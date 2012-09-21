@@ -1,0 +1,17 @@
+import file from AssemblyInfo.bake
+import file from Db.bake
+import file from Deploy.bake
+import file from WebSiteSupport.bake
+
+Global(
+	Project: "AnalitF.Net",
+	HumanReadableName: "AnalitF.Net"
+)
+
+task @default, [@Build]
+
+task @Build, [@BuildWebSite]
+
+task @DeployApp, [@WebDeploy]
+
+task @deploy, [@DeployPipeline]

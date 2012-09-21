@@ -1,0 +1,96 @@
+﻿<Window x:Class="AnalitF.Net.Client.Views.ShellView"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+		Title="ShellViewViewModel" MinHeight="800" MinWidth="600">
+	<Window.Resources>
+		<Style TargetType="{x:Type c:DataGrid}">
+			<Setter Property="IsReadOnly" Value="True" />
+			<Setter Property="CanUserAddRows" Value="False" />
+			<Setter Property="CanUserDeleteRows" Value="False" />
+		</Style>
+	</Window.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<ToolBarTray Background="White" Grid.Row="0">
+			<ToolBar Band="1" BandIndex="1">
+				<Button x:Name="ShowCatalog">
+					Поиск препаратов в каталоге
+				</Button>
+				<Button x:Name="SearchOffers">
+					Поиск в прайс-листах
+				</Button>
+				<Button x:Name="SearchSearchMnn">
+					Поиск по МНН
+				</Button>
+				<Button x:Name="ShowPrice">
+					Прайс-листы фирм
+				</Button>
+				<Button x:Name="ShowMinCosts">
+					Минимальные цены
+				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowOrderLines">
+					Сводный заказ
+				</Button>
+				<Button x:Name="ShowOrders">
+					Заказы
+				</Button>
+				<Button x:Name="ShowAutoOrder">
+					Авто заказ
+				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowJunkOffers">
+					Уцененные препараты
+				</Button>
+				<Button x:Name="ShowRejects">
+					Забракованные препараты
+				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowWaybills">
+					Накладные
+				</Button>
+			</ToolBar>
+		</ToolBarTray>
+
+		<ContentControl Grid.Row="1" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
+
+		<StatusBar Grid.Row="2">
+			<StatusBarItem>
+				<Label>Заказов:</Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Label x:Name="OrdersCount"></Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Separator></Separator>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Label>Заказов:</Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Label x:Name="OrderLinesCount"></Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Separator></Separator>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Label>Сумма:</Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Label x:Name="OrdersSum"></Label>
+			</StatusBarItem>
+		</StatusBar>
+	</Grid>
+</Window>

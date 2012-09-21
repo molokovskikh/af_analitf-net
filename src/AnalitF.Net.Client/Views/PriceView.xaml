@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.PriceView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" mc:Ignorable="d">
+	<UserControl.Resources>
+		<Style TargetType="TextBlock" x:Key="PriceInfo">
+			<Setter Property="Padding" Value="5" />
+			<Setter Property="FontWeight" Value="Bold"/>
+		</Style>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition></ColumnDefinition>
+			<ColumnDefinition Width="200"></ColumnDefinition>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+		<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="4">
+			<Label>Всего прайс листов:</Label>
+			<Label x:Name="Prices_Count"></Label>
+		</StackPanel>
+		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices">
+		</c:DataGrid>
+		<StackPanel Grid.Row="1" Grid.Column="1">
+			<Label>Информация</Label>
+			<TextBlock x:Name="CurrentPrice_SupplierFullName" Style="{StaticResource PriceInfo}"></TextBlock>
+
+			<TextBlock Style="{StaticResource PriceInfo}">
+				Телефон:<Run x:Name="CurrentPrice_Phone"></Run>
+			</TextBlock>
+
+			<TextBlock Style="{StaticResource PriceInfo}">
+				Минимальный заказ:<Run x:Name="CurrentPrice_MinReq"></Run>
+			</TextBlock>
+
+			<TextBlock Style="{StaticResource PriceInfo}">
+				Email:<Run x:Name="CurrentPrice_Email"></Run>
+			</TextBlock>
+
+			<Label>Контактная информация:</Label>
+			<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_ContactInfo"></TextBlock>
+
+			<Label>Оперативная информация:</Label>
+			<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_OperativeInfo"></TextBlock>
+		</StackPanel>
+		<StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="4">
+			<CheckBox Margin="0, 0, 4, 0">Показать только лидирующие позиции (F3)</CheckBox>
+		</StackPanel>
+	</Grid>
+</UserControl>
