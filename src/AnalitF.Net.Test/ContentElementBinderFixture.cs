@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,14 +17,15 @@ namespace AnalitF.Net.Test
 		[Test, RequiresSTA]
 		public void Bind_content_elements()
 		{
-			var view = new UserControl();
+			var model = new ViewModel { Text = "123" };
+			var view = new UserControl {DataContext = model};
 			var text = new TextBlock();
 			var item = new Run { Name = "Text" };
 			text.Inlines.Add(item);
 			view.Content = text;
 
 			Assert.That(XamlExtentions.DeepChildren(view).Count(), Is.GreaterThan(0));
-			ContentElementBinder.Bind(new ViewModel { Text = "123" }, view, null);
+			ContentElementBinder.Bind(model, view, null);
 			Assert.That(item.Text, Is.EqualTo("123"));
 		}
 

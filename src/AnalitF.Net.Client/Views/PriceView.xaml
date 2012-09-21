@@ -21,8 +21,9 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 		<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="4">
-			<Label>Всего прайс листов:</Label>
-			<Label x:Name="Prices_Count"></Label>
+			<TextBlock Margin="5">
+				Всего прайс листов: <Run x:Name="Prices_Count"></Run>
+			</TextBlock>
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices">
 		</c:DataGrid>
@@ -31,15 +32,15 @@
 			<TextBlock x:Name="CurrentPrice_SupplierFullName" Style="{StaticResource PriceInfo}"></TextBlock>
 
 			<TextBlock Style="{StaticResource PriceInfo}">
-				Телефон:<Run x:Name="CurrentPrice_Phone"></Run>
+				Телефон: <Run x:Name="CurrentPrice_Phone"></Run>
 			</TextBlock>
 
 			<TextBlock Style="{StaticResource PriceInfo}">
-				Минимальный заказ:<Run x:Name="CurrentPrice_MinReq"></Run>
+				Минимальный заказ: <Run x:Name="CurrentPrice_MinReq"></Run>
 			</TextBlock>
 
 			<TextBlock Style="{StaticResource PriceInfo}">
-				Email:<Run x:Name="CurrentPrice_Email"></Run>
+				Email: <Run x:Name="CurrentPrice_Email"></Run>
 			</TextBlock>
 
 			<Label>Контактная информация:</Label>

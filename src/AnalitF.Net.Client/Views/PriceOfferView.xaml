@@ -27,10 +27,9 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 		<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
-			<Label>Прайс-лист</Label>
-			<Label x:Name="Price_Name"></Label>
-			<Label>, регион</Label>
-			<Label x:Name="Price_RegionName"></Label>
+			<TextBlock Margin="5">
+				Прайс-лист <Run x:Name="Price_Name"/>, регион <Run x:Name="Price_RegionName"/>
+			</TextBlock>
 
 			<Button Margin="0, 0, 4, 0">В каталог (F2)</Button>
 			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
@@ -82,10 +81,9 @@
 		<StackPanel Orientation="Horizontal" Grid.Row="5">
 			<Button>История</Button>
 			<Button>Удалить заказ</Button>
-			<Label>Заказано</Label>
-			<Label x:Name="Order_Lines_Count"></Label>
-			<Label>позиций на сумму</Label>
-			<Label x:Name="Order_Sum"></Label>
+			<TextBlock Margin="5">
+				Заказано <Run x:Name="Order_Lines_Count"/> позиций на сумму <Run x:Name="Order_Sum"/>
+			</TextBlock>
 		</StackPanel>
 	</Grid>
 </UserControl>
