@@ -9,6 +9,8 @@
 			<Setter Property="IsReadOnly" Value="True" />
 			<Setter Property="CanUserAddRows" Value="False" />
 			<Setter Property="CanUserDeleteRows" Value="False" />
+			<Setter Property="AutoGenerateColumns" Value="False" />
+			<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
 		</Style>
 	</Window.Resources>
 	<Grid>

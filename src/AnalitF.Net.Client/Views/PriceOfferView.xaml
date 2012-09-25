@@ -43,6 +43,33 @@
 			</ComboBox>
 		</StackPanel>
 		<c:DataGrid Grid.Row="2" x:Name="Offers">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Код" Binding="{Binding Code}" />
+				<DataGridTextColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
+				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
+				<DataGridTextColumn Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
+				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+				<DataGridTextColumn Width="*" Header="Наценака поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="*" Header="Цена" />
+				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" />
+				<DataGridTextColumn Width="*" Header="Мин.цена" Binding="{Binding LeaderCost}" />
+				<DataGridTextColumn Width="*" Header="Прайс - лидер" Binding="{Binding LeaderPrice.SupplierName}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион - лидер" Binding="{Binding LeaderRegion}" />
+				<DataGridTextColumn Width="*" Header="Заказ" />
+				<DataGridTextColumn Width="*" Header="Сумма" />
+			</DataGrid.Columns>
 		</c:DataGrid>
 		<Grid Grid.Row="3">
 			<Grid.ColumnDefinitions>

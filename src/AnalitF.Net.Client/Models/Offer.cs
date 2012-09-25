@@ -71,5 +71,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual Price LeaderPrice { get; set; }
 
 		public virtual decimal LeaderCost { get; set; }
+
+		public virtual string LeaderRegion { get; set; }
 	}
 }

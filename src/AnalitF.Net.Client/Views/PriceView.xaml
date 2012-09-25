@@ -26,6 +26,18 @@
 			</TextBlock>
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding SupplierName}" />
+				<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding RegionName}" />
+				<DataGridCheckBoxColumn Width="*" Header="Склад" Binding="{Binding Storage}" />
+				<DataGridCheckBoxColumn Width="*" Header="В работе" />
+				<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding PositionCount}" />
+				<DataGridTextColumn Width="*" Header="Заказ" />
+				<DataGridTextColumn Width="*" Header="Сумма" />
+				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding PriceDate}" />
+				<DataGridTextColumn Width="*" Header="Месячный заказ" />
+				<DataGridTextColumn Width="*" Header="Недельный заказ" />
+			</DataGrid.Columns>
 		</c:DataGrid>
 		<StackPanel Grid.Row="1" Grid.Column="1">
 			<Label>Информация</Label>

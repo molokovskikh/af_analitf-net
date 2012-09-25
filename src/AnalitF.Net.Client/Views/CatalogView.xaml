@@ -28,8 +28,14 @@
 			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" x:Name="CatalogNames">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Name}" />
+			</DataGrid.Columns>
 		</c:DataGrid>
 		<c:DataGrid Grid.Row="1" Grid.Column="1" x:Name="CatalogForms">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
+			</DataGrid.Columns>
 		</c:DataGrid>
 		<Grid Grid.Row="2" Grid.Column="1">
 			<Grid.ColumnDefinitions>
