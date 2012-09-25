@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel()
 		{
+			DisplayName = "АналитФАРМАЦИЯ";
 		}
 
 		public void ShowCatalog()

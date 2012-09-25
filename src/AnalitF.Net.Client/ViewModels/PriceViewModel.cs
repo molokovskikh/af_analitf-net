@@ -12,7 +12,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PriceViewModel()
 		{
-			Prices = session.Query<Price>().OrderBy(c => c.Name).ToList();
+			DisplayName = "Прайс-листы фирм";
+			Prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 		}
 
 		public List<Price> Prices { get; set; }

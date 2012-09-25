@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -18,7 +19,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogViewModel()
 		{
-			CatalogNames = session.Query<CatalogName>().OrderBy(c => c.Name).ToList();
+			DisplayName = "Поиск препаратов в каталоге";
+			CatalogNames = Session.Query<CatalogName>().OrderBy(c => c.Name).ToList();
 		}
 
 		public List<CatalogName> CatalogNames
@@ -60,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentCatalogForm = value;
 				RaisePropertyChangedEventImmediately("CurrentCatalogForm");
-				CurrentCatalog = session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == CurrentCatalogForm);
+				CurrentCatalog = Session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == CurrentCatalogForm);
 			}
 		}
 
@@ -79,7 +81,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (_currentCatalogName == null)
 				CatalogForms = Enumerable.Empty<CatalogForm>().ToList();
 
-			CatalogForms = session.Query<Catalog>()
+			CatalogForms = Session.Query<Catalog>()
 				.Where(c => c.Name == _currentCatalogName)
 				.Select(c => c.Form)
 				.ToList();
@@ -87,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterCatalogForms()
 		{
-			Shell.ActiveAndSaveCurrent(new OfferViewModel(session, CurrentCatalogName, CurrentCatalogForm));
+			Shell.ActiveAndSaveCurrent(new OfferViewModel(CurrentCatalogName, CurrentCatalogForm));
 		}
 
 		public bool CanShowDescription
@@ -97,7 +99,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowDescription()
 		{
-			Shell.ActivateItem(new DescriptionViewModel(CurrentCatalogName.Description));
+			if (!CanShowDescription)
+				return;
+
+			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalogName.Description));
 		}
 	}
 }

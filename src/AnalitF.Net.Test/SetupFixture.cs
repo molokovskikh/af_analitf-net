@@ -9,6 +9,7 @@ namespace AnalitF.Net.Test
 		public void Setup()
 		{
 			global::Test.Support.Setup.Initialize();
+			new Client.Config.Initializers.NHibernate().Init();
 		}
 	}
 }

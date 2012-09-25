@@ -64,8 +64,8 @@
     <Compile Include="BindScreen.cs" />
     <Compile Include="ContentElementBinderFixture.cs" />
     <Compile Include="ExportImportFixture.cs" />
-    <Compile Include="Fixture.cs" />
     <Compile Include="SetupFixture.cs" />
+    <Compile Include="Views\CatalogViewFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

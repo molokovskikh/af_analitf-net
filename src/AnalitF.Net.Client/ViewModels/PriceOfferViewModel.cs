@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PriceOfferViewModel(Price price, bool showLeaders)
 		{
+			DisplayName = "Заявка поставщику";
 			Price = price;
 
 			Filters = filters;
@@ -76,7 +78,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentOffer = value;
 				RaisePropertyChangedEventImmediately("CurrentOffer");
-				CurrentCatalog = session.Load<Catalog>(currentOffer.CatalogId);
+				CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 			}
 		}
 
@@ -87,6 +89,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentCatalog = value;
 				RaisePropertyChangedEventImmediately("CurrentCatalog");
+				RaisePropertyChangedEventImmediately("CanShowDescription");
 			}
 		}
 
@@ -105,7 +108,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Filter()
 		{
-			var query = session.Query<Offer>().Where(o => o.PriceId == Price.Id);
+			var query = Session.Query<Offer>().Where(o => o.PriceId == Price.Id);
 			if (CurrentProducer != allLabel) {
 				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
 			}
@@ -118,16 +121,22 @@ namespace AnalitF.Net.Client.ViewModels
 			Offers = query.ToList();
 		}
 
+		public bool CanShowDescription
+		{
+			get
+			{
+				return CurrentOffer != null
+					&& CurrentCatalog != null
+					&& CurrentCatalog.Name.Description != null;
+			}
+		}
+
 		public void ShowDescription()
 		{
-			if (currentOffer == null)
+			if (!CanShowDescription)
 				return;
 
-			var catalog = session.Load<Catalog>(currentOffer.CatalogId);
-			var description = catalog.Name.Description;
-			if (description == null)
-				return;
-			Shell.ActivateItem(new DescriptionViewModel(description));
+			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
 		}
 	}
 }

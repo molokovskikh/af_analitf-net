@@ -77,6 +77,7 @@
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Extentions\BoolToVisibilityConverter.cs" />
+    <Compile Include="Extentions\WindowManager.cs" />
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogForm.cs" />

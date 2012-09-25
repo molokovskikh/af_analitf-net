@@ -18,12 +18,6 @@ namespace AnalitF.Net.Test
 	[TestFixture]
 	public class BindScreen
 	{
-		[SetUp]
-		public void Setup()
-		{
-			new Client.Config.Initializers.NHibernate().Init();
-		}
-
 		[Test, RequiresSTA]
 		public void Test()
 		{

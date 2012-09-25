@@ -10,11 +10,14 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return ((ShellViewModel)Parent); }
 		}
 
-		protected ISession session;
+		protected IWindowManager Manager { get; private set; }
+
+		protected ISession Session;
 
 		public BaseScreen()
 		{
-			session = Config.Initializers.NHibernate.Factory.OpenSession();
+			Session = Config.Initializers.NHibernate.Factory.OpenSession();
+			Manager = IoC.Get<IWindowManager>();
 		}
 	}
 }

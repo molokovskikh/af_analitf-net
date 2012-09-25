@@ -15,10 +15,25 @@ namespace AnalitF.Net.Client
 	{
 		public AppBootstrapper()
 		{
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
+				Console.WriteLine(args.ExceptionObject);
+			};
+
+			Application.DispatcherUnhandledException += (sender, args) => {
+				args.Handled = true;
+				Console.WriteLine(args.Exception);
+			};
 			LogManager.GetLog = t => new ConsoleLog();
 			new Config.Initializers.NHibernate().Init();
 
 			RegisterBinder();
+		}
+
+		protected override object GetInstance(Type service, string key)
+		{
+			if (typeof(IWindowManager) == service)
+				return new Extentions.WindowManager();
+			return base.GetInstance(service, key);
 		}
 
 		public static void RegisterBinder()
