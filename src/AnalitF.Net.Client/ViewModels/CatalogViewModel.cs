@@ -16,11 +16,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private List<CatalogName> _catalogNames;
 		private List<CatalogForm> _catalogForms;
+		private bool showWithoutOffers;
 
 		public CatalogViewModel()
 		{
 			DisplayName = "Поиск препаратов в каталоге";
-			CatalogNames = Session.Query<CatalogName>().OrderBy(c => c.Name).ToList();
+			Update();
 		}
 
 		public List<CatalogName> CatalogNames
@@ -74,6 +75,26 @@ namespace AnalitF.Net.Client.ViewModels
 				currentCatalog = value;
 				RaisePropertyChangedEventImmediately("CurrentCatalog");
 			}
+		}
+
+		public bool ShowWithoutOffers
+		{
+			get { return showWithoutOffers; }
+			set
+			{
+				showWithoutOffers = value;
+				RaisePropertyChangedEventImmediately("ShowWithoutOffers");
+				Update();
+			}
+		}
+
+		private void Update()
+		{
+			var catalogNames = Session.Query<CatalogName>();
+			if (!ShowWithoutOffers) {
+				catalogNames = catalogNames.Where(c => c.HaveOffers);
+			}
+			CatalogNames = catalogNames.OrderBy(c => c.Name).ToList();
 		}
 
 		private void LoadCatalogForms()

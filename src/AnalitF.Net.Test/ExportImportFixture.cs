@@ -128,10 +128,14 @@ from Catalogs.Descriptions";
 			sql = @"
 select cn.Id,
 	cn.Name,
-	cn.DescriptionId
+	cn.DescriptionId,
+	exists(select *
+		from usersettings.Core cr
+			join Catalogs.Products p on p.Id = cr.ProductId
+				join Catalogs.Catalog c on c.Id = p.CatalogId
+		where c.NameId = cn.Id) as HaveOffers
 from Catalogs.CatalogNames cn
-	join Catalogs.Catalog c on c.NameId = cn.Id
-where c.Hidden = 0
+where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 group by cn.Id";
 			result.Add(Export(sql, "catalognames"));
 
