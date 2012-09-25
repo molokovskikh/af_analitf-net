@@ -1,10 +1,8 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.PriceOfferView"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-		mc:Ignorable="d">
+		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
 	<UserControl.Resources>
 		<Style TargetType="Label" x:Key="Legend">
 			<Setter Property="Width" Value="250" />
@@ -16,6 +14,7 @@
 			<Setter Property="IsReadOnly" Value="True" />
 			<Setter Property="Margin" Value="0, 0, 4, 0" />
 		</Style>
+		<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -35,15 +34,12 @@
 			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 			<Label>Позиций:</Label>
 			<Label x:Name="Offers_Count"></Label>
-			<ComboBox Style="{StaticResource Filter}">
-				<ComboBoxItem>Лучшие предложения (F6)</ComboBoxItem>
-				<ComboBoxItem>Заказы (F5)</ComboBoxItem>
-				<ComboBoxItem>Прайс-лист (F4)</ComboBoxItem>
+			<ComboBox Style="{StaticResource Filter}" Name="Filters">
 			</ComboBox>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" Grid.Row="1">
 			<TextBox Width="150" Margin="0, 0, 4, 0"></TextBox>
-			<ComboBox Style="{StaticResource Filter}">
+			<ComboBox Style="{StaticResource Filter}" Name="Producers">
 			</ComboBox>
 		</StackPanel>
 		<c:DataGrid Grid.Row="2" x:Name="Offers">
@@ -59,14 +55,14 @@
 				<RowDefinition Height="Auto"></RowDefinition>
 			</Grid.RowDefinitions>
 			<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
-				<Label Foreground="Red">ЖНВЛС</Label>
-				<Label Foreground="Green">Обяз. список</Label>
+				<Label Foreground="Red" Visibility="{Binding Path=CurrentOffer.VitallyImportant, Converter={StaticResource VisibilityConverter}}">ЖНВЛС</Label>
+				<Label Foreground="Green" Visibility="{Binding Path=CurrentCatalog.MandatoryList, Converter={StaticResource VisibilityConverter}}">Обяз. список</Label>
 			</StackPanel>
 			<Label Grid.Row="0" Grid.Column="1">Наименование:</Label>
 			<Label Grid.Row="0" Grid.Column="2" x:Name="CurrentOffer_ProductSynonym"></Label>
-			<Button Grid.Row="1" Grid.Column="0">Описание (F1, Пробел)</Button>
+			<Button Grid.Row="1" Grid.Column="0" Name="ShowDescription">Описание (F1, Пробел)</Button>
 			<Label Grid.Row="1" Grid.Column="1">МНН:</Label>
-			<Label Grid.Row="1" Grid.Column="2" x:Name="CurrentOffer_MnnName"></Label>
+			<Label Grid.Row="1" Grid.Column="2" x:Name="CurrentCatalog_Name_Mnn_Name"></Label>
 		</Grid>
 		<StackPanel Grid.Row="4">
 			<Label>Подсказка</Label>

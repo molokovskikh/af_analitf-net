@@ -18,7 +18,7 @@ namespace AnalitF.Net.Test
 		public void Bind_content_elements()
 		{
 			var model = new ViewModel { Text = "123" };
-			var view = new UserControl {DataContext = model};
+			var view = new UserControl { DataContext = model };
 			var text = new TextBlock();
 			var item = new Run { Name = "Text" };
 			text.Inlines.Add(item);

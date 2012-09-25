@@ -5,5 +5,7 @@
 		public virtual uint Id { get; set; }
 
 		public virtual string Name { get; set; }
+
+		public virtual ProductDescription Description { get; set; }
 	}
 }

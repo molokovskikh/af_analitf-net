@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint ProductId { get; set; }
 
+		public virtual uint CatalogId { get; set; }
+
 		public virtual uint ProductSynonymId { get; set; }
 
 		public virtual uint? ProducerId { get; set; }
@@ -63,5 +65,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ProducerSynonym { get; set; }
 
 		public virtual decimal Cost { get; set; }
+
+		public virtual OrderLine Line { get; set; }
+
+		public virtual Price LeaderPrice { get; set; }
+
+		public virtual decimal LeaderCost { get; set; }
 	}
 }

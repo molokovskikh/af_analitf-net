@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
@@ -7,18 +8,66 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class PriceOfferViewModel : BaseScreen
 	{
+		private Catalog currentCatalog;
 		private Offer currentOffer;
+		private List<string> producers;
+		private string currentProducer;
+		private List<Offer> offers;
+		private string allLabel = "Все производители";
+		private string[] filters = new[] {
+			"Прайс-лист (F4)",
+			"Заказы (F5)",
+			"Лучшие предложения (F6)",
+		};
 
-		public PriceOfferViewModel(Price price)
+		private string currentFilter;
+
+		public PriceOfferViewModel(Price price, bool showLeaders)
 		{
 			Price = price;
 
-			Offers = session.Query<Offer>().Where(o => o.PriceId == price.Id).ToList();
+			Filters = filters;
+			currentProducer = allLabel;
+			currentFilter = filters[0];
+			if (showLeaders)
+				currentFilter = filters[2];
+
+			Filter();
+			Producers = new[] { allLabel }.Concat(Offers.Select(o => o.ProducerSynonym).ToList()).ToList();
 		}
 
 		public Price Price { get; set; }
 
-		public List<Offer> Offers { get; set; }
+		public List<Offer> Offers
+		{
+			get { return offers; }
+			set
+			{
+				offers = value;
+				RaisePropertyChangedEventImmediately("Offers");
+			}
+		}
+
+		public List<string> Producers
+		{
+			get { return producers; }
+			set
+			{
+				producers = value;
+				RaisePropertyChangedEventImmediately("Producers");
+			}
+		}
+
+		public string CurrentProducer
+		{
+			get { return currentProducer; }
+			set
+			{
+				currentProducer = value;
+				RaisePropertyChangedEventImmediately("CurrentProducer");
+				Filter();
+			}
+		}
 
 		public Offer CurrentOffer
 		{
@@ -27,7 +76,58 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentOffer = value;
 				RaisePropertyChangedEventImmediately("CurrentOffer");
+				CurrentCatalog = session.Load<Catalog>(currentOffer.CatalogId);
 			}
+		}
+
+		public Catalog CurrentCatalog
+		{
+			get { return currentCatalog; }
+			set
+			{
+				currentCatalog = value;
+				RaisePropertyChangedEventImmediately("CurrentCatalog");
+			}
+		}
+
+		public string[] Filters { get; set; }
+
+		public string CurrentFilter
+		{
+			get { return currentFilter; }
+			set
+			{
+				currentFilter = value;
+				RaisePropertyChangedEventImmediately("CurrentFilter");
+				Filter();
+			}
+		}
+
+		private void Filter()
+		{
+			var query = session.Query<Offer>().Where(o => o.PriceId == Price.Id);
+			if (CurrentProducer != allLabel) {
+				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
+			}
+			if (CurrentFilter == filters[2]) {
+				query = query.Where(o => o.LeaderPrice == Price);
+			}
+			if (currentFilter == filters[1]) {
+				query = query.Where(o => o.Line != null);
+			}
+			Offers = query.ToList();
+		}
+
+		public void ShowDescription()
+		{
+			if (currentOffer == null)
+				return;
+
+			var catalog = session.Load<Catalog>(currentOffer.CatalogId);
+			var description = catalog.Name.Description;
+			if (description == null)
+				return;
+			Shell.ActivateItem(new DescriptionViewModel(description));
 		}
 	}
 }

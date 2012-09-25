@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.ViewModels
 	public class CatalogViewModel : BaseScreen
 	{
 		private CatalogName _currentCatalogName;
+		private CatalogForm currentCatalogForm;
+		private Catalog currentCatalog;
 
 		private List<CatalogName> _catalogNames;
 		private List<CatalogForm> _catalogForms;
@@ -45,11 +47,32 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_currentCatalogName = value;
+				RaisePropertyChangedEventImmediately("CurrentCatalogName");
+				RaisePropertyChangedEventImmediately("CanShowDescription");
 				LoadCatalogForms();
 			}
 		}
 
-		public CatalogForm CurrentCatalogForm { get; set; }
+		public CatalogForm CurrentCatalogForm
+		{
+			get { return currentCatalogForm; }
+			set
+			{
+				currentCatalogForm = value;
+				RaisePropertyChangedEventImmediately("CurrentCatalogForm");
+				CurrentCatalog = session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == CurrentCatalogForm);
+			}
+		}
+
+		public Catalog CurrentCatalog
+		{
+			get { return currentCatalog; }
+			set
+			{
+				currentCatalog = value;
+				RaisePropertyChangedEventImmediately("CurrentCatalog");
+			}
+		}
 
 		private void LoadCatalogForms()
 		{
@@ -65,6 +88,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public void EnterCatalogForms()
 		{
 			Shell.ActiveAndSaveCurrent(new OfferViewModel(session, CurrentCatalogName, CurrentCatalogForm));
+		}
+
+		public bool CanShowDescription
+		{
+			get { return CurrentCatalogName != null && CurrentCatalogName.Description != null; }
+		}
+
+		public void ShowDescription()
+		{
+			Shell.ActivateItem(new DescriptionViewModel(CurrentCatalogName.Description));
 		}
 	}
 }

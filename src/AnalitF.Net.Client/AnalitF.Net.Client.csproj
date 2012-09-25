@@ -76,20 +76,27 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Controls\DataGrid.cs" />
+    <Compile Include="Extentions\BoolToVisibilityConverter.cs" />
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogForm.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
+    <Compile Include="Models\OrderLine.cs" />
     <Compile Include="Models\Price.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
+    <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\OfferViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\PriceViewModel.cs" />
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DescriptionView.xaml.cs">
+      <DependentUpon>DescriptionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OfferView.xaml.cs">
       <DependentUpon>OfferView.xaml</DependentUpon>
@@ -109,6 +116,10 @@
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
     <Page Include="Views\CatalogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DescriptionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

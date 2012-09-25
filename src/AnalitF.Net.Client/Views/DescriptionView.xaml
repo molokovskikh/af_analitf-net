@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.DescriptionView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<StackPanel>
+		<TextBlock x:Name="Description_Name"></TextBlock>
+
+		<TextBlock>Состав:</TextBlock>
+		<TextBlock Name="Description_Composition"></TextBlock>
+
+		<TextBlock>Фармакологическое действие:</TextBlock>
+		<TextBlock Name="Description_PharmacologicalAction"></TextBlock>
+
+		<TextBlock>Показания к применению:</TextBlock>
+		<TextBlock Name="Description_IndicationsForUse"></TextBlock>
+
+		<TextBlock>Предостережения и противопоказания:</TextBlock>
+		<TextBlock Name="Description_Warnings"></TextBlock>
+
+		<TextBlock>Способ применения и дозы:</TextBlock>
+		<TextBlock Name="Description_Dosing"></TextBlock>
+
+		<TextBlock>Побочные действия:</TextBlock>
+		<TextBlock Name="Description_SideEffect"></TextBlock>
+
+		<TextBlock>Взаимодействие:</TextBlock>
+		<TextBlock Name="Description_Interaction"></TextBlock>
+
+		<TextBlock>Форма выпуска:</TextBlock>
+		<TextBlock Name="Description_ProductForm"></TextBlock>
+
+		<TextBlock>Дополнительно:</TextBlock>
+		<TextBlock Name="Description_Description"></TextBlock>
+
+		<TextBlock>Условия хранения:</TextBlock>
+		<TextBlock Name="Description_Storage"></TextBlock>
+
+		<TextBlock>Срок годности:</TextBlock>
+		<TextBlock Name="Description_Expiration"></TextBlock>
+	</StackPanel>
+</UserControl>

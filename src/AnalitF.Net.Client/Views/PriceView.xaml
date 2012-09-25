@@ -50,7 +50,7 @@
 			<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_OperativeInfo"></TextBlock>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="4">
-			<CheckBox Margin="0, 0, 4, 0">Показать только лидирующие позиции (F3)</CheckBox>
+			<CheckBox Margin="0, 0, 4, 0" Name="ShowLeaders">Показать только лидирующие позиции (F3)</CheckBox>
 		</StackPanel>
 	</Grid>
 </UserControl>

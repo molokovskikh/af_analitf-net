@@ -27,12 +27,14 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool ShowLeaders { get; set; }
+
 		public void EnterPrices()
 		{
 			if (CurrentPrice == null)
 				return;
 
-			Shell.ActiveAndSaveCurrent(new PriceOfferViewModel(CurrentPrice));
+			Shell.ActiveAndSaveCurrent(new PriceOfferViewModel(CurrentPrice, ShowLeaders));
 		}
 	}
 }
