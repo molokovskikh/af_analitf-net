@@ -110,7 +110,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterCatalogForms()
 		{
-			Shell.ActiveAndSaveCurrent(new OfferViewModel(CurrentCatalogName, CurrentCatalogForm));
+			var catalog = Session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == currentCatalogForm);
+			Shell.ActiveAndSaveCurrent(new OfferViewModel(catalog));
 		}
 
 		public bool CanShowDescription

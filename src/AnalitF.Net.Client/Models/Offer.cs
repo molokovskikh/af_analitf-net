@@ -6,6 +6,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ulong RegionId { get; set;  }
 
+		public virtual string RegionName { get; set; }
+
 		public virtual uint PriceId { get; set; }
 
 		public virtual uint ProductId { get; set; }

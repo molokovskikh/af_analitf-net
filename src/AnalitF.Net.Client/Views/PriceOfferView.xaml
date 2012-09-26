@@ -11,62 +11,6 @@
 			</cal:ActionMessage>
 		</i:EventTrigger>
 	</i:Interaction.Triggers>
-	<UserControl.Resources>
-		<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
-		<Style TargetType="Label" x:Key="Legend">
-			<Setter Property="Width" Value="250" />
-			<Setter Property="HorizontalContentAlignment" Value="Center" />
-			<Setter Property="Margin" Value="4" />
-			<Setter Property="Padding" Value="0" />
-		</Style>
-
-		<Style TargetType="Label" x:Key="VitallyImportantLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-			<Setter Property="Foreground" Value="Green"></Setter>
-		</Style>
-		<Style x:Key="VitallyImportant" TargetType="{x:Type DataGridCell}">
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding VitallyImportant}" Value="true">
-					<Setter Property="Foreground" Value="Green"/>
-				</DataTrigger>
-				<DataTrigger Binding="{Binding Banned}" Value="true">
-					<Setter Property="Background" Value="Red"/>
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<Style TargetType="Label" x:Key="JunkLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-			<Setter Property="Background" Value="#f29e66"></Setter>
-		</Style>
-		<Style x:Key="Junk" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=VitallyImportant}">
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding Junk}" Value="true">
-					<Setter Property="Background" Value="#f29e66"/>
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<Style TargetType="Label" x:Key="BannedLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-			<Setter Property="Background" Value="Red"></Setter>
-		</Style>
-
-		<Style TargetType="Label" x:Key="LeaderLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-			<Setter Property="Background" Value="#C0DCC0"></Setter>
-		</Style>
-		<Style x:Key="Leader" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=VitallyImportant}">
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding Leader}" Value="true">
-					<Setter Property="Background" Value="#C0DCC0"/>
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<Style TargetType="ComboBox" x:Key="Filter">
-			<Setter Property="Width" Value="150" />
-			<Setter Property="IsEditable" Value="False" />
-			<Setter Property="IsReadOnly" Value="True" />
-			<Setter Property="Margin" Value="0, 0, 4, 0" />
-		</Style>
-	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -85,13 +29,11 @@
 			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 			<Label>Позиций:</Label>
 			<Label x:Name="Offers_Count"></Label>
-			<ComboBox Style="{StaticResource Filter}" x:Name="Filters">
-			</ComboBox>
+			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" Grid.Row="1">
 			<TextBox Width="150" Margin="0, 0, 4, 0"></TextBox>
-			<ComboBox Style="{StaticResource Filter}" x:Name="Producers">
-			</ComboBox>
+			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
 		</StackPanel>
 		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
 			<DataGrid.Columns>
@@ -122,26 +64,7 @@
 				<DataGridTextColumn Width="*" Header="Сумма" />
 			</DataGrid.Columns>
 		</c:DataGrid>
-		<Grid Grid.Row="3">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
-			</Grid.RowDefinitions>
-			<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
-				<Label Foreground="Red" Visibility="{Binding Path=CurrentOffer.VitallyImportant, Converter={StaticResource VisibilityConverter}}">ЖНВЛС</Label>
-				<Label Foreground="Green" Visibility="{Binding Path=CurrentCatalog.MandatoryList, Converter={StaticResource VisibilityConverter}}">Обяз. список</Label>
-			</StackPanel>
-			<Label Grid.Row="0" Grid.Column="1">Наименование:</Label>
-			<Label Grid.Row="0" Grid.Column="2" x:Name="CurrentOffer_ProductSynonym"></Label>
-			<Button Grid.Row="1" Grid.Column="0" x:Name="ShowDescription">Описание (F1, Пробел)</Button>
-			<Label Grid.Row="1" Grid.Column="1">МНН:</Label>
-			<Label Grid.Row="1" Grid.Column="2" x:Name="CurrentCatalog_Name_Mnn_Name"></Label>
-		</Grid>
+		<ContentControl Grid.Row="3" ContentTemplate="{StaticResource ResourceKey=OfferPanel}"></ContentControl>
 		<StackPanel Grid.Row="4">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">

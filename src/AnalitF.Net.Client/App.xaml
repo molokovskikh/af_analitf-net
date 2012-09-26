@@ -5,6 +5,7 @@
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="Assets/Application.xaml" />
 				<ResourceDictionary>
 					<local:AppBootstrapper x:Key="bootstrapper" />
 				</ResourceDictionary>

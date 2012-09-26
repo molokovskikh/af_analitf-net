@@ -86,6 +86,7 @@
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />
     <Compile Include="Models\Price.cs" />
+    <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
@@ -116,6 +117,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
+    <Page Include="Assets\Application.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CatalogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
