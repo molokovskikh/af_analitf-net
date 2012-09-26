@@ -72,6 +72,13 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal LeaderCost { get; set; }
 
+		public virtual ulong LeaderRegionId { get; set; }
+
 		public virtual string LeaderRegion { get; set; }
+
+		public virtual bool Leader
+		{
+			get { return LeaderRegionId == RegionId && LeaderPrice.Id == PriceId; }
+		}
 	}
 }
