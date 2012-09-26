@@ -7,9 +7,7 @@ namespace AnalitF.Net.Client.Controls
 	{
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
-			if (e.Key == Key.Return)
-				return;
-			if (e.Key == Key.Escape)
+			if (e.Key == Key.Enter)
 				return;
 			base.OnKeyDown(e);
 		}

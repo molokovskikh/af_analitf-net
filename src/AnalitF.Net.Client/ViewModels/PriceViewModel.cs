@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using NHibernate.Linq;

@@ -8,7 +8,7 @@
 			xmlns:cal="http://www.caliburnproject.org">
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="KeyDown">
-			<cal:ActionMessage MethodName="Exit">
+			<cal:ActionMessage MethodName="TryClose">
 			</cal:ActionMessage>
 		</i:EventTrigger>
 	</i:Interaction.Triggers>

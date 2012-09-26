@@ -2,7 +2,15 @@
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
+		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
+		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+		xmlns:cal="http://www.caliburnproject.org">
+	<i:Interaction.Triggers>
+		<i:EventTrigger EventName="KeyDown">
+			<cal:ActionMessage MethodName="TryClose">
+			</cal:ActionMessage>
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
 	<UserControl.Resources>
 		<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 		<Style TargetType="Label" x:Key="Legend">

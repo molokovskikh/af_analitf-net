@@ -88,10 +88,10 @@ from Usersettings.ActivePrices ap
 			var offerQuery = new OfferQuery();
 			offerQuery
 				.Select("m.PriceCode as LeaderPriceId",
-					"m.MinCost as LeaderCost",
-					"lr.RegionCode as LeaderRegionId",
-					"lr.Region as LeaderRegion",
-					"p.CatalogId")
+				"m.MinCost as LeaderCost",
+				"lr.RegionCode as LeaderRegionId",
+				"lr.Region as LeaderRegion",
+				"p.CatalogId")
 				.Join("join Usersettings.MinCosts m on m.Id = c0.Id and m.RegionCode = ap.RegionCode")
 				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
 				.Join("join Catalogs.Products p on p.Id = c0.ProductId");

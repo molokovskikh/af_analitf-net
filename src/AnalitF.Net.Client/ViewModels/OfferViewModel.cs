@@ -23,10 +23,5 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public List<Offer> Offers { get; set; }
-
-		public void Exit()
-		{
-			TryClose();
-		}
 	}
 }

@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.ViewModels
 				currentFilter = filters[2];
 
 			Filter();
-			Producers = new[] { allLabel }.Concat(Offers.Select(o => o.ProducerSynonym).ToList()).ToList();
 		}
 
 		public Price Price { get; set; }
@@ -119,6 +118,8 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.Line != null);
 			}
 			Offers = query.ToList();
+			CurrentOffer = offers.FirstOrDefault();
+			Producers = new[] { allLabel }.Concat(Offers.Select(o => o.ProducerSynonym).ToList()).ToList();
 		}
 
 		public bool CanShowDescription

@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.Binders
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
 				.Where(a => a.EventArgs.Key == Key.Return)
+				.Do(a => a.EventArgs.Handled = true)
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 
 			var mouseDoubleClick = Observable.FromEventPattern<MouseButtonEventArgs>(element, "MouseDoubleClick")

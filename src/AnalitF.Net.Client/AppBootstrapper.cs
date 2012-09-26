@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
@@ -15,6 +17,9 @@ namespace AnalitF.Net.Client
 	{
 		public AppBootstrapper()
 		{
+			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
+				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 				Console.WriteLine(args.ExceptionObject);
 			};
