@@ -17,6 +17,8 @@ namespace AnalitF.Net.Test
 		[Test, RequiresSTA]
 		public void Bind_content_elements()
 		{
+			ContentElementBinder.RegisterConvention();
+
 			var model = new ViewModel { Text = "123" };
 			var view = new UserControl { DataContext = model };
 			var text = new TextBlock();

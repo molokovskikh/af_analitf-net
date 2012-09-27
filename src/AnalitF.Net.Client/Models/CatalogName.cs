@@ -8,6 +8,8 @@
 
 		public virtual bool HaveOffers { get; set; }
 
+		public virtual Mnn Mnn { get; set; }
+
 		public virtual ProductDescription Description { get; set; }
 	}
 }

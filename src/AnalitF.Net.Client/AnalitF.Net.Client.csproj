@@ -81,6 +81,7 @@
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />

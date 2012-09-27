@@ -57,7 +57,7 @@
 	</Style>
 
 	<DataTemplate x:Key="OfferPanel">
-		<Grid >
+		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>

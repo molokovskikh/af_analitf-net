@@ -73,7 +73,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<ContentControl Grid.Row="2" ContentTemplate="{StaticResource ResourceKey=OfferPanel}"></ContentControl>
+		<ContentControl Grid.Row="2" ContentTemplate="{StaticResource ResourceKey=OfferPanel}" cal:Bind.Model="{Binding}"></ContentControl>
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>

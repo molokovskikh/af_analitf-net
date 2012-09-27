@@ -64,7 +64,7 @@
 				<DataGridTextColumn Width="*" Header="Сумма" />
 			</DataGrid.Columns>
 		</c:DataGrid>
-		<ContentControl Grid.Row="3" ContentTemplate="{StaticResource ResourceKey=OfferPanel}"></ContentControl>
+		<ContentControl Grid.Row="3" ContentTemplate="{StaticResource ResourceKey=OfferPanel}" cal:Bind.Model="{Binding}"></ContentControl>
 		<StackPanel Grid.Row="4">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">

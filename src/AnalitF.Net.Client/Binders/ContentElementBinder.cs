@@ -13,10 +13,13 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class ContentElementBinder
 	{
+		public static void RegisterConvention()
+		{
+			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
+		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)
 		{
-			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			var viewModelType = viewModel.GetType();
 			var elements = XamlExtentions
 				.DeepChildren(view)

@@ -132,9 +132,17 @@ from Catalogs.Descriptions";
 			result.Add(Export(sql, "ProductDescriptions"));
 
 			sql = @"
+select Id,
+RussianMnn as Name
+from Catalogs.Mnn";
+
+			result.Add(Export(sql, "mnns"));
+
+			sql = @"
 select cn.Id,
 	cn.Name,
 	cn.DescriptionId,
+	cn.MnnId,
 	exists(select *
 		from usersettings.Core cr
 			join Catalogs.Products p on p.Id = cr.ProductId
