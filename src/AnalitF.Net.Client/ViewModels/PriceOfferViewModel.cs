@@ -10,9 +10,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class PriceOfferViewModel : BaseOfferViewModel
 	{
 		private Offer currentOffer;
-		private string currentProducer;
-		private List<Offer> offers;
-		private string allLabel = "Все производители";
+
 		private string[] filters = new[] {
 			"Прайс-лист (F4)",
 			"Заказы (F5)",
@@ -27,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Price = price;
 
 			Filters = filters;
-			currentProducer = allLabel;
+			currentProducer = AllProducerLabel;
 			currentFilter = filters[0];
 			if (showLeaders)
 				currentFilter = filters[2];
@@ -36,27 +34,6 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public Price Price { get; set; }
-
-		public List<Offer> Offers
-		{
-			get { return offers; }
-			set
-			{
-				offers = value;
-				RaisePropertyChangedEventImmediately("Offers");
-			}
-		}
-
-		public string CurrentProducer
-		{
-			get { return currentProducer; }
-			set
-			{
-				currentProducer = value;
-				RaisePropertyChangedEventImmediately("CurrentProducer");
-				Filter();
-			}
-		}
 
 		public Offer CurrentOffer
 		{
@@ -85,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void Filter()
 		{
 			var query = Session.Query<Offer>().Where(o => o.PriceId == Price.Id);
-			if (CurrentProducer != allLabel) {
+			if (CurrentProducer != AllProducerLabel) {
 				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
 			}
 			if (CurrentFilter == filters[2]) {
@@ -96,7 +73,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			Offers = query.ToList();
 			CurrentOffer = offers.FirstOrDefault();
-			Producers = new[] { allLabel }.Concat(Offers.Select(o => o.ProducerSynonym).ToList()).ToList();
 		}
 	}
 }

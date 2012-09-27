@@ -6,34 +6,76 @@
 			xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
 			xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 			xmlns:cal="http://www.caliburnproject.org">
+	<UserControl.Resources>
+		<Style x:Key="GroupButton" TargetType="ToggleButton">
+			<Style.Triggers>
+				<Trigger Property="IsChecked" Value="True">
+					<Setter Property="Content" Value="Разгруппировать"></Setter>
+				</Trigger>
+				<Trigger Property="IsChecked" Value="False">
+					<Setter Property="Content" Value="Группировать"></Setter>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</UserControl.Resources>
+
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="KeyDown">
 			<cal:ActionMessage MethodName="TryClose">
 			</cal:ActionMessage>
 		</i:EventTrigger>
 	</i:Interaction.Triggers>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Orientation="Horizontal" Grid.Row="0">
 			<Label x:Name="Catalog_Name"></Label>
-			<Button>Группировать</Button>
+			<ToggleButton Name="GroupByProduct" Style="{StaticResource ResourceKey=GroupButton}"></ToggleButton>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Regions"></ComboBox>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="2">
+		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Код" Binding="{Binding Code}" />
+				<DataGridTextColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
+				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
+				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+				<DataGridTextColumn Width="*" Header="Наценака поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
+				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" />
+				<DataGridTextColumn Width="*" Header="Мин.цена" Binding="{Binding LeaderCost}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Header="Прайс - лидер" Binding="{Binding LeaderPrice.SupplierName}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Visibility="Collapsed" Header="Регион - лидер" Binding="{Binding LeaderRegion}" />
+				<DataGridTextColumn Width="*" Header="Заказ" />
+				<DataGridTextColumn Width="*" Header="Сумма" />
+			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<ContentControl Grid.Row="3" ContentTemplate="{StaticResource ResourceKey=OfferPanel}"></ContentControl>
+		<ContentControl Grid.Row="2" ContentTemplate="{StaticResource ResourceKey=OfferPanel}"></ContentControl>
 
-		<StackPanel Grid.Row="4">
+		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">
 				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
@@ -43,7 +85,7 @@
 			</StackPanel>
 		</StackPanel>
 
-		<StackPanel Grid.Row="5">
+		<StackPanel Grid.Row="4">
 			<Label>Информация о поставщике</Label>
 		</StackPanel>
 	</Grid>

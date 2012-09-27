@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using AnalitF.Net.Client.Models;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -7,6 +10,16 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private Catalog currentCatalog;
 		protected List<string> producers;
+		protected List<Offer> offers;
+		protected string currentProducer;
+
+		protected const string AllProducerLabel = "Все производители";
+
+		protected void UpdateProducers()
+		{
+			var offerProducers = Offers.Select(o => o.ProducerSynonym).Distinct().OrderBy(p => p);
+			Producers = new[] { AllProducerLabel }.Concat(offerProducers).ToList();
+		}
 
 		public Catalog CurrentCatalog
 		{
@@ -35,6 +48,26 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				producers = value;
 				RaisePropertyChangedEventImmediately("Producers");
+			}
+		}
+
+		public List<Offer> Offers
+		{
+			get { return offers; }
+			set
+			{
+				offers = value;
+				RaisePropertyChangedEventImmediately("Offers");
+			}
+		}
+
+		public string CurrentProducer
+		{
+			get { return currentProducer; }
+			set
+			{
+				currentProducer = value;
+				RaisePropertyChangedEventImmediately("CurrentProducer");
 			}
 		}
 

@@ -88,13 +88,15 @@ from Usersettings.ActivePrices ap
 			var offerQuery = new OfferQuery();
 			offerQuery
 				.Select("m.PriceCode as LeaderPriceId",
+				"r.Region as RegionName",
 				"m.MinCost as LeaderCost",
 				"lr.RegionCode as LeaderRegionId",
 				"lr.Region as LeaderRegion",
 				"p.CatalogId")
 				.Join("join Usersettings.MinCosts m on m.Id = c0.Id and m.RegionCode = ap.RegionCode")
 				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
-				.Join("join Catalogs.Products p on p.Id = c0.ProductId");
+				.Join("join Catalogs.Products p on p.Id = c0.ProductId")
+				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode");
 			offerQuery.SelectSynonyms();
 			sql = offerQuery.ToSql()
 				.Replace("{Offer.", "")
@@ -144,23 +146,16 @@ group by cn.Id";
 			result.Add(Export(sql, "catalognames"));
 
 			sql = @"
-select cf.Id,
-	cf.Form
-from Catalogs.CatalogForms cf
-	join Catalogs.Catalog c on c.FormId = cf.Id
-where c.Hidden = 0
-group by cf.Id";
-			result.Add(Export(sql, "catalogforms"));
-
-			sql = @"
 select
 	c.Id,
 	c.NameId,
-	c.FormId,
 	c.VitallyImportant,
 	c.MandatoryList,
-	exists(select * from usersettings.Core cr join Catalogs.Products p on p.Id = cr.ProductId where p.CatalogId = c.Id) as HaveOffers
+	exists(select * from usersettings.Core cr join Catalogs.Products p on p.Id = cr.ProductId where p.CatalogId = c.Id) as HaveOffers,
+	cf.Id as FormId,
+	cf.Form as Form
 from Catalogs.Catalog c
+	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where Hidden = 0";
 			result.Add(Export(sql, "catalogs"));
 

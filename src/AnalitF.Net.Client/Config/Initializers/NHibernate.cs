@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var mapper = new ConventionModelMapper();
 			mapper.BeforeMapBag += (inspector, member, customizer) => customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => customizer.Column(member.LocalMember.Name + "Id");
-			var assembly = typeof(CatalogForm).Assembly;
+			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => t.GetProperty("Id") != null);
 			var mapping = mapper.CompileMappingFor(types);
 

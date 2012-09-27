@@ -11,11 +11,11 @@ namespace AnalitF.Net.Client.ViewModels
 	public class CatalogViewModel : BaseScreen
 	{
 		private CatalogName _currentCatalogName;
-		private CatalogForm currentCatalogForm;
+		private Catalog currentCatalogForm;
 		private Catalog currentCatalog;
 
 		private List<CatalogName> _catalogNames;
-		private List<CatalogForm> _catalogForms;
+		private List<Catalog> _catalogForms;
 		private bool showWithoutOffers;
 
 		public CatalogViewModel()
@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public List<CatalogForm> CatalogForms
+		public List<Catalog> CatalogForms
 		{
 			get { return _catalogForms; }
 			set
@@ -56,14 +56,14 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public CatalogForm CurrentCatalogForm
+		public Catalog CurrentCatalogForm
 		{
 			get { return currentCatalogForm; }
 			set
 			{
 				currentCatalogForm = value;
+				CurrentCatalog = value;
 				RaisePropertyChangedEventImmediately("CurrentCatalogForm");
-				CurrentCatalog = Session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == CurrentCatalogForm);
 			}
 		}
 
@@ -99,19 +99,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void LoadCatalogForms()
 		{
-			if (_currentCatalogName == null)
-				CatalogForms = Enumerable.Empty<CatalogForm>().ToList();
+			if (CurrentCatalogName == null)
+				CatalogForms = Enumerable.Empty<Catalog>().ToList();
 
-			CatalogForms = Session.Query<Catalog>()
-				.Where(c => c.Name == _currentCatalogName)
-				.Select(c => c.Form)
+			var queryable = Session.Query<Catalog>().Where(c => c.Name == CurrentCatalogName);
+			if (!ShowWithoutOffers) {
+				queryable = queryable.Where(c => c.HaveOffers);
+			}
+			CatalogForms = queryable
+				.OrderBy(c => c.Form)
 				.ToList();
 		}
 
 		public void EnterCatalogForms()
 		{
-			var catalog = Session.Query<Catalog>().First(c => c.Name == CurrentCatalogName && c.Form == currentCatalogForm);
-			Shell.ActiveAndSaveCurrent(new OfferViewModel(catalog));
+			Shell.ActiveAndSaveCurrent(new OfferViewModel(CurrentCatalog));
 		}
 
 		public bool CanShowDescription

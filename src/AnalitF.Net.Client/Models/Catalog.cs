@@ -4,7 +4,9 @@
 	{
 		public virtual uint Id { get; set; }
 
-		public virtual CatalogForm Form { get; set; }
+		public virtual uint FormId { get; set; }
+
+		public virtual string Form { get; set; }
 
 		public virtual CatalogName Name { get; set; }
 

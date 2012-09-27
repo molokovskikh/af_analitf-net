@@ -80,7 +80,6 @@
     <Compile Include="Extentions\WindowManager.cs" />
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Models\Catalog.cs" />
-    <Compile Include="Models\CatalogForm.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
