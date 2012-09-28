@@ -34,7 +34,7 @@
 		</StackPanel>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
-			<TextBox Width="150" Margin="0, 0, 4, 0"></TextBox>
+			<TextBox Style="{StaticResource ResourceKey=SearchText}"></TextBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
 		</StackPanel>
 

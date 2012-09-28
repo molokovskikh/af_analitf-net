@@ -51,10 +51,18 @@ namespace AnalitF.Net.Client
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
 			};
+
+			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
+				EnterBinder.CustomBind,
+				SearchBinder.CustomBind
+			};
+
 			ViewModelBinder.BindActions = (elements, type) => {
 				var binded = defaultBindActions(elements, type).ToList();
 
-				EnterBinder.CustomBind(type, elements, binded);
+				foreach (var binder in customBinders) {
+					binder(type, elements, binded);
+				}
 				return elements;
 			};
 		}

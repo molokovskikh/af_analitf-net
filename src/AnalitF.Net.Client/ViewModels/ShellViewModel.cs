@@ -30,6 +30,11 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateItem(new MnnViewModel());
 		}
 
+		public void SearchOffers()
+		{
+			ActivateItem(new SearchOfferViewModel());
+		}
+
 		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {

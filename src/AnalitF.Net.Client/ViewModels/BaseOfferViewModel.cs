@@ -84,12 +84,42 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool CanShowCatalogWithMnnFilter
+		{
+			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
+		}
+
 		public void ShowDescription()
 		{
 			if (!CanShowDescription)
 				return;
 
 			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
+		}
+
+		public void ShowCatalogWithMnnFilter()
+		{
+			if (!CanShowCatalogWithMnnFilter)
+				return;
+
+			Shell.ActivateItem(new CatalogViewModel {
+				FiltredMnn = CurrentCatalog.Name.Mnn
+			});
+		}
+
+		public void ShowCatalog()
+		{
+			if (CurrentOffer == null)
+				return;
+
+			Shell.CancelNavigation();
+			TryClose();
+			Shell.PushInChain(new CatalogViewModel {
+				CurrentCatalog = CurrentCatalog
+			});
+			var offerViewModel = new OfferViewModel(CurrentCatalog);
+			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
+			Shell.ActivateItem(offerViewModel);
 		}
 	}
 }

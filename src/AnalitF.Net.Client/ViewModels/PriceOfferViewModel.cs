@@ -61,35 +61,5 @@ namespace AnalitF.Net.Client.ViewModels
 			Offers = query.ToList();
 			CurrentOffer = offers.FirstOrDefault();
 		}
-
-		public void ShowCatalog()
-		{
-			if (CurrentOffer == null)
-				return;
-
-			Shell.CancelNavigation();
-			TryClose();
-			Shell.PushInChain(new CatalogViewModel {
-				CurrentCatalog = CurrentCatalog
-			});
-			var offerViewModel = new OfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
-			Shell.ActivateItem(offerViewModel);
-		}
-
-		public bool CanShowCatalogWithMnnFilter
-		{
-			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
-		}
-
-		public void ShowCatalogWithMnnFilter()
-		{
-			if (!CanShowCatalogWithMnnFilter)
-				return;
-
-			Shell.ActivateItem(new CatalogViewModel {
-				FiltredMnn = CurrentCatalog.Name.Mnn
-			});
-		}
 	}
 }

@@ -74,6 +74,11 @@
 		<Setter Property="Margin" Value="4" />
 	</Style>
 
+	<Style TargetType="TextBox" x:Key="SearchText">
+		<Setter Property="Width" Value="150" />
+		<Setter Property="Margin" Value="0, 0, 4, 0" />
+	</Style>
+
 	<DataTemplate x:Key="OfferPanel">
 		<Grid>
 			<Grid.ColumnDefinitions>

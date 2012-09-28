@@ -28,6 +28,11 @@ namespace AnalitF.Net.Client.Binders
 
 			var enterObservable = keydown.Merge(mouseDoubleClick).Where(i => i != null);
 
+			RegisterTrigger(element, method, enterObservable);
+		}
+
+		public static void RegisterTrigger(FrameworkElement element, MethodInfo method, IObservable<object> enterObservable)
+		{
 			var trigger = new ObservableTrigger {
 				Observable = enterObservable
 			};
