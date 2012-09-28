@@ -6,6 +6,6 @@
 
 		public virtual string Name { get; set; }
 
-		public virtual bool HasOffers { get; set; }
+		public virtual bool HaveOffers { get; set; }
 	}
 }

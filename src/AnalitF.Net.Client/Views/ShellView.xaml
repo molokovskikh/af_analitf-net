@@ -28,7 +28,7 @@
 				<Button x:Name="SearchOffers">
 					Поиск в прайс-листах
 				</Button>
-				<Button x:Name="SearchSearchMnn">
+				<Button x:Name="ShowMnn">
 					Поиск по МНН
 				</Button>
 				<Button x:Name="ShowPrice">

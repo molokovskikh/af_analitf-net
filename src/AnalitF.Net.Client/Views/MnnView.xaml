@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.MnnView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+		</Grid.RowDefinitions>
+		<StackPanel Grid.Row="0" Style="{StaticResource ResourceKey=FilterPanel}">
+			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
+		</StackPanel>
+		<c:DataGrid Grid.Row="1" x:Name="Mnns">
+			<DataGrid.Columns>
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="МНН" Binding="{Binding Name}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+	</Grid>
+</UserControl>

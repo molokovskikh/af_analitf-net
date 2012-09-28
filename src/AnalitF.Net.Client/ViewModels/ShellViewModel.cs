@@ -17,13 +17,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
-			var model = new CatalogViewModel();
-			ActivateItem(model);
+			ActivateItem(new CatalogViewModel());
 		}
 
 		public void ShowPrice()
 		{
 			ActivateItem(new PriceViewModel());
+		}
+
+		public void ShowMnn()
+		{
+			ActivateItem(new MnnViewModel());
 		}
 
 		public void ActiveAndSaveCurrent(IScreen item)

@@ -90,6 +90,7 @@
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
+    <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\OfferViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -99,6 +100,9 @@
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MnnView.xaml.cs">
+      <DependentUpon>MnnView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OfferView.xaml.cs">
       <DependentUpon>OfferView.xaml</DependentUpon>
@@ -126,6 +130,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DescriptionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MnnView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

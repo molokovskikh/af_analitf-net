@@ -5,13 +5,6 @@
 		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
 	<UserControl.Resources>
 		<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
-		<Style x:Key="HaveOffers" TargetType="{x:Type DataGridCell}">
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding HaveOffers}" Value="false">
-					<Setter Property="Background" Value="Silver"/>
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
 	</UserControl.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
@@ -25,20 +18,33 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
-		<StackPanel Margin="4" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}">
 			<TextBox Width="150" x:Name="SearchText" Margin="0, 0, 4, 0"></TextBox>
-			<ComboBox Width="150" IsEditable="False" IsReadOnly="true" Margin="0, 0, 4, 0">
-				<ComboBoxItem>Все</ComboBoxItem>
-				<ComboBoxItem>Жизненноважные</ComboBoxItem>
-				<ComboBoxItem>Обязательный ассортимент</ComboBoxItem>
-			</ComboBox>
-			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
+			<ComboBox Style="{StaticResource ResourceKey=Filter}" x:Name="Filters"></ComboBox>
+
+			<ToggleButton Margin="0, 0, 4, 0" x:Name="FilterByMnn">
+				<ToggleButton.Style>
+					<Style TargetType="ToggleButton">
+						<Style.Triggers>
+							<Trigger Property="IsChecked" Value="True">
+								<Setter Property="Content" Value="Убрать синонимы (Esc)"></Setter>
+							</Trigger>
+							<Trigger Property="IsChecked" Value="False">
+								<Setter Property="Content" Value="Попазать синонимы (Ctrl+N)"></Setter>
+							</Trigger>
+						</Style.Triggers>
+					</Style>
+				</ToggleButton.Style>
+			</ToggleButton>
 		</StackPanel>
+
 		<c:DataGrid Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" x:Name="CatalogNames">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование" Binding="{Binding Name}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
 		<c:DataGrid Grid.Row="1" Grid.Column="1" x:Name="CatalogForms">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
@@ -65,10 +71,10 @@
 			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name"></Label>
 		</Grid>
 		<Image Height="125" Grid.Row="3" Grid.Column="1"></Image>
-		<StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="4">
-			<CheckBox Margin="0, 0, 4, 0">Поиск по части наименования</CheckBox>
-			<CheckBox Name="ShowWithoutOffers" Margin="0, 0, 4, 0">Отображать весь каталог</CheckBox>
-			<CheckBox Margin="0, 0, 4, 0">Поиск по форме выпуска</CheckBox>
+		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
+			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по части наименования</CheckBox>
+			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
+			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска</CheckBox>
 		</StackPanel>
 	</Grid>
 </UserControl>

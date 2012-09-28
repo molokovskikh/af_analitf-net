@@ -16,13 +16,5 @@ namespace AnalitF.Net.Test.Views
 		{
 			var view = new ShellView();
 		}
-
-		[Test]
-		public void Show_catalog_view()
-		{
-			var view = new CatalogViewModel();
-			view.CurrentCatalogName = view.CatalogNames.First();
-			view.ShowDescription();
-		}
 	}
 }

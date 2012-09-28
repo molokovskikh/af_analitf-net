@@ -66,6 +66,7 @@
     <Compile Include="ExportImportFixture.cs" />
     <Compile Include="SetupFixture.cs" />
     <Compile Include="ViewModes\BaseFixture.cs" />
+    <Compile Include="ViewModes\CatalogViewModelFixture.cs" />
     <Compile Include="ViewModes\OfferViewModelFixture.cs" />
     <Compile Include="Views\CatalogViewFixture.cs" />
   </ItemGroup>

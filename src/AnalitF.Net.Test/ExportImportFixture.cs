@@ -133,8 +133,14 @@ from Catalogs.Descriptions";
 
 			sql = @"
 select Id,
-RussianMnn as Name
-from Catalogs.Mnn";
+	RussianMnn as Name,
+	exists(select *
+		from usersettings.Core cr
+			join Catalogs.Products p on p.Id = cr.ProductId
+				join Catalogs.Catalog c on c.Id = p.CatalogId
+					join Catalogs.CatalogNames cn on cn.Id = c.NameId
+		where m.Id = cn.MnnId) as HaveOffers
+from Catalogs.Mnn m";
 
 			result.Add(Export(sql, "mnns"));
 
@@ -147,7 +153,9 @@ select cn.Id,
 		from usersettings.Core cr
 			join Catalogs.Products p on p.Id = cr.ProductId
 				join Catalogs.Catalog c on c.Id = p.CatalogId
-		where c.NameId = cn.Id) as HaveOffers
+		where c.NameId = cn.Id) as HaveOffers,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
 from Catalogs.CatalogNames cn
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 group by cn.Id";
