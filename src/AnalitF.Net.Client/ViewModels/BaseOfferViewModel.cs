@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected List<string> producers;
 		protected List<Offer> offers;
 		protected string currentProducer;
+		private Offer currentOffer;
 
 		protected const string AllProducerLabel = "Все производители";
 
@@ -68,6 +69,18 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentProducer = value;
 				RaisePropertyChangedEventImmediately("CurrentProducer");
+			}
+		}
+
+		public Offer CurrentOffer
+		{
+			get { return currentOffer; }
+			set
+			{
+				currentOffer = value;
+				RaisePropertyChangedEventImmediately("CurrentOffer");
+				if (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId)
+					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 			}
 		}
 

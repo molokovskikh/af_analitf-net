@@ -8,7 +8,7 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class ShellViewModel : Conductor<IScreen>
 	{
-		private Stack<IScreen> screens = new Stack<IScreen>();
+		private Stack<IScreen> navigationChain = new Stack<IScreen>();
 
 		public ShellViewModel()
 		{
@@ -30,23 +30,41 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateItem(new MnnViewModel());
 		}
 
-		public void ActiveAndSaveCurrent(IScreen item)
+		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {
-				screens.Push(ActiveItem);
+				navigationChain.Push(ActiveItem);
 				DeactivateItem(ActiveItem, false);
 			}
 
 			ActivateItem(item);
 		}
 
+		public IEnumerable<IScreen> NavigationChain
+		{
+			get { return navigationChain; }
+		}
+
 		public override void DeactivateItem(IScreen item, bool close)
 		{
 			base.DeactivateItem(item, close);
 
-			if (ActiveItem == null && screens.Count > 0) {
-				ActivateItem(screens.Peek());
+			if (ActiveItem == null && navigationChain.Count > 0) {
+				ActivateItem(navigationChain.Peek());
 			}
+		}
+
+		public void CancelNavigation()
+		{
+			while (navigationChain.Count > 0) {
+				var screen = navigationChain.Pop();
+				screen.TryClose();
+			}
+		}
+
+		public void PushInChain(IScreen screen)
+		{
+			navigationChain.Push(screen);
 		}
 	}
 }

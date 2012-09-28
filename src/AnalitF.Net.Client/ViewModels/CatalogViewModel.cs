@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<Catalog> _catalogForms;
 		private bool showWithoutOffers;
 		private string currentFilter;
-		private Mnn filterByMnn;
+		private Mnn filtredMnn;
 
 		public CatalogViewModel()
 		{
@@ -91,6 +91,10 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentCatalog = value;
+				//если нас вызвала другая форма
+				if (CurrentCatalogName == null) {
+					CurrentCatalogName = currentCatalog.Name;
+				}
 				RaisePropertyChangedEventImmediately("CurrentCatalog");
 			}
 		}
@@ -119,20 +123,33 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool FilterByMnn
 		{
-			get { return filterByMnn != null; }
+			get { return filtredMnn != null; }
 			set
 			{
 				if (value) {
 					if (CurrentCatalogName != null) {
-						filterByMnn = CurrentCatalogName.Mnn;
+						filtredMnn = CurrentCatalogName.Mnn;
 					}
 				}
 				else {
-					filterByMnn = null;
+					filtredMnn = null;
 				}
+				RaisePropertyChangedEventImmediately("FilterByMnn");
+				RaisePropertyChangedEventImmediately("FiltredMnn");
+			}
+		}
+
+		public Mnn FiltredMnn
+		{
+			get { return filtredMnn; }
+			set
+			{
+				filtredMnn = value;
+				RaisePropertyChangedEventImmediately("FiltredMnn");
 				RaisePropertyChangedEventImmediately("FilterByMnn");
 			}
 		}
+
 
 		private void Update()
 		{
@@ -146,8 +163,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentFilter == Filters[2]) {
 				queryable = queryable.Where(c => c.MandatoryList);
 			}
-			if (filterByMnn != null) {
-				queryable = queryable.Where(n => n.Mnn == filterByMnn);
+			if (filtredMnn != null) {
+				queryable = queryable.Where(n => n.Mnn == filtredMnn);
 			}
 			CatalogNames = queryable.OrderBy(c => c.Name).ToList();
 		}
@@ -177,7 +194,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterCatalogForms()
 		{
-			Shell.ActiveAndSaveCurrent(new OfferViewModel(CurrentCatalog));
+			Shell.Navigate(new OfferViewModel(CurrentCatalog));
 		}
 
 		public bool CanShowDescription

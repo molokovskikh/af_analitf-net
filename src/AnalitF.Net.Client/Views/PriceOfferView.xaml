@@ -25,8 +25,8 @@
 				Прайс-лист <Run x:Name="Price_Name"/>, регион <Run x:Name="Price_RegionName"/>
 			</TextBlock>
 
-			<Button Margin="0, 0, 4, 0">В каталог (F2)</Button>
-			<Button Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
+			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 			<Label>Позиций:</Label>
 			<Label x:Name="Offers_Count"></Label>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>

@@ -43,6 +43,8 @@ namespace AnalitF.Net.Client
 
 		public static void RegisterBinder()
 		{
+			ContentElementBinder.RegisterConvention();
+
 			var defaultBindActions = ViewModelBinder.BindActions;
 			var defaultBind = ViewModelBinder.Bind;
 			ViewModelBinder.Bind = (viewModel, view, context) => {
