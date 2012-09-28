@@ -16,6 +16,13 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public void Init(string connectionStringName = "local")
 		{
 			var mapper = new ConventionModelMapper();
+			mapper.BeforeMapProperty += (inspector, member, customizer) => {
+				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {
+					if (((PropertyInfo)member.LocalMember).PropertyType == typeof(string)) {
+						customizer.Length(10000);
+					}
+				}
+			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => customizer.Column(member.LocalMember.Name + "Id");
 			var assembly = typeof(Offer).Assembly;
