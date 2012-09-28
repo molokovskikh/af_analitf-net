@@ -20,7 +20,8 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
-		<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
+
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0" Grid.Column="0">
 			<TextBlock Margin="5">
 				Прайс-лист <Run x:Name="Price_Name"/>, регион <Run x:Name="Price_RegionName"/>
 			</TextBlock>
@@ -31,10 +32,12 @@
 			<Label x:Name="Offers_Count"></Label>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>
 		</StackPanel>
-		<StackPanel Orientation="Horizontal" Grid.Row="1">
+
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
 			<TextBox Width="150" Margin="0, 0, 4, 0"></TextBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
 		</StackPanel>
+
 		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Код" Binding="{Binding Code}" />

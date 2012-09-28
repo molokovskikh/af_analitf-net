@@ -54,17 +54,7 @@ namespace AnalitF.Net.Client
 			ViewModelBinder.BindActions = (elements, type) => {
 				var binded = defaultBindActions(elements, type).ToList();
 
-				foreach (var method in type.GetMethods()) {
-					var name = method.Name;
-					if (name.StartsWith("Enter")) {
-						var element = elements.FindName(name.Replace("Enter", ""));
-						if (element == null)
-							continue;
-
-						EnterBinder.Bind(method, element);
-						binded.Add(element);
-					}
-				}
+				EnterBinder.CustomBind(type, elements, binded);
 				return elements;
 			};
 		}

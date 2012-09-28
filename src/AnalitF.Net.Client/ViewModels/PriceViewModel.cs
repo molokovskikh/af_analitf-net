@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool ShowLeaders { get; set; }
 
-		public void EnterPrices()
+		public void EnterPrice()
 		{
 			if (CurrentPrice == null)
 				return;

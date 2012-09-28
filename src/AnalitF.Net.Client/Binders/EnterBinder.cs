@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -41,6 +42,21 @@ namespace AnalitF.Net.Client.Binders
 			var property = (DependencyProperty)(typeof(Message).GetField("MessageTriggersProperty", BindingFlags.Static | BindingFlags.NonPublic))
 				.GetValue(null);
 			element.SetValue(property, new[] { trigger });
+		}
+
+		public static void CustomBind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)
+		{
+			var pattern = "Enter";
+			var methods = type.GetMethods().Where(m => m.Name.StartsWith(pattern));
+			foreach (var method in methods) {
+				var name = method.Name.Replace(pattern, "").InflectTo().Pluralized;
+				var element = elements.FindName(name);
+				if (element == null)
+					continue;
+
+				Bind(method, element);
+				binded.Add(element);
+			}
 		}
 	}
 }

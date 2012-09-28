@@ -35,7 +35,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Orientation="Horizontal" Grid.Row="0">
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
 			<Label x:Name="Catalog_Name"></Label>
 			<ToggleButton Name="GroupByProduct" Style="{StaticResource ResourceKey=GroupButton}"></ToggleButton>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>

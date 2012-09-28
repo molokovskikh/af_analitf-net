@@ -192,7 +192,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToList();
 		}
 
-		public void EnterCatalogForms()
+		public void EnterCatalogForm()
 		{
 			Shell.Navigate(new OfferViewModel(CurrentCatalog));
 		}

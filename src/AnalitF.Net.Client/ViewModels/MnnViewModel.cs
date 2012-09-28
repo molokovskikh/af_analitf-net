@@ -42,6 +42,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public void EnterMnn()
+		{
+			if (CurrentMnn == null)
+				return;
+
+			Shell.ActivateItem(new CatalogViewModel {
+				FiltredMnn = CurrentMnn
+			});
+		}
+
 		public void Update()
 		{
 			var query = Session.Query<Mnn>();
