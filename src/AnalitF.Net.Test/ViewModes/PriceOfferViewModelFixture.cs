@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -11,12 +12,10 @@ namespace AnalitF.Net.Test.ViewModes
 	public class PriceOfferViewModelFixture : BaseFixture
 	{
 		private ISession session;
-		private ShellViewModel shell;
 
 		[SetUp]
 		public void Setup()
 		{
-			shell = new ShellViewModel();
 			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
 		}
 
@@ -24,7 +23,7 @@ namespace AnalitF.Net.Test.ViewModes
 		public void Show_catalog()
 		{
 			var price = session.Query<Price>().First();
-			var model = Init(price);
+			var model = Init(new PriceOfferViewModel(price, false));
 
 			var offer = model.CurrentOffer;
 			model.ShowCatalog();
@@ -43,20 +42,13 @@ namespace AnalitF.Net.Test.ViewModes
 		{
 			var offer = session.Query<Offer>().First(o => session.Query<Catalog>().Where(c => c.HaveOffers && c.Name.Mnn != null).Select(c => c.Id).Contains(o.CatalogId));
 			var price = session.Load<Price>(offer.PriceId);
-			var model = Init(price);
+			var model = Init(new PriceOfferViewModel(price, false));
 			model.CurrentOffer = model.Offers.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();
 			Assert.That(shell.NavigationChain.Count(), Is.EqualTo(0));
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Name.Mnn));
-		}
-
-		private PriceOfferViewModel Init(Price price)
-		{
-			var model = new PriceOfferViewModel(price, false);
-			model.Parent = shell;
-			return model;
 		}
 	}
 }

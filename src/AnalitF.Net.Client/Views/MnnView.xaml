@@ -8,6 +8,7 @@
 			<RowDefinition></RowDefinition>
 		</Grid.RowDefinitions>
 		<StackPanel Grid.Row="0" Style="{StaticResource ResourceKey=FilterPanel}">
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" x:Name="Mnns">

@@ -19,7 +19,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}"  Grid.Row="0" Grid.ColumnSpan="2">
 			<TextBox Width="150" x:Name="SearchText" Margin="0, 0, 4, 0"></TextBox>
 			<ComboBox Style="{StaticResource ResourceKey=Filter}" x:Name="Filters"></ComboBox>
 
@@ -37,6 +37,7 @@
 					</Style>
 				</ToggleButton.Style>
 			</ToggleButton>
+			<Label x:Name="FilterDescription" Foreground="Red"></Label>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" x:Name="CatalogNames">
@@ -64,11 +65,11 @@
 				<Label Foreground="Red" Visibility="{Binding Path=CurrentCatalog.VitallyImportant, Converter={StaticResource VisibilityConverter}}">ЖНВЛС</Label>
 				<Label Foreground="Green" Visibility="{Binding Path=CurrentCatalog.MandatoryList, Converter={StaticResource VisibilityConverter}}">Обяз. список</Label>
 			</StackPanel>
-			<Label Grid.Row="0" Grid.Column="1">Наименование:</Label>
-			<Label Grid.Row="0" Grid.Column="2" Name="CurrentCatalogName_Name"></Label>
+			<Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">Наименование:</Label>
+			<Label Grid.Row="0" Grid.Column="2" Name="CurrentCatalogName_Name" FontWeight="Bold"></Label>
 			<Button Grid.Row="1" Grid.Column="0" Name="ShowDescription">Описание (F1, Пробел)</Button>
-			<Label Grid.Row="1" Grid.Column="1">МНН:</Label>
-			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name"></Label>
+			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">МНН:</Label>
+			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name" FontWeight="Bold"></Label>
 		</Grid>
 		<Image Height="125" Grid.Row="3" Grid.Column="1"></Image>
 		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">

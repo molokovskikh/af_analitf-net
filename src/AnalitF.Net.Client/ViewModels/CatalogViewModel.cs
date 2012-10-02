@@ -4,12 +4,37 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class FilterDeclaration
+	{
+		public FilterDeclaration(string name)
+		{
+			Name = name;
+		}
+
+		public FilterDeclaration(string name, string filterDescription, string filterDescriptionWithMnn)
+		{
+			Name = name;
+			FilterDescription = filterDescription;
+			FilterDescriptionWithMnn = filterDescriptionWithMnn;
+		}
+
+		public string Name { get; set; }
+		public string FilterDescription { get; set; }
+		public string FilterDescriptionWithMnn { get; set; }
+
+		public override string ToString()
+		{
+			return Name;
+		}
+	}
+
 	public class CatalogViewModel : BaseScreen
 	{
 		private CatalogName currentCatalogName;
@@ -19,16 +44,16 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<CatalogName> _catalogNames;
 		private List<Catalog> _catalogForms;
 		private bool showWithoutOffers;
-		private string currentFilter;
+		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
 
 		public CatalogViewModel()
 		{
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new [] {
-				"Все",
-				"Жизненноважные",
-				"Обязательный ассортимент"
+				new FilterDeclaration("Все"),
+				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные"),
+				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),
 			};
 			CurrentFilter = Filters[0];
 			Update();
@@ -109,15 +134,17 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public string[] Filters { get; set; }
+		public FilterDeclaration[] Filters { get; set; }
 
-		public string CurrentFilter
+		public FilterDeclaration CurrentFilter
 		{
 			get { return currentFilter; }
 			set
 			{
 				currentFilter = value;
+				FilterByMnn = false;
 				RaisePropertyChangedEventImmediately("CurrentFilter");
+				RaisePropertyChangedEventImmediately("FilterDescription");
 			}
 		}
 
@@ -136,6 +163,7 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 				RaisePropertyChangedEventImmediately("FilterByMnn");
 				RaisePropertyChangedEventImmediately("FiltredMnn");
+				RaisePropertyChangedEventImmediately("FilterDescription");
 			}
 		}
 
@@ -145,8 +173,11 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				filtredMnn = value;
+				if (!filtredMnn.HaveOffers)
+					ShowWithoutOffers = true;
 				RaisePropertyChangedEventImmediately("FiltredMnn");
 				RaisePropertyChangedEventImmediately("FilterByMnn");
+				RaisePropertyChangedEventImmediately("FilterDescription");
 			}
 		}
 
@@ -200,6 +231,27 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool CanShowDescription
 		{
 			get { return CurrentCatalogName != null && CurrentCatalogName.Description != null; }
+		}
+
+		public string FilterDescription
+		{
+			get
+			{
+				var parts = new List<string>();
+				if (FiltredMnn != null)
+					parts.Add(String.Format("\"{0}\"", FiltredMnn.Name));
+
+				if (currentFilter != null) {
+					var filter = FiltredMnn == null ? currentFilter.FilterDescription : currentFilter.FilterDescriptionWithMnn;
+					if (!String.IsNullOrEmpty(filter))
+						parts.Add(filter);
+				}
+
+				if (parts.Count > 0)
+					parts.Insert(0, "Фильтр по");
+
+				return parts.Implode(" ");
+			}
 		}
 
 		public void ShowDescription()

@@ -19,13 +19,6 @@
 		</Style>
 	</UserControl.Resources>
 
-	<i:Interaction.Triggers>
-		<i:EventTrigger EventName="KeyDown">
-			<cal:ActionMessage MethodName="TryClose">
-			</cal:ActionMessage>
-		</i:EventTrigger>
-	</i:Interaction.Triggers>
-
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
@@ -16,7 +17,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Search()
 		{
-			if (string.IsNullOrEmpty(SearchText))
+			if (String.IsNullOrEmpty(SearchText))
 				return;
 
 			Offers = Session.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText)).ToList();
@@ -31,5 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 				RaisePropertyChangedEventImmediately("SearchText");
 			}
 		}
+
+		public List<string> Prices { get; set; }
 	}
 }

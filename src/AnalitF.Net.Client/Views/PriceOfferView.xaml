@@ -5,12 +5,6 @@
 		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 		xmlns:cal="http://www.caliburnproject.org">
-	<i:Interaction.Triggers>
-		<i:EventTrigger EventName="KeyDown">
-			<cal:ActionMessage MethodName="TryClose">
-			</cal:ActionMessage>
-		</i:EventTrigger>
-	</i:Interaction.Triggers>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -34,8 +28,8 @@
 		</StackPanel>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
-			<TextBox Style="{StaticResource ResourceKey=SearchText}"></TextBox>
-			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
+			<ComboBox x:Name="Producers" Style="{StaticResource Filter}"></ComboBox>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}">

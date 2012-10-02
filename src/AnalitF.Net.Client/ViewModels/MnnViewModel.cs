@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private bool showWithoutOffers;
 		private List<Mnn> mnns;
+		private string filterText;
 
 		public MnnViewModel()
 		{
@@ -42,6 +43,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public string SearchText { get; set; }
+
 		public void EnterMnn()
 		{
 			if (CurrentMnn == null)
@@ -59,7 +62,20 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(m => m.HaveOffers);
 			}
 
+			if (!String.IsNullOrEmpty(filterText)) {
+				query = query.Where(m => m.Name.Contains(filterText));
+			}
+
 			Mnns = query.OrderBy(m => m.Name).ToList();
+		}
+
+		public void Search()
+		{
+			if (String.IsNullOrEmpty(SearchText))
+				return;
+
+			filterText = SearchText;
+			Update();
 		}
 	}
 }

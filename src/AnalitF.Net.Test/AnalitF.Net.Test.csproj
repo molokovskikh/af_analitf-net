@@ -67,8 +67,10 @@
     <Compile Include="SetupFixture.cs" />
     <Compile Include="ViewModes\BaseFixture.cs" />
     <Compile Include="ViewModes\CatalogViewModelFixture.cs" />
+    <Compile Include="ViewModes\MnnViewModelFixture.cs" />
     <Compile Include="ViewModes\OfferViewModelFixture.cs" />
     <Compile Include="ViewModes\PriceOfferViewModelFixture.cs" />
+    <Compile Include="ViewModes\SearchOfferViewModelFixture.cs" />
     <Compile Include="Views\CatalogViewFixture.cs" />
   </ItemGroup>
   <ItemGroup>

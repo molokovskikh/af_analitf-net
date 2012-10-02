@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using NHibernate.Linq;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -16,6 +18,7 @@ namespace AnalitF.Net.Client.ViewModels
 		};
 
 		private string currentFilter;
+		private string filterText;
 
 		public PriceOfferViewModel(Price price, bool showLeaders)
 		{
@@ -28,7 +31,12 @@ namespace AnalitF.Net.Client.ViewModels
 			if (showLeaders)
 				currentFilter = filters[2];
 
-			Filter();
+			this.ObservableForProperty(m => m.CurrentFilter)
+				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
+				.Subscribe(e => Update());
+
+			Update();
+			UpdateProducers();
 		}
 
 		public Price Price { get; set; }
@@ -42,11 +50,10 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentFilter = value;
 				RaisePropertyChangedEventImmediately("CurrentFilter");
-				Filter();
 			}
 		}
 
-		private void Filter()
+		private void Update()
 		{
 			var query = Session.Query<Offer>().Where(o => o.PriceId == Price.Id);
 			if (CurrentProducer != AllProducerLabel) {
@@ -58,8 +65,23 @@ namespace AnalitF.Net.Client.ViewModels
 			if (currentFilter == filters[1]) {
 				query = query.Where(o => o.Line != null);
 			}
+			if (!String.IsNullOrEmpty(filterText)) {
+				query = query.Where(o => o.ProductSynonym.Contains(filterText));
+			}
+
 			Offers = query.ToList();
 			CurrentOffer = offers.FirstOrDefault();
+		}
+
+		public string SearchText { get; set; }
+
+		public void Search()
+		{
+			if (string.IsNullOrEmpty(SearchText))
+				return;
+
+			filterText = SearchText;
+			Update();
 		}
 	}
 }
