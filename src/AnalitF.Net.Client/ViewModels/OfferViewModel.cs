@@ -44,6 +44,9 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.RetailMarkup)
 				.Subscribe(_ => RaisePropertyChangedEventImmediately("RetailCost"));
 
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("Price"));
+
 			Filter();
 
 			UpdateRegions();
@@ -69,6 +72,16 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public string[] Filters { get; set; }
+
+		public Price Price
+		{
+			get
+			{
+				if (CurrentOffer == null)
+					return null;
+				return Session.Load<Price>(CurrentOffer.PriceId);
+			}
+		}
 
 		public string CurrentFilter
 		{

@@ -77,7 +77,11 @@
 		</StackPanel>
 
 		<StackPanel Grid.Row="4" Orientation="Horizontal">
-			<Label>Информация о поставщике</Label>
+			<StackPanel>
+				<Label>Информация о поставщике</Label>
+				<TextBlock Style="{StaticResource ResourceKey=PriceInfo}">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
+				<TextBlock Style="{StaticResource ResourceKey=PriceInfo}" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
+			</StackPanel>
 			<StackPanel>
 				<Label>Наценка</Label>
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
