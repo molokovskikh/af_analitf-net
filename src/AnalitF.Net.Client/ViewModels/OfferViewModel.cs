@@ -12,15 +12,20 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class OfferViewModel : BaseOfferViewModel
 	{
+		private const string allRegionLabel = "Все регионы";
+
 		private string currentRegion;
 		private List<string> regions;
 		private string currentFilter;
 		private bool groupByProduct;
 
-		private const string allRegionLabel = "Все регионы";
+		private decimal retailMarkup;
+		private List<MarkupConfig> markups = new List<MarkupConfig>();
 
 		public OfferViewModel(Catalog catalog)
 		{
+			markups = Session.Query<MarkupConfig>().ToList();
+
 			DisplayName = "Сводный прайс-лист";
 			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
@@ -32,6 +37,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Merge(this.ObservableForProperty(m => m.CurrentFilter))
 				.Subscribe(e => Filter());
+
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("RetailMarkup"));
+
+			this.ObservableForProperty(m => m.RetailMarkup)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("RetailCost"));
+
 			Filter();
 
 			UpdateRegions();
@@ -96,6 +108,29 @@ namespace AnalitF.Net.Client.ViewModels
 				groupByProduct = value;
 				Offers = Sort(Offers);
 				RaisePropertyChangedEventImmediately("GroupByProduct");
+			}
+		}
+
+		public decimal RetailCost
+		{
+			get
+			{
+				if (CurrentOffer == null)
+					return 0;
+				return CurrentOffer.Cost * (1 + RetailMarkup / 100);
+			}
+		}
+
+		public decimal RetailMarkup
+		{
+			get
+			{
+				return retailMarkup == 0 ? MarkupConfig.Calculate(markups, CurrentOffer) : retailMarkup;
+			}
+			set
+			{
+				retailMarkup = value;
+				RaisePropertyChangedEventImmediately("RetailMarkup");
 			}
 		}
 

@@ -5,7 +5,7 @@
 			xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
 			xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-			xmlns:cal="http://www.caliburnproject.org">
+			xmlns:cal="http://www.caliburnproject.org" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
 	<UserControl.Resources>
 		<Style x:Key="GroupButton" TargetType="ToggleButton">
 			<Style.Triggers>
@@ -76,8 +76,13 @@
 			</StackPanel>
 		</StackPanel>
 
-		<StackPanel Grid.Row="4">
+		<StackPanel Grid.Row="4" Orientation="Horizontal">
 			<Label>Информация о поставщике</Label>
+			<StackPanel>
+				<Label>Наценка</Label>
+				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
+				<Label Name="RetailCost"></Label>
+			</StackPanel>
 		</StackPanel>
 	</Grid>
 </UserControl>

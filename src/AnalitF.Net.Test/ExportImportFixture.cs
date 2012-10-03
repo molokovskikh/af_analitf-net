@@ -11,6 +11,7 @@ using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test
 {
@@ -32,7 +33,7 @@ namespace AnalitF.Net.Test
 		public void Load_data()
 		{
 			var supplier = TestSupplier.Create();
-			supplier.CreateSampleCore();
+			supplier.CreateSampleCore1();
 			var client = TestClient.CreateNaked();
 			Close();
 

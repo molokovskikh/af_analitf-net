@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using AnalitF.Net.Client.Extentions;
 using Caliburn.Micro;
 using Common.Tools;
+using Xceed.Wpf.Toolkit;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -16,6 +17,7 @@ namespace AnalitF.Net.Client.Binders
 		public static void RegisterConvention()
 		{
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
+			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)

@@ -64,6 +64,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="wpftoolkit.extended, Version=1.7.4644.13122, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -81,6 +82,7 @@
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />

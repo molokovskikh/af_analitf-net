@@ -16,6 +16,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public void Init(string connectionStringName = "local")
 		{
 			var mapper = new ConventionModelMapper();
+			mapper.Class<MarkupConfig>(m => m.Id(p => p.Id, i => i.Generator(Generators.Native)));
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
 				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {
 					if (((PropertyInfo)member.LocalMember).PropertyType == typeof(string)) {
