@@ -15,6 +15,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public MnnViewModel()
 		{
+			DisplayName = "Поиск по МНН";
+
 			Update();
 
 			this.ObservableForProperty(m => m.ShowWithoutOffers)
