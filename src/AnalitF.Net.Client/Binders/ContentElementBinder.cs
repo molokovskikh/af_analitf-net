@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Extentions;
@@ -23,8 +24,7 @@ namespace AnalitF.Net.Client.Binders
 		public static void Bind(object viewModel, DependencyObject view, object context)
 		{
 			var viewModelType = viewModel.GetType();
-			var elements = XamlExtentions
-				.DeepChildren(view)
+			var elements = view.DeepChildren()
 				.OfType<FrameworkContentElement>()
 				.Where(e => !string.IsNullOrEmpty(e.Name))
 				.Distinct()

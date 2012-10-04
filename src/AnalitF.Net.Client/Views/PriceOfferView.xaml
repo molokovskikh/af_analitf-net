@@ -4,7 +4,8 @@
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-		xmlns:cal="http://www.caliburnproject.org">
+		xmlns:cal="http://www.caliburnproject.org" xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
+             xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -61,7 +62,9 @@
 				<DataGridTextColumn Width="*" Header="Сумма" />
 			</DataGrid.Columns>
 		</c:DataGrid>
-		<ContentControl Grid.Row="3" ContentTemplate="{StaticResource ResourceKey=OfferPanel}" cal:Bind.Model="{Binding}"></ContentControl>
+
+		<Views:ProductInfoPanel Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+
 		<StackPanel Grid.Row="4">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">

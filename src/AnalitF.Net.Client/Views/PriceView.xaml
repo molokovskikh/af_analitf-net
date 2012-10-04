@@ -19,7 +19,7 @@
 				Всего прайс листов: <Run x:Name="Prices_Count"></Run>
 			</TextBlock>
 		</StackPanel>
-		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices">
+		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices" IsTextSearchEnabled="True" TextSearch.TextPath="Name">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding SupplierName}" />
 				<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding RegionName}" />

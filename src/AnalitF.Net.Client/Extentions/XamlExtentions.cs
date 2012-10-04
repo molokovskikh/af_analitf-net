@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Extentions
 			}
 		}
 
-		public static T GetVisualChild<T>(Visual parent) where T : Visual
+		public static T GetVisualChild<T>(this Visual parent) where T : Visual
 		{
 			T child = default(T);
 
@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Extentions
 			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
 		}
 
-		public static bool IsVisual(DependencyObject o)
+		public static bool IsVisual(this DependencyObject o)
 		{
 			return o is Visual || o is Visual3D;
 		}
@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Extentions
 			}
 		}
 
-		public static DependencyObject Parent(DependencyObject o)
+		public static DependencyObject Parent(this DependencyObject o)
 		{
 			var frameworkElement = o as FrameworkElement;
 			if (frameworkElement != null)
@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Extentions
 			return VisualTreeHelper.GetParent(o);
 		}
 
-		public static IEnumerable<DependencyObject> DeepChildren(DependencyObject view)
+		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
 		{
 			return view.Children().Flat(d => d.Children());
 		}

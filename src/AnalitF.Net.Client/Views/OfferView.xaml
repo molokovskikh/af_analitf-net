@@ -5,7 +5,8 @@
 			xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
 			xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-			xmlns:cal="http://www.caliburnproject.org" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
+			xmlns:cal="http://www.caliburnproject.org" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
 	<UserControl.Resources>
 		<Style x:Key="GroupButton" TargetType="ToggleButton">
 			<Style.Triggers>
@@ -65,7 +66,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<ContentControl Grid.Row="2" ContentTemplate="{StaticResource ResourceKey=OfferPanel}" cal:Bind.Model="{Binding}"></ContentControl>
+		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>

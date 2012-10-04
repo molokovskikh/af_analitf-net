@@ -11,19 +11,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AnalitF.Net.Client.Extentions;
 
 namespace AnalitF.Net.Client.Views
 {
-	public partial class PriceOfferView : UserControl
+	public partial class ProductInfoPanel : UserControl
 	{
-		public PriceOfferView()
+		public ProductInfoPanel()
 		{
 			InitializeComponent();
-
-			Loaded += (sender, args) => {
-				XamlExtentions.Focus(Offers);
-			};
 		}
 	}
 }

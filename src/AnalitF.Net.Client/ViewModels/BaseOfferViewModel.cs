@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentOffer = value;
 				RaisePropertyChangedEventImmediately("CurrentOffer");
-				if (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId)
+				if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 			}
 		}

@@ -1,7 +1,8 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.SearchOfferView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" xmlns:cal="http://www.caliburnproject.org">
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" xmlns:cal="http://www.caliburnproject.org"
+             xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -50,7 +51,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<ContentControl Grid.Row="2" ContentTemplate="{StaticResource ResourceKey=OfferPanel}" cal:Bind.Model="{Binding}"></ContentControl>
+		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>
