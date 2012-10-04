@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace AnalitF.Net.Test
+namespace AnalitF.Net.Test.Integration
 {
 	[SetUpFixture]
 	public class SetupFixture

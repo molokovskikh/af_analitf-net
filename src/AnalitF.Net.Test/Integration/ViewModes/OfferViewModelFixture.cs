@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -8,7 +7,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.ViewModes
+namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
 	public class OfferViewModelFixture : BaseFixture
@@ -56,6 +55,13 @@ namespace AnalitF.Net.Test.ViewModes
 			model.RetailMarkup = 23;
 			model.CurrentOffer = model.Offers[0];
 			Assert.That(model.RetailMarkup, Is.EqualTo(23));
+		}
+
+		[Test]
+		public void CalculateDiff()
+		{
+			Assert.That(model.Offers[0].Diff, Is.Null);
+			Assert.That(model.Offers[1].Diff, Is.Not.EqualTo(0));
 		}
 
 		[Test]

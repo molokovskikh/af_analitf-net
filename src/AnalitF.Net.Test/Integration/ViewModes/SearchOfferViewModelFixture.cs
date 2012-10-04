@@ -1,15 +1,15 @@
 ﻿using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.ViewModes
+namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SearchOfferViewModelFixture
+	public class SearchOfferViewModelFixture : BaseFixture
 	{
 		[Test]
 		public void Full_filter_values()
 		{
-			SearchOfferViewModel model = null;
+			var model = new SearchOfferViewModel();
 			Assert.That(model.Producers.Count, Is.GreaterThan(0));
 			Assert.That(model.Prices.Count, Is.GreaterThan(0));
 		}

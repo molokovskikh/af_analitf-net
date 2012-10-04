@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
-using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.ViewModes
+namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
 	public class PriceOfferViewModelFixture : BaseFixture

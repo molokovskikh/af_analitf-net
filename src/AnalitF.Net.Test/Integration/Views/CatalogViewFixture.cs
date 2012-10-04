@@ -1,12 +1,8 @@
-using System.Linq;
-using System.Windows;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
-using AnalitF.Net.Test.ViewModes;
-using Caliburn.Micro;
+using AnalitF.Net.Test.Integration.ViewModes;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Views
+namespace AnalitF.Net.Test.Integration.Views
 {
 	[TestFixture, RequiresSTA]
 	public class CatalogViewFixture : BaseFixture

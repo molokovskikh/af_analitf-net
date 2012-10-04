@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -120,6 +121,23 @@ namespace AnalitF.Net.Client.ViewModels
 			var offerViewModel = new OfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 			Shell.ActivateItem(offerViewModel);
+		}
+
+		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key)
+		{
+			var lookup = offer.GroupBy(key)
+				.ToDictionary(g => g.Key, g => g.Min(o => o.Cost));
+
+			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.Cost)).ToList();
+
+			var indexes = lookup.OrderBy(k => k.Value)
+				.Select((k, i) => Tuple.Create(k.Key, i))
+				.ToDictionary(t => t.Item1, t => t.Item2);
+			offers.Each(o => {
+				o.SortKeyGroup = indexes[key(o)] % 2;
+			});
+
+			return offers;
 		}
 	}
 }

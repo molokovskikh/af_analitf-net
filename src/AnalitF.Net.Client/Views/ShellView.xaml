@@ -71,6 +71,9 @@
 
 		<StatusBar Grid.Row="2">
 			<StatusBarItem>
+				<Button x:Name="Snoop">Snoop</Button>
+			</StatusBarItem>
+			<StatusBarItem>
 				<Label>Заказов:</Label>
 			</StatusBarItem>
 			<StatusBarItem>

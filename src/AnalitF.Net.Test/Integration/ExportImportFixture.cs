@@ -11,9 +11,8 @@ using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test
+namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture]
 	public class ExportImportFixture : IntegrationFixture
@@ -29,7 +28,7 @@ namespace AnalitF.Net.Test
 			export.Create(false, true);
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void Load_data()
 		{
 			var supplier = TestSupplier.Create();

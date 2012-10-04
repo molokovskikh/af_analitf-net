@@ -1,13 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
+using Environment = NHibernate.Cfg.Environment;
 
 namespace AnalitF.Net.Client.Config.Initializers
 {
+	public class IgnoreAttribute : Attribute
+	{}
+
 	public class NHibernate
 	{
 		public static ISessionFactory Factory;
@@ -16,6 +21,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public void Init(string connectionStringName = "local")
 		{
 			var mapper = new ConventionModelMapper();
+			var basInspector = new SimpleModelInspector();
+			((SimpleModelInspector)mapper.ModelInspector).IsPersistentProperty((m, declared) => {
+				return ((IModelInspector)basInspector).IsPersistentProperty(m) && m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
+			});
+
 			mapper.Class<MarkupConfig>(m => m.Id(p => p.Id, i => i.Generator(Generators.Native)));
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
 				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {

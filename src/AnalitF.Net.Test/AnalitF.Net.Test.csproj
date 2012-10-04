@@ -61,17 +61,18 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BindScreen.cs" />
-    <Compile Include="ContentElementBinderFixture.cs" />
-    <Compile Include="ExportImportFixture.cs" />
-    <Compile Include="SetupFixture.cs" />
-    <Compile Include="ViewModes\BaseFixture.cs" />
-    <Compile Include="ViewModes\CatalogViewModelFixture.cs" />
-    <Compile Include="ViewModes\MnnViewModelFixture.cs" />
-    <Compile Include="ViewModes\OfferViewModelFixture.cs" />
-    <Compile Include="ViewModes\PriceOfferViewModelFixture.cs" />
-    <Compile Include="ViewModes\SearchOfferViewModelFixture.cs" />
-    <Compile Include="Views\CatalogViewFixture.cs" />
+    <Compile Include="Integration\BindScreen.cs" />
+    <Compile Include="Integration\ContentElementBinderFixture.cs" />
+    <Compile Include="Integration\ExportImportFixture.cs" />
+    <Compile Include="Integration\SetupFixture.cs" />
+    <Compile Include="Integration\ViewModes\BaseFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\MnnViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\OfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\PriceOfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />
+    <Compile Include="Integration\Views\CatalogViewFixture.cs" />
+    <Compile Include="Unit\OfferSortFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

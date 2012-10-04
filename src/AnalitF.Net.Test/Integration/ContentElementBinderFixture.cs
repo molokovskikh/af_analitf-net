@@ -1,15 +1,11 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Windows;
+﻿using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
-using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test
+namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture]
 	public class ContentElementBinderFixture

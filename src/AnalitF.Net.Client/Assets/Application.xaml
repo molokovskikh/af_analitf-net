@@ -20,6 +20,9 @@
 	</Style>
 	<Style x:Key="VitallyImportant" TargetType="{x:Type DataGridCell}">
 		<Style.Triggers>
+			<DataTrigger Binding="{Binding SortKeyGroup}" Value="1">
+				<Setter Property="Background" Value="#CCC1E3"/>
+			</DataTrigger>
 			<DataTrigger Binding="{Binding VitallyImportant}" Value="true">
 				<Setter Property="Foreground" Value="Green"/>
 			</DataTrigger>

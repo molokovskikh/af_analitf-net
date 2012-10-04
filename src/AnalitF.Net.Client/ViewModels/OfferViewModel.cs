@@ -68,7 +68,14 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentProducer != AllProducerLabel) {
 				queryable = queryable.Where(o => o.ProducerSynonym == CurrentProducer);
 			}
-			Offers = Sort(queryable.ToList());
+			var offers = queryable.OrderBy(c => c.Cost).ToList();
+			//порядок важен сначала нужно вычислить разницу и только потом сортировать
+			var cost = offers.Select(o => o.Cost).FirstOrDefault();
+			foreach (var offer in offers)
+				offer.CalculateDiff(cost);
+
+			offers = Sort(offers);
+			Offers = offers;
 		}
 
 		public string[] Filters { get; set; }
@@ -150,8 +157,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<Offer> Sort(List<Offer> offer)
 		{
 			if (GroupByProduct) {
-				var lookup = offer.GroupBy(o => o.ProductId).ToDictionary(g => g.Key, g => g.Min(o => o.Cost));
-				return offer.OrderBy(o => Tuple.Create(lookup[o.ProductId], o.Cost)).ToList();
+				return SortByMinCostInGroup(offer, o => o.ProductId);
 			}
 			return offer.OrderBy(o => o.Cost).ToList();
 		}

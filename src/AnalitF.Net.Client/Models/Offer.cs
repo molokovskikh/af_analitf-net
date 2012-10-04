@@ -1,7 +1,11 @@
+using AnalitF.Net.Client.Config.Initializers;
+
 namespace AnalitF.Net.Client.Models
 {
 	public class Offer
 	{
+		private decimal? _diff;
+
 		public virtual ulong Id { get; set; }
 
 		public virtual ulong RegionId { get; set;  }
@@ -81,6 +85,23 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool Leader
 		{
 			get { return LeaderRegionId == RegionId && LeaderPrice.Id == PriceId; }
+		}
+
+		[Ignore]
+		public virtual decimal? Diff
+		{
+			get { return _diff; }
+		}
+
+		[Ignore]
+		public virtual int SortKeyGroup { get; set; }
+
+		public virtual void CalculateDiff(decimal cost)
+		{
+			if (cost == Cost || cost == 0)
+				return;
+
+			_diff = (Cost - cost) / cost;
 		}
 	}
 }

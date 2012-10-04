@@ -33,5 +33,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Email { get; set; }
 
 		public virtual uint MinReq { get; set; }
+
+		public override string ToString()
+		{
+			return String.Format("{0} {1}", SupplierName, Name);
+		}
 	}
 }

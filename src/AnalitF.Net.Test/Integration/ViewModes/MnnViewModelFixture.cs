@@ -3,7 +3,7 @@ using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.ViewModes
+namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
 	public class MnnViewModelFixture : BaseFixture

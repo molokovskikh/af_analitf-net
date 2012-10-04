@@ -52,6 +52,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
 				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />

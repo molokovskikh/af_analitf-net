@@ -3,7 +3,7 @@ using System.Linq;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.ViewModes
+namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	public class CatalogViewModelFixture : BaseFixture
 	{

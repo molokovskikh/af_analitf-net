@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -86,5 +87,14 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			navigationChain.Push(screen);
 		}
+
+#if DEBUG
+		public void Snoop()
+		{
+			var assembly = Assembly.Load("snoop");
+			var type = assembly.GetType("Snoop.SnoopUI");
+			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
+		}
+#endif
 	}
 }

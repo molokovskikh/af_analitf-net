@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using AnalitF.Net.Client;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.ViewModels;
@@ -13,7 +8,7 @@ using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test
+namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture]
 	public class BindScreen

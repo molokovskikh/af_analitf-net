@@ -9,10 +9,21 @@ namespace AnalitF.Net.Client.ViewModels
 	public class SearchOfferViewModel : BaseOfferViewModel
 	{
 		private string searchText;
+		private Price currentPrice;
+
+		private const string AllPricesLabel = "Все прайс-листы";
 
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
+
+			var producers = Session.Query<Offer>().Select(o => o.ProducerSynonym).ToList().Distinct().OrderBy(p => p);
+			Producers = new[] { AllProducerLabel }.Concat(producers).ToList();
+			CurrentProducer = AllProducerLabel;
+
+			var prices = Session.Query<Price>().OrderBy(p => p.Name);
+			Prices = new[] { new Price {Name = AllPricesLabel} }.Concat(prices).ToList();
+			CurrentPrice = Prices.First();
 		}
 
 		public void Search()
@@ -20,7 +31,21 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(SearchText))
 				return;
 
-			Offers = Session.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText)).ToList();
+			var query = Session.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
+			if (currentPrice != null && currentPrice.Id > 0) {
+				query = query.Where(o => o.PriceId == currentPrice.Id);
+			}
+
+			if (CurrentProducer != null && CurrentProducer != AllProducerLabel) {
+				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
+			}
+
+			if (true) {
+				Offers = SortByMinCostInGroup(query.ToList(), o => o.ProductId);
+			}
+			else {
+				Offers = SortByMinCostInGroup(query.ToList(), o => o.CatalogId);
+			}
 		}
 
 		public string SearchText
@@ -33,6 +58,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public List<string> Prices { get; set; }
+		public List<Price> Prices { get; set; }
+
+		public Price CurrentPrice
+		{
+			get { return currentPrice; }
+			set
+			{
+				currentPrice = value;
+				RaisePropertyChangedEventImmediately("CurrentPrice");
+			}
+		}
 	}
 }
