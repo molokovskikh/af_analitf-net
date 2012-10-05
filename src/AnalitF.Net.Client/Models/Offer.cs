@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
@@ -12,7 +13,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string RegionName { get; set; }
 
-		public virtual uint PriceId { get; set; }
+		//public virtual uint PriceId { get; set; }
+
+		public virtual Price Price { get; set; }
 
 		public virtual uint ProductId { get; set; }
 
@@ -84,7 +87,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Leader
 		{
-			get { return LeaderRegionId == RegionId && LeaderPrice.Id == PriceId; }
+			get { return LeaderRegionId == RegionId && LeaderPrice.Id == Price.Id; }
 		}
 
 		[Ignore]
@@ -96,12 +99,21 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual int SortKeyGroup { get; set; }
 
+		[Ignore]
+		public virtual decimal RetailCost { get; set; }
+
 		public virtual void CalculateDiff(decimal cost)
 		{
 			if (cost == Cost || cost == 0)
 				return;
 
 			_diff = (Cost - cost) / cost;
+		}
+
+		public virtual void CalculateRetailCost(List<MarkupConfig> markups)
+		{
+			var markup = MarkupConfig.Calculate(markups, this);
+			RetailCost = Cost * (1 + markup / 100);
 		}
 	}
 }

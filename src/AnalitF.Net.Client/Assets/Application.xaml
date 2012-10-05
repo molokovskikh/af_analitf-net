@@ -32,6 +32,22 @@
 		</Style.Triggers>
 	</Style>
 
+	<Style x:Key="NotBaseOffer" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=VitallyImportant}">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding Price.BasePrice}" Value="false">
+				<Setter Property="Background" Value="#F0F0F0"/>
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+
+	<Style x:Key="NotBasePrice" TargetType="{x:Type DataGridCell}">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding BasePrice}" Value="false">
+				<Setter Property="Background" Value="#F0F0F0"/>
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+
 	<Style TargetType="Label" x:Key="JunkLegend" BasedOn="{StaticResource ResourceKey=Legend}">
 		<Setter Property="Background" Value="#f29e66"></Setter>
 	</Style>

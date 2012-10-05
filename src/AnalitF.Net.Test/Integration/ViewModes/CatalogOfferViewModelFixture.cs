@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OfferViewModelFixture : BaseFixture
+	public class CatalogOfferViewModelFixture : BaseFixture
 	{
 		private OfferViewModel model;
 		private ISession session;
@@ -20,9 +20,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
 			var catalog = session.Query<Catalog>()
-				.Where(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2)
-				.First();
+				.First(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
 			model = new OfferViewModel(catalog);
+		}
+
+		[TearDown]
+		public void Teardown()
+		{
+			session.Dispose();
 		}
 
 		[Test]
@@ -45,6 +50,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				t.Commit();
 			}
 			model = new OfferViewModel(model.CurrentCatalog);
+			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
 
 			model.CurrentOffer = model.Offers[0];
 			Assert.That(model.RetailMarkup, Is.EqualTo(20));
@@ -58,10 +64,49 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		}
 
 		[Test]
-		public void CalculateDiff()
+		public void Calculate_diff()
 		{
 			Assert.That(model.Offers[0].Diff, Is.Null);
 			Assert.That(model.Offers[1].Diff, Is.Not.EqualTo(0));
+		}
+
+		[Test]
+		public void Select_base_offer()
+		{
+			MakeDifferentCategory();
+
+			model = new OfferViewModel(model.CurrentCatalog);
+			Assert.That(model.CurrentOffer.Id, Is.EqualTo(model.Offers[1].Id));
+		}
+
+		[Test]
+		public void Filter_by_price_category()
+		{
+			MakeDifferentCategory();
+
+			model.CurrentFilter = model.Filters[1];
+			Assert.That(model.Offers.Count, Is.EqualTo(1));
+			Assert.That(model.Offers[0].Price.BasePrice, Is.True);
+
+			model.CurrentFilter = model.Filters[0];
+			Assert.That(model.Offers.Count, Is.EqualTo(2));
+
+			model.CurrentFilter = model.Filters[2];
+			Assert.That(model.Offers.Count, Is.EqualTo(1));
+			Assert.That(model.Offers[0].Price.BasePrice, Is.False, model.Offers[0].Price.Id.ToString());
+		}
+
+		[Test]
+		public void Filter_result_empty()
+		{
+			var ids = model.Offers.Select(o => o.Price.Id).Distinct().ToList();
+			var prices = session.Query<Price>().Where(p => ids.Contains(p.Id)).ToList();
+
+			foreach (var price in prices)
+				price.BasePrice = true;
+			session.Flush();
+
+			model.CurrentFilter = model.Filters[2];
 		}
 
 		[Test]
@@ -91,6 +136,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			};
 			model.GroupByProduct = true;
 			Assert.That(model.Offers.Select(o => o.Cost).Implode(), Is.EqualTo("90, 120, 103, 105"));
+		}
+
+		private void MakeDifferentCategory()
+		{
+			var offers = model.Offers;
+			Assert.That(offers[0].Price.Id, Is.Not.EqualTo(offers[1].Price.Id));
+
+			var price1 = session.Load<Price>(offers[0].Price.Id);
+			var price2 = session.Load<Price>(offers[1].Price.Id);
+			price1.BasePrice = false;
+			price2.BasePrice = true;
+			session.Save(price1);
+			session.Save(price2);
+			session.Flush();
 		}
 	}
 }

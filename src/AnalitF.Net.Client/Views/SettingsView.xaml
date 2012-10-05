@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+	<StackPanel>
+		<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
+		<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
+		<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+		<Label>Включить в основную группу поставщиков начиная с:</Label>
+		<TextBox x:Name="Settings_BaseFromCategory"></TextBox>
+		<Button x:Name="Save">ОК</Button>
+		<Button x:Name="TryClose">Отменить</Button>
+	</StackPanel>
+</UserControl>

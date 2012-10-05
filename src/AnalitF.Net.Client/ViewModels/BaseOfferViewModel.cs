@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -14,8 +15,14 @@ namespace AnalitF.Net.Client.ViewModels
 		protected List<Offer> offers;
 		protected string currentProducer;
 		private Offer currentOffer;
+		protected List<MarkupConfig> markups = new List<MarkupConfig>();
 
 		protected const string AllProducerLabel = "Все производители";
+
+		public BaseOfferViewModel()
+		{
+			markups = Session.Query<MarkupConfig>().ToList();
+		}
 
 		protected void UpdateProducers()
 		{
@@ -138,6 +145,12 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 
 			return offers;
+		}
+
+		protected void CalculateRetailCost()
+		{
+			foreach (var offer in Offers)
+				offer.CalculateRetailCost(markups);
 		}
 	}
 }

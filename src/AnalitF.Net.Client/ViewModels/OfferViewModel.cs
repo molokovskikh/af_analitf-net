@@ -20,12 +20,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool groupByProduct;
 
 		private decimal retailMarkup;
-		private List<MarkupConfig> markups = new List<MarkupConfig>();
 
 		public OfferViewModel(Catalog catalog)
 		{
-			markups = Session.Query<MarkupConfig>().ToList();
-
 			DisplayName = "Сводный прайс-лист";
 			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
@@ -49,6 +46,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Filter();
 
+			CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
+			if (CurrentOffer == null)
+				CurrentOffer = offers.FirstOrDefault();
+
 			UpdateRegions();
 			UpdateProducers();
 		}
@@ -68,14 +69,26 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentProducer != AllProducerLabel) {
 				queryable = queryable.Where(o => o.ProducerSynonym == CurrentProducer);
 			}
-			var offers = queryable.OrderBy(c => c.Cost).ToList();
-			//порядок важен сначала нужно вычислить разницу и только потом сортировать
-			var cost = offers.Select(o => o.Cost).FirstOrDefault();
-			foreach (var offer in offers)
-				offer.CalculateDiff(cost);
+			if (CurrentFilter == Filters[1]) {
+				queryable = queryable.Where(o => o.Price.BasePrice);
+			}
+			if (CurrentFilter == Filters[2]) {
+				queryable = queryable.Where(o => !o.Price.BasePrice);
+			}
 
+			var offers = queryable.ToList();
 			offers = Sort(offers);
 			Offers = offers;
+			Calculate();
+		}
+
+		private void Calculate()
+		{
+			var minCost = Offers.Select(o => o.Cost).DefaultIfEmpty().Min();
+			foreach (var offer in Offers)
+				offer.CalculateDiff(minCost);
+
+			CalculateRetailCost();
 		}
 
 		public string[] Filters { get; set; }
@@ -86,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				if (CurrentOffer == null)
 					return null;
-				return Session.Load<Price>(CurrentOffer.PriceId);
+				return Session.Load<Price>(CurrentOffer.Price.Id);
 			}
 		}
 

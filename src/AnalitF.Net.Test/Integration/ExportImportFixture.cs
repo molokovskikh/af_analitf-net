@@ -75,7 +75,8 @@ rd.OperativeInfo,
 rd.ContactInfo,
 rd.SupportPhone as Phone,
 rd.AdminMail as Email,
-ap.MinReq
+ap.MinReq,
+ap.FirmCategory as Category
 from Usersettings.ActivePrices ap
 	join Usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode

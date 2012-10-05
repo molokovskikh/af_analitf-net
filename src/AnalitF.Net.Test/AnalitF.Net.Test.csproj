@@ -61,6 +61,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Integration\AppStatePersisterFixture.cs" />
     <Compile Include="Integration\BindScreen.cs" />
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
@@ -68,9 +69,10 @@
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\MnnViewModelFixture.cs" />
-    <Compile Include="Integration\ViewModes\OfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\SettingsViewModelFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
   </ItemGroup>

@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Controls;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
-using Common.Tools;
 
 namespace AnalitF.Net.Client
 {
 	public class AppBootstrapper : Bootstrapper<ShellViewModel>
 	{
+		public static ShellViewModel Shell;
+
 		public AppBootstrapper()
 		{
+			LogManager.GetLog = t => new ConsoleLog();
+
 			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
 				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
 
@@ -29,10 +31,20 @@ namespace AnalitF.Net.Client
 				args.Handled = true;
 				Console.WriteLine(args.Exception);
 			};
-			LogManager.GetLog = t => new ConsoleLog();
-			new Config.Initializers.NHibernate().Init();
 
+			new Config.Initializers.NHibernate().Init();
 			RegisterBinder();
+		}
+
+		protected override void OnExit(object sender, EventArgs e)
+		{
+		}
+
+		protected override void OnStartup(object sender, StartupEventArgs e)
+		{
+			new SanityCheck().Check();
+
+			base.OnStartup(sender, e);
 		}
 
 		protected override object GetInstance(Type service, string key)
@@ -66,24 +78,6 @@ namespace AnalitF.Net.Client
 				}
 				return elements;
 			};
-		}
-	}
-
-	public class ConsoleLog : ILog
-	{
-		public void Info(string format, params object[] args)
-		{
-			Console.WriteLine(format, args);
-		}
-
-		public void Warn(string format, params object[] args)
-		{
-			Console.WriteLine(format, args);
-		}
-
-		public void Error(Exception exception)
-		{
-			Console.WriteLine(exception);
 		}
 	}
 }

@@ -39,8 +39,8 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
 				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
@@ -61,7 +61,7 @@
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="*" Header="Заказ" />
 				<DataGridTextColumn Width="*" Header="Сумма" />
 			</DataGrid.Columns>

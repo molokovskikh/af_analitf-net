@@ -64,6 +64,12 @@
 				<Button x:Name="ShowWaybills">
 					Накладные
 				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowSettings">
+					Конфигурация
+				</Button>
 			</ToolBar>
 		</ToolBarTray>
 

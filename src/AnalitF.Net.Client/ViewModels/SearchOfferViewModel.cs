@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var query = Session.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
 			if (currentPrice != null && currentPrice.Id > 0) {
-				query = query.Where(o => o.PriceId == currentPrice.Id);
+				query = query.Where(o => o.Price.Id == currentPrice.Id);
 			}
 
 			if (CurrentProducer != null && CurrentProducer != AllProducerLabel) {
@@ -46,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				Offers = SortByMinCostInGroup(query.ToList(), o => o.CatalogId);
 			}
+
+			CalculateRetailCost();
 		}
 
 		public string SearchText

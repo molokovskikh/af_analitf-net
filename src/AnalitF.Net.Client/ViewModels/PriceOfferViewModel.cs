@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Update()
 		{
-			var query = Session.Query<Offer>().Where(o => o.PriceId == Price.Id);
+			var query = Session.Query<Offer>().Where(o => o.Price.Id == Price.Id);
 			if (CurrentProducer != AllProducerLabel) {
 				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
 			}

@@ -26,7 +26,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 				return ((IModelInspector)basInspector).IsPersistentProperty(m) && m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
 			});
 
-			mapper.Class<MarkupConfig>(m => m.Id(p => p.Id, i => i.Generator(Generators.Native)));
+			mapper.AfterMapClass += (inspector, type, customizer) => {
+				customizer.Id(m => m.Generator(Generators.Native));
+			};
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
 				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {
 					if (((PropertyInfo)member.LocalMember).PropertyType == typeof(string)) {

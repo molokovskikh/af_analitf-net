@@ -40,7 +40,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Show_catalog_with_mnn_filter()
 		{
 			var offer = session.Query<Offer>().First(o => session.Query<Catalog>().Where(c => c.HaveOffers && c.Name.Mnn != null).Select(c => c.Id).Contains(o.CatalogId));
-			var price = session.Load<Price>(offer.PriceId);
+			var price = session.Load<Price>(offer.Price.Id);
 			var model = Init(new PriceOfferViewModel(price, false));
 			model.CurrentOffer = model.Offers.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();

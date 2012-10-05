@@ -34,6 +34,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint MinReq { get; set; }
 
+		public virtual bool BasePrice { get; set; }
+
+		public virtual int Category { get; set; }
+
 		public override string ToString()
 		{
 			return String.Format("{0} {1}", SupplierName, Name);
