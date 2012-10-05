@@ -21,6 +21,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private decimal retailMarkup;
 
+		private Settings settings;
+
 		public OfferViewModel(Catalog catalog)
 		{
 			DisplayName = "Сводный прайс-лист";
@@ -29,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentFilter = Filters[0];
 			CurrentRegion = allRegionLabel;
 			CurrentProducer = AllProducerLabel;
+			settings = Session.Query<Settings>().First();
 
 			this.ObservableForProperty(m => m.CurrentRegion)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
@@ -84,11 +87,24 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Calculate()
 		{
-			var minCost = Offers.Select(o => o.Cost).DefaultIfEmpty().Min();
-			foreach (var offer in Offers)
-				offer.CalculateDiff(minCost);
+			CalculateDiff();
 
 			CalculateRetailCost();
+		}
+
+		private void CalculateDiff()
+		{
+			decimal baseCost = 0;
+			if (settings.DiffCalcMode == DiffCalcMode.MinCost)
+				baseCost = Offers.Select(o => o.Cost).DefaultIfEmpty().Min();
+			else if (settings.DiffCalcMode == DiffCalcMode.MinBaseCost)
+				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).DefaultIfEmpty().Min();
+
+			foreach (var offer in Offers) {
+				offer.CalculateDiff(baseCost);
+				if (settings.DiffCalcMode == DiffCalcMode.PrevOffer)
+					baseCost = offer.Cost;
+			}
 		}
 
 		public string[] Filters { get; set; }

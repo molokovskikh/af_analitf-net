@@ -82,10 +82,13 @@
 		</Style.Triggers>
 	</Style>
 
-	<Style TargetType="ComboBox" x:Key="Filter">
-		<Setter Property="Width" Value="150" />
+	<Style TargetType="ComboBox" x:Key="Select">
 		<Setter Property="IsEditable" Value="False" />
 		<Setter Property="IsReadOnly" Value="True" />
+	</Style>
+
+	<Style TargetType="ComboBox" x:Key="Filter" BasedOn="{StaticResource ResourceKey=Select}">
+		<Setter Property="Width" Value="150" />
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 	</Style>
 

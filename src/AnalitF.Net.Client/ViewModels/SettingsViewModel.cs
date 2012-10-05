@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
 
@@ -9,9 +12,24 @@ namespace AnalitF.Net.Client.ViewModels
 		public SettingsViewModel()
 		{
 			Settings = Session.Query<Settings>().First();
+			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 		}
 
 		public Settings Settings { get; set; }
+
+		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
+
+		public ValueDescription<DiffCalcMode> CurrentDiffCalculationType
+		{
+			get
+			{
+				return DiffCalculationTypes.First(t => t.Value ==  Settings.DiffCalcMode);
+			}
+			set
+			{
+				Settings.DiffCalcMode = value.Value;
+			}
+		}
 
 		public void Save()
 		{

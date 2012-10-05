@@ -83,6 +83,7 @@
     <Compile Include="Extentions\WindowManager.cs" />
     <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Helpers\ConsoleLog.cs" />
+    <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\Persister.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
@@ -125,9 +126,6 @@
     </Compile>
     <Compile Include="Views\SearchOfferView.xaml.cs">
       <DependentUpon>SearchOfferView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SettingsView.xaml.cs">
-      <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
