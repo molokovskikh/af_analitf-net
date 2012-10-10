@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.OrderLinesView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:cal="http://www.caliburnproject.org">
 	<Grid>
@@ -34,7 +35,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
@@ -52,7 +53,7 @@
 			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 			<TextBlock Margin="5">
-				Позиций: <Run x:Name="Lines_Count"/> на, сумму: <Run x:Name="Sum"/>
+				Позиций: <Run x:Name="Lines_Count"/> на сумму: <Run x:Name="Sum"/>
 			</TextBlock>
 		</StackPanel>
 	</Grid>

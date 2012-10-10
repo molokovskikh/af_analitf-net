@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -120,14 +121,13 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			Shell.CancelNavigation();
-			TryClose();
-			Shell.PushInChain(new CatalogViewModel {
+			var catalogViewModel = new CatalogViewModel {
 				CurrentCatalog = CurrentCatalog
-			});
+			};
 			var offerViewModel = new OfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
-			Shell.ActivateItem(offerViewModel);
+
+			Shell.Navigate(catalogViewModel, offerViewModel);
 		}
 
 		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key)

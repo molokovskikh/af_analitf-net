@@ -75,6 +75,7 @@
     <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsViewModelFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
+    <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.LeaderPrice == Price);
 			}
 			if (currentFilter == filters[1]) {
-				query = query.Where(o => o.Line != null);
+				query = query.Where(o => o.OrderLine != null);
 			}
 			if (!String.IsNullOrEmpty(filterText)) {
 				query = query.Where(o => o.ProductSynonym.Contains(filterText));

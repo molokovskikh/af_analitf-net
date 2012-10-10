@@ -11,6 +11,7 @@ using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
 using NHibernate.Linq;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -32,7 +33,7 @@ namespace AnalitF.Net.Test.Integration
 		public void Load_data()
 		{
 			var supplier = TestSupplier.Create();
-			CreateSampleCore1(supplier);
+			CreateSampleCore(supplier);
 			var client = TestClient.CreateNaked();
 			Close();
 
@@ -54,7 +55,7 @@ namespace AnalitF.Net.Test.Integration
 			}
 		}
 
-		public void CreateSampleCore1(TestSupplier supplier)
+		public void CreateSampleCore(TestSupplier supplier)
 		{
 			var price = supplier.Prices[0];
 			var random = new Random();
@@ -78,7 +79,6 @@ namespace AnalitF.Net.Test.Integration
 				var producer = randomProducers.First();
 				synonyms.Add(Tuple.Create(product.CatalogProduct.Name, product, producer.Name, producer));
 			}
-
 			foreach (var data in synonyms) {
 				var productSynonymValue = data.Item1;
 				if (price.ProductSynonyms.Any(s => s.Name == productSynonymValue))

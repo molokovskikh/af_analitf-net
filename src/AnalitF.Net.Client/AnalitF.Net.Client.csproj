@@ -86,6 +86,7 @@
     <Compile Include="Helpers\ConsoleLog.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\Persister.cs" />
+    <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\MarkupConfig.cs" />

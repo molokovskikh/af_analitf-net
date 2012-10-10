@@ -22,8 +22,17 @@ namespace AnalitF.Net.Client.Config.Initializers
 		{
 			var mapper = new ConventionModelMapper();
 			var basInspector = new SimpleModelInspector();
-			((SimpleModelInspector)mapper.ModelInspector).IsPersistentProperty((m, declared) => {
-				return ((IModelInspector)basInspector).IsPersistentProperty(m) && m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
+			var simpleModelInspector = ((SimpleModelInspector)mapper.ModelInspector);
+			simpleModelInspector.IsPersistentProperty((m, declared) => {
+				return ((IModelInspector)basInspector).IsPersistentProperty(m)
+					&& m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
+			});
+			simpleModelInspector.IsRootEntity((type, declared) => {
+				var modelInspector = ((IModelInspector)simpleModelInspector);
+				return declared || (type.IsClass
+					//если наследуемся от класса который не маплен то это простое наследование
+					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)))
+					&& modelInspector.IsEntity(type);
 			});
 
 			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
@@ -42,6 +51,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => t.GetProperty("Id") != null);
 			var mapping = mapper.CompileMappingFor(types);
+			if (debug)
+				Console.WriteLine(mapping.AsString());
 
 			Configuration = new Configuration();
 			Configuration.AddProperties(new Dictionary<string, string> {
@@ -56,10 +67,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
-
-			if (debug)
-				Console.WriteLine(mapping.AsString());
-
 			Factory = Configuration.BuildSessionFactory();
 		}
 	}

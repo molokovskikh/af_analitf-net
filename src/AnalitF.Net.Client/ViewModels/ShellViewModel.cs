@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using AnalitF.Net.Client.Models;
@@ -118,6 +119,18 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			info.AddValue("ActiveItem", ActiveItem);
 			info.AddValue("navigationChain", navigationChain);
+		}
+
+		public void Navigate(params IScreen[] views)
+		{
+			CancelNavigation();
+			if (ActiveItem != null)
+				ActiveItem.TryClose();
+			var navigationChain = views.TakeWhile((s, i) => i < views.Length - 2);
+			foreach (var screen in navigationChain) {
+				PushInChain(screen);
+			}
+			ActivateItem(views.Last());
 		}
 	}
 }

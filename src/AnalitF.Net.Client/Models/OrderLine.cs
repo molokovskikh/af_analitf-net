@@ -1,12 +1,13 @@
 ﻿namespace AnalitF.Net.Client.Models
 {
-	public class OrderLine
+	public class OrderLine : BaseOffer
 	{
 		public OrderLine()
 		{
 		}
 
-		public OrderLine(Order order, Offer currentOffer)
+		public OrderLine(Order order, Offer offer)
+			: base(offer)
 		{
 			Order = order;
 		}
@@ -15,15 +16,9 @@
 
 		public virtual Order Order { get; set; }
 
-		public virtual string ProductSynonym { get; set; }
-
-		public virtual string ProducerSynonym { get; set; }
-
-		public virtual uint Quantity { get; set; }
-
-		public virtual decimal Cost { get; set; }
-
 		public virtual uint Count { get; set; }
+
+		public virtual ulong OfferId { get; set; }
 
 		public virtual decimal Sum
 		{
