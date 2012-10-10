@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
+	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
+	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls">
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 
 	<Style TargetType="TextBlock" x:Key="PriceInfo">
@@ -13,6 +14,14 @@
 		<Setter Property="HorizontalContentAlignment" Value="Center" />
 		<Setter Property="Margin" Value="4" />
 		<Setter Property="Padding" Value="0" />
+	</Style>
+
+	<Style TargetType="{x:Type Controls:DataGrid}">
+		<Setter Property="IsReadOnly" Value="True" />
+		<Setter Property="CanUserAddRows" Value="False" />
+		<Setter Property="CanUserDeleteRows" Value="False" />
+		<Setter Property="AutoGenerateColumns" Value="False" />
+		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
 	</Style>
 
 	<Style TargetType="Label" x:Key="VitallyImportantLegend" BasedOn="{StaticResource ResourceKey=Legend}">

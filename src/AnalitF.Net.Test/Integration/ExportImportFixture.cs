@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
-using Common.Models.Repositories;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Models;
 using Common.Tools;
-using MySql.Data.MySqlClient;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -32,15 +32,16 @@ namespace AnalitF.Net.Test.Integration
 		public void Load_data()
 		{
 			var supplier = TestSupplier.Create();
-			supplier.CreateSampleCore1();
+			CreateSampleCore1(supplier);
 			var client = TestClient.CreateNaked();
 			Close();
 
-			var files = Export(client.Users[0].Id);
+			var exporter = new Exporter(session);
+			var files = exporter.Export(client.Users[0].Id);
 			Import(files);
 		}
 
-		private void Import(List<Tuple<string, string[]>> tables)
+		private void Import(List<System.Tuple<string, string[]>> tables)
 		{
 			foreach (var table in tables) {
 				var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
@@ -53,144 +54,51 @@ namespace AnalitF.Net.Test.Integration
 			}
 		}
 
-		private List<Tuple<string, string[]>> Export(uint userId)
+		public void CreateSampleCore1(TestSupplier supplier)
 		{
-			session.CreateSQLQuery("call Customers.GetOffers(:userId)")
-				.SetParameter("userId", userId)
-				.ExecuteUpdate();
+			var price = supplier.Prices[0];
+			var random = new Random();
+			var producers = TestProducer.Queryable.Take(1000).ToList();
+			var products = TestProduct.Queryable.Fetch(p => p.CatalogProduct).Where(p => !p.CatalogProduct.Hidden).Take(1000).ToList();
 
-			var result = new List<Tuple<string, string[]>>();
-			var sql = @"select
-ap.PriceCode as Id,
-ap.PriceName as Name,
-r.RegionCode as RegionId,
-r.Region as RegionName,
-s.Id as SupplierId,
-s.Name as SupplierName,
-s.FullName as SupplierFullName,
-rd.Storage,
-ap.PositionCount,
-ap.PriceDate,
-rd.OperativeInfo,
-rd.ContactInfo,
-rd.SupportPhone as Phone,
-rd.AdminMail as Email,
-ap.MinReq,
-ap.FirmCategory as Category
-from Usersettings.ActivePrices ap
-	join Usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
-		join Customers.Suppliers s on s.Id = pd.FirmCode
-	join Farm.Regions r on r.RegionCode = ap.RegionCode
-	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
-";
+			var maxProducer = producers.Count();
+			var maxProduct = products.Count();
 
-			result.Add(Export(sql, "prices"));
+			var randomProducts = Generator.Random(maxProduct).Select(i => products.Skip(i).Take(1).First());
+			var randomProducers = Generator.Random(maxProducer).Select(i => producers.Skip(i).Take(1).First());
 
-			var offerQuery = new OfferQuery();
-			offerQuery
-				.Select("m.PriceCode as LeaderPriceId",
-				"r.Region as RegionName",
-				"m.MinCost as LeaderCost",
-				"lr.RegionCode as LeaderRegionId",
-				"lr.Region as LeaderRegion",
-				"p.CatalogId")
-				.Join("join Usersettings.MinCosts m on m.Id = c0.Id and m.RegionCode = ap.RegionCode")
-				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
-				.Join("join Catalogs.Products p on p.Id = c0.ProductId")
-				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode");
-			offerQuery.SelectSynonyms();
-			sql = offerQuery.ToSql()
-				.Replace("{Offer.", "")
-				.Replace("}", "")
-				.Replace("as Id.CoreId,", "as Id,")
-				.Replace("as Id.RegionCode ,", "as RegionId,")
-				.Replace("as CodeFirmCr,", "as ProducerId,")
-				.Replace("as SynonymCode,", "as ProductSynonymId,")
-				.Replace("as SynonymFirmCrCode,", "as ProducerSynonymId,")
-				.Replace("c0.Await as Await,", "")
-				.Replace("c0.UpdateTime as CoreUpdateTime,", "")
-				.Replace("c0.QuantityUpdate as CoreQuantityUpdate,", "")
-				.Replace("as PriceCode,", "as PriceId,");
-			result.Add(Export(sql, "offers"));
+			var synonyms = new List<Tuple<string, TestProduct, string, TestProducer>>();
+			var productForCreate = randomProducts.Take(20)
+				.Concat(randomProducts.Where(p => p.CatalogProduct.VitallyImportant).Take(7))
+				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList).Take(3))
+				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList && p.CatalogProduct.VitallyImportant).Take(2))
+				.Concat(products.Where(p => products.Count(c => c.CatalogProduct == p.CatalogProduct) > 1).Take(3));
 
-			sql = @"
-select
-	Id,
-	Name,
-	EnglishName,
-	Description,
-	Interaction,
-	SideEffect,
-	IndicationsForUse,
-	Dosing,
-	Warnings,
-	ProductForm,
-	PharmacologicalAction,
-	Storage,
-	Expiration,
-	Composition
-from Catalogs.Descriptions";
-			result.Add(Export(sql, "ProductDescriptions"));
+			foreach (var product in productForCreate) {
+				var producer = randomProducers.First();
+				synonyms.Add(Tuple.Create(product.CatalogProduct.Name, product, producer.Name, producer));
+			}
 
-			sql = @"
-select Id,
-	RussianMnn as Name,
-	exists(select *
-		from usersettings.Core cr
-			join Catalogs.Products p on p.Id = cr.ProductId
-				join Catalogs.Catalog c on c.Id = p.CatalogId
-					join Catalogs.CatalogNames cn on cn.Id = c.NameId
-		where m.Id = cn.MnnId) as HaveOffers
-from Catalogs.Mnn m";
+			foreach (var data in synonyms) {
+				var productSynonymValue = data.Item1;
+				if (price.ProductSynonyms.Any(s => s.Name == productSynonymValue))
+					productSynonymValue += " " + random.Next(100000).ToString();
+				var producerSynonymValue = data.Item3;
+				if (price.ProducerSynonyms.Any(s => s.Name == producerSynonymValue))
+					producerSynonymValue += " " + random.Next(10000).ToString();
 
-			result.Add(Export(sql, "mnns"));
-
-			sql = @"
-select cn.Id,
-	cn.Name,
-	cn.DescriptionId,
-	cn.MnnId,
-	exists(select *
-		from usersettings.Core cr
-			join Catalogs.Products p on p.Id = cr.ProductId
-				join Catalogs.Catalog c on c.Id = p.CatalogId
-		where c.NameId = cn.Id) as HaveOffers,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
-from Catalogs.CatalogNames cn
-where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
-group by cn.Id";
-			result.Add(Export(sql, "catalognames"));
-
-			sql = @"
-select
-	c.Id,
-	c.NameId,
-	c.VitallyImportant,
-	c.MandatoryList,
-	exists(select * from usersettings.Core cr join Catalogs.Products p on p.Id = cr.ProductId where p.CatalogId = c.Id) as HaveOffers,
-	cf.Id as FormId,
-	cf.Form as Form
-from Catalogs.Catalog c
-	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where Hidden = 0";
-			result.Add(Export(sql, "catalogs"));
-
-			return result;
-		}
-
-		public Tuple<string, string[]> Export(string sql, string file)
-		{
-			var dataAdapter = new MySqlDataAdapter(sql + " limit 0", (MySqlConnection)session.Connection);
-			var table = new DataTable();
-			dataAdapter.Fill(table);
-			var columns = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
-
-			var exportFile = Path.GetFullPath(file + ".txt").Replace(@"\", "/");
-			File.Delete(exportFile);
-			sql += " INTO OUTFILE '" + exportFile + "' ";
-			session.CreateSQLQuery(sql).ExecuteUpdate();
-			return Tuple.Create(exportFile, columns);
+				var productSynonym = price.AddProductSynonym(productSynonymValue, data.Item2);
+				var producerSynonym = price.AddProducerSynonym(producerSynonymValue, data.Item4);
+				var core = new TestCore(productSynonym, producerSynonym) {
+					Price = price,
+					Quantity = random.Next(1, 10 * 1000).ToString(),
+					Junk = random.Next(100) < 5,
+				};
+				core.SaveAndFlush();
+				core.AddCost((decimal)(random.NextDouble() * 10000));
+				price.Core.Add(core);
+				core.SaveAndFlush();
+			}
 		}
 	}
 }

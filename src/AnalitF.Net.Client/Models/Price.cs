@@ -38,6 +38,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int Category { get; set; }
 
+		public virtual Order Order { get; set; }
+
 		public override string ToString()
 		{
 			return String.Format("{0} {1}", SupplierName, Name);

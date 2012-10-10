@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -96,9 +97,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			decimal baseCost = 0;
 			if (settings.DiffCalcMode == DiffCalcMode.MinCost)
-				baseCost = Offers.Select(o => o.Cost).DefaultIfEmpty().Min();
+				baseCost = Offers.Select(o => o.Cost).MinOrDefault();
 			else if (settings.DiffCalcMode == DiffCalcMode.MinBaseCost)
-				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).DefaultIfEmpty().Min();
+				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
 
 			foreach (var offer in Offers) {
 				offer.CalculateDiff(baseCost);

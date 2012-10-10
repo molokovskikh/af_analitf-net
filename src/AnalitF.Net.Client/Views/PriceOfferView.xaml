@@ -2,10 +2,8 @@
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
-		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-		xmlns:cal="http://www.caliburnproject.org" xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
-             xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
+		xmlns:cal="http://www.caliburnproject.org"
+		xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -49,7 +47,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценака поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />

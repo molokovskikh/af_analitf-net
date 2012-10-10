@@ -9,7 +9,18 @@ namespace AnalitF.Net.Client.Controls
 		{
 			if (e.Key == Key.Enter)
 				return;
+
 			base.OnKeyDown(e);
+		}
+
+		protected override void OnExecutedDelete(ExecutedRoutedEventArgs e)
+		{
+		}
+
+		protected override void OnCanExecuteDelete(CanExecuteRoutedEventArgs e)
+		{
+			e.Handled = false;
+			e.ContinueRouting = true;
 		}
 	}
 }

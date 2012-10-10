@@ -74,6 +74,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Binders\ContentElementBinder.cs" />
+    <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\Mnn.cs" />
+    <Compile Include="Models\Order.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />
@@ -101,6 +103,7 @@
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\OfferViewModel.cs" />
+    <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -117,6 +120,9 @@
     </Compile>
     <Compile Include="Views\OfferView.xaml.cs">
       <DependentUpon>OfferView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OrderLinesView.xaml.cs">
+      <DependentUpon>OrderLinesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PriceOfferView.xaml.cs">
       <DependentUpon>PriceOfferView.xaml</DependentUpon>
@@ -155,6 +161,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\OfferView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OrderLinesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

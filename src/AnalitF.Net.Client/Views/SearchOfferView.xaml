@@ -39,7 +39,7 @@
 				<DataGridTextColumn Width="*" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценака поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />

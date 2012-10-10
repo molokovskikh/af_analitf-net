@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
@@ -18,6 +19,7 @@ namespace AnalitF.Net.Client
 
 		public AppBootstrapper()
 		{
+			var command = ApplicationCommands.Delete;
 			LogManager.GetLog = t => new ConsoleLog();
 
 			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),

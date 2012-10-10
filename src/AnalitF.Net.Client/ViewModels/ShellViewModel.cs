@@ -59,6 +59,11 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateItem(new SettingsViewModel());
 		}
 
+		public void ShowOrderLines()
+		{
+			ActivateItem(new OrderLinesViewModel());
+		}
+
 		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {

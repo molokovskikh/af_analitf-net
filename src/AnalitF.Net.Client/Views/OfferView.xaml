@@ -1,12 +1,10 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.OfferView"
-			xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-			xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-			xmlns:cal="http://www.caliburnproject.org" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
 	<UserControl.Resources>
 		<Style x:Key="GroupButton" TargetType="ToggleButton">
 			<Style.Triggers>
@@ -46,9 +44,9 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" />
-				<DataGridTextColumn Width="*" Header="Дата прайс-листа" />
+				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.SupplierName}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
+				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
@@ -56,14 +54,14 @@
 				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценака поставщика" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
-				<DataGridTextColumn Width="*" Header="Заказ" />
-				<DataGridTextColumn Width="*" Header="Сумма" />
+				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

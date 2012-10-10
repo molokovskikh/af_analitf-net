@@ -70,6 +70,7 @@
     <Compile Include="Integration\ViewModes\CatalogViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\MnnViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsViewModelFixture.cs" />
@@ -80,6 +81,10 @@
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>AnalitF.Net.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.csproj">
+      <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
+      <Name>AnalitF.Net</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common.Models\Common.Models\Common.Models.csproj">
       <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>

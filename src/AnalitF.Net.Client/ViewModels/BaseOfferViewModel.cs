@@ -152,5 +152,20 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var offer in Offers)
 				offer.CalculateRetailCost(markups);
 		}
+
+		public void OfferUpdated()
+		{
+			if (CurrentOffer == null)
+				return;
+
+			var order = CurrentOffer.UpdateOrderLine();
+			if (order.IsEmpty) {
+				Session.Delete(order);
+			}
+			else {
+				Session.SaveOrUpdate(order);
+			}
+			Session.Flush();
+		}
 	}
 }

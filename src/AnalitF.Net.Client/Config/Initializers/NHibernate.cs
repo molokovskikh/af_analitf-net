@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public static ISessionFactory Factory;
 		public static Configuration Configuration;
 
-		public void Init(string connectionStringName = "local")
+		public void Init(string connectionStringName = "local", bool debug = false)
 		{
 			var mapper = new ConventionModelMapper();
 			var basInspector = new SimpleModelInspector();
@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				return ((IModelInspector)basInspector).IsPersistentProperty(m) && m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
 			});
 
+			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
@@ -55,6 +56,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
+
+			if (debug)
+				Console.WriteLine(mapping.AsString());
 
 			Factory = Configuration.BuildSessionFactory();
 		}
