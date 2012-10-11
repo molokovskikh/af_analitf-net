@@ -77,6 +77,9 @@ namespace AnalitF.Net.Client.Models
 			set { }
 		}
 
+		[Ignore]
+		public virtual string Warning { get; set; }
+
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -96,6 +99,8 @@ namespace AnalitF.Net.Client.Models
 					Price.Order.AddLine(OrderLine);
 				}
 				OrderLine.Count = orderCount;
+				if (Junk)
+					Warning = "Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.";
 			}
 			if (orderCount == 0 && OrderLine != null) {
 				Price.Order.RemoveLine(OrderLine);
@@ -103,6 +108,7 @@ namespace AnalitF.Net.Client.Models
 				if (Price.Order.IsEmpty) {
 					Price.Order = null;
 				}
+				Warning = null;
 			}
 			return Price.Order;
 		}

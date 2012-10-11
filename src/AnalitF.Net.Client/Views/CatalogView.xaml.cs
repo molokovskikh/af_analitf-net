@@ -9,7 +9,6 @@ namespace AnalitF.Net.Client.Views
 {
 	public partial class CatalogView : UserControl
 	{
-
 		public CatalogView()
 		{
 			InitializeComponent();

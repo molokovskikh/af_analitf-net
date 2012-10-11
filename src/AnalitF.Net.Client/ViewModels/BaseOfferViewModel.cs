@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
@@ -17,12 +18,18 @@ namespace AnalitF.Net.Client.ViewModels
 		protected string currentProducer;
 		private Offer currentOffer;
 		protected List<MarkupConfig> markups = new List<MarkupConfig>();
+		private string orderWarning;
 
 		protected const string AllProducerLabel = "Все производители";
 
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
+
+			this.ObservableForProperty(m => m.OrderWarning)
+				.Where(m => !String.IsNullOrEmpty(m.Value))
+				.Throttle(TimeSpan.FromSeconds(3))
+				.Subscribe(m => { OrderWarning = null; });
 		}
 
 		protected void UpdateProducers()
@@ -98,6 +105,16 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
 		}
 
+		public string OrderWarning
+		{
+			get { return orderWarning; }
+			set
+			{
+				orderWarning = value;
+				RaisePropertyChangedEventImmediately("OrderWarning");
+			}
+		}
+
 		public void ShowDescription()
 		{
 			if (!CanShowDescription)
@@ -159,6 +176,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var order = CurrentOffer.UpdateOrderLine();
+			OrderWarning = CurrentOffer.Warning;
 			if (order.IsEmpty) {
 				Session.Delete(order);
 			}

@@ -3,7 +3,8 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 		xmlns:cal="http://www.caliburnproject.org"
-		xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
+		xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
+		xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -56,10 +57,12 @@
 				<DataGridTextColumn Width="*" Header="Мин.цена" Binding="{Binding LeaderCost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Header="Прайс - лидер" Binding="{Binding LeaderPrice.SupplierName}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Visibility="Collapsed" Header="Регион - лидер" Binding="{Binding LeaderRegion}" />
-				<DataGridTextColumn Width="*" Header="Заказ" />
-				<DataGridTextColumn Width="*" Header="Сумма" />
+				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<Parts:Warning Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
 
 		<Views:ProductInfoPanel Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 

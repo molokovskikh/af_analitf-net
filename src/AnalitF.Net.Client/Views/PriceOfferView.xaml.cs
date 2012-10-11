@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
 
 namespace AnalitF.Net.Client.Views
@@ -24,6 +25,8 @@ namespace AnalitF.Net.Client.Views
 			Loaded += (sender, args) => {
 				XamlExtentions.Focus(Offers);
 			};
+
+			EditBehavior.Attach(Offers);
 		}
 	}
 }

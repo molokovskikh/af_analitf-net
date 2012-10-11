@@ -4,7 +4,7 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views">
+	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views" xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts">
 	<UserControl.Resources>
 		<Style x:Key="GroupButton" TargetType="ToggleButton">
 			<Style.Triggers>
@@ -64,6 +64,8 @@
 				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<Parts:Warning Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
 
 		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 

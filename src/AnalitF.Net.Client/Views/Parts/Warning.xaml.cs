@@ -11,17 +11,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AnalitF.Net.Client.Binders;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Views.Parts
 {
-	public partial class SearchOfferView : UserControl
+	/// <summary>
+	/// Interaction logic for Warning.xaml
+	/// </summary>
+	public partial class Warning : UserControl
 	{
-		public SearchOfferView()
+		public Warning()
 		{
 			InitializeComponent();
-
-			EditBehavior.Attach(Offers);
 		}
 	}
 }
