@@ -57,8 +57,8 @@
 				<DataGridTextColumn Width="*" Header="Мин.цена" Binding="{Binding LeaderCost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Header="Прайс - лидер" Binding="{Binding LeaderPrice.SupplierName}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Visibility="Collapsed" Header="Регион - лидер" Binding="{Binding LeaderRegion}" />
-				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

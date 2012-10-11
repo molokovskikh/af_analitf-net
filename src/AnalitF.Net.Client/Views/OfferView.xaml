@@ -60,8 +60,8 @@
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
-				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -75,6 +75,7 @@
 				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
 				<Label Style="{StaticResource BannedLegend}">Препарат запрещен к заказу</Label>
 				<Label Style="{StaticResource VitallyImportantLegend}">Жизненно важные препараты</Label>
+				<Label Style="{StaticResource NotBaseOfferLegend}">Неосновной поставщик</Label>
 			</StackPanel>
 		</StackPanel>
 

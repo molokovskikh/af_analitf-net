@@ -12,6 +12,8 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class BaseOfferViewModel : BaseScreen
 	{
+		private readonly TimeSpan warningTimeout = TimeSpan.FromSeconds(5);
+
 		private Catalog currentCatalog;
 		protected List<string> producers;
 		protected List<Offer> offers;
@@ -28,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
-				.Throttle(TimeSpan.FromSeconds(3))
+				.Throttle(warningTimeout)
 				.Subscribe(m => { OrderWarning = null; });
 		}
 
