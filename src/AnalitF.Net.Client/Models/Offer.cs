@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AnalitF.Net.Client.Config.Initializers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -74,11 +76,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal OrderSum
 		{
 			get { return OrderCount * Cost; }
-			set { }
 		}
 
 		[Ignore]
 		public virtual string Warning { get; set; }
+
+		[Ignore]
+		public virtual string Notification { get; set; }
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
@@ -91,6 +95,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual Order UpdateOrderLine()
 		{
 			if (OrderCount > 0) {
+				PreorderCheck();
 				if (OrderLine == null) {
 					if (Price.Order == null) {
 						Price.Order = new Order(Price);
@@ -99,8 +104,6 @@ namespace AnalitF.Net.Client.Models
 					Price.Order.AddLine(OrderLine);
 				}
 				OrderLine.Count = orderCount;
-				if (Junk)
-					Warning = "Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.";
 			}
 			if (orderCount == 0 && OrderLine != null) {
 				Price.Order.RemoveLine(OrderLine);
@@ -111,6 +114,68 @@ namespace AnalitF.Net.Client.Models
 				Warning = null;
 			}
 			return Price.Order;
+		}
+
+		private void PreorderCheck()
+		{
+			Notification = Check();
+			OrderCount = CalculateAvailableQuantity(OrderCount);
+		}
+
+		private uint CalculateAvailableQuantity(uint quantity)
+		{
+			var topBound = SafeConvert.ToUInt32(Quantity);
+			if (topBound == 0)
+				topBound = uint.MaxValue;
+			topBound = Math.Min(topBound, quantity);
+			var bottomBound = Math.Ceiling(MinOrderSum.GetValueOrDefault() / Cost);
+			bottomBound = Math.Max(MinOrderCount.GetValueOrDefault(), bottomBound);
+			var result = topBound - (topBound % RequestRatio.GetValueOrDefault(1));
+			if (result < bottomBound) {
+				return 0;
+			}
+			return result;
+		}
+
+		public virtual string Check()
+		{
+			if (OrderCount == 0)
+				return null;
+
+			if (OrderCount % RequestRatio.GetValueOrDefault(1) != 0) {
+				return String.Format("Поставщиком определена кратность по заказываемой позиции.\r\nВведенное значение \"{0}\" не кратно установленному значению \"{1}\"",
+					OrderCount,
+					RequestRatio);
+			}
+			if (MinOrderSum != null && OrderSum < MinOrderSum) {
+				return String.Format("Сумма заказа \"{0}\" меньше минимальной сумме заказа \"{1}\" по данной позиции!",
+					OrderSum,
+					MinOrderSum);
+			}
+
+			if (MinOrderCount != null && OrderCount < MinOrderCount) {
+				return String.Format("'Заказанное количество \"{0}\" меньше минимального количества \"{1}\" по данной позиции!'",
+					OrderCount,
+					MinOrderCount);
+			}
+
+			//проверка матрицы
+			if (false) {
+				return "Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?";
+			}
+			return null;
+		}
+
+		public virtual void MakePreorderCheck()
+		{
+			if (Junk)
+				Warning = "Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.";
+
+			var quantity = SafeConvert.ToUInt32(Quantity);
+			if (quantity > 0 && OrderCount > quantity) {
+				OrderCount = CalculateAvailableQuantity(OrderCount);
+				Notification = String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", OrderCount);
+			}
 		}
 	}
 }

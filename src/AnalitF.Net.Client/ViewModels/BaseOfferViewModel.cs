@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
@@ -21,6 +22,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private Offer currentOffer;
 		protected List<MarkupConfig> markups = new List<MarkupConfig>();
 		private string orderWarning;
+		//тк уведомление о сохранении изменний приходит после
+		//изменения текущего предложения
+		private Offer lastEditOffer;
 
 		protected const string AllProducerLabel = "Все производители";
 
@@ -177,8 +181,19 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			var order = CurrentOffer.UpdateOrderLine();
-			OrderWarning = CurrentOffer.Warning;
+			lastEditOffer = CurrentOffer;
+			CurrentOffer.MakePreorderCheck();
+			ProcessMessages(CurrentOffer);
+		}
+
+		public void OfferCommitted()
+		{
+			Console.WriteLine("OfferCommitted");
+			if (lastEditOffer == null)
+				return;
+
+			var order = lastEditOffer.UpdateOrderLine();
+			ProcessMessages(lastEditOffer);
 			if (order.IsEmpty) {
 				Session.Delete(order);
 			}
@@ -186,6 +201,20 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.SaveOrUpdate(order);
 			}
 			Session.Flush();
+		}
+
+		private void ProcessMessages(Offer offer)
+		{
+			OrderWarning = CurrentOffer.Warning;
+			if (!String.IsNullOrEmpty(offer.Notification)) {
+				Manager.ShowMessageBox(offer.Notification, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+				offer.Notification = null;
+				//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
+				//мог ввести коректное значение
+				if (CurrentOffer == null || CurrentOffer.Id != offer.Id) {
+					CurrentOffer = offer;
+				}
+			}
 		}
 	}
 }

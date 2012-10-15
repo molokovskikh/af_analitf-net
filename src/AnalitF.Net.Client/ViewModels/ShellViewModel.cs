@@ -12,7 +12,7 @@ using ReactiveUI;
 namespace AnalitF.Net.Client.ViewModels
 {
 	[Serializable]
-	public class ShellViewModel : Conductor<IScreen>//, ISerializable
+	public class ShellViewModel : Conductor<IScreen>
 	{
 		private Stack<IScreen> navigationChain = new Stack<IScreen>();
 
@@ -97,9 +97,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void PushInChain(IScreen screen)
+		public void Navigate(params IScreen[] views)
 		{
-			navigationChain.Push(screen);
+			CancelNavigation();
+			if (ActiveItem != null)
+				ActiveItem.TryClose();
+			var chain = views.TakeWhile((s, i) => i < views.Length - 2);
+			foreach (var screen in chain) {
+				navigationChain.Push(screen);
+			}
+			ActivateItem(views.Last());
 		}
 
 #if DEBUG
@@ -110,27 +117,5 @@ namespace AnalitF.Net.Client.ViewModels
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
 #endif
-
-		public ShellViewModel(SerializationInfo info, StreamingContext context)
-		{
-		}
-
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.AddValue("ActiveItem", ActiveItem);
-			info.AddValue("navigationChain", navigationChain);
-		}
-
-		public void Navigate(params IScreen[] views)
-		{
-			CancelNavigation();
-			if (ActiveItem != null)
-				ActiveItem.TryClose();
-			var navigationChain = views.TakeWhile((s, i) => i < views.Length - 2);
-			foreach (var screen in navigationChain) {
-				PushInChain(screen);
-			}
-			ActivateItem(views.Last());
-		}
 	}
 }

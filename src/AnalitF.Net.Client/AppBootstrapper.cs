@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
@@ -10,6 +11,8 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using ReactiveUI;
+using LogManager = Caliburn.Micro.LogManager;
 
 namespace AnalitF.Net.Client
 {

@@ -74,7 +74,8 @@ from Usersettings.ActivePrices ap
 				.Replace("c0.Await as Await,", "")
 				.Replace("c0.UpdateTime as CoreUpdateTime,", "")
 				.Replace("c0.QuantityUpdate as CoreQuantityUpdate,", "")
-				.Replace("as PriceCode,", "as PriceId,");
+				.Replace("as PriceCode,", "as PriceId,")
+				.Replace("as OrderCost,", "as MinOrderSum,");
 			result.Add(Export(sql, "offers"));
 
 			sql = @"

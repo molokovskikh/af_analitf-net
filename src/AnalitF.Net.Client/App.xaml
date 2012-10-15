@@ -6,6 +6,7 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Assets/Application.xaml" />
+				<ResourceDictionary Source="Assets/DataGrid.xaml" />
 				<ResourceDictionary>
 					<local:AppBootstrapper x:Key="bootstrapper" />
 				</ResourceDictionary>

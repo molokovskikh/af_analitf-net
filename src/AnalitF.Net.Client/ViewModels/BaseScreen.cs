@@ -14,14 +14,14 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return ((ShellViewModel)Parent); }
 		}
 
-		protected IWindowManager Manager { get; private set; }
+		protected Extentions.WindowManager Manager { get; private set; }
 
 		protected ISession Session;
 
 		public BaseScreen()
 		{
 			Session = Config.Initializers.NHibernate.Factory.OpenSession();
-			Manager = IoC.Get<IWindowManager>();
+			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 		}
 
 	}

@@ -28,5 +28,14 @@ namespace AnalitF.Net.Client.Extentions
 			}
 			return window;
 		}
+
+		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
+		{
+			if (UnderTest) {
+				return MessageBoxResult.OK;
+			}
+
+			return MessageBox.Show(text, caption, buttons, icon);
+		}
 	}
 }

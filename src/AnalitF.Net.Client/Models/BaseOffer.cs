@@ -45,17 +45,19 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Junk { get; set; }
 
+
 		public virtual decimal? MinBoundCost { get; set; }
-
-		public virtual bool VitallyImportant { get; set; }
-
-		public virtual uint? RequestRatio { get; set; }
-
-		public virtual decimal? RegistryCost { get; set; }
 
 		public virtual decimal? MaxBoundCost { get; set; }
 
-		public virtual decimal? OrderCost { get; set; }
+
+		public virtual bool VitallyImportant { get; set; }
+
+		public virtual decimal? RegistryCost { get; set; }
+
+		public virtual uint? RequestRatio { get; set; }
+
+		public virtual decimal? MinOrderSum { get; set; }
 
 		public virtual uint? MinOrderCount { get; set; }
 
