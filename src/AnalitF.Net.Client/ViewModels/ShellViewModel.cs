@@ -65,6 +65,11 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateItem(new OrderLinesViewModel());
 		}
 
+		public void ShowJunkOffers()
+		{
+			ActivateItem(new JunkOfferViewModel());
+		}
+
 		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {

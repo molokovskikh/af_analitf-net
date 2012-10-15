@@ -55,15 +55,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool CanShowDescription
-		{
-			get
-			{
-				return CurrentCatalog != null
-					&& CurrentCatalog.Name.Description != null;
-			}
-		}
-
 		public List<string> Producers
 		{
 			get { return producers; }
@@ -121,6 +112,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool CanShowDescription
+		{
+			get
+			{
+				return CurrentCatalog != null
+					&& CurrentCatalog.Name.Description != null;
+			}
+		}
+
 		public void ShowDescription()
 		{
 			if (!CanShowDescription)
@@ -163,6 +163,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var indexes = lookup.OrderBy(k => k.Value)
 				.Select((k, i) => Tuple.Create(k.Key, i))
 				.ToDictionary(t => t.Item1, t => t.Item2);
+
 			offers.Each(o => {
 				o.SortKeyGroup = indexes[key(o)] % 2;
 			});
@@ -188,7 +189,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void OfferCommitted()
 		{
-			Console.WriteLine("OfferCommitted");
 			if (lastEditOffer == null)
 				return;
 
