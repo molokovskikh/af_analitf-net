@@ -1,5 +1,6 @@
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using NHibernate;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -8,10 +9,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	{
 		protected Client.Extentions.WindowManager manager;
 		protected ShellViewModel shell;
+		protected ISession session;
 
 		[SetUp]
 		public void Setup()
 		{
+			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
 			shell = new ShellViewModel();
 			manager = new Client.Extentions.WindowManager();
 			manager.UnderTest = true;

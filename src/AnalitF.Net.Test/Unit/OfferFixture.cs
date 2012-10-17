@@ -33,7 +33,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Junk = true;
 			offer.OrderCount = 1;
-			offer.UpdateOrderLine();
+			offer.MakePreorderCheck();
 			Assert.That(offer.Warning, Is.StringContaining("Вы заказали препарат с ограниченным сроком годности"));
 		}
 
@@ -42,17 +42,20 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Junk = true;
 			offer.OrderCount = 1;
-			offer.UpdateOrderLine();
+			offer.MakePreorderCheck();
 			Assert.That(offer.Warning, Is.Not.Null);
 			offer.OrderCount = 0;
-			offer.UpdateOrderLine();
+			offer.MakePreorderCheck();
+			var order = offer.UpdateOrderLine();
 			Assert.That(offer.Warning, Is.Null);
+			Assert.That(order, Is.Null);
 		}
 
 		[Test]
 		public void Can_not_order_to_many()
 		{
 			offer.OrderCount = uint.MaxValue;
+			offer.MakePreorderCheck();
 			Assert.That(offer.OrderCount, Is.EqualTo(65535));
 		}
 
@@ -61,10 +64,9 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Quantity = "10";
 			offer.OrderCount = 15;
-			offer.UpdateOrderLine();
+			offer.MakePreorderCheck();
 			Assert.That(offer.OrderCount, Is.EqualTo(10));
 			Assert.That(offer.Notification, Is.EqualTo("Заказ превышает остаток на складе, товар будет заказан в количестве 10"));
-			Assert.That(offer.OrderLine.Count, Is.EqualTo(10));
 		}
 
 		[Test]
@@ -89,6 +91,16 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(offer.OrderCount, Is.EqualTo(0));
 			Assert.That(offer.OrderLine, Is.Null);
 			Assert.That(offer.Price.Order, Is.Null);
+		}
+
+		[Test]
+		public void Delete_order_line()
+		{
+			offer.OrderCount = 1;
+			offer.UpdateOrderLine();
+			offer.OrderCount = 0;
+			var order = offer.UpdateOrderLine();
+			Assert.That(order, Is.Not.Null);
 		}
 
 		[Test]

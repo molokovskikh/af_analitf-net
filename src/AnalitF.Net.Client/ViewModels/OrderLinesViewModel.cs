@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive.Linq;
+using System.Windows;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
@@ -13,10 +15,14 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private OrderLine currentLine;
 		private Catalog currentCatalog;
+		private List<MarkupConfig> markups;
+		private Price currentPrice;
+		private List<OrderLine> lines;
 
 		public OrderLinesViewModel()
 		{
 			DisplayName = "Сводный заказ";
+			markups = Session.Query<MarkupConfig>().ToList();
 
 			Dep(m => m.CanShowCatalog,
 				m => m.CurrentCatalog);
@@ -33,10 +39,38 @@ namespace AnalitF.Net.Client.ViewModels
 			Dep(m => m.CurrentOffer,
 				m => m.CurrentLine);
 
-			Lines = Session.Query<OrderLine>()
+			Dep(m => m.Sum, m => m.Lines);
+			Dep(m => m.CanDelete, m => m.CurrentLine);
+
+			Dep(Update, m => m.CurrentPrice);
+
+			Update();
+
+			var prices = Session.Query<Price>().OrderBy(p => p.Name);
+			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
+			CurrentPrice = Prices.First();
+		}
+
+		public void Update()
+		{
+			var query = Session.Query<OrderLine>();
+
+			if (CurrentPrice != null && CurrentPrice.Id != 0) {
+				query = query.Where(l => l.Order.Price == CurrentPrice);
+			}
+
+			Lines = query
 				.OrderBy(l => l.ProductSynonym)
 				.ThenBy(l => l.ProducerSynonym)
 				.ToList();
+
+			CalculateRetailCost();
+		}
+
+		private void Dep(Action action, params Expression<Func<OrderLinesViewModel, object>>[] to)
+		{
+			to.Select(e => this.ObservableForProperty(e)).Merge()
+				.Subscribe(e => action());
 		}
 
 		protected void Dep(Expression<Func<OrderLinesViewModel, object>> from, Expression<Func<OrderLinesViewModel, object>> to)
@@ -46,8 +80,33 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(e => RaisePropertyChangedEventImmediately(name));
 		}
 
+		protected void CalculateRetailCost()
+		{
+			foreach (var offer in Lines)
+				offer.CalculateRetailCost(markups);
+		}
+
 		public virtual List<Price> Prices { get; set; }
-		public virtual List<OrderLine> Lines { get; set; }
+
+		public Price CurrentPrice
+		{
+			get { return currentPrice; }
+			set
+			{
+				currentPrice = value;
+				RaisePropertyChangedEventImmediately("CurrentPrice");
+			}
+		}
+
+		public virtual List<OrderLine> Lines
+		{
+			get { return lines; }
+			set
+			{
+				lines = value;
+				RaisePropertyChangedEventImmediately("Lines");
+			}
+		}
 
 		public virtual decimal Sum
 		{
@@ -101,9 +160,34 @@ namespace AnalitF.Net.Client.ViewModels
 			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
 		}
 
+		public bool CanDelete
+		{
+			get { return CurrentLine != null; }
+		}
+
 		public void Delete()
 		{
+			if (CurrentLine == null)
+				return;
 
+			var result = Manager.ShowMessageBox("Удалить позицию?", "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.YesNo, MessageBoxImage.Question);
+			if (result != MessageBoxResult.Yes)
+				return;
+
+			var offer = Session.Load<Offer>(CurrentLine.OfferId);
+			offer.OrderCount = 0;
+			var order = offer.UpdateOrderLine();
+
+			if (order != null) {
+				if (order.IsEmpty) {
+					Session.Delete(order);
+				}
+				else {
+					Session.SaveOrUpdate(order);
+				}
+				Session.Flush();
+			}
+			Update();
 		}
 
 		public bool CanShowCatalog

@@ -40,7 +40,7 @@
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
 				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
 			</DataGrid.Columns>

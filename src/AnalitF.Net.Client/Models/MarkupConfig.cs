@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal End { get; set; }
 		public virtual decimal Markup { get; set; }
 
-		public static decimal Calculate(List<MarkupConfig> markups, Offer currentOffer)
+		public static decimal Calculate(List<MarkupConfig> markups, BaseOffer currentOffer)
 		{
 			if (currentOffer == null)
 				return 0;
@@ -28,6 +28,13 @@ namespace AnalitF.Net.Client.Models
 			return markups.Where(m => currentOffer.Cost > m.Begin && currentOffer.Cost <= m.End)
 				.Select(m => m.Markup)
 				.FirstOrDefault();
+		}
+
+		public static IEnumerable<MarkupConfig> Defaults()
+		{
+			return new[] {
+				new MarkupConfig(0, 10000, 20)
+			};
 		}
 	}
 }

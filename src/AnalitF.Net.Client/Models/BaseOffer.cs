@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -76,5 +78,14 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ProducerSynonym { get; set; }
 
 		public virtual decimal Cost { get; set; }
+
+		[Ignore]
+		public virtual decimal RetailCost { get; set; }
+
+		public virtual void CalculateRetailCost(List<MarkupConfig> markups)
+		{
+			var markup = MarkupConfig.Calculate(markups, this);
+			RetailCost = Cost * (1 + markup / 100);
+		}
 	}
 }

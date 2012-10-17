@@ -43,21 +43,12 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual int SortKeyGroup { get; set; }
 
-		[Ignore]
-		public virtual decimal RetailCost { get; set; }
-
 		public virtual void CalculateDiff(decimal cost)
 		{
 			if (cost == Cost || cost == 0)
 				return;
 
 			_diff = (Cost - cost) / cost;
-		}
-
-		public virtual void CalculateRetailCost(List<MarkupConfig> markups)
-		{
-			var markup = MarkupConfig.Calculate(markups, this);
-			RetailCost = Cost * (1 + markup / 100);
 		}
 
 		[Ignore]
@@ -94,26 +85,28 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Order UpdateOrderLine()
 		{
+			var order = Price.Order;
 			if (OrderCount > 0) {
 				PreorderCheck();
 				if (OrderLine == null) {
-					if (Price.Order == null) {
-						Price.Order = new Order(Price);
+					if (order == null) {
+						order = new Order(Price);
+						Price.Order = order;
 					}
-					OrderLine = new OrderLine(Price.Order, this);
-					Price.Order.AddLine(OrderLine);
+					OrderLine = new OrderLine(order, this);
+					order.AddLine(OrderLine);
 				}
 				OrderLine.Count = orderCount;
 			}
 			if (orderCount == 0 && OrderLine != null) {
-				Price.Order.RemoveLine(OrderLine);
+				order.RemoveLine(OrderLine);
 				OrderLine = null;
-				if (Price.Order.IsEmpty) {
+				if (order.IsEmpty) {
 					Price.Order = null;
 				}
 				Warning = null;
 			}
-			return Price.Order;
+			return order;
 		}
 
 		private void PreorderCheck()
@@ -168,8 +161,17 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void MakePreorderCheck()
 		{
+			Warning = null;
+			Notification = null;
+			if (OrderCount == 0)
+				return;
+
 			if (Junk)
 				Warning = "Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.";
+
+			if (OrderCount > 65535) {
+				OrderCount = 65535;
+			}
 
 			var quantity = SafeConvert.ToUInt32(Quantity);
 			if (quantity > 0 && OrderCount > quantity) {

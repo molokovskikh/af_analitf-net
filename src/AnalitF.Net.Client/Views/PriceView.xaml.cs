@@ -11,13 +11,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
+using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Client.Views
 {
-	/// <summary>
-	/// Interaction logic for PriceView.xaml
-	/// </summary>
 	public partial class PriceView : UserControl
 	{
 		public PriceView()
@@ -26,6 +25,8 @@ namespace AnalitF.Net.Client.Views
 			Loaded += (sender, args) => {
 				XamlExtentions.Focus(Prices);
 			};
+
+			ContextMenuBehavior.Attach(Prices);
 		}
 	}
 }

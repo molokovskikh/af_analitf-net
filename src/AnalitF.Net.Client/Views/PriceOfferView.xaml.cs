@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.Views
 			};
 
 			EditBehavior.Attach(Offers);
+			ContextMenuBehavior.Attach(Offers);
 		}
 	}
 }

@@ -94,6 +94,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Binders\ContentElementBinder.cs" />
+    <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
+    <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />

@@ -12,6 +12,14 @@ namespace AnalitF.Net.Client.Models
 				if (settings == null) {
 					session.Save(new Settings());
 				}
+
+				var markups = session.Query<MarkupConfig>().ToList();
+				if (markups.Count == 0) {
+					var defaults = MarkupConfig.Defaults();
+					foreach (var markup in defaults) {
+						session.Save(markup);
+					}
+				}
 			}
 		}
 	}

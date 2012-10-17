@@ -11,8 +11,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private string searchText;
 		private Price currentPrice;
 
-		private const string AllPricesLabel = "Все прайс-листы";
-
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
@@ -22,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentProducer = AllProducerLabel;
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
-			Prices = new[] { new Price {Name = AllPricesLabel} }.Concat(prices).ToList();
+			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice = Prices.First();
 		}
 

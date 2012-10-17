@@ -4,6 +4,8 @@
 		<Style.Triggers>
 			<Trigger Property="IsSelected" Value="True" >
 				<Setter Property="Foreground" Value="Black" />
+				<Setter Property="Background" Value="#D7F0FF" />
+				<Setter Property="BorderBrush" Value="#D7F0FF" />
 			</Trigger>
 		</Style.Triggers>
 	</Style>
@@ -12,6 +14,8 @@
 		<Style.Triggers>
 			<Trigger Property="IsSelected" Value="True" >
 				<Setter Property="Foreground" Value="Black" />
+				<Setter Property="Background" Value="#D7F0FF" />
+				<Setter Property="BorderBrush" Value="#D7F0FF" />
 			</Trigger>
 		</Style.Triggers>
 	</Style>

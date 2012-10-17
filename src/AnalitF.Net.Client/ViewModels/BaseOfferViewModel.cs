@@ -194,13 +194,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var order = lastEditOffer.UpdateOrderLine();
 			ProcessMessages(lastEditOffer);
-			if (order.IsEmpty) {
-				Session.Delete(order);
+			if (order != null) {
+				if (order.IsEmpty) {
+					Session.Delete(order);
+				}
+				else {
+					Session.SaveOrUpdate(order);
+				}
+				Session.Flush();
 			}
-			else {
-				Session.SaveOrUpdate(order);
-			}
-			Session.Flush();
 		}
 
 		private void ProcessMessages(Offer offer)

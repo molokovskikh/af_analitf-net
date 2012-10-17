@@ -7,6 +7,7 @@ namespace AnalitF.Net.Client.Extentions
 	public class WindowManager : Caliburn.Micro.WindowManager
 	{
 		public bool UnderTest;
+		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
 		public List<Window> Windows = new List<Window>();
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
@@ -32,7 +33,7 @@ namespace AnalitF.Net.Client.Extentions
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
 		{
 			if (UnderTest) {
-				return MessageBoxResult.OK;
+				return DefaultResult;
 			}
 
 			return MessageBox.Show(text, caption, buttons, icon);

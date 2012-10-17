@@ -12,9 +12,12 @@ namespace AnalitF.Net.Client.Models
 		public Order(Price price)
 			: this()
 		{
+			Price = price;
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual Price Price { get; set; }
 
 		public virtual IList<OrderLine> Lines { get; set; }
 

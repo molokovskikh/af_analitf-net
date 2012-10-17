@@ -10,6 +10,7 @@
 			: base(offer)
 		{
 			Order = order;
+			OfferId = offer.Id;
 		}
 
 		public virtual uint Id { get; set; }
