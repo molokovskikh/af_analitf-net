@@ -11,9 +11,9 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Views
 {
-	public partial class OfferView : UserControl
+	public partial class CatalogOfferView : UserControl
 	{
-		public OfferView()
+		public CatalogOfferView()
 		{
 			InitializeComponent();
 			var grid = Offers;

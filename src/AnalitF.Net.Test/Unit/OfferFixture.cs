@@ -113,5 +113,13 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(offer.OrderCount, Is.EqualTo(1));
 			Assert.That(offer.Notification, Is.Null);
 		}
+
+		[Test]
+		public void Calculate_markup()
+		{
+			offer.ProducerCost = 10;
+			offer.Cost = 11;
+			Assert.That(offer.SupplierMarkup, Is.EqualTo(10));
+		}
 	}
 }

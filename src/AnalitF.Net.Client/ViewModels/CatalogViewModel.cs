@@ -228,7 +228,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterCatalogForm()
 		{
-			Shell.Navigate(new OfferViewModel(CurrentCatalog));
+			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
 		}
 
 		public bool CanShowDescription

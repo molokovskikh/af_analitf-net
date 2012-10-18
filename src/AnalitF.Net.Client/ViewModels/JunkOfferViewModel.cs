@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o.Junk)
 				.OrderBy(o => o.ProducerSynonym)
 				.ToList();
-			CalculateRetailCost();
+			Calculate();
 		}
 	}
 }

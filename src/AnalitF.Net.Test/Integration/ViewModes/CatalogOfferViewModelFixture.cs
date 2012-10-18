@@ -12,7 +12,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture]
 	public class CatalogOfferViewModelFixture : BaseFixture
 	{
-		private OfferViewModel model;
+		private CatalogOfferViewModel model;
 		private ISession session;
 
 		[SetUp]
@@ -21,7 +21,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
 			var catalog = session.Query<Catalog>()
 				.First(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
-			model = new OfferViewModel(catalog);
+			model = new CatalogOfferViewModel(catalog);
 		}
 
 		[TearDown]
@@ -49,7 +49,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				session.Save(markupConfig2);
 				t.Commit();
 			}
-			model = new OfferViewModel(model.CurrentCatalog);
+			model = new CatalogOfferViewModel(model.CurrentCatalog);
 			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
 
 			model.CurrentOffer = model.Offers[0];
@@ -75,7 +75,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			MakeDifferentCategory();
 
-			model = new OfferViewModel(model.CurrentCatalog);
+			model = new CatalogOfferViewModel(model.CurrentCatalog);
 			Assert.That(model.CurrentOffer.Id, Is.EqualTo(model.Offers[1].Id));
 		}
 

@@ -32,7 +32,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(catalogModel.CurrentCatalog.Id, Is.EqualTo(offer.CatalogId));
 			Assert.That(catalogModel.CurrentCatalogName.Id, Is.EqualTo(catalogModel.CurrentCatalog.Name.Id));
 
-			var offerModel = (OfferViewModel)shell.ActiveItem;
+			var offerModel = (CatalogOfferViewModel)shell.ActiveItem;
 			Assert.That(offerModel.CurrentOffer.Id, Is.EqualTo(offer.Id));
 		}
 

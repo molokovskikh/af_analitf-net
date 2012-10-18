@@ -11,7 +11,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class OfferViewModel : BaseOfferViewModel
+	public class CatalogOfferViewModel : BaseOfferViewModel
 	{
 		private const string allRegionLabel = "Все регионы";
 
@@ -22,9 +22,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private decimal retailMarkup;
 
-		public OfferViewModel(Catalog catalog)
+		public CatalogOfferViewModel(Catalog catalog)
 		{
 			DisplayName = "Сводный прайс-лист";
+			NeedToCalculateDiff = true;
 			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
@@ -81,28 +82,6 @@ namespace AnalitF.Net.Client.ViewModels
 			offers = Sort(offers);
 			Offers = offers;
 			Calculate();
-		}
-
-		private void Calculate()
-		{
-			CalculateDiff();
-
-			CalculateRetailCost();
-		}
-
-		private void CalculateDiff()
-		{
-			decimal baseCost = 0;
-			if (Settings.DiffCalcMode == DiffCalcMode.MinCost)
-				baseCost = Offers.Select(o => o.Cost).MinOrDefault();
-			else if (Settings.DiffCalcMode == DiffCalcMode.MinBaseCost)
-				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
-
-			foreach (var offer in Offers) {
-				offer.CalculateDiff(baseCost);
-				if (Settings.DiffCalcMode == DiffCalcMode.PrevOffer)
-					baseCost = offer.Cost;
-			}
 		}
 
 		public string[] Filters { get; set; }

@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
+			NeedToCalculateDiff = true;
 
 			var producers = Session.Query<Offer>().Select(o => o.ProducerSynonym).ToList().Distinct().OrderBy(p => p);
 			Producers = new[] { AllProducerLabel }.Concat(producers).ToList();
@@ -45,7 +46,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Offers = SortByMinCostInGroup(query.ToList(), o => o.CatalogId);
 			}
 
-			CalculateRetailCost();
+			Calculate();
 		}
 
 		public string SearchText

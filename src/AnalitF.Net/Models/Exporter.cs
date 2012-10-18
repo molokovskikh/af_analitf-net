@@ -58,11 +58,13 @@ from Usersettings.ActivePrices ap
 				"m.MinCost as LeaderCost",
 				"lr.RegionCode as LeaderRegionId",
 				"lr.Region as LeaderRegion",
-				"p.CatalogId")
+				"p.CatalogId",
+				"pr.Name as Producer")
 				.Join("join Usersettings.MinCosts m on m.Id = c0.Id and m.RegionCode = ap.RegionCode")
 				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
 				.Join("join Catalogs.Products p on p.Id = c0.ProductId")
-				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode");
+				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode")
+				.Join("left join Catalogs.Producers pr on pr.Id = c0.CodeFirmCr");
 			offerQuery.SelectSynonyms();
 			sql = offerQuery.ToSql()
 				.Replace("{Offer.", "")

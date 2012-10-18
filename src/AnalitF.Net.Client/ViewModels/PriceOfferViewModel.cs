@@ -71,6 +71,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Offers = query.ToList();
 			CurrentOffer = offers.FirstOrDefault();
+
+			Calculate();
 		}
 
 		public string SearchText { get; set; }

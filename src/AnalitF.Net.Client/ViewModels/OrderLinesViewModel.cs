@@ -200,7 +200,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanShowCatalog)
 				return;
 
-			var offerViewModel = new OfferViewModel(CurrentCatalog);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentLine.OfferId);
 
 			Shell.Navigate(offerViewModel);

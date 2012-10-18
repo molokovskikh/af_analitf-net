@@ -25,6 +25,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint ProductSynonymId { get; set; }
 
+		public virtual string Producer { get; set; }
+
 		public virtual uint? ProducerId { get; set; }
 
 		public virtual uint? ProducerSynonymId { get; set; }
@@ -57,11 +59,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? RegistryCost { get; set; }
 
+		public virtual decimal? MaxProducerCost { get; set; }
+
+
 		public virtual uint? RequestRatio { get; set; }
 
 		public virtual decimal? MinOrderSum { get; set; }
 
 		public virtual uint? MinOrderCount { get; set; }
+
 
 		public virtual decimal? ProducerCost { get; set; }
 
@@ -78,6 +84,22 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ProducerSynonym { get; set; }
 
 		public virtual decimal Cost { get; set; }
+
+		public virtual decimal? SupplierCost
+		{
+			get { return Cost; }
+		}
+
+		public virtual decimal? SupplierMarkup
+		{
+			get
+			{
+				if (ProducerCost == null)
+					return null;
+				var nds = NDS ?? 10.0m;
+				return (Cost / (ProducerCost.Value * (nds / 100 + 1)) - 1) * 100;
+			}
+		}
 
 		[Ignore]
 		public virtual decimal RetailCost { get; set; }

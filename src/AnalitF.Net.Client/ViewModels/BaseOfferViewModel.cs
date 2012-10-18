@@ -28,6 +28,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected const string AllProducerLabel = "Все производители";
 
+		protected bool NeedToCalculateDiff;
+
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
@@ -147,7 +149,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var catalogViewModel = new CatalogViewModel {
 				CurrentCatalog = CurrentCatalog
 			};
-			var offerViewModel = new OfferViewModel(CurrentCatalog);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 
 			Shell.Navigate(catalogViewModel, offerViewModel);
@@ -171,7 +173,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return offers;
 		}
 
-		protected void CalculateRetailCost()
+		private void CalculateRetailCost()
 		{
 			foreach (var offer in Offers)
 				offer.CalculateRetailCost(markups);
@@ -216,6 +218,29 @@ namespace AnalitF.Net.Client.ViewModels
 				if (CurrentOffer == null || CurrentOffer.Id != offer.Id) {
 					CurrentOffer = offer;
 				}
+			}
+		}
+
+		protected void Calculate()
+		{
+			if (NeedToCalculateDiff)
+				CalculateDiff();
+
+			CalculateRetailCost();
+		}
+
+		private void CalculateDiff()
+		{
+			decimal baseCost = 0;
+			if (Settings.DiffCalcMode == DiffCalcMode.MinCost)
+				baseCost = Offers.Select(o => o.Cost).MinOrDefault();
+			else if (Settings.DiffCalcMode == DiffCalcMode.MinBaseCost)
+				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
+
+			foreach (var offer in Offers) {
+				offer.CalculateDiff(baseCost);
+				if (Settings.DiffCalcMode == DiffCalcMode.PrevOffer)
+					baseCost = offer.Cost;
 			}
 		}
 	}

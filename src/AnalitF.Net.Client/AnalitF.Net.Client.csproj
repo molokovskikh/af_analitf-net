@@ -129,7 +129,7 @@
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
-    <Compile Include="ViewModels\OfferViewModel.cs" />
+    <Compile Include="ViewModels\CatalogOfferViewModel.cs" />
     <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
@@ -150,8 +150,8 @@
     <Compile Include="Views\MnnView.xaml.cs">
       <DependentUpon>MnnView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OfferView.xaml.cs">
-      <DependentUpon>OfferView.xaml</DependentUpon>
+    <Compile Include="Views\CatalogOfferView.xaml.cs">
+      <DependentUpon>CatalogOfferView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OrderLinesView.xaml.cs">
       <DependentUpon>OrderLinesView.xaml</DependentUpon>
@@ -209,7 +209,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OfferView.xaml">
+    <Page Include="Views\CatalogOfferView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

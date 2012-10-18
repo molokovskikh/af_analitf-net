@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.OfferView"
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.CatalogOfferView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
@@ -39,7 +39,7 @@
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
 				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
@@ -52,11 +52,11 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
 				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
-				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
+				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
-				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
