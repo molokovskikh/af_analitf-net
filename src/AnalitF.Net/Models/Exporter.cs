@@ -27,7 +27,8 @@ namespace AnalitF.Net.Models
 			var result = new List<Tuple<string, string[]>>();
 			var sql = @"select
 ap.PriceCode as Id,
-ap.PriceName as Name,
+ap.PriceName as PriceName,
+s.Name as Name,
 r.RegionCode as RegionId,
 r.Region as RegionName,
 s.Id as SupplierId,

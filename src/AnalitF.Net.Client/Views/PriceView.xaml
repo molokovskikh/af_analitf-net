@@ -21,7 +21,7 @@
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices">
 			<DataGrid.Columns>
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBasePrice}" Width="*" Header="Прайс-лист" Binding="{Binding SupplierName}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBasePrice}" Width="*" Header="Прайс-лист" Binding="{Binding Name}" />
 				<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding RegionName}" />
 				<DataGridCheckBoxColumn Width="*" Header="Склад" Binding="{Binding Storage}" />
 				<DataGridCheckBoxColumn Width="*" Header="В работе" />

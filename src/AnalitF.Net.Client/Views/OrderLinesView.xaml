@@ -26,7 +26,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
 
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.SupplierName}" />
+				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
 
 				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />

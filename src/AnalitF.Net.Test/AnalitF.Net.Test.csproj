@@ -79,6 +79,7 @@
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
+    <Compile Include="Unit\SettingsFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

@@ -111,6 +111,7 @@
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\Order.cs" />

@@ -44,7 +44,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.SupplierName}" />
+				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
 				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />

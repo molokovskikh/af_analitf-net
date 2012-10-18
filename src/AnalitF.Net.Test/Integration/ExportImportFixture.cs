@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Models;
@@ -29,6 +28,13 @@ namespace AnalitF.Net.Test.Integration
 			export.Create(false, true);
 		}
 
+		[TearDown]
+		public void Teardown()
+		{
+			localSession.Flush();
+			localSession.Dispose();
+		}
+
 		[Test, Ignore]
 		public void Load_data()
 		{
@@ -39,20 +45,7 @@ namespace AnalitF.Net.Test.Integration
 
 			var exporter = new Exporter(session);
 			var files = exporter.Export(client.Users[0].Id);
-			Import(files);
-		}
-
-		private void Import(List<System.Tuple<string, string[]>> tables)
-		{
-			foreach (var table in tables) {
-				var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
-					table.Item1,
-					Path.GetFileNameWithoutExtension(table.Item1),
-					table.Item2.Implode());
-				var dbCommand = session.Connection.CreateCommand();
-				dbCommand.CommandText = sql;
-				dbCommand.ExecuteNonQuery();
-			}
+			new Importer(localSession).Import(files);
 		}
 
 		public void CreateSampleCore(TestSupplier supplier)

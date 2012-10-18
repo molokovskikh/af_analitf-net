@@ -6,7 +6,16 @@ namespace AnalitF.Net.Client.Models
 	{
 		public virtual uint Id { get; set; }
 
+		/// <summary>
+		/// название которое отображается в интерфейсе, зависит от опции "Всегда показывать названия прайс-листов"
+		/// </summary>
 		public virtual string Name { get; set; }
+
+		/// <summary>
+		/// Название прайса без названия поставщика, нужно для вычисления, Name
+		/// не использовать, используй Name
+		/// </summary>
+		public virtual string PriceName { get; set; }
 
 		public virtual ulong RegionId { get; set; }
 
@@ -42,7 +51,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return String.Format("{0} {1}", SupplierName, Name);
+			return Name;
 		}
 	}
 }

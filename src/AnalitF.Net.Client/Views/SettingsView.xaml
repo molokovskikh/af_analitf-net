@@ -4,11 +4,24 @@
 	<StackPanel>
 		<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
 		<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
-		<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+
+		<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
+		<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
+
 		<Label>Включить в основную группу поставщиков начиная с:</Label>
 		<TextBox x:Name="Settings_BaseFromCategory"></TextBox>
+
+		<Label>Предупреждать о превышении средней цены закупки на (%):</Label>
+		<TextBox x:Name="Settings_OverCostWarningPercent"></TextBox>
+
+		<Label>Предупреждать о превышении среднего количества по предыд. заказам в (раз):</Label>
+		<TextBox x:Name="Settings_OverCountWarningFactor"></TextBox>
+
 		<Label>Расчет разницы в таблице предложений:</Label>
-		<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="DiffCalculationTypes" DisplayMemberPath="Name"></ComboBox>
+		<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="DiffCalculationTypes" DisplayMemberPath="Name" />
+
+		<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+
 		<StackPanel Orientation="Horizontal">
 			<Button x:Name="Save">ОК</Button>
 			<Button x:Name="TryClose">Отменить</Button>
