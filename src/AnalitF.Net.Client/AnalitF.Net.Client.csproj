@@ -93,6 +93,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Binders\CloseOnEscapeBehavior.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
     <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
@@ -127,7 +128,9 @@
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\OfferViewModel.cs" />
+    <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
+    <Compile Include="ViewModels\OrdersViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -150,6 +153,12 @@
     </Compile>
     <Compile Include="Views\OrderLinesView.xaml.cs">
       <DependentUpon>OrderLinesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OrdersView.xaml.cs">
+      <DependentUpon>OrdersView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OrderDetailsView.xaml.cs">
+      <DependentUpon>OrderDetailsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\Warning.xaml.cs">
       <DependentUpon>Warning.xaml</DependentUpon>
@@ -203,6 +212,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\OrderLinesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OrdersView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OrderDetailsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

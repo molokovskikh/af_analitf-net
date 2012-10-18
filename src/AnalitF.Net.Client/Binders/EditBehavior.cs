@@ -64,12 +64,14 @@ namespace AnalitF.Net.Client.Binders
 			return uint.TryParse(text, out v);
 		}
 
-		private static void InvokeDataContext(object sender, string method)
+		public static void InvokeDataContext(object sender, string method)
 		{
 			var dataGrid = (DataGrid)sender;
 			var viewModel = dataGrid.DataContext;
 			if (viewModel != null) {
-				viewModel.GetType().GetMethod(method, new Type[0]).Invoke(viewModel, null);
+				var methodInfo = viewModel.GetType().GetMethod(method, new Type[0]);
+				if (methodInfo != null)
+					methodInfo.Invoke(viewModel, null);
 			}
 		}
 

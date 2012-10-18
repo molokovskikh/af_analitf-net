@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.OrderDetailsView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
+	xmlns:cal="http://www.caliburnproject.org">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Style="{StaticResource ResourceKey=FilterPanel}">
+			<Button x:Name="ShowCatalog" Style="{StaticResource ResourceKey=FilterButton}">В каталог (F2)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource ResourceKey=FilterButton}">Показать синонимы (Ctrl+N)</Button>
+			<Button x:Name="ShowPrice" Style="{StaticResource ResourceKey=FilterButton}">В прайс</Button>
+		</StackPanel>
+
+		<StackPanel Grid.Row="1" Style="{StaticResource ResourceKey=FilterPanel}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Заказ №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Order_Id"></Label>
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Count"></Label>
+
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="Order_CreatedOn"></Label>
+
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right">на сумму:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="Order_Sum"></Label>
+
+				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right">Прайс-лист:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Order_Price"></Label>
+
+				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right">Регион:</Label>
+				<Label Grid.Row="1" Grid.Column="5" Name="Order_Price_RegionName"></Label>
+			</Grid>
+		</StackPanel>
+
+		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+
+				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
+				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
+				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
+				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
+				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<StackPanel Grid.Row="3">
+			<Label>Подсказка</Label>
+			<StackPanel Orientation="Horizontal">
+				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
+				<Label Style="{StaticResource BannedLegend}">Препарат запрещен к заказу</Label>
+				<Label Style="{StaticResource VitallyImportantLegend}">Жизненно важные препараты</Label>
+			</StackPanel>
+		</StackPanel>
+
+		<Grid Grid.Row="4">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition></ColumnDefinition>
+				<ColumnDefinition></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			<Views:ProductInfoPanel Grid.Column="0" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+
+			<StackPanel Grid.Column="1">
+				<Label>Сообщение поставщику</Label>
+				<TextBox Name="Order_Comment" Width="Auto" Height="Auto"></TextBox>
+			</StackPanel>
+		</Grid>
+
+	</Grid>
+</UserControl>

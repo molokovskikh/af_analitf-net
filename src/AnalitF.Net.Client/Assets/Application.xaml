@@ -10,10 +10,10 @@
 	</Style>
 
 	<Style TargetType="Label" x:Key="Legend">
-		<Setter Property="Width" Value="200" />
+		<Setter Property="MinWidth" Value="200" />
 		<Setter Property="HorizontalContentAlignment" Value="Center" />
 		<Setter Property="Margin" Value="4" />
-		<Setter Property="Padding" Value="0" />
+		<Setter Property="Padding" Value="4, 0, 4, 0" />
 	</Style>
 
 	<Style TargetType="{x:Type Controls:DataGrid}">
@@ -44,6 +44,14 @@
 		<Setter Property="Background" Value="#C0DCC0"></Setter>
 	</Style>
 
+	<Style TargetType="Label" x:Key="FrozenLegend" BasedOn="{StaticResource ResourceKey=Legend}">
+		<Setter Property="Background" Value="Silver" />
+	</Style>
+
+	<Style TargetType="Label" x:Key="NotValidOrderLegend" BasedOn="{StaticResource ResourceKey=Legend}">
+		<Setter Property="Background" Value="Red" />
+	</Style>
+
 	<Style TargetType="ComboBox" x:Key="Select">
 		<Setter Property="IsEditable" Value="False" />
 		<Setter Property="IsReadOnly" Value="True" />
@@ -62,6 +70,10 @@
 	<Style TargetType="StackPanel" x:Key="FilterPanel">
 		<Setter Property="Orientation" Value="Horizontal" />
 		<Setter Property="Margin" Value="4" />
+	</Style>
+
+	<Style TargetType="Button" x:Key="FilterButton">
+		<Setter Property="Margin" Value="0, 0, 4, 0" />
 	</Style>
 
 	<Style TargetType="TextBox" x:Key="SearchText">

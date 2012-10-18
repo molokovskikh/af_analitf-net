@@ -81,4 +81,15 @@
 			</DataTrigger>
 		</Style.Triggers>
 	</Style>
+
+	<Style x:Key="OrderRow" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=DefaultCellStyle}">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding Valid}" Value="false">
+				<Setter Property="Background" Value="Red"/>
+			</DataTrigger>
+			<DataTrigger Binding="{Binding Frozen}" Value="true">
+				<Setter Property="Background" Value="Silver"/>
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
 </ResourceDictionary>

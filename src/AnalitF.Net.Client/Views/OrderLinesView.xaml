@@ -49,9 +49,9 @@
 		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
 		<StackPanel Grid.Row="3" Style="{StaticResource ResourceKey=FilterPanel}">
-			<Button x:Name="Delete" Margin="0, 0, 4, 0">Удалить</Button>
-			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
-			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
+			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
+			<Button x:Name="ShowCatalog" Style="{StaticResource ResourceKey=FilterButton}">В каталог (F2)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource ResourceKey=FilterButton}">Попазать синонимы (Ctrl+N)</Button>
 			<TextBlock Margin="5">
 				Позиций: <Run x:Name="Lines_Count"/> на сумму: <Run x:Name="Sum"/>
 			</TextBlock>
