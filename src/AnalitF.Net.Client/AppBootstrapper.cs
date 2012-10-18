@@ -62,7 +62,15 @@ namespace AnalitF.Net.Client
 		public static void RegisterBinder()
 		{
 			ContentElementBinder.RegisterConvention();
+			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
+				EnabledBinder.Bind
+			};
+			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
+				EnterBinder.Bind,
+				SearchBinder.Bind
+			};
 
+			var defaultBindProperties = ViewModelBinder.BindProperties;
 			var defaultBindActions = ViewModelBinder.BindActions;
 			var defaultBind = ViewModelBinder.Bind;
 			ViewModelBinder.Bind = (viewModel, view, context) => {
@@ -70,9 +78,11 @@ namespace AnalitF.Net.Client
 				ContentElementBinder.Bind(viewModel, view, context);
 			};
 
-			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
-				EnterBinder.CustomBind,
-				SearchBinder.CustomBind
+			ViewModelBinder.BindProperties = (elements, type) => {
+				foreach (var binder in customPropertyBinders) {
+					binder(elements, type);
+				}
+				return defaultBindProperties(elements, type);
 			};
 
 			ViewModelBinder.BindActions = (elements, type) => {

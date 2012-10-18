@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Binders
 			element.SetValue(property, new[] { trigger });
 		}
 
-		public static void CustomBind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)
+		public static void Bind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)
 		{
 			var pattern = "Enter";
 			var methods = type.GetMethods().Where(m => m.Name.StartsWith(pattern));

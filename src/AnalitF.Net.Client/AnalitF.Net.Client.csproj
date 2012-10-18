@@ -97,6 +97,7 @@
     <Compile Include="Binders\ContentElementBinder.cs" />
     <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
+    <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />

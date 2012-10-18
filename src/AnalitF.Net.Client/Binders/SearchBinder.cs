@@ -9,7 +9,7 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class SearchBinder
 	{
-		public static void CustomBind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)
+		public static void Bind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)
 		{
 			var method = type.GetMethod("Search");
 			if (method == null)

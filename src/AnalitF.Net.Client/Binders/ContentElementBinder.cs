@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.Binders
 		{
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
+			ConventionManager.AddElementConvention<FrameworkElement>(UIElement.IsEnabledProperty, "IsEnabled", "IsEnabledChanged");
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)

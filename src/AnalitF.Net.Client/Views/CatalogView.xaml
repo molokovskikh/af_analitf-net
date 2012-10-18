@@ -75,7 +75,7 @@
 		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по части наименования</CheckBox>
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
-			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска</CheckBox>
+			<CheckBox Name="ShowOfferForAllForms" Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска</CheckBox>
 		</StackPanel>
 	</Grid>
 </UserControl>

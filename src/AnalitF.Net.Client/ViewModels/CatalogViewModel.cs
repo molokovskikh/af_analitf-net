@@ -49,6 +49,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogViewModel()
 		{
+			ShowOfferForAllForms = true;
+			ShowOfferForAllFormsEnabled = Settings.CanViewOffersByCatalogName;
+
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new [] {
 				new FilterDeclaration("Все"),
@@ -261,5 +264,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalogName.Description));
 		}
+
+		public bool ShowOfferForAllForms { get; set; }
+
+		public bool ShowOfferForAllFormsEnabled { get; private set; }
 	}
 }

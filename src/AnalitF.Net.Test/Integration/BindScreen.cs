@@ -46,6 +46,8 @@ namespace AnalitF.Net.Test.Integration
 			//Console.WriteLine(catalogForms);
 		}
 
+
+
 		public void Dump(DependencyObject o, string pad = "")
 		{
 			Console.WriteLine(pad + o);
