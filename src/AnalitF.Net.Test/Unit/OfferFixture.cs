@@ -118,8 +118,20 @@ namespace AnalitF.Net.Test.Unit
 		public void Calculate_markup()
 		{
 			offer.ProducerCost = 10;
-			offer.Cost = 11;
+			offer.Cost = 12.1m;
 			Assert.That(offer.SupplierMarkup, Is.EqualTo(10));
+		}
+
+		[Test]
+		public void Accamulate_warnings()
+		{
+			offer.Junk = true;
+			offer.Quantity = "10000";
+			offer.OrderCount = 1001;
+			offer.MakePreorderCheck();
+			Assert.That(offer.Warning, Is.EqualTo("Вы заказали препарат с ограниченным сроком годности"
+				+ "\r\nили с повреждением вторичной упаковки."
+				+ "\r\nВнимание! Вы заказали большое количество препарата."));
 		}
 	}
 }

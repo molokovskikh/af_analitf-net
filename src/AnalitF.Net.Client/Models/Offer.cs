@@ -166,9 +166,6 @@ namespace AnalitF.Net.Client.Models
 			if (OrderCount == 0)
 				return;
 
-			if (Junk)
-				Warning = "Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.";
-
 			if (OrderCount > 65535) {
 				OrderCount = 65535;
 			}
@@ -178,6 +175,28 @@ namespace AnalitF.Net.Client.Models
 				OrderCount = CalculateAvailableQuantity(OrderCount);
 				Notification = String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", OrderCount);
 			}
+
+			var warnings = new List<string>();
+			if (Junk)
+				warnings.Add("Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки.");
+
+			if (OrderCount > 1000) {
+				warnings.Add("Внимание! Вы заказали большое количество препарата.");
+			}
+
+			if (false) {
+				warnings.Add("Товар присутствует в замороженных заказах.");
+			}
+
+			if (false) {
+				warnings.Add("Превышение среднего заказа!");
+			}
+
+			if (false) {
+				warnings.Add("Превышение средней цены!");
+			}
+
+			Warning = warnings.Implode(Environment.NewLine);
 		}
 	}
 }

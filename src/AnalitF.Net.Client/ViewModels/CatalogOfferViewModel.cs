@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Сводный прайс-лист";
 			NeedToCalculateDiff = true;
+			GroupByProduct = Settings.GroupByProduct;
 			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
@@ -160,12 +161,17 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private List<Offer> Sort(List<Offer> offer)
+		private List<Offer> Sort(List<Offer> offers)
 		{
+			if (offers == null)
+				return null;
+
 			if (GroupByProduct) {
-				return SortByMinCostInGroup(offer, o => o.ProductId);
+				return SortByMinCostInGroup(offers, o => o.ProductId);
 			}
-			return offer.OrderBy(o => o.Cost).ToList();
+			else {
+				return SortByMinCostInGroup(offers, o => o.CatalogId);
+			}
 		}
 	}
 }

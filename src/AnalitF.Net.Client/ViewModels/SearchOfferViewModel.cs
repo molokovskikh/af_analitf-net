@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
 			}
 
-			if (true) {
+			if (Settings.GroupByProduct) {
 				Offers = SortByMinCostInGroup(query.ToList(), o => o.ProductId);
 			}
 			else {

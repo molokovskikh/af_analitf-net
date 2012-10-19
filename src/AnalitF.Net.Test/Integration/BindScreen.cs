@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration
 {
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class BindScreen
 	{
 		[Test, RequiresSTA]
