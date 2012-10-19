@@ -40,12 +40,51 @@ namespace AnalitF.Net.Test.Integration
 		{
 			var supplier = TestSupplier.Create();
 			CreateSampleCore(supplier);
+			var maxProducerCosts = CreateMaxProduceCosts(supplier);
 			var client = TestClient.CreateNaked();
 			Close();
 
-			var exporter = new Exporter(session);
+			var exporter = new Exporter(session) {
+				MaxProducerCostPriceId = maxProducerCosts.Id,
+				MaxProducerCostCostId = maxProducerCosts.Costs[0].Id
+			};
 			var files = exporter.Export(client.Users[0].Id);
-			new Importer(localSession).Import(files);
+
+			var importer = new Importer(localSession);
+			importer.Import(files);
+		}
+
+		private TestPrice CreateMaxProduceCosts(TestSupplier supplier)
+		{
+			var source = supplier.Prices[0].Core.Where(c => c.Product.CatalogProduct.VitallyImportant);
+
+			var holder = TestSupplier.Create();
+			var price = holder.Prices[0];
+			var synonyms = source.GroupBy(c => new { c.Product, c.Producer })
+				.Select(g => Tuple.Create(g.Key.Product.CatalogProduct.Name, g.Key.Product, g.Key.Producer.Name, g.Key.Producer));
+			var random = new Random();
+
+			foreach (var data in synonyms) {
+				var productSynonymValue = data.Item1;
+				if (price.ProductSynonyms.Any(s => s.Name == productSynonymValue))
+					productSynonymValue += " " + random.Next(100000).ToString();
+				var producerSynonymValue = data.Item3;
+				if (price.ProducerSynonyms.Any(s => s.Name == producerSynonymValue))
+					producerSynonymValue += " " + random.Next(10000).ToString();
+
+				var productSynonym = price.AddProductSynonym(productSynonymValue, data.Item2);
+				var producerSynonym = price.AddProducerSynonym(producerSynonymValue, data.Item4);
+				var core = new TestCore(productSynonym, producerSynonym) {
+					Price = price,
+				};
+				core.SaveAndFlush();
+				core.AddCost((decimal)(random.NextDouble() * 10000));
+				price.Core.Add(core);
+				core.SaveAndFlush();
+			}
+
+			price.Costs[0].PriceItem.RowCount = price.Core.Count;
+			return price;
 		}
 
 		public void CreateSampleCore(TestSupplier supplier)
@@ -92,6 +131,8 @@ namespace AnalitF.Net.Test.Integration
 				price.Core.Add(core);
 				core.SaveAndFlush();
 			}
+
+			price.Costs[0].PriceItem.RowCount = price.Core.Count;
 		}
 	}
 }

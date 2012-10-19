@@ -79,17 +79,51 @@
 			</StackPanel>
 		</StackPanel>
 
-		<StackPanel Grid.Row="4" Orientation="Horizontal">
-			<StackPanel>
-				<Label>Информация о поставщике</Label>
-				<TextBlock Style="{StaticResource ResourceKey=PriceInfo}">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
-				<TextBlock Style="{StaticResource ResourceKey=PriceInfo}" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
+		<Grid Grid.Row="4">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			<StackPanel Grid.Column="0">
+				<Label>Предыдущие заказы</Label>
+				<c:DataGrid Width="460" Height="83">
+					<DataGrid.Columns>
+						<DataGridTextColumn Width="*" Header="Прайс-лист"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Производитель"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Срок годн." Binding="{Binding Period}" />
+						<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+						<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
+						<DataGridTextColumn Width="*" Header="Дата"></DataGridTextColumn>
+					</DataGrid.Columns>
+				</c:DataGrid>
+				<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>
 			</StackPanel>
-			<StackPanel>
+
+			<TabControl Grid.Column="1">
+				<TabItem Header="Информация о поставщике">
+					<StackPanel>
+						<TextBlock Style="{StaticResource ResourceKey=PriceInfo}">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
+						<TextBlock Style="{StaticResource ResourceKey=PriceInfo}" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
+					</StackPanel>
+				</TabItem>
+				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
+					<c:DataGrid>
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Цена" Binding="{Binding Cost}"></DataGridTextColumn>
+						</DataGrid.Columns>
+					</c:DataGrid>
+				</TabItem>
+			</TabControl>
+
+			<StackPanel Grid.Column="2">
 				<Label>Наценка</Label>
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
 				<Label Name="RetailCost"></Label>
 			</StackPanel>
-		</StackPanel>
+		</Grid>
 	</Grid>
 </UserControl>

@@ -20,13 +20,18 @@ namespace AnalitF.Net.Client.Models
 		public void Import(List<System.Tuple<string, string[]>> tables)
 		{
 			foreach (var table in tables) {
-				var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
-					table.Item1,
-					Path.GetFileNameWithoutExtension(table.Item1),
-					table.Item2.Implode());
-				var dbCommand = session.Connection.CreateCommand();
-				dbCommand.CommandText = sql;
-				dbCommand.ExecuteNonQuery();
+				try {
+					var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
+						table.Item1,
+						Path.GetFileNameWithoutExtension(table.Item1),
+						table.Item2.Implode());
+					var dbCommand = session.Connection.CreateCommand();
+					dbCommand.CommandText = sql;
+					dbCommand.ExecuteNonQuery();
+				}
+				catch (Exception e) {
+					throw new Exception(String.Format("Не могу импортировать {0}", table), e);
+				}
 			}
 
 			new SanityCheck().Check();
