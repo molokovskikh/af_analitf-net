@@ -27,8 +27,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = model.CurrentOffer;
 			model.ShowCatalog();
 
-			Assert.That(shell.NavigationChain.Count(), Is.EqualTo(1));
-			var catalogModel = (CatalogViewModel)shell.NavigationChain.First();
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(1));
+			var catalogModel = (CatalogViewModel)shell.NavigationStack.First();
 			Assert.That(catalogModel.CurrentCatalog.Id, Is.EqualTo(offer.CatalogId));
 			Assert.That(catalogModel.CurrentCatalogName.Id, Is.EqualTo(catalogModel.CurrentCatalog.Name.Id));
 
@@ -44,7 +44,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var model = Init(new PriceOfferViewModel(price, false));
 			model.CurrentOffer = model.Offers.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();
-			Assert.That(shell.NavigationChain.Count(), Is.EqualTo(0));
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Name.Mnn));

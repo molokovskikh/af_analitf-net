@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.ViewModels
 	[Serializable]
 	public class ShellViewModel : Conductor<IScreen>
 	{
-		private Stack<IScreen> navigationChain = new Stack<IScreen>();
+		private Stack<IScreen> navigationStack = new Stack<IScreen>();
 
 		public ShellViewModel()
 		{
@@ -78,45 +78,45 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {
-				navigationChain.Push(ActiveItem);
+				navigationStack.Push(ActiveItem);
 				DeactivateItem(ActiveItem, false);
 			}
 
 			ActivateItem(item);
 		}
 
-		public IEnumerable<IScreen> NavigationChain
+		public IEnumerable<IScreen> NavigationStack
 		{
-			get { return navigationChain; }
+			get { return navigationStack; }
+		}
+
+		private void ResetNavigation()
+		{
+			while (navigationStack.Count > 0) {
+				var screen = navigationStack.Pop();
+				screen.TryClose();
+			}
+		}
+
+		public void NavigateAndReset(params IScreen[] views)
+		{
+			ResetNavigation();
+			if (ActiveItem != null)
+				ActiveItem.TryClose();
+			var chain = views.TakeWhile((s, i) => i < views.Length - 2);
+			foreach (var screen in chain) {
+				navigationStack.Push(screen);
+			}
+			ActivateItem(views.Last());
 		}
 
 		public override void DeactivateItem(IScreen item, bool close)
 		{
 			base.DeactivateItem(item, close);
 
-			if (ActiveItem == null && navigationChain.Count > 0) {
-				ActivateItem(navigationChain.Peek());
+			if (ActiveItem == null && navigationStack.Count > 0) {
+				ActivateItem(navigationStack.Peek());
 			}
-		}
-
-		public void CancelNavigation()
-		{
-			while (navigationChain.Count > 0) {
-				var screen = navigationChain.Pop();
-				screen.TryClose();
-			}
-		}
-
-		public void Navigate(params IScreen[] views)
-		{
-			CancelNavigation();
-			if (ActiveItem != null)
-				ActiveItem.TryClose();
-			var chain = views.TakeWhile((s, i) => i < views.Length - 2);
-			foreach (var screen in chain) {
-				navigationChain.Push(screen);
-			}
-			ActivateItem(views.Last());
 		}
 
 #if DEBUG

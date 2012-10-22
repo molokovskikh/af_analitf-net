@@ -71,7 +71,7 @@
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\MnnViewModelFixture.cs" />
-    <Compile Include="Integration\ViewModes\CatalogOfferViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />

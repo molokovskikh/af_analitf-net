@@ -109,7 +109,7 @@
 					</StackPanel>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
-					<c:DataGrid>
+					<c:DataGrid x:Name="MaxProducerCosts">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
 							<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -10,7 +11,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class CatalogOfferViewModelFixture : BaseFixture
+	public class CatalogOfferFixture : BaseFixture
 	{
 		private CatalogOfferViewModel model;
 		private ISession session;
@@ -107,6 +108,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 
 			model.CurrentFilter = model.Filters[2];
+		}
+
+		[Test]
+		public void Load_max_producer_costs()
+		{
+			//предельные цены формируются только для прайса которые был создан в текущем импорте
+			//и для прайсов созданых в предыдущих импортах он не будет сформирован
+			var currentPrice = session.Query<Price>().Select(p => p.Id).ToArray().Max();
+			var catalogId = session.Query<Offer>().First(o => o.Price.Id == currentPrice && o.VitallyImportant).CatalogId;
+			var catalog = session.Load<Catalog>(catalogId);
+			model = new CatalogOfferViewModel(catalog);
+			Assert.That(model.MaxProducerCosts.Count, Is.GreaterThan(0));
 		}
 
 		[Test]

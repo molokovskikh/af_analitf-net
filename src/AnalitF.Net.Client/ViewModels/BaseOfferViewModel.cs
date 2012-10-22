@@ -152,7 +152,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 
-			Shell.Navigate(catalogViewModel, offerViewModel);
+			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
 
 		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key)

@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool groupByProduct;
 
 		private decimal retailMarkup;
+		private List<MaxProducerCost> maxProducerCosts;
 
 		public CatalogOfferViewModel(Catalog catalog)
 		{
@@ -47,7 +48,9 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => RaisePropertyChangedEventImmediately("Price"));
 
+
 			Filter();
+			UpdateMaxProducers();
 
 			CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
 			if (CurrentOffer == null)
@@ -55,6 +58,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 			UpdateRegions();
 			UpdateProducers();
+		}
+
+		private void UpdateMaxProducers()
+		{
+			if (CurrentCatalog == null)
+				return;
+
+			MaxProducerCosts = Session.Query<MaxProducerCost>()
+				.Where(c => c.CatalogId == CurrentCatalog.Id)
+				.OrderBy(c => c.Product)
+				.ThenBy(c => c.Producer)
+				.ToList();
 		}
 
 		private void UpdateRegions()
@@ -86,6 +101,16 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public string[] Filters { get; set; }
+
+		public List<MaxProducerCost> MaxProducerCosts
+		{
+			get { return maxProducerCosts; }
+			set
+			{
+				maxProducerCosts = value;
+				RaisePropertyChangedEventImmediately("MaxProducerCosts");
+			}
+		}
 
 		public Price Price
 		{
