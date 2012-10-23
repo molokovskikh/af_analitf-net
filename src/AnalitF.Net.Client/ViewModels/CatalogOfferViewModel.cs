@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private decimal retailMarkup;
 		private List<MaxProducerCost> maxProducerCosts;
+		private List<SentOrderLine> historyOrders;
 
 		public CatalogOfferViewModel(Catalog catalog)
 		{
@@ -48,6 +49,10 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => RaisePropertyChangedEventImmediately("Price"));
 
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Where(o => o != null)
+				.Throttle(TimeSpan.FromMilliseconds(2000), Scheduler)
+				.Subscribe(_ => LoadHistoryOrders());
 
 			Filter();
 			UpdateMaxProducers();
@@ -58,6 +63,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 			UpdateRegions();
 			UpdateProducers();
+		}
+
+		private void LoadHistoryOrders()
+		{
+			if (CurrentOffer == null)
+				return;
+
+			HistoryOrders = Session.Query<SentOrderLine>()
+				.Where(o => o.CatalogId == CurrentOffer.CatalogId)
+				.OrderByDescending(o => o.Order.SentOn)
+				.Take(20)
+				.ToList();
 		}
 
 		private void UpdateMaxProducers()
@@ -183,6 +200,16 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				retailMarkup = value;
 				RaisePropertyChangedEventImmediately("RetailMarkup");
+			}
+		}
+
+		public List<SentOrderLine> HistoryOrders
+		{
+			get { return historyOrders; }
+			set
+			{
+				historyOrders = value;
+				RaisePropertyChangedEventImmediately("HistoryOrders");
 			}
 		}
 

@@ -15,8 +15,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 	public class NHibernate
 	{
-		public static ISessionFactory Factory;
-		public static Configuration Configuration;
+		public ISessionFactory Factory;
+		public Configuration Configuration;
 
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
@@ -36,6 +36,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 
 			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
+			mapper.Class<SentOrder>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
+
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};

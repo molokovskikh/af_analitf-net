@@ -7,7 +7,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		public void Check()
 		{
-			using (var session = Config.Initializers.NHibernate.Factory.OpenSession()) {
+			var factory = AppBootstrapper.NHibernate.Factory;
+			using (var session = factory.OpenSession()) {
 				var settings = session.Query<Settings>().FirstOrDefault();
 				if (settings == null) {
 					session.Save(new Settings());

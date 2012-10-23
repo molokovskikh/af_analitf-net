@@ -22,8 +22,8 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
-			localSession = Client.Config.Initializers.NHibernate.Factory.OpenSession();
-			var export = new SchemaExport(Client.Config.Initializers.NHibernate.Configuration);
+			localSession = SetupFixture.Factory.OpenSession();
+			var export = new SchemaExport(SetupFixture.Configuration);
 			export.Drop(false, true);
 			export.Create(false, true);
 		}

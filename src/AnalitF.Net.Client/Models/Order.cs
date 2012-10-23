@@ -65,5 +65,10 @@ namespace AnalitF.Net.Client.Models
 			LinesCount = Lines.Count;
 			Lines.Add(line);
 		}
+
+		public virtual void AddLine(Offer offer, uint count)
+		{
+			AddLine(new OrderLine(this, offer) { Count =  count });
+		}
 	}
 }

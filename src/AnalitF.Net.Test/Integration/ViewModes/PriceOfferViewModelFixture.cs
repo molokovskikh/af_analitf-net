@@ -10,14 +10,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture]
 	public class PriceOfferViewModelFixture : BaseFixture
 	{
-		private ISession session;
-
-		[SetUp]
-		public void Setup()
-		{
-			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
-		}
-
 		[Test]
 		public void Show_catalog()
 		{

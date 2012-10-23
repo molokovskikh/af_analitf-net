@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client
 	{
 		public static ShellViewModel Shell;
 
+		public static Config.Initializers.NHibernate NHibernate;
+
 		public AppBootstrapper()
 		{
 			var command = ApplicationCommands.Delete;
@@ -37,8 +39,10 @@ namespace AnalitF.Net.Client
 				Console.WriteLine(args.Exception);
 			};
 
-			new Config.Initializers.NHibernate().Init();
 			RegisterBinder();
+
+			NHibernate = new Config.Initializers.NHibernate();
+			NHibernate.Init();
 		}
 
 		protected override void OnExit(object sender, EventArgs e)

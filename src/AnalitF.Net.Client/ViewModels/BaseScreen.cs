@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive.Concurrency;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
@@ -23,9 +24,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected Settings Settings;
 
+		public static IScheduler Scheduler = DefaultScheduler.Instance;
+
 		public BaseScreen()
 		{
-			Session = Config.Initializers.NHibernate.Factory.OpenSession();
+			var factory = AppBootstrapper.NHibernate.Factory;
+			Session = factory.OpenSession();
 			Settings = Session.Query<Settings>().First();
 			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 		}

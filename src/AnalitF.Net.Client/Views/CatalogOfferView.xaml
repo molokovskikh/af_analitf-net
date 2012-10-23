@@ -88,14 +88,14 @@
 
 			<StackPanel Grid.Column="0">
 				<Label>Предыдущие заказы</Label>
-				<c:DataGrid Width="460" Height="83">
+				<c:DataGrid Width="460" Height="83" x:Name="HistoryOrders">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Прайс-лист"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Производитель"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.PriceName}"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
 						<DataGridTextColumn Width="*" Header="Срок годн." Binding="{Binding Period}" />
-						<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
+						<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
 						<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
-						<DataGridTextColumn Width="*" Header="Дата"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
 					</DataGrid.Columns>
 				</c:DataGrid>
 				<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>

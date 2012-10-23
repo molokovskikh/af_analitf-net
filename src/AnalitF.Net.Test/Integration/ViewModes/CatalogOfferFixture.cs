@@ -1,12 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
+using Microsoft.Reactive.Testing;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -14,21 +20,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class CatalogOfferFixture : BaseFixture
 	{
 		private CatalogOfferViewModel model;
-		private ISession session;
 
 		[SetUp]
 		public void Setup()
 		{
-			session = Client.Config.Initializers.NHibernate.Factory.OpenSession();
 			var catalog = session.Query<Catalog>()
 				.First(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
-			model = new CatalogOfferViewModel(catalog);
-		}
-
-		[TearDown]
-		public void Teardown()
-		{
-			session.Dispose();
+			model = Init(new CatalogOfferViewModel(catalog));
 		}
 
 		[Test]
@@ -120,6 +118,26 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalog = session.Load<Catalog>(catalogId);
 			model = new CatalogOfferViewModel(catalog);
 			Assert.That(model.MaxProducerCosts.Count, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Load_history_orders()
+		{
+			var offer = model.Offers.First();
+
+			session.Query<SentOrderLine>()
+				.Where(l => l.CatalogId == offer.CatalogId)
+				.Each(l => session.Delete(l));
+
+			var order = new Order(offer.Price);
+			order.AddLine(offer, 1);
+			var sentOrder = new SentOrder(order);
+			session.Save(sentOrder);
+			session.Flush();
+
+			schedule.AdvanceToMs(4000);
+			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1));
+			Assert.That(model.HistoryOrders[0].Count, Is.EqualTo(1));
 		}
 
 		[Test]
