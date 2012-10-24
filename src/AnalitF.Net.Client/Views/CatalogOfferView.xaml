@@ -110,6 +110,21 @@
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
 					<c:DataGrid x:Name="MaxProducerCosts">
+						<FrameworkElement.Style>
+							<Style TargetType="c:DataGrid" BasedOn="{StaticResource {x:Type c:DataGrid}}">
+								<Style.Triggers>
+									<Trigger Property="IsEmpty" Value="True" >
+										<Setter Property="Control.Template">
+											<Setter.Value>
+												<ControlTemplate>
+													<Label HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16">Предельных отпускных цен производителей на ЖНВЛС нет.</Label>
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+									</Trigger>
+								</Style.Triggers>
+							</Style>
+						</FrameworkElement.Style>
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
 							<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
