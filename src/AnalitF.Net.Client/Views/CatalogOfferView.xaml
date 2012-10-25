@@ -147,7 +147,7 @@
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
 				<Label Name="RetailCost"></Label>
 				<Label>Сумма</Label>
-				<Label Content="{Binding Path=CurrentOffer.Price.Order.TotalOrderSum}"></Label>
+				<Label Name="CurrentOffer_Price_Order_Sum"></Label>
 			</StackPanel>
 		</Grid>
 	</Grid>

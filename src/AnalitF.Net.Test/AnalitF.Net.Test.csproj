@@ -71,6 +71,7 @@
     <Compile Include="Integration\BindScreen.cs" />
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
+    <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />

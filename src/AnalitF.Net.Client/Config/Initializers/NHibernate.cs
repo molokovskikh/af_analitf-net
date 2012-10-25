@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
 using NHibernate;
+using NHibernate.Bytecode;
 using NHibernate.Cfg;
+using NHibernate.Engine;
 using NHibernate.Mapping.ByCode;
+using NHibernate.Proxy;
+using NHibernate.Proxy.DynamicProxy;
+using NHibernate.Type;
+using Cascade = NHibernate.Mapping.ByCode.Cascade;
 using Environment = NHibernate.Cfg.Environment;
+using IInterceptor = NHibernate.IInterceptor;
 
 namespace AnalitF.Net.Client.Config.Initializers
 {
@@ -35,6 +43,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 					&& modelInspector.IsEntity(type);
 			});
 
+			mapper.Class<Price>(m => {
+				m.Property(p => p.ContactInfo, c => c.Length(10000));
+				m.Property(p => p.OperativeInfo, c => c.Length(10000));
+			});
 			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
 			mapper.Class<SentOrder>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
 
@@ -66,10 +78,67 @@ namespace AnalitF.Net.Client.Config.Initializers
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
 				{Environment.Isolation, "ReadCommitted"},
+				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName}
 			});
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
 			Factory = Configuration.BuildSessionFactory();
+		}
+	}
+
+	public class LazyInitializer : DefaultLazyInitializer,  global::NHibernate.Proxy.DynamicProxy.IInterceptor
+	{
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
+		public LazyInitializer(string entityName, Type persistentClass, object id, MethodInfo getIdentifierMethod, MethodInfo setIdentifierMethod, IAbstractComponentType componentIdType, ISessionImplementor session)
+			: base(entityName, persistentClass, id, getIdentifierMethod, setIdentifierMethod, componentIdType, session)
+		{
+		}
+
+		public new object Intercept(InvocationInfo info)
+		{
+			if (info.TargetMethod.Name.Contains("PropertyChanged")) {
+				var propertyChangedEventHandler = (PropertyChangedEventHandler)info.Arguments[0];
+				if (info.TargetMethod.Name.StartsWith("add_"))
+					PropertyChanged += propertyChangedEventHandler;
+				else
+					PropertyChanged -= propertyChangedEventHandler;
+			}
+			var result = base.Intercept(info);
+
+			if (info.TargetMethod.Name.StartsWith("set_") && PropertyChanged != null)
+				PropertyChanged(info.Target, new PropertyChangedEventArgs(info.TargetMethod.Name.Substring(4)));
+
+			return result;
+		}
+	}
+
+	public class ProxyFactoryFactory : DefaultProxyFactoryFactory, IProxyFactoryFactory
+	{
+		public new IProxyFactory BuildProxyFactory()
+		{
+			return new ProxyFactory();
+		}
+	}
+
+	public class ProxyFactory : DefaultProxyFactory, IProxyFactory
+	{
+		private readonly global::NHibernate.Proxy.DynamicProxy.ProxyFactory factory
+			= new global::NHibernate.Proxy.DynamicProxy.ProxyFactory();
+
+		public new INHibernateProxy GetProxy(object id, ISessionImplementor session)
+		{
+			if (!IsClassProxy || !typeof(INotifyPropertyChanged).IsAssignableFrom(PersistentClass))
+				return base.GetProxy(id, session);
+
+			try {
+				var initializer = new LazyInitializer(EntityName, PersistentClass, id, GetIdentifierMethod, SetIdentifierMethod, ComponentIdType, session);
+				return (INHibernateProxy)factory.CreateProxy(PersistentClass, initializer, Interfaces);
+			}
+			catch (Exception ex) {
+				log.Error("Creating a proxy instance failed", ex);
+				throw new HibernateException("Creating a proxy instance failed", ex);
+			}
 		}
 	}
 }
