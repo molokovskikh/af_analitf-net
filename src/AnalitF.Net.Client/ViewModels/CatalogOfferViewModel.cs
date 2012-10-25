@@ -65,16 +65,36 @@ namespace AnalitF.Net.Client.ViewModels
 			UpdateProducers();
 		}
 
-		private void LoadHistoryOrders()
+		//TODO: похоже что исключение не обрабатывается все падает
+		public void LoadHistoryOrders()
 		{
-			if (CurrentOffer == null)
+			if (CurrentOffer == null || Address == null)
 				return;
 
-			HistoryOrders = Session.Query<SentOrderLine>()
-				.Where(o => o.CatalogId == CurrentOffer.CatalogId)
+			var query = Session.Query<SentOrderLine>();
+			if (Settings.GroupByProduct) {
+				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId);
+			}
+			else {
+				query = query.Where(o => o.ProductId == CurrentOffer.ProductId);
+			}
+			HistoryOrders = query
+				.Where(o => o.Order.Address == Address)
 				.OrderByDescending(o => o.Order.SentOn)
 				.Take(20)
 				.ToList();
+
+			var begin = DateTime.Now.AddMonths(-1);
+			var values = Session.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
+from SentOrderLines ol
+join SentOrders o on o.Id = ol.SentOrderId
+where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
+				.SetParameter("begin", begin)
+				.SetParameter("productId", CurrentOffer.ProductId)
+				.SetParameter("addressId", Address.Id)
+				.UniqueResult<object[]>();
+			CurrentOffer.PrevOrderAvgCost = (decimal?)values[0];
+			CurrentOffer.PrevOrderAvgCount = (decimal?)values[1];
 		}
 
 		private void UpdateMaxProducers()
@@ -186,7 +206,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				if (CurrentOffer == null)
 					return 0;
-				return CurrentOffer.Cost * (1 + RetailMarkup / 100);
+				return Math.Round(CurrentOffer.Cost * (1 + RetailMarkup / 100), 2);
 			}
 		}
 

@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Interactivity;
 using System.Windows.Media;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using ReactiveUI.Blend;
 

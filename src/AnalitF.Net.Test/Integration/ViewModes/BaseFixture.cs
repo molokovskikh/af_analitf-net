@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NHibernate;
+using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
@@ -14,6 +17,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		protected ShellViewModel shell;
 		protected ISession session;
 		protected TestScheduler schedule;
+		protected Address address;
 
 		[SetUp]
 		public void Setup()
@@ -23,6 +27,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			TestUtils.WithScheduler(schedule);
 
 			session = SetupFixture.Factory.OpenSession();
+			address = session.Query<Address>().FirstOrDefault();
 			shell = new ShellViewModel();
 			manager = new Client.Extentions.WindowManager();
 			manager.UnderTest = true;

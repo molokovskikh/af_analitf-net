@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views

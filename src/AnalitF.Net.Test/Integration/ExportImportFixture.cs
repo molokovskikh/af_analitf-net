@@ -38,7 +38,8 @@ namespace AnalitF.Net.Test.Integration
 		[Test, Ignore]
 		public void Load_data()
 		{
-			var supplier = TestSupplier.Create();
+			var supplier = TestSupplier.CreateNaked();
+			CreateSampleContactInfo(supplier);
 			CreateSampleCore(supplier);
 			var maxProducerCosts = CreateMaxProduceCosts(supplier);
 			var client = TestClient.CreateNaked();
@@ -52,6 +53,42 @@ namespace AnalitF.Net.Test.Integration
 
 			var importer = new Importer(localSession);
 			importer.Import(files);
+		}
+
+		private void CreateSampleContactInfo(TestSupplier supplier)
+		{
+			var price = supplier.RegionalData[0];
+			price.SupportPhone = "473-2727092";
+			price.ContactInfo = @"р/с 40702810213360100306
+в Центрально-Черноземный банк СБ РФ г.Воронеж, к/с 30101810600000000681,
+БИК 042007681, ОКПО 4790682, ОКОНХ 71100,
+
+  тел./факс. (0732) 72-70-92 – региональный отдел (многоканальный),
+   тел. (0732) 72-70-92 – начальник отдела сбыта (Шунелько Елена Владимировна),
+  тел. (0732) 57-28-22 – менеджер по претензиям (Ольга Цепина),
+  тел. (0732) 72-70-92 – зав. складом (Круликовский Александр).
+  E-mail:
+  программист: sia@sia.vrn.ru  (Старов Константин),
+  начальник отдела сбыта: nos@sia.vrn.ru(Шунелько Елена Владимировна),
+менеджер по претензиям: pretenz@sia.vrn.ru (Цепина Ольга)
+  прием и обработка заявок: zakaz@sia.vrn.ru (Белобородова Елена)
+  менеджер по маркетингу: market1@sia.vrn.ru (Анучкина Нина)
+  отдел сертификации: sertif@sia.vrn.ru (Шишкина Виктория)
+  склад: sklad@sia.vrn.ru(Круликовский Александр)
+   Уважаемые клиенты,в целях улучшения сотрудничества,условий и времени доставки товара,своевременности обработки претензий,корректного обращения,быстрого реагирования на просьбы,выполнение индивидуальных соглашений и т.п.просьба направлять Ваши предложения по совершенствованию сервиса по адресу:
+   pravda_all@mail.ru";
+
+			price.OperativeInfo = @"ДОСТАВКА ПО г.ВОРОНЕЖУ
+ ЗАЯВКИ, ПРИНЯТЫЕ ДО 12-00, БУДУТ ДОСТАВЛЕНЫ ПОСЛЕ 15-00
+  ЗАЯВКИ, ПРИНЯТЫЕ ДО 18-00 В ПЯТНИЦУ, БУДУТ ДОСТАВЛЕНЫ ПО    ЖЕЛАНИЮ КЛИЕНТА В СУББОТУ С 9-00 ДО 15-00
+
+ВСЕ ЭЛЕКТРОННЫЕ ЗАЯВКИ, ПОЛУЧЕННЫЕ  ДО 18-00 ВОСКРЕСЕНЬЯ, БУДУТ   ДОСТАВЛЕНЫ В ПОНЕДЕЛЬНИК ДО 11-00
+
+ЗАЯВКИ ПРИНИМАЮТСЯ ДО 18-30
+
+ДОСТАВКА ОСУЩЕСТВЛЯЕТСЯ ОДИН РАЗ В ДЕНЬ СОГЛАСНО ГРАФИКУ.
+
+МИНИМАЛЬНАЯ СУММА ЗАЯВКИ ДЛЯ ДОСТАВКИ 3000 руб.";
 		}
 
 		private TestPrice CreateMaxProduceCosts(TestSupplier supplier)

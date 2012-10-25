@@ -40,7 +40,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var offer = session.Query<Offer>().First();
 			offer.OrderCount = 1;
-			offer.UpdateOrderLine();
+			offer.UpdateOrderLine(address);
 			session.Save(offer.Price.Order);
 			session.Flush();
 			session.Clear();

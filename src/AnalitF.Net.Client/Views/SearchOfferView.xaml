@@ -20,7 +20,7 @@
 			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />

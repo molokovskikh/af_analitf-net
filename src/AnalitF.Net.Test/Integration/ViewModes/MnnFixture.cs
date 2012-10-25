@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class MnnViewModelFixture : BaseFixture
+	public class MnnFixture : BaseFixture
 	{
 		[Test]
 		public void On_open_catalog_update_have_offers_flag()

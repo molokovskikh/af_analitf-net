@@ -24,13 +24,22 @@ namespace AnalitF.Net.Models
 
 		public List<Tuple<string, string[]>> Export(uint userId)
 		{
+			var result = new List<Tuple<string, string[]>>();
+
 			session.CreateSQLQuery("call Customers.GetOffers(:userId)")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+			string sql;
 
-			var result = new List<Tuple<string, string[]>>();
+			sql = @"
+select a.Id,
+a.Address as Name
+from Customers.Addresses a
+join Customers.UserAddresses ua on ua.AddressId = a.Id
+where a.Enabled = 1 and ua.UserId = ?userId";
+			result.Add(Export(sql, "Addresses", new { userId }));
 
-			var sql = @"
+			sql = @"
 drop temporary table if exists Usersettings.MaxProducerCosts;
 create temporary table Usersettings.MaxProducerCosts(
 	Id bigint unsigned not null,
@@ -200,7 +209,10 @@ where Hidden = 0";
 			var exportFile = Path.GetFullPath(file + ".txt").Replace(@"\", "/");
 			File.Delete(exportFile);
 			sql += " INTO OUTFILE '" + exportFile + "' ";
-			session.CreateSQLQuery(sql).ExecuteUpdate();
+			var command = new MySqlCommand(sql, (MySqlConnection)session.Connection);
+			if (parameters != null)
+				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
+			command.ExecuteNonQuery();
 			return Tuple.Create(exportFile, columns);
 		}
 	}

@@ -30,9 +30,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected bool NeedToCalculateDiff;
 
+		protected Address Address;
+
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
+			Address = Session.Query<Address>().FirstOrDefault();
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
@@ -194,7 +197,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			var order = lastEditOffer.UpdateOrderLine();
+			var order = lastEditOffer.UpdateOrderLine(Address);
 			ProcessMessages(lastEditOffer);
 			if (order != null) {
 				if (order.IsEmpty) {

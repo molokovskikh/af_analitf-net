@@ -50,10 +50,14 @@
 			</TextBlock>
 
 			<Label>Контактная информация:</Label>
-			<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_ContactInfo"></TextBlock>
+			<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+				<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_ContactInfo"></TextBlock>
+			</ScrollViewer>
 
-			<Label>Оперативная информация:</Label>
-			<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_OperativeInfo"></TextBlock>
+					<Label>Оперативная информация:</Label>
+			<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+				<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_OperativeInfo"></TextBlock>
+			</ScrollViewer>
 		</StackPanel>
 		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}" Name="ShowLeaders">Показать только лидирующие позиции (F3)</CheckBox>

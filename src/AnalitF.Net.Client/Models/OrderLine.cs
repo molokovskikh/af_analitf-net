@@ -6,11 +6,12 @@
 		{
 		}
 
-		public OrderLine(Order order, Offer offer)
+		public OrderLine(Order order, Offer offer, uint count)
 			: base(offer)
 		{
 			Order = order;
 			OfferId = offer.Id;
+			Count = count;
 		}
 
 		public virtual uint Id { get; set; }

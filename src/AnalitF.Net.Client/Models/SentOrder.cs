@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.Models
 
 		public SentOrder(Order order)
 		{
+			Address = order.Address;
 			PriceName = order.Price.Name;
 			CreatedOn = order.CreatedOn;
 			SentOn = DateTime.Now;
@@ -23,6 +24,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 
 		public virtual string PriceName { get; set; }
+
+		public virtual Address Address { get; set; }
 
 		public virtual DateTime CreatedOn { get; set; }
 

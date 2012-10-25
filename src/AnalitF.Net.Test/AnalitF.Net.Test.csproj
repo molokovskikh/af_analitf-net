@@ -39,21 +39,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Caliburn.Micro, Version=1.3.1.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL" />
-    <Reference Include="Castle.ActiveRecord, Version=3.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" />
-    <Reference Include="castle.core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" />
-    <Reference Include="microsoft.reactive.testing, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="Mysql.data, Version=6.5.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
-    <Reference Include="nhibernate, Version=3.3.1.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL" />
+    <Reference Include="Caliburn.Micro" />
+    <Reference Include="Castle.ActiveRecord" />
+    <Reference Include="castle.core" />
+    <Reference Include="microsoft.reactive.testing" />
+    <Reference Include="Mysql.data" />
+    <Reference Include="nhibernate" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFrameWork" />
-    <Reference Include="ReactiveUI, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="reactiveui.testing, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="ReactiveUI" />
+    <Reference Include="reactiveui.testing" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="system.reactive.core, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Reactive.Interfaces, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Reactive.Linq, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="system.reactive.core" />
+    <Reference Include="System.Reactive.Interfaces" />
+    <Reference Include="System.Reactive.Linq" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -74,16 +74,17 @@
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
-    <Compile Include="Integration\ViewModes\CatalogViewModelFixture.cs" />
-    <Compile Include="Integration\ViewModes\MnnViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
+    <Compile Include="Integration\ViewModes\MnnFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
-    <Compile Include="Integration\ViewModes\PriceOfferViewModelFixture.cs" />
-    <Compile Include="Integration\ViewModes\SearchOfferViewModelFixture.cs" />
-    <Compile Include="Integration\ViewModes\SettingsViewModelFixture.cs" />
+    <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
+    <Compile Include="Unit\OrderFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
   </ItemGroup>
   <ItemGroup>

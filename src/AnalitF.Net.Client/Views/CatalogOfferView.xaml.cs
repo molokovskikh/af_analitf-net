@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 

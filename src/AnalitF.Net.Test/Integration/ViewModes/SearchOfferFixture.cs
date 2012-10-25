@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SearchOfferViewModelFixture : BaseFixture
+	public class SearchOfferFixture : BaseFixture
 	{
 		[Test]
 		public void Full_filter_values()

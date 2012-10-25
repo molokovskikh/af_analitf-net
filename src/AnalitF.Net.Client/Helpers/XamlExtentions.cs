@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,12 +6,10 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Views;
 using Common.Tools;
 using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
-namespace AnalitF.Net.Client.Extentions
+namespace AnalitF.Net.Client.Helpers
 {
 	public static class XamlExtentions
 	{
@@ -124,7 +122,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
 		{
-			return view.Children().Flat(d => d.Children());
+			return view.Children().Flat(d => Children((DependencyObject)d));
 		}
 	}
 }

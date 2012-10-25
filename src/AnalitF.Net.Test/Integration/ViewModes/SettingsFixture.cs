@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SettingsViewModelFixture : BaseFixture
+	public class SettingsFixture : BaseFixture
 	{
 		[Test]
 		public void Calculate_base_category()

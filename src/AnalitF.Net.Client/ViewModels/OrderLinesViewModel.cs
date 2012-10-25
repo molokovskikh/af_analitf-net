@@ -19,6 +19,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private Price currentPrice;
 		private List<OrderLine> lines;
 
+		private Address address;
+
 		public OrderLinesViewModel()
 		{
 			DisplayName = "Сводный заказ";
@@ -176,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
 			offer.OrderCount = 0;
-			var order = offer.UpdateOrderLine();
+			var order = offer.UpdateOrderLine(address);
 
 			if (order != null) {
 				if (order.IsEmpty) {

@@ -3,6 +3,7 @@ using System.Windows;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;

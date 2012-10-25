@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
-	public class CatalogViewModelFixture : BaseFixture
+	public class CatalogFixture : BaseFixture
 	{
 		private CatalogViewModel model;
 

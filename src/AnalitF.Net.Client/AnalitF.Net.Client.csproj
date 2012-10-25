@@ -41,40 +41,41 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Caliburn.Micro, Version=1.3.1.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL" />
-    <Reference Include="inflector_extension, Version=0.0.8.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="mysql.data, Version=6.5.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
-    <Reference Include="newtonsoft.json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
-    <Reference Include="nhibernate, Version=3.3.1.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL" />
-    <Reference Include="reactiveui, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Caliburn.Micro" />
+    <Reference Include="iesi.collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL" />
+    <Reference Include="inflector_extension" />
+    <Reference Include="mysql.data" />
+    <Reference Include="newtonsoft.json" />
+    <Reference Include="nhibernate" />
+    <Reference Include="reactiveui">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Reactiveui.blend, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Reactiveui.blend">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="reactiveui.xaml, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="reactiveui.xaml">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Reactive.Core, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Reactive.Core">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Core.2.0.20823\lib\Net40\System.Reactive.Core.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Interfaces, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Reactive.Interfaces">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Interfaces.2.0.20823\lib\Net40\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Linq, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Reactive.Linq">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Linq.2.0.20823\lib\Net40\System.Reactive.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Windows.Threading, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Reactive.Windows.Threading">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Xaml.2.0.20823\lib\Net40\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
-    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Windows.Interactivity" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -86,7 +87,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="wpftoolkit.extended, Version=1.7.4644.13122, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL" />
+    <Reference Include="wpftoolkit.extended" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -105,10 +106,12 @@
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Extentions\BoolToVisibilityConverter.cs" />
     <Compile Include="Extentions\WindowManager.cs" />
-    <Compile Include="Extentions\XamlExtentions.cs" />
     <Compile Include="Helpers\ConsoleLog.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\Persister.cs" />
+    <Compile Include="Helpers\SessionExtentions.cs" />
+    <Compile Include="Helpers\XamlExtentions.cs" />
+    <Compile Include="Models\Address.cs" />
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />

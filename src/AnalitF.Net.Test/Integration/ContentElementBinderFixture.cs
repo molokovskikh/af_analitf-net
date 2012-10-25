@@ -4,6 +4,7 @@ using System.Windows.Documents;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using NUnit.Framework;
 

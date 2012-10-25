@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class Order
+	public class Order : INotifyPropertyChanged
 	{
+		private decimal sum;
+
 		public Order()
 		{
 			Lines = new List<OrderLine>();
 		}
 
-		public Order(Price price)
+		public Order(Price price, Address address)
 			: this()
 		{
+			Address = address;
 			Price = price;
 			CreatedOn = DateTime.Now;
 		}
@@ -22,11 +26,21 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime CreatedOn { get; set; }
 
+		public virtual Address Address { get; set; }
+
 		public virtual Price Price { get; set; }
 
 		public virtual int LinesCount { get; set; }
 
-		public virtual decimal Sum { get; set; }
+		public virtual decimal Sum
+		{
+			get { return sum; }
+			set
+			{
+				sum = value;
+				OnPropertyChanged("Sum");
+			}
+		}
 
 		public virtual decimal MonthlyOrderSum { get; set; }
 
@@ -54,21 +68,29 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void RemoveLine(OrderLine line)
 		{
+			Lines.Remove(line);
 			Sum = Lines.Sum(l => l.Sum);
 			LinesCount = Lines.Count;
-			Lines.Remove(line);
 		}
 
 		public virtual void AddLine(OrderLine line)
 		{
+			Lines.Add(line);
 			Sum = Lines.Sum(l => l.Sum);
 			LinesCount = Lines.Count;
-			Lines.Add(line);
 		}
 
 		public virtual void AddLine(Offer offer, uint count)
 		{
-			AddLine(new OrderLine(this, offer) { Count =  count });
+			AddLine(new OrderLine(this, offer, count));
+		}
+
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			var handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

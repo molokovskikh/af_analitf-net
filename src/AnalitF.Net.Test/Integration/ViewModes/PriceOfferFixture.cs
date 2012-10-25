@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class PriceOfferViewModelFixture : BaseFixture
+	public class PriceOfferFixture : BaseFixture
 	{
 		[Test]
 		public void Show_catalog()

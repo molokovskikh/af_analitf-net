@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
 using Xceed.Wpf.Toolkit;

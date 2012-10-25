@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 
@@ -8,8 +9,12 @@ namespace AnalitF.Net.Client.Models
 {
 	public class Offer : BaseOffer, INotifyPropertyChanged
 	{
+		private decimal totalOrderSum;
+
 		private decimal? _diff;
 		private uint orderCount;
+		private decimal? prevOrderAvgCost;
+		private decimal? prevOrderAvgCount;
 
 		public virtual ulong Id { get; set; }
 
@@ -48,7 +53,7 @@ namespace AnalitF.Net.Client.Models
 			if (cost == Cost || cost == 0)
 				return;
 
-			_diff = (Cost - cost) / cost;
+			_diff = Math.Round((Cost - cost) / cost, 2);
 		}
 
 		[Ignore]
@@ -75,6 +80,44 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual string Notification { get; set; }
 
+		//Значение для этого поля загружается исинхронно, что бы ui узнал о загрузке надо его оповестить
+		[Ignore]
+		public virtual decimal? PrevOrderAvgCost
+		{
+			get
+			{
+				return prevOrderAvgCost;
+			}
+			set
+			{
+				prevOrderAvgCost = value;
+				OnPropertyChanged("PrevOrderAvgCost");
+			}
+		}
+
+		[Ignore]
+		public virtual decimal? PrevOrderAvgCount
+		{
+			get { return prevOrderAvgCount; }
+			set
+			{
+				prevOrderAvgCount = value;
+				OnPropertyChanged("PrevOrderAvgCount");
+			}
+		}
+
+		[Ignore]
+		public virtual decimal TotalOrderSum
+		{
+			get { return totalOrderSum; }
+			set {
+				totalOrderSum = value;
+				OnPropertyChanged("TotalOrderSum");
+			}
+		}
+
+
+
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -83,20 +126,23 @@ namespace AnalitF.Net.Client.Models
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		public virtual Order UpdateOrderLine()
+		public virtual Order UpdateOrderLine(Address address)
 		{
 			var order = Price.Order;
 			if (OrderCount > 0) {
 				PreorderCheck();
 				if (OrderLine == null) {
 					if (order == null) {
-						order = new Order(Price);
+						order = new Order(Price, address);
 						Price.Order = order;
 					}
-					OrderLine = new OrderLine(order, this);
+					OrderLine = new OrderLine(order, this, orderCount);
 					order.AddLine(OrderLine);
 				}
-				OrderLine.Count = orderCount;
+				else {
+					OrderLine.Count = OrderCount;
+					OrderLine.Order.Sum = OrderLine.Order.Lines.Sum(l => l.Sum);
+				}
 			}
 			if (orderCount == 0 && OrderLine != null) {
 				order.RemoveLine(OrderLine);

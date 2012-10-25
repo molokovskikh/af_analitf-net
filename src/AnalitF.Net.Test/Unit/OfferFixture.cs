@@ -7,10 +7,12 @@ namespace AnalitF.Net.Test.Unit
 	public class OfferFixture
 	{
 		private Offer offer;
+		private Address address;
 
 		[SetUp]
 		public void Setup()
 		{
+			address = new Address();
 			offer = new Offer {
 				Price = new Price(),
 				Cost = 53.1m
@@ -22,10 +24,25 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.OrderCount = 10;
 			Assert.That(offer.OrderSum, Is.EqualTo(531));
-			offer.UpdateOrderLine();
+			offer.UpdateOrderLine(address);
 			Assert.That(offer.OrderLine, Is.Not.Null);
 			Assert.That(offer.Price.Order, Is.Not.Null);
 			Assert.That(offer.OrderLine.Count, Is.EqualTo(10));
+			Assert.That(offer.OrderLine.Sum, Is.EqualTo(531));
+			Assert.That(offer.OrderLine.Order.Sum, Is.EqualTo(531));
+			Assert.That(offer.OrderLine.Order.LinesCount, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Update_count()
+		{
+			offer.OrderCount = 10;
+			offer.UpdateOrderLine(address);
+			offer.OrderCount = 5;
+			offer.UpdateOrderLine(address);
+			Assert.That(offer.OrderCount, Is.EqualTo(5));
+			Assert.That(offer.OrderLine.Count, Is.EqualTo(5));
+			Assert.That(offer.OrderLine.Order.Sum, Is.EqualTo(265.5));
 		}
 
 		[Test]
@@ -46,7 +63,7 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(offer.Warning, Is.Not.Null);
 			offer.OrderCount = 0;
 			offer.MakePreorderCheck();
-			var order = offer.UpdateOrderLine();
+			var order = offer.UpdateOrderLine(address);
 			Assert.That(offer.Warning, Is.Null);
 			Assert.That(order, Is.Null);
 		}
@@ -75,7 +92,7 @@ namespace AnalitF.Net.Test.Unit
 			offer.Quantity = "23";
 			offer.OrderCount = 50;
 			offer.RequestRatio = 5;
-			offer.UpdateOrderLine();
+			offer.UpdateOrderLine(address);
 			Assert.That(offer.OrderCount, Is.EqualTo(20));
 			Assert.That(offer.OrderLine.Count, Is.EqualTo(20));
 		}
@@ -86,7 +103,7 @@ namespace AnalitF.Net.Test.Unit
 			offer.OrderCount = 1;
 			offer.MinOrderSum = 100;
 			offer.Cost = 70;
-			offer.UpdateOrderLine();
+			offer.UpdateOrderLine(address);
 			Assert.That(offer.Notification, Is.EqualTo("Сумма заказа \"70\" меньше минимальной сумме заказа \"100\" по данной позиции!"));
 			Assert.That(offer.OrderCount, Is.EqualTo(0));
 			Assert.That(offer.OrderLine, Is.Null);
@@ -97,9 +114,9 @@ namespace AnalitF.Net.Test.Unit
 		public void Delete_order_line()
 		{
 			offer.OrderCount = 1;
-			offer.UpdateOrderLine();
+			offer.UpdateOrderLine(address);
 			offer.OrderCount = 0;
-			var order = offer.UpdateOrderLine();
+			var order = offer.UpdateOrderLine(address);
 			Assert.That(order, Is.Not.Null);
 		}
 

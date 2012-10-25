@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
@@ -97,7 +98,7 @@ namespace AnalitF.Net.Client.Models
 				if (ProducerCost == null)
 					return null;
 				var nds = NDS ?? 10.0m;
-				return (Cost / (ProducerCost.Value * (nds / 100 + 1)) - 1) * 100;
+				return Math.Round((Cost / (ProducerCost.Value * (nds / 100 + 1)) - 1) * 100, 2);
 			}
 		}
 
@@ -107,7 +108,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual void CalculateRetailCost(List<MarkupConfig> markups)
 		{
 			var markup = MarkupConfig.Calculate(markups, this);
-			RetailCost = Cost * (1 + markup / 100);
+			RetailCost = Math.Round(Cost * (1 + markup / 100), 2);
 		}
 	}
 }

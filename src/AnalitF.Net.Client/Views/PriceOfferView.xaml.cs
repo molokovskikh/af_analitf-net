@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views
 {

@@ -13,20 +13,30 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
 	public class CatalogOfferFixture : BaseFixture
 	{
-		private CatalogOfferViewModel model;
+		private Lazy<CatalogOfferViewModel> lazyModel;
+		private Catalog catalog;
+
+		private CatalogOfferViewModel model
+		{
+			get { return lazyModel.Value; }
+		}
 
 		[SetUp]
 		public void Setup()
 		{
-			var catalog = session.Query<Catalog>()
+			lazyModel = new Lazy<CatalogOfferViewModel>(() => {
+				session.Flush();
+				return Init(new CatalogOfferViewModel(catalog));
+			});
+			catalog = session.Query<Catalog>()
 				.First(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
-			model = Init(new CatalogOfferViewModel(catalog));
 		}
 
 		[Test]
@@ -43,12 +53,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var splitCost = model.Offers[0].Cost;
 			var markupConfig1 = new MarkupConfig(0, splitCost, 20);
 			var markupConfig2 = new MarkupConfig(splitCost, 100 * splitCost, 30);
-			using(var t = session.BeginTransaction()) {
-				session.Save(markupConfig1);
-				session.Save(markupConfig2);
-				t.Commit();
-			}
-			model = new CatalogOfferViewModel(model.CurrentCatalog);
+			session.DeleteEach(session.Query<MarkupConfig>());
+			session.Save(markupConfig1);
+			session.Save(markupConfig2);
+
 			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
 
 			model.CurrentOffer = model.Offers[0];
@@ -74,7 +82,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			MakeDifferentCategory();
 
-			model = new CatalogOfferViewModel(model.CurrentCatalog);
 			Assert.That(model.CurrentOffer.Id, Is.EqualTo(model.Offers[1].Id));
 		}
 
@@ -115,8 +122,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			//и для прайсов созданых в предыдущих импортах он не будет сформирован
 			var currentPrice = session.Query<Price>().Select(p => p.Id).ToArray().Max();
 			var catalogId = session.Query<Offer>().First(o => o.Price.Id == currentPrice && o.VitallyImportant).CatalogId;
-			var catalog = session.Load<Catalog>(catalogId);
-			model = new CatalogOfferViewModel(catalog);
+			catalog = session.Load<Catalog>(catalogId);
+
 			Assert.That(model.MaxProducerCosts.Count, Is.GreaterThan(0));
 		}
 
@@ -125,11 +132,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var offer = model.Offers.First();
 
-			session.Query<SentOrderLine>()
-				.Where(l => l.CatalogId == offer.CatalogId)
-				.Each(l => session.Delete(l));
+			CleanSendOrders(offer);
 
-			var order = new Order(offer.Price);
+			var order = new Order(offer.Price, address);
 			order.AddLine(offer, 1);
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
@@ -169,9 +174,34 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Offers.Select(o => o.Cost).Implode(), Is.EqualTo("90, 120, 103, 105"));
 		}
 
+		[Test]
+		public void Load_order_history()
+		{
+			session.DeleteEach(session.Query<SentOrderLine>());
+
+			CleanSendOrders(model.CurrentOffer);
+			model.LoadHistoryOrders();
+		}
+
+		[Test]
+		public void Load_order_history_without_address()
+		{
+			session.DeleteEach(session.Query<Order>());
+			session.DeleteEach(session.Query<SentOrder>());
+			session.DeleteEach(session.Query<Address>());
+			model.LoadHistoryOrders();
+		}
+
+		private void CleanSendOrders(Offer offer)
+		{
+			session.Query<SentOrderLine>()
+				.Where(l => l.CatalogId == offer.CatalogId)
+				.Each(l => session.Delete(l));
+		}
+
 		private void MakeDifferentCategory()
 		{
-			var offers = model.Offers;
+			var offers = session.Query<Offer>().Where(o => o.CatalogId == catalog.Id).ToList();
 			Assert.That(offers[0].Price.Id, Is.Not.EqualTo(offers[1].Price.Id));
 
 			var price1 = session.Load<Price>(offers[0].Price.Id);

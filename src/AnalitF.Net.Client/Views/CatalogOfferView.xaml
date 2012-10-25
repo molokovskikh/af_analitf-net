@@ -28,14 +28,14 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
-			<Label x:Name="Catalog_Name"></Label>
+			<Label x:Name="CurrentCatalog_Name" FontWeight="Bold"></Label>
 			<ToggleButton Name="GroupByProduct" Style="{StaticResource ResourceKey=GroupButton}"></ToggleButton>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Regions"></ComboBox>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
@@ -79,16 +79,19 @@
 			</StackPanel>
 		</StackPanel>
 
-		<Grid Grid.Row="4">
+		<Grid Grid.Row="4" Height="120">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 				<ColumnDefinition></ColumnDefinition>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 			</Grid.ColumnDefinitions>
 
-			<StackPanel Grid.Column="0">
-				<Label>Предыдущие заказы</Label>
-				<c:DataGrid Width="460" Height="83" x:Name="HistoryOrders">
+			<DockPanel Grid.Column="0">
+				<Label DockPanel.Dock="Top">Предыдущие заказы</Label>
+				<Label DockPanel.Dock="Bottom">
+					<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>
+				</Label>
+				<c:DataGrid Width="460" x:Name="HistoryOrders">
 					<DataGrid.Columns>
 						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.PriceName}"></DataGridTextColumn>
 						<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
@@ -98,15 +101,20 @@
 						<DataGridTextColumn Width="*" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
 					</DataGrid.Columns>
 				</c:DataGrid>
-				<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>
-			</StackPanel>
+			</DockPanel>
 
 			<TabControl Grid.Column="1">
 				<TabItem Header="Информация о поставщике">
-					<StackPanel>
-						<TextBlock Style="{StaticResource ResourceKey=PriceInfo}">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
-						<TextBlock Style="{StaticResource ResourceKey=PriceInfo}" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
-					</StackPanel>
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"></RowDefinition>
+							<RowDefinition></RowDefinition>
+						</Grid.RowDefinitions>
+						<TextBlock Grid.Row="0" FontWeight="Bold">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
+						<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+							<TextBlock FontWeight="Bold" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
+						</ScrollViewer>
+					</Grid>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
 					<c:DataGrid x:Name="MaxProducerCosts">
@@ -138,6 +146,8 @@
 				<Label>Наценка</Label>
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
 				<Label Name="RetailCost"></Label>
+				<Label>Сумма</Label>
+				<Label Content="{Binding Path=CurrentOffer.Price.Order.TotalOrderSum}"></Label>
 			</StackPanel>
 		</Grid>
 	</Grid>
