@@ -11,6 +11,20 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public interface IPrintable
+	{
+		bool CanPrint { get; }
+
+		void Print();
+	}
+
+	public interface IExportable
+	{
+		bool CanExport { get; }
+
+		void Export();
+	}
+
 	[Serializable]
 	public class ShellViewModel : Conductor<IScreen>
 	{
@@ -22,6 +36,12 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "АналитФАРМАЦИЯ";
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => UpdateDisplayName());
+
+			this.ObservableForProperty(m => m.ActiveItem)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanPrint"));
+
+			this.ObservableForProperty(m => m.ActiveItem)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanExport"));
 		}
 
 		protected void UpdateDisplayName()
@@ -33,6 +53,46 @@ namespace AnalitF.Net.Client.ViewModels
 				value += " - " + named.DisplayName;
 			}
 			DisplayName = value;
+		}
+
+		public bool CanExport
+		{
+			get
+			{
+				var exportable = ActiveItem as IExportable;
+				if (exportable != null) {
+					return exportable.CanExport;
+				}
+				return false;
+			}
+		}
+
+		public void Export()
+		{
+			if (!CanExport)
+				return;
+
+			((IExportable)ActiveItem).Export();
+		}
+
+		public bool CanPrint
+		{
+			get
+			{
+				var printable = ActiveItem as IPrintable;
+				if (printable != null) {
+					return printable.CanPrint;
+				}
+				return false;
+			}
+		}
+
+		public void Print()
+		{
+			if (!CanPrint)
+				return;
+
+			((IPrintable)ActiveItem).Print();
 		}
 
 		public void ShowCatalog()

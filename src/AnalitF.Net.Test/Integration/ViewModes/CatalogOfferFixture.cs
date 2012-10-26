@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Resources;
 using System.Threading;
+using System.Windows;
+using System.Windows.Markup;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Views;
+using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Reactive.Testing;
 using NHibernate;
@@ -190,6 +196,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.DeleteEach(session.Query<SentOrder>());
 			session.DeleteEach(session.Query<Address>());
 			model.LoadHistoryOrders();
+		}
+
+		[Test, RequiresSTA]
+		public void Export()
+		{
+			var app = new Client.App();
+			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
+			((IViewAware)model).AttachView(new CatalogOfferView());
+			model.Export();
 		}
 
 		private void CleanSendOrders(Offer offer)

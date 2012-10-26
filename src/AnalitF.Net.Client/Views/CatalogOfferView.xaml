@@ -147,7 +147,20 @@
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
 				<Label Name="RetailCost"></Label>
 				<Label>Сумма</Label>
-				<Label Name="CurrentOffer_Price_Order_Sum"></Label>
+				<Label Name="CurrentOffer_Price_Order_Sum">
+					<FrameworkElement.Style>
+						<Style TargetType="Label">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding CurrentOffer.Price.Order.Valid}" Value="true">
+									<Setter Property="Foreground" Value="Green" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding CurrentOffer.Price.Order.Valid}" Value="false">
+									<Setter Property="Foreground" Value="Red" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</FrameworkElement.Style>
+				</Label>
 			</StackPanel>
 		</Grid>
 	</Grid>

@@ -47,6 +47,7 @@
     <Reference Include="mysql.data" />
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
+    <Reference Include="npoi, Version=1.2.5.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL" />
     <Reference Include="reactiveui">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
