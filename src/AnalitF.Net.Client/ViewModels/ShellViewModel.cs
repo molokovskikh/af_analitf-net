@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		bool CanExport { get; }
 
-		void Export();
+		IResult Export();
 	}
 
 	[Serializable]
@@ -67,12 +67,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void Export()
+		public IResult Export()
 		{
 			if (!CanExport)
-				return;
+				return null;
 
-			((IExportable)ActiveItem).Export();
+			return ((IExportable)ActiveItem).Export();
 		}
 
 		public bool CanPrint

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -267,13 +268,12 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			get { return true; }
 		}
 
-		public void Export()
+		public IResult Export()
 		{
 			var view = (UserControl) GetView();
 			var grid = (DataGrid)view.DeepChildren().OfType<Controls.DataGrid>().First(g => g.Name == "Offers");
 			var columns = grid.Columns;
-			var filename = Path.GetTempFileName();
-			Console.WriteLine(filename);
+			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
 			using(var file = File.OpenWrite(filename)) {
 				var book = new HSSFWorkbook();
 				var sheet = book.CreateSheet("Экспорт");
@@ -290,6 +290,8 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				}
 				book.Write(file);
 			}
+
+			return new OpenFileResult(filename);
 		}
 
 		private string GetValue(DataGridColumn column, object offer)
@@ -311,5 +313,24 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return "";
 			return value.ToString();
 		}
+	}
+
+	public class OpenFileResult : IResult
+	{
+		public string Filename;
+
+		public OpenFileResult(string filename)
+		{
+			Filename = filename;
+		}
+
+		//TODO: Обработка ошибок?
+		public void Execute(ActionExecutionContext context)
+		{
+			Process.Start("excel", Filename);
+			Completed(this, new ResultCompletionEventArgs());
+		}
+
+		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 }

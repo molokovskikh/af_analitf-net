@@ -204,7 +204,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var app = new Client.App();
 			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			((IViewAware)model).AttachView(new CatalogOfferView());
-			model.Export();
+			var result = (OpenFileResult)model.Export();
+			Assert.That(File.Exists(result.Filename), result.Filename);
+			File.Delete(result.Filename);
 		}
 
 		private void CleanSendOrders(Offer offer)
