@@ -33,32 +33,48 @@
 				<DataGridTextColumn Width="*" Header="Недельный заказ" />
 			</DataGrid.Columns>
 		</c:DataGrid>
-		<StackPanel Grid.Row="1" Grid.Column="1">
-			<Label>Информация</Label>
-			<TextBlock x:Name="CurrentPrice_SupplierFullName" Style="{StaticResource PriceInfo}"></TextBlock>
+		<Grid Grid.Row="1" Grid.Column="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
 
-			<TextBlock Style="{StaticResource PriceInfo}">
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition></RowDefinition>
+
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition></RowDefinition>
+			</Grid.RowDefinitions>
+
+			<Label Grid.Row="0">Информация</Label>
+			<TextBlock Grid.Row="1" x:Name="CurrentPrice_SupplierFullName" Style="{StaticResource PriceInfo}"></TextBlock>
+
+			<TextBlock Grid.Row="2" Style="{StaticResource PriceInfo}">
 				Телефон: <Run x:Name="CurrentPrice_Phone"></Run>
 			</TextBlock>
 
-			<TextBlock Style="{StaticResource PriceInfo}">
+			<TextBlock Grid.Row="3" Style="{StaticResource PriceInfo}">
 				Минимальный заказ: <Run x:Name="CurrentPrice_MinReq"></Run>
 			</TextBlock>
 
-			<TextBlock Style="{StaticResource PriceInfo}">
+			<TextBlock Grid.Row="4" Style="{StaticResource PriceInfo}">
 				Email: <Run x:Name="CurrentPrice_Email"></Run>
 			</TextBlock>
 
-			<Label>Контактная информация:</Label>
-			<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+			<Label Grid.Row="5">Контактная информация:</Label>
+			<ScrollViewer Grid.Row="6" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 				<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_ContactInfo"></TextBlock>
 			</ScrollViewer>
 
-					<Label>Оперативная информация:</Label>
-			<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+			<Label Grid.Row="7">Оперативная информация:</Label>
+			<ScrollViewer Grid.Row="8" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 				<TextBlock Padding="5" TextWrapping="Wrap" x:Name="CurrentPrice_OperativeInfo"></TextBlock>
 			</ScrollViewer>
-		</StackPanel>
+		</Grid>
+
 		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}" Name="ShowLeaders">Показать только лидирующие позиции (F3)</CheckBox>
 		</StackPanel>
