@@ -48,6 +48,7 @@
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
     <Reference Include="npoi, Version=1.2.5.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL" />
+    <Reference Include="ReachFramework" />
     <Reference Include="reactiveui">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -60,6 +61,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Printing" />
     <Reference Include="System.Reactive.Core">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Core.2.0.20823\lib\Net40\System.Reactive.Core.dll</HintPath>

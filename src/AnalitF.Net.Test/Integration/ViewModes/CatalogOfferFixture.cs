@@ -201,12 +201,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test, RequiresSTA]
 		public void Export()
 		{
+			Assert.That(model.CanExport, Is.True);
 			var app = new Client.App();
 			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			((IViewAware)model).AttachView(new CatalogOfferView());
 			var result = (OpenFileResult)model.Export();
 			Assert.That(File.Exists(result.Filename), result.Filename);
 			File.Delete(result.Filename);
+		}
+
+		[Test, Ignore]
+		public void Print()
+		{
+			Assert.That(model.CanPrint, Is.True);
+			model.Print();
 		}
 
 		private void CleanSendOrders(Offer offer)

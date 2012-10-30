@@ -3,9 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Printing;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Documents.Serialization;
+using System.Windows.Media;
+using System.Windows.Xps;
+using System.Windows.Xps.Packaging;
+using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
@@ -260,7 +268,62 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		public void Print()
 		{
-			throw new NotImplementedException();
+			var rows = offers.Select((o, i) => {
+				return new object[] {
+					i,
+					o.ProducerSynonym,
+					o.ProducerSynonym,
+					o.Cost,
+					o.OrderCount,
+					o.OrderSum
+				};
+			});
+
+			var doc = BuildDocument(rows);
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+
+			var outputXps = "output.xps";
+			using (var stream = File.Create(outputXps)) {
+				var factory = new XpsSerializerFactory();
+				var writer = factory.CreateSerializerWriter(stream);
+				writer.Write(paginator);
+			}
+			Process.Start(outputXps);
+
+			//var server = new LocalPrintServer();
+			//var queue = server.DefaultPrintQueue;
+			//var writer = PrintQueue.CreateXpsDocumentWriter(queue);
+			//
+			//writer.Write(paginator);
+		}
+
+		private static FlowDocument BuildDocument(IEnumerable<object[]> rows)
+		{
+			var doc = new FlowDocument();
+			var table = new Table();
+			table.CellSpacing = 0;
+			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn());
+			var tableRowGroup = new TableRowGroup();
+			table.RowGroups.Add(tableRowGroup);
+
+			foreach (var data in rows) {
+				var row = new TableRow();
+				tableRowGroup.Rows.Add(row);
+
+				for (var i = 0; i < data.Length; i++) {
+					var cell = new TableCell(new Paragraph(new Run(data[i].ToString())));
+					cell.BorderBrush = Brushes.Black;
+					cell.BorderThickness = new Thickness(1);
+					row.Cells.Add(cell);
+				}
+			}
+			doc.Blocks.Add(table);
+			return doc;
 		}
 
 		public bool CanExport
