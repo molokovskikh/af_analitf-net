@@ -10,3 +10,6 @@
 [submodule "src/Common.Tools"]
 	path = src/Common.Tools
 	url = ssh://git.analit.net/var/www/git/Common.Tools
+[submodule "src/Common.Web"]
+	path = src/Common.Web
+	url = ssh://git.analit.net/var/git/Common.Web

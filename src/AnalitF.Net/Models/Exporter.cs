@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Common.Models.Repositories;
 using Common.Tools;
+using Ionic.Zip;
 using MySql.Data.MySqlClient;
 using NHibernate;
 
@@ -13,16 +14,18 @@ namespace AnalitF.Net.Models
 	public class Exporter
 	{
 		private ISession session;
+		private uint userId;
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
 
-		public Exporter(ISession session)
+		public Exporter(ISession session, uint userId)
 		{
 			this.session = session;
+			this.userId = userId;
 		}
 
-		public List<Tuple<string, string[]>> Export(uint userId)
+		public List<Tuple<string, string[]>> Export()
 		{
 			var result = new List<Tuple<string, string[]>>();
 
@@ -214,6 +217,16 @@ where Hidden = 0";
 				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
 			command.ExecuteNonQuery();
 			return Tuple.Create(exportFile, columns);
+		}
+
+		public void ExportCompressed(string file)
+		{
+			var files = Export();
+			var zip = new ZipFile();
+			foreach (var tuple in files) {
+				zip.AddFile(tuple.Item1);
+			}
+			zip.Save(file);
 		}
 	}
 }
