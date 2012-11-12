@@ -26,6 +26,9 @@ namespace AnalitF.Net.Client
 		{
 			var command = ApplicationCommands.Delete;
 			LogManager.GetLog = t => new ConsoleLog();
+			Tasks.Uri = new Uri("http://localhost:8080/Main/");
+			Tasks.ArchiveFile = "archive.zip";
+			Tasks.ExtractPath = ".";
 
 			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
 				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));

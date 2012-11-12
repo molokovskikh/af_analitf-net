@@ -11,10 +11,15 @@ using NHibernate;
 
 namespace AnalitF.Net.Models
 {
-	public class Exporter
+	public class Exporter : IDisposable
 	{
 		private ISession session;
 		private uint userId;
+		private FileCleaner cleaner = new FileCleaner();
+
+		public string Prefix = "";
+		public string ExportPath = "";
+		public string ResultPath = "";
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -209,24 +214,41 @@ where Hidden = 0";
 			dataAdapter.Fill(table);
 			var columns = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
 
-			var exportFile = Path.GetFullPath(file + ".txt").Replace(@"\", "/");
-			File.Delete(exportFile);
-			sql += " INTO OUTFILE '" + exportFile + "' ";
+			var path = Path.GetFullPath(Path.Combine(ExportPath, Prefix + file + ".txt"));
+			var mysqlPath = path.Replace(@"\", "/");
+			File.Delete(mysqlPath);
+			sql += " INTO OUTFILE '" + mysqlPath + "' ";
 			var command = new MySqlCommand(sql, (MySqlConnection)session.Connection);
 			if (parameters != null)
 				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
 			command.ExecuteNonQuery();
-			return Tuple.Create(exportFile, columns);
+
+			cleaner.Watch(path);
+
+			return Tuple.Create(mysqlPath, columns);
 		}
 
-		public void ExportCompressed(string file)
+		public string ExportCompressed(string file)
 		{
 			var files = Export();
-			var zip = new ZipFile();
-			foreach (var tuple in files) {
-				zip.AddFile(tuple.Item1);
+			using (var zip = new ZipFile()) {
+				foreach (var tuple in files) {
+					var entry = zip.AddFile(tuple.Item1);
+					var dataname = Path.GetFileName(tuple.Item1);
+					dataname = dataname.Replace(Prefix, "");
+					var metaname = Path.ChangeExtension(dataname, ".meta.txt");
+					entry.FileName = dataname;
+					zip.AddEntry(metaname, tuple.Item2.Implode("\r\n"));
+				}
+				file = Path.Combine(ResultPath, file);
+				zip.Save(file);
 			}
-			zip.Save(file);
+			return file;
+		}
+
+		public void Dispose()
+		{
+			cleaner.Dispose();
 		}
 	}
 }

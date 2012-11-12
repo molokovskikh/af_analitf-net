@@ -45,11 +45,11 @@ namespace AnalitF.Net.Test.Integration
 			var client = TestClient.CreateNaked();
 			Close();
 
-			var exporter = new Exporter(session) {
+			var exporter = new Exporter(session, client.Users[0].Id) {
 				MaxProducerCostPriceId = maxProducerCosts.Id,
 				MaxProducerCostCostId = maxProducerCosts.Costs[0].Id
 			};
-			var files = exporter.Export(client.Users[0].Id);
+			var files = exporter.Export();
 
 			var importer = new Importer(localSession);
 			importer.Import(files);

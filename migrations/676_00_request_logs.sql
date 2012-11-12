@@ -3,8 +3,8 @@
         Id INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
        UserId INTEGER UNSIGNED,
        CreatedOn DATETIME,
-       IsReady TINYINT(1),
-       IsBroken TINYINT(1),
+       IsCompleted TINYINT(1),
+       IsFaulted TINYINT(1),
        Error VARCHAR(255),
        primary key (Id)
     );

@@ -8,6 +8,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
+using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -214,7 +215,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			OrderWarning = CurrentOffer.Warning;
 			if (!String.IsNullOrEmpty(offer.Notification)) {
-				Manager.ShowMessageBox(offer.Notification, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+				Manager.Warning(offer.Notification);
 				offer.Notification = null;
 				//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
 				//мог ввести коректное значение

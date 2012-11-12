@@ -44,6 +44,7 @@
     <Reference Include="Caliburn.Micro" />
     <Reference Include="iesi.collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL" />
     <Reference Include="inflector_extension" />
+    <Reference Include="ionic.zip, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL" />
     <Reference Include="mysql.data" />
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
@@ -59,8 +60,10 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Reactive.Core">
       <SpecificVersion>False</SpecificVersion>
@@ -78,6 +81,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Rx-Xaml.2.0.20823\lib\Net40\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Interactivity" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -131,6 +135,7 @@
     <Compile Include="Models\SentOrder.cs" />
     <Compile Include="Models\SentOrderLine.cs" />
     <Compile Include="Models\Settings.cs" />
+    <Compile Include="Models\Tasks.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
@@ -147,11 +152,15 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\PriceViewModel.cs" />
+    <Compile Include="ViewModels\WaitCancelViewModel.cs" />
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WaitCancelView.xaml.cs">
+      <DependentUpon>WaitCancelView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\JunkOfferView.xaml.cs">
       <DependentUpon>JunkOfferView.xaml</DependentUpon>
@@ -207,6 +216,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DescriptionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WaitCancelView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

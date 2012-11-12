@@ -33,6 +33,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DiffCalcMode DiffCalcMode { get; set; }
 
+		public virtual string UserName { get; set; }
+
+		public virtual string Password { get; set; }
+
+		public virtual bool IsValid
+		{
+			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }
+		}
+
 		public virtual void ApplyChanges(ISession session)
 		{
 			session

@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using NHibernate;
+using NHibernate.Linq;
 using ReactiveUI;
+using LogManager = Caliburn.Micro.LogManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -29,10 +36,21 @@ namespace AnalitF.Net.Client.ViewModels
 	public class ShellViewModel : Conductor<IScreen>
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
+		private Settings settings;
+		private Extentions.WindowManager windowManager;
+		private ISession session;
+		private ILog log = LogManager.GetLog(typeof(ShellViewModel));
 
 		public ShellViewModel()
 		{
 			AppBootstrapper.Shell = this;
+
+			var factory = AppBootstrapper.NHibernate.Factory;
+			session = factory.OpenSession();
+
+			windowManager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			settings = session.Query<Settings>().First();
+
 			DisplayName = "АналитФАРМАЦИЯ";
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => UpdateDisplayName());
@@ -42,6 +60,23 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanExport"));
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			IsSettingsValid();
+		}
+
+		private bool IsSettingsValid()
+		{
+			if (!settings.IsValid) {
+				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
+				ActivateItem(new SettingsViewModel());
+				return false;
+			}
+			return true;
 		}
 
 		protected void UpdateDisplayName()
@@ -133,6 +168,47 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowOrders()
 		{
 			ActivateItem(new OrdersViewModel());
+		}
+
+		public void Update()
+		{
+			if (!IsSettingsValid())
+				return;
+
+			var cancellation = new CancellationTokenSource();
+			var token = cancellation.Token;
+			var task = Tasks.Update(new NetworkCredential(settings.UserName, settings.Password), token);
+
+			var wait = new WaitCancelViewModel(cancellation);
+			task.ContinueWith(t => {
+					wait.TryClose();
+					if (!t.IsFaulted && !t.IsCanceled)
+						windowManager.Notify("Обновление завершено успешно.");
+					else if (t.IsFaulted) {
+						log.Error(t.Exception);
+						var error = TranslateException(t.Exception)
+							?? "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
+						windowManager.Error(error);
+					}
+				},
+				TaskScheduler.FromCurrentSynchronizationContext());
+			task.Start();
+
+			windowManager.ShowDialog(wait);
+		}
+
+		private string TranslateException(AggregateException exception)
+		{
+			var requestException = exception.GetBaseException() as RequestException;
+			if (requestException != null) {
+				if (requestException.StatusCode == HttpStatusCode.Unauthorized) {
+					return "Доступ запрещен.\r\nВведены некорректные учетные данные.";
+				}
+				if (requestException.StatusCode == HttpStatusCode.Forbidden) {
+					return "Доступ запрещен.\r\nОбратитесь в АК Инфорум.";
+				}
+			}
+			return null;
 		}
 
 		public void Navigate(IScreen item)

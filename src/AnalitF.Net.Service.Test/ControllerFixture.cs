@@ -85,9 +85,9 @@ namespace AnalitF.Net.Service.Test
 			task.Wait();
 			localSession.Clear();
 			localSession.Refresh(job);
+			Assert.That(job.Error, Is.Null);
 			Assert.That(job.IsCompleted, Is.True);
 			Assert.That(job.IsFaulted, Is.False);
-			Assert.That(job.Error, Is.Null);
 		}
 	}
 }

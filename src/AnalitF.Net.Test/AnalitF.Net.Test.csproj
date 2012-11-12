@@ -18,8 +18,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AnalitF.Net.Test</RootNamespace>
     <AssemblyName>AnalitF.Net.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,6 +30,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +39,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
@@ -52,6 +55,7 @@
     <Reference Include="reactiveui.testing" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="system.reactive.core" />
     <Reference Include="System.Reactive.Interfaces" />
     <Reference Include="System.Reactive.Linq" />
@@ -74,6 +78,7 @@
     <Compile Include="Integration\ExportImportFixture.cs" />
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
+    <Compile Include="Integration\Models\TasksFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
@@ -83,6 +88,7 @@
     <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
+    <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />

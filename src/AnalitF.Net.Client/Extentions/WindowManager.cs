@@ -8,12 +8,15 @@ namespace AnalitF.Net.Client.Extentions
 	{
 		public bool UnderTest;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
-		public List<Window> Windows = new List<Window>();
+		public List<Window> Dialogs = new List<Window>();
+		public List<string> MessageBoxes = new List<string>();
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 			if (UnderTest) {
-				Windows.Add(CreateWindow(rootModel, true, context, settings));
+				var window = CreateWindow(rootModel, true, context, settings);
+				window.Closed += (sender, args) => Dialogs.Remove(window);
+				Dialogs.Add(window);
 				return true;
 			}
 			return base.ShowDialog(rootModel, context, settings);
@@ -33,10 +36,26 @@ namespace AnalitF.Net.Client.Extentions
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
 		{
 			if (UnderTest) {
+				MessageBoxes.Add(text);
 				return DefaultResult;
 			}
 
 			return MessageBox.Show(text, caption, buttons, icon);
+		}
+
+		public void Warning(string text)
+		{
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+		}
+
+		public void Notify(string text)
+		{
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+		}
+
+		public void Error(string text)
+		{
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 	}
 }

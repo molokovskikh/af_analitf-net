@@ -12,6 +12,12 @@
 		<ToolBarTray Background="White" Grid.Row="0">
 			<ToolBar Band="1" BandIndex="1">
 
+				<Button x:Name="Update">
+					Получить данные
+				</Button>
+
+				<Separator />
+
 				<Button x:Name="Export">
 					Сохранить текущую таблицу
 				</Button>

@@ -26,14 +26,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			BaseScreen.Scheduler = schedule;
 			TestUtils.WithScheduler(schedule);
 
+			manager = new Client.Extentions.WindowManager();
+			manager.UnderTest = true;
+			IoC.GetInstance = (type, key) => manager;
+
 			session = SetupFixture.Factory.OpenSession();
 			address = session.Query<Address>().FirstOrDefault();
 			shell = new ShellViewModel();
-			manager = new Client.Extentions.WindowManager();
-			manager.UnderTest = true;
-			IoC.GetInstance = (type, key) => {
-				return manager;
-			};
 		}
 
 		[TearDown]

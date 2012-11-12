@@ -1,6 +1,7 @@
 ﻿using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
+using AnalitF.Net.Models;
 using Common.Web.Service.Filters;
 using NHibernate;
 using log4net.Config;
@@ -14,6 +15,7 @@ namespace AnalitF.Net
 		protected void Application_Start()
 		{
 			XmlConfigurator.Configure();
+
 			var nhibernate = new Config.Initializers.NHibernate();
 			nhibernate.Init();
 			SessionFactory = nhibernate.Factory;

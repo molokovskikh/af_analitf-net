@@ -2,29 +2,43 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<StackPanel>
-		<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
-		<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
+		<TabControl>
+			<TabItem Header="Авторизация">
+				<StackPanel>
+					<Label>Учетные данные</Label>
+					<Label>Имя</Label>
+					<TextBox x:Name="Settings_UserName"></TextBox>
+					<Label>Пароль</Label>
+					<TextBox x:Name="Settings_Password"></TextBox>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Визуализация">
+				<StackPanel>
+					<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
+					<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
 
-		<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
-		<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
+					<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
+					<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
 
-		<Label>Включить в основную группу поставщиков начиная с:</Label>
-		<TextBox x:Name="Settings_BaseFromCategory"></TextBox>
+					<Label>Включить в основную группу поставщиков начиная с:</Label>
+					<TextBox x:Name="Settings_BaseFromCategory"></TextBox>
 
-		<Label>Предупреждать о превышении средней цены закупки на (%):</Label>
-		<TextBox x:Name="Settings_OverCostWarningPercent"></TextBox>
+					<Label>Предупреждать о превышении средней цены закупки на (%):</Label>
+					<TextBox x:Name="Settings_OverCostWarningPercent"></TextBox>
 
-		<Label>Предупреждать о превышении среднего количества по предыд. заказам в (раз):</Label>
-		<TextBox x:Name="Settings_OverCountWarningFactor"></TextBox>
+					<Label>Предупреждать о превышении среднего количества по предыд. заказам в (раз):</Label>
+					<TextBox x:Name="Settings_OverCountWarningFactor"></TextBox>
 
-		<Label>Расчет разницы в таблице предложений:</Label>
-		<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="DiffCalculationTypes" DisplayMemberPath="Name" />
+					<Label>Расчет разницы в таблице предложений:</Label>
+					<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="DiffCalculationTypes" DisplayMemberPath="Name" />
 
-		<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
-
-		<StackPanel Orientation="Horizontal">
-			<Button x:Name="Save">ОК</Button>
-			<Button x:Name="TryClose">Отменить</Button>
+					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+				</StackPanel>
+			</TabItem>
+		</TabControl>
+		<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
+			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>
+			<Button x:Name="TryClose" MinWidth="100" IsCancel="True">Отменить</Button>
 		</StackPanel>
 	</StackPanel>
 </UserControl>

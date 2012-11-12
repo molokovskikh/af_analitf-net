@@ -38,9 +38,11 @@ namespace AnalitF.Net.Models
 			get { return Id.ToString(); }
 		}
 
-		public virtual Stream GetResult()
+		public virtual Stream GetResult(string path)
 		{
-			return File.OpenRead(OutputFile);
+			if (IsFaulted)
+				throw new Exception("Обработка запроса завершилась ошибкой");
+			return File.OpenRead(Path.Combine(path, OutputFile));
 		}
 	}
 }

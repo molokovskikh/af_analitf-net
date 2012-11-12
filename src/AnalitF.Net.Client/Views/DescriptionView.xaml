@@ -60,7 +60,7 @@
 			</StackPanel>
 		</ScrollViewer>
 		<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1" Margin="4">
-			<Button MinWidth="100" x:Name="Exit">OK</Button>
+			<Button MinWidth="100" x:Name="Exit" IsDefault="True">OK</Button>
 			<Button MinWidth="100">Печать</Button>
 		</StackPanel>
 	</Grid>

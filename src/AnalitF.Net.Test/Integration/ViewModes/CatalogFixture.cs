@@ -15,7 +15,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model = new CatalogViewModel();
 		}
 
-		[Test, RequiresSTA]
+		[Test, RequiresSTA, Ignore]
 		public void Show_catalog_view()
 		{
 			model.CurrentCatalogName = model.CatalogNames.First();

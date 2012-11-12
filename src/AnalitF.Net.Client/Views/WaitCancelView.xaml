@@ -1,0 +1,8 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.WaitCancelView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<StackPanel>
+		<TextBlock Name="Text"></TextBlock>
+		<Button Name="Cancel"  Content="Отмена"/>
+	</StackPanel>
+</UserControl>

@@ -5,6 +5,7 @@ using System.IO;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Tool.hbm2ddl;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -19,6 +20,10 @@ namespace AnalitF.Net.Client.Models
 
 		public void Import(List<System.Tuple<string, string[]>> tables)
 		{
+			var export = new SchemaExport(AppBootstrapper.NHibernate.Configuration);
+			export.Drop(false, true);
+			export.Create(false, true);
+
 			foreach (var table in tables) {
 				try {
 					var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",

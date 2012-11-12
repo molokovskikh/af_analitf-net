@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -38,7 +39,9 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				sum = value;
+				Valid = Sum > 1000;
 				OnPropertyChanged("Sum");
+				//OnPropertyChanged("Valid");
 			}
 		}
 
@@ -56,9 +59,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<OrderLine> Lines { get; set; }
 
-		public virtual bool Valid
-		{
-			get { return true; }
+		[Ignore]
+		public virtual bool Valid { get; set; // { return Sum > 1000; }
 		}
 
 		public virtual bool IsEmpty
