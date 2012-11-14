@@ -1,13 +1,30 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
+using NHibernate.Cfg;
 using NHibernate.Linq;
+using NHibernate.Tool.hbm2ddl;
 
 namespace AnalitF.Net.Client.Models
 {
 	public class SanityCheck
 	{
+		private string dataPath;
+
+		public SanityCheck(string dataPath)
+		{
+			this.dataPath = dataPath;
+		}
+
 		public void Check()
 		{
 			var factory = AppBootstrapper.NHibernate.Factory;
+			var configuration = AppBootstrapper.NHibernate.Configuration;
+
+			if (!Directory.Exists(dataPath)) {
+				Directory.CreateDirectory(dataPath);
+				InitDb(configuration);
+			}
+
 			using (var session = factory.OpenSession()) {
 				var settings = session.Query<Settings>().FirstOrDefault();
 				if (settings == null) {
@@ -22,6 +39,13 @@ namespace AnalitF.Net.Client.Models
 					}
 				}
 			}
+		}
+
+		private static void InitDb(Configuration configuration)
+		{
+			var export = new SchemaExport(configuration);
+			export.Drop(false, true);
+			export.Create(false, true);
 		}
 	}
 }

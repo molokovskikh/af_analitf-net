@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
 using NHibernate;
 using NHibernate.Bytecode;
-using NHibernate.Cfg;
 using NHibernate.Engine;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Proxy;
 using NHibernate.Proxy.DynamicProxy;
 using NHibernate.Type;
 using Cascade = NHibernate.Mapping.ByCode.Cascade;
+using Configuration = NHibernate.Cfg.Configuration;
 using Environment = NHibernate.Cfg.Environment;
 using IInterceptor = NHibernate.IInterceptor;
 
@@ -68,10 +69,15 @@ namespace AnalitF.Net.Client.Config.Initializers
 			if (debug)
 				Console.WriteLine(mapping.AsString());
 
+			var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+			var driver = "NHibernate.Driver.MySqlDataDriver";
+			if (connectionString.Contains("Embedded=True"))
+				driver = typeof(DevArtDriver).AssemblyQualifiedName;
+
 			Configuration = new Configuration();
 			Configuration.AddProperties(new Dictionary<string, string> {
 				{Environment.Dialect, "NHibernate.Dialect.MySQL5Dialect"},
-				{Environment.ConnectionDriver, "NHibernate.Driver.MySqlDataDriver"},
+				{Environment.ConnectionDriver, driver},
 				{Environment.ConnectionProvider, "NHibernate.Connection.DriverConnectionProvider"},
 				{Environment.ConnectionStringName, connectionStringName},
 				{Environment.Hbm2ddlKeyWords, "none"},

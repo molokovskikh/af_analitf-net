@@ -13,24 +13,37 @@ namespace AnalitF.Net.Client.Extentions
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+			var window = CreateWindow(rootModel, true, context, settings);
+			if (window.Owner != null) {
+				window.SizeToContent = SizeToContent.Manual;
+				window.Height = window.Owner.Height * 2 / 3;
+				window.Width = window.Owner.Width * 2 / 3;
+				window.ShowInTaskbar = false;
+			}
+
+			return ShowDialog(window);
+		}
+
+		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
+		{
+			var window = CreateWindow(rootModel, true, context, settings);
+			window.ResizeMode = ResizeMode.NoResize;
+			window.SizeToContent = SizeToContent.Manual;
+			window.Width = 400;
+			window.Height = 300;
+			window.ShowInTaskbar = false;
+
+			return ShowDialog(window);
+		}
+
+		private bool? ShowDialog(Window window)
+		{
 			if (UnderTest) {
-				var window = CreateWindow(rootModel, true, context, settings);
 				window.Closed += (sender, args) => Dialogs.Remove(window);
 				Dialogs.Add(window);
 				return true;
 			}
-			return base.ShowDialog(rootModel, context, settings);
-		}
-
-		protected override Window EnsureWindow(object model, object view, bool isDialog)
-		{
-			var window = base.EnsureWindow(model, view, isDialog);
-			if (isDialog && window.Owner != null) {
-				window.SizeToContent = SizeToContent.Manual;
-				window.Height = window.Owner.Height * 2 / 3;
-				window.Width = window.Owner.Width * 2 / 3;
-			}
-			return window;
+			return window.ShowDialog();
 		}
 
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)

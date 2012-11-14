@@ -18,7 +18,7 @@
     </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -42,6 +42,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
+    <Reference Include="Devart.Data, Version=5.0.573.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.MySql, Version=7.2.114.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="iesi.collections, Version=1.0.1.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL" />
     <Reference Include="inflector_extension" />
     <Reference Include="ionic.zip, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL" />
@@ -108,6 +110,7 @@
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
+    <Compile Include="Config\Initializers\DevArtDriver.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Controls\DataGrid.cs" />

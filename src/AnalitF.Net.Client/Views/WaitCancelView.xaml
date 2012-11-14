@@ -1,8 +1,22 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.WaitCancelView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<StackPanel>
+	<StackPanel Margin="4">
 		<TextBlock Name="Text"></TextBlock>
-		<Button Name="Cancel"  Content="Отмена"/>
+		<GroupBox Header="Текущая операция">
+			<StackPanel>
+				<Label Name="Progress_Stage"></Label>
+				<ProgressBar Height="20" Name="Progress_Current" />
+			</StackPanel>
+		</GroupBox>
+		<GroupBox Header="Общий ход выполенния">
+			<StackPanel>
+				<Label>
+					<TextBlock>Прошло времени: <Run Name="Time"></Run></TextBlock>
+				</Label>
+				<ProgressBar Height="20" Name="Progress_Total" />
+			</StackPanel>
+		</GroupBox>
+		<Button HorizontalAlignment="Center" MaxWidth="100" Name="Cancel" Content="Отмена"/>
 	</StackPanel>
 </UserControl>

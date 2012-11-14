@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -71,6 +72,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private bool IsSettingsValid()
 		{
+			session.Clear();
+			settings = session.Query<Settings>().First();
 			if (!settings.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
 				ActivateItem(new SettingsViewModel());
@@ -177,9 +180,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var cancellation = new CancellationTokenSource();
 			var token = cancellation.Token;
-			var task = Tasks.Update(new NetworkCredential(settings.UserName, settings.Password), token);
+			var progress = new BehaviorSubject<Progress>(new Progress());
+			var credential = new NetworkCredential(settings.UserName, settings.Password);
+			var task = Tasks.Update(credential, token, progress);
 
-			var wait = new WaitCancelViewModel(cancellation);
+			var wait = new WaitCancelViewModel(cancellation, progress);
 			task.ContinueWith(t => {
 					wait.TryClose();
 					if (!t.IsFaulted && !t.IsCanceled)
@@ -194,7 +199,7 @@ namespace AnalitF.Net.Client.ViewModels
 				TaskScheduler.FromCurrentSynchronizationContext());
 			task.Start();
 
-			windowManager.ShowDialog(wait);
+			windowManager.ShowFixedDialog(wait);
 		}
 
 		private string TranslateException(AggregateException exception)

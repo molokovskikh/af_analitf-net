@@ -20,13 +20,9 @@ namespace AnalitF.Net.Client.Models
 
 		public void Import(List<System.Tuple<string, string[]>> tables)
 		{
-			var export = new SchemaExport(AppBootstrapper.NHibernate.Configuration);
-			export.Drop(false, true);
-			export.Create(false, true);
-
 			foreach (var table in tables) {
 				try {
-					var sql = String.Format("LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
+					var sql = String.Format("TRUNCATE {1}; LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
 						table.Item1,
 						Path.GetFileNameWithoutExtension(table.Item1),
 						table.Item2.Implode());
@@ -39,7 +35,7 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 
-			new SanityCheck().Check();
+			new SanityCheck("data").Check();
 
 			var settings = session.Query<Settings>().ToList()[0];
 			settings.ApplyChanges(session);

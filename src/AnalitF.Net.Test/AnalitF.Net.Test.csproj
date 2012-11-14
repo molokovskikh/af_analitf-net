@@ -31,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -45,6 +46,8 @@
     <Reference Include="Caliburn.Micro" />
     <Reference Include="Castle.ActiveRecord" />
     <Reference Include="castle.core" />
+    <Reference Include="Devart.Data, Version=5.0.573.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.MySql, Version=7.2.114.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
     <Reference Include="microsoft.reactive.testing" />
     <Reference Include="Mysql.data" />
     <Reference Include="nhibernate" />
@@ -79,6 +82,7 @@
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\TasksFixture.cs" />
+    <Compile Include="Integration\ProgressReportFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />

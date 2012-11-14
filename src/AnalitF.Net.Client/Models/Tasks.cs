@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.ViewModels;
 using Ionic.Zip;
 
 namespace AnalitF.Net.Client.Models
@@ -22,15 +24,16 @@ namespace AnalitF.Net.Client.Models
 
 	public class Tasks
 	{
-		public static Func<ICredentials, CancellationToken, Task> Update = (c, t) => UpdateTask(c, t);
+		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task> Update = (c, t, p) => UpdateTask(c, t, p);
 
 		public static Uri Uri;
 		public static string ArchiveFile;
 		public static string ExtractPath;
 
-		public static Task UpdateTask(ICredentials credentials, CancellationToken cancellation)
+		public static Task UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
 			return new Task(() => {
+				progress.OnNext(new Progress("Соединение", 0, 0));
 				var handler = new HttpClientHandler {
 					Credentials = credentials,
 					PreAuthenticate = true
@@ -47,6 +50,7 @@ namespace AnalitF.Net.Client.Models
 								&& response.StatusCode != HttpStatusCode.Accepted)
 								throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
 									response.StatusCode);
+							progress.OnNext(new Progress("Подготовка данных", 0, 0));
 							done = response.StatusCode == HttpStatusCode.OK;
 							if (!done) {
 								cancellation.WaitHandle.WaitOne(TimeSpan.FromSeconds(15));
@@ -54,11 +58,16 @@ namespace AnalitF.Net.Client.Models
 							}
 						}
 
+						progress.OnNext(new Progress("Подготовка данных", 100, 0));
+						progress.OnNext(new Progress("Загрузка данных", 0, 33));
 						if (response.StatusCode == HttpStatusCode.OK) {
 							using (var file = File.OpenWrite(ArchiveFile)) {
 								response.Content.ReadAsStreamAsync().Result.CopyTo(file);
 							}
+							progress.OnNext(new Progress("Загрузка данных", 100, 33));
+							progress.OnNext(new Progress("Импорт данных", 0, 66));
 							Import(ArchiveFile);
+							progress.OnNext(new Progress("Импорт данных", 100, 100));
 						}
 					}
 				}

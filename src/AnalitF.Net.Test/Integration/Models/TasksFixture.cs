@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using NHibernate;
 using NUnit.Framework;
 
@@ -25,7 +27,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			Tasks.ExtractPath = ".";
 			cancelletion = new CancellationTokenSource();
 			var token = cancelletion.Token;
-			task = Tasks.Update(new NetworkCredential(Environment.UserName, ""), token);
+			var progress = new BehaviorSubject<Progress>(new Progress());
+			task = Tasks.Update(new NetworkCredential(Environment.UserName, ""), token, progress);
 		}
 
 		[Test]

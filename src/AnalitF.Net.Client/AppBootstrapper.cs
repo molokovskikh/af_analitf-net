@@ -22,6 +22,8 @@ namespace AnalitF.Net.Client
 
 		public static Config.Initializers.NHibernate NHibernate;
 
+		private string DataPath = "data";
+
 		public AppBootstrapper()
 		{
 			var command = ApplicationCommands.Delete;
@@ -54,7 +56,7 @@ namespace AnalitF.Net.Client
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
 		{
-			new SanityCheck().Check();
+			new SanityCheck(DataPath).Check();
 
 			base.OnStartup(sender, e);
 		}

@@ -62,7 +62,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var waittask = new Task(() => {
 				wait.Wait();
 			});
-			Tasks.Update = (c, t) => waittask;
+			Tasks.Update = (c, t, p) => waittask;
 
 			var dispatcher = WithDispatcher(() => {
 				shell.Update();
