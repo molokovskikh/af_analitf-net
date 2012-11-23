@@ -54,12 +54,11 @@
     <Compile Include="ControllerFixture.cs" />
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.csproj">
+    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.Service.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
-      <Name>AnalitF.Net</Name>
+      <Name>AnalitF.Net.Service</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common.Models\Common.Models\Common.Models.csproj">
       <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>
@@ -80,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

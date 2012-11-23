@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\ProjectLib.properties" Condition="Exists('..\ProjectLib.properties')" />
+  <ItemGroup>
+    <StyleCopAdditionalAddinPaths Include="..\..\lib\StyleCop">
+      <InProject>false</InProject>
+    </StyleCopAdditionalAddinPaths>
+  </ItemGroup>
+  <PropertyGroup>
+    <StyleCopOverrideSettingsFile>..\..\lib\StyleCop\Settings.StyleCop</StyleCopOverrideSettingsFile>
+    <StyleCopTreatErrorsAsWarnings>False</StyleCopTreatErrorsAsWarnings>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F4E5BF74-FD5D-4A1C-AB92-A54A7B79EC42}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AnalitF.Net.Test</RootNamespace>
+    <AssemblyName>AnalitF.Net.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Caliburn.Micro" />
+    <Reference Include="Castle.ActiveRecord" />
+    <Reference Include="castle.core" />
+    <Reference Include="Devart.Data, Version=5.0.573.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Devart.Data.MySql, Version=7.2.114.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL" />
+    <Reference Include="Ionic.Zip, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL" />
+    <Reference Include="microsoft.reactive.testing" />
+    <Reference Include="Mysql.data" />
+    <Reference Include="nhibernate" />
+    <Reference Include="npoi, Version=1.2.5.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFrameWork" />
+    <Reference Include="ReactiveUI" />
+    <Reference Include="reactiveui.testing" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="system.reactive.core" />
+    <Reference Include="System.Reactive.Interfaces" />
+    <Reference Include="System.Reactive.Linq" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="nunit.framework" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Integration\AppStatePersisterFixture.cs" />
+    <Compile Include="Integration\BindScreen.cs" />
+    <Compile Include="Integration\ContentElementBinderFixture.cs" />
+    <Compile Include="Integration\ExportImportFixture.cs" />
+    <Compile Include="Integration\Models\OrderFixture.cs" />
+    <Compile Include="Integration\Models\SanityCheckFixture.cs" />
+    <Compile Include="Integration\Models\TasksFixture.cs" />
+    <Compile Include="Integration\SetupFixture.cs" />
+    <Compile Include="Integration\ViewModes\BaseFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
+    <Compile Include="Integration\ViewModes\MnnFixture.cs" />
+    <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
+    <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
+    <Compile Include="Integration\ViewModes\ShellFixture.cs" />
+    <Compile Include="Integration\Views\CatalogViewFixture.cs" />
+    <Compile Include="Unit\MySqlFixture.cs" />
+    <Compile Include="Unit\OfferFixture.cs" />
+    <Compile Include="Unit\OfferSortFixture.cs" />
+    <Compile Include="Unit\OrderFixture.cs" />
+    <Compile Include="Unit\SettingsFixture.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">
+      <Project>{5878740B-360A-4942-8902-926907209616}</Project>
+      <Name>AnalitF.Net.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.Service.csproj">
+      <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
+      <Name>AnalitF.Net.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Models\Common.Models\Common.Models.csproj">
+      <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>
+      <Name>Common.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.MySql\Common.MySql\Common.MySql.csproj">
+      <Project>{8A680813-C83B-497A-85E6-E8F07B7D7650}</Project>
+      <Name>Common.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Tools\Common.Tools\Common.Tools.csproj">
+      <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
+      <Name>Common.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Test.Support\Test.Support\Test.Support.csproj">
+      <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
+      <Name>Test.Support</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\packages\StyleCop.MSBuild.4.7.35.0\tools\StyleCop.Targets" />
+</Project>

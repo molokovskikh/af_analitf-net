@@ -16,7 +16,7 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
-			AppBootstrapper.RegisterBinder();
+			AppBootstrapper.InitUi();
 		}
 
 		[Test, RequiresSTA]

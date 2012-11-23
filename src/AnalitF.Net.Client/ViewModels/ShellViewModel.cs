@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Subjects;
@@ -187,8 +189,15 @@ namespace AnalitF.Net.Client.ViewModels
 			var wait = new WaitCancelViewModel(cancellation, progress);
 			task.ContinueWith(t => {
 					wait.TryClose();
-					if (!t.IsFaulted && !t.IsCanceled)
-						windowManager.Notify("Обновление завершено успешно.");
+					if (!t.IsFaulted && !t.IsCanceled) {
+						if (t.Result == UpdateResult.UpdatePending) {
+							windowManager.Warning("Получена новая версия программы. Сейчас будет выполено обновление.");
+							RunUpdate();
+						}
+						else {
+							windowManager.Notify("Обновление завершено успешно.");
+						}
+					}
 					else if (t.IsFaulted) {
 						log.Error(t.Exception);
 						var error = TranslateException(t.Exception)
@@ -200,6 +209,13 @@ namespace AnalitF.Net.Client.ViewModels
 			task.Start();
 
 			windowManager.ShowFixedDialog(wait);
+		}
+
+		private void RunUpdate()
+		{
+			var updateExePath = Path.Combine(AppBootstrapper.TempPath, "update", "Updater.exe");
+			Process.Start(updateExePath, Process.GetCurrentProcess().Id.ToString());
+			TryClose();
 		}
 
 		private string TranslateException(AggregateException exception)

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
+using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Bytecode;
 using NHibernate.Engine;
@@ -71,15 +74,17 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
 			var driver = "NHibernate.Driver.MySqlDataDriver";
-			if (connectionString.Contains("Embedded=True"))
+			if (connectionString.Contains("Embedded=True")) {
+				connectionString = FixRelativePaths(connectionString);
 				driver = typeof(DevArtDriver).AssemblyQualifiedName;
+			}
 
 			Configuration = new Configuration();
 			Configuration.AddProperties(new Dictionary<string, string> {
 				{Environment.Dialect, "NHibernate.Dialect.MySQL5Dialect"},
 				{Environment.ConnectionDriver, driver},
 				{Environment.ConnectionProvider, "NHibernate.Connection.DriverConnectionProvider"},
-				{Environment.ConnectionStringName, connectionStringName},
+				{Environment.ConnectionString, connectionString},
 				{Environment.Hbm2ddlKeyWords, "none"},
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
@@ -89,6 +94,26 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
 			Factory = Configuration.BuildSessionFactory();
+		}
+
+		public static string FixRelativePaths(string connectionString)
+		{
+			var builder = new MySqlConnectionStringBuilder(connectionString);
+			var parameters = builder.ServerParameters;
+			if (String.IsNullOrEmpty(parameters))
+				return connectionString;
+			var dictionary = parameters
+				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Split('='))
+				.ToDictionary(p => p[0], p => p[1]);
+
+			var dirKeys = dictionary.Keys.Where(k => k.EndsWith("dir")).ToArray();
+			foreach (var key in dirKeys) {
+				var value = dictionary[key];
+				dictionary[key] = Path.GetFullPath(FileHelper.MakeRooted(value)).Replace("\\", "/");
+			}
+
+			builder.ServerParameters = dictionary.Select(k => k.Key + "=" + k.Value).Implode(";");
+			return builder.ToString();
 		}
 	}
 

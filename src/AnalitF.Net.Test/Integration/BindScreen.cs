@@ -17,7 +17,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test, RequiresSTA]
 		public void Test()
 		{
-			AppBootstrapper.RegisterBinder();
+			AppBootstrapper.InitUi();
 
 			var view = new CatalogView();
 			var model = new CatalogViewModel();

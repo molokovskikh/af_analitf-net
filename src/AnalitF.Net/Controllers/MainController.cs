@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
@@ -23,19 +24,28 @@ namespace AnalitF.Net.Controllers
 		public ISession Session { get; set; }
 		public User CurrentUser { get; set; }
 
-		public HttpResponseMessage Get()
+		public HttpResponseMessage Get(bool reset = false)
 		{
 			var existsJob = Session.Query<RequestLog>()
 				.OrderByDescending(j => j.CreatedOn)
 				.FirstOrDefault(j => j.User == CurrentUser);
 
 			if (existsJob != null) {
-				if (existsJob.IsStale || existsJob.IsFaulted)
+				if (existsJob.IsStale)
+					existsJob = null;
+				else if (reset)
 					existsJob = null;
 			}
 
+
 			if (existsJob == null) {
-				existsJob  = new RequestLog(CurrentUser);
+				var version = new Version();
+				IEnumerable<string> headers;
+				if (Request.Headers.TryGetValues("Version", out headers)) {
+					Version.TryParse(headers.FirstOrDefault(), out version);
+				}
+
+				existsJob  = new RequestLog(CurrentUser, version);
 				Session.Save(existsJob);
 				Session.Transaction.Commit();
 
@@ -57,10 +67,11 @@ namespace AnalitF.Net.Controllers
 					using (var session = sessionFactory.OpenSession()) {
 						var job = session.Load<RequestLog>(jobId);
 						try {
-							var exporter = new Exporter(session, job.User.Id) {
+							var exporter = new Exporter(session, job.User.Id, job.Version) {
 								Prefix = job.Id.ToString(),
 								ExportPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ExportPath"]),
-								ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"])
+								ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"]),
+								UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"])
 							};
 							using (exporter) {
 								exporter.ExportCompressed(job.OutputFile);

@@ -7,3 +7,4 @@ packages/
 *.user
 src/*.properties
 src/data
+AssemblyInfo.cs

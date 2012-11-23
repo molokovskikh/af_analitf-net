@@ -10,10 +10,11 @@ namespace AnalitF.Net.Models
 		{
 		}
 
-		public RequestLog(User user)
+		public RequestLog(User user, Version version)
 		{
 			User = user;
 			CreatedOn = DateTime.Now;
+			Version = version;
 		}
 
 		public virtual uint Id { get; set; }
@@ -27,6 +28,8 @@ namespace AnalitF.Net.Models
 		public virtual bool IsFaulted { get; set; }
 
 		public virtual string Error { get; set; }
+
+		public virtual Version Version { get; set; }
 
 		public virtual bool IsStale
 		{

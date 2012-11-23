@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AnalitF.Net.Models;
 using Common.Models;
@@ -15,6 +17,8 @@ namespace AnalitF.Net.Service.Test
 	{
 		private ISession localSession;
 		private User user;
+		private Exporter exporter;
+		private string file;
 
 		[SetUp]
 		public void Setup()
@@ -28,41 +32,60 @@ namespace AnalitF.Net.Service.Test
 			localSession.BeginTransaction();
 
 			user = localSession.Load<User>(client.Users[0].Id);
-			FileHelper.InitDir("export", "data");
+			FileHelper.InitDir("export", "data", "update");
+
+			file = "data.zip";
+			File.Delete(file);
+			exporter = new Exporter(session, user.Id, Version.Parse("1.1")) {
+				Prefix = "1",
+				ExportPath = "export",
+				ResultPath = "data",
+				UpdatePath = "update"
+			};
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
 			localSession.Dispose();
+			exporter.Dispose();
+		}
+
+		[Test]
+		public void Export_update()
+		{
+			File.WriteAllText("update\\version.txt", "1.2");
+			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[0]);
+
+			file = exporter.ExportCompressed(file);
+			var files = lsZip();
+			Assert.That(files.Implode(), Is.StringContaining("update/analitf.net.client.exe"));
 		}
 
 		[Test]
 		public void Export_meta()
 		{
-			var file = "data.zip";
-			File.Delete(file);
-
-			var exporter = new Exporter(session, user.Id) {
-				Prefix = "1",
-				ExportPath = "export",
-				ResultPath = "data"
-			};
 			file = exporter.ExportCompressed(file);
 
-			var zip = ZipFile.Read(file);
-			var zipEntries = zip.ToList();
+			var zipEntries = lsZip();
 			var zipEntry = zipEntries[0];
 			var meta = zipEntries[1];
 
 			Assert.That(File.Exists(file), "{0} не существует", file);
-			Assert.That(zipEntry.FileName, Is.EqualTo("Addresses.txt"));
-			Assert.That(meta.FileName, Is.EqualTo("Addresses.meta.txt"));
+			Assert.That(zipEntry, Is.EqualTo("Addresses.txt"));
+			Assert.That(meta, Is.EqualTo("Addresses.meta.txt"));
 
 			Assert.That(Directory.GetFiles("export")[0], Is.EqualTo("export\\1Addresses.txt"));
 			Assert.That(Directory.GetFiles("data")[0], Is.EquivalentTo("data\\data.zip"));
 			exporter.Dispose();
 			Assert.That(Directory.GetFiles("export"), Is.Empty);
+		}
+
+		private List<string> lsZip()
+		{
+			using(var zip = ZipFile.Read(file)) {
+				return zip.Select(z => z.FileName).ToList();
+			}
 		}
 	}
 }

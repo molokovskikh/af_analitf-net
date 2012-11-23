@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		}
 
 		public DevArtDriver()
-			: base("Devart.Data.MySql", "MyDevart.Data.MySql", "Devart.Data.MySql.MySqlConnection", "Devart.Data.MySql.MySqlCommand")
+			: base("Devart.Data.MySql", "Devart.Data.MySql", "Devart.Data.MySql.MySqlConnection", "Devart.Data.MySql.MySqlCommand")
 		{
 		}
 
@@ -62,6 +62,5 @@ namespace AnalitF.Net.Client.Config.Initializers
 		{
 			return new BasicResultSetsCommand(session);
 		}
-
 	}
 }

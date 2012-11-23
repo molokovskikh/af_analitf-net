@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AnalitF.Net.Controllers;
 using AnalitF.Net.Models;
 using Common.Models;
 using NHibernate;
+using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
 
@@ -33,6 +35,7 @@ namespace AnalitF.Net.Service.Test
 
 			user = localSession.Load<User>(client.Users[0].Id);
 			controller = new MainController {
+				Request = new HttpRequestMessage(),
 				Session = localSession,
 				CurrentUser = user
 			};
@@ -52,9 +55,24 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Build_new_update_on_reset()
+		{
+			controller.Get(true);
+
+			localSession.Dispose();
+			localSession = FixtureSetup.Factory.OpenSession();
+			localSession.BeginTransaction();
+			controller.Session = localSession;
+			controller.Get(true);
+
+			var requests = localSession.Query<RequestLog>().Where(r => r.User == user).ToList();
+			Assert.That(requests.Count, Is.EqualTo(2));
+		}
+
+		[Test]
 		public void Do_not_load_stale_data()
 		{
-			var job = new RequestLog(user);
+			var job = new RequestLog(user, new Version());
 			job.CreatedOn = DateTime.Now.AddMonths(-1);
 			localSession.Save(job);
 
@@ -65,7 +83,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Reset_error()
 		{
-			var job = new RequestLog(user) {
+			var job = new RequestLog(user, new Version()) {
 				IsCompleted = true,
 				IsFaulted = true
 			};
@@ -77,7 +95,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Process_request()
 		{
-			var job = new RequestLog(user);
+			var job = new RequestLog(user, new Version());
 			localSession.Save(job);
 			localSession.Transaction.Commit();
 

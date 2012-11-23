@@ -45,7 +45,7 @@ namespace AnalitF.Net.Test.Integration
 			var client = TestClient.CreateNaked();
 			Close();
 
-			var exporter = new Exporter(session, client.Users[0].Id) {
+			var exporter = new Exporter(session, client.Users[0].Id, new Version()) {
 				MaxProducerCostPriceId = maxProducerCosts.Id,
 				MaxProducerCostCostId = maxProducerCosts.Costs[0].Id
 			};

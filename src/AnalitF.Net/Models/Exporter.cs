@@ -14,20 +14,27 @@ namespace AnalitF.Net.Models
 	public class Exporter : IDisposable
 	{
 		private ISession session;
-		private uint userId;
+
 		private FileCleaner cleaner = new FileCleaner();
+		private bool disposed;
+
+		private uint userId;
+		private Version version;
 
 		public string Prefix = "";
 		public string ExportPath = "";
 		public string ResultPath = "";
+		public string UpdatePath;
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
 
-		public Exporter(ISession session, uint userId)
+
+		public Exporter(ISession session, uint userId, Version version)
 		{
 			this.session = session;
 			this.userId = userId;
+			this.version = version;
 		}
 
 		public List<Tuple<string, string[]>> Export()
@@ -240,14 +247,31 @@ where Hidden = 0";
 					entry.FileName = dataname;
 					zip.AddEntry(metaname, tuple.Item2.Implode("\r\n"));
 				}
+				CheckUpdate(zip);
 				file = Path.Combine(ResultPath, file);
 				zip.Save(file);
 			}
 			return file;
 		}
 
+		private void CheckUpdate(ZipFile zip)
+		{
+			var file = Path.Combine(UpdatePath, "version.txt");
+			if (!File.Exists(file))
+				return;
+
+			var updateVersion = Version.Parse(File.ReadAllText(file));
+			if (updateVersion <= version)
+				return;
+
+			zip.AddDirectory(UpdatePath, "update");
+		}
+
 		public void Dispose()
 		{
+			if (disposed)
+				return;
+			disposed = true;
 			cleaner.Dispose();
 		}
 	}

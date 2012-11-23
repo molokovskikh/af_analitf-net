@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Models
 			foreach (var table in tables) {
 				try {
 					var sql = String.Format("TRUNCATE {1}; LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
-						table.Item1,
+						table.Item1.Replace("\\", "/"),
 						Path.GetFileNameWithoutExtension(table.Item1),
 						table.Item2.Implode());
 					var dbCommand = session.Connection.CreateCommand();
@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 
-			new SanityCheck("data").Check();
+			new SanityCheck(AppBootstrapper.DataPath).Check();
 
 			var settings = session.Query<Settings>().ToList()[0];
 			settings.ApplyChanges(session);

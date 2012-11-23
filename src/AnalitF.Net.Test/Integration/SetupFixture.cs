@@ -18,9 +18,9 @@ namespace AnalitF.Net.Test.Integration
 		{
 			RxApp.LoggerFactory = t => new NullLogger();
 
-			global::Test.Support.Setup.Initialize();
+			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
-			AppBootstrapper.NHibernate.Init();
+			AppBootstrapper.NHibernate.Init("client");
 			Factory = AppBootstrapper.NHibernate.Factory;
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 		}

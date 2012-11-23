@@ -59,8 +59,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var waitClose = new ManualResetEventSlim();
 			var wait = new ManualResetEventSlim();
-			var waittask = new Task(() => {
+			var waittask = new Task<UpdateResult>(() => {
 				wait.Wait();
+				return UpdateResult.OK;
 			});
 			Tasks.Update = (c, t, p) => waittask;
 

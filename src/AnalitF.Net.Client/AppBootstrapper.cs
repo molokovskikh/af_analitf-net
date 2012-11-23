@@ -1,53 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.Tools;
 using ReactiveUI;
+using log4net.Config;
+using ILog = log4net.ILog;
 using LogManager = Caliburn.Micro.LogManager;
 
 namespace AnalitF.Net.Client
 {
 	public class AppBootstrapper : Bootstrapper<ShellViewModel>
 	{
+		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
+
 		public static ShellViewModel Shell;
 
 		public static Config.Initializers.NHibernate NHibernate;
 
-		private string DataPath = "data";
+		public static string DataPath = "data";
+		public static string TempPath = "temp";
+
+		private bool initializationCompleted;
 
 		public AppBootstrapper()
 		{
-			var command = ApplicationCommands.Delete;
-			LogManager.GetLog = t => new ConsoleLog();
-			Tasks.Uri = new Uri("http://localhost:8080/Main/");
-			Tasks.ArchiveFile = "archive.zip";
-			Tasks.ExtractPath = ".";
+		}
 
-			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
-				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
-
+		private void InitLog()
+		{
+			XmlConfigurator.Configure();
+			LogManager.GetLog = t => new Log4net(t);
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
-				Console.WriteLine(args.ExceptionObject);
+				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);
 			};
+		}
 
-			Application.DispatcherUnhandledException += (sender, args) => {
-				args.Handled = true;
-				Console.WriteLine(args.Exception);
-			};
+		protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+		{
+			log.Error("Ошибка в главной нитки приложения", e.Exception);
+			e.Handled = true;
+			if (!initializationCompleted)
+				System.Windows.Application.Current.Shutdown();
+		}
 
-			RegisterBinder();
+		private static void InitApp()
+		{
+			TempPath = FileHelper.MakeRooted(TempPath);
+			DataPath = FileHelper.MakeRooted(DataPath);
 
-			NHibernate = new Config.Initializers.NHibernate();
-			NHibernate.Init();
+			if (Directory.Exists(TempPath)) {
+				try {
+					Directory.Delete(TempPath, true);
+					Directory.CreateDirectory(TempPath);
+				}
+				catch(Exception) {}
+			}
+			else
+				Directory.CreateDirectory(TempPath);
+
+			Tasks.Uri = new Uri(ConfigurationManager.AppSettings["Uri"]);
+			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
+			Tasks.ExtractPath = TempPath;
 		}
 
 		protected override void OnExit(object sender, EventArgs e)
@@ -56,9 +82,22 @@ namespace AnalitF.Net.Client
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
 		{
-			new SanityCheck(DataPath).Check();
+			InitLog();
+			InitApp();
+			InitUi();
+			InitDb();
 
 			base.OnStartup(sender, e);
+
+			initializationCompleted = true;
+		}
+
+		private static void InitDb()
+		{
+			NHibernate = new Config.Initializers.NHibernate();
+			NHibernate.Init();
+
+			new SanityCheck(DataPath).Check();
 		}
 
 		protected override object GetInstance(Type service, string key)
@@ -68,8 +107,11 @@ namespace AnalitF.Net.Client
 			return base.GetInstance(service, key);
 		}
 
-		public static void RegisterBinder()
+		public static void InitUi()
 		{
+			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
+				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
 			ContentElementBinder.RegisterConvention();
 			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
 				EnabledBinder.Bind
