@@ -140,21 +140,25 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
+			ResetNavigation();
 			ActivateItem(new CatalogViewModel());
 		}
 
 		public void ShowPrice()
 		{
+			ResetNavigation();
 			ActivateItem(new PriceViewModel());
 		}
 
 		public void ShowMnn()
 		{
+			ResetNavigation();
 			ActivateItem(new MnnViewModel());
 		}
 
 		public void SearchOffers()
 		{
+			ResetNavigation();
 			ActivateItem(new SearchOfferViewModel());
 		}
 
@@ -165,16 +169,19 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrderLines()
 		{
+			ResetNavigation();
 			ActivateItem(new OrderLinesViewModel());
 		}
 
 		public void ShowJunkOffers()
 		{
+			ResetNavigation();
 			ActivateItem(new JunkOfferViewModel());
 		}
 
 		public void ShowOrders()
 		{
+			ResetNavigation();
 			ActivateItem(new OrdersViewModel());
 		}
 
