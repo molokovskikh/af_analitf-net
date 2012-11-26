@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Поиск в прайс-листах";
 			NeedToCalculateDiff = true;
 
-			var producers = Session.Query<Offer>().Select(o => o.ProducerSynonym).ToList().Distinct().OrderBy(p => p);
+			var producers = StatelessSession.Query<Offer>().Select(o => o.Producer).ToList().Distinct().OrderBy(p => p);
 			Producers = new[] { AllProducerLabel }.Concat(producers).ToList();
 			CurrentProducer = AllProducerLabel;
 
@@ -30,20 +30,21 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(SearchText))
 				return;
 
-			var query = Session.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
+			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
 			if (currentPrice != null && currentPrice.Id > 0) {
 				query = query.Where(o => o.Price.Id == currentPrice.Id);
 			}
 
 			if (CurrentProducer != null && CurrentProducer != AllProducerLabel) {
-				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
+				query = query.Where(o => o.Producer == CurrentProducer);
 			}
 
+			var offer = query.Fetch(o => o.Price).ToList();
 			if (Settings.GroupByProduct) {
-				Offers = SortByMinCostInGroup(query.ToList(), o => o.ProductId);
+				Offers = SortByMinCostInGroup(offer, o => o.ProductId);
 			}
 			else {
-				Offers = SortByMinCostInGroup(query.ToList(), o => o.CatalogId);
+				Offers = SortByMinCostInGroup(offer, o => o.CatalogId);
 			}
 
 			Calculate();

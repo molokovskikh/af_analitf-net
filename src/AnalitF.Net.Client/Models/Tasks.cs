@@ -113,7 +113,7 @@ namespace AnalitF.Net.Client.Models
 				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d).Match(f.Replace(".meta.txt", "")))))
 				.Where(t => t.Item2 != null)
 				.Select(t => Tuple.Create(
-					Path.GetFullPath(Path.Combine(ExtractPath, Path.GetFullPath(t.Item2))),
+					Path.GetFullPath(Path.Combine(ExtractPath, t.Item2)),
 					File.ReadAllLines(Path.Combine(ExtractPath, t.Item1))))
 				.ToList();
 		}

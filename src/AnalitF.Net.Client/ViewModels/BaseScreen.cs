@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected Extentions.WindowManager Manager { get; private set; }
 
 		protected ISession Session;
+		protected IStatelessSession StatelessSession;
 
 		protected Settings Settings;
 
@@ -29,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public BaseScreen()
 		{
 			var factory = AppBootstrapper.NHibernate.Factory;
+			StatelessSession = factory.OpenStatelessSession();
 			Session = factory.OpenSession();
 			Settings = Session.Query<Settings>().First();
 			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();

@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration
 {
-	[TestFixture]
+	[TestFixture, RequiresSTA]
 	public class ContentElementBinderFixture
 	{
 		[SetUp]
@@ -19,7 +19,7 @@ namespace AnalitF.Net.Test.Integration
 			AppBootstrapper.InitUi();
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Bind_content_elements()
 		{
 			var model = new ViewModel { Text = "123" };
@@ -34,7 +34,7 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(item.Text, Is.EqualTo("123"));
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Enabled_binder()
 		{
 			var model = new ViewModel { Text = "123" };
@@ -45,6 +45,20 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(view.DeepChildren().Count(), Is.GreaterThan(0));
 			ViewModelBinder.Bind(model, view, null);
 			Assert.That(checkBox.IsEnabled, Is.False);
+		}
+
+		[Test]
+		public void Bind_password()
+		{
+			var model = new ViewModel { Text = "123" };
+			var view = new UserControl { DataContext = model };
+			var password = new PasswordBox { Name = "Text" };
+			view.Content = password;
+
+			ViewModelBinder.Bind(model, view, null);
+			Assert.That(password.Password, Is.EqualTo("123"));
+			password.Password = "456";
+			Assert.That(model.Text, Is.EqualTo("456"));
 		}
 
 		public class ViewModel

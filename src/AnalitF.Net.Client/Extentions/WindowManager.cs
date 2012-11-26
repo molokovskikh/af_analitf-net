@@ -28,9 +28,7 @@ namespace AnalitF.Net.Client.Extentions
 		{
 			var window = CreateWindow(rootModel, true, context, settings);
 			window.ResizeMode = ResizeMode.NoResize;
-			window.SizeToContent = SizeToContent.Manual;
-			window.Width = 400;
-			window.Height = 300;
+			window.SizeToContent = SizeToContent.WidthAndHeight;
 			window.ShowInTaskbar = false;
 
 			return ShowDialog(window);

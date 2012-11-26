@@ -16,11 +16,45 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class ContentElementBinder
 	{
+		public static readonly DependencyProperty PasswordProperty =
+			DependencyProperty.RegisterAttached("Password",
+			typeof(string), typeof(ContentElementBinder),
+			new FrameworkPropertyMetadata(null, OnPasswordPropertyChanged));
+
+		private static void OnPasswordPropertyChanged(DependencyObject sender,
+				DependencyPropertyChangedEventArgs e)
+		{
+			var passwordBox = sender as PasswordBox;
+			passwordBox.PasswordChanged -= PasswordChanged;
+
+			if (!Equals(passwordBox.Password, e.NewValue))
+				passwordBox.Password = (string)e.NewValue;
+
+			passwordBox.PasswordChanged += PasswordChanged;
+		}
+
+		public static string GetPassword(DependencyObject dp)
+		{
+			return (string)dp.GetValue(PasswordProperty);
+		}
+
+		public static void SetPassword(DependencyObject dp, string value)
+		{
+			dp.SetValue(PasswordProperty, value);
+		}
+
+		private static void PasswordChanged(object sender, RoutedEventArgs e)
+		{
+			var passwordBox = sender as PasswordBox;
+			SetPassword(passwordBox, passwordBox.Password);
+		}
+
 		public static void RegisterConvention()
 		{
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
 			ConventionManager.AddElementConvention<FrameworkElement>(UIElement.IsEnabledProperty, "IsEnabled", "IsEnabledChanged");
+			ConventionManager.AddElementConvention<PasswordBox>(PasswordProperty, "Password", "PasswordChanged");
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)

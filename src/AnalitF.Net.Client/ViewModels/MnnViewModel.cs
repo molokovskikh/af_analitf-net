@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Update()
 		{
-			var query = Session.Query<Mnn>();
+			var query = StatelessSession.Query<Mnn>();
 			if (!ShowWithoutOffers) {
 				query = query.Where(m => m.HaveOffers);
 			}

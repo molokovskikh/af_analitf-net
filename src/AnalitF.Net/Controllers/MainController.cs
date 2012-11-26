@@ -64,7 +64,8 @@ namespace AnalitF.Net.Controllers
 		{
 			var task = new Task(() => {
 				try {
-					using (var session = sessionFactory.OpenSession()) {
+					using (var session = sessionFactory.OpenSession())
+					using (var transaction = session.BeginTransaction()) {
 						var job = session.Load<RequestLog>(jobId);
 						try {
 							var exporter = new Exporter(session, job.User.Id, job.Version) {
@@ -76,6 +77,7 @@ namespace AnalitF.Net.Controllers
 							using (exporter) {
 								exporter.ExportCompressed(job.OutputFile);
 							}
+							transaction.Commit();
 						}
 						catch(Exception e) {
 							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);

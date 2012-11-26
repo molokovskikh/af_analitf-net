@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.SettingsView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
+             Height="500" Width="700">
 	<StackPanel>
 		<TabControl>
 			<TabItem Header="Авторизация">
@@ -9,7 +10,7 @@
 					<Label>Имя</Label>
 					<TextBox x:Name="Settings_UserName"></TextBox>
 					<Label>Пароль</Label>
-					<TextBox x:Name="Settings_Password"></TextBox>
+					<PasswordBox x:Name="Settings_Password" Binders:ContentElementBinder.Password="{Binding Path=Settings.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></PasswordBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Визуализация">

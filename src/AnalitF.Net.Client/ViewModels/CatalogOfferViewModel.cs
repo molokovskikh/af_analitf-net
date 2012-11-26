@@ -132,12 +132,12 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		private void Filter()
 		{
-			var queryable = Session.Query<Offer>().Where(o => o.CatalogId == CurrentCatalog.Id);
+			var queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == CurrentCatalog.Id);
 			if (CurrentRegion != allRegionLabel) {
 				queryable = queryable.Where(o => o.RegionName == CurrentRegion);
 			}
 			if (CurrentProducer != AllProducerLabel) {
-				queryable = queryable.Where(o => o.ProducerSynonym == CurrentProducer);
+				queryable = queryable.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == Filters[1]) {
 				queryable = queryable.Where(o => o.Price.BasePrice);
@@ -146,7 +146,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				queryable = queryable.Where(o => !o.Price.BasePrice);
 			}
 
-			var offers = queryable.ToList();
+			var offers = queryable.Fetch(o => o.Price).ToList();
 			offers = Sort(offers);
 			Offers = offers;
 			Calculate();
@@ -271,7 +271,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			var rows = offers.Select((o, i) => {
 				return new object[] {
 					i,
-					o.ProducerSynonym,
+					o.ProductSynonym,
 					o.ProducerSynonym,
 					o.Cost,
 					o.OrderCount,

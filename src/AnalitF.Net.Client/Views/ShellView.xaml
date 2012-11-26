@@ -2,86 +2,112 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	MinHeight="600" MinWidth="800">
+
 	<Grid>
 		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<ToolBarTray Background="White" Grid.Row="0">
+		<Menu Grid.Row="0">
+			<MenuItem Header="Файл">
+				<MenuItem Header="Получить данные" InputGestureText="Ctrl+R"></MenuItem>
+				<Separator></Separator>
+				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T"></MenuItem>
+				<Separator></Separator>
+				<MenuItem Header="Выход" InputGestureText="Alt+F4"></MenuItem>
+			</MenuItem>
+
+			<MenuItem Header="Файл">
+				<MenuItem Header="Список препаратов" InputGestureText="F8"></MenuItem>
+				<MenuItem Header="Уцененные препараты"></MenuItem>
+				<MenuItem Header="Прайс-листы" InputGestureText="F9"></MenuItem>
+				<Separator></Separator>
+				<MenuItem Header="Сводный заказ" InputGestureText="F10"></MenuItem>
+				<Separator></Separator>
+				<MenuItem Header="Заказ" InputGestureText="F12"></MenuItem>
+			</MenuItem>
+
+			<MenuItem Header="Сервис">
+				<MenuItem Header="Конфигурация"></MenuItem>
+			</MenuItem>
+		</Menu>
+
+		<ToolBarTray Grid.Row="1">
 			<ToolBar Band="1" BandIndex="1">
 
-				<Button x:Name="Update">
-					Получить данные
+				<Button x:Name="Update" ToolTip="Получить данные">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico"></Image>
 				</Button>
 
 				<Separator />
 
-				<Button x:Name="Export">
-					Сохранить текущую таблицу
+				<Button x:Name="Export" ToolTip="Сохранить текущую таблицу">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico"></Image>
 				</Button>
 
-				<Button x:Name="Print">
-					Печать
-				</Button>
-
-				<Separator />
-
-				<Button x:Name="ShowCatalog">
-					Поиск препаратов в каталоге
-				</Button>
-				<Button x:Name="SearchOffers">
-					Поиск в прайс-листах
-				</Button>
-				<Button x:Name="ShowMnn">
-					Поиск по МНН
-				</Button>
-				<Button x:Name="ShowPrice">
-					Прайс-листы фирм
-				</Button>
-				<Button x:Name="ShowMinCosts">
-					Минимальные цены
+				<Button x:Name="Print" ToolTip="Печать">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico"></Image>
 				</Button>
 
 				<Separator />
 
-				<Button x:Name="ShowOrderLines">
-					Сводный заказ
+				<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico"></Image>
 				</Button>
-				<Button x:Name="ShowOrders">
-					Заказы
+				<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico"></Image>
 				</Button>
-				<Button x:Name="ShowAutoOrder">
-					Авто заказ
+				<Button x:Name="ShowMnn" ToolTip="Поиск по МНН">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico"></Image>
 				</Button>
-
-				<Separator />
-
-				<Button x:Name="ShowJunkOffers">
-					Уцененные препараты
+				<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"></Image>
 				</Button>
-				<Button x:Name="ShowRejects">
-					Забракованные препараты
+				<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"></Image>
 				</Button>
 
 				<Separator />
 
-				<Button x:Name="ShowWaybills">
-					Накладные
+				<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico"></Image>
+				</Button>
+				<Button x:Name="ShowOrders" ToolTip="Заказы">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"></Image>
+				</Button>
+				<Button x:Name="ShowAutoOrder" ToolTip="Авто заказ">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Document_32.ico"></Image>
 				</Button>
 
 				<Separator />
 
-				<Button x:Name="ShowSettings">
-					Конфигурация
+				<Button x:Name="ShowJunkOffers" ToolTip="Уцененные препараты">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad_32.ico"></Image>
+				</Button>
+				<Button x:Name="ShowRejects" ToolTip="Забракованные препараты">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad2_32.ico"></Image>
+				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowWaybills" ToolTip="Накладные">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"></Image>
+				</Button>
+
+				<Separator />
+
+				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"></Image>
 				</Button>
 			</ToolBar>
 		</ToolBarTray>
 
-		<ContentControl Grid.Row="1" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
+		<ContentControl Grid.Row="2" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
 
-		<StatusBar Grid.Row="2">
+		<StatusBar Grid.Row="3">
 			<StatusBarItem>
 				<Button x:Name="Snoop">Snoop</Button>
 			</StatusBarItem>

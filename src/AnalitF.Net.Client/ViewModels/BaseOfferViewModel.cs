@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Windows;
 using AnalitF.Net.Client.Models;
-using Caliburn.Micro;
 using Common.Tools;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -46,7 +44,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void UpdateProducers()
 		{
-			var offerProducers = Offers.Select(o => o.ProducerSynonym).Distinct().OrderBy(p => p);
+			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
 			Producers = new[] { AllProducerLabel }.Concat(offerProducers).ToList();
 		}
 

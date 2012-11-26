@@ -40,6 +40,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Assets\images\mainicon_original.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
     <Reference Include="Devart.Data, Version=5.0.573.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
@@ -294,12 +297,61 @@
     <None Include="App.config" />
     <None Include="App.release.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Assets\images\Download_16.ico" />
+    <Resource Include="Assets\images\Download_32.ico" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.Tools\Common.Tools\Common.Tools.csproj">
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\images\Address Book_16.ico" />
+    <Resource Include="Assets\images\Address Book_32.ico" />
+    <Resource Include="Assets\images\Address Book_Original.ico" />
+    <Resource Include="Assets\images\Clipboard_32.ico" />
+    <Resource Include="Assets\images\Compose Email_32.ico" />
+    <Resource Include="Assets\images\Control Panel 1_16.ico" />
+    <Resource Include="Assets\images\Control Panel 1_32.ico" />
+    <Resource Include="Assets\images\Control Panel 2_32.ico" />
+    <Resource Include="Assets\images\Document Blank_16.ico" />
+    <Resource Include="Assets\images\Document Blank_32.ico" />
+    <Resource Include="Assets\images\Document_16.ico" />
+    <Resource Include="Assets\images\Document_32.ico" />
+    <Resource Include="Assets\images\Email 2_32.ico" />
+    <Resource Include="Assets\images\Favourites.ico" />
+    <Resource Include="Assets\images\Favourites_16.ico" />
+    <Resource Include="Assets\images\Favourites_32.ico" />
+    <Resource Include="Assets\images\Floppy Disk Green_16.ico" />
+    <Resource Include="Assets\images\Floppy Disk Green_32.ico" />
+    <Resource Include="Assets\images\Folder Green_16.ico" />
+    <Resource Include="Assets\images\Folder Green_32.ico" />
+    <Resource Include="Assets\images\Folder Orange_16.ico" />
+    <Resource Include="Assets\images\Folder Orange_32.ico" />
+    <Resource Include="Assets\images\Folder Yellow_16.ico" />
+    <Resource Include="Assets\images\Folder Yellow_32.ico" />
+    <Resource Include="Assets\images\Home 2_16.ico" />
+    <Resource Include="Assets\images\Home 2_32.ico" />
+    <Resource Include="Assets\images\My Documents3_32.ico" />
+    <Resource Include="Assets\images\Notepad2_16.ico" />
+    <Resource Include="Assets\images\Notepad2_32.ico" />
+    <Resource Include="Assets\images\Notepad_16.ico" />
+    <Resource Include="Assets\images\Notepad_32.ico" />
+    <Resource Include="Assets\images\Printer 2_16.ico" />
+    <Resource Include="Assets\images\Printer 2_32.ico" />
+    <Resource Include="Assets\images\Quest.ico" />
+    <Resource Include="Assets\images\Recycle Bin Empty 1_32.ico" />
+    <Resource Include="Assets\images\Search_16.ico" />
+    <Resource Include="Assets\images\Search_32.ico" />
+    <Resource Include="Assets\images\View Doc_32.ico" />
+    <Resource Include="Assets\images\WayBill_32.ico" />
+    <Resource Include="Assets\images\Work_16.ico" />
+    <Resource Include="Assets\images\Work_32.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\images\mainicon_original.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

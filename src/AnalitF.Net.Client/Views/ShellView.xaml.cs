@@ -9,6 +9,9 @@ namespace AnalitF.Net.Client.Views
 		public ShellView()
 		{
 			InitializeComponent();
+#if !DEBUG
+			Snoop.Visibility = Visibility.Collapsed;
+#endif
 		}
 	}
 }

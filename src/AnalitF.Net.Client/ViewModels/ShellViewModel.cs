@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -69,7 +70,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnActivate();
 
-			IsSettingsValid();
+			((Window)GetView()).Loaded += (sender, args) => {
+				IsSettingsValid();
+			};
 		}
 
 		private bool IsSettingsValid()
@@ -78,7 +81,7 @@ namespace AnalitF.Net.Client.ViewModels
 			settings = session.Query<Settings>().First();
 			if (!settings.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
-				ActivateItem(new SettingsViewModel());
+				ShowSettings();
 				return false;
 			}
 			return true;
@@ -157,7 +160,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowSettings()
 		{
-			ActivateItem(new SettingsViewModel());
+			windowManager.ShowFixedDialog(new SettingsViewModel());
 		}
 
 		public void ShowOrderLines()

@@ -26,12 +26,18 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Setup()
 		{
 			updatePath = @"..\..\..\data\update";
-			FileHelper.InitDir(updatePath);
+			Tasks.ExtractPath = "temp";
+			var files = Directory.GetFiles(".", "*.txt");
+			foreach (var file in files) {
+				File.Delete(file);
+			}
+
+			FileHelper.InitDir(updatePath, Tasks.ExtractPath);
 
 			session = SetupFixture.Factory.OpenSession();
 			Tasks.Uri = new Uri("http://localhost:8080/Main/");
-			Tasks.ArchiveFile = "archive.zip";
-			Tasks.ExtractPath = ".";
+			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
+
 			cancelletion = new CancellationTokenSource();
 			var token = cancelletion.Token;
 			var progress = new BehaviorSubject<Progress>(new Progress());

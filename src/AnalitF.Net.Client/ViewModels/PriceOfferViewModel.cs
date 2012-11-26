@@ -55,9 +55,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Update()
 		{
-			var query = Session.Query<Offer>().Where(o => o.Price.Id == Price.Id);
+			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == Price.Id);
 			if (CurrentProducer != AllProducerLabel) {
-				query = query.Where(o => o.ProducerSynonym == CurrentProducer);
+				query = query.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == filters[2]) {
 				query = query.Where(o => o.LeaderPrice == Price);
@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.ProductSynonym.Contains(filterText));
 			}
 
-			Offers = query.ToList();
+			Offers = query.Fetch(o => o.Price).ToList();
 			CurrentOffer = offers.FirstOrDefault();
 
 			Calculate();

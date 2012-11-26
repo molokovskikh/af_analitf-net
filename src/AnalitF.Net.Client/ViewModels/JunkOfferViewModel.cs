@@ -9,9 +9,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public JunkOfferViewModel()
 		{
 			DisplayName = "Препараты с истекающими сроками годности";
-			Offers = Session.Query<Offer>()
+			Offers = StatelessSession.Query<Offer>()
 				.Where(o => o.Junk)
-				.OrderBy(o => o.ProducerSynonym)
+				.OrderBy(o => o.ProductSynonym)
+				.Fetch(o => o.Price)
 				.ToList();
 			Calculate();
 		}
