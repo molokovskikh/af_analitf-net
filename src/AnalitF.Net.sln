@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalitF.Net.Service", "AnalitF.Net\AnalitF.Net.Service.csproj", "{B38A237B-0BF4-4FD0-941D-E3640A3058EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalitF.Net.Service", "AnalitF.Net.Service\AnalitF.Net.Service.csproj", "{B38A237B-0BF4-4FD0-941D-E3640A3058EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalitF.Net.Client.Test", "AnalitF.Net.Test\AnalitF.Net.Client.Test.csproj", "{F4E5BF74-FD5D-4A1C-AB92-A54A7B79EC42}"
 EndProject

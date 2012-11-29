@@ -18,11 +18,11 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public static readonly DependencyProperty PasswordProperty =
 			DependencyProperty.RegisterAttached("Password",
-			typeof(string), typeof(ContentElementBinder),
-			new FrameworkPropertyMetadata(null, OnPasswordPropertyChanged));
+				typeof(string),
+				typeof(ContentElementBinder),
+				new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.Journal, OnPasswordPropertyChanged));
 
-		private static void OnPasswordPropertyChanged(DependencyObject sender,
-				DependencyPropertyChangedEventArgs e)
+		private static void OnPasswordPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
 		{
 			var passwordBox = sender as PasswordBox;
 			passwordBox.PasswordChanged -= PasswordChanged;

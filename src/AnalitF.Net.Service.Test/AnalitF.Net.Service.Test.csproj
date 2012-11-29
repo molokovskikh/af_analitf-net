@@ -56,7 +56,7 @@
     <Compile Include="FixtureSetup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.Service.csproj">
+    <ProjectReference Include="..\AnalitF.Net.Service\AnalitF.Net.Service.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
       <Name>AnalitF.Net.Service</Name>
     </ProjectReference>

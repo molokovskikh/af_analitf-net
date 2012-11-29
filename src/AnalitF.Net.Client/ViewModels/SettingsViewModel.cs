@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Settings = Session.Query<Settings>().First();
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
+			DisplayName = "Настройка";
 		}
 
 		public Settings Settings { get; set; }

@@ -105,7 +105,7 @@
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>AnalitF.Net.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AnalitF.Net\AnalitF.Net.Service.csproj">
+    <ProjectReference Include="..\AnalitF.Net.Service\AnalitF.Net.Service.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
       <Name>AnalitF.Net.Service</Name>
     </ProjectReference>
