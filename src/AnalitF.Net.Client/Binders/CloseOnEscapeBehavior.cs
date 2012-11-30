@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Binders
 		{
 			Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
 				.Where(e => e.EventArgs.Key == Key.Escape)
-				.Subscribe(e => EditBehavior.InvokeDataContext(e.Sender, "TryClose"));
+				.Subscribe(e => ViewModelHelper.InvokeDataContext(e.Sender, "TryClose"));
 		}
 	}
 

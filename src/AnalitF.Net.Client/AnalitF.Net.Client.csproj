@@ -114,12 +114,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Binders\CloseOnEscapeBehavior.cs" />
+    <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
     <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
+    <Compile Include="Binders\ViewModelHelper.cs" />
     <Compile Include="Config\Initializers\DevArtDriver.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />

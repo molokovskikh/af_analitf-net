@@ -55,24 +55,13 @@ namespace AnalitF.Net.Client.Binders
 				.Take(1)
 				.Repeat()
 				.ObserveOn(DispatcherScheduler.Current)
-				.Subscribe(e => InvokeDataContext(e, "OfferCommitted"));
+				.Subscribe(e => ViewModelHelper.InvokeDataContext(e, "OfferCommitted"));
 		}
 
 		private static bool IsUint32(string text)
 		{
 			uint v;
 			return uint.TryParse(text, out v);
-		}
-
-		public static void InvokeDataContext(object sender, string method)
-		{
-			var dataGrid = (DataGrid)sender;
-			var viewModel = dataGrid.DataContext;
-			if (viewModel != null) {
-				var methodInfo = viewModel.GetType().GetMethod(method, new Type[0]);
-				if (methodInfo != null)
-					methodInfo.Invoke(viewModel, null);
-			}
 		}
 
 		public static void UpdateValue<T>(object sender, T e, Func<string, T, string> value)
