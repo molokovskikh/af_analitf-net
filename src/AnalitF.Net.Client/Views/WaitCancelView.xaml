@@ -4,7 +4,10 @@
 	Width="400"
 	Height="300">
 	<StackPanel Margin="4">
-		<TextBlock Name="Text"></TextBlock>
+		<StackPanel Orientation="Horizontal">
+			<Image Source="/AnalitF.Net.Client;component/assets/images/update.png" Margin="10, 5, 10, 5"></Image>
+			<TextBlock Name="Text"></TextBlock>
+		</StackPanel>
 		<GroupBox Header="Текущая операция">
 			<StackPanel>
 				<Label Name="Progress_Stage"></Label>

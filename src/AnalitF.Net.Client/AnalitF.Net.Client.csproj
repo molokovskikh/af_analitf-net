@@ -356,5 +356,8 @@
   <ItemGroup>
     <Resource Include="Assets\images\mainicon_original.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\images\update.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
