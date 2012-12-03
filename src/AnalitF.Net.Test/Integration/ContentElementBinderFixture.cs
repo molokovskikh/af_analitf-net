@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client;
@@ -6,6 +7,7 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration

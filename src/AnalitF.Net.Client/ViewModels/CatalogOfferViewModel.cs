@@ -326,6 +326,21 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			return doc;
 		}
 
+		public void ShowCatalog()
+		{
+			if (CurrentOffer == null)
+				return;
+
+			var price = CurrentOffer.Price;
+			var catalogViewModel = new PriceViewModel {
+				CurrentPrice = price
+			};
+			var offerViewModel = new PriceOfferViewModel(price, catalogViewModel.ShowLeaders);
+			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
+
+			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
+		}
+
 		public bool CanExport
 		{
 			get { return true; }
