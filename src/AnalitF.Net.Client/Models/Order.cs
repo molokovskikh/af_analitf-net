@@ -2,10 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.Initializers;
+using NHibernate;
+using NHibernate.Proxy;
+using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
+	public class ClientOrder
+	{
+		public uint ClientOrderId { get; set; }
+		public uint PriceId { get; set; }
+		public uint AddressId { get; set; }
+		public ulong RegionId { get; set; }
+		public DateTime CreatedOn { get; set; }
+		public DateTime PriceDate { get; set; }
+		public string Comment { get; set; }
+
+		public OrderLine[] Items { get; set; }
+	}
+
 	public class Order : INotifyPropertyChanged
 	{
 		private decimal sum;
@@ -41,7 +58,7 @@ namespace AnalitF.Net.Client.Models
 				sum = value;
 				Valid = Sum > 1000;
 				OnPropertyChanged("Sum");
-				//OnPropertyChanged("Valid");
+				OnPropertyChanged("Valid");
 			}
 		}
 
@@ -60,8 +77,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<OrderLine> Lines { get; set; }
 
 		[Ignore]
-		public virtual bool Valid { get; set; // { return Sum > 1000; }
-		}
+		public virtual bool Valid { get; set; }
 
 		public virtual bool IsEmpty
 		{
@@ -85,6 +101,20 @@ namespace AnalitF.Net.Client.Models
 		public virtual void AddLine(Offer offer, uint count)
 		{
 			AddLine(new OrderLine(this, offer, count));
+		}
+
+		public virtual ClientOrder ToClientOrder()
+		{
+			return new ClientOrder {
+				ClientOrderId = Id,
+				AddressId = Address.Id,
+				CreatedOn = CreatedOn,
+				PriceId = Price.Id,
+				RegionId = Price.RegionId,
+				PriceDate = Price.PriceDate,
+				Comment = Comment,
+				Items = Lines.ToArray(),
+			};
 		}
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;

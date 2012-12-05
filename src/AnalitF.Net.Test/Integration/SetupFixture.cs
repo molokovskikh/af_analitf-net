@@ -16,8 +16,6 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
-			RxApp.LoggerFactory = t => new NullLogger();
-
 			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate.Init("client");

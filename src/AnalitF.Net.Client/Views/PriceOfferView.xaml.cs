@@ -24,11 +24,15 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
+			var observable = EditBehavior.Attach(Offers);
 			Loaded += (sender, args) => {
 				XamlExtentions.Focus(Offers);
 			};
 
-			EditBehavior.Attach(Offers);
+			Unloaded += (sender, args) => {
+				observable.Dispose();
+			};
+
 			ContextMenuBehavior.Attach(Offers);
 		}
 	}

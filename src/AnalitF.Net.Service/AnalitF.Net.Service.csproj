@@ -70,6 +70,7 @@
     </Compile>
     <Compile Include="Controllers\MainController.cs">
     </Compile>
+    <Compile Include="Models\ClientOrder.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

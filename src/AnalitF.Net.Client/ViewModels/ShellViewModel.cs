@@ -64,6 +64,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanExport"));
+
+			this.ObservableForProperty(m => m.CanPrint)
+				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanPrintPreview"));
 		}
 
 		protected override void OnActivate()
@@ -138,6 +141,16 @@ namespace AnalitF.Net.Client.ViewModels
 			((IPrintable)ActiveItem).Print();
 		}
 
+		public bool CanPrintPreview
+		{
+			get { return CanPrint; }
+		}
+
+		public void PrintPreview()
+		{
+
+		}
+
 		public void ShowCatalog()
 		{
 			ResetNavigation();
@@ -187,34 +200,54 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Update()
 		{
+			Sync("Обновление завершено успешно.",
+				"Не удалось получить обновление. Попробуйте повторить операцию позднее.",
+				Tasks.Update);
+		}
+
+		public bool CanSendOrders
+		{
+			get { return true; }
+		}
+
+		public void SendOrders()
+		{
+			Sync("Отправка заказов завершена успешно.",
+				"Не удалось отправить заказы. Попробуйте повторить операцию позднее.",
+				Tasks.SendOrders);
+		}
+
+		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> func)
+		{
 			if (!IsSettingsValid())
 				return;
+
+			ResetNavigation();
 
 			var cancellation = new CancellationTokenSource();
 			var token = cancellation.Token;
 			var progress = new BehaviorSubject<Progress>(new Progress());
 			var credential = new NetworkCredential(settings.UserName, settings.Password);
-			var task = Tasks.Update(credential, token, progress);
+			var task = func(credential, token, progress);
 
 			var wait = new WaitCancelViewModel(cancellation, progress);
 			task.ContinueWith(t => {
-					wait.TryClose();
-					if (!t.IsFaulted && !t.IsCanceled) {
-						if (t.Result == UpdateResult.UpdatePending) {
-							windowManager.Warning("Получена новая версия программы. Сейчас будет выполено обновление.");
-							RunUpdate();
-						}
-						else {
-							windowManager.Notify("Обновление завершено успешно.");
-						}
+				wait.TryClose();
+				if (!t.IsFaulted && !t.IsCanceled) {
+					if (t.Result == UpdateResult.UpdatePending) {
+						RunUpdate();
 					}
-					else if (t.IsFaulted) {
-						log.Error(t.Exception);
-						var error = TranslateException(t.Exception)
-							?? "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
-						windowManager.Error(error);
+					else {
+						windowManager.Notify(sucessMessage);
 					}
-				},
+				}
+				else if (t.IsFaulted) {
+					log.Error(t.Exception);
+					var error = TranslateException(t.Exception)
+						?? errorMessage;
+					windowManager.Error(error);
+				}
+			},
 				TaskScheduler.FromCurrentSynchronizationContext());
 			task.Start();
 
@@ -223,6 +256,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void RunUpdate()
 		{
+			windowManager.Warning("Получена новая версия программы. Сейчас будет выполено обновление.");
 			var updateExePath = Path.Combine(AppBootstrapper.TempPath, "update", "Updater.exe");
 			Process.Start(updateExePath, Process.GetCurrentProcess().Id.ToString());
 			TryClose();
@@ -263,13 +297,15 @@ namespace AnalitF.Net.Client.ViewModels
 				var screen = navigationStack.Pop();
 				screen.TryClose();
 			}
+
+			if (ActiveItem != null)
+				ActiveItem.TryClose();
 		}
 
 		public void NavigateAndReset(params IScreen[] views)
 		{
 			ResetNavigation();
-			if (ActiveItem != null)
-				ActiveItem.TryClose();
+
 			var chain = views.TakeWhile((s, i) => i < views.Length - 2);
 			foreach (var screen in chain) {
 				navigationStack.Push(screen);

@@ -1,4 +1,6 @@
-﻿namespace AnalitF.Net.Client.Models
+﻿using Newtonsoft.Json;
+
+namespace AnalitF.Net.Client.Models
 {
 	public class OrderLine : BaseOffer
 	{
@@ -16,6 +18,7 @@
 
 		public virtual uint Id { get; set; }
 
+		[JsonIgnore]
 		public virtual Order Order { get; set; }
 
 		public virtual uint Count { get; set; }

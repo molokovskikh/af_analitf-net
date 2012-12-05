@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -10,6 +12,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI;
 using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -50,13 +53,27 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Execute_update_task()
 		{
-			var settings = session.Query<Settings>().First();
-			settings.UserName = "test";
-			settings.Password = "123";
-			session.Flush();
-			shell = new ShellViewModel();
+			PrepareForSync();
 
+			StartSync();
 
+			Assert.That(manager.Dialogs.Count, Is.EqualTo(0));
+		}
+
+		[Test]
+		public void Before_sync_close_active_items()
+		{
+			PrepareForSync();
+
+			shell.ShowCatalog();
+			StartSync();
+
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
+			Assert.That(shell.ActiveItem, Is.Null);
+		}
+
+		private void StartSync()
+		{
 			var waitClose = new ManualResetEventSlim();
 			var wait = new ManualResetEventSlim();
 			var waittask = new Task<UpdateResult>(() => {
@@ -71,11 +88,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				manager.Dialogs[0].Closed += (sender, args) => waitClose.Set();
 				wait.Set();
 			});
-
 			waitClose.Wait(TimeSpan.FromSeconds(10));
 			dispatcher.InvokeShutdown();
+		}
 
-			Assert.That(manager.Dialogs.Count, Is.EqualTo(0));
+		private void PrepareForSync()
+		{
+			var settings = session.Query<Settings>().First();
+			settings.UserName = "test";
+			settings.Password = "123";
+			session.Flush();
+			shell = new ShellViewModel();
 		}
 
 		public static Dispatcher WithDispatcher(Action action)
@@ -94,7 +117,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			dispatcherThread.Start();
 			started.Wait();
 			var dispatcher = Dispatcher.FromThread(dispatcherThread);
-			dispatcher.Invoke(action);
+			dispatcher.Invoke(() => {
+				RxApp.DeferredScheduler = DispatcherScheduler.Current;
+				action();
+			});
 			return dispatcher;
 		}
 	}

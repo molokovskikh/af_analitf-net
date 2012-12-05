@@ -78,7 +78,6 @@ namespace AnalitF.Net.Client.ViewModels
 			var dialog = new PrintDialog();
 			if (dialog.ShowDialog() != true)
 				return;
-			Console.WriteLine("dialog.PrintableAreaWidth = " + dialog.PrintableAreaWidth);
 
 			var maxWidth = dialog.PrintableAreaWidth;
 			doc.PagePadding = new Thickness(25);

@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using AnalitF.Net.Models;
 using Common.Models;
+using Common.MySql;
 using Common.Tools;
 using Ionic.Zip;
+using MySql.Data.MySqlClient;
 using NHibernate;
 using NHibernate.Linq;
 using log4net;
@@ -36,7 +38,6 @@ namespace AnalitF.Net.Controllers
 				else if (reset)
 					existsJob = null;
 			}
-
 
 			if (existsJob == null) {
 				var version = new Version();
@@ -99,8 +100,40 @@ namespace AnalitF.Net.Controllers
 			return task;
 		}
 
-		public void Post()
+		public HttpResponseMessage Post(ClientOrder[] clientOrders)
 		{
+			StorageProcedures.GetActivePrices((MySqlConnection)Session.Connection, CurrentUser.Id);
+
+			var rules = Session.Load<OrderRules>(CurrentUser.Client.Id);
+			foreach (var clientOrder in clientOrders) {
+				var address = Session.Load<Address>(clientOrder.AddressId);
+				var price = Session.Load<PriceList>(clientOrder.PriceId);
+				var activePrice = Session.Load<ActivePrice>(new PriceKey(price, clientOrder.RegionId));
+
+				var order = new Order(activePrice, CurrentUser, address, rules) {
+					ClientOrderId = clientOrder.ClientOrderId,
+					PriceDate = clientOrder.PriceDate,
+					ClientAddition = clientOrder.Comment,
+				};
+				foreach (var item in clientOrder.Items) {
+					var offer = new Offer {
+						Id = new OfferKey(item.OfferId, clientOrder.RegionId),
+						Cost = (float)item.Cost,
+						PriceList = activePrice,
+						PriceCode = price.PriceCode
+					};
+
+					var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);
+					foreach (var property in properties) {
+						var value = property.GetValue(item, null);
+						property.SetValue(offer, value, null);
+					}
+
+					order.AddOrderItem(offer, item.Count);
+				}
+				Session.Save(order);
+			}
+			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 	}
 }
