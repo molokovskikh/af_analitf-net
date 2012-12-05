@@ -120,7 +120,8 @@ namespace AnalitF.Net.Controllers
 						Id = new OfferKey(item.OfferId, clientOrder.RegionId),
 						Cost = (float)item.Cost,
 						PriceList = activePrice,
-						PriceCode = price.PriceCode
+						PriceCode = price.PriceCode,
+						CodeFirmCr = item.ProducerId,
 					};
 
 					var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
+using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -24,12 +25,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CatalogId { get; set; }
 
+		[JsonProperty("SynonymCode")]
 		public virtual uint ProductSynonymId { get; set; }
 
 		public virtual string Producer { get; set; }
 
 		public virtual uint? ProducerId { get; set; }
 
+		[JsonProperty("SynonymFirmCrCode")]
 		public virtual uint? ProducerSynonymId { get; set; }
 
 		public virtual string Code { get; set; }
@@ -65,6 +68,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint? RequestRatio { get; set; }
 
+		[JsonProperty("OrderCost")]
 		public virtual decimal? MinOrderSum { get; set; }
 
 		public virtual uint? MinOrderCount { get; set; }

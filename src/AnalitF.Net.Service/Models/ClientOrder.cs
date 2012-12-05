@@ -20,6 +20,7 @@ namespace AnalitF.Net.Models
 	{
 		public ulong OfferId { get; set; }
 		public uint Count { get; set; }
+		public uint? ProducerId { get; set; }
 		public decimal Cost { get; set; }
 	}
 }

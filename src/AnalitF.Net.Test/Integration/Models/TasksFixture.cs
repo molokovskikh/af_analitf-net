@@ -13,13 +13,14 @@ using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class TasksFixture
+	public class TasksFixture : IntegrationFixture
 	{
-		private ISession session;
+		private ISession localSession;
 		private Task<UpdateResult> task;
 		private CancellationTokenSource cancelletion;
 		private string updatePath;
@@ -38,7 +39,7 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			FileHelper.InitDir(updatePath, Tasks.ExtractPath);
 
-			session = SetupFixture.Factory.OpenSession();
+			localSession = SetupFixture.Factory.OpenSession();
 			Tasks.Uri = new Uri("http://localhost:8080/Main/");
 			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
 
@@ -51,12 +52,12 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Import()
 		{
-			session.CreateSQLQuery("delete from offers").ExecuteUpdate();
+			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
 			task.Start();
 			task.Wait();
 			Assert.That(task.Exception, Is.Null);
-			var offers = session.CreateSQLQuery("select * from offers").List();
+			var offers = localSession.CreateSQLQuery("select * from offers").List();
 			Assert.That(offers.Count, Is.GreaterThan(0));
 		}
 
@@ -87,13 +88,14 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Send_orders()
 		{
 			var begin = DateTime.Now;
-			using (session.BeginTransaction()) {
-				session.CreateSQLQuery("delete from orders").ExecuteUpdate();
-				var address = session.Query<Address>().First();
-				var offer = session.Query<Offer>().First();
+			Offer offer;
+			using (localSession.BeginTransaction()) {
+				localSession.CreateSQLQuery("delete from orders").ExecuteUpdate();
+				var address = localSession.Query<Address>().First();
+				offer = localSession.Query<Offer>().First();
 				var order = new Order(offer.Price, address);
 				order.AddLine(offer, 1);
-				session.Save(order);
+				localSession.Save(order);
 			}
 
 			task = Tasks.SendOrders(null, token, progress);
@@ -101,10 +103,19 @@ namespace AnalitF.Net.Test.Integration.Models
 			task.Start();
 			task.Wait();
 
-			Assert.That(session.Query<Order>().Count(), Is.EqualTo(0));
-			var sentOrders = session.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
+			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
+			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
 			Assert.That(sentOrders.Count, Is.EqualTo(1));
 			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
+
+			var orders = session.Query<TestOrder>().Where(o => o.WriteTime > begin).ToList();
+			Assert.That(orders.Count, Is.EqualTo(1));
+			var resultOrder = orders[0];
+			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
+			var item = resultOrder.Items[0];
+			Assert.That(item.CodeFirmCr, Is.EqualTo(offer.ProducerId));
+			Assert.That(item.SynonymCode, Is.EqualTo(offer.ProductSynonymId));
+			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(offer.ProducerSynonymId));
 		}
 	}
 }
