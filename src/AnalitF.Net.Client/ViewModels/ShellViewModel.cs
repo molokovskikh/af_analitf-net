@@ -232,6 +232,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var wait = new WaitCancelViewModel(cancellation, progress);
 			task.ContinueWith(t => {
+				wait.IsCompleted = true;
 				wait.TryClose();
 				if (!t.IsFaulted && !t.IsCanceled) {
 					if (t.Result == UpdateResult.UpdatePending) {

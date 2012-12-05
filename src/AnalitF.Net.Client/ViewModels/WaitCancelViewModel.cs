@@ -41,6 +41,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public string Text { get; set; }
 
+		public bool IsCompleted { get; set; }
+
 		public TimeSpan Time
 		{
 			get { return _time; }
@@ -59,6 +61,14 @@ namespace AnalitF.Net.Client.ViewModels
 				_progress = value;
 				NotifyOfPropertyChange("Progress");
 			}
+		}
+
+		public override void CanClose(Action<bool> callback)
+		{
+			//мы не можем закрываться тк происходит процесс обмена данными
+			//все что мы можем попытаться отменить его и ждать пока, процесс будет отменет и сам закроет диалог
+			Cancel();
+			callback(IsCompleted);
 		}
 
 		public void Cancel()
