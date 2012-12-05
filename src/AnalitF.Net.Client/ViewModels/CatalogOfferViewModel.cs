@@ -56,13 +56,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(e => Filter());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("RetailMarkup"));
+				.Subscribe(_ => NotifyOfPropertyChange("RetailMarkup"));
 
 			this.ObservableForProperty(m => m.RetailMarkup)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("RetailCost"));
+				.Subscribe(_ => NotifyOfPropertyChange("RetailCost"));
 
 			this.ObservableForProperty(m => m.CurrentOffer)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("Price"));
+				.Subscribe(_ => NotifyOfPropertyChange("Price"));
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
@@ -160,7 +160,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				maxProducerCosts = value;
-				RaisePropertyChangedEventImmediately("MaxProducerCosts");
+				NotifyOfPropertyChange("MaxProducerCosts");
 			}
 		}
 
@@ -180,7 +180,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				currentFilter = value;
-				RaisePropertyChangedEventImmediately("CurrentFilter");
+				NotifyOfPropertyChange("CurrentFilter");
 			}
 		}
 
@@ -190,7 +190,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				regions = value;
-				RaisePropertyChangedEventImmediately("Regions");
+				NotifyOfPropertyChange("Regions");
 			}
 		}
 
@@ -200,7 +200,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				currentRegion = value;
-				RaisePropertyChangedEventImmediately("CurrentRegion");
+				NotifyOfPropertyChange("CurrentRegion");
 			}
 		}
 
@@ -211,7 +211,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			{
 				groupByProduct = value;
 				Offers = Sort(Offers);
-				RaisePropertyChangedEventImmediately("GroupByProduct");
+				NotifyOfPropertyChange("GroupByProduct");
 			}
 		}
 
@@ -234,7 +234,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				retailMarkup = value;
-				RaisePropertyChangedEventImmediately("RetailMarkup");
+				NotifyOfPropertyChange("RetailMarkup");
 			}
 		}
 
@@ -244,7 +244,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			set
 			{
 				historyOrders = value;
-				RaisePropertyChangedEventImmediately("HistoryOrders");
+				NotifyOfPropertyChange("HistoryOrders");
 			}
 		}
 

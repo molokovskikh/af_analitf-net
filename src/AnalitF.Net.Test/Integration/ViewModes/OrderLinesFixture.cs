@@ -51,5 +51,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Delete();
 			Assert.That(model.Lines.Count, Is.EqualTo(0));
 		}
+
+		[Test]
+		public void Load_sent_orders()
+		{
+			var model = Init(new OrderLinesViewModel());
+
+			model.IsSentSelected = true;
+			model.IsCurrentSelected = false;
+
+			Assert.That(model.SentLines, Is.Not.Null);
+		}
 	}
 }

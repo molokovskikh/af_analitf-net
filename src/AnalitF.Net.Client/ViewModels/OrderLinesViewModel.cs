@@ -11,13 +11,14 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class OrderLinesViewModel : BaseScreen
+	public class OrderLinesViewModel : BaseOrderViewModel
 	{
 		private OrderLine currentLine;
 		private Catalog currentCatalog;
 		private List<MarkupConfig> markups;
 		private Price currentPrice;
 		private List<OrderLine> lines;
+		private List<SentOrderLine> sentLines;
 
 		private Address address;
 
@@ -44,29 +45,48 @@ namespace AnalitF.Net.Client.ViewModels
 			Dep(m => m.Sum, m => m.Lines);
 			Dep(m => m.CanDelete, m => m.CurrentLine);
 
-			Dep(Update, m => m.CurrentPrice);
+			Dep(Update, m => m.CurrentPrice, m => m.Begin, m => m.End);
 
 			Update();
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice = Prices.First();
+
+			Begin = DateTime.Today;
+			End = DateTime.Today;
 		}
 
-		public void Update()
+		public override void Update()
 		{
-			var query = Session.Query<OrderLine>();
+			if (IsCurrentSelected) {
+				var query = Session.Query<OrderLine>();
 
-			if (CurrentPrice != null && CurrentPrice.Id != 0) {
-				query = query.Where(l => l.Order.Price == CurrentPrice);
+				if (CurrentPrice != null && CurrentPrice.Id != 0) {
+					query = query.Where(l => l.Order.Price == CurrentPrice);
+				}
+
+				Lines = query
+					.OrderBy(l => l.ProductSynonym)
+					.ThenBy(l => l.ProducerSynonym)
+					.ToList();
+
+				CalculateRetailCost();
 			}
+			else {
+				var query = StatelessSession.Query<SentOrderLine>()
+					.Fetch(l => l.Order)
+					.ThenFetch(o => o.Price)
+					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1));
 
-			Lines = query
-				.OrderBy(l => l.ProductSynonym)
-				.ThenBy(l => l.ProducerSynonym)
-				.ToList();
+				if (CurrentPrice != null && CurrentPrice.Id != 0) {
+					query = query.Where(l => l.Order.Price == CurrentPrice);
+				}
 
-			CalculateRetailCost();
+				SentLines = query.OrderBy(l => l.ProductSynonym)
+					.ThenBy(l => l.ProductSynonym)
+					.ToList();
+			}
 		}
 
 		private void Dep(Action action, params Expression<Func<OrderLinesViewModel, object>>[] to)
@@ -79,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var name = @from.GetProperty();
 			this.ObservableForProperty(to)
-				.Subscribe(e => RaisePropertyChangedEventImmediately(name));
+				.Subscribe(e => NotifyOfPropertyChange(name));
 		}
 
 		protected void CalculateRetailCost()
@@ -96,7 +116,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentPrice = value;
-				RaisePropertyChangedEventImmediately("CurrentPrice");
+				NotifyOfPropertyChange("CurrentPrice");
 			}
 		}
 
@@ -106,7 +126,17 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				lines = value;
-				RaisePropertyChangedEventImmediately("Lines");
+				NotifyOfPropertyChange("Lines");
+			}
+		}
+
+		public virtual List<SentOrderLine> SentLines
+		{
+			get { return sentLines; }
+			set
+			{
+				sentLines = value;
+				NotifyOfPropertyChange("SentLines");
 			}
 		}
 
@@ -141,7 +171,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentLine = value;
-				RaisePropertyChangedEventImmediately("CurrentLine");
+				NotifyOfPropertyChange("CurrentLine");
 			}
 		}
 

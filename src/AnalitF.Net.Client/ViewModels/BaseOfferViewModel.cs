@@ -54,8 +54,8 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentCatalog = value;
-				RaisePropertyChangedEventImmediately("CurrentCatalog");
-				RaisePropertyChangedEventImmediately("CanShowDescription");
+				NotifyOfPropertyChange("CurrentCatalog");
+				NotifyOfPropertyChange("CanShowDescription");
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				producers = value;
-				RaisePropertyChangedEventImmediately("Producers");
+				NotifyOfPropertyChange("Producers");
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				offers = value;
-				RaisePropertyChangedEventImmediately("Offers");
+				NotifyOfPropertyChange("Offers");
 			}
 		}
 
@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentProducer = value;
-				RaisePropertyChangedEventImmediately("CurrentProducer");
+				NotifyOfPropertyChange("CurrentProducer");
 			}
 		}
 
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentOffer = value;
-				RaisePropertyChangedEventImmediately("CurrentOffer");
+				NotifyOfPropertyChange("CurrentOffer");
 				if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 			}
@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				orderWarning = value;
-				RaisePropertyChangedEventImmediately("OrderWarning");
+				NotifyOfPropertyChange("OrderWarning");
 			}
 		}
 

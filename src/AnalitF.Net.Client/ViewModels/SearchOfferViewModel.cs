@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				searchText = value;
-				RaisePropertyChangedEventImmediately("SearchText");
+				NotifyOfPropertyChange("SearchText");
 			}
 		}
 
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentPrice = value;
-				RaisePropertyChangedEventImmediately("CurrentPrice");
+				NotifyOfPropertyChange("CurrentPrice");
 			}
 		}
 	}

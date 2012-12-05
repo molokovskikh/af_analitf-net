@@ -96,8 +96,8 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentCatalogName = value;
-				RaisePropertyChangedEventImmediately("CurrentCatalogName");
-				RaisePropertyChangedEventImmediately("CanShowDescription");
+				NotifyOfPropertyChange("CurrentCatalogName");
+				NotifyOfPropertyChange("CanShowDescription");
 				LoadCatalogForms();
 			}
 		}
@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentCatalogForm = value;
 				CurrentCatalog = value;
-				RaisePropertyChangedEventImmediately("CurrentCatalogForm");
+				NotifyOfPropertyChange("CurrentCatalogForm");
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace AnalitF.Net.Client.ViewModels
 				if (CurrentCatalogName == null) {
 					CurrentCatalogName = currentCatalog.Name;
 				}
-				RaisePropertyChangedEventImmediately("CurrentCatalog");
+				NotifyOfPropertyChange("CurrentCatalog");
 			}
 		}
 
@@ -133,7 +133,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				showWithoutOffers = value;
-				RaisePropertyChangedEventImmediately("ShowWithoutOffers");
+				NotifyOfPropertyChange("ShowWithoutOffers");
 			}
 		}
 
@@ -146,8 +146,8 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentFilter = value;
 				FilterByMnn = false;
-				RaisePropertyChangedEventImmediately("CurrentFilter");
-				RaisePropertyChangedEventImmediately("FilterDescription");
+				NotifyOfPropertyChange("CurrentFilter");
+				NotifyOfPropertyChange("FilterDescription");
 			}
 		}
 
@@ -164,9 +164,9 @@ namespace AnalitF.Net.Client.ViewModels
 				else {
 					filtredMnn = null;
 				}
-				RaisePropertyChangedEventImmediately("FilterByMnn");
-				RaisePropertyChangedEventImmediately("FiltredMnn");
-				RaisePropertyChangedEventImmediately("FilterDescription");
+				NotifyOfPropertyChange("FilterByMnn");
+				NotifyOfPropertyChange("FiltredMnn");
+				NotifyOfPropertyChange("FilterDescription");
 			}
 		}
 
@@ -178,9 +178,9 @@ namespace AnalitF.Net.Client.ViewModels
 				filtredMnn = value;
 				if (!filtredMnn.HaveOffers)
 					ShowWithoutOffers = true;
-				RaisePropertyChangedEventImmediately("FiltredMnn");
-				RaisePropertyChangedEventImmediately("FilterByMnn");
-				RaisePropertyChangedEventImmediately("FilterDescription");
+				NotifyOfPropertyChange("FiltredMnn");
+				NotifyOfPropertyChange("FilterByMnn");
+				NotifyOfPropertyChange("FilterDescription");
 			}
 		}
 

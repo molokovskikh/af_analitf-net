@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				mnns = value;
-				RaisePropertyChangedEventImmediately("Mnns");
+				NotifyOfPropertyChange("Mnns");
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				showWithoutOffers = value;
-				RaisePropertyChangedEventImmediately("ShowWithoutOffers");
+				NotifyOfPropertyChange("ShowWithoutOffers");
 			}
 		}
 

@@ -14,24 +14,42 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Label>Вывести за период с</Label>
+			<DatePicker Name="Begin"></DatePicker>
 			<Label>по</Label>
+			<DatePicker Name="End"></DatePicker>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Orders">
-			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Создано" Binding="{Binding CreatedOn}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price}" />
-				<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding LinesCount}" />
-				<DataGridTextColumn Width="*" Header="Отправить" Binding="{Binding Send}" />
-				<DataGridTextColumn Width="*" Header="Мин.сумма" Binding="{Binding MinSum}" />
-				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
-				<DataGridTextColumn Width="*" Header="Месячный заказ" Binding="{Binding MonthlyOrderSum}" />
-				<DataGridTextColumn Width="*" Header="Недельный заказ" Binding="{Binding WeeklyOrderSum}" />
-			</DataGrid.Columns>
-		</c:DataGrid>
+		<TabControl Grid.Row="1" Grid.Column="0">
+			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
+				<c:DataGrid x:Name="Orders">
+					<DataGrid.Columns>
+						<DataGridTextColumn Width="*" Header="Создано" Binding="{Binding CreatedOn}" />
+						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price}" />
+						<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding Price.RegionName}" />
+						<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding LinesCount}" />
+						<DataGridTextColumn Width="*" Header="Отправить" Binding="{Binding Send}" />
+						<DataGridTextColumn Width="*" Header="Мин.сумма" Binding="{Binding MinSum}" />
+						<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
+						<DataGridTextColumn Width="*" Header="Месячный заказ" Binding="{Binding MonthlyOrderSum}" />
+						<DataGridTextColumn Width="*" Header="Недельный заказ" Binding="{Binding WeeklyOrderSum}" />
+					</DataGrid.Columns>
+				</c:DataGrid>
+			</TabItem>
+			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected}">
+				<c:DataGrid x:Name="SentOrders">
+					<DataGrid.Columns>
+						<DataGridTextColumn Width="*" Header="Отправлено" Binding="{Binding SentOn}" />
+						<DataGridTextColumn Width="*" Header="Создано" Binding="{Binding CreatedOn}" />
+						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price}" />
+						<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding Price.RegionName}" />
+						<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding LinesCount}" />
+						<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
+					</DataGrid.Columns>
+				</c:DataGrid>
+			</TabItem>
+		</TabControl>
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
 			<Label>Сообщение поставщику</Label>

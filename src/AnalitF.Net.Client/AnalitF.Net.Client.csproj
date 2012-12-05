@@ -156,6 +156,7 @@
     <Compile Include="Models\Tasks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
+    <Compile Include="ViewModels\BaseOrderViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />

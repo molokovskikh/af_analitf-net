@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_time = value;
-				RaisePropertyChangedEventImmediately("Time");
+				NotifyOfPropertyChange("Time");
 			}
 		}
 

@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentFilter = value;
-				RaisePropertyChangedEventImmediately("CurrentFilter");
+				NotifyOfPropertyChange("CurrentFilter");
 			}
 		}
 

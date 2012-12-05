@@ -60,13 +60,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => UpdateDisplayName());
 
 			this.ObservableForProperty(m => m.ActiveItem)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanPrint"));
+				.Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
 
 			this.ObservableForProperty(m => m.ActiveItem)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanExport"));
+				.Subscribe(_ => NotifyOfPropertyChange("CanExport"));
 
 			this.ObservableForProperty(m => m.CanPrint)
-				.Subscribe(_ => RaisePropertyChangedEventImmediately("CanPrintPreview"));
+				.Subscribe(_ => NotifyOfPropertyChange("CanPrintPreview"));
 		}
 
 		protected override void OnActivate()
