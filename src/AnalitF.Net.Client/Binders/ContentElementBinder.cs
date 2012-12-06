@@ -51,6 +51,7 @@ namespace AnalitF.Net.Client.Binders
 
 		public static void RegisterConvention()
 		{
+			ConventionManager.Singularize = s => s.InflectTo().Singularized;
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
 			ConventionManager.AddElementConvention<FrameworkElement>(UIElement.IsEnabledProperty, "IsEnabled", "IsEnabledChanged");

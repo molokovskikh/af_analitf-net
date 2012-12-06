@@ -234,6 +234,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(renewModel.CurrentOffer.OrderLine, Is.Not.Null);
 		}
 
+		[Test]
+		public void Can_not_make_order_if_current_address_is_null()
+		{
+			shell.CurrentAddress = null;
+			model.CurrentOffer.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+
+			Assert.That(model.CurrentOffer.OrderCount, Is.EqualTo(0));
+			Assert.That(model.CurrentOffer.OrderLine, Is.Null);
+		}
+
 		private void CleanSendOrders(Offer offer)
 		{
 			session.Query<SentOrderLine>()

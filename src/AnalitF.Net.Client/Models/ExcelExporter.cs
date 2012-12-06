@@ -12,6 +12,13 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.Models
 {
+	public interface IExportable
+	{
+		bool CanExport { get; }
+
+		IResult Export();
+	}
+
 	public class ExportAttribute : Attribute
 	{
 	}

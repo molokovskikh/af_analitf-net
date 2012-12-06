@@ -34,14 +34,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
-			Address = Session.Query<Address>().FirstOrDefault();
-
 			excelExporter = new ExcelExporter(this);
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
 				.Throttle(warningTimeout)
 				.Subscribe(m => { OrderWarning = null; });
+		}
+
+		protected override void OnInitialize()
+		{
+			Address = Shell.CurrentAddress;
 		}
 
 		protected void UpdateProducers()
@@ -151,9 +154,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			var catalogViewModel = new CatalogViewModel {
-				CurrentCatalog = CurrentCatalog
-			};
+			var catalogViewModel = new CatalogViewModel();
+			catalogViewModel.CurrentCatalogName = catalogViewModel.CatalogNames.FirstOrDefault(c => c.Id == CurrentCatalog.Name.Id);
+			catalogViewModel.CurrentCatalog = catalogViewModel.CatalogForms.FirstOrDefault(c => c.Id == CurrentCatalog.Id);
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 
@@ -188,6 +191,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (CurrentOffer == null)
 				return;
+
+			if (Address == null)
+				CurrentOffer.OrderCount = 0;
 
 			lastEditOffer = CurrentOffer;
 			CurrentOffer.MakePreorderCheck();
@@ -261,6 +267,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void LoadOrderItems()
 		{
+			if (Address == null)
+				return;
+
 			var lines = Session.Query<OrderLine>().Where(l => l.Order.Address == Address).ToList();
 
 			foreach (var offer in Offers) {

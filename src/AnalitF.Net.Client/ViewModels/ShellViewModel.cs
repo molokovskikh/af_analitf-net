@@ -29,13 +29,6 @@ namespace AnalitF.Net.Client.ViewModels
 		void Print();
 	}
 
-	public interface IExportable
-	{
-		bool CanExport { get; }
-
-		IResult Export();
-	}
-
 	[Serializable]
 	public class ShellViewModel : Conductor<IScreen>
 	{
@@ -44,6 +37,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private Extentions.WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLog(typeof(ShellViewModel));
+		private List<Address> addresses;
+		private Address currentAddress;
 
 		public ShellViewModel()
 		{
@@ -53,7 +48,10 @@ namespace AnalitF.Net.Client.ViewModels
 			session = factory.OpenSession();
 
 			windowManager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+
 			settings = session.Query<Settings>().First();
+			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
+			CurrentAddress = Addresses.FirstOrDefault();
 
 			DisplayName = "АналитФАРМАЦИЯ";
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -76,6 +74,27 @@ namespace AnalitF.Net.Client.ViewModels
 			((Window)GetView()).Loaded += (sender, args) => {
 				IsSettingsValid();
 			};
+		}
+
+		public List<Address> Addresses
+		{
+			get { return addresses; }
+			set
+			{
+				addresses = value;
+				NotifyOfPropertyChange("Addresses");
+			}
+		}
+
+		public Address CurrentAddress
+		{
+			get { return currentAddress; }
+			set
+			{
+				currentAddress = value;
+				ResetNavigation();
+				NotifyOfPropertyChange("CurrentAddress");
+			}
 		}
 
 		private bool IsSettingsValid()
@@ -307,7 +326,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			ResetNavigation();
 
-			var chain = views.TakeWhile((s, i) => i < views.Length - 2);
+			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
 			foreach (var screen in chain) {
 				navigationStack.Push(screen);
 			}

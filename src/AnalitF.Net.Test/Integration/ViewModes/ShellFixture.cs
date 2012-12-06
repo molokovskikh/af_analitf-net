@@ -72,6 +72,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.ActiveItem, Is.Null);
 		}
 
+		[Test]
+		public void Close_current_view_on_address_change()
+		{
+			shell.ShowPrice();
+			shell.CurrentAddress = shell.Addresses[1];
+
+			Assert.That(shell.ActiveItem, Is.Null);
+			Assert.That(shell.NavigationStack, Is.Empty);
+		}
+
 		private void StartSync()
 		{
 			var waitClose = new ManualResetEventSlim();

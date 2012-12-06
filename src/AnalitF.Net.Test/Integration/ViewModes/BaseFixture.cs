@@ -44,6 +44,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		protected T Init<T>(T model) where T : BaseScreen
 		{
 			model.Parent = shell;
+			ScreenExtensions.TryActivate(model);
 			return model;
 		}
 	}

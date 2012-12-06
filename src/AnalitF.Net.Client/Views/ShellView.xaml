@@ -118,6 +118,13 @@
 				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"></Image>
 				</Button>
+
+				<Separator></Separator>
+
+				<StackPanel>
+					<Label>Адрес заказа:</Label>
+					<ComboBox Style="{StaticResource Filter}" x:Name="Addresses" DisplayMemberPath="Name"></ComboBox>
+				</StackPanel>
 			</ToolBar>
 		</ToolBarTray>
 
