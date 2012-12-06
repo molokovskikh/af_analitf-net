@@ -63,6 +63,17 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(model.Text, Is.EqualTo("456"));
 		}
 
+		[Test]
+		public void Create_command_binding()
+		{
+			var model = new ViewModel { Text = "123" };
+			var view = new UserControl { DataContext = model };
+			ViewModelBinder.Bind(model, view, null);
+
+			Assert.That(view.CommandBindings.Count, Is.EqualTo(1));
+			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Commands.InvokeViewModel));
+		}
+
 		public class ViewModel
 		{
 			public string Text { get; set; }

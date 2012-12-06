@@ -127,6 +127,7 @@ namespace AnalitF.Net.Client
 			ViewModelBinder.Bind = (viewModel, view, context) => {
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
+				CommandBinder.BindCommand(view);
 			};
 
 			ViewModelBinder.BindProperties = (elements, type) => {

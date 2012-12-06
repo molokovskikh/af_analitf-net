@@ -51,8 +51,14 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
 				m.Property(p => p.OperativeInfo, c => c.Length(10000));
 			});
-			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
-			mapper.Class<SentOrder>(m => m.Bag(o => o.Lines, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All)));
+			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+				c.Inverse(true);
+			}));
+			mapper.Class<SentOrder>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+				c.Inverse(true);
+			}));
 
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
@@ -89,7 +95,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
 				{Environment.Isolation, "ReadCommitted"},
-				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName}
+				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
+				{Environment.ReleaseConnections, "on_close"}
 			});
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);

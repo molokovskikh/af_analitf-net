@@ -117,6 +117,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Binders\CloseOnEscapeBehavior.cs" />
+    <Compile Include="Binders\CommandBinder.cs" />
     <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
     <Compile Include="Binders\ContextMenuBehavior.cs" />

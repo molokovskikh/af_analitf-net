@@ -32,12 +32,13 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string LeaderRegion { get; set; }
 
-		public virtual OrderLine OrderLine { get; set; }
-
 		public virtual bool Leader
 		{
 			get { return LeaderRegionId == RegionId && LeaderPrice.Id == Price.Id; }
 		}
+
+		[Ignore]
+		public virtual OrderLine OrderLine { get; set; }
 
 		[Ignore]
 		public virtual decimal? Diff
@@ -80,7 +81,7 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual string Notification { get; set; }
 
-		//Значение для этого поля загружается исинхронно, что бы ui узнал о загрузке надо его оповестить
+		//Значение для этого поля загружается асинхронно, что бы ui узнал о загрузке надо его оповестить
 		[Ignore]
 		public virtual decimal? PrevOrderAvgCost
 		{
@@ -115,8 +116,6 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged("TotalOrderSum");
 			}
 		}
-
-
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 

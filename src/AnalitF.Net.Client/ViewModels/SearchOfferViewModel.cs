@@ -17,8 +17,8 @@ namespace AnalitF.Net.Client.ViewModels
 			NeedToCalculateDiff = true;
 
 			var producers = StatelessSession.Query<Offer>().Select(o => o.Producer).ToList().Distinct().OrderBy(p => p);
-			Producers = new[] { AllProducerLabel }.Concat(producers).ToList();
-			CurrentProducer = AllProducerLabel;
+			Producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
+			CurrentProducer = Consts.AllProducerLabel;
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
@@ -27,27 +27,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Search()
 		{
-			if (String.IsNullOrEmpty(SearchText))
-				return;
-
-			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
-			if (currentPrice != null && currentPrice.Id > 0) {
-				query = query.Where(o => o.Price.Id == currentPrice.Id);
-			}
-
-			if (CurrentProducer != null && CurrentProducer != AllProducerLabel) {
-				query = query.Where(o => o.Producer == CurrentProducer);
-			}
-
-			var offer = query.Fetch(o => o.Price).ToList();
-			if (Settings.GroupByProduct) {
-				Offers = SortByMinCostInGroup(offer, o => o.ProductId);
-			}
-			else {
-				Offers = SortByMinCostInGroup(offer, o => o.CatalogId);
-			}
-
-			Calculate();
+			Update();
 		}
 
 		public string SearchText
@@ -69,6 +49,29 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentPrice = value;
 				NotifyOfPropertyChange("CurrentPrice");
+			}
+		}
+
+		protected override void Query()
+		{
+			if (String.IsNullOrEmpty(SearchText))
+				return;
+
+			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
+			if (currentPrice != null && currentPrice.Id > 0) {
+				query = query.Where(o => o.Price.Id == currentPrice.Id);
+			}
+
+			if (CurrentProducer != null && CurrentProducer != Consts.AllProducerLabel) {
+				query = query.Where(o => o.Producer == CurrentProducer);
+			}
+
+			var offer = query.Fetch(o => o.Price).ToList();
+			if (Settings.GroupByProduct) {
+				Offers = SortByMinCostInGroup(offer, o => o.ProductId);
+			}
+			else {
+				Offers = SortByMinCostInGroup(offer, o => o.CatalogId);
 			}
 		}
 	}

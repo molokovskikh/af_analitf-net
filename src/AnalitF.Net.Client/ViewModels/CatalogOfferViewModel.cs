@@ -16,8 +16,6 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
 	{
-		private const string allRegionLabel = "Все регионы";
-
 		private string currentRegion;
 		private List<string> regions;
 		private string currentFilter;
@@ -27,6 +25,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<MaxProducerCost> maxProducerCosts;
 		private List<SentOrderLine> historyOrders;
 
+		private static TimeSpan LoadOrderHistoryTimeout = TimeSpan.FromMilliseconds(2000);
+
 		public CatalogOfferViewModel(Catalog catalog)
 		{
 			DisplayName = "Сводный прайс-лист";
@@ -35,13 +35,13 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
-			CurrentRegion = allRegionLabel;
-			CurrentProducer = AllProducerLabel;
+			CurrentRegion = Consts.AllRegionLabel;
+			CurrentProducer = Consts.AllProducerLabel;
 
 			this.ObservableForProperty(m => m.CurrentRegion)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Merge(this.ObservableForProperty(m => m.CurrentFilter))
-				.Subscribe(e => Filter());
+				.Subscribe(e => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => NotifyOfPropertyChange("RetailMarkup"));
@@ -54,10 +54,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
-				.Throttle(TimeSpan.FromMilliseconds(2000), Scheduler)
+				.Throttle(LoadOrderHistoryTimeout, Scheduler)
 				.Subscribe(_ => LoadHistoryOrders());
 
-			Filter();
+			Update();
 			UpdateMaxProducers();
 
 			CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
@@ -115,16 +115,16 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		private void UpdateRegions()
 		{
 			var offerRegions = Offers.Select(o => o.RegionName).Distinct().OrderBy(r => r).ToList();
-			Regions = new[] { allRegionLabel }.Concat(offerRegions).ToList();
+			Regions = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
 		}
 
-		private void Filter()
+		protected override void Query()
 		{
 			var queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == CurrentCatalog.Id);
-			if (CurrentRegion != allRegionLabel) {
+			if (CurrentRegion != Consts.AllRegionLabel) {
 				queryable = queryable.Where(o => o.RegionName == CurrentRegion);
 			}
-			if (CurrentProducer != AllProducerLabel) {
+			if (CurrentProducer != Consts.AllProducerLabel) {
 				queryable = queryable.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == Filters[1]) {
@@ -137,7 +137,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			var offers = queryable.Fetch(o => o.Price).ToList();
 			offers = Sort(offers);
 			Offers = offers;
-			Calculate();
 		}
 
 		public string[] Filters { get; set; }

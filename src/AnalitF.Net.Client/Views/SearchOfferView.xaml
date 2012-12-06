@@ -2,7 +2,17 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" xmlns:cal="http://www.caliburnproject.org"
-	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views" xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts">
+	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
+	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowCatalog" />
+		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowCatalogWithMnnFilter" />
+		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+	</UserControl.InputBindings>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>

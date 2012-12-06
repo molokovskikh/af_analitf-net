@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Price = price;
 
 			Filters = filters;
-			currentProducer = AllProducerLabel;
+			currentProducer = Consts.AllProducerLabel;
 			currentFilter = filters[0];
 			if (showLeaders)
 				currentFilter = filters[2];
@@ -53,10 +53,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private void Update()
+		protected override void Query()
 		{
 			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == Price.Id);
-			if (CurrentProducer != AllProducerLabel) {
+			if (CurrentProducer != Consts.AllProducerLabel) {
 				query = query.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == filters[2]) {
@@ -71,8 +71,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Offers = query.Fetch(o => o.Price).ToList();
 			CurrentOffer = offers.FirstOrDefault();
-
-			Calculate();
 		}
 
 		public string SearchText { get; set; }

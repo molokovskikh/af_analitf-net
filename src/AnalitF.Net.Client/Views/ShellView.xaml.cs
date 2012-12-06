@@ -15,21 +15,5 @@ namespace AnalitF.Net.Client.Views
 			Snoop.Visibility = Visibility.Collapsed;
 #endif
 		}
-
-		private void InvokeViewModel(object sender, ExecutedRoutedEventArgs e)
-		{
-			ViewModelHelper.InvokeDataContext(sender, e.Parameter as string);
-		}
-
-		private void CanInvokeViewModel(object sender, CanExecuteRoutedEventArgs e)
-		{
-			var result = ViewModelHelper.InvokeDataContext(sender, "Can" + e.Parameter)
-				?? ViewModelHelper.InvokeDataContext(sender, "get_Can" + e.Parameter);
-			if (result is bool)
-				e.CanExecute = (bool)result;
-			else {
-				e.CanExecute = true;
-			}
-		}
 	}
 }

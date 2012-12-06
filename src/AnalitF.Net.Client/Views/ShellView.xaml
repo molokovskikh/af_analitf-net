@@ -11,11 +11,6 @@
 		<KeyBinding Gesture="F10" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowOrderLines" />
 		<KeyBinding Gesture="F12" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowOrders" />
 	</Window.InputBindings>
-	<Window.CommandBindings>
-		<CommandBinding Command="binders:Commands.InvokeViewModel"
-			Executed="InvokeViewModel"
-			CanExecute="CanInvokeViewModel"/>
-	</Window.CommandBindings>
 
 	<Grid>
 		<Grid.RowDefinitions>

@@ -20,6 +20,7 @@ using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using AnalitF.Net.Client.Helpers;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -219,6 +220,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			Assert.That(model.CanPrint, Is.True);
 			model.Print();
+		}
+
+		[Test]
+		public void Load_order_count()
+		{
+			model.CurrentOffer.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+
+			var renewModel = Init(new CatalogOfferViewModel(catalog));
+			Assert.That(renewModel.CurrentOffer.OrderCount, Is.EqualTo(1));
+			Assert.That(renewModel.CurrentOffer.OrderLine, Is.Not.Null);
 		}
 
 		private void CleanSendOrders(Offer offer)

@@ -27,12 +27,6 @@
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
 	</UserControl.InputBindings>
 
-	<UserControl.CommandBindings>
-		<CommandBinding Command="binders:Commands.InvokeViewModel"
-			Executed="InvokeViewModel"
-			CanExecute="CanInvokeViewModel"/>
-	</UserControl.CommandBindings>
-
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>

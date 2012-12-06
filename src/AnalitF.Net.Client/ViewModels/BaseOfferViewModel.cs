@@ -11,7 +11,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class BaseOfferViewModel : BaseScreen, IExportable
+	public abstract class BaseOfferViewModel : BaseScreen, IExportable
 	{
 		private readonly TimeSpan warningTimeout = TimeSpan.FromSeconds(5);
 
@@ -25,8 +25,6 @@ namespace AnalitF.Net.Client.ViewModels
 		//тк уведомление о сохранении изменний приходит после
 		//изменения текущего предложения
 		private Offer lastEditOffer;
-
-		protected const string AllProducerLabel = "Все производители";
 
 		protected bool NeedToCalculateDiff;
 
@@ -49,7 +47,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected void UpdateProducers()
 		{
 			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
-			Producers = new[] { AllProducerLabel }.Concat(offerProducers).ToList();
+			Producers = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
 		}
 
 		public Catalog CurrentCatalog
@@ -259,6 +257,28 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult Export()
 		{
 			return excelExporter.Export();
+		}
+
+		protected void LoadOrderItems()
+		{
+			var lines = Session.Query<OrderLine>().Where(l => l.Order.Address == Address).ToList();
+
+			foreach (var offer in Offers) {
+				var line = lines.FirstOrDefault(l => l.OfferId == offer.Id);
+				if (line != null) {
+					offer.OrderLine = line;
+					offer.OrderCount = line.Count;
+				}
+			}
+		}
+
+		protected abstract void Query();
+
+		public void Update()
+		{
+			Query();
+			Calculate();
+			LoadOrderItems();
 		}
 	}
 }

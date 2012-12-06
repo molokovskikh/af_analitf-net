@@ -9,12 +9,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public JunkOfferViewModel()
 		{
 			DisplayName = "Препараты с истекающими сроками годности";
+			Update();
+		}
+
+		protected override void Query()
+		{
 			Offers = StatelessSession.Query<Offer>()
 				.Where(o => o.Junk)
 				.OrderBy(o => o.ProductSynonym)
 				.Fetch(o => o.Price)
 				.ToList();
-			Calculate();
 		}
 	}
 }
