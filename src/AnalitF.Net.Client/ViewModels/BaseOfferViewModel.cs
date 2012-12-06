@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -10,7 +11,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class BaseOfferViewModel : BaseScreen
+	public class BaseOfferViewModel : BaseScreen, IExportable
 	{
 		private readonly TimeSpan warningTimeout = TimeSpan.FromSeconds(5);
 
@@ -30,11 +31,14 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool NeedToCalculateDiff;
 
 		protected Address Address;
+		private ExcelExporter excelExporter;
 
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
 			Address = Session.Query<Address>().FirstOrDefault();
+
+			excelExporter = new ExcelExporter(this);
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
@@ -69,6 +73,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		[Export]
 		public List<Offer> Offers
 		{
 			get { return offers; }
@@ -244,6 +249,16 @@ namespace AnalitF.Net.Client.ViewModels
 				if (Settings.DiffCalcMode == DiffCalcMode.PrevOffer)
 					baseCost = offer.Cost;
 			}
+		}
+
+		public bool CanExport
+		{
+			get { return excelExporter.CanExport; }
+		}
+
+		public IResult Export()
+		{
+			return excelExporter.Export();
 		}
 	}
 }

@@ -1,12 +1,17 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Concurrency;
+using System.Windows.Controls;
+using System.Windows.Data;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using NPOI.HSSF.UserModel;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels

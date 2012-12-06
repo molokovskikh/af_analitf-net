@@ -3,30 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Printing;
 using System.Reactive.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Documents.Serialization;
 using System.Windows.Media;
-using System.Windows.Xps;
-using System.Windows.Xps.Packaging;
 using System.Windows.Xps.Serialization;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using Caliburn.Micro;
-using Common.Tools;
-using NHibernate;
 using NHibernate.Linq;
-using NPOI.HSSF.UserModel;
-using NPOI.SS.UserModel;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable, IExportable
+	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
 	{
 		private const string allRegionLabel = "Все регионы";
 
@@ -326,7 +314,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			return doc;
 		}
 
-		public void ShowCatalog()
+		public void ShowPrice()
 		{
 			if (CurrentOffer == null)
 				return;
@@ -340,75 +328,5 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
-
-		public bool CanExport
-		{
-			get { return true; }
-		}
-
-		public IResult Export()
-		{
-			var view = (UserControl) GetView();
-			var grid = (DataGrid)view.DeepChildren().OfType<Controls.DataGrid>().First(g => g.Name == "Offers");
-			var columns = grid.Columns;
-			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
-			using(var file = File.OpenWrite(filename)) {
-				var book = new HSSFWorkbook();
-				var sheet = book.CreateSheet("Экспорт");
-				var rowIndex = 0;
-				var row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < columns.Count; i++) {
-					row.CreateCell(i).SetCellValue(columns[i].Header.ToString());
-				}
-				foreach (var offer in Offers) {
-					row = sheet.CreateRow(rowIndex++);
-					for(var i = 0; i < columns.Count; i++) {
-						row.CreateCell(i).SetCellValue(GetValue(columns[i], offer));
-					}
-				}
-				book.Write(file);
-			}
-
-			return new OpenFileResult(filename);
-		}
-
-		private string GetValue(DataGridColumn column, object offer)
-		{
-			var path = ((Binding)((DataGridTextColumn)column).Binding).Path.Path;
-			var parts = path.Split('.');
-
-			var value = offer;
-			foreach (var part in parts) {
-				if (value == null)
-					return "";
-				var type = value.GetType();
-				var property = type.GetProperty(part);
-				if (property == null)
-					return "";
-				value = property.GetValue(value, null);
-			}
-			if (value == null)
-				return "";
-			return value.ToString();
-		}
-	}
-
-	public class OpenFileResult : IResult
-	{
-		public string Filename;
-
-		public OpenFileResult(string filename)
-		{
-			Filename = filename;
-		}
-
-		//TODO: Обработка ошибок?
-		public void Execute(ActionExecutionContext context)
-		{
-			Process.Start("excel", Filename);
-			Completed(this, new ResultCompletionEventArgs());
-		}
-
-		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 }
