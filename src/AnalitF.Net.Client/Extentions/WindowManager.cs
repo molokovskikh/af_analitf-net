@@ -68,5 +68,11 @@ namespace AnalitF.Net.Client.Extentions
 		{
 			ShowMessageBox(text, "АналитФАРМАЦИЯ: Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
+
+		public MessageBoxResult Question(string text)
+		{
+			var result = ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+			return result;
+		}
 	}
 }

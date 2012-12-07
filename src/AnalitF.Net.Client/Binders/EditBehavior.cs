@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Binders
 		private static TimeSpan inputInterval = TimeSpan.FromMilliseconds(1500);
 		private static TimeSpan commitInterval = TimeSpan.FromMilliseconds(750);
 
-		public static IDisposable Attach(Controls.DataGrid grid)
+		public static void Attach(Controls.DataGrid grid)
 		{
 			var textInput = Observable
 				.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput")
@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Binders
 			//игнорировать события до тех пор пока не произошло событие редактирования
 			//когда произошло взять одно событие и повторить, фактически это state machine
 			//которая генерирует событие OfferCommitted только если было событие редактирования
-			return updated.Throttle(commitInterval)
+			updated.Throttle(commitInterval)
 				.Merge(Observable.FromEventPattern<EventArgs>(grid, "CurrentCellChanged").Select(e => e.Sender))
 				.Merge(Observable.FromEventPattern<RoutedEventArgs>(grid, "Unloaded").Select(e => e.Sender))
 				.SkipUntil(updated)

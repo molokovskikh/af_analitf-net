@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using ReactiveUI;
 
@@ -23,25 +24,18 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 	}
 
-	public class WaitCancelViewModel : BaseScreen
+	public class SyncViewModel : WaitViewModel
 	{
-		private CancellationTokenSource _cancellation;
 		private TimeSpan _time;
 		private Progress _progress;
 
-		public WaitCancelViewModel(CancellationTokenSource cancellation, IObservable<Progress> progress)
+		public SyncViewModel(IObservable<Progress> progress)
 		{
 			DisplayName = "Обмен данными";
-			Text = "Производится обмен данными.\r\nПожалуйста подождите.";
-			_cancellation = cancellation;
 			var timer = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1.0), RxApp.DeferredScheduler)
 				.Subscribe(t => Time = TimeSpan.FromSeconds(t));
 			progress.Subscribe(p => Progress = p);
 		}
-
-		public string Text { get; set; }
-
-		public bool IsCompleted { get; set; }
 
 		public TimeSpan Time
 		{
@@ -61,19 +55,6 @@ namespace AnalitF.Net.Client.ViewModels
 				_progress = value;
 				NotifyOfPropertyChange("Progress");
 			}
-		}
-
-		public override void CanClose(Action<bool> callback)
-		{
-			//мы не можем закрываться тк происходит процесс обмена данными
-			//все что мы можем попытаться отменить его и ждать пока, процесс будет отменен и сам закроет диалог
-			Cancel();
-			callback(IsCompleted);
-		}
-
-		public void Cancel()
-		{
-			_cancellation.Cancel();
 		}
 	}
 }

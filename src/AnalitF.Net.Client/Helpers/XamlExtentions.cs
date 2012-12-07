@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
 		{
-			return view.Children().Flat(d => Children((DependencyObject)d));
+			return view.Children().Flat(d => Children(d));
 		}
 	}
 }

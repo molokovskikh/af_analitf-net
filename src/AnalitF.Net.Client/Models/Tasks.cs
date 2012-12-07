@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -8,14 +10,19 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
+using NHibernate;
+using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Proxy;
+using NHibernate.Tool.hbm2ddl;
 using Newtonsoft.Json.Serialization;
+using log4net;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -48,6 +55,8 @@ namespace AnalitF.Net.Client.Models
 
 	public class Tasks
 	{
+		private static ILog log = LogManager.GetLogger(typeof(Tasks));
+
 		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> Update = (c, t, p) => UpdateTask(c, t, p);
 		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> SendOrders = (c, t, p) => SendOrdersTask(c, t, p);
 
@@ -173,6 +182,86 @@ namespace AnalitF.Net.Client.Models
 					Path.GetFullPath(Path.Combine(ExtractPath, t.Item2)),
 					File.ReadAllLines(Path.Combine(ExtractPath, t.Item1))))
 				.ToList();
+		}
+
+		public static bool CheckAndRepairDb(CancellationToken toke)
+		{
+			var configuration = AppBootstrapper.NHibernate.Configuration;
+			var dataPath = AppBootstrapper.DataPath;
+			var factory = AppBootstrapper.NHibernate.Factory;
+
+			var dialect = NHibernate.Dialect.Dialect.GetDialect(configuration.Properties);
+			var tables = configuration.CreateMappings(dialect).IterateTables.Select(t => t.Name);
+
+			var results = new List<RepairStatus>();
+
+			using(var session = factory.OpenSession()) {
+				foreach (var table in tables) {
+					toke.ThrowIfCancellationRequested();
+
+					log.ErrorFormat("REPAIR TABLE {0} EXTENDED", table);
+					var messages = session
+						.CreateSQLQuery(String.Format("REPAIR TABLE {0} EXTENDED", table))
+						.List<object[]>()
+						.Select(m => m.Select(v => v.ToString()).ToArray())
+						.ToList();
+					log.Error(messages.Implode(s => s.Implode(), System.Environment.NewLine));
+
+					var result =  Parse(messages);
+					results.Add(result);
+					if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
+						session
+							.CreateSQLQuery(String.Format("OPTIMIZE TABLE {0}", table))
+							.ExecuteUpdate();
+					}
+					if (result == RepairStatus.Fail) {
+						log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
+						log.Error(String.Format("DROP TABLE IF EXISTS {0}", table));
+						session
+							.CreateSQLQuery(String.Format("DROP TABLE IF EXISTS {0}", table))
+							.ExecuteUpdate();
+						//если заголовок таблицы поврежден то drop table не даст результатов
+						//файлы останутся а при попытке создать таблицу будет ошибка
+						//нужно удалить файлы
+						Directory.GetFiles(dataPath, table + ".*").Each(File.Delete);
+					}
+				}
+			}
+
+			var export = new SchemaUpdate(configuration);
+			export.Execute(false, true);
+
+			new SanityCheck(dataPath).Check();
+
+			return results.All(r => r == RepairStatus.Ok);
+		}
+
+		private static RepairStatus Parse(IList<string[]> messages)
+		{
+			//не ведомо что случилось, но нужно верить в лучшее
+			if (!messages.Any())
+				return RepairStatus.Ok;
+
+			var notExist = messages.Where(m => m[2].Match("error")).Any(m => Regex.Match(m[3], "Table .+ doesn't exist").Success);
+			if (notExist)
+				return RepairStatus.NotExist;
+
+			var ok = messages.Where(m => m[2].Match("status")).Any(m => m[3].Match("OK"));
+			if (ok) {
+				var rowsChanged = messages.Where(m => m[2].Match("error")).Any(m => m[3].StartsWith("Number of rows changed"));
+				if (rowsChanged)
+					return RepairStatus.NumberOfRowsChanged;
+				return RepairStatus.Ok;
+			}
+			return RepairStatus.Fail;
+		}
+
+		public enum RepairStatus
+		{
+			Ok,
+			NumberOfRowsChanged,
+			NotExist,
+			Fail
 		}
 	}
 }

@@ -134,7 +134,6 @@
     <Compile Include="Extentions\WindowManager.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
-    <Compile Include="Helpers\Persister.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
     <Compile Include="Helpers\XamlExtentions.cs" />
     <Compile Include="Models\Address.cs" />
@@ -175,15 +174,16 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\PriceViewModel.cs" />
-    <Compile Include="ViewModels\WaitCancelViewModel.cs" />
+    <Compile Include="ViewModels\SyncViewModel.cs" />
+    <Compile Include="ViewModels\WaitViewModel.cs" />
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WaitCancelView.xaml.cs">
-      <DependentUpon>WaitCancelView.xaml</DependentUpon>
+    <Compile Include="Views\SyncView.xaml.cs">
+      <DependentUpon>SyncView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\JunkOfferView.xaml.cs">
       <DependentUpon>JunkOfferView.xaml</DependentUpon>
@@ -226,6 +226,9 @@
     <Compile Include="Views\ProductInfoPanel.xaml.cs">
       <DependentUpon>ProductInfoPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\WaitView.xaml.cs">
+      <DependentUpon>WaitView.xaml</DependentUpon>
+    </Compile>
     <Page Include="Assets\Application.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -242,7 +245,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\WaitCancelView.xaml">
+    <Page Include="Views\SyncView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -295,6 +298,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ProductInfoPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WaitView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

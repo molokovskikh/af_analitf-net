@@ -14,6 +14,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using log4net.Config;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
@@ -116,6 +117,20 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(item.CodeFirmCr, Is.EqualTo(offer.ProducerId));
 			Assert.That(item.SynonymCode, Is.EqualTo(offer.ProductSynonymId));
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(offer.ProducerSynonymId));
+		}
+
+		[Test]
+		public void Repair_data_base()
+		{
+			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
+			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
+			var cancellation = new CancellationTokenSource();
+
+			var result = Tasks.CheckAndRepairDb(cancellation.Token);
+
+			Assert.That(result, Is.False);
+			Assert.That(Directory.GetFiles("data", "mnns.*").Length, Is.EqualTo(3));
+			Assert.That(new FileInfo(Path.Combine("data", "markupconfigs.frm")).Length, Is.GreaterThan(0));
 		}
 	}
 }

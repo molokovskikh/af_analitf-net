@@ -80,6 +80,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
 			var driver = "NHibernate.Driver.MySqlDataDriver";
+			var dialect = typeof(DevartMySqlDialect).AssemblyQualifiedName;
+
 			if (connectionString.Contains("Embedded=True")) {
 				connectionString = FixRelativePaths(connectionString);
 				driver = typeof(DevArtDriver).AssemblyQualifiedName;
@@ -87,14 +89,13 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			Configuration = new Configuration();
 			Configuration.AddProperties(new Dictionary<string, string> {
-				{Environment.Dialect, "NHibernate.Dialect.MySQL5Dialect"},
+				{Environment.Dialect, dialect},
 				{Environment.ConnectionDriver, driver},
 				{Environment.ConnectionProvider, "NHibernate.Connection.DriverConnectionProvider"},
 				{Environment.ConnectionString, connectionString},
 				{Environment.Hbm2ddlKeyWords, "none"},
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
-				{Environment.Isolation, "ReadCommitted"},
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
 				{Environment.ReleaseConnections, "on_close"}
 			});

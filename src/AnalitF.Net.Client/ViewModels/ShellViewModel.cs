@@ -19,6 +19,7 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using LogManager = Caliburn.Micro.LogManager;
+using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -236,42 +237,60 @@ namespace AnalitF.Net.Client.ViewModels
 				Tasks.SendOrders);
 		}
 
+		public void CheckDb()
+		{
+			RunTask(
+				new WaitViewModel("Производится восстановление базы данных.\r\nПодождите..."),
+				Tasks.CheckAndRepairDb,
+				t => {
+					if (t.Result) {
+						windowManager.Notify("Проверка базы данных завершена.\r\nОшибок не найдено.");
+					}
+					else {
+						var result = windowManager.Question("Восстановление базы данных завершено.\r\n"
+							+ "В результате восстановления некоторые данные могли быть потеряны и необходимо сделать кумулятивное обновление.\r\n"
+							+ "Выполнить кумулятивное обновление?");
+						if (result == MessageBoxResult.Yes) {
+							Update();
+						}
+					}
+				});
+		}
+
+		public void CleanDb()
+		{
+			var result = windowManager.Question("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?.");
+			if (result != MessageBoxResult.Yes)
+				return;
+
+			RunTask(
+				new WaitViewModel("Производится очистка базы данных.\r\nПодождите..."),
+				Tasks.CheckAndRepairDb,
+				t => Update());
+		}
+
 		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> func)
 		{
 			if (!IsSettingsValid())
 				return;
 
-			ResetNavigation();
-
-			var cancellation = new CancellationTokenSource();
-			var token = cancellation.Token;
 			var progress = new BehaviorSubject<Progress>(new Progress());
+			var wait = new SyncViewModel(progress) {
+				GenericErrorMessage = errorMessage
+			};
+			var token = wait.Cancellation.Token;
 			var credential = new NetworkCredential(settings.UserName, settings.Password);
 			var task = func(credential, token, progress);
 
-			var wait = new WaitCancelViewModel(cancellation, progress);
-			task.ContinueWith(t => {
-				wait.IsCompleted = true;
-				wait.TryClose();
-				if (!t.IsFaulted && !t.IsCanceled) {
+			RunTask(wait,task,
+				t => {
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
 					}
 					else {
 						windowManager.Notify(sucessMessage);
 					}
-				}
-				else if (t.IsFaulted) {
-					log.Error(t.Exception);
-					var error = TranslateException(t.Exception)
-						?? errorMessage;
-					windowManager.Error(error);
-				}
-			},
-				TaskScheduler.FromCurrentSynchronizationContext());
-			task.Start();
-
-			windowManager.ShowFixedDialog(wait);
+				});
 		}
 
 		private void RunUpdate()
@@ -296,6 +315,35 @@ namespace AnalitF.Net.Client.ViewModels
 			return null;
 		}
 
+		private void RunTask<T>(WaitViewModel viewModel, Task<T> task, Action<Task<T>> continueWith)
+		{
+			ResetNavigation();
+
+			task.ContinueWith(t => {
+				viewModel.IsCompleted = true;
+				viewModel.TryClose();
+				if (!t.IsCanceled && !t.IsFaulted) {
+					continueWith(t);
+				}
+				else if (t.IsFaulted) {
+					log.Error(t.Exception);
+					var error = TranslateException(t.Exception)
+						?? viewModel.GenericErrorMessage;
+					windowManager.Error(error);
+				}
+			}, TaskScheduler.FromCurrentSynchronizationContext());
+			task.Start();
+			windowManager.ShowFixedDialog(viewModel);
+		}
+
+		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> continueWith)
+		{
+			var cancellation = new CancellationTokenSource();
+			var token = cancellation.Token;
+			var task = new Task<T>(() => func(token), token);
+			RunTask(viewModel, task, continueWith);
+		}
+
 		public void Navigate(IScreen item)
 		{
 			if (ActiveItem != null) {
@@ -311,7 +359,7 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return navigationStack; }
 		}
 
-		private void ResetNavigation()
+		public void ResetNavigation()
 		{
 			while (navigationStack.Count > 0) {
 				var screen = navigationStack.Pop();
