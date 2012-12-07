@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -13,6 +14,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
+using Test.Support.log4net;
 using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -53,12 +55,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Execute_update_task()
 		{
+			session.DeleteEach(session.Query<Address>());
+			session.Flush();
+			shell.Reload();
+			Assert.That(shell.Addresses.Count, Is.EqualTo(0));
+
 			PrepareForSync();
 
 			StartSync();
 
 			Assert.That(manager.Dialogs.Count, Is.EqualTo(0));
-			Assert.That(shell.Addresses.Count, Is.EqualTo(2));
+			Assert.That(shell.Addresses.Count, Is.EqualTo(1));
 		}
 
 		[Test]

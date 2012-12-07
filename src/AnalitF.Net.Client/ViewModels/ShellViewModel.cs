@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return true;
 		}
 
-		private void Reload()
+		public void Reload()
 		{
 			session.Clear();
 
