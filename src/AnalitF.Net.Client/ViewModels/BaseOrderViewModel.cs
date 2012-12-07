@@ -21,6 +21,12 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(n => Update());
 
 			this.ObservableForProperty(m => m.IsSentSelected)
+				.Subscribe(m => {
+					NotifyOfPropertyChange("BeginEnabled");
+					NotifyOfPropertyChange("EndEnabled");
+				});
+
+			this.ObservableForProperty(m => m.IsSentSelected)
 				.Merge(this.ObservableForProperty(m => m.IsCurrentSelected))
 				.Skip(1)
 				.Take(1)
@@ -30,9 +36,6 @@ namespace AnalitF.Net.Client.ViewModels
 						isSendInit = true;
 						Update();
 					}
-
-					NotifyOfPropertyChange("BeginEnabled");
-					NotifyOfPropertyChange("EndEnabled");
 				});
 		}
 
