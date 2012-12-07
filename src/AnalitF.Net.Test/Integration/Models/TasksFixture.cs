@@ -124,13 +124,21 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
 			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
-			var cancellation = new CancellationTokenSource();
 
-			var result = Tasks.CheckAndRepairDb(cancellation.Token);
+			var result = Tasks.CheckAndRepairDb(cancelletion.Token);
 
 			Assert.That(result, Is.False);
 			Assert.That(Directory.GetFiles("data", "mnns.*").Length, Is.EqualTo(3));
 			Assert.That(new FileInfo(Path.Combine("data", "markupconfigs.frm")).Length, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Clean_db()
+		{
+			Tasks.CleanDb(cancelletion.Token);
+
+			Assert.That(session.Query<Offer>().Count(), Is.EqualTo(0));
+			Assert.That(session.Query<Settings>().Count(), Is.EqualTo(1));
 		}
 	}
 }

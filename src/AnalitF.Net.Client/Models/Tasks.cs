@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Data;
-using System.Data.Common;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -16,7 +13,6 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
-using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Proxy;
@@ -184,20 +180,35 @@ namespace AnalitF.Net.Client.Models
 				.ToList();
 		}
 
-		public static bool CheckAndRepairDb(CancellationToken toke)
+		public static void CleanDb(CancellationToken token)
 		{
 			var configuration = AppBootstrapper.NHibernate.Configuration;
-			var dataPath = AppBootstrapper.DataPath;
 			var factory = AppBootstrapper.NHibernate.Factory;
 
-			var dialect = NHibernate.Dialect.Dialect.GetDialect(configuration.Properties);
-			var tables = configuration.CreateMappings(dialect).IterateTables.Select(t => t.Name);
+			var ignored = new [] { "SentOrders", "SentOrderLines", "Settings", "MarkupConfigs" };
+			var tables = Tables(configuration).Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
+
+			using(var sesssion = factory.OpenSession()) {
+				foreach (var table in tables) {
+					sesssion.CreateSQLQuery(String.Format("TRUNCATE {0}", table))
+						.ExecuteUpdate();
+				}
+			}
+		}
+
+		public static bool CheckAndRepairDb(CancellationToken token)
+		{
+			var configuration = AppBootstrapper.NHibernate.Configuration;
+			var factory = AppBootstrapper.NHibernate.Factory;
+			var dataPath = AppBootstrapper.DataPath;
+
+			var tables = Tables(configuration);
 
 			var results = new List<RepairStatus>();
 
 			using(var session = factory.OpenSession()) {
 				foreach (var table in tables) {
-					toke.ThrowIfCancellationRequested();
+					token.ThrowIfCancellationRequested();
 
 					log.ErrorFormat("REPAIR TABLE {0} EXTENDED", table);
 					var messages = session
@@ -234,6 +245,13 @@ namespace AnalitF.Net.Client.Models
 			new SanityCheck(dataPath).Check();
 
 			return results.All(r => r == RepairStatus.Ok);
+		}
+
+		private static IEnumerable<string> Tables(Configuration configuration)
+		{
+			var dialect = NHibernate.Dialect.Dialect.GetDialect(configuration.Properties);
+			var tables = configuration.CreateMappings(dialect).IterateTables.Select(t => t.Name);
+			return tables;
 		}
 
 		private static RepairStatus Parse(IList<string[]> messages)

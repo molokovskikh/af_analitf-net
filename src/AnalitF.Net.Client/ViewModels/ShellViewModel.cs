@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
 		private Settings settings;
-		private Extentions.WindowManager windowManager;
+		private WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLog(typeof(ShellViewModel));
 		private List<Address> addresses;
@@ -48,11 +48,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var factory = AppBootstrapper.NHibernate.Factory;
 			session = factory.OpenSession();
 
-			windowManager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
-
-			settings = session.Query<Settings>().First();
-			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
-			CurrentAddress = Addresses.FirstOrDefault();
+			Reload();
+			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			DisplayName = "АналитФАРМАЦИЯ";
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -100,14 +97,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private bool IsSettingsValid()
 		{
-			session.Clear();
-			settings = session.Query<Settings>().First();
+			Reload();
 			if (!settings.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
 				ShowSettings();
 				return false;
 			}
 			return true;
+		}
+
+		private void Reload()
+		{
+			session.Clear();
+
+			settings = session.Query<Settings>().First();
+			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
+			CurrentAddress = Addresses.FirstOrDefault();
 		}
 
 		protected void UpdateDisplayName()
@@ -250,23 +255,24 @@ namespace AnalitF.Net.Client.ViewModels
 						var result = windowManager.Question("Восстановление базы данных завершено.\r\n"
 							+ "В результате восстановления некоторые данные могли быть потеряны и необходимо сделать кумулятивное обновление.\r\n"
 							+ "Выполнить кумулятивное обновление?");
-						if (result == MessageBoxResult.Yes) {
+						if (result == MessageBoxResult.Yes)
 							Update();
-						}
 					}
 				});
+			Reload();
 		}
 
 		public void CleanDb()
 		{
-			var result = windowManager.Question("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?.");
+			var result = windowManager.Question("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?");
 			if (result != MessageBoxResult.Yes)
 				return;
 
 			RunTask(
 				new WaitViewModel("Производится очистка базы данных.\r\nПодождите..."),
-				Tasks.CheckAndRepairDb,
+				Tasks.CleanDb,
 				t => Update());
+			Reload();
 		}
 
 		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> func)
@@ -282,7 +288,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var credential = new NetworkCredential(settings.UserName, settings.Password);
 			var task = func(credential, token, progress);
 
-			RunTask(wait,task,
+			RunTask(wait,
+				task,
 				t => {
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
@@ -291,6 +298,7 @@ namespace AnalitF.Net.Client.ViewModels
 						windowManager.Notify(sucessMessage);
 					}
 				});
+			Reload();
 		}
 
 		private void RunUpdate()
@@ -315,33 +323,47 @@ namespace AnalitF.Net.Client.ViewModels
 			return null;
 		}
 
-		private void RunTask<T>(WaitViewModel viewModel, Task<T> task, Action<Task<T>> continueWith)
+		private Task<T> RunTask<T>(WaitViewModel viewModel, Task<T> task, Action<Task<T>> continueWith)
 		{
 			ResetNavigation();
 
 			task.ContinueWith(t => {
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
-				if (!t.IsCanceled && !t.IsFaulted) {
-					continueWith(t);
-				}
-				else if (t.IsFaulted) {
-					log.Error(t.Exception);
-					var error = TranslateException(t.Exception)
-						?? viewModel.GenericErrorMessage;
-					windowManager.Error(error);
-				}
 			}, TaskScheduler.FromCurrentSynchronizationContext());
 			task.Start();
+
 			windowManager.ShowFixedDialog(viewModel);
+
+			if (!task.IsCanceled && !task.IsFaulted) {
+				continueWith(task);
+			}
+			else if (task.IsFaulted) {
+				log.Error(task.Exception);
+				var error = TranslateException(task.Exception)
+					?? viewModel.GenericErrorMessage;
+				windowManager.Error(error);
+			}
+			return task;
 		}
 
-		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> continueWith)
+		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> success)
 		{
 			var cancellation = new CancellationTokenSource();
 			var token = cancellation.Token;
 			var task = new Task<T>(() => func(token), token);
-			RunTask(viewModel, task, continueWith);
+			RunTask(viewModel, task, success);
+		}
+
+		private void RunTask(WaitViewModel viewModel, Action<CancellationToken> action, Action<Task> success)
+		{
+			var cancellation = new CancellationTokenSource();
+			var token = cancellation.Token;
+			var task = new Task<object>(() => {
+				action(token);
+				return null;
+			}, token);
+			RunTask(viewModel, task, success);
 		}
 
 		public void Navigate(IScreen item)

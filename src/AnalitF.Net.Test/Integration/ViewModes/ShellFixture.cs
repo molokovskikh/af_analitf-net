@@ -58,6 +58,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			StartSync();
 
 			Assert.That(manager.Dialogs.Count, Is.EqualTo(0));
+			Assert.That(shell.Addresses.Count, Is.EqualTo(2));
 		}
 
 		[Test]

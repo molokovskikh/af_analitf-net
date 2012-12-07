@@ -31,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public SyncViewModel(IObservable<Progress> progress)
 		{
+			Text = "Производится обмен данными.\r\nПожалуйста подождите.";
 			DisplayName = "Обмен данными";
 			var timer = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(1.0), RxApp.DeferredScheduler)
 				.Subscribe(t => Time = TimeSpan.FromSeconds(t));

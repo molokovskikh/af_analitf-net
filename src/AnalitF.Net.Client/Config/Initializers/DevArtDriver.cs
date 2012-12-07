@@ -204,5 +204,4 @@ namespace AnalitF.Net.Client.Config.Initializers
 			SetNumericalPrecision(rs["Precision"]);
 		}
 	}
-
 }
