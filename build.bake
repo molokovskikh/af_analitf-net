@@ -23,9 +23,9 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
 
 task @DeployApp, [@WebDeploy]
 
-task @deploy, [@SendNotification, @DeployPipeline, @DeployClient]
+task @deploy, [@DeployPipeline, @DeployClient]
 
-task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip]
+task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip, @AfterBuildApp]
 
 task @CopyNativeLib:
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
@@ -33,12 +33,14 @@ task @CopyNativeLib:
 task @BeforeBuildApp:
 	Globals.Project = "AnalitF.Net.Client"
 
+task @AfterBuildApp:
+	Globals.Project = "AnalitF.Net.Service"
+
 task @DeployClient:
 	Cp("output/AnalitF.Net.Client.zip", "//offdc/MMedia/Квасов Роман/", true)
 
 task @BuildSetup:
 	document = XDocument.Load("build/files.template")
-	#reader = document.CreateReader()
 	manager = XmlNamespaceManager(NameTable())
 	manager.AddNamespace("prefix", "http://schemas.microsoft.com/wix/2006/wi")
 	element = document.XPathSelectElement("/prefix:Wix/prefix:Fragment/prefix:DirectoryRef/prefix:Component", manager)
@@ -54,7 +56,7 @@ task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 
 task @SendNotification:
-	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net")
+	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net, r.kvasov@analit.net")
 	mail.Subject = "Обновление демо версии"
 	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением
 \\offdc\MMedia\Квасов Роман\dcmysql.exe - установщик коннектора, поставить

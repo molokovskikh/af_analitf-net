@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		{
 			get
 			{
-				return false;
+				return true;
 			}
 		}
 	}

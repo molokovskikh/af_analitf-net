@@ -102,7 +102,7 @@
 				</Label>
 				<c:DataGrid Width="460" x:Name="HistoryOrders">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.PriceName}"></DataGridTextColumn>
+						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
 						<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
 						<DataGridTextColumn Width="*" Header="Срок годн." Binding="{Binding Period}" />
 						<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
