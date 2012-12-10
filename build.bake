@@ -6,6 +6,7 @@ import file from Web.bake
 import file from AppSupport.bake
 import file from WebSiteSupport.bake
 import System.IO
+import System.Net.Mail
 import System.Xml
 import System.Xml.Linq
 import System.Xml.XPath.Extensions
@@ -18,11 +19,11 @@ Global(
 
 task @default, [@Build]
 
-task @Build, [@BuildWebSite]
+task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
 
 task @DeployApp, [@WebDeploy]
 
-task @deploy, [@DeployPipeline]
+task @deploy, [@SendNotification, @DeployPipeline, @DeployClient]
 
 task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip]
 
@@ -31,6 +32,9 @@ task @CopyNativeLib:
 
 task @BeforeBuildApp:
 	Globals.Project = "AnalitF.Net.Client"
+
+task @DeployClient:
+	Cp("output/AnalitF.Net.Client.zip", "//offdc/MMedia/Квасов Роман/", true)
 
 task @BuildSetup:
 	document = XDocument.Load("build/files.template")
@@ -48,3 +52,13 @@ task @BeforeBuildUpdater:
 task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
 	Cp("build/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
+
+task @SendNotification:
+	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net")
+	mail.Subject = "Обновление демо версии"
+	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением
+\\offdc\MMedia\Квасов Роман\dcmysql.exe - установщик коннектора, поставить
+перед запуском приложения
+"""
+	mail.Attachments.Add(Attachment("output/changes.txt"))
+	SmtpClient().Send(mail)
