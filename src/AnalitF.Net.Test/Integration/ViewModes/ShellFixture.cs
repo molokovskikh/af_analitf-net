@@ -19,7 +19,7 @@ using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class ShellFixture : BaseFixture
 	{
 		[SetUp]
@@ -55,7 +55,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Execute_update_task()
 		{
-			session.DeleteEach(session.Query<Address>());
+			session.DeleteEach<Address>();
 			session.Flush();
 			shell.Reload();
 			Assert.That(shell.Addresses.Count, Is.EqualTo(0));

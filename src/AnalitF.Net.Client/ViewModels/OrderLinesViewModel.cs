@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>();
 
-				if (CurrentPrice != null && CurrentPrice.Id != 0) {
+				if (CurrentPrice != null && CurrentPrice.Id != null) {
 					query = query.Where(l => l.Order.Price == CurrentPrice);
 				}
 
@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.ThenFetch(o => o.Price)
 					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1));
 
-				if (CurrentPrice != null && CurrentPrice.Id != 0) {
+				if (CurrentPrice != null && CurrentPrice.Id != null) {
 					query = query.Where(l => l.Order.Price == CurrentPrice);
 				}
 

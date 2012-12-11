@@ -16,6 +16,7 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
+			AppBootstrapper.InitUi();
 			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate.Init("client");

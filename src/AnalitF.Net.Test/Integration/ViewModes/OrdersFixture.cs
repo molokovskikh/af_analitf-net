@@ -18,6 +18,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var view = Init(new OrdersViewModel());
 			Assert.That(view.SentOrders, Is.Null);
 			view.IsSentSelected = true;
+			view.IsCurrentSelected = false;
 			Assert.That(view.SentOrders, Is.Not.Null);
 		}
 	}

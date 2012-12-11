@@ -86,7 +86,7 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 			result.Add(Export(sql, "MaxProducerCosts"));
 
 			sql = @"select
-ap.PriceCode as Id,
+ap.PriceCode as PriceId,
 ap.PriceName as PriceName,
 s.Name as Name,
 r.RegionCode as RegionId,
@@ -132,7 +132,7 @@ from Usersettings.ActivePrices ap
 			sql = offerQuery.ToSql()
 				.Replace("{Offer.", "")
 				.Replace("}", "")
-				.Replace("as Id.CoreId,", "as Id,")
+				.Replace("as Id.CoreId,", "as OfferId,")
 				.Replace("as Id.RegionCode ,", "as RegionId,")
 				.Replace("as CodeFirmCr,", "as ProducerId,")
 				.Replace("as SynonymCode,", "as ProductSynonymId,")

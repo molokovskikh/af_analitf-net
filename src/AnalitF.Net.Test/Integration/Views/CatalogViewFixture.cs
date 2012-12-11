@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture, RequiresSTA, Ignore]
 	public class CatalogViewFixture : BaseFixture
 	{
 		[Test]

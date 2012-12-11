@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Count { get; set; }
 
-		public virtual ulong OfferId { get; set; }
+		public virtual OfferComposedId OfferId { get; set; }
 
 		public virtual decimal Sum
 		{

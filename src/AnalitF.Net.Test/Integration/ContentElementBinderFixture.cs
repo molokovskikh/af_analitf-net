@@ -15,12 +15,6 @@ namespace AnalitF.Net.Test.Integration
 	[TestFixture, RequiresSTA]
 	public class ContentElementBinderFixture
 	{
-		[SetUp]
-		public void Setup()
-		{
-			AppBootstrapper.InitUi();
-		}
-
 		[Test]
 		public void Bind_content_elements()
 		{

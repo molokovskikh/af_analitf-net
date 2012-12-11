@@ -56,11 +56,21 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o != null)
 				.Throttle(LoadOrderHistoryTimeout, Scheduler)
 				.Subscribe(_ => LoadHistoryOrders());
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
 
 			Update();
 			UpdateMaxProducers();
 
-			CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
+			if (CurrentOffer != null)
+				CurrentOffer = offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
+
+			if (CurrentOffer == null)
+				CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
+
 			if (CurrentOffer == null)
 				CurrentOffer = offers.FirstOrDefault();
 

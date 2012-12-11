@@ -18,7 +18,7 @@ using log4net.Config;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class TasksFixture : IntegrationFixture
 	{
 		private ISession localSession;

@@ -41,24 +41,42 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 			simpleModelInspector.IsRootEntity((type, declared) => {
 				var modelInspector = ((IModelInspector)simpleModelInspector);
-				return declared || (type.IsClass
+				return declared || (type.IsClass && type.BaseType != null
 					//если наследуемся от класса который не маплен то это простое наследование
 					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)))
 					&& modelInspector.IsEntity(type);
 			});
 
 			mapper.Class<Price>(m => {
+				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
 				m.Property(p => p.OperativeInfo, c => c.Length(10000));
 			});
-			mapper.Class<Order>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.DeleteOrphans | Cascade.All);
-				c.Inverse(true);
-			}));
-			mapper.Class<SentOrder>(m => m.Bag(o => o.Lines, c => {
-				c.Cascade(Cascade.DeleteOrphans | Cascade.All);
-				c.Inverse(true);
-			}));
+			mapper.Class<Order>(m => {
+				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(true);
+				});
+			});
+			mapper.Class<Order>(m => {
+				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(true);
+				});
+			});
+			mapper.Class<Offer>(m => {
+				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.ManyToOne(o => o.LeaderPrice, c => c.Columns(cm => cm.Name("LeaderPriceId"), cm => cm.Name("LeaderRegionId")));
+			});
+			mapper.Class<SentOrder>(m => {
+				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(true);
+				});
+			});
 
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
@@ -71,7 +89,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 				}
 			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
-			mapper.BeforeMapManyToOne += (inspector, member, customizer) => customizer.Column(member.LocalMember.Name + "Id");
+			mapper.BeforeMapManyToOne += (inspector, member, customizer) => {
+				customizer.Column(member.LocalMember.Name + "Id");
+			};
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => t.GetProperty("Id") != null);
 			var mapping = mapper.CompileMappingFor(types);

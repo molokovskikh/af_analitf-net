@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.ViewModels
 			catalogViewModel.CurrentCatalogName = catalogViewModel.CatalogNames.FirstOrDefault(c => c.Id == CurrentCatalog.Name.Id);
 			catalogViewModel.CurrentCatalog = catalogViewModel.CatalogForms.FirstOrDefault(c => c.Id == CurrentCatalog.Id);
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
+			offerViewModel.CurrentOffer = CurrentOffer;
 
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}

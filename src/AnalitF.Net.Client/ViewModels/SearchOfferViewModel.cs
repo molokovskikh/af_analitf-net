@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
-			if (currentPrice != null && currentPrice.Id > 0) {
+			if (currentPrice != null && currentPrice.Id != null) {
 				query = query.Where(o => o.Price.Id == currentPrice.Id);
 			}
 

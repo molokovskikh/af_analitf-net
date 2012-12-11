@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.Models
 				using (var session = AppBootstrapper.NHibernate.Factory.OpenSession())
 				using (var transaction = session.BeginTransaction()) {
 					var orders = session.Query<Order>().ToList();
-					var clientOrders = orders.Select(o => o.ToClientOrder()).ToArray();
+					var clientOrders = orders.Select(o => o.ToClientOrder()).Where(o => o != null).ToArray();
 
 					var formatter = new JsonMediaTypeFormatter {
 						SerializerSettings = { ContractResolver = new NHibernateResolver() }

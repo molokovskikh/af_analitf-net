@@ -105,12 +105,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ClientOrder ToClientOrder()
 		{
+			if (Address == null || Price == null)
+				return null;
+
 			return new ClientOrder {
 				ClientOrderId = Id,
 				AddressId = Address.Id,
 				CreatedOn = CreatedOn,
-				PriceId = Price.Id,
-				RegionId = Price.RegionId,
+				PriceId = Price.Id.PriceId,
+				RegionId = Price.Id.RegionId,
 				PriceDate = Price.PriceDate,
 				Comment = Comment,
 				Items = Lines.ToArray(),

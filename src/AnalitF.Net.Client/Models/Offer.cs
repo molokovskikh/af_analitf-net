@@ -7,6 +7,47 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
 {
+	[Serializable]
+	public class OfferComposedId
+	{
+		public ulong OfferId { get; set; }
+
+		public ulong RegionId { get; set; }
+
+		protected bool Equals(OfferComposedId other)
+		{
+			return OfferId == other.OfferId && RegionId == other.RegionId;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != this.GetType()) return false;
+			return Equals((OfferComposedId)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				return ((int)OfferId * 397) ^ RegionId.GetHashCode();
+			}
+		}
+
+		public static bool operator ==(OfferComposedId v1, OfferComposedId v2) {
+			return Equals(v1, v2);
+		}
+
+		public static bool operator !=(OfferComposedId v1, OfferComposedId v2) {
+			return !Equals(v1, v2);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("OfferId: {0}, RegionId: {1}", OfferId, RegionId);
+		}
+	}
+
 	public class Offer : BaseOffer, INotifyPropertyChanged
 	{
 		private decimal totalOrderSum;
@@ -16,7 +57,7 @@ namespace AnalitF.Net.Client.Models
 		private decimal? prevOrderAvgCost;
 		private decimal? prevOrderAvgCount;
 
-		public virtual ulong Id { get; set; }
+		public virtual OfferComposedId Id { get; set; }
 
 		public virtual ulong RegionId { get; set;  }
 
@@ -34,7 +75,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Leader
 		{
-			get { return LeaderRegionId == RegionId && LeaderPrice.Id == Price.Id; }
+			get { return LeaderPrice.Id == Price.Id; }
 		}
 
 		[Ignore]

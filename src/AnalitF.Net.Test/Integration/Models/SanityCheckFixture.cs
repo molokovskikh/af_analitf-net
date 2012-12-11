@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class SanityCheckFixture
 	{
 		[Test]

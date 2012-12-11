@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
@@ -16,12 +17,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			var orders = session.Query<Order>().ToList();
-			orders.Each(o => o.Price.Order = null);
-			orders.SelectMany(o => o.Lines)
-				.Select(l => session.Load<Offer>(l.OfferId))
-				.Each(o => o.OrderLine = null);
-			orders.Each(o => session.Delete(o));
+			session.DeleteEach<Order>();
 			session.Flush();
 			session.Clear();
 		}
