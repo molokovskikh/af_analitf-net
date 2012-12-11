@@ -73,6 +73,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			mapper.Class<SentOrder>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				m.Bag(o => o.Lines, c => {
+					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
 				});
@@ -88,7 +89,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 					}
 				}
 			};
-			mapper.BeforeMapBag += (inspector, member, customizer) => customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
+			mapper.BeforeMapBag += (inspector, member, customizer) => {
+				customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
+			};
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => {
 				customizer.Column(member.LocalMember.Name + "Id");
 			};

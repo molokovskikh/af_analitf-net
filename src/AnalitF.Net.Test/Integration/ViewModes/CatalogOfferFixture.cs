@@ -156,6 +156,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			schedule.AdvanceToMs(4000);
 			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1));
 			Assert.That(model.HistoryOrders[0].Count, Is.EqualTo(1));
+			Assert.That(model.CurrentOffer.PrevOrderAvgCost, Is.EqualTo(offer.Cost));
+			Assert.That(model.CurrentOffer.PrevOrderAvgCount, Is.EqualTo(1));
 		}
 
 		[Test]

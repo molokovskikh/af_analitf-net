@@ -100,7 +100,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var begin = DateTime.Now.AddMonths(-1);
 			var values = Session.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
 from SentOrderLines ol
-join SentOrders o on o.Id = ol.SentOrderId
+join SentOrders o on o.Id = ol.OrderId
 where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
 				.SetParameter("begin", begin)
 				.SetParameter("productId", CurrentOffer.ProductId)
