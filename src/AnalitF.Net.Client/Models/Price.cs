@@ -1,4 +1,5 @@
 ﻿using System;
+using AnalitF.Net.Client.Config.Initializers;
 using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
@@ -115,6 +116,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int Category { get; set; }
 
+		[Ignore]
 		public virtual Order Order { get; set; }
 
 		public override string ToString()

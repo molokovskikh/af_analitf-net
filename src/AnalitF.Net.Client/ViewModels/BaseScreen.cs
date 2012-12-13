@@ -51,7 +51,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			Address = Shell.CurrentAddress;
+			if (Shell != null)
+				Address = Shell.CurrentAddress;
 		}
 
 		public override string ToString()

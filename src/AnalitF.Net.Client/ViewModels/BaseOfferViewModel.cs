@@ -269,8 +269,7 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var offer in Offers) {
 				var line = lines.FirstOrDefault(l => l.OfferId == offer.Id);
 				if (line != null) {
-					offer.OrderLine = line;
-					offer.OrderCount = line.Count;
+					offer.AttachOrderLine(line);
 				}
 			}
 		}

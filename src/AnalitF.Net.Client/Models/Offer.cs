@@ -286,5 +286,12 @@ namespace AnalitF.Net.Client.Models
 
 			Warning = warnings.Implode(Environment.NewLine);
 		}
+
+		public virtual void AttachOrderLine(OrderLine orderLine)
+		{
+			OrderLine = orderLine;
+			Price.Order = orderLine.Order;
+			OrderCount = orderLine.Count;
+		}
 	}
 }

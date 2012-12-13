@@ -205,7 +205,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
-			offer.OrderLine = CurrentLine;
+			offer.AttachOrderLine(CurrentLine);
 			offer.OrderCount = 0;
 			var order = offer.UpdateOrderLine(Address);
 
