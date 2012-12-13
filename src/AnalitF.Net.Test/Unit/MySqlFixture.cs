@@ -1,4 +1,5 @@
 ﻿using System;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit

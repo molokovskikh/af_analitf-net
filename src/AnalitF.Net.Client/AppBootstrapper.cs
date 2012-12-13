@@ -26,14 +26,13 @@ namespace AnalitF.Net.Client
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 
-		public static ShellViewModel Shell;
-
 		public static Config.Initializers.NHibernate NHibernate;
 
 		public static string DataPath = "data";
 		public static string TempPath = "temp";
 
-		private bool initializationCompleted;
+		private bool isInitialized;
+		private static bool Import;
 
 		public AppBootstrapper()
 		{
@@ -52,28 +51,8 @@ namespace AnalitF.Net.Client
 		{
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
-			if (!initializationCompleted)
-				System.Windows.Application.Current.Shutdown();
-		}
-
-		private static void InitApp()
-		{
-			TempPath = FileHelper.MakeRooted(TempPath);
-			DataPath = FileHelper.MakeRooted(DataPath);
-
-			if (Directory.Exists(TempPath)) {
-				try {
-					Directory.Delete(TempPath, true);
-					Directory.CreateDirectory(TempPath);
-				}
-				catch(Exception) {}
-			}
-			else
-				Directory.CreateDirectory(TempPath);
-
-			Tasks.Uri = new Uri(ConfigurationManager.AppSettings["Uri"]);
-			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
-			Tasks.ExtractPath = TempPath;
+			if (!isInitialized)
+				Application.Current.Shutdown();
 		}
 
 		protected override void OnExit(object sender, EventArgs e)
@@ -89,15 +68,7 @@ namespace AnalitF.Net.Client
 
 			base.OnStartup(sender, e);
 
-			initializationCompleted = true;
-		}
-
-		private static void InitDb()
-		{
-			NHibernate = new Config.Initializers.NHibernate();
-			NHibernate.Init();
-
-			new SanityCheck(DataPath).Check();
+			isInitialized = true;
 		}
 
 		protected override object GetInstance(Type service, string key)
@@ -105,6 +76,40 @@ namespace AnalitF.Net.Client
 			if (typeof(IWindowManager) == service)
 				return new Extentions.WindowManager();
 			return base.GetInstance(service, key);
+		}
+
+		private static void InitApp()
+		{
+			TempPath = FileHelper.MakeRooted(TempPath);
+			DataPath = FileHelper.MakeRooted(DataPath);
+
+			var args = Environment.GetCommandLineArgs();
+			Import = args.LastOrDefault().Match("import");
+
+			if (Directory.Exists(TempPath)) {
+				if (!Import) {
+					try {
+						Directory.Delete(TempPath, true);
+						Directory.CreateDirectory(TempPath);
+					}
+					catch(Exception) {}
+				}
+			}
+			else {
+				Directory.CreateDirectory(TempPath);
+			}
+
+			Tasks.Uri = new Uri(ConfigurationManager.AppSettings["Uri"]);
+			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
+			Tasks.ExtractPath = TempPath;
+		}
+
+		private static void InitDb()
+		{
+			NHibernate = new Config.Initializers.NHibernate();
+			NHibernate.Init();
+
+			new SanityCheck(DataPath).Check(Import);
 		}
 
 		public static void InitUi()

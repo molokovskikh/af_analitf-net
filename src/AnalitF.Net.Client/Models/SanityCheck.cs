@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models
 			this.dataPath = dataPath;
 		}
 
-		public void Check()
+		public void Check(bool updateSchema = false)
 		{
 			var factory = AppBootstrapper.NHibernate.Factory;
 			var configuration = AppBootstrapper.NHibernate.Configuration;
@@ -23,6 +23,9 @@ namespace AnalitF.Net.Client.Models
 			if (!Directory.Exists(dataPath)) {
 				Directory.CreateDirectory(dataPath);
 				InitDb(configuration);
+			}
+			else if (updateSchema) {
+				UpdateDb(configuration);
 			}
 
 			using (var session = factory.OpenSession()) {
@@ -39,6 +42,12 @@ namespace AnalitF.Net.Client.Models
 					}
 				}
 			}
+		}
+
+		private static void UpdateDb(Configuration configuration)
+		{
+			var export = new SchemaUpdate(configuration);
+			export.Execute(false, true);
 		}
 
 		private static void InitDb(Configuration configuration)

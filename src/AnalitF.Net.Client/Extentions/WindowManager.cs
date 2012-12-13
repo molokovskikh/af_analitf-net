@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows;
 
 namespace AnalitF.Net.Client.Extentions
@@ -8,6 +9,7 @@ namespace AnalitF.Net.Client.Extentions
 	{
 		public bool UnderTest;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
+
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 
@@ -56,23 +58,30 @@ namespace AnalitF.Net.Client.Extentions
 
 		public void Warning(string text)
 		{
-			ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание",
+				MessageBoxButton.OK,
+				MessageBoxImage.Warning);
 		}
 
 		public void Notify(string text)
 		{
-			ShowMessageBox(text, "АналитФАРМАЦИЯ: Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Информация",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
 		}
 
 		public void Error(string text)
 		{
-			ShowMessageBox(text, "АналитФАРМАЦИЯ: Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+			ShowMessageBox(text, "АналитФАРМАЦИЯ: Ошибка",
+				MessageBoxButton.OK,
+				MessageBoxImage.Error);
 		}
 
 		public MessageBoxResult Question(string text)
 		{
-			var result = ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-			return result;
+			return ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Warning);
 		}
 	}
 }

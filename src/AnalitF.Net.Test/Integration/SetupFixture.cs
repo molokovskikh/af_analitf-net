@@ -1,9 +1,12 @@
 ﻿using System;
+using System.IO;
 using AnalitF.Net.Client;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
 using NUnit.Framework;
 using ReactiveUI;
+using Test.Support;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -16,12 +19,36 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
+			//FileHelper.InitDir("data");
 			AppBootstrapper.InitUi();
 			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate.Init("client");
 			Factory = AppBootstrapper.NHibernate.Factory;
 			Configuration = AppBootstrapper.NHibernate.Configuration;
+
+			//ImportData();
+			//BackupData();
+		}
+
+		private void ImportData()
+		{
+			var import = new ExportImportFixture();
+			((IntegrationFixture)import).Setup();
+			import.Setup();
+			import.Load_data();
+			import.Teardown();
+			import.TearDown();
+		}
+
+		private void BackupData()
+		{
+			using(var session = Factory.OpenSession()) {
+				session.CreateSQLQuery("flush tables").ExecuteUpdate();
+			}
+			FileHelper.InitDir("backup");
+			Directory.GetFiles("data")
+				.Each(f => File.Copy(f, Path.Combine("backup", Path.GetFileName(f)), true));
 		}
 	}
 }

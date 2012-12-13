@@ -2,25 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Resources;
-using System.Threading;
-using System.Windows;
-using System.Windows.Markup;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
-using Microsoft.Reactive.Testing;
-using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
 using AnalitF.Net.Client.Helpers;
-using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -43,7 +33,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				return Init(new CatalogOfferViewModel(catalog));
 			});
 			catalog = session.Query<Catalog>()
-				.First(c => session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
+				.First(c => c.HaveOffers && session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
 		}
 
 		[Test]

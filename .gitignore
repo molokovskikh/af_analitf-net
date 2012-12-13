@@ -8,3 +8,4 @@ packages/
 src/*.properties
 src/data
 AssemblyInfo.cs
+TestResult.xml

@@ -7,12 +7,14 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
+using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Proxy;
@@ -53,14 +55,14 @@ namespace AnalitF.Net.Client.Models
 	{
 		private static ILog log = LogManager.GetLogger(typeof(Tasks));
 
-		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> Update = (c, t, p) => UpdateTask(c, t, p);
-		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> SendOrders = (c, t, p) => SendOrdersTask(c, t, p);
+		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> Update = (c, t, p) => UpdateTask(c, t, p);
+		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> SendOrders = (c, t, p) => SendOrdersTask(c, t, p);
 
 		public static Uri Uri;
 		public static string ArchiveFile;
 		public static string ExtractPath;
 
-		public static Task<UpdateResult> UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
+		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, cancellation, progress, client => {
 				var currentUri = new UriBuilder(Uri) {
@@ -92,13 +94,13 @@ namespace AnalitF.Net.Client.Models
 				}
 				progress.OnNext(new Progress("Загрузка данных", 100, 33));
 				progress.OnNext(new Progress("Импорт данных", 0, 66));
-				var result = Import(ArchiveFile);
+				var result = ProcessUpdate(ArchiveFile);
 				progress.OnNext(new Progress("Импорт данных", 100, 100));
 				return result;
 			});
 		}
 
-		public static Task<UpdateResult> SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
+		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, token, progress, client => {
 				progress.OnNext(new Progress("Соединение", 100, 0));
@@ -130,43 +132,57 @@ namespace AnalitF.Net.Client.Models
 			});
 		}
 
-		private static Task<UpdateResult> RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
+		private static UpdateResult RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
 		{
-			return new Task<UpdateResult>(() => {
-				var version = typeof(Tasks).Assembly.GetName().Version;
+			var version = typeof(Tasks).Assembly.GetName().Version;
 
-				progress.OnNext(new Progress("Соединение", 0, 0));
-				var handler = new HttpClientHandler {
-					Credentials = credentials,
-					PreAuthenticate = true
-				};
-				if (handler.Credentials == null)
-					handler.UseDefaultCredentials = true;
-				using (handler) {
-					using (var client = new HttpClient(handler)) {
-						client.DefaultRequestHeaders.Add("Version", version.ToString());
-						return action(client);
-					}
+			progress.OnNext(new Progress("Соединение", 0, 0));
+			var handler = new HttpClientHandler {
+				Credentials = credentials,
+				PreAuthenticate = true,
+				UseProxy = true,
+				Proxy = new WebProxy(new Uri("http://localhost:8888"), false)
+			};
+			if (handler.Credentials == null)
+				handler.UseDefaultCredentials = true;
+			using (handler) {
+				using (var client = new HttpClient(handler)) {
+					client.DefaultRequestHeaders.Add("Version", version.ToString());
+					return action(client);
 				}
-			}, cancellation);
+			}
 		}
 
-		private static UpdateResult Import(string archiveFile)
+		private static UpdateResult ProcessUpdate(string archiveFile)
 		{
-			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(archiveFile)) {
 				zip.ExtractAll(ExtractPath, ExtractExistingFileAction.OverwriteSilently);
-				data = GetDbData(zip.Select(z => z.FileName));
 			}
 
 			if (File.Exists(Path.Combine(ExtractPath, "update", "Updater.exe")))
 				return UpdateResult.UpdatePending;
 
+			Import(archiveFile);
+			return UpdateResult.OK;
+		}
+
+		public static UpdateResult Import(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
+		{
+			progress.OnNext(new Progress("Импорт данных", 0, 66));
+			Import(ArchiveFile);
+			progress.OnNext(new Progress("Импорт данных", 100, 100));
+			return UpdateResult.OK;
+		}
+
+		public static void Import(string archiveFile)
+		{
+			List<System.Tuple<string, string[]>> data;
+			using (var zip = new ZipFile(archiveFile))
+				data = GetDbData(zip.Select(z => z.FileName));
 			using (var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
 				var importer = new Importer(session);
 				importer.Import(data);
 			}
-			return UpdateResult.OK;
 		}
 
 		private static List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
@@ -210,21 +226,14 @@ namespace AnalitF.Net.Client.Models
 				foreach (var table in tables) {
 					token.ThrowIfCancellationRequested();
 
-					log.ErrorFormat("REPAIR TABLE {0} EXTENDED", table);
-					var messages = session
-						.CreateSQLQuery(String.Format("REPAIR TABLE {0} EXTENDED", table))
-						.List<object[]>()
-						.Select(m => m.Select(v => v.ToString()).ToArray())
-						.ToList();
-					log.Error(messages.Implode(s => s.Implode(), System.Environment.NewLine));
-
-					var result =  Parse(messages);
+					var messages = ExecuteMaintainsQuery(String.Format("REPAIR TABLE {0} EXTENDED", table), session);
+					var result = Parse(messages);
 					results.Add(result);
 					if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
-						session
-							.CreateSQLQuery(String.Format("OPTIMIZE TABLE {0}", table))
-							.ExecuteUpdate();
+						result = Parse(ExecuteMaintainsQuery(String.Format("OPTIMIZE TABLE {0}", table), session));
+						results.Add(result);
 					}
+					results.Add(result);
 					if (result == RepairStatus.Fail) {
 						log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
 						log.Error(String.Format("DROP TABLE IF EXISTS {0}", table));
@@ -239,12 +248,21 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 
-			var export = new SchemaUpdate(configuration);
-			export.Execute(false, true);
-
-			new SanityCheck(dataPath).Check();
+			new SanityCheck(dataPath).Check(true);
 
 			return results.All(r => r == RepairStatus.Ok);
+		}
+
+		private static List<string[]> ExecuteMaintainsQuery(string sql, ISession session)
+		{
+			log.ErrorFormat(sql);
+			var messages = session
+				.CreateSQLQuery(sql)
+				.List<object[]>()
+				.Select(m => m.Select(v => v.ToString()).ToArray())
+				.ToList();
+			log.Error(messages.Implode(s => s.Implode(), System.Environment.NewLine));
+			return messages;
 		}
 
 		private static IEnumerable<string> Tables(Configuration configuration)

@@ -16,9 +16,15 @@ namespace AnalitF.Net.Models
 		public ClientOrderItem[] Items { get; set; }
 	}
 
+	public class OfferComposedId
+	{
+		public ulong RegionId { get; set; }
+		public ulong OfferId { get; set; }
+	}
+
 	public class ClientOrderItem : BaseOffer
 	{
-		public ulong OfferId { get; set; }
+		public OfferComposedId OfferId { get; set; }
 		public uint Count { get; set; }
 		public uint? ProducerId { get; set; }
 		public decimal Cost { get; set; }

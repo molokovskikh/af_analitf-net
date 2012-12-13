@@ -117,7 +117,7 @@ namespace AnalitF.Net.Controllers
 				};
 				foreach (var item in clientOrder.Items) {
 					var offer = new Offer {
-						Id = new OfferKey(item.OfferId, clientOrder.RegionId),
+						Id = new OfferKey(item.OfferId.OfferId, item.OfferId.RegionId),
 						Cost = (float)item.Cost,
 						PriceList = activePrice,
 						PriceCode = price.PriceCode,

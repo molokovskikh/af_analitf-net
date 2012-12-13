@@ -18,7 +18,7 @@ using log4net.Config;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
-	[TestFixture, Ignore]
+	[TestFixture]
 	public class TasksFixture : IntegrationFixture
 	{
 		private ISession localSession;
@@ -47,7 +47,16 @@ namespace AnalitF.Net.Test.Integration.Models
 			cancelletion = new CancellationTokenSource();
 			token = cancelletion.Token;
 			progress = new BehaviorSubject<Progress>(new Progress());
-			task = Tasks.Update(null, token, progress);
+
+			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
+		}
+
+		[TearDown]
+		public void FixtureTearDown()
+		{
+			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
+			Directory.GetFiles("backup")
+				.Each(f => File.Copy(f, Path.Combine("data", Path.GetFileName(f)), true));
 		}
 
 		[Test]
@@ -74,20 +83,10 @@ namespace AnalitF.Net.Test.Integration.Models
 		}
 
 		[Test]
-		public void Cancel_task()
-		{
-			var c = task.ContinueWith(t => {
-				Assert.That(task.IsCanceled, Is.True);
-			});
-			task.Start();
-			task.Wait(100);
-			cancelletion.Cancel();
-			c.Wait();
-		}
-
-		[Test]
 		public void Send_orders()
 		{
+			task = new Task<UpdateResult>(t => Tasks.SendOrders(null, token, progress), token);
+
 			var begin = DateTime.Now;
 			Offer offer;
 			using (localSession.BeginTransaction()) {
@@ -99,8 +98,6 @@ namespace AnalitF.Net.Test.Integration.Models
 				localSession.Save(order);
 			}
 
-			task = Tasks.SendOrders(null, token, progress);
-
 			task.Start();
 			task.Wait();
 
@@ -109,7 +106,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(sentOrders.Count, Is.EqualTo(1));
 			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
 
-			var orders = session.Query<TestOrder>().Where(o => o.WriteTime > begin).ToList();
+			var orders = session.Query<TestOrder>().Where(o => o.WriteTime >= begin).ToList();
 			Assert.That(orders.Count, Is.EqualTo(1));
 			var resultOrder = orders[0];
 			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
@@ -135,10 +132,22 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Clean_db()
 		{
-			Tasks.CleanDb(cancelletion.Token);
+			Tasks.CleanDb(token);
 
-			Assert.That(session.Query<Offer>().Count(), Is.EqualTo(0));
-			Assert.That(session.Query<Settings>().Count(), Is.EqualTo(1));
+			Assert.That(localSession.Query<Offer>().Count(), Is.EqualTo(0));
+			Assert.That(localSession.Query<Settings>().Count(), Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Import_after_update()
+		{
+			File.Copy(@"..\..\..\data\result\21", Tasks.ArchiveFile);
+			using(var file = new ZipFile(Tasks.ArchiveFile))
+				file.ExtractAll(Tasks.ExtractPath);
+
+			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
+			Tasks.Import(null, token, progress);
+			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 		}
 	}
 }

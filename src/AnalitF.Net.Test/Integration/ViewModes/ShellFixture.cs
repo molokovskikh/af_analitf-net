@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -11,6 +12,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
+using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
@@ -19,37 +21,40 @@ using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
-	[TestFixture, Ignore]
+	[TestFixture, Ignore("Тесты сломаны, из-за обработки даилога я не знаю как их чинить")]
 	public class ShellFixture : BaseFixture
 	{
 		[SetUp]
 		public void Setup()
 		{
-			var settings = session.Query<Settings>().First();
-			settings.UserName = null;
-			settings.Password = null;
-			session.Flush();
-
-			shell = new ShellViewModel();
+			shell = new ShellViewModel {
+				UnderTest = true
+			};
 		}
 
-		[Test]
+		[Test, RequiresSTA]
 		public void If_user_name_empty_open_configuration_form()
 		{
-			((IActivate)shell).Activate();
+			ResetCredentials();
+
+			shell.OnLoaded();
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
-			Assert.That(shell.ActiveItem, Is.TypeOf<SettingsViewModel>());
+			Assert.That(manager.Dialogs[0].DataContext, Is.TypeOf<SettingsViewModel>());
 		}
 
-		[Test]
+		[Test, RequiresSTA]
 		public void Reject_update_with_empty_user_name()
 		{
-			((IActivate)shell).Activate();
+			ResetCredentials();
+
+			shell.OnLoaded();
 			manager.MessageBoxes.Clear();
-			shell.ActiveItem.TryClose();
+			manager.Dialogs[0].Close();
+			manager.Dialogs.Clear();
+
 			shell.Update();
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
-			Assert.That(shell.ActiveItem, Is.TypeOf<SettingsViewModel>());
+			Assert.That(manager.Dialogs[0].DataContext, Is.TypeOf<SettingsViewModel>());
 		}
 
 		[Test]
@@ -90,23 +95,50 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.NavigationStack, Is.Empty);
 		}
 
+		[Test, RequiresSTA]
+		public void Import_if_argument_specified()
+		{
+			Tasks.ExtractPath = "temp";
+			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
+			FileHelper.InitDir(Tasks.ExtractPath);
+			File.Copy(@"..\..\..\data\result\21", Tasks.ArchiveFile);
+			new ZipFile(Tasks.ArchiveFile).ExtractAll(Tasks.ExtractPath);
+
+			PrepareForSync();
+
+			session.CreateSQLQuery("delete from offers").ExecuteUpdate();
+			shell.Arguments = new[] { "cmd.exe", "import" };
+			WithDispatcher(() => {
+				shell.OnLoaded();
+			});
+
+			var closed = new ManualResetEventSlim();
+			manager.Dialogs[0].Closed += (sender, args) => closed.Set();
+			closed.Wait(TimeSpan.FromSeconds(10));
+
+			Assert.That(manager.MessageBoxes.Implode(), Is.EqualTo("Обновление завершено успешно."));
+			Assert.That(session.Query<Offer>().Count(), Is.GreaterThan(0));
+		}
+
 		private void StartSync()
 		{
-			var waitClose = new ManualResetEventSlim();
-			var wait = new ManualResetEventSlim();
-			var waittask = new Task<UpdateResult>(() => {
-				wait.Wait();
+			var dialogClosed = new ManualResetEventSlim();
+			var taskCompleted = new ManualResetEventSlim();
+			Tasks.Update = (c, t, p) => {
+				Thread.Sleep(100);
+				taskCompleted.Wait();
 				return UpdateResult.OK;
-			});
-			Tasks.Update = (c, t, p) => waittask;
+			};
 
 			var dispatcher = WithDispatcher(() => {
+				taskCompleted.Set();
 				shell.Update();
 				Assert.That(manager.Dialogs.Count, Is.EqualTo(1));
-				manager.Dialogs[0].Closed += (sender, args) => waitClose.Set();
-				wait.Set();
+				manager.Dialogs[0].Closed += (sender, args) => {
+					dialogClosed.Set();
+				};
 			});
-			waitClose.Wait(TimeSpan.FromSeconds(10));
+			dialogClosed.Wait(TimeSpan.FromSeconds(10));
 			dispatcher.InvokeShutdown();
 		}
 
@@ -117,6 +149,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Password = "123";
 			session.Flush();
 			shell = new ShellViewModel();
+		}
+
+		private void ResetCredentials()
+		{
+			var settings = session.Query<Settings>().First();
+			settings.UserName = null;
+			settings.Password = null;
+			session.Flush();
 		}
 
 		public static Dispatcher WithDispatcher(Action action)

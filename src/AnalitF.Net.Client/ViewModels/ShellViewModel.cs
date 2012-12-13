@@ -15,10 +15,12 @@ using System.Windows;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using LogManager = Caliburn.Micro.LogManager;
+using LogManager = log4net.LogManager;
+using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -37,13 +39,15 @@ namespace AnalitF.Net.Client.ViewModels
 		private Settings settings;
 		private WindowManager windowManager;
 		private ISession session;
-		private ILog log = LogManager.GetLog(typeof(ShellViewModel));
+		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
 		private List<Address> addresses;
 		private Address currentAddress;
 
+		public bool UnderTest;
+
 		public ShellViewModel()
 		{
-			AppBootstrapper.Shell = this;
+			Arguments = Environment.GetCommandLineArgs();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
 			session = factory.OpenSession();
@@ -65,13 +69,25 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => NotifyOfPropertyChange("CanPrintPreview"));
 		}
 
+		public string[] Arguments;
+
 		protected override void OnActivate()
 		{
 			base.OnActivate();
 
-			((Window)GetView()).Loaded += (sender, args) => {
-				IsSettingsValid();
-			};
+			if (!UnderTest)
+				((Window)GetView()).Loaded += (sender, args) => OnLoaded();
+		}
+
+		public void OnLoaded()
+		{
+			var import = Arguments.LastOrDefault().Match("import");
+			if (import) {
+				Import();
+			}
+			else {
+				CheckSettings();
+			}
 		}
 
 		public List<Address> Addresses
@@ -95,7 +111,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private bool IsSettingsValid()
+		private bool CheckSettings()
 		{
 			Reload();
 			if (!settings.IsValid) {
@@ -242,6 +258,13 @@ namespace AnalitF.Net.Client.ViewModels
 				Tasks.SendOrders);
 		}
 
+		private void Import()
+		{
+			Sync("Обновление завершено успешно.",
+				"Не удалось получить обновление. Попробуйте повторить операцию позднее.",
+				Tasks.Import);
+		}
+
 		public void CheckDb()
 		{
 			RunTask(
@@ -275,21 +298,19 @@ namespace AnalitF.Net.Client.ViewModels
 			Reload();
 		}
 
-		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Task<UpdateResult>> func)
+		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
 		{
-			if (!IsSettingsValid())
+			if (!CheckSettings())
 				return;
 
 			var progress = new BehaviorSubject<Progress>(new Progress());
 			var wait = new SyncViewModel(progress) {
 				GenericErrorMessage = errorMessage
 			};
-			var token = wait.Cancellation.Token;
 			var credential = new NetworkCredential(settings.UserName, settings.Password);
-			var task = func(credential, token, progress);
 
 			RunTask(wait,
-				task,
+				t => func(credential, t, progress),
 				t => {
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
@@ -349,16 +370,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> success)
 		{
-			var cancellation = new CancellationTokenSource();
-			var token = cancellation.Token;
+			var token = viewModel.Cancellation.Token;
 			var task = new Task<T>(() => func(token), token);
 			RunTask(viewModel, task, success);
 		}
 
 		private void RunTask(WaitViewModel viewModel, Action<CancellationToken> action, Action<Task> success)
 		{
-			var cancellation = new CancellationTokenSource();
-			var token = cancellation.Token;
+			var token = viewModel.Cancellation.Token;
 			var task = new Task<object>(() => {
 				action(token);
 				return null;

@@ -42,7 +42,11 @@ namespace AnalitF.Net.Test.Integration
 			CreateSampleContactInfo(supplier);
 			CreateSampleCore(supplier);
 			var maxProducerCosts = CreateMaxProduceCosts(supplier);
+			//очищаем предудыщие попытки
+			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
 			var client = TestClient.CreateNaked();
+			//что бы можно было руками обновить клиент
+			client.Users[0].Login = Environment.UserName;
 			Close();
 
 			var exporter = new Exporter(session, client.Users[0].Id, new Version()) {
