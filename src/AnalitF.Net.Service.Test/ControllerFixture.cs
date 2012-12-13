@@ -88,7 +88,7 @@ namespace AnalitF.Net.Service.Test
 				IsFaulted = true
 			};
 			localSession.Save(job);
-			var response = controller.Get();
+			var response = controller.Get(true);
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
 		}
 

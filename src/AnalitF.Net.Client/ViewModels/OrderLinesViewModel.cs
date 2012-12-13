@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
-			CurrentPrice = Prices.First();
+			CurrentPrice = Prices.FirstOrDefault();
 
 			Begin = DateTime.Today;
 			End = DateTime.Today;
@@ -207,6 +207,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
+			offer.OrderLine = CurrentLine;
 			offer.OrderCount = 0;
 			var order = offer.UpdateOrderLine(address);
 

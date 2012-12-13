@@ -251,10 +251,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		private void MakeDifferentCategory()
 		{
 			var offers = session.Query<Offer>().Where(o => o.CatalogId == catalog.Id).ToList();
-			Assert.That(offers[0].Price.Id, Is.Not.EqualTo(offers[1].Price.Id));
+			var offer = offers[0];
+			var offer1 = offers.First(o => o.Price.Id != offer.Price.Id);
+			Assert.That(offer.Price.Id, Is.Not.EqualTo(offer1.Price.Id));
 
-			var price1 = session.Load<Price>(offers[0].Price.Id);
-			var price2 = session.Load<Price>(offers[1].Price.Id);
+			var price1 = session.Load<Price>(offer.Price.Id);
+			var price2 = session.Load<Price>(offer1.Price.Id);
 			price1.BasePrice = false;
 			price2.BasePrice = true;
 			session.Save(price1);

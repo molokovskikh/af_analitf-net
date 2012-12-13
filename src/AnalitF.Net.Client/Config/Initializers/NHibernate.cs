@@ -51,6 +51,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
 				m.Property(p => p.OperativeInfo, c => c.Length(10000));
+				m.ManyToOne(p => p.Order, c => c.NotFound(NotFoundMode.Ignore));
 			});
 			mapper.Class<Order>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));

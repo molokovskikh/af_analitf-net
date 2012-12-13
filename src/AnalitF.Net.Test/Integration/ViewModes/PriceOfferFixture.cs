@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate;
@@ -13,7 +14,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_catalog()
 		{
-			var price = session.Query<Price>().First();
+			var price = session.Query<Price>().First(p => p.PositionCount > 0);
 			var model = Init(new PriceOfferViewModel(price, false));
 
 			var offer = model.CurrentOffer;
