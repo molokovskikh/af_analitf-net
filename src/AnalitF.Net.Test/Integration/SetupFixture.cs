@@ -36,11 +36,11 @@ namespace AnalitF.Net.Test.Integration
 		private void ImportData()
 		{
 			var import = new ExportImportFixture();
-			((IntegrationFixture)import).Setup();
+			import.IntegrationSetup();
 			import.Setup();
 			import.Load_data();
 			import.Teardown();
-			import.TearDown();
+			import.IntegrationTearDown();
 		}
 
 		private void BackupData()

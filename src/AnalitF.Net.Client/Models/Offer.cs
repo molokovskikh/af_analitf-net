@@ -238,10 +238,11 @@ namespace AnalitF.Net.Client.Models
 					MinOrderCount);
 			}
 
+			//заготовка что бы не забыть
 			//проверка матрицы
-			if (false) {
-				return "Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?";
-			}
+			//if (false) {
+			//	return "Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?";
+			//}
 			return null;
 		}
 
@@ -270,17 +271,18 @@ namespace AnalitF.Net.Client.Models
 				warnings.Add("Внимание! Вы заказали большое количество препарата.");
 			}
 
-			if (false) {
-				warnings.Add("Товар присутствует в замороженных заказах.");
-			}
+			//Заготовка что бы не забыть о проверках
+			//if (false) {
+			//	warnings.Add("Товар присутствует в замороженных заказах.");
+			//}
 
-			if (false) {
-				warnings.Add("Превышение среднего заказа!");
-			}
+			//if (false) {
+			//	warnings.Add("Превышение среднего заказа!");
+			//}
 
-			if (false) {
-				warnings.Add("Превышение средней цены!");
-			}
+			//if (false) {
+			//	warnings.Add("Превышение средней цены!");
+			//}
 
 			Warning = warnings.Implode(Environment.NewLine);
 		}

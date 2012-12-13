@@ -28,7 +28,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected bool NeedToCalculateDiff;
 
-		protected Address Address;
 		private ExcelExporter excelExporter;
 
 		public BaseOfferViewModel()
@@ -40,11 +39,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(m => !String.IsNullOrEmpty(m.Value))
 				.Throttle(warningTimeout)
 				.Subscribe(m => { OrderWarning = null; });
-		}
-
-		protected override void OnInitialize()
-		{
-			Address = Shell.CurrentAddress;
 		}
 
 		protected void UpdateProducers()

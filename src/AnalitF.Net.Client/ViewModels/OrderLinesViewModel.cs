@@ -20,8 +20,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<OrderLine> lines;
 		private List<SentOrderLine> sentLines;
 
-		private Address address;
-
 		public OrderLinesViewModel()
 		{
 			DisplayName = "Сводный заказ";
@@ -202,14 +200,14 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentLine == null)
 				return;
 
-			var result = Manager.ShowMessageBox("Удалить позицию?", "АналитФАРМАЦИЯ: Внимание", MessageBoxButton.YesNo, MessageBoxImage.Question);
+			var result = Manager.Question("Удалить позицию?");
 			if (result != MessageBoxResult.Yes)
 				return;
 
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
 			offer.OrderLine = CurrentLine;
 			offer.OrderCount = 0;
-			var order = offer.UpdateOrderLine(address);
+			var order = offer.UpdateOrderLine(Address);
 
 			if (order != null) {
 				if (order.IsEmpty) {

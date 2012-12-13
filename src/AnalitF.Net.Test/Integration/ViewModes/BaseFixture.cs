@@ -20,7 +20,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		protected Address address;
 
 		[SetUp]
-		public void Setup()
+		public void BaseFixtureSetup()
 		{
 			schedule = new TestScheduler();
 			BaseScreen.Scheduler = schedule;
@@ -36,7 +36,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		}
 
 		[TearDown]
-		public void Teardown()
+		public void BaseFixtureTearDown()
 		{
 			session.Dispose();
 		}

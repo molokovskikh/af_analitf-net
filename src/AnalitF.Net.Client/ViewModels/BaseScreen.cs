@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IStatelessSession StatelessSession;
 
 		protected Settings Settings;
+		protected Address Address;
 
 		public static IScheduler Scheduler = DefaultScheduler.Instance;
 
@@ -46,6 +47,11 @@ namespace AnalitF.Net.Client.ViewModels
 			var canClose = Shell == null || Shell.NavigationStack.Any();
 			if (canClose)
 				TryClose();
+		}
+
+		protected override void OnInitialize()
+		{
+			Address = Shell.CurrentAddress;
 		}
 
 		public override string ToString()

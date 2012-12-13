@@ -12,7 +12,7 @@ using Path = System.IO.Path;
 
 namespace Updater
 {
-	public partial class MainWindow : Window
+	public partial class MainWindow
 	{
 		private ILog log = LogManager.GetLogger(typeof(MainWindow));
 
@@ -114,7 +114,7 @@ namespace Updater
 					process.Kill();
 				}
 				//если пока думали все завершилось
-				catch (InvalidOperationException e) {}
+				catch (InvalidOperationException) {}
 			}
 		}
 
@@ -127,7 +127,7 @@ namespace Updater
 				return Process.GetProcessById(pid);
 			}
 			//если процесс уже завершилса
-			catch (ArgumentException e) {}
+			catch (ArgumentException) {}
 			return null;
 		}
 

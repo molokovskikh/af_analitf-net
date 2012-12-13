@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Настройка";
 		}
 
-		public Settings Settings { get; set; }
+		public new Settings Settings { get; set; }
 
 		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
 

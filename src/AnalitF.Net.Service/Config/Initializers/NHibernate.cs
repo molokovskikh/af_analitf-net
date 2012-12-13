@@ -26,7 +26,7 @@ namespace AnalitF.Net.Config.Initializers
 
 	public class VersionType : IUserType
 	{
-		public bool Equals(object x, object y)
+		public new bool Equals(object x, object y)
 		{
 			return object.Equals(x, y);
 		}
