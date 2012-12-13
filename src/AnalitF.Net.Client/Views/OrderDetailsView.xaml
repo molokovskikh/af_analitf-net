@@ -2,7 +2,13 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
-	xmlns:cal="http://www.caliburnproject.org">
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>

@@ -426,8 +426,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.DeactivateItem(item, close);
 
-			if (ActiveItem == null && navigationStack.Count > 0) {
-				ActivateItem(navigationStack.Peek());
+			if (close) {
+				if (ActiveItem == null && navigationStack.Count > 0) {
+					ActivateItem(navigationStack.Pop());
+				}
 			}
 		}
 

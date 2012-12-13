@@ -19,7 +19,6 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
-			//FileHelper.InitDir("data");
 			AppBootstrapper.InitUi();
 			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
@@ -27,8 +26,11 @@ namespace AnalitF.Net.Test.Integration
 			Factory = AppBootstrapper.NHibernate.Factory;
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 
-			//ImportData();
-			//BackupData();
+			if (!Directory.Exists("data")) {
+				FileHelper.InitDir("data");
+				ImportData();
+				BackupData();
+			}
 		}
 
 		private void ImportData()

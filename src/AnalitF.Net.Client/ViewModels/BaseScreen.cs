@@ -40,5 +40,17 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings = Session.Query<Settings>().First();
 			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 		}
+
+		public virtual void NavigateBackward()
+		{
+			var canClose = Shell == null || Shell.NavigationStack.Any();
+			if (canClose)
+				TryClose();
+		}
+
+		public override string ToString()
+		{
+			return DisplayName;
+		}
 	}
 }

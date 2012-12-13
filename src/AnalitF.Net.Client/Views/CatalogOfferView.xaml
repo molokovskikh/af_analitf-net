@@ -24,7 +24,7 @@
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowPrice" />
 		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>

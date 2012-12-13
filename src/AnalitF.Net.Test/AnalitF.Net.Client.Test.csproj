@@ -83,6 +83,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BindScreen.cs" />
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
