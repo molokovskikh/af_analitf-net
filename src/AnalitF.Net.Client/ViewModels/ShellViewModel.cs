@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -29,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		bool CanPrint { get; }
 
-		void Print();
+		IResult Print();
 	}
 
 	[Serializable]
@@ -174,12 +175,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void Print()
+		public IResult Print()
 		{
 			if (!CanPrint)
-				return;
+				return null;
 
-			((IPrintable)ActiveItem).Print();
+			return ((IPrintable)ActiveItem).Print();
 		}
 
 		public bool CanPrintPreview
@@ -189,7 +190,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void PrintPreview()
 		{
+			if (!CanPrintPreview)
+				return;
 
+			var printResult = ((IPrintable)ActiveItem).Print() as PrintResult;
+			windowManager.ShowDialog(new PrintPreviewViewModel(printResult));
 		}
 
 		public void ShowCatalog()

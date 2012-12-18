@@ -15,5 +15,10 @@
 		public virtual bool MandatoryList { get; set; }
 
 		public virtual bool HaveOffers { get; set; }
+
+		public virtual string Fullname
+		{
+			get { return Name.Name + " " + Form; }
+		}
 	}
 }

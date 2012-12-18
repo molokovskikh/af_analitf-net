@@ -11,7 +11,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class DescriptionViewModel : BaseScreen
+	public class DescriptionViewModel : BaseScreen, IPrintable
 	{
 		public DescriptionViewModel(ProductDescription description)
 		{
@@ -24,14 +24,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public FlowDocument Document { get; set; }
 
-		public void Print()
+		public bool CanPrint
+		{
+			get
+			{
+				return Description != null;
+			}
+		}
+
+		public IResult Print()
 		{
 			//мы не можем использовать существующий документ, тк это приведет к тому что визуализация в FlowDocumentScrollViewer "исчезнет"
 			//и что бы увидеть данные пользователю нужно будет вызвать перересовку документа, например с помощью скрола
-			PrintDocument(BuildDocument(), DisplayName);
+			return new PrintResult(BuildDocument(), DisplayName);
 		}
 
-		private FlowDocument BuildDocument()
+		public FlowDocument BuildDocument()
 		{
 			var document = new FlowDocument();
 
@@ -67,22 +75,7 @@ namespace AnalitF.Net.Client.ViewModels
 				document.Blocks.Add(new Paragraph(new Run(property.Item3)));
 			}
 
-
 			return document;
-		}
-
-		private static void PrintDocument(FlowDocument doc, string name)
-		{
-			if (doc == null)
-				return;
-			var dialog = new PrintDialog();
-			if (dialog.ShowDialog() != true)
-				return;
-
-			var maxWidth = dialog.PrintableAreaWidth;
-			doc.PagePadding = new Thickness(25);
-			doc.ColumnWidth = maxWidth;
-			dialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, name);
 		}
 	}
 }

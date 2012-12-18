@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Xps.Serialization;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -263,63 +267,114 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			get { return true; }
 		}
 
-		public void Print()
+		public IResult Print()
+		{
+			return new PrintResult(BuildDocument(), DisplayName);
+		}
+
+		public FlowDocument BuildDocument()
 		{
 			var rows = offers.Select((o, i) => {
 				return new object[] {
-					i,
 					o.ProductSynonym,
 					o.ProducerSynonym,
-					o.Cost,
-					o.OrderCount,
-					o.OrderSum
+					o.Price.Name,
+					o.Period,
+					o.Price.PriceDate,
+					o.Diff,
+					o.Cost
 				};
 			});
 
-			var doc = BuildDocument(rows);
-			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-
-			var outputXps = "output.xps";
-			using (var stream = File.Create(outputXps)) {
-				var factory = new XpsSerializerFactory();
-				var writer = factory.CreateSerializerWriter(stream);
-				writer.Write(paginator);
-			}
-			Process.Start(outputXps);
-
-			//var server = new LocalPrintServer();
-			//var queue = server.DefaultPrintQueue;
-			//var writer = PrintQueue.CreateXpsDocumentWriter(queue);
-			//
-			//writer.Write(paginator);
+			return BuildDocument(rows);
 		}
 
-		private static FlowDocument BuildDocument(IEnumerable<object[]> rows)
+		private FlowDocument BuildDocument(IEnumerable<object[]> rows)
 		{
+			var totalRows = rows.Count();
 			var doc = new FlowDocument();
+
+			doc.Blocks.Add(new Paragraph());
+			doc.Blocks.Add(new Paragraph(new Run(CurrentCatalog.Fullname)) {
+				FontWeight = FontWeights.Bold,
+				FontSize = 16
+			});
+
 			var table = new Table();
 			table.CellSpacing = 0;
-			table.Columns.Add(new TableColumn());
-			table.Columns.Add(new TableColumn());
-			table.Columns.Add(new TableColumn());
-			table.Columns.Add(new TableColumn());
-			table.Columns.Add(new TableColumn());
-			table.Columns.Add(new TableColumn());
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(216)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(136)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(112)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(85)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(85)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(48)
+			});
+			table.Columns.Add(new TableColumn {
+				Width = new GridLength(55)
+			});
 			var tableRowGroup = new TableRowGroup();
 			table.RowGroups.Add(tableRowGroup);
 
+			var headers = new [] {
+				"Наименование",
+				"Производитель",
+				"Прайс-лист",
+				"Срок год.",
+				"Дата пр.",
+				"Разн.",
+				"Цена"
+			};
+
+			var headerRow = new TableRow();
+			for(var i = 0; i < headers.Length; i++) {
+				var header = headers[i];
+				var tableCell = new TableCell(new Paragraph(new Run(header))) {
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(1, 1, 0, 0),
+					FontWeight = FontWeights.Bold,
+					LineStackingStrategy = LineStackingStrategy.MaxHeight
+				};
+				headerRow.Cells.Add(tableCell);
+				if (i == headers.Length - 1)
+					tableCell.BorderThickness = new Thickness(1, 1, 1, 0);
+			}
+			tableRowGroup.Rows.Add(headerRow);
+
+			var j = 0;
 			foreach (var data in rows) {
 				var row = new TableRow();
 				tableRowGroup.Rows.Add(row);
 
 				for (var i = 0; i < data.Length; i++) {
-					var cell = new TableCell(new Paragraph(new Run(data[i].ToString())));
+					string text = null;
+					if (data[i] != null)
+						text = data[i].ToString();
+
+					var cell = new TableCell(new Paragraph(new Run(text)));
 					cell.BorderBrush = Brushes.Black;
-					cell.BorderThickness = new Thickness(1);
+					var thickness = new Thickness(1, 1, 0, 0);
+					if (i == headers.Length - 1)
+						thickness.Right = 1;
+					if (j == totalRows - 1)
+						thickness.Bottom = 1;
+					cell.BorderThickness = thickness;
 					row.Cells.Add(cell);
 				}
+				j++;
 			}
 			doc.Blocks.Add(table);
+			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", totalRows))));
 			return doc;
 		}
 

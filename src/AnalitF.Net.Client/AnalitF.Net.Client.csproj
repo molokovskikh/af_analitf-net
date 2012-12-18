@@ -130,8 +130,9 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Controls\DataGrid.cs" />
-    <Compile Include="Extentions\BoolToVisibilityConverter.cs" />
-    <Compile Include="Extentions\WindowManager.cs" />
+    <Compile Include="Binders\BoolToVisibilityConverter.cs" />
+    <Compile Include="Binders\WindowManager.cs" />
+    <Compile Include="Helpers\FlowDocumentExtentions.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\OpenFileResult.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\PrintResult.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />
@@ -156,6 +158,7 @@
     <Compile Include="Models\SentOrderLine.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Tasks.cs" />
+    <Compile Include="Models\WrapDocumentPaginator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseOrderViewModel.cs" />
@@ -170,6 +173,7 @@
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
+    <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -181,6 +185,9 @@
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PrintPreviewView.xaml.cs">
+      <DependentUpon>PrintPreviewView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SyncView.xaml.cs">
       <DependentUpon>SyncView.xaml</DependentUpon>
@@ -242,6 +249,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DescriptionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrintPreviewView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

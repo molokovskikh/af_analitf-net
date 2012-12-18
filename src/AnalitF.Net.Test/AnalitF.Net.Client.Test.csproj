@@ -83,6 +83,7 @@
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\TasksFixture.cs" />
+    <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\BaseFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Unit\OfferSortFixture.cs" />
     <Compile Include="Unit\OrderFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
+    <Compile Include="Unit\ViewModelHelperFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">
@@ -131,14 +133,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-	<Import Project="..\..\packages\StyleCop.MSBuild.4.7.35.0\tools\StyleCop.Targets" />
-	<PropertyGroup>
-		<StyleCopTreatErrorsAsWarnings>False</StyleCopTreatErrorsAsWarnings>
-		<StyleCopOverrideSettingsFile>..\..\packages\StyleCopAddOn.1.0.4\Settings.StyleCop</StyleCopOverrideSettingsFile>
-	</PropertyGroup>
-	<ItemGroup>
-		<StyleCopAdditionalAddinPaths Include="..\..\packages\StyleCopAddOn.1.0.4\lib\4.0">
-			<InProject>false</InProject>
-		</StyleCopAdditionalAddinPaths>
-	</ItemGroup>
+  <Import Project="..\..\packages\StyleCop.MSBuild.4.7.35.0\tools\StyleCop.Targets" />
+  <PropertyGroup>
+    <StyleCopTreatErrorsAsWarnings>False</StyleCopTreatErrorsAsWarnings>
+    <StyleCopOverrideSettingsFile>..\..\packages\StyleCopAddOn.1.0.4\Settings.StyleCop</StyleCopOverrideSettingsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <StyleCopAdditionalAddinPaths Include="..\..\packages\StyleCopAddOn.1.0.4\lib\4.0">
+      <InProject>false</InProject>
+    </StyleCopAdditionalAddinPaths>
+  </ItemGroup>
 </Project>

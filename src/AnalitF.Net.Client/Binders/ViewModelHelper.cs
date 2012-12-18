@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -19,8 +21,27 @@ namespace AnalitF.Net.Client.Binders
 				return null;
 
 			var methodInfo = viewModel.GetType().GetMethod(method, new Type[0]);
-			if (methodInfo != null)
-				return methodInfo.Invoke(viewModel, null);
+			if (methodInfo != null) {
+				var result = methodInfo.Invoke(viewModel, null);
+
+				IEnumerator<IResult> actions = null;
+
+				if (result is IResult) {
+					result = new [] { (IResult)result };
+				}
+
+				if (result is IEnumerable<IResult>) {
+					result = ((IEnumerable<IResult>)result).GetEnumerator();
+				}
+
+				if (result is IEnumerator<IResult>) {
+					actions = result as IEnumerator<IResult>;
+				}
+
+				if (actions != null)
+					Coroutine.BeginExecute(actions);
+				return result;
+			}
 			return null;
 		}
 	}

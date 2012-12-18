@@ -16,8 +16,9 @@ namespace AnalitF.Net.Client.Models
 		//TODO: Обработка ошибок?
 		public void Execute(ActionExecutionContext context)
 		{
-			Process.Start("excel", Filename);
-			Completed(this, new ResultCompletionEventArgs());
+			Process.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
+			if (Completed != null)
+				Completed(this, new ResultCompletionEventArgs());
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
