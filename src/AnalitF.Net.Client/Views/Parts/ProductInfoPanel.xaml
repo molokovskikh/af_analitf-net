@@ -11,6 +11,7 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"></RowDefinition>
 				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
 			</Grid.RowDefinitions>
 			<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
 				<Label Foreground="Green" Visibility="{Binding Path=CurrentOffer.VitallyImportant, Converter={StaticResource VisibilityConverter}, FallbackValue=Hidden}">ЖНВЛС</Label>
@@ -18,9 +19,13 @@
 			</StackPanel>
 			<Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">Наименование:</Label>
 			<Label Grid.Row="0" Grid.Column="2" x:Name="CurrentOffer_ProductSynonym" FontWeight="Bold"></Label>
-			<Button Grid.Row="1" Grid.Column="0" x:Name="ShowDescription">Описание (F1, Пробел)</Button>
-			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">МНН:</Label>
-			<Label Grid.Row="1" Grid.Column="2" x:Name="CurrentCatalog_Name_Mnn_Name" FontWeight="Bold"></Label>
+
+			<Button Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" x:Name="ShowDescription">Описание (F1, Пробел)</Button>
+			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Padding="5, 0, 5, 0">МНН:</Label>
+			<Label Grid.Row="1" Grid.Column="2" x:Name="CurrentCatalog_Name_Mnn_Name" FontWeight="Bold" Padding="5, 0, 5, 0"></Label>
+
+			<Label Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Padding="5, 0, 5, 0">Примечание:</Label>
+			<Label Grid.Row="2" Grid.Column="2" x:Name="CurrentOffer_Note" FontWeight="Bold" Padding="5, 0, 5, 0"></Label>
 		</Grid>
 	</Grid>
 </UserControl>

@@ -232,7 +232,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
-    <Compile Include="Views\ProductInfoPanel.xaml.cs">
+    <Compile Include="Views\Parts\ProductInfoPanel.xaml.cs">
       <DependentUpon>ProductInfoPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WaitView.xaml.cs">
@@ -310,7 +310,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ProductInfoPanel.xaml">
+    <Page Include="Views\Parts\ProductInfoPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
