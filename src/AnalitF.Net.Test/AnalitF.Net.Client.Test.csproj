@@ -49,6 +49,7 @@
     <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL" />
     <Reference Include="microsoft.reactive.testing" />
     <Reference Include="Mysql.data" />
+    <Reference Include="newtonsoft.json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="nhibernate" />
     <Reference Include="npoi, Version=1.2.5.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
@@ -76,6 +77,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BindScreen.cs" />
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
@@ -96,6 +98,9 @@
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
+    <Compile Include="Integration\Views\ExportFixture.cs" />
+    <Compile Include="Integration\Views\SaveTableSettingsFixture.cs" />
+    <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />

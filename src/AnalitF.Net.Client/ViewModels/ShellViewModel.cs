@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
@@ -19,6 +20,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using Newtonsoft.Json;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
@@ -30,10 +32,28 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		bool CanPrint { get; }
 
-		IResult Print();
+		PrintResult Print();
 	}
 
-	[Serializable]
+	public class ColumnSettings
+	{
+		public ColumnSettings()
+		{
+		}
+
+		public ColumnSettings(DataGridColumn dataGridColumn)
+		{
+			Name = dataGridColumn.Header.ToString();
+			Visible = dataGridColumn.Visibility;
+			Width = dataGridColumn.Width;
+		}
+
+		public string Name;
+		public Visibility Visible;
+		public DataGridLength Width;
+	}
+
+	[DataContract]
 	public class ShellViewModel : Conductor<IScreen>
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
@@ -44,10 +64,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<Address> addresses;
 		private Address currentAddress;
 
-		public bool UnderTest;
-
 		public ShellViewModel()
 		{
+			ViewSettings = new Dictionary<string, List<ColumnSettings>>();
 			Arguments = Environment.GetCommandLineArgs();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
@@ -72,15 +91,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public string[] Arguments;
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
+		[DataMember]
+		public Dictionary<string, List<ColumnSettings>> ViewSettings;
 
-			if (!UnderTest)
-				((Window)GetView()).Loaded += (sender, args) => OnLoaded();
-		}
-
-		public void OnLoaded()
+		protected override void OnViewLoaded(object view)
 		{
 			var import = Arguments.LastOrDefault().Match("import");
 			if (import) {
@@ -89,6 +103,11 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				CheckSettings();
 			}
+		}
+
+		public void OnLoaded()
+		{
+			OnViewLoaded(GetView());
 		}
 
 		public List<Address> Addresses
@@ -193,7 +212,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanPrintPreview)
 				return;
 
-			var printResult = ((IPrintable)ActiveItem).Print() as PrintResult;
+			var printResult = ((IPrintable)ActiveItem).Print();
 			windowManager.ShowDialog(new PrintPreviewViewModel(printResult));
 		}
 

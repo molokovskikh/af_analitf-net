@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
@@ -295,7 +298,61 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnDeactivate(bool close)
 		{
 			Session.Flush();
+
+			var view = GetView();
+			if (view != null)
+				SaveSettings(view);
+
 			base.OnDeactivate(close);
+		}
+
+		protected override void OnViewAttached(object view, object context)
+		{
+			RestoreSettings(view);
+		}
+
+		private void SaveSettings(object view)
+		{
+			foreach (var grid in GetControls(view)) {
+				var key = GetKey(grid);
+				if (Shell.ViewSettings.ContainsKey(key)) {
+					Shell.ViewSettings.Remove(key);
+				}
+				Shell.ViewSettings.Add(key, grid.Columns.Select(c => new ColumnSettings(c)).ToList());
+			}
+		}
+
+		private void RestoreSettings(object view)
+		{
+			foreach (var dataGrid in GetControls(view)) {
+				var key = GetKey(dataGrid);
+				if (!Shell.ViewSettings.ContainsKey(key))
+					continue;
+
+				var settings = Shell.ViewSettings[key];
+				foreach (var setting in settings) {
+					var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
+					if (column == null)
+						return;
+					column.Width = setting.Width;
+					column.Visibility = setting.Visible;
+				}
+			}
+		}
+
+		public IEnumerable<DataGrid> GetControls(object view)
+		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject == null || Shell == null)
+				return Enumerable.Empty<DataGrid>();
+			return dependencyObject.DeepChildren()
+				.OfType<DataGrid>()
+				.Where(c => c.Name == "Offers");
+		}
+
+		private string GetKey(DataGrid grid)
+		{
+			return GetType().Name + "." + grid.Name;
 		}
 	}
 }

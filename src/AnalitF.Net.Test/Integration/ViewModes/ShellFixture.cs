@@ -24,14 +24,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture, Ignore("Тесты сломаны, из-за обработки даилога я не знаю как их чинить")]
 	public class ShellFixture : BaseFixture
 	{
-		[SetUp]
-		public void Setup()
-		{
-			shell = new ShellViewModel {
-				UnderTest = true
-			};
-		}
-
 		[Test, RequiresSTA]
 		public void If_user_name_empty_open_configuration_form()
 		{

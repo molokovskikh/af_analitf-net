@@ -19,16 +19,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		protected TestScheduler schedule;
 		protected Address address;
 
+		private IDisposable disposeTestShedule;
+
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
 			schedule = new TestScheduler();
 			BaseScreen.Scheduler = schedule;
-			TestUtils.WithScheduler(schedule);
+			disposeTestShedule = TestUtils.WithScheduler(schedule);
 
-			manager = new Client.Extentions.WindowManager();
-			manager.UnderTest = true;
-			IoC.GetInstance = (type, key) => manager;
+			StubWindowManager();
 
 			session = SetupFixture.Factory.OpenSession();
 			address = session.Query<Address>().FirstOrDefault();
@@ -38,7 +38,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[TearDown]
 		public void BaseFixtureTearDown()
 		{
+			disposeTestShedule.Dispose();
 			session.Dispose();
+		}
+
+		protected void StubWindowManager()
+		{
+			manager = new Client.Extentions.WindowManager();
+			manager.UnderTest = true;
+			var @base = IoC.GetInstance;
+			IoC.GetInstance = (type, key) => {
+				if (type == typeof(IWindowManager))
+					return manager;
+				return @base(type, key);
+			};
 		}
 
 		protected T Init<T>(T model) where T : BaseScreen

@@ -13,6 +13,14 @@ namespace AnalitF.Net.Client.Extentions
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 
+		public override void ShowWindow(object rootModel, object context = null, IDictionary<string, object> settings = null)
+		{
+			if (UnderTest)
+				return;
+
+			base.ShowWindow(rootModel, context, settings);
+		}
+
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 			var window = CreateWindow(rootModel, true, context, settings);

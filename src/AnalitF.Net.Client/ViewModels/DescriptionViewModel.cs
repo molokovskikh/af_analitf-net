@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IResult Print()
+		public PrintResult Print()
 		{
 			//мы не можем использовать существующий документ, тк это приведет к тому что визуализация в FlowDocumentScrollViewer "исчезнет"
 			//и что бы увидеть данные пользователю нужно будет вызвать перересовку документа, например с помощью скрола

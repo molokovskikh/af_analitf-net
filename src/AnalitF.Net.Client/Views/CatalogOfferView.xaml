@@ -46,31 +46,31 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False">
 			<DataGrid.Columns>
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
-				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
-				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="177*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn Width="89*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="33*" Header="Упаковка" Binding="{Binding Volume}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="48*" Header="Примечание" Binding="{Binding Note}" />
+				<DataGridTextColumn Width="56*" MinWidth="5" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn Width="74*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
+				<DataGridTextColumn Width="72*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
+				<DataGridTextColumn Width="87*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
+				<DataGridTextColumn Width="61*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<DataGridTextColumn Width="26*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
+				<DataGridTextColumn Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
-				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="Auto" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
-				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
+				<DataGridTextColumn Width="59*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="39*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="48*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
+				<DataGridTextColumn Width="34*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn Width="51*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

@@ -267,7 +267,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			get { return true; }
 		}
 
-		public IResult Print()
+		public PrintResult Print()
 		{
 			return new PrintResult(BuildDocument(), DisplayName);
 		}
