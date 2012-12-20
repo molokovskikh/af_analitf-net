@@ -1,4 +1,8 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AnalitF.Net.Client.Models;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -9,6 +13,9 @@ namespace AnalitF.Net.Test.Unit
 		private Offer offer;
 		private Address address;
 
+		private string error;
+		private string warning;
+
 		[SetUp]
 		public void Setup()
 		{
@@ -17,13 +24,14 @@ namespace AnalitF.Net.Test.Unit
 				Price = new Price(),
 				Cost = 53.1m
 			};
+			error = null;
+			warning = null;
 		}
 
 		[Test]
 		public void Update_order_count()
 		{
 			offer.OrderCount = 10;
-			Assert.That(offer.OrderSum, Is.EqualTo(531));
 			offer.UpdateOrderLine(address);
 			Assert.That(offer.OrderLine, Is.Not.Null);
 			Assert.That(offer.Price.Order, Is.Not.Null);
@@ -50,8 +58,8 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Junk = true;
 			offer.OrderCount = 1;
-			offer.MakePreorderCheck();
-			Assert.That(offer.Warning, Is.StringContaining("Вы заказали препарат с ограниченным сроком годности"));
+			Validate();
+			Assert.That(warning, Is.StringContaining("Вы заказали препарат с ограниченным сроком годности"));
 		}
 
 		[Test]
@@ -59,20 +67,21 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Junk = true;
 			offer.OrderCount = 1;
-			offer.MakePreorderCheck();
-			Assert.That(offer.Warning, Is.Not.Null);
+			Validate();
+			Assert.That(warning, Is.Not.Null);
 			offer.OrderCount = 0;
-			offer.MakePreorderCheck();
-			var order = offer.UpdateOrderLine(address);
-			Assert.That(offer.Warning, Is.Null);
-			Assert.That(order, Is.Null);
+			Validate();
+			Read(offer.SaveOrderLine(address));
+			Assert.That(warning, Is.Null.Or.Empty);
+			Assert.That(offer.Price.Order, Is.Null);
+			Assert.That(offer.OrderLine, Is.Null);
 		}
 
 		[Test]
 		public void Can_not_order_to_many()
 		{
 			offer.OrderCount = uint.MaxValue;
-			offer.MakePreorderCheck();
+			Validate();
 			Assert.That(offer.OrderCount, Is.EqualTo(65535));
 		}
 
@@ -81,9 +90,9 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.Quantity = "10";
 			offer.OrderCount = 15;
-			offer.MakePreorderCheck();
+			Validate();
 			Assert.That(offer.OrderCount, Is.EqualTo(10));
-			Assert.That(offer.Notification, Is.EqualTo("Заказ превышает остаток на складе, товар будет заказан в количестве 10"));
+			Assert.That(error, Is.EqualTo("Заказ превышает остаток на складе, товар будет заказан в количестве 10"));
 		}
 
 		[Test]
@@ -104,8 +113,9 @@ namespace AnalitF.Net.Test.Unit
 			offer.MinOrderSum = 100;
 			offer.Cost = 70;
 			offer.UpdateOrderLine(address);
-			Assert.That(offer.Notification, Is.EqualTo("Сумма заказа \"70\" меньше минимальной сумме заказа \"100\" по данной позиции!"));
-			Assert.That(offer.OrderCount, Is.EqualTo(0));
+			Read(offer.SaveOrderLine(address));
+			Assert.That(error, Is.EqualTo("Сумма заказа \"70\" меньше минимальной сумме заказа \"100\" по данной позиции!"));
+			Assert.That(offer.OrderCount, Is.Null);
 			Assert.That(offer.OrderLine, Is.Null);
 			Assert.That(offer.Price.Order, Is.Null);
 		}
@@ -116,8 +126,10 @@ namespace AnalitF.Net.Test.Unit
 			offer.OrderCount = 1;
 			offer.UpdateOrderLine(address);
 			offer.OrderCount = 0;
-			var order = offer.UpdateOrderLine(address);
-			Assert.That(order, Is.Not.Null);
+			offer.UpdateOrderLine(address);
+			Assert.That(offer.OrderCount, Is.Null);
+			Assert.That(offer.OrderLine, Is.Null);
+			Assert.That(offer.Price.Order, Is.Null);
 		}
 
 		[Test]
@@ -126,9 +138,9 @@ namespace AnalitF.Net.Test.Unit
 			offer.RequestRatio = 3;
 			offer.Quantity = "10";
 			offer.OrderCount = 1;
-			offer.MakePreorderCheck();
+			Validate();
 			Assert.That(offer.OrderCount, Is.EqualTo(1));
-			Assert.That(offer.Notification, Is.Null);
+			Assert.That(error, Is.Null.Or.Empty);
 		}
 
 		[Test]
@@ -145,10 +157,42 @@ namespace AnalitF.Net.Test.Unit
 			offer.Junk = true;
 			offer.Quantity = "10000";
 			offer.OrderCount = 1001;
-			offer.MakePreorderCheck();
-			Assert.That(offer.Warning, Is.EqualTo("Вы заказали препарат с ограниченным сроком годности"
+			Validate();
+			Assert.That(warning, Is.EqualTo("Вы заказали препарат с ограниченным сроком годности"
 				+ "\r\nили с повреждением вторичной упаковки."
 				+ "\r\nВнимание! Вы заказали большое количество препарата."));
+		}
+
+		[Test]
+		public void Can_not_order_without_address()
+		{
+			address = null;
+			offer.OrderCount = 1;
+			Validate();
+			Assert.That(offer.OrderCount, Is.Null);
+		}
+
+		[Test]
+		public void Remove_order_on_order_line_delete()
+		{
+			offer.OrderCount = 1;
+			Validate();
+			Assert.That(address.Orders.Count, Is.EqualTo(1));
+			offer.OrderCount = 0;
+			Validate();
+			Assert.That(address.Orders.Count, Is.EqualTo(0));
+		}
+
+		private void Validate()
+		{
+			var message = offer.UpdateOrderLine(address);
+			Read(message);
+		}
+
+		private void Read(List<Message> message)
+		{
+			warning = message.Where(m => m.IsWarning).Implode(Environment.NewLine);
+			error = message.Where(m => m.IsError).Implode(Environment.NewLine);
 		}
 	}
 }

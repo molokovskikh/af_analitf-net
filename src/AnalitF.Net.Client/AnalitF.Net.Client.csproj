@@ -127,6 +127,7 @@
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Binders\ViewModelHelper.cs" />
     <Compile Include="Config\Initializers\DevArtDriver.cs" />
+    <Compile Include="Config\Initializers\LazyInitializer.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Controls\DataGrid.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\MaxProducerCost.cs" />
+    <Compile Include="Models\MinOrderSumRule.cs" />
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\OpenFileResult.cs" />
     <Compile Include="Models\Order.cs" />

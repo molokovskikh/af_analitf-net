@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Price currentPrice;
 		private List<OrderLine> lines;
 		private List<SentOrderLine> sentLines;
+		private string orderWarning;
 
 		public OrderLinesViewModel()
 		{
@@ -57,6 +58,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			//перед запросом данных нужно сохранить изменения а то не будет измененных данных
+			Session.Flush();
+
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>();
 
@@ -207,18 +211,33 @@ namespace AnalitF.Net.Client.ViewModels
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
 			offer.AttachOrderLine(CurrentLine);
 			offer.OrderCount = 0;
-			var order = offer.UpdateOrderLine(Address);
+			var error = offer.UpdateOrderLine(Address);
+			ShowValidationError(error);
 
-			if (order != null) {
-				if (order.IsEmpty) {
-					Session.Delete(order);
-				}
-				else {
-					Session.SaveOrUpdate(order);
-				}
-				Session.Flush();
-			}
 			Update();
+		}
+
+		private void ShowValidationError(List<Message> messages)
+		{
+			var warnings = messages.Where(m => m.IsWarning).Implode(Environment.NewLine);
+			//нельзя перетирать старые предупреждения, предупреждения очищаются только по таймеру
+			if (!String.IsNullOrEmpty(warnings))
+				OrderWarning = warnings;
+
+			var errors = messages.Where(m => m.IsError);
+			foreach (var message in errors) {
+				Manager.Warning(message.MessageText);
+			}
+		}
+
+		public string OrderWarning
+		{
+			get { return orderWarning; }
+			set
+			{
+				orderWarning = value;
+				NotifyOfPropertyChange("OrderWarning");
+			}
 		}
 
 		public bool CanShowCatalog

@@ -1,4 +1,7 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Models
@@ -20,13 +23,18 @@ namespace AnalitF.Net.Test.Integration.Models
 				orderId = order.Id;
 				session.Clear();
 
-				object eventSender = null;
+
+				var events = new List<Tuple<object, PropertyChangedEventArgs>>();
 				order = session.Load<Order>(orderId);
 				order.PropertyChanged += (sender, args) => {
-					eventSender = sender;
+					events.Add(Tuple.Create(sender, args));
 				};
 				order.Sum = 100;
-				Assert.That(eventSender.GetHashCode(), Is.EqualTo(order.GetHashCode()));
+				Assert.That(events.Count, Is.EqualTo(2));
+				Assert.That(events[0].Item2.PropertyName, Is.EqualTo("Sum"));
+				Assert.That(events[0].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
+				Assert.That(events[1].Item2.PropertyName, Is.EqualTo("IsValid"));
+				Assert.That(events[1].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
 			}
 		}
 	}

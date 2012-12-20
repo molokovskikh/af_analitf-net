@@ -223,10 +223,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.CurrentOffer.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
+			ScreenExtensions.TryDeactivate(model, true);
 
 			var renewModel = Init(new CatalogOfferViewModel(catalog));
 			Assert.That(renewModel.CurrentOffer.OrderCount, Is.EqualTo(1));
 			Assert.That(renewModel.CurrentOffer.OrderLine, Is.Not.Null);
+			Assert.That(renewModel.CurrentOrder, Is.Not.Null);
 		}
 
 		[Test]
@@ -237,7 +239,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.OfferUpdated();
 			model.OfferCommitted();
 
-			Assert.That(model.CurrentOffer.OrderCount, Is.EqualTo(0));
+			Assert.That(model.CurrentOffer.OrderCount, Is.Null);
 			Assert.That(model.CurrentOffer.OrderLine, Is.Null);
 		}
 

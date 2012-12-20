@@ -8,6 +8,7 @@ using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
+using Message = Common.Tools.Message;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -39,6 +40,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(m => !String.IsNullOrEmpty(m.Value))
 				.Throttle(warningTimeout)
 				.Subscribe(m => { OrderWarning = null; });
+
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
 		}
 
 		protected void UpdateProducers()
@@ -98,6 +102,18 @@ namespace AnalitF.Net.Client.ViewModels
 				NotifyOfPropertyChange("CurrentOffer");
 				if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
+			}
+		}
+
+		public Order CurrentOrder
+		{
+			get
+			{
+				if (CurrentOffer == null)
+					return null;
+				if (CurrentOffer.OrderLine == null)
+					return null;
+				return CurrentOffer.OrderLine.Order;
 			}
 		}
 
@@ -186,12 +202,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			if (Address == null)
-				CurrentOffer.OrderCount = 0;
-
 			lastEditOffer = CurrentOffer;
-			CurrentOffer.MakePreorderCheck();
-			ProcessMessages(CurrentOffer);
+			ShowValidationError(CurrentOffer.UpdateOrderLine(Address));
 		}
 
 		public void OfferCommitted()
@@ -199,29 +211,26 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			var order = lastEditOffer.UpdateOrderLine(Address);
-			ProcessMessages(lastEditOffer);
-			if (order != null) {
-				if (order.IsEmpty) {
-					Session.Delete(order);
-				}
-				else {
-					Session.SaveOrUpdate(order);
-				}
-				Session.Flush();
-			}
+			ShowValidationError(lastEditOffer.SaveOrderLine(Address));
 		}
 
-		private void ProcessMessages(Offer offer)
+		private void ShowValidationError(List<Message> messages)
 		{
-			OrderWarning = CurrentOffer.Warning;
-			if (!String.IsNullOrEmpty(offer.Notification)) {
-				Manager.Warning(offer.Notification);
-				offer.Notification = null;
-				//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
-				//мог ввести коректное значение
-				if (CurrentOffer == null || CurrentOffer.Id != offer.Id) {
-					CurrentOffer = offer;
+			var warnings = messages.Where(m => m.IsWarning).Implode(Environment.NewLine);
+			//нельзя перетирать старые предупреждения, предупреждения очищаются только по таймеру
+			if (!String.IsNullOrEmpty(warnings))
+				OrderWarning = warnings;
+
+			var errors = messages.Where(m => m.IsError);
+			foreach (var message in errors) {
+				Manager.Warning(message.MessageText);
+			}
+
+			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
+			//мог ввести коректное значение
+			if (errors.Any()) {
+				if (CurrentOffer == null || CurrentOffer.Id != lastEditOffer.Id) {
+					CurrentOffer = lastEditOffer;
 				}
 			}
 		}
@@ -281,6 +290,12 @@ namespace AnalitF.Net.Client.ViewModels
 			Query();
 			Calculate();
 			LoadOrderItems();
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			Session.Flush();
+			base.OnDeactivate(close);
 		}
 	}
 }

@@ -19,7 +19,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			session.DeleteEach<Order>();
 			session.Flush();
-			session.Clear();
 		}
 
 		[Test]

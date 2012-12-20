@@ -82,6 +82,26 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 				.SetParameter("costId", MaxProducerCostCostId)
 				.ExecuteUpdate();
 
+			sql = @"
+select
+	a.Id as AddressId,
+	i.PriceId as PriceId,
+	i.RegionId as RegionId,
+	if(ai.MinReq > 0, ai.MinReq, p.MinReq) as MinOrderSum,
+	ai.ControlMinReq as IsRuleMandatory
+from
+  Customers.Users u
+  join Customers.Clients c on u.ClientId = c.Id
+  join Customers.UserAddresses ua on ua.UserId = u.Id
+  join Customers.Addresses a on c.Id = a.ClientId and ua.AddressId = a.Id
+  join Customers.Intersection i on i.ClientId = c.Id
+  join Customers.AddressIntersection ai on ai.IntersectionId = i.Id and ai.AddressId = a.Id
+  join Usersettings.ActivePrices p on p.PriceCode = i.PriceId and p.RegionCode = i.RegionId
+where u.Id = ?UserId
+	and a.Enabled = 1
+";
+			result.Add(Export(sql, "MinOrderSumRules", new { userId }));
+
 			sql = @"select * from Usersettings.MaxProducerCosts";
 			result.Add(Export(sql, "MaxProducerCosts"));
 

@@ -28,8 +28,6 @@ namespace AnalitF.Net.Test.Integration
 			};
 			var result = view.Print() as PrintResult;
 			Assert.That(result.Doc, Is.Not.Null);
-
-			SaveAndOpen(result);
 		}
 
 		public static void SaveAndOpen(PrintResult result)

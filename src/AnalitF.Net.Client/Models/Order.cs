@@ -56,9 +56,8 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				sum = value;
-				Valid = Sum > 1000;
 				OnPropertyChanged("Sum");
-				OnPropertyChanged("Valid");
+				OnPropertyChanged("IsValid");
 			}
 		}
 
@@ -76,8 +75,16 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<OrderLine> Lines { get; set; }
 
-		[Ignore]
-		public virtual bool Valid { get; set; }
+		public virtual bool IsValid
+		{
+			get
+			{
+				var rule = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
+				if (rule == null)
+					return true;
+				return Sum >= rule.MinOrderSum;
+			}
+		}
 
 		public virtual bool IsEmpty
 		{
@@ -125,7 +132,8 @@ namespace AnalitF.Net.Client.Models
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
 			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			if (handler != null)
+				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

@@ -70,7 +70,7 @@
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -156,14 +156,14 @@
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
 				<Label Name="RetailCost"></Label>
 				<Label>Сумма</Label>
-				<Label Name="CurrentOffer_Price_Order_Sum">
+				<Label Name="CurrentOffer_OrderLine_Order_Sum">
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding CurrentOffer.Price.Order.Valid}" Value="true">
+								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}" Value="true">
 									<Setter Property="Foreground" Value="Green" />
 								</DataTrigger>
-								<DataTrigger Binding="{Binding CurrentOffer.Price.Order.Valid}" Value="false">
+								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}" Value="false">
 									<Setter Property="Foreground" Value="Red" />
 								</DataTrigger>
 							</Style.Triggers>

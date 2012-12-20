@@ -51,8 +51,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			if (Shell != null)
-				Address = Shell.CurrentAddress;
+			if (Shell != null && Shell.CurrentAddress != null) {
+				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
+			}
 		}
 
 		public override string ToString()
