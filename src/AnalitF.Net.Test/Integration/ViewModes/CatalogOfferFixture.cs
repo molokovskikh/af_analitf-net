@@ -231,6 +231,32 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.CurrentOffer.OrderLine, Is.Null);
 		}
 
+		[Test]
+		public void Create_order_line_with_comment()
+		{
+			model.AutoCommentText = "тестовый комментарий";
+			model.CurrentOffer.OrderCount = 1;
+			model.OfferUpdated();
+			Assert.That(model.CurrentOffer.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
+		}
+
+		[Test]
+		public void Reset_auto_comment()
+		{
+			model.AutoCommentText = "тестовый комментарий";
+			model.ResetAutoComment = true;
+			model.CurrentOffer.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.That(model.CurrentOffer.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
+
+			model.CurrentOffer = model.Offers[1];
+			Assert.That(model.AutoCommentText, Is.Null);
+
+			model.CurrentOffer = model.Offers[0];
+			Assert.That(model.AutoCommentText, Is.EqualTo("тестовый комментарий"));
+		}
+
 		private void CleanSendOrders(Offer offer)
 		{
 			session.Query<SentOrderLine>()

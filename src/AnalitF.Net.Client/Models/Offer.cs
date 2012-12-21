@@ -151,7 +151,7 @@ namespace AnalitF.Net.Client.Models
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		public virtual List<Message> UpdateOrderLine(Address address, bool edit = true)
+		public virtual List<Message> UpdateOrderLine(Address address, string comment = null, bool edit = true)
 		{
 			var result = Enumerable.Empty<Message>().ToList();
 			if (address == null) {
@@ -167,10 +167,12 @@ namespace AnalitF.Net.Client.Models
 						address.Orders.Add(order);
 					}
 					OrderLine = new OrderLine(order, this, orderCount.Value);
+					orderLine.Comment = comment;
 					order.AddLine(OrderLine);
 				}
 				else {
 					OrderLine.Count = OrderCount.Value;
+					OrderLine.Comment = comment;
 					OrderLine.Order.Sum = OrderLine.Order.Lines.Sum(l => l.Sum);
 				}
 
@@ -201,9 +203,9 @@ namespace AnalitF.Net.Client.Models
 			OrderCount = orderLine.Count;
 		}
 
-		public virtual List<Message> SaveOrderLine(Address address)
+		public virtual List<Message> SaveOrderLine(Address address, string comment = null)
 		{
-			return UpdateOrderLine(address, false);
+			return UpdateOrderLine(address, comment, false);
 		}
 	}
 }

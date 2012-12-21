@@ -33,6 +33,8 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool NeedToCalculateDiff;
 
 		private ExcelExporter excelExporter;
+		protected string autoCommentText;
+		protected bool resetAutoComment;
 
 		public BaseOfferViewModel()
 		{
@@ -102,6 +104,10 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				currentOffer = value;
+				if (ResetAutoComment) {
+					var commentText = currentOffer.OrderLine != null ? currentOffer.OrderLine.Comment : null;
+					AutoCommentText = commentText;
+				}
 				NotifyOfPropertyChange("CurrentOffer");
 				if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
@@ -206,7 +212,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			lastEditOffer = CurrentOffer;
-			ShowValidationError(CurrentOffer.UpdateOrderLine(Address));
+			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -214,7 +220,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(Address));
+			ShowValidationError(lastEditOffer.SaveOrderLine(Address, AutoCommentText));
 		}
 
 		private void ShowValidationError(List<Message> messages)
@@ -264,6 +270,32 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool CanExport
 		{
 			get { return excelExporter.CanExport; }
+		}
+
+		public string AutoCommentText
+		{
+			get
+			{
+				return autoCommentText;
+			}
+			set
+			{
+				autoCommentText = value;
+				NotifyOfPropertyChange("AutoCommentText");
+			}
+		}
+
+		public bool ResetAutoComment
+		{
+			get
+			{
+				return resetAutoComment;
+			}
+			set
+			{
+				resetAutoComment = value;
+				NotifyOfPropertyChange("ResetAutoComment");
+			}
 		}
 
 		public IResult Export()

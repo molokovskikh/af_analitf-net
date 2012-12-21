@@ -10,6 +10,7 @@ namespace AnalitF.Net.Client.Models
 	public class OrderLine : BaseOffer, INotifyPropertyChanged
 	{
 		private uint count;
+		private string comment;
 
 		public OrderLine()
 		{
@@ -27,6 +28,16 @@ namespace AnalitF.Net.Client.Models
 
 		[JsonIgnore]
 		public virtual Order Order { get; set; }
+
+		public virtual string Comment
+		{
+			get { return comment;}
+			set
+			{
+				comment = value;
+				OnPropertyChanged("Comment");
+			}
+		}
 
 		public virtual uint Count
 		{
