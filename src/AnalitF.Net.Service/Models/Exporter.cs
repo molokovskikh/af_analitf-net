@@ -149,6 +149,8 @@ from Usersettings.ActivePrices ap
 				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode")
 				.Join("left join Usersettings.MaxProducerCosts mx on mx.ProductId = c0.ProductId and mx.ProducerId = c0.CodeFirmCr");
 			offerQuery.SelectSynonyms();
+			//в MaxProducerCosts может быть более одной записи
+			offerQuery.GroupBy("c0.Id, ap.RegionCode");
 			sql = offerQuery.ToSql()
 				.Replace("{Offer.", "")
 				.Replace("}", "")
