@@ -5,6 +5,7 @@ import file from Deploy.bake
 import file from Web.bake
 import file from AppSupport.bake
 import file from WebSiteSupport.bake
+import System
 import System.IO
 import System.Net.Mail
 import System.Xml
@@ -23,7 +24,7 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
 
 task @DeployApp, [@WebDeploy]
 
-task @deploy, [@DeployPipeline, @DeployClient]
+task @deploy, [@DeployPipeline, @DeployClient, @SendNotification]
 
 task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip, @AfterBuildApp]
 
@@ -56,11 +57,10 @@ task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 
 task @SendNotification:
+	path = Environment.CurrentDirectory.Replace("\\", "/")
+	Sh("bash -l -c \"cd $path;./scripts/changes.sh\"")
 	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net, r.kvasov@analit.net")
 	mail.Subject = "Обновление демо версии"
-	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением
-\\offdc\MMedia\Квасов Роман\dcmysql.exe - установщик коннектора, поставить
-перед запуском приложения
-"""
+	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением """
 	mail.Attachments.Add(Attachment("output/changes.txt"))
 	SmtpClient().Send(mail)
