@@ -140,8 +140,6 @@ namespace AnalitF.Net.Client.Models
 			var handler = new HttpClientHandler {
 				Credentials = credentials,
 				PreAuthenticate = true,
-				UseProxy = true,
-				Proxy = new WebProxy(new Uri("http://localhost:8888"), false)
 			};
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;
