@@ -73,7 +73,9 @@ namespace AnalitF.Net.Controllers
 								Prefix = job.Id.ToString(),
 								ExportPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ExportPath"]),
 								ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"]),
-								UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"])
+								UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"]),
+								MaxProducerCostPriceId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostPriceId"]),
+								MaxProducerCostCostId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostCostId"]),
 							};
 							using (exporter) {
 								exporter.ExportCompressed(job.OutputFile);

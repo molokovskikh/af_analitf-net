@@ -15,7 +15,8 @@ import System.Xml.XPath.Extensions
 Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",
-	Profile: @catalog
+	Profile: @catalog,
+	Environment: @test
 )
 
 task @default, [@Build]
@@ -24,7 +25,9 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
 
 task @DeployApp, [@WebDeploy]
 
-task @deploy, [@DeployPipeline, @DeployClient, @SendNotification]
+task @DeployService, [@DeployPipeline]
+
+task @deploy, [@Tag, @DeployService, @DeployClient, @SendNotification]
 
 task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip, @AfterBuildApp]
 
@@ -56,9 +59,11 @@ task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
 	Cp("build/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 
-task @SendNotification:
+task @Tag:
 	path = Environment.CurrentDirectory.Replace("\\", "/")
 	Sh("bash -l -c \"cd $path;./scripts/changes.sh\"")
+
+task @SendNotification:
 	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net, r.kvasov@analit.net")
 	mail.Subject = "Обновление демо версии"
 	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением """
