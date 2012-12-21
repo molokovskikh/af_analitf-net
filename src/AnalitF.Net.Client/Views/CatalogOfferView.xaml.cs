@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
@@ -23,6 +24,9 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 			var grid = Offers;
 			Loaded += (sender, args) => {
+				var model = DataContext as CatalogOfferViewModel;
+				if (model != null && model.IsFilterByCatalogName)
+					Offers.Items.GroupDescriptions.Add(new PropertyGroupDescription("GroupName"));
 				XamlExtentions.Focus(grid);
 			};
 

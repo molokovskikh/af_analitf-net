@@ -94,6 +94,14 @@ namespace AnalitF.Net.Client.Models
 			get { return _diff; }
 		}
 
+		//поле для отображения сгруппированные данных
+		//оно здесь потомучто PropertyGroupDescription
+		//может группировать только по свойству
+		//а переделывать механиз группировки не целесообразно
+		//используется если снята опция "Поиск по форме выпуска"
+		[Ignore]
+		public virtual string GroupName { get; set; }
+
 		[Ignore]
 		public virtual int SortKeyGroup { get; set; }
 

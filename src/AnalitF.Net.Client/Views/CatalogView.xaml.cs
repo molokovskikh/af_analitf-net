@@ -5,6 +5,7 @@ using System.Windows.Input;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -24,8 +25,13 @@ namespace AnalitF.Net.Client.Views
 			};
 
 			CatalogNames.KeyDown += (sender, args) => {
-				if (args.Key == Key.Return)
-					XamlExtentions.Focus(CatalogForms);
+				var model = DataContext as CatalogViewModel;
+				if (args.Key == Key.Return) {
+					if (model == null || model.ViewOffersByCatalog)
+						XamlExtentions.Focus(CatalogForms);
+					else
+						model.ShowAllOffers();
+				}
 				if (args.Key == Key.Escape)
 					SearchText.Text = "";
 			};

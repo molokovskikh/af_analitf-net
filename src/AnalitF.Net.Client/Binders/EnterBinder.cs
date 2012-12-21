@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Binders
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 
 			var mouseDoubleClick = Observable.FromEventPattern<MouseButtonEventArgs>(element, "MouseDoubleClick")
-				.Select(a => XamlExtentions.Parents((DependencyObject)a.EventArgs.OriginalSource).OfType<DataGridCell>().FirstOrDefault());
+				.Select(a => ((DependencyObject)a.EventArgs.OriginalSource).Parents().OfType<DataGridCell>().FirstOrDefault());
 
 			var enterObservable = keydown.Merge(mouseDoubleClick).Where(i => i != null);
 

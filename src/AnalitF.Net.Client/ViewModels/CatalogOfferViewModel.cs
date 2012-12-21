@@ -13,6 +13,7 @@ using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -29,14 +30,16 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<MaxProducerCost> maxProducerCosts;
 		private List<SentOrderLine> historyOrders;
 
+		private CatalogName filterCatalogName;
+		private Catalog filterCatalog;
+
 		private static TimeSpan LoadOrderHistoryTimeout = TimeSpan.FromMilliseconds(2000);
 
-		public CatalogOfferViewModel(Catalog catalog)
+		private CatalogOfferViewModel()
 		{
 			DisplayName = "Сводный прайс-лист";
 			NeedToCalculateDiff = true;
 			GroupByProduct = Settings.GroupByProduct;
-			CurrentCatalog = catalog;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
 			CurrentRegion = Consts.AllRegionLabel;
@@ -60,6 +63,20 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o != null)
 				.Throttle(LoadOrderHistoryTimeout, Scheduler)
 				.Subscribe(_ => LoadHistoryOrders());
+		}
+
+		public CatalogOfferViewModel(Catalog catalog)
+			: this()
+		{
+			filterCatalog = catalog;
+			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
+			CurrentCatalog = catalog;
+		}
+
+		public CatalogOfferViewModel(CatalogName catalogName)
+			: this()
+		{
+			filterCatalogName = catalogName;
 		}
 
 		protected override void OnInitialize()
@@ -134,7 +151,19 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		protected override void Query()
 		{
-			var queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == CurrentCatalog.Id);
+			Catalog[] catalogs = null;
+			IQueryable<Offer> queryable;
+			if (filterCatalog != null)
+				queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == filterCatalog.Id);
+			else {
+				catalogs = StatelessSession.Query<Catalog>()
+					.Fetch(c => c.Name)
+					.Where(c => c.Name == filterCatalogName).ToArray();
+				var ids = catalogs.Select(c => c.Id).ToArray();
+				queryable = StatelessSession.Query<Offer>()
+					.Where(o => ids.Contains(o.CatalogId));
+			}
+
 			if (CurrentRegion != Consts.AllRegionLabel) {
 				queryable = queryable.Where(o => o.RegionName == CurrentRegion);
 			}
@@ -150,7 +179,18 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 			var offers = queryable.Fetch(o => o.Price).ToList();
 			offers = Sort(offers);
+			if (IsFilterByCatalogName) {
+				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId).Select(c => c.Fullname).FirstOrDefault());
+			}
 			Offers = offers;
+		}
+
+		public bool IsFilterByCatalogName
+		{
+			get
+			{
+				return filterCatalogName != null;
+			}
 		}
 
 		public string[] Filters { get; set; }

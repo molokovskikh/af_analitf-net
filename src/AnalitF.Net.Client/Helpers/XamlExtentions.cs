@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		public static IEnumerable<object> Parents(DependencyObject o)
+		public static IEnumerable<object> Parents(this DependencyObject o)
 		{
 			var parent = Parent(o);
 			while (parent != null) {
@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
 		{
-			return view.Children().Flat(d => Children(d));
+			return view.Children().Flat(Children);
 		}
 	}
 }

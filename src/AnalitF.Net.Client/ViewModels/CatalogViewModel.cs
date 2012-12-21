@@ -49,8 +49,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogViewModel()
 		{
-			ShowOfferForAllForms = true;
-			ShowOfferForAllFormsEnabled = Settings.CanViewOffersByCatalogName;
+			ViewOffersByCatalog = true;
+			ViewOffersByCatalogEnabled = Settings.CanViewOffersByCatalogName;
 
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new [] {
@@ -184,7 +184,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-
 		private void Update()
 		{
 			var queryable = Session.Query<CatalogName>();
@@ -231,6 +230,14 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
 		}
 
+		public void ShowAllOffers()
+		{
+			if (CurrentCatalogName == null)
+				return;
+
+			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
+		}
+
 		public bool CanShowDescription
 		{
 			get { return CurrentCatalogName != null && CurrentCatalogName.Description != null; }
@@ -265,8 +272,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalogName.Description));
 		}
 
-		public bool ShowOfferForAllForms { get; set; }
+		public bool ViewOffersByCatalog { get; set; }
 
-		public bool ShowOfferForAllFormsEnabled { get; private set; }
+		public bool ViewOffersByCatalogEnabled { get; private set; }
 	}
 }

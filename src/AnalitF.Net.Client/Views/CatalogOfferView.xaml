@@ -89,6 +89,19 @@
 				<DataGridTextColumn Width="34*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" />
 				<DataGridTextColumn Width="51*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
+			<ItemsControl.GroupStyle>
+				<GroupStyle>
+					<GroupStyle.HeaderTemplate>
+						<DataTemplate>
+							<Border SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1" >
+								<StackPanel Background="#d8f1ff">
+									<TextBlock Text="{Binding Path=Name}" />
+								</StackPanel>
+							</Border>
+						</DataTemplate>
+					</GroupStyle.HeaderTemplate>
+				</GroupStyle>
+			</ItemsControl.GroupStyle>
 		</c:DataGrid>
 
 		<Parts:Warning Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
