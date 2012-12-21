@@ -257,6 +257,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.AutoCommentText, Is.EqualTo("тестовый комментарий"));
 		}
 
+		[Test]
+		public void Do_not_reset_navigation_chain_on_orders()
+		{
+			shell.ShowCatalog();
+			((CatalogViewModel)shell.ActiveItem).EnterCatalogForm();
+			shell.ShowOrders();
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(2));
+		}
+
 		private void CleanSendOrders(Offer offer)
 		{
 			session.Query<SentOrderLine>()

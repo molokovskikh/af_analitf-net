@@ -259,8 +259,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrders()
 		{
-			ResetNavigation();
-			ActivateItem(new OrdersViewModel());
+			if (ActiveItem is CatalogOfferViewModel)
+				Navigate(new OrdersViewModel());
+			else
+				ActivateItem(new OrdersViewModel());
 		}
 
 		public void Update()
