@@ -120,9 +120,7 @@
 							<RowDefinition></RowDefinition>
 						</Grid.RowDefinitions>
 						<TextBlock Grid.Row="0" FontWeight="Bold">Телефон: <Run Name="Price_Phone"></Run></TextBlock>
-						<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-							<TextBlock FontWeight="Bold" Name="Price_OperativeInfo" TextWrapping="Wrap"></TextBlock>
-						</ScrollViewer>
+						<TextBox Grid.Row="1" IsReadOnly="True" BorderThickness="0" FontWeight="Bold" TextWrapping="Wrap" Name="Price_OperativeInfo"></TextBox>
 					</Grid>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
