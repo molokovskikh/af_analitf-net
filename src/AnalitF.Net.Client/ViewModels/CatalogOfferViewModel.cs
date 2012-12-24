@@ -57,9 +57,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => NotifyOfPropertyChange("RetailCost"));
 
 			this.ObservableForProperty(m => m.CurrentOffer)
-				.Subscribe(_ => NotifyOfPropertyChange("Price"));
-
-			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
 				.Throttle(LoadOrderHistoryTimeout, Scheduler)
 				.Subscribe(_ => LoadHistoryOrders());
@@ -105,7 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null || Address == null)
 				return;
 
-			var query = Session.Query<SentOrderLine>();
+			var query = StatelessSession.Query<SentOrderLine>();
 			if (Settings.GroupByProduct) {
 				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId);
 			}
@@ -113,22 +110,14 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.ProductId == CurrentOffer.ProductId);
 			}
 			HistoryOrders = query
+				.Fetch(l => l.Order)
+				.ThenFetch(o => o.Price)
 				.Where(o => o.Order.Address == Address)
 				.OrderByDescending(o => o.Order.SentOn)
 				.Take(20)
 				.ToList();
 
-			var begin = DateTime.Now.AddMonths(-1);
-			var values = Session.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
-from SentOrderLines ol
-join SentOrders o on o.Id = ol.OrderId
-where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
-				.SetParameter("begin", begin)
-				.SetParameter("productId", CurrentOffer.ProductId)
-				.SetParameter("addressId", Address.Id)
-				.UniqueResult<object[]>();
-			CurrentOffer.PrevOrderAvgCost = (decimal?)values[0];
-			CurrentOffer.PrevOrderAvgCount = (decimal?)values[1];
+			LoadStat();
 		}
 
 		private void UpdateMaxProducers()
@@ -136,7 +125,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (CurrentCatalog == null)
 				return;
 
-			MaxProducerCosts = Session.Query<MaxProducerCost>()
+			MaxProducerCosts = StatelessSession.Query<MaxProducerCost>()
 				.Where(c => c.CatalogId == CurrentCatalog.Id)
 				.OrderBy(c => c.Product)
 				.ThenBy(c => c.Producer)
@@ -202,16 +191,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			{
 				maxProducerCosts = value;
 				NotifyOfPropertyChange("MaxProducerCosts");
-			}
-		}
-
-		public Price Price
-		{
-			get
-			{
-				if (CurrentOffer == null)
-					return null;
-				return Session.Load<Price>(CurrentOffer.Price.Id);
 			}
 		}
 

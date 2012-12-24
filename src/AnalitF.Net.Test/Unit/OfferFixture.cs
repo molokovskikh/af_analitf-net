@@ -15,10 +15,12 @@ namespace AnalitF.Net.Test.Unit
 
 		private string error;
 		private string warning;
+		private Settings settings;
 
 		[SetUp]
 		public void Setup()
 		{
+			settings = new Settings();
 			address = new Address();
 			offer = new Offer {
 				Price = new Price(),
@@ -32,7 +34,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Update_order_count()
 		{
 			offer.OrderCount = 10;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			Assert.That(offer.OrderLine, Is.Not.Null);
 			Assert.That(offer.Price.Order, Is.Not.Null);
 			Assert.That(offer.OrderLine.Count, Is.EqualTo(10));
@@ -45,9 +47,9 @@ namespace AnalitF.Net.Test.Unit
 		public void Update_count()
 		{
 			offer.OrderCount = 10;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			offer.OrderCount = 5;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			Assert.That(offer.OrderCount, Is.EqualTo(5));
 			Assert.That(offer.OrderLine.Count, Is.EqualTo(5));
 			Assert.That(offer.OrderLine.Order.Sum, Is.EqualTo(265.5));
@@ -71,7 +73,7 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(warning, Is.Not.Null);
 			offer.OrderCount = 0;
 			Validate();
-			Read(offer.SaveOrderLine(address));
+			Read(offer.SaveOrderLine(address, settings));
 			Assert.That(warning, Is.Null.Or.Empty);
 			Assert.That(offer.Price.Order, Is.Null);
 			Assert.That(offer.OrderLine, Is.Null);
@@ -101,7 +103,7 @@ namespace AnalitF.Net.Test.Unit
 			offer.Quantity = "23";
 			offer.OrderCount = 50;
 			offer.RequestRatio = 5;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			Assert.That(offer.OrderCount, Is.EqualTo(20));
 			Assert.That(offer.OrderLine.Count, Is.EqualTo(20));
 		}
@@ -112,8 +114,8 @@ namespace AnalitF.Net.Test.Unit
 			offer.OrderCount = 1;
 			offer.MinOrderSum = 100;
 			offer.Cost = 70;
-			offer.UpdateOrderLine(address);
-			Read(offer.SaveOrderLine(address));
+			offer.UpdateOrderLine(address, settings);
+			Read(offer.SaveOrderLine(address, settings));
 			Assert.That(error, Is.EqualTo("Сумма заказа \"70\" меньше минимальной сумме заказа \"100\" по данной позиции!"));
 			Assert.That(offer.OrderCount, Is.Null);
 			Assert.That(offer.OrderLine, Is.Null);
@@ -124,9 +126,9 @@ namespace AnalitF.Net.Test.Unit
 		public void Delete_order_line()
 		{
 			offer.OrderCount = 1;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			offer.OrderCount = 0;
-			offer.UpdateOrderLine(address);
+			offer.UpdateOrderLine(address, settings);
 			Assert.That(offer.OrderCount, Is.Null);
 			Assert.That(offer.OrderLine, Is.Null);
 			Assert.That(offer.Price.Order, Is.Null);
@@ -183,9 +185,33 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(address.Orders.Count, Is.EqualTo(0));
 		}
 
+		[Test]
+		public void Validate_avg_cost()
+		{
+			offer.PrevOrderAvgCount = 10;
+			offer.OrderCount = 51;
+			Validate();
+			Assert.That(warning, Is.EqualTo("Превышение среднего заказа!"));
+		}
+
+		[Test]
+		public void Warning_if_exist_in_frozen()
+		{
+			offer.OrderCount = 1;
+			offer.UpdateOrderLine(address, settings);
+			offer.SaveOrderLine(address, settings);
+			address.Orders[0].Frozen = true;
+
+			offer.OrderLine = null;
+			offer.OrderCount = null;
+			offer.OrderCount = 1;
+			Validate();
+			Assert.That(warning, Is.EqualTo("Товар присутствует в замороженных заказах."));
+		}
+
 		private void Validate()
 		{
-			var message = offer.UpdateOrderLine(address);
+			var message = offer.UpdateOrderLine(address, settings);
 			Read(message);
 		}
 

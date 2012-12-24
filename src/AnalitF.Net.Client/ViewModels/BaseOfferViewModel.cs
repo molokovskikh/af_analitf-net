@@ -212,7 +212,8 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			lastEditOffer = CurrentOffer;
-			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, AutoCommentText));
+			LoadStat();
+			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, Settings, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -220,7 +221,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(Address, AutoCommentText));
+			ShowValidationError(lastEditOffer.SaveOrderLine(Address, Settings, AutoCommentText));
 		}
 
 		private void ShowValidationError(List<Message> messages)
@@ -385,6 +386,28 @@ namespace AnalitF.Net.Client.ViewModels
 		private string GetKey(DataGrid grid)
 		{
 			return GetType().Name + "." + grid.Name;
+		}
+
+		protected void LoadStat()
+		{
+			if (Address == null || CurrentOffer == null)
+				return;
+
+			if (CurrentOffer.StatLoaded)
+				return;
+
+			var begin = DateTime.Now.AddMonths(-1);
+			var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
+from SentOrderLines ol
+join SentOrders o on o.Id = ol.OrderId
+where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
+				.SetParameter("begin", begin)
+				.SetParameter("productId", CurrentOffer.ProductId)
+				.SetParameter("addressId", Address.Id)
+				.UniqueResult<object[]>();
+			CurrentOffer.PrevOrderAvgCost = (decimal?)values[0];
+			CurrentOffer.PrevOrderAvgCount = (decimal?)values[1];
+			CurrentOffer.StatLoaded = true;
 		}
 	}
 }

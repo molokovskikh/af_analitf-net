@@ -82,18 +82,6 @@ namespace AnalitF.Net.Client.Models
 			if (Count > 1000)
 				result.Add(Message.Warning("Внимание! Вы заказали большое количество препарата."));
 
-			//Заготовка что бы не забыть о проверках
-			//if (false) {
-			//	warnings.Add("Товар присутствует в замороженных заказах.");
-			//}
-
-			//if (false) {
-			//	warnings.Add("Превышение среднего заказа!");
-			//}
-
-			//if (false) {
-			//	warnings.Add("Превышение средней цены!");
-			//}
 			return result;
 		}
 

@@ -18,6 +18,12 @@ namespace AnalitF.Net.Client.Models
 
 	public class Settings
 	{
+		public Settings()
+		{
+			OverCountWarningFactor = 5;
+			OverCostWarningPercent = 5;
+		}
+
 		public virtual int Id { get; set; }
 
 		public virtual bool CanViewOffersByCatalogName { get; set; }

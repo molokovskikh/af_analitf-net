@@ -211,7 +211,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
 			offer.AttachOrderLine(CurrentLine);
 			offer.OrderCount = 0;
-			var error = offer.UpdateOrderLine(Address);
+			var error = offer.UpdateOrderLine(Address, Settings);
 			ShowValidationError(error);
 
 			Update();

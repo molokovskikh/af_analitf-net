@@ -26,7 +26,7 @@ namespace AnalitF.Net.Test.Integration
 			view.Offers = new List<Offer> {
 				new Offer { ProducerSynonym = "123", ProductSynonym = "123", Price = new Price() }
 			};
-			var result = view.Print() as PrintResult;
+			var result = view.Print();
 			Assert.That(result.Doc, Is.Not.Null);
 		}
 

@@ -13,13 +13,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	public class BaseFixture
 	{
+		private IDisposable disposeTestShedule;
+
 		protected Client.Extentions.WindowManager manager;
-		protected ShellViewModel shell;
 		protected ISession session;
 		protected TestScheduler schedule;
-		protected Address address;
 
-		private IDisposable disposeTestShedule;
+		protected ShellViewModel shell;
+
+		protected Address address;
+		protected Settings settings;
 
 		[SetUp]
 		public void BaseFixtureSetup()
@@ -32,6 +35,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			session = SetupFixture.Factory.OpenSession();
 			address = session.Query<Address>().FirstOrDefault();
+			settings = session.Query<Settings>().FirstOrDefault();
 			shell = new ShellViewModel();
 		}
 

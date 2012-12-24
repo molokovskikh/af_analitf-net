@@ -151,6 +151,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Ignore]
+		public virtual bool StatLoaded { get; set; }
+
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -159,7 +162,7 @@ namespace AnalitF.Net.Client.Models
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		public virtual List<Message> UpdateOrderLine(Address address, string comment = null, bool edit = true)
+		public virtual List<Message> UpdateOrderLine(Address address, Settings settings, string comment = null, bool edit = true)
 		{
 			var result = Enumerable.Empty<Message>().ToList();
 			if (address == null) {
@@ -184,8 +187,10 @@ namespace AnalitF.Net.Client.Models
 					OrderLine.Order.Sum = OrderLine.Order.Lines.Sum(l => l.Sum);
 				}
 
-				if (edit)
-					result = OrderLine.EditValidate();
+				if (edit) {
+					result.AddRange(OrderLine.EditValidate());
+					result.AddRange(EditValidate(address, settings));
+				}
 				else
 					result = OrderLine.SaveValidate();
 				OrderCount = OrderLine.Count;
@@ -204,6 +209,26 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
+		private List<Message> EditValidate(Address address, Settings settings)
+		{
+			var result = new List<Message>();
+			if (OrderCount.GetValueOrDefault(0) == 0)
+				return result;
+
+			if (address.Orders.Where(o => o.Frozen).SelectMany(o => o.Lines).Any(l => l.ProductId == ProductId)) {
+				result.Add(Message.Warning("Товар присутствует в замороженных заказах."));
+			}
+
+			if (PrevOrderAvgCount != null && OrderCount > PrevOrderAvgCount * settings.OverCountWarningFactor) {
+				result.Add(Message.Warning("Превышение среднего заказа!"));
+			}
+
+			if (PrevOrderAvgCost != null && Cost > PrevOrderAvgCost * (1 + settings.OverCostWarningPercent / 100)) {
+				result.Add(Message.Warning("Превышение средней цены!"));
+			}
+			return result;
+		}
+
 		public virtual void AttachOrderLine(OrderLine orderLine)
 		{
 			OrderLine = orderLine;
@@ -211,9 +236,9 @@ namespace AnalitF.Net.Client.Models
 			OrderCount = orderLine.Count;
 		}
 
-		public virtual List<Message> SaveOrderLine(Address address, string comment = null)
+		public virtual List<Message> SaveOrderLine(Address address, Settings settings, string comment = null)
 		{
-			return UpdateOrderLine(address, comment, false);
+			return UpdateOrderLine(address, settings, comment, false);
 		}
 	}
 }

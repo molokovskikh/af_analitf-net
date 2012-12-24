@@ -198,13 +198,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.LoadHistoryOrders();
 		}
 
-		[Test, Ignore]
-		public void Print()
-		{
-			Assert.That(model.CanPrint, Is.True);
-			model.Print();
-		}
-
 		[Test]
 		public void Load_order_count()
 		{
@@ -275,6 +268,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
 			Assert.That(catalogViewModel.SearchText, Is.EqualTo("а"));
 			Assert.That(catalogViewModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));
+		}
+
+		[Test]
+		public void Check_prev_order_count()
+		{
+			var offer = model.Offers.First();
+			var order = new Order(offer.Price, address);
+			order.AddLine(offer, 1);
+			var sentOrder = new SentOrder(order);
+			session.Save(sentOrder);
+			session.Flush();
+
+			model.CurrentOffer = offer;
+			model.CurrentOffer.OrderCount = 51;
+			model.OfferUpdated();
+			Assert.That(model.OrderWarning, Is.EqualTo("Превышение среднего заказа!"));
 		}
 
 		private void CleanSendOrders(Offer offer)
