@@ -21,9 +21,11 @@ namespace AnalitF.Net.Client.Views
 				if (Char.IsControl(args.Text[0]))
 					return;
 				SearchText.Text += args.Text;
-				DoSearch();
 			};
 
+			//todo: если поставить фокус в строку поиска и ввести запрос
+			//для товара который не отображен на экране
+			//то выделение переместится к этому товару но прокрутка не будет произведена
 			CatalogNames.KeyDown += (sender, args) => {
 				var model = DataContext as CatalogViewModel;
 				if (args.Key == Key.Return) {
@@ -44,16 +46,6 @@ namespace AnalitF.Net.Client.Views
 			Loaded += (sender, args) => {
 				XamlExtentions.Focus(CatalogNames);
 			};
-		}
-
-		private void DoSearch()
-		{
-			var text = SearchText.Text;
-			var result = CatalogNames.Items.Cast<CatalogName>().FirstOrDefault(n => n.Name.ToLower().StartsWith(text));
-			if (result != null) {
-				CatalogNames.SelectedItem = result;
-				XamlExtentions.Focus(CatalogNames);
-			}
 		}
 	}
 }

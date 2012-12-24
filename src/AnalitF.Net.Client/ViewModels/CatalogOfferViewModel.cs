@@ -432,5 +432,18 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
+
+		public void SearchInCatalog(string text)
+		{
+			if (Shell == null)
+				return;
+
+			var catalog = Shell.NavigationStack.LastOrDefault() as CatalogViewModel;
+			if (catalog == null)
+				return;
+
+			catalog.SearchText = text;
+			TryClose();
+		}
 	}
 }

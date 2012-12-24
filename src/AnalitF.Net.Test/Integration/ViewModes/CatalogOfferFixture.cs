@@ -266,6 +266,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(2));
 		}
 
+		[Test]
+		public void Search_in_catalog_names()
+		{
+			var catalogViewModel = new CatalogViewModel();
+			((Stack<IScreen>)shell.NavigationStack).Push(catalogViewModel);
+			model.SearchInCatalog("а");
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
+			Assert.That(catalogViewModel.SearchText, Is.EqualTo("а"));
+			Assert.That(catalogViewModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));
+		}
+
 		private void CleanSendOrders(Offer offer)
 		{
 			session.Query<SentOrderLine>()

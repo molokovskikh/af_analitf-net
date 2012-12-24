@@ -33,6 +33,13 @@ namespace AnalitF.Net.Client.Views
 			EditBehavior.Attach(grid);
 			ContextMenuBehavior.Attach(grid);
 
+			Offers.TextInput += (sender, args) => {
+				args.Handled = true;
+				var model = DataContext as CatalogOfferViewModel;
+				if (model != null)
+					model.SearchInCatalog(args.Text);
+			};
+
 			CalculateColumnWidth(Offers, "00.00", "Наценка поставщика");
 			CalculateColumnWidth(Offers, "000.00", "Цена производителя");
 			CalculateColumnWidth(Offers, "000.00", "Пред.зарег.цена");

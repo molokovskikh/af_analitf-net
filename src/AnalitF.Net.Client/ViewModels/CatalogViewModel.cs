@@ -46,6 +46,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool showWithoutOffers;
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
+		private string searchText;
 
 		public CatalogViewModel()
 		{
@@ -68,6 +69,25 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => (object)m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogForms());
+		}
+
+		public string SearchText
+		{
+			get { return searchText; }
+			set
+			{
+				searchText = value;
+
+				if (!String.IsNullOrEmpty(SearchText)) {
+					var text = SearchText;
+					var result = CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(text));
+					if (result != null) {
+						CurrentCatalogName = result;
+					}
+				}
+
+				NotifyOfPropertyChange("SearchText");
+			}
 		}
 
 		public List<CatalogName> CatalogNames
