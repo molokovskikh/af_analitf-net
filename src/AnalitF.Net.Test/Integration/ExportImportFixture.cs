@@ -100,6 +100,7 @@ namespace AnalitF.Net.Test.Integration
 			var source = supplier.Prices[0].Core.Where(c => c.Product.CatalogProduct.VitallyImportant);
 
 			var holder = TestSupplier.Create();
+			holder.Name = "Предельные цены производителей";
 			var price = holder.Prices[0];
 			var synonyms = source.GroupBy(c => new { c.Product, c.Producer })
 				.Select(g => Tuple.Create(g.Key.Product.CatalogProduct.Name, g.Key.Product, g.Key.Producer.Name, g.Key.Producer));

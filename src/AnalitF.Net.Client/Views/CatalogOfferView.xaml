@@ -132,12 +132,12 @@
 				</Label>
 				<c:DataGrid Width="460" x:Name="HistoryOrders">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Срок годн." Binding="{Binding Period}" />
-						<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
-						<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
-						<DataGridTextColumn Width="*" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
+						<DataGridTextColumn Width="110*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
+						<DataGridTextColumn Width="102*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
+						<DataGridTextColumn Width="Auto" Header="Срок годн." Binding="{Binding Period}" />
+						<DataGridTextColumn Width="38*" Header="Заказ" Binding="{Binding Count}" />
+						<DataGridTextColumn Width="49" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" />
+						<DataGridTextColumn Width="68" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
 					</DataGrid.Columns>
 				</c:DataGrid>
 			</DockPanel>
@@ -171,9 +171,9 @@
 							</Style>
 						</FrameworkElement.Style>
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" Header="Цена" Binding="{Binding Cost}"></DataGridTextColumn>
+							<DataGridTextColumn Width="50*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
+							<DataGridTextColumn Width="34*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
+							<DataGridTextColumn Width="16*" Header="Цена" Binding="{Binding Cost}"></DataGridTextColumn>
 						</DataGrid.Columns>
 					</c:DataGrid>
 				</TabItem>
