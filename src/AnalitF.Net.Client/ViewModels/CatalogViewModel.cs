@@ -220,6 +220,9 @@ namespace AnalitF.Net.Client.ViewModels
 				queryable = queryable.Where(n => n.Mnn == filtredMnn);
 			}
 			CatalogNames = queryable.OrderBy(c => c.Name).ToList();
+
+			if (CurrentCatalogName == null)
+				CurrentCatalogName = CatalogNames.FirstOrDefault();
 		}
 
 		private void LoadCatalogForms()
@@ -271,7 +274,7 @@ namespace AnalitF.Net.Client.ViewModels
 				if (FiltredMnn != null)
 					parts.Add(String.Format("\"{0}\"", FiltredMnn.Name));
 
-				if (currentFilter != null) {
+				if (CurrentFilter != null) {
 					var filter = FiltredMnn == null ? currentFilter.FilterDescription : currentFilter.FilterDescriptionWithMnn;
 					if (!String.IsNullOrEmpty(filter))
 						parts.Add(filter);
@@ -290,6 +293,26 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalogName.Description));
+		}
+
+		public override void NavigateBackward()
+		{
+			if (FilterByMnn) {
+				FilterByMnn = false;
+				return;
+			}
+
+			if (!CurrentFilter.Name.Match("Все")) {
+				CurrentFilter = Filters[0];
+				return;
+			}
+
+			base.NavigateBackward();
+		}
+
+		public void SwitchMnnFilter()
+		{
+			FilterByMnn = !FilterByMnn;
 		}
 
 		public bool ViewOffersByCatalog { get; set; }

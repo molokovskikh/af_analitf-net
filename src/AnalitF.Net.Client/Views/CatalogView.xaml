@@ -9,7 +9,10 @@
 	</UserControl.Resources>
 
 	<UserControl.InputBindings>
+		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchMnnFilter" />
 	</UserControl.InputBindings>
 
 	<Grid>
@@ -46,13 +49,13 @@
 			<Label x:Name="FilterDescription" Foreground="Red"></Label>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" x:Name="CatalogNames" CurrentItem="{Binding CurrentCatalogName}">
+		<c:DataGrid Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" x:Name="CatalogNames" CurrentItem="{Binding CurrentCatalogName}" SelectedValuePath="Id">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование" Binding="{Binding Name}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="1" x:Name="CatalogForms">
+		<c:DataGrid Grid.Row="1" Grid.Column="1" x:Name="CatalogForms" SelectedValuePath="Id">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
 			</DataGrid.Columns>

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Extentions;
@@ -34,13 +36,17 @@ namespace AnalitF.Net.Client.Views
 					else
 						model.ShowAllOffers();
 				}
-				if (args.Key == Key.Escape)
+				if (args.Key == Key.Escape && !String.IsNullOrEmpty(SearchText.Text)) {
 					SearchText.Text = "";
+					args.Handled = true;
+				}
 			};
 
 			CatalogForms.KeyDown += (sender, args) => {
-				if (args.Key == Key.Escape)
+				if (args.Key == Key.Escape) {
 					XamlExtentions.Focus(CatalogNames);
+					args.Handled = true;
+				}
 			};
 
 			Loaded += (sender, args) => {

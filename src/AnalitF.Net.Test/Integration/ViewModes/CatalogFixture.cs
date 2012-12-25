@@ -52,6 +52,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.FiltredMnn, Is.Null);
 		}
 
+		[Test]
+		public void Reset_filter_on_escape()
+		{
+			ApplyMnnFilter();
+
+			model.NavigateBackward();
+			Assert.That(model.FilterByMnn, Is.False);
+		}
+
 		private void ApplyMnnFilter()
 		{
 			model.CurrentCatalogName = model.CatalogNames.First(n => n.Mnn != null);

@@ -46,11 +46,20 @@ namespace AnalitF.Net.Client.ViewModels
 			Name = dataGridColumn.Header.ToString();
 			Visible = dataGridColumn.Visibility;
 			Width = dataGridColumn.Width;
+			DisplayIndex = dataGridColumn.DisplayIndex;
+		}
+
+		public void Restore(DataGridColumn column)
+		{
+			column.Width = Width;
+			column.Visibility = Visible;
+			column.DisplayIndex = DisplayIndex;
 		}
 
 		public string Name;
 		public Visibility Visible;
 		public DataGridLength Width;
+		public int DisplayIndex;
 	}
 
 	[DataContract]

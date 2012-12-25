@@ -367,8 +367,7 @@ namespace AnalitF.Net.Client.ViewModels
 					var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
 					if (column == null)
 						return;
-					column.Width = setting.Width;
-					column.Visibility = setting.Visible;
+					setting.Restore(column);
 				}
 			}
 		}

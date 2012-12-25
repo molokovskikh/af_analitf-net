@@ -60,7 +60,7 @@
 			</Grid>
 		</DockPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False">
+		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False" SelectedValuePath="Id">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn Width="89*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />

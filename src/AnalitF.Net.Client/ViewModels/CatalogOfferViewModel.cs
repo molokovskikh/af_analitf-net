@@ -83,9 +83,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 			UpdateMaxProducers();
 
-			if (CurrentOffer != null)
-				CurrentOffer = offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
-
 			if (CurrentOffer == null)
 				CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
 
