@@ -22,6 +22,13 @@ namespace AnalitF.Net.Client.Binders
 		//если поле стало скрытым все подписки надо освободить
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
+			grid.TextInput += (sender, args) => {
+				if (Char.IsControl(args.Text[0]))
+					return;
+				searchText.Text += args.Text;
+				DataGridHelper.Centrify(grid);
+			};
+
 			var disposable = new CompositeDisposable();
 
 			searchText.IsVisibleChanged += (sender, args) => {
@@ -67,6 +74,5 @@ namespace AnalitF.Net.Client.Binders
 				});
 			disposible.Add(lostFocusSubscription);
 		}
-
 	}
 }

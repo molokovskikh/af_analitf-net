@@ -58,8 +58,8 @@
 
 		<TextBox Grid.Row="1" Grid.RowSpan="3" Grid.Column="0"
 				Style="{StaticResource PopupSearch}"
-				x:Name="SearchText"
-				Visibility="{Binding SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+				x:Name="CatalogNamesSearch_SearchText"
+				Visibility="{Binding CatalogNamesSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
 
 		<GridSplitter Grid.Row="1"
 			Grid.Column="1"
@@ -68,11 +68,16 @@
 			ShowsPreview="True"
 			Width="5" />
 
-		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="CatalogForms" SelectedValuePath="Id">
+		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="CatalogForms" CurrentItem="{Binding CurrentCatalogForm}" SelectedValuePath="Id">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<TextBox Grid.Row="1" Grid.Column="2"
+				Style="{StaticResource PopupSearch}"
+				x:Name="CatalogsSearch_SearchText"
+				Visibility="{Binding CatalogsSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
 
 		<Grid Grid.Row="2" Grid.Column="2">
 			<Grid.ColumnDefinitions>

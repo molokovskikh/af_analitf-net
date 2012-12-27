@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Windows.Threading;
@@ -50,9 +49,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
 
-		private string searchText;
-		private bool searchInProgress;
-
 		public CatalogViewModel()
 		{
 			ViewOffersByCatalog = true;
@@ -67,6 +63,14 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentFilter = Filters[0];
 			Update();
 
+			CatalogNamesSearch = new QuickSearch<CatalogName>(
+				v => CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(v)),
+				c => CurrentCatalogName = c);
+
+			CatalogsSearch = new QuickSearch<Catalog>(
+				v => CatalogForms.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
+				c => CurrentCatalogForm = c);
+
 			this.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(this.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(this.ObservableForProperty(m => (object)m.ShowWithoutOffers))
@@ -74,58 +78,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => (object)m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogForms());
-
-			var searchTextChanges = this.ObservableForProperty(m => m.SearchText);
-			searchTextChanges.Subscribe(_ => NotifyOfPropertyChange("SearchTextVisible"));
-			searchTextChanges
-				.Throttle(TimeSpan.FromMilliseconds(5000), DispatcherScheduler.Current)
-				.ObserveOnDispatcher()
-				.Where(o => !String.IsNullOrEmpty(o.Value))
-				.Subscribe(_ => SearchText = null);
 		}
 
 		public string SearchText
 		{
-			get { return searchText; }
-			set
-			{
-				//это защита от обнуления запроса в случае если ячейка таблицы
-				//потеряла фокус из-за перехода к найденой строке
-				if (searchInProgress)
-					return;
-
-				if (String.Equals(searchText, value, StringComparison.CurrentCultureIgnoreCase))
-					return;
-
-				searchInProgress = true;
-				var notify = false;
-				try
-				{
-					if (!String.IsNullOrEmpty(value)) {
-						var result = CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(value));
-						if (result != null) {
-							notify = true;
-							searchText = value;
-							CurrentCatalogName = result;
-						}
-					}
-					else {
-						notify = true;
-						searchText = value;
-					}
-				}
-				finally {
-					searchInProgress = false;
-				}
-				if (notify)
-					NotifyOfPropertyChange("SearchText");
-			}
+			get { return CatalogNamesSearch.SearchText; }
+			set { CatalogNamesSearch.SearchText = value; }
 		}
 
-		public bool SearchTextVisible
-		{
-			get { return !String.IsNullOrEmpty(SearchText); }
-		}
+		public QuickSearch<CatalogName> CatalogNamesSearch { get; private set; }
+		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
 
 		public List<CatalogName> CatalogNames
 		{

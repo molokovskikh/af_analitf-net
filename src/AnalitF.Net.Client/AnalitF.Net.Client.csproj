@@ -178,6 +178,7 @@
     <Compile Include="ViewModels\OrdersViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
+    <Compile Include="ViewModels\QuickSearch.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />

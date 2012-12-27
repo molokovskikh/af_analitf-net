@@ -13,14 +13,8 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			SearchBehavior.AttachSearch(CatalogNames, SearchText);
-
-			CatalogNames.TextInput += (sender, args) => {
-				if (Char.IsControl(args.Text[0]))
-					return;
-				SearchText.Text += args.Text;
-				DataGridHelper.Centrify(CatalogNames);
-			};
+			SearchBehavior.AttachSearch(CatalogNames, CatalogNamesSearch_SearchText);
+			SearchBehavior.AttachSearch(CatalogForms, CatalogsSearch_SearchText);
 
 			//todo: если поставить фокус в строку поиска и ввести запрос
 			//для товара который не отображен на экране
