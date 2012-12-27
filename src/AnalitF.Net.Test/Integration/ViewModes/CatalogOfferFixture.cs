@@ -254,7 +254,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Do_not_reset_navigation_chain_on_orders()
 		{
 			shell.ShowCatalog();
-			((CatalogViewModel)shell.ActiveItem).EnterCatalogForm();
+			var catalog = ((CatalogViewModel)shell.ActiveItem);
+			catalog.CurrentCatalogForm = catalog.CatalogForms[0];
+			catalog.EnterCatalogForm();
 			shell.ShowOrders();
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(2));
 		}

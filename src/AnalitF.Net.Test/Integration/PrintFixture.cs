@@ -21,7 +21,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Print()
 		{
-			var view = new CatalogOfferViewModel(new Catalog());
+			var view = new CatalogOfferViewModel(new Catalog("тест"));
 			view.CurrentCatalog = new Catalog { Name = new CatalogName(), Form = "Папаверин" };
 			view.Offers = new List<Offer> {
 				new Offer { ProducerSynonym = "123", ProductSynonym = "123", Price = new Price() }

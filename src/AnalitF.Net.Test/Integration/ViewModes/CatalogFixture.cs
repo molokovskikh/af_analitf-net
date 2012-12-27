@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -13,7 +16,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			model = new CatalogViewModel();
+			model = Init(new CatalogViewModel());
 		}
 
 		[Test, RequiresSTA, Ignore]
@@ -70,6 +73,19 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.SearchText += "ё";
 			Assert.That(model.SearchText, Is.Null);
 			Assert.That(changes, Is.Empty);
+		}
+
+		[Test]
+		public void Open_offers_if_catalog_only_one()
+		{
+			var catalogId = session.Query<Catalog>().Where(c => c.HaveOffers)
+				.GroupBy(c => c.Name)
+				.Where(g => g.Count() == 1)
+				.Select(g => g.Key)
+				.ToList();
+			model.CurrentCatalogName = model.CatalogNames.First(f => f.Id == catalogId[0].Id);
+			model.EnterCatalogName();
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}
 
 		private void ApplyMnnFilter()

@@ -66,6 +66,7 @@ namespace AnalitF.Net.Client.ViewModels
 			: this()
 		{
 			filterCatalog = catalog;
+			Name = catalog.Fullname;
 			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
 			CurrentCatalog = catalog;
 		}
@@ -74,7 +75,10 @@ namespace AnalitF.Net.Client.ViewModels
 			: this()
 		{
 			filterCatalogName = catalogName;
+			Name = filterCatalogName.Name;
 		}
+
+		public string Name { get; private set; }
 
 		protected override void OnInitialize()
 		{

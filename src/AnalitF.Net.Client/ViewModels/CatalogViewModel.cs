@@ -48,6 +48,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool showWithoutOffers;
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
+		private bool viewOffersByCatalog;
 
 		public CatalogViewModel()
 		{
@@ -252,12 +253,27 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
 		}
 
-		public void ShowAllOffers()
+		//todo: если поставить фокус в строку поиска и ввести запрос
+		//для товара который не отображен на экране
+		//то выделение переместится к этому товару но прокрутка не будет произведена
+		public IResult EnterCatalogName()
 		{
-			if (CurrentCatalogName == null)
-				return;
+			if (CurrentCatalogName == null || CatalogForms.Count == 0)
+				return null;
 
-			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
+			if (ViewOffersByCatalog) {
+				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
+				return null;
+			}
+
+			if (CatalogForms.Count == 1) {
+				CurrentCatalogForm = CatalogForms.First();
+				EnterCatalogForm();
+				return null;
+			}
+			else {
+				return new FocusResult("CatalogForms");
+			}
 		}
 
 		public bool CanShowDescription
@@ -318,7 +334,21 @@ namespace AnalitF.Net.Client.ViewModels
 			FilterByMnn = !FilterByMnn;
 		}
 
-		public bool ViewOffersByCatalog { get; set; }
+		public void SwitchViewOffersByCatalog()
+		{
+			if (ViewOffersByCatalogEnabled)
+				ViewOffersByCatalog = !ViewOffersByCatalog;
+		}
+
+		public bool ViewOffersByCatalog
+		{
+			get { return viewOffersByCatalog; }
+			set
+			{
+				viewOffersByCatalog = value;
+				NotifyOfPropertyChange("ViewOffersByCatalog");
+			}
+		}
 
 		public bool ViewOffersByCatalogEnabled { get; private set; }
 	}

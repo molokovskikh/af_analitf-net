@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -23,9 +24,12 @@ namespace AnalitF.Net.Client.Binders
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
 			grid.TextInput += (sender, args) => {
-				if (Char.IsControl(args.Text[0]))
+				if (!Char.IsControl(args.Text[0]))
+					searchText.Text += args.Text;
+				else if (args.Text[0] == '\b')
+					searchText.Text = searchText.Text.Slice(0, -2);
+				else
 					return;
-				searchText.Text += args.Text;
 				DataGridHelper.Centrify(grid);
 			};
 

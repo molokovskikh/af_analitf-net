@@ -2,6 +2,15 @@
 {
 	public class Catalog
 	{
+		public Catalog()
+		{
+		}
+
+		public Catalog(string name)
+		{
+			Name = new CatalogName { Name = name };
+		}
+
 		public virtual uint Id { get; set; }
 
 		public virtual uint FormId { get; set; }

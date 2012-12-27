@@ -16,19 +16,6 @@ namespace AnalitF.Net.Client.Views
 			SearchBehavior.AttachSearch(CatalogNames, CatalogNamesSearch_SearchText);
 			SearchBehavior.AttachSearch(CatalogForms, CatalogsSearch_SearchText);
 
-			//todo: если поставить фокус в строку поиска и ввести запрос
-			//для товара который не отображен на экране
-			//то выделение переместится к этому товару но прокрутка не будет произведена
-			CatalogNames.KeyDown += (sender, args) => {
-				var model = DataContext as CatalogViewModel;
-				if (args.Key == Key.Return) {
-					if (model == null || model.ViewOffersByCatalog)
-						DataGridHelper.Focus(CatalogForms);
-					else
-						model.ShowAllOffers();
-				}
-			};
-
 			SizeChanged += (sender, args) => {
 				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
 			};

@@ -11,6 +11,7 @@
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F4" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchViewOffersByCatalog" />
 		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchMnnFilter" />
@@ -103,7 +104,7 @@
 		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ResourceKey=FilterPanel}">
 			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по части наименования</CheckBox>
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
-			<CheckBox Name="ViewOffersByCatalog" Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска</CheckBox>
+			<CheckBox Name="ViewOffersByCatalog" Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска (F4)</CheckBox>
 		</StackPanel>
 	</Grid>
 </UserControl>

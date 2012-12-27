@@ -34,13 +34,14 @@ namespace AnalitF.Net.Test.Integration
 		public void Reactivate_view()
 		{
 			shell.ShowCatalog();
-			var catalogViewModel = ((CatalogViewModel)shell.ActiveItem);
-			catalogViewModel.EnterCatalogForm();
+			var catalog = ((CatalogViewModel)shell.ActiveItem);
+			catalog.CurrentCatalogForm = catalog.CatalogForms[0];
+			catalog.EnterCatalogForm();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 
 			shell.ShowCatalog();
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
-			Assert.That(shell.ActiveItem, Is.EqualTo(catalogViewModel));
+			Assert.That(shell.ActiveItem, Is.EqualTo(catalog));
 		}
 	}
 }

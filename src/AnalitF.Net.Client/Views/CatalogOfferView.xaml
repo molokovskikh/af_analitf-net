@@ -28,7 +28,7 @@
 		</Grid.RowDefinitions>
 
 		<DockPanel Grid.Row="0" LastChildFill="False">
-			<Label x:Name="CurrentCatalog_Name" FontWeight="Bold"></Label>
+			<Label x:Name="Name" FontWeight="Bold"></Label>
 			<Grid DockPanel.Dock="Right">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"></RowDefinition>

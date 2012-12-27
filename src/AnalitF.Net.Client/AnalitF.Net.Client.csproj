@@ -145,6 +145,7 @@
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
+    <Compile Include="Models\FocusResult.cs" />
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\MaxProducerCost.cs" />
