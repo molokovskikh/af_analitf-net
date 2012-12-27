@@ -182,7 +182,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
 
-		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key)
+		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)
 		{
 			var lookup = offer.GroupBy(key)
 				.ToDictionary(g => g.Key, g => g.Min(o => o.Cost));
@@ -194,7 +194,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToDictionary(t => t.Item1, t => t.Item2);
 
 			offers.Each(o => {
-				o.SortKeyGroup = indexes[key(o)] % 2;
+				o.SortKeyGroup = setGroupKey ? indexes[key(o)] % 2 : 0;
 			});
 
 			return offers;
@@ -326,65 +326,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Query();
 			Calculate();
 			LoadOrderItems();
-		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			Session.Flush();
-
-			var view = GetView();
-			if (view != null)
-				SaveSettings(view);
-
-			base.OnDeactivate(close);
-		}
-
-		protected override void OnViewAttached(object view, object context)
-		{
-			RestoreSettings(view);
-		}
-
-		private void SaveSettings(object view)
-		{
-			foreach (var grid in GetControls(view)) {
-				var key = GetKey(grid);
-				if (Shell.ViewSettings.ContainsKey(key)) {
-					Shell.ViewSettings.Remove(key);
-				}
-				Shell.ViewSettings.Add(key, grid.Columns.Select(c => new ColumnSettings(c)).ToList());
-			}
-		}
-
-		private void RestoreSettings(object view)
-		{
-			foreach (var dataGrid in GetControls(view)) {
-				var key = GetKey(dataGrid);
-				if (!Shell.ViewSettings.ContainsKey(key))
-					continue;
-
-				var settings = Shell.ViewSettings[key];
-				foreach (var setting in settings) {
-					var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
-					if (column == null)
-						return;
-					setting.Restore(column);
-				}
-			}
-		}
-
-		public IEnumerable<DataGrid> GetControls(object view)
-		{
-			var dependencyObject = view as DependencyObject;
-			if (dependencyObject == null || Shell == null)
-				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.DeepChildren()
-				.OfType<DataGrid>()
-				.Where(c => c.Name == "Offers");
-		}
-
-		private string GetKey(DataGrid grid)
-		{
-			return GetType().Name + "." + grid.Name;
 		}
 
 		protected void LoadStat()

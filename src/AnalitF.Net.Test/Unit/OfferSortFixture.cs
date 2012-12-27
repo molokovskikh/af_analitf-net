@@ -8,10 +8,12 @@ namespace AnalitF.Net.Test.Unit
 	[TestFixture]
 	public class OfferSortFixture
 	{
-		[Test]
-		public void After_sort_assign_product_index()
+		private List<Offer> offers;
+
+		[SetUp]
+		public void Setup()
 		{
-			var offers = new List<Offer> {
+			offers = new List<Offer> {
 				new Offer {
 					ProductId = 50,
 					Cost = 30
@@ -29,11 +31,24 @@ namespace AnalitF.Net.Test.Unit
 					Cost = 33
 				},
 			};
+		}
 
+		[Test]
+		public void After_sort_assign_product_index()
+		{
 			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
 			Assert.That(offers[0].SortKeyGroup, Is.EqualTo(0));
 			Assert.That(offers[1].SortKeyGroup, Is.EqualTo(1));
 			Assert.That(offers[3].SortKeyGroup, Is.EqualTo(0));
+		}
+
+		[Test]
+		public void Reset_group_key()
+		{
+			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
+			Assert.That(offers[1].SortKeyGroup, Is.EqualTo(1));
+			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.CatalogId, false);
+			Assert.That(offers[1].SortKeyGroup, Is.EqualTo(0));
 		}
 	}
 }

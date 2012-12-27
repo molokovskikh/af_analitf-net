@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Controls;
@@ -16,7 +17,7 @@ using Newtonsoft.Json;
 namespace AnalitF.Net.Test.Integration.Views
 {
 	[TestFixture, RequiresSTA]
-	public class SaveTableSettingsFixture : BaseViewFixture
+	public class SaveViewFixture : BaseViewFixture
 	{
 		private CatalogOfferViewModel model;
 		private CatalogOfferView view;

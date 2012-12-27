@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Models;
@@ -37,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 	}
 
+	[DataContract]
 	public class CatalogViewModel : BaseScreen
 	{
 		private CatalogName currentCatalogName;
@@ -79,6 +81,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => (object)m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogForms());
+
+			this.ObservableForProperty(m => m.ViewOffersByCatalog)
+				.Subscribe(_ => NotifyOfPropertyChange("CatalogFormsEnabled"));
 		}
 
 		public string SearchText
@@ -108,6 +113,11 @@ namespace AnalitF.Net.Client.ViewModels
 				_catalogForms = value;
 				NotifyOfPropertyChange("CatalogForms");
 			}
+		}
+
+		public bool CatalogFormsEnabled
+		{
+			get { return ViewOffersByCatalog; }
 		}
 
 		public CatalogName CurrentCatalogName
@@ -147,6 +157,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		[DataMember]
 		public bool ShowWithoutOffers
 		{
 			get { return showWithoutOffers; }
@@ -250,6 +261,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterCatalogForm()
 		{
+			if (CurrentCatalog == null)
+				return;
+
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
 		}
 
@@ -261,7 +275,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentCatalogName == null || CatalogForms.Count == 0)
 				return null;
 
-			if (ViewOffersByCatalog) {
+			if (!ViewOffersByCatalog) {
 				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
 				return null;
 			}
@@ -340,6 +354,7 @@ namespace AnalitF.Net.Client.ViewModels
 				ViewOffersByCatalog = !ViewOffersByCatalog;
 		}
 
+		[DataMember]
 		public bool ViewOffersByCatalog
 		{
 			get { return viewOffersByCatalog; }

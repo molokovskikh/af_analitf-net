@@ -278,7 +278,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return SortByMinCostInGroup(offers, o => o.ProductId);
 			}
 			else {
-				return SortByMinCostInGroup(offers, o => o.CatalogId);
+				return SortByMinCostInGroup(offers, o => o.CatalogId, false);
 			}
 		}
 

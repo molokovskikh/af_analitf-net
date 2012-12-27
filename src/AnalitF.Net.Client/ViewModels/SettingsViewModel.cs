@@ -38,10 +38,5 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.Save(Settings);
 			TryClose();
 		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			Session.Flush();
-		}
 	}
 }

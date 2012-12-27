@@ -90,11 +90,5 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			get { return IsSentSelected; }
 		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			Session.Flush();
-			base.OnDeactivate(close);
-		}
 	}
 }

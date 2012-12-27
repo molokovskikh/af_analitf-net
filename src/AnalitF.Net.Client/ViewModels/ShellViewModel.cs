@@ -83,7 +83,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel()
 		{
-			ViewSettings = new Dictionary<string, List<ColumnSettings>>();
 			Arguments = Environment.GetCommandLineArgs();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
@@ -109,7 +108,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public string[] Arguments;
 
 		[DataMember]
-		public Dictionary<string, List<ColumnSettings>> ViewSettings;
+		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
+
+		[DataMember]
+		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
 		protected override void OnViewLoaded(object view)
 		{

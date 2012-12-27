@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
@@ -18,14 +19,15 @@ namespace AnalitF.Net.Test.Integration
 
 			var app = CreateBootstrapper();
 			app.InitShell();
-			app.Shell.ViewSettings.Add("test", new EditableList<ColumnSettings> {
+			app.Shell.ViewSettings.Add("test", new List<ColumnSettings> {
 				new ColumnSettings()
 			});
 			app.Serialize();
 
 			app = CreateBootstrapper();
 			app.InitShell();
-			Assert.That(app.Shell.ViewSettings["test"].Count, Is.EqualTo(1));
+			var viewSetting = (List<ColumnSettings>)app.Shell.ViewSettings["test"];
+			Assert.That(viewSetting.Count, Is.EqualTo(1));
 		}
 
 		private AppBootstrapper CreateBootstrapper()

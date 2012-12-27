@@ -66,6 +66,7 @@
     <Reference Include="System.Reactive.Interfaces" />
     <Reference Include="System.Reactive.Linq" />
     <Reference Include="System.Reactive.Windows.Threading, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -97,12 +98,13 @@
     <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
     <Compile Include="Integration\ViewModes\OrdersFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
-    <Compile Include="Integration\Views\SaveTableSettingsFixture.cs" />
+    <Compile Include="Integration\Views\SaveViewFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
