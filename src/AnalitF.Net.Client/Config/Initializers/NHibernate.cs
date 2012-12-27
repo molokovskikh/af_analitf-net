@@ -124,7 +124,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
-				{Environment.ReleaseConnections, "on_close"}
 			});
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);

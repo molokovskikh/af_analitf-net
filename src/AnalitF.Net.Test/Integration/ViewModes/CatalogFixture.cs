@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
@@ -59,6 +60,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.NavigateBackward();
 			Assert.That(model.FilterByMnn, Is.False);
+		}
+
+		[Test]
+		public void Do_change_search_text_if_result_not_found()
+		{
+			var changes = new List<string>();
+			model.PropertyChanged += (sender, args) => changes.Add(args.PropertyName);
+			model.SearchText += "ё";
+			Assert.That(model.SearchText, Is.Null);
+			Assert.That(changes, Is.Empty);
 		}
 
 		private void ApplyMnnFilter()

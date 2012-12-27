@@ -53,13 +53,21 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			column.Width = Width;
 			column.Visibility = Visible;
-			column.DisplayIndex = DisplayIndex;
+			//безумие, если колонке два раза сказать что у нее DisplayIndex -1, то будет исключение
+			//ArgumentOutOfRangeException
+			if (column.DisplayIndex != DisplayIndex)
+				column.DisplayIndex = DisplayIndex;
 		}
 
 		public string Name;
 		public Visibility Visible;
 		public DataGridLength Width;
 		public int DisplayIndex;
+
+		public override string ToString()
+		{
+			return Name;
+		}
 	}
 
 	[DataContract]
@@ -227,26 +235,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
-			ResetNavigation();
-			ActivateItem(new CatalogViewModel());
+			ActivateRootItem(new CatalogViewModel());
 		}
 
 		public void ShowPrice()
 		{
-			ResetNavigation();
-			ActivateItem(new PriceViewModel());
+			ActivateRootItem(new PriceViewModel());
 		}
 
 		public void ShowMnn()
 		{
-			ResetNavigation();
-			ActivateItem(new MnnViewModel());
+			ActivateRootItem(new MnnViewModel());
 		}
 
 		public void SearchOffers()
 		{
-			ResetNavigation();
-			ActivateItem(new SearchOfferViewModel());
+			ActivateRootItem(new SearchOfferViewModel());
 		}
 
 		public void ShowSettings()
@@ -256,14 +260,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrderLines()
 		{
-			ResetNavigation();
-			ActivateItem(new OrderLinesViewModel());
+			ActivateRootItem(new OrderLinesViewModel());
 		}
 
 		public void ShowJunkOffers()
 		{
-			ResetNavigation();
-			ActivateItem(new JunkOfferViewModel());
+			ActivateRootItem(new JunkOfferViewModel());
 		}
 
 		public void ShowOrders()
@@ -271,7 +273,24 @@ namespace AnalitF.Net.Client.ViewModels
 			if (ActiveItem is CatalogOfferViewModel)
 				Navigate(new OrdersViewModel());
 			else
-				ActivateItem(new OrdersViewModel());
+				ActivateRootItem(new OrdersViewModel());
+		}
+
+		private void ActivateRootItem(IScreen screen)
+		{
+			if (ActiveItem != null && ActiveItem.GetType() == screen.GetType())
+				return;
+
+			var toClose = navigationStack.TakeWhile(s => s.GetType() != screen.GetType());
+			foreach (var closing in toClose) {
+				closing.TryClose();
+			}
+
+			if (ActiveItem != null)
+				ActiveItem.TryClose();
+
+			if (ActiveItem == null)
+				ActivateItem(screen);
 		}
 
 		public void Update()

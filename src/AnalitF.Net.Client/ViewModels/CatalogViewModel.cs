@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
@@ -46,7 +49,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool showWithoutOffers;
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
+
 		private string searchText;
+		private bool searchInProgress;
 
 		public CatalogViewModel()
 		{
@@ -69,6 +74,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => (object)m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogForms());
+
+			var searchTextChanges = this.ObservableForProperty(m => m.SearchText);
+			searchTextChanges.Subscribe(_ => NotifyOfPropertyChange("SearchTextVisible"));
+			searchTextChanges
+				.Throttle(TimeSpan.FromMilliseconds(5000), DispatcherScheduler.Current)
+				.ObserveOnDispatcher()
+				.Where(o => !String.IsNullOrEmpty(o.Value))
+				.Subscribe(_ => SearchText = null);
 		}
 
 		public string SearchText
@@ -76,18 +89,42 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return searchText; }
 			set
 			{
-				searchText = value;
+				//это защита от обнуления запроса в случае если ячейка таблицы
+				//потеряла фокус из-за перехода к найденой строке
+				if (searchInProgress)
+					return;
 
-				if (!String.IsNullOrEmpty(SearchText)) {
-					var text = SearchText;
-					var result = CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(text));
-					if (result != null) {
-						CurrentCatalogName = result;
+				if (String.Equals(searchText, value, StringComparison.CurrentCultureIgnoreCase))
+					return;
+
+				searchInProgress = true;
+				var notify = false;
+				try
+				{
+					if (!String.IsNullOrEmpty(value)) {
+						var result = CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(value));
+						if (result != null) {
+							notify = true;
+							searchText = value;
+							CurrentCatalogName = result;
+						}
+					}
+					else {
+						notify = true;
+						searchText = value;
 					}
 				}
-
-				NotifyOfPropertyChange("SearchText");
+				finally {
+					searchInProgress = false;
+				}
+				if (notify)
+					NotifyOfPropertyChange("SearchText");
 			}
+		}
+
+		public bool SearchTextVisible
+		{
+			get { return !String.IsNullOrEmpty(SearchText); }
 		}
 
 		public List<CatalogName> CatalogNames
@@ -297,6 +334,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void NavigateBackward()
 		{
+			if (!String.IsNullOrEmpty(SearchText)) {
+				SearchText = null;
+			}
+
 			if (FilterByMnn) {
 				FilterByMnn = false;
 				return;

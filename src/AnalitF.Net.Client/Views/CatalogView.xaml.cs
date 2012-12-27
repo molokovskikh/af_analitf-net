@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
@@ -16,13 +12,14 @@ namespace AnalitF.Net.Client.Views
 		public CatalogView()
 		{
 			InitializeComponent();
-			CatalogNames.Items.Clear();
-			CatalogForms.Items.Clear();
+
+			SearchBehavior.AttachSearch(CatalogNames, SearchText);
 
 			CatalogNames.TextInput += (sender, args) => {
 				if (Char.IsControl(args.Text[0]))
 					return;
 				SearchText.Text += args.Text;
+				DataGridHelper.Centrify(CatalogNames);
 			};
 
 			//todo: если поставить фокус в строку поиска и ввести запрос
@@ -32,26 +29,24 @@ namespace AnalitF.Net.Client.Views
 				var model = DataContext as CatalogViewModel;
 				if (args.Key == Key.Return) {
 					if (model == null || model.ViewOffersByCatalog)
-						XamlExtentions.Focus(CatalogForms);
+						DataGridHelper.Focus(CatalogForms);
 					else
 						model.ShowAllOffers();
 				}
-				if (args.Key == Key.Escape && !String.IsNullOrEmpty(SearchText.Text)) {
-					SearchText.Text = "";
-					args.Handled = true;
-				}
+			};
+
+			SizeChanged += (sender, args) => {
+				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
 			};
 
 			CatalogForms.KeyDown += (sender, args) => {
 				if (args.Key == Key.Escape) {
-					XamlExtentions.Focus(CatalogNames);
+					DataGridHelper.Focus(CatalogNames);
 					args.Handled = true;
 				}
 			};
 
-			Loaded += (sender, args) => {
-				XamlExtentions.Focus(CatalogNames);
-			};
+			Loaded += (sender, args) => DataGridHelper.Focus(CatalogNames);
 		}
 	}
 }

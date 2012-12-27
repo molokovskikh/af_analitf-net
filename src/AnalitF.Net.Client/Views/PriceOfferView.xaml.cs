@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Views
 
 			EditBehavior.Attach(Offers);
 			Loaded += (sender, args) => {
-				XamlExtentions.Focus(Offers);
+				DataGridHelper.Focus(Offers);
 			};
 
 			ContextMenuBehavior.Attach(Offers);

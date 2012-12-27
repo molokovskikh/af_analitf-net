@@ -29,5 +29,18 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(shell.ActiveItem, Is.EqualTo(parent));
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
 		}
+
+		[Test]
+		public void Reactivate_view()
+		{
+			shell.ShowCatalog();
+			var catalogViewModel = ((CatalogViewModel)shell.ActiveItem);
+			catalogViewModel.EnterCatalogForm();
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
+
+			shell.ShowCatalog();
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
+			Assert.That(shell.ActiveItem, Is.EqualTo(catalogViewModel));
+		}
 	}
 }

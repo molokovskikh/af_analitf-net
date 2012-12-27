@@ -3,22 +3,24 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 		xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
-		xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+		xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+		Name="View">
 	<UserControl.Resources>
 		<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	</UserControl.Resources>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchMnnFilter" />
 	</UserControl.InputBindings>
 
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition></ColumnDefinition>
-			<ColumnDefinition></ColumnDefinition>
+			<ColumnDefinition Name="CatalogNamesColumn" MinWidth="50" Width="300"></ColumnDefinition>
+			<ColumnDefinition Width="Auto"></ColumnDefinition>
+			<ColumnDefinition MinWidth="50"></ColumnDefinition>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -28,8 +30,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}"  Grid.Row="0" Grid.ColumnSpan="2">
-			<TextBox Width="150" x:Name="SearchText" Margin="0, 0, 4, 0"></TextBox>
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}"  Grid.Row="0" Grid.ColumnSpan="3">
 			<ComboBox Style="{StaticResource ResourceKey=Filter}" x:Name="Filters"></ComboBox>
 
 			<ToggleButton Margin="0, 0, 4, 0" x:Name="FilterByMnn">
@@ -55,13 +56,25 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="1" x:Name="CatalogForms" SelectedValuePath="Id">
+		<TextBox Grid.Row="1" Grid.RowSpan="3" Grid.Column="0"
+				Style="{StaticResource PopupSearch}"
+				x:Name="SearchText"
+				Visibility="{Binding SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+
+		<GridSplitter Grid.Row="1"
+			Grid.Column="1"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Stretch"
+			ShowsPreview="True"
+			Width="5" />
+
+		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="CatalogForms" SelectedValuePath="Id">
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<Grid Grid.Row="2" Grid.Column="1">
+		<Grid Grid.Row="2" Grid.Column="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -81,8 +94,8 @@
 			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">МНН:</Label>
 			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name" FontWeight="Bold"></Label>
 		</Grid>
-		<Image Height="125" Grid.Row="3" Grid.Column="1"></Image>
-		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
+		<Image Height="125" Grid.Row="3" Grid.Column="2"></Image>
+		<StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ResourceKey=FilterPanel}">
 			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по части наименования</CheckBox>
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
 			<CheckBox Name="ViewOffersByCatalog" Style="{StaticResource ResourceKey=FilterCheckBox}">Поиск по форме выпуска</CheckBox>
