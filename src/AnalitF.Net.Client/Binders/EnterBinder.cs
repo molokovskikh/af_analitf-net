@@ -20,7 +20,8 @@ namespace AnalitF.Net.Client.Binders
 		public static void Bind(MethodInfo method, FrameworkElement element)
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
-				.Where(a => a.EventArgs.Key == Key.Return)
+				.Where(a => a.EventArgs.Key == Key.Return
+					&& ((DataGrid)a.Sender).SelectedItem != null)
 				.Do(a => a.EventArgs.Handled = true)
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 

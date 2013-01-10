@@ -141,6 +141,7 @@
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
+    <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\XamlExtentions.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\BaseOffer.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\FocusResult.cs" />
+    <Compile Include="Models\HandledResult.cs" />
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\MaxProducerCost.cs" />

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using NHibernate.Linq;
@@ -64,10 +66,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void Search()
+		public IResult Search()
 		{
 			if (!string.IsNullOrEmpty(SearchText) && SearchText.Length < 3)
-				return;
+				return new HandledResult(false);
 
 			IQueryable<Catalog> query = StatelessSession.Query<Catalog>()
 				.Fetch(c => c.Name)
@@ -77,13 +79,27 @@ namespace AnalitF.Net.Client.ViewModels
 			query = ParentModel.ApplyFilter(query);
 
 			ActiveSearchTerm = SearchText;
-			Catalogs = query
-				.OrderBy(c => c.Name.Name)
-				.ThenBy(c => c.Form)
-				.ToList();
+			Catalogs = query.OrderBy(c => c.Name.Name).ThenBy(c => c.Form).ToList();
+			SearchText = "";
 
 			if (CurrentCatalog == null)
 				CurrentCatalog = Catalogs.FirstOrDefault();
+			return new HandledResult();
+		}
+
+		public IResult ClearSearch()
+		{
+			if (!String.IsNullOrEmpty(SearchText)) {
+				SearchText = "";
+				return new HandledResult();
+			}
+
+			if (String.IsNullOrEmpty(ActiveSearchTerm))
+				return new HandledResult(false);
+
+			SearchText = "";
+			Search();
+			return new HandledResult();
 		}
 
 		public List<Catalog> Catalogs

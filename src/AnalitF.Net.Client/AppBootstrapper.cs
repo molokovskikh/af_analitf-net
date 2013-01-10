@@ -178,8 +178,9 @@ namespace AnalitF.Net.Client
 				VisibilityBinder.Bind,
 			};
 			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
+				//сначала должен обрабатываться поиск и только потом переход
+				SearchBinder.Bind,
 				EnterBinder.Bind,
-				SearchBinder.Bind
 			};
 
 			var defaultBindProperties = ViewModelBinder.BindProperties;

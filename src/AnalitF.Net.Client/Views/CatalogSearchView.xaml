@@ -3,7 +3,8 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
-	xmlns:cal="http://www.caliburnproject.org">
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -12,11 +13,11 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
-			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}" Binders:SearchBinder.Grid="Catalogs"></TextBox>
 			<CheckBox x:Name="QuickSearch_IsEnabled" Style="{StaticResource FilterCheckBoxSmall}">Искать в начале слова</CheckBox>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id" c:SearchableDataGridColumn.SearchTerm="{Binding SearchText}">
+		<c:DataGrid Grid.Row="1" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id" c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование"
 					Binding="{Binding Name}"

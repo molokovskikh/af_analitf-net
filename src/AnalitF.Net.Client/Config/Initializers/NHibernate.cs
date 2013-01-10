@@ -121,6 +121,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				{Environment.ConnectionProvider, "NHibernate.Connection.DriverConnectionProvider"},
 				{Environment.ConnectionString, connectionString},
 				{Environment.Hbm2ddlKeyWords, "none"},
+				{Environment.FormatSql, "true"},
 				//раскомментировать если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},

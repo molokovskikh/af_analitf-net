@@ -237,10 +237,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void NavigateBackward()
 		{
-			if (!String.IsNullOrEmpty(SearchText)) {
-				SearchText = null;
-			}
-
 			if (FilterByMnn) {
 				FilterByMnn = false;
 				return;

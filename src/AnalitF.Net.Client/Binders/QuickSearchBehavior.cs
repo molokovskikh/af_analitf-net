@@ -24,24 +24,10 @@ namespace AnalitF.Net.Client.Binders
 		//если поле стало скрытым все подписки надо освободить
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
-			grid.TextInput += (sender, args) => {
-				if (!searchText.IsEnabled)
-					return;
-
-				if (!Char.IsControl(args.Text[0])) {
-					args.Handled = true;
-					searchText.Text += args.Text;
-					DataGridHelper.Centrify(grid);
-				}
-				else if (args.Text[0] == '\b') {
-					args.Handled = true;
-					searchText.Text = searchText.Text.Slice(0, -2);
-					DataGridHelper.Centrify(grid);
-				}
-			};
+			AttachInput(grid, searchText);
 
 			grid.KeyDown += (sender, args) => {
-				if (searchText.IsEnabled)
+				if (!searchText.IsEnabled)
 					return;
 
 				if (args.Key == Key.Escape) {
@@ -70,6 +56,25 @@ namespace AnalitF.Net.Client.Binders
 				else {
 					disposable.Dispose();
 					disposable = new CompositeDisposable();
+				}
+			};
+		}
+
+		public static void AttachInput(DataGrid grid, TextBox searchText)
+		{
+			grid.TextInput += (sender, args) => {
+				if (!searchText.IsEnabled)
+					return;
+
+				if (!Char.IsControl(args.Text[0])) {
+					args.Handled = true;
+					searchText.Text += args.Text;
+					DataGridHelper.Centrify(grid);
+				}
+				else if (args.Text[0] == '\b') {
+					args.Handled = true;
+					searchText.Text = searchText.Text.Slice(0, -2);
+					DataGridHelper.Centrify(grid);
 				}
 			};
 		}

@@ -10,6 +10,12 @@ namespace AnalitF.Net.Client.Controls
 {
 	public class SearchableDataGridColumn : DataGridTextColumn
 	{
+		public static DependencyProperty SearchTermProperty
+			= DependencyProperty.RegisterAttached("SearchTerm", typeof(string), typeof(SearchableDataGridColumn));
+
+		public static DependencyProperty HighlightStyleProperty
+			= DependencyProperty.RegisterAttached("HighlightStyle", typeof(Style), typeof(SearchableDataGridColumn));
+
 		protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
 		{
 			var element = (TextBlock) base.GenerateElement(cell, dataItem);
@@ -41,9 +47,6 @@ namespace AnalitF.Net.Client.Controls
 				element.Inlines.Add(new Run(text.Slice(end, -1)));
 		}
 
-		public static DependencyProperty SearchTermProperty
-			= DependencyProperty.RegisterAttached("SearchTerm", typeof(string), typeof(SearchableDataGridColumn));
-
 		public static string GetSearchTerm(DependencyObject d)
 		{
 			return (string)d.GetValue(SearchTermProperty);
@@ -53,9 +56,6 @@ namespace AnalitF.Net.Client.Controls
 		{
 			d.SetValue(SearchTermProperty, value);
 		}
-
-		public static DependencyProperty HighlightStyleProperty
-			= DependencyProperty.RegisterAttached("HighlightStyle", typeof(Style), typeof(SearchableDataGridColumn));
 
 		public Style HighlightStyle
 		{
