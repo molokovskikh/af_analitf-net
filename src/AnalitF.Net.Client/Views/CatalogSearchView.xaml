@@ -13,7 +13,7 @@
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
 			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
-			<CheckBox x:Name="QuickSearchEnabled" Style="{StaticResource FilterCheckBoxSmall}">Искать в начале слова</CheckBox>
+			<CheckBox x:Name="QuickSearch_IsEnabled" Style="{StaticResource FilterCheckBoxSmall}">Искать в начале слова</CheckBox>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id" c:SearchableDataGridColumn.SearchTerm="{Binding SearchText}">
@@ -30,7 +30,8 @@
 		<TextBox Grid.Row="1"
 				Style="{StaticResource PopupSearch}"
 				x:Name="QuickSearch_SearchText"
-				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"
+				IsEnabled="{Binding QuickSearch.IsEnabled}" />
 
 		<Parts:CatalogPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}"></Parts:CatalogPanel>
 	</Grid>

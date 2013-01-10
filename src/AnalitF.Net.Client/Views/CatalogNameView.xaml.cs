@@ -12,8 +12,8 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			SearchBehavior.AttachSearch(CatalogNames, CatalogNamesSearch_SearchText);
-			SearchBehavior.AttachSearch(Catalogs, CatalogsSearch_SearchText);
+			QuickSearchBehavior.AttachSearch(CatalogNames, CatalogNamesSearch_SearchText);
+			QuickSearchBehavior.AttachSearch(Catalogs, CatalogsSearch_SearchText);
 
 			SizeChanged += (sender, args) => {
 				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;

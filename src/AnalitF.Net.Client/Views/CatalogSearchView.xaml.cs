@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			SearchBehavior.AttachSearch(Catalogs, QuickSearch_SearchText);
+			QuickSearchBehavior.AttachSearch(Catalogs, QuickSearch_SearchText);
 		}
 	}
 }

@@ -125,7 +125,7 @@
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\VisibilityBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
-    <Compile Include="Binders\SearchBehavior.cs" />
+    <Compile Include="Binders\QuickSearchBehavior.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Binders\ViewModelHelper.cs" />
     <Compile Include="Config\Initializers\DevArtDriver.cs" />

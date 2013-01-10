@@ -11,7 +11,7 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Binders
 {
-	public class SearchBehavior
+	public class QuickSearchBehavior
 	{
 		//основная идея:
 		//видимость поля ввода привязана к поисковому запросу
@@ -25,6 +25,9 @@ namespace AnalitF.Net.Client.Binders
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
 			grid.TextInput += (sender, args) => {
+				if (!searchText.IsEnabled)
+					return;
+
 				if (!Char.IsControl(args.Text[0])) {
 					args.Handled = true;
 					searchText.Text += args.Text;
@@ -38,6 +41,9 @@ namespace AnalitF.Net.Client.Binders
 			};
 
 			grid.KeyDown += (sender, args) => {
+				if (searchText.IsEnabled)
+					return;
+
 				if (args.Key == Key.Escape) {
 					if (!String.IsNullOrEmpty(searchText.Text)) {
 						args.Handled = true;

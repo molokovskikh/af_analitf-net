@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -173,7 +174,8 @@ namespace AnalitF.Net.Client
 
 			ContentElementBinder.RegisterConvention();
 			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
-				EnabledBinder.Bind
+				EnabledBinder.Bind,
+				VisibilityBinder.Bind,
 			};
 			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
 				EnterBinder.Bind,

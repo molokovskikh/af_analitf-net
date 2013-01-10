@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Windows.Threading;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -12,6 +13,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool searchInProgress;
 		private Action<T> update;
 		private Func<string, T> search;
+		private bool _isEnabled = true;
+
+		public static IScheduler TestScheduler;
 
 		public QuickSearch(Func<string, T> search, Action<T> update)
 		{
@@ -20,9 +24,21 @@ namespace AnalitF.Net.Client.ViewModels
 			var searchTextChanges = this.ObservableForProperty(m => m.SearchText);
 			searchTextChanges.Subscribe(_ => OnPropertyChanged("SearchTextVisible"));
 			searchTextChanges
-				.Throttle(TimeSpan.FromMilliseconds(5000), DispatcherScheduler.Current)
+				.Throttle(TimeSpan.FromMilliseconds(5000), TestScheduler ?? DispatcherScheduler.Current)
 				.Where(o => !String.IsNullOrEmpty(o.Value))
 				.Subscribe(_ => SearchText = null);
+		}
+
+		public bool IsEnabled
+		{
+			get { return _isEnabled; }
+			set
+			{
+				if (!value)
+					SearchText = null;
+				_isEnabled = value;
+				OnPropertyChanged("IsEnabled");
+			}
 		}
 
 		public string SearchText
@@ -30,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return searchText; }
 			set
 			{
+				if (!IsEnabled)
+					return;
 				//это защита от обнуления запроса в случае если ячейка таблицы
 				//потеряла фокус из-за перехода к найденой строке
 				if (searchInProgress)

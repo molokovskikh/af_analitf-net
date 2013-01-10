@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.ViewModels
 			QuickSearch = new QuickSearch<Catalog>(
 				v => Catalogs.FirstOrDefault(c => c.Name.Name.ToLower().StartsWith(v)),
 				v => CurrentCatalog = v);
+			QuickSearch.IsEnabled = false;
 
 			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))

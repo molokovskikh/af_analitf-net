@@ -110,6 +110,7 @@
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
     <Compile Include="Unit\OrderFixture.cs" />
+    <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
   </ItemGroup>
