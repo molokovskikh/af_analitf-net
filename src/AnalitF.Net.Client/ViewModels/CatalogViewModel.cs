@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -41,16 +42,12 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class CatalogViewModel : BaseScreen
 	{
-		private CatalogName currentCatalogName;
-		private Catalog currentCatalogForm;
-		private Catalog currentCatalog;
-
-		private List<CatalogName> _catalogNames;
-		private List<Catalog> _catalogForms;
 		private bool showWithoutOffers;
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
 		private bool viewOffersByCatalog;
+		private Screen activeItem;
+		private IDisposable observable = Disposable.Empty;
 
 		public CatalogViewModel()
 		{
@@ -64,96 +61,40 @@ namespace AnalitF.Net.Client.ViewModels
 				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),
 			};
 			CurrentFilter = Filters[0];
-			Update();
 
-			CatalogNamesSearch = new QuickSearch<CatalogName>(
-				v => CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(v)),
-				c => CurrentCatalogName = c);
+			CatalogSearch = false;
 
-			CatalogsSearch = new QuickSearch<Catalog>(
-				v => CatalogForms.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
-				c => CurrentCatalogForm = c);
+			this.ObservableForProperty(m => m.CurrentCatalogName)
+				.Subscribe(_ => NotifyOfPropertyChange("CanShowDescription"));
 
-			this.ObservableForProperty(m => (object)m.FilterByMnn)
-				.Merge(this.ObservableForProperty(m => (object)m.CurrentFilter))
-				.Merge(this.ObservableForProperty(m => (object)m.ShowWithoutOffers))
-				.Subscribe(_ => Update());
-
-			this.ObservableForProperty(m => (object)m.CurrentFilter)
-				.Subscribe(_ => LoadCatalogForms());
-
-			this.ObservableForProperty(m => m.ViewOffersByCatalog)
-				.Subscribe(_ => NotifyOfPropertyChange("CatalogFormsEnabled"));
+			this.ObservableForProperty(m => m.CatalogSearch)
+				.Subscribe(_ => NotifyOfPropertyChange("ViewOffersByCatalogVisible"));
 		}
 
 		public string SearchText
 		{
-			get { return CatalogNamesSearch.SearchText; }
-			set { CatalogNamesSearch.SearchText = value; }
-		}
-
-		public QuickSearch<CatalogName> CatalogNamesSearch { get; private set; }
-		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
-
-		public List<CatalogName> CatalogNames
-		{
-			get { return _catalogNames; }
+			get
+			{
+				if (ActiveItem is CatalogNameViewModel)
+					return ((CatalogNameViewModel)ActiveItem).CatalogNamesSearch.SearchText;
+				return ((CatalogSearchViewModel)ActiveItem).SearchText;
+			}
 			set
 			{
-				_catalogNames = value;
-				NotifyOfPropertyChange("CatalogNames");
+				if (ActiveItem is CatalogNameViewModel)
+					((CatalogNameViewModel)ActiveItem).CatalogNamesSearch.SearchText = value;
+				else
+					((CatalogSearchViewModel)ActiveItem).SearchText = value;
 			}
 		}
 
-		public List<Catalog> CatalogForms
+		public Screen ActiveItem
 		{
-			get { return _catalogForms; }
+			get { return activeItem; }
 			set
 			{
-				_catalogForms = value;
-				NotifyOfPropertyChange("CatalogForms");
-			}
-		}
-
-		public bool CatalogFormsEnabled
-		{
-			get { return ViewOffersByCatalog; }
-		}
-
-		public CatalogName CurrentCatalogName
-		{
-			get { return currentCatalogName; }
-			set
-			{
-				currentCatalogName = value;
-				NotifyOfPropertyChange("CurrentCatalogName");
-				NotifyOfPropertyChange("CanShowDescription");
-				LoadCatalogForms();
-			}
-		}
-
-		public Catalog CurrentCatalogForm
-		{
-			get { return currentCatalogForm; }
-			set
-			{
-				currentCatalogForm = value;
-				CurrentCatalog = value;
-				NotifyOfPropertyChange("CurrentCatalogForm");
-			}
-		}
-
-		public Catalog CurrentCatalog
-		{
-			get { return currentCatalog; }
-			set
-			{
-				currentCatalog = value;
-				//если нас вызвала другая форма
-				if (CurrentCatalogName == null) {
-					CurrentCatalogName = currentCatalog.Name;
-				}
-				NotifyOfPropertyChange("CurrentCatalog");
+				activeItem = value;
+				NotifyOfPropertyChange("ActiveItem");
 			}
 		}
 
@@ -179,6 +120,47 @@ namespace AnalitF.Net.Client.ViewModels
 				FilterByMnn = false;
 				NotifyOfPropertyChange("CurrentFilter");
 				NotifyOfPropertyChange("FilterDescription");
+			}
+		}
+
+		public CatalogName CurrentCatalogName
+		{
+			get
+			{
+				if (activeItem is CatalogSearchViewModel) {
+					var catalog = ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+					return catalog == null ? null : catalog.Name;
+				}
+				return ((CatalogNameViewModel)activeItem).CurrentCatalogName;
+			}
+		}
+
+		public Catalog CurrentCatalog
+		{
+			get
+			{
+				if (activeItem is CatalogSearchViewModel) {
+					return ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+				}
+				return ((CatalogNameViewModel)activeItem).CurrentCatalog;
+			}
+			set
+			{
+				if (activeItem is CatalogSearchViewModel) {
+					((CatalogSearchViewModel)activeItem).CurrentCatalog = value;
+				}
+				((CatalogNameViewModel)activeItem).CurrentCatalog = value;
+			}
+		}
+
+		public object CurrentItem
+		{
+			get
+			{
+				if (activeItem is CatalogSearchViewModel) {
+					return ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+				}
+				return ((CatalogNameViewModel)activeItem).CurrentItem;
 			}
 		}
 
@@ -215,86 +197,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private void Update()
-		{
-			var queryable = Session.Query<CatalogName>();
-			if (!ShowWithoutOffers) {
-				queryable = queryable.Where(c => c.HaveOffers);
-			}
-			if (CurrentFilter == Filters[1]) {
-				queryable = queryable.Where(c => c.VitallyImportant);
-			}
-			if (CurrentFilter == Filters[2]) {
-				queryable = queryable.Where(c => c.MandatoryList);
-			}
-			if (filtredMnn != null) {
-				queryable = queryable.Where(n => n.Mnn == filtredMnn);
-			}
-			CatalogNames = queryable.OrderBy(c => c.Name).ToList();
-
-			if (CurrentCatalogName == null)
-				CurrentCatalogName = CatalogNames.FirstOrDefault();
-		}
-
-		private void LoadCatalogForms()
-		{
-			if (CurrentCatalogName == null)
-				CatalogForms = Enumerable.Empty<Catalog>().ToList();
-
-			var queryable = Session.Query<Catalog>().Where(c => c.Name == CurrentCatalogName);
-			if (!ShowWithoutOffers) {
-				queryable = queryable.Where(c => c.HaveOffers);
-			}
-
-			if (CurrentFilter == Filters[1]) {
-				queryable = queryable.Where(c => c.VitallyImportant);
-			}
-
-			if (CurrentFilter == Filters[2]) {
-				queryable = queryable.Where(c => c.MandatoryList);
-			}
-
-			CatalogForms = queryable
-				.OrderBy(c => c.Form)
-				.ToList();
-		}
-
-		public void EnterCatalogForm()
-		{
-			if (CurrentCatalog == null)
-				return;
-
-			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
-		}
-
-		//todo: если поставить фокус в строку поиска и ввести запрос
-		//для товара который не отображен на экране
-		//то выделение переместится к этому товару но прокрутка не будет произведена
-		public IResult EnterCatalogName()
-		{
-			if (CurrentCatalogName == null || CatalogForms.Count == 0)
-				return null;
-
-			if (!ViewOffersByCatalog) {
-				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
-				return null;
-			}
-
-			if (CatalogForms.Count == 1) {
-				CurrentCatalogForm = CatalogForms.First();
-				EnterCatalogForm();
-				return null;
-			}
-			else {
-				return new FocusResult("CatalogForms");
-			}
-		}
-
-		public bool CanShowDescription
-		{
-			get { return CurrentCatalogName != null && CurrentCatalogName.Description != null; }
-		}
-
 		public string FilterDescription
 		{
 			get
@@ -316,12 +218,21 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool CanShowDescription
+		{
+			get
+			{
+				return CurrentCatalogName != null && CurrentCatalogName.Description != null;
+			}
+		}
+
 		public void ShowDescription()
 		{
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalogName.Description));
+			var description = StatelessSession.Get<ProductDescription>(CurrentCatalogName.Description.Id);
+			Manager.ShowDialog(new DescriptionViewModel(description));
 		}
 
 		public override void NavigateBackward()
@@ -365,6 +276,65 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool ViewOffersByCatalogVisible
+		{
+			get { return !CatalogSearch; }
+		}
+
 		public bool ViewOffersByCatalogEnabled { get; private set; }
+
+		[DataMember]
+		public bool CatalogSearch
+		{
+			get { return ActiveItem is CatalogSearchViewModel; }
+			set
+			{
+				if (value && !(ActiveItem is CatalogSearchViewModel)) {
+					observable.Dispose();
+					var model = new CatalogSearchViewModel(this);
+					observable = model.ObservableForProperty(m => m.CurrentCatalog)
+						.Subscribe(_ => {
+							NotifyOfPropertyChange("CurrentItem");
+							NotifyOfPropertyChange("CurrentCatalog");
+							NotifyOfPropertyChange("CurrentCatalogName");
+						});
+					ActiveItem = model;
+				}
+				else if (!(ActiveItem is CatalogNameViewModel)) {
+					observable.Dispose();
+					var model = new CatalogNameViewModel(this);
+					var composite = new CompositeDisposable {
+						model
+							.ObservableForProperty(m => m.CurrentItem)
+							.Subscribe(_ => NotifyOfPropertyChange("CurrentItem")),
+						model
+							.ObservableForProperty(m => m.CurrentCatalog)
+							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalog")),
+						model
+							.ObservableForProperty(m => m.CurrentCatalogName)
+							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalogName"))
+					};
+					observable = composite;
+					ActiveItem = model;
+				}
+				NotifyOfPropertyChange("CatalogSearch");
+			}
+		}
+
+		public IQueryable<Catalog> ApplyFilter(IQueryable<Catalog> queryable)
+		{
+			if (!ShowWithoutOffers) {
+				queryable = queryable.Where(c => c.HaveOffers);
+			}
+
+			if (CurrentFilter == Filters[1]) {
+				queryable = queryable.Where(c => c.VitallyImportant);
+			}
+
+			if (CurrentFilter == Filters[2]) {
+				queryable = queryable.Where(c => c.MandatoryList);
+			}
+			return queryable;
+		}
 	}
 }

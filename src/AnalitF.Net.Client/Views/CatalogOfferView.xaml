@@ -7,9 +7,6 @@
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
-	<UserControl.Resources>
-
-	</UserControl.Resources>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />

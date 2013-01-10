@@ -12,22 +12,6 @@ namespace AnalitF.Net.Client.Views
 		public CatalogView()
 		{
 			InitializeComponent();
-
-			SearchBehavior.AttachSearch(CatalogNames, CatalogNamesSearch_SearchText);
-			SearchBehavior.AttachSearch(CatalogForms, CatalogsSearch_SearchText);
-
-			SizeChanged += (sender, args) => {
-				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
-			};
-
-			CatalogForms.KeyDown += (sender, args) => {
-				if (args.Key == Key.Escape) {
-					DataGridHelper.Focus(CatalogNames);
-					args.Handled = true;
-				}
-			};
-
-			Loaded += (sender, args) => DataGridHelper.Focus(CatalogNames);
 		}
 	}
 }

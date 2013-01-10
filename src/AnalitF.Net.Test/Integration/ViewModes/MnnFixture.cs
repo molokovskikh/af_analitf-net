@@ -17,10 +17,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.EnterMnn();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
+			var names = (CatalogNameViewModel)catalog.ActiveItem;
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentMnn));
-			Assert.That(catalog.CatalogNames.Count, Is.GreaterThan(0));
-			Assert.That(catalog.CatalogNames.All(n => n.Mnn.Id == model.CurrentMnn.Id), Is.True, catalog.CatalogNames.Implode());
+			Assert.That(names.CatalogNames.Count, Is.GreaterThan(0));
+			Assert.That(names.CatalogNames.All(n => n.Mnn.Id == model.CurrentMnn.Id), Is.True, names.CatalogNames.Implode());
 			Assert.That(catalog.ShowWithoutOffers, Is.True);
 		}
 	}

@@ -123,6 +123,7 @@
     <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
+    <Compile Include="Binders\VisibilityBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\SearchBehavior.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
+    <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
     <Compile Include="Helpers\Log4net.cs" />
@@ -168,6 +170,8 @@
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseOrderViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
+    <Compile Include="ViewModels\CatalogNameViewModel.cs" />
+    <Compile Include="ViewModels\CatalogSearchViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
@@ -186,6 +190,12 @@
     <Compile Include="ViewModels\PriceViewModel.cs" />
     <Compile Include="ViewModels\SyncViewModel.cs" />
     <Compile Include="ViewModels\WaitViewModel.cs" />
+    <Compile Include="Views\CatalogNameView.xaml.cs">
+      <DependentUpon>CatalogNameView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CatalogSearchView.xaml.cs">
+      <DependentUpon>CatalogSearchView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
@@ -194,6 +204,9 @@
     </Compile>
     <Compile Include="Views\Parts\AutoComment.xaml.cs">
       <DependentUpon>AutoComment.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Parts\CatalogPanel.xaml.cs">
+      <DependentUpon>CatalogPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintPreviewView.xaml.cs">
       <DependentUpon>PrintPreviewView.xaml</DependentUpon>
@@ -253,6 +266,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\CatalogNameView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CatalogSearchView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CatalogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -262,6 +283,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Parts\AutoComment.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Parts\CatalogPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -24,8 +24,8 @@
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
 			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
-			<ComboBox Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
-			<ComboBox Style="{StaticResource Filter}" x:Name="Prices" DisplayMemberPath="Name"></ComboBox>
+			<ComboBox x:Name="Producers" Style="{StaticResource Filter}"></ComboBox>
+			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name"></ComboBox>
 
 			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>

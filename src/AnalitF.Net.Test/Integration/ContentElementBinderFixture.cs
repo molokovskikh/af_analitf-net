@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client;
@@ -44,6 +45,19 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
+		public void Visible_binder()
+		{
+			var model = new ViewModel { Text = "123" };
+			var view = new UserControl { DataContext = model };
+			var checkBox = new CheckBox { Name = "Is" };
+			view.Content = checkBox;
+
+			Assert.That(view.DeepChildren().Count(), Is.GreaterThan(0));
+			ViewModelBinder.Bind(model, view, null);
+			Assert.That(checkBox.Visibility, Is.EqualTo(Visibility.Collapsed));
+		}
+
+		[Test]
 		public void Bind_password()
 		{
 			var model = new ViewModel { Text = "123" };
@@ -75,6 +89,8 @@ namespace AnalitF.Net.Test.Integration
 			public bool Is { get; set; }
 
 			public bool IsEnabled { get; set; }
+
+			public bool IsVisible { get; set; }
 		}
 	}
 }

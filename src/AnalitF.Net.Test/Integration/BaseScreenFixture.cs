@@ -35,8 +35,9 @@ namespace AnalitF.Net.Test.Integration
 		{
 			shell.ShowCatalog();
 			var catalog = ((CatalogViewModel)shell.ActiveItem);
-			catalog.CurrentCatalogForm = catalog.CatalogForms[0];
-			catalog.EnterCatalogForm();
+			var names = (CatalogNameViewModel)catalog.ActiveItem;
+			names.CurrentCatalog = names.Catalogs[0];
+			names.EnterCatalog();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 
 			shell.ShowCatalog();

@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		protected ILog log;
 
-		protected ShellViewModel Shell
+		protected virtual ShellViewModel Shell
 		{
 			get { return ((ShellViewModel)Parent); }
 		}

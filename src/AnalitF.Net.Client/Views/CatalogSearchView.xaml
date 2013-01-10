@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.CatalogSearchView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
+	xmlns:cal="http://www.caliburnproject.org">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
+			<CheckBox x:Name="QuickSearchEnabled" Style="{StaticResource FilterCheckBoxSmall}">Искать в начале слова</CheckBox>
+		</StackPanel>
+
+		<c:DataGrid Grid.Row="1" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id" c:SearchableDataGridColumn.SearchTerm="{Binding SearchText}">
+			<DataGrid.Columns>
+				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование"
+					Binding="{Binding Name}"
+					HighlightStyle="{StaticResource DataGridHighlight}" />
+				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Формы выпуска"
+					Binding="{Binding Form}"
+					HighlightStyle="{StaticResource DataGridHighlight}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<TextBox Grid.Row="1"
+				Style="{StaticResource PopupSearch}"
+				x:Name="QuickSearch_SearchText"
+				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+
+		<Parts:CatalogPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}"></Parts:CatalogPanel>
+	</Grid>
+</UserControl>

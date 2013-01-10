@@ -67,6 +67,10 @@
 		<Setter Property="FontWeight" Value="Bold" />
 	</Style>
 
+	<Style TargetType="CheckBox" x:Key="FilterCheckBoxSmall">
+		<Setter Property="Margin" Value="0, 0, 4, 0" />
+	</Style>
+
 	<Style TargetType="StackPanel" x:Key="FilterPanel">
 		<Setter Property="Orientation" Value="Horizontal" />
 		<Setter Property="Margin" Value="4" />

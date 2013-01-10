@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
 	<Style TargetType="DataGridCell">
 		<Style.Triggers>
 			<MultiTrigger>
@@ -55,12 +56,14 @@
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding SortKeyGroup}" Value="1">
 				<Setter Property="Background" Value="#CCC1E3"/>
+				<Setter Property="BorderBrush" Value="#CCC1E3"/>
 			</DataTrigger>
 			<DataTrigger Binding="{Binding VitallyImportant}" Value="true">
 				<Setter Property="Foreground" Value="Green"/>
 			</DataTrigger>
 			<DataTrigger Binding="{Binding Banned}" Value="true">
 				<Setter Property="Background" Value="Red"/>
+				<Setter Property="BorderBrush" Value="Red"/>
 			</DataTrigger>
 		</Style.Triggers>
 	</Style>
@@ -69,6 +72,7 @@
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding Price.BasePrice}" Value="false">
 				<Setter Property="Background" Value="#EEF8FF"/>
+				<Setter Property="BorderBrush" Value="#EEF8FF"/>
 			</DataTrigger>
 		</Style.Triggers>
 	</Style>
@@ -77,6 +81,7 @@
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding Price.BasePrice}" Value="false">
 				<Setter Property="Background" Value="#F0F0F0"/>
+				<Setter Property="BorderBrush" Value="#F0F0F0"/>
 			</DataTrigger>
 		</Style.Triggers>
 	</Style>
@@ -85,30 +90,7 @@
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding BasePrice}" Value="false">
 				<Setter Property="Background" Value="#F0F0F0"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
-	<Style x:Key="Junk" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=VitallyImportant}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding Junk}" Value="true">
-				<Setter Property="Background" Value="#f29e66"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
-	<Style x:Key="Leader" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=VitallyImportant}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding Leader}" Value="true">
-				<Setter Property="Background" Value="#C0DCC0"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
-	<Style x:Key="HaveOffers" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey=DefaultCellStyle}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding HaveOffers}" Value="false">
-				<Setter Property="Background" Value="Silver"/>
+				<Setter Property="BorderBrush" Value="#F0F0F0"/>
 			</DataTrigger>
 		</Style.Triggers>
 	</Style>
@@ -117,10 +99,16 @@
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding Valid}" Value="false">
 				<Setter Property="Background" Value="Red"/>
+				<Setter Property="BorderBrush" Value="Red"/>
 			</DataTrigger>
 			<DataTrigger Binding="{Binding Frozen}" Value="true">
 				<Setter Property="Background" Value="Silver"/>
+				<Setter Property="BorderBrush" Value="Silver"/>
 			</DataTrigger>
 		</Style.Triggers>
+	</Style>
+
+	<Style x:Key="DataGridHighlight" TargetType="Run">
+		<Setter Property="Background" Value="#FEFEA7"></Setter>
 	</Style>
 </ResourceDictionary>

@@ -23,7 +23,7 @@ namespace AnalitF.Net.Test.Integration
 			var model = new CatalogViewModel();
 			ViewModelBinder.Bind(model, view, null);
 
-			model.CurrentCatalogName = model.CatalogNames[0];
+			//model.CurrentCatalogName = model.CatalogNames[0];
 			Console.WriteLine(view.FindName("CatalogNames"));
 			var catalogForms = (DataGrid)view.FindName("CatalogForms");
 			var form = catalogForms.Items[0];

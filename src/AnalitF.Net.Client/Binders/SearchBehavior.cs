@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -24,13 +25,25 @@ namespace AnalitF.Net.Client.Binders
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
 			grid.TextInput += (sender, args) => {
-				if (!Char.IsControl(args.Text[0]))
+				if (!Char.IsControl(args.Text[0])) {
+					args.Handled = true;
 					searchText.Text += args.Text;
-				else if (args.Text[0] == '\b')
+					DataGridHelper.Centrify(grid);
+				}
+				else if (args.Text[0] == '\b') {
+					args.Handled = true;
 					searchText.Text = searchText.Text.Slice(0, -2);
-				else
-					return;
-				DataGridHelper.Centrify(grid);
+					DataGridHelper.Centrify(grid);
+				}
+			};
+
+			grid.KeyDown += (sender, args) => {
+				if (args.Key == Key.Escape) {
+					if (!String.IsNullOrEmpty(searchText.Text)) {
+						args.Handled = true;
+						searchText.Text = null;
+					}
+				}
 			};
 
 			var disposable = new CompositeDisposable();
@@ -39,14 +52,14 @@ namespace AnalitF.Net.Client.Binders
 				if ((bool)args.NewValue) {
 					var cellChangedSubscription = Observable
 						.FromEventPattern<EventArgs>(grid, "CurrentCellChanged")
-						.Subscribe(_ => AttachToCurrentCell(grid, disposable));
+						.Subscribe(_ => AttachToCurrentCell(grid, disposable, searchText));
 
 					disposable.Add(cellChangedSubscription);
 
 					if (!((bool)grid.GetValue(Selector.IsSelectionActiveProperty)))
 						DataGridHelper.Focus(grid);
 
-					AttachToCurrentCell(grid, disposable);
+					AttachToCurrentCell(grid, disposable, searchText);
 				}
 				else {
 					disposable.Dispose();
@@ -55,7 +68,7 @@ namespace AnalitF.Net.Client.Binders
 			};
 		}
 
-		private static void AttachToCurrentCell(DataGrid grid, CompositeDisposable disposible)
+		private static void AttachToCurrentCell(DataGrid grid, CompositeDisposable disposible, TextBox text)
 		{
 			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item);
 			if (container == null)
@@ -67,10 +80,7 @@ namespace AnalitF.Net.Client.Binders
 			IDisposable lostFocusSubscription = null;
 			lostFocusSubscription = Observable.FromEventPattern<RoutedEventArgs>(cell, "LostFocus")
 				.Subscribe(_ => {
-					var model = grid.DataContext as CatalogViewModel;
-					if (model == null)
-						return;
-					model.SearchText = null;
+					text.Text = null;
 					if (lostFocusSubscription != null) {
 						disposible.Remove(lostFocusSubscription);
 						lostFocusSubscription.Dispose();

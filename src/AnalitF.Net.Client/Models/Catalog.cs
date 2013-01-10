@@ -25,7 +25,7 @@
 
 		public virtual bool HaveOffers { get; set; }
 
-		public virtual string Fullname
+		public virtual string FullName
 		{
 			get { return Name.Name + " " + Form; }
 		}

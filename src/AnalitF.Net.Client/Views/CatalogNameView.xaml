@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.CatalogNameView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:cal="http://www.caliburnproject.org">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Name="CatalogNamesColumn" MinWidth="50" Width="300"></ColumnDefinition>
+			<ColumnDefinition Width="Auto"></ColumnDefinition>
+			<ColumnDefinition MinWidth="50"></ColumnDefinition>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<c:DataGrid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames" CurrentItem="{Binding CurrentCatalogName}" SelectedValuePath="Id"
+			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]">
+			<DataGrid.Columns>
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование" Binding="{Binding Name}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<TextBox Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
+				Style="{StaticResource PopupSearch}"
+				x:Name="CatalogNamesSearch_SearchText"
+				Visibility="{Binding CatalogNamesSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+
+		<GridSplitter Grid.Row="1"
+			Grid.Column="1"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Stretch"
+			ShowsPreview="True"
+			Width="5" />
+
+		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id"
+			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">
+			<DataGrid.Columns>
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<TextBox Grid.Row="1" Grid.Column="2"
+				Style="{StaticResource PopupSearch}"
+				x:Name="CatalogsSearch_SearchText"
+				Visibility="{Binding CatalogsSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"></TextBox>
+
+		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2" cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}"></Parts:CatalogPanel>
+	</Grid>
+</UserControl>

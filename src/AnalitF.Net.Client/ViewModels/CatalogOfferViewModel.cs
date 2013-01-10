@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.ViewModels
 			: this()
 		{
 			filterCatalog = catalog;
-			Name = catalog.Fullname;
+			Name = catalog.FullName;
 			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
 			CurrentCatalog = catalog;
 		}
@@ -170,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var offers = queryable.Fetch(o => o.Price).ToList();
 			offers = Sort(offers);
 			if (IsFilterByCatalogName) {
-				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId).Select(c => c.Fullname).FirstOrDefault());
+				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId).Select(c => c.FullName).FirstOrDefault());
 			}
 			Offers = offers;
 		}
@@ -315,7 +315,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var doc = new FlowDocument();
 
 			doc.Blocks.Add(new Paragraph());
-			doc.Blocks.Add(new Paragraph(new Run(CurrentCatalog.Fullname)) {
+			doc.Blocks.Add(new Paragraph(new Run(CurrentCatalog.FullName)) {
 				FontWeight = FontWeights.Bold,
 				FontSize = 16
 			});

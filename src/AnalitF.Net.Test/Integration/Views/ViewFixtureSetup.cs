@@ -18,7 +18,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			init = true;
 			var app = new Client.App();
 			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
-			//при инициализации caliburn будет дума что у нас есть dispatcher
+			app.RegisterResources();
+			//при инициализации caliburn будет думать что у нас есть dispatcher
 			//и пытатся выболнять все уведомления в ui thread
 			//на самом деле у нас dispatcher`а нет
 			Execute.ResetWithoutDispatcher();
