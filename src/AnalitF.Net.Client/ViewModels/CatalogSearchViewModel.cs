@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class CatalogSearchViewModel : BaseScreen
 	{
-		private List<Catalog> catalogs;
+		private List<Catalog> catalogs = new List<Catalog>();
 		private string searchText;
 		private Catalog currentCatalog;
 		private string _activeSearchTerm;
@@ -37,6 +37,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search());
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
 
 			Update();
 		}

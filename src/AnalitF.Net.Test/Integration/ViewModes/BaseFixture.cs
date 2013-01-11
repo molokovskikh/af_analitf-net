@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -64,6 +66,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Parent = shell;
 			ScreenExtensions.TryActivate(model);
 			return model;
+		}
+
+		protected List<string> TrackChanges(INotifyPropertyChanged catalogNameViewModel)
+		{
+			var changes = new List<string>();
+			catalogNameViewModel.PropertyChanged += (sender, args) => changes.Add(args.PropertyName);
+			return changes;
 		}
 	}
 }

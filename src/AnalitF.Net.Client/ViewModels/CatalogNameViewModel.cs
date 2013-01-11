@@ -14,8 +14,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private CatalogName currentCatalogName;
 		private Catalog currentCatalog;
 
-		private List<Catalog> catalogs;
-		private List<CatalogName> catalogNames;
+		private List<Catalog> catalogs = new List<Catalog>();
+		private List<CatalogName> catalogNames = new List<CatalogName>();
 		private object currentItem;
 		private Type activeItemType = typeof(CatalogName);
 
@@ -30,7 +30,6 @@ namespace AnalitF.Net.Client.ViewModels
 			CatalogsSearch = new QuickSearch<Catalog>(
 				v => Catalogs.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
 				c => CurrentCatalog = c);
-			Update();
 
 			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
@@ -131,6 +130,13 @@ namespace AnalitF.Net.Client.ViewModels
 				currentItem = value;
 				NotifyOfPropertyChange("CurrentItem");
 			}
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			Update();
 		}
 
 		private void Update()

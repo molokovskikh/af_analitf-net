@@ -78,8 +78,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Do_change_search_text_if_result_not_found()
 		{
-			var changes = new List<string>();
-			nameViewModel.PropertyChanged += (sender, args) => changes.Add(args.PropertyName);
+			var changes = TrackChanges(nameViewModel);
 			catalogModel.SearchText += "ё";
 			Assert.That(catalogModel.SearchText, Is.Null);
 			Assert.That(changes, Is.Empty);
@@ -159,6 +158,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			nameViewModel.ActivateCatalogName();
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<CatalogName>());
+		}
+
+		[Test]
+		public void Search_in_catalog_names()
+		{
+			var name = (CatalogNameViewModel)catalogModel.ActiveItem;
+			shell.ActiveItem = catalogModel;
+			name.CurrentCatalog = name.Catalogs.First();
+			name.EnterCatalog();
+			var offer = (CatalogOfferViewModel)shell.ActiveItem;
+			offer.SearchInCatalog("а");
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
+			Assert.That(catalogModel.SearchText, Is.EqualTo("а"));
+			Assert.That(catalogModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));
 		}
 
 		private void ApplyMnnFilter()

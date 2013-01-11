@@ -79,12 +79,14 @@ namespace AnalitF.Net.Client.ViewModels
 			var key = GetType().FullName;
 			if (Shell.ViewModelSettings.ContainsKey(key)) {
 				try {
+					IsNotifying = false;
 					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this);
 				}
 				catch (Exception e) {
 					log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
 				}
 				finally {
+					IsNotifying = true;
 					Shell.ViewModelSettings.Remove(key);
 				}
 			}

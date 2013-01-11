@@ -94,7 +94,11 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return activeItem; }
 			set
 			{
+				ScreenExtensions.TryDeactivate(activeItem, true);
 				activeItem = value;
+				if (IsActive) {
+					ScreenExtensions.TryActivate(activeItem);
+				}
 				NotifyOfPropertyChange("ActiveItem");
 			}
 		}
@@ -279,6 +283,18 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public bool ViewOffersByCatalogEnabled { get; private set; }
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+			ScreenExtensions.TryActivate(ActiveItem);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+			ScreenExtensions.TryDeactivate(ActiveItem, close);
+		}
 
 		[DataMember]
 		public bool CatalogSearch
