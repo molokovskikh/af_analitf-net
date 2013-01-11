@@ -143,7 +143,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(sentOrder);
 			session.Flush();
 
-			schedule.AdvanceToMs(4000);
+			testScheduler.AdvanceToMs(4000);
 			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1));
 			Assert.That(model.HistoryOrders[0].Count, Is.EqualTo(1));
 			Assert.That(model.CurrentOffer.PrevOrderAvgCost, Is.EqualTo(offer.Cost));

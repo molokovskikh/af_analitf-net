@@ -39,7 +39,9 @@ namespace AnalitF.Net.Client.ViewModels
 		protected Settings Settings;
 		protected Address Address;
 
-		public static IScheduler Scheduler = DefaultScheduler.Instance;
+		public static IScheduler TestSchuduler;
+		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
+		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
 
 		public BaseScreen()
 		{

@@ -18,6 +18,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private Catalog currentCatalog;
 		private string _activeSearchTerm;
 
+		private static TimeSpan SearchTimeout = TimeSpan.FromMilliseconds(5000);
+
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
 			ParentModel = catalog;
@@ -31,7 +33,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Subscribe(_ => Update());
 
-
+			this.ObservableForProperty(m => m.SearchText)
+				.Throttle(SearchTimeout, Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => Search());
 
 			Update();
 		}

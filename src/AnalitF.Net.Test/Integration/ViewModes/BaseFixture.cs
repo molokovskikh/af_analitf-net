@@ -17,7 +17,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		protected Client.Extentions.WindowManager manager;
 		protected ISession session;
-		protected TestScheduler schedule;
+		protected TestScheduler testScheduler;
 
 		protected ShellViewModel shell;
 
@@ -27,9 +27,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
-			schedule = new TestScheduler();
-			BaseScreen.Scheduler = schedule;
-			disposeTestShedule = TestUtils.WithScheduler(schedule);
+			testScheduler = new TestScheduler();
+			BaseScreen.TestSchuduler = testScheduler;
+			disposeTestShedule = TestUtils.WithScheduler(testScheduler);
 
 			StubWindowManager();
 
