@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels

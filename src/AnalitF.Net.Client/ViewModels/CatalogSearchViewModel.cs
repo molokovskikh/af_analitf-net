@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -143,12 +144,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void EnterCatalog()
+		public IResult EnterCatalog()
 		{
-			if (CurrentCatalog == null || !CurrentCatalog.HaveOffers)
-				return;
+			if (CurrentCatalog == null)
+				return null;
+
+			if (!CurrentCatalog.HaveOffers)
+				return new ShowPopupResult();
 
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+			return null;
 		}
 	}
 }

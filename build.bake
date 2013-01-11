@@ -24,7 +24,7 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
 
 task @DeployApp, [@WebDeploy]
 
-task @DeployService, [@DeployPipeline]
+task @DeployService, [@SetupEnvironment, @DeployPipeline]
 
 task @deploy, [@SetupEnvironment, @Tag, @DeployService, @DeployClient, @SendNotification]
 

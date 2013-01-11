@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -183,8 +184,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (!ParentModel.ViewOffersByCatalog) {
 
-				if (CurrentCatalogName == null || !CurrentCatalogName.HaveOffers)
-					return null;
+				if (!CurrentCatalogName.HaveOffers)
+					return new ShowPopupResult();
 
 				Shell.Navigate(new CatalogOfferViewModel(CurrentCatalogName));
 				return null;
@@ -192,20 +193,23 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (Catalogs.Count == 1) {
 				CurrentCatalog = Catalogs.First();
-				EnterCatalog();
-				return null;
+				return EnterCatalog();
 			}
 			else {
 				return new FocusResult("Catalogs");
 			}
 		}
 
-		public void EnterCatalog()
+		public IResult EnterCatalog()
 		{
-			if (CurrentCatalog == null || !CurrentCatalog.HaveOffers)
-				return;
+			if (CurrentCatalog == null)
+				return null;
+
+			if (!CurrentCatalog.HaveOffers)
+				return new ShowPopupResult();
 
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+			return null;
 		}
 
 		public void ActivateCatalog()

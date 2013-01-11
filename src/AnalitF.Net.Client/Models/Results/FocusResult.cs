@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Results
 {
 	public class FocusResult : IResult
 	{

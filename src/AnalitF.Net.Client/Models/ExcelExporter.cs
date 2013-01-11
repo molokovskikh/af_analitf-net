@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;

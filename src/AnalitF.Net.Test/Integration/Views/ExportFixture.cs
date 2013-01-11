@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using AnalitF.Net.Test.Integration.ViewModes;

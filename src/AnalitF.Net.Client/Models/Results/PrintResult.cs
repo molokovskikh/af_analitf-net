@@ -1,11 +1,10 @@
 using System;
 using System.Windows;
-using System.Windows.Annotations;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Results
 {
 	public class PrintResult : IResult
 	{

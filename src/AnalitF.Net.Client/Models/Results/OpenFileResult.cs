@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Results
 {
 	public class OpenFileResult : IResult
 	{

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;

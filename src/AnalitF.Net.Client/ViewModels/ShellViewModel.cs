@@ -16,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
