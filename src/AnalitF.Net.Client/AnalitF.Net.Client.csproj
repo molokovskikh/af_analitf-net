@@ -123,6 +123,7 @@
     <Compile Include="Binders\ContextMenuBehavior.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
+    <Compile Include="Binders\FocusBehavior.cs" />
     <Compile Include="Binders\VisibilityBinder.cs" />
     <Compile Include="Binders\EnterBinder.cs" />
     <Compile Include="Binders\QuickSearchBehavior.cs" />

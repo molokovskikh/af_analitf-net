@@ -27,7 +27,6 @@ namespace AnalitF.Net.Client.Views
 				var model = DataContext as CatalogOfferViewModel;
 				if (model != null && model.IsFilterByCatalogName)
 					Offers.Items.GroupDescriptions.Add(new PropertyGroupDescription("GroupName"));
-				DataGridHelper.Focus(grid);
 			};
 
 			EditBehavior.Attach(grid);

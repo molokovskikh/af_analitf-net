@@ -101,21 +101,53 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Activete_search()
 		{
+			catalogModel.CatalogSearch = true;
+			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
+
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
 
-			catalogModel.CatalogSearch = true;
 			Assert.That(catalogModel.ActiveItem, Is.InstanceOf<CatalogSearchViewModel>());
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<Catalog>());
-
-			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
-			catalogModel.SearchText = catalog.Name.Name.Slice(3);
+			var term = catalog.Name.Name.Slice(3);
+			catalogModel.SearchText = term;
 			searchModel.Search();
+			Assert.That(searchModel.SearchText, Is.Empty);
+			Assert.That(searchModel.ActiveSearchTerm, Is.EqualTo(term));
 			Assert.That(searchModel.Catalogs.Count, Is.GreaterThan(0));
 			Assert.That(searchModel.CurrentCatalog, Is.Not.Null);
 
 			Assert.That(catalogModel.CurrentItem, Is.EqualTo(searchModel.CurrentCatalog));
 			Assert.That(catalogModel.CurrentCatalog, Is.EqualTo(searchModel.CurrentCatalog));
 			Assert.That(catalogModel.CurrentCatalogName, Is.EqualTo(searchModel.CurrentCatalog.Name));
+		}
+
+		[Test]
+		public void Clear_search_term()
+		{
+			catalogModel.CatalogSearch = true;
+			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
+
+			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
+			var total = searchModel.Catalogs.Count;
+			var term = catalog.Name.Name.Slice(3);
+			catalogModel.SearchText = term;
+			searchModel.Search();
+			searchModel.ClearSearch();
+			Assert.That(searchModel.ActiveSearchTerm, Is.Empty);
+			Assert.That(searchModel.Catalogs.Count, Is.EqualTo(total));
+		}
+
+		[Test]
+		public void Filter_by_mnn_in_search()
+		{
+			catalogModel.CatalogSearch = true;
+			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
+
+			var catalog = session.Query<Catalog>().First(c => c.HaveOffers && c.Name.Mnn != null);
+			var total = searchModel.Catalogs.Count;
+			searchModel.CurrentCatalog = catalog;
+			catalogModel.FilterByMnn = true;
+			Assert.That(searchModel.Catalogs.Count, Is.LessThan(total));
 		}
 
 		[Test]

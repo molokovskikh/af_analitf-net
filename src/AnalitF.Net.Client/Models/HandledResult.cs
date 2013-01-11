@@ -29,5 +29,15 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
+
+		public static HandledResult Skip()
+		{
+			return new HandledResult(false);
+		}
+
+		public static HandledResult Handled()
+		{
+			return new HandledResult();
+		}
 	}
 }

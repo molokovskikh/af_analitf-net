@@ -3,7 +3,9 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
-	xmlns:cal="http://www.caliburnproject.org">
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
+	Binders:FocusBehavior.DefaultFocus="{x:Reference CatalogNames}">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Name="CatalogNamesColumn" MinWidth="50" Width="300"></ColumnDefinition>

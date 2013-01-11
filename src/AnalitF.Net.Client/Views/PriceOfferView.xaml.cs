@@ -1,20 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Extentions;
-using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -25,10 +10,6 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			EditBehavior.Attach(Offers);
-			Loaded += (sender, args) => {
-				DataGridHelper.Focus(Offers);
-			};
-
 			ContextMenuBehavior.Attach(Offers);
 		}
 	}

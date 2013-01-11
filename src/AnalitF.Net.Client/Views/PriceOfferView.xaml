@@ -5,7 +5,8 @@
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference Offers}">
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />

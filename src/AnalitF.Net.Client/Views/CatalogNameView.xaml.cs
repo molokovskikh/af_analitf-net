@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
@@ -25,8 +26,6 @@ namespace AnalitF.Net.Client.Views
 					args.Handled = true;
 				}
 			};
-
-			Loaded += (sender, args) => DataGridHelper.Focus(CatalogNames);
 		}
 	}
 }

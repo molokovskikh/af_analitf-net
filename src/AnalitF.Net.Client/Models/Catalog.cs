@@ -29,5 +29,10 @@
 		{
 			get { return Name.Name + " " + Form; }
 		}
+
+		public override string ToString()
+		{
+			return FullName;
+		}
 	}
 }

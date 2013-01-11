@@ -4,7 +4,8 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" mc:Ignorable="d"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference Prices}">
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />

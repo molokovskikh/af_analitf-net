@@ -4,7 +4,8 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:cal="http://www.caliburnproject.org"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.Resources>
 		<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverterResource" />

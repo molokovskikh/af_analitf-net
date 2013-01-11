@@ -4,7 +4,8 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:cal="http://www.caliburnproject.org"
-	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders">
+	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
+	Binders:FocusBehavior.DefaultFocus="{x:Reference Catalogs}">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>

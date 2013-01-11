@@ -190,6 +190,7 @@ namespace AnalitF.Net.Client
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
 				CommandBinder.BindCommand(view);
+				FocusBehavior.Bind(viewModel, view, context);
 			};
 
 			ViewModelBinder.BindProperties = (elements, type) => {

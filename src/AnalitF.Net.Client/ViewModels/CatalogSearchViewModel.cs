@@ -29,9 +29,9 @@ namespace AnalitF.Net.Client.ViewModels
 			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
-				.Subscribe(_ => Search());
+				.Subscribe(_ => Update());
 
-			Search();
+			Update();
 		}
 
 		protected override ShellViewModel Shell
@@ -68,38 +68,47 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult Search()
 		{
-			if (!string.IsNullOrEmpty(SearchText) && SearchText.Length < 3)
+			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3)
 				return new HandledResult(false);
 
+			ActiveSearchTerm = SearchText;
+			SearchText = "";
+			Update();
+			return new HandledResult();
+		}
+
+		public void Update()
+		{
 			IQueryable<Catalog> query = StatelessSession.Query<Catalog>()
 				.Fetch(c => c.Name)
 				.ThenFetch(n => n.Mnn);
-			if (!string.IsNullOrEmpty(searchText))
-				query = query.Where(c => c.Name.Name.Contains(SearchText) || c.Form.Contains(SearchText));
+			if (!string.IsNullOrEmpty(ActiveSearchTerm))
+				query = query.Where(c => c.Name.Name.Contains(ActiveSearchTerm) || c.Form.Contains(ActiveSearchTerm));
 			query = ParentModel.ApplyFilter(query);
 
-			ActiveSearchTerm = SearchText;
+			if (ParentModel.FiltredMnn != null) {
+				query = query.Where(c => c.Name.Mnn == ParentModel.FiltredMnn);
+			}
+
 			Catalogs = query.OrderBy(c => c.Name.Name).ThenBy(c => c.Form).ToList();
-			SearchText = "";
 
 			if (CurrentCatalog == null)
 				CurrentCatalog = Catalogs.FirstOrDefault();
-			return new HandledResult();
 		}
 
 		public IResult ClearSearch()
 		{
 			if (!String.IsNullOrEmpty(SearchText)) {
 				SearchText = "";
-				return new HandledResult();
+				return HandledResult.Handled();
 			}
 
 			if (String.IsNullOrEmpty(ActiveSearchTerm))
-				return new HandledResult(false);
+				return HandledResult.Skip();
 
-			SearchText = "";
-			Search();
-			return new HandledResult();
+			ActiveSearchTerm = "";
+			Update();
+			return HandledResult.Handled();
 		}
 
 		public List<Catalog> Catalogs
