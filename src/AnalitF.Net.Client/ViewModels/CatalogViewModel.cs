@@ -77,7 +77,8 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				if (ActiveItem is CatalogNameViewModel)
 					return ((CatalogNameViewModel)ActiveItem).CatalogNamesSearch.SearchText;
-				return ((CatalogSearchViewModel)ActiveItem).SearchText;
+				else
+					return ((CatalogSearchViewModel)ActiveItem).SearchText;
 			}
 			set
 			{

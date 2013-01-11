@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
@@ -21,7 +22,7 @@ using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class BaseScreen : Screen
+	public class BaseScreen : Screen, IActivateEx
 	{
 		protected ILog log;
 
@@ -49,6 +50,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings = Session.Query<Settings>().First();
 			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 		}
+
+		public bool IsSuccessfulActivated { get; protected set; }
 
 		public virtual void NavigateBackward()
 		{
@@ -83,6 +86,11 @@ namespace AnalitF.Net.Client.ViewModels
 					Shell.ViewModelSettings.Remove(key);
 				}
 			}
+		}
+
+		protected override void OnActivate()
+		{
+			IsSuccessfulActivated = true;
 		}
 
 		protected override void OnDeactivate(bool close)

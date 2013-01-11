@@ -97,6 +97,16 @@ namespace AnalitF.Net.Client.ViewModels
 			UpdateProducers();
 		}
 
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			if (Offers.Count == 0) {
+				Manager.Warning("Нет предложений");
+				IsSuccessfulActivated = false;
+			}
+		}
+
 		//TODO: похоже что исключение не обрабатывается все падает
 		public void LoadHistoryOrders()
 		{

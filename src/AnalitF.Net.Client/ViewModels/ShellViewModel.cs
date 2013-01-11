@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -71,7 +72,7 @@ namespace AnalitF.Net.Client.ViewModels
 	}
 
 	[DataContract]
-	public class ShellViewModel : Conductor<IScreen>
+	public class ShellViewModel : BaseConductor
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
 		private Settings settings;

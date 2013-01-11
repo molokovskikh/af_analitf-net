@@ -31,6 +31,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Subscribe(_ => Update());
 
+
+
 			Update();
 		}
 

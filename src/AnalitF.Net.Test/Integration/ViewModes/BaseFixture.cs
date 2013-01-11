@@ -37,6 +37,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			address = session.Query<Address>().FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
 			shell = new ShellViewModel();
+			ScreenExtensions.TryActivate(shell);
 		}
 
 		[TearDown]

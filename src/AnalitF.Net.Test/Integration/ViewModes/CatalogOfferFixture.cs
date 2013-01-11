@@ -289,6 +289,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.OrderWarning, Is.EqualTo("Превышение среднего заказа!"));
 		}
 
+		[Test]
+		public void Reject_activate_if_offers_not_found()
+		{
+			catalog = session.Query<Catalog>().First(c => !c.HaveOffers);
+			Assert.That(model.IsSuccessfulActivated, Is.False);
+			Assert.That(manager.MessageBoxes.Implode(), Is.EqualTo("Нет предложений"));
+		}
+
 		private void CleanSendOrders(Offer offer)
 		{
 			session.Query<SentOrderLine>()

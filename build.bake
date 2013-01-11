@@ -15,8 +15,7 @@ import System.Xml.XPath.Extensions
 Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",
-	Profile: @catalog,
-	Environment: @test
+	Profile: @catalog
 )
 
 task @default, [@Build]
@@ -27,9 +26,13 @@ task @DeployApp, [@WebDeploy]
 
 task @DeployService, [@DeployPipeline]
 
-task @deploy, [@Tag, @DeployService, @DeployClient, @SendNotification]
+task @deploy, [@SetupEnvironment, @Tag, @DeployService, @DeployClient, @SendNotification]
 
 task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip, @AfterBuildApp]
+
+task @SetupEnvironment:
+	unless Configuration.Maybe.env:
+		Globals.Environment = @test
 
 task @CopyNativeLib:
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
