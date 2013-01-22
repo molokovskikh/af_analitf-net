@@ -27,6 +27,6 @@
 			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name" FontWeight="Bold"></Label>
 		</Grid>
 
-		<Image Height="125"></Image>
+		<Image Height="125" Name="Ad"></Image>
 	</StackPanel>
 </UserControl>

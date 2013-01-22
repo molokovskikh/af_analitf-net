@@ -148,7 +148,7 @@
 							<RowDefinition></RowDefinition>
 						</Grid.RowDefinitions>
 						<TextBlock Grid.Row="0" FontWeight="Bold">Телефон: <Run Name="CurrentOffer_Price_Phone"></Run></TextBlock>
-						<TextBox Grid.Row="1" IsReadOnly="True" BorderThickness="0" FontWeight="Bold" TextWrapping="Wrap" Name="CurrentOffer_Price_OperativeInfo"></TextBox>
+						<TextBox Grid.Row="1" VerticalScrollBarVisibility="Auto" IsReadOnly="True" BorderThickness="0" FontWeight="Bold" TextWrapping="Wrap" Name="CurrentOffer_Price_OperativeInfo"></TextBox>
 					</Grid>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">

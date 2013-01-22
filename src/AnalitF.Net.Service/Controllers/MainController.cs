@@ -65,22 +65,26 @@ namespace AnalitF.Net.Controllers
 		{
 			var task = new Task(() => {
 				try {
-					using (var session = sessionFactory.OpenSession())
-					using (var transaction = session.BeginTransaction()) {
-						var job = session.Load<RequestLog>(jobId);
+					using (var logSession = sessionFactory.OpenSession())
+					using (var logTransaction = logSession.BeginTransaction()) {
+						var job = logSession.Load<RequestLog>(jobId);
 						try {
-							var exporter = new Exporter(session, job.User.Id, job.Version) {
-								Prefix = job.Id.ToString(),
-								ExportPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ExportPath"]),
-								ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"]),
-								UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"]),
-								MaxProducerCostPriceId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostPriceId"]),
-								MaxProducerCostCostId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostCostId"]),
-							};
-							using (exporter) {
-								exporter.ExportCompressed(job.OutputFile);
+							using(var exportSession = sessionFactory.OpenSession())
+							using(var exportTransaction = exportSession.BeginTransaction()) {
+								var exporter = new Exporter(exportSession, job.User.Id, job.Version) {
+									Prefix = job.Id.ToString(),
+									ExportPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ExportPath"]),
+									ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"]),
+									UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"]),
+									AdsPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["AdsPath"]),
+									MaxProducerCostPriceId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostPriceId"]),
+									MaxProducerCostCostId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostCostId"]),
+								};
+								using (exporter) {
+									exporter.ExportCompressed(job.OutputFile);
+								}
+								exportTransaction.Commit();
 							}
-							transaction.Commit();
 						}
 						catch(Exception e) {
 							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
@@ -89,8 +93,9 @@ namespace AnalitF.Net.Controllers
 						}
 						finally {
 							job.IsCompleted = true;
-							session.Save(job);
-							session.Flush();
+							logSession.Save(job);
+							logSession.Flush();
+							logTransaction.Commit();
 						}
 					}
 				}

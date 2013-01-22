@@ -61,6 +61,7 @@ namespace AnalitF.Net.Client.Models
 		public static Uri Uri;
 		public static string ArchiveFile;
 		public static string ExtractPath;
+		public static string RootPath;
 
 		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
@@ -161,7 +162,21 @@ namespace AnalitF.Net.Client.Models
 				return UpdateResult.UpdatePending;
 
 			Import(archiveFile);
+			Copy(Path.Combine(ExtractPath, "ads"), Path.Combine(RootPath, "ads"));
 			return UpdateResult.OK;
+		}
+
+		private static void Copy(string source, string destination)
+		{
+			if (Directory.Exists(source)) {
+				if (!Directory.Exists(destination)) {
+					Directory.CreateDirectory(destination);
+				}
+
+				foreach (var file in Directory.GetFiles(source)) {
+					File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+				}
+			}
 		}
 
 		public static UpdateResult Import(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)

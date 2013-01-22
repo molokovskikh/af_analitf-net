@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -25,6 +26,7 @@ namespace AnalitF.Net.Service.Test
 		[SetUp]
 		public void Setup()
 		{
+			ConfigurationManager.AppSettings["ExportPath"] = ".";
 			var client = TestClient.CreateNaked();
 			session.Save(client);
 			session.Flush();
@@ -106,6 +108,23 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(job.Error, Is.Null);
 			Assert.That(job.IsCompleted, Is.True);
 			Assert.That(job.IsFaulted, Is.False);
+		}
+
+		[Test]
+		public void Log_broken_job()
+		{
+			var job = new RequestLog(user, new Version());
+			localSession.Save(job);
+			localSession.Transaction.Commit();
+			ConfigurationManager.AppSettings["ExportPath"] = "asdasd";
+
+			var task = MainController.StartJob(job.Id, localSession.SessionFactory);
+			task.Wait();
+			localSession.Refresh(job);
+			Assert.That(job.Error, Is.Not.Null);
+			Assert.That(job.IsCompleted, Is.True);
+			Assert.That(job.IsFaulted, Is.True);
+
 		}
 	}
 }

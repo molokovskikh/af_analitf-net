@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using Common.Models;
 using Common.Models.Repositories;
 using Common.Tools;
 using Ionic.Zip;
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Models
 		public string Prefix = "";
 		public string ExportPath = "";
 		public string ResultPath = "";
+		public string AdsPath = "";
 		public string UpdatePath;
 
 		public uint MaxProducerCostPriceId;
@@ -188,7 +190,7 @@ from Catalogs.Descriptions";
 
 			sql = @"
 select Id,
-	RussianMnn as Name,
+	Mnn as Name,
 	exists(select *
 		from usersettings.Core cr
 			join Catalogs.Products p on p.Id = cr.ProductId
@@ -270,10 +272,24 @@ where Hidden = 0";
 					zip.AddEntry(metaname, tuple.Item2.Implode("\r\n"));
 				}
 				CheckUpdate(zip);
+				CheckAds(zip);
 				file = Path.Combine(ResultPath, file);
 				zip.Save(file);
 			}
 			return file;
+		}
+
+		public void CheckAds(ZipFile zip)
+		{
+			var user = session.Load<User>(userId);
+			if (!Directory.Exists(AdsPath))
+				return;
+			var template = String.Format("_{0}", user.Client.RegionCode);
+			var dir = Directory.GetDirectories(AdsPath).FirstOrDefault(d => d.EndsWith(template));
+			if (String.IsNullOrEmpty(dir))
+				return;
+
+			zip.AddDirectory(dir, "ads");
 		}
 
 		private void CheckUpdate(ZipFile zip)

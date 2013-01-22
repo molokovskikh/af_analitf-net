@@ -36,7 +36,7 @@ namespace AnalitF.Net.Service.Test
 
 			file = "data.zip";
 			File.Delete(file);
-			exporter = new Exporter(session, user.Id, Version.Parse("1.1")) {
+			exporter = new Exporter(localSession, user.Id, Version.Parse("1.1")) {
 				Prefix = "1",
 				ExportPath = "export",
 				ResultPath = "data",
@@ -79,6 +79,20 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(Directory.GetFiles("data")[0], Is.EquivalentTo("data\\data.zip"));
 			exporter.Dispose();
 			Assert.That(Directory.GetFiles("export"), Is.Empty);
+		}
+
+		[Test]
+		public void Export_ads()
+		{
+			FileHelper.InitDir("ads");
+			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
+			exporter.AdsPath = "ads";
+			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[0]);
+
+			file = exporter.ExportCompressed(file);
+
+			var zipEntries = lsZip();
+			Assert.That(zipEntries.Implode(), Is.StringContaining("ads/2block.gif"));
 		}
 
 		private List<string> lsZip()

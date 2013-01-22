@@ -33,12 +33,13 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			updatePath = @"..\..\..\data\update";
 			Tasks.ExtractPath = "temp";
+			Tasks.RootPath = "app";
 			var files = Directory.GetFiles(".", "*.txt");
 			foreach (var file in files) {
 				File.Delete(file);
 			}
 
-			FileHelper.InitDir(updatePath, Tasks.ExtractPath);
+			FileHelper.InitDir(updatePath, Tasks.ExtractPath, Tasks.RootPath);
 
 			localSession = SetupFixture.Factory.OpenSession();
 			Tasks.Uri = new Uri("http://localhost:8080/Main/");

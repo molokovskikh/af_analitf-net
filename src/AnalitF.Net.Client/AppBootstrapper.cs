@@ -157,6 +157,7 @@ namespace AnalitF.Net.Client
 			Tasks.Uri = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
 			Tasks.ExtractPath = TempPath;
+			Tasks.RootPath = FileHelper.MakeRooted(".");
 		}
 
 		private static void InitDb()

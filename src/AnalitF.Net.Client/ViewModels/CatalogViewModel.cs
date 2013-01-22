@@ -69,7 +69,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CatalogSearch)
 				.Subscribe(_ => NotifyOfPropertyChange("ViewOffersByCatalogVisible"));
+			Ad = FileHelper.MakeRooted(@"ads\2block.gif");
 		}
+
+		public string Ad { get; private set; }
 
 		public string SearchText
 		{
