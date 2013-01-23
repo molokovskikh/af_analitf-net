@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace AnalitF.Net.Client.Extentions
 {
@@ -42,6 +44,26 @@ namespace AnalitF.Net.Client.Extentions
 			window.ShowInTaskbar = false;
 
 			return ShowDialog(window);
+		}
+
+		//скорбная песнь
+		//для того что значения форматировались в соответсвии с правилами русского языка
+		//wpf нужно сказать что мы русские люди, сам он понимать отказывается и по умолчанию
+		//использует локаль en-us
+		//для этого есть много способов:
+		//перегрузка значения для FramewrokElement.Language, работает не полностью тк есть еще FramewrokContentElement.Language
+		//я его перегрузить нельзя тк на самом деле это свойство и само является переопределением FramewrokElement.Language
+		//а переопределить свойство дважды в wpf нельзя
+		//
+		//xml:lang - нужно применять для всех форм которые ты создаешь, что геморой и будет просрано
+		//
+		//остается надеяться что ни какой придурок не будет создавать окна руками
+		//по этому для каждого вновь создаваемого окна принудительно указываем Language
+		protected override Window CreateWindow(object rootModel, bool isDialog, object context, IDictionary<string, object> settings)
+		{
+			var window = base.CreateWindow(rootModel, isDialog, context, settings);
+			window.Language = XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag);
+			return window;
 		}
 
 		private bool? ShowDialog(Window window)

@@ -60,6 +60,7 @@
 	<Style TargetType="ComboBox" x:Key="Filter" BasedOn="{StaticResource ResourceKey=Select}">
 		<Setter Property="Width" Value="150" />
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
+		<Setter Property="VerticalAlignment" Value="Center"></Setter>
 	</Style>
 
 	<Style TargetType="CheckBox" x:Key="FilterCheckBox">
@@ -68,6 +69,10 @@
 	</Style>
 
 	<Style TargetType="CheckBox" x:Key="FilterCheckBoxSmall">
+		<Setter Property="Margin" Value="0, 0, 4, 0" />
+	</Style>
+
+	<Style TargetType="FrameworkElement" x:Key="FilterElement">
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 	</Style>
 
@@ -87,5 +92,6 @@
 	<Style TargetType="TextBox" x:Key="SearchText">
 		<Setter Property="Width" Value="150" />
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
+		<Setter Property="VerticalAlignment" Value="Center"></Setter>
 	</Style>
 </ResourceDictionary>

@@ -125,7 +125,7 @@
 
 			<DockPanel Grid.Column="0">
 				<Label DockPanel.Dock="Top">Предыдущие заказы</Label>
-				<Label DockPanel.Dock="Bottom">
+				<Label DockPanel.Dock="Bottom" FontWeight="Bold">
 					<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>
 				</Label>
 				<c:DataGrid Width="460" x:Name="HistoryOrders">

@@ -19,8 +19,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private Catalog currentCatalog;
 		private string _activeSearchTerm;
 
-		private static TimeSpan SearchTimeout = TimeSpan.FromMilliseconds(5000);
-
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
 			ParentModel = catalog;
@@ -35,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => Update());
 
 			this.ObservableForProperty(m => m.SearchText)
-				.Throttle(SearchTimeout, Scheduler)
+				.Throttle(Consts.SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search());
 		}
@@ -81,13 +79,29 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult Search()
 		{
-			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3)
+			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3) {
 				return new HandledResult(false);
+			}
 
 			ActiveSearchTerm = SearchText;
 			SearchText = "";
 			Update();
 			return new HandledResult();
+		}
+
+		public IResult ClearSearch()
+		{
+			if (!String.IsNullOrEmpty(SearchText)) {
+				SearchText = "";
+				return HandledResult.Handled();
+			}
+
+			if (String.IsNullOrEmpty(ActiveSearchTerm))
+				return HandledResult.Skip();
+
+			ActiveSearchTerm = "";
+			Update();
+			return HandledResult.Handled();
 		}
 
 		public void Update()
@@ -107,21 +121,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (CurrentCatalog == null)
 				CurrentCatalog = Catalogs.FirstOrDefault();
-		}
-
-		public IResult ClearSearch()
-		{
-			if (!String.IsNullOrEmpty(SearchText)) {
-				SearchText = "";
-				return HandledResult.Handled();
-			}
-
-			if (String.IsNullOrEmpty(ActiveSearchTerm))
-				return HandledResult.Skip();
-
-			ActiveSearchTerm = "";
-			Update();
-			return HandledResult.Handled();
 		}
 
 		public List<Catalog> Catalogs

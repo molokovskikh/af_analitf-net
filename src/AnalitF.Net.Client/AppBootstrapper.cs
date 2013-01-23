@@ -170,9 +170,6 @@ namespace AnalitF.Net.Client
 
 		public static void InitUi()
 		{
-			FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
-				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
-
 			ContentElementBinder.RegisterConvention();
 			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
 				EnabledBinder.Bind,

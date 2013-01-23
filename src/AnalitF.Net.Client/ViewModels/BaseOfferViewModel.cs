@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Offer currentOffer;
 		protected List<MarkupConfig> markups = new List<MarkupConfig>();
 		private string orderWarning;
+		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменний приходит после
 		//изменения текущего предложения
 		private Offer lastEditOffer;
@@ -44,16 +45,27 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
 				.Throttle(warningTimeout)
+				.ObserveOn(UiScheduler)
 				.Subscribe(m => { OrderWarning = null; });
+
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Where(o => o != null)
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => LoadHistoryOrders());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
 		}
 
-		protected void UpdateProducers()
+		public List<SentOrderLine> HistoryOrders
 		{
-			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
-			Producers = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
+			get { return historyOrders; }
+			set
+			{
+				historyOrders = value;
+				NotifyOfPropertyChange("HistoryOrders");
+			}
 		}
 
 		public Catalog CurrentCatalog
@@ -197,6 +209,12 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 
 			return offers;
+		}
+
+		protected void UpdateProducers()
+		{
+			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
+			Producers = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
 		}
 
 		private void CalculateRetailCost()
@@ -347,6 +365,29 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			CurrentOffer.PrevOrderAvgCost = (decimal?)values[0];
 			CurrentOffer.PrevOrderAvgCount = (decimal?)values[1];
 			CurrentOffer.StatLoaded = true;
+		}
+
+		public void LoadHistoryOrders()
+		{
+			if (CurrentOffer == null || Address == null)
+				return;
+
+			var query = StatelessSession.Query<SentOrderLine>();
+			if (Settings.GroupByProduct) {
+				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId);
+			}
+			else {
+				query = query.Where(o => o.ProductId == CurrentOffer.ProductId);
+			}
+			HistoryOrders = query
+				.Fetch(l => l.Order)
+				.ThenFetch(o => o.Price)
+				.Where(o => o.Order.Address == Address)
+				.OrderByDescending(o => o.Order.SentOn)
+				.Take(20)
+				.ToList();
+
+			LoadStat();
 		}
 	}
 }

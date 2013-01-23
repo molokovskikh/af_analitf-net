@@ -29,17 +29,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private decimal retailMarkup;
 		private List<MaxProducerCost> maxProducerCosts;
-		private List<SentOrderLine> historyOrders;
 
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
 
-		private static TimeSpan LoadOrderHistoryTimeout = TimeSpan.FromMilliseconds(2000);
-
 		private CatalogOfferViewModel()
 		{
-			DisplayName = "Сводный прайс-лист";
 			NeedToCalculateDiff = true;
+			DisplayName = "Сводный прайс-лист";
 			GroupByProduct = Settings.GroupByProduct;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
@@ -56,11 +53,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.RetailMarkup)
 				.Subscribe(_ => NotifyOfPropertyChange("RetailCost"));
-
-			this.ObservableForProperty(m => m.CurrentOffer)
-				.Where(o => o != null)
-				.Throttle(LoadOrderHistoryTimeout, Scheduler)
-				.Subscribe(_ => LoadHistoryOrders());
 		}
 
 		public CatalogOfferViewModel(Catalog catalog)
@@ -106,30 +98,6 @@ namespace AnalitF.Net.Client.ViewModels
 				Manager.Warning("Нет предложений");
 				IsSuccessfulActivated = false;
 			}
-		}
-
-		//TODO: похоже что исключение не обрабатывается все падает
-		public void LoadHistoryOrders()
-		{
-			if (CurrentOffer == null || Address == null)
-				return;
-
-			var query = StatelessSession.Query<SentOrderLine>();
-			if (Settings.GroupByProduct) {
-				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId);
-			}
-			else {
-				query = query.Where(o => o.ProductId == CurrentOffer.ProductId);
-			}
-			HistoryOrders = query
-				.Fetch(l => l.Order)
-				.ThenFetch(o => o.Price)
-				.Where(o => o.Order.Address == Address)
-				.OrderByDescending(o => o.Order.SentOn)
-				.Take(20)
-				.ToList();
-
-			LoadStat();
 		}
 
 		private void UpdateMaxProducers()
@@ -267,16 +235,6 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				retailMarkup = value;
 				NotifyOfPropertyChange("RetailMarkup");
-			}
-		}
-
-		public List<SentOrderLine> HistoryOrders
-		{
-			get { return historyOrders; }
-			set
-			{
-				historyOrders = value;
-				NotifyOfPropertyChange("HistoryOrders");
 			}
 		}
 

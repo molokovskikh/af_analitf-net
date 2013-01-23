@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -10,6 +12,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private string searchText;
 		private Price currentPrice;
+		private string activeSearchTerm;
 
 		public SearchOfferViewModel()
 		{
@@ -23,11 +26,30 @@ namespace AnalitF.Net.Client.ViewModels
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice = Prices.First();
+
+			this.ObservableForProperty(m => m.SearchText)
+				.Throttle(Consts.SearchTimeout, Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => Search());
 		}
 
 		public void Search()
 		{
+			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3) {
+				return;
+			}
+
+			ActiveSearchTerm = SearchText;
+			SearchText = "";
 			Update();
+		}
+
+		public void ClearSearch()
+		{
+			ActiveSearchTerm = "";
+			SearchText = "";
+			CurrentOffer = null;
+			Offers = new List<Offer>();
 		}
 
 		public string SearchText
@@ -37,6 +59,16 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				searchText = value;
 				NotifyOfPropertyChange("SearchText");
+			}
+		}
+
+		public string ActiveSearchTerm
+		{
+			get { return activeSearchTerm; }
+			set
+			{
+				activeSearchTerm = value;
+				NotifyOfPropertyChange("ActiveSearchTerm");
 			}
 		}
 
@@ -54,10 +86,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Query()
 		{
-			if (String.IsNullOrEmpty(SearchText))
+			if (String.IsNullOrEmpty(ActiveSearchTerm))
 				return;
 
-			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(SearchText));
+			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
 			if (currentPrice != null && currentPrice.Id != null) {
 				query = query.Where(o => o.Price.Id == currentPrice.Id);
 			}

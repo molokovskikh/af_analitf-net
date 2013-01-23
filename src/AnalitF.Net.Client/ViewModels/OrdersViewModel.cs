@@ -67,6 +67,19 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool CanDelete
+		{
+			get { return CurrentOrder != null && !IsSentSelected; }
+		}
+
+		public void Delete()
+		{
+			if (!CanDelete)
+				return;
+			Session.Delete(CurrentOrder);
+			Orders.Remove(CurrentOrder);
+		}
+
 		public void EnterOrder()
 		{
 			if (CurrentOrder == null)

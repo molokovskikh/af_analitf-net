@@ -39,25 +39,7 @@ namespace AnalitF.Net.Client.Views
 					model.SearchInCatalog(args.Text);
 			};
 
-			CalculateColumnWidth(Offers, "00.00", "Наценка поставщика");
-			CalculateColumnWidth(Offers, "000.00", "Цена производителя");
-			CalculateColumnWidth(Offers, "000.00", "Пред.зарег.цена");
-			CalculateColumnWidth(Offers, "0000.00", "Цена поставщика");
-		}
-
-		private void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
-		{
-			var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(header));
-			if (column == null)
-				return;
-
-			var text = new FormattedText(template,
-				CultureInfo.CurrentUICulture,
-				dataGrid.FlowDirection,
-				new Typeface(dataGrid.FontFamily, dataGrid.FontStyle, dataGrid.FontWeight, dataGrid.FontStretch),
-				dataGrid.FontSize,
-				dataGrid.Foreground);
-			column.Width = new DataGridLength(text.Width, DataGridLengthUnitType.Star);
+			DataGridHelper.CalculateColumnWidths(Offers);
 		}
 	}
 }

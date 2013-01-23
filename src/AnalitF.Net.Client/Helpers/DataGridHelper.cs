@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -34,12 +36,13 @@ namespace AnalitF.Net.Client.Helpers
 			if (grid.SelectedItem == null)
 				grid.SelectedItem = grid.Items.Cast<object>().FirstOrDefault();
 			var item = grid.SelectedItem;
-
 			if (item == null)
 				return;
+
 			grid.ScrollIntoView(item);
-			var container = grid.ItemContainerGenerator.ContainerFromItem(item);
-			var cell = GetCell((DataGridRow)container, grid.CurrentCell.Column);
+			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(item);
+			var column = grid.CurrentCell.Column;
+			var cell = GetCell(container, column);
 			if (cell != null)
 				Keyboard.Focus(cell);
 		}
@@ -55,6 +58,29 @@ namespace AnalitF.Net.Client.Helpers
 			if (presenter == null)
 				return null;
 			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+		}
+
+		public static void CalculateColumnWidth(Controls.DataGrid dataGrid, string template, string header)
+		{
+			var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(header));
+			if (column == null)
+				return;
+
+			var text = new FormattedText(template,
+				CultureInfo.CurrentUICulture,
+				dataGrid.FlowDirection,
+				new Typeface(dataGrid.FontFamily, dataGrid.FontStyle, dataGrid.FontWeight, dataGrid.FontStretch),
+				dataGrid.FontSize,
+				dataGrid.Foreground);
+			column.Width = new DataGridLength(text.Width, DataGridLengthUnitType.Star);
+		}
+
+		public static void CalculateColumnWidths(Controls.DataGrid grid)
+		{
+			CalculateColumnWidth(grid, "00.00", "Наценка поставщика");
+			CalculateColumnWidth(grid, "000.00", "Цена производителя");
+			CalculateColumnWidth(grid, "000.00", "Пред.зарег.цена");
+			CalculateColumnWidth(grid, "0000.00", "Цена поставщика");
 		}
 	}
 }

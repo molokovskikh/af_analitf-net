@@ -18,56 +18,66 @@
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
-			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
-			<ComboBox x:Name="Producers" Style="{StaticResource Filter}"></ComboBox>
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}" binders:SearchBinder.Grid="Offers"></TextBox>
 			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name"></ComboBox>
-
-			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
-			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
+			<CheckBox VerticalAlignment="Center" x:Name="OnlyBase" Style="{StaticResource FilterElement}">Только основные</CheckBox>
+			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Попазать синонимы (Ctrl+N)</Button>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="1" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False">
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
+			<ComboBox VerticalAlignment="Center" x:Name="Producers" Style="{StaticResource Filter}" />
+			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}"></Parts:AutoComment>
+		</StackPanel>
+
+		<c:DataGrid x:Name="Offers" Grid.Row="2" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False"
+			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}">
 			<DataGrid.Columns>
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
-				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
-				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Склад" Binding="{Binding Price.Storage}" />
-				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
-				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
-				<DataGridTextColumn Width="*" Header="Кратность" Binding="{Binding RequestRatio}" />
-				<DataGridTextColumn Width="*" Header="Мин.сумма" Binding="{Binding OrderCost}" />
-				<DataGridTextColumn Width="*" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<c:SearchableDataGridColumn Width="196*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}"
+					Header="Название"
+					Binding="{Binding ProductSynonym}"
+					HighlightStyle="{StaticResource DataGridHighlight}" />
+				<DataGridTextColumn Width="85*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="63*" Header="Упаковка" Binding="{Binding Volume}" />
+				<DataGridTextColumn Width="69*" Header="Примечание" Binding="{Binding Note}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="85*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn Width="85*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
+				<DataGridTextColumn Width="72*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
+				<DataGridTextColumn Width="37*" MinWidth="3" Visibility="Collapsed" Header="Склад" Binding="{Binding Price.Storage}" />
+				<DataGridTextColumn Width="103*" MinWidth="5" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
+				<DataGridTextColumn Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="65*" Header="Кратность" Binding="{Binding RequestRatio}" />
+				<DataGridTextColumn Width="65*" Header="Мин.сумма" Binding="{Binding OrderCost}" />
+				<DataGridTextColumn Width="65*" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
-				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="Auto" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
-				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn Width="55*" MinWidth="5" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="65*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
+				<DataGridTextColumn Width="62*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
+				<DataGridTextColumn Width="68*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="47*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn Width="70*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<Parts:Warning Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
+		<Parts:Warning Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
 
-		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+		<Views:ProductInfoPanel Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
-		<StackPanel Grid.Row="3">
+		<StackPanel Grid.Row="4">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">
 				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
@@ -76,5 +86,32 @@
 				<Label Style="{StaticResource NotBaseOfferLegend}">Неосновной поставщик</Label>
 			</StackPanel>
 		</StackPanel>
+
+		<DockPanel Grid.Row="5">
+			<Label DockPanel.Dock="Top">Предыдущие заказы</Label>
+			<StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+				<Label FontWeight="Bold">
+					<TextBlock>
+						Средняя цена по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>
+					</TextBlock>
+				</Label>
+				<Label FontWeight="Bold">
+					<TextBlock>
+						Средний заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCount"></Run>
+					</TextBlock>
+				</Label>
+			</StackPanel>
+
+			<c:DataGrid x:Name="HistoryOrders" CanUserSortColumns="False" Height="90">
+				<DataGrid.Columns>
+					<DataGridTextColumn Width="110*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
+					<DataGridTextColumn Width="102*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
+					<DataGridTextColumn Width="38*" Header="Заказ" Binding="{Binding Count}"></DataGridTextColumn>
+					<DataGridTextColumn Width="49*" Header="Цена" Binding="{Binding Cost}" CellStyle="{StaticResource ResourceKey=Junk}"></DataGridTextColumn>
+					<DataGridTextColumn Width="68*" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
+					<DataGridTextColumn Width="65*" Header="Срок годн." Binding="{Binding Period}"></DataGridTextColumn>
+				</DataGrid.Columns>
+			</c:DataGrid>
+		</DockPanel>
 	</Grid>
 </UserControl>

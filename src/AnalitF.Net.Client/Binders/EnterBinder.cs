@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Binders
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
 				.Where(a => a.EventArgs.Key == Key.Return
+					&& !a.EventArgs.Handled
 					&& ((DataGrid)a.Sender).SelectedItem != null)
 				.Do(a => a.EventArgs.Handled = true)
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);

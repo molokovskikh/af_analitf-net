@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool showWithoutOffers;
 		private List<Mnn> mnns;
 		private string filterText;
+		private string searchText;
 
 		public MnnViewModel()
 		{
@@ -45,7 +46,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public string SearchText { get; set; }
+		public string SearchText
+		{
+			get { return searchText; }
+			set
+			{
+				searchText = value;
+				NotifyOfPropertyChange("SearchText");
+			}
+		}
 
 		public void EnterMnn()
 		{
