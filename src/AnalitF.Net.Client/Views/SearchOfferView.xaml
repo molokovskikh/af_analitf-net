@@ -69,7 +69,7 @@
 				<DataGridTextColumn Width="62*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="68*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="47*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn Width="70*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn Width="70*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

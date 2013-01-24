@@ -69,7 +69,7 @@
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Header="Прайс - лидер" Binding="{Binding LeaderPrice.Name}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Leader}" Width="*" Visibility="Collapsed" Header="Регион - лидер" Binding="{Binding LeaderPrice.RegionName}" />
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderSum}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

@@ -39,11 +39,18 @@ namespace AnalitF.Net.Test.Integration
 			Process.Start(file);
 		}
 
-		public static void SaveToBmp(Visual visual, string file)
+		public static void SaveToPng(UIElement visual, string file, Size size)
 		{
-			var bmp = new RenderTargetBitmap(180, 180, 120, 96, PixelFormats.Pbgra32);
+			visual.Measure(size);
+			visual.Arrange(new Rect(size));
+			SaveToPng((Visual)visual, file, size);
+		}
+
+		public static void SaveToPng(Visual visual, string file, Size size)
+		{
+			var bmp = new RenderTargetBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
 			bmp.Render(visual);
-			var enc = new BmpBitmapEncoder();
+			var enc = new PngBitmapEncoder();
 			enc.Frames.Add(BitmapFrame.Create(bmp));
 			using (var f = File.OpenWrite(file))
 				enc.Save(f);

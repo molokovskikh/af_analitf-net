@@ -77,6 +77,10 @@ namespace AnalitF.Net.Client.Models
 			get { return LeaderPrice.Id == Price.Id; }
 		}
 
+		//Заглушка для реализации матрицы
+		[Ignore]
+		public virtual bool Banned { get; set; }
+
 		[Ignore]
 		public virtual OrderLine OrderLine
 		{

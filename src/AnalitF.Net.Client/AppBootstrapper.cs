@@ -52,6 +52,11 @@ namespace AnalitF.Net.Client
 
 		private void InitLog()
 		{
+#if DEBUG
+			//нужно вызвать иначе wpf игнорирует все настройки протколирование
+			PresentationTraceSources.Refresh();
+#endif
+
 			XmlConfigurator.Configure();
 			LogManager.GetLog = t => new Log4net(t);
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {

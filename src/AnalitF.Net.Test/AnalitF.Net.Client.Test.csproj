@@ -105,6 +105,7 @@
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\SaveViewFixture.cs" />
+    <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />

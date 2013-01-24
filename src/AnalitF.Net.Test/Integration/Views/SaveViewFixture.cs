@@ -33,9 +33,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		private void InitView()
 		{
 			model = Init(new CatalogOfferViewModel(catalog));
-			view = new CatalogOfferView();
-			((IViewAware)model).AttachView(new CatalogOfferView());
-			ViewModelBinder.Bind(model, view, null);
+			view = InitView<CatalogOfferView>(model);
 		}
 
 		[Test]
