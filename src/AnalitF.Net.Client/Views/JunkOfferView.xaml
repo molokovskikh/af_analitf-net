@@ -22,45 +22,52 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
+
 		<c:DataGrid x:Name="Offers" Grid.Row="0" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
-				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />
-				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<DataGridTextColumn Width="*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
-				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
+				<DataGridTextColumn Width="174*" Header="Название" Binding="{Binding ProductSynonym}" />
+				<DataGridTextColumn Width="70*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="37*" Header="Упаковка" Binding="{Binding Volume}" />
+				<DataGridTextColumn Width="37*" Header="Примечание" Binding="{Binding Note}" />
+				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="65*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn Width="92*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
+				<DataGridTextColumn Width="73*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
+				<DataGridTextColumn Width="90*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
+				<DataGridTextColumn Width="30*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="30*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" />
+				<DataGridTextColumn Width="65*" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" />
+				<DataGridTextColumn Width="65*" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<DataGridTextColumn Width="65*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
-				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
+				<DataGridTextColumn Width="Auto" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
-				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Заказ" Binding="{Binding OrderCount}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=OrderColumn}" Width="*" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
+				<DataGridTextColumn Width="63*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="50*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
+				<DataGridTextColumn Width="37*" Header="Остаток" Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="46*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" />
+				<DataGridTextColumn Width="51*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderLine.Sum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<TextBox Grid.Row="0"
+				Style="{StaticResource PopupSearch}"
+				x:Name="QuickSearch_SearchText"
+				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"
+				IsEnabled="{Binding QuickSearch.IsEnabled}"></TextBox>
 
 		<Parts:Warning Grid.Row="0" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
 
 		<Views:ProductInfoPanel Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="2">
-			<Button x:Name="ShowCatalog" Margin="0, 0, 4, 0">В каталог (F2)</Button>
-			<Button x:Name="ShowCatalogWithMnnFilter" Margin="0, 0, 4, 0">Попазать синонимы (Ctrl+N)</Button>
-			<Label>Позиций:</Label>
-			<Label x:Name="Offers_Count"></Label>
+			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Попазать синонимы (Ctrl+N)</Button>
+			<Label FontWeight="Bold">Позиций:</Label>
+			<Label FontWeight="Bold" x:Name="Offers_Count"></Label>
 		</StackPanel>
 	</Grid>
 </UserControl>

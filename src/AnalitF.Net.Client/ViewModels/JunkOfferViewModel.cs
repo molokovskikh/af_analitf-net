@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
 
@@ -11,8 +12,14 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Препараты с истекающими сроками годности";
 			NavigateOnShowCatalog = true;
 
+			QuickSearch = new QuickSearch<Offer>(
+				t => Offers.FirstOrDefault(o => o.ProductSynonym.ToLower().Contains(t)),
+				o => CurrentOffer = o);
+
 			Update();
 		}
+
+		public QuickSearch<Offer> QuickSearch { get; private set; }
 
 		protected override void Query()
 		{
