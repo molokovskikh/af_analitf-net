@@ -13,11 +13,13 @@ namespace AnalitF.Net.Client.ViewModels
 		private string searchText;
 		private Price currentPrice;
 		private string activeSearchTerm;
+		private bool onlyBase;
 
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
 			NeedToCalculateDiff = true;
+			NavigateOnShowCatalog = true;
 
 			var producers = StatelessSession.Query<Offer>().Select(o => o.Producer).ToList().Distinct().OrderBy(p => p);
 			Producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
@@ -31,6 +33,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search());
+
+			this.ObservableForProperty(m => (object)m.CurrentPrice)
+				.Merge(this.ObservableForProperty(m => (object)m.CurrentProducer))
+				.Merge(this.ObservableForProperty(m => (object)m.OnlyBase))
+				.Subscribe(_ => Update());
 		}
 
 		public void Search()
@@ -84,6 +91,19 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public bool OnlyBase
+		{
+			get
+			{
+				return onlyBase;
+			}
+			set
+			{
+				onlyBase = value;
+				NotifyOfPropertyChange("OnlyBase");
+			}
+		}
+
 		protected override void Query()
 		{
 			if (String.IsNullOrEmpty(ActiveSearchTerm))
@@ -96,6 +116,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (CurrentProducer != null && CurrentProducer != Consts.AllProducerLabel) {
 				query = query.Where(o => o.Producer == CurrentProducer);
+			}
+
+			if (OnlyBase) {
+				query = query.Where(o => o.Price.BasePrice);
 			}
 
 			var offer = query.Fetch(o => o.Price).ToList();

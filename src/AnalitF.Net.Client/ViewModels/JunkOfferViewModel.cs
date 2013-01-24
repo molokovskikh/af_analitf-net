@@ -9,6 +9,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public JunkOfferViewModel()
 		{
 			DisplayName = "Препараты с истекающими сроками годности";
+			NavigateOnShowCatalog = true;
+
 			Update();
 		}
 

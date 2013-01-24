@@ -3,6 +3,7 @@
 	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls">
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
+	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
 
 	<Style TargetType="TextBlock" x:Key="PriceInfo">
 		<Setter Property="Padding" Value="5" />

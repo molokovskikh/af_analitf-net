@@ -41,6 +41,11 @@ namespace AnalitF.Net.Test.Integration
 			var supplier = TestSupplier.CreateNaked();
 			CreateSampleContactInfo(supplier);
 			CreateSampleCore(supplier);
+
+			var supplier1 = TestSupplier.CreateNaked();
+			CreateSampleContactInfo(supplier);
+			CreateSampleCore(supplier);
+
 			var maxProducerCosts = CreateMaxProduceCosts(supplier);
 			//очищаем предудыщие попытки
 			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();

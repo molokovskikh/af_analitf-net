@@ -82,7 +82,6 @@
   <ItemGroup>
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
-    <Compile Include="Integration\BindScreen.cs" />
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
     <Compile Include="Integration\Models\OrderFixture.cs" />

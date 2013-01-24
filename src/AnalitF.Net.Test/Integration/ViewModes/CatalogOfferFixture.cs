@@ -82,15 +82,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Select_base_offer()
 		{
-			MakeDifferentCategory();
+			catalog = FindMultiOfferCatalog();
+			MakeDifferentCategory(catalog);
 
-			Assert.That(model.CurrentOffer.Id, Is.EqualTo(model.Offers[1].Id));
+			var baseOffer = model.Offers.First(o => o.Price.BasePrice);
+			Assert.That(model.CurrentOffer.Id, Is.EqualTo(baseOffer.Id), model.Offers.Implode(o => o.Id));
 		}
 
 		[Test]
 		public void Filter_by_price_category()
 		{
-			MakeDifferentCategory();
+			catalog = FindMultiOfferCatalog();
+			MakeDifferentCategory(catalog);
 
 			var count = model.Offers.Count;
 			model.CurrentFilter = model.Filters[1];
@@ -291,22 +294,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Query<SentOrderLine>()
 				.Where(l => l.CatalogId == offer.CatalogId)
 				.Each(l => session.Delete(l));
-		}
-
-		private void MakeDifferentCategory()
-		{
-			var offers = session.Query<Offer>().Where(o => o.CatalogId == catalog.Id).ToList();
-			var offer = offers[0];
-			var offer1 = offers.First(o => o.Price.Id != offer.Price.Id);
-			Assert.That(offer.Price.Id, Is.Not.EqualTo(offer1.Price.Id));
-
-			var price1 = session.Load<Price>(offer.Price.Id);
-			var price2 = session.Load<Price>(offer1.Price.Id);
-			price1.BasePrice = false;
-			price2.BasePrice = true;
-			session.Save(price1);
-			session.Save(price2);
-			session.Flush();
 		}
 	}
 }

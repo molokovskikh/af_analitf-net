@@ -74,5 +74,29 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalogNameViewModel.PropertyChanged += (sender, args) => changes.Add(args.PropertyName);
 			return changes;
 		}
+
+		public void MakeDifferentCategory(Catalog catalog)
+		{
+			var offers = session.Query<Offer>().Where(o => o.CatalogId == catalog.Id).ToList();
+			var offer = offers[0];
+			var offer1 = offers.First(o => o.Price.Id != offer.Price.Id);
+
+			offer.Price.BasePrice = false;
+			offer1.Price.BasePrice = true;
+			session.Save(offer1.Price);
+			session.Save(offer1.Price);
+			session.Flush();
+		}
+
+		protected Catalog FindMultiOfferCatalog()
+		{
+			return session.Query<Catalog>()
+				.First(c => c.HaveOffers
+					&& session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2
+					&& session.Query<Offer>().Where(o => o.CatalogId == c.Id)
+						.Select(o => o.Price)
+						.Distinct()
+						.Count() > 1);
+		}
 	}
 }

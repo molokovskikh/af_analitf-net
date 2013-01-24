@@ -30,7 +30,13 @@
 			<DataGrid.Columns>
 				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=NotBasePrice}" Width="*" Header="Прайс-лист" Binding="{Binding Name}" />
 				<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding RegionName}" />
-				<DataGridCheckBoxColumn Width="*" Header="Склад" Binding="{Binding Storage}" />
+				<DataGridTextColumn Width="*" Header="Склад" Binding="{Binding Storage, Converter={StaticResource BoolToChar}}">
+					<DataGridTextColumn.CellStyle>
+						<Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+							<Setter Property="Block.TextAlignment" Value="Center"></Setter>
+						</Style>
+					</DataGridTextColumn.CellStyle>
+				</DataGridTextColumn>
 				<DataGridCheckBoxColumn Width="*" Header="В работе" />
 				<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding PositionCount}" />
 				<DataGridTextColumn Width="*" Header="Заказ" />

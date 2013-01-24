@@ -35,7 +35,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var view = ViewLocator.LocateForModel(model, null, null);
 			ViewModelBinder.Bind(model, view, null);
-			((IViewAware)model).AttachView(new T());
 			return view as T;
 		}
 

@@ -38,7 +38,7 @@
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}"></Parts:AutoComment>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="2" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CanUserSortColumns="False"
+		<c:DataGrid x:Name="Offers" Grid.Row="2" CellStyle="{StaticResource VitallyImportant}" CanUserSortColumns="False"
 			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn Width="196*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}"
@@ -53,7 +53,13 @@
 				<DataGridTextColumn Width="85*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" />
 				<DataGridTextColumn Width="85*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
 				<DataGridTextColumn Width="72*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<DataGridTextColumn Width="37*" MinWidth="3" Visibility="Collapsed" Header="Склад" Binding="{Binding Price.Storage}" />
+				<DataGridTextColumn Width="37*" MinWidth="3" Visibility="Collapsed" Header="Склад" Binding="{Binding Price.Storage, Converter={StaticResource BoolToChar}}">
+					<DataGridTextColumn.CellStyle>
+						<Style TargetType="DataGridCell" BasedOn="{StaticResource VitallyImportant}">
+							<Setter Property="Block.TextAlignment" Value="Center"></Setter>
+						</Style>
+					</DataGridTextColumn.CellStyle>
+				</DataGridTextColumn>
 				<DataGridTextColumn Width="103*" MinWidth="5" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" />
 				<DataGridTextColumn Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
 				<DataGridTextColumn Width="65*" Header="Кратность" Binding="{Binding RequestRatio}" />

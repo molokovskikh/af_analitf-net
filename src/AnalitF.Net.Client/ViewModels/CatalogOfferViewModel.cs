@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CurrentRegion)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
-				.Merge(this.ObservableForProperty(m => m.CurrentFilter))
+				.	Merge(this.ObservableForProperty(m => m.CurrentFilter))
 				.Subscribe(e => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer)

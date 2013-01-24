@@ -37,6 +37,10 @@ namespace AnalitF.Net.Client.ViewModels
 		protected string autoCommentText;
 		protected bool resetAutoComment;
 
+		protected bool NavigateOnShowCatalog;
+
+		private object orderHistoryCacheKey;
+
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
@@ -49,6 +53,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(m => { OrderWarning = null; });
 
 			this.ObservableForProperty(m => m.CurrentOffer)
+				.Subscribe(_ => InvalidateHistoryOrders());
+
+			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
@@ -56,6 +63,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
+
+			this.ObservableForProperty(m => m.CurrentCatalog)
+				.Subscribe(_ => NotifyOfPropertyChange("CanShowCatalogWithMnnFilter"));
 		}
 
 		public List<SentOrderLine> HistoryOrders
@@ -175,7 +185,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanShowCatalogWithMnnFilter)
 				return;
 
-			Shell.ActivateItem(new CatalogViewModel {
+			Shell.Navigate(new CatalogViewModel {
 				FiltredMnn = CurrentCatalog.Name.Mnn
 			});
 		}
@@ -185,12 +195,18 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			var catalogViewModel = new CatalogViewModel();
-			catalogViewModel.CurrentCatalog = CurrentCatalog;
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
 			offerViewModel.CurrentOffer = CurrentOffer;
 
-			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
+			if (NavigateOnShowCatalog) {
+				Shell.Navigate(offerViewModel);
+			}
+			else {
+				var catalogViewModel = new CatalogViewModel();
+				catalogViewModel.CurrentCatalog = CurrentCatalog;
+
+				Shell.NavigateAndReset(catalogViewModel, offerViewModel);
+			}
 		}
 
 		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)
@@ -367,9 +383,22 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			CurrentOffer.StatLoaded = true;
 		}
 
+		private void InvalidateHistoryOrders()
+		{
+			if (Equals(orderHistoryCacheKey, HistoryOrdersCacheKey()))
+				return;
+
+			HistoryOrders = new List<SentOrderLine>();
+		}
+
 		public void LoadHistoryOrders()
 		{
 			if (CurrentOffer == null || Address == null)
+				return;
+
+			var currentCacheKey = HistoryOrdersCacheKey();
+
+			if (Equals(currentCacheKey, orderHistoryCacheKey))
 				return;
 
 			var query = StatelessSession.Query<SentOrderLine>();
@@ -387,7 +416,19 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				.Take(20)
 				.ToList();
 
+			orderHistoryCacheKey = currentCacheKey;
 			LoadStat();
+		}
+
+		private object HistoryOrdersCacheKey()
+		{
+			if (CurrentOffer == null || Address == null)
+				return null;
+
+			var currentCacheKey = CurrentOffer.CatalogId;
+			if (!Settings.GroupByProduct)
+				currentCacheKey = CurrentOffer.ProductId;
+			return currentCacheKey;
 		}
 	}
 }
