@@ -192,7 +192,7 @@ namespace AnalitF.Net.Client
 			ViewModelBinder.Bind = (viewModel, view, context) => {
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
-				CommandBinder.BindCommand(view);
+				CommandBinder.Bind(viewModel, view, context);
 				FocusBehavior.Bind(viewModel, view, context);
 			};
 

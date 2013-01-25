@@ -5,6 +5,13 @@
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
 
+	<Style TargetType="TextBox" x:Key="ReadOnlyText">
+		<Setter Property="VerticalScrollBarVisibility" Value="Auto"></Setter>
+		<Setter Property="IsReadOnly" Value="True"></Setter>
+		<Setter Property="BorderThickness" Value="0"></Setter>
+		<Setter Property="TextWrapping" Value="Wrap"></Setter>
+	</Style>
+
 	<Style TargetType="TextBlock" x:Key="PriceInfo">
 		<Setter Property="Padding" Value="5" />
 		<Setter Property="FontWeight" Value="Bold"/>

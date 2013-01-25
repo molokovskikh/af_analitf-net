@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
@@ -78,7 +79,7 @@ namespace AnalitF.Net.Test.Integration
 			var view = new UserControl { DataContext = model };
 			ViewModelBinder.Bind(model, view, null);
 
-			Assert.That(view.CommandBindings.Count, Is.EqualTo(1));
+			Assert.That(view.CommandBindings.Count, Is.EqualTo(2));
 			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Commands.InvokeViewModel));
 		}
 

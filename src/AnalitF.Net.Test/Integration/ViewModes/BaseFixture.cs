@@ -98,5 +98,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 						.Distinct()
 						.Count() > 1);
 		}
+
+		protected void MakeSentOrder(Offer offer)
+		{
+			var order = new Order(offer.Price, address);
+			order.AddLine(offer, 1);
+			var sentOrder = new SentOrder(order);
+			session.Save(sentOrder);
+			session.Flush();
+		}
+
+		protected void MakeOrder(Offer offer)
+		{
+			var order = new Order(offer.Price, address);
+			order.AddLine(offer, 1);
+			session.Save(order);
+			session.Flush();
+		}
 	}
 }

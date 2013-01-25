@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
+using Common.Tools;
 using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
@@ -71,6 +74,23 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
+	public class Mailto
+	{
+		public Mailto(string mailto, string name)
+		{
+			Uri = mailto;
+			Name = name;
+		}
+
+		public string Uri { get; set; }
+		public string Name { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("{0} {1}", Uri, Name);
+		}
+	}
+
 	public class Price
 	{
 		public virtual PriceComposedId Id { get; set; }
@@ -110,14 +130,38 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Email { get; set; }
 
-		public virtual uint MinReq { get; set; }
-
 		public virtual bool BasePrice { get; set; }
 
 		public virtual int Category { get; set; }
 
 		[Ignore]
+		public virtual List<Mailto> Emails {
+			get
+			{
+				if (String.IsNullOrEmpty(Email))
+					return new List<Mailto>();
+				var parts = Email.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+					.Select(p => p.Trim())
+					.Where(p => !String.IsNullOrWhiteSpace(p))
+					.ToArray();
+				if (parts.Length == 0)
+					return new List<Mailto>();
+				var uri = "mailto:" + parts.Implode(",");
+				return parts.Select(v => new Mailto(uri, v)).ToList();
+			}
+		}
+
+		[Ignore]
 		public virtual Order Order { get; set; }
+
+		[Ignore]
+		public virtual bool HaveOrder
+		{
+			get { return Order != null; }
+		}
+
+		[Ignore]
+		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
 		public override string ToString()
 		{

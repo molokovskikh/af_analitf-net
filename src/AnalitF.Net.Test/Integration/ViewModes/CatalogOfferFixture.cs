@@ -269,11 +269,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Check_prev_order_count()
 		{
 			var offer = model.Offers.First();
-			var order = new Order(offer.Price, address);
-			order.AddLine(offer, 1);
-			var sentOrder = new SentOrder(order);
-			session.Save(sentOrder);
-			session.Flush();
+			MakeSentOrder(offer);
 
 			model.CurrentOffer = offer;
 			model.CurrentOffer.OrderCount = 51;

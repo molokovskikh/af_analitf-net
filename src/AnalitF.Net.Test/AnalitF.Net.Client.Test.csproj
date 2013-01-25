@@ -96,6 +96,7 @@
     <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
     <Compile Include="Integration\ViewModes\OrdersFixture.cs" />
+    <Compile Include="Integration\ViewModes\PriceFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />
     <Compile Include="Unit\OrderFixture.cs" />
+    <Compile Include="Unit\PriceFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
