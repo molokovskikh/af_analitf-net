@@ -48,7 +48,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Calculate_retail_cost()
 		{
-			var splitCost = model.Offers[0].Cost + 1;
+			var splitCost = session.Query<Offer>()
+				.Where(o => o.CatalogId == catalog.Id)
+				.OrderBy(o => o.Cost)
+				.First().Cost;
 			var markupConfig1 = new MarkupConfig(0, splitCost, 20);
 			var markupConfig2 = new MarkupConfig(splitCost, 100 * splitCost, 30);
 			session.DeleteEach<MarkupConfig>();
@@ -63,7 +66,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.RetailCost, Is.EqualTo(expected));
 
 			model.CurrentOffer = model.Offers[1];
-			Assert.That(model.RetailMarkup, Is.EqualTo(30));
+			Assert.That(model.RetailMarkup, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Cost);
 			expected = Math.Round(model.Offers[1].Cost * (decimal)1.3, 2);
 			Assert.That(model.RetailCost, Is.EqualTo(expected));
 

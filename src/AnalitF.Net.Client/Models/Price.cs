@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
@@ -133,6 +134,15 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool BasePrice { get; set; }
 
 		public virtual int Category { get; set; }
+
+		public virtual bool DisabledByClient { get; set; }
+
+		[Ignore]
+		public virtual bool Active
+		{
+			get { return !DisabledByClient; }
+			set { DisabledByClient = !value; }
+		}
 
 		[Ignore]
 		public virtual List<Mailto> Emails {

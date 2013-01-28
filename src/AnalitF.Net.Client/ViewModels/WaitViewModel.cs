@@ -1,9 +1,10 @@
 using System;
 using System.Threading;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class WaitViewModel : BaseScreen
+	public class WaitViewModel : Screen
 	{
 		public WaitViewModel()
 		{

@@ -28,7 +28,9 @@
 			</TextBlock>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices" CellStyle="{StaticResource Price}" CurrentItem="{Binding CurrentPrice}">
+		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices" CellStyle="{StaticResource Price}"
+			CurrentItem="{Binding CurrentPrice}"
+			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}" Header="Прайс-лист" Binding="{Binding Name}" />
 				<DataGridTextColumn Width="57*" Header="Регион" Binding="{Binding RegionName}" />
@@ -39,7 +41,7 @@
 						</Style>
 					</DataGridTextColumn.CellStyle>
 				</DataGridTextColumn>
-				<DataGridCheckBoxColumn Width="65*" Header="В работе" />
+				<DataGridCheckBoxColumn Width="65*" Header="В работе" Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
 				<DataGridTextColumn Width="50*" Header="Позиций" Binding="{Binding PositionCount}" />
 				<DataGridTextColumn Width="45*" Header="Заказ" Binding="{Binding Order.LinesCount}" />
 				<DataGridTextColumn Width="51*" Header="Сумма" Binding="{Binding Order.Sum}" />

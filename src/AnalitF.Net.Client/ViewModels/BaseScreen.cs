@@ -47,13 +47,17 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			log = log4net.LogManager.GetLogger(GetType());
 			var factory = AppBootstrapper.NHibernate.Factory;
+			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+
 			StatelessSession = factory.OpenStatelessSession();
 			Session = factory.OpenSession();
 			Settings = Session.Query<Settings>().First();
-			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			User = Session.Query<User>().FirstOrDefault();
 		}
 
 		public bool IsSuccessfulActivated { get; protected set; }
+
+		public User User { get; private set; }
 
 		public virtual void NavigateBackward()
 		{

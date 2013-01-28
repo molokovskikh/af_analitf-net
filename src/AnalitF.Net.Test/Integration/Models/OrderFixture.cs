@@ -23,7 +23,6 @@ namespace AnalitF.Net.Test.Integration.Models
 				orderId = order.Id;
 				session.Clear();
 
-
 				var events = new List<Tuple<object, PropertyChangedEventArgs>>();
 				order = session.Load<Order>(orderId);
 				order.PropertyChanged += (sender, args) => {

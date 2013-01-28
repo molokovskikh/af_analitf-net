@@ -26,7 +26,7 @@ namespace AnalitF.Net.Test.Integration
 
 			app = CreateBootstrapper();
 			app.InitShell();
-			var viewSetting = (List<ColumnSettings>)app.Shell.ViewSettings["test"];
+			var viewSetting = app.Shell.ViewSettings["test"];
 			Assert.That(viewSetting.Count, Is.EqualTo(1));
 		}
 

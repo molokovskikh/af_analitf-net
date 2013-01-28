@@ -92,6 +92,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 						customizer.Length(10000);
 					}
 				}
+
+				if (((PropertyInfo)member.LocalMember).PropertyType == typeof(DateTime)) {
+					customizer.Type<UtcToLocalDateTimeType>();
+				}
 			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => {
 				customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));

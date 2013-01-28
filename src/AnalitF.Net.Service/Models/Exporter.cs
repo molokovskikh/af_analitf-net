@@ -39,11 +39,13 @@ namespace AnalitF.Net.Models
 			this.version = version;
 		}
 
+		//Все даты передаются в UTC!
 		public List<Tuple<string, string[]>> Export()
 		{
 			var result = new List<Tuple<string, string[]>>();
 
-			session.CreateSQLQuery("call Customers.GetOffers(:userId)")
+			session.CreateSQLQuery("call Customers.GetOffers(:userId);" +
+				"call Customers.GetPrices(:userId);")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 			string sql;
@@ -55,6 +57,13 @@ from Customers.Addresses a
 join Customers.UserAddresses ua on ua.AddressId = a.Id
 where a.Enabled = 1 and ua.UserId = ?userId";
 			result.Add(Export(sql, "Addresses", new { userId }));
+
+			sql = @"
+select Id,
+	InheritPricesFrom is not null as IsPriceEditDisabled
+from Customers.Users
+where Id = ?userId";
+			result.Add(Export(sql, "Users", new { userId }));
 
 			sql = @"
 drop temporary table if exists Usersettings.MaxProducerCosts;
@@ -108,8 +117,8 @@ where u.Id = ?UserId
 			result.Add(Export(sql, "MaxProducerCosts"));
 
 			sql = @"select
-ap.PriceCode as PriceId,
-ap.PriceName as PriceName,
+p.PriceCode as PriceId,
+p.PriceName as PriceName,
 s.Name as Name,
 r.RegionCode as RegionId,
 r.Region as RegionName,
@@ -117,17 +126,18 @@ s.Id as SupplierId,
 s.Name as SupplierName,
 s.FullName as SupplierFullName,
 rd.Storage,
-ap.PositionCount,
-ap.PriceDate,
+p.PositionCount,
+convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
 rd.OperativeInfo,
 rd.ContactInfo,
 rd.SupportPhone as Phone,
 rd.AdminMail as Email,
-ap.FirmCategory as Category
-from Usersettings.ActivePrices ap
-	join Usersettings.PricesData pd on pd.PriceCode = ap.PriceCode
+p.FirmCategory as Category,
+p.DisabledByClient
+from Usersettings.Prices p
+	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
-	join Farm.Regions r on r.RegionCode = ap.RegionCode
+	join Farm.Regions r on r.RegionCode = p.RegionCode
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
 ";
 

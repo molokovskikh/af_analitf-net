@@ -134,6 +134,7 @@
     <Compile Include="Config\Initializers\LazyInitializer.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
+    <Compile Include="Config\Initializers\UtcToLocalDateTimeType.cs" />
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Models\SentOrderLine.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Tasks.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Models\WrapDocumentPaginator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />

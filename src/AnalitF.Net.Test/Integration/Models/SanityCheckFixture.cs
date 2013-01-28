@@ -38,7 +38,6 @@ namespace AnalitF.Net.Test.Integration.Models
 			var dataPath = "data";
 			if (Directory.Exists(dataPath))
 				Directory.GetFiles("data").Each(f => File.Delete(f));
-				//Directory.Delete(dataPath, true);
 
 			var sanityCheck = new SanityCheck(dataPath);
 			sanityCheck.Check();

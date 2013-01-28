@@ -85,6 +85,7 @@
     <Compile Include="Integration\ContentElementBinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
     <Compile Include="Integration\Models\OrderFixture.cs" />
+    <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\TasksFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />

@@ -43,8 +43,8 @@ namespace AnalitF.Net.Test.Integration
 			CreateSampleCore(supplier);
 
 			var supplier1 = TestSupplier.CreateNaked();
-			CreateSampleContactInfo(supplier);
-			CreateSampleCore(supplier);
+			CreateSampleContactInfo(supplier1);
+			CreateSampleCore(supplier1);
 
 			var maxProducerCosts = CreateMaxProduceCosts(supplier);
 			//очищаем предудыщие попытки
