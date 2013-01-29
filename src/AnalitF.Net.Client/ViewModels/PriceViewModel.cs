@@ -6,6 +6,7 @@ using System.Threading;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
+using NHibernate.Criterion;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -16,19 +17,14 @@ namespace AnalitF.Net.Client.ViewModels
 		private Price currentPrice;
 		private bool showLeader;
 
+		public bool OpenSinglePrice;
+
 		public PriceViewModel()
 		{
 			DisplayName = "Прайс-листы фирм";
 			QuickSearch = new QuickSearch<Price>(
 				t => Prices.FirstOrDefault(p => p.Name.ToLower().Contains(t)),
 				p => CurrentPrice = p);
-		}
-
-		//при активации надо обновить данные тк можно войти в прайс, сделать заказ а потом вернуться
-		protected override void OnActivate()
-		{
-			Update();
-			base.OnActivate();
 		}
 
 		public QuickSearch<Price> QuickSearch { get; set; }
@@ -53,6 +49,25 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				showLeader = value;
 				NotifyOfPropertyChange("ShowLeaders");
+			}
+		}
+
+		//при активации надо обновить данные тк можно войти в прайс, сделать заказ а потом вернуться
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			Update();
+		}
+
+		public override void PostActivated()
+		{
+			if (OpenSinglePrice) {
+				OpenSinglePrice = false;
+				if (Prices.Count == 1 && Prices[0].PositionCount > 0) {
+					CurrentPrice = Prices.FirstOrDefault();
+					EnterPrice();
+				}
 			}
 		}
 

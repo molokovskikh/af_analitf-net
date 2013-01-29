@@ -96,6 +96,13 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		//метод нужен для того что бы форма могла изменять
+		//ActiveItem тк делать это в OnActivate нельзя
+		//например открыть дочерний елемент если он один
+		public virtual void PostActivated()
+		{
+		}
+
 		protected override void OnActivate()
 		{
 			IsSuccessfulActivated = true;

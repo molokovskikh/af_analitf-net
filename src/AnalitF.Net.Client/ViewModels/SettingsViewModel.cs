@@ -12,11 +12,15 @@ namespace AnalitF.Net.Client.ViewModels
 		public SettingsViewModel()
 		{
 			Settings = Session.Query<Settings>().First();
+			Markups = Session.Query<MarkupConfig>().OrderBy(m => m.Begin).ToList();
+
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 			DisplayName = "Настройка";
 		}
 
 		public new Settings Settings { get; set; }
+
+		public List<MarkupConfig> Markups { get; set; }
 
 		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
 

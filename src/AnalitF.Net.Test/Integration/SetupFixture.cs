@@ -52,5 +52,12 @@ namespace AnalitF.Net.Test.Integration
 			Directory.GetFiles("data")
 				.Each(f => File.Copy(f, Path.Combine("backup", Path.GetFileName(f)), true));
 		}
+
+		public static void RestoreData(ISession localSession)
+		{
+			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
+			Directory.GetFiles("backup")
+				.Each(f => File.Copy(f, Path.Combine("data", Path.GetFileName(f)), true));
+		}
 	}
 }

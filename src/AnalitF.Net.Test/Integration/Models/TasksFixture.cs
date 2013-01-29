@@ -55,9 +55,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[TearDown]
 		public void FixtureTearDown()
 		{
-			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
-			Directory.GetFiles("backup")
-				.Each(f => File.Copy(f, Path.Combine("data", Path.GetFileName(f)), true));
+			SetupFixture.RestoreData(localSession);
 		}
 
 		[Test]

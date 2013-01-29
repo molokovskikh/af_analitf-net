@@ -244,7 +244,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowPrice()
 		{
-			ActivateRootItem(new PriceViewModel());
+			var model = new PriceViewModel {
+				OpenSinglePrice = true
+			};
+			ActivateRootItem(model);
 		}
 
 		public void ShowMnn()
@@ -488,6 +491,14 @@ namespace AnalitF.Net.Client.ViewModels
 				if (ActiveItem == null && navigationStack.Count > 0) {
 					ActivateItem(navigationStack.Pop());
 				}
+			}
+		}
+
+		protected override void OnActivationProcessed(IScreen item, bool success)
+		{
+			var screen = item as BaseScreen;
+			if (screen != null) {
+				screen.PostActivated();
 			}
 		}
 
