@@ -50,8 +50,8 @@
 				<DataGridTextColumn Width="45*" Header="Заказ" Binding="{Binding Order.LinesCount}" IsReadOnly="True" />
 				<DataGridTextColumn Width="51*" Header="Сумма" Binding="{Binding Order.Sum}" IsReadOnly="True" />
 				<DataGridTextColumn Width="95*" Header="Дата прайс-листа" Binding="{Binding PriceDate}" IsReadOnly="True" />
-				<DataGridTextColumn Width="60*" Header="Месячный заказ" IsReadOnly="True" />
-				<DataGridTextColumn Width="65*" Header="Недельный заказ" IsReadOnly="True" />
+				<DataGridTextColumn Width="60*" Header="Месячный заказ" Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" />
+				<DataGridTextColumn Width="65*" Header="Недельный заказ" Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 		<TextBox Grid.Row="1" Grid.Column="0"

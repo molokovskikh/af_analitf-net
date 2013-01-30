@@ -12,22 +12,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture]
 	public class PriceFixture : BaseFixture
 	{
-		private bool Restore;
-
-		[SetUp]
-		public void Setup()
-		{
-			Restore = false;
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			if (Restore) {
-				SetupFixture.RestoreData(session);
-			}
-		}
-
 		[Test]
 		public void Load_order()
 		{
@@ -53,15 +37,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.ActiveItem, Is.InstanceOf<PriceViewModel>());
 		}
 
-		//[Test]
-		//public void Order_history()
-		//{
-		//	MakeSentOrder(session.Query<Offer>().First());
+		[Test]
+		public void Order_history()
+		{
+			var offer = session.Query<Offer>().First();
+			MakeSentOrder(offer);
 
-		//	var model = Init(new PriceViewModel());
-		//	Assert.That(model.Prices[0].WeeklyOrderSum, Is.GreaterThan(0));
-		//	Assert.That(model.Prices[0].MonthlyOrderSum, Is.GreaterThan(0));
-		//}
+			var model = Init(new PriceViewModel());
+			var price = model.Prices.First(p => p.Id == offer.Price.Id);
+			Assert.That(price.WeeklyOrderSum, Is.GreaterThan(0));
+			Assert.That(price.MonthlyOrderSum, Is.GreaterThan(0));
+		}
 
 		//[Test]
 		//public void Save_current_price()

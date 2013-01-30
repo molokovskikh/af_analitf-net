@@ -6,6 +6,7 @@ using System.Threading;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
+using Common.Tools.Calendar;
 using NHibernate.Criterion;
 using NHibernate.Linq;
 
@@ -80,11 +81,29 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {
+				var weekBegin = DateTime.Today.FirstDayOfWeek();
+				var monthBegin = DateTime.Today.FirstDayOfMonth();
+				var monthlyStat = OrderStat(monthBegin);
+				var weeklyStat = OrderStat(weekBegin);
+
+				prices.Each(p => p.WeeklyOrderSum = weeklyStat.Where(s => s.Item1 == p.Id)
+					.Select(s => (decimal?)s.Item2).FirstOrDefault());
+				prices.Each(p => p.MonthlyOrderSum = monthlyStat.Where(s => s.Item1 == p.Id)
+					.Select(s => (decimal?)s.Item2).FirstOrDefault());
 				prices.Each(p => p.Order = Address.Orders.FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));
 			}
 
 			Prices = prices;
+		}
+
+		private List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from)
+		{
+			return StatelessSession.Query<SentOrder>()
+				.Where(o => o.Address == Address && o.SentOn >= from)
+				.GroupBy(o => o.Price)
+				.Select(g => Tuple.Create(g.Key.Id, g.Sum(o => o.Sum)))
+				.ToList();
 		}
 
 		public void EnterPrice()

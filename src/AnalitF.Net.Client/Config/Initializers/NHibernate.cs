@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			if (connectionString.Contains("Embedded=True")) {
 				connectionString = FixRelativePaths(connectionString);
-				driver = typeof(DevArtDriver).AssemblyQualifiedName;
+				driver = typeof(DevartDriver).AssemblyQualifiedName;
 			}
 
 			Configuration = new Configuration();

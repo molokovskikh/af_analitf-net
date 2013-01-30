@@ -401,18 +401,22 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (Equals(currentCacheKey, orderHistoryCacheKey))
 				return;
 
-			var query = StatelessSession.Query<SentOrderLine>();
+			IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
+				.OrderByDescending(o => o.Order.SentOn);
+			//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
+			//переместить в общий блок то первый
+			//where применяться не будет
 			if (Settings.GroupByProduct) {
-				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId);
+				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId)
+					.Where(o => o.Order.Address == Address);
 			}
 			else {
-				query = query.Where(o => o.ProductId == CurrentOffer.ProductId);
+				query = query.Where(o => o.ProductId == CurrentOffer.ProductId)
+					.Where(o => o.Order.Address == Address);
 			}
 			HistoryOrders = query
 				.Fetch(l => l.Order)
 				.ThenFetch(o => o.Price)
-				.Where(o => o.Order.Address == Address)
-				.OrderByDescending(o => o.Order.SentOn)
 				.Take(20)
 				.ToList();
 

@@ -11,6 +11,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using AnalitF.Net.Client.Helpers;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -139,7 +140,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_history_orders()
 		{
-			var offer = model.Offers.First();
+			var offer = model.CurrentOffer;
 
 			CleanSendOrders(offer);
 
@@ -150,7 +151,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 
 			testScheduler.AdvanceToMs(4000);
-			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1));
+
+			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1), model.HistoryOrders.Implode(l => l.Id));
 			Assert.That(model.HistoryOrders[0].Count, Is.EqualTo(1));
 			Assert.That(model.CurrentOffer.PrevOrderAvgCost, Is.EqualTo(offer.Cost));
 			Assert.That(model.CurrentOffer.PrevOrderAvgCount, Is.EqualTo(1));
@@ -293,6 +295,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Query<SentOrderLine>()
 				.Where(l => l.CatalogId == offer.CatalogId)
 				.Each(l => session.Delete(l));
+			session.Flush();
 		}
 	}
 }

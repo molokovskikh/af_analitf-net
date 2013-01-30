@@ -145,6 +145,12 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Ignore]
+		public virtual decimal? WeeklyOrderSum { get; set; }
+
+		[Ignore]
+		public virtual decimal? MonthlyOrderSum { get; set; }
+
+		[Ignore]
 		public virtual List<Mailto> Emails {
 			get
 			{

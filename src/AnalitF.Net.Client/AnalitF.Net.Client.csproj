@@ -130,7 +130,10 @@
     <Compile Include="Binders\QuickSearchBehavior.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Binders\ViewModelHelper.cs" />
-    <Compile Include="Config\Initializers\DevArtDriver.cs" />
+    <Compile Include="Config\Initializers\DevartDriver.cs" />
+    <Compile Include="Config\Initializers\DevartMySqlDialect.cs" />
+    <Compile Include="Config\Initializers\DevartMySqlSchema.cs" />
+    <Compile Include="Config\Initializers\DevartMySqlTableMetadata.cs" />
     <Compile Include="Config\Initializers\LazyInitializer.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />

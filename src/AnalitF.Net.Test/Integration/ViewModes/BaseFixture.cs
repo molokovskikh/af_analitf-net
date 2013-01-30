@@ -25,10 +25,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		protected Address address;
 		protected Settings settings;
+		protected bool Restore;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
+			Restore = false;
+
 			testScheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = testScheduler;
 			disposeTestShedule = TestUtils.WithScheduler(testScheduler);
@@ -45,6 +48,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[TearDown]
 		public void BaseFixtureTearDown()
 		{
+			if (Restore) {
+				SetupFixture.RestoreData(session);
+			}
 			disposeTestShedule.Dispose();
 			session.Dispose();
 		}
