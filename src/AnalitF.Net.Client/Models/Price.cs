@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
+using Newtonsoft.Json;
 using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
@@ -167,7 +168,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Ignore]
+		[Ignore, JsonIgnore]
 		public virtual Order Order { get; set; }
 
 		[Ignore]
@@ -176,7 +177,7 @@ namespace AnalitF.Net.Client.Models
 			get { return Order != null; }
 		}
 
-		[Ignore]
+		[Ignore, JsonIgnore]
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
 		public override string ToString()

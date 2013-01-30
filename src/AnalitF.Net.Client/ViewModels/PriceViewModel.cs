@@ -32,6 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public List<Price> Prices { get; set; }
 
+		[DataMember]
 		public Price CurrentPrice
 		{
 			get { return currentPrice; }
@@ -95,6 +96,11 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			Prices = prices;
+			if (CurrentPrice != null) {
+				CurrentPrice = Prices.Where(p => p.Id == CurrentPrice.Id)
+					.DefaultIfEmpty(Prices.FirstOrDefault())
+					.First();
+			}
 		}
 
 		private List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from)

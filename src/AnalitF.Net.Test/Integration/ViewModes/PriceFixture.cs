@@ -3,6 +3,8 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
+using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support.log4net;
@@ -49,14 +51,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(price.MonthlyOrderSum, Is.GreaterThan(0));
 		}
 
-		//[Test]
-		//public void Save_current_price()
-		//{
-		//	var model = Init(new PriceViewModel());
-		//	var price = model.Prices[1];
-		//	model.CurrentPrice = price;
-		//	model = Init(new PriceViewModel());
-		//	Assert.That(model.CurrentPrice.Id, Is.EqualTo(price.Id));
-		//}
+		[Test]
+		public void Save_current_price()
+		{
+			var model = Init(new PriceViewModel());
+			var price = model.Prices[1];
+			model.CurrentPrice = price;
+			ScreenExtensions.TryDeactivate(model, true);
+
+			model = Init(new PriceViewModel());
+			Assert.That(model.CurrentPrice.Id, Is.EqualTo(price.Id));
+			var persistedPrice = model.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Id);
+			Assert.That(model.CurrentPrice, Is.EqualTo(persistedPrice));
+		}
 	}
 }
