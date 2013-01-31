@@ -34,9 +34,6 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentFilter)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Subscribe(e => Update());
-
-			Update();
-			UpdateProducers();
 		}
 
 		public Price Price { get; set; }
@@ -51,6 +48,14 @@ namespace AnalitF.Net.Client.ViewModels
 				currentFilter = value;
 				NotifyOfPropertyChange("CurrentFilter");
 			}
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			Update();
+			UpdateProducers();
 		}
 
 		protected override void Query()

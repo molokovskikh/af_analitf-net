@@ -82,6 +82,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {
+				Session.Evict(Address);
+				Address = Session.Load<Address>(Address.Id);
+
 				var weekBegin = DateTime.Today.FirstDayOfWeek();
 				var monthBegin = DateTime.Today.FirstDayOfMonth();
 				var monthlyStat = OrderStat(monthBegin);

@@ -15,6 +15,11 @@ namespace AnalitF.Net.Client.ViewModels
 			QuickSearch = new QuickSearch<Offer>(
 				t => Offers.FirstOrDefault(o => o.ProductSynonym.ToLower().Contains(t)),
 				o => CurrentOffer = o);
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
 
 			Update();
 		}

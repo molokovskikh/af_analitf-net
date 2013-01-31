@@ -64,5 +64,24 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var persistedPrice = model.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Id);
 			Assert.That(model.CurrentPrice, Is.EqualTo(persistedPrice));
 		}
+
+		[Test]
+		public void Reload_order_info_on_activate()
+		{
+			session.DeleteEach<Order>();
+			session.Flush();
+
+			var model = Init(new PriceViewModel());
+			ScreenExtensions.TryActivate(model);
+			ScreenExtensions.TryDeactivate(model, false);
+
+			var offer = session.Query<Offer>().First();
+			MakeOrder(offer);
+
+			ScreenExtensions.TryActivate(model);
+
+			var price = model.Prices.First(p => p.Id == offer.Price.Id);
+			Assert.That(price.Order, Is.Not.Null);
+		}
 	}
 }

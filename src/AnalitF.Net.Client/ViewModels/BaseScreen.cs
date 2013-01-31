@@ -68,18 +68,24 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
+			Load();
+			Restore();
+		}
+
+		private void Load()
+		{
 			if (Shell == null)
 				return;
 
-			if (Shell.CurrentAddress != null) {
+			if (Shell.CurrentAddress != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
-			}
-
-			Restore();
 		}
 
 		private void Restore()
 		{
+			if (Shell == null)
+				return;
+
 			var key = GetType().FullName;
 			if (Shell.ViewModelSettings.ContainsKey(key)) {
 				try {
