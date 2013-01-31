@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public QuickSearch<Price> QuickSearch { get; set; }
 
+		[Export]
 		public List<Price> Prices { get; set; }
 
 		[DataMember]

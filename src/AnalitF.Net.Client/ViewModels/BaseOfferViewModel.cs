@@ -15,7 +15,7 @@ using Message = Common.Tools.Message;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public abstract class BaseOfferViewModel : BaseScreen, IExportable
+	public abstract class BaseOfferViewModel : BaseScreen
 	{
 		private readonly TimeSpan warningTimeout = TimeSpan.FromSeconds(5);
 
@@ -33,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected bool NeedToCalculateDiff;
 
-		private ExcelExporter excelExporter;
 		protected string autoCommentText;
 		protected bool resetAutoComment;
 
@@ -44,7 +43,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public BaseOfferViewModel()
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
-			excelExporter = new ExcelExporter(this);
 
 			this.ObservableForProperty(m => m.OrderWarning)
 				.Where(m => !String.IsNullOrEmpty(m.Value))
@@ -301,11 +299,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool CanExport
-		{
-			get { return excelExporter.CanExport; }
-		}
-
 		public string AutoCommentText
 		{
 			get
@@ -330,11 +323,6 @@ namespace AnalitF.Net.Client.ViewModels
 				resetAutoComment = value;
 				NotifyOfPropertyChange("ResetAutoComment");
 			}
-		}
-
-		public IResult Export()
-		{
-			return excelExporter.Export();
 		}
 
 		protected void LoadOrderItems()

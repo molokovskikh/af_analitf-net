@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
@@ -24,11 +25,30 @@ namespace AnalitF.Net.Test.Integration
 		{
 			var view = new CatalogOfferViewModel(new Catalog("тест"));
 			view.CurrentCatalog = new Catalog { Name = new CatalogName(), Form = "Папаверин" };
-			view.Offers = new List<Offer> {
-				new Offer { ProducerSynonym = "123", ProductSynonym = "123", Price = new Price() }
-			};
+			view.Offers = Offers();
 			var result = view.Print();
 			Assert.That(result.Doc, Is.Not.Null);
+			SaveAndOpen(result);
+		}
+
+		[Test]
+		public void Print_price()
+		{
+			var price = new Price {
+				PriceDate = DateTime.Now,
+				Name = "Тестовый поставщик",
+				Phone = "473-2606000"
+			};
+			var address = new Address { Name = "Тестовый адрес доставки" };
+			var doc = new PriceOfferDocument(Offers(), price, address).BuildDocument();
+			Assert.That(doc, Is.Not.Null);
+		}
+
+		private static List<Offer> Offers()
+		{
+			return new List<Offer> {
+				new Offer { ProducerSynonym = "123", ProductSynonym = "123", Price = new Price() }
+			};
 		}
 
 		public static void SaveAndOpen(PrintResult result)

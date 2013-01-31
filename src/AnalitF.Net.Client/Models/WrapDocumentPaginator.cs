@@ -53,17 +53,36 @@ namespace AnalitF.Net.Client.Models
 
 		private Visual Header(int pageNumber)
 		{
-			var section = new Paragraph {
-				Inlines = {
-					new Floater(new Paragraph(new Run("Информационная поддержка \"АК \"Инфорум\"\" 473-2606000"))) {
-						HorizontalAlignment = HorizontalAlignment.Left
-					}, new Floater(new Paragraph(new Run(DateTime.Now.ToString()))) {
-						HorizontalAlignment = HorizontalAlignment.Right
+			var table = new Table {
+				Columns = {
+					new TableColumn {
+						Width = new GridLength(560)
 					},
+					new TableColumn {
+						Width = GridLength.Auto
+					},
+				},
+				RowGroups = {
+					new TableRowGroup {
+						Rows = {
+							new TableRow {
+								Cells = {
+									new TableCell(new Paragraph(new Run("Информационная поддержка \"АК \"Инфорум\"\" 473-2606000")) {
+										TextAlignment = TextAlignment.Left,
+										FontWeight = FontWeights.Bold,
+										FontSize = 16
+									}),
+									new TableCell(new Paragraph(new Run(DateTime.Now.ToString()))) {
+										TextAlignment = TextAlignment.Right
+									}
+								}
+							}
+						}
+					}
 				}
 			};
 
-			return ToVisual(section);
+			return ToVisual(table);
 		}
 
 		private Size ContentSize()

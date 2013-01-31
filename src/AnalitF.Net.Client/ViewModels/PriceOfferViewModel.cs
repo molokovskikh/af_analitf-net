@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class PriceOfferViewModel : BaseOfferViewModel
+	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
 	{
 		private string[] filters = new[] {
 			"Прайс-лист (F4)",
@@ -87,6 +90,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 			filterText = SearchText;
 			Update();
+		}
+
+		public bool CanPrint
+		{
+			get { return true; }
+		}
+
+		public PrintResult Print()
+		{
+			var doc = new PriceOfferDocument(offers, Price, Address).BuildDocument();
+			return new PrintResult(doc, DisplayName);
 		}
 	}
 }

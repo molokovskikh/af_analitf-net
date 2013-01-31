@@ -38,6 +38,13 @@ namespace AnalitF.Net.Test.Integration.Views
 			return view as T;
 		}
 
+		protected DependencyObject InitView(BaseScreen model)
+		{
+			var view = ViewLocator.LocateForModel(model, null, null);
+			ViewModelBinder.Bind(model, view, null);
+			return view;
+		}
+
 		public static void ForceBinding(UIElement view)
 		{
 			var size = new Size(1000, 1000);
@@ -53,8 +60,21 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Export()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
-			var model = Init(new CatalogOfferViewModel(catalog));
-			((IViewAware)model).AttachView(new CatalogOfferView());
+			var model = new CatalogOfferViewModel(catalog);
+			CheckExport(model);
+		}
+
+		[Test]
+		public void Export_prices()
+		{
+			var model = new PriceViewModel();
+			CheckExport(model);
+		}
+
+		private void CheckExport(BaseScreen model)
+		{
+			Init(model);
+			InitView(model);
 
 			Assert.That(model.CanExport, Is.True);
 			var result = (OpenFileResult)model.Export();

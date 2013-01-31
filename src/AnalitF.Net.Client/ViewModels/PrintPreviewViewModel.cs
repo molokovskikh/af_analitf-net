@@ -6,10 +6,11 @@ using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class PrintPreviewViewModel : BaseScreen
+	public class PrintPreviewViewModel : Screen
 	{
 		public PrintPreviewViewModel()
 		{

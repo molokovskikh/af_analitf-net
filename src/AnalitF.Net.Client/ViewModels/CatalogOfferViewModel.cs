@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
@@ -258,113 +259,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			return new PrintResult(BuildDocument(), DisplayName);
-		}
-
-		public FlowDocument BuildDocument()
-		{
-			var rows = offers.Select((o, i) => {
-				return new object[] {
-					o.ProductSynonym,
-					o.ProducerSynonym,
-					o.Price.Name,
-					o.Period,
-					o.Price.PriceDate,
-					o.Diff,
-					o.Cost
-				};
-			});
-
-			return BuildDocument(rows);
-		}
-
-		private FlowDocument BuildDocument(IEnumerable<object[]> rows)
-		{
-			var totalRows = rows.Count();
-			var doc = new FlowDocument();
-
-			doc.Blocks.Add(new Paragraph());
-			doc.Blocks.Add(new Paragraph(new Run(CurrentCatalog.FullName)) {
-				FontWeight = FontWeights.Bold,
-				FontSize = 16
-			});
-
-			var table = new Table();
-			table.CellSpacing = 0;
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(216)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(136)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(112)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(85)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(85)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(48)
-			});
-			table.Columns.Add(new TableColumn {
-				Width = new GridLength(55)
-			});
-			var tableRowGroup = new TableRowGroup();
-			table.RowGroups.Add(tableRowGroup);
-
-			var headers = new [] {
-				"Наименование",
-				"Производитель",
-				"Прайс-лист",
-				"Срок год.",
-				"Дата пр.",
-				"Разн.",
-				"Цена"
-			};
-
-			var headerRow = new TableRow();
-			for(var i = 0; i < headers.Length; i++) {
-				var header = headers[i];
-				var tableCell = new TableCell(new Paragraph(new Run(header))) {
-					BorderBrush = Brushes.Black,
-					BorderThickness = new Thickness(1, 1, 0, 0),
-					FontWeight = FontWeights.Bold,
-					LineStackingStrategy = LineStackingStrategy.MaxHeight
-				};
-				headerRow.Cells.Add(tableCell);
-				if (i == headers.Length - 1)
-					tableCell.BorderThickness = new Thickness(1, 1, 1, 0);
-			}
-			tableRowGroup.Rows.Add(headerRow);
-
-			var j = 0;
-			foreach (var data in rows) {
-				var row = new TableRow();
-				tableRowGroup.Rows.Add(row);
-
-				for (var i = 0; i < data.Length; i++) {
-					string text = null;
-					if (data[i] != null)
-						text = data[i].ToString();
-
-					var cell = new TableCell(new Paragraph(new Run(text)));
-					cell.BorderBrush = Brushes.Black;
-					var thickness = new Thickness(1, 1, 0, 0);
-					if (i == headers.Length - 1)
-						thickness.Right = 1;
-					if (j == totalRows - 1)
-						thickness.Bottom = 1;
-					cell.BorderThickness = thickness;
-					row.Cells.Add(cell);
-				}
-				j++;
-			}
-			doc.Blocks.Add(table);
-			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", totalRows))));
-			return doc;
+			var doc = new CatalogOfferDocument(Offers, Name).BuildDocument();
+			return new PrintResult(doc, DisplayName);
 		}
 
 		public void ShowPrice()

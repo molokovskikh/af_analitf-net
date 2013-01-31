@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
@@ -52,20 +53,23 @@ namespace AnalitF.Net.Client.Models
 			var name = property.Name;
 
 			var view = (UserControl) model.GetView();
-			var grid = (DataGrid)view.DeepChildren().OfType<Controls.DataGrid>().First(g => g.Name == name);
-			var columns = grid.Columns;
+			var grid = view.DeepChildren().OfType<DataGrid>().First(g => g.Name == name);
+			var columns = grid.Columns.OfType<DataGridBoundColumn>()
+				.OrderBy(c => c.DisplayIndex)
+				.Where(c => c.Visibility == Visibility.Visible)
+				.ToArray();
 			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
 			using(var file = File.OpenWrite(filename)) {
 				var book = new HSSFWorkbook();
 				var sheet = book.CreateSheet("Экспорт");
 				var rowIndex = 0;
 				var row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < columns.Count; i++) {
+				for(var i = 0; i < columns.Length; i++) {
 					row.CreateCell(i).SetCellValue(columns[i].Header.ToString());
 				}
 				foreach (var item in items) {
 					row = sheet.CreateRow(rowIndex++);
-					for(var i = 0; i < columns.Count; i++) {
+					for(var i = 0; i < columns.Length; i++) {
 						row.CreateCell(i).SetCellValue(GetValue(columns[i], item));
 					}
 				}
@@ -75,9 +79,9 @@ namespace AnalitF.Net.Client.Models
 			return new OpenFileResult(filename);
 		}
 
-		private string GetValue(DataGridColumn column, object offer)
+		private string GetValue(DataGridBoundColumn column, object offer)
 		{
-			var path = ((Binding)((DataGridTextColumn)column).Binding).Path.Path;
+			var path = ((Binding)column.Binding).Path.Path;
 			var parts = path.Split('.');
 
 			var value = offer;
@@ -92,6 +96,14 @@ namespace AnalitF.Net.Client.Models
 			}
 			if (value == null)
 				return "";
+			if (value is bool) {
+				if (((bool)value)) {
+					return "Да";
+				}
+				else {
+					return "Нет";
+				}
+			}
 			return value.ToString();
 		}
 	}

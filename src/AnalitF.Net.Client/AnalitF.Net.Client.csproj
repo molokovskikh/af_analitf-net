@@ -146,6 +146,7 @@
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
+    <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\XamlExtentions.cs" />
@@ -160,6 +161,8 @@
     <Compile Include="Models\MinOrderSumRule.cs" />
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\Print\CatalogOfferDocument.cs" />
+    <Compile Include="Models\Print\PriceOfferDocument.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />

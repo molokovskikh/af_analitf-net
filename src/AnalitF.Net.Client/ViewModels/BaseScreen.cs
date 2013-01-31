@@ -22,7 +22,7 @@ using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class BaseScreen : Screen, IActivateEx
+	public class BaseScreen : Screen, IActivateEx, IExportable
 	{
 		protected ILog log;
 
@@ -30,6 +30,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			get { return ((ShellViewModel)Parent); }
 		}
+
+		protected ExcelExporter excelExporter;
 
 		protected Extentions.WindowManager Manager { get; private set; }
 
@@ -53,11 +55,18 @@ namespace AnalitF.Net.Client.ViewModels
 			Session = factory.OpenSession();
 			Settings = Session.Query<Settings>().First();
 			User = Session.Query<User>().FirstOrDefault();
+
+			excelExporter = new ExcelExporter(this);
 		}
 
 		public bool IsSuccessfulActivated { get; protected set; }
 
 		public User User { get; private set; }
+
+		public bool CanExport
+		{
+			get { return excelExporter.CanExport; }
+		}
 
 		public virtual void NavigateBackward()
 		{
@@ -206,6 +215,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public override string ToString()
 		{
 			return DisplayName;
+		}
+
+		public IResult Export()
+		{
+			return excelExporter.Export();
 		}
 	}
 }
