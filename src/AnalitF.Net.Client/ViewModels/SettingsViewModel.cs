@@ -3,7 +3,10 @@ using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using NHibernate.Collection.Generic;
 using NHibernate.Linq;
+using NHibernate.Persister.Collection;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -12,7 +15,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public SettingsViewModel()
 		{
 			Settings = Session.Query<Settings>().First();
-			Markups = Session.Query<MarkupConfig>().OrderBy(m => m.Begin).ToList();
+			var markups = Session.Query<MarkupConfig>().OrderBy(m => m.Begin).ToList();
+			Markups = new PersistentList<MarkupConfig>(markups, Session);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 			DisplayName = "Настройка";
@@ -20,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public new Settings Settings { get; set; }
 
-		public List<MarkupConfig> Markups { get; set; }
+		public IList<MarkupConfig> Markups { get; set; }
 
 		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
 
