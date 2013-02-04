@@ -15,6 +15,14 @@ using ReactiveUI.Blend;
 
 namespace AnalitF.Net.Client.Binders
 {
+	public class ObservableTrigger : TriggerBase<FrameworkElement>
+	{
+		public ObservableTrigger(IObservable<object> observable)
+		{
+			observable.Subscribe(InvokeActions);
+		}
+	}
+
 	public class EnterBinder
 	{
 		public static void Bind(MethodInfo method, FrameworkElement element)
@@ -34,11 +42,9 @@ namespace AnalitF.Net.Client.Binders
 			RegisterTrigger(element, method, enterObservable);
 		}
 
-		public static void RegisterTrigger(FrameworkElement element, MethodInfo method, IObservable<object> enterObservable)
+		public static void RegisterTrigger(FrameworkElement element, MethodInfo method, IObservable<object> observable)
 		{
-			var trigger = new ObservableTrigger {
-				Observable = enterObservable
-			};
+			var trigger = new ObservableTrigger(observable);
 			var action = new ActionMessage { MethodName = method.Name };
 			foreach (var parameterInfo in method.GetParameters()) {
 				action.Parameters.Add(Parser.CreateParameter(element, parameterInfo.Name));

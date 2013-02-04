@@ -146,6 +146,7 @@
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
+    <Compile Include="Helpers\NotifyValue.cs" />
     <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
     <Compile Include="Helpers\TimeIt.cs" />

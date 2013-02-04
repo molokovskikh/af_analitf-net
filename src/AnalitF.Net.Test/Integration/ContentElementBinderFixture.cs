@@ -83,9 +83,23 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Commands.InvokeViewModel));
 		}
 
+		[Test]
+		public void Bind_notify_value()
+		{
+			var model = new ViewModel { Term = new NotifyValue<string>("123") };
+			var view = new UserControl { DataContext = model };
+			var textBox = new TextBox { Name = "Term" };
+			view.Content = textBox;
+			ViewModelBinder.Bind(model, view, null);
+
+			Assert.That(textBox.Text, Is.EqualTo("123"));
+		}
+
 		public class ViewModel
 		{
 			public string Text { get; set; }
+
+			public NotifyValue<string> Term { get; set; }
 
 			public bool Is { get; set; }
 

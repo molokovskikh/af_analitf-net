@@ -176,6 +176,21 @@ namespace AnalitF.Net.Client
 		public static void InitUi()
 		{
 			ContentElementBinder.RegisterConvention();
+
+			var defaultSetBinding = ConventionManager.SetBinding;
+			ConventionManager.SetBinding =
+				(viewModelType, path, property, element, convention, bindableProperty) => {
+					if (property.PropertyType.IsGenericType
+						&& property.PropertyType.GetGenericTypeDefinition() == typeof(NotifyValue<>)) {
+						path += ".Value";
+						property = typeof(NotifyValue<>).GetProperty("Value");
+						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
+					}
+					else {
+						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
+					}
+				};
+
 			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
 				EnabledBinder.Bind,
 				VisibilityBinder.Bind,

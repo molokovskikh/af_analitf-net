@@ -39,14 +39,16 @@
 		</StackPanel>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
-			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"></TextBox>
+			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}" binders:SearchBinder.Grid="Offers"></TextBox>
 			<ComboBox x:Name="Producers" Style="{StaticResource Filter}"></ComboBox>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}"
+			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Код" Binding="{Binding Code}" />
-				<DataGridTextColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}" />
+				<c:SearchableDataGridColumn Width="*" Header="Название" Binding="{Binding ProductSynonym}"
+					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
 				<DataGridTextColumn Width="*" Header="Упаковка" Binding="{Binding Volume}" />

@@ -93,7 +93,7 @@
 						<DataTemplate>
 							<Border SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1" >
 								<StackPanel Background="#d8f1ff">
-									<TextBlock Text="{Binding Path=Name}" />
+									<TextBlock Text="{Binding Path=Name}" FontWeight="Bold" />
 								</StackPanel>
 							</Border>
 						</DataTemplate>

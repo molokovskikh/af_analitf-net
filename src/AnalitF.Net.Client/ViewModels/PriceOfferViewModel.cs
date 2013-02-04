@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Documents;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -21,10 +22,11 @@ namespace AnalitF.Net.Client.ViewModels
 		};
 
 		private string currentFilter;
-		private string filterText;
+		private string activeSearchTerm;
 
 		public PriceOfferViewModel(Price price, bool showLeaders)
 		{
+			SearchText = new NotifyValue<string>();
 			DisplayName = "Заявка поставщику";
 			Price = price;
 
@@ -42,6 +44,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public Price Price { get; set; }
 
 		public string[] Filters { get; set; }
+
+		public string ActiveSearchTerm
+		{
+			get { return activeSearchTerm; }
+			set
+			{
+				activeSearchTerm = value;
+				NotifyOfPropertyChange("ActiveSearchTerm");
+			}
+		}
 
 		public string CurrentFilter
 		{
@@ -73,23 +85,37 @@ namespace AnalitF.Net.Client.ViewModels
 			if (currentFilter == filters[1]) {
 				query = query.Where(o => o.OrderLine != null);
 			}
-			if (!String.IsNullOrEmpty(filterText)) {
-				query = query.Where(o => o.ProductSynonym.Contains(filterText));
+			if (!String.IsNullOrEmpty(ActiveSearchTerm)) {
+				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
 			}
 
 			Offers = query.Fetch(o => o.Price).ToList();
 			CurrentOffer = offers.FirstOrDefault();
 		}
 
-		public string SearchText { get; set; }
+		public NotifyValue<string> SearchText { get; set; }
 
-		public void Search()
+		public IResult Search()
 		{
-			if (string.IsNullOrEmpty(SearchText))
-				return;
+			if (string.IsNullOrEmpty(SearchText.Value) || SearchText.Value.Length < 3) {
+				return HandledResult.Skip();
+			}
 
-			filterText = SearchText;
+			ActiveSearchTerm = SearchText;
+			SearchText.Value = "";
 			Update();
+			return HandledResult.Handled();
+		}
+
+		public IResult ClearSearch()
+		{
+			if (String.IsNullOrEmpty(ActiveSearchTerm))
+				return HandledResult.Skip();
+
+			ActiveSearchTerm = "";
+			SearchText.Value = "";
+			Update();
+			return HandledResult.Handled();
 		}
 
 		public bool CanPrint

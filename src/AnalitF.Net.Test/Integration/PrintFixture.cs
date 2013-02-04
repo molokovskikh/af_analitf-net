@@ -28,7 +28,6 @@ namespace AnalitF.Net.Test.Integration
 			view.Offers = Offers();
 			var result = view.Print();
 			Assert.That(result.Doc, Is.Not.Null);
-			SaveAndOpen(result);
 		}
 
 		[Test]
