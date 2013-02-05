@@ -209,6 +209,16 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(warning, Is.EqualTo("Товар присутствует в замороженных заказах."));
 		}
 
+		[Test]
+		public void Update_order_line()
+		{
+			offer.OrderCount = 1;
+			offer.UpdateOrderLine(address, settings);
+
+			offer.OrderLine = null;
+			Assert.That(offer.OrderCount, Is.Null);
+		}
+
 		private void Validate()
 		{
 			var message = offer.UpdateOrderLine(address, settings);

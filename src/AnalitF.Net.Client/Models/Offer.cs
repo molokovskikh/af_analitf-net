@@ -88,6 +88,9 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				orderLine = value;
+				if (OrderLine == null) {
+					OrderCount = null;
+				}
 				OnPropertyChanged("OrderLine");
 			}
 		}
@@ -125,7 +128,6 @@ namespace AnalitF.Net.Client.Models
 			{
 				orderCount = value;
 				OnPropertyChanged("OrderCount");
-				OnPropertyChanged("OrderSum");
 			}
 		}
 
@@ -162,7 +164,7 @@ namespace AnalitF.Net.Client.Models
 
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
+			var handler = PropertyChanged;
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 

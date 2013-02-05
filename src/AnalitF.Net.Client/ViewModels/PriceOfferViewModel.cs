@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -44,8 +45,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public PriceOfferViewModel(Price price, bool showLeaders)
 		{
 			SearchText = new NotifyValue<string>();
+			Price = new NotifyValue<Price>(price);
 			DisplayName = "Заявка поставщику";
-			Price = price;
 
 			Filters = filters;
 			currentProducer = Consts.AllProducerLabel;
@@ -56,9 +57,12 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentFilter)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Subscribe(e => Update());
+
+			this.ObservableForProperty(m => m.Price.Value.Order)
+				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder"));
 		}
 
-		public Price Price { get; set; }
+		public NotifyValue<Price> Price { get; set; }
 
 		public string[] Filters { get; set; }
 
@@ -92,15 +96,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Query()
 		{
-			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == Price.Id);
+			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == Price.Value.Id);
 			if (CurrentProducer != Consts.AllProducerLabel) {
 				query = query.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == filters[2]) {
-				query = query.Where(o => o.LeaderPrice == Price);
+				query = query.Where(o => o.LeaderPrice == Price.Value);
 			}
 			if (currentFilter == filters[1]) {
-				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id && l.Order.Address == Address) > 0);
+				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id
+					&& l.Order.Address == Address
+					&& l.Order.Price == Price.Value) > 0);
 			}
 			if (!String.IsNullOrEmpty(ActiveSearchTerm)) {
 				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
@@ -108,6 +114,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Offers = query.Fetch(o => o.Price).ToList();
 			CurrentOffer = offers.FirstOrDefault();
+			if (CurrentOffer != null)
+				Price.Value = CurrentOffer.Price;
 		}
 
 		public NotifyValue<string> SearchText { get; set; }
@@ -178,6 +186,34 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult EnterOffer()
 		{
 			return ShowHistoryOrders();
+		}
+
+		public bool CanDeleteOrder
+		{
+			get
+			{
+				return Price.Value.Order != null && Address != null;
+			}
+		}
+
+		public void DeleteOrder()
+		{
+			if (!CanDeleteOrder)
+				return;
+
+			if (!Confirm("Удалить весь заказ по данному прайс-листу?"))
+				return;
+
+			Address.Orders.Remove(Price.Value.Order);
+			Price.Value.Order = null;
+			foreach (var offer in Offers) {
+				offer.OrderLine = null;
+			}
+		}
+
+		private bool Confirm(string message)
+		{
+			return Manager.Question(message) == MessageBoxResult.Yes;
 		}
 	}
 }

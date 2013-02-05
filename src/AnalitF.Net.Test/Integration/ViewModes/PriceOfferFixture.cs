@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -80,6 +83,25 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var history = (DialogResult)model.ShowHistoryOrders();
 			var lines = ((HistoryOrdersViewModel)history.Model).Lines;
 			Assert.That(lines.Count, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Delete_order()
+		{
+			manager.DefaultResult = MessageBoxResult.Yes;
+			session.DeleteEach<Order>();
+			var offer = session.Query<Offer>().First(o => o.Price == price);
+			var order = MakeOrder(offer);
+
+			Assert.That(model.Price.Value.Order, Is.Not.Null);
+			Assert.That(model.Offers[0].OrderLine, Is.Not.Null);
+			model.DeleteOrder();
+			Assert.That(model.Price.Value.Order, Is.Null);
+			Assert.That(model.Offers[0].OrderLine, Is.Null);
+
+			ScreenExtensions.TryDeactivate(model, true);
+			session.Clear();
+			Assert.That(session.Get<Order>(order.Id), Is.Null);
 		}
 	}
 }

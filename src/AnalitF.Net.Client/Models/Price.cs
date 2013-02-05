@@ -93,8 +93,10 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class Price
+	public class Price : INotifyPropertyChanged
 	{
+		private Order order;
+
 		public virtual PriceComposedId Id { get; set; }
 
 		/// <summary>
@@ -169,7 +171,15 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Ignore, JsonIgnore]
-		public virtual Order Order { get; set; }
+		public virtual Order Order
+		{
+			get { return order; }
+			set
+			{
+				order = value;
+				OnPropertyChanged("Order");
+			}
+		}
 
 		[Ignore]
 		public virtual bool HaveOrder
@@ -183,6 +193,14 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return Name;
+		}
+
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			var handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

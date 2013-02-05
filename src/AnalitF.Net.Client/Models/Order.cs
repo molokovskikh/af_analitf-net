@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.Models
 	public class Order : INotifyPropertyChanged
 	{
 		private decimal sum;
+		private int linesCount;
 
 		public Order()
 		{
@@ -48,7 +49,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Price Price { get; set; }
 
-		public virtual int LinesCount { get; set; }
+		public virtual int LinesCount
+		{
+			get { return linesCount; }
+			set
+			{
+				linesCount = value;
+				OnPropertyChanged("LinesCount");
+			}
+		}
 
 		public virtual decimal Sum
 		{

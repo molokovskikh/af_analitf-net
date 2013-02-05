@@ -31,7 +31,7 @@
 
 		<DockPanel Grid.Row="0" Style="{StaticResource FilterDockPanel}">
 			<TextBlock Margin="0, 5" Style="{StaticResource HeaderTextBlock}">
-				Прайс-лист <Run x:Name="Price_Name"/>, регион <Run x:Name="Price_RegionName"/>
+				Прайс-лист <Run x:Name="Price_Value_Name"/>, регион <Run x:Name="Price_Value_RegionName"/>
 			</TextBlock>
 
 			<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
@@ -100,9 +100,9 @@
 
 		<StackPanel Orientation="Horizontal" Grid.Row="5" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Button Style="{StaticResource ResourceKey=FilterButton}" Name="ShowHistoryOrders">История</Button>
-			<Button Style="{StaticResource ResourceKey=FilterButton}">Удалить заказ</Button>
+			<Button Style="{StaticResource ResourceKey=FilterButton}" Name="DeleteOrder">Удалить заказ</Button>
 			<TextBlock Margin="5">
-				Заказано <Run x:Name="Order_Lines_Count"/> позиций на сумму <Run x:Name="Order_Sum"/>
+				Заказано <Run x:Name="Price_Value_Order_LinesCount"/> позиций на сумму <Run x:Name="Price_Value_Order_Sum"/>
 			</TextBlock>
 		</StackPanel>
 	</Grid>
