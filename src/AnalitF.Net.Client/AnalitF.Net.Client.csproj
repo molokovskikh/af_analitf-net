@@ -141,6 +141,7 @@
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
+    <Compile Include="Controls\DataGridTextColumn.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />

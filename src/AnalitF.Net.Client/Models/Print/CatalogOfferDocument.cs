@@ -114,6 +114,9 @@ namespace AnalitF.Net.Client.Models.Print
 						text = data[i].ToString();
 
 					var cell = new TableCell(new Paragraph(new Run(text)));
+					if (IsDigitValue(data[i])) {
+						cell.TextAlignment = TextAlignment.Right;
+					}
 					cell.BorderBrush = Brushes.Black;
 					var thickness = new Thickness(1, 1, 0, 0);
 					if (i == headers.Length - 1)
@@ -127,6 +130,11 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 
 			return table;
+		}
+
+		private static bool IsDigitValue(object o)
+		{
+			return o is int || o is uint || o is decimal || o is double || o is float;
 		}
 	}
 }

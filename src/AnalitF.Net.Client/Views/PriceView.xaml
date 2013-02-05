@@ -38,20 +38,14 @@
 				<DataGridTextColumn Width="57*" Header="Регион"
 					Binding="{Binding RegionName}"
 					IsReadOnly="True" />
-				<DataGridTextColumn Width="36*" Header="Склад" Binding="{Binding Storage, Converter={StaticResource BoolToChar}}" IsReadOnly="True">
-					<DataGridTextColumn.CellStyle>
-						<Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
-							<Setter Property="Block.TextAlignment" Value="Center"></Setter>
-						</Style>
-					</DataGridTextColumn.CellStyle>
-				</DataGridTextColumn>
+				<c:DataGridTextColumnEx Width="36*" Header="Склад" Binding="{Binding Storage, Converter={StaticResource BoolToChar}}" IsReadOnly="True" TextAlignment="Center" />
 				<DataGridCheckBoxColumn Width="65*" Header="В работе" Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
-				<DataGridTextColumn Width="50*" Header="Позиций" Binding="{Binding PositionCount}" IsReadOnly="True" />
-				<DataGridTextColumn Width="45*" Header="Заказ" Binding="{Binding Order.LinesCount}" IsReadOnly="True" />
-				<DataGridTextColumn Width="51*" Header="Сумма" Binding="{Binding Order.Sum}" IsReadOnly="True" />
-				<DataGridTextColumn Width="95*" Header="Дата прайс-листа" Binding="{Binding PriceDate}" IsReadOnly="True" />
-				<DataGridTextColumn Width="60*" Header="Месячный заказ" Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" />
-				<DataGridTextColumn Width="65*" Header="Недельный заказ" Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Width="50*" Header="Позиций" Binding="{Binding PositionCount}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="45*" Header="Заказ" Binding="{Binding Order.LinesCount}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.Sum}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа" Binding="{Binding PriceDate}" IsReadOnly="True" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="60*" Header="Месячный заказ" Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ" Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 		<TextBox Grid.Row="1" Grid.Column="0"
