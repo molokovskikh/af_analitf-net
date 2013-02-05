@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.HistoryOrdersView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference TryClose}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+	</UserControl.InputBindings>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0">
+			<Label Name="Catalog_Name_Name" FontWeight="Bold"></Label>
+			<Label Name="Catalog_Form" FontWeight="Bold"></Label>
+		</StackPanel>
+
+		<c:DataGrid x:Name="Lines" CanUserSortColumns="False" Grid.Row="1">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="149*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
+				<DataGridTextColumn Width="109*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
+				<DataGridTextColumn Width="94*" Header="Регион" Binding="{Binding Order.Price.RegionName}"></DataGridTextColumn>
+				<DataGridTextColumn Width="85*" Header="Дата" Binding="{Binding Order.SentOn}"></DataGridTextColumn>
+				<DataGridTextColumn Width="65*" Header="Срок годн." Binding="{Binding Period}"></DataGridTextColumn>
+				<DataGridTextColumn Width="57*" Header="Заказ" Binding="{Binding Count}"></DataGridTextColumn>
+				<DataGridTextColumn Width="82*" Header="Цена" Binding="{Binding Cost}" CellStyle="{StaticResource ResourceKey=Junk}"></DataGridTextColumn>
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<StackPanel Grid.Row="2" Orientation="Horizontal">
+			<Button Name="TryClose">Закрыть</Button>
+			<Label FontWeight="Bold">
+				<TextBlock>
+					Средняя цена по предыдущим заказам: <Run Name="Offer_PrevOrderAvgCost"></Run>
+				</TextBlock>
+			</Label>
+			<Label FontWeight="Bold">
+				<TextBlock>
+					Средний заказ по предыдущим заказам: <Run Name="Offer_PrevOrderAvgCount"></Run>
+				</TextBlock>
+			</Label>
+		</StackPanel>
+	</Grid>
+</UserControl>

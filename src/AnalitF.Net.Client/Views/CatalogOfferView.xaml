@@ -26,7 +26,7 @@
 		</Grid.RowDefinitions>
 
 		<DockPanel Grid.Row="0" LastChildFill="False">
-			<Label x:Name="Name" FontWeight="Bold"></Label>
+			<Label x:Name="Name" Style="{StaticResource HeaderLabel}"></Label>
 			<Grid DockPanel.Dock="Right">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto"></RowDefinition>
@@ -80,7 +80,7 @@
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
 				<DataGridTextColumn Width="Auto" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" />
-				<DataGridTextColumn Width="59*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn Width="59*" CellStyle="{StaticResource ResourceKey=Junk}" FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="39*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="48*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="50*" Header="Комментарий" Binding="{Binding OrderLine.Comment}" />

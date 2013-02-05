@@ -5,6 +5,16 @@
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
 
+	<Style TargetType="TextBlock" x:Key="HeaderTextBlock">
+		<Setter Property="FontWeight" Value="Bold"></Setter>
+		<Setter Property="FontSize" Value="14"></Setter>
+	</Style>
+
+	<Style TargetType="Label" x:Key="HeaderLabel">
+		<Setter Property="FontWeight" Value="Bold"></Setter>
+		<Setter Property="FontSize" Value="14"></Setter>
+	</Style>
+
 	<Style TargetType="TextBox" x:Key="ReadOnlyText">
 		<Setter Property="VerticalScrollBarVisibility" Value="Auto"></Setter>
 		<Setter Property="IsReadOnly" Value="True"></Setter>
@@ -94,16 +104,22 @@
 		<Setter Property="Margin" Value="4" />
 	</Style>
 
+	<Style TargetType="DockPanel" x:Key="FilterDockPanel">
+		<Setter Property="Margin" Value="4" />
+		<Setter Property="LastChildFill" Value="False" />
+	</Style>
+
 	<Style TargetType="Button" x:Key="FilterButton">
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 	</Style>
 
 	<Style TargetType="ToggleButton" x:Key="FilterToggleButton">
+		<Setter Property="VerticalAlignment" Value="Center"></Setter>
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 	</Style>
 
 	<Style TargetType="TextBox" x:Key="SearchText">
-		<Setter Property="Width" Value="150" />
+		<Setter Property="Width" Value="350" />
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 		<Setter Property="VerticalAlignment" Value="Center"></Setter>
 	</Style>

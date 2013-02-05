@@ -8,7 +8,7 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class FocusBehavior
 	{
-		public static DependencyProperty GridProperty
+		public static DependencyProperty DefaultFocusProperty
 			= DependencyProperty.RegisterAttached("DefaultFocus", typeof(IInputElement), typeof(FocusBehavior));
 
 		public static void Bind(object viewModel, DependencyObject view, object context)
@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Binders
 					Keyboard.Focus(lastFocusedElement);
 				}
 				else {
-					var defaultFocus = GetDefaultFocus(view);
+					var defaultFocus = GetDefaultFocus(view) ?? FromContent(view);
 					if (defaultFocus == null)
 						return;
 					if (defaultFocus is DataGrid)
@@ -41,14 +41,26 @@ namespace AnalitF.Net.Client.Binders
 			};
 		}
 
+		//если мы показываем диалог то DefaultFocus будет у UserControl
+		private static IInputElement FromContent(DependencyObject view)
+		{
+			var window = view as Window;
+			if (window == null)
+				return null;
+				var content = window.Content as DependencyObject;
+			if (content == null)
+				return null;
+			return GetDefaultFocus(content);
+		}
+
 		public static IInputElement GetDefaultFocus(DependencyObject d)
 		{
-			return (IInputElement)d.GetValue(GridProperty);
+			return (IInputElement)d.GetValue(DefaultFocusProperty);
 		}
 
 		public static void SetDefaultFocus(DependencyObject d, IInputElement value)
 		{
-			d.SetValue(GridProperty, value);
+			d.SetValue(DefaultFocusProperty, value);
 		}
 
 	}

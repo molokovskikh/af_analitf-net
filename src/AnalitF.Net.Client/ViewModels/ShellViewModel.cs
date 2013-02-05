@@ -288,8 +288,11 @@ namespace AnalitF.Net.Client.ViewModels
 			if (ActiveItem != null && ActiveItem.GetType() == screen.GetType())
 				return;
 
-			var toClose = navigationStack.TakeWhile(s => s.GetType() != screen.GetType());
-			foreach (var closing in toClose) {
+			while (navigationStack.Count > 0) {
+				var closing = navigationStack.Peek();
+				if (closing.GetType() == screen.GetType())
+					break;
+				navigationStack.Pop();
 				closing.TryClose();
 			}
 

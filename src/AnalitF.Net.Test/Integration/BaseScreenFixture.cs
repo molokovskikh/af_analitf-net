@@ -44,5 +44,17 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
 			Assert.That(shell.ActiveItem, Is.EqualTo(catalog));
 		}
+
+		[Test]
+		public void Activate_root_item()
+		{
+			shell.ShowPrice();
+			var price = (PriceViewModel)shell.ActiveItem;
+			price.CurrentPrice = price.Prices.FirstOrDefault();
+			price.EnterPrice();
+			Assert.That(shell.ActiveItem, Is.InstanceOf<PriceOfferViewModel>());
+			shell.ShowCatalog();
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
+		}
 	}
 }

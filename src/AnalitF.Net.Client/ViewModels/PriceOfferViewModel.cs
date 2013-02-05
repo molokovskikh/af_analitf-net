@@ -13,6 +13,23 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class HistoryOrdersViewModel : Screen
+	{
+		public HistoryOrdersViewModel(Catalog catalog, Offer offer, List<SentOrderLine> lines)
+		{
+			Offer = offer;
+			Catalog = catalog;
+			Lines = lines;
+			DisplayName = "Предыдущие заказы";
+		}
+
+		public Offer Offer { get; set; }
+
+		public Catalog Catalog { get; set; }
+
+		public List<SentOrderLine> Lines { get; set; }
+	}
+
 	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
 	{
 		private string[] filters = new[] {
@@ -83,7 +100,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.LeaderPrice == Price);
 			}
 			if (currentFilter == filters[1]) {
-				query = query.Where(o => o.OrderLine != null);
+				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id && l.Order.Address == Address) > 0);
 			}
 			if (!String.IsNullOrEmpty(ActiveSearchTerm)) {
 				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
@@ -94,6 +111,21 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<string> SearchText { get; set; }
+
+		public void CancelFilter()
+		{
+			CurrentFilter = Filters[0];
+		}
+
+		public void FilterOrdered()
+		{
+			CurrentFilter = Filters[1];
+		}
+
+		public void FilterLeader()
+		{
+			CurrentFilter = Filters[2];
+		}
 
 		public IResult Search()
 		{
@@ -127,6 +159,25 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var doc = new PriceOfferDocument(offers, Price, Address).BuildDocument();
 			return new PrintResult(doc, DisplayName);
+		}
+
+		public bool CanShowHistoryOrders
+		{
+			get { return CurrentCatalog != null; }
+		}
+
+		public IResult ShowHistoryOrders()
+		{
+			if (!CanShowHistoryOrders)
+				return null;
+
+			LoadHistoryOrders();
+			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer, HistoryOrders));
+		}
+
+		public IResult EnterOffer()
+		{
+			return ShowHistoryOrders();
 		}
 	}
 }

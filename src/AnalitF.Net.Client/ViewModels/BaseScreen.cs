@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected ExcelExporter excelExporter;
 
-		protected Extentions.WindowManager Manager { get; private set; }
+		public Extentions.WindowManager Manager { get; private set; }
 
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
