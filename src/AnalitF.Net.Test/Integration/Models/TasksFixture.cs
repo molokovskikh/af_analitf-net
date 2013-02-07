@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -14,6 +15,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
 using log4net.Config;
 
 namespace AnalitF.Net.Test.Integration.Models
@@ -79,6 +81,34 @@ namespace AnalitF.Net.Test.Integration.Models
 			task.Start();
 			task.Wait();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
+		}
+
+		[Test]
+		public void Sent_price_settings_changes()
+		{
+			var price = localSession.Query<Price>().First();
+			Assert.That(price.Active, Is.True);
+			Assert.That(price.PositionCount, Is.GreaterThan(0));
+			price.Active = false;
+			localSession.Flush();
+
+			task.Start();
+			task.Wait();
+
+			localSession.Refresh(price);
+			Assert.That(price.Active, Is.False, price.Id.ToString());
+			Assert.That(price.PositionCount, Is.EqualTo(0));
+			var offersCount = localSession.Query<Offer>().Count(o => o.Price == price);
+			Assert.That(offersCount, Is.EqualTo(0));
+
+			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var priceSettings = session
+				.CreateSQLQuery("select * from Customers.UserPrices where UserId = :userId and PriceId = :priceId and RegionId = :regionId")
+				.SetParameter("userId", user.Id)
+				.SetParameter("priceId", price.Id.PriceId)
+				.SetParameter("regionId", price.Id.RegionId)
+				.List();
+			Assert.That(priceSettings.Count, Is.EqualTo(0));
 		}
 
 		[Test]

@@ -13,6 +13,8 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.Suppliers;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Service.Test
 {
@@ -124,7 +126,36 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(job.Error, Is.Not.Null);
 			Assert.That(job.IsCompleted, Is.True);
 			Assert.That(job.IsFaulted, Is.True);
+		}
 
+		[Test]
+		public void Save_price_settings()
+		{
+			session.BeginTransaction();
+			var supplier = TestSupplier.CreateNaked();
+			session.Save(supplier);
+			supplier.Maintain();
+			session.Transaction.Commit();
+
+			var price = supplier.Prices[0];
+
+			var userPrices = localSession.Query<UserPrice>().Where(p => p.User == user).ToList();
+			var disabledPrice = userPrices.FirstOrDefault(p => p.RegionId == 1 && p.Price.PriceCode == price.Id);
+			Assert.That(disabledPrice, Is.Not.Null);
+
+			controller.Post(new SyncRequest {
+				Prices = new[] {
+					new PriceSettings {
+						Active = false,
+						PriceId = price.Id,
+						RegionId = 1
+					}
+				}
+			});
+
+			userPrices = localSession.Query<UserPrice>().Where(p => p.User == user).ToList();
+			disabledPrice = userPrices.FirstOrDefault(p => p.RegionId == 1 && p.Price.PriceCode == price.Id);
+			Assert.That(disabledPrice, Is.Null);
 		}
 	}
 }

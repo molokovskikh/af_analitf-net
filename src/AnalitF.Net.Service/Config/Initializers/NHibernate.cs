@@ -19,6 +19,18 @@ namespace AnalitF.Net.Config.Initializers
 				m.Property(l => l.Version, pm => pm.Type<VersionType>());
 			});
 
+			Mapper.Class<UserPrice>(m => {
+				m.Schema("Customers");
+				m.ComposedId(i => {
+					i.Property(p => p.RegionId);
+					i.ManyToOne(p => p.Price);
+					i.ManyToOne(p => p.User);
+				});
+				m.ManyToOne(p => p.Price);
+				m.ManyToOne(p => p.User);
+				m.Property(p => p.RegionId);
+			});
+
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			base.Init();
 		}

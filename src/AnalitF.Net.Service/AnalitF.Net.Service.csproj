@@ -66,6 +66,7 @@
     <Compile Include="Models\ClientOrder.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\RequestLog.cs" />
+    <Compile Include="Models\UserPrice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

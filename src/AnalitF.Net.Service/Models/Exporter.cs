@@ -44,7 +44,9 @@ namespace AnalitF.Net.Models
 		{
 			var result = new List<Tuple<string, string[]>>();
 
-			session.CreateSQLQuery("call Customers.GetOffers(:userId);" +
+			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
+				"drop temporary table if exists usersettings.activeprices;" +
+				"call Customers.GetOffers(:userId);" +
 				"call Customers.GetPrices(:userId);")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
@@ -126,7 +128,7 @@ s.Id as SupplierId,
 s.Name as SupplierName,
 s.FullName as SupplierFullName,
 rd.Storage,
-p.PositionCount,
+if(p.DisabledByClient or not p.Actual, 0, p.PositionCount) as PositionCount,
 convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
 rd.OperativeInfo,
 rd.ContactInfo,

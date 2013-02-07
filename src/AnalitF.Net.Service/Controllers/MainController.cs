@@ -107,41 +107,70 @@ namespace AnalitF.Net.Controllers
 			return task;
 		}
 
-		public HttpResponseMessage Post(ClientOrder[] clientOrders)
+		public HttpResponseMessage Post(SyncRequest request)
 		{
-			StorageProcedures.GetActivePrices((MySqlConnection)Session.Connection, CurrentUser.Id);
-
-			var rules = Session.Load<OrderRules>(CurrentUser.Client.Id);
-			foreach (var clientOrder in clientOrders) {
-				var address = Session.Load<Address>(clientOrder.AddressId);
-				var price = Session.Load<PriceList>(clientOrder.PriceId);
-				var activePrice = Session.Load<ActivePrice>(new PriceKey(price, clientOrder.RegionId));
-
-				var order = new Order(activePrice, CurrentUser, address, rules) {
-					ClientOrderId = clientOrder.ClientOrderId,
-					PriceDate = clientOrder.PriceDate,
-					ClientAddition = clientOrder.Comment,
-				};
-				foreach (var item in clientOrder.Items) {
-					var offer = new Offer {
-						Id = new OfferKey(item.OfferId.OfferId, item.OfferId.RegionId),
-						Cost = (float)item.Cost,
-						PriceList = activePrice,
-						PriceCode = price.PriceCode,
-						CodeFirmCr = item.ProducerId,
-					};
-
-					var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);
-					foreach (var property in properties) {
-						var value = property.GetValue(item, null);
-						property.SetValue(offer, value, null);
-					}
-
-					order.AddOrderItem(offer, item.Count);
-				}
-				Session.Save(order);
-			}
+			SaveOrders(request.Orders);
+			SavePriceSettings(request.Prices);
 			return new HttpResponseMessage(HttpStatusCode.OK);
+		}
+
+		private void SaveOrders(ClientOrder[] clientOrders)
+		{
+			if (clientOrders == null)
+				return;
+
+			using(StorageProcedures.GetActivePrices((MySqlConnection)Session.Connection, CurrentUser.Id)) {
+				var rules = Session.Load<OrderRules>(CurrentUser.Client.Id);
+				foreach (var clientOrder in clientOrders) {
+					var address = Session.Load<Address>(clientOrder.AddressId);
+					var price = Session.Load<PriceList>(clientOrder.PriceId);
+					var activePrice = Session.Load<ActivePrice>(new PriceKey(price, clientOrder.RegionId));
+
+					var order = new Order(activePrice, CurrentUser, address, rules) {
+						ClientOrderId = clientOrder.ClientOrderId,
+						PriceDate = clientOrder.PriceDate,
+						ClientAddition = clientOrder.Comment,
+					};
+					foreach (var item in clientOrder.Items) {
+						var offer = new Offer {
+							Id = new OfferKey(item.OfferId.OfferId, item.OfferId.RegionId),
+							Cost = (float)item.Cost,
+							PriceList = activePrice,
+							PriceCode = price.PriceCode,
+							CodeFirmCr = item.ProducerId,
+						};
+
+						var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);
+						foreach (var property in properties) {
+							var value = property.GetValue(item, null);
+							property.SetValue(offer, value, null);
+						}
+
+						order.AddOrderItem(offer, item.Count);
+					}
+					Session.Save(order);
+				}
+			}
+		}
+
+		private void SavePriceSettings(PriceSettings[] settings)
+		{
+			if (settings == null)
+				return;
+
+			foreach (var setting in settings) {
+				var userPrice = Session.Query<UserPrice>().FirstOrDefault(u => u.User == CurrentUser
+					&& u.Price.PriceCode == setting.PriceId
+					&& u.RegionId == setting.RegionId);
+
+				if (!setting.Active && userPrice != null) {
+					Session.Delete(userPrice);
+				}
+				else if (setting.Active && userPrice == null) {
+					var price = Session.Load<PriceList>(setting.PriceId);
+					Session.Save(new UserPrice(CurrentUser, setting.RegionId, price));
+				}
+			}
 		}
 	}
 }

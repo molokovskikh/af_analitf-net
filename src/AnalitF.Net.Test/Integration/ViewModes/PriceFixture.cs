@@ -29,7 +29,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Auto_open_single_price()
 		{
 			Restore = true;
-			session.DeleteEach(session.Query<Price>().Skip(1));
+			var price = session.Query<Price>().First(p => p.PositionCount > 0);
+			session.DeleteEach(session.Query<Price>().ToList().Where(p => p.Id != price.Id));
 			session.Flush();
 
 			shell.ShowPrice();

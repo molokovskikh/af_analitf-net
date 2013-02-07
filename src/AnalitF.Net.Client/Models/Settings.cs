@@ -43,6 +43,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Password { get; set; }
 
+		public virtual DateTime LastUpdate { get; set; }
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }

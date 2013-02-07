@@ -72,6 +72,8 @@ namespace AnalitF.Net.Client.Models
 				var done = false;
 				HttpResponseMessage response = null;
 
+				PostPriceSettings(client, cancellation);
+
 				while (!done) {
 					var request = client.GetAsync(currentUri, HttpCompletionOption.ResponseHeadersRead, cancellation);
 					currentUri = Uri;
@@ -101,6 +103,26 @@ namespace AnalitF.Net.Client.Models
 			});
 		}
 
+		private static void PostPriceSettings(HttpClient client, CancellationToken token)
+		{
+			Price[] prices;
+			using(var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
+				var settings = session.Query<Settings>().First();
+				prices = session.Query<Price>().Where(p => p.Timestamp > settings.LastUpdate).ToArray();
+			}
+
+			var clientPrices = prices.Select(p => new { p.Id.PriceId, p.Id.RegionId, p.Active }).ToArray();
+
+			var formatter = new JsonMediaTypeFormatter {
+				SerializerSettings = { ContractResolver = new NHibernateResolver() }
+			};
+			var response = client.PostAsync(Uri.ToString(), new SyncRequest(clientPrices), formatter, token).Result;
+
+			if (response.StatusCode != HttpStatusCode.OK)
+				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
+					response.StatusCode);
+		}
+
 		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, token, progress, client => {
@@ -114,7 +136,7 @@ namespace AnalitF.Net.Client.Models
 					var formatter = new JsonMediaTypeFormatter {
 						SerializerSettings = { ContractResolver = new NHibernateResolver() }
 					};
-					var response = client.PostAsync(Uri.ToString(), clientOrders, formatter, token).Result;
+					var response = client.PostAsync(Uri.ToString(), new SyncRequest(clientOrders), formatter, token).Result;
 
 					if (response.StatusCode != HttpStatusCode.OK)
 						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),

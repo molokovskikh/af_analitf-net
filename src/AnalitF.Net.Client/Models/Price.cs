@@ -140,6 +140,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool DisabledByClient { get; set; }
 
+		public virtual DateTime? Timestamp { get; set; }
+
 		[Ignore]
 		public virtual bool Active
 		{

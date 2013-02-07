@@ -3,17 +3,30 @@ using Common.Models;
 
 namespace AnalitF.Net.Models
 {
+	public class SyncRequest
+	{
+		public PriceSettings[] Prices;
+		public ClientOrder[] Orders;
+	}
+
+	public class PriceSettings
+	{
+		public uint PriceId;
+		public uint RegionId;
+		public bool Active;
+	}
+
 	public class ClientOrder
 	{
-		public uint ClientOrderId { get; set; }
-		public uint PriceId { get; set; }
-		public uint AddressId { get; set; }
-		public ulong RegionId { get; set; }
-		public DateTime CreatedOn { get; set; }
-		public DateTime PriceDate { get; set; }
-		public string Comment { get; set; }
+		public uint ClientOrderId;
+		public uint PriceId;
+		public uint AddressId;
+		public ulong RegionId;
+		public DateTime CreatedOn;
+		public DateTime PriceDate;
+		public string Comment;
 
-		public ClientOrderItem[] Items { get; set; }
+		public ClientOrderItem[] Items;
 	}
 
 	public class OfferComposedId

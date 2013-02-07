@@ -37,7 +37,8 @@ namespace AnalitF.Net.Client.Models
 
 			new SanityCheck(AppBootstrapper.DataPath).Check();
 
-			var settings = session.Query<Settings>().ToList()[0];
+			var settings = session.Query<Settings>().First();
+			settings.LastUpdate = DateTime.Now;
 			settings.ApplyChanges(session);
 		}
 	}

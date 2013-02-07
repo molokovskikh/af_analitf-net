@@ -47,7 +47,7 @@
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:DataGridTextColumnEx Width="85*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="63*" Header="Упаковка" Binding="{Binding Volume}" TextAlignment="ru" />
+				<c:DataGridTextColumnEx Width="63*" Header="Упаковка" Binding="{Binding Volume}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="85*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />

@@ -10,17 +10,33 @@ using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
+	public class SyncRequest
+	{
+		public SyncRequest(object[] prices)
+		{
+			Prices = prices;
+		}
+
+		public SyncRequest(ClientOrder[] orders)
+		{
+			Orders = orders;
+		}
+
+		public object[] Prices;
+		public ClientOrder[] Orders;
+	}
+
 	public class ClientOrder
 	{
-		public uint ClientOrderId { get; set; }
-		public uint PriceId { get; set; }
-		public uint AddressId { get; set; }
-		public ulong RegionId { get; set; }
-		public DateTime CreatedOn { get; set; }
-		public DateTime PriceDate { get; set; }
-		public string Comment { get; set; }
+		public uint ClientOrderId;
+		public uint PriceId;
+		public uint AddressId;
+		public ulong RegionId;
+		public DateTime CreatedOn;
+		public DateTime PriceDate;
+		public string Comment;
 
-		public OrderLine[] Items { get; set; }
+		public OrderLine[] Items;
 	}
 
 	public class Order : INotifyPropertyChanged
