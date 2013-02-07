@@ -2,6 +2,7 @@
 using System.Data;
 using System.Reflection;
 using AnalitF.Net.Models;
+using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using NHibernate;
 using NHibernate.Mapping.Attributes;
@@ -14,8 +15,11 @@ namespace AnalitF.Net.Config.Initializers
 	{
 		public override void Init()
 		{
+			Mapper.Class<ClientAppLog>(m => {
+				m.Property(p => p.Text, c => c.Length(10000));
+			});
+
 			Mapper.Class<RequestLog>(m => {
-				m.Schema("logs");
 				m.Property(l => l.Version, pm => pm.Type<VersionType>());
 			});
 
@@ -30,6 +34,18 @@ namespace AnalitF.Net.Config.Initializers
 				m.ManyToOne(p => p.User);
 				m.Property(p => p.RegionId);
 			});
+
+			Mapper.AfterMapClass += (i, t, c) => {
+				if (t.Name.EndsWith("Log")) {
+					c.Schema("Logs");
+				}
+			};
+
+			Mapper.AfterMapProperty += (inspector, member, customizer) => {
+				if (typeof(ValueType).IsAssignableFrom(((PropertyInfo)member.LocalMember).PropertyType)) {
+					customizer.NotNullable(true);
+				}
+			};
 
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			base.Init();

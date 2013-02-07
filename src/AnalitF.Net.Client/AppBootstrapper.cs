@@ -159,7 +159,7 @@ namespace AnalitF.Net.Client
 				Directory.CreateDirectory(TempPath);
 			}
 
-			Tasks.Uri = new Uri(ConfigurationManager.AppSettings["Uri"]);
+			Tasks.BaseUri = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
 			Tasks.ExtractPath = TempPath;
 			Tasks.RootPath = FileHelper.MakeRooted(".");

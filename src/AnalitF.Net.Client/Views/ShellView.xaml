@@ -59,36 +59,36 @@
 			<ToolBar Band="1" BandIndex="1">
 
 				<Button x:Name="Update" ToolTip="Получить данные">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Button x:Name="SendOrders" ToolTip="Отправить заказы">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Separator />
 
 				<Button x:Name="Export" ToolTip="Сохранить текущую таблицу">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Button x:Name="Print" ToolTip="Печать">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Separator />
 
 				<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<Button x:Name="ShowMnn" ToolTip="Поиск по МНН">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<!--скрыл, пока не реализовано
 				<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены">
@@ -98,10 +98,11 @@
 				<Separator />
 
 				<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico" Style="{StaticResource ButtonImage}">
+					</Image>
 				</Button>
 				<Button x:Name="ShowOrders" ToolTip="Заказы">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<!--скрыл кнопку пока не реализовано
 				<Button x:Name="ShowAutoOrder" ToolTip="Авто заказ">
@@ -111,22 +112,23 @@
 				<Separator />
 
 				<Button x:Name="ShowJunkOffers" ToolTip="Уцененные препараты">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 				<Button x:Name="ShowRejects" ToolTip="Забракованные препараты">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad2_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad2_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Separator />
 
+				<!--скрыл кнопку пока не реализовано
 				<Button x:Name="ShowWaybills" ToolTip="Накладные">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"></Image>
-				</Button>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico" Style="{StaticResource ButtonImage}"></Image>
+				</Button>-->
 
-				<Separator />
+				<!--<Separator />-->
 
 				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"></Image>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico" Style="{StaticResource ButtonImage}"></Image>
 				</Button>
 
 				<Separator></Separator>
@@ -141,9 +143,16 @@
 		<ContentControl Grid.Row="2" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
 
 		<StatusBar Grid.Row="3">
+			<StatusBar.ItemsPanel>
+				<ItemsPanelTemplate>
+					<DockPanel LastChildFill="False"></DockPanel>
+				</ItemsPanelTemplate>
+			</StatusBar.ItemsPanel>
+
 			<StatusBarItem>
 				<Button x:Name="Snoop">Snoop</Button>
 			</StatusBarItem>
+
 			<StatusBarItem>
 				<Label>Заказов:</Label>
 			</StatusBarItem>
@@ -153,8 +162,9 @@
 			<StatusBarItem>
 				<Separator></Separator>
 			</StatusBarItem>
+
 			<StatusBarItem>
-				<Label>Заказов:</Label>
+				<Label>Позиций:</Label>
 			</StatusBarItem>
 			<StatusBarItem>
 				<Label x:Name="OrderLinesCount"></Label>
@@ -162,11 +172,32 @@
 			<StatusBarItem>
 				<Separator></Separator>
 			</StatusBarItem>
+
 			<StatusBarItem>
 				<Label>Сумма:</Label>
 			</StatusBarItem>
 			<StatusBarItem>
 				<Label x:Name="OrdersSum"></Label>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Separator></Separator>
+			</StatusBarItem>
+
+			<StatusBarItem>
+				<TextBlock Margin="5">
+					<Run>Обновление:&#160;</Run>
+					<Run Name="Settings_Value_LastUpdate"></Run>
+				</TextBlock>
+			</StatusBarItem>
+			<StatusBarItem>
+				<Separator></Separator>
+			</StatusBarItem>
+
+			<StatusBarItem DockPanel.Dock="Right">
+				<TextBlock Margin="5">
+					<Run>ИД:&#160;</Run><Run Name="User_Value_Id"></Run>
+					<Run> (версия&#160;</Run><Run Name="Version"></Run><Run>)</Run>
+				</TextBlock>
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>

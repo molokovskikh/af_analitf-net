@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Password { get; set; }
 
-		public virtual DateTime LastUpdate { get; set; }
+		public virtual DateTime? LastUpdate { get; set; }
 
 		public virtual bool IsValid
 		{

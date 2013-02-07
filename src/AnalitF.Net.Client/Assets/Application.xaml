@@ -5,6 +5,18 @@
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
 
+	<Style TargetType="Image" x:Key="ButtonImage">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=Button}}" Value="False">
+				<Setter Property="Effect">
+					<Setter.Value>
+						<Controls:GrayscaleEffect></Controls:GrayscaleEffect>
+					</Setter.Value>
+				</Setter>
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+
 	<Style TargetType="TextBlock" x:Key="HeaderTextBlock">
 		<Setter Property="FontWeight" Value="Bold"></Setter>
 		<Setter Property="FontSize" Value="14"></Setter>

@@ -9,8 +9,8 @@
     <ProjectGuid>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AnalitF.Net</RootNamespace>
-    <AssemblyName>AnalitF.Net</AssemblyName>
+    <RootNamespace>AnalitF.Net.Service</RootNamespace>
+    <AssemblyName>AnalitF.Net.Service</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -59,10 +59,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\Initializers\NHibernate.cs" />
+    <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Global.asax.cs">
     </Compile>
     <Compile Include="Controllers\MainController.cs">
     </Compile>
+    <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\ClientOrder.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\RequestLog.cs" />

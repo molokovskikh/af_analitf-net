@@ -44,7 +44,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			FileHelper.InitDir(updatePath, Tasks.ExtractPath, Tasks.RootPath);
 
 			localSession = SetupFixture.Factory.OpenSession();
-			Tasks.Uri = new Uri("http://localhost:8080/Main/");
+			Tasks.BaseUri = new Uri("http://localhost:8080/");
 			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
 
 			cancelletion = new CancellationTokenSource();
@@ -86,7 +86,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Sent_price_settings_changes()
 		{
-			var price = localSession.Query<Price>().First();
+			var price = localSession.Query<Price>().First(p => p.PositionCount > 0);
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
@@ -109,6 +109,22 @@ namespace AnalitF.Net.Test.Integration.Models
 				.SetParameter("regionId", price.Id.RegionId)
 				.List();
 			Assert.That(priceSettings.Count, Is.EqualTo(0));
+		}
+
+		[Test]
+		public void Send_logs()
+		{
+			var begin = DateTime.Now;
+			File.WriteAllText(@"app\AnalitF.Net.Client.log", "123");
+			task.Start();
+			task.Wait();
+
+			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var text = session.CreateSQLQuery("select Text from Logs.ClientAppLogs where UserId = :userId and CreatedOn >= :date")
+				.SetParameter("userId", user.Id)
+				.SetParameter("date", begin)
+				.UniqueResult<string>();
+			Assert.That(text, Is.EqualTo("123"));
 		}
 
 		[Test]

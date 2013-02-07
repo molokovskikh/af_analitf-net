@@ -21,6 +21,7 @@ using NHibernate.Proxy;
 using NHibernate.Tool.hbm2ddl;
 using Newtonsoft.Json.Serialization;
 using log4net;
+using log4net.Config;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -58,7 +59,7 @@ namespace AnalitF.Net.Client.Models
 		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> Update = (c, t, p) => UpdateTask(c, t, p);
 		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> SendOrders = (c, t, p) => SendOrdersTask(c, t, p);
 
-		public static Uri Uri;
+		public static Uri BaseUri;
 		public static string ArchiveFile;
 		public static string ExtractPath;
 		public static string RootPath;
@@ -66,17 +67,19 @@ namespace AnalitF.Net.Client.Models
 		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, cancellation, progress, client => {
-				var currentUri = new UriBuilder(Uri) {
-					Query = "reset=true"
+				var currentUri = new UriBuilder(BaseUri) {
+					Path = "Main",
+					Query = "reset=true",
 				}.Uri;
 				var done = false;
 				HttpResponseMessage response = null;
 
-				PostPriceSettings(client, cancellation);
+				SendPrices(client, cancellation);
+				var sendLogsTask = SendLogs(client, cancellation);
 
 				while (!done) {
 					var request = client.GetAsync(currentUri, HttpCompletionOption.ResponseHeadersRead, cancellation);
-					currentUri = Uri;
+					currentUri = new Uri(BaseUri, "Main");
 					response = request.Result;
 					if (response.StatusCode != HttpStatusCode.OK
 						&& response.StatusCode != HttpStatusCode.Accepted)
@@ -99,11 +102,55 @@ namespace AnalitF.Net.Client.Models
 				progress.OnNext(new Progress("Импорт данных", 0, 66));
 				var result = ProcessUpdate(ArchiveFile);
 				progress.OnNext(new Progress("Импорт данных", 100, 100));
+
+				if (sendLogsTask.IsFaulted || (sendLogsTask.IsCompleted && sendLogsTask.Result.StatusCode != HttpStatusCode.OK)) {
+					if (sendLogsTask.Exception != null)
+						log.Error("Ошибка при отправке логов {0}", sendLogsTask.Exception);
+					else
+						log.ErrorFormat("Ошибка при отправке логов {0}", sendLogsTask.Result);
+				}
+
 				return result;
 			});
 		}
 
-		private static void PostPriceSettings(HttpClient client, CancellationToken token)
+		public static Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
+		{
+			var file = Path.GetTempFileName();
+			var cleaner = new FileCleaner();
+			cleaner.Watch(file);
+
+			LogManager.ResetConfiguration();
+			try
+			{
+				var logs = Directory.GetFiles(RootPath, "*.log");
+
+				using(var zip = new ZipFile()) {
+					foreach (var logFile in logs) {
+						zip.AddFile(logFile);
+					}
+					zip.Save(file);
+				}
+
+				var logsWatch = new FileCleaner();
+				logsWatch.Watch(logs);
+				logsWatch.Dispose();
+			}
+			finally {
+				XmlConfigurator.Configure();
+			}
+
+			var uri = new Uri(BaseUri, "Logs");
+			var stream = File.OpenRead(file);
+			var post = client.PostAsync(uri, new StreamContent(stream), token);
+			post.ContinueWith(t => {
+				stream.Dispose();
+				cleaner.Dispose();
+			});
+			return post;
+		}
+
+		private static void SendPrices(HttpClient client, CancellationToken token)
 		{
 			Price[] prices;
 			using(var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
@@ -116,7 +163,7 @@ namespace AnalitF.Net.Client.Models
 			var formatter = new JsonMediaTypeFormatter {
 				SerializerSettings = { ContractResolver = new NHibernateResolver() }
 			};
-			var response = client.PostAsync(Uri.ToString(), new SyncRequest(clientPrices), formatter, token).Result;
+			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientPrices), formatter, token).Result;
 
 			if (response.StatusCode != HttpStatusCode.OK)
 				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
@@ -136,7 +183,7 @@ namespace AnalitF.Net.Client.Models
 					var formatter = new JsonMediaTypeFormatter {
 						SerializerSettings = { ContractResolver = new NHibernateResolver() }
 					};
-					var response = client.PostAsync(Uri.ToString(), new SyncRequest(clientOrders), formatter, token).Result;
+					var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientOrders), formatter, token).Result;
 
 					if (response.StatusCode != HttpStatusCode.OK)
 						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
@@ -217,6 +264,7 @@ namespace AnalitF.Net.Client.Models
 			using (var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
 				var importer = new Importer(session);
 				importer.Import(data);
+				session.Flush();
 			}
 		}
 

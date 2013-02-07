@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Views;
@@ -76,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class ShellViewModel : BaseConductor
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
-		private Settings settings;
+		//private Settings Settings;
 		private WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -85,6 +86,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel()
 		{
+			User = new NotifyValue<User>();
+			Settings = new NotifyValue<Settings>();
+			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			Arguments = Environment.GetCommandLineArgs();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
@@ -131,6 +135,10 @@ namespace AnalitF.Net.Client.ViewModels
 			OnViewLoaded(GetView());
 		}
 
+		public NotifyValue<Settings> Settings { get; set; }
+		public NotifyValue<User> User { get; set; }
+		public string Version { get; set; }
+
 		public List<Address> Addresses
 		{
 			get { return addresses; }
@@ -155,7 +163,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool CheckSettings()
 		{
 			Reload();
-			if (!settings.IsValid) {
+			if (!Settings.Value.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
 				ShowSettings();
 				return false;
@@ -167,7 +175,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			session.Clear();
 
-			settings = session.Query<Settings>().First();
+			Settings.Value = session.Query<Settings>().First();
+			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
 		}
@@ -371,7 +380,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var wait = new SyncViewModel(progress) {
 				GenericErrorMessage = errorMessage
 			};
-			var credential = new NetworkCredential(settings.UserName, settings.Password);
+			var credential = new NetworkCredential(Settings.Value.UserName, Settings.Value.Password);
 
 			RunTask(wait,
 				t => func(credential, t, progress),

@@ -8,6 +8,8 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public WaitViewModel()
 		{
+			DisplayName = "АналитФАРМАЦИЯ";
+			GenericErrorMessage = "Не удалось выполнить операцию. Обратитесь в АК\"Инфорум\".";
 			Cancellation = new CancellationTokenSource();
 		}
 
@@ -15,8 +17,6 @@ namespace AnalitF.Net.Client.ViewModels
 			: this()
 		{
 			Text = text;
-			DisplayName = "АналитФАРМАЦИЯ";
-			GenericErrorMessage = "Не удалось выполнить операцию. Обратитесь в АК\"Инфорум\".";
 		}
 
 		public CancellationTokenSource Cancellation;
