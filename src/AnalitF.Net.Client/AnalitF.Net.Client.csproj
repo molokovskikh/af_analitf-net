@@ -143,6 +143,7 @@
     <Compile Include="Binders\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
     <Compile Include="Controls\GrayScaleEffect.cs" />
+    <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
@@ -173,7 +174,7 @@
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
-    <Compile Include="Models\Results\OpenFileResult.cs" />
+    <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />
@@ -281,11 +282,11 @@
     <Compile Include="Views\WaitView.xaml.cs">
       <DependentUpon>WaitView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Assets\Application.xaml">
+    <Page Include="Assets\styles\Application.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Assets\DataGrid.xaml">
+    <Page Include="Assets\styles\DataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

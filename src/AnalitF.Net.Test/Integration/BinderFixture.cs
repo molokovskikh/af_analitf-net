@@ -15,7 +15,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture, RequiresSTA]
-	public class ContentElementBinderFixture
+	public class BinderFixture
 	{
 		[Test]
 		public void Bind_content_elements()
@@ -95,8 +95,28 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(textBox.Text, Is.EqualTo("123"));
 		}
 
+		[Test]
+		public void Invoke_view_model_with_parameters()
+		{
+			var model = new ViewModel();
+			var view = new UserControl { DataContext = model };
+			ViewModelHelper.InvokeDataContext(view, new { Method = "Reset", i = 1 });
+			Assert.That(model.ResetValue, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Invoke_view_model()
+		{
+			var model = new ViewModel();
+			var view = new UserControl { DataContext = model };
+			ViewModelHelper.InvokeDataContext(view, "Reset", EventArgs.Empty);
+			Assert.That(model.ResetValue, Is.EqualTo(100));
+		}
+
 		public class ViewModel
 		{
+			public int ResetValue;
+
 			public string Text { get; set; }
 
 			public NotifyValue<string> Term { get; set; }
@@ -106,6 +126,16 @@ namespace AnalitF.Net.Test.Integration
 			public bool IsEnabled { get; set; }
 
 			public bool IsVisible { get; set; }
+
+			public void Reset()
+			{
+				ResetValue = 100;
+			}
+
+			public void Reset(int i)
+			{
+				ResetValue = i;
+			}
 		}
 	}
 }

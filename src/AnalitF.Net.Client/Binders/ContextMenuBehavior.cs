@@ -1,3 +1,7 @@
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Extentions;
@@ -10,6 +14,12 @@ namespace AnalitF.Net.Client.Binders
 		public static void Attach(DataGrid grid)
 		{
 			var contextMenu = new ContextMenu();
+			contextMenu.Items.Add(new MenuItem {
+				Header = "Восстановить значения по умолчанию",
+				Command = Commands.InvokeViewModel,
+				CommandParameter = new { Method = "ResetView", grid },
+			});
+			contextMenu.Items.Add(new Separator());
 			foreach (var column in grid.Columns) {
 				var menuItem = new MenuItem {
 					Header = column.Header,

@@ -5,8 +5,8 @@
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="Assets/Application.xaml" />
-				<ResourceDictionary Source="Assets/DataGrid.xaml" />
+				<ResourceDictionary Source="Assets/styles/Application.xaml" />
+				<ResourceDictionary Source="Assets/styles/DataGrid.xaml" />
 				<ResourceDictionary>
 					<local:AppBootstrapper x:Key="bootstrapper" />
 				</ResourceDictionary>

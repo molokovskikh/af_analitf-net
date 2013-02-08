@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -24,6 +25,9 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class BaseScreen : Screen, IActivateEx, IExportable
 	{
+		private Dictionary<string, List<ColumnSettings>> viewDefaults
+			= new Dictionary<string, List<ColumnSettings>>();
+
 		protected ILog log;
 
 		protected virtual ShellViewModel Shell
@@ -164,31 +168,47 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			foreach (var grid in GetControls(view)) {
-				var key = GetViewKey(grid);
-				if (Shell.ViewSettings.ContainsKey(key)) {
-					Shell.ViewSettings.Remove(key);
-				}
-				Shell.ViewSettings.Add(key, grid.Columns.Select(c => new ColumnSettings(c)).ToList());
+				SaveView(grid, Shell.ViewSettings);
 			}
+		}
+
+		private void SaveView(DataGrid grid, Dictionary<string, List<ColumnSettings>> storage)
+		{
+			var key = GetViewKey(grid);
+			if (storage.ContainsKey(key)) {
+				storage.Remove(key);
+			}
+			storage.Add(key, grid.Columns.Select(c => new ColumnSettings(c)).ToList());
 		}
 
 		protected void RestoreView(object view)
 		{
-			foreach (var dataGrid in GetControls(view)) {
-				var key = GetViewKey(dataGrid);
-				if (!Shell.ViewSettings.ContainsKey(key))
-					continue;
+			foreach (var grid in GetControls(view)) {
+				SaveView(grid, viewDefaults);
+				RestoreView(grid, Shell.ViewSettings);
+			}
+		}
 
-				var settings = Shell.ViewSettings[key];
-				if (settings == null)
+		public void ResetView(DataGrid grid)
+		{
+			RestoreView(grid, viewDefaults);
+		}
+
+		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
+		{
+			var key = GetViewKey(dataGrid);
+			if (!storage.ContainsKey(key))
+				return;
+
+			var settings = storage[key];
+			if (settings == null)
+				return;
+
+			foreach (var setting in settings) {
+				var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
+				if (column == null)
 					return;
-
-				foreach (var setting in settings) {
-					var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
-					if (column == null)
-						return;
-					setting.Restore(column);
-				}
+				setting.Restore(column);
 			}
 		}
 
@@ -206,6 +226,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.OfType<DataGrid>()
 				.Where(c => c.Name == "Offers");
 		}
+
 
 		protected override void OnViewAttached(object view, object context)
 		{

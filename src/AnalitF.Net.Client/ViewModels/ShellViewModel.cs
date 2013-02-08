@@ -77,7 +77,6 @@ namespace AnalitF.Net.Client.ViewModels
 	public class ShellViewModel : BaseConductor
 	{
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
-		//private Settings Settings;
 		private WindowManager windowManager;
 		private ISession session;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -109,6 +108,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CanPrint)
 				.Subscribe(_ => NotifyOfPropertyChange("CanPrintPreview"));
+
+			this.ObservableForProperty(m => m.Settings.Value)
+				.Subscribe(_ => {
+					NotifyOfPropertyChange("CanShowCatalog");
+					NotifyOfPropertyChange("CanSearchOffers");
+					NotifyOfPropertyChange("CanShowMnn");
+					NotifyOfPropertyChange("CanShowPrice");
+
+					NotifyOfPropertyChange("CanShowOrders");
+					NotifyOfPropertyChange("CanShowOrderLines");
+
+					NotifyOfPropertyChange("CanShowJunkOffers");
+					NotifyOfPropertyChange("CanShowRejects");
+				});
 		}
 
 		public string[] Arguments;
@@ -246,9 +259,19 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowDialog(new PrintPreviewViewModel(printResult));
 		}
 
+		public bool CanShowCatalog
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
 		public void ShowCatalog()
 		{
 			ActivateRootItem(new CatalogViewModel());
+		}
+
+		public bool CanShowPrice
+		{
+			get { return Settings.Value.LastUpdate != null; }
 		}
 
 		public void ShowPrice()
@@ -259,9 +282,19 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateRootItem(model);
 		}
 
+		public bool CanShowMnn
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
 		public void ShowMnn()
 		{
 			ActivateRootItem(new MnnViewModel());
+		}
+
+		public bool CanSearchOffers
+		{
+			get { return Settings.Value.LastUpdate != null; }
 		}
 
 		public void SearchOffers()
@@ -274,14 +307,38 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowFixedDialog(new SettingsViewModel());
 		}
 
+		public bool CanShowOrderLines
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
 		public void ShowOrderLines()
 		{
 			ActivateRootItem(new OrderLinesViewModel());
 		}
 
+		public bool CanShowJunkOffers
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
 		public void ShowJunkOffers()
 		{
 			ActivateRootItem(new JunkOfferViewModel());
+		}
+
+		public bool CanShowRejects
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void ShowRejects()
+		{
+		}
+
+		public bool CanShowOrders
+		{
+			get { return Settings.Value.LastUpdate != null; }
 		}
 
 		public void ShowOrders()

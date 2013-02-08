@@ -77,7 +77,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			InitView(model);
 
 			Assert.That(model.CanExport, Is.True);
-			var result = (OpenFileResult)model.Export();
+			var result = (OpenResult)model.Export();
 			Assert.That(File.Exists(result.Filename), result.Filename);
 			File.Delete(result.Filename);
 		}

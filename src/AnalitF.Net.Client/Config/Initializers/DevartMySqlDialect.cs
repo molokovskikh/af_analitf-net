@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public DevartMySqlDialect()
 		{
 			//http://dev.mysql.com/doc/refman/5.0/en/fixed-point-types.html
-			//по умолчанию mysql интерпритирует decimal как decimal(10, 0) обрезая дробную часть
+			//РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ mysql РёРЅС‚РµСЂРїСЂРёС‚РёСЂСѓРµС‚ decimal РєР°Рє decimal(10, 0) РѕР±СЂРµР·Р°СЏ РґСЂРѕР±РЅСѓСЋ С‡Р°СЃС‚СЊ
 			RegisterCastType(DbType.Decimal, "DECIMAL(19,5)");
 			RegisterCastType(DbType.Double, "DECIMAL(19,5)");
 			RegisterCastType(DbType.Single, "DECIMAL(19,5)");

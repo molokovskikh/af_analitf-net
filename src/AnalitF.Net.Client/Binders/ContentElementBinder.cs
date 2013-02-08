@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Binders
 			SetPassword(passwordBox, passwordBox.Password);
 		}
 
-		public static void RegisterConvention()
+		public static void Register()
 		{
 			ConventionManager.Singularize = s => s.InflectTo().Singularized;
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");

@@ -4,11 +4,11 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Results
 {
-	public class OpenFileResult : IResult
+	public class OpenResult : IResult
 	{
 		public string Filename;
 
-		public OpenFileResult(string filename)
+		public OpenResult(string filename)
 		{
 			Filename = filename;
 		}

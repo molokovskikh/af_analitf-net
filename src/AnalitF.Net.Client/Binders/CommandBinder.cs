@@ -1,6 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using AnalitF.Net.Client.Models.Results;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -21,12 +24,12 @@ namespace AnalitF.Net.Client.Binders
 			if (e.Parameter == null)
 				return;
 
-			Process.Start(new ProcessStartInfo(e.Parameter.ToString()) { Verb = "Open" });
+			new OpenResult(e.Parameter.ToString()).Execute(new ActionExecutionContext());
 		}
 
-		private static void InvokeViewModel(object sender, ExecutedRoutedEventArgs e)
+		public static void InvokeViewModel(object sender, ExecutedRoutedEventArgs e)
 		{
-			ViewModelHelper.InvokeDataContext(sender, e.Parameter as string);
+			ViewModelHelper.InvokeDataContext(sender, e.Parameter, e);
 		}
 
 		private static void CanInvokeViewModel(object sender, CanExecuteRoutedEventArgs e)

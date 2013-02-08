@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.Models
 				book.Write(file);
 			}
 
-			return new OpenFileResult(filename);
+			return new OpenResult(filename);
 		}
 
 		private string GetValue(DataGridBoundColumn column, object offer)

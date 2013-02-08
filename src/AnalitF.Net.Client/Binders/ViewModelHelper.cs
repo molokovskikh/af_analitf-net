@@ -1,13 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using Caliburn.Micro;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Binders
 {
 	public class ViewModelHelper
 	{
-		public static object InvokeDataContext(object sender, string method)
+		public static object InvokeDataContext(object sender, object methodOrMethodAndArgs, params object[] args)
+		{
+			if (methodOrMethodAndArgs is string) {
+				return InvokeDataContext(sender, methodOrMethodAndArgs as string, args);
+			}
+			else {
+				var values = ObjectExtentions.ToDictionary(methodOrMethodAndArgs);
+				if (values.ContainsKey("Method")) {
+					args = values.Where(k => k.Key != "Method").Select(k => k.Value).ToArray();
+					return InvokeDataContext(sender, values["Method"] as string, args);
+				}
+				return null;
+			}
+		}
+
+		public static object InvokeDataContext(object sender, string method, params object[] args)
 		{
 			if (method == null)
 				return null;
@@ -20,9 +37,14 @@ namespace AnalitF.Net.Client.Binders
 			if (viewModel == null)
 				return null;
 
-			var methodInfo = viewModel.GetType().GetMethod(method, new Type[0]);
+			var type = viewModel.GetType();
+			var methodInfo = type.GetMethod(method, args.Select(a => a.GetType()).ToArray());
+			if (methodInfo == null) {
+				args = new object[0];
+				methodInfo = type.GetMethod(method, new Type[0]);
+			}
 			if (methodInfo != null) {
-				var result = methodInfo.Invoke(viewModel, null);
+				var result = methodInfo.Invoke(viewModel, args);
 
 				IEnumerator<IResult> actions = null;
 

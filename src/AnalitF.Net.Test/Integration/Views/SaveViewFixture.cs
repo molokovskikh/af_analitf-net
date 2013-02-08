@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
-using AnalitF.Net.Client.Controls;
+using System.Windows.Controls;
+using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -13,6 +15,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Newtonsoft.Json;
+using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -68,6 +71,15 @@ namespace AnalitF.Net.Test.Integration.Views
 			InitView();
 			grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Collapsed));
+		}
+
+		[Test]
+		public void Reset_settings()
+		{
+			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			grid.Columns[0].Visibility = Visibility.Collapsed;
+			model.ResetView(grid);
+			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Visible));
 		}
 	}
 }

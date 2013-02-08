@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -175,7 +176,8 @@ namespace AnalitF.Net.Client
 
 		public static void InitUi()
 		{
-			ContentElementBinder.RegisterConvention();
+			ContentElementBinder.Register();
+			SaneCheckboxEditor.Register();
 
 			var defaultSetBinding = ConventionManager.SetBinding;
 			ConventionManager.SetBinding =
