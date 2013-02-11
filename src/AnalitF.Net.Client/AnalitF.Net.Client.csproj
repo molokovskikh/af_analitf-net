@@ -146,6 +146,7 @@
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
+    <Compile Include="Helpers\ErrorHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
@@ -158,6 +159,8 @@
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\Commands\RemoteCommand.cs" />
+    <Compile Include="Models\Commands\SendOrders.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
@@ -181,6 +184,7 @@
     <Compile Include="Models\SentOrder.cs" />
     <Compile Include="Models\SentOrderLine.cs" />
     <Compile Include="Models\Settings.cs" />
+    <Compile Include="Models\Stat.cs" />
     <Compile Include="Models\Tasks.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\WrapDocumentPaginator.cs" />

@@ -11,6 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
@@ -57,7 +59,7 @@ namespace AnalitF.Net.Client.Models
 		private static ILog log = LogManager.GetLogger(typeof(Tasks));
 
 		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> Update = (c, t, p) => UpdateTask(c, t, p);
-		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> SendOrders = (c, t, p) => SendOrdersTask(c, t, p);
+		public static Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, Address, UpdateResult> SendOrders = (c, t, p, a) => SendOrdersTask(c, t, p, a);
 
 		public static Uri BaseUri;
 		public static string ArchiveFile;
@@ -170,39 +172,19 @@ namespace AnalitF.Net.Client.Models
 					response.StatusCode);
 		}
 
-		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
+		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress, Address address)
 		{
-			return RemoteTask(credentials, token, progress, client => {
-				progress.OnNext(new Progress("Соединение", 100, 0));
-				progress.OnNext(new Progress("Отправка заказов", 0, 50));
-				using (var session = AppBootstrapper.NHibernate.Factory.OpenSession())
-				using (var transaction = session.BeginTransaction()) {
-					var orders = session.Query<Order>().ToList();
-					var clientOrders = orders.Select(o => o.ToClientOrder()).Where(o => o != null).ToArray();
-
-					var formatter = new JsonMediaTypeFormatter {
-						SerializerSettings = { ContractResolver = new NHibernateResolver() }
-					};
-					var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientOrders), formatter, token).Result;
-
-					if (response.StatusCode != HttpStatusCode.OK)
-						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
-							response.StatusCode);
-
-					foreach (var order in orders)
-						session.Save(new SentOrder(order));
-
-					foreach (var order in orders)
-						session.Delete(order);
-
-					transaction.Commit();
-				}
-				progress.OnNext(new Progress("Отправка заказов", 100, 100));
-				return UpdateResult.OK;
-			});
+			var command = new SendOrders {
+				BaseUri = BaseUri,
+				Address = address,
+				Credentials = credentials,
+				Token = token,
+				Progress = progress,
+			};
+			return command.Run();
 		}
 
-		private static UpdateResult RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
+		public static UpdateResult RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
 		{
 			var version = typeof(Tasks).Assembly.GetName().Version;
 

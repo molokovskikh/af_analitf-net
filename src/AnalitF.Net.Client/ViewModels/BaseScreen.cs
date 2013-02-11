@@ -39,6 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Extentions.WindowManager Manager { get; private set; }
 
+		protected bool Flush = true;
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
 
@@ -48,6 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static IScheduler TestSchuduler;
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
+		protected IMessageBus Bus = RxApp.MessageBus;
 
 		public BaseScreen()
 		{
@@ -129,7 +131,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			Session.Flush();
+			if (Flush)
+				Session.Flush();
 
 			if (close) {
 				Save();

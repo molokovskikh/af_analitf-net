@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -83,8 +85,13 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<Address> addresses;
 		private Address currentAddress;
 
+		protected IScheduler Scheduler = BaseScreen.TestSchuduler ?? DefaultScheduler.Instance;
+		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
+		protected IMessageBus Bus = RxApp.MessageBus;
+
 		public ShellViewModel()
 		{
+			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
@@ -109,6 +116,13 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CanPrint)
 				.Subscribe(_ => NotifyOfPropertyChange("CanPrintPreview"));
 
+			this.ObservableForProperty(m => (object)m.Stat.Value)
+				.Merge(this.ObservableForProperty(m => (object)m.CurrentAddress))
+				.Subscribe(_ => NotifyOfPropertyChange("CanSendOrders"));
+
+			this.ObservableForProperty(m => m.CurrentAddress)
+				.Subscribe(e => Stat.Value = Models.Stat.Update(session, e.Value));
+
 			this.ObservableForProperty(m => m.Settings.Value)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanShowCatalog");
@@ -122,6 +136,9 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanShowJunkOffers");
 					NotifyOfPropertyChange("CanShowRejects");
 				});
+
+			Bus.Listen<Stat>()
+				.Subscribe(e => Stat.Value = new Stat(e, Stat.Value));
 		}
 
 		public string[] Arguments;
@@ -150,6 +167,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
+		public NotifyValue<Stat> Stat { get; set; }
 		public string Version { get; set; }
 
 		public List<Address> Addresses
@@ -378,14 +396,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanSendOrders
 		{
-			get { return true; }
+			get
+			{
+				return Stat.Value.OrdersCount > 0 && CurrentAddress != null;
+			}
 		}
 
 		public void SendOrders()
 		{
 			Sync("Отправка заказов завершена успешно.",
 				"Не удалось отправить заказы. Попробуйте повторить операцию позднее.",
-				Tasks.SendOrders);
+				(c, t, b) => Tasks.SendOrders(c, t, b, CurrentAddress));
 		}
 
 		private void Import()
@@ -460,20 +481,6 @@ namespace AnalitF.Net.Client.ViewModels
 			TryClose();
 		}
 
-		private string TranslateException(AggregateException exception)
-		{
-			var requestException = exception.GetBaseException() as RequestException;
-			if (requestException != null) {
-				if (requestException.StatusCode == HttpStatusCode.Unauthorized) {
-					return "Доступ запрещен.\r\nВведены некорректные учетные данные.";
-				}
-				if (requestException.StatusCode == HttpStatusCode.Forbidden) {
-					return "Доступ запрещен.\r\nОбратитесь в АК Инфорум.";
-				}
-			}
-			return null;
-		}
-
 		private Task<T> RunTask<T>(WaitViewModel viewModel, Task<T> task, Action<Task<T>> continueWith)
 		{
 			ResetNavigation();
@@ -491,7 +498,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			else if (task.IsFaulted) {
 				log.Error(task.Exception);
-				var error = TranslateException(task.Exception)
+				var error = ErrorHelper.TranslateException(task.Exception)
 					?? viewModel.GenericErrorMessage;
 				windowManager.Error(error);
 			}

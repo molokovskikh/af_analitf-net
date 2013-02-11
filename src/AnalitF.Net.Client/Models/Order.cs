@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Models
 		public Order(Price price, Address address)
 			: this()
 		{
+			Send = true;
 			Address = address;
 			Price = price;
 			CreatedOn = DateTime.Now;

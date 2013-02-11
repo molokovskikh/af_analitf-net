@@ -87,6 +87,7 @@
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
+    <Compile Include="Integration\Models\StatFixture.cs" />
     <Compile Include="Integration\Models\TasksFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Integration\ViewModes\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
+    <Compile Include="Integration\ViewModes\Shell2Fixture.cs" />
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\Views\CatalogViewFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />

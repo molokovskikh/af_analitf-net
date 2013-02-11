@@ -9,6 +9,7 @@ using Microsoft.Reactive.Testing;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI;
 using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -32,6 +33,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			Restore = false;
 
+			RxApp.MessageBus = new MessageBus();
 			testScheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = testScheduler;
 			disposeTestShedule = TestUtils.WithScheduler(testScheduler);
@@ -51,6 +53,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			if (Restore) {
 				SetupFixture.RestoreData(session);
 			}
+
 			disposeTestShedule.Dispose();
 			session.Dispose();
 		}

@@ -14,12 +14,13 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public SettingsViewModel()
 		{
+			Flush = false;
+			DisplayName = "Настройка";
+
 			Settings = Session.Query<Settings>().First();
 			var markups = Session.Query<MarkupConfig>().OrderBy(m => m.Begin).ToList();
 			Markups = new PersistentList<MarkupConfig>(markups, Session);
-
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
-			DisplayName = "Настройка";
 		}
 
 		public new Settings Settings { get; set; }
@@ -42,8 +43,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Save()
 		{
+			Flush = true;
 			Settings.ApplyChanges(Session);
-			Session.Save(Settings);
 			TryClose();
 		}
 	}

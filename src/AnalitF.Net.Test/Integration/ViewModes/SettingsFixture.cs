@@ -1,5 +1,9 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
+using Common.Tools;
+using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support.log4net;
 
@@ -31,6 +35,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Save();
 			model = Init(new SettingsViewModel());
 			Assert.That(model.Markups.Count, Is.EqualTo(count + 1));
+		}
+
+		[Test]
+		public void Do_not_flush_changes_by_default()
+		{
+			var value = Generator.Random(10000).First();
+			model.Settings.OverCostWarningPercent = value;
+			ScreenExtensions.TryDeactivate(model, true);
+			session.Refresh(settings);
+			Assert.That(settings.OverCostWarningPercent, Is.Not.EqualTo(value));
 		}
 	}
 }

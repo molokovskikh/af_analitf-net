@@ -130,13 +130,13 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Send_orders()
 		{
-			task = new Task<UpdateResult>(t => Tasks.SendOrders(null, token, progress), token);
+			var address = localSession.Query<Address>().First();
+			task = new Task<UpdateResult>(t => Tasks.SendOrders(null, token, progress, address), token);
 
 			var begin = DateTime.Now;
 			Offer offer;
 			using (localSession.BeginTransaction()) {
 				localSession.CreateSQLQuery("delete from orders").ExecuteUpdate();
-				var address = localSession.Query<Address>().First();
 				offer = localSession.Query<Offer>().First();
 				var order = new Order(offer.Price, address);
 				order.AddLine(offer, 1);

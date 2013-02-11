@@ -64,6 +64,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowCatalogWithMnnFilter"));
+
+			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
+				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+				.Select(e => new Stat(Address));
+			Bus.RegisterMessageSource(observable);
 		}
 
 		public List<SentOrderLine> HistoryOrders

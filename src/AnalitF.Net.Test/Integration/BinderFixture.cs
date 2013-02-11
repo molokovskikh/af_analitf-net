@@ -17,11 +17,20 @@ namespace AnalitF.Net.Test.Integration
 	[TestFixture, RequiresSTA]
 	public class BinderFixture
 	{
+		private UserControl view;
+		private ViewModel model;
+
+		[SetUp]
+		public void Setup()
+		{
+			model = new ViewModel();
+			view = new UserControl { DataContext = model };
+		}
+
 		[Test]
 		public void Bind_content_elements()
 		{
-			var model = new ViewModel { Text = "123" };
-			var view = new UserControl { DataContext = model };
+			model.Text = "123";
 			var text = new TextBlock();
 			var item = new Run { Name = "Text" };
 			text.Inlines.Add(item);
@@ -35,8 +44,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Enabled_binder()
 		{
-			var model = new ViewModel { Text = "123" };
-			var view = new UserControl { DataContext = model };
+			model.Text = "123";
 			var checkBox = new CheckBox { Name = "Is" };
 			view.Content = checkBox;
 
@@ -48,8 +56,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Visible_binder()
 		{
-			var model = new ViewModel { Text = "123" };
-			var view = new UserControl { DataContext = model };
+			model.Text = "123";
 			var checkBox = new CheckBox { Name = "Is" };
 			view.Content = checkBox;
 
@@ -61,8 +68,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Bind_password()
 		{
-			var model = new ViewModel { Text = "123" };
-			var view = new UserControl { DataContext = model };
+			model.Text = "123";
 			var password = new PasswordBox { Name = "Text" };
 			view.Content = password;
 
@@ -75,8 +81,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Create_command_binding()
 		{
-			var model = new ViewModel { Text = "123" };
-			var view = new UserControl { DataContext = model };
+			model.Text = "123";
 			ViewModelBinder.Bind(model, view, null);
 
 			Assert.That(view.CommandBindings.Count, Is.EqualTo(2));
@@ -86,8 +91,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Bind_notify_value()
 		{
-			var model = new ViewModel { Term = new NotifyValue<string>("123") };
-			var view = new UserControl { DataContext = model };
+			model.Term = new NotifyValue<string>("123");
 			var textBox = new TextBox { Name = "Term" };
 			view.Content = textBox;
 			ViewModelBinder.Bind(model, view, null);
@@ -98,8 +102,6 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Invoke_view_model_with_parameters()
 		{
-			var model = new ViewModel();
-			var view = new UserControl { DataContext = model };
 			ViewModelHelper.InvokeDataContext(view, new { Method = "Reset", i = 1 });
 			Assert.That(model.ResetValue, Is.EqualTo(1));
 		}
@@ -107,8 +109,6 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Invoke_view_model()
 		{
-			var model = new ViewModel();
-			var view = new UserControl { DataContext = model };
 			ViewModelHelper.InvokeDataContext(view, "Reset", EventArgs.Empty);
 			Assert.That(model.ResetValue, Is.EqualTo(100));
 		}

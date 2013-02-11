@@ -154,33 +154,24 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Label>Заказов:</Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Label x:Name="OrdersCount"></Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Separator></Separator>
+				<TextBlock Margin="5">
+					<Run>Заказов:&#160;</Run>
+					<Run Name="Stat_Value_OrdersCount"></Run>
+				</TextBlock>
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Label>Позиций:</Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Label x:Name="OrderLinesCount"></Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Separator></Separator>
+				<TextBlock Margin="5">
+					<Run>Позиций:&#160;</Run>
+					<Run Name="Stat_Value_OrderLinesCount"></Run>
+				</TextBlock>
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Label>Сумма:</Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Label x:Name="OrdersSum"></Label>
-			</StatusBarItem>
-			<StatusBarItem>
-				<Separator></Separator>
+				<TextBlock Margin="5">
+					<Run>Сумма:&#160;</Run>
+					<Run Name="Stat_Value_Sum"></Run>
+				</TextBlock>
 			</StatusBarItem>
 
 			<StatusBarItem>
@@ -189,8 +180,19 @@
 					<Run Name="Settings_Value_LastUpdate"></Run>
 				</TextBlock>
 			</StatusBarItem>
+
 			<StatusBarItem>
-				<Separator></Separator>
+				<TextBlock Margin="5">
+					<Run>За неделю:&#160;</Run>
+					<Run Name="Stat_Value_WeeklySum"></Run>
+				</TextBlock>
+			</StatusBarItem>
+
+			<StatusBarItem>
+				<TextBlock Margin="5">
+					<Run>За месяц:&#160;</Run>
+					<Run Name="Stat_Value_MonthlySum"></Run>
+				</TextBlock>
 			</StatusBarItem>
 
 			<StatusBarItem DockPanel.Dock="Right">
