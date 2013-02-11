@@ -167,10 +167,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			dispatcherThread.Start();
 			started.Wait();
 			var dispatcher = Dispatcher.FromThread(dispatcherThread);
-			dispatcher.Invoke(() => {
+			dispatcher.Invoke(new Action(() => {
 				RxApp.DeferredScheduler = DispatcherScheduler.Current;
 				action();
-			});
+			}));
 			return dispatcher;
 		}
 	}
