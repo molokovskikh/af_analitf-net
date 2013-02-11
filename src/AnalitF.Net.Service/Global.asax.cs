@@ -14,13 +14,18 @@ namespace AnalitF.Net
 
 		protected void Application_Start()
 		{
+			Init();
+
+			Configure(GlobalConfiguration.Configuration);
+		}
+
+		public static void Init()
+		{
 			XmlConfigurator.Configure();
 
 			var nhibernate = new Config.Initializers.NHibernate();
 			nhibernate.Init();
 			SessionFactory = nhibernate.Factory;
-
-			Configure(GlobalConfiguration.Configuration);
 		}
 
 		public static void Configure(HttpConfiguration config)

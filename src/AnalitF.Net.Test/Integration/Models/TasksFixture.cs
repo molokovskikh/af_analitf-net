@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Subjects;
+using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -30,6 +32,28 @@ namespace AnalitF.Net.Test.Integration.Models
 		private BehaviorSubject<Progress> progress;
 		private CancellationToken token;
 
+		private HttpSelfHostServer server;
+		private Uri uri;
+
+		[TestFixtureSetUp]
+		public void FixtureSetup()
+		{
+			FileHelper.InitDir("service",
+				"service/data/export",
+				"service/data/result",
+				"service/data/update",
+				"service/data/ads");
+			uri = new Uri("http://localhost:7018");
+			var cfg = new HttpSelfHostConfiguration(uri);
+			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
+
+			Application.Init();
+			Application.Configure(cfg);
+
+			server = new HttpSelfHostServer(cfg);
+			server.OpenAsync().Wait();
+		}
+
 		[SetUp]
 		public void Setup()
 		{
@@ -44,7 +68,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			FileHelper.InitDir(updatePath, Tasks.ExtractPath, Tasks.RootPath);
 
 			localSession = SetupFixture.Factory.OpenSession();
-			Tasks.BaseUri = new Uri("http://localhost:8080/");
+			Tasks.BaseUri = uri;
 			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
 
 			cancelletion = new CancellationTokenSource();
@@ -55,9 +79,16 @@ namespace AnalitF.Net.Test.Integration.Models
 		}
 
 		[TearDown]
-		public void FixtureTearDown()
+		public void Teardown()
 		{
 			SetupFixture.RestoreData(localSession);
+		}
+
+		[TestFixtureTearDown]
+		public void FixtureTearDown()
+		{
+			server.CloseAsync().Wait();
+			server.Dispose();
 		}
 
 		[Test]
