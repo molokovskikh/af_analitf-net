@@ -69,10 +69,7 @@ namespace AnalitF.Net.Client.Models
 		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, cancellation, progress, client => {
-				var currentUri = new UriBuilder(BaseUri) {
-					Path = "Main",
-					Query = "reset=true",
-				}.Uri;
+				var currentUri = new Uri(BaseUri, new Uri("Main/reset=true", UriKind.Relative));
 				var done = false;
 				HttpResponseMessage response = null;
 

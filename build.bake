@@ -12,6 +12,23 @@ import System.Xml
 import System.Xml.Linq
 import System.Xml.XPath.Extensions
 
+def FileElement(file as string, id as string, element as XElement):
+	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
+
+def AddDirectory(id as string, path as string, document as XDocument, manager as XmlNamespaceManager):
+	element = document.XPathSelectElement("/prefix:Wix/prefix:Fragment/prefix:DirectoryRef[@Id='$id']/prefix:Component", manager)
+	for file in Directory.GetFiles(path):
+		fileId = Path.GetFileName(file) + "_" + id
+		element.Add(FileElement(file, fileId, element))
+
+	for dir in Directory.GetDirectories(path):
+		id = Path.GetFileName(dir)
+		AddDirectory(id, dir, document, manager)
+
+def Bash(cmd as string):
+	path = Environment.CurrentDirectory.Replace("\\", "/")
+	Sh("bash -l -c \"cd $path;$cmd\"")
+
 Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",
@@ -28,7 +45,7 @@ task @DeployService, [@SetupEnvironment, @DeployPipeline]
 
 task @deploy, [@SetupEnvironment, @Tag, @DeployService, @DeployClient, @SendNotification]
 
-task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @Zip, @AfterBuildApp]
+task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @BuildSetup, @AfterBuildApp]
 
 task @SetupEnvironment:
 	unless Configuration.Maybe.env:
@@ -43,17 +60,21 @@ task @BeforeBuildApp:
 task @AfterBuildApp:
 	Globals.Project = "AnalitF.Net.Service"
 
-task @DeployClient:
-	Cp("output/AnalitF.Net.Client.zip", "//offdc/MMedia/Квасов Роман/", true)
+task @DeployClient, [@BuildClient]:
+	Cp("output/setup/setup.exe", "//offdc/MMedia/Квасов Роман/", true)
 
 task @BuildSetup:
-	document = XDocument.Load("build/files.template")
+	Bash("./scripts/wix.sh")
+
+task @UpdateSetupFiles:
+	name = "output/setup/files.wxs"
+	document = XDocument.Load(name)
 	manager = XmlNamespaceManager(NameTable())
 	manager.AddNamespace("prefix", "http://schemas.microsoft.com/wix/2006/wi")
-	element = document.XPathSelectElement("/prefix:Wix/prefix:Fragment/prefix:DirectoryRef/prefix:Component", manager)
-	for file in Directory.GetFiles("output/AnalitF.Net.Client"):
-		element.Add(XElement(element.Name.Namespace + "File", XAttribute("Id", Path.GetFileName(file)), XAttribute("Source", Path.GetFullPath(file))))
-	document.Save("build/files.wxs")
+
+	path = "output/AnalitF.Net.Client/"
+	AddDirectory("INSTALLFOLDER", path, document, manager)
+	document.Save(name)
 
 task @BeforeBuildUpdater:
 	Globals.Project = "Updater"
@@ -63,12 +84,11 @@ task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 
 task @Tag:
-	path = Environment.CurrentDirectory.Replace("\\", "/")
-	Sh("bash -l -c \"cd $path;./scripts/changes.sh\"")
+	Bash("./scripts/changes.sh")
 
 task @SendNotification:
 	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net, r.kvasov@analit.net")
 	mail.Subject = "Обновление демо версии"
-	mail.Body = """\\offdc\MMedia\Квасов Роман\AnalitF.Net.Client.zip - архив с приложением """
+	mail.Body = """\\offdc\MMedia\Квасов Роман\setup.exe - установщик"""
 	mail.Attachments.Add(Attachment("output/changes.txt"))
 	SmtpClient().Send(mail)
