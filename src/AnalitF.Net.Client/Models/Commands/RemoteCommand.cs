@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			try
 			{
-				Tasks.RemoteTask(Credentials, Token, Progress, c => {
+				return Tasks.RemoteTask(Credentials, Token, Progress, c => {
 					Client = c;
 					using (Session = AppBootstrapper.NHibernate.Factory.OpenSession())
 					using (var transaction = Session.BeginTransaction()) {
@@ -48,7 +48,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				Session = null;
 				Client = null;
 			}
-			throw new Exception("Задача не запущена");
 		}
 
 		public static void CheckResult(HttpResponseMessage response)

@@ -8,6 +8,7 @@ using System.Reactive.Subjects;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -45,6 +46,7 @@ namespace AnalitF.Net.Test.Integration.Models
 				"service/data/ads");
 			uri = new Uri("http://localhost:7018");
 			var cfg = new HttpSelfHostConfiguration(uri);
+			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
 
 			Application.Init();
@@ -57,7 +59,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[SetUp]
 		public void Setup()
 		{
-			updatePath = @"..\..\..\data\update";
+			updatePath = @"service/data/update";
 			Tasks.ExtractPath = "temp";
 			Tasks.RootPath = "app";
 			var files = Directory.GetFiles(".", "*.txt");

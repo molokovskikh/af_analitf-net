@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.Models
 		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
 			return RemoteTask(credentials, cancellation, progress, client => {
-				var currentUri = new Uri(BaseUri, new Uri("Main/reset=true", UriKind.Relative));
+				var currentUri = new Uri(BaseUri, new Uri("Main/?reset=true", UriKind.Relative));
 				var done = false;
 				HttpResponseMessage response = null;
 
@@ -78,11 +78,13 @@ namespace AnalitF.Net.Client.Models
 
 				while (!done) {
 					var request = client.GetAsync(currentUri, HttpCompletionOption.ResponseHeadersRead, cancellation);
-					currentUri = new Uri(BaseUri, "Main");
 					response = request.Result;
+					currentUri = new Uri(BaseUri, "Main");
 					if (response.StatusCode != HttpStatusCode.OK
 						&& response.StatusCode != HttpStatusCode.Accepted)
-						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
+						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+								response.StatusCode,
+								response.Content.ReadAsStringAsync().Result),
 							response.StatusCode);
 					progress.OnNext(new Progress("Подготовка данных", 0, 0));
 					done = response.StatusCode == HttpStatusCode.OK;
