@@ -167,7 +167,9 @@ namespace AnalitF.Net.Client.Models
 			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientPrices), formatter, token).Result;
 
 			if (response.StatusCode != HttpStatusCode.OK)
-				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
+				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+						response.StatusCode,
+						response.Content.ReadAsStringAsync().Result),
 					response.StatusCode);
 		}
 

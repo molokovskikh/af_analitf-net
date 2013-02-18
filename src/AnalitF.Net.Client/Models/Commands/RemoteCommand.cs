@@ -53,7 +53,9 @@ namespace AnalitF.Net.Client.Models.Commands
 		public static void CheckResult(HttpResponseMessage response)
 		{
 			if (response.StatusCode != HttpStatusCode.OK)
-				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}", response.StatusCode),
+				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+						response.StatusCode,
+						response.Content.ReadAsStringAsync().Result),
 					response.StatusCode);
 		}
 	}

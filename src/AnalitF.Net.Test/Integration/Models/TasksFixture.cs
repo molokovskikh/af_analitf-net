@@ -35,6 +35,7 @@ namespace AnalitF.Net.Test.Integration.Models
 
 		private HttpSelfHostServer server;
 		private Uri uri;
+		private bool restoreUser;
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
@@ -59,6 +60,8 @@ namespace AnalitF.Net.Test.Integration.Models
 		[SetUp]
 		public void Setup()
 		{
+			restoreUser = false;
+
 			updatePath = @"service/data/update";
 			Tasks.ExtractPath = "temp";
 			Tasks.RootPath = "app";
@@ -84,6 +87,15 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Teardown()
 		{
 			SetupFixture.RestoreData(localSession);
+			if (restoreUser) {
+				session.Flush();
+				var user = localSession.Query<User>().First();
+				session.CreateSQLQuery("update Customers.Users set Login = Id;" +
+					"update Customers.Users set Login = :login where Id = :id")
+					.SetParameter("login", Environment.UserName)
+					.SetParameter("id", user.Id)
+					.ExecuteUpdate();
+			}
 		}
 
 		[TestFixtureTearDown]
@@ -119,6 +131,10 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Sent_price_settings_changes()
 		{
+			ExportImportFixture.CreateUser(session);
+			session.Transaction.Commit();
+			restoreUser = true;
+
 			var price = localSession.Query<Price>().First(p => p.PositionCount > 0);
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));

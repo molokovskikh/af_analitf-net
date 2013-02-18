@@ -47,11 +47,7 @@ namespace AnalitF.Net.Test.Integration
 			CreateSampleCore(supplier1);
 
 			var maxProducerCosts = CreateMaxProduceCosts(supplier);
-			//очищаем предудыщие попытки
-			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
-			var client = TestClient.CreateNaked();
-			//что бы можно было руками обновить клиент
-			client.Users[0].Login = Environment.UserName;
+			var client = CreateUser(session);
 			Close();
 
 			var exporter = new Exporter(session, client.Users[0].Id, new Version()) {
@@ -62,6 +58,16 @@ namespace AnalitF.Net.Test.Integration
 
 			var importer = new Importer(localSession);
 			importer.Import(files);
+		}
+
+		public static TestClient CreateUser(ISession session)
+		{
+			//очищаем предудыщие попытки
+			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
+			var client = TestClient.CreateNaked();
+			//что бы можно было руками обновить клиент
+			client.Users[0].Login = Environment.UserName;
+			return client;
 		}
 
 		private void CreateSampleContactInfo(TestSupplier supplier)
