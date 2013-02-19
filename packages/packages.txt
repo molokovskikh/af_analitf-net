@@ -1,0 +1,18 @@
+Caliburn.Micro -Version 1.4.1
+Castle.Windsor -Version 3.2.0
+DotNetZip -Version 1.9.1.8
+Extended.Wpf.Toolkit -Version 1.9.0
+inflector_extension -Version 0.0.8
+log4net -Version 2.0.0
+Microsoft.AspNet.WebApi -Version 4.0.20710.0
+Microsoft.AspNet.WebApi.SelfHost -Version 4.0.20918.0
+MySql.Data -Version 6.6.4
+NHibernate -Version 3.3.2.4000
+NHibernate.Mapping.Attributes -Version 3.2.0.0
+NPOI -Version 1.2.5
+NUnit -Version 2.6.2
+reactiveui -Version 4.4.1
+reactiveui-testing -Version 4.4.1
+RhinoMocks -Version 3.6.1
+StyleCop.MSBuild -Version 4.7.44.1
+Microsoft.Bcl.Async -Version 1.0.14-rc -Pre

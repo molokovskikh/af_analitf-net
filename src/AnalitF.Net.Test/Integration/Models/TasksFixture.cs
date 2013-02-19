@@ -235,7 +235,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Import_after_update()
 		{
-			File.Copy(Directory.GetFiles(@"..\..\..\data\result\").Last(), Tasks.ArchiveFile);
+			File.Copy(Directory.GetFiles(@"service/data/result").Last(), Tasks.ArchiveFile);
 			using(var file = new ZipFile(Tasks.ArchiveFile))
 				file.ExtractAll(Tasks.ExtractPath);
 
