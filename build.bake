@@ -6,6 +6,7 @@ import file from Web.bake
 import file from AppSupport.bake
 import file from WebSiteSupport.bake
 import System
+import System.Reflection
 import System.IO
 import System.Net.Mail
 import System.Xml
@@ -67,6 +68,8 @@ task @BuildSetup:
 	Bash("./scripts/wix.sh")
 
 task @UpdateSetupFiles:
+	assembly = Assembly.LoadFile(Path.GetFullPath("output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"))
+	File.WriteAllText("output/setup/version.txt", assembly.GetName().Version.ToString())
 	name = "output/setup/files.wxs"
 	document = XDocument.Load(name)
 	manager = XmlNamespaceManager(NameTable())

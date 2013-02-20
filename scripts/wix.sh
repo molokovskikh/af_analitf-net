@@ -1,9 +1,5 @@
 #!/bin/sh
 wixpath=$(cygpath -wa $(dirname `which candle`))
-publisher="Инфорум"
-version="0.1"
-product="АналитФАРМАЦИЯ"
-params=
 output=output/setup
 input=build
 
@@ -13,6 +9,10 @@ mkdir $output
 cp $input/* $output/
 bake UpdateSetupFiles
 cd $output
+
+version=`cat version.txt`
+publisher="Инфорум"
+product="АналитФАРМАЦИЯ"
 
 candle.exe /nologo "setup.wxs" "files.wxs" -d"Setup.TargetPath=setup.msi" -d"Setup.Version=$version" -d"Setup.Product=$product" -d"Setup.Publisher=$publisher" &&\
 light.exe /nologo -cultures:ru-ru -out "Setup.msi" "setup.wixobj" "files.wixobj" &&\
