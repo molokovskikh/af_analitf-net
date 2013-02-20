@@ -74,7 +74,9 @@
   <ItemGroup>
     <None Include="Web.config" />
     <None Include="Web.release.config" />
-    <None Include="Web.test.config" />
+    <None Include="Web.test.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.Models\Common.Models\Common.Models.csproj">
