@@ -14,5 +14,5 @@ NUnit -Version 2.6.2
 reactiveui -Version 4.4.1
 reactiveui-testing -Version 4.4.1
 RhinoMocks -Version 3.6.1
-StyleCop.MSBuild -Version 4.7.44.1
+StyleCopAddOn -Version 1.0.8
 Microsoft.Bcl.Async -Version 1.0.14-rc -Pre
