@@ -1,4 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Data;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -7,8 +11,6 @@ namespace AnalitF.Net.Client.Views
 		public SettingsView()
 		{
 			InitializeComponent();
-
-			Markups.Items.Clear();
 		}
 	}
 }

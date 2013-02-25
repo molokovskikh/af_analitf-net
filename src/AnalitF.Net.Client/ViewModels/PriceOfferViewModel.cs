@@ -104,6 +104,9 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.LeaderPrice == Price.Value);
 			}
 			if (currentFilter == filters[1]) {
+				//если мы установили фильтр по заказанным позициям то нужно
+				//выполнить сохранение
+				Session.Flush();
 				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id
 					&& l.Order.Address == Address
 					&& l.Order.Price == Price.Value) > 0);
@@ -209,11 +212,6 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var offer in Offers) {
 				offer.OrderLine = null;
 			}
-		}
-
-		private bool Confirm(string message)
-		{
-			return Manager.Question(message) == MessageBoxResult.Yes;
 		}
 	}
 }

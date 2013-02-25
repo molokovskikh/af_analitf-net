@@ -1,26 +1,64 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.SettingsView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
-	Height="500" Width="700">
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700">
 	<StackPanel>
 		<TabControl>
 			<TabItem Header="Наценки прочий ассортимент">
-				<DataGrid x:Name="Markups">
-					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
-					</DataGrid.Columns>
-				</DataGrid>
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition></ColumnDefinition>
+						<ColumnDefinition Width="100"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+
+					<DataGrid x:Name="Markups" Grid.Column="0">
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
+						</DataGrid.Columns>
+					</DataGrid>
+
+					<StackPanel Grid.Column="1">
+						<Button Margin="3" CommandTarget="{x:Reference Markups}" Command="ApplicationCommands.Delete">Удалить</Button>
+
+						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
+						<Label Margin="3" Height="13" Width="30" Background="#808000" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
+						<Label Margin="3" Height="13" Width="30" Background="#800000" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
+					</StackPanel>
+				</Grid>
 			</TabItem>
 			<TabItem Header="Наценки ЖНВЛС">
-				<DataGrid x:Name="VitallyImportantMarkups">
-					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
-						<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
-					</DataGrid.Columns>
-				</DataGrid>
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition></ColumnDefinition>
+						<ColumnDefinition Width="100"></ColumnDefinition>
+					</Grid.ColumnDefinitions>
+
+					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0"
+						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
+						</DataGrid.Columns>
+					</DataGrid>
+
+					<StackPanel Grid.Column="1">
+						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}" Command="ApplicationCommands.Delete">Удалить</Button>
+
+						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
+						<Label Margin="3" Height="13" Width="30" Background="#808000" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
+						<Label Margin="3" Height="13" Width="30" Background="#800000" HorizontalAlignment="Left"></Label>
+						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
+					</StackPanel>
+				</Grid>
 			</TabItem>
 			<TabItem Header="Авторизация">
 				<StackPanel>

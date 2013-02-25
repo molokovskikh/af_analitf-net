@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Extentions.WindowManager Manager { get; private set; }
 
-		protected bool Flush = true;
+		protected bool FlushOnClose = true;
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
 
@@ -59,6 +59,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			StatelessSession = factory.OpenStatelessSession();
 			Session = factory.OpenSession();
+			Session.BeginTransaction();
+
 			Settings = Session.Query<Settings>().First();
 			User = Session.Query<User>().FirstOrDefault();
 
@@ -131,8 +133,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			if (Flush)
+			if (FlushOnClose) {
+				if (Session.Transaction.IsActive)
+					Session.Transaction.Commit();
+
 				Session.Flush();
+			}
 
 			if (close) {
 				Save();
@@ -244,6 +250,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult Export()
 		{
 			return excelExporter.Export();
+		}
+
+		protected bool Confirm(string message)
+		{
+			return Manager.Question(message) == MessageBoxResult.Yes;
 		}
 	}
 }

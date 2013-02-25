@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using NHibernate.Collection.Generic;
 using NHibernate.Linq;
-using NHibernate.Persister.Collection;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -14,18 +10,31 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public SettingsViewModel()
 		{
-			Flush = false;
+			FlushOnClose = false;
 			DisplayName = "Настройка";
 
 			Settings = Session.Query<Settings>().First();
-			var markups = Session.Query<MarkupConfig>().OrderBy(m => m.Begin).ToList();
+
+			var markups = Session.Query<MarkupConfig>().Where(t => t.Type == MarkupType.Over)
+				.OrderBy(m => m.Begin)
+				.ToList();
+			MarkupConfig.Validate(markups.ToArray());
 			Markups = new PersistentList<MarkupConfig>(markups, Session);
+
+			var vitiallyImportant = Session.Query<MarkupConfig>().Where(t => t.Type == MarkupType.VitallyImportant)
+				.OrderBy(m => m.Begin)
+				.ToList();
+			MarkupConfig.Validate(vitiallyImportant.ToArray());
+			VitallyImportantMarkups = new PersistentList<MarkupConfig>(vitiallyImportant, Session);
+
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 		}
 
 		public new Settings Settings { get; set; }
 
 		public IList<MarkupConfig> Markups { get; set; }
+
+		public IList<MarkupConfig> VitallyImportantMarkups { get; set; }
 
 		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
 
@@ -43,7 +52,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Save()
 		{
-			Flush = true;
+			var isValid = MarkupConfig.Validate(Markups) && MarkupConfig.Validate(VitallyImportantMarkups);
+			if (!isValid) {
+				Manager.Warning("Некорректно введены границы цен.");
+				return;
+			}
+
+			FlushOnClose = true;
 			Settings.ApplyChanges(Session);
 			TryClose();
 		}

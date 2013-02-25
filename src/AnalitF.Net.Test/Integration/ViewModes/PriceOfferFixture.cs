@@ -103,5 +103,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Clear();
 			Assert.That(session.Get<Order>(order.Id), Is.Null);
 		}
+
+		[Test]
+		public void Filter_by_ordered()
+		{
+			session.DeleteEach<Order>();
+
+			model.CurrentOffer.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+
+			model.CurrentFilter = model.Filters[1];
+			Assert.That(model.Offers.Count, Is.EqualTo(1));
+		}
 	}
 }

@@ -118,6 +118,7 @@
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
+    <Compile Include="Unit\MarkupConfigFixture.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />
     <Compile Include="Unit\OfferFixture.cs" />
     <Compile Include="Unit\OfferSortFixture.cs" />

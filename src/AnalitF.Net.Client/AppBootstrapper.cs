@@ -82,6 +82,7 @@ namespace AnalitF.Net.Client
 		{
 			InitLog();
 			InitApp();
+			((App)Application).RegisterResources();
 			InitUi();
 			InitDb();
 			InitShell();

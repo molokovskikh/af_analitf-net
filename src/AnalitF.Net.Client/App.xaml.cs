@@ -17,12 +17,6 @@ namespace AnalitF.Net.Client
 {
 	public partial class App : Application
 	{
-		protected override void OnStartup(StartupEventArgs e)
-		{
-			base.OnStartup(e);
-			RegisterResources();
-		}
-
 		public void RegisterResources()
 		{
 			var activeColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
@@ -44,9 +38,18 @@ namespace AnalitF.Net.Client
 			style = CellStyle(activeColor, inactiveColor, "Price.BasePrice", false, Color.FromRgb(0xF0, 0xF0, 0xF0));
 			resources.Add("NotBaseOffer", style);
 
-			var baseStyle = (Style)Resources["VitallyImportant"];
+			var baseStyle = (Style)Resources[typeof(DataGridCell)];
 			style = new Style(typeof(DataGridCell), baseStyle);
-			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
+			AddTriggers(style, "BeginOverlap", true, Color.FromRgb(0x80, 0x80, 0), activeColor, inactiveColor);
+			AddTriggers(style, "HaveGap",  true, Color.FromRgb(0x80, 0, 0), activeColor, inactiveColor);
+			resources.Add("BeginMarkup", style);
+
+			style = new Style(typeof(DataGridCell), baseStyle);
+			AddTriggers(style, "EndLessThanBegin", true, Colors.Red, activeColor, inactiveColor);
+			resources.Add("EndMarkup", style);
+
+			var offerBaseStyle = (Style)Resources["VitallyImportant"];
+			style = new Style(typeof(DataGridCell), offerBaseStyle);
 			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("OrderColumn", style);
 		}
