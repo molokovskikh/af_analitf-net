@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Windows;
+using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
@@ -23,7 +27,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public OrderLinesViewModel()
 		{
+			AllOrders = new NotifyValue<bool>();
+			AddressesEnabled = new NotifyValue<bool>(() => AllOrders.Value, AllOrders);
+
 			DisplayName = "Сводный заказ";
+			Addresses = Session.Query<Address>()
+				.OrderBy(a => a.Name)
+				.Select(a => new Selectable<Address>(a)).ToList();
+
 			markups = Session.Query<MarkupConfig>().ToList();
 
 			Dep(m => m.CanShowCatalog,
@@ -42,30 +53,50 @@ namespace AnalitF.Net.Client.ViewModels
 				m => m.CurrentLine);
 
 			Dep(m => m.Sum, m => m.Lines);
-			Dep(m => m.CanDelete, m => m.CurrentLine);
+			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
 
-			Dep(Update, m => m.CurrentPrice, m => m.Begin, m => m.End);
+			Addresses.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
+				.Merge()
+				.Throttle(TimeSpan.FromMilliseconds(500), Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => Update());
 
-			Update();
+			Dep(Update, m => m.CurrentPrice, m => m.AllOrders.Value);
 
+			//пока устанавливаем значения не надо оповещать об изменения
+			//все равно будет запрос когда форма активируется
+			IsNotifying = false;
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice = Prices.FirstOrDefault();
 
 			Begin = DateTime.Today;
 			End = DateTime.Today;
+			IsNotifying = true;
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			Update();
 		}
 
 		public override void Update()
 		{
-			//перед запросом данных нужно сохранить изменения а то не будет измененных данных
-			Session.Flush();
-
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>();
 
 				if (CurrentPrice != null && CurrentPrice.Id != null) {
 					query = query.Where(l => l.Order.Price == CurrentPrice);
+				}
+
+				if (!AllOrders.Value) {
+					query = query.Where(l => l.Order.Address == Address);
+				}
+				else {
+					var addresses = Addresses.Where(i => i.IsSelected).Select(i => i.Item).ToArray();
+					query = query.Where(l => addresses.Contains(l.Order.Address));
 				}
 
 				Lines = query
@@ -90,17 +121,18 @@ namespace AnalitF.Net.Client.ViewModels
 					.ToList();
 			}
 		}
-
 		private void Dep(Action action, params Expression<Func<OrderLinesViewModel, object>>[] to)
 		{
-			to.Select(e => this.ObservableForProperty(e)).Merge()
+			to.Select(e => this.ObservableForProperty(e))
+				.Merge()
 				.Subscribe(e => action());
 		}
 
-		protected void Dep(Expression<Func<OrderLinesViewModel, object>> from, Expression<Func<OrderLinesViewModel, object>> to)
+		protected void Dep(Expression<Func<OrderLinesViewModel, object>> from, params Expression<Func<OrderLinesViewModel, object>>[] to)
 		{
 			var name = @from.GetProperty();
-			this.ObservableForProperty(to)
+			to.Select(e => this.ObservableForProperty(e))
+				.Merge()
 				.Subscribe(e => NotifyOfPropertyChange(name));
 		}
 
@@ -110,7 +142,23 @@ namespace AnalitF.Net.Client.ViewModels
 				offer.CalculateRetailCost(markups);
 		}
 
-		public virtual List<Price> Prices { get; set; }
+		public NotifyValue<bool> AllOrders { get; set; }
+
+		public bool AllOrdersVisible
+		{
+			get { return Addresses.Count > 1; }
+		}
+
+		public IList<Selectable<Address>> Addresses { get; set; }
+
+		public bool AddressesVisible
+		{
+			get { return Addresses.Count > 1; }
+		}
+
+		public NotifyValue<bool> AddressesEnabled { get; set; }
+
+		public List<Price> Prices { get; set; }
 
 		public Price CurrentPrice
 		{
@@ -122,7 +170,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public virtual List<OrderLine> Lines
+		[Export]
+		public List<OrderLine> Lines
 		{
 			get { return lines; }
 			set
@@ -132,7 +181,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public virtual List<SentOrderLine> SentLines
+		[Export]
+		public List<SentOrderLine> SentLines
 		{
 			get { return sentLines; }
 			set
@@ -142,7 +192,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public virtual decimal Sum
+		public decimal Sum
 		{
 			get
 			{
@@ -196,16 +246,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanDelete
 		{
-			get { return CurrentLine != null; }
+			get { return CurrentLine != null && IsCurrentSelected; }
 		}
 
 		public void Delete()
 		{
-			if (CurrentLine == null)
+			if (!CanDelete)
 				return;
 
-			var result = Manager.Question("Удалить позицию?");
-			if (result != MessageBoxResult.Yes)
+			if (!Confirm("Удалить позицию?"))
 				return;
 
 			var offer = Session.Load<Offer>(CurrentLine.OfferId);
@@ -243,6 +292,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool CanShowCatalog
 		{
 			get { return CurrentCatalog != null && CurrentOffer != null; }
+		}
+
+		public void EnterLine()
+		{
+			ShowCatalog();
 		}
 
 		public void ShowCatalog()

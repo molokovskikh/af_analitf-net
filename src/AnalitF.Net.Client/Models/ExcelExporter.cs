@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,33 +28,32 @@ namespace AnalitF.Net.Client.Models
 
 	public class ExcelExporter
 	{
-		private PropertyInfo property;
+		private List<PropertyInfo> properties;
 		private Screen model;
 
 		public ExcelExporter(Screen model)
 		{
 			this.model = model;
-			property = model.GetType().GetProperties()
-				.FirstOrDefault(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0);
+			properties = model.GetType().GetProperties()
+				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
+				.ToList();
 		}
 
 		public bool CanExport
 		{
-			get { return property != null; }
+			get { return properties != null; }
 		}
 
 		public IResult Export()
 		{
-			if (property == null)
+			var grid = FindGrid();
+			if (grid == null)
 				return null;
 
-			var items = property.GetValue(model, null) as IEnumerable;
+			var items = grid.ItemsSource;
 			if (items == null)
 				return null;
-			var name = property.Name;
 
-			var view = (UserControl) model.GetView();
-			var grid = view.DeepChildren().OfType<DataGrid>().First(g => g.Name == name);
 			var columns = grid.Columns.OfType<DataGridBoundColumn>()
 				.OrderBy(c => c.DisplayIndex)
 				.Where(c => c.Visibility == Visibility.Visible)
@@ -77,6 +77,18 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			return new OpenResult(filename);
+		}
+
+		private DataGrid FindGrid()
+		{
+			if (properties == null)
+				return null;
+
+			var names = properties.Select(p => p.Name).ToArray();
+			var view = (UserControl) model.GetView();
+			return view.DeepChildren().OfType<DataGrid>().Where(g => names.Contains(g.Name))
+				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 100 + Convert.ToUInt32(g.IsVisible) * 10)
+				.FirstOrDefault();
 		}
 
 		private string GetValue(DataGridBoundColumn column, object offer)

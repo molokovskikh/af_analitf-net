@@ -24,9 +24,24 @@ namespace AnalitF.Net.Client
 
 			var resources = Resources.MergedDictionaries[1];
 
+			var baseStyle = (Style)Resources[typeof(DataGridCell)];
+			var style = new Style(typeof(DataGridCell), baseStyle);
+			style.Triggers.Add(new DataTrigger {
+				Binding = new Binding("VitallyImportant"),
+				Value = true,
+				Setters = {
+					new Setter(Control.ForegroundProperty, Brushes.Green)
+				}
+			});
+			resources.Add("BaseOrderLine", style);
+
+			style = new Style(typeof(DataGridCell), baseStyle);
+			AddTriggers(style, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66), activeColor, inactiveColor);
+			resources.Add("JunkOrderLine", style);
+
 			resources.Add("VitallyImportant", BaseStyle(activeColor, inactiveColor));
 
-			var style = CellStyle(activeColor, inactiveColor, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66));
+			style = CellStyle(activeColor, inactiveColor, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66));
 			resources.Add("Junk", style);
 
 			style = CellStyle(activeColor, inactiveColor, "HaveOffers", false, Colors.Silver);
@@ -38,7 +53,6 @@ namespace AnalitF.Net.Client
 			style = CellStyle(activeColor, inactiveColor, "Price.BasePrice", false, Color.FromRgb(0xF0, 0xF0, 0xF0));
 			resources.Add("NotBaseOffer", style);
 
-			var baseStyle = (Style)Resources[typeof(DataGridCell)];
 			style = new Style(typeof(DataGridCell), baseStyle);
 			AddTriggers(style, "BeginOverlap", true, Color.FromRgb(0x80, 0x80, 0), activeColor, inactiveColor);
 			AddTriggers(style, "HaveGap",  true, Color.FromRgb(0x80, 0, 0), activeColor, inactiveColor);

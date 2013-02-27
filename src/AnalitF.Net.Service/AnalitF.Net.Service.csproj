@@ -72,8 +72,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Web.config" />
-    <None Include="Web.release.config" />
+    <None Include="Web.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Web.release.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Web.test.config">
       <SubType>Designer</SubType>
     </None>

@@ -4,8 +4,8 @@
 	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700">
 	<StackPanel>
-		<TabControl>
-			<TabItem Header="Наценки прочий ассортимент">
+		<TabControl SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
+			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab">
 				<Grid>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition></ColumnDefinition>
@@ -32,7 +32,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Наценки ЖНВЛС">
+			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab">
 				<Grid>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition></ColumnDefinition>
@@ -60,7 +60,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Авторизация">
+			<TabItem Header="Авторизация" Name="LoginTab">
 				<StackPanel>
 					<Label>Учетные данные</Label>
 					<Label>Имя</Label>
@@ -69,7 +69,7 @@
 					<PasswordBox x:Name="Settings_Password" Binders:ContentElementBinder.Password="{Binding Path=Settings.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></PasswordBox>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Визуализация">
+			<TabItem Header="Визуализация" Name="ViewSettingsTab">
 				<StackPanel>
 					<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
 					<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>

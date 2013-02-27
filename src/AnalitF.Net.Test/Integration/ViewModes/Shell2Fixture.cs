@@ -3,6 +3,8 @@ using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Common.Tools;
+using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
@@ -15,6 +17,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Update_order_stat_on_order_change()
 		{
 			session.DeleteEach<Order>();
+			session.Flush();
 
 			shell.ShowPrice();
 			var prices = (PriceViewModel)shell.ActiveItem;

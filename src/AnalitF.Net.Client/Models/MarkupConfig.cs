@@ -107,10 +107,11 @@ namespace AnalitF.Net.Client.Models
 				markup.EndLessThanBegin = markup.End < markup.Begin;
 			}
 
-			var  first = data.First();
+			var  prev = data.First();
 			foreach (var markup in data.Skip(1)) {
-				markup.BeginOverlap = first.End > markup.Begin;
-				markup.HaveGap = first.End < markup.Begin;
+				markup.BeginOverlap = prev.End > markup.Begin;
+				markup.HaveGap = prev.End < markup.Begin;
+				prev = markup;
 			}
 
 			return !data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap);

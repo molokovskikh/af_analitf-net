@@ -61,6 +61,7 @@
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
     <Reference Include="npoi" />
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="ReachFramework" />
     <Reference Include="reactiveui">
       <SpecificVersion>False</SpecificVersion>
@@ -145,6 +146,7 @@
     <Compile Include="Controls\GrayScaleEffect.cs" />
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
+    <Compile Include="Controls\PopupSelector.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
@@ -291,6 +293,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Assets\styles\DataGrid.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Assets\styles\PopupSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

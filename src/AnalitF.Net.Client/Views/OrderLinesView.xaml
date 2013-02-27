@@ -21,6 +21,7 @@
 			<RowDefinition></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
@@ -36,17 +37,22 @@
 				</StackPanel>
 			</GroupBox>
 			<ComboBox VerticalAlignment="Center" Style="{StaticResource Filter}" x:Name="Prices" DisplayMemberPath="Name"></ComboBox>
+			<CheckBox VerticalAlignment="Center" Margin="0, 0, 4, 0" Name="AllOrders">Все заказы</CheckBox>
+			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Addresses" LabelText="Адреса" />
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Lines" CellStyle="{StaticResource ResourceKey=VitallyImportant}" Visibility="{Binding IsCurrentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
+		<c:DataGrid Grid.Row="1" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+			Visibility="{Binding IsCurrentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
 			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Адрес заказа" Binding="{Binding Order.Address.Name}"
+					Visibility="{Binding Path=IsChecked, Source={x:Reference AllOrders}, Converter={StaticResource BooleanToVisibilityConverterResource}}" />
 				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}" />
 				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
 
 				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Order.Price.RegionName}" />
@@ -60,7 +66,7 @@
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
@@ -68,7 +74,8 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=VitallyImportant}" Visibility="{Binding IsSentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
+		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+			Visibility="{Binding IsSentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
@@ -76,7 +83,7 @@
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}" />
 				<DataGridTextColumn Width="*" Header="Примечание" Binding="{Binding Note}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
 
 				<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Регион" Binding="{Binding Order.Price.RegionName}" />
@@ -90,7 +97,7 @@
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" Binding="{Binding Cost}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Цена" Binding="{Binding Cost}" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" />
 				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
@@ -101,7 +108,12 @@
 
 		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 
-		<StackPanel Grid.Row="3" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="3">
+			<Label>Комментарий</Label>
+			<TextBox Name="CurrentLine_Comment"></TextBox>
+		</StackPanel>
+
+		<StackPanel Grid.Row="4" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
 			<Button x:Name="ShowCatalog" Style="{StaticResource ResourceKey=FilterButton}">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource ResourceKey=FilterButton}">Попазать синонимы (Ctrl+N)</Button>

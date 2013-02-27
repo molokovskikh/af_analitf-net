@@ -4,6 +4,12 @@ namespace AnalitF.Net.Client.Models
 {
 	public class Address
 	{
+		public Address(string name)
+			: this()
+		{
+			Name = name;
+		}
+
 		public Address()
 		{
 			Orders = new List<Order>();
@@ -17,5 +23,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<MinOrderSumRule> Rules { get; set; }
 
 		public virtual IList<Order> Orders { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("{0} {1}", Id, Name);
+		}
 	}
 }

@@ -5,8 +5,26 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public class NotifyValue<T> : INotifyPropertyChanged
 	{
+		private Func<T> calc;
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
 		public NotifyValue()
 		{
+		}
+
+		public NotifyValue(Func<T> calc, params INotifyPropertyChanged[] props)
+		{
+			this.calc = calc;
+			Value = calc();
+			foreach (var prop in props) {
+				prop.PropertyChanged += Reclculate;
+			}
+		}
+
+		private void Reclculate(object sender, PropertyChangedEventArgs e)
+		{
+			Value = calc();
 		}
 
 		public NotifyValue(T value)
@@ -31,8 +49,6 @@ namespace AnalitF.Net.Client.Helpers
 				OnPropertyChanged("Value");
 			}
 		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
 		{

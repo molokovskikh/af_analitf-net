@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
@@ -10,6 +11,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public SettingsViewModel()
 		{
+			SelectedTab = new NotifyValue<string>("OverMarkupsTab");
 			FlushOnClose = false;
 			DisplayName = "Настройка";
 
@@ -28,7 +30,13 @@ namespace AnalitF.Net.Client.ViewModels
 			VitallyImportantMarkups = new PersistentList<MarkupConfig>(vitiallyImportant, Session);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
+
+			if (string.IsNullOrEmpty(Settings.UserName)) {
+				SelectedTab.Value = "LoginTab";
+			}
 		}
+
+		public NotifyValue<string> SelectedTab { get; set; }
 
 		public new Settings Settings { get; set; }
 
@@ -48,6 +56,11 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				Settings.DiffCalcMode = value.Value;
 			}
+		}
+
+		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
+		{
+			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
 		}
 
 		public void Save()

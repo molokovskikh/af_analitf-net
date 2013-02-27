@@ -117,10 +117,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 		}
 
-		protected Order MakeOrder(Offer offer)
+		protected Order MakeOrder(Offer offer, Address toAddress = null)
 		{
-			var order = new Order(offer.Price, address);
+			var order = new Order(offer.Price, toAddress ?? address);
 			order.AddLine(offer, 1);
+			offer.OrderLine = order.Lines[0];
 			session.Save(order);
 			session.Flush();
 			return order;
