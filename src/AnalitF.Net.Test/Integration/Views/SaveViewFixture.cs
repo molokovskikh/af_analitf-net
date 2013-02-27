@@ -74,6 +74,17 @@ namespace AnalitF.Net.Test.Integration.Views
 		}
 
 		[Test]
+		public void Restore_display_index()
+		{
+			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			ForceBinding(view);
+			grid.Columns[0].DisplayIndex = 5;
+			model.ResetView(grid);
+			Assert.That(grid.Columns[0].DisplayIndex, Is.EqualTo(0),
+				grid.Columns.Select(c => Tuple.Create(c.DisplayIndex, c.Header)).Implode());
+		}
+
+		[Test]
 		public void Reset_settings()
 		{
 			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");

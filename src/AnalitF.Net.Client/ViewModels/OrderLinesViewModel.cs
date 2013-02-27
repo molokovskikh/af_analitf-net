@@ -308,7 +308,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentLine.OfferId);
+			offerViewModel.CurrentOffer = StatelessSession.Get<Offer>(CurrentLine.OfferId);
 
 			Shell.Navigate(offerViewModel);
 		}

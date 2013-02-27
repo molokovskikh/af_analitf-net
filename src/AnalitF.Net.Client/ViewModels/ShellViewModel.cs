@@ -46,21 +46,25 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 		}
 
-		public ColumnSettings(DataGridColumn dataGridColumn)
+		public ColumnSettings(DataGridColumn dataGridColumn, int index)
 		{
 			Name = dataGridColumn.Header.ToString();
 			Visible = dataGridColumn.Visibility;
 			Width = dataGridColumn.Width;
-			DisplayIndex = dataGridColumn.DisplayIndex;
+			//-1 будет в том случае если таблица еще не отображалась
+			//в этом случае надо использовать индекс колонки
+			if (dataGridColumn.DisplayIndex != -1)
+				DisplayIndex = dataGridColumn.DisplayIndex;
+			else
+				DisplayIndex = index;
 		}
 
 		public void Restore(DataGridColumn column)
 		{
 			column.Width = Width;
 			column.Visibility = Visible;
-			//безумие, если колонке два раза сказать что у нее DisplayIndex -1, то будет исключение
-			//ArgumentOutOfRangeException
-			if (column.DisplayIndex != DisplayIndex)
+			//мы не можем установить неопределенный индекс
+			if (DisplayIndex != -1)
 				column.DisplayIndex = DisplayIndex;
 		}
 

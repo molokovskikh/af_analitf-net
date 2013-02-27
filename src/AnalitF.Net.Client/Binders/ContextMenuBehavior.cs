@@ -11,8 +11,16 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class ContextMenuBehavior
 	{
+		public static readonly DependencyProperty PersistColumnSettingsProperty =
+			DependencyProperty.RegisterAttached("PersistColumnSettings",
+				typeof(bool),
+				typeof(ContextMenuBehavior),
+				new PropertyMetadata(false));
+
 		public static void Attach(DataGrid grid)
 		{
+			grid.SetValue(PersistColumnSettingsProperty, true);
+
 			var contextMenu = new ContextMenu();
 			contextMenu.Items.Add(new MenuItem {
 				Header = "Восстановить значения по умолчанию",

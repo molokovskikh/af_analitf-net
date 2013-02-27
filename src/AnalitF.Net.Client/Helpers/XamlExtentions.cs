@@ -54,15 +54,19 @@ namespace AnalitF.Net.Client.Helpers
 				}
 			}
 			else {
-				var contentControl = o as ContentControl;
-				if (contentControl != null) {
-					var content = contentControl.Content as DependencyObject;
-					if (content != null)
-						yield return content;
+				var haveLogicalChildren = false;
+				foreach (var child in LogicalTreeHelper.GetChildren(o).OfType<DependencyObject>()) {
+					haveLogicalChildren = true;
+					yield return child;
 				}
 
-				foreach (var child in LogicalTreeHelper.GetChildren(o).OfType<DependencyObject>()) {
-					yield return child;
+				if (!haveLogicalChildren) {
+					var contentControl = o as ContentControl;
+					if (contentControl != null) {
+						var content = contentControl.Content as DependencyObject;
+						if (content != null)
+							yield return content;
+					}
 				}
 			}
 		}

@@ -187,7 +187,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (storage.ContainsKey(key)) {
 				storage.Remove(key);
 			}
-			storage.Add(key, grid.Columns.Select(c => new ColumnSettings(c)).ToList());
+			storage.Add(key, grid.Columns.Select((c, i) => new ColumnSettings(c, i)).ToList());
 		}
 
 		protected void RestoreView(object view)
@@ -233,9 +233,8 @@ namespace AnalitF.Net.Client.ViewModels
 				return Enumerable.Empty<DataGrid>();
 			return dependencyObject.DeepChildren()
 				.OfType<DataGrid>()
-				.Where(c => c.Name == "Offers");
+				.Where(c => (bool)c.GetValue(ContextMenuBehavior.PersistColumnSettingsProperty));
 		}
-
 
 		protected override void OnViewAttached(object view, object context)
 		{

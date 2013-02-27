@@ -42,6 +42,19 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
+		public void Select_children()
+		{
+			view.Content = new TabControl {
+				Items = {
+					new TabItem { Content = new DataGrid() },
+					new TabItem { Content = new DataGrid() },
+				}
+			};
+			var count = view.DeepChildren().OfType<DataGrid>().Count();
+			Assert.That(count, Is.EqualTo(2));
+		}
+
+		[Test]
 		public void Enabled_binder()
 		{
 			model.Text = "123";
