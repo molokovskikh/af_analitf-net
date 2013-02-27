@@ -110,7 +110,8 @@ namespace AnalitF.Net.Client.ViewModels
 				var query = StatelessSession.Query<SentOrderLine>()
 					.Fetch(l => l.Order)
 					.ThenFetch(o => o.Price)
-					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1));
+					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1))
+					.Where(l => l.Order.Address == Address);
 
 				if (CurrentPrice != null && CurrentPrice.Id != null) {
 					query = query.Where(l => l.Order.Price == CurrentPrice);

@@ -1,19 +1,8 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Media;
 using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
-using Common.Tools;
-using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Client.Views
 {
