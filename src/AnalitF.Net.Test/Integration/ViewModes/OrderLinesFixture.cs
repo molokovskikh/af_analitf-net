@@ -80,5 +80,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			testScheduler.AdvanceByMs(1000);
 			Assert.That(model.Lines.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		public void Print()
+		{
+			Assert.That(model.CanPrint, Is.True);
+			var doc = model.Print().Doc;
+			Assert.That(doc, Is.Not.Null);
+		}
 	}
 }

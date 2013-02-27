@@ -9,13 +9,15 @@ using System.Windows;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.Models.Results;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class OrderLinesViewModel : BaseOrderViewModel
+	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable
 	{
 		private OrderLine currentLine;
 		private Catalog currentCatalog;
@@ -325,6 +327,17 @@ namespace AnalitF.Net.Client.ViewModels
 				FiltredMnn = CurrentCatalog.Name.Mnn
 			};
 			Shell.Navigate(catalogViewModel);
+		}
+
+		public bool CanPrint
+		{
+			get { return true; }
+		}
+
+		public PrintResult Print()
+		{
+			var doc = new OrderLinesDocument(this).BuildDocument();
+			return new PrintResult(doc, DisplayName);
 		}
 	}
 }
