@@ -14,6 +14,9 @@ namespace AnalitF.Net.Client.Models
 
 		public Stat(Address address)
 		{
+			if (address == null)
+				return;
+
 			OrdersCount = address.Orders.Count;
 			OrderLinesCount = address.Orders.SelectMany(o => o.Lines).Count();
 			Sum = address.Orders.Sum(o => o.Sum);

@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
+using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -28,11 +29,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			session.DeleteEach<Order>();
 
-			Reinit();
-		}
-
-		private void Reinit()
-		{
 			lazyModel = new Lazy<OrderLinesViewModel>(() => {
 				session.Flush();
 				return Init(new OrderLinesViewModel());
@@ -99,6 +95,51 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.CanPrint, Is.True);
 			var doc = model.Print().Doc;
 			Assert.That(doc, Is.Not.Null);
+		}
+
+		[Test]
+		public void Delete_line_on_edit()
+		{
+			var order = MakeOrder(session.Query<Offer>().First());
+
+			model.CurrentLine = model.Lines.FirstOrDefault();
+			model.CurrentLine.Count = 0;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.That(model.Lines.Count, Is.EqualTo(0));
+			Assert.That(model.Sum, Is.EqualTo(0));
+
+			ScreenExtensions.TryDeactivate(model, true);
+
+			session.Clear();
+			Assert.That(session.Get<Order>(order.Id), Is.Null);
+			Assert.That(session.Get<OrderLine>(order.Lines[0].Id), Is.Null);
+		}
+
+		[Test]
+		public void Update_stat_on_delete()
+		{
+			MakeOrder(session.Query<Offer>().First());
+			model.CurrentLine = model.Lines.FirstOrDefault();
+
+			shell.NotifyOfPropertyChange("CurrentAddress");
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
+			model.CurrentLine.Count = 0;
+			model.OfferUpdated();
+			testScheduler.AdvanceByMs(1000);
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
+		}
+
+		[Test]
+		public void Update_stat()
+		{
+			MakeOrder(session.Query<Offer>().First());
+			model.CurrentLine = model.Lines.FirstOrDefault();
+			model.CurrentLine.Count = 100;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			testScheduler.AdvanceByMs(1000);
+			Assert.That(shell.Stat.Value.Sum, Is.EqualTo(model.CurrentLine.Sum));
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Catalog currentCatalog;
 		private List<MarkupConfig> markups;
 		private Price currentPrice;
-		private List<OrderLine> lines;
+		private ObservableCollection<OrderLine> lines;
 		private List<SentOrderLine> sentLines;
 		private OrderLine lastEdit;
 
@@ -32,6 +32,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			AllOrders = new NotifyValue<bool>();
 			AddressesEnabled = new NotifyValue<bool>(() => AllOrders.Value, AllOrders);
+
+			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
 
 			DisplayName = "Сводный заказ";
 			Addresses = Session.Query<Address>()
@@ -60,11 +62,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Addresses.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
 				.Merge()
-				.Throttle(TimeSpan.FromMilliseconds(500), Scheduler)
+				.Throttle(Consts.FilterUpdateTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Update());
 
 			Dep(Update, m => m.CurrentPrice, m => m.AllOrders.Value);
+
+			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
+				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+				.Select(e => new Stat(Address));
+			Bus.RegisterMessageSource(observable);
+			observable.Subscribe(_ => NotifyOfPropertyChange("Sum"));
 
 			//пока устанавливаем значения не надо оповещать об изменения
 			//все равно будет запрос когда форма активируется
@@ -104,10 +112,10 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => addresses.Contains(l.Order.Address));
 				}
 
-				Lines = query
+				Lines = new ObservableCollection<OrderLine>(query
 					.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProducerSynonym)
-					.ToList();
+					.ToList());
 
 				CalculateRetailCost();
 			}
@@ -177,7 +185,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		[Export]
-		public List<OrderLine> Lines
+		public ObservableCollection<OrderLine> Lines
 		{
 			get { return lines; }
 			set
@@ -263,13 +271,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Удалить позицию?"))
 				return;
 
-			var offer = Session.Load<Offer>(CurrentLine.OfferId);
-			offer.AttachOrderLine(CurrentLine);
-			offer.OrderCount = 0;
-			var error = offer.UpdateOrderLine(Address, Settings);
-			ShowValidationError(error);
-
-			Update();
+			CurrentLine.Count = 0;
+			CheckForDelete(currentLine);
 		}
 
 		public void OfferUpdated()
@@ -278,7 +281,26 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			lastEdit = CurrentLine;
-			ShowValidationError(currentLine.EditValidate());
+			ShowValidationError(lastEdit.EditValidate());
+			CheckForDelete(lastEdit);
+		}
+
+		private void CheckForDelete(OrderLine orderLine)
+		{
+			if (orderLine.Count == 0) {
+				lastEdit = null;
+				var order = orderLine.Order;
+				if (order != null) {
+					order.RemoveLine(orderLine);
+					if (order.IsEmpty)
+						order.Address.Orders.Remove(order);
+				}
+				Lines.Remove(orderLine);
+			}
+
+			if (orderLine.Order != null) {
+				orderLine.Order.Sum = orderLine.Order.Lines.Sum(l => l.Sum);
+			}
 		}
 
 		public void OfferCommitted()
