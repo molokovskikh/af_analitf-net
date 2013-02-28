@@ -206,6 +206,7 @@
     <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
+    <Compile Include="ViewModels\Parts\InlineEditWarningViewModel.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\QuickSearch.cs" />
@@ -260,8 +261,8 @@
     <Compile Include="Views\OrderDetailsView.xaml.cs">
       <DependentUpon>OrderDetailsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Parts\Warning.xaml.cs">
-      <DependentUpon>Warning.xaml</DependentUpon>
+    <Compile Include="Views\Parts\InlineEditWarningView.xaml.cs">
+      <DependentUpon>InlineEditWarningView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PriceOfferView.xaml.cs">
       <DependentUpon>PriceOfferView.xaml</DependentUpon>
@@ -357,7 +358,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Parts\Warning.xaml">
+    <Page Include="Views\Parts\InlineEditWarningView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

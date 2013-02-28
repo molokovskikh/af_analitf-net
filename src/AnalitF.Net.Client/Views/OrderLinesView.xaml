@@ -95,6 +95,8 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
+		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
+
 		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
 			Visibility="{Binding IsSentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
 			<DataGrid.Columns>

@@ -10,5 +10,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public static TimeSpan SearchTimeout = TimeSpan.FromMilliseconds(5000);
 		public static TimeSpan LoadOrderHistoryTimeout = TimeSpan.FromMilliseconds(2000);
 		public static TimeSpan RefreshOrderStatTimeout = TimeSpan.FromMilliseconds(500);
+		public static readonly TimeSpan WarningTimeout = TimeSpan.FromSeconds(5);
 	}
 }

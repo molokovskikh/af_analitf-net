@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 
@@ -48,7 +49,7 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class Offer : BaseOffer, INotifyPropertyChanged
+	public class Offer : BaseOffer, INotifyPropertyChanged, IInlineEditable
 	{
 		private decimal? _diff;
 		private uint? orderCount;
@@ -221,6 +222,9 @@ namespace AnalitF.Net.Client.Models
 			if (OrderCount.GetValueOrDefault(0) == 0)
 				return result;
 
+			if (Junk)
+				result.Add(Message.Warning("Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки."));
+
 			if (address.Orders.Where(o => o.Frozen).SelectMany(o => o.Lines).Any(l => l.ProductId == ProductId)) {
 				result.Add(Message.Warning("Товар присутствует в замороженных заказах."));
 			}
@@ -232,6 +236,7 @@ namespace AnalitF.Net.Client.Models
 			if (PrevOrderAvgCost != null && Cost > PrevOrderAvgCost * (1 + settings.OverCostWarningPercent / 100)) {
 				result.Add(Message.Warning("Превышение средней цены!"));
 			}
+
 			return result;
 		}
 
@@ -245,6 +250,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual List<Message> SaveOrderLine(Address address, Settings settings, string comment = null)
 		{
 			return UpdateOrderLine(address, settings, comment, false);
+		}
+
+		[Ignore]
+		public virtual uint Value
+		{
+			get { return OrderCount.GetValueOrDefault(); }
+			set { OrderCount = value; }
 		}
 	}
 }

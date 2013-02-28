@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -25,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Price currentPrice;
 		private List<OrderLine> lines;
 		private List<SentOrderLine> sentLines;
-		private string orderWarning;
+		private OrderLine lastEdit;
 
 		public OrderLinesViewModel()
 		{
@@ -76,6 +77,8 @@ namespace AnalitF.Net.Client.ViewModels
 			End = DateTime.Today;
 			IsNotifying = true;
 		}
+
+		public InlineEditWarningViewModel OrderWarning { get; set; }
 
 		protected override void OnActivate()
 		{
@@ -269,26 +272,34 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 		}
 
-		private void ShowValidationError(List<Message> messages)
+		public void OfferUpdated()
 		{
-			var warnings = messages.Where(m => m.IsWarning).Implode(Environment.NewLine);
-			//нельзя перетирать старые предупреждения, предупреждения очищаются только по таймеру
-			if (!String.IsNullOrEmpty(warnings))
-				OrderWarning = warnings;
+			if (CurrentLine == null)
+				return;
 
-			var errors = messages.Where(m => m.IsError);
-			foreach (var message in errors) {
-				Manager.Warning(message.MessageText);
-			}
+			lastEdit = CurrentLine;
+			ShowValidationError(currentLine.EditValidate());
 		}
 
-		public string OrderWarning
+		public void OfferCommitted()
 		{
-			get { return orderWarning; }
-			set
-			{
-				orderWarning = value;
-				NotifyOfPropertyChange("OrderWarning");
+			if (lastEdit == null)
+				return;
+
+			ShowValidationError(lastEdit.SaveValidate());
+		}
+
+		private void ShowValidationError(List<Message> messages)
+		{
+			OrderWarning.Show(messages);
+
+			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
+			//мог ввести коректное значение
+			var errors = messages.Where(m => m.IsError);
+			if (errors.Any()) {
+				if (CurrentLine == null || CurrentLine.Id != lastEdit.Id) {
+					CurrentLine = lastEdit;
+				}
 			}
 		}
 

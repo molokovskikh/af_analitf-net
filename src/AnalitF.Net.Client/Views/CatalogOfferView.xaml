@@ -102,7 +102,7 @@
 			</ItemsControl.GroupStyle>
 		</c:DataGrid>
 
-		<Parts:Warning Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
+		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
 		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 

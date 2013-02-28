@@ -84,7 +84,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<Parts:Warning Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
+		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
 		<Views:ProductInfoPanel Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 

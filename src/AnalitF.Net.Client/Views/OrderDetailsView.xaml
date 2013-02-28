@@ -7,7 +7,11 @@
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.InputBindings>
+		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowCatalog" />
+		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowCatalogWithMnnFilter" />
 	</UserControl.InputBindings>
 
 	<Grid>
@@ -60,12 +64,12 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=VitallyImportant}">
+		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
 				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
 
 				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
 				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
@@ -73,7 +77,7 @@
 				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
 				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=Junk}" Width="*" Header="Цена" />
+				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Цена" />
 				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
 				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
 				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />

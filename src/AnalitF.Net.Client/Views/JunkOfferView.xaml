@@ -59,7 +59,7 @@
 				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"
 				IsEnabled="{Binding QuickSearch.IsEnabled}"></TextBox>
 
-		<Parts:Warning Grid.Row="0" cal:Bind.ModelWithoutContext="{Binding}"></Parts:Warning>
+		<ContentControl x:Name="OrderWarning" Grid.Row="0" />
 
 		<Views:ProductInfoPanel Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
 

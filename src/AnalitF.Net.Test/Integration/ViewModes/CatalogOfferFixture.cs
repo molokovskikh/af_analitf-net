@@ -279,7 +279,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.CurrentOffer = offer;
 			model.CurrentOffer.OrderCount = 51;
 			model.OfferUpdated();
-			Assert.That(model.OrderWarning, Is.EqualTo("Превышение среднего заказа!"));
+			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Превышение среднего заказа!"));
 		}
 
 		[Test]

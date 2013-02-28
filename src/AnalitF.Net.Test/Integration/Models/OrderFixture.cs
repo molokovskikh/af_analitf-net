@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.Models
 {

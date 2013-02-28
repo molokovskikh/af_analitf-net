@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			return view as T;
 		}
 
-		protected DependencyObject InitView(BaseScreen model)
+		protected UIElement InitView(BaseScreen model)
 		{
 			var view = ViewLocator.LocateForModel(model, null, null);
 			ViewModelBinder.Bind(model, view, null);

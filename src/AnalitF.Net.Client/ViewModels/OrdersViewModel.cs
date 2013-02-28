@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOrder == null)
 				return;
 
-			Shell.ActivateItem(new OrderDetailsViewModel(CurrentOrder));
+			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder));
 		}
 	}
 }

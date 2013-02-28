@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.Views
 			ContextMenuBehavior.Attach(SentLines);
 			DataGridHelper.CalculateColumnWidths(Lines);
 			DataGridHelper.CalculateColumnWidths(SentLines);
+			EditBehavior.Attach(Lines);
 		}
 	}
 }

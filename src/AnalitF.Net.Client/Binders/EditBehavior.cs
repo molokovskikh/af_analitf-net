@@ -11,6 +11,11 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Binders
 {
+	public interface IInlineEditable
+	{
+		uint Value { get; set; }
+	}
+
 	public class EditBehavior
 	{
 		private static TimeSpan inputInterval = TimeSpan.FromMilliseconds(1500);
@@ -68,14 +73,13 @@ namespace AnalitF.Net.Client.Binders
 		public static void UpdateValue<T>(object sender, T e, Func<string, T, string> value)
 		{
 			var dataGrid = (DataGrid)sender;
-			var item = dataGrid.SelectedItem as Offer;
+			var item = dataGrid.SelectedItem as IInlineEditable;
 			if (item == null)
 				return;
-			item.OrderCount = SafeConvert.ToUInt32(value(item.OrderCount.ToString(), e));
-			var viewModel = dataGrid.DataContext as BaseOfferViewModel;
-			if (viewModel != null) {
-				viewModel.OfferUpdated();
-			}
+			item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString(), e));
+			var viewModel = dataGrid.DataContext;
+			if (viewModel != null)
+				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
 		}
 	}
 }

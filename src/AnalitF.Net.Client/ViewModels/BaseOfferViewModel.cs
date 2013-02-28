@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
@@ -17,15 +18,12 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public abstract class BaseOfferViewModel : BaseScreen
 	{
-		private readonly TimeSpan warningTimeout = TimeSpan.FromSeconds(5);
-
 		private Catalog currentCatalog;
 		protected List<string> producers;
 		protected List<Offer> offers;
 		protected string currentProducer;
 		private Offer currentOffer;
 		protected List<MarkupConfig> markups = new List<MarkupConfig>();
-		private string orderWarning;
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменний приходит после
 		//изменения текущего предложения
@@ -44,11 +42,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
 
-			this.ObservableForProperty(m => m.OrderWarning)
-				.Where(m => !String.IsNullOrEmpty(m.Value))
-				.Throttle(warningTimeout)
-				.ObserveOn(UiScheduler)
-				.Subscribe(m => { OrderWarning = null; });
+			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => InvalidateHistoryOrders());
@@ -70,6 +64,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => new Stat(Address));
 			Bus.RegisterMessageSource(observable);
 		}
+
+		public InlineEditWarningViewModel OrderWarning { get; set; }
 
 		public List<SentOrderLine> HistoryOrders
 		{
@@ -154,16 +150,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool CanShowCatalogWithMnnFilter
 		{
 			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
-		}
-
-		public string OrderWarning
-		{
-			get { return orderWarning; }
-			set
-			{
-				orderWarning = value;
-				NotifyOfPropertyChange("OrderWarning");
-			}
 		}
 
 		public bool CanShowDescription
@@ -260,20 +246,13 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowValidationError(lastEditOffer.SaveOrderLine(Address, Settings, AutoCommentText));
 		}
 
-		private void ShowValidationError(List<Message> messages)
+		protected void ShowValidationError(List<Message> messages)
 		{
-			var warnings = messages.Where(m => m.IsWarning).Implode(Environment.NewLine);
-			//нельзя перетирать старые предупреждения, предупреждения очищаются только по таймеру
-			if (!String.IsNullOrEmpty(warnings))
-				OrderWarning = warnings;
-
-			var errors = messages.Where(m => m.IsError);
-			foreach (var message in errors) {
-				Manager.Warning(message.MessageText);
-			}
+			OrderWarning.Show(messages);
 
 			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
 			//мог ввести коректное значение
+			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
 				if (CurrentOffer == null || CurrentOffer.Id != lastEditOffer.Id) {
 					CurrentOffer = lastEditOffer;

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 using NHibernate.Cfg;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class OrderLine : BaseOffer, INotifyPropertyChanged
+	public class OrderLine : BaseOffer, INotifyPropertyChanged, IInlineEditable
 	{
 		private uint count;
 		private string comment;
@@ -76,9 +78,6 @@ namespace AnalitF.Net.Client.Models
 				result.Add(Message.Error(String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", Count)));
 			}
 
-			if (Junk)
-				result.Add(Message.Warning("Вы заказали препарат с ограниченным сроком годности\r\nили с повреждением вторичной упаковки."));
-
 			if (Count > 1000)
 				result.Add(Message.Warning("Внимание! Вы заказали большое количество препарата."));
 
@@ -143,6 +142,13 @@ namespace AnalitF.Net.Client.Models
 			var handler = PropertyChanged;
 			if (handler != null)
 				handler(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		[Ignore, JsonIgnore]
+		public virtual uint Value
+		{
+			get { return Count; }
+			set { Count = value; }
 		}
 	}
 }
