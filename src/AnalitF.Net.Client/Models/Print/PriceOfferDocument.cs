@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PriceOfferDocument
+	public class PriceOfferDocument : BaseDocument
 	{
 		private List<Offer> offers;
 		private Price price;
@@ -22,39 +22,10 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public FlowDocument BuildDocument()
 		{
-			var doc = new FlowDocument();
 			doc.Blocks.Add(new Paragraph());
 
 			var headerText = String.Format("Заявка на {0} от {1}", price.Name, address == null ? "" : address.Name);
-			var header = new Table {
-				Columns = {
-					new TableColumn {
-						Width = new GridLength(520)
-					},
-					new TableColumn {
-						Width = GridLength.Auto
-					},
-				},
-				RowGroups = {
-					new TableRowGroup {
-						Rows = {
-							new TableRow {
-								Cells = {
-									new TableCell(new Paragraph(new Run(headerText)) {
-										TextAlignment = TextAlignment.Left,
-										FontWeight = FontWeights.Bold,
-										FontSize = 16
-									}),
-									new TableCell(new Paragraph(new Run(price.Phone))) {
-										TextAlignment = TextAlignment.Right
-									}
-								}
-							}
-						}
-					}
-				}
-			};
-			doc.Blocks.Add(header);
+			TwoColumnHeader(headerText, price.Phone);
 
 			var text = String.Format("Прайс-лист от {0}", price.PriceDate);
 			doc.Blocks.Add(new Paragraph(new Run(text)));
@@ -76,7 +47,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.OrderLine == null ? null : (uint?)o.OrderLine.Count,
 				o.OrderLine == null ? null : (decimal?)o.OrderLine.Sum,
 			});
-			var table = CatalogOfferDocument.BuildTable(rows, headers, offers.Count);
+			var table = BuildTable(rows, headers, offers.Count);
 			var sum = offers.Where(o => o.OrderLine != null).Sum(o => o.OrderLine.Sum);
 			var sumLabel = "";
 			if (sum > 0)

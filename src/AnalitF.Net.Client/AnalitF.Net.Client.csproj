@@ -170,7 +170,9 @@
     <Compile Include="Models\MinOrderSumRule.cs" />
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\Print\BaseDocument.cs" />
     <Compile Include="Models\Print\CatalogOfferDocument.cs" />
+    <Compile Include="Models\Print\OrderDocument.cs" />
     <Compile Include="Models\Print\OrderLinesDocument.cs" />
     <Compile Include="Models\Print\PriceOfferDocument.cs" />
     <Compile Include="Models\ProductDescription.cs" />

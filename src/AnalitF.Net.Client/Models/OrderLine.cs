@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class OrderLine : BaseOffer, INotifyPropertyChanged, IInlineEditable
+	public class OrderLine : BaseOffer, INotifyPropertyChanged, IInlineEditable, IOrderLine
 	{
 		private uint count;
 		private string comment;

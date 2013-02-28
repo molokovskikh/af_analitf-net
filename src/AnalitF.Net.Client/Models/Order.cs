@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models
 		public OrderLine[] Items;
 	}
 
-	public class Order : INotifyPropertyChanged
+	public class Order : INotifyPropertyChanged, IOrder
 	{
 		private decimal sum;
 		private int linesCount;
@@ -100,6 +100,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual string PersonalComment { get; set; }
 
 		public virtual IList<OrderLine> Lines { get; set; }
+
+		IEnumerable<IOrderLine> IOrder.Lines
+		{
+			get { return Lines; }
+		}
 
 		public virtual bool IsValid
 		{

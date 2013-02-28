@@ -8,7 +8,7 @@ using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class OrderLinesDocument
+	public class OrderLinesDocument : BaseDocument
 	{
 		private OrderLinesViewModel model;
 
@@ -19,10 +19,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public FlowDocument BuildDocument()
 		{
-			var doc = new FlowDocument();
-
 			var address = ((ShellViewModel)model.Parent).CurrentAddress;
-
 			if (model.IsCurrentSelected) {
 				var text = String.Format("Текущий сводный заказ от {0}", address == null ? "" : address.Name);
 				doc.Blocks.Add(new Paragraph(new Run(text)) {
@@ -31,11 +28,11 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 			else {
-				Header(doc, String.Format("Отправленный сводный заказ {0}", address == null ? "" : address.Name));
+				Header(String.Format("Отправленный сводный заказ {0}", address == null ? "" : address.Name));
 				var text = String.Format("Период: {0} - {1}",
 					model.Begin.ToShortDateString(),
 					model.End.ToShortDateString());
-				Header(doc, text);
+				Header(text);
 			}
 			var headers = new [] {
 				new PrintColumnDeclaration("Наименование", 232),
@@ -76,8 +73,7 @@ namespace AnalitF.Net.Client.Models.Print
 					l.Count * l.Cost
 				});
 			}
-			var table = CatalogOfferDocument.BuildTable(rows, headers, count);
-			doc.Blocks.Add(table);
+			var table = BuildTable(rows, headers, count);
 			if (count > 0) {
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
@@ -104,14 +100,6 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 
 			return doc;
-		}
-
-		private static void Header(FlowDocument doc, string text)
-		{
-			doc.Blocks.Add(new Paragraph(new Run(text)) {
-				FontWeight = FontWeights.Bold,
-				FontSize = 16
-			});
 		}
 	}
 }

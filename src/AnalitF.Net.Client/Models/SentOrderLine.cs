@@ -1,6 +1,6 @@
 namespace AnalitF.Net.Client.Models
 {
-	public class SentOrderLine : BaseOffer
+	public class SentOrderLine : BaseOffer, IOrderLine
 	{
 		public SentOrderLine()
 		{}
@@ -15,6 +15,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 
 		public virtual uint Count { get; set; }
+
+		public virtual decimal Sum
+		{
+			get { return Count * Cost; }
+		}
 
 		public virtual SentOrder Order { get; set; }
 	}

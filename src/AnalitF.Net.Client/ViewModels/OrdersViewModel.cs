@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.Models.Results;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -11,7 +14,7 @@ using log4net;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class OrdersViewModel : BaseOrderViewModel
+	public class OrdersViewModel : BaseOrderViewModel, IPrintable
 	{
 		private Order currentOrder;
 		private List<Order> orders;
@@ -37,6 +40,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.ToList();
 		}
 
+		[Export]
 		public List<Order> Orders
 		{
 			get { return orders; }
@@ -47,6 +51,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		[Export]
 		public List<SentOrder> SentOrders
 		{
 			get { return sentOrders; }
@@ -86,6 +91,23 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder));
+		}
+
+		public bool CanPrint
+		{
+			get { return true; }
+		}
+
+		public PrintResult Print()
+		{
+			IEnumerable<FlowDocument> docs;
+			if (!IsSentSelected) {
+				docs = Orders.Select(o => new OrderDocument(o).Build());
+			}
+			else {
+				docs = SentOrders.Select(o => new OrderDocument(o).Build());
+			}
+			return new PrintResult(docs, DisplayName);
 		}
 	}
 }

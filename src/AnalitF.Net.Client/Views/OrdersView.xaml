@@ -30,29 +30,56 @@
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
-				<c:DataGrid x:Name="Orders">
+				<c:DataGrid x:Name="Orders" IsReadOnly="False">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Создано" Binding="{Binding CreatedOn}" />
-						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price}" />
-						<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding Price.RegionName}" />
-						<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding LinesCount}" />
-						<DataGridTextColumn Width="*" Header="Отправить" Binding="{Binding Send}" />
-						<DataGridTextColumn Width="*" Header="Мин.сумма" Binding="{Binding MinSum}" />
-						<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
-						<DataGridTextColumn Width="*" Header="Месячный заказ" Binding="{Binding MonthlyOrderSum}" />
-						<DataGridTextColumn Width="*" Header="Недельный заказ" Binding="{Binding WeeklyOrderSum}" />
+						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
+							TextAlignment="Center"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price}"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
+							TextAlignment="Right"
+							IsReadOnly="True" />
+						<DataGridCheckBoxColumn Width="56*" Header="Отправить"
+							Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinSum}"
+							TextAlignment="Right"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
+							TextAlignment="Right"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding MonthlyOrderSum}"
+							TextAlignment="Right"
+							IsReadOnly="True" />
+						<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding WeeklyOrderSum}"
+							TextAlignment="Right"
+							IsReadOnly="True" />
 					</DataGrid.Columns>
 				</c:DataGrid>
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected}">
 				<c:DataGrid x:Name="SentOrders">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="*" Header="Отправлено" Binding="{Binding SentOn}" />
-						<DataGridTextColumn Width="*" Header="Создано" Binding="{Binding CreatedOn}" />
-						<DataGridTextColumn Width="*" Header="Прайс-лист" Binding="{Binding Price}" />
-						<DataGridTextColumn Width="*" Header="Регион" Binding="{Binding Price.RegionName}" />
-						<DataGridTextColumn Width="*" Header="Позиций" Binding="{Binding LinesCount}" />
-						<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding SentOn}"
+							MinWidth="5"
+							TextAlignment="Right" />
+						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}"
+							TextAlignment="Center" />
+						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
+							MinWidth="5"
+							TextAlignment="Center" />
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price}"
+							MinWidth="5" />
+						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
+							MinWidth="5" />
+						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
+							TextAlignment="Right"
+							MinWidth="5" />
+						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
+							TextAlignment="Right"
+							MinWidth="5" />
 					</DataGrid.Columns>
 				</c:DataGrid>
 			</TabItem>
