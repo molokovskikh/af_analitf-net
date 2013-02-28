@@ -88,10 +88,10 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" />
+					CellStyle="{StaticResource ResourceKey=CountColumn}" />
 				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" />
+					CellStyle="{StaticResource ResourceKey=CountColumn}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -138,10 +138,10 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" />
+					CellStyle="{StaticResource ResourceKey=CountColumn}" />
 				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" />
+					CellStyle="{StaticResource ResourceKey=CountColumn}" />
 				<c:DataGridTextColumnEx Width="65*" Header="Отправлено" Binding="{Binding Order.SentOn}"
 					TextAlignment="Center" />
 			</DataGrid.Columns>

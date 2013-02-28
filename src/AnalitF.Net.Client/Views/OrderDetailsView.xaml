@@ -44,43 +44,60 @@
 					<RowDefinition Height="Auto"></RowDefinition>
 				</Grid.RowDefinitions>
 
-				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Заказ №:</Label>
-				<Label Grid.Row="0" Grid.Column="1" Name="Order_Id"></Label>
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Заказ №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Order_Id" FontWeight="Bold"></Label>
 
-				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right">Позиций:</Label>
-				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Count"></Label>
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Count" FontWeight="Bold"></Label>
 
-				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">от:</Label>
-				<Label Grid.Row="0" Grid.Column="3" Name="Order_CreatedOn"></Label>
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="Order_CreatedOn" FontWeight="Bold"></Label>
 
-				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right">на сумму:</Label>
-				<Label Grid.Row="1" Grid.Column="3" Name="Order_Sum"></Label>
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">на сумму:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="Order_Sum" FontWeight="Bold"></Label>
 
-				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right">Прайс-лист:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Order_Price"></Label>
+				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Прайс-лист:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Order_Price" FontWeight="Bold"></Label>
 
-				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right">Регион:</Label>
-				<Label Grid.Row="1" Grid.Column="5" Name="Order_Price_RegionName"></Label>
+				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Регион:</Label>
+				<Label Grid.Row="1" Grid.Column="5" Name="Order_Price_RegionName" FontWeight="Bold"></Label>
 			</Grid>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn Width="*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="*" Visibility="Collapsed" Header="Кат.производитель" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Срок годн." Binding="{Binding Period}" />
+				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
+				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Кат.производитель"
+					Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн."
+					Binding="{Binding Period}"
+					TextAlignment="Center" />
 
-				<DataGridTextColumn Width="*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
-				<DataGridTextColumn Width="*" Header="Пред.зарег.цена" />
-				<DataGridTextColumn Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Наценка поставщика" />
-				<DataGridTextColumn Width="*" Header="НДС" Binding="{Binding NDS}" />
-				<DataGridTextColumn Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Width="*" Header="Цена" />
-				<DataGridTextColumn Width="*" Header="Остаток" Binding="{Binding Quantity}" />
-				<DataGridTextColumn Width="*" Header="Заказ" Binding="{Binding Count}" />
-				<DataGridTextColumn Width="*" Header="Сумма" Binding="{Binding Sum}" />
+				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
+					Binding="{Binding MaxProducerCost}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
+					Binding="{Binding ProducerCost}"
+					TextAlignment="Right"  />
+				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
+					Binding="{Binding SupplierMarkup}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Цена"
+					Binding="{Binding Cost}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
+					CellStyle="{StaticResource ResourceKey=CountColumn}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding Sum}"
+					CellStyle="{StaticResource ResourceKey=CountColumn}"
+					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -99,12 +116,18 @@
 				<ColumnDefinition></ColumnDefinition>
 			</Grid.ColumnDefinitions>
 
-			<Views:ProductInfoPanel Grid.Column="0" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
-
-			<StackPanel Grid.Column="1">
-				<Label>Сообщение поставщику</Label>
-				<TextBox Name="Order_Comment" Width="Auto" Height="Auto"></TextBox>
+			<StackPanel Grid.Column="0">
+				<Views:ProductInfoPanel cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+				<StackPanel Grid.Row="3">
+					<Label>Комментарий</Label>
+					<TextBox Name="CurrentLine_Comment"></TextBox>
+				</StackPanel>
 			</StackPanel>
+
+			<DockPanel Grid.Column="1">
+				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
+				<TextBox Name="Order_Comment" VerticalScrollBarVisibility="Auto"></TextBox>
+			</DockPanel>
 		</Grid>
 
 	</Grid>

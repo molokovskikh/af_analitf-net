@@ -44,7 +44,6 @@
 				<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding SupplierCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="63*" CellStyle="{StaticResource ResourceKey=Junk}" FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="50*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="37*" Header="Остаток" Binding="{Binding Quantity}" TextAlignment="Right" />
