@@ -154,7 +154,7 @@ from Usersettings.Prices p
 				"p.CatalogId",
 				"pr.Name as Producer",
 				"mx.Cost as MaxProducerCost")
-				.Join("join Usersettings.MinCosts m on m.Id = c0.Id and m.RegionCode = ap.RegionCode")
+				.Join("join Usersettings.MinCosts m on m.ProductId = c0.ProductId and m.RegionCode = ap.RegionCode")
 				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
 				.Join("join Catalogs.Products p on p.Id = c0.ProductId")
 				.Join("join Catalogs.Catalog cl on cl.Id = p.CatalogID")

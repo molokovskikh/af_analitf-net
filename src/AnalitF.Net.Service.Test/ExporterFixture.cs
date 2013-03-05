@@ -7,8 +7,10 @@ using Common.Models;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
+using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.Suppliers;
 
 namespace AnalitF.Net.Service.Test
 {
@@ -19,11 +21,12 @@ namespace AnalitF.Net.Service.Test
 		private User user;
 		private Exporter exporter;
 		private string file;
+		private TestClient client;
 
 		[SetUp]
 		public void Setup()
 		{
-			var client = TestClient.CreateNaked();
+			client = TestClient.CreateNaked();
 			session.Save(client);
 			session.Flush();
 			session.Transaction.Commit();
@@ -93,6 +96,33 @@ namespace AnalitF.Net.Service.Test
 
 			var zipEntries = lsZip();
 			Assert.That(zipEntries.Implode(), Is.StringContaining("ads/2block.gif"));
+		}
+
+		[Test]
+		public void Export_all_offers()
+		{
+			var supplier = TestSupplier.CreateNaked();
+			client.MaintainIntersection();
+			var price = supplier.Prices[0];
+			var product = session.Query<TestProduct>().First();
+			var synonym = price.AddProductSynonym(product.CatalogProduct.Name, product);
+			var core1 = new TestCore(synonym);
+			var core2 = new TestCore(synonym);
+			session.Save(core1);
+			session.Save(core2);
+			core1.AddCost(100);
+			core2.AddCost(150);
+			session.Flush();
+			session.Save(core1);
+			session.Save(core2);
+			session.Flush();
+			session.Transaction.Commit();
+
+			var files = exporter.Export();
+			var offers = files.First(t => t.Item1.EndsWith("offers.txt"));
+			var text = File.ReadAllText(offers.Item1);
+			Assert.That(text, Is.StringContaining(core1.Id.ToString()));
+			Assert.That(text, Is.StringContaining(core2.Id.ToString()));
 		}
 
 		private List<string> lsZip()
