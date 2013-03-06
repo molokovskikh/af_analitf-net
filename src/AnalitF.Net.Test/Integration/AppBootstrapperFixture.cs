@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;

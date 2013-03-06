@@ -110,7 +110,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			var source = supplier.Prices[0].Core.Where(c => c.Product.CatalogProduct.VitallyImportant);
 
-			var holder = TestSupplier.Create();
+			var holder = TestSupplier.CreateNaked();
 			holder.Name = "Предельные цены производителей";
 			var price = holder.Prices[0];
 			var synonyms = source.GroupBy(c => new { c.Product, c.Producer })

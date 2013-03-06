@@ -48,11 +48,8 @@
 				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ" Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
-		<TextBox Grid.Row="1" Grid.Column="0"
-				Style="{StaticResource PopupSearch}"
-				x:Name="QuickSearch_SearchText"
-				Visibility="{Binding QuickSearch.SearchTextVisible, Converter={StaticResource VisibilityConverter}}"
-				IsEnabled="{Binding QuickSearch.IsEnabled}"></TextBox>
+
+		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" />
 
 		<Grid Grid.Row="1" Grid.Column="1">
 			<Grid.RowDefinitions>

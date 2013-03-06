@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 
@@ -16,11 +17,13 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
-			QuickSearch<string>.TestScheduler = new TestScheduler();
+			var scheduler = new TestScheduler();
 
 			items = new List<string>();
 			result = null;
-			search = new QuickSearch<string>(v => items.FirstOrDefault(i => i.Contains(v)), s => result = s);
+			search = new QuickSearch<string>(scheduler,
+				v => items.FirstOrDefault(i => i.Contains(v)),
+				s => result = s);
 			items.Add("123");
 		}
 

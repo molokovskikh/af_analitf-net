@@ -30,7 +30,8 @@
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
-				<c:DataGrid x:Name="Orders" IsReadOnly="False">
+				<c:DataGrid x:Name="Orders" IsReadOnly="False"
+					CellStyle="{StaticResource ResourceKey=BaseOrder}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
 							TextAlignment="Center"

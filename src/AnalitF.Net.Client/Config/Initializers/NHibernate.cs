@@ -66,6 +66,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 			mapper.Class<Order>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.ManyToOne(o => o.MinOrderSum, c => {
+					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("AddressId"), cm => cm.Name("RegionId"));
+					c.Insert(false);
+					c.Update(false);
+				});
 				m.Bag(o => o.Lines, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
@@ -76,7 +81,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 				c.Inverse(true);
 			}));
 			mapper.Class<Offer>(m => {
-				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				m.ManyToOne(o => o.Price, c => {
+					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
+					c.Insert(false);
+					c.Update(false);
+				});
 				m.ManyToOne(o => o.LeaderPrice, c => c.Columns(cm => cm.Name("LeaderPriceId"), cm => cm.Name("LeaderRegionId")));
 			});
 			mapper.Class<SentOrder>(m => {

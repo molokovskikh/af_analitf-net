@@ -162,7 +162,9 @@
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
+    <Compile Include="Models\Commands\ReorderCommand.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />
+    <Compile Include="Models\Commands\UnfreezeCommand.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
@@ -209,9 +211,9 @@
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarningViewModel.cs" />
+    <Compile Include="ViewModels\Parts\QuickSearch.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
-    <Compile Include="ViewModels\QuickSearch.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -235,6 +237,9 @@
     </Compile>
     <Compile Include="Views\Parts\CatalogPanel.xaml.cs">
       <DependentUpon>CatalogPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Parts\QuickSearchView.xaml.cs">
+      <DependentUpon>QuickSearchView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrintPreviewView.xaml.cs">
       <DependentUpon>PrintPreviewView.xaml</DependentUpon>
@@ -325,6 +330,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Parts\CatalogPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Parts\QuickSearchView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

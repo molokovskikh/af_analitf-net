@@ -95,6 +95,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
+		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
 		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"

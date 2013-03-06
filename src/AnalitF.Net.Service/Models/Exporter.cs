@@ -146,11 +146,9 @@ from Usersettings.Prices p
 			result.Add(Export(sql, "prices"));
 
 			var offerQuery = new OfferQuery();
-			offerQuery.Select("m.PriceCode as LeaderPriceId",
-				"r.Region as RegionName",
-				"m.MinCost as LeaderCost",
+			offerQuery.Select("m.MinCost as LeaderCost",
+				"m.PriceCode as LeaderPriceId",
 				"lr.RegionCode as LeaderRegionId",
-				"lr.Region as LeaderRegion",
 				"p.CatalogId",
 				"pr.Name as Producer",
 				"mx.Cost as MaxProducerCost")

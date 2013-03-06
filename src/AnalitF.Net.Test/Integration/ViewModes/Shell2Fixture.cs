@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate.Linq;

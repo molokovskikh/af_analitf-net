@@ -18,5 +18,18 @@ namespace AnalitF.Net.Test.Integration.Models
 				var stat = Stat.Update(session, address);
 			}
 		}
+
+		[Test]
+		public void Ignore_frozen()
+		{
+			var address = new Address("Тестовый адрес доставки");
+			var order = new Order(new Price(), address);
+			order.AddLine(new Offer(), 1);
+			order.Frozen = true;
+			order.Send = false;
+			address.Orders.Add(order);
+			var stat = new Stat(address);
+			Assert.That(stat.OrdersCount, Is.EqualTo(0));
+		}
 	}
 }

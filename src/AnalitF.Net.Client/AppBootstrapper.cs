@@ -177,6 +177,12 @@ namespace AnalitF.Net.Client
 
 		public static void InitUi()
 		{
+			//нужно затем что бы можно было дела модели без суфикса ViewModel
+			//достаточно что бы лни лежали в пространстве имен ViewModels
+			ViewLocator.NameTransformer.AddRule(
+				@"(?<nsbefore>([A-Za-z_]\w*\.)*)(?<subns>ViewModels\.)(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)(?!<suffix>ViewModel)$",
+				"${nsbefore}Views.${nsafter}${basename}View");
+
 			ContentElementBinder.Register();
 			SaneCheckboxEditor.Register();
 

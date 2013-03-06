@@ -6,6 +6,7 @@ using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -22,7 +23,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
 			ParentModel = catalog;
-			QuickSearch = new QuickSearch<Catalog>(
+			QuickSearch = new QuickSearch<Catalog>(UiScheduler,
 				v => Catalogs.FirstOrDefault(c => c.Name.Name.ToLower().StartsWith(v)),
 				v => CurrentCatalog = v);
 			QuickSearch.IsEnabled = false;

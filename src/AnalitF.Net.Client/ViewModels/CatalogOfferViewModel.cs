@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void UpdateRegions()
 		{
-			var offerRegions = Offers.Select(o => o.RegionName).Distinct().OrderBy(r => r).ToList();
+			var offerRegions = Offers.Select(o => o.Price).Distinct().Select(p => p.RegionName).OrderBy(r => r).ToList();
 			Regions = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
 		}
 
@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (CurrentRegion != Consts.AllRegionLabel) {
-				queryable = queryable.Where(o => o.RegionName == CurrentRegion);
+				queryable = queryable.Where(o => o.Price.RegionName == CurrentRegion);
 			}
 			if (CurrentProducer != Consts.AllProducerLabel) {
 				queryable = queryable.Where(o => o.Producer == CurrentProducer);

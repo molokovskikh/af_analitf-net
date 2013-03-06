@@ -9,7 +9,6 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 			ContextMenuBehavior.Attach(Prices);
-			QuickSearchBehavior.AttachSearch(Prices, QuickSearch_SearchText);
 		}
 	}
 }

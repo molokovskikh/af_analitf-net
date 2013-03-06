@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NUnit.Framework;

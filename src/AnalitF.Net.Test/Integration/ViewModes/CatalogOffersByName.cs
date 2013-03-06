@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using NUnit.Framework;

@@ -104,7 +104,7 @@ namespace AnalitF.Net.Service.Test
 			var supplier = TestSupplier.CreateNaked();
 			client.MaintainIntersection();
 			var price = supplier.Prices[0];
-			var product = session.Query<TestProduct>().First();
+			var product = session.Query<TestProduct>().First(p => !p.CatalogProduct.Hidden);
 			var synonym = price.AddProductSynonym(product.CatalogProduct.Name, product);
 			var core1 = new TestCore(synonym);
 			var core2 = new TestCore(synonym);

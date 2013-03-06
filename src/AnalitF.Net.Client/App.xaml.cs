@@ -43,6 +43,12 @@ namespace AnalitF.Net.Client
 			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
 
+
+			style = new Style(typeof(DataGridCell), baseStyle);
+			AddTriggers(style, "Frozen", true, Colors.Silver, activeColor, inactiveColor);
+			resources.Add("BaseOrder", style);
+
+
 			resources.Add("VitallyImportant", BaseStyle(activeColor, inactiveColor));
 
 			style = CellStyle(activeColor, inactiveColor, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66));

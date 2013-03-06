@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -24,11 +25,11 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			ParentModel = catalogViewModel;
 
-			CatalogNamesSearch = new QuickSearch<CatalogName>(
+			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
 				v => CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(v)),
 				c => CurrentCatalogName = c);
 
-			CatalogsSearch = new QuickSearch<Catalog>(
+			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,
 				v => Catalogs.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
 				c => CurrentCatalog = c);
 

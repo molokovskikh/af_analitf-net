@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Common.Tools.Calendar;
@@ -17,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class OrdersViewModel : BaseOrderViewModel, IPrintable
 	{
 		private Order currentOrder;
-		private List<Order> orders;
+		private BindingList<Order> orders;
 		private List<SentOrder> sentOrders;
 
 		public OrdersViewModel()
@@ -26,22 +28,49 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Begin = DateTime.Today.AddMonths(-3).FirstDayOfMonth();
 			End = DateTime.Today;
-			Orders = Session.Query<Order>().OrderBy(o => o.CreatedOn).ToList();
+
+			this.ObservableForProperty(m => (object)m.CurrentOrder)
+				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected))
+				.Subscribe(_ => {
+					NotifyOfPropertyChange("CanDelete");
+					NotifyOfPropertyChange("CanFreeze");
+					NotifyOfPropertyChange("CanUnfreeze");
+				});
+			this.ObservableForProperty(m => m.CurrentOrder.Frozen)
+				.Subscribe(_ => {
+					NotifyOfPropertyChange("CanFreeze");
+					NotifyOfPropertyChange("CanUnfreeze");
+				});
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			Update();
 		}
 
 		public override void Update()
 		{
-			if (IsSentSelected)
+			if (IsSentSelected) {
 				SentOrders = StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1))
 					.Fetch(o => o.Price)
 					.OrderBy(o => o.SentOn)
 					.Take(1000)
 					.ToList();
+			}
+			else {
+				Orders = new BindingList<Order>(Session.Query<Order>().OrderBy(o => o.CreatedOn).ToList());
+				var observable = Observable.FromEventPattern<ListChangedEventArgs>(Orders, "ListChanged")
+					.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+					.Select(e => new Stat(Address));
+				Bus.RegisterMessageSource(observable);
+			}
 		}
 
 		[Export]
-		public List<Order> Orders
+		public BindingList<Order> Orders
 		{
 			get { return orders; }
 			set
@@ -81,8 +110,53 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!CanDelete)
 				return;
-			Session.Delete(CurrentOrder);
-			Orders.Remove(CurrentOrder);
+			DeleteOrder(CurrentOrder);
+		}
+
+		private void DeleteOrder(Order order)
+		{
+			Session.Delete(order);
+			Orders.Remove(order);
+		}
+
+		public bool CanFreeze
+		{
+			get { return CurrentOrder != null && !CurrentOrder.Frozen && !IsSentSelected; }
+		}
+
+		public void Freeze()
+		{
+			if (!CanFreeze)
+				return;
+
+			CurrentOrder.Frozen = true;
+			CurrentOrder.Send = false;
+		}
+
+		public bool CanUnfreeze
+		{
+			get { return CurrentOrder != null && CurrentOrder.Frozen && !IsSentSelected; }
+		}
+
+		public void Unfreeze()
+		{
+			if (!CanUnfreeze)
+				return;
+
+			Run(new UnfreezeCommand(CurrentOrder.Id));
+		}
+
+		public bool CanReorder
+		{
+			get { return CurrentOrder != null && IsCurrentSelected && Orders.Count > 1; }
+		}
+
+		public void Reorder()
+		{
+			if (!CanReorder)
+				return;
+
+			Run(new ReorderCommand(CurrentOrder.Id));
 		}
 
 		public void EnterOrder()
@@ -108,6 +182,18 @@ namespace AnalitF.Net.Client.ViewModels
 				docs = SentOrders.Select(o => new OrderDocument(o).Build());
 			}
 			return new PrintResult(docs, DisplayName);
+		}
+
+		public void Run(DbCommand command)
+		{
+			Session.Flush();
+			using(var session = Session.SessionFactory.OpenSession())
+			using(var transaction = session.BeginTransaction()) {
+				command.Session = session;
+				command.Execute();
+				transaction.Commit();
+			}
+			Update();
 		}
 	}
 }

@@ -17,9 +17,11 @@ namespace AnalitF.Net.Client.Models
 			if (address == null)
 				return;
 
-			OrdersCount = address.Orders.Count;
-			OrderLinesCount = address.Orders.SelectMany(o => o.Lines).Count();
-			Sum = address.Orders.Sum(o => o.Sum);
+			var orders = address.Orders.Where(o => !o.Frozen).ToArray();
+			OrdersCount = orders.Length;
+			ReadyForSendOrdersCount = orders.Count(o => o.Send);
+			OrderLinesCount = orders.SelectMany(o => o.Lines).Count();
+			Sum = orders.Sum(o => o.Sum);
 		}
 
 		public Stat(Stat newStat, Stat currentStat)
@@ -31,6 +33,7 @@ namespace AnalitF.Net.Client.Models
 			MonthlySum = currentStat.MonthlySum;
 		}
 
+		public int ReadyForSendOrdersCount { get; set; }
 		public int OrdersCount { get; set; }
 		public int OrderLinesCount { get; set; }
 		public decimal Sum { get; set; }
@@ -61,6 +64,7 @@ namespace AnalitF.Net.Client.Models
 
 			var stat = new Stat();
 			stat.OrdersCount = session.Query<Order>().Count(o => o.Address == value && !o.Frozen);
+			stat.ReadyForSendOrdersCount = session.Query<Order>().Count(o => o.Address == value && !o.Frozen && o.Send);
 			stat.OrderLinesCount = session.Query<OrderLine>().Count(o => o.Order.Address == value && !o.Order.Frozen);
 			stat.Sum = session.Query<Order>().Where(o => o.Address == value && !o.Frozen).Sum(o => (decimal?)o.Sum)
 				.GetValueOrDefault();

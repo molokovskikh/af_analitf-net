@@ -1,13 +1,18 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Windows.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Helpers;
+using Caliburn.Micro;
 using ReactiveUI;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class QuickSearch<T> : INotifyPropertyChanged
+	public class QuickSearch<T> : ViewAware
 	{
 		private string searchText;
 		private bool searchInProgress;
@@ -15,16 +20,14 @@ namespace AnalitF.Net.Client.ViewModels
 		private Func<string, T> search;
 		private bool _isEnabled = true;
 
-		public static IScheduler TestScheduler;
-
-		public QuickSearch(Func<string, T> search, Action<T> update)
+		public QuickSearch(IScheduler scheduler, Func<string, T> search, Action<T> update)
 		{
 			this.search = search;
 			this.update = update;
 			var searchTextChanges = this.ObservableForProperty(m => m.SearchText);
-			searchTextChanges.Subscribe(_ => OnPropertyChanged("SearchTextVisible"));
+			searchTextChanges.Subscribe(_ => NotifyOfPropertyChange("SearchTextVisible"));
 			searchTextChanges
-				.Throttle(TimeSpan.FromMilliseconds(5000), TestScheduler ?? DispatcherScheduler.Current)
+				.Throttle(TimeSpan.FromMilliseconds(5000))
 				.Where(o => !String.IsNullOrEmpty(o.Value))
 				.Subscribe(_ => SearchText = null);
 		}
@@ -37,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels
 				if (!value)
 					SearchText = null;
 				_isEnabled = value;
-				OnPropertyChanged("IsEnabled");
+				NotifyOfPropertyChange("IsEnabled");
 			}
 		}
 
@@ -78,7 +81,7 @@ namespace AnalitF.Net.Client.ViewModels
 					searchInProgress = false;
 				}
 				if (notify)
-					OnPropertyChanged("SearchText");
+					NotifyOfPropertyChange("SearchText");
 			}
 		}
 
@@ -87,13 +90,21 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return !String.IsNullOrEmpty(SearchText); }
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
+		protected override void OnViewAttached(object view, object context)
 		{
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
+			base.OnViewAttached(view, context);
+			var d = view as DependencyObject;
+			if (d != null) {
+				var box = d.DeepChildren().OfType<TextBox>().FirstOrDefault();
+				if (box == null)
+					return;
+
+				var grid = d.Parent().Parent().Children().OfType<DataGrid>().FirstOrDefault();
+				if (grid == null)
+					return;
+
+				QuickSearchBehavior.AttachSearch(grid, box);
+			}
 		}
 	}
 }

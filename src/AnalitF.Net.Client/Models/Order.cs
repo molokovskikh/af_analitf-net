@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using AnalitF.Net.Client.Config.Initializers;
 using NHibernate;
+using NHibernate.Linq;
 using NHibernate.Proxy;
 using Newtonsoft.Json.Serialization;
 
@@ -43,6 +45,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		private decimal sum;
 		private int linesCount;
+		private bool send;
+		private bool frozen;
 
 		public Order()
 		{
@@ -56,6 +60,7 @@ namespace AnalitF.Net.Client.Models
 			Address = address;
 			Price = price;
 			CreatedOn = DateTime.Now;
+			MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
 		}
 
 		public virtual uint Id { get; set; }
@@ -91,9 +96,25 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal WeeklyOrderSum { get; set; }
 
-		public virtual bool Send { get; set; }
+		public virtual bool Send
+		{
+			get { return send; }
+			set
+			{
+				send = value;
+				OnPropertyChanged("Send");
+			}
+		}
 
-		public virtual bool Frozen { get; set; }
+		public virtual bool Frozen
+		{
+			get { return frozen; }
+			set
+			{
+				frozen = value;
+				OnPropertyChanged("Frozen");
+			}
+		}
 
 		public virtual string Comment { get; set; }
 
@@ -106,14 +127,15 @@ namespace AnalitF.Net.Client.Models
 			get { return Lines; }
 		}
 
+		public virtual MinOrderSumRule MinOrderSum { get; set; }
+
 		public virtual bool IsValid
 		{
 			get
 			{
-				var rule = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
-				if (rule == null)
+				if (MinOrderSum == null)
 					return true;
-				return Sum >= rule.MinOrderSum;
+				return Sum >= MinOrderSum.MinOrderSum;
 			}
 		}
 
@@ -136,9 +158,11 @@ namespace AnalitF.Net.Client.Models
 			LinesCount = Lines.Count;
 		}
 
-		public virtual void AddLine(Offer offer, uint count)
+		public virtual OrderLine AddLine(Offer offer, uint count)
 		{
-			AddLine(new OrderLine(this, offer, count));
+			var line = new OrderLine(this, offer, count);
+			AddLine(line);
+			return line;
 		}
 
 		public virtual ClientOrder ToClientOrder()
@@ -165,6 +189,72 @@ namespace AnalitF.Net.Client.Models
 			var handler = PropertyChanged;
 			if (handler != null)
 				handler(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		public virtual Order Unfreeze(ISession session)
+		{
+			if (Address == null)
+				return null;
+
+			if (Price == null)
+				return null;
+
+			var exists = session.Query<Order>().FirstOrDefault(o => o.Id != Id
+				&& o.Address == Address
+				&& o.Price == Price
+				&& !o.Frozen);
+
+			if (exists == null) {
+				exists = new Order(Price, Address) {
+					Comment = Comment,
+					PersonalComment = PersonalComment
+				};
+			}
+
+			var log = new StringBuilder();
+			foreach (var line in Lines.ToArray()) {
+				var offers = session.Query<Offer>().Where(o => o.ProductSynonymId == line.ProductSynonymId
+					&& o.ProducerSynonymId == line.ProducerSynonymId
+					&& o.Price == Price
+					&& o.Code == line.Code
+					&& o.RequestRatio == line.RequestRatio
+					&& o.MinOrderCount == line.MinOrderCount
+					&& o.MinOrderSum == line.MinOrderSum)
+					.OrderBy(o => o.Cost)
+					.ToArray();
+				line.Merge(exists, offers, log);
+			}
+			return exists;
+		}
+
+		public virtual void Reorder(Order[] orders, Offer[] offers)
+		{
+			foreach (var line in Lines.ToArray()) {
+				var toOrder = offers.Where(o => o.ProductId == line.ProductId && o.ProducerId == line.ProducerId)
+					.OrderBy(o => o.Cost)
+					.ToArray();
+
+				foreach (var offer in toOrder) {
+					var destOrder = orders.First(o => o.Price == offer.Price);
+					var existLine = destOrder.Lines.FirstOrDefault(l => l.OfferId == offer.Id);
+					if (existLine == null) {
+						var destLine = new OrderLine(destOrder, offer, line.Count);
+						if (destLine.IsCountValid()) {
+							destOrder.AddLine(destLine);
+							RemoveLine(line);
+							break;
+						}
+					}
+					else {
+						var requiredCount = existLine.Count + line.Count;
+						if (existLine.CalculateAvailableQuantity(requiredCount) == requiredCount) {
+							existLine.Count = requiredCount;
+							RemoveLine(line);
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 }

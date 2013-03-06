@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Text;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
@@ -120,7 +122,12 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
-		private uint CalculateAvailableQuantity(uint quantity)
+		public virtual bool IsCountValid()
+		{
+			return Count == CalculateAvailableQuantity(Count);
+		}
+
+		public virtual uint CalculateAvailableQuantity(uint quantity)
 		{
 			var topBound = SafeConvert.ToUInt32(Quantity);
 			if (topBound == 0)
@@ -149,6 +156,48 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return Count; }
 			set { Count = value; }
+		}
+
+		public virtual void Merge(Order order, Offer[] offers, StringBuilder log)
+		{
+			var rest = Count;
+			foreach (var offer in offers) {
+				if (rest == 0)
+					break;
+
+				var line = order.Lines.FirstOrDefault(l => l.OfferId == offer.Id);
+				if (line == null) {
+					line = new OrderLine(order, offer, rest);
+					line.Count = line.CalculateAvailableQuantity(line.Count);
+					if (line.Count > 0)
+						order.AddLine(line);
+					rest = rest - line.Count;
+				}
+				else {
+					var toOrder = line.Count + rest;
+					line.Count = line.CalculateAvailableQuantity(toOrder);
+					rest = toOrder - line.Count;
+				}
+			}
+
+			Order.RemoveLine(this);
+
+			if (rest > 0) {
+				if (rest == Count) {
+					log.AppendLine(String.Format("{0} : {1} - {2} ; Предложений не найдено",
+						order.Price.Name,
+						ProductSynonym,
+						ProducerSynonym));
+				}
+				else {
+					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказнное количество {3} вместо {4}",
+						Order.Price.Name,
+						ProductSynonym,
+						ProducerSynonym,
+						Count - rest,
+						Count));
+				}
+			}
 		}
 	}
 }

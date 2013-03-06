@@ -314,7 +314,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Address == null)
 				return;
 
-			var lines = Session.Query<OrderLine>().Where(l => l.Order.Address == Address).ToList();
+			var lines = Address.Orders.Where(o => !o.Frozen).SelectMany(o => o.Lines).ToList();
 
 			foreach (var offer in Offers) {
 				var line = lines.FirstOrDefault(l => l.OfferId == offer.Id);

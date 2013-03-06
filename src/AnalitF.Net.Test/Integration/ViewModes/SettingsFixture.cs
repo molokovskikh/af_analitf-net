@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;

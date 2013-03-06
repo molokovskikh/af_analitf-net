@@ -14,6 +14,11 @@ namespace AnalitF.Net.Client.Models
 
 		protected BaseOffer(BaseOffer offer)
 		{
+			Clone(offer);
+		}
+
+		public virtual void Clone(BaseOffer offer)
+		{
 			var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);
 			foreach (var property in properties) {
 				var value = property.GetValue(offer, null);

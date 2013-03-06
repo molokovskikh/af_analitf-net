@@ -402,7 +402,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			get
 			{
-				return Stat.Value.OrdersCount > 0 && CurrentAddress != null;
+				return Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
 			}
 		}
 

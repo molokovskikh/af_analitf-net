@@ -34,6 +34,9 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressesEnabled = new NotifyValue<bool>(() => AllOrders.Value, AllOrders);
 
 			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
+			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
+				s => Lines.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
+				l => CurrentLine = l);
 
 			DisplayName = "Сводный заказ";
 			Addresses = Session.Query<Address>()
@@ -87,6 +90,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public InlineEditWarningViewModel OrderWarning { get; set; }
+		public QuickSearch<OrderLine> QuickSearch { get; set; }
 
 		protected override void OnActivate()
 		{
@@ -98,7 +102,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			if (IsCurrentSelected) {
-				var query = Session.Query<OrderLine>();
+				var query = Session.Query<OrderLine>()
+					.Where(l => !l.Order.Frozen);
 
 				if (CurrentPrice != null && CurrentPrice.Id != null) {
 					query = query.Where(l => l.Order.Price == CurrentPrice);

@@ -57,21 +57,52 @@ namespace AnalitF.Net.Client.Models
 		private decimal? prevOrderAvgCount;
 		private OrderLine orderLine;
 
+		public Offer()
+		{
+		}
+
+		public Offer(Price price, decimal cost)
+		{
+			Id = new OfferComposedId();
+			Price = price;
+			Cost = cost;
+		}
+
+		public Offer(Offer offer, decimal cost)
+		{
+			Clone(offer);
+			Id = new OfferComposedId();
+			Id.OfferId = offer.Id.OfferId++;
+			Price = offer.Price;
+			Cost = cost;
+		}
+
+		public Offer(Price price, Offer clone, decimal cost)
+			: this(clone, cost)
+		{
+			Price = price;
+			PriceId = price.Id.PriceId;
+			Id.RegionId = price.Id.RegionId;
+			Cost = cost;
+		}
+
 		public virtual OfferComposedId Id { get; set; }
 
-		public virtual ulong RegionId { get; set;  }
-
-		public virtual string RegionName { get; set; }
+		//это поле нужно что бы сделать хибер счастливым
+		//в тестах я создаю данные но без этого поля вставка не будет работать
+		//ключ прайс листа состоит из двух полей PriceId и RegionId
+		//но RegionId участвует еще в первичном ключе
+		//код вставки записи у хибера
+		//не может разрешить эту ситуацию и ломается
+		//по этому в мапинге указано что связь с прайс листом вставлять не нужно
+		//а PriceId замаплен как отдельное поле
+		public virtual uint PriceId { get; set; }
 
 		public virtual Price Price { get; set; }
 
 		public virtual Price LeaderPrice { get; set; }
 
 		public virtual decimal LeaderCost { get; set; }
-
-		public virtual ulong LeaderRegionId { get; set; }
-
-		public virtual string LeaderRegion { get; set; }
 
 		public virtual bool Leader
 		{
@@ -103,7 +134,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		//поле для отображения сгруппированные данных
-		//оно здесь потомучто PropertyGroupDescription
+		//оно здесь потому что PropertyGroupDescription
 		//может группировать только по свойству
 		//а переделывать механиз группировки не целесообразно
 		//используется если снята опция "Поиск по форме выпуска"
@@ -132,7 +163,8 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		//Значение для этого поля загружается асинхронно, что бы ui узнал о загрузке надо его оповестить
+		//Значение для этого поля загружается асинхронно
+		//что бы ui узнал о загрузке надо его оповестить
 		[Ignore]
 		public virtual decimal? PrevOrderAvgCost
 		{

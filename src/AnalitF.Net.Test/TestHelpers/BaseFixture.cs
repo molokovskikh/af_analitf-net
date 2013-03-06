@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Test.Integration;
 using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NHibernate;
@@ -12,7 +13,7 @@ using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public class BaseFixture
 	{

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -23,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public PriceViewModel()
 		{
 			DisplayName = "Прайс-листы фирм";
-			QuickSearch = new QuickSearch<Price>(
+			QuickSearch = new QuickSearch<Price>(UiScheduler,
 				t => Prices.FirstOrDefault(p => p.Name.ToLower().Contains(t)),
 				p => CurrentPrice = p);
 		}
@@ -95,7 +96,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.Select(s => (decimal?)s.Item2).FirstOrDefault());
 				prices.Each(p => p.MonthlyOrderSum = monthlyStat.Where(s => s.Item1 == p.Id)
 					.Select(s => (decimal?)s.Item2).FirstOrDefault());
-				prices.Each(p => p.Order = Address.Orders.FirstOrDefault(o => o.Price == p));
+				prices.Each(p => p.Order = Address.Orders.Where(o => !o.Frozen).FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));
 			}
 
