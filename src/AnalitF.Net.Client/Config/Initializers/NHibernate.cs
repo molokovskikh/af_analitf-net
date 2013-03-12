@@ -116,6 +116,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			};
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => {
 				customizer.Column(member.LocalMember.Name + "Id");
+				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));

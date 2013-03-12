@@ -45,7 +45,7 @@
 							IsReadOnly="True" />
 						<DataGridCheckBoxColumn Width="56*" Header="Отправить"
 							Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}" />
-						<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinSum}"
+						<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
 							TextAlignment="Right"
 							IsReadOnly="True" />
 						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
@@ -88,9 +88,9 @@
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
 			<Label>Сообщение поставщику</Label>
-			<TextBox Name="CurrentOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected}"></TextBox>
+			<TextBox Name="EditableOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected}"></TextBox>
 			<Label>Личные комментарии</Label>
-			<TextBox Name="CurrentOrder_PersonalComment" Width="279" Height="104"></TextBox>
+			<TextBox Name="EditableOrder_PersonalComment" Width="279" Height="104"></TextBox>
 		</StackPanel>
 
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2">

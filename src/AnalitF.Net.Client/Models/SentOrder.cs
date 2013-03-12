@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace AnalitF.Net.Client.Models
@@ -43,15 +44,17 @@ namespace AnalitF.Net.Client.Models
 
 		Address Address { get; }
 
-		string Comment { get; }
+		string Comment { get; set; }
 
-		string PersonalComment { get; }
+		string PersonalComment { get; set; }
 
 		IEnumerable<IOrderLine> Lines { get; }
 	}
 
-	public class SentOrder : IOrder
+	public class SentOrder : IOrder, INotifyPropertyChanged
 	{
+		private string personalComment;
+
 		public SentOrder()
 		{}
 
@@ -88,13 +91,29 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal Sum { get; set; }
 
-		public virtual string PersonalComment { get; set; }
+		public virtual string PersonalComment
+		{
+			get { return personalComment; }
+			set
+			{
+				personalComment = value;
+				OnPropertyChanged("PersonalComment");
+			}
+		}
 
 		public virtual IList<SentOrderLine> Lines { get; set; }
 
 		IEnumerable<IOrderLine> IOrder.Lines
 		{
 			get { return Lines; }
+		}
+
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			PropertyChangedEventHandler handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

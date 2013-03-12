@@ -50,12 +50,14 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("RestoreVisible");
 					NotifyOfPropertyChange("CanReorder");
+					NotifyOfPropertyChange("EditableOrder");
 				});
 
 			this.ObservableForProperty(m => m.IsCurrentSelected)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("FreezeVisible");
 					NotifyOfPropertyChange("UnfreezeVisible");
+					NotifyOfPropertyChange("EditableOrder");
 				});
 
 			this.ObservableForProperty(m => m.CurrentSentOrder)
@@ -103,6 +105,18 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public IOrder EditableOrder
+		{
+			get
+			{
+				if (IsCurrentSelected)
+					return CurrentOrder;
+				if (IsSentSelected)
+					return CurrentSentOrder;
+				return null;
+			}
+		}
+
 		[Export]
 		public IList<Order> Orders
 		{
@@ -121,6 +135,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentOrder = value;
 				NotifyOfPropertyChange("CurrentOrder");
+				NotifyOfPropertyChange("EditableOrder");
 			}
 		}
 
@@ -140,9 +155,22 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return currentSentOrder; }
 			set
 			{
+				if (currentSentOrder != null)
+					currentSentOrder.PropertyChanged -= WatchForUpdate;
+
 				currentSentOrder = value;
+
+				if (currentSentOrder != null)
+					currentSentOrder.PropertyChanged += WatchForUpdate;
+
 				NotifyOfPropertyChange("CurrentSentOrder");
+				NotifyOfPropertyChange("EditableOrder");
 			}
+		}
+
+		private void WatchForUpdate(object sender, PropertyChangedEventArgs e)
+		{
+			StatelessSession.Update(sender);
 		}
 
 		public bool CanDelete

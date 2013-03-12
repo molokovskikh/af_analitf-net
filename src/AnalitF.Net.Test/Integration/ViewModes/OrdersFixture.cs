@@ -215,6 +215,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
 
+		[Test]
+		public void Update_personal_comment()
+		{
+			var order = PrepareSent();
+
+			model.CurrentSentOrder.PersonalComment = "тестовый комментарий";
+			session.Refresh(order);
+			Assert.AreEqual(order.PersonalComment, "тестовый комментарий");
+		}
+
 		private Offer MakeReordarable(Offer offer)
 		{
 			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);
@@ -225,13 +235,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			return newOffer;
 		}
 
-		private void PrepareSent()
+		private SentOrder PrepareSent()
 		{
 			session.DeleteEach<Order>();
 			session.DeleteEach<SentOrder>();
-			MakeSentOrder();
+			var order = MakeSentOrder();
 
 			SelectSent();
+			return order;
 		}
 
 		private void SelectSent()
