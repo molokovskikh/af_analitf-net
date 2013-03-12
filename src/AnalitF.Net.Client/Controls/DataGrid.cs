@@ -14,14 +14,23 @@ namespace AnalitF.Net.Client.Controls
 			base.OnKeyDown(e);
 		}
 
+		public bool BindDelete { get; set; }
+
 		protected override void OnExecutedDelete(ExecutedRoutedEventArgs e)
 		{
+			if (BindDelete)
+				base.OnExecutedDelete(e);
 		}
 
 		protected override void OnCanExecuteDelete(CanExecuteRoutedEventArgs e)
 		{
-			e.Handled = false;
-			e.ContinueRouting = true;
+			if (BindDelete) {
+				base.OnCanExecuteDelete(e);
+			}
+			else {
+				e.Handled = false;
+				e.ContinueRouting = true;
+			}
 		}
 	}
 }

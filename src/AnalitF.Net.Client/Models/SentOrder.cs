@@ -6,9 +6,23 @@ namespace AnalitF.Net.Client.Models
 {
 	public interface IOrderLine
 	{
-		string ProductSynonym { get; set; }
+		uint ProductSynonymId { get; }
 
-		string ProducerSynonym { get; set; }
+		string ProductSynonym { get; }
+
+		uint? ProducerSynonymId { get; }
+
+		string ProducerSynonym { get; }
+
+		decimal? MinOrderSum { get; }
+
+		uint? MinOrderCount { get; }
+
+		uint ProductId { get; }
+
+		uint? ProducerId { get; set; }
+
+		string Code { get; }
 
 		string Period { get; }
 
@@ -17,6 +31,8 @@ namespace AnalitF.Net.Client.Models
 		uint Count { get; }
 
 		decimal Sum { get; }
+
+		uint? RequestRatio { get; }
 	}
 
 	public interface IOrder
@@ -28,6 +44,8 @@ namespace AnalitF.Net.Client.Models
 		Address Address { get; }
 
 		string Comment { get; }
+
+		string PersonalComment { get; }
 
 		IEnumerable<IOrderLine> Lines { get; }
 	}

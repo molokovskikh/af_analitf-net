@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			OrdersCount = newStat.OrdersCount;
 			OrderLinesCount = newStat.OrderLinesCount;
+			ReadyForSendOrdersCount = newStat.ReadyForSendOrdersCount;
 			Sum = newStat.Sum;
 			WeeklySum = currentStat.WeeklySum;
 			MonthlySum = currentStat.MonthlySum;

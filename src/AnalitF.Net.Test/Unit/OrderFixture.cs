@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -127,7 +128,8 @@ namespace AnalitF.Net.Test.Unit
 			var offer2 = new Offer(price2, 150) { ProductId = 1 };
 			orders[1].AddLine(offer2, 1);
 
-			order.Reorder(orders, new[] { offer1, offer2 });
+			var log = new StringBuilder();
+			ReorderCommand<Order>.Reorder(order, orders, new[] { offer1, offer2 }, log);
 			Assert.That(order.Lines.Count, Is.EqualTo(0));
 			Assert.That(orders[0].Lines.Count, Is.EqualTo(1));
 			Assert.That(orders[0].Lines[0].Count, Is.EqualTo(20));

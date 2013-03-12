@@ -83,7 +83,11 @@ namespace AnalitF.Net.Client.Extentions
 				return DefaultResult;
 			}
 
-			return MessageBox.Show(text, caption, buttons, icon);
+			var window = InferOwnerOf(null);
+			if (window == null)
+				return MessageBox.Show(text, caption, buttons, icon);
+			else
+				return MessageBox.Show(window, text, caption, buttons, icon);
 		}
 
 		public void Warning(string text)

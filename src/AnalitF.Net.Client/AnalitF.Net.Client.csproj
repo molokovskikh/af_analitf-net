@@ -139,6 +139,7 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Config\Initializers\UtcToLocalDateTimeType.cs" />
+    <Compile Include="Controls\Closable.cs" />
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="Models\Results\HandledResult.cs" />
     <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
+    <Compile Include="Models\Results\SaveFileResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />
     <Compile Include="Models\SentOrder.cs" />
@@ -204,6 +206,7 @@
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\CatalogOfferViewModel.cs" />
@@ -231,6 +234,9 @@
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\TextView.xaml.cs">
+      <DependentUpon>TextView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\AutoComment.xaml.cs">
       <DependentUpon>AutoComment.xaml</DependentUpon>
@@ -322,6 +328,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DescriptionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\TextView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

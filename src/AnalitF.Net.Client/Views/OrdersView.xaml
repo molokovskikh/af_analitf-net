@@ -30,7 +30,7 @@
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
-				<c:DataGrid x:Name="Orders" IsReadOnly="False"
+				<c:DataGrid x:Name="Orders" IsReadOnly="False" BindDelete="True"
 					CellStyle="{StaticResource ResourceKey=BaseOrder}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
@@ -63,7 +63,7 @@
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected}">
 				<c:DataGrid x:Name="SentOrders">
 					<DataGrid.Columns>
-						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding SentOn}"
+						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}"
 							MinWidth="5"
 							TextAlignment="Right" />
 						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}"
@@ -88,7 +88,7 @@
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
 			<Label>Сообщение поставщику</Label>
-			<TextBox Name="CurrentOrder_Comment" Width="279" Height="104"></TextBox>
+			<TextBox Name="CurrentOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected}"></TextBox>
 			<Label>Личные комментарии</Label>
 			<TextBox Name="CurrentOrder_PersonalComment" Width="279" Height="104"></TextBox>
 		</StackPanel>
@@ -101,11 +101,12 @@
 			</StackPanel>
 		</StackPanel>
 
-		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
-			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
-			<Button x:Name="Freeze" Style="{StaticResource ResourceKey=FilterButton}">"Заморозить" заказы</Button>
-			<Button x:Name="Unfreeze" Style="{StaticResource ResourceKey=FilterButton}">"Разморозить" заказы</Button>
-			<Button x:Name="Reorder" Style="{StaticResource ResourceKey=FilterButton}">Перераспределить</Button>
+		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
+			<Button x:Name="Delete" Style="{StaticResource FilterButton}">Удалить</Button>
+			<Button x:Name="Freeze" Style="{StaticResource FilterButton}">"Заморозить" заказы</Button>
+			<Button x:Name="Unfreeze" Style="{StaticResource FilterButton}">"Разморозить" заказы</Button>
+			<Button x:Name="Restore" Style="{StaticResource FilterButton}">Вернуть в текущие</Button>
+			<Button x:Name="Reorder" Style="{StaticResource FilterButton}">Перераспределить</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>

@@ -31,5 +31,12 @@ namespace AnalitF.Net.Test.Integration.Models
 			var stat = new Stat(address);
 			Assert.That(stat.OrdersCount, Is.EqualTo(0));
 		}
+
+		[Test]
+		public void Copy_stat_values()
+		{
+			var stat = new Stat(new Stat { ReadyForSendOrdersCount = 1}, new Stat());
+			Assert.That(stat.ReadyForSendOrdersCount, Is.EqualTo(1));
+		}
 	}
 }

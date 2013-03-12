@@ -1,23 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Xps.Serialization;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
-using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
+using System.Reactive.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
 {

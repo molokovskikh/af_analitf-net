@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.TextView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference TryClose}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+	</UserControl.InputBindings>
+
+	<StackPanel>
+		<Label FontWeight="Bold">Предложения по данным позициям из заказа отсутствуют:</Label>
+		<TextBox Name="Text" Height="300" Width="700" Margin="4"
+			VerticalScrollBarVisibility="Auto"
+			HorizontalScrollBarVisibility="Auto"
+			TextWrapping="Wrap">
+		</TextBox>
+		<StackPanel Orientation="Horizontal">
+			<Button Name="TryClose" Margin="4">Закрыть</Button>
+			<Button Name="Save" Margin="4">Сохранить в файл</Button>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

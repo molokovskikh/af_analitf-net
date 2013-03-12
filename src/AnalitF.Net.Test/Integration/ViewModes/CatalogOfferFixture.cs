@@ -50,15 +50,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Calculate_retail_cost()
 		{
+			session.DeleteEach<MarkupConfig>();
 			var splitCost = session.Query<Offer>()
 				.Where(o => o.CatalogId == catalog.Id)
 				.OrderBy(o => o.Cost)
 				.First().Cost;
-			var markupConfig1 = new MarkupConfig(0, splitCost, 20);
-			var markupConfig2 = new MarkupConfig(splitCost, 100 * splitCost, 30);
-			session.DeleteEach<MarkupConfig>();
+			var markupType = catalog.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			var markupConfig1 = new MarkupConfig(0, splitCost, 20, markupType);
+			var markupConfig2 = new MarkupConfig(splitCost, 100 * splitCost, 30, markupType);
 			session.SaveEach(markupConfig1, markupConfig2);
-			session.Flush();
 
 			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
 

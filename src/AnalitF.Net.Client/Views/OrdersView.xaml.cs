@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 
 namespace AnalitF.Net.Client.Views
@@ -10,6 +11,10 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			ContextMenuBehavior.Attach(Orders);
+
+			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
+				CommandBinder.InvokeViewModel,
+				CommandBinder.CanInvokeViewModel));
 		}
 	}
 }

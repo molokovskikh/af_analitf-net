@@ -109,17 +109,24 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 						.Count() > 1);
 		}
 
-		protected void MakeSentOrder(Offer offer)
+		protected SentOrder MakeSentOrder(Offer offer = null)
 		{
+			if (offer == null)
+				offer = session.Query<Offer>().First();
+
 			var order = new Order(offer.Price, address);
 			order.AddLine(offer, 1);
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 			session.Flush();
+			return sentOrder;
 		}
 
-		protected Order MakeOrder(Offer offer, Address toAddress = null)
+		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
+			if (offer == null)
+				offer = session.Query<Offer>().First();
+
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.AddLine(offer, 1);
 			offer.OrderLine = order.Lines[0];
