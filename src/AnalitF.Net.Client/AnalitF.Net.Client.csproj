@@ -139,7 +139,6 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Config\Initializers\UtcToLocalDateTimeType.cs" />
-    <Compile Include="Controls\Closable.cs" />
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
@@ -213,6 +212,7 @@
     <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
+    <Compile Include="ViewModels\Parts\AddressSelector.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarningViewModel.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
@@ -237,6 +237,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Parts\AddressSelectorView.xaml.cs">
+      <DependentUpon>AddressSelectorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\AutoComment.xaml.cs">
       <DependentUpon>AutoComment.xaml</DependentUpon>
@@ -332,6 +335,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Parts\AddressSelectorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

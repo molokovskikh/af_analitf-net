@@ -49,7 +49,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public ColumnSettings(DataGridColumn dataGridColumn, int index)
 		{
 			Name = dataGridColumn.Header.ToString();
-			Visible = dataGridColumn.Visibility;
+			//видимостью колонки управляет флаг на форме
+			//состояние не нужно сохранять
+			if (Name != "Адрес заказа")
+				Visible = dataGridColumn.Visibility;
 			Width = dataGridColumn.Width;
 			//-1 будет в том случае если таблица еще не отображалась
 			//в этом случае надо использовать индекс колонки

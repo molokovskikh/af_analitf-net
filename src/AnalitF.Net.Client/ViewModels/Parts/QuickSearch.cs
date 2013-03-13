@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			var searchTextChanges = this.ObservableForProperty(m => m.SearchText);
 			searchTextChanges.Subscribe(_ => NotifyOfPropertyChange("SearchTextVisible"));
 			searchTextChanges
-				.Throttle(TimeSpan.FromMilliseconds(5000))
+				.Throttle(TimeSpan.FromMilliseconds(5000), scheduler)
 				.Where(o => !String.IsNullOrEmpty(o.Value))
 				.Subscribe(_ => SearchText = null);
 		}

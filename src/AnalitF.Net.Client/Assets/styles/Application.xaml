@@ -2,6 +2,8 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls">
+
+	<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverterResource" />
 	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
 	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
 

@@ -113,6 +113,8 @@
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
+    <Compile Include="Integration\Views\OrderLinesFixture.cs" />
+    <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
     <Compile Include="Integration\Views\SaveViewFixture.cs" />
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />

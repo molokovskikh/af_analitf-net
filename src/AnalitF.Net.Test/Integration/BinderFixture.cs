@@ -2,12 +2,14 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Test.Integration.Views;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;

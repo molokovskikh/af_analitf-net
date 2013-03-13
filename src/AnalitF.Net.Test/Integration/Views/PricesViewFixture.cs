@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -18,9 +19,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Bind_quick_search()
 		{
-			var model = Init(new PriceViewModel());
-			var view = InitView(model);
-			ForceBinding(view);
+			var view = Bind(new PriceViewModel());
 
 			var search = view.DeepChildren().OfType<Control>().First(e => e.Name == "QuickSearch");
 			var text = search.DeepChildren().OfType<TextBox>().FirstOrDefault();

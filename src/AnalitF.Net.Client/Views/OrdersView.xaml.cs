@@ -15,6 +15,10 @@ namespace AnalitF.Net.Client.Views
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				CommandBinder.InvokeViewModel,
 				CommandBinder.CanInvokeViewModel));
+
+			SentOrders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
+				CommandBinder.InvokeViewModel,
+				CommandBinder.CanInvokeViewModel));
 		}
 	}
 }

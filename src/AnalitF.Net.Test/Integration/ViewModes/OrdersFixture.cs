@@ -225,6 +225,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.AreEqual(order.PersonalComment, "тестовый комментарий");
 		}
 
+		[Test]
+		public void Select_all_orders()
+		{
+			session.DeleteEach<Order>();
+
+			Restore = true;
+			var newAddress = new Address { Name = "Тестовый адрес доставки" };
+			session.Save(newAddress);
+			MakeOrder();
+			shell.CurrentAddress = newAddress;
+
+			Assert.That(model.Orders.Count, Is.EqualTo(0));
+			model.AddressSelector.All.Value = true;
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+		}
+
 		private Offer MakeReordarable(Offer offer)
 		{
 			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);

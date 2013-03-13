@@ -30,19 +30,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public OrderLinesViewModel()
 		{
-			AllOrders = new NotifyValue<bool>();
-			AddressesEnabled = new NotifyValue<bool>(() => AllOrders.Value, AllOrders);
-
 			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
 				s => Lines.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
 				l => CurrentLine = l);
+			AddressSelector = new AddressSelector(Session, UiScheduler, this);
 
 			DisplayName = "Сводный заказ";
-			Addresses = Session.Query<Address>()
-				.OrderBy(a => a.Name)
-				.Select(a => new Selectable<Address>(a)).ToList();
-
 			markups = Session.Query<MarkupConfig>().ToList();
 
 			Dep(m => m.CanShowCatalog,
@@ -63,13 +57,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Dep(m => m.Sum, m => m.Lines);
 			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
 
-			Addresses.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
-				.Merge()
-				.Throttle(Consts.FilterUpdateTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => Update());
-
-			Dep(Update, m => m.CurrentPrice, m => m.AllOrders.Value);
+			Dep(Update, m => m.CurrentPrice, m => m.AddressSelector.All.Value);
 
 			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
@@ -91,6 +79,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public InlineEditWarningViewModel OrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
+		public AddressSelector AddressSelector { get; set; }
 
 		protected override void OnActivate()
 		{
@@ -109,11 +98,11 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => l.Order.Price == CurrentPrice);
 				}
 
-				if (!AllOrders.Value) {
+				if (!AddressSelector.All.Value) {
 					query = query.Where(l => l.Order.Address == Address);
 				}
 				else {
-					var addresses = Addresses.Where(i => i.IsSelected).Select(i => i.Item).ToArray();
+					var addresses = AddressSelector.Addresses.Where(i => i.IsSelected).Select(i => i.Item).ToArray();
 					query = query.Where(l => addresses.Contains(l.Order.Address));
 				}
 
@@ -160,22 +149,6 @@ namespace AnalitF.Net.Client.ViewModels
 			foreach (var offer in Lines)
 				offer.CalculateRetailCost(markups);
 		}
-
-		public NotifyValue<bool> AllOrders { get; set; }
-
-		public bool AllOrdersVisible
-		{
-			get { return Addresses.Count > 1; }
-		}
-
-		public IList<Selectable<Address>> Addresses { get; set; }
-
-		public bool AddressesVisible
-		{
-			get { return Addresses.Count > 1; }
-		}
-
-		public NotifyValue<bool> AddressesEnabled { get; set; }
 
 		public List<Price> Prices { get; set; }
 

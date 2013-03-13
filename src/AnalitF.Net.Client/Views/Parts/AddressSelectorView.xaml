@@ -1,0 +1,11 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Parts.AddressSelectorView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" mc:Ignorable="d">
+	<StackPanel Orientation="Horizontal">
+		<CheckBox VerticalAlignment="Center" Margin="0, 0, 4, 0" Name="All">Все заказы</CheckBox>
+		<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Addresses" LabelText="Адреса" />
+	</StackPanel>
+</UserControl>

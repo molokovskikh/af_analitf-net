@@ -70,9 +70,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder(offer);
 			MakeOrder(offer, newAddress);
 
-			model.AllOrders.Value = true;
+			model.AddressSelector.All.Value = true;
 			Assert.That(model.Lines.Count, Is.EqualTo(2));
-			model.Addresses[1].IsSelected = false;
+			model.AddressSelector.Addresses[1].IsSelected = false;
 			Assert.That(model.Lines.Count, Is.EqualTo(2));
 			testScheduler.AdvanceByMs(1000);
 			Assert.That(model.Lines.Count, Is.EqualTo(1));

@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public void TearDown()
 		{
 			if (ViewFixtureSetup.BindingErrors.Count > 0) {
-				throw new Exception(ViewFixtureSetup.BindingErrors.Implode());
+				throw new Exception(ViewFixtureSetup.BindingErrors.Implode(Environment.NewLine));
 			}
 		}
 
@@ -45,6 +45,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var size = new Size(1000, 1000);
 			view.Measure(size);
 			view.Arrange(new Rect(size));
+		}
+
+		protected UIElement Bind(BaseScreen priceViewModel)
+		{
+			var model = Init(priceViewModel);
+			var view = InitView(model);
+			ForceBinding(view);
+			return view;
 		}
 	}
 }

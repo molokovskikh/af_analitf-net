@@ -23,16 +23,21 @@
 
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Name="Begin"></DatePicker>
+			<DatePicker Margin="0, 0, 4, 0" Name="Begin"></DatePicker>
 			<Label>по</Label>
-			<DatePicker Name="End"></DatePicker>
+			<DatePicker Margin="0, 0, 4, 0" Name="End"></DatePicker>
+			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
-				<c:DataGrid x:Name="Orders" IsReadOnly="False" BindDelete="True"
-					CellStyle="{StaticResource ResourceKey=BaseOrder}">
+				<c:DataGrid x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
+					CellStyle="{StaticResource ResourceKey=BaseOrder}"
+					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
+						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
+							Visibility="Collapsed"
+							IsReadOnly="True" />
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
 							TextAlignment="Center"
 							IsReadOnly="True" />
@@ -61,8 +66,11 @@
 				</c:DataGrid>
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected}">
-				<c:DataGrid x:Name="SentOrders">
+				<c:DataGrid x:Name="SentOrders" CanUserDeleteRows="True"
+					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
+						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
+							Visibility="Collapsed" />
 						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}"
 							MinWidth="5"
 							TextAlignment="Right" />

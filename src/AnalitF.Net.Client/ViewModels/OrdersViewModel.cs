@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
@@ -31,6 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public OrdersViewModel()
 		{
 			DisplayName = "Заказы";
+			AddressSelector = new AddressSelector(Session, Scheduler, this);
 
 			IsNotifying = false;
 			Begin = DateTime.Today.AddMonths(-3).FirstDayOfMonth();
@@ -72,7 +74,12 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanFreeze");
 					NotifyOfPropertyChange("CanUnfreeze");
 				});
+
+			this.ObservableForProperty(m => m.AddressSelector.All.Value)
+				.Subscribe(_ => Update());
 		}
+
+		public AddressSelector AddressSelector { get; set; }
 
 		protected override void OnActivate()
 		{
@@ -87,6 +94,7 @@ namespace AnalitF.Net.Client.ViewModels
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1))
 					.Fetch(o => o.Price)
+					.Fetch(o => o.Address)
 					.OrderBy(o => o.SentOn)
 					.Take(1000)
 					.ToList());
@@ -96,11 +104,23 @@ namespace AnalitF.Net.Client.ViewModels
 				forceCurrentUpdate = false;
 				Session.Flush();
 				Session.Clear();
-				Address = Session.Load<Address>(Address.Id);
-				Orders = new BindingList<Order>(Address.Orders.OrderBy(o => o.CreatedOn).ToList());
+				List<Order> orders;
+				if (AddressSelector.All.Value) {
+					orders = AddressSelector.Addresses.Where(a => a.IsSelected)
+						.Select(a => a.Item)
+						.SelectMany(a => Session.Load<Address>(a.Id).Orders)
+						.OrderBy(o => o.CreatedOn)
+						.ToList();
+				}
+				else {
+					Address = Session.Load<Address>(Address.Id);
+					orders = Address.Orders.OrderBy(o => o.CreatedOn).ToList();
+				}
+				Orders = new BindingList<Order>(orders);
 				var observable = Observable.FromEventPattern<ListChangedEventArgs>(Orders, "ListChanged")
 					.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 					.Select(e => new Stat(Address));
+
 				Bus.RegisterMessageSource(observable);
 			}
 		}

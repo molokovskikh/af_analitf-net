@@ -33,9 +33,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Check_view()
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
-			var model = Init(new CatalogOfferViewModel(catalog));
-			var view = InitView(model);
-			ForceBinding(view);
+			var model = new CatalogOfferViewModel(catalog);
+			var view = Bind(model);
 
 			model.OrderWarning.OrderWarning = "test";
 
