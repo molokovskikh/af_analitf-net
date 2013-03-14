@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +16,7 @@ using AnalitF.Net.Test.Integration.Views;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
+using ReactiveUI;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -128,8 +132,28 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(model.ResetValue, Is.EqualTo(100));
 		}
 
+		[Test]
+		public void Bind_multiselector()
+		{
+			model.Items = new List<string> {"a", "b", "c"};
+			var grid = new DataGrid {
+				Name = "Items"
+			};
+			view.Content = grid;
+			ViewModelBinder.Bind(model, view, null);
+
+			grid.SelectedItems.Add("a");
+			grid.SelectedItems.Add("b");
+			Assert.That(model.SelectedItems, Is.EquivalentTo(new[] {"a", "b"}));
+		}
+
 		public class ViewModel
 		{
+			public ViewModel()
+			{
+				SelectedItems = new ReactiveCollection<string>();
+			}
+
 			public int ResetValue;
 
 			public string Text { get; set; }
@@ -141,6 +165,10 @@ namespace AnalitF.Net.Test.Integration
 			public bool IsEnabled { get; set; }
 
 			public bool IsVisible { get; set; }
+
+			public List<string> Items { get; set; }
+
+			public ReactiveCollection<string> SelectedItems { get; set; }
 
 			public void Reset()
 			{

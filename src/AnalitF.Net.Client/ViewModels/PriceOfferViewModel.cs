@@ -115,7 +115,10 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
 			}
 
-			Offers = query.Fetch(o => o.Price).ToList();
+			Offers = query
+				.Fetch(o => o.Price)
+				.Fetch(o => o.LeaderPrice)
+				.ToList();
 			CurrentOffer = offers.FirstOrDefault();
 			if (CurrentOffer != null)
 				Price.Value = CurrentOffer.Price;

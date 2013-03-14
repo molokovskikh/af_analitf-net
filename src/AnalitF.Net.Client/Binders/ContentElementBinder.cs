@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,7 @@ using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
+using ReactiveUI;
 using Xceed.Wpf.Toolkit;
 
 namespace AnalitF.Net.Client.Binders
@@ -58,6 +60,23 @@ namespace AnalitF.Net.Client.Binders
 			ConventionManager.AddElementConvention<FlowDocumentScrollViewer>(FlowDocumentScrollViewer.DocumentProperty, "Document ", "DataContextChanged");
 			ConventionManager.AddElementConvention<DocumentViewerBase>(DocumentViewerBase.DocumentProperty, "Document ", "DataContextChanged");
 			ConventionManager.AddElementConvention<PasswordBox>(PasswordProperty, "Password", "PasswordChanged");
+			ConventionManager.AddElementConvention<MultiSelector>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) =>
+				{
+					var parentApplied = ConventionManager.GetElementConvention(typeof(Selector)).ApplyBinding(viewModelType, path, property, element, convention);
+					var index = path.LastIndexOf('.');
+					index = index == -1 ? 0 : index + 1;
+					var baseName = path.Substring(index);
+					var propertyInfo = viewModelType.GetPropertyCaseInsensitive("Selected" + baseName);
+
+					if (propertyInfo == null || !typeof(IList).IsAssignableFrom(propertyInfo.PropertyType))
+						return parentApplied;
+
+					var target = (IList)propertyInfo.GetValue(element.DataContext, null);
+					CollectionHelper.Bind(((MultiSelector)element).SelectedItems, target);
+
+					return true;
+				};
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)

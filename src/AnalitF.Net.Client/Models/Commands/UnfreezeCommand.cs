@@ -8,33 +8,34 @@ namespace AnalitF.Net.Client.Models.Commands
 {
 	public class UnfreezeCommand<T> : DbCommand where T : class, IOrder
 	{
-		private uint id;
+		private uint[] ids;
 
 		public UnfreezeCommand(uint id)
 		{
-			this.id = id;
+			ids = new[] { id };
+		}
+
+		public UnfreezeCommand(uint[] ids)
+		{
+			this.ids = ids;
 		}
 
 		public override void Execute()
 		{
 			var log = new StringBuilder();
-			var order = Session.Load<T>(id);
-			var newOrder = Unfreeze(order, Session, log);
-
-			var currentOrder = order as Order;
-			if (currentOrder != null && currentOrder.IsEmpty)
-				Session.Delete(order);
-
-			if (newOrder != null && !newOrder.IsEmpty)
-				Session.Save(newOrder);
-
+			foreach (var id in ids) {
+				var order = Session.Load<T>(id);
+				Unfreeze(order, Session, log);
+			}
 			Result = log.ToString();
 		}
 
 		public static Order Unfreeze(IOrder sourceOrder, ISession session, StringBuilder log)
 		{
-			if (sourceOrder.Address == null)
+			if (sourceOrder.Address == null) {
+				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. адрес доставки больше не доступен.", sourceOrder.Id));
 				return null;
+			}
 
 			if (sourceOrder.Price == null) {
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. прайс-листа нет в обзоре.", sourceOrder.Id));
@@ -65,6 +66,14 @@ namespace AnalitF.Net.Client.Models.Commands
 					.ToArray();
 				Merge(destOrder, sourceOrder, line, offers, log);
 			}
+
+			var currentOrder = sourceOrder as Order;
+			if (currentOrder != null && currentOrder.IsEmpty)
+				session.Delete(sourceOrder);
+
+			if (!destOrder.IsEmpty)
+				session.Save(destOrder);
+
 			return destOrder;
 		}
 

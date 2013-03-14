@@ -33,6 +33,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Заказы";
 			AddressSelector = new AddressSelector(Session, Scheduler, this);
+			SelectedOrders = new List<Order>();
+			SelectedSentOrders = new List<SentOrder>();
 
 			IsNotifying = false;
 			Begin = DateTime.Today.AddMonths(-3).FirstDayOfMonth();
@@ -137,6 +139,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public List<Order> SelectedOrders { get; set; }
+
 		[Export]
 		public IList<Order> Orders
 		{
@@ -169,6 +173,8 @@ namespace AnalitF.Net.Client.ViewModels
 				NotifyOfPropertyChange("SentOrders");
 			}
 		}
+
+		public List<SentOrder> SelectedSentOrders { get; set; }
 
 		public SentOrder CurrentSentOrder
 		{
@@ -207,11 +213,16 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Удалить выбранные заявки?"))
 				return;
 
-			if (IsCurrentSelected)
-				DeleteOrder(CurrentOrder);
+			if (IsCurrentSelected) {
+				foreach (var selected in SelectedOrders.ToArray()) {
+					DeleteOrder(selected);
+				}
+			}
 			else {
-				StatelessSession.Delete(CurrentSentOrder);
-				SentOrders.Remove(CurrentSentOrder);
+				foreach (var selected in SelectedSentOrders.ToArray()) {
+					StatelessSession.Delete(selected);
+					SentOrders.Remove(selected);
+				}
 			}
 		}
 
@@ -242,8 +253,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("\"Заморозить\" выбранные заявки?"))
 				return;
 
-			CurrentOrder.Frozen = true;
-			CurrentOrder.Send = false;
+			foreach (var selectedOrder in SelectedOrders) {
+				selectedOrder.Frozen = true;
+				selectedOrder.Send = false;
+			}
 		}
 
 		public bool UnfreezeVisible
@@ -264,14 +277,15 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Внимание! \"Размороженные\" заявки будут объединены с текущими заявками.\r\n\r\n\"Разморозить\" выбранные заявки?"))
 				return null;
 
-			return Run(new UnfreezeCommand<Order>(CurrentOrder.Id));
+			var ids = SelectedOrders.Where(o => o.Frozen).Select(o => o.Id).ToArray();
+			return Run(new UnfreezeCommand<Order>(ids));
 		}
 
 		public bool CanReorder
 		{
 			get
 			{
-				return ((CurrentOrder != null && IsCurrentSelected && Orders.Count > 1)
+				return Address != null && ((CurrentOrder != null && IsCurrentSelected && Orders.Count > 1)
 						|| (CurrentSentOrder != null && IsSentSelected && Orders.Count > 0));
 			}
 		}
@@ -284,12 +298,34 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Перераспределить выбранную заявку на других поставщиков?"))
 				return null;
 
-			//'Перемещать в прайс-лист можно только по одной заявке.'
-			//'Перемещать в прайс-лист можно только заявки текущего адреса заказа.'
-			if (IsCurrentSelected)
+			if (IsCurrentSelected) {
+
+				if (SelectedOrders.Count > 1) {
+					Manager.Error("Перемещать в прайс-лист можно только по одной заявке.");
+					return null;
+				}
+
+				if (CurrentOrder.Address != null && CurrentOrder.Address.Id != Address.Id) {
+					Manager.Error("Перемещать в прайс-лист можно только заявки текущего адреса заказа.");
+					return null;
+				}
+
 				return Run(new ReorderCommand<Order>(CurrentOrder.Id));
-			else
+			}
+			else {
+
+				if (SelectedSentOrders.Count > 1) {
+					Manager.Error("Перемещать в прайс-лист можно только по одной заявке.");
+					return null;
+				}
+
+				if (CurrentSentOrder.Address != null && CurrentSentOrder.Address.Id != Address.Id) {
+					Manager.Error("Перемещать в прайс-лист можно только заявки текущего адреса заказа.");
+					return null;
+				}
+
 				return Run(new ReorderCommand<SentOrder>(CurrentSentOrder.Id));
+			}
 		}
 
 		public bool CanRestore
@@ -310,7 +346,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Вернуть выбранные заявки в работу?"))
 				return null;
 
-			return Run(new UnfreezeCommand<SentOrder>(CurrentSentOrder.Id));
+			var ids = SelectedSentOrders.Select(o => o.Id).ToArray();
+			return Run(new UnfreezeCommand<SentOrder>(ids));
 		}
 
 		public void EnterOrder()
@@ -319,6 +356,14 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			Shell.Navigate(new OrderDetailsViewModel(CurrentOrder));
+		}
+
+		public void EnterSentOrder()
+		{
+			if (CurrentSentOrder == null)
+				return;
+
+			Shell.Navigate(new OrderDetailsViewModel(null));
 		}
 
 		public bool CanPrint

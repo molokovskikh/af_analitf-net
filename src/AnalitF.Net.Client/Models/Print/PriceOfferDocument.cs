@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumnDeclaration("Сумма", 80)
 			};
 			var rows = offers.Select((o, i) => new object[]{
-				++i,
+				i + 1,
 				o.ProducerSynonym,
 				o.ProducerSynonym,
 				o.Cost,

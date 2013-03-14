@@ -45,11 +45,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Delete_order()
 		{
-			session.DeleteEach<Order>();
+			var order = PrepareCurrent();
 
-			var order = MakeOrder();
-			model.IsCurrentSelected = true;
-			model.CurrentOrder = model.Orders.First();
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
 			testScheduler.AdvanceByMs(5000);
@@ -98,10 +95,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Freeze_order()
 		{
-			session.DeleteEach<Order>();
-			MakeOrder(session.Query<Offer>().First());
-
-			model.CurrentOrder = model.Orders.First();
+			PrepareCurrent();
 
 			shell.NotifyOfPropertyChange("CurrentAddress");
 			Assert.That(shell.CanSendOrders, Is.True);
@@ -118,10 +112,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Unfreeze_order()
 		{
-			session.DeleteEach<Order>();
-			var order = MakeOrder(session.Query<Offer>().First());
+			var order = PrepareCurrent();
 
-			model.CurrentOrder = model.Orders.First();
 			Assert.That(model.CanFreeze, Is.True);
 			model.Freeze();
 			Assert.That(model.CanUnfreeze);
@@ -188,12 +180,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Delete_sent_order()
 		{
-			session.DeleteEach<SentOrder>();
-			var order = MakeSentOrder();
+			var order = PrepareSent();
 
-			model.IsCurrentSelected = false;
-			model.IsSentSelected = true;
-			model.CurrentSentOrder = model.SentOrders.First();
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
 			Assert.That(model.SentOrders, Is.Empty);
@@ -251,6 +239,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			return newOffer;
 		}
 
+		private Order PrepareCurrent()
+		{
+			session.DeleteEach<Order>();
+
+			var order = MakeOrder();
+			model.IsCurrentSelected = true;
+			model.CurrentOrder = model.Orders.First();
+			model.SelectedOrders.Add(model.CurrentOrder);
+			return order;
+		}
+
 		private SentOrder PrepareSent()
 		{
 			session.DeleteEach<Order>();
@@ -266,6 +265,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.IsCurrentSelected = false;
 			model.IsSentSelected = true;
 			model.CurrentSentOrder = model.SentOrders.First();
+			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
 
 		//[Test]

@@ -1,4 +1,6 @@
-﻿using AnalitF.Net.Client.Binders;
+﻿using System;
+using System.Runtime.InteropServices;
+using AnalitF.Net.Client.Binders;
 using Caliburn.Micro;
 using NUnit.Framework;
 
