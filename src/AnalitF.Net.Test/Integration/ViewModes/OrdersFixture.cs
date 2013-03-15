@@ -47,10 +47,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var order = PrepareCurrent();
 
+			shell.NotifyOfPropertyChange("CurrentAddress");
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
+			testScheduler.AdvanceByMs(5000);
+
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
 			testScheduler.AdvanceByMs(5000);
 			ScreenExtensions.TryDeactivate(model, true);
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 
 			session.Clear();
 			Assert.Null(session.Get<Order>(order.Id));
@@ -268,19 +273,37 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
 
-		//[Test]
-		//public void Move()
-		//{
-		//	Restore = true;
+		[Test]
+		public void Move()
+		{
+			Restore = true;
 
-		//	session.DeleteEach<Order>();
-		//	MakeOrder();
+			var newAddress = new Address("Тестовый адрес доставки");
+			session.Save(newAddress);
+			PrepareCurrent();
 
-		//	model.CurrentOrder = model.Orders.First();
-		//	Assert.NotNull(model.CurrentMoveAddress);
-		//	Assert.True(model.CanMove);
-		//	model.Move();
-		//	Assert.That(model.CurrentOrder.Address.Id, Is.Not.EqualTo(address.Id));
-		//}
+			model.AddressSelector.All.Value = true;
+			model.CurrentOrder = model.Orders.First();
+			model.AddressToMove = model.AddressesToMove.Find(a => a.Id == newAddress.Id);
+			Assert.True(model.CanMove);
+			Assert.That(model.MoveVisible);
+			model.Move();
+			Assert.That(model.Orders[0].Address.Id, Is.EqualTo(newAddress.Id));
+		}
+
+		[Test]
+		public void Update_stat_after_delete_in_full_view_move()
+		{
+			PrepareCurrent();
+
+			shell.NotifyOfPropertyChange("CurrentAddress");
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
+			model.AddressSelector.All.Value = true;
+			Assert.IsTrue(model.CanDelete);
+			model.Delete();
+
+			testScheduler.AdvanceByMs(10000);
+			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
+		}
 	}
 }

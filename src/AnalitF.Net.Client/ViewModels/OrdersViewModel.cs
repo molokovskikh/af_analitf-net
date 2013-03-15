@@ -32,6 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public OrdersViewModel()
 		{
 			DisplayName = "Заказы";
+
 			AddressSelector = new AddressSelector(Session, Scheduler, this);
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
@@ -48,6 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanFreeze");
 					NotifyOfPropertyChange("CanUnfreeze");
 					NotifyOfPropertyChange("CanReorder");
+					NotifyOfPropertyChange("CanMove");
 				});
 
 			this.ObservableForProperty(m => m.IsSentSelected)
@@ -61,6 +63,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("FreezeVisible");
 					NotifyOfPropertyChange("UnfreezeVisible");
+					NotifyOfPropertyChange("MoveVisible");
 					NotifyOfPropertyChange("EditableOrder");
 				});
 
@@ -79,9 +82,34 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.AddressSelector.All.Value)
 				.Subscribe(_ => Update());
+
+			var ordersChanged = this.ObservableForProperty(m => m.Orders);
+			var update = ordersChanged
+				.SelectMany(e => Observable.FromEventPattern<ListChangedEventArgs>(e.Value, "ListChanged"));
+
+			var observable = ordersChanged.Cast<object>()
+				.Merge(update)
+				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+				.Select(e => new Stat(Address));
+
+			Bus.RegisterMessageSource(observable);
 		}
 
 		public AddressSelector AddressSelector { get; set; }
+
+		public List<Address> AddressesToMove { get; set; }
+
+		public Address AddressToMove { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			AddressesToMove = Session.Query<Address>()
+				.Where(a => a != Address)
+				.OrderBy(a => a.Name)
+				.ToList();
+		}
 
 		protected override void OnActivate()
 		{
@@ -92,9 +120,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			var filterAddresses = new Address[0];
+			if (AddressSelector.All.Value) {
+				filterAddresses = AddressSelector.Addresses
+					.Where(a => a.IsSelected)
+					.Select(a => a.Item)
+					.ToArray();
+			}
+			else if (Address != null) {
+				filterAddresses = new[] {Address};
+			}
+
 			if (IsSentSelected) {
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
-					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1))
+					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1)
+						&& filterAddresses.Contains(o.Address))
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)
 					.OrderBy(o => o.SentOn)
@@ -103,28 +143,40 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (IsCurrentSelected || forceCurrentUpdate) {
-				forceCurrentUpdate = false;
-				Session.Flush();
-				Session.Clear();
-				List<Order> orders;
-				if (AddressSelector.All.Value) {
-					orders = AddressSelector.Addresses.Where(a => a.IsSelected)
-						.Select(a => a.Item)
-						.SelectMany(a => Session.Load<Address>(a.Id).Orders)
-						.OrderBy(o => o.CreatedOn)
-						.ToList();
-				}
-				else {
-					Address = Session.Load<Address>(Address.Id);
-					orders = Address.Orders.OrderBy(o => o.CreatedOn).ToList();
-				}
-				Orders = new BindingList<Order>(orders);
-				var observable = Observable.FromEventPattern<ListChangedEventArgs>(Orders, "ListChanged")
-					.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
-					.Select(e => new Stat(Address));
+				if (forceCurrentUpdate)
+					RebuildSessionIfNeeded();
 
-				Bus.RegisterMessageSource(observable);
+				var orders = filterAddresses.SelectMany(a => a.Orders)
+					.OrderBy(o => o.CreatedOn)
+					.ToList();
+				Orders = new BindingList<Order>(orders);
 			}
+		}
+
+		private void RebuildSessionIfNeeded()
+		{
+			forceCurrentUpdate = false;
+			Session.Flush();
+			Session.Clear();
+			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые
+			//были связаны с закрытой сессией иначе где нибуть позже мы попробуем обратиться
+			//к объекты закрытой сессиии и получим ошибку
+
+			//загружаем все в память что не делать лишних запросов
+			var addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+
+			if (Address != null)
+				Address = Session.Load<Address>(Address.Id);
+
+			foreach (var item in AddressSelector.Addresses)
+				item.Item = Session.Load<Address>(item.Item.Id);
+
+			if (AddressToMove != null)
+				AddressToMove = Session.Load<Address>(AddressToMove.Id);
+
+			AddressesToMove = addresses.Where(a => a != Address)
+				.OrderBy(a => a.Name)
+				.ToList();
 		}
 
 		public IOrder EditableOrder
@@ -348,6 +400,28 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var ids = SelectedSentOrders.Select(o => o.Id).ToArray();
 			return Run(new UnfreezeCommand<SentOrder>(ids));
+		}
+
+		public bool CanMove
+		{
+			get { return IsCurrentSelected && CurrentOrder != null && AddressesToMove.Count > 0; }
+		}
+
+		public bool MoveVisible
+		{
+			get { return IsCurrentSelected; }
+		}
+
+		public IResult Move()
+		{
+			if (!CanMove)
+				return null;
+
+			if (!Confirm("Внимание! Перемещаемые заявки будут объединены с текущими заявками.\r\n\r\nПеренести выбранные заявки?"))
+				return null;
+
+			var ids = SelectedOrders.Where(o => o.Address == Address).Select(o => o.Id).ToArray();
+			return Run(new UnfreezeCommand<Order>(ids, AddressToMove));
 		}
 
 		public void EnterOrder()

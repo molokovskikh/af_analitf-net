@@ -71,8 +71,8 @@ namespace AnalitF.Net.Client.Controls
 		public static DependencyProperty IsOpenProperty
 			= DependencyProperty.RegisterAttached("IsOpen", typeof(bool), typeof(PopupSelector), new PropertyMetadata(false, IsOpenChanged));
 
-		public static DependencyProperty LabelTextProperty
-			= DependencyProperty.RegisterAttached("LabelText", typeof(string), typeof(PopupSelector), new PropertyMetadata());
+		public static DependencyProperty ButtonContentProperty
+			= DependencyProperty.RegisterAttached("ButtonContent", typeof(object), typeof(PopupSelector), new PropertyMetadata());
 
 		public bool IsOpened
 		{
@@ -80,10 +80,10 @@ namespace AnalitF.Net.Client.Controls
 			set { SetValue(IsOpenProperty, value); }
 		}
 
-		public string LabelText
+		public string ButtonContent
 		{
-			get { return (string)GetValue(LabelTextProperty); }
-			set { SetValue(LabelTextProperty, value); }
+			get { return (string)GetValue(ButtonContentProperty); }
+			set { SetValue(ButtonContentProperty, value); }
 		}
 
 		private static void IsOpenChanged(DependencyObject sender,

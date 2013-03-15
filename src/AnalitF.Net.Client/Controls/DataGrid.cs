@@ -15,11 +15,11 @@ namespace AnalitF.Net.Client.Controls
 			= DependencyProperty.RegisterAttached("ShowAddressColumn",
 				typeof(bool),
 				typeof(DataGrid),
-				new FrameworkPropertyMetadata(false, ShowAddressColumnPropertyChnged));
+				new FrameworkPropertyMetadata(false, ShowAddressColumnPropertyChanged));
 
 		//это хак, тк дата биндинг не работает для DataGridColumn
 		//это фактически его эмуляция
-		private static void ShowAddressColumnPropertyChnged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		private static void ShowAddressColumnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var grid = (DataGrid)d;
 			var column = grid.Columns.FirstOrDefault(c => c.Header.Equals("Адрес заказа"));

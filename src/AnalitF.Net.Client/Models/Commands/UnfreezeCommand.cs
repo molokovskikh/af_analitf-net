@@ -9,15 +9,18 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class UnfreezeCommand<T> : DbCommand where T : class, IOrder
 	{
 		private uint[] ids;
+		private uint addressId;
 
 		public UnfreezeCommand(uint id)
 		{
 			ids = new[] { id };
 		}
 
-		public UnfreezeCommand(uint[] ids)
+		public UnfreezeCommand(uint[] ids, Address address = null)
 		{
 			this.ids = ids;
+			if (address != null)
+				addressId = address.Id;
 		}
 
 		public override void Execute()
@@ -25,14 +28,16 @@ namespace AnalitF.Net.Client.Models.Commands
 			var log = new StringBuilder();
 			foreach (var id in ids) {
 				var order = Session.Load<T>(id);
-				Unfreeze(order, Session, log);
+				var address = Session.Get<Address>(addressId);
+				Unfreeze(order, address, Session, log);
 			}
 			Result = log.ToString();
 		}
 
-		public static Order Unfreeze(IOrder sourceOrder, ISession session, StringBuilder log)
+		public static Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
-			if (sourceOrder.Address == null) {
+			var address = addressToOverride ?? sourceOrder.Address;
+			if (address == null) {
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. адрес доставки больше не доступен.", sourceOrder.Id));
 				return null;
 			}
@@ -43,12 +48,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			var destOrder = session.Query<Order>().FirstOrDefault(o => o.Id != sourceOrder.Id
-				&& o.Address == sourceOrder.Address
+				&& o.Address == address
 				&& o.Price == sourceOrder.Price
 				&& !o.Frozen);
 
 			if (destOrder == null) {
-				destOrder = new Order(sourceOrder.Price, sourceOrder.Address) {
+				destOrder = new Order(sourceOrder.Price, address) {
 					Comment = sourceOrder.Comment,
 					PersonalComment = sourceOrder.PersonalComment
 				};
