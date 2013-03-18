@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			markups = Session.Query<MarkupConfig>().ToList();
 
-			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
+			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => InvalidateHistoryOrders());
@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Bus.RegisterMessageSource(observable);
 		}
 
-		public InlineEditWarningViewModel OrderWarning { get; set; }
+		public InlineEditWarning OrderWarning { get; set; }
 
 		public List<SentOrderLine> HistoryOrders
 		{

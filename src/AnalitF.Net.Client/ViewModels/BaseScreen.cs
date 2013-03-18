@@ -255,5 +255,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return Manager.Question(message) == MessageBoxResult.Yes;
 		}
+
+		protected static void Attach(object view, CommandBinding[] commands)
+		{
+			var ui = view as UIElement;
+			if (ui == null)
+				return;
+
+			foreach (var binding in commands) {
+				ui.CommandBindings.Add(binding);
+				var command = binding.Command as RoutedUICommand;
+				if (command == null)
+					continue;
+
+				foreach (InputGesture o in command.InputGestures) {
+					ui.InputBindings.Add(new InputBinding(command, o));
+				}
+			}
+		}
 	}
 }

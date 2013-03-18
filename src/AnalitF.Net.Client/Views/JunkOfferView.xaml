@@ -60,7 +60,7 @@
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="0" />
 
-		<Views:ProductInfoPanel Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+		<Parts:ProductInfoView Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}"></Parts:ProductInfoView>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="2">
 			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>

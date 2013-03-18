@@ -84,8 +84,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder(session.Query<Offer>().First());
 
 			model.CurrentLine = model.Lines.First();
-			Assert.That(model.CanShowCatalog, Is.True);
-			model.ShowCatalog();
+			Assert.That(model.ProductInfo.CanShowCatalog, Is.True);
+			model.ProductInfo.ShowCatalog();
 
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}

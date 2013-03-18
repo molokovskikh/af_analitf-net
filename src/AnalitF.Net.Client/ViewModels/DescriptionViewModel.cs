@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public DescriptionViewModel(ProductDescription description)
 		{
-			Description = description;
+			Description = StatelessSession.Get<ProductDescription>(description.Id);
 			DisplayName = "Описание";
 			Document = BuildDocument();
 		}

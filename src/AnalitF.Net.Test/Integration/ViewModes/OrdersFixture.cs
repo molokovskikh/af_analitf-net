@@ -305,5 +305,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			testScheduler.AdvanceByMs(10000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
+
+
+		[Test]
+		public void Enter_sent_order()
+		{
+			PrepareSent();
+
+			model.EnterSentOrder();
+
+			var currentMode = (OrderDetailsViewModel)shell.ActiveItem;
+			Assert.AreEqual(currentMode.Lines.Count, 1);
+		}
 	}
 }

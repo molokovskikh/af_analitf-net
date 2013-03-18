@@ -103,7 +103,7 @@
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
-		<Views:ProductInfoPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Views:ProductInfoPanel>
+		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:ProductInfoView>
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>

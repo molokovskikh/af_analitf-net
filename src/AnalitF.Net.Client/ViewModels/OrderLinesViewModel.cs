@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -21,7 +22,6 @@ namespace AnalitF.Net.Client.ViewModels
 	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable
 	{
 		private OrderLine currentLine;
-		private Catalog currentCatalog;
 		private List<MarkupConfig> markups;
 		private Price currentPrice;
 		private ObservableCollection<OrderLine> lines;
@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public OrderLinesViewModel()
 		{
-			OrderWarning = new InlineEditWarningViewModel(UiScheduler, Manager);
+			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
 				s => Lines.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
 				l => CurrentLine = l);
@@ -39,25 +39,13 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Сводный заказ";
 			markups = Session.Query<MarkupConfig>().ToList();
 
-			Dep(m => m.CanShowCatalog,
-				m => m.CurrentCatalog);
-
-			Dep(m => m.CanShowDescription,
-				m => m.CurrentCatalog);
-
-			Dep(m => m.CanShowCatalogWithMnnFilter,
-				m => m.CurrentCatalog);
-
-			Dep(m => m.CurrentCatalog,
-				m => m.CurrentLine);
-
-			Dep(m => m.CurrentOffer,
-				m => m.CurrentLine);
-
 			Dep(m => m.Sum, m => m.Lines);
 			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
 
 			Dep(Update, m => m.CurrentPrice, m => m.AddressSelector.All.Value);
+
+			this.ObservableForProperty(m => m.CurrentLine)
+				.Subscribe(e => ProductInfo.CurrentOffer = e.Value);
 
 			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
@@ -77,9 +65,25 @@ namespace AnalitF.Net.Client.ViewModels
 			IsNotifying = true;
 		}
 
-		public InlineEditWarningViewModel OrderWarning { get; set; }
+		public InlineEditWarning OrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
 		public AddressSelector AddressSelector { get; set; }
+		public ProductInfo ProductInfo { get; set; }
+
+		protected override void OnViewAttached(object view, object context)
+		{
+			base.OnViewAttached(view, context);
+
+			var commands = ProductInfo.Bindings;
+			Attach(view, commands);
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+		}
 
 		protected override void OnActivate()
 		{
@@ -192,23 +196,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public Catalog CurrentCatalog
-		{
-			get
-			{
-				if (CurrentLine == null)
-					return null;
-				if (currentCatalog == null || currentCatalog.Id != CurrentLine.CatalogId)
-					currentCatalog = Session.Load<Catalog>(CurrentLine.CatalogId);
-				return currentCatalog;
-			}
-		}
-
-		public BaseOffer CurrentOffer
-		{
-			get { return CurrentLine; }
-		}
-
 		public OrderLine CurrentLine
 		{
 			get { return currentLine; }
@@ -219,21 +206,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool CanShowDescription
+		public void EnterLine()
 		{
-			get
-			{
-				return CurrentCatalog != null
-					&& CurrentCatalog.Name.Description != null;
-			}
-		}
-
-		public void ShowDescription()
-		{
-			if (!CanShowDescription)
-				return;
-
-			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
+			ProductInfo.ShowCatalog();
 		}
 
 		public bool CanDelete
@@ -301,43 +276,6 @@ namespace AnalitF.Net.Client.ViewModels
 					CurrentLine = lastEdit;
 				}
 			}
-		}
-
-		public bool CanShowCatalog
-		{
-			get { return CurrentCatalog != null && CurrentOffer != null; }
-		}
-
-		public void EnterLine()
-		{
-			ShowCatalog();
-		}
-
-		public void ShowCatalog()
-		{
-			if (!CanShowCatalog)
-				return;
-
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = StatelessSession.Get<Offer>(CurrentLine.OfferId);
-
-			Shell.Navigate(offerViewModel);
-		}
-
-		public bool CanShowCatalogWithMnnFilter
-		{
-			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
-		}
-
-		public void ShowCatalogWithMnnFilter()
-		{
-			if (!CanShowCatalogWithMnnFilter)
-				return;
-
-			var catalogViewModel = new CatalogViewModel {
-				FiltredMnn = CurrentCatalog.Name.Mnn
-			};
-			Shell.Navigate(catalogViewModel);
 		}
 
 		public bool CanPrint

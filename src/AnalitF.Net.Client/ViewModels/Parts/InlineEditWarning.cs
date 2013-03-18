@@ -4,17 +4,19 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Caliburn.Micro;
 using Common.Tools;
 using ReactiveUI;
+using Message = Common.Tools.Message;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class InlineEditWarningViewModel : INotifyPropertyChanged
+	public class InlineEditWarning : ViewAware
 	{
 		private string _orderWarning;
 		private Extentions.WindowManager _manager;
 
-		public InlineEditWarningViewModel(IScheduler scheduler, Extentions.WindowManager manager)
+		public InlineEditWarning(IScheduler scheduler, Extentions.WindowManager manager)
 		{
 			_manager = manager;
 
@@ -31,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			set
 			{
 				_orderWarning = value;
-				OnPropertyChanged("OrderWarning");
+				NotifyOfPropertyChange("OrderWarning");
 			}
 		}
 
@@ -46,14 +48,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			foreach (var message in errors) {
 				_manager.Warning(message.MessageText);
 			}
-		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		public override string ToString()

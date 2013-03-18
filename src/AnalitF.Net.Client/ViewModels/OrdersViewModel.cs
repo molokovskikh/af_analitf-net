@@ -120,18 +120,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
-			var filterAddresses = new Address[0];
-			if (AddressSelector.All.Value) {
-				filterAddresses = AddressSelector.Addresses
-					.Where(a => a.IsSelected)
-					.Select(a => a.Item)
-					.ToArray();
-			}
-			else if (Address != null) {
-				filterAddresses = new[] {Address};
-			}
-
 			if (IsSentSelected) {
+				var filterAddresses = AddressFilter();
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1)
 						&& filterAddresses.Contains(o.Address))
@@ -146,11 +136,29 @@ namespace AnalitF.Net.Client.ViewModels
 				if (forceCurrentUpdate)
 					RebuildSessionIfNeeded();
 
+				//этот вызов должен быть после RebuildSessionIfNeeded
+				//тк он перазагрузить объекты
+				var filterAddresses = AddressFilter();
 				var orders = filterAddresses.SelectMany(a => a.Orders)
 					.OrderBy(o => o.CreatedOn)
 					.ToList();
 				Orders = new BindingList<Order>(orders);
 			}
+		}
+
+		private Address[] AddressFilter()
+		{
+			var filterAddresses = new Address[0];
+			if (AddressSelector.All.Value) {
+				filterAddresses = AddressSelector.Addresses
+					.Where(a => a.IsSelected)
+					.Select(a => a.Item)
+					.ToArray();
+			}
+			else if (Address != null) {
+				filterAddresses = new[] { Address };
+			}
+			return filterAddresses;
 		}
 
 		private void RebuildSessionIfNeeded()
@@ -437,7 +445,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentSentOrder == null)
 				return;
 
-			Shell.Navigate(new OrderDetailsViewModel(null));
+			Shell.Navigate(new OrderDetailsViewModel(CurrentSentOrder));
 		}
 
 		public bool CanPrint

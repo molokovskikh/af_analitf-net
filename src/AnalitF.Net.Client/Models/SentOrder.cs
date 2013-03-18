@@ -15,13 +15,15 @@ namespace AnalitF.Net.Client.Models
 
 		string ProducerSynonym { get; }
 
+		string Producer { get; }
+
 		decimal? MinOrderSum { get; }
 
 		uint? MinOrderCount { get; }
 
 		uint ProductId { get; }
 
-		uint? ProducerId { get; set; }
+		uint? ProducerId { get; }
 
 		string Code { get; }
 
@@ -34,15 +36,31 @@ namespace AnalitF.Net.Client.Models
 		decimal Sum { get; }
 
 		uint? RequestRatio { get; }
+
+		decimal? RegistryCost { get; }
+
+		decimal? MaxProducerCost { get; }
+
+		decimal? ProducerCost { get; }
+
+		decimal? SupplierMarkup { get; }
+
+		uint? NDS { get; }
+
+		string Quantity { get; }
 	}
 
 	public interface IOrder
 	{
 		uint Id { get; }
 
+		DateTime CreatedOn { get; }
+
 		Price Price { get; }
 
 		Address Address { get; }
+
+		decimal Sum { get; }
 
 		string Comment { get; set; }
 
