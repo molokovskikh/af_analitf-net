@@ -215,6 +215,7 @@
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
     <Compile Include="ViewModels\Parts\AddressSelector.cs" />
+    <Compile Include="ViewModels\Parts\Editor.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />

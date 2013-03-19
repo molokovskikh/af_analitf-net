@@ -10,11 +10,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			Order = order;
 			Count = orderLine.Count;
+			Comment = orderLine.Comment;
 		}
 
 		public virtual uint Id { get; set; }
 
 		public virtual uint Count { get; set; }
+
+		public virtual string Comment { get; set; }
 
 		public virtual decimal Sum
 		{

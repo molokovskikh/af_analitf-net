@@ -263,7 +263,9 @@ namespace AnalitF.Net.Client.ViewModels
 				CurrentPrice = price
 			};
 			var offerViewModel = new PriceOfferViewModel(price, catalogViewModel.ShowLeaders);
-			offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
+
+			//временно не работает пока не придумаю решения по лучше
+			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}

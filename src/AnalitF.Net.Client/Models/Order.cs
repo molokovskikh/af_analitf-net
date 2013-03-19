@@ -144,6 +144,16 @@ namespace AnalitF.Net.Client.Models
 			get { return Lines.Count == 0; }
 		}
 
+		public virtual string PriceLabel
+		{
+			get
+			{
+				if (Price == null)
+					return null;
+				return Price.ToString();
+			}
+		}
+
 		public virtual void RemoveLine(OrderLine line)
 		{
 			Lines.Remove(line);

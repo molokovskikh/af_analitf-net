@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -26,7 +25,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private Price currentPrice;
 		private ObservableCollection<OrderLine> lines;
 		private List<SentOrderLine> sentLines;
-		private OrderLine lastEdit;
+
+		private Editor editor;
 
 		public OrderLinesViewModel()
 		{
@@ -35,6 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 				s => Lines.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
 				l => CurrentLine = l);
 			AddressSelector = new AddressSelector(Session, UiScheduler, this);
+			editor = new Editor(OrderWarning, Manager);
 
 			DisplayName = "Сводный заказ";
 			markups = Session.Query<MarkupConfig>().ToList();
@@ -46,6 +47,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CurrentLine)
 				.Subscribe(e => ProductInfo.CurrentOffer = e.Value);
+
+			this.ObservableForProperty(m => m.CurrentLine)
+				.Select(e => e.Value)
+				.BindTo(editor, e => e.CurrentEdit);
+
+			this.ObservableForProperty(m => m.Lines)
+				.Select(e => e.Value)
+				.BindTo(editor, e => e.Lines);
+
+			editor.ObservableForProperty(e => e.CurrentEdit)
+				.Select(e => e.Value)
+				.BindTo(this, m => m.CurrentLine);
 
 			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
@@ -201,6 +214,9 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return currentLine; }
 			set
 			{
+				if (currentLine == value)
+					return;
+
 				currentLine = value;
 				NotifyOfPropertyChange("CurrentLine");
 			}
@@ -221,61 +237,17 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanDelete)
 				return;
 
-			if (!Confirm("Удалить позицию?"))
-				return;
-
-			CurrentLine.Count = 0;
-			CheckForDelete(currentLine);
+			editor.Delete();
 		}
 
 		public void OfferUpdated()
 		{
-			if (CurrentLine == null)
-				return;
-
-			lastEdit = CurrentLine;
-			ShowValidationError(lastEdit.EditValidate());
-			CheckForDelete(lastEdit);
-		}
-
-		private void CheckForDelete(OrderLine orderLine)
-		{
-			if (orderLine.Count == 0) {
-				lastEdit = null;
-				var order = orderLine.Order;
-				if (order != null) {
-					order.RemoveLine(orderLine);
-					if (order.IsEmpty)
-						order.Address.Orders.Remove(order);
-				}
-				Lines.Remove(orderLine);
-			}
-
-			if (orderLine.Order != null) {
-				orderLine.Order.Sum = orderLine.Order.Lines.Sum(l => l.Sum);
-			}
+			editor.Updated();
 		}
 
 		public void OfferCommitted()
 		{
-			if (lastEdit == null)
-				return;
-
-			ShowValidationError(lastEdit.SaveValidate());
-		}
-
-		private void ShowValidationError(List<Message> messages)
-		{
-			OrderWarning.Show(messages);
-
-			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
-			//мог ввести коректное значение
-			var errors = messages.Where(m => m.IsError);
-			if (errors.Any()) {
-				if (CurrentLine == null || CurrentLine.Id != lastEdit.Id) {
-					CurrentLine = lastEdit;
-				}
-			}
+			editor.Committed();
 		}
 
 		public bool CanPrint

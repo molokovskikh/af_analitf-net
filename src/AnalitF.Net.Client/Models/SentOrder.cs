@@ -48,6 +48,8 @@ namespace AnalitF.Net.Client.Models
 		uint? NDS { get; }
 
 		string Quantity { get; }
+
+		string Comment { get; set; }
 	}
 
 	public interface IOrder
@@ -66,6 +68,8 @@ namespace AnalitF.Net.Client.Models
 
 		string PersonalComment { get; set; }
 
+		string PriceLabel { get; }
+
 		IEnumerable<IOrderLine> Lines { get; }
 	}
 
@@ -82,6 +86,7 @@ namespace AnalitF.Net.Client.Models
 
 			Address = order.Address;
 			Price = order.Price;
+			PriceDate = Price.PriceDate;
 			CreatedOn = order.CreatedOn;
 			LinesCount = order.LinesCount;
 			Sum = order.Sum;
@@ -105,6 +110,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime SentOn { get; set; }
 
+		public virtual DateTime PriceDate { get; set; }
+
 		public virtual int LinesCount { get; set; }
 
 		public virtual decimal Sum { get; set; }
@@ -126,11 +133,19 @@ namespace AnalitF.Net.Client.Models
 			get { return Lines; }
 		}
 
+		public virtual string PriceLabel
+		{
+			get
+			{
+				return String.Format("{0} от {1}", Price, PriceDate);
+			}
+		}
+
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			PropertyChangedEventHandler handler = PropertyChanged;
+			var handler = PropertyChanged;
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}

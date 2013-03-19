@@ -102,6 +102,7 @@
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModes\MnnFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\OrderDetailsFixture.cs" />
     <Compile Include="Integration\ViewModes\OrderLinesFixture.cs" />
     <Compile Include="Integration\ViewModes\OrdersFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceFixture.cs" />

@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	xmlns:Parts="clr-namespace:AnalitF.Net.Client.ViewModels.Parts"
+	xmlns:Parts="clr-namespace:AnalitF.Net.Client.ViewModels.Parts" xmlns:cal="http://www.caliburnproject.org"
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.InputBindings>
@@ -57,21 +57,24 @@
 				<Label Grid.Row="1" Grid.Column="3" Name="Order_Sum" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Прайс-лист:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Order_Price" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Order_PriceLabel" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Регион:</Label>
 				<Label Grid.Row="1" Grid.Column="5" Name="Order_Price_RegionName" FontWeight="Bold"></Label>
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}">
+		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Кат.производитель"
+				<c:DataGridTextColumnEx Width="Auto" Header="Кат.производитель"
+					Visibility="Collapsed"
 					Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн."
+				<c:DataGridTextColumnEx Width="65*" Header="Срок годн."
 					Binding="{Binding Period}"
+					CellStyle="{StaticResource ResourceKey=JunkOrderLine}"
 					TextAlignment="Center" />
 
 				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
@@ -87,8 +90,9 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Цена"
+				<c:DataGridTextColumnEx Width="65" Header="Цена"
 					Binding="{Binding Cost}"
+					CellStyle="{StaticResource ResourceKey=JunkOrderLine}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
@@ -100,6 +104,8 @@
 					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>
@@ -126,7 +132,7 @@
 
 			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox Name="Order_Comment" VerticalScrollBarVisibility="Auto"></TextBox>
+				<TextBox Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto"></TextBox>
 			</DockPanel>
 		</Grid>
 
