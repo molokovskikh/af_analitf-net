@@ -5,6 +5,7 @@ using System.Windows.Xps.Packaging;
 using System.Windows.Xps.Serialization;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 

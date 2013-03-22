@@ -6,7 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -54,7 +56,7 @@ namespace AnalitF.Net.Client
 		private void InitLog()
 		{
 #if DEBUG
-			//нужно вызвать иначе wpf игнорирует все настройки протколирование
+			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
 			PresentationTraceSources.Refresh();
 #endif
 
@@ -177,28 +179,15 @@ namespace AnalitF.Net.Client
 
 		public static void InitUi()
 		{
-			//нужно затем что бы можно было дела модели без суфикса ViewModel
-			//достаточно что бы лни лежали в пространстве имен ViewModels
+			//нужно затем что бы можно было делать модели без суффикса ViewModel
+			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(
 				@"(?<nsbefore>([A-Za-z_]\w*\.)*)(?<subns>ViewModels\.)(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)(?!<suffix>ViewModel)$",
 				"${nsbefore}Views.${nsafter}${basename}View");
 
 			ContentElementBinder.Register();
 			SaneCheckboxEditor.Register();
-
-			var defaultSetBinding = ConventionManager.SetBinding;
-			ConventionManager.SetBinding =
-				(viewModelType, path, property, element, convention, bindableProperty) => {
-					if (property.PropertyType.IsGenericType
-						&& property.PropertyType.GetGenericTypeDefinition() == typeof(NotifyValue<>)) {
-						path += ".Value";
-						property = typeof(NotifyValue<>).GetProperty("Value");
-						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
-					}
-					else {
-						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
-					}
-				};
+			NotifyValueSupport.Register();
 
 			var customPropertyBinders = new Action<IEnumerable<FrameworkElement>, Type>[] {
 				EnabledBinder.Bind,

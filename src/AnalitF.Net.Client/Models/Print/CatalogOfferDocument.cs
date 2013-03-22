@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumnDeclaration("Цена", 55)
 			};
 
-			BuildTable(rows, headers, totalRows);
+			BuildTable(rows, headers);
 			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", totalRows))));
 			return doc;
 		}

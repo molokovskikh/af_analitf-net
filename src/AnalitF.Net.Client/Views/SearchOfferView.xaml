@@ -30,7 +30,7 @@
 			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name"></ComboBox>
 			<CheckBox VerticalAlignment="Center" x:Name="OnlyBase" Style="{StaticResource FilterElement}">Только основные</CheckBox>
 			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
-			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Попазать синонимы (Ctrl+N)</Button>
+			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
 		</StackPanel>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">

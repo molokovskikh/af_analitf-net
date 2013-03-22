@@ -116,7 +116,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						orderline.ProducerSynonym));
 				}
 				else {
-					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказнное количество {3} вместо {4}",
+					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказное количество {3} вместо {4}",
 						sourceOrder.Price.Name,
 						orderline.ProductSynonym,
 						orderline.ProducerSynonym,

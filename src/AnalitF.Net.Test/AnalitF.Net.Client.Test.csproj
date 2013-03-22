@@ -47,6 +47,7 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
+    <Reference Include="inflector_extension, Version=0.0.8.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Ionic.Zip" />
     <Reference Include="log4net" />
     <Reference Include="microsoft.reactive.testing" />
@@ -107,6 +108,7 @@
     <Compile Include="Integration\ViewModes\OrdersFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceFixture.cs" />
     <Compile Include="Integration\ViewModes\PriceOfferFixture.cs" />
+    <Compile Include="Integration\ViewModes\RejectsFixture.cs" />
     <Compile Include="Integration\ViewModes\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModes\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
+    <Compile Include="Integration\Views\RejectsFixture.cs" />
     <Compile Include="Integration\Views\SaveViewFixture.cs" />
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />

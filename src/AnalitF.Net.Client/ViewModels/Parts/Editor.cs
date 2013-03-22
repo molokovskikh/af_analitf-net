@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			warning.Show(messages);
 
 			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
-			//мог ввести коректное значение
+			//мог ввести корректное значение
 			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
 				if (CurrentEdit == null || CurrentEdit.Id != lastEdit.Id) {

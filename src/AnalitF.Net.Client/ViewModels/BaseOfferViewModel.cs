@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Offer currentOffer;
 		protected List<MarkupConfig> markups = new List<MarkupConfig>();
 		private List<SentOrderLine> historyOrders;
-		//тк уведомление о сохранении изменний приходит после
+		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		private Offer lastEditOffer;
 
@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client.ViewModels
 			OrderWarning.Show(messages);
 
 			//если человек ушел с этой позиции а мы откатываем значение то нужно вернуть его к этой позиции что бы он
-			//мог ввести коректное значение
+			//мог ввести корректное значение
 			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
 				if (CurrentOffer == null || CurrentOffer.Id != lastEditOffer.Id) {

@@ -147,11 +147,25 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(model.SelectedItems, Is.EquivalentTo(new[] {"a", "b"}));
 		}
 
+		[Test]
+		public void Bind_current_item()
+		{
+			model.Items = new List<string> {"a", "b", "c"};
+			var grid = new DataGrid {
+				Name = "Items"
+			};
+			view.Content = grid;
+			ViewModelBinder.Bind(model, view, null);
+			grid.SelectedItem = "a";
+			Assert.That(model.CurrentItem.Value, Is.EqualTo("a"));
+		}
+
 		public class ViewModel
 		{
 			public ViewModel()
 			{
 				SelectedItems = new ReactiveCollection<string>();
+				CurrentItem = new NotifyValue<string>();
 			}
 
 			public int ResetValue;
@@ -169,6 +183,8 @@ namespace AnalitF.Net.Test.Integration
 			public List<string> Items { get; set; }
 
 			public ReactiveCollection<string> SelectedItems { get; set; }
+
+			public NotifyValue<string> CurrentItem { get; set; }
 
 			public void Reset()
 			{

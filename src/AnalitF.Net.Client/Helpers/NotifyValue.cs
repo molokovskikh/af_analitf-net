@@ -1,11 +1,15 @@
 using System;
 using System.ComponentModel;
+using System.Reactive;
+using System.Reactive.Linq;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public class NotifyValue<T> : INotifyPropertyChanged
 	{
 		private Func<T> calc;
+		private T value;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -22,17 +26,10 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		private void Reclculate(object sender, PropertyChangedEventArgs e)
-		{
-			Value = calc();
-		}
-
 		public NotifyValue(T value)
 		{
 			this.value = value;
 		}
-
-		private T value;
 
 		public T Value
 		{
@@ -50,10 +47,16 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		private void Reclculate(object sender, PropertyChangedEventArgs e)
+		{
+			Value = calc();
+		}
+
 		protected virtual void OnPropertyChanged(string propertyName)
 		{
 			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			if (handler != null)
+				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		public static implicit operator T(NotifyValue<T> value)
@@ -66,6 +69,16 @@ namespace AnalitF.Net.Client.Helpers
 			if (Equals(value, null))
 				return String.Empty;
 			return value.ToString();
+		}
+
+		public IObservable<EventPattern<PropertyChangedEventArgs>> ValueUpdated()
+		{
+			return this.ObservableForProperty(v => v.Value)
+				.Select(v => v.Value as INotifyPropertyChanged)
+				.Select(v => v == null
+					? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()
+					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))
+				.Switch();
 		}
 	}
 }

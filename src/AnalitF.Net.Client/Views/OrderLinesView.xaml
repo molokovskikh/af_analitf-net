@@ -155,7 +155,7 @@
 
 			<Button x:Name="ShowCatalogWithMnnFilter"
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"
-				Style="{StaticResource ResourceKey=FilterButton}">Попазать синонимы (Ctrl+N)</Button>
+				Style="{StaticResource ResourceKey=FilterButton}">Показать синонимы (Ctrl+N)</Button>
 
 			<TextBlock Margin="5" FontWeight="Bold">
 				Позиций: <Run x:Name="Lines_Count"/> на сумму: <Run x:Name="Sum"/>

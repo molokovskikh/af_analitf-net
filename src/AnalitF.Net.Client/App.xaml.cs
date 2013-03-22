@@ -17,14 +17,19 @@ namespace AnalitF.Net.Client
 {
 	public partial class App : Application
 	{
+		private Color inactiveColor;
+		private Color activeColor;
+		private ResourceDictionary resources;
+		private Style baseStyle;
+
 		public void RegisterResources()
 		{
-			var activeColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
-			var inactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
+			activeColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
+			inactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
 
-			var resources = Resources.MergedDictionaries[1];
+			resources = Resources.MergedDictionaries[1];
 
-			var baseStyle = (Style)Resources[typeof(DataGridCell)];
+			baseStyle = (Style)Resources[typeof(DataGridCell)];
 			var style = new Style(typeof(DataGridCell), baseStyle);
 			style.Triggers.Add(new DataTrigger {
 				Binding = new Binding("VitallyImportant"),
@@ -43,11 +48,8 @@ namespace AnalitF.Net.Client
 			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
 
-
-			style = new Style(typeof(DataGridCell), baseStyle);
-			AddTriggers(style, "Frozen", true, Colors.Silver, activeColor, inactiveColor);
-			resources.Add("BaseOrder", style);
-
+			SimpleStyle("BaseOrder", "Frozen", Colors.Silver);
+			SimpleStyle("Reject", "Marked", Colors.Silver);
 
 			resources.Add("VitallyImportant", BaseStyle(activeColor, inactiveColor));
 
@@ -76,6 +78,13 @@ namespace AnalitF.Net.Client
 			style = new Style(typeof(DataGridCell), offerBaseStyle);
 			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("OrderColumn", style);
+		}
+
+		private void SimpleStyle(string name, string property, Color color)
+		{
+			var style = new Style(typeof(DataGridCell), baseStyle);
+			AddTriggers(style, property, true, color, activeColor, inactiveColor);
+			resources.Add(name, style);
 		}
 
 		private Style CellStyle(Color active, Color inactive, string name, bool value, Color baseColor)

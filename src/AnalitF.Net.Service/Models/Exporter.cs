@@ -53,6 +53,20 @@ namespace AnalitF.Net.Models
 			string sql;
 
 			sql = @"
+select Id,
+	Product,
+	ProductId,
+	Producer,
+	ProducerId,
+	Series,
+	LetterNo,
+	convert_tz(LetterDate, @@session.time_zone,'+00:00') as LetterDate,
+	CauseRejects
+from Farm.Rejects
+where CancelDate is null";
+			result.Add(Export(sql, "Rejects"));
+
+			sql = @"
 select a.Id,
 a.Address as Name
 from Customers.Addresses a

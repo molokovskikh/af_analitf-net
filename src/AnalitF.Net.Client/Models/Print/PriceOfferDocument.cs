@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.OrderLine == null ? null : (uint?)o.OrderLine.Count,
 				o.OrderLine == null ? null : (decimal?)o.OrderLine.Sum,
 			});
-			var table = BuildTable(rows, headers, offers.Count);
+			var table = BuildTable(rows, headers);
 			var sum = offers.Where(o => o.OrderLine != null).Sum(o => o.OrderLine.Sum);
 			var sumLabel = "";
 			if (sum > 0)

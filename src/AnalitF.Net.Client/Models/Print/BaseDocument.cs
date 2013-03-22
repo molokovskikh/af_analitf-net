@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -55,7 +57,50 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 		}
 
-		public Table BuildTable(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers, int totalRows)
+		public Table BuildTable(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers)
+		{
+			var table = BuildTableHeader(headers);
+			var tableRowGroup = table.RowGroups[0];
+
+			var j = 0;
+			foreach (var data in rows) {
+				BuildRow(headers, tableRowGroup, data, j);
+				j++;
+			}
+			var row = tableRowGroup.Rows.Last();
+			foreach (var cell in row.Cells) {
+				cell.BorderThickness = new Thickness(1, 1, 1, 1);
+			}
+
+			doc.Blocks.Add(table);
+			return table;
+		}
+
+		protected static void BuildRow(PrintColumnDeclaration[] headers, TableRowGroup tableRowGroup, object[] data, int index)
+		{
+			var row = new TableRow();
+			tableRowGroup.Rows.Add(row);
+
+			for (var i = 0; i < data.Length; i++) {
+				var text = "";
+				var value = data[i];
+				if (value != null)
+					text = value.ToString();
+
+				var cell = new TableCell(new Paragraph(new Run(text)));
+				if (IsDigitValue(value)) {
+					cell.TextAlignment = TextAlignment.Right;
+				}
+				cell.BorderBrush = Brushes.Black;
+				var thickness = new Thickness(1, 1, 0, 0);
+				if (i == data.Length - 1)
+					thickness.Right = 1;
+				cell.BorderThickness = thickness;
+				row.Cells.Add(cell);
+			}
+		}
+
+		protected static Table BuildTableHeader(PrintColumnDeclaration[] headers)
 		{
 			var table = new Table {
 				CellSpacing = 0,
@@ -85,34 +130,6 @@ namespace AnalitF.Net.Client.Models.Print
 					tableCell.BorderThickness = new Thickness(1, 1, 1, 0);
 			}
 			tableRowGroup.Rows.Add(headerRow);
-
-			var j = 0;
-			foreach (var data in rows) {
-				var row = new TableRow();
-				tableRowGroup.Rows.Add(row);
-
-				for (var i = 0; i < data.Length; i++) {
-					string text = "";
-					if (data[i] != null)
-						text = data[i].ToString();
-
-					var cell = new TableCell(new Paragraph(new Run(text)));
-					if (IsDigitValue(data[i])) {
-						cell.TextAlignment = TextAlignment.Right;
-					}
-					cell.BorderBrush = Brushes.Black;
-					var thickness = new Thickness(1, 1, 0, 0);
-					if (i == headers.Length - 1)
-						thickness.Right = 1;
-					if (j == totalRows - 1)
-						thickness.Bottom = 1;
-					cell.BorderThickness = thickness;
-					row.Cells.Add(cell);
-				}
-				j++;
-			}
-
-			doc.Blocks.Add(table);
 			return table;
 		}
 

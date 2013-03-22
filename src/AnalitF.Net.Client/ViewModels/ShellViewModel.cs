@@ -359,6 +359,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowRejects()
 		{
+			ActivateRootItem(new RejectsViewModel());
 		}
 
 		public bool CanShowOrders
@@ -482,7 +483,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void RunUpdate()
 		{
-			windowManager.Warning("Получена новая версия программы. Сейчас будет выполено обновление.");
+			windowManager.Warning("Получена новая версия программы. Сейчас будет выполнено обновление.");
 			var updateExePath = Path.Combine(AppBootstrapper.TempPath, "update", "Updater.exe");
 			Process.Start(updateExePath, Process.GetCurrentProcess().Id.ToString());
 			TryClose();

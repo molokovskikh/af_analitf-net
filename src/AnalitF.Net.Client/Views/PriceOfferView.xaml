@@ -36,7 +36,7 @@
 
 			<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
 				<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
-				<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Попазать синонимы (Ctrl+N)</Button>
+				<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
 				<Label FontWeight="Bold">Позиций:</Label>
 				<Label FontWeight="Bold" x:Name="Offers_Count"></Label>
 				<ComboBox x:Name="Filters" Style="{StaticResource Filter}"></ComboBox>

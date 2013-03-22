@@ -71,6 +71,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			};
 		}
 
+		protected T Init<T>() where T : BaseScreen, new()
+		{
+			return Init(new T());
+		}
+
 		protected T Init<T>(T model) where T : BaseScreen
 		{
 			model.Parent = shell;

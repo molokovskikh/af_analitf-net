@@ -29,7 +29,7 @@
 								<Setter Property="Content" Value="Убрать синонимы (Esc)"></Setter>
 							</Trigger>
 							<Trigger Property="IsChecked" Value="False">
-								<Setter Property="Content" Value="Попазать синонимы (Ctrl+N)"></Setter>
+								<Setter Property="Content" Value="Показать синонимы (Ctrl+N)"></Setter>
 							</Trigger>
 						</Style.Triggers>
 					</Style>

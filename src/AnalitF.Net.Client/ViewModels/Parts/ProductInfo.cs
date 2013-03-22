@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				new KeyGesture(Key.Space)
 			});
 
-		public static RoutedUICommand ShowMnnCommand = new RoutedUICommand("Попазать синонимы (Ctrl+N)",
+		public static RoutedUICommand ShowMnnCommand = new RoutedUICommand("Показать синонимы (Ctrl+N)",
 			"ShowCatalogWithMnnFilter",
 			typeof(ProductInfo),
 			new InputGestureCollection {

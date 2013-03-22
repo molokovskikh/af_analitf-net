@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				if (!IsEnabled)
 					return;
 				//это защита от обнуления запроса в случае если ячейка таблицы
-				//потеряла фокус из-за перехода к найденой строке
+				//потеряла фокус из-за перехода к найденной строке
 				if (searchInProgress)
 					return;
 

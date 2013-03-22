@@ -54,7 +54,11 @@ namespace AnalitF.Net.Client.Binders
 
 		public static void Register()
 		{
-			ConventionManager.Singularize = s => s.InflectTo().Singularized;
+			ConventionManager.Singularize = s => {
+				if (s == "Value")
+					return s;
+				return s.InflectTo().Singularized;
+			};
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
 			ConventionManager.AddElementConvention<FlowDocumentScrollViewer>(FlowDocumentScrollViewer.DocumentProperty, "Document ", "DataContextChanged");

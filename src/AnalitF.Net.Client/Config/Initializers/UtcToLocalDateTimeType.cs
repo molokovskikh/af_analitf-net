@@ -5,7 +5,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 {
 	//в базе всегда храниться время в utc, при загрузке данных
 	//преобразуем utc -> локальное
-	//при сохранении нооборот
+	//при сохранении наоборот
 	public class UtcToLocalDateTimeType : DateTimeType
 	{
 		public override object Get(System.Data.IDataReader rs, int index)

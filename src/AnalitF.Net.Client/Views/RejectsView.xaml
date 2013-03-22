@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.RejectsView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="Mark" />
+	</UserControl.InputBindings>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="*"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<Label>Вывести за период с</Label>
+			<DatePicker Style="{StaticResource FilterElement}" Name="Begin"></DatePicker>
+			<Label>по</Label>
+			<DatePicker Style="{StaticResource FilterElement}" Name="End"></DatePicker>
+			<CheckBox Name="ShowCauseReason" VerticalAlignment="Center" Style="{StaticResource FilterElement}">Выводить причину забраковки</CheckBox>
+			<Button Name="Mark" Style="{StaticResource FilterElement}">Пометить</Button>
+			<Button Name="ClearMarks" Style="{StaticResource FilterElement}">Снять все пометки</Button>
+		</StackPanel>
+
+		<c:DataGrid Grid.Row="1" x:Name="Rejects"
+			CellStyle="{StaticResource Reject}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="189*" Header="Товар"
+					Binding="{Binding Product}" />
+				<DataGridTextColumn Width="86*" Header="Производитель"
+					Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="86*" Header="Серия"
+					Binding="{Binding Series}" />
+				<DataGridTextColumn Width="62*" Header="Номер письма"
+					Binding="{Binding LetterNo}" />
+				<DataGridTextColumn Width="88*" Header="Дата письма"
+					Binding="{Binding LetterDate}" />
+				<DataGridTextColumn Width="135*" Header="Причина"
+					Binding="{Binding CauseRejects}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<Grid Grid.Row="2">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Серия:</Label>
+			<Label Grid.Row="0" Grid.Column="1" Name="CurrentReject_Value_Series" FontWeight="Bold"></Label>
+			<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Номер письма:</Label>
+			<Label Grid.Row="1" Grid.Column="1" FontWeight="Bold">
+				<TextBlock>
+					<Run Name="CurrentReject_Value_LetterNo"></Run>
+					<Run> от </Run>
+					<Run Name="CurrentReject_Value_LetterDate"></Run>
+				</TextBlock>
+			</Label>
+			<TextBox FontWeight="Bold" Grid.Row="2" Grid.ColumnSpan="2" Height="30" Style="{StaticResource ReadOnlyText}" Padding="5" x:Name="CurrentReject_Value_CauseRejects"></TextBox>
+		</Grid>
+	</Grid>
+</UserControl>

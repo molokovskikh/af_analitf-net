@@ -23,9 +23,9 @@
 
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Margin="0, 0, 4, 0" Name="Begin"></DatePicker>
+			<DatePicker Style="{StaticResource FilterElement}" Name="Begin"></DatePicker>
 			<Label>по</Label>
-			<DatePicker Margin="0, 0, 4, 0" Name="End"></DatePicker>
+			<DatePicker Style="{StaticResource FilterElement}" Name="End"></DatePicker>
 			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 

@@ -86,6 +86,8 @@ namespace AnalitF.Net.Client.Models
 
 			var names = properties.Select(p => p.Name).ToArray();
 			var view = (UserControl) model.GetView();
+			if (view == null)
+				return null;
 			return view.DeepChildren().OfType<DataGrid>().Where(g => names.Contains(g.Name))
 				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 100 + Convert.ToUInt32(g.IsVisible) * 10)
 				.FirstOrDefault();

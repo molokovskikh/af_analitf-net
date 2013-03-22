@@ -70,13 +70,11 @@ namespace AnalitF.Net.Service.Test
 		{
 			file = exporter.ExportCompressed(file);
 
-			var zipEntries = lsZip();
-			var zipEntry = zipEntries[0];
-			var meta = zipEntries[1];
+			var zipEntries = lsZip().Implode();
 
 			Assert.That(File.Exists(file), "{0} не существует", file);
-			Assert.That(zipEntry, Is.EqualTo("Addresses.txt"));
-			Assert.That(meta, Is.EqualTo("Addresses.meta.txt"));
+			Assert.That(zipEntries, Is.StringContaining("Addresses.txt"));
+			Assert.That(zipEntries, Is.StringContaining("Addresses.meta.txt"));
 
 			Assert.That(Directory.GetFiles("export")[0], Is.EqualTo("export\\1Addresses.txt"));
 			Assert.That(Directory.GetFiles("data")[0], Is.EquivalentTo("data\\data.zip"));

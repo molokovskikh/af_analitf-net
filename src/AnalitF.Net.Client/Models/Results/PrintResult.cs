@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using AnalitF.Net.Client.Models.Print;
 using Caliburn.Micro;
 using Common.Tools;
 
@@ -54,6 +56,8 @@ namespace AnalitF.Net.Client.Models.Results
 			foreach (var doc in Docs) {
 				var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 				documentPaginator = new WrapDocumentPaginator(documentPaginator);
+				if (documentPaginator.PageSize.Width > documentPaginator.PageSize.Height)
+					dialog.PrintTicket.PageOrientation = PageOrientation.Landscape;
 				dialog.PrintDocument(documentPaginator, name);
 			}
 

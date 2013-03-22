@@ -1,4 +1,7 @@
-﻿using AnalitF.Net.Client.Helpers;
+﻿using System;
+using System.ComponentModel;
+using System.Dynamic;
+using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -14,6 +17,63 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(p2.Value, Is.EqualTo(2));
 			p1.Value = 2;
 			Assert.That(p2.Value, Is.EqualTo(3));
+		}
+
+		public class MyClass : INotifyPropertyChanged
+		{
+			private int data;
+
+			public int Data
+			{
+				get { return data; }
+				set
+				{
+					data = value;
+					OnPropertyChanged("Data");
+				}
+			}
+
+			public event PropertyChangedEventHandler PropertyChanged;
+
+			protected virtual void OnPropertyChanged(string propertyName)
+			{
+				var handler = PropertyChanged;
+				if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+
+		[Test]
+		public void Values_changes()
+		{
+			var count = 0;
+			var p = new NotifyValue<MyClass>();
+			p.ValueUpdated().Subscribe(_ => count++);
+			p.Value = new MyClass();
+
+			Assert.AreEqual(count, 0);
+			p.Value.Data = 1;
+			Assert.AreEqual(count, 1);
+			p.Value.Data = 2;
+			Assert.AreEqual(count, 2);
+			var old = p.Value;
+			p.Value = new MyClass();
+			old.Data = 1;
+			Assert.AreEqual(count, 2);
+			p.Value.Data = 1;
+			Assert.AreEqual(count, 3);
+		}
+
+		[Test]
+		public void Observ_on_null()
+		{
+			var count = 0;
+			var p = new NotifyValue<MyClass>();
+			p.ValueUpdated().Subscribe(_ => count++);
+			p.Value = new MyClass();
+			var old = p.Value;
+			p.Value = null;
+			old.Data = 1;
+			Assert.AreEqual(0, count);
 		}
 	}
 }

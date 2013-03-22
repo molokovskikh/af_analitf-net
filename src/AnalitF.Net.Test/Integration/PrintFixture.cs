@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -42,6 +43,13 @@ namespace AnalitF.Net.Test.Integration
 			var address = new Address { Name = "Тестовый адрес доставки" };
 			var doc = new PriceOfferDocument(Offers(), price, address).BuildDocument();
 			Assert.That(doc, Is.Not.Null);
+		}
+
+		[Test]
+		public void Print_in_landscape_mode()
+		{
+			var doc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false).Build();
+			Assert.IsNotNull(doc);
 		}
 
 		private static List<Offer> Offers()

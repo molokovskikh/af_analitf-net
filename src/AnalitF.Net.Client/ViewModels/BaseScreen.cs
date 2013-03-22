@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -121,7 +122,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		//метод нужен для того что бы форма могла изменять
 		//ActiveItem тк делать это в OnActivate нельзя
-		//например открыть дочерний елемент если он один
+		//например открыть дочерний элемент если он один
 		public virtual void PostActivated()
 		{
 		}
@@ -272,6 +273,17 @@ namespace AnalitF.Net.Client.ViewModels
 					ui.InputBindings.Add(new InputBinding(command, o));
 				}
 			}
+		}
+
+		protected void WatchForUpdate(object sender, PropertyChangedEventArgs e)
+		{
+			StatelessSession.Update(sender);
+		}
+
+		protected void WatchForUpdate(NotifyValue<Reject> currentReject)
+		{
+			currentReject.ValueUpdated()
+				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
 		}
 	}
 }

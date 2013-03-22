@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		[Description("От предыдущего предложения")] PrevOffer,
 		[Description("От минимальной цены")] MinCost,
-		[Description("От минимальной цены в осноных поставщиках")] MinBaseCost,
+		[Description("От минимальной цены в основных поставщиках")] MinBaseCost,
 	}
 
 	public class Settings

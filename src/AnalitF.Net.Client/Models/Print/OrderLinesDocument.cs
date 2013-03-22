@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Models.Print
 					l.Count * l.Cost
 				});
 			}
-			var table = BuildTable(rows, headers, count);
+			var table = BuildTable(rows, headers);
 			if (count > 0) {
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {

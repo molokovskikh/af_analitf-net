@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Print
 {
 	public class WrapDocumentPaginator : DocumentPaginator, IDocumentPaginatorSource
 	{
@@ -45,18 +45,18 @@ namespace AnalitF.Net.Client.Models
 				visual.Children.Add(footerContainer);
 			}
 
-			return new DocumentPage(visual,
-				_pageSize,
-				new Rect(new Point(), _pageSize),
-				new Rect(new Point(_margins.Left, _margins.Top), ContentSize()));
+			var documentPage = new DocumentPage(visual, _pageSize, new Rect(new Point(), _pageSize), new Rect(new Point(_margins.Left, _margins.Top), ContentSize()));
+			return documentPage;
 		}
 
 		private Visual Header(int pageNumber)
 		{
+			//300 это примерный размер блока с датой, нужно молиться что бы хватило
+			var width = PageSize.Width - 300;
 			var table = new Table {
 				Columns = {
 					new TableColumn {
-						Width = new GridLength(560)
+						Width = new GridLength(width)
 					},
 					new TableColumn {
 						Width = GridLength.Auto
@@ -93,7 +93,8 @@ namespace AnalitF.Net.Client.Models
 
 		private Visual Footer(int pageNumber)
 		{
-			return ToVisual(new Paragraph(new Run("Электронная почта: farm@analit.net, интернет: http://www.analit.net/")));
+			var footer = "Электронная почта: farm@analit.net, интернет: http://www.analit.net/";
+			return ToVisual(new Paragraph(new Run(footer)));
 		}
 
 		private Visual ToVisual(Block section)
@@ -106,7 +107,9 @@ namespace AnalitF.Net.Client.Models
 			if (document != null) {
 				doc.PagePadding = document.PagePadding;
 			}
-			var page = ((IDocumentPaginatorSource)doc).DocumentPaginator.GetPage(0);
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			paginator.PageSize = PageSize;
+			var page = paginator.GetPage(0);
 			return page.Visual;
 		}
 

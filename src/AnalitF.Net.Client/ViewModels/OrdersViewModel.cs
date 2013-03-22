@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.ViewModels
 					RebuildSessionIfNeeded();
 
 				//этот вызов должен быть после RebuildSessionIfNeeded
-				//тк он перазагрузить объекты
+				//тк он перезагрузить объекты
 				var filterAddresses = AddressFilter();
 				var orders = filterAddresses.SelectMany(a => a.Orders)
 					.OrderBy(o => o.CreatedOn)
@@ -167,8 +167,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.Flush();
 			Session.Clear();
 			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые
-			//были связаны с закрытой сессией иначе где нибуть позже мы попробуем обратиться
-			//к объекты закрытой сессиии и получим ошибку
+			//были связаны с закрытой сессией иначе где нибудь позже мы попробуем обратиться
+			//к объекты закрытой сессии и получим ошибку
 
 			//загружаем все в память что не делать лишних запросов
 			var addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -252,11 +252,6 @@ namespace AnalitF.Net.Client.ViewModels
 				NotifyOfPropertyChange("CurrentSentOrder");
 				NotifyOfPropertyChange("EditableOrder");
 			}
-		}
-
-		private void WatchForUpdate(object sender, PropertyChangedEventArgs e)
-		{
-			StatelessSession.Update(sender);
 		}
 
 		public bool CanDelete
