@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -21,6 +22,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private object currentItem;
 		private Type activeItemType = typeof(CatalogName);
 
+		private CompositeDisposable disposable = new CompositeDisposable();
+
 		public CatalogNameViewModel(CatalogViewModel catalogViewModel)
 		{
 			ParentModel = catalogViewModel;
@@ -33,16 +36,16 @@ namespace AnalitF.Net.Client.ViewModels
 				v => Catalogs.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
 				c => CurrentCatalog = c);
 
-			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
+			disposable.Add(ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
-				.Subscribe(_ => Update());
+				.Subscribe(_ => Update()));
 
-			ParentModel.ObservableForProperty(m => m.CurrentFilter)
-				.Subscribe(_ => LoadCatalogs());
+			disposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter)
+				.Subscribe(_ => LoadCatalogs()));
 
-			ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)
-				.Subscribe(_ => NotifyOfPropertyChange("CatalogsEnabled"));
+			disposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)
+				.Subscribe(_ => NotifyOfPropertyChange("CatalogsEnabled")));
 		}
 
 		protected override ShellViewModel Shell
@@ -132,6 +135,14 @@ namespace AnalitF.Net.Client.ViewModels
 				currentItem = value;
 				NotifyOfPropertyChange("CurrentItem");
 			}
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			if (close)
+				disposable.Dispose();
+
+			base.OnDeactivate(close);
 		}
 
 		protected override void OnInitialize()

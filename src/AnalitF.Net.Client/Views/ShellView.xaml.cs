@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
+			Collect.Visibility = Visibility.Collapsed;
 #endif
 		}
 	}

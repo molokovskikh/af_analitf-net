@@ -1,4 +1,4 @@
-ex="([a-zA-Z\.0-9\-\_]+) -Version (.+)"
+ex="([a-zA-Z\.0-9\_\-]+) -Version (.+)"
 current=`ls`
 version="((([0-9]+\.){1,3})[0-9]+)"
 updated=""

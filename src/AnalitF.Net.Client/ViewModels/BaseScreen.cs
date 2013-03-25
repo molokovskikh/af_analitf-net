@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			if (FlushOnClose) {
+			if (FlushOnClose && Session.IsOpen) {
 				if (Session.Transaction.IsActive)
 					Session.Transaction.Commit();
 
@@ -144,6 +144,11 @@ namespace AnalitF.Net.Client.ViewModels
 			if (close) {
 				Save();
 				SaveView(GetView());
+			}
+
+			if (close && Session.IsOpen) {
+				StatelessSession.Dispose();
+				Session.Dispose();
 			}
 		}
 

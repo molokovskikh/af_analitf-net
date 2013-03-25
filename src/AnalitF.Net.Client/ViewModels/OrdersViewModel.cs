@@ -125,9 +125,9 @@ namespace AnalitF.Net.Client.ViewModels
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1)
 						&& filterAddresses.Contains(o.Address))
+					.OrderBy(o => o.SentOn)
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)
-					.OrderBy(o => o.SentOn)
 					.Take(1000)
 					.ToList());
 			}

@@ -154,6 +154,10 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
+				<Button x:Name="Collect">Collect</Button>
+			</StatusBarItem>
+
+			<StatusBarItem>
 				<TextBlock Margin="5">
 					<Run>Заказов:&#160;</Run>
 					<Run Name="Stat_Value_OrdersCount"></Run>

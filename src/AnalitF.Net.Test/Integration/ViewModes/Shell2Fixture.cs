@@ -28,6 +28,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			offers.CurrentOffer.OrderCount = 1;
 			offers.OfferUpdated();
 			offers.OfferCommitted();
+
+			testScheduler.AdvanceByMs(1000);
+
 			offers.NavigateBackward();
 
 			testScheduler.AdvanceByMs(1000);

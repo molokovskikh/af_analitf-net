@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
@@ -19,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private string searchText;
 		private Catalog currentCatalog;
 		private string _activeSearchTerm;
+		private CompositeDisposable disposable = new CompositeDisposable();
 
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
@@ -28,15 +30,25 @@ namespace AnalitF.Net.Client.ViewModels
 				v => CurrentCatalog = v);
 			QuickSearch.IsEnabled = false;
 
-			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
+			//после закрытия формы нужно отписаться от событий родительской формы
+			//что бы не делать лишних обновлений
+			disposable.Add(ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
-				.Subscribe(_ => Update());
+				.Subscribe(_ => Update()));
 
-			this.ObservableForProperty(m => m.SearchText)
+			disposable.Add(this.ObservableForProperty(m => m.SearchText)
 				.Throttle(Consts.SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
-				.Subscribe(_ => Search());
+				.Subscribe(_ => Search()));
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			if (close)
+				disposable.Dispose();
+
+			base.OnDeactivate(close);
 		}
 
 		protected override void OnInitialize()

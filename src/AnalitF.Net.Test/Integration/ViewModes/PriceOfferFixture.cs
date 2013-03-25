@@ -30,9 +30,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			price = session.Query<Price>().First(p => p.PositionCount > 0);
 			lazyModel = new Lazy<PriceOfferViewModel>(
-				() => Init(new PriceOfferViewModel(price, false)));
+				() => Init(new PriceOfferViewModel(price.Id, false)));
 		}
-
 
 		[Test]
 		public void Show_catalog()

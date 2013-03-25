@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[TearDown]
 		public void Teardown()
 		{
-			if (lazyModel.IsValueCreated)
+			if (lazyModel.IsValueCreated && model.IsActive)
 				ScreenExtensions.TryDeactivate(model, true);
 		}
 

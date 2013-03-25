@@ -33,10 +33,10 @@
 
 		<GridSplitter Grid.Row="1"
 			Grid.Column="1"
-			HorizontalAlignment="Center"
-			VerticalAlignment="Stretch"
-			ShowsPreview="True"
-			Width="5" />
+				HorizontalAlignment="Center"
+				VerticalAlignment="Stretch"
+				ShowsPreview="True"
+				Width="5" />
 
 		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">

@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
@@ -307,6 +308,8 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				if (value && !(ActiveItem is CatalogSearchViewModel)) {
 					observable.Dispose();
+					CleanCache();
+
 					var model = new CatalogSearchViewModel(this);
 					observable = model.ObservableForProperty(m => m.CurrentCatalog)
 						.Subscribe(_ => {
@@ -314,10 +317,13 @@ namespace AnalitF.Net.Client.ViewModels
 							NotifyOfPropertyChange("CurrentCatalog");
 							NotifyOfPropertyChange("CurrentCatalogName");
 						});
+					CleanCache();
 					ActiveItem = model;
 				}
 				else if (!(ActiveItem is CatalogNameViewModel)) {
 					observable.Dispose();
+					CleanCache();
+
 					var model = new CatalogNameViewModel(this);
 					var composite = new CompositeDisposable {
 						model
@@ -335,6 +341,17 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 				NotifyOfPropertyChange("CatalogSearch");
 			}
+		}
+
+		private void CleanCache()
+		{
+			//Когда мы пересоздаем ActiveItem
+			//выражение cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}"
+			//приводит к тому что в словать Views добавляется CatalogPanel
+			//что ведет к утечке памяти
+			//при пересоздании нужно чистить словарь
+			var toRemove = Views.Where(k => k.Value is CatalogPanel).ToArray();
+			toRemove.Each(r => Views.Remove(r.Key));
 		}
 
 		public IQueryable<Catalog> ApplyFilter(IQueryable<Catalog> queryable)

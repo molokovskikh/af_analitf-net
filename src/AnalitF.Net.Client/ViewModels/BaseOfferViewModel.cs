@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -365,6 +366,11 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		public void LoadHistoryOrders()
 		{
+			//таймер может сработать уже после того как мы ушли с формы
+			//в этом случае не надо ничего делать
+			if (!IsActive)
+				return;
+
 			if (CurrentOffer == null || Address == null)
 				return;
 

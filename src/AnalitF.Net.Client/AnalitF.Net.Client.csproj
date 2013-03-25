@@ -69,6 +69,10 @@
     <Reference Include="Reactiveui.blend">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="ReactiveUI.Routing, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\reactiveui-xaml.4.5.0\lib\Net40\ReactiveUI.Routing.dll</HintPath>
+    </Reference>
     <Reference Include="reactiveui.xaml">
       <SpecificVersion>False</SpecificVersion>
     </Reference>

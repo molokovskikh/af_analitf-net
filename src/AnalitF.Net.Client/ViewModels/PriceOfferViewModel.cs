@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Documents;
@@ -41,11 +42,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private string currentFilter;
 		private string activeSearchTerm;
+		private PriceComposedId priceId;
 
-		public PriceOfferViewModel(Price price, bool showLeaders)
+		private CompositeDisposable disposable = new CompositeDisposable();
+
+		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders)
 		{
+			//мы не можем принимать объект который принадлежит другой форме
+			//это может вызвать исключение если сессия в которой был загруже объект будет закрыта
+			//утечки памяти если текущая форма подпишится на события изменения в переданном объекте
+			//между формами можно передавать только примитивные объекты
+			this.priceId = priceId;
+
 			SearchText = new NotifyValue<string>();
-			Price = new NotifyValue<Price>(price);
+			Price = new NotifyValue<Price>();
 			DisplayName = "Заявка поставщику";
 
 			Filters = filters;
@@ -58,8 +68,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Subscribe(e => Update());
 
-			this.ObservableForProperty(m => m.Price.Value.Order)
-				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder"));
+			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
+			//но если не удалить подписку будет утечка памяти
+			disposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
+				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
 		}
 
 		public NotifyValue<Price> Price { get; set; }
@@ -86,22 +98,36 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			if (close)
+				disposable.Dispose();
+
+			base.OnDeactivate(close);
+		}
+
 		protected override void OnActivate()
 		{
 			base.OnActivate();
 
 			Update();
 			UpdateProducers();
+
+			var haveOffers = StatelessSession.Query<Offer>().Any(o => o.Price.Id == priceId);
+			if (!haveOffers) {
+				Manager.Warning("Выбранный прайс-лист отсутствует");
+				IsSuccessfulActivated = false;
+			}
 		}
 
 		protected override void Query()
 		{
-			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == Price.Value.Id);
+			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == priceId);
 			if (CurrentProducer != Consts.AllProducerLabel) {
 				query = query.Where(o => o.Producer == CurrentProducer);
 			}
 			if (CurrentFilter == filters[2]) {
-				query = query.Where(o => o.LeaderPrice == Price.Value);
+				query = query.Where(o => o.LeaderPrice.Id == priceId);
 			}
 			if (currentFilter == filters[1]) {
 				//если мы установили фильтр по заказанным позициям то нужно
@@ -109,7 +135,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.Flush();
 				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id
 					&& l.Order.Address == Address
-					&& l.Order.Price == Price.Value) > 0);
+					&& !l.Order.Frozen
+					&& l.Order.Price.Id == priceId) > 0);
 			}
 			if (!String.IsNullOrEmpty(ActiveSearchTerm)) {
 				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
@@ -120,8 +147,12 @@ namespace AnalitF.Net.Client.ViewModels
 				.Fetch(o => o.LeaderPrice)
 				.ToList();
 			CurrentOffer = offers.FirstOrDefault();
+
 			if (CurrentOffer != null)
 				Price.Value = CurrentOffer.Price;
+
+			if (Price.Value == null)
+				Price.Value = StatelessSession.Get<Price>(priceId);
 		}
 
 		public NotifyValue<string> SearchText { get; set; }

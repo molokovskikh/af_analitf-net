@@ -123,7 +123,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanShowPrice)
 				return;
 
-			var offerViewModel = new PriceOfferViewModel(Order.Price, false);
+			var offerViewModel = new PriceOfferViewModel(Order.Price.Id, false);
 			//временно не работает пока не придумаю решения по лучше
 			//var offerId = ((OrderLine)CurrentLine).OfferId;
 			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == offerId);

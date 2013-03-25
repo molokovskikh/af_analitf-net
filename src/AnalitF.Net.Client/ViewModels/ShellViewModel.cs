@@ -587,6 +587,13 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 #if DEBUG
+		public void Collect()
+		{
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+		}
+
 		public void Snoop()
 		{
 			var assembly = Assembly.Load("snoop");

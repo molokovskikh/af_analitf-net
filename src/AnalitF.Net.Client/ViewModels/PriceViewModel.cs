@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentPrice == null)
 				return;
 
-			Shell.Navigate(new PriceOfferViewModel(CurrentPrice, ShowLeaders));
+			Shell.Navigate(new PriceOfferViewModel(CurrentPrice.Id, ShowLeaders));
 		}
 	}
 }

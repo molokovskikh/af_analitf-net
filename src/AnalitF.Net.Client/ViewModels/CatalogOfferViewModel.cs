@@ -262,7 +262,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var catalogViewModel = new PriceViewModel {
 				CurrentPrice = price
 			};
-			var offerViewModel = new PriceOfferViewModel(price, catalogViewModel.ShowLeaders);
+			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders);
 
 			//временно не работает пока не придумаю решения по лучше
 			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
