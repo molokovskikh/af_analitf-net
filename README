@@ -15,3 +15,28 @@ lib/dcmysql72std.exe
 
 для компиляции шейдера нужен Direct3D Shader Compiler, fxc.exe должен быть в PATH
 есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
+
+NHibernate
+
+при работе с nhibernate нужно соблюдать правила
+которые помогут избежать утечек памяти
+# session.Query<..>().Where(i => i.BelongTo = filter)
+такое выражение потенциально может привести к утечке памяти
+тк nhibernate кеширует запросы
+в кеш через замыкание попадет значение filter
+если ViewModel подписалась на события в filter
+то кеш потянет за сабой и модель цепочка получится примерно такая
+кеш -> filter -> ViewModel
+правильная версия запроса будет выглядеть так
+var filterId = filter.Id
+session.Query<..>().Where(i => i.BelongTo.Id = filterId)
+# передача объектов между ViewModel
+передавать объекты между ViewModel нужно крайне осторожно
+лучше не передавать объекты из базы данных на прямуя а передавать
+ключи этих объектов что
+код в духе
+var model = new PriceViewModel()
+model.CurrentPrice = price;
+может привести к утечки памяти
+если текущая модель подписана на события в price
+или ошибке доступа если какая либо связь не будет загружена

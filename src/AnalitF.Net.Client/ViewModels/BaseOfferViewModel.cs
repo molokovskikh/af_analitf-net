@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool NavigateOnShowCatalog;
 
 		private object orderHistoryCacheKey;
+		protected CompositeDisposable disposable = new CompositeDisposable();
 
 		public BaseOfferViewModel()
 		{
@@ -63,7 +64,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
-			Bus.RegisterMessageSource(observable);
+			disposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -384,13 +385,16 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
 			//переместить в общий блок то первый
 			//where применяться не будет
+			var addressId = Address.Id;
 			if (Settings.GroupByProduct) {
-				query = query.Where(o => o.CatalogId == CurrentOffer.CatalogId)
-					.Where(o => o.Order.Address == Address);
+				var catalogId = CurrentOffer.CatalogId;
+				query = query.Where(o => o.CatalogId == catalogId)
+					.Where(o => o.Order.Address.Id == addressId);
 			}
 			else {
-				query = query.Where(o => o.ProductId == CurrentOffer.ProductId)
-					.Where(o => o.Order.Address == Address);
+				var productId = CurrentOffer.ProductId;
+				query = query.Where(o => o.ProductId == productId)
+					.Where(o => o.Order.Address.Id == addressId);
 			}
 			HistoryOrders = query
 				.Fetch(l => l.Order)
@@ -411,6 +415,14 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (!Settings.GroupByProduct)
 				currentCacheKey = CurrentOffer.ProductId;
 			return currentCacheKey;
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			if (close)
+				disposable.Dispose();
+
+			base.OnDeactivate(close);
 		}
 	}
 }

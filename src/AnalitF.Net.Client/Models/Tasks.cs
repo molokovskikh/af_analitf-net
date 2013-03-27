@@ -156,7 +156,8 @@ namespace AnalitF.Net.Client.Models
 			Price[] prices;
 			using(var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
 				var settings = session.Query<Settings>().First();
-				prices = session.Query<Price>().Where(p => p.Timestamp > settings.LastUpdate).ToArray();
+				var lastUpdate = settings.LastUpdate;
+				prices = session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
 			}
 
 			var clientPrices = prices.Select(p => new { p.Id.PriceId, p.Id.RegionId, p.Active }).ToArray();

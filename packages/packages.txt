@@ -15,4 +15,5 @@ reactiveui -Version 4.5.0
 reactiveui-testing -Version 4.5.0
 RhinoMocks -Version 3.6.1
 StyleCopAddOn -Version 1.0.8
+Microsoft.TestApi -Version 0.6.0
 Microsoft.Bcl.Async -Version 1.0.14-rc -Pre

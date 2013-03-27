@@ -165,7 +165,8 @@ namespace AnalitF.Net.Client.ViewModels
 				queryable = queryable.Where(c => c.MandatoryList);
 			}
 			if (ParentModel.FiltredMnn != null) {
-				queryable = queryable.Where(n => n.Mnn == ParentModel.FiltredMnn);
+				var mnnId = ParentModel.FiltredMnn.Id;
+				queryable = queryable.Where(n => n.Mnn.Id == mnnId);
 			}
 			CatalogNames = queryable.OrderBy(c => c.Name).ToList();
 
@@ -175,10 +176,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void LoadCatalogs()
 		{
-			if (CurrentCatalogName == null)
+			if (CurrentCatalogName == null) {
 				Catalogs = Enumerable.Empty<Catalog>().ToList();
+				return;
+			}
 
-			var queryable = Session.Query<Catalog>().Where(c => c.Name == CurrentCatalogName);
+			var nameId = CurrentCatalogName.Id;
+			var queryable = Session.Query<Catalog>().Where(c => c.Name.Id == nameId);
 			queryable = ParentModel.ApplyFilter(queryable);
 
 			Catalogs = queryable

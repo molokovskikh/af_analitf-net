@@ -96,8 +96,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentCatalog == null)
 				return;
 
+			var catalogId = CurrentCatalog.Id;
 			MaxProducerCosts = StatelessSession.Query<MaxProducerCost>()
-				.Where(c => c.CatalogId == CurrentCatalog.Id)
+				.Where(c => c.CatalogId == catalogId)
 				.OrderBy(c => c.Product)
 				.ThenBy(c => c.Producer)
 				.ToList();
@@ -113,8 +114,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Catalog[] catalogs = null;
 			IQueryable<Offer> queryable;
-			if (filterCatalog != null)
-				queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == filterCatalog.Id);
+			if (filterCatalog != null) {
+				var catalogId = filterCatalog.Id;
+				queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == catalogId);
+			}
 			else {
 				catalogs = StatelessSession.Query<Catalog>()
 					.Fetch(c => c.Name)

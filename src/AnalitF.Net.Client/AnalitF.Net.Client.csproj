@@ -168,6 +168,7 @@
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
+    <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
     <Compile Include="Models\Commands\ReorderCommand.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />

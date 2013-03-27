@@ -44,8 +44,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private string activeSearchTerm;
 		private PriceComposedId priceId;
 
-		private CompositeDisposable disposable = new CompositeDisposable();
-
 		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders)
 		{
 			//мы не можем принимать объект который принадлежит другой форме
@@ -98,14 +96,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		protected override void OnDeactivate(bool close)
-		{
-			if (close)
-				disposable.Dispose();
-
-			base.OnDeactivate(close);
-		}
-
 		protected override void OnActivate()
 		{
 			base.OnActivate();
@@ -133,8 +123,9 @@ namespace AnalitF.Net.Client.ViewModels
 				//если мы установили фильтр по заказанным позициям то нужно
 				//выполнить сохранение
 				Session.Flush();
+				var addressId = Address != null ? Address.Id : 0;
 				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id
-					&& l.Order.Address == Address
+					&& l.Order.Address.Id == addressId
 					&& !l.Order.Frozen
 					&& l.Order.Price.Id == priceId) > 0);
 			}

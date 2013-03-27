@@ -110,8 +110,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from)
 		{
+			var addressId = Address.Id;
+
 			return StatelessSession.Query<SentOrder>()
-				.Where(o => o.Address == Address && o.SentOn >= from)
+				.Where(o => o.Address.Id == addressId && o.SentOn >= from)
 				.GroupBy(o => o.Price)
 				.Select(g => Tuple.Create(g.Key.Id, g.Sum(o => o.Sum)))
 				.ToList();

@@ -95,10 +95,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					currentCatalog = null;
 				}
 				else if (currentCatalog == null || currentCatalog.Id != currentOffer.CatalogId) {
+					var catalogId = CurrentOffer.CatalogId;
 					currentCatalog = StatelessSession.Query<Catalog>()
 						.Fetch(c => c.Name)
 						.ThenFetch(n => n.Mnn)
-						.First(c => c.Id == CurrentOffer.CatalogId);
+						.First(c => c.Id == catalogId);
 				}
 				NotifyOfPropertyChange("CurrentOffer");
 				NotifyOfPropertyChange("CurrentCatalog");

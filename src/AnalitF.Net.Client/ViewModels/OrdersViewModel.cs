@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -28,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private IList<SentOrder> sentOrders;
 		private SentOrder currentSentOrder;
 		private bool forceCurrentUpdate;
+		private CompositeDisposable disposable = new CompositeDisposable();
 
 		public OrdersViewModel()
 		{
@@ -42,7 +44,7 @@ namespace AnalitF.Net.Client.ViewModels
 			End = DateTime.Today;
 			IsNotifying = true;
 
-			this.ObservableForProperty(m => (object)m.CurrentOrder)
+			disposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected))
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
@@ -50,35 +52,35 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanUnfreeze");
 					NotifyOfPropertyChange("CanReorder");
 					NotifyOfPropertyChange("CanMove");
-				});
+				}));
 
-			this.ObservableForProperty(m => m.IsSentSelected)
+			disposable.Add(this.ObservableForProperty(m => m.IsSentSelected)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("RestoreVisible");
 					NotifyOfPropertyChange("CanReorder");
 					NotifyOfPropertyChange("EditableOrder");
-				});
+				}));
 
-			this.ObservableForProperty(m => m.IsCurrentSelected)
+			disposable.Add(this.ObservableForProperty(m => m.IsCurrentSelected)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("FreezeVisible");
 					NotifyOfPropertyChange("UnfreezeVisible");
 					NotifyOfPropertyChange("MoveVisible");
 					NotifyOfPropertyChange("EditableOrder");
-				});
+				}));
 
-			this.ObservableForProperty(m => m.CurrentSentOrder)
+			disposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
 					NotifyOfPropertyChange("CanRestore");
 					NotifyOfPropertyChange("CanReorder");
-				});
+				}));
 
-			this.ObservableForProperty(m => m.CurrentOrder.Frozen)
+			disposable.Add(this.ObservableForProperty(m => m.CurrentOrder.Frozen)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanFreeze");
 					NotifyOfPropertyChange("CanUnfreeze");
-				});
+				}));
 
 			this.ObservableForProperty(m => m.AddressSelector.All.Value)
 				.Subscribe(_ => Update());
@@ -92,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 
-			Bus.RegisterMessageSource(observable);
+			disposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -105,8 +107,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			var addressId = Address != null ? Address.Id : 0;
 			AddressesToMove = Session.Query<Address>()
-				.Where(a => a != Address)
+				.Where(a => a.Id != addressId)
 				.OrderBy(a => a.Name)
 				.ToList();
 		}
@@ -118,13 +121,21 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			if (close) {
+				disposable.Dispose();
+			}
+			base.OnDeactivate(close);
+		}
+
 		public override void Update()
 		{
 			if (IsSentSelected) {
-				var filterAddresses = AddressFilter();
+				var filterAddresses = AddressFilter().Select(a => a.Id).ToArray();
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1)
-						&& filterAddresses.Contains(o.Address))
+						&& filterAddresses.Contains(o.Address.Id))
 					.OrderBy(o => o.SentOn)
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)

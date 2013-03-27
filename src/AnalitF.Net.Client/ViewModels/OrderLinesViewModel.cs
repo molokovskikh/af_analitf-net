@@ -112,15 +112,19 @@ namespace AnalitF.Net.Client.ViewModels
 					.Where(l => !l.Order.Frozen);
 
 				if (CurrentPrice != null && CurrentPrice.Id != null) {
-					query = query.Where(l => l.Order.Price == CurrentPrice);
+					var priceId = CurrentPrice.Id;
+					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
 				if (!AddressSelector.All.Value) {
-					query = query.Where(l => l.Order.Address == Address);
+					var addressId = Address.Id;
+					query = query.Where(l => l.Order.Address.Id == addressId);
 				}
 				else {
-					var addresses = AddressSelector.Addresses.Where(i => i.IsSelected).Select(i => i.Item).ToArray();
-					query = query.Where(l => addresses.Contains(l.Order.Address));
+					var addresses = AddressSelector.Addresses.Where(i => i.IsSelected)
+						.Select(i => i.Item.Id)
+						.ToArray();
+					query = query.Where(l => addresses.Contains(l.Order.Address.Id));
 				}
 
 				Lines = new ObservableCollection<OrderLine>(query
@@ -131,14 +135,16 @@ namespace AnalitF.Net.Client.ViewModels
 				CalculateRetailCost();
 			}
 			else {
+				var addressId = Address.Id;
 				var query = StatelessSession.Query<SentOrderLine>()
 					.Fetch(l => l.Order)
 					.ThenFetch(o => o.Price)
 					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1))
-					.Where(l => l.Order.Address == Address);
+					.Where(l => l.Order.Address.Id == addressId);
 
 				if (CurrentPrice != null && CurrentPrice.Id != null) {
-					query = query.Where(l => l.Order.Price == CurrentPrice);
+					var priceId = CurrentPrice.Id;
+					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
 				SentLines = query.OrderBy(l => l.ProductSynonym)

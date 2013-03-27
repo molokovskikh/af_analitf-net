@@ -127,7 +127,8 @@ namespace AnalitF.Net.Client.ViewModels
 			query = ParentModel.ApplyFilter(query);
 
 			if (ParentModel.FiltredMnn != null) {
-				query = query.Where(c => c.Name.Mnn == ParentModel.FiltredMnn);
+				var mnnId = ParentModel.FiltredMnn.Id;
+				query = query.Where(c => c.Name.Mnn.Id == mnnId);
 			}
 
 			Catalogs = query.OrderBy(c => c.Name.Name).ThenBy(c => c.Form).ToList();

@@ -58,8 +58,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Update()
 		{
+			var begin = Begin.Value;
+			var end = End.Value.AddDays(1);
 			Rejects.Value = StatelessSession.Query<Reject>()
-				.Where(r => r.LetterDate >= Begin.Value && r.LetterDate < End.Value.AddDays(1))
+				.Where(r => r.LetterDate >= begin && r.LetterDate < end)
 				.OrderBy(r => r.LetterDate)
 				.ToList();
 		}
