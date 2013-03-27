@@ -1,4 +1,4 @@
-Caliburn.Micro -Version 1.5.1
+Caliburn.Micro -Version 1.4.1
 Castle.Windsor -Version 3.2.0
 DotNetZip -Version 1.9.1.8
 Extended.Wpf.Toolkit -Version 1.9.0
