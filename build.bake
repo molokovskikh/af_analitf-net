@@ -33,7 +33,8 @@ def Bash(cmd as string):
 Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",
-	Profile: @catalog
+	Profile: @catalog,
+	JenkinsProject: "AnalitF.Net"
 )
 
 task @default, [@Build]
