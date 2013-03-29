@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,22 +16,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 {
 	//тесты проверяют наличие утечек памяти, для запуска x86 версия windbg должна быть в PATH
 	[TestFixture, Ignore("для ручного тестирования")]
-	public class MemoryLeakFixture
+	public class MemoryLeakFixture : BaseFixture
 	{
-		private Process process;
-		private AutomationElement MainWindow;
-
-		private TimeSpan timeout = TimeSpan.FromSeconds(5);
-
-		[TearDown]
-		public void Teardown()
-		{
-			if (!process.HasExited)
-				process.CloseMainWindow();
-
-			process.WaitForExit();
-		}
-
 		[Test]
 		public void Orders()
 		{
@@ -87,7 +72,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void Toggle(string name)
 		{
-			var element = Find(name);
+			var element = FindByName(name);
 
 			if (element == null)
 				throw new Exception(String.Format("Не могу найти кнопку {0}", name));
@@ -122,8 +107,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private AutomationElement WaitForElement(string name)
 		{
-			Wait(() => Find(name) == null);
-			return Find(name);
+			Wait(() => FindByName(name) == null);
+			return FindByName(name);
 		}
 
 		private void Activate()
@@ -132,40 +117,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var exe = @"..\..\..\AnalitF.Net.Client\bin\Debug";
 			Prepare(exe, root);
 
-			process = new Process();
-			process.StartInfo.FileName = Path.Combine(exe, "AnalitF.Net.Client.exe");
-			process.Start();
-			process.EnableRaisingEvents = true;
-
-			Automation.AddAutomationEventHandler(
-				WindowPatternIdentifiers.WindowOpenedEvent,
-				AutomationElement.RootElement,
-				TreeScope.Subtree,
-				OnActivated);
-
-			Wait(() => MainWindow == null);
-		}
-
-		private void Click(string name)
-		{
-			var launchButton = Find(name);
-			if (launchButton == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}", name));
-
-			var invokePattern = (InvokePattern)launchButton.GetCurrentPattern(InvokePattern.Pattern);
-			invokePattern.Invoke();
-		}
-
-		private AutomationElement Find(string name)
-		{
-			return MainWindow.FindAll(
-				TreeScope.Descendants,
-				new PropertyCondition(
-					AutomationElement.AutomationIdProperty,
-					name,
-					PropertyConditionFlags.IgnoreCase))
-				.Cast<AutomationElement>()
-				.FirstOrDefault();
+			StartProcess(Path.Combine(exe, "AnalitF.Net.Client.exe"));
 		}
 
 		private static void Prepare(string exe, string root)
@@ -194,23 +146,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			foreach (var dir in Directory.GetDirectories(src)) {
 				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
 			}
-		}
-
-		private void Wait(Func<bool> func)
-		{
-			var elapsed = new TimeSpan();
-			var wait = TimeSpan.FromMilliseconds(100);
-			while (func()) {
-				Thread.Sleep(wait);
-				elapsed += wait;
-				if (elapsed > timeout)
-					throw new Exception("Не удалось дождаться");
-			}
-		}
-
-		private void OnActivated(object sender, AutomationEventArgs e)
-		{
-			MainWindow = AutomationElement.FromHandle(process.MainWindowHandle);
 		}
 	}
 }

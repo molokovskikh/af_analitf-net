@@ -41,8 +41,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Filter_by_producer()
 		{
+			Restore = true;
+
+			var baseOffer = session.Query<Offer>().First(o => o.CatalogId == catalog.Id);
+			var newOffer = new Offer(baseOffer.Price, baseOffer, baseOffer.Cost + 50) {
+				Producer = "Тестовый",
+				ProducerId = (uint?)Generator.Random(int.MaxValue).First()
+			};
+			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
+			session.Save(newOffer);
+
 			var count = model.Producers.Count;
-			Assert.That(count, Is.GreaterThan(1));
+			Assert.That(count, Is.GreaterThan(2));
 			model.CurrentProducer = model.Producers[1];
 			Assert.That(model.Offers.Count, Is.LessThan(count));
 		}
