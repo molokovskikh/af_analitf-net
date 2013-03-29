@@ -50,7 +50,7 @@ task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @BuildSetup, @Af
 
 task @SetupEnvironment:
 	unless Configuration.Maybe.env:
-		Globals.Environment = @test
+		Globals.DeployRoot = """\\acdcserv.adc.analit.net\WWWRoot\TEST"""
 
 task @CopyNativeLib:
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
