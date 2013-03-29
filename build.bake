@@ -38,7 +38,7 @@ Global(
 
 task @default, [@Build]
 
-task @Build, [@GenerateAssemblyInfo, @BuildWebSite, @BuildClient]
+task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
