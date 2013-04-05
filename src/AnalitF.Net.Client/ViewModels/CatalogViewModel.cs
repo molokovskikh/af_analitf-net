@@ -347,7 +347,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//Когда мы пересоздаем ActiveItem
 			//выражение cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}"
-			//приводит к тому что в словать Views добавляется CatalogPanel
+			//приводит к тому что в словарь Views добавляется CatalogPanel
 			//что ведет к утечке памяти
 			//при пересоздании нужно чистить словарь
 			var toRemove = Views.Where(k => k.Value is CatalogPanel).ToArray();

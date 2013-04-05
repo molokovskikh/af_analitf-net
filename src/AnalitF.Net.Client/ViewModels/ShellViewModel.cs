@@ -15,9 +15,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -120,7 +122,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Import();
 			}
 			else {
-				CheckSettings();
+				StartCheck();
 			}
 		}
 
@@ -153,6 +155,21 @@ namespace AnalitF.Net.Client.ViewModels
 				ResetNavigation();
 				NotifyOfPropertyChange("CurrentAddress");
 			}
+		}
+
+		public void StartCheck()
+		{
+			if (!Settings.Value.IsValid)
+				CheckSettings();
+
+			Reload();
+
+			if (!Settings.Value.IsValid)
+				return;
+
+			var request = Settings.Value.CheckUpdateCondition();
+			if (!String.IsNullOrEmpty(request) && Confirm(request))
+				Update();
 		}
 
 		private bool CheckSettings()
@@ -403,8 +420,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void CleanDb()
 		{
-			var result = windowManager.Question("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?");
-			if (result != MessageBoxResult.Yes)
+			if (!Confirm("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?"))
 				return;
 
 			RunTask(
@@ -412,6 +428,12 @@ namespace AnalitF.Net.Client.ViewModels
 				Tasks.CleanDb,
 				t => Update());
 			Reload();
+		}
+
+		private bool Confirm(string text)
+		{
+			var result = windowManager.Question(text);
+			return result == MessageBoxResult.Yes;
 		}
 
 		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
@@ -450,10 +472,16 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			ResetNavigation();
 
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+
 			task.ContinueWith(t => {
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
-			}, TaskScheduler.FromCurrentSynchronizationContext());
+			}, scheduler);
 			task.Start();
 
 			windowManager.ShowFixedDialog(viewModel);
@@ -558,5 +586,28 @@ namespace AnalitF.Net.Client.ViewModels
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
 #endif
+	}
+
+	public class CommandResult : IResult
+	{
+		private SyncViewModel viewModel;
+		private RemoteCommand command;
+
+		public CommandResult(SyncViewModel viewModel, RemoteCommand command)
+		{
+			this.viewModel = viewModel;
+			this.command = command;
+		}
+
+		public void Execute(ActionExecutionContext context)
+		{
+			var token = viewModel.Cancellation.Token;
+			var task = new Task<object>(() => {
+				command.Run();
+				return null;
+			}, token);
+		}
+
+		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 }

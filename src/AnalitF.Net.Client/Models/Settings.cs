@@ -77,5 +77,16 @@ namespace AnalitF.Net.Client.Models
 				});
 			}
 		}
+
+		public virtual string CheckUpdateCondition()
+		{
+			if (LastUpdate == null)
+				return "База данных программы не заполнена. Выполнить обновление?";
+
+			if (LastUpdate < DateTime.Now.AddHours(-8))
+				return "Вы работаете с устаревшим набором данных. Выполнить обновление?";
+
+			return null;
+		}
 	}
 }

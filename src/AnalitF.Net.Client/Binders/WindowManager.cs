@@ -10,7 +10,9 @@ namespace AnalitF.Net.Client.Extentions
 	public class WindowManager : Caliburn.Micro.WindowManager
 	{
 		public bool UnderTest;
+		public MessageBoxResult DefaultQuestsionResult = MessageBoxResult.Yes;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
+		public Action<object> ContinueViewDialog = d => {  };
 
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
@@ -38,6 +40,10 @@ namespace AnalitF.Net.Client.Extentions
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+			if (UnderTest) {
+				ContinueViewDialog(rootModel);
+				return true;
+			}
 			var window = CreateWindow(rootModel, true, context, settings);
 			window.ResizeMode = ResizeMode.NoResize;
 			window.SizeToContent = SizeToContent.WidthAndHeight;
@@ -80,7 +86,7 @@ namespace AnalitF.Net.Client.Extentions
 		{
 			if (UnderTest) {
 				MessageBoxes.Add(text);
-				return DefaultResult;
+				return icon == MessageBoxImage.Warning ? DefaultQuestsionResult : DefaultResult;
 			}
 
 			var window = InferOwnerOf(null);

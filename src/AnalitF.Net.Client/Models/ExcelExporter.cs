@@ -58,21 +58,22 @@ namespace AnalitF.Net.Client.Models
 				.OrderBy(c => c.DisplayIndex)
 				.Where(c => c.Visibility == Visibility.Visible)
 				.ToArray();
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var rowIndex = 0;
+			var row = sheet.CreateRow(rowIndex++);
+			for(var i = 0; i < columns.Length; i++) {
+				row.CreateCell(i).SetCellValue(columns[i].Header.ToString());
+			}
+			foreach (var item in items) {
+				row = sheet.CreateRow(rowIndex++);
+				for(var i = 0; i < columns.Length; i++) {
+					row.CreateCell(i).SetCellValue(GetValue(columns[i], item));
+				}
+			}
+
 			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
 			using(var file = File.OpenWrite(filename)) {
-				var book = new HSSFWorkbook();
-				var sheet = book.CreateSheet("Экспорт");
-				var rowIndex = 0;
-				var row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < columns.Length; i++) {
-					row.CreateCell(i).SetCellValue(columns[i].Header.ToString());
-				}
-				foreach (var item in items) {
-					row = sheet.CreateRow(rowIndex++);
-					for(var i = 0; i < columns.Length; i++) {
-						row.CreateCell(i).SetCellValue(GetValue(columns[i], item));
-					}
-				}
 				book.Write(file);
 			}
 
