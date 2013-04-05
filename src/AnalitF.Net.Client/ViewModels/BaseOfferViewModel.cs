@@ -38,7 +38,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool NavigateOnShowCatalog;
 
 		private object orderHistoryCacheKey;
-		protected CompositeDisposable disposable = new CompositeDisposable();
 
 		public BaseOfferViewModel()
 		{
@@ -64,7 +63,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
-			disposable.Add(Bus.RegisterMessageSource(observable));
+			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -415,14 +414,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (!Settings.GroupByProduct)
 				currentCacheKey = CurrentOffer.ProductId;
 			return currentCacheKey;
-		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			if (close)
-				disposable.Dispose();
-
-			base.OnDeactivate(close);
 		}
 	}
 }

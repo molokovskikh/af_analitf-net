@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,6 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
+		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
 
 		public BaseScreen()
 		{
@@ -134,6 +136,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
+			if (close)
+				OnCloseDisposable.Dispose();
+
 			if (FlushOnClose && Session.IsOpen) {
 				if (Session.Transaction.IsActive)
 					Session.Transaction.Commit();

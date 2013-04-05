@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
-	[TestFixture, Ignore("для ручного тестирования")]
+	[TestFixture, Explicit]
 	public class SetupFixture : BaseFixture
 	{
 		//string source = @"\\VBOXSVR\setup\setup.exe";

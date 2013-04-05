@@ -33,7 +33,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		public static List<WindbgLog> GetHeapDump(Process process)
 		{
 			var log = Path.GetFullPath("windbg.log");
-			File.WriteAllText("windbg.cmd", String.Format(".loadby sos clr\r\n.logopen {0}\r\n!dumpheap -type AnalitF.Net.Client.ViewModels\r\nqq", log));
+			var winDbgCommands = String.Format(".loadby sos clr\r\n.logopen {0}\r\n!dumpheap -type AnalitF.Net.Client.ViewModels\r\nqq", log);
+			File.WriteAllText("windbg.cmd", winDbgCommands);
 			var commands = String.Format("$<{0}", Path.GetFullPath("windbg.cmd"));
 			var arguments = String.Format("-p {0} -c \"{1}\"", process.Id, commands);
 			var windbg = Process.Start(@"C:\Program Files (x86)\Debugging Tools for Windows (x86)\windbg.exe", arguments);

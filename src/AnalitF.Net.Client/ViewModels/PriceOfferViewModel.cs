@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
 			//но если не удалить подписку будет утечка памяти
-			disposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
 				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
 		}
 

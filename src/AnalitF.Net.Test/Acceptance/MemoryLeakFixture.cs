@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,9 +16,11 @@ using NUnit.Framework;
 namespace AnalitF.Net.Client.Test.Acceptance
 {
 	//тесты проверяют наличие утечек памяти, для запуска x86 версия windbg должна быть в PATH
-	[TestFixture, Ignore("для ручного тестирования")]
+	[TestFixture, Explicit]
 	public class MemoryLeakFixture : BaseFixture
 	{
+		private StreamWriter writer;
+
 		[Test]
 		public void Orders()
 		{
@@ -44,6 +47,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 			Click("ShowPrice");
 			var prices = WaitForElement("Prices");
+
 			DoubleClickCell(prices, 0, 0);
 
 			WaitForElement("Offers");
@@ -70,12 +74,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			CheckViewModelLeak(typeof(CatalogViewModel), typeof(CatalogNameViewModel));
 		}
 
-		private void Toggle(string name)
+		private void Toggle(string id)
 		{
-			var element = FindByName(name);
+			var element = FindById(id);
 
 			if (element == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}", name));
+				throw new Exception(String.Format("Не могу найти кнопку {0}", id));
 
 			var invokePattern = (TogglePattern)element.GetCurrentPattern(TogglePattern.Pattern);
 			invokePattern.Toggle();
@@ -91,9 +95,22 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void CheckViewModelLeak(params Type[] type)
 		{
-			Click("Collect");
+			//при обращение с объекту с помощью ui automation
+			//automation - держит ссылки на эти объекты
+			//нужно очистить мусор
+			MainWindow = null;
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
+
+			//не знаю почему именно здесь нужна пауза
+			//но если ее нет тогда сборка мусора не удаляет все объекты
+			//наверное есть нитка которая что то делает возможно ее запускает wpf
+			Thread.Sleep(4000);
+			Collect();
 			Thread.Sleep(2000);
-			//process.WaitForInputIdle();
+
+			process.WaitForInputIdle();
 			var posibleViewModels = typeof(ShellViewModel).Assembly.GetTypes()
 				.Where(t => typeof(BaseScreen).IsAssignableFrom(t))
 				.Select(t => t.FullName)
@@ -105,10 +122,15 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				viewModels.Implode());
 		}
 
+		private void Collect()
+		{
+			writer.WriteLine("Collect");
+		}
+
 		private AutomationElement WaitForElement(string name)
 		{
-			Wait(() => FindByName(name) == null);
-			return FindByName(name);
+			Wait(() => FindById(name) == null);
+			return FindById(name);
 		}
 
 		private void Activate()
@@ -117,7 +139,13 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var exe = @"..\..\..\AnalitF.Net.Client\bin\Debug";
 			Prepare(exe, root);
 
-			StartProcess(Path.Combine(exe, "AnalitF.Net.Client.exe"));
+			var debugPipe = Guid.NewGuid().ToString();
+			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
+			writer = new StreamWriter(pipe);
+
+			StartProcess(Path.Combine(exe, "AnalitF.Net.Client.exe"), "--debug-pipe=" + debugPipe);
+			pipe.WaitForConnection();
+			writer.AutoFlush = true;
 		}
 
 		private static void Prepare(string exe, string root)

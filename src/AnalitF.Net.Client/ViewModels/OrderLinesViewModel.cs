@@ -63,8 +63,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
-			Bus.RegisterMessageSource(observable);
-			observable.Subscribe(_ => NotifyOfPropertyChange("Sum"));
+			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+			OnCloseDisposable.Add(observable.Subscribe(_ => NotifyOfPropertyChange("Sum")));
 
 			//пока устанавливаем значения не надо оповещать об изменения
 			//все равно будет запрос когда форма активируется

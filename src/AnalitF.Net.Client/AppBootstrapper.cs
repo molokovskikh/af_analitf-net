@@ -42,6 +42,10 @@ namespace AnalitF.Net.Client
 
 		public ShellViewModel Shell;
 
+#if DEBUG
+		private DebugPipe debugPipe;
+#endif
+
 		public AppBootstrapper()
 			: this(true)
 		{
@@ -143,11 +147,14 @@ namespace AnalitF.Net.Client
 
 		private void InitApp()
 		{
+			var args = Environment.GetCommandLineArgs();
+#if DEBUG
+			debugPipe = new DebugPipe(args);
+#endif
 			TempPath = FileHelper.MakeRooted(TempPath);
 			DataPath = FileHelper.MakeRooted(DataPath);
 			SettingsPath = FileHelper.MakeRooted(SettingsPath);
 
-			var args = Environment.GetCommandLineArgs();
 			Import = args.LastOrDefault().Match("import");
 
 			if (Directory.Exists(TempPath)) {

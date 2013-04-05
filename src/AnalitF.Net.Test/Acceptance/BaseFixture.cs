@@ -22,6 +22,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[TearDown]
 		public void Teardown()
 		{
+			MainWindow = null;
 			if (process != null) {
 				if (!process.HasExited)
 					process.CloseMainWindow();
@@ -68,10 +69,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			}
 		}
 
-		protected void StartProcess(string fileName)
+		protected void StartProcess(string fileName, string arguments = "")
 		{
 			process = new Process();
 			process.StartInfo.FileName = fileName;
+			process.StartInfo.Arguments = arguments;
 			process.Start();
 			process.EnableRaisingEvents = true;
 

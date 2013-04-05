@@ -173,6 +173,7 @@
     <Compile Include="Models\Commands\ReorderCommand.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />
     <Compile Include="Models\Commands\UnfreezeCommand.cs" />
+    <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\MarkupConfig.cs" />

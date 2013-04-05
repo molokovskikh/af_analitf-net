@@ -145,6 +145,7 @@
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
+    <Compile Include="Unit\DebugPipeFixture.cs" />
     <Compile Include="Unit\MarkupConfigFixture.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />
     <Compile Include="Unit\NotifyValueFixture.cs" />

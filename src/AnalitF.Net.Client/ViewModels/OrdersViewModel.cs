@@ -29,7 +29,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private IList<SentOrder> sentOrders;
 		private SentOrder currentSentOrder;
 		private bool forceCurrentUpdate;
-		private CompositeDisposable disposable = new CompositeDisposable();
 
 		public OrdersViewModel()
 		{
@@ -44,7 +43,7 @@ namespace AnalitF.Net.Client.ViewModels
 			End = DateTime.Today;
 			IsNotifying = true;
 
-			disposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected))
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
@@ -54,14 +53,14 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanMove");
 				}));
 
-			disposable.Add(this.ObservableForProperty(m => m.IsSentSelected)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsSentSelected)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("RestoreVisible");
 					NotifyOfPropertyChange("CanReorder");
 					NotifyOfPropertyChange("EditableOrder");
 				}));
 
-			disposable.Add(this.ObservableForProperty(m => m.IsCurrentSelected)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsCurrentSelected)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("FreezeVisible");
 					NotifyOfPropertyChange("UnfreezeVisible");
@@ -69,14 +68,14 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("EditableOrder");
 				}));
 
-			disposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
 					NotifyOfPropertyChange("CanRestore");
 					NotifyOfPropertyChange("CanReorder");
 				}));
 
-			disposable.Add(this.ObservableForProperty(m => m.CurrentOrder.Frozen)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentOrder.Frozen)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanFreeze");
 					NotifyOfPropertyChange("CanUnfreeze");
@@ -94,7 +93,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 
-			disposable.Add(Bus.RegisterMessageSource(observable));
+			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -119,14 +118,6 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnActivate();
 
 			Update();
-		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			if (close) {
-				disposable.Dispose();
-			}
-			base.OnDeactivate(close);
 		}
 
 		public override void Update()
