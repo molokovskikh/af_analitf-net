@@ -23,6 +23,8 @@ namespace AnalitF.Net.Models
 
 		public virtual DateTime CreatedOn { get; set; }
 
+		public virtual int ExecuteInSeconds { get; set; }
+
 		public virtual bool IsCompleted { get; set; }
 
 		public virtual bool IsFaulted { get; set; }
@@ -30,6 +32,18 @@ namespace AnalitF.Net.Models
 		public virtual string Error { get; set; }
 
 		public virtual Version Version { get; set; }
+
+		public virtual void Faulted(Exception e)
+		{
+			IsFaulted = true;
+			Error = e.ToString();
+		}
+
+		public virtual void Completed()
+		{
+			IsCompleted = true;
+			ExecuteInSeconds = (int)(DateTime.Now - CreatedOn).TotalSeconds;
+		}
 
 		public virtual bool IsStale
 		{

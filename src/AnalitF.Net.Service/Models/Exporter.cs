@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Common.Models;
@@ -9,11 +10,14 @@ using Common.Tools;
 using Ionic.Zip;
 using MySql.Data.MySqlClient;
 using NHibernate;
+using log4net;
 
 namespace AnalitF.Net.Models
 {
 	public class Exporter : IDisposable
 	{
+		private ILog log = LogManager.GetLogger(typeof(Exporter));
+
 		private ISession session;
 
 		private FileCleaner cleaner = new FileCleaner();
@@ -30,7 +34,6 @@ namespace AnalitF.Net.Models
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
-
 
 		public Exporter(ISession session, uint userId, Version version)
 		{
@@ -275,7 +278,12 @@ where Hidden = 0";
 			var command = new MySqlCommand(sql, (MySqlConnection)session.Connection);
 			if (parameters != null)
 				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
+
+			var watch = new Stopwatch();
+			watch.Start();
 			command.ExecuteNonQuery();
+			watch.Stop();
+			log.DebugFormat("Запрос {0} занял {1}с", sql, watch.Elapsed.TotalSeconds);
 
 			cleaner.Watch(path);
 

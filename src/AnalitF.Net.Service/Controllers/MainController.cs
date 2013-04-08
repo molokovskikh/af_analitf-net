@@ -88,11 +88,10 @@ namespace AnalitF.Net.Controllers
 						}
 						catch(Exception e) {
 							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
-							job.IsFaulted = true;
-							job.Error = e.ToString();
+							job.Faulted(e);
 						}
 						finally {
-							job.IsCompleted = true;
+							job.Completed();
 							logSession.Save(job);
 							logSession.Flush();
 							logTransaction.Commit();
