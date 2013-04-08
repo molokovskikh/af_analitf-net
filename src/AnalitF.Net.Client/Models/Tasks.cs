@@ -104,15 +104,28 @@ namespace AnalitF.Net.Client.Models
 				var result = ProcessUpdate(ArchiveFile);
 				progress.OnNext(new Progress("Импорт данных", 100, 100));
 
-				if (sendLogsTask.IsFaulted || (sendLogsTask.IsCompleted && sendLogsTask.Result.StatusCode != HttpStatusCode.OK)) {
-					if (sendLogsTask.Exception != null)
-						log.Error("Ошибка при отправке логов {0}", sendLogsTask.Exception);
-					else
-						log.ErrorFormat("Ошибка при отправке логов {0}", sendLogsTask.Result);
-				}
+				Log(sendLogsTask);
 
 				return result;
 			});
+		}
+
+		private static void Log(Task<HttpResponseMessage> task)
+		{
+			if (task == null)
+				return;
+
+			if (task.IsFaulted || (task.IsCompleted && !IsOkStatusCode(task.Result.StatusCode))) {
+				if (task.Exception != null)
+					log.Error("Ошибка при отправке логов {0}", task.Exception);
+				else
+					log.ErrorFormat("Ошибка при отправке логов {0}", task.Result);
+			}
+		}
+
+		private static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
+		{
+			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
 		}
 
 		public static Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
@@ -124,7 +137,12 @@ namespace AnalitF.Net.Client.Models
 			LogManager.ResetConfiguration();
 			try
 			{
-				var logs = Directory.GetFiles(RootPath, "*.log");
+				var logs = Directory.GetFiles(RootPath, "*.log")
+					.Where(f => new FileInfo(f).Length > 0)
+					.ToArray();
+
+				if (logs.Length > 0)
+					return null;
 
 				using(var zip = new ZipFile()) {
 					foreach (var logFile in logs) {
