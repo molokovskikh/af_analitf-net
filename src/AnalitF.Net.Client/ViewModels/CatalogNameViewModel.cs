@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Update()
 		{
-			var queryable = Session.Query<CatalogName>();
+			var queryable = StatelessSession.Query<CatalogName>();
 			if (!ParentModel.ShowWithoutOffers) {
 				queryable = queryable.Where(c => c.HaveOffers);
 			}
@@ -158,7 +158,9 @@ namespace AnalitF.Net.Client.ViewModels
 				var mnnId = ParentModel.FiltredMnn.Id;
 				queryable = queryable.Where(n => n.Mnn.Id == mnnId);
 			}
-			CatalogNames = queryable.OrderBy(c => c.Name).ToList();
+			CatalogNames = queryable.OrderBy(c => c.Name)
+				.Fetch(c => c.Mnn)
+				.ToList();
 
 			if (CurrentCatalogName == null)
 				CurrentCatalogName = CatalogNames.FirstOrDefault();
@@ -172,7 +174,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			var nameId = CurrentCatalogName.Id;
-			var queryable = Session.Query<Catalog>().Where(c => c.Name.Id == nameId);
+			var queryable = StatelessSession.Query<Catalog>()
+				.Fetch(c => c.Name)
+				.ThenFetch(c => c.Mnn)
+				.Where(c => c.Name.Id == nameId);
 			queryable = ParentModel.ApplyFilter(queryable);
 
 			Catalogs = queryable

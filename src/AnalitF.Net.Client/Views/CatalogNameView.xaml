@@ -22,7 +22,7 @@
 		<c:DataGrid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames" CurrentItem="{Binding CurrentCatalogName}" SelectedValuePath="Id"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]">
 			<DataGrid.Columns>
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование" Binding="{Binding Name}" />
+				<DataGridTextColumn Width="*" CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Header="Наименование" Binding="{Binding Name}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -41,7 +41,7 @@
 		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="Catalogs" CurrentItem="{Binding CurrentCatalog}" SelectedValuePath="Id"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">
 			<DataGrid.Columns>
-				<DataGridTextColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Форма выпуска" Binding="{Binding Form}" />
+				<DataGridTextColumn Width="*" CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Header="Форма выпуска" Binding="{Binding Form}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 

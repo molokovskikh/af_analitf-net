@@ -42,7 +42,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			ApplyMnnFilter();
 
-			Assert.That(nameViewModel.CatalogNames, Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName }));
+			Assert.That(nameViewModel.CatalogNames.Select(c => c.Name).ToList(),
+				Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName.Name }));
 			catalogModel.FilterByMnn = false;
 			Assert.That(nameViewModel.CatalogNames.Count, Is.GreaterThan(1));
 		}

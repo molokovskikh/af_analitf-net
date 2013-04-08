@@ -20,9 +20,9 @@ namespace AnalitF.Net.Client.Helpers
 		public NotifyValue(Func<T> calc, params INotifyPropertyChanged[] props)
 		{
 			this.calc = calc;
-			Value = calc();
+			Recalculate();
 			foreach (var prop in props) {
-				prop.PropertyChanged += Reclculate;
+				prop.PropertyChanged += (s, a) => Recalculate();
 			}
 		}
 
@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		private void Reclculate(object sender, PropertyChangedEventArgs e)
+		public void Recalculate()
 		{
 			Value = calc();
 		}

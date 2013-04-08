@@ -40,6 +40,8 @@ namespace AnalitF.Net.Client
 			});
 			resources.Add("BaseOrderLine", style);
 
+			SimpleStyle("CatalogHaveOffers", "HaveOffers", Colors.Silver, false, VitallyImportant());
+
 			style = new Style(typeof(DataGridCell), baseStyle);
 			AddTriggers(style, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66), activeColor, inactiveColor);
 			resources.Add("JunkOrderLine", style);
@@ -80,11 +82,14 @@ namespace AnalitF.Net.Client
 			resources.Add("OrderColumn", style);
 		}
 
-		private void SimpleStyle(string name, string property, Color color)
+		private Style SimpleStyle(string name, string property, Color color, bool value = true, params DataTrigger[] triggers)
 		{
 			var style = new Style(typeof(DataGridCell), baseStyle);
-			AddTriggers(style, property, true, color, activeColor, inactiveColor);
+			AddTriggers(style, property, value, color, activeColor, inactiveColor);
+			foreach (var trigger in triggers)
+				style.Triggers.Add(trigger);
 			resources.Add(name, style);
+			return style;
 		}
 
 		private Style CellStyle(Color active, Color inactive, string name, bool value, Color baseColor)
@@ -102,15 +107,20 @@ namespace AnalitF.Net.Client
 			AddTriggers(style, "SortKeyGroup", 1, Color.FromRgb(0xCC, 0xC1, 0xE3), active, inactive);
 			AddTriggers(style, "Banned", true, Colors.Red, active, inactive);
 
-			style.Triggers.Add(new DataTrigger {
+			style.Triggers.Add(VitallyImportant());
+
+			return style;
+		}
+
+		private static DataTrigger VitallyImportant()
+		{
+			return new DataTrigger {
 				Binding = new Binding("VitallyImportant"),
 				Value = true,
 				Setters = {
 					new Setter(Control.ForegroundProperty, Brushes.Green)
 				}
-			});
-
-			return style;
+			};
 		}
 
 		private void AddTriggers(Style style, string name, object value,
