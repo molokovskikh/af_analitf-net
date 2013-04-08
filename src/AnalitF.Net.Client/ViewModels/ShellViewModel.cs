@@ -131,6 +131,16 @@ namespace AnalitF.Net.Client.ViewModels
 			OnViewLoaded(GetView());
 		}
 
+		public override void CanClose(Action<bool> callback)
+		{
+			if (Stat.Value.OrdersCount > 0) {
+				if (Confirm("Обнаружены неотправленные заказы. Отправить их сейчас?")) {
+					SendOrders();
+				}
+			}
+			base.CanClose(callback);
+		}
+
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }

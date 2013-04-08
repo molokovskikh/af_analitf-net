@@ -17,14 +17,19 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture]
 	public class Shell2Fixture : BaseFixture
 	{
-		private bool executed;
+		private string command;
 
 		[SetUp]
 		public void Setup()
 		{
-			executed = false;
+			command = "";
 			Tasks.Update = (credentials, token, arg3) => {
-				executed = true;
+				command = "Update";
+				return UpdateResult.OK;
+			};
+
+			Tasks.SendOrders = (credentials, token, arg3, arg4) => {
+				command = "SendOrders";
 				return UpdateResult.OK;
 			};
 		}
@@ -80,7 +85,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(manager.MessageBoxes[0], Is.StringContaining("необходимо заполнить учетные данные"));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("База данных программы не заполнена"));
 			Assert.That(manager.MessageBoxes[2], Is.StringContaining("Обновление завершено успешно"));
-			Assert.That(executed, Is.True);
+			Assert.That(command, Is.EqualTo("Update"));
 		}
 
 		[Test]
@@ -97,7 +102,28 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.StartCheck();
 			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Вы работаете с устаревшим набором данных."));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Обновление завершено успешно"));
-			Assert.That(executed, Is.True);
+			Assert.That(command, Is.EqualTo("Update"));
+		}
+
+		[Test]
+		public void Check_orders_on_close()
+		{
+			MakeOrder();
+
+			settings.LastUpdate = DateTime.Now.AddDays(-1);
+			settings.UserName = "test";
+			settings.Password = "123";
+			session.Flush();
+			shell.Reload();
+
+			shell.NotifyOfPropertyChange("CurrentAddress");
+			var canClose = false;
+			shell.CanClose(b => canClose = b);
+
+			Assert.IsTrue(canClose);
+			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Обнаружены неотправленные заказы."));
+			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Отправка заказов завершена успешно."));
+			Assert.That(command, Is.EqualTo("SendOrders"));
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)
