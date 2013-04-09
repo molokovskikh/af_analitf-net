@@ -23,7 +23,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="0" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CurrentItem="{Binding CurrentOffer}">
+		<c:DataGrid x:Name="Offers" Grid.Row="0" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CurrentItemStub="{Binding CurrentOffer}">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="70*" Header="Производитель" Binding="{Binding ProducerSynonym}" />

@@ -29,7 +29,7 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices" CellStyle="{StaticResource Price}"
-			CurrentItem="{Binding CurrentPrice}"
+			CurrentItemStub="{Binding CurrentPrice}"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}" Header="Прайс-лист"

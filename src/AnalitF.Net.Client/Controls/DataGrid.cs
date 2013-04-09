@@ -17,6 +17,27 @@ namespace AnalitF.Net.Client.Controls
 				typeof(DataGrid),
 				new FrameworkPropertyMetadata(false, ShowAddressColumnPropertyChanged));
 
+		//свойство нужно тк в 4.0
+		//биндинг на CurrentItem сбрасывается http://connect.microsoft.com/visualstudio/feedback/details/696155/wpf
+		public static DependencyProperty CurrentItemStubProperty
+			= DependencyProperty.RegisterAttached("CurrentItemStub",
+				typeof(object),
+				typeof(DataGrid),
+				new FrameworkPropertyMetadata(null, CurrentItemStubChanged));
+
+
+		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var grid = (DataGrid)d;
+			grid.CurrentItem = e.NewValue;
+		}
+
+		public object CurrentItemStub
+		{
+			get { return GetValue(CurrentItemStubProperty); }
+			set { SetValue(CurrentItemStubProperty, value); }
+		}
+
 		//это хак, тк дата биндинг не работает для DataGridColumn
 		//это фактически его эмуляция
 		private static void ShowAddressColumnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
