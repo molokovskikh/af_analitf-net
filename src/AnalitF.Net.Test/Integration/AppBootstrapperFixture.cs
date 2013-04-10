@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -14,22 +15,54 @@ namespace AnalitF.Net.Test.Integration
 	[TestFixture, RequiresSTA]
 	public class AppBootstrapperFixture : BaseFixture
 	{
+		private AppBootstrapper app;
+
+		[SetUp]
+		public void Setup()
+		{
+			app = CreateBootstrapper();
+		}
+
 		[Test]
 		public void Persist_shell()
 		{
 			File.Delete("AnalitF.Net.Client.data");
 
-			var app = CreateBootstrapper();
-			app.InitShell();
-			app.Shell.ViewSettings.Add("test", new List<ColumnSettings> {
+			StartShell();
+			shell.ViewSettings.Add("test", new List<ColumnSettings> {
 				new ColumnSettings()
 			});
 			app.Serialize();
 
-			app = CreateBootstrapper();
-			app.InitShell();
-			var viewSetting = app.Shell.ViewSettings["test"];
+			StartShell();
+			var viewSetting = shell.ViewSettings["test"];
 			Assert.That(viewSetting.Count, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Serialize_current_address()
+		{
+			Restore = true;
+
+			session.Save(new Address("Тестовый адрес доставки"));
+
+			StartShell();
+			var currentAddress = shell.Addresses.First(a => a.Id != shell.CurrentAddress.Id);
+			shell.CurrentAddress = currentAddress;
+
+			app.Serialize();
+			var savedAddressId = shell.CurrentAddress.Id;
+
+			StartShell();
+			Assert.AreEqual(savedAddressId, shell.CurrentAddress.Id);
+			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
+		}
+
+		private void StartShell()
+		{
+			app.InitShell();
+			ScreenExtensions.TryActivate(app.Shell);
+			shell = app.Shell;
 		}
 
 		private AppBootstrapper CreateBootstrapper()

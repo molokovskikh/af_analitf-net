@@ -57,6 +57,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel()
 		{
+			DisplayName = "АналитФАРМАЦИЯ";
+
 			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
@@ -65,11 +67,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var factory = AppBootstrapper.NHibernate.Factory;
 			session = factory.OpenSession();
-
-			Reload();
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
-			DisplayName = "АналитФАРМАЦИЯ";
 			this.ObservableForProperty(m => m.ActiveItem)
 				.Subscribe(_ => UpdateDisplayName());
 
@@ -87,7 +86,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => NotifyOfPropertyChange("CanSendOrders"));
 
 			this.ObservableForProperty(m => m.CurrentAddress)
-				.Subscribe(e => Stat.Value = Models.Stat.Update(session, e.Value));
+				.Subscribe(e => UpdateStat());
 
 			this.ObservableForProperty(m => m.Settings.Value)
 				.Subscribe(_ => {
@@ -115,6 +114,38 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
+		public NotifyValue<Settings> Settings { get; set; }
+		public NotifyValue<User> User { get; set; }
+		public NotifyValue<Stat> Stat { get; set; }
+		public string Version { get; set; }
+
+		public List<Address> Addresses
+		{
+			get { return addresses; }
+			set
+			{
+				addresses = value;
+				NotifyOfPropertyChange("Addresses");
+			}
+		}
+
+		[DataMember]
+		public Address CurrentAddress
+		{
+			get { return currentAddress; }
+			set
+			{
+				currentAddress = value;
+				ResetNavigation();
+				NotifyOfPropertyChange("CurrentAddress");
+			}
+		}
+
+		protected override void OnInitialize()
+		{
+			Reload();
+		}
+
 		protected override void OnViewLoaded(object view)
 		{
 			var import = Arguments.LastOrDefault().Match("import");
@@ -141,30 +172,9 @@ namespace AnalitF.Net.Client.ViewModels
 			base.CanClose(callback);
 		}
 
-		public NotifyValue<Settings> Settings { get; set; }
-		public NotifyValue<User> User { get; set; }
-		public NotifyValue<Stat> Stat { get; set; }
-		public string Version { get; set; }
-
-		public List<Address> Addresses
+		public void UpdateStat()
 		{
-			get { return addresses; }
-			set
-			{
-				addresses = value;
-				NotifyOfPropertyChange("Addresses");
-			}
-		}
-
-		public Address CurrentAddress
-		{
-			get { return currentAddress; }
-			set
-			{
-				currentAddress = value;
-				ResetNavigation();
-				NotifyOfPropertyChange("CurrentAddress");
-			}
+			Stat.Value = Models.Stat.Update(session, CurrentAddress);
 		}
 
 		public void StartCheck()
@@ -197,10 +207,17 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			session.Clear();
 
+			//нужно сохранить идентификатор выбранного адреса доставки тк
+			//строка Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
+			//сбросит его
+			var addressId = CurrentAddress == null ? 0u : CurrentAddress.Id;
+
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
-			CurrentAddress = Addresses.FirstOrDefault();
+			CurrentAddress = Addresses.Where(a => a.Id == addressId)
+				.DefaultIfEmpty(Addresses.FirstOrDefault())
+				.FirstOrDefault();
 		}
 
 		protected void UpdateDisplayName()
@@ -596,28 +613,5 @@ namespace AnalitF.Net.Client.ViewModels
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
 #endif
-	}
-
-	public class CommandResult : IResult
-	{
-		private SyncViewModel viewModel;
-		private RemoteCommand command;
-
-		public CommandResult(SyncViewModel viewModel, RemoteCommand command)
-		{
-			this.viewModel = viewModel;
-			this.command = command;
-		}
-
-		public void Execute(ActionExecutionContext context)
-		{
-			var token = viewModel.Cancellation.Token;
-			var task = new Task<object>(() => {
-				command.Run();
-				return null;
-			}, token);
-		}
-
-		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 }

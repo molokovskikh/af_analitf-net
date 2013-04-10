@@ -110,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Shell.ViewModelSettings.ContainsKey(key)) {
 				try {
 					IsNotifying = false;
-					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, SerializerSettings());
+					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, JsonHelper.SerializerSettings());
 				}
 				catch (Exception e) {
 					log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
@@ -170,16 +170,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Shell.ViewModelSettings.ContainsKey(key)) {
 				Shell.ViewModelSettings.Remove(key);
 			}
-			var json = JsonConvert.SerializeObject(this, SerializerSettings());
+			var json = JsonConvert.SerializeObject(this, JsonHelper.SerializerSettings());
 			Shell.ViewModelSettings.Add(key, json);
-		}
-
-		private static JsonSerializerSettings SerializerSettings()
-		{
-			var settings = new JsonSerializerSettings {
-				ContractResolver = new NHibernateResolver()
-			};
-			return settings;
 		}
 
 		private void SaveView(object view)

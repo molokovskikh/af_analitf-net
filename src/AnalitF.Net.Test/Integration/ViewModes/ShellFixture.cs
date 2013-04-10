@@ -142,6 +142,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Password = "123";
 			session.Flush();
 			shell = new ShellViewModel();
+			ScreenExtensions.TryActivate(shell);
 		}
 
 		private void ResetCredentials()

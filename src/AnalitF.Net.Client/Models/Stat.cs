@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate;
 using NHibernate.Linq;
@@ -54,13 +55,7 @@ namespace AnalitF.Net.Client.Models
 		public static Stat Update(ISession session, Address value)
 		{
 			if (value == null) {
-				return new Stat {
-					OrdersCount = 0,
-					OrderLinesCount = 0,
-					Sum = 0,
-					WeeklySum = 0,
-					MonthlySum = 0,
-				};
+				return new Stat();
 			}
 
 			var stat = new Stat();

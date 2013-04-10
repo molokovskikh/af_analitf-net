@@ -112,7 +112,9 @@ namespace AnalitF.Net.Client
 					return;
 
 				using(var stream = new StreamWriter(SettingsPath)) {
-					var serializer = new JsonSerializer();
+					var serializer = new JsonSerializer {
+						ContractResolver = new NHibernateResolver()
+					};
 					serializer.Serialize(stream, Shell);
 				}
 			}
@@ -128,13 +130,19 @@ namespace AnalitF.Net.Client
 				if (!File.Exists(SettingsPath))
 					return;
 
+				Shell.IsNotifying = false;
 				using(var stream = new StreamReader(SettingsPath)) {
-					var serializer = new JsonSerializer();
+					var serializer = new JsonSerializer {
+						ContractResolver = new NHibernateResolver()
+					};
 					serializer.Populate(stream, Shell);
 				}
 			}
 			catch(Exception e) {
 				log.Error("Не удалось прочитать настройки", e);
+			}
+			finally {
+				Shell.IsNotifying = true;
 			}
 		}
 

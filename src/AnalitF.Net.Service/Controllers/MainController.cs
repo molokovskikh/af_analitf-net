@@ -123,7 +123,16 @@ namespace AnalitF.Net.Controllers
 				foreach (var clientOrder in clientOrders) {
 					var address = Session.Load<Address>(clientOrder.AddressId);
 					var price = Session.Load<PriceList>(clientOrder.PriceId);
-					var activePrice = Session.Load<ActivePrice>(new PriceKey(price, clientOrder.RegionId));
+
+					var activePrice = Session.Get<ActivePrice>(new PriceKey(price, clientOrder.RegionId));
+					//мы должны принимать заказы даже если прайс-лист больше не активен, например устарел
+					//как мне кажется смысла в этом не но так было всегда
+					if (activePrice == null) {
+						activePrice = new ActivePrice {
+							Id = new PriceKey(price, clientOrder.RegionId),
+							PriceDate = clientOrder.PriceDate
+						};
+					}
 
 					var order = new Order(activePrice, CurrentUser, address, rules) {
 						ClientOrderId = clientOrder.ClientOrderId,

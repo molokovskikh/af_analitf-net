@@ -141,7 +141,7 @@ namespace AnalitF.Net.Client.Models
 					.Where(f => new FileInfo(f).Length > 0)
 					.ToArray();
 
-				if (logs.Length > 0)
+				if (logs.Length == 0)
 					return null;
 
 				using(var zip = new ZipFile()) {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -20,8 +21,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Name { get; set; }
 
+		[IgnoreDataMember]
 		public virtual IList<MinOrderSumRule> Rules { get; set; }
 
+		[IgnoreDataMember]
 		public virtual IList<Order> Orders { get; set; }
 
 		public override string ToString()

@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected void StubWindowManager()
 		{
-			manager = new Client.Extentions.WindowManager();
+			manager = new Extentions.WindowManager();
 			manager.UnderTest = true;
 			var @base = IoC.GetInstance;
 			IoC.GetInstance = (type, key) => {

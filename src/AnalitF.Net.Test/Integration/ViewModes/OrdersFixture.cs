@@ -13,6 +13,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using log4net.Config;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -47,7 +48,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var order = PrepareCurrent();
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
+			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 			testScheduler.AdvanceByMs(5000);
 
@@ -90,7 +91,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.Orders[0].Send = false;
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
+			shell.UpdateStat();
 			Assert.That(shell.CanSendOrders, Is.True);
 
 			testScheduler.AdvanceByMs(5000);
@@ -102,7 +103,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			PrepareCurrent();
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
+			shell.UpdateStat();
 			Assert.That(shell.CanSendOrders, Is.True);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 
@@ -296,7 +297,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			PrepareCurrent();
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
+			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 			model.AddressSelector.All.Value = true;
 			Assert.IsTrue(model.CanDelete);

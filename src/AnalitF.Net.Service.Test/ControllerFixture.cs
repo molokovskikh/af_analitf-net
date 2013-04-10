@@ -157,5 +157,50 @@ namespace AnalitF.Net.Service.Test
 			disabledPrice = userPrices.FirstOrDefault(p => p.RegionId == 1 && p.Price.PriceCode == price.Id);
 			Assert.That(disabledPrice, Is.Null);
 		}
+
+		[Test]
+		public void Send_order_for_disabled_price()
+		{
+			session.BeginTransaction();
+			var supplier = TestSupplier.CreateNaked();
+			var price = supplier.Prices[0];
+			supplier.CreateSampleCore();
+			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
+			session.Save(supplier);
+			supplier.Maintain();
+			session.Transaction.Commit();
+
+			var offer = price.Core[0];
+			controller.Post(new SyncRequest {
+				Orders = new [] {
+					new ClientOrder {
+						ClientOrderId = 1,
+						PriceId = price.Id,
+						RegionId = supplier.HomeRegion.Id,
+						AddressId = user.AvaliableAddresses[0].Id,
+						CreatedOn = DateTime.Now,
+						PriceDate = DateTime.Now,
+						Items = new[] {
+							new ClientOrderItem {
+								OfferId = new OfferComposedId {
+									OfferId = offer.Id,
+									RegionId = supplier.HomeRegion.Id,
+								},
+								ProductId = offer.Product.Id,
+								ProducerId = offer.Producer.Id,
+								Count = 1,
+								Cost = 100
+							},
+						}
+					}
+				}
+			});
+
+			var orders = localSession.Query<Order>()
+				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
+				.ToList();
+
+			Assert.That(orders.Count, Is.EqualTo(1));
+		}
 	}
 }

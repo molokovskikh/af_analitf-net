@@ -157,6 +157,7 @@
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />
     <Compile Include="Helpers\FlowDocumentExtentions.cs" />
+    <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />

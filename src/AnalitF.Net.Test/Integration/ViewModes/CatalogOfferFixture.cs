@@ -51,7 +51,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
 			session.Save(newOffer);
 
-			var count = model.Producers.Count;
+			var count = model.Offers.Count;
 			Assert.That(count, Is.GreaterThan(2));
 			model.CurrentProducer = model.Producers[1];
 			Assert.That(model.Offers.Count, Is.LessThan(count));
