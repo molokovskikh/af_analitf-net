@@ -3,18 +3,22 @@
   <Fragment>
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="ApplicationFiles" Guid="{CC9400B9-BACE-463b-B803-D9D7EDB657FA}">
+		<RemoveFolder Id="RemoveApplicationFiles" On="uninstall"/>
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="share">
       <Component Id="ShareFiles" Guid="{2C9FE468-9A0A-46e6-BAEF-9D1BD05261D7}">
+		<RemoveFolder Id="RemoveShareFiles" On="uninstall"/>
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="charsets">
       <Component Id="CharsetsFiles" Guid="{3EE8615B-6A88-4ef6-8131-D6AB9834E88B}">
+		<RemoveFolder Id="RemoveCharsetsFiles" On="uninstall"/>
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="english">
       <Component Id="EnglishFiles" Guid="{80301B53-611D-41f1-A00A-E39E5ED3AAE2}">
+		<RemoveFolder Id="RemoveEnglishFiles" On="uninstall"/>
       </Component>
     </DirectoryRef>
   </Fragment>
