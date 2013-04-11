@@ -23,16 +23,23 @@ namespace AnalitF.Net.Client.ViewModels
 		private OrderLine currentLine;
 		private List<MarkupConfig> markups;
 		private Price currentPrice;
-		private ObservableCollection<OrderLine> lines;
-		private List<SentOrderLine> sentLines;
 
 		private Editor editor;
 
 		public OrderLinesViewModel()
 		{
+			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
+			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
+
+			Sum = new NotifyValue<decimal>(() => {
+				if (IsCurrentSelected)
+					return Lines.Value.Sum(l => l.Sum);
+				return SentLines.Value.Sum(l => l.Sum);
+			}, SentLines, Lines);
+
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
-				s => Lines.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
+				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
 				l => CurrentLine = l);
 			AddressSelector = new AddressSelector(Session, UiScheduler, this);
 			editor = new Editor(OrderWarning, Manager);
@@ -40,10 +47,11 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Сводный заказ";
 			markups = Session.Query<MarkupConfig>().ToList();
 
-			Dep(m => m.Sum, m => m.Lines);
 			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
-
 			Dep(Update, m => m.CurrentPrice, m => m.AddressSelector.All.Value);
+
+			this.ObservableForProperty(m => m.IsCurrentSelected)
+				.Subscribe(_ => Sum.Recalculate());
 
 			this.ObservableForProperty(m => m.CurrentLine)
 				.Subscribe(e => ProductInfo.CurrentOffer = e.Value);
@@ -52,7 +60,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.BindTo(editor, e => e.CurrentEdit);
 
-			this.ObservableForProperty(m => m.Lines)
+			this.ObservableForProperty(m => m.Lines.Value)
 				.Select(e => e.Value)
 				.BindTo(editor, e => e.Lines);
 
@@ -64,7 +72,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
-			OnCloseDisposable.Add(observable.Subscribe(_ => NotifyOfPropertyChange("Sum")));
+			OnCloseDisposable.Add(observable.Subscribe(_ => Sum.Recalculate()));
 
 			//пока устанавливаем значения не надо оповещать об изменения
 			//все равно будет запрос когда форма активируется
@@ -127,7 +135,7 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => addresses.Contains(l.Order.Address.Id));
 				}
 
-				Lines = new ObservableCollection<OrderLine>(query
+				Lines.Value = new ObservableCollection<OrderLine>(query
 					.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProducerSynonym)
 					.ToList());
@@ -147,11 +155,12 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
-				SentLines = query.OrderBy(l => l.ProductSynonym)
+				SentLines.Value = query.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProductSynonym)
 					.ToList();
 			}
 		}
+
 		private void Dep(Action action, params Expression<Func<OrderLinesViewModel, object>>[] to)
 		{
 			to.Select(e => this.ObservableForProperty(e))
@@ -169,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void CalculateRetailCost()
 		{
-			foreach (var offer in Lines)
+			foreach (var offer in Lines.Value)
 				offer.CalculateRetailCost(markups);
 		}
 
@@ -186,34 +195,12 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		[Export]
-		public ObservableCollection<OrderLine> Lines
-		{
-			get { return lines; }
-			set
-			{
-				lines = value;
-				NotifyOfPropertyChange("Lines");
-			}
-		}
+		public NotifyValue<ObservableCollection<OrderLine>> Lines { get; set; }
 
 		[Export]
-		public List<SentOrderLine> SentLines
-		{
-			get { return sentLines; }
-			set
-			{
-				sentLines = value;
-				NotifyOfPropertyChange("SentLines");
-			}
-		}
+		public NotifyValue<List<SentOrderLine>> SentLines { get; set; }
 
-		public decimal Sum
-		{
-			get
-			{
-				return Lines.Sum(l => l.Sum);
-			}
-		}
+		public NotifyValue<decimal> Sum { get; set; }
 
 		public OrderLine CurrentLine
 		{

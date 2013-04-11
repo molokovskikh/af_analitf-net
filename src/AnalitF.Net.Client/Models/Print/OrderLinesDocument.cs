@@ -49,9 +49,9 @@ namespace AnalitF.Net.Client.Models.Print
 
 			if (model.IsCurrentSelected) {
 				var lines = model.Lines;
-				count = lines.Count;
-				sum = lines.Sum(l => l.Sum);
-				rows = model.Lines.Select(l => new object[] {
+				count = lines.Value.Count;
+				sum = lines.Value.Sum(l => l.Sum);
+				rows = model.Lines.Value.Select(l => new object[] {
 					l.ProducerSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
@@ -62,9 +62,9 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 			else {
 				var lines = model.SentLines;
-				count = lines.Count;
-				sum = lines.Sum(l => l.Count * l.Cost);
-				rows = model.SentLines.Select(l => new object[] {
+				count = lines.Value.Count;
+				sum = lines.Value.Sum(l => l.Count * l.Cost);
+				rows = model.SentLines.Value.Select(l => new object[] {
 					l.ProducerSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
