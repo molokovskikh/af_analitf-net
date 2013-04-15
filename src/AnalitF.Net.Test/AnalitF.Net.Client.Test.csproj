@@ -107,6 +107,7 @@
     <Compile Include="Acceptance\BaseFixture.cs" />
     <Compile Include="Acceptance\MemoryLeakFixture.cs" />
     <Compile Include="Acceptance\SetupFixture.cs" />
+    <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />

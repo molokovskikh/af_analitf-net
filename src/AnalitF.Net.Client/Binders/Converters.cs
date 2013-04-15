@@ -2,9 +2,31 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace AnalitF.Net.Client.Extentions
 {
+	public class UriToBitmapConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value == null || String.IsNullOrEmpty(value.ToString()))
+				return null;
+
+			var bi = new BitmapImage();
+			bi.BeginInit();
+			bi.UriSource = new Uri(value.ToString());
+			bi.CacheOption = BitmapCacheOption.OnLoad;
+			bi.EndInit();
+			return bi;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 	public class IntToBoolConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

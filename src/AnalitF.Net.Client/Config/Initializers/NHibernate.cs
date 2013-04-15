@@ -10,6 +10,7 @@ using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Type;
+using log4net;
 using Cascade = NHibernate.Mapping.ByCode.Cascade;
 using Configuration = NHibernate.Cfg.Configuration;
 using Environment = NHibernate.Cfg.Environment;
@@ -21,6 +22,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 	public class NHibernate
 	{
+		private static ILog log = LogManager.GetLogger(typeof(NHibernate));
+
 		public ISessionFactory Factory;
 		public Configuration Configuration;
 
@@ -160,6 +163,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			}
 
 			builder.ServerParameters = dictionary.Select(k => k.Key + "=" + k.Value).Implode(";");
+			log.DebugFormat("Строка подключения {0}", builder);
 			return builder.ToString();
 		}
 	}

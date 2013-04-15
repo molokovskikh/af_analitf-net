@@ -1,9 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Automation;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Acceptance
@@ -13,29 +16,40 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
 		public static extern IntPtr FindWindowByCaption(IntPtr ZeroOnly, string lpWindowName);
 
-		protected TimeSpan timeout = TimeSpan.FromSeconds(5);
+		protected TimeSpan Timeout = TimeSpan.FromSeconds(5);
 
-		protected Process process;
+		protected Process Process;
 
 		protected AutomationElement MainWindow;
+		protected string Exe;
+		protected StreamWriter Writer;
+
+		protected Action<AutomationElement> DialogHandler;
+
+		[SetUp]
+		public void Setup()
+		{
+			Exe = @"..\..\..\AnalitF.Net.Client\bin\Debug";
+		}
 
 		[TearDown]
 		public void Teardown()
 		{
 			MainWindow = null;
-			if (process != null) {
-				if (!process.HasExited)
-					process.CloseMainWindow();
+			if (Process != null) {
+				if (!Process.HasExited)
+					Process.CloseMainWindow();
 
-				process.WaitForExit(TimeSpan.FromSeconds(10).Milliseconds);
-				if (!process.HasExited)
-					process.Kill();
+				Process.WaitForExit(TimeSpan.FromSeconds(10).Milliseconds);
+				if (!Process.HasExited)
+					Process.Kill();
 			}
 		}
 
-		protected AutomationElement FindByName(string name)
+		protected AutomationElement FindByName(string name, AutomationElement element = null)
 		{
-			return MainWindow.FindAll(
+			element = element ?? MainWindow;
+			return element.FindAll(
 				TreeScope.Descendants,
 				new PropertyCondition(
 					AutomationElement.NameProperty,
@@ -45,9 +59,10 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				.FirstOrDefault();
 		}
 
-		protected AutomationElement FindById(string name)
+		protected AutomationElement FindById(string name, AutomationElement element = null)
 		{
-			return MainWindow.FindAll(
+			element = element ?? MainWindow;
+			return element.FindAll(
 				TreeScope.Descendants,
 				new PropertyCondition(
 					AutomationElement.AutomationIdProperty,
@@ -57,25 +72,14 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				.FirstOrDefault();
 		}
 
-		protected void Wait(Func<bool> func)
+		protected void StartProcess(string fileName, string dir = "", string arguments = "")
 		{
-			var elapsed = new TimeSpan();
-			var wait = TimeSpan.FromMilliseconds(100);
-			while (func()) {
-				Thread.Sleep(wait);
-				elapsed += wait;
-				if (elapsed > timeout)
-					throw new Exception("ÕÂ Û‰‡ÎÓÒ¸ ‰ÓÊ‰‡Ú¸Òˇ");
-			}
-		}
-
-		protected void StartProcess(string fileName, string arguments = "")
-		{
-			process = new Process();
-			process.StartInfo.FileName = fileName;
-			process.StartInfo.Arguments = arguments;
-			process.Start();
-			process.EnableRaisingEvents = true;
+			Process = new Process();
+			Process.StartInfo.FileName = fileName;
+			Process.StartInfo.Arguments = arguments;
+			//Process.StartInfo.WorkingDirectory = dir;
+			Process.Start();
+			Process.EnableRaisingEvents = true;
 
 			Automation.AddAutomationEventHandler(
 				WindowPatternIdentifiers.WindowOpenedEvent,
@@ -86,21 +90,21 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Wait(() => MainWindow == null);
 		}
 
-		protected void ClickByName(string name)
+		protected void ClickByName(string name, AutomationElement element = null)
 		{
-			var launchButton = FindByName(name);
+			var launchButton = FindByName(name, element);
 			if (launchButton == null)
-				throw new Exception(String.Format("ÕÂ ÏÓ„Û Ì‡ÈÚË ÍÌÓÔÍÛ {0}", name));
+				throw new Exception(String.Format("–ù–µ –º–æ–≥—É –Ω–∞–π—Ç–∏ –∫–Ω–æ–ø–∫—É {0}", name));
 
 			var invokePattern = (InvokePattern)launchButton.GetCurrentPattern(InvokePattern.Pattern);
 			invokePattern.Invoke();
 		}
 
-		protected void Click(string id)
+		protected void Click(string id, AutomationElement element = null)
 		{
-			var launchButton = FindById(id);
+			var launchButton = FindById(id, element);
 			if (launchButton == null)
-				throw new Exception(String.Format("ÕÂ ÏÓ„Û Ì‡ÈÚË ÍÌÓÔÍÛ {0}", id));
+				throw new Exception(String.Format("–ù–µ –º–æ–≥—É –Ω–∞–π—Ç–∏ –∫–Ω–æ–ø–∫—É {0}", id));
 
 			var invokePattern = (InvokePattern)launchButton.GetCurrentPattern(InvokePattern.Pattern);
 			invokePattern.Invoke();
@@ -108,23 +112,34 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
-			MainWindow = AutomationElement.FromHandle(process.MainWindowHandle);
+			if (MainWindow == null) {
+				MainWindow = AutomationElement.FromHandle(Process.MainWindowHandle);
+			}
+			else if (DialogHandler != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
+				DialogHandler(sender as AutomationElement);
+			}
 		}
 
 		public static void Dump(AutomationElementCollection elements)
 		{
 			foreach (var element in elements.Cast<AutomationElement>()) {
-				Console.WriteLine("--------------");
-				foreach (AutomationProperty p in element.GetSupportedProperties()) {
-					Console.WriteLine("{0} = {1}", p.ProgrammaticName, element.GetCurrentPropertyValue(p));
-				}
+				Dump(element);
 			}
 		}
 
-		public void WaitWindow(string caption)
+		private static void Dump(AutomationElement element)
 		{
-			Wait(() => FindWindowByCaption(IntPtr.Zero, "¿Ì‡ÎËÚ‘¿–Ã¿÷»ﬂ") == IntPtr.Zero);
-			MainWindow = AutomationElement.FromHandle(FindWindowByCaption(IntPtr.Zero, "¿Ì‡ÎËÚ‘¿–Ã¿÷»ﬂ"));
+			if (element == null)
+				return;
+
+			Console.WriteLine("--------------");
+			foreach (var p in element.GetSupportedProperties()) {
+				Console.WriteLine("{0} = {1}", p.ProgrammaticName, element.GetCurrentPropertyValue(p));
+			}
+
+			foreach (var pattern in element.GetSupportedPatterns()) {
+				Console.WriteLine(pattern.ProgrammaticName);
+			}
 		}
 
 		protected AutomationElementCollection FindTextElements(string text)
@@ -135,9 +150,82 @@ namespace AnalitF.Net.Client.Test.Acceptance
 					new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text)));
 		}
 
+		protected AutomationElementCollection FindTextElements(AutomationElement element)
+		{
+			return element.FindAll(TreeScope.Subtree,
+				new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text));
+		}
+
+		protected void Wait(Func<bool> func)
+		{
+			var elapsed = new TimeSpan();
+			var wait = TimeSpan.FromMilliseconds(100);
+			while (func()) {
+				Thread.Sleep(wait);
+				elapsed += wait;
+				if (elapsed > Timeout)
+					throw new Exception(String.Format("–ù–µ —É–¥–∞–ª–æ—Å—å –¥–æ–∂–¥–∞—Ç—å—Å—è –∑–∞ {0}", Timeout));
+			}
+		}
+
+		public void WaitWindow(string caption)
+		{
+			Wait(() => FindWindowByCaption(IntPtr.Zero, "–ê–Ω–∞–ª–∏—Ç–§–ê–†–ú–ê–¶–ò–Ø") == IntPtr.Zero);
+			MainWindow = AutomationElement.FromHandle(FindWindowByCaption(IntPtr.Zero, "–ê–Ω–∞–ª–∏—Ç–§–ê–†–ú–ê–¶–ò–Ø"));
+		}
+
 		protected void WaitText(string text)
 		{
 			Wait(() => FindTextElements(text).Count == 0);
+		}
+
+		protected AutomationElement WaitForElement(string name)
+		{
+			Wait(() => FindById(name, MainWindow) == null);
+			return FindById(name, MainWindow);
+		}
+
+		protected void Activate()
+		{
+			var root = "acceptance";
+			Prepare(Exe, root);
+
+			var debugPipe = Guid.NewGuid().ToString();
+			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
+			Writer = new StreamWriter(pipe);
+
+			StartProcess(Path.Combine(root, "AnalitF.Net.Client.exe"), root, "--debug-pipe=" + debugPipe);
+			pipe.WaitForConnection();
+			Writer.AutoFlush = true;
+		}
+
+		protected static void CopyDir(string src, string dst)
+		{
+			if (!Directory.Exists(dst)) {
+				Directory.CreateDirectory(dst);
+			}
+
+			foreach (var file in Directory.GetFiles(src)) {
+				File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
+			}
+
+			foreach (var dir in Directory.GetDirectories(src)) {
+				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
+			}
+		}
+
+		protected static void Prepare(string exe, string root)
+		{
+			if (!Directory.Exists(root))
+				Directory.CreateDirectory(root);
+
+			var files = Directory.GetFiles(exe, "*.exe")
+				.Concat(Directory.GetFiles(exe, "*.dll"))
+				.Concat(Directory.GetFiles(exe, "*.config"));
+			files.Each(f => File.Copy(f, Path.Combine(root, Path.GetFileName(f)), true));
+
+			CopyDir("share", Path.Combine(root, "share"));
+			//CopyDir("backup", Path.Combine(root, "data"));
 		}
 	}
 }

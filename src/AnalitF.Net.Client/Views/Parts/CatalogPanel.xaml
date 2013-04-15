@@ -1,6 +1,9 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.Parts.CatalogPanel"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
+	<UserControl.Resources>
+		<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
+	</UserControl.Resources>
 	<StackPanel>
 		<Grid>
 			<Grid.ColumnDefinitions>
@@ -27,6 +30,7 @@
 			<Label Grid.Row="1" Grid.Column="2" Name="CurrentCatalogName_Mnn_Name" FontWeight="Bold"></Label>
 		</Grid>
 
-		<Image Height="125" Name="Ad" CacheMode=""></Image>
+		<Image Height="125" Source="{Binding Ad, Converter={StaticResource UriToBitmap}}">
+		</Image>
 	</StackPanel>
 </UserControl>

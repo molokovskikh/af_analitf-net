@@ -19,8 +19,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 	[TestFixture, Explicit]
 	public class MemoryLeakFixture : BaseFixture
 	{
-		private StreamWriter writer;
-
 		[Test]
 		public void Orders()
 		{
@@ -76,7 +74,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void Toggle(string id)
 		{
-			var element = FindById(id);
+			var element = FindById(id, MainWindow);
 
 			if (element == null)
 				throw new Exception(String.Format("Не могу найти кнопку {0}", id));
@@ -110,12 +108,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Collect();
 			Thread.Sleep(2000);
 
-			process.WaitForInputIdle();
+			Process.WaitForInputIdle();
 			var posibleViewModels = typeof(ShellViewModel).Assembly.GetTypes()
 				.Where(t => typeof(BaseScreen).IsAssignableFrom(t))
 				.Select(t => t.FullName)
 				.ToArray();
-			var logs = WindbgHelper.GetHeapDump(process);
+			var logs = WindbgHelper.GetHeapDump(Process);
 			var viewModels = logs.Where(l => posibleViewModels.Contains(l.ClassName)).ToList();
 			Assert.That(viewModels.Select(v => v.ClassName).ToArray(),
 				Is.EquivalentTo(type.Select(t => t.FullName).ToArray()),
@@ -124,56 +122,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void Collect()
 		{
-			writer.WriteLine("Collect");
-		}
-
-		private AutomationElement WaitForElement(string name)
-		{
-			Wait(() => FindById(name) == null);
-			return FindById(name);
-		}
-
-		private void Activate()
-		{
-			var root = "acceptance";
-			var exe = @"..\..\..\AnalitF.Net.Client\bin\Debug";
-			Prepare(exe, root);
-
-			var debugPipe = Guid.NewGuid().ToString();
-			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
-			writer = new StreamWriter(pipe);
-
-			StartProcess(Path.Combine(exe, "AnalitF.Net.Client.exe"), "--debug-pipe=" + debugPipe);
-			pipe.WaitForConnection();
-			writer.AutoFlush = true;
-		}
-
-		private static void Prepare(string exe, string root)
-		{
-			if (!Directory.Exists(root))
-				Directory.CreateDirectory(root);
-
-			var files = Directory.GetFiles(exe, "*.exe")
-				.Concat(Directory.GetFiles(exe, "*.dll"));
-			files.Each(f => File.Copy(f, Path.Combine(root, Path.GetFileName(f)), true));
-
-			CopyDir("share", Path.Combine(root, "share"));
-			CopyDir("backup", Path.Combine(root, "data"));
-		}
-
-		private static void CopyDir(string src, string dst)
-		{
-			if (!Directory.Exists(dst)) {
-				Directory.CreateDirectory(dst);
-			}
-
-			foreach (var file in Directory.GetFiles(src)) {
-				File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
-			}
-
-			foreach (var dir in Directory.GetDirectories(src)) {
-				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
-			}
+			Writer.WriteLine("Collect");
 		}
 	}
 }
