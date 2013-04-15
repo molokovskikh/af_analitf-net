@@ -15,7 +15,12 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static string TranslateException(AggregateException exception)
 		{
-			var requestException = exception.GetBaseException() as RequestException;
+			return TranslateException(exception.GetBaseException());
+		}
+
+		public static string TranslateException(Exception baseException)
+		{
+			var requestException = baseException as RequestException;
 			if (requestException != null) {
 				if (requestException.StatusCode == HttpStatusCode.Unauthorized) {
 					return "Доступ запрещен.\r\nВведены некорректные учетные данные.";
@@ -25,7 +30,7 @@ namespace AnalitF.Net.Client.Helpers
 				}
 			}
 
-			var endUserError = exception.GetBaseException() as EndUserError;
+			var endUserError = baseException as EndUserError;
 			if (endUserError != null) {
 				return endUserError.Message;
 			}

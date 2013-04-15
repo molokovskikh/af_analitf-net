@@ -17,6 +17,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Install()
 		{
+			//VBoxManage.exe list runningvms
+			//VBoxManage.exe startvm "Windows 7"
+			//VBoxManage.exe guestcontrol "Windows 7" exec --image "C:\Windows\notepad.exe" --username "test" --wait-stdout --verbose
 			var file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "setup.exe");
 			File.Copy(source, file, true);
 			StartProcess(file);

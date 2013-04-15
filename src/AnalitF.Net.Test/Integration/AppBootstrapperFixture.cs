@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
@@ -22,6 +24,8 @@ namespace AnalitF.Net.Test.Integration
 		{
 			app = CreateBootstrapper();
 		}
+
+
 
 		[Test]
 		public void Persist_shell()
@@ -56,6 +60,19 @@ namespace AnalitF.Net.Test.Integration
 			StartShell();
 			Assert.AreEqual(savedAddressId, shell.CurrentAddress.Id);
 			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
+		}
+
+		[Test]
+		public void Reject_start_second_time()
+		{
+			ConfigurationManager.AppSettings["Uri"] = "http://localhost";
+			var app = CreateBootstrapper();
+			app.Init();
+			Assert.IsTrue(app.IsInitialized);
+
+			var app1 = CreateBootstrapper();
+			Assert.Throws<EndUserError>(app1.Init);
+			Assert.IsFalse(app1.IsInitialized);
 		}
 
 		private void StartShell()

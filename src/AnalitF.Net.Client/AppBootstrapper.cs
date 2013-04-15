@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -30,20 +31,21 @@ namespace AnalitF.Net.Client
 	public class AppBootstrapper : Bootstrapper<ShellViewModel>
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
+		private string name;
+		private SingleInstance instance;
 
 		public static Config.Initializers.NHibernate NHibernate;
 
 		public static string DataPath = "data";
 		public static string TempPath = "temp";
 		public string SettingsPath;
-
-		private bool isInitialized;
 		private static bool Import;
 
 		public ShellViewModel Shell;
 
 #if DEBUG
 		private DebugPipe debugPipe;
+		private static bool IsUiInitialized;
 #endif
 
 		public AppBootstrapper()
@@ -54,8 +56,12 @@ namespace AnalitF.Net.Client
 		public AppBootstrapper(bool useApplication = true)
 			: base(useApplication)
 		{
-			SettingsPath = typeof(AppBootstrapper).Assembly.GetName().Name + ".data";
+			name = typeof(AppBootstrapper).Assembly.GetName().Name;
+			instance = new SingleInstance(name);
+			SettingsPath = name + ".data";
 		}
+
+		public bool IsInitialized { get; private set; }
 
 		private void InitLog()
 		{
@@ -75,8 +81,17 @@ namespace AnalitF.Net.Client
 		{
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
-			if (!isInitialized)
+			if (!IsInitialized) {
+				//если не запустились то нужно сказать что случилась беда
+				//если запуск состоялся просто проглатываем исключение
+				MessageBox.Show(
+						ErrorHelper.TranslateException(e.Exception) ?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Exception.Message),
+						"АналитФАРМАЦИЯ: Внимание",
+						MessageBoxButton.OK,
+						MessageBoxImage.Warning);
+
 				Application.Current.Shutdown();
+			}
 		}
 
 		protected override void OnExit(object sender, EventArgs e)
@@ -86,9 +101,19 @@ namespace AnalitF.Net.Client
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
 		{
+			Init();
+		}
+
+		public void Init()
+		{
 			InitLog();
-			InitApp();
-			((App)Application).RegisterResources();
+			if (!InitApp()) {
+				Application.Current.Shutdown();
+				return;
+			}
+
+			if (Application != null)
+				((App)Application).RegisterResources();
 			InitUi();
 			InitDb();
 			InitShell();
@@ -102,13 +127,13 @@ namespace AnalitF.Net.Client
 			Deserialize();
 
 			windowManager.ShowWindow(Shell);
-			isInitialized = true;
+			IsInitialized = true;
 		}
 
 		public void Serialize()
 		{
 			try {
-				if (!isInitialized)
+				if (!IsInitialized)
 					return;
 
 				using(var stream = new StreamWriter(SettingsPath)) {
@@ -153,8 +178,12 @@ namespace AnalitF.Net.Client
 			return base.GetInstance(service, key);
 		}
 
-		private void InitApp()
+		private bool InitApp()
 		{
+			var isSingle = instance.Check();
+			if (!isSingle)
+				return false;
+
 			var args = Environment.GetCommandLineArgs();
 #if DEBUG
 			debugPipe = new DebugPipe(args);
@@ -182,18 +211,25 @@ namespace AnalitF.Net.Client
 			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
 			Tasks.ExtractPath = TempPath;
 			Tasks.RootPath = FileHelper.MakeRooted(".");
+			return true;
 		}
 
 		private static void InitDb()
 		{
-			NHibernate = new Config.Initializers.NHibernate();
-			NHibernate.Init();
+			if (NHibernate == null) {
+				NHibernate = new Config.Initializers.NHibernate();
+				NHibernate.Init();
+			}
 
 			new SanityCheck(DataPath).Check(Import);
 		}
 
 		public static void InitUi()
 		{
+			//в тестах мы можем дважды инициализировать ui
+			//это приведет к тому что делегаты будут вызываться рекурсивно
+			if (IsUiInitialized)
+				return;
 			//нужно затем что бы можно было делать модели без суффикса ViewModel
 			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(
@@ -239,6 +275,7 @@ namespace AnalitF.Net.Client
 				}
 				return elements;
 			};
+			IsUiInitialized = true;
 		}
 	}
 }
