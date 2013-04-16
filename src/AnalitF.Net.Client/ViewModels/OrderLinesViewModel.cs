@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -18,6 +19,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	[DataContract]
 	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable
 	{
 		private OrderLine currentLine;
@@ -88,6 +90,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public InlineEditWarning OrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
+		[DataMember]
 		public AddressSelector AddressSelector { get; set; }
 		public ProductInfo ProductInfo { get; set; }
 

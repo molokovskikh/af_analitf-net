@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Helpers;
@@ -22,6 +23,7 @@ using log4net;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	[DataContract]
 	public class OrdersViewModel : BaseOrderViewModel, IPrintable
 	{
 		private Order currentOrder;
@@ -96,6 +98,7 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
+		[DataMember]
 		public AddressSelector AddressSelector { get; set; }
 
 		public List<Address> AddressesToMove { get; set; }
