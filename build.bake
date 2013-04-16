@@ -11,6 +11,7 @@ import System.IO
 import System.Net.Mail
 import System.Xml
 import System.Xml.Linq
+import System.Linq.Enumerable
 import System.Xml.XPath.Extensions
 
 def FileElement(file as string, id as string, element as XElement):
@@ -58,7 +59,7 @@ task @DeployService, [@DeployPipeline]
 
 task @deploy, [@Tag, @DeployService, @DeployClient]
 
-task @BuildClient, [@BeforeBuildApp, @BuildUpdatePackage, @CopyNativeLib, @BuildSetup, @AfterBuildApp]
+task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @BuildSetup, @BuildUpdatePackage, @AfterBuildApp]
 
 task @CopyNativeLib:
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
@@ -88,6 +89,7 @@ task @UpdateSetupFiles:
 	document.Save(name)
 
 task @BeforeBuildUpdater:
+	Engine.Tasks.First({t| t.Name == @BuildApp}).Executed = false
 	Globals.Project = "Updater"
 
 task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
