@@ -102,6 +102,3 @@ task @DeployUpdatePackage, [@BuildUpdatePackage]:
 
 task @Tag:
 	Bash("./scripts/changes.sh")
-
-task @Debug:
-	print Globals.DeployRoot
