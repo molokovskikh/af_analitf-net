@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Binders;
 using Caliburn.Micro;
+using Ionic.Zip;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit

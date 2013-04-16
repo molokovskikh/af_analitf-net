@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
-using System.Linq;
-using NHibernate.Linq;
-using NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Commands

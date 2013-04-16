@@ -63,19 +63,19 @@ namespace AnalitF.Net.Test.Integration.Models
 			restoreUser = false;
 
 			updatePath = @"service/data/update";
-			Tasks.ExtractPath = "temp";
+			Tasks.BaseUri = uri;
+			Tasks.ArchiveFile = Path.Combine("temp", "archive.zip");
+			Tasks.ExtractPath = Path.Combine("temp", "update");
 			Tasks.RootPath = "app";
+
 			var files = Directory.GetFiles(".", "*.txt");
 			foreach (var file in files) {
 				File.Delete(file);
 			}
 
-			FileHelper.InitDir(updatePath, Tasks.ExtractPath, Tasks.RootPath);
+			FileHelper.InitDir(updatePath, Tasks.RootPath, "temp");
 
 			localSession = SetupFixture.Factory.OpenSession();
-			Tasks.BaseUri = uri;
-			Tasks.ArchiveFile = Path.Combine(Tasks.ExtractPath, "archive.zip");
-
 			cancelletion = new CancellationTokenSource();
 			token = cancelletion.Token;
 			progress = new BehaviorSubject<Progress>(new Progress());
@@ -242,6 +242,25 @@ namespace AnalitF.Net.Test.Integration.Models
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			Tasks.Import(null, token, progress);
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Clean_after_import()
+		{
+			File.WriteAllBytes(Path.Combine(updatePath, "updater.exe"), new byte[0]);
+			File.WriteAllText(Path.Combine(updatePath, "version.txt"), "99.99.99.99");
+
+			task.Start();
+			task.Wait();
+			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
+
+			File.Delete(Path.Combine(updatePath, "updater.exe"));
+			File.Delete(Path.Combine(updatePath, "version.txt"));
+
+			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
+			task.Start();
+			task.Wait();
+			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
 		}
 	}
 }

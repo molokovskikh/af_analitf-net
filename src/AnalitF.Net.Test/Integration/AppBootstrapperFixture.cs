@@ -25,7 +25,11 @@ namespace AnalitF.Net.Test.Integration
 			app = CreateBootstrapper();
 		}
 
-
+		[TearDown]
+		public void TearDown()
+		{
+			app.Dispose();
+		}
 
 		[Test]
 		public void Persist_shell()
@@ -84,7 +88,8 @@ namespace AnalitF.Net.Test.Integration
 
 		private AppBootstrapper CreateBootstrapper()
 		{
-			var app = new AppBootstrapper(false);
+			//нужно переопределить имя что бы избежать конфликтов с запущеным приложением
+			var app = new AppBootstrapper(false, "AnalitF.Net.Client.Test");
 			Execute.ResetWithoutDispatcher();
 			//setup - переопределяет windowmanager но AppBootstrapper вернет все назад
 			//нужно восстановить тестовый windowmanager а то тесты начнут показывать окна

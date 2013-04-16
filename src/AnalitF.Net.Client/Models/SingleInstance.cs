@@ -8,7 +8,7 @@ using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class SingleInstance
+	public class SingleInstance : IDisposable
 	{
 		private Mutex mutex;
 		private string name;
@@ -73,6 +73,12 @@ namespace AnalitF.Net.Client.Models
 				ShowWindow(handle, 9);
 
 			return SetForegroundWindow(handle);
+		}
+
+		public void Dispose()
+		{
+			if (mutex != null)
+				mutex.Dispose();
 		}
 	}
 }

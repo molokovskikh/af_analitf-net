@@ -5,8 +5,10 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
 using System.Windows.Automation;
 using Common.Tools;
+using Microsoft.Test.Input;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Acceptance
@@ -156,7 +158,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text));
 		}
 
-		protected void Wait(Func<bool> func)
+		protected void Wait(Func<bool> func, string message = null)
 		{
 			var elapsed = new TimeSpan();
 			var wait = TimeSpan.FromMilliseconds(100);
@@ -164,7 +166,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				Thread.Sleep(wait);
 				elapsed += wait;
 				if (elapsed > Timeout)
-					throw new Exception(String.Format("Не удалось дождаться за {0}", Timeout));
+					throw new Exception(String.Format("Не удалось дождаться за {0} {1}", Timeout, message));
 			}
 		}
 
@@ -181,7 +183,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected AutomationElement WaitForElement(string name)
 		{
-			Wait(() => FindById(name, MainWindow) == null);
+			Wait(() => FindById(name, MainWindow) == null, String.Format("появления элемента {0}", name));
 			return FindById(name, MainWindow);
 		}
 
@@ -225,7 +227,23 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			files.Each(f => File.Copy(f, Path.Combine(root, Path.GetFileName(f)), true));
 
 			CopyDir("share", Path.Combine(root, "share"));
-			//CopyDir("backup", Path.Combine(root, "data"));
+			CopyDir("backup", Path.Combine(root, "data"));
+		}
+
+		protected static void DoubleClickCell(AutomationElement table, int row, int column)
+		{
+			var cell = ((GridPattern)table.GetCurrentPattern(GridPattern.Pattern)).GetItem(row, column);
+			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
+			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
+			Mouse.DoubleClick(MouseButton.Left);
+		}
+
+		protected static void ClickCell(AutomationElement table, int row, int column)
+		{
+			var cell = ((GridPattern)table.GetCurrentPattern(GridPattern.Pattern)).GetItem(row, column);
+			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
+			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
+			Mouse.Click(MouseButton.Left);
 		}
 	}
 }

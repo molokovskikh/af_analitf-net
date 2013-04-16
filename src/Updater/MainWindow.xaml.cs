@@ -12,6 +12,19 @@ using Path = System.IO.Path;
 
 namespace Updater
 {
+	public class FileNameComparer : IEqualityComparer<string>
+	{
+		public bool Equals(string x, string y)
+		{
+			return StringComparer.CurrentCultureIgnoreCase.Equals(Path.GetFileName(x), Path.GetFileName(y));
+		}
+
+		public int GetHashCode(string obj)
+		{
+			return StringComparer.CurrentCultureIgnoreCase.GetHashCode(Path.GetFileName(obj));
+		}
+	}
+
 	public partial class MainWindow
 	{
 		private ILog log = LogManager.GetLogger(typeof(MainWindow));
@@ -62,14 +75,16 @@ namespace Updater
 			var sourceRootPath = FileHelper.MakeRooted(".");
 			var destRootPath = Path.Combine(sourceRootPath, "..\\..");
 
-			var selfExe = Path.GetFileNameWithoutExtension(typeof(MainWindow).Assembly.Location);
+			var selfExe = Path.GetFileName(typeof(MainWindow).Assembly.Location);
 			var version = File.ReadAllText(Path.Combine(sourceRootPath, "version.txt")).Trim();
 			var newBinPath = Path.Combine(destRootPath, version);
 			var oldBinPath = Path.Combine(destRootPath, "bin");
 			var exePath = destRootPath;
 			var files = Directory.GetFiles(sourceRootPath);
 
-			files = files.Where(f => !Path.GetFileNameWithoutExtension(f).Match(selfExe)).ToArray();
+			var ignore = new [] {selfExe, selfExe + ".config", "version.txt"};
+
+			files = files.Except(ignore, new FileNameComparer()).ToArray();
 			var exeFiles = files.Where(f => Path.GetExtension(f).Match(".exe")).ToArray();
 			exeFiles = exeFiles.Concat(files.Where(f => Path.GetExtension(f).Match(".config")
 				&& exeFiles.Any(e => Path.GetFileNameWithoutExtension(e).Match(Path.GetFileNameWithoutExtension(f)))))

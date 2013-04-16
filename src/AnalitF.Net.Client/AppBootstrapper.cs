@@ -28,37 +28,36 @@ using LogManager = Caliburn.Micro.LogManager;
 
 namespace AnalitF.Net.Client
 {
-	public class AppBootstrapper : Bootstrapper<ShellViewModel>
+	public class AppBootstrapper : Bootstrapper<ShellViewModel>, IDisposable
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
-		private string name;
 		private SingleInstance instance;
-
-		public static Config.Initializers.NHibernate NHibernate;
-
-		public static string DataPath = "data";
-		public static string TempPath = "temp";
-		public string SettingsPath;
-		private static bool Import;
-
-		public ShellViewModel Shell;
-
+		private bool import;
+		private string name;
 #if DEBUG
 		private DebugPipe debugPipe;
-		private static bool IsUiInitialized;
 #endif
+
+		public string SettingsPath;
+		public ShellViewModel Shell;
+
+		private static bool IsUiInitialized;
+
+		public static Config.Initializers.NHibernate NHibernate;
+		public static string DataPath = "data";
+		public static string TempPath = "temp";
 
 		public AppBootstrapper()
 			: this(true)
 		{
 		}
 
-		public AppBootstrapper(bool useApplication = true)
+		public AppBootstrapper(bool useApplication = true, string name = null)
 			: base(useApplication)
 		{
-			name = typeof(AppBootstrapper).Assembly.GetName().Name;
-			instance = new SingleInstance(name);
-			SettingsPath = name + ".data";
+			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
+			instance = new SingleInstance(this.name);
+			SettingsPath = this.name + ".data";
 		}
 
 		public bool IsInitialized { get; private set; }
@@ -192,10 +191,10 @@ namespace AnalitF.Net.Client
 			DataPath = FileHelper.MakeRooted(DataPath);
 			SettingsPath = FileHelper.MakeRooted(SettingsPath);
 
-			Import = args.LastOrDefault().Match("import");
+			import = args.LastOrDefault().Match("import");
 
 			if (Directory.Exists(TempPath)) {
-				if (!Import) {
+				if (!import) {
 					try {
 						Directory.Delete(TempPath, true);
 						Directory.CreateDirectory(TempPath);
@@ -209,19 +208,23 @@ namespace AnalitF.Net.Client
 
 			Tasks.BaseUri = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
-			Tasks.ExtractPath = TempPath;
+			Tasks.ExtractPath = Path.Combine(TempPath, "update");
+			if (import && File.Exists(Path.Combine(TempPath, "update", "Updater.exe"))) {
+				Tasks.ExtractPath = TempPath;
+				Tasks.DeleteExtractPath = false;
+			}
 			Tasks.RootPath = FileHelper.MakeRooted(".");
 			return true;
 		}
 
-		private static void InitDb()
+		private void InitDb()
 		{
 			if (NHibernate == null) {
 				NHibernate = new Config.Initializers.NHibernate();
 				NHibernate.Init();
 			}
 
-			new SanityCheck(DataPath).Check(Import);
+			new SanityCheck(DataPath).Check(import);
 		}
 
 		public static void InitUi()
@@ -276,6 +279,11 @@ namespace AnalitF.Net.Client
 				return elements;
 			};
 			IsUiInitialized = true;
+		}
+
+		public void Dispose()
+		{
+			instance.Dispose();
 		}
 	}
 }

@@ -83,14 +83,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			invokePattern.Toggle();
 		}
 
-		private static void DoubleClickCell(AutomationElement prices, int row, int column)
-		{
-			var cell = ((GridPattern)prices.GetCurrentPattern(GridPattern.Pattern)).GetItem(row, column);
-			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
-			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
-			Mouse.DoubleClick(MouseButton.Left);
-		}
-
 		private void CheckViewModelLeak(params Type[] type)
 		{
 			//при обращение с объекту с помощью ui automation

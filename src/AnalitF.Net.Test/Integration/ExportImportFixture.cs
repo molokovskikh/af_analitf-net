@@ -58,6 +58,11 @@ namespace AnalitF.Net.Test.Integration
 
 			var importer = new Importer(localSession);
 			importer.Import(files);
+
+			var settings = localSession.Query<Settings>().First();
+			settings.UserName = "test";
+			settings.Password = "123";
+			localSession.Save(settings);
 		}
 
 		public static TestClient CreateUser(ISession session)

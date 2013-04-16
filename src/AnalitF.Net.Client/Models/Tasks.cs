@@ -65,6 +65,7 @@ namespace AnalitF.Net.Client.Models
 		public static string ArchiveFile;
 		public static string ExtractPath;
 		public static string RootPath;
+		public static bool DeleteExtractPath = true;
 
 		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
 		{
@@ -223,8 +224,14 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		private static UpdateResult ProcessUpdate(string archiveFile)
+		public static UpdateResult ProcessUpdate(string archiveFile)
 		{
+			if (Directory.Exists(ExtractPath))
+				Directory.Delete(ExtractPath, true);
+
+			if (!Directory.Exists(ExtractPath))
+				Directory.CreateDirectory(ExtractPath);
+
 			using (var zip = new ZipFile(archiveFile)) {
 				zip.ExtractAll(ExtractPath, ExtractExistingFileAction.OverwriteSilently);
 			}
@@ -233,7 +240,6 @@ namespace AnalitF.Net.Client.Models
 				return UpdateResult.UpdatePending;
 
 			Import(archiveFile);
-			Copy(Path.Combine(ExtractPath, "ads"), Path.Combine(RootPath, "ads"));
 			return UpdateResult.OK;
 		}
 
@@ -258,8 +264,10 @@ namespace AnalitF.Net.Client.Models
 			return UpdateResult.OK;
 		}
 
-		public static void Import(string archiveFile)
+		private static void Import(string archiveFile)
 		{
+			Copy(Path.Combine(ExtractPath, "ads"), Path.Combine(RootPath, "ads"));
+
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(archiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
@@ -268,6 +276,9 @@ namespace AnalitF.Net.Client.Models
 				importer.Import(data);
 				session.Flush();
 			}
+
+			if (DeleteExtractPath)
+				Directory.Delete(ExtractPath, true);
 		}
 
 		private static List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
