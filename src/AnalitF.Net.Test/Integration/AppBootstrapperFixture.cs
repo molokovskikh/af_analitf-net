@@ -22,6 +22,7 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
+			File.Delete("AnalitF.Net.Client.Test.data");
 			app = CreateBootstrapper();
 		}
 
@@ -34,8 +35,6 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Persist_shell()
 		{
-			File.Delete("AnalitF.Net.Client.data");
-
 			StartShell();
 			shell.ViewSettings.Add("test", new List<ColumnSettings> {
 				new ColumnSettings()

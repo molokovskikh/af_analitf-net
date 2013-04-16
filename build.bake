@@ -34,6 +34,17 @@ Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
+	Variables : {
+		@Production : {
+			@DeployRoot: """\\acdcserv.adc.analit.net\WWWRoot\TEST""",
+			@UpdateDeployRoot: """\\acdcserv\WWWRoot\TEST\var\update"""
+		},
+		@Test : {
+			@DeployRoot: """\\acdcserv.adc.analit.net\WWWRoot\TEST""",
+			@DeployAlias: "AnalitF.Net.Service.Test",
+			@UpdateDeployRoot: """\\acdcserv\WWWRoot\TEST\var-test\update"""
+		}
+	},
 	JenkinsProject: "AnalitF.Net"
 )
 
@@ -43,15 +54,11 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
-task @DeployService, [@SetupEnvironment, @DeployPipeline]
+task @DeployService, [@DeployPipeline]
 
-task @deploy, [@SetupEnvironment, @Tag, @DeployService, @DeployClient, @SendNotification]
+task @deploy, [@Tag, @DeployService, @DeployClient]
 
-task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @BuildSetup, @AfterBuildApp]
-
-task @SetupEnvironment:
-	unless Configuration.Maybe.env:
-		Globals.DeployRoot = """\\acdcserv.adc.analit.net\WWWRoot\TEST"""
+task @BuildClient, [@BeforeBuildApp, @BuildUpdatePackage, @CopyNativeLib, @BuildSetup, @AfterBuildApp]
 
 task @CopyNativeLib:
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
@@ -84,15 +91,17 @@ task @BeforeBuildUpdater:
 	Globals.Project = "Updater"
 
 task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
-	Cp("build/version.txt", "output/Updater/", true)
+	Cp("output/setup/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
+	Rm(FileSet("output/Updater/*.pdb"))
+
+task @DeployUpdatePackage, [@BuildUpdatePackage]:
+	dir = Globals.UpdateDeployRoot
+	Rm("$dir/*")
+	Cp("output/Updater/*", dir, true)
 
 task @Tag:
 	Bash("./scripts/changes.sh")
 
-task @SendNotification:
-	mail = MailMessage("r.kvasov@analit.net", "emk@analit.net, r.kvasov@analit.net")
-	mail.Subject = "Обновление демо версии"
-	mail.Body = """\\offdc\MMedia\Квасов Роман\setup.exe - установщик"""
-	mail.Attachments.Add(Attachment("output/changes.txt"))
-	SmtpClient().Send(mail)
+task @Debug:
+	print Globals.DeployRoot
