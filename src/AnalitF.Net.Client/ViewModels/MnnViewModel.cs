@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
+using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -11,12 +14,13 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private bool showWithoutOffers;
 		private List<Mnn> mnns;
-		private string filterText;
-		private string searchText;
 
 		public MnnViewModel()
 		{
 			DisplayName = "Поиск по МНН";
+
+			SearchText = new NotifyValue<string>();
+			ActiveSearchTerm = new NotifyValue<string>();
 
 			Update();
 
@@ -36,6 +40,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Mnn CurrentMnn { get; set; }
 
+		public NotifyValue<string> SearchText { get; set; }
+		public NotifyValue<string> ActiveSearchTerm { get; set; }
+
 		public bool ShowWithoutOffers
 		{
 			get { return showWithoutOffers; }
@@ -46,22 +53,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public string SearchText
-		{
-			get { return searchText; }
-			set
-			{
-				searchText = value;
-				NotifyOfPropertyChange("SearchText");
-			}
-		}
-
 		public void EnterMnn()
 		{
 			if (CurrentMnn == null)
 				return;
 
-			Shell.ActivateItem(new CatalogViewModel {
+			Shell.Navigate(new CatalogViewModel {
 				FiltredMnn = CurrentMnn
 			});
 		}
@@ -73,20 +70,33 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(m => m.HaveOffers);
 			}
 
-			if (!String.IsNullOrEmpty(filterText)) {
-				query = query.Where(m => m.Name.Contains(filterText));
+			if (!String.IsNullOrEmpty(ActiveSearchTerm.Value)) {
+				query = query.Where(m => m.Name.Contains(ActiveSearchTerm.Value));
 			}
 
 			Mnns = query.OrderBy(m => m.Name).ToList();
 		}
 
-		public void Search()
+		public IResult Search()
 		{
-			if (String.IsNullOrEmpty(SearchText))
-				return;
+			if (string.IsNullOrEmpty(SearchText.Value) || SearchText.Value.Length < 3)
+				return HandledResult.Skip();
 
-			filterText = SearchText;
+			ActiveSearchTerm.Value = SearchText.Value;
+			SearchText.Value = "";
 			Update();
+			return HandledResult.Handled();
+		}
+
+		public IResult ClearSearch()
+		{
+			if (String.IsNullOrEmpty(ActiveSearchTerm))
+				return HandledResult.Skip();
+
+			ActiveSearchTerm.Value = "";
+			SearchText.Value = "";
+			Update();
+			return HandledResult.Handled();
 		}
 	}
 }
