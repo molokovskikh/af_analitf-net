@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				var modelInspector = ((IModelInspector)simpleModelInspector);
 				return declared || (type.IsClass && type.BaseType != null
 					//если наследуемся от класса который не маплен то это простое наследование
-					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)))
+					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)) || type.BaseType == typeof(BaseStatelessObject))
 					&& modelInspector.IsEntity(type);
 			});
 
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;
-			var types = assembly.GetTypes().Where(t => t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));
+			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));
 			var mapping = mapper.CompileMappingFor(types);
 			if (debug)
 				Console.WriteLine(mapping.AsString());

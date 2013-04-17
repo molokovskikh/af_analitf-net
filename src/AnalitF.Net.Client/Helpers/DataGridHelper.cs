@@ -14,10 +14,10 @@ namespace AnalitF.Net.Client.Helpers
 			var scrollViewer = grid.DeepChildren().OfType<ScrollViewer>().FirstOrDefault();
 			if (scrollViewer == null)
 				return;
-			var currentItem = grid.CurrentItem;
-			if (currentItem == null)
+			var selected = grid.SelectedItem;
+			if (selected == null)
 				return;
-			var container = grid.ItemContainerGenerator.ContainerFromItem(currentItem);
+			var container = grid.ItemContainerGenerator.ContainerFromItem(selected);
 			if (container == null)
 				return;
 			var index = grid.ItemContainerGenerator.IndexFromContainer(container);

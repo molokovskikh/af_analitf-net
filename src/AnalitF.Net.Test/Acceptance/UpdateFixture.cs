@@ -63,6 +63,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitForElement("CatalogNames");
 		}
 
+		[Test(Description = "После применения\\отмены фильтров в таблице выбранная строка должна быть по центру таблицы")]
+		public void Centrify_on_selected_item()
+		{
+		}
+
 		private void SkipUpdateDialog()
 		{
 			Timeout = TimeSpan.FromSeconds(50);

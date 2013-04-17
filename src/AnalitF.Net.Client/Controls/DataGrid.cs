@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -78,6 +80,30 @@ namespace AnalitF.Net.Client.Controls
 			else {
 				e.Handled = false;
 				e.ContinueRouting = true;
+			}
+		}
+
+		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+		{
+			base.OnItemsSourceChanged(oldValue, newValue);
+
+
+			if (SelectedItem != null) {
+				ScrollIntoView(SelectedItem);
+				//скорбная песнь, для того что бы вычислить вертикальное смещение
+				//что бы отобразить строку по центру используется ViewportHeight
+				//но при изменение ItemsSource меняется и ViewportHeight
+				//но ViewportHeight будет пересчитан только когда будет обновлен layout
+				//контрола (ArrangeOverride)
+				//по этому мы говорим планировщику что нужно выполнить Centrify после того как он поделает все дела
+				//это приводит к неприятному эффекту "дергания" когда таблица рисуется в одном положении
+				//а затем почти мгновенно в другом
+				Dispatcher.BeginInvoke(DispatcherPriority.Background,
+					new DispatcherOperationCallback(a => {
+						Helpers.DataGridHelper.Centrify(this);
+						return null;
+					}),
+					this);
 			}
 		}
 	}

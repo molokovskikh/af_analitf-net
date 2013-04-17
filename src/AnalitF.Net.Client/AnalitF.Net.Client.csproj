@@ -167,6 +167,7 @@
     <Compile Include="Helpers\XamlExtentions.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\BaseOffer.cs" />
+    <Compile Include="Models\BaseStatelessObject.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ColumnSettings.cs" />

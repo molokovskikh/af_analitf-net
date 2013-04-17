@@ -1,8 +1,8 @@
 ﻿namespace AnalitF.Net.Client.Models
 {
-	public class Mnn
+	public class Mnn : BaseStatelessObject
 	{
-		public virtual uint Id { get; set; }
+		public override uint Id { get; set; }
 
 		public virtual string Name { get; set; }
 

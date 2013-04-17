@@ -18,7 +18,8 @@
 			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}" binders:SearchBinder.Grid="Mnns"></TextBox>
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
 		</StackPanel>
-		<c:DataGrid Grid.Row="1" x:Name="Mnns" c:SearchableDataGridColumn.SearchTerm="{Binding SearchText}">
+		<c:DataGrid Grid.Row="1" x:Name="Mnns"
+			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
 					CellStyle="{StaticResource ResourceKey=HaveOffers}"

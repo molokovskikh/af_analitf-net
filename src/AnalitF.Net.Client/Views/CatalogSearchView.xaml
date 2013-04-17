@@ -18,13 +18,14 @@
 			<CheckBox x:Name="QuickSearch_IsEnabled" Style="{StaticResource FilterCheckBoxSmall}">Искать в начале слова</CheckBox>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Catalogs" CurrentItemStub="{Binding CurrentCatalog}" SelectedValuePath="Id"
+		<c:DataGrid Grid.Row="1" x:Name="Catalogs"
+			CurrentItemStub="{Binding CurrentCatalog}"
 			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}">
 			<DataGrid.Columns>
-				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Наименование"
+				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Width="*" Header="Наименование"
 					Binding="{Binding Name}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
-				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=HaveOffers}" Width="*" Header="Формы выпуска"
+				<c:SearchableDataGridColumn CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Width="*" Header="Формы выпуска"
 					Binding="{Binding Form}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 			</DataGrid.Columns>

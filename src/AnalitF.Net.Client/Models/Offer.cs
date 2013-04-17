@@ -290,5 +290,21 @@ namespace AnalitF.Net.Client.Models
 			get { return OrderCount.GetValueOrDefault(); }
 			set { OrderCount = value; }
 		}
+
+		//перегрузка Equals и GetHashCode
+		//нужна что бы DataGrid сохранял выделенную позицию после обновления данных
+		public override bool Equals(object obj)
+		{
+			var that = obj as Offer;
+			if (that == null)
+				return false;
+
+			return Id.Equals(that.Id);
+		}
+
+		public override int GetHashCode()
+		{
+			return Id.GetHashCode();
+		}
 	}
 }

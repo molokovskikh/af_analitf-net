@@ -3,11 +3,11 @@ using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class Reject : INotifyPropertyChanged
+	public class Reject : BaseStatelessObject, INotifyPropertyChanged
 	{
 		private bool marked;
 
-		public virtual uint Id { get; set; }
+		public override uint Id { get; set; }
 
 		public virtual string Product { get; set; }
 
