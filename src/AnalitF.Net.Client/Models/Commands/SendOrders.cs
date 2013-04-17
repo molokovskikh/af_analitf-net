@@ -9,7 +9,12 @@ namespace AnalitF.Net.Client.Models.Commands
 {
 	public class SendOrders : RemoteCommand
 	{
-		public Address Address;
+		private Address Address;
+
+		public SendOrders(Address address)
+		{
+			Address = address;
+		}
 
 		protected override UpdateResult Execute()
 		{

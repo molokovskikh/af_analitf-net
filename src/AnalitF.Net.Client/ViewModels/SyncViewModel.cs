@@ -2,28 +2,11 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using AnalitF.Net.Client.Models;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class Progress
-	{
-		public string Stage { get; set; }
-		public int Current { get; set; }
-		public int Total { get; set; }
-
-		public Progress()
-		{
-		}
-
-		public Progress(string stage, int current, int total)
-		{
-			Stage = stage;
-			Current = current;
-			Total = total;
-		}
-	}
-
 	public class SyncViewModel : WaitViewModel
 	{
 		private TimeSpan _time;

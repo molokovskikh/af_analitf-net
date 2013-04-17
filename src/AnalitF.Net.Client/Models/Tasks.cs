@@ -3,27 +3,18 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Reactive.Subjects;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
-using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
 using NHibernate.Cfg;
-using NHibernate.Linq;
 using NHibernate.Proxy;
-using NHibernate.Tool.hbm2ddl;
 using Newtonsoft.Json.Serialization;
 using log4net;
-using log4net.Config;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -36,22 +27,6 @@ namespace AnalitF.Net.Client.Models
 			else
 				return base.GetSerializableMembers(objectType);
 		}
-	}
-
-	public class RequestException : Exception
-	{
-		public RequestException(string message, HttpStatusCode statusCode) : base(message)
-		{
-			StatusCode = statusCode;
-		}
-
-		public HttpStatusCode StatusCode { get; set; }
-	}
-
-	public enum UpdateResult
-	{
-		OK,
-		UpdatePending,
 	}
 
 	public class Tasks
@@ -67,137 +42,10 @@ namespace AnalitF.Net.Client.Models
 		public static string RootPath;
 		public static bool DeleteExtractPath = true;
 
-		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress)
+		public static UpdateResult UpdateTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
 		{
-			return RemoteTask(credentials, cancellation, progress, client => {
-				var currentUri = new Uri(BaseUri, new Uri("Main/?reset=true", UriKind.Relative));
-				var done = false;
-				HttpResponseMessage response = null;
-
-				SendPrices(client, cancellation);
-				var sendLogsTask = SendLogs(client, cancellation);
-
-				while (!done) {
-					var request = client.GetAsync(currentUri, HttpCompletionOption.ResponseHeadersRead, cancellation);
-					response = request.Result;
-					currentUri = new Uri(BaseUri, "Main");
-					if (response.StatusCode != HttpStatusCode.OK
-						&& response.StatusCode != HttpStatusCode.Accepted)
-						throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
-								response.StatusCode,
-								response.Content.ReadAsStringAsync().Result),
-							response.StatusCode);
-					progress.OnNext(new Progress("Подготовка данных", 0, 0));
-					done = response.StatusCode == HttpStatusCode.OK;
-					if (!done) {
-						cancellation.WaitHandle.WaitOne(TimeSpan.FromSeconds(15));
-						cancellation.ThrowIfCancellationRequested();
-					}
-				}
-
-				progress.OnNext(new Progress("Подготовка данных", 100, 0));
-				progress.OnNext(new Progress("Загрузка данных", 0, 33));
-				using (var file = File.Create(ArchiveFile)) {
-					response.Content.ReadAsStreamAsync().Result.CopyTo(file);
-				}
-				progress.OnNext(new Progress("Загрузка данных", 100, 33));
-				progress.OnNext(new Progress("Импорт данных", 0, 66));
-				var result = ProcessUpdate(ArchiveFile);
-				progress.OnNext(new Progress("Импорт данных", 100, 100));
-
-				Log(sendLogsTask);
-
-				return result;
-			});
-		}
-
-		private static void Log(Task<HttpResponseMessage> task)
-		{
-			if (task == null)
-				return;
-
-			if (task.IsFaulted || (task.IsCompleted && !IsOkStatusCode(task.Result.StatusCode))) {
-				if (task.Exception != null)
-					log.Error("Ошибка при отправке логов {0}", task.Exception);
-				else
-					log.ErrorFormat("Ошибка при отправке логов {0}", task.Result);
-			}
-		}
-
-		private static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
-		{
-			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
-		}
-
-		public static Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
-		{
-			var file = Path.GetTempFileName();
-			var cleaner = new FileCleaner();
-			cleaner.Watch(file);
-
-			LogManager.ResetConfiguration();
-			try
-			{
-				var logs = Directory.GetFiles(RootPath, "*.log")
-					.Where(f => new FileInfo(f).Length > 0)
-					.ToArray();
-
-				if (logs.Length == 0)
-					return null;
-
-				using(var zip = new ZipFile()) {
-					foreach (var logFile in logs) {
-						zip.AddFile(logFile);
-					}
-					zip.Save(file);
-				}
-
-				var logsWatch = new FileCleaner();
-				logsWatch.Watch(logs);
-				logsWatch.Dispose();
-			}
-			finally {
-				XmlConfigurator.Configure();
-			}
-
-			var uri = new Uri(BaseUri, "Logs");
-			var stream = File.OpenRead(file);
-			var post = client.PostAsync(uri, new StreamContent(stream), token);
-			post.ContinueWith(t => {
-				stream.Dispose();
-				cleaner.Dispose();
-			});
-			return post;
-		}
-
-		private static void SendPrices(HttpClient client, CancellationToken token)
-		{
-			Price[] prices;
-			using(var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
-				var settings = session.Query<Settings>().First();
-				var lastUpdate = settings.LastUpdate;
-				prices = session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
-			}
-
-			var clientPrices = prices.Select(p => new { p.Id.PriceId, p.Id.RegionId, p.Active }).ToArray();
-
-			var formatter = new JsonMediaTypeFormatter {
-				SerializerSettings = { ContractResolver = new NHibernateResolver() }
-			};
-			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientPrices), formatter, token).Result;
-
-			if (response.StatusCode != HttpStatusCode.OK)
-				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
-						response.StatusCode,
-						response.Content.ReadAsStringAsync().Result),
-					response.StatusCode);
-		}
-
-		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress, Address address)
-		{
-			var command = new SendOrders {
+			var command = new UpdateCommand(ArchiveFile, ExtractPath, RootPath) {
 				BaseUri = BaseUri,
-				Address = address,
 				Credentials = credentials,
 				Token = token,
 				Progress = progress,
@@ -205,42 +53,15 @@ namespace AnalitF.Net.Client.Models
 			return command.Run();
 		}
 
-		public static UpdateResult RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
+		public static UpdateResult SendOrdersTask(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress, Address address)
 		{
-			var version = typeof(Tasks).Assembly.GetName().Version;
-
-			progress.OnNext(new Progress("Соединение", 0, 0));
-			var handler = new HttpClientHandler {
+			var command = new SendOrders(address) {
+				BaseUri = BaseUri,
 				Credentials = credentials,
-				PreAuthenticate = true,
+				Token = token,
+				Progress = progress,
 			};
-			if (handler.Credentials == null)
-				handler.UseDefaultCredentials = true;
-			using (handler) {
-				using (var client = new HttpClient(handler)) {
-					client.DefaultRequestHeaders.Add("Version", version.ToString());
-					return action(client);
-				}
-			}
-		}
-
-		public static UpdateResult ProcessUpdate(string archiveFile)
-		{
-			if (Directory.Exists(ExtractPath))
-				Directory.Delete(ExtractPath, true);
-
-			if (!Directory.Exists(ExtractPath))
-				Directory.CreateDirectory(ExtractPath);
-
-			using (var zip = new ZipFile(archiveFile)) {
-				zip.ExtractAll(ExtractPath, ExtractExistingFileAction.OverwriteSilently);
-			}
-
-			if (File.Exists(Path.Combine(ExtractPath, "update", "Updater.exe")))
-				return UpdateResult.UpdatePending;
-
-			Import(archiveFile);
-			return UpdateResult.OK;
+			return command.Run();
 		}
 
 		private static void Copy(string source, string destination)
@@ -258,22 +79,23 @@ namespace AnalitF.Net.Client.Models
 
 		public static UpdateResult Import(ICredentials credentials, CancellationToken token, BehaviorSubject<Progress> progress)
 		{
-			progress.OnNext(new Progress("Импорт данных", 0, 66));
-			Import(ArchiveFile);
-			progress.OnNext(new Progress("Импорт данных", 100, 100));
+			var reporter = new ProgressReporter(progress);
+			reporter.Stage("Импорт данных");
+			Import(ArchiveFile, reporter);
 			return UpdateResult.OK;
 		}
 
-		private static void Import(string archiveFile)
+		public static void Import(string archiveFile, ProgressReporter reporter)
 		{
 			Copy(Path.Combine(ExtractPath, "ads"), Path.Combine(RootPath, "ads"));
 
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(archiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
+			reporter.Weight(data.Count);
 			using (var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
 				var importer = new Importer(session);
-				importer.Import(data);
+				importer.Import(data, reporter);
 				session.Flush();
 			}
 

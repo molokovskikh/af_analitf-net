@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Models;
 using Common.Tools;
 using NHibernate;
@@ -57,7 +59,7 @@ namespace AnalitF.Net.Test.Integration
 			var files = exporter.Export();
 
 			var importer = new Importer(localSession);
-			importer.Import(files);
+			importer.Import(files, new ProgressReporter());
 
 			var settings = localSession.Query<Settings>().First();
 			settings.UserName = "test";

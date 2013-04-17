@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Models
 			this.session = session;
 		}
 
-		public void Import(List<System.Tuple<string, string[]>> tables)
+		public void Import(List<System.Tuple<string, string[]>> tables, ProgressReporter reporter)
 		{
 			foreach (var table in tables) {
 				try {
@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.Models
 					var dbCommand = session.Connection.CreateCommand();
 					dbCommand.CommandText = sql;
 					dbCommand.ExecuteNonQuery();
+					reporter.Progress(1);
 				}
 				catch (Exception e) {
 					throw new Exception(String.Format("Не могу импортировать {0}", table), e);

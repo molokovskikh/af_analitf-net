@@ -155,6 +155,7 @@
     <Compile Include="Unit\OfferSortFixture.cs" />
     <Compile Include="Unit\OrderFixture.cs" />
     <Compile Include="Unit\PriceFixture.cs" />
+    <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />

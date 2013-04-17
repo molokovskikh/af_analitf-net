@@ -175,6 +175,7 @@
     <Compile Include="Models\Commands\ReorderCommand.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />
     <Compile Include="Models\Commands\UnfreezeCommand.cs" />
+    <Compile Include="Models\Commands\UpdateCommand.cs" />
     <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\Importer.cs" />
@@ -194,6 +195,7 @@
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />
     <Compile Include="Models\Price.cs" />
+    <Compile Include="Models\ProgressReporter.cs" />
     <Compile Include="Models\Reject.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
