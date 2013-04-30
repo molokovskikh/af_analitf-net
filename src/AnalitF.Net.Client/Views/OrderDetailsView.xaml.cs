@@ -10,7 +10,6 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			ContextMenuBehavior.Attach(Lines);
 			DataGridHelper.CalculateColumnWidths(Lines);
 			EditBehavior.Attach(Lines);
 		}

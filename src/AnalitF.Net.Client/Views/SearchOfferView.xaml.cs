@@ -11,7 +11,6 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			EditBehavior.Attach(Offers);
-			ContextMenuBehavior.Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
 		}
 	}

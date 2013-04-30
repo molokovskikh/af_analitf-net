@@ -19,7 +19,6 @@ namespace AnalitF.Net.Client.Views
 			};
 
 			EditBehavior.Attach(grid);
-			ContextMenuBehavior.Attach(grid);
 
 			Offers.TextInput += (sender, args) => {
 				args.Handled = true;

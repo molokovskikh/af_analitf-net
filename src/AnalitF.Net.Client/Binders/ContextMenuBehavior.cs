@@ -15,11 +15,46 @@ namespace AnalitF.Net.Client.Binders
 			DependencyProperty.RegisterAttached("PersistColumnSettings",
 				typeof(bool),
 				typeof(ContextMenuBehavior),
-				new PropertyMetadata(false));
+				new PropertyMetadata(false, PropertyChangedCallback));
 
-		public static void Attach(DataGrid grid)
+		public static bool GetPersistColumnSettings(DependencyObject o)
 		{
-			grid.SetValue(PersistColumnSettingsProperty, true);
+			return (bool)o.GetValue(PersistColumnSettingsProperty);
+		}
+
+		public static void SetPersistColumnSettings(DependencyObject o, bool value)
+		{
+			o.SetValue(PersistColumnSettingsProperty, value);
+		}
+
+		private static void PropertyChangedCallback(DependencyObject o, DependencyPropertyChangedEventArgs a)
+		{
+			var grid = (DataGrid)o;
+			if ((bool)a.NewValue) {
+				Attach(grid);
+			}
+			else {
+				Detach(grid);
+			}
+		}
+
+		private static void Detach(DataGrid grid)
+		{
+			grid.ContextMenu = null;
+		}
+
+		private static void Attach(DataGrid grid)
+		{
+			if (!grid.IsInitialized) {
+				EventHandler loaded = null;
+				loaded = (sender, args) => {
+					var dataGrid = (DataGrid)sender;
+					dataGrid.Initialized -= loaded;
+					Attach(dataGrid);
+				};
+				grid.Initialized += loaded;
+				return;
+			}
 
 			var contextMenu = new ContextMenu();
 			contextMenu.Items.Add(new MenuItem {

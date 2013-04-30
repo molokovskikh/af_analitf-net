@@ -37,17 +37,18 @@
 
 		<c:DataGrid Grid.Row="1" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
 			Visibility="{Binding IsCurrentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}"
-			ShowAddressColumn="{Binding AddressSelector.All.Value}">
+			ShowAddressColumn="{Binding AddressSelector.All.Value}"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.Address.Name}"
 					Visibility="Collapsed" />
 				<c:DataGridTextColumnEx Width="225*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="140*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="45*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="61*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн." Binding="{Binding Period}"
 					TextAlignment="Center" />
 
@@ -58,9 +59,9 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}"
 					TextAlignment="Right" />
@@ -68,7 +69,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="67*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Цена" Binding="{Binding Cost}"
 					TextAlignment="Right"
@@ -90,15 +91,16 @@
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
 		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
-			Visibility="{Binding IsSentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}">
+			Visibility="{Binding IsSentSelected, Converter={StaticResource BooleanToVisibilityConverterResource}}"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="255*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<DataGridTextColumn Width="140*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}"
 					TextAlignment="Right" />
 				<DataGridTextColumn Width="45*" Header="Примечание" Binding="{Binding Note}" />
-				<DataGridTextColumn Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="61*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн." Binding="{Binding Period}"
 					TextAlignment="Center" />
 
@@ -109,9 +111,9 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}"
 					TextAlignment="Right" />
@@ -119,7 +121,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="67*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Цена" Binding="{Binding Cost}"
 					TextAlignment="Right"

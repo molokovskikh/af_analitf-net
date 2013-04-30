@@ -8,7 +8,6 @@ namespace AnalitF.Net.Client.Views
 		public PriceView()
 		{
 			InitializeComponent();
-			ContextMenuBehavior.Attach(Prices);
 		}
 	}
 }

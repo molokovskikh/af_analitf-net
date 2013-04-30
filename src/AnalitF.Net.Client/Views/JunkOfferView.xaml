@@ -23,14 +23,17 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="0" CellStyle="{StaticResource ResourceKey=VitallyImportant}" CurrentItemStub="{Binding CurrentOffer}">
+		<c:DataGrid x:Name="Offers" Grid.Row="0"
+			CellStyle="{StaticResource ResourceKey=VitallyImportant}"
+			CurrentItemStub="{Binding CurrentOffer}"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="70*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="37*" Header="Упаковка" Binding="{Binding Volume}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="37*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="Auto" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="92*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
 				<c:DataGridTextColumnEx Width="73*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
@@ -43,7 +46,7 @@
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="63*" CellStyle="{StaticResource ResourceKey=Junk}" FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="50*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="37*" Header="Остаток" Binding="{Binding Quantity}" TextAlignment="Right" />

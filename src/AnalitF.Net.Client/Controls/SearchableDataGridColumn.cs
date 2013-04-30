@@ -38,13 +38,15 @@ namespace AnalitF.Net.Client.Controls
 			element.Inlines.Clear();
 
 			if (index > 0)
-				element.Inlines.Add(new Run(text.Slice(0, index - 1)));
-			element.Inlines.Add(new Run(text.Slice(index, index + term.Length - 1)) {
+				element.Inlines.Add(new Run(text.Substring(0, index)));
+
+			element.Inlines.Add(new Run(text.Substring(index, term.Length)) {
 				Style = HighlightStyle
 			});
-			var end = index + term.Length + 1;
-			if (end < text.Length - 1)
-				element.Inlines.Add(new Run(text.Slice(end, -1)));
+
+			var left = text.Length - term.Length - index;
+			if (left > 0)
+				element.Inlines.Add(new Run(text.Substring(index + term.Length, left)));
 		}
 
 		public static string GetSearchTerm(DependencyObject d)

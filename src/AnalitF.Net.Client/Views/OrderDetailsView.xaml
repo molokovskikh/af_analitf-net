@@ -65,11 +65,12 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
-			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]">
+			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="Auto" Header="Кат.производитель"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="Кат.производитель"
 					Visibility="Collapsed"
 					Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="65*" Header="Срок годн."
@@ -88,7 +89,7 @@
 				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
 					Binding="{Binding SupplierMarkup}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="Auto" Header="НДС" Binding="{Binding NDS}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
 					Binding="{Binding Cost}"

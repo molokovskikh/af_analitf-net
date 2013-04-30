@@ -28,9 +28,11 @@
 			</TextBlock>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices" CellStyle="{StaticResource Price}"
+		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices"
+			CellStyle="{StaticResource Price}"
 			CurrentItemStub="{Binding CurrentPrice}"
-			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}">
+			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}" Header="Прайс-лист"
 					Binding="{Binding Name}"
