@@ -233,6 +233,7 @@
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
+    <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />

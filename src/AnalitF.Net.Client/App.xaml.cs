@@ -41,6 +41,7 @@ namespace AnalitF.Net.Client
 			resources.Add("BaseOrderLine", style);
 
 			SimpleStyle("CatalogHaveOffers", "HaveOffers", Colors.Silver, false, VitallyImportant());
+			SimpleStyle("MnnHaveOffers", "HaveOffers", Colors.Silver, false);
 
 			style = new Style(typeof(DataGridCell), baseStyle);
 			AddTriggers(style, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66), activeColor, inactiveColor);

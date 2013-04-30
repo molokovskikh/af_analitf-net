@@ -62,6 +62,11 @@ namespace AnalitF.Net.Client.ViewModels
 			if (showLeaders)
 				currentFilter = filters[2];
 
+			OnCloseDisposable.Add(SearchText.Changes()
+				.Throttle(Consts.SearchTimeout, Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => Search()));
+
 			this.ObservableForProperty(m => m.CurrentFilter)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
 				.Subscribe(e => Update());

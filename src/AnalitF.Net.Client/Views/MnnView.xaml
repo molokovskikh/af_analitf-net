@@ -14,15 +14,18 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Style="{StaticResource ResourceKey=FilterPanel}">
-			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}" binders:SearchBinder.Grid="Mnns"></TextBox>
-			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource ResourceKey=FilterCheckBox}">Отображать весь каталог</CheckBox>
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<TextBox x:Name="SearchText"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+				Style="{StaticResource SearchText}"
+				binders:SearchBinder.Grid="Mnns" />
+			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource FilterCheckBox}">Отображать весь каталог</CheckBox>
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" x:Name="Mnns"
-			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm.Value}">
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
-					CellStyle="{StaticResource ResourceKey=HaveOffers}"
+					CellStyle="{StaticResource MnnHaveOffers}"
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					Width="*" Header="МНН" Binding="{Binding Name}" />
 			</DataGrid.Columns>
