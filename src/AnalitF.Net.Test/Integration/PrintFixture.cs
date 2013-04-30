@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -65,6 +66,17 @@ namespace AnalitF.Net.Test.Integration
 			var paginator = new WrapDocumentPaginator(((IDocumentPaginatorSource)result.Doc).DocumentPaginator);
 			paginator.SaveToXps(file);
 			Process.Start(file);
+		}
+
+		public static void SaveToPng(FlowDocument doc)
+		{
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			//paginator.PageSize = size;
+			var count = paginator.PageCount;
+			for(var i = 0; i <= count; i++) {
+				var page = paginator.GetPage(i);
+				SaveToPng(page.Visual, i + ".png", page.Size);
+			}
 		}
 
 		public static void SaveToPng(UIElement visual, string file, Size size)

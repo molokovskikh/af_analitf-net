@@ -38,9 +38,19 @@ namespace AnalitF.Net.Client.Models
 
 			new SanityCheck(AppBootstrapper.DataPath).Check();
 
-			var settings = session.Query<Settings>().First();
-			settings.LastUpdate = DateTime.Now;
-			settings.ApplyChanges(session);
+			using (var transaction = session.BeginTransaction()) {
+				var settings = session.Query<Settings>().First();
+				var markups = session.Query<MarkupConfig>().ToList();
+
+				var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
+				foreach (var waybill in newWaybills) {
+					waybill.Calculate(settings, markups, true);
+				}
+
+				settings.LastUpdate = DateTime.Now;
+				settings.ApplyChanges(session);
+				transaction.Commit();
+			}
 		}
 	}
 }

@@ -35,6 +35,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal Begin { get; set; }
 		public virtual decimal End { get; set; }
 		public virtual decimal Markup { get; set; }
+		public virtual decimal MaxMarkup { get; set; }
+		public virtual decimal MaxSupplierMarkup { get; set; }
 		public virtual MarkupType Type { get; set; }
 
 		[Ignore]
@@ -82,11 +84,19 @@ namespace AnalitF.Net.Client.Models
 				return 0;
 
 			var type = currentOffer.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			var cost = currentOffer.Cost;
 
+			var config = Calculate(markups, type, cost);
+			if (config == null)
+				return 0;
+			return config.Markup;
+		}
+
+		public static MarkupConfig Calculate(IEnumerable<MarkupConfig> markups, MarkupType type, decimal cost)
+		{
 			return markups
 				.Where(m => m.Type == type)
-				.Where(m => currentOffer.Cost > m.Begin && currentOffer.Cost <= m.End)
-				.Select(m => m.Markup)
+				.Where(m => cost > m.Begin && cost <= m.End)
 				.FirstOrDefault();
 		}
 

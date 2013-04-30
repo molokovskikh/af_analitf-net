@@ -92,6 +92,22 @@
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Настройка стелажной карты" Name="RackingMapSettings">
+				<StackPanel>
+					<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="RackingMapSizes" DisplayMemberPath="Name" />
+					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted">Удалять непечатаемые элементы</CheckBox>
+					<Label>Печатаемые элементы стелажной карты</Label>
+					<CheckBox x:Name="Settings_RackingMap_PrintProduct">Наименование</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintProducer">Производитель</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintSerialNumber">Серия товара</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintPeriod">Срок годности</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintQuantity">Количество</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintSupplier">Поставщик</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintCertificates">Номер сертификата</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintDocumentDate">Дата поступления</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintRetailCost">Цена</CheckBox>
+				</StackPanel>
+			</TabItem>
 		</TabControl>
 		<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

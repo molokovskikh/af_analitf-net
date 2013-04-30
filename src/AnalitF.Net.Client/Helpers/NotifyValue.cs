@@ -80,5 +80,10 @@ namespace AnalitF.Net.Client.Helpers
 					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))
 				.Switch();
 		}
+
+		public IObservable<object> Changes()
+		{
+			return Observable.Empty<object>();
+		}
 	}
 }

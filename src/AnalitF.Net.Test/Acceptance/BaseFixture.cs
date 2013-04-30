@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected string Exe;
 		protected StreamWriter Writer;
 
-		protected Action<AutomationElement> DialogHandler;
+		protected Action<AutomationElement> WindowHandler;
 
 		[SetUp]
 		public void Setup()
@@ -114,22 +114,23 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
+			Console.WriteLine(sender);
 			if (MainWindow == null) {
 				MainWindow = AutomationElement.FromHandle(Process.MainWindowHandle);
 			}
-			else if (DialogHandler != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
-				DialogHandler(sender as AutomationElement);
+			else if (WindowHandler != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
+				WindowHandler(sender as AutomationElement);
 			}
 		}
 
-		public static void Dump(AutomationElementCollection elements)
+		protected static void Dump(AutomationElementCollection elements)
 		{
 			foreach (var element in elements.Cast<AutomationElement>()) {
 				Dump(element);
 			}
 		}
 
-		private static void Dump(AutomationElement element)
+		protected static void Dump(AutomationElement element)
 		{
 			if (element == null)
 				return;
@@ -244,6 +245,13 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
 			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
 			Mouse.Click(MouseButton.Left);
+		}
+
+		protected static void RightClick(AutomationElement element)
+		{
+			var rect = (Rect)element.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
+			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 10, (int)rect.Y + 10));
+			Mouse.DoubleClick(MouseButton.Right);
 		}
 	}
 }

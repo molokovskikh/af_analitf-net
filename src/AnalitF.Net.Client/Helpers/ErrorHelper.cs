@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 
 namespace AnalitF.Net.Client.Helpers
 {

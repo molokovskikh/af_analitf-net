@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;

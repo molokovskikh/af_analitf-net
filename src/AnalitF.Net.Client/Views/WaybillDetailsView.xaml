@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.WaybillDetailsView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<Button Name="PrintRackingMap" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Стелажная карта</Button>
+			<Button Name="ExportRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Реестр в Excel</Button>
+			<Button Name="ExportWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Накладная в Excel</Button>
+		</StackPanel>
+
+		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto"></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto"></RowDefinition>
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Накладная №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Waybill_Id" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">№ поставщика:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Waybill_ProviderDocumentId" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="Waybill_DocumentDate" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Count" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_Supplier_FullName" FontWeight="Bold"></Label>
+			</Grid>
+		</StackPanel>
+
+		<c:DataGrid Grid.Row="2" x:Name="Lines"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Наименование"
+					Binding="{Binding Product}" />
+				<DataGridTextColumn Width="*" Header="Производитель"
+					Binding="{Binding Producer}" />
+				<DataGridTextColumn Width="*" Header="Страна"
+					Binding="{Binding Country}" />
+				<DataGridTextColumn Width="*" Header="Печатать" />
+				<DataGridTextColumn Width="*" Header="Срок годности"
+					Binding="{Binding Period}" />
+				<DataGridTextColumn Width="*" Header="Серия товара"
+					Binding="{Binding SerialNumber}" />
+				<DataGridTextColumn Header="Сертификаты"
+					Width="SizeToHeader" />
+				<DataGridTextColumn Header="Получить"
+					Width="SizeToHeader" />
+				<DataGridTextColumn Width="*" Header="Номер сертификата"
+					Binding="{Binding Certificates}" />
+				<DataGridTextColumn Width="*" Header="Цена производителя без НДС"
+					Binding="{Binding ProducerCost}" />
+				<DataGridTextColumn Width="*" Header="Цена ГР"
+					Binding="{Binding RegistryCost}" />
+				<DataGridTextColumn Width="*" Header="Торговая наценка оптовика"
+					Binding="{Binding SupplierPriceMarkup}" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика без НДС"
+					Binding="{Binding SupplierCostWithoutNds}" />
+				<DataGridTextColumn Header="НДС"
+					Binding="{Binding NDS}"
+					Width="SizeToHeader" />
+				<DataGridTextColumn Width="*" Header="Цена поставщика с НДС"
+					Binding="{Binding SupplierCost}" />
+				<DataGridTextColumn Width="*" Header="Макс. розничная наценка"
+					Binding="{Binding MaxRetailMarkup}" />
+				<DataGridTextColumn Width="*" Header="Розничная наценка"
+					Binding="{Binding RetailMarkup}" />
+				<DataGridTextColumn Width="*" Header="Реальная наценка"
+					Binding="{Binding RealRetailMarkup}" />
+				<DataGridTextColumn Width="*" Header="Розничная цена"
+					Binding="{Binding RetailCost}" />
+				<DataGridTextColumn Width="*" Header="Заказ"
+					Binding="{Binding Quantity}" />
+				<DataGridTextColumn Width="*" Header="Розничная сумма"
+					Binding="{Binding RetailSum}" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+	</Grid>
+</UserControl>

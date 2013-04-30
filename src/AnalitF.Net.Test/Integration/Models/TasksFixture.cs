@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Ionic.Zip;
@@ -18,6 +19,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.Documents;
 using Test.Support.log4net;
 using log4net.Config;
 
@@ -192,8 +194,7 @@ namespace AnalitF.Net.Test.Integration.Models
 				localSession.Save(order);
 			}
 
-			task.Start();
-			task.Wait();
+			Update();
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
 			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
@@ -208,6 +209,66 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(item.CodeFirmCr, Is.EqualTo(offer.ProducerId));
 			Assert.That(item.SynonymCode, Is.EqualTo(offer.ProductSynonymId));
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(offer.ProducerSynonymId));
+		}
+
+		[Test]
+		public void Import_waybill()
+		{
+			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
+			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
+			var waybill = new TestWaybill(log);
+			waybill.Lines.Add(new TestWaybillLine(waybill) {
+				Product = "Азарга капли глазные 5мл Фл.-кап. Х1",
+				Certificates = "РОСС BE.ФМ11.Д06711",
+				CertificatesDate = "01.16.2013",
+				Period = "30.09.2014",
+				Producer = "Алкон-Куврер н.в. с.а.",
+				Country = "БЕЛЬГИЯ",
+				SupplierCostWithoutNDS = 536.17m,
+				SupplierCost = 589.79m,
+				Quantity = 1,
+				SerialNumber = "A 565",
+				Amount = 589.79m,
+				NDS = 10,
+				NDSAmount = 53.62m,
+			});
+			waybill.Lines.Add(new TestWaybillLine(waybill) {
+				Product = "Доксазозин 4мг таб. Х30 (R)",
+				Certificates = "РОСС RU.ФМ08.Д38737",
+				Period = "01.05.2017",
+				Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+				ProducerCost = 213.18m,
+				RegistryCost = 382.89m,
+				SupplierPriceMarkup = -5.746m,
+				SupplierCostWithoutNDS = 200.93m,
+				SupplierCost = 221.03m,
+				Quantity = 2,
+				VitallyImportant = true,
+				NDS = 10,
+				SerialNumber = "21012",
+				Amount = 442.05m,
+				NDSAmount = 40.19m,
+				BillOfEntryNumber = "10609010/101209/0004305/1",
+				EAN13 = "4605635002748",
+			});
+			for(var i = 0; i < 10; i++)
+				waybill.Lines.Add(new TestWaybillLine(waybill) {
+					Product = "Доксазозин 4мг таб. Х30 (R)",
+					Certificates = "РОСС RU.ФМ08.Д38737",
+					Period = "01.05.2017",
+					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+				});
+			session.Save(waybill);
+			var sendLog = new TestDocumentSendLog(user, log);
+			session.Save(sendLog);
+
+			Update();
+
+			var waybills = localSession.Query<Waybill>().ToList();
+			Assert.That(waybills.Count(), Is.EqualTo(1));
+			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
+			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
 		}
 
 		[Test]
@@ -261,6 +322,15 @@ namespace AnalitF.Net.Test.Integration.Models
 			task.Start();
 			task.Wait();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
+		}
+
+		private void Update()
+		{
+			session.Flush();
+			session.Transaction.Commit();
+
+			task.Start();
+			task.Wait();
 		}
 	}
 }

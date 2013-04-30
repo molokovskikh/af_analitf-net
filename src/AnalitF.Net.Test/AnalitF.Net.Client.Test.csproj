@@ -135,6 +135,8 @@
     <Compile Include="Integration\ViewModes\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModes\Shell2Fixture.cs" />
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
+    <Compile Include="Integration\ViewModes\WaybillDetailFixture.cs" />
+    <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
@@ -159,6 +161,7 @@
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
+    <Compile Include="Unit\WaybillLineFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

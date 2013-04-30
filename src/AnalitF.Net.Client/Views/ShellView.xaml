@@ -120,12 +120,11 @@
 
 				<Separator />
 
-				<!--скрыл кнопку пока не реализовано
 				<Button x:Name="ShowWaybills" ToolTip="Накладные">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico" Style="{StaticResource ButtonImage}"></Image>
-				</Button>-->
+				</Button>
 
-				<!--<Separator />-->
+				<Separator />
 
 				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico" Style="{StaticResource ButtonImage}"></Image>

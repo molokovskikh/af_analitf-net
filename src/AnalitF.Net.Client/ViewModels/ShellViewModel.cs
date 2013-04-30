@@ -100,6 +100,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 					NotifyOfPropertyChange("CanShowJunkOffers");
 					NotifyOfPropertyChange("CanShowRejects");
+					NotifyOfPropertyChange("CanShowWaybills");
 				});
 
 			Bus.Listen<Stat>()
@@ -374,6 +375,16 @@ namespace AnalitF.Net.Client.ViewModels
 				Navigate(new OrdersViewModel());
 			else
 				ActivateRootItem(new OrdersViewModel());
+		}
+
+		public bool CanShowWaybills
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void ShowWaybills()
+		{
+			ActivateRootItem(new WaybillsViewModel());
 		}
 
 		private void ActivateRootItem(IScreen screen)

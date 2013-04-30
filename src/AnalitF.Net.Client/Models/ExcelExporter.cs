@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -68,12 +69,17 @@ namespace AnalitF.Net.Client.Models
 			foreach (var item in items) {
 				row = sheet.CreateRow(rowIndex++);
 				for(var i = 0; i < columns.Length; i++) {
-					row.CreateCell(i).SetCellValue(GetValue(columns[i], item));
+					SetCellValue(row.CreateCell(i), GetValue(columns[i], item));
 				}
 			}
 
+			return Export(book);
+		}
+
+		public IResult Export(HSSFWorkbook book)
+		{
 			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
-			using(var file = File.OpenWrite(filename)) {
+			using (var file = File.OpenWrite(filename)) {
 				book.Write(file);
 			}
 
@@ -94,7 +100,7 @@ namespace AnalitF.Net.Client.Models
 				.FirstOrDefault();
 		}
 
-		private string GetValue(DataGridBoundColumn column, object offer)
+		private object GetValue(DataGridBoundColumn column, object offer)
 		{
 			var path = ((Binding)column.Binding).Path.Path;
 			var parts = path.Split('.');
@@ -102,24 +108,54 @@ namespace AnalitF.Net.Client.Models
 			var value = offer;
 			foreach (var part in parts) {
 				if (value == null)
-					return "";
+					return null;
 				var type = value.GetType();
 				var property = type.GetProperty(part);
 				if (property == null)
-					return "";
+					return null;
 				value = property.GetValue(value, null);
 			}
+			return value;
+		}
+
+		public static void SetCellValue(ICell cell, object value)
+		{
 			if (value == null)
-				return "";
+				return;
+
 			if (value is bool) {
-				if (((bool)value)) {
-					return "Да";
-				}
-				else {
-					return "Нет";
+				if ((bool)value)
+					cell.SetCellValue("Да");
+				else
+					cell.SetCellValue("Нет");
+			}
+			if (value is DateTime) {
+				cell.SetCellValue((DateTime)value);
+			}
+			if (Util.IsDigitValue(value)) {
+				cell.SetCellValue(Convert.ToDouble(value));
+			}
+			cell.SetCellValue(value.ToString());
+		}
+
+		public HSSFWorkbook ExportTable(string[] columns, IEnumerable<object[]> items, int startRow = 0)
+		{
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var rowIndex = startRow;
+			var row = sheet.CreateRow(rowIndex++);
+
+			for(var i = 0; i < columns.Length; i++) {
+				row.CreateCell(i).SetCellValue(columns[i]);
+			}
+			foreach (var item in items) {
+				row = sheet.CreateRow(rowIndex++);
+				for(var i = 0; i < columns.Length; i++) {
+					SetCellValue(row.CreateCell(i), item[i]);
 				}
 			}
-			return value.ToString();
+
+			return book;
 		}
 	}
 }

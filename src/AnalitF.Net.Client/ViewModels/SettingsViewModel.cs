@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 			VitallyImportantMarkups = new PersistentList<MarkupConfig>(vitiallyImportant, Session);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
+			RackingMapSizes = Settings.RackingMap.Size.ToDescriptions<RackingMapSize>();
 
 			if (string.IsNullOrEmpty(Settings.UserName)) {
 				SelectedTab.Value = "LoginTab";
@@ -48,14 +49,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ValueDescription<DiffCalcMode> CurrentDiffCalculationType
 		{
-			get
-			{
-				return DiffCalculationTypes.First(t => t.Value ==  Settings.DiffCalcMode);
-			}
-			set
-			{
-				Settings.DiffCalcMode = value.Value;
-			}
+			get { return DiffCalculationTypes.First(t => t.Value ==  Settings.DiffCalcMode); }
+			set { Settings.DiffCalcMode = value.Value; }
+		}
+
+		public List<ValueDescription<RackingMapSize>> RackingMapSizes { get; set; }
+
+		public ValueDescription<RackingMapSize> CurrentRackingMapSize
+		{
+			get { return RackingMapSizes.First(x => x.Value == Settings.RackingMap.Size); }
+			set { Settings.RackingMap.Size = value.Value; }
 		}
 
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)

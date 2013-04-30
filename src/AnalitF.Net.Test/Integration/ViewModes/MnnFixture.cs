@@ -14,7 +14,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var model = Init(new MnnViewModel());
 			model.ShowWithoutOffers = true;
-			model.CurrentMnn = model.Mnns.First(m => !m.HaveOffers);
+			model.CurrentMnn = model.Mnns.Value.First(m => !m.HaveOffers);
 			model.EnterMnn();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;

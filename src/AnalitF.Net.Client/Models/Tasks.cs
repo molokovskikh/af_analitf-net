@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			Copy(Path.Combine(ExtractPath, "ads"), Path.Combine(RootPath, "ads"));
 
-			List<System.Tuple<string, string[]>> data;
+			List<Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(archiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
 			reporter.Weight(data.Count);
@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.Models
 				Directory.Delete(ExtractPath, true);
 		}
 
-		private static List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
+		private static List<Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
 		{
 			return files.Where(f => f.EndsWith("meta.txt"))
 				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d).Match(f.Replace(".meta.txt", "")))))

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -16,12 +17,72 @@ namespace AnalitF.Net.Client.Models
 		[Description("От минимальной цены в основных поставщиках")] MinBaseCost,
 	}
 
+	public class WaybillSettings
+	{
+		public WaybillSettings()
+		{
+		}
+
+		public WaybillSettings(User user, Address address)
+		{
+			Name = user.FullName;
+			Address = address.Name;
+			BelongsToAddress = address;
+		}
+
+		public virtual uint Id { get; set; }
+
+		public virtual string Name { get; set; }
+		public virtual string Address { get; set; }
+		public virtual Address BelongsToAddress { get; set; }
+
+		public virtual string FullName
+		{
+			get { return String.Format("{0}, {1}", Name, Address); }
+		}
+	}
+
+	public enum RackingMapSize
+	{
+		[Description("Стандартный размер")] Normal,
+		[Description("Большой размер")] Big
+	}
+
+	public class RackingMapSettings
+	{
+		public RackingMapSettings()
+		{
+			PrintProduct = true;
+			PrintProducer = true;
+			PrintSerialNumber = true;
+			PrintPeriod = true;
+			PrintQuantity = true;
+			PrintSupplier = true;
+			PrintCertificates = true;
+			PrintDocumentDate = true;
+			PrintRetailCost = true;
+		}
+
+		public virtual RackingMapSize Size { get; set; }
+		public virtual bool HideNotPrinted { get; set; }
+		public virtual bool PrintProduct { get; set; }
+		public virtual bool PrintProducer { get; set; }
+		public virtual bool PrintSerialNumber { get; set; }
+		public virtual bool PrintPeriod { get; set; }
+		public virtual bool PrintQuantity { get; set; }
+		public virtual bool PrintSupplier { get; set; }
+		public virtual bool PrintCertificates { get; set; }
+		public virtual bool PrintDocumentDate { get; set; }
+		public virtual bool PrintRetailCost { get; set; }
+	}
+
 	public class Settings
 	{
 		public Settings()
 		{
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
+			RackingMap = new RackingMapSettings();
 		}
 
 		public virtual int Id { get; set; }
@@ -45,9 +106,24 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime? LastUpdate { get; set; }
 
+		public virtual bool LookupMarkByProducerCost { get; set; }
+
+		public virtual RackingMapSettings RackingMap { get; set; }
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }
+		}
+
+		public virtual IEnumerable<string> DocumentDirs
+		{
+			get
+			{
+				var root = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				root = Path.Combine(root, "АналитФАРМАЦИЯ");
+				var dirs = new [] {"Документы", "Отказы", "Накладные"};
+				return dirs.Select(d => Path.Combine(root, d));
+			}
 		}
 
 		public virtual void ApplyChanges(ISession session)

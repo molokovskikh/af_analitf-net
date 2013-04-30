@@ -72,6 +72,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Inverse(true);
 				});
 			});
+			mapper.Class<Waybill>(m => {
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(true);
+				});
+			});
 			mapper.Class<Address>(m => m.Bag(o => o.Orders, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
@@ -97,14 +103,19 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
+				var propertyType = ((PropertyInfo)member.LocalMember).PropertyType;
 				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {
-					if (((PropertyInfo)member.LocalMember).PropertyType == typeof(string)) {
+					if (propertyType == typeof(string)) {
 						customizer.Length(10000);
 					}
 				}
 
-				if (((PropertyInfo)member.LocalMember).PropertyType == typeof(DateTime)) {
+				if (propertyType == typeof(DateTime)) {
 					customizer.Type<UtcToLocalDateTimeType>();
+				}
+
+				if (propertyType.IsValueType && !propertyType.IsNullable()) {
+					customizer.NotNullable(true);
 				}
 			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => {

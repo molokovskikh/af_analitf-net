@@ -68,6 +68,20 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 		}
 
+		[Test]
+		public void Restore_grid_settings()
+		{
+			Activate();
+			Click("ShowPrice");
+			var prices = WaitForElement("Prices");
+			WindowHandler = e => {
+				Dump(e);
+			};
+			Console.WriteLine("--------------");
+			RightClick(prices);
+			Thread.Sleep(1000);
+		}
+
 		private void SkipUpdateDialog()
 		{
 			Timeout = TimeSpan.FromSeconds(50);
@@ -77,14 +91,14 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private AutomationElement WaitWindow()
 		{
 			AutomationElement window = null;
-			DialogHandler = e => { window = e; };
+			WindowHandler = e => { window = e; };
 			Wait(() => window == null);
 			return window;
 		}
 
 		private void HandleDialogs()
 		{
-			DialogHandler = e => {
+			WindowHandler = e => {
 				//отказываемся от всего
 				ClickByName("Нет", e);
 			};

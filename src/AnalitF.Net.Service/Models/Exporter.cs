@@ -78,10 +78,12 @@ where a.Enabled = 1 and ua.UserId = ?userId";
 			result.Add(Export(sql, "Addresses", new { userId }));
 
 			sql = @"
-select Id,
-	InheritPricesFrom is not null as IsPriceEditDisabled
-from Customers.Users
-where Id = ?userId";
+select u.Id,
+	u.InheritPricesFrom is not null as IsPriceEditDisabled,
+	c.FullName as FullName #version-tag-13
+from Customers.Users u
+	join Customers.Clients c on c.Id = u.ClientId
+where u.Id = ?userId";
 			result.Add(Export(sql, "Users", new { userId }));
 
 			sql = @"
@@ -161,6 +163,14 @@ from Usersettings.Prices p
 ";
 
 			result.Add(Export(sql, "prices"));
+
+			sql = @"select
+s.Id,
+s.Name,
+s.FullName
+from Customers.Suppliers s
+	join Usersettings.Prices p on p.FirmCode = s.Id";
+			result.Add(Export(sql, "suppliers"));
 
 			var offerQuery = new OfferQuery();
 			offerQuery.Select("m.MinCost as LeaderCost",
@@ -258,6 +268,44 @@ from Catalogs.Catalog c
 where Hidden = 0";
 			result.Add(Export(sql, "catalogs"));
 
+			sql = @"
+select dh.Id,
+	dh.ProviderDocumentId,
+	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
+	dh.DocumentDate,
+	dh.AddressId,
+	dh.FirmCode as SupplierId
+from Logs.DocumentSendLogs ds
+	join Logs.Document_logs d on d.RowId = ds.DocumentId
+		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
+where ds.UserId = ?UserId
+	and ds.Committed = 0
+group by dh.Id";
+			result.Add(Export(sql, "Waybills", new { userId }));
+
+			sql = @"
+select db.Id,
+	db.DocumentId as WaybillId,
+	db.Product,
+	db.Producer,
+	db.Country,
+	db.ProducerCost,
+	db.RegistryCost,
+	db.SupplierPriceMarkup,
+	db.SupplierCostWithoutNds,
+	db.SupplierCost,
+	db.Quantity,
+	db.Nds,
+	db.SerialNumber,
+	db.Amount,
+	db.NdsAmount
+from Logs.DocumentSendLogs ds
+	join Logs.Document_logs d on d.RowId = ds.DocumentId
+		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
+			join Documents.DocumentBodies db on db.DocumentId = dh.Id
+where ds.UserId = ?UserId
+	and ds.Committed = 0";
+			result.Add(Export(sql, "WaybillLines", new { userId }));
 			return result;
 		}
 

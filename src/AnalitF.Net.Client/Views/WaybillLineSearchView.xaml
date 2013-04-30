@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.WaybillLineSearchView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition></RowDefinition>
+		</Grid.RowDefinitions>
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<Button Name="NavigateBackward" Style="{StaticResource FilterElement}">Назад</Button>
+			<TextBox x:Name="SearchText" Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SearchText}" binders:SearchBinder.Grid="Lines"></TextBox>
+		</StackPanel>
+		<c:DataGrid Grid.Row="1" x:Name="Lines"
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
+			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="*" Header="Дата документа"
+					Binding="{Binding Waybill.WriteTime}" />
+				<DataGridTextColumn Width="*" Header="Поставщик"
+					Binding="{Binding Waybill.Supplier.FullName}" />
+				<DataGridTextColumn Width="*" Header="Наименование"
+					Binding="{Binding Product}" />
+				<c:SearchableDataGridColumn Width="*" Header="Серия товара"
+					HighlightStyle="{StaticResource DataGridHighlight}"
+					Binding="{Binding SerialNumber}" />
+				<DataGridTextColumn Width="*" Header="Получить" />
+				<DataGridTextColumn Width="*" Header="Сертификаты" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+	</Grid>
+</UserControl>

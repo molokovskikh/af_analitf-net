@@ -164,6 +164,7 @@
     <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
+    <Compile Include="Helpers\Util.cs" />
     <Compile Include="Helpers\XamlExtentions.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\BaseOffer.cs" />
@@ -189,6 +190,7 @@
     <Compile Include="Models\Print\OrderDocument.cs" />
     <Compile Include="Models\Print\OrderLinesDocument.cs" />
     <Compile Include="Models\Print\PriceOfferDocument.cs" />
+    <Compile Include="Models\Print\RackingMapDocument.cs" />
     <Compile Include="Models\Print\RejectsDocument.cs" />
     <Compile Include="Models\Print\WrapDocumentPaginator.cs" />
     <Compile Include="Models\ProductDescription.cs" />
@@ -210,8 +212,11 @@
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\SingleInstance.cs" />
     <Compile Include="Models\Stat.cs" />
+    <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\Tasks.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Models\Waybill.cs" />
+    <Compile Include="Models\WaybillLine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseOrderViewModel.cs" />
@@ -238,11 +243,14 @@
     <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
+    <Compile Include="ViewModels\WaybillLineSearch.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\PriceViewModel.cs" />
     <Compile Include="ViewModels\SyncViewModel.cs" />
     <Compile Include="ViewModels\WaitViewModel.cs" />
+    <Compile Include="ViewModels\WaybillDetails.cs" />
+    <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\CatalogNameView.xaml.cs">
       <DependentUpon>CatalogNameView.xaml</DependentUpon>
     </Compile>
@@ -328,6 +336,15 @@
     </Compile>
     <Compile Include="Views\WaitView.xaml.cs">
       <DependentUpon>WaitView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WaybillDetailsView.xaml.cs">
+      <DependentUpon>WaybillDetailsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WaybillLineSearchView.xaml.cs">
+      <DependentUpon>WaybillLineSearchView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WaybillsView.xaml.cs">
+      <DependentUpon>WaybillsView.xaml</DependentUpon>
     </Compile>
     <Page Include="Assets\styles\Application.xaml">
       <SubType>Designer</SubType>
@@ -446,6 +463,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\WaitView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WaybillDetailsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WaybillLineSearchView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WaybillsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

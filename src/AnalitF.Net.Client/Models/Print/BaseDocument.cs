@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
@@ -88,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Print
 					text = value.ToString();
 
 				var cell = new TableCell(new Paragraph(new Run(text)));
-				if (IsDigitValue(value)) {
+				if (Util.IsDigitValue(value)) {
 					cell.TextAlignment = TextAlignment.Right;
 				}
 				cell.BorderBrush = Brushes.Black;
@@ -131,11 +132,6 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 			tableRowGroup.Rows.Add(headerRow);
 			return table;
-		}
-
-		private static bool IsDigitValue(object o)
-		{
-			return o is int || o is uint || o is decimal || o is double || o is float;
 		}
 	}
 }
