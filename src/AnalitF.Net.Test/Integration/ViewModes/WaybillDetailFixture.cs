@@ -39,11 +39,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Print_racking_map()
 		{
 			var result = (DialogResult)model.PrintRackingMap();
-			var doc = (FixedDocument)((PrintPreviewViewModel)result.Model).Document;
-			foreach (var page in doc.Pages) {
-				PrintFixture.SaveToPng(page.Child, "1.png", new Size(600, 800));
-			}
-			Process.Start("mspaint", "1.png");
+			var preview = ((PrintPreviewViewModel)result.Model);
+			Assert.IsNotNull(preview);
+		}
+
+		[Test, RequiresSTA]
+		public void Print_invoice()
+		{
+			var result = (DialogResult)model.PrintInvoice();
+			var preview = ((PrintPreviewViewModel)result.Model);
+			Assert.IsNotNull(preview.Document);
 		}
 	}
 }

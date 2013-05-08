@@ -253,8 +253,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			var doc = new OrderLinesDocument(this).BuildDocument();
-			return new PrintResult(doc, DisplayName);
+			var doc = new OrderLinesDocument(this).Build();
+			return new PrintResult(DisplayName, doc);
 		}
 	}
 }

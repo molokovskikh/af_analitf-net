@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.address = address;
 		}
 
-		public FlowDocument BuildDocument()
+		public override FlowDocument Build()
 		{
 			doc.Blocks.Add(new Paragraph());
 

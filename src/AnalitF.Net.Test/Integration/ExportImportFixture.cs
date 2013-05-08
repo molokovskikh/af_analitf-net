@@ -27,7 +27,7 @@ namespace AnalitF.Net.Test.Integration
 			localSession = SetupFixture.Factory.OpenSession();
 			var export = new SchemaExport(SetupFixture.Configuration);
 			export.Drop(false, true);
-			export.Create(true, true);
+			export.Create(false, true);
 		}
 
 		[TearDown]

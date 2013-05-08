@@ -94,7 +94,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Print()
 		{
 			Assert.That(model.CanPrint, Is.True);
-			var doc = model.Print().Doc;
+			var doc = model.Print().Paginator;
 			Assert.That(doc, Is.Not.Null);
 		}
 

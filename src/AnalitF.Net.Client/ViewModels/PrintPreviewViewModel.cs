@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (result == null)
 				return;
 
-			var paginator = new WrapDocumentPaginator(((IDocumentPaginatorSource)result.Doc).DocumentPaginator);
+			var paginator = result.Paginator;
 			var outputXps = Path.GetTempFileName();
 			paginator.SaveToXps(outputXps);
 			var xpsDoc = new XpsDocument(outputXps, FileAccess.Read);

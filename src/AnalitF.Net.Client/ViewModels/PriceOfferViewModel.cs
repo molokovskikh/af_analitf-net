@@ -198,8 +198,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			var doc = new PriceOfferDocument(offers, Price, Address).BuildDocument();
-			return new PrintResult(doc, DisplayName);
+			var doc = new PriceOfferDocument(offers, Price, Address);
+			return new PrintResult(DisplayName, doc);
 		}
 
 		public bool CanShowHistoryOrders

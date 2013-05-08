@@ -30,7 +30,7 @@ namespace AnalitF.Net.Test.Integration
 			view.CurrentCatalog = new Catalog { Name = new CatalogName(), Form = "Папаверин" };
 			view.Offers = Offers();
 			var result = view.Print();
-			Assert.That(result.Doc, Is.Not.Null);
+			Assert.That(result.Paginator, Is.Not.Null);
 		}
 
 		[Test]
@@ -42,7 +42,7 @@ namespace AnalitF.Net.Test.Integration
 				Phone = "473-2606000"
 			};
 			var address = new Address { Name = "Тестовый адрес доставки" };
-			var doc = new PriceOfferDocument(Offers(), price, address).BuildDocument();
+			var doc = new PriceOfferDocument(Offers(), price, address).Build();
 			Assert.That(doc, Is.Not.Null);
 		}
 
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Test.Integration
 		public static void SaveAndOpen(PrintResult result)
 		{
 			var file = "output.xps";
-			var paginator = new WrapDocumentPaginator(((IDocumentPaginatorSource)result.Doc).DocumentPaginator);
+			var paginator = result.Paginator;
 			paginator.SaveToXps(file);
 			Process.Start(file);
 		}

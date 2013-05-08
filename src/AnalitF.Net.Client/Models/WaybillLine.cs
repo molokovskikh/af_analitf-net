@@ -27,6 +27,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool LoadCertificate { get; set; }
 		public virtual string CertificateNumber { get; set; }
 
+		public virtual string Unit { get; set; }
+		public virtual decimal? ExciseTax { get; set; }
+		public virtual string BillOfEntryNumber { get; set; }
+
 		public virtual bool? VitallyImportant { get; set; }
 
 		public virtual decimal? ProducerCost { get; set; }
@@ -63,6 +67,10 @@ namespace AnalitF.Net.Client.Models
 			get { return Quantity * RetailCost; }
 		}
 
+		public virtual decimal? AmountExcludeTax
+		{
+			get { return Amount - NDSAmount; }
+		}
 
 		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups, bool round)
 		{

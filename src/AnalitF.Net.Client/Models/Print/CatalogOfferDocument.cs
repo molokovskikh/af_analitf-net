@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Models.Print
 			reportHeader = header;
 		}
 
-		public FlowDocument BuildDocument()
+		public override FlowDocument Build()
 		{
 			var rows = offers.Select((o, i) => new object[] {
 				o.ProductSynonym,

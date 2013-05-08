@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.order = order;
 		}
 
-		public FlowDocument Build()
+		public override FlowDocument Build()
 		{
 			var header = String.Format("Заявка № {0} от на {1} от {2}",
 				order.Id,

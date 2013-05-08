@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			//мы не можем использовать существующий документ, тк это приведет к тому что визуализация в FlowDocumentScrollViewer "исчезнет"
 			//и что бы увидеть данные пользователю нужно будет вызвать перерисовку документа, например с помощью скрола
-			return new PrintResult(BuildDocument(), DisplayName);
+			return new PrintResult(DisplayName, BuildDocument());
 		}
 
 		public FlowDocument BuildDocument()

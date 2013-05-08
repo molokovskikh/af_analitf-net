@@ -7,26 +7,33 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class WrapDocumentPaginator : DocumentPaginator, IDocumentPaginatorSource
 	{
-		private DocumentPaginator _paginator;
-		private Size _pageSize;
-		private Thickness _margins;
+		private BaseDocument document;
+		private DocumentPaginator paginator;
+		private Size pageSize;
+		private Thickness margins;
 
-		public WrapDocumentPaginator(DocumentPaginator paginator)
+		public WrapDocumentPaginator(DocumentPaginator paginator, BaseDocument document)
 		{
-			_margins = new Thickness(0, 50, 0, 50);
-			_paginator = paginator;
+			this.document = document;
+			this.paginator = paginator;
+
+			margins = new Thickness(0, 50, 0, 50);
 			PageSize = paginator.PageSize;
 		}
 
 		public override DocumentPage GetPage(int pageNumber)
 		{
-			var originalVisual = _paginator.GetPage(pageNumber).Visual;
+			//что бы paginator.PageCount вернул корректное значение нужно сформировать все страницы
+			var totalPages = 0;
+			while (paginator.GetPage(totalPages++) != DocumentPage.Missing) {}
+
+			var originalVisual = paginator.GetPage(pageNumber).Visual;
 
 			var visual = new ContainerVisual();
 			var pageVisual = new ContainerVisual {
 				Transform = new TranslateTransform(
-					_margins.Left,
-					_margins.Top)
+					margins.Left,
+					margins.Top)
 			};
 			pageVisual.Children.Add(originalVisual);
 			visual.Children.Add(pageVisual);
@@ -39,71 +46,48 @@ namespace AnalitF.Net.Client.Models.Print
 			var footer = Footer(pageNumber);
 			if (footer != null) {
 				var footerContainer = new ContainerVisual {
-					Transform = new TranslateTransform(_margins.Left, PageSize.Height - _margins.Bottom)
+					Transform = new TranslateTransform(margins.Left, PageSize.Height - margins.Bottom)
 				};
 				footerContainer.Children.Add(footer);
 				visual.Children.Add(footerContainer);
 			}
 
-			var documentPage = new DocumentPage(visual, _pageSize, new Rect(new Point(), _pageSize), new Rect(new Point(_margins.Left, _margins.Top), ContentSize()));
+			var documentPage = new DocumentPage(visual,
+				pageSize,
+				new Rect(new Point(), pageSize),
+				new Rect(new Point(margins.Left, margins.Top), ContentSize()));
 			return documentPage;
 		}
 
 		private Visual Header(int pageNumber)
 		{
-			//300 это примерный размер блока с датой, нужно молиться что бы хватило
-			var width = PageSize.Width - 300;
-			var table = new Table {
-				Columns = {
-					new TableColumn {
-						Width = new GridLength(width)
-					},
-					new TableColumn {
-						Width = GridLength.Auto
-					},
-				},
-				RowGroups = {
-					new TableRowGroup {
-						Rows = {
-							new TableRow {
-								Cells = {
-									new TableCell(new Paragraph(new Run("Информационная поддержка \"АК \"Инфорум\"\" 473-2606000")) {
-										TextAlignment = TextAlignment.Left,
-										FontWeight = FontWeights.Bold,
-										FontSize = 16
-									}),
-									new TableCell(new Paragraph(new Run(DateTime.Now.ToString()))) {
-										TextAlignment = TextAlignment.Right
-									}
-								}
-							}
-						}
-					}
-				}
-			};
-
-			return ToVisual(table);
-		}
-
-		private Size ContentSize()
-		{
-			return new Size(_pageSize.Width - _margins.Left - _margins.Right,
-				_pageSize.Height - _margins.Top - _margins.Bottom);
+			if (document != null)
+				return ToVisual(document.GetHeader(pageNumber, PageCount));
+			return null;
 		}
 
 		private Visual Footer(int pageNumber)
 		{
-			var footer = "Электронная почта: farm@analit.net, интернет: http://www.analit.net/";
-			return ToVisual(new Paragraph(new Run(footer)));
+			if (document != null)
+				return ToVisual(document.GetFooter(pageNumber, PageCount));
+			return null;
 		}
 
-		private Visual ToVisual(Block section)
+		private Size ContentSize()
 		{
-			var doc = new FlowDocument(section) {
+			return new Size(pageSize.Width - margins.Left - margins.Right,
+				pageSize.Height - margins.Top - margins.Bottom);
+		}
+
+		private Visual ToVisual(FrameworkContentElement section)
+		{
+			if (section == null)
+				return null;
+			var doc = new FlowDocument((Block)section) {
 				ColumnGap = 0,
 				ColumnWidth = double.PositiveInfinity
 			};
-			var document = _paginator.Source as FlowDocument;
+			var document = this.paginator.Source as FlowDocument;
 			if (document != null) {
 				doc.PagePadding = document.PagePadding;
 			}
@@ -115,24 +99,24 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override bool IsPageCountValid
 		{
-			get { return _paginator.IsPageCountValid; }
+			get { return paginator.IsPageCountValid; }
 		}
 
 		public override int PageCount
 		{
-			get { return _paginator.PageCount; }
+			get { return paginator.PageCount; }
 		}
 
 		public override Size PageSize
 		{
 			get
 			{
-				return _pageSize;
+				return pageSize;
 			}
 			set
 			{
-				_pageSize = value;
-				_paginator.PageSize = ContentSize();
+				pageSize = value;
+				paginator.PageSize = ContentSize();
 			}
 		}
 
@@ -140,7 +124,7 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			get
 			{
-				return _paginator.Source;
+				return paginator.Source;
 			}
 		}
 

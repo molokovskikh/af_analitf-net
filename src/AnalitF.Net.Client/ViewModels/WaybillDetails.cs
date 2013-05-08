@@ -16,6 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public WaybillDetails(uint id)
 		{
+			DisplayName = "Р”РµС‚Р°Р»РёР·Р°С†РёСЏ РЅР°РєР»Р°РґРЅРѕР№";
 			this.id = id;
 		}
 
@@ -41,29 +42,49 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult PrintRackingMap()
 		{
 			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Стелажная карта",
+				DisplayName = "РЎС‚РµР»Р°Р¶РЅР°СЏ РєР°СЂС‚Р°",
 				Document = new RackingMapDocument().Build(Waybill, waybillSettings, Settings)
 			});
+		}
+
+		public IResult PrintPriceTags()
+		{
+			return null;
+		}
+
+		public IResult PrintRegistry()
+		{
+			return null;
+		}
+
+		public IResult PrintWaybill()
+		{
+			return new DialogResult(new PrintPreviewViewModel(new PrintResult("РќР°РєР»Р°РґРЅР°СЏ", new WaybillDocument(Waybill, waybillSettings))));
+		}
+
+		public IResult PrintInvoice()
+		{
+			return new DialogResult(new PrintPreviewViewModel(new PrintResult("РЎС‡РµС‚-С„Р°РєС‚СѓСЂР°", new InvoiceDocument(Waybill))));
 		}
 
 		public IResult ExportWaybill()
 		{
 			var columns = new [] {
-				"№ пп",
-				"Наименование и краткая характеристика товара",
-				"Серия товара Сертификат",
-				"Срок годности",
-				"Производитель",
-				"Цена без НДС, руб",
-				"Затребован.колич.",
-				"Опт. надб. %",
-				"Отпуск. цена пос-ка без НДС, руб",
-				"НДС пос-ка, руб",
-				"Отпуск. цена пос-ка с НДС, руб",
-				"Розн. торг. надб. %",
-				"Розн. цена за ед., руб",
-				"Кол-во",
-				"Розн. сумма, руб"
+				"в„– РїРї",
+				"РќР°РёРјРµРЅРѕРІР°РЅРёРµ Рё РєСЂР°С‚РєР°СЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєР° С‚РѕРІР°СЂР°",
+				"РЎРµСЂРёСЏ С‚РѕРІР°СЂР° РЎРµСЂС‚РёС„РёРєР°С‚",
+				"РЎСЂРѕРє РіРѕРґРЅРѕСЃС‚Рё",
+				"РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ",
+				"Р¦РµРЅР° Р±РµР· РќР”РЎ, СЂСѓР±",
+				"Р—Р°С‚СЂРµР±РѕРІР°РЅ.РєРѕР»РёС‡.",
+				"РћРїС‚. РЅР°РґР±. %",
+				"РћС‚РїСѓСЃРє. С†РµРЅР° РїРѕСЃ-РєР° Р±РµР· РќР”РЎ, СЂСѓР±",
+				"РќР”РЎ РїРѕСЃ-РєР°, СЂСѓР±",
+				"РћС‚РїСѓСЃРє. С†РµРЅР° РїРѕСЃ-РєР° СЃ РќР”РЎ, СЂСѓР±",
+				"Р РѕР·РЅ. С‚РѕСЂРі. РЅР°РґР±. %",
+				"Р РѕР·РЅ. С†РµРЅР° Р·Р° РµРґ., СЂСѓР±",
+				"РљРѕР»-РІРѕ",
+				"Р РѕР·РЅ. СЃСѓРјРјР°, СЂСѓР±"
 			};
 			var items = Lines.Select((l, i) => new object[] {
 				i + 1,
@@ -84,54 +105,54 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 			var book = excelExporter.ExportTable(columns, items, 8);
 			var sheet = book.GetSheetAt(0);
-			sheet.CreateRow(1).CreateCell(6).SetCellValue(String.Format("Наименование организации: Сотрудник {0}",
+			sheet.CreateRow(1).CreateCell(6).SetCellValue(String.Format("РќР°РёРјРµРЅРѕРІР°РЅРёРµ РѕСЂРіР°РЅРёР·Р°С†РёРё: РЎРѕС‚СЂСѓРґРЅРёРє {0}",
 				waybillSettings.FullName));
 			var row = sheet.CreateRow(2);
-			row.CreateCell(3).SetCellValue("Отдел:");
+			row.CreateCell(3).SetCellValue("РћС‚РґРµР»:");
 			row.CreateCell(4).SetCellValue("_______________________________________");
 
 			row = sheet.CreateRow(3);
-			row.CreateCell(0).SetCellValue("Требование №");
+			row.CreateCell(0).SetCellValue("РўСЂРµР±РѕРІР°РЅРёРµ в„–");
 			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Накладная №");
+			row.CreateCell(5).SetCellValue("РќР°РєР»Р°РґРЅР°СЏ в„–");
 			row.CreateCell(6).SetCellValue("_______________________");
 
 			row = sheet.CreateRow(4);
-			row.CreateCell(1).SetCellValue("от \"___\"_________________20___г");
-			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(1).SetCellValue("РѕС‚ \"___\"_________________20___Рі");
+			row.CreateCell(6).SetCellValue("РѕС‚ \"___\"_________________20___Рі");
 
 			row = sheet.CreateRow(5);
-			row.CreateCell(0).SetCellValue("Кому: Аптечный пункт");
+			row.CreateCell(0).SetCellValue("РљРѕРјСѓ: РђРїС‚РµС‡РЅС‹Р№ РїСѓРЅРєС‚");
 			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Через кого");
+			row.CreateCell(5).SetCellValue("Р§РµСЂРµР· РєРѕРіРѕ");
 			row.CreateCell(6).SetCellValue("_______________________");
 
 			row = sheet.CreateRow(6);
-			row.CreateCell(0).SetCellValue("Основание отпуска");
+			row.CreateCell(0).SetCellValue("РћСЃРЅРѕРІР°РЅРёРµ РѕС‚РїСѓСЃРєР°");
 			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Доверенность №_____");
-			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(5).SetCellValue("Р”РѕРІРµСЂРµРЅРЅРѕСЃС‚СЊ в„–_____");
+			row.CreateCell(6).SetCellValue("РѕС‚ \"___\"_________________20___Рі");
 			return excelExporter.Export(book);
 		}
 
 		public IResult ExportRegistry()
 		{
 			var columns = new [] {
-				"№ пп",
-				"Наименование",
-				"Серия товара",
-				"Срок годности",
-				"Производитель",
-				"Цена без НДС, руб",
-				"Цена ГР, руб",
-				"Опт. надб. %",
-				"Отпуск. цена пос-ка без НДС, руб",
-				"НДС пос-ка, руб",
-				"Отпуск. цена пос-ка с НДС, руб",
-				"Розн. торг. надб. %",
-				"Розн. цена за ед., руб",
-				"Кол-во",
-				"Розн. сумма, руб"
+				"в„– РїРї",
+				"РќР°РёРјРµРЅРѕРІР°РЅРёРµ",
+				"РЎРµСЂРёСЏ С‚РѕРІР°СЂР°",
+				"РЎСЂРѕРє РіРѕРґРЅРѕСЃС‚Рё",
+				"РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ",
+				"Р¦РµРЅР° Р±РµР· РќР”РЎ, СЂСѓР±",
+				"Р¦РµРЅР° Р“Р , СЂСѓР±",
+				"РћРїС‚. РЅР°РґР±. %",
+				"РћС‚РїСѓСЃРє. С†РµРЅР° РїРѕСЃ-РєР° Р±РµР· РќР”РЎ, СЂСѓР±",
+				"РќР”РЎ РїРѕСЃ-РєР°, СЂСѓР±",
+				"РћС‚РїСѓСЃРє. С†РµРЅР° РїРѕСЃ-РєР° СЃ РќР”РЎ, СЂСѓР±",
+				"Р РѕР·РЅ. С‚РѕСЂРі. РЅР°РґР±. %",
+				"Р РѕР·РЅ. С†РµРЅР° Р·Р° РµРґ., СЂСѓР±",
+				"РљРѕР»-РІРѕ",
+				"Р РѕР·РЅ. СЃСѓРјРјР°, СЂСѓР±"
 			};
 			var items = Lines.Select((l, i) => new object[] {
 				i + 1,
@@ -152,9 +173,9 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 			var book = excelExporter.ExportTable(columns, items, 5);
 			var sheet = book.GetSheetAt(0);
-			sheet.CreateRow(1).CreateCell(6).SetCellValue("Реестр");
-			sheet.CreateRow(2).CreateCell(3).SetCellValue("розничных цен на лекарственные средства и изделия медицинского назначения,");
-			sheet.CreateRow(3).CreateCell(3).SetCellValue(String.Format("полученные от {0}-по счету (накладной) №{1} от {2}",
+			sheet.CreateRow(1).CreateCell(6).SetCellValue("Р РµРµСЃС‚СЂ");
+			sheet.CreateRow(2).CreateCell(3).SetCellValue("СЂРѕР·РЅРёС‡РЅС‹С… С†РµРЅ РЅР° Р»РµРєР°СЂСЃС‚РІРµРЅРЅС‹Рµ СЃСЂРµРґСЃС‚РІР° Рё РёР·РґРµР»РёСЏ РјРµРґРёС†РёРЅСЃРєРѕРіРѕ РЅР°Р·РЅР°С‡РµРЅРёСЏ,");
+			sheet.CreateRow(3).CreateCell(3).SetCellValue(String.Format("РїРѕР»СѓС‡РµРЅРЅС‹Рµ РѕС‚ {0}-РїРѕ СЃС‡РµС‚Сѓ (РЅР°РєР»Р°РґРЅРѕР№) в„–{1} РѕС‚ {2}",
 				Waybill.Supplier != null ? Waybill.Supplier.FullName : "",
 				Waybill.ProviderDocumentId,
 				Waybill.DocumentDate.ToShortDateString()));

@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.showReason = showReason;
 		}
 
-		public FlowDocument Build()
+		public override FlowDocument Build()
 		{
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			var size = paginator.PageSize;
@@ -49,11 +49,11 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private void BuildTableWithReason(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers)
 		{
-			var table = BuildTableHeader(headers);
+			var table = BuildTableHeader(headers, TODO);
 			var rowGroup = table.RowGroups[0];
 			var i = 0;
 			foreach (var row in rows) {
-				BuildRow(headers, rowGroup, row, i);
+				BuildRow(headers, rowGroup, row);
 
 				var reject = rejects[i];
 				var tableRow = new TableRow();
@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var cell = new TableCell(new Paragraph(new Run(reject.CauseRejects))) {
 					ColumnSpan = headers.Length,
 					BorderBrush = Brushes.Black,
-					BorderThickness = new Thickness(1, 1, 1, 0),
+					BorderThickness = new Thickness(0, 0, 1, 1),
 					FontStyle = FontStyles.Italic
 				};
 				tableRow.Cells.Add(cell);

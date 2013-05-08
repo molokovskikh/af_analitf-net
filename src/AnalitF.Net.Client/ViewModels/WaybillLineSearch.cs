@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public WaybillLineSearch(DateTime begin, DateTime end)
 		{
-			DisplayName = "Поиск товара в накладных";
+			DisplayName = "РџРѕРёСЃРє С‚РѕРІР°СЂР° РІ РЅР°РєР»Р°РґРЅС‹С…";
 			this.begin = begin;
 			this.end = end;
 

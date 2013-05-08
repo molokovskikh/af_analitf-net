@@ -298,7 +298,10 @@ select db.Id,
 	db.Nds,
 	db.SerialNumber,
 	db.Amount,
-	db.NdsAmount
+	db.NdsAmount,
+	db.Unit,
+	db.BillOfEntryNumber,
+	db.ExciseTax
 from Logs.DocumentSendLogs ds
 	join Logs.Document_logs d on d.RowId = ds.DocumentId
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId

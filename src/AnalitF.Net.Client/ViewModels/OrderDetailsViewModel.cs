@@ -100,7 +100,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			return new PrintResult(new OrderDocument(Order).Build(), DisplayName);
+			return new PrintResult(DisplayName, new OrderDocument(Order).Build());
 		}
 
 		public void EnterLine()

@@ -462,7 +462,7 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				docs = SentOrders.Select(o => new OrderDocument(o).Build());
 			}
-			return new PrintResult(docs, DisplayName);
+			return new PrintResult(DisplayName, docs);
 		}
 
 		public IResult Run(DbCommand command)

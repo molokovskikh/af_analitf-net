@@ -252,7 +252,7 @@ namespace AnalitF.Net.Test.Integration.Models
 				BillOfEntryNumber = "10609010/101209/0004305/1",
 				EAN13 = "4605635002748",
 			});
-			for(var i = 0; i < 10; i++)
+			for(var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
 					Product = "Доксазозин 4мг таб. Х30 (R)",
 					Certificates = "РОСС RU.ФМ08.Д38737",

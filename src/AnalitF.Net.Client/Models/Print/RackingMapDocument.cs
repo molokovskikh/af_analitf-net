@@ -11,6 +11,8 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class RackingMapDocument
 	{
+		private Size pageSize = new Size(816.0, 1056.0);
+
 		private GridLength defaultHeight;
 		private GridLength bigHeight;
 		private GridLength labelColumnWidth;
@@ -60,46 +62,63 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 
-			var panel = new StackPanel();
-			var label = new Label {
-				Padding = new Thickness(0, 5, 0, 5),
-				Content = String.Format("{0} {1}", waybill.ProviderDocumentId, waybillSettings.FullName),
-				FontFamily = new FontFamily("Arial"),
-			};
-			panel.Children.Add(label);
-			panel.Children.Add(BuildMapGrid(waybill));
-
-			var page = new PageContent();
-			page.Child = new FixedPage();
-			var border = new Border {
-				Margin = new Thickness(25),
-				Child = panel,
-			};
-			page.Child.Children.Add(border);
 			var document = new FixedDocument();
-			document.Pages.Add(page);
+			var start = 0;
+			do {
+				var panel = new StackPanel();
+				var label = new Label {
+					Padding = new Thickness(0, 5, 0, 5),
+					Content = String.Format("{0} {1}", waybill.ProviderDocumentId, waybillSettings.FullName),
+					FontFamily = new FontFamily("Arial"),
+				};
+				panel.Children.Add(label);
+				panel.Children.Add(BuildMapGrid(waybill, pageSize, ref start));
+				var page = new PageContent();
+				page.Child = new FixedPage();
+				var border = new Border {
+					Margin = new Thickness(25),
+					Child = panel,
+				};
+				page.Child.Children.Add(border);
+				document.Pages.Add(page);
+			} while (start < waybill.Lines.Count - 1);
 			return document;
 		}
 
-		private FrameworkElement BuildMapGrid(Waybill waybill)
+		private FrameworkElement BuildMapGrid(Waybill waybill, Size size, ref int start)
 		{
 			var panel = new Grid();
 			for (var i = 0; i < columnCount; i++)
 				panel.ColumnDefinitions.Add(new ColumnDefinition());
 			for (var i = 0; i < waybill.Lines.Count / columnCount; i ++)
 				panel.RowDefinitions.Add(new RowDefinition());
-			for (var i = 0; i < waybill.Lines.Count; i ++) {
-				var element = Map(waybill.Lines[i]);
-				element.SetValue(Grid.RowProperty, i / columnCount);
-				element.SetValue(Grid.ColumnProperty, i % columnCount);
-				panel.Children.Add(element);
-			}
 			var border = new Border {
 				Child = panel,
 				BorderBrush = Brushes.Black,
 				SnapsToDevicePixels = true,
 				BorderThickness = new Thickness(2.5, 2.5, 0, 0)
 			};
+
+			var height = size.Height - border.BorderThickness.Top - border.BorderThickness.Bottom;
+
+			for (var i = start; i < waybill.Lines.Count; i++) {
+				start = i;
+				var element = Map(waybill.Lines[i]);
+				element.Measure(size);
+				var columnIndex = i % columnCount;
+				var rowIndex = i / columnCount;
+				if (columnIndex == 0) {
+					if (height < element.DesiredSize.Height) {
+						break;
+					}
+					else {
+						height -= element.DesiredSize.Height;
+					}
+				}
+				element.SetValue(Grid.RowProperty, rowIndex);
+				element.SetValue(Grid.ColumnProperty, columnIndex);
+				panel.Children.Add(element);
+			}
 			return border;
 		}
 

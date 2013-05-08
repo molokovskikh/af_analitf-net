@@ -17,6 +17,10 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<Button Name="PrintPriceTags" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать ценников</Button>
+			<Button Name="PrintRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать реестра</Button>
+			<Button Name="PrintWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать накладной</Button>
+			<Button Name="PrintInvoice" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать счет-фактуры</Button>
 			<Button Name="PrintRackingMap" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Стелажная карта</Button>
 			<Button Name="ExportRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Реестр в Excel</Button>
 			<Button Name="ExportWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Накладная в Excel</Button>

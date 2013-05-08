@@ -13,49 +13,52 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class PrintResult : IResult
 	{
-		private string name;
+		private string name = "";
+		private IEnumerable<FlowDocument> docs = new FlowDocument[0];
+		private BaseDocument baseDocument = new DefaultDocument();
 
-		public PrintResult(FlowDocument doc, string name)
+		public PrintResult(string name, BaseDocument doc)
 		{
-			Doc = doc;
-			Docs = new [] { doc};
-			Prepare(doc);
+			baseDocument = doc;
+			docs = new [] { doc.Build() };
+			docs.Each(Prepare);
 			this.name = name;
 		}
 
-		public PrintResult(IEnumerable<FlowDocument> docs, string name)
+		public PrintResult(string name, params FlowDocument[] docs)
 		{
-			Docs = docs.ToArray();
-			Doc = Docs.FirstOrDefault();
-			Docs.Each(Prepare);
+			this.docs = docs;
+			this.docs.Each(Prepare);
 			this.name = name;
 		}
 
-		public FlowDocument Doc { get; private set; }
-
-		public IEnumerable<FlowDocument> Docs { get; private set; }
+		public PrintResult(string name, IEnumerable<FlowDocument> docs)
+		{
+			this.docs = docs.ToArray();
+			this.docs.Each(Prepare);
+			this.name = name;
+		}
 
 		private void Prepare(FlowDocument doc)
 		{
 			if (doc != null) {
-				Doc.PagePadding = new Thickness(25);
-				Doc.ColumnGap = 0;
-				Doc.ColumnWidth = double.PositiveInfinity;
+				doc.PagePadding = new Thickness(25);
+				doc.ColumnGap = 0;
+				doc.ColumnWidth = double.PositiveInfinity;
 			}
 		}
 
 		public void Execute(ActionExecutionContext context)
 		{
-			if (Docs == null)
+			if (docs == null)
 				return;
 
 			var dialog = new PrintDialog();
 			if (dialog.ShowDialog() != true)
 				return;
 
-			foreach (var doc in Docs) {
-				var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-				documentPaginator = new WrapDocumentPaginator(documentPaginator);
+			foreach (var doc in docs) {
+				var documentPaginator = GetPaginator(doc);
 				if (documentPaginator.PageSize.Width > documentPaginator.PageSize.Height)
 					dialog.PrintTicket.PageOrientation = PageOrientation.Landscape;
 				dialog.PrintDocument(documentPaginator, name);
@@ -63,6 +66,25 @@ namespace AnalitF.Net.Client.Models.Results
 
 			if (Completed != null)
 				Completed(this, new ResultCompletionEventArgs());
+		}
+
+		public WrapDocumentPaginator Paginator
+		{
+			get
+			{
+				var doc = docs.First();
+				return GetPaginator(doc);
+			}
+		}
+
+		private WrapDocumentPaginator GetPaginator(FlowDocument doc)
+		{
+			var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			var defaultDocument = baseDocument as DefaultDocument;
+			if (defaultDocument != null) {
+				defaultDocument.Document = doc;
+			}
+			return new WrapDocumentPaginator(documentPaginator, baseDocument);
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;

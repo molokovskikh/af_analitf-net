@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.model = model;
 		}
 
-		public FlowDocument BuildDocument()
+		public override FlowDocument Build()
 		{
 			var address = ((ShellViewModel)model.Parent).CurrentAddress;
 			if (model.IsCurrentSelected) {
