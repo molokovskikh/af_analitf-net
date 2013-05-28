@@ -77,7 +77,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WindowHandler = e => {
 				Dump(e);
 			};
-			Console.WriteLine("--------------");
 			RightClick(prices);
 			Thread.Sleep(1000);
 		}
