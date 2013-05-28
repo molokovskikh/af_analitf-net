@@ -11,6 +11,8 @@ namespace AnalitF.Net.Client.Models.Results
 			Model = model;
 		}
 
+		public event EventHandler<ResultCompletionEventArgs> Completed;
+
 		public Screen Model { get; private set; }
 
 		public bool ShowFixed { get; set; }
@@ -18,14 +20,13 @@ namespace AnalitF.Net.Client.Models.Results
 		public void Execute(ActionExecutionContext context)
 		{
 			var windowManager = ((BaseScreen)context.Target).Manager;
+			var args = new ResultCompletionEventArgs();
 			if (ShowFixed)
-				windowManager.ShowFixedDialog(Model);
+				args.WasCancelled = !windowManager.ShowFixedDialog(Model).GetValueOrDefault();
 			else
-				windowManager.ShowDialog(Model);
+				args.WasCancelled = !windowManager.ShowDialog(Model).GetValueOrDefault();
 			if (Completed != null)
-				Completed(this, new ResultCompletionEventArgs());
+				Completed(this, args);
 		}
-
-		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 }

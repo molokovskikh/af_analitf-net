@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumnDeclaration("Страна происхождения", 99),
 				new PrintColumnDeclaration("Номер грузовой таможенной декларации", 135)
 			};
-			var dataTable = BuildTableHeader(columns, TODO);
+			var dataTable = BuildTableHeader(columns);
 			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
 			var header = new TableRow();
 			Enumerable.Range(1, columns.Length)

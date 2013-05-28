@@ -220,18 +220,48 @@ namespace AnalitF.Net.Client.Models.Print
 			var tableRowGroup = new TableRowGroup();
 			table.RowGroups.Add(tableRowGroup);
 
+			groups = (groups ?? new ColumnGroup[0]);
+			ColumnGroup lastgroup = null;
 			var headerRow = new TableRow();
 			for (var i = 0; i < columns.Length; i++) {
 				var column = columns[i];
-				var group = groups.FirstOrDefault(g => g.First == i);
-				var name = group != null ? group.Name : column.Name;
+				var group = groups.FirstOrDefault(g => i >= g.First && i <= g.Last);
+				if (group != null && group == lastgroup)
+					continue;
+
+				lastgroup = group;
+				var name = lastgroup != null ? lastgroup.Name : column.Name;
 				var tableCell = new TableCell(new Paragraph(new Run(name))) {
-					Style = TableHeaderStyle
+					Style = TableHeaderStyle,
 				};
+				if (group != null) {
+					tableCell.ColumnSpan = group.Last - group.First + 1;
+				}
+				else if (groups.Any()) {
+					tableCell.RowSpan = 2;
+				}
 
 				headerRow.Cells.Add(tableCell);
 			}
 			tableRowGroup.Rows.Add(headerRow);
+
+			if (groups.Any()) {
+				var row = new TableRow();
+				for (var i = 0; i < columns.Length; i++) {
+					var column = columns[i];
+					var name = column.Name;
+					var group = groups.FirstOrDefault(g => i >= g.First && i <= g.Last);
+					if (group == null)
+						continue;
+
+					var tableCell = new TableCell(new Paragraph(new Run(name))) {
+						Style = TableHeaderStyle,
+					};
+					row.Cells.Add(tableCell);
+				}
+				tableRowGroup.Rows.Add(row);
+			}
+
 			return table;
 		}
 

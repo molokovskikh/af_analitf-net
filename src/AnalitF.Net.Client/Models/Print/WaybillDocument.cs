@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -45,13 +48,31 @@ namespace AnalitF.Net.Client.Models.Print
 		}
 	}
 
+	[Description("Настройка печати накладной")]
 	public class WaybillDocumentSettings
 	{
+		public WaybillDocumentSettings(Waybill waybill)
+		{
+			ProviderDocumentId = waybill.ProviderDocumentId;
+			DocumentDate = waybill.DocumentDate;
+		}
+
+		[Display(Name = "Накладная №", Order = 0)]
 		public string ProviderDocumentId { get; set; }
+
+		[Display(Name = "Дата", Order = 1)]
 		public DateTime DocumentDate { get; set; }
+
+		[Display(Name = "Через кого", Order = 2)]
 		public string OperatedBy { get; set; }
+
+		[Display(Name = "Затребовал", Order = 3)]
 		public string ReqestedBy { get; set; }
+
+		[Display(Name = "Отпустил", Order = 4)]
 		public string SentBy { get; set; }
+
+		[Display(Name = "Получил", Order = 5)]
 		public string GotBy { get; set; }
 	}
 
@@ -60,12 +81,13 @@ namespace AnalitF.Net.Client.Models.Print
 		private Waybill waybill;
 		private WaybillSettings waybillSettings;
 		private DocumentTemplate template;
-		private WaybillDocumentSettings docSettings = new WaybillDocumentSettings();
+		private WaybillDocumentSettings docSettings;
 
-		public WaybillDocument(Waybill waybill, WaybillSettings settings)
+		public WaybillDocument(Waybill waybill, WaybillSettings settings, WaybillDocumentSettings docSettings)
 		{
 			this.waybill = waybill;
 			this.waybillSettings = settings;
+			this.docSettings = docSettings;
 
 			doc.FontFamily = new FontFamily("Arial");
 			this.waybill = waybill;
@@ -113,16 +135,20 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumnDeclaration("Серия товара", 50),
 				new PrintColumnDeclaration("Сертификат", 66),
 				new PrintColumnDeclaration("Срок годности", 60),
-				new PrintColumnDeclaration("Предприятие - изготовитель Наименование", 124),
-				new PrintColumnDeclaration("Предприятие - изготовитель Цена без НДС, руб", 56),
+				new PrintColumnDeclaration("Наименование", 124),
+				new PrintColumnDeclaration("Цена без НДС, руб", 56),
 				new PrintColumnDeclaration("Затребован.колич.", 56),
 				new PrintColumnDeclaration("Опт. надб. %", 32),
 				new PrintColumnDeclaration("Отпуск. цена пост-ка без НДС, руб", 56),
 				new PrintColumnDeclaration("НДС пост-ка, руб", 40),
-				new PrintColumnDeclaration("Отпуск. цена пост-ка с НДС, руб", 56)
+				new PrintColumnDeclaration("Отпуск. цена пост-ка с НДС, руб", 56),
+				new PrintColumnDeclaration("Розн. торг. надб. %", 33),
+				new PrintColumnDeclaration("Розн. цена. за ед., руб", 56),
+				new PrintColumnDeclaration("Кол-во", 36),
+				new PrintColumnDeclaration("Розн. сумма, руб", 56),
 			};
 			var columnGrops = new [] {
-				new ColumnGroup("Предприятие", 5, 6)
+				new ColumnGroup("Предприятие - изготовитель", 5, 6)
 			};
 			var rows = waybill.Lines.Select((l, i) => new object[] {
 				++i,
@@ -136,12 +162,16 @@ namespace AnalitF.Net.Client.Models.Print
 				l.SupplierPriceMarkup,
 				l.SupplierCostWithoutNds,
 				l.SupplierCost - l.SupplierCostWithoutNds,
-				l.SupplierCost
+				l.SupplierCost,
+				l.RetailMarkup,
+				l.RetailCost,
+				l.Quantity,
+				l.RetailSum
 			});
 			BuildTable(rows, columns, columnGrops);
 
-			Block("Продажная сумма: {0}");
-			Block("Сумма поставки: {1}");
+			Block("Продажная сумма: " + RusCurrency.Str((double)waybill.RetailSum));
+			Block("Сумма поставки: " + RusCurrency.Str((double)waybill.Sum));
 
 			TwoColumns();
 			Block(String.Format("Затребовал:  {0}\n\n", docSettings.ReqestedBy)

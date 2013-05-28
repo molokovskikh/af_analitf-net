@@ -4,6 +4,7 @@ using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NHibernate.Linq;
 
@@ -57,9 +58,13 @@ namespace AnalitF.Net.Client.ViewModels
 			return null;
 		}
 
-		public IResult PrintWaybill()
+		public IEnumerable<IResult> PrintWaybill()
 		{
-			return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", new WaybillDocument(Waybill, waybillSettings))));
+			var docSettings = new WaybillDocumentSettings(Waybill);
+			yield return new DialogResult(new SimpleSettings(docSettings)) {
+				ShowFixed = true
+			};
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", new WaybillDocument(Waybill, waybillSettings, docSettings))));
 		}
 
 		public IResult PrintInvoice()

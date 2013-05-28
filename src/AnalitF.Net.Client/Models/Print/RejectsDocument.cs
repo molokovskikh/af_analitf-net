@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private void BuildTableWithReason(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers)
 		{
-			var table = BuildTableHeader(headers, TODO);
+			var table = BuildTableHeader(headers);
 			var rowGroup = table.RowGroups[0];
 			var i = 0;
 			foreach (var row in rows) {
