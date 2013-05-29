@@ -40,8 +40,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? SupplierCostWithoutNds { get; set; }
 		public virtual decimal? SupplierCost { get; set; }
 
-		public virtual int? NDS { get; set; }
-		public virtual decimal? NDSAmount { get; set; }
+		public virtual int? Nds { get; set; }
+		public virtual decimal? NdsAmount { get; set; }
 
 		public virtual decimal? Amount { get; set; }
 
@@ -69,7 +69,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? AmountExcludeTax
 		{
-			get { return Amount - NDSAmount; }
+			get { return Amount - NdsAmount; }
+		}
+
+		public virtual decimal? ProducerCostWithTax
+		{
+			get { return ProducerCost * (1 + (decimal?) Nds / 100); }
 		}
 
 		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups, bool round)
@@ -94,10 +99,10 @@ namespace AnalitF.Net.Client.Models
 			var vitallyImportant = VitallyImportant.GetValueOrDefault();
 			decimal value;
 			if (vitallyImportant) {
-				value = ((SupplierCostWithoutNds + ProducerCost*(markup/100)) * (100 + NDS) / 100).GetValueOrDefault();
+				value = ((SupplierCostWithoutNds + ProducerCost * (markup / 100)) * (100 + Nds) / 100).GetValueOrDefault();
 			}
 			else {
-				value = (SupplierCost  + SupplierCostWithoutNds * (100 + NDS) / 100 * markup / 100).GetValueOrDefault();
+				value = (SupplierCost  + SupplierCostWithoutNds * (100 + Nds) / 100 * markup / 100).GetValueOrDefault();
 			}
 			value = Math.Round(value, 2);
 			if (rountTo1)

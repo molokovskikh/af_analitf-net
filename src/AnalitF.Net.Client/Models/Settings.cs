@@ -34,6 +34,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Name { get; set; }
 		public virtual string Address { get; set; }
+		public virtual string Director { get; set; }
+		public virtual string Accountant { get; set; }
 		public virtual Address BelongsToAddress { get; set; }
 
 		public virtual string FullName

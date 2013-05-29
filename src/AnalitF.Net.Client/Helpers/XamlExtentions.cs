@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -91,6 +92,17 @@ namespace AnalitF.Net.Client.Helpers
 		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
 		{
 			return view.Children().Flat(Children);
+		}
+
+		public static void PrintVisualTree(Visual visual, int offset = 0)
+		{
+			for(var i = 0; i < offset; i++)
+				Console.Write('\t');
+			Console.WriteLine(visual.GetType());
+			var count = VisualTreeHelper.GetChildrenCount(visual);
+			for(var i = 0; i < count; i++) {
+				PrintVisualTree((Visual)VisualTreeHelper.GetChild(visual, i), offset + 1);
+			}
 		}
 	}
 }

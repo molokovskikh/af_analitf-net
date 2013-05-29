@@ -79,18 +79,17 @@ namespace AnalitF.Net.Client.Models.Print
 	public class WaybillDocument : BaseDocument
 	{
 		private Waybill waybill;
-		private WaybillSettings waybillSettings;
+		private WaybillSettings settings;
 		private DocumentTemplate template;
 		private WaybillDocumentSettings docSettings;
 
 		public WaybillDocument(Waybill waybill, WaybillSettings settings, WaybillDocumentSettings docSettings)
 		{
 			this.waybill = waybill;
-			this.waybillSettings = settings;
+			this.settings = settings;
 			this.docSettings = docSettings;
 
 			doc.FontFamily = new FontFamily("Arial");
-			this.waybill = waybill;
 			BlockStyle = new Style(typeof(Paragraph)) {
 				Setters = {
 					new Setter(Control.FontSizeProperty, 10d),
@@ -115,7 +114,7 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			Landscape();
 
-			Header(String.Format("\n                               Наименование организации: {0}\n", waybillSettings.FullName)
+			Header(String.Format("\n                               Наименование организации: {0}\n", settings.FullName)
 				+ "             Отдел:______________________________________________\n");
 
 			TwoColumns();
@@ -170,8 +169,21 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			BuildTable(rows, columns, columnGrops);
 
-			Block("Продажная сумма: " + RusCurrency.Str((double)waybill.RetailSum));
-			Block("Сумма поставки: " + RusCurrency.Str((double)waybill.Sum));
+			var block = Block("Продажная сумма: " + RusCurrency.Str((double)waybill.RetailSum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.RetailSum.ToString()))) {
+				FontWeight = FontWeights.Bold,
+				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
+				Padding = new Thickness(0),
+				Margin = new Thickness(0)
+			});
+
+			block = Block("Сумма поставки: " + RusCurrency.Str((double)waybill.Sum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.Sum.ToString()))) {
+				FontWeight = FontWeights.Bold,
+				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
+				Padding = new Thickness(0),
+				Margin = new Thickness(0)
+			});
 
 			TwoColumns();
 			Block(String.Format("Затребовал:  {0}\n\n", docSettings.ReqestedBy)
@@ -179,8 +191,8 @@ namespace AnalitF.Net.Client.Models.Print
 				+ "\" ____\" _______________20__г\n");
 			Block(String.Format("Отпустил: Сдал (выдал)________________{0}\n\n", docSettings.SentBy)
 				+ String.Format("Получил:Принял(получил)______________{0}\n\n", docSettings.GotBy)
-				+ "Руководитель учреждения_____________\n\n"
-				+ "Главный (старший)бухгалтер ________________\n");
+				+ String.Format("Руководитель учреждения_____________{0}\n\n", settings.Director)
+				+ String.Format("Главный (старший)бухгалтер ________________{0}\n", settings.Accountant));
 			return doc;
 		}
 

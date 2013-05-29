@@ -192,6 +192,7 @@
     <Compile Include="Models\Print\OrderLinesDocument.cs" />
     <Compile Include="Models\Print\PriceOfferDocument.cs" />
     <Compile Include="Models\Print\RackingMapDocument.cs" />
+    <Compile Include="Models\Print\RegistryDocument.cs" />
     <Compile Include="Models\Print\RejectsDocument.cs" />
     <Compile Include="Models\Print\WaybillDocument.cs" />
     <Compile Include="Models\Print\WrapDocumentPaginator.cs" />

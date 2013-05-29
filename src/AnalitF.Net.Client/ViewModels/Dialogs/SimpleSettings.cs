@@ -53,14 +53,16 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				grid.Children.Add(label);
 
 				UIElement input;
+				DependencyProperty inputProperty;
 				if (property.Item1.PropertyType == typeof(DateTime)) {
 					input = new DatePicker();
-					BindingOperations.SetBinding(input, DatePicker.SelectedDateProperty, new Binding(property.Item1.Name));
+					inputProperty = DatePicker.SelectedDateProperty;
 				}
 				else {
 					input = new TextBox();
-					BindingOperations.SetBinding(input, TextBox.TextProperty, new Binding(property.Item1.Name));
+					inputProperty = TextBox.TextProperty;
 				}
+				BindingOperations.SetBinding(input, inputProperty, new Binding(property.Item1.Name));
 				input.SetValue(Grid.RowProperty, i);
 				input.SetValue(Grid.ColumnProperty, 1);
 				grid.Children.Add(input);

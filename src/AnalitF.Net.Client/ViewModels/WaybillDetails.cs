@@ -53,9 +53,14 @@ namespace AnalitF.Net.Client.ViewModels
 			return null;
 		}
 
-		public IResult PrintRegistry()
+		public IEnumerable<IResult> PrintRegistry()
 		{
-			return null;
+			var docSettings = new RegistryDocumentSettings(Waybill);
+			yield return new DialogResult(new SimpleSettings(docSettings)) {
+				ShowFixed = true
+			};
+			var doc = new RegistryDocument(Waybill, waybillSettings, docSettings);
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", doc)));
 		}
 
 		public IEnumerable<IResult> PrintWaybill()
@@ -64,7 +69,8 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new SimpleSettings(docSettings)) {
 				ShowFixed = true
 			};
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", new WaybillDocument(Waybill, waybillSettings, docSettings))));
+			var doc = new WaybillDocument(Waybill, waybillSettings, docSettings);
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", doc)));
 		}
 
 		public IResult PrintInvoice()
@@ -101,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Quantity,
 				l.SupplierPriceMarkup,
 				l.SupplierCostWithoutNds,
-				l.NDS,
+				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
 				l.RetailCost,
@@ -169,7 +175,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.RegistryCost,
 				l.SupplierPriceMarkup,
 				l.SupplierCostWithoutNds,
-				l.NDS,
+				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
 				l.RetailCost,

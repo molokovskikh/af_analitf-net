@@ -39,7 +39,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Calculate_max_markup()
 		{
 			var line = new WaybillLine(waybill) {
-				NDS = 10,
+				Nds = 10,
 				SupplierCost = 82.63m,
 				SupplierCostWithoutNds = 75.12m,
 				ProducerCost = 72.89m,
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Round_value()
 		{
 			var line = new WaybillLine(waybill) {
-				NDS = 10,
+				Nds = 10,
 				SupplierCost = 251.20m,
 				SupplierCostWithoutNds = 228.36m,
 				ProducerCost = 221.58m,
@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var line = new WaybillLine(waybill) {
 				VitallyImportant = true,
-				NDS = 10,
+				Nds = 10,
 				SupplierCost = 196.59m,
 				SupplierCostWithoutNds = 178.72m,
 				ProducerCost = 164.54m,

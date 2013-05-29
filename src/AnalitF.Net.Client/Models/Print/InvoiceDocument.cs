@@ -99,17 +99,17 @@ namespace AnalitF.Net.Client.Models.Print
 
 			dataTable.RowGroups[0].Rows.Add(header);
 
-			var groups = waybill.Lines.GroupBy(l => l.NDS);
+			var groups = waybill.Lines.GroupBy(l => l.Nds);
 			foreach (var taxGroup in groups) {
 				var rows = taxGroup.Select(l => new object[] {
 					l.Product,
 					l.Unit,
 					l.Quantity,
 					l.SupplierCostWithoutNds,
-					l.Amount - l.NDSAmount,
+					l.Amount - l.NdsAmount,
 					l.ExciseTax,
-					string.Format("{0}%", l.NDS),
-					l.NDSAmount,
+					string.Format("{0}%", l.Nds),
+					l.NdsAmount,
 					l.Amount,
 					l.Country,
 					l.BillOfEntryNumber
@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.Models.Print
 				row.FontWeight = FontWeights.Bold;
 				row.Cells.Add(Cell("Итого", 4));
 				row.Cells.Add(Cell(taxGroup.Sum(l => l.AmountExcludeTax)));
-				row.Cells.Add(Cell(taxGroup.Sum(l => l.NDSAmount), 3));
+				row.Cells.Add(Cell(taxGroup.Sum(l => l.NdsAmount), 3));
 				row.Cells.Add(Cell(taxGroup.Sum(l => l.Amount)));
 				row.Cells.Add(Cell("", 2));
 				dataTable.RowGroups[0].Rows.Add(row);
@@ -129,17 +129,17 @@ namespace AnalitF.Net.Client.Models.Print
 			result.FontWeight = FontWeights.Bold;
 			result.Cells.Add(Cell("Всего к оплате", 4));
 			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.AmountExcludeTax)));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.NDSAmount), 3));
+			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.NdsAmount), 3));
 			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.Amount)));
 			result.Cells.Add(Cell("", 2));
 			dataTable.RowGroups[0].Rows.Add(result);
 			doc.Blocks.Add(dataTable);
 
-			var tax10Sum = waybill.Lines.Where(l => l.NDS == 10).Select(l => l.NDSAmount).Sum();
+			var tax10Sum = waybill.Lines.Where(l => l.Nds == 10).Select(l => l.NdsAmount).Sum();
 			var tax10Block = Block(string.Format("Итого НДС 10%: {0} руб", tax10Sum));
 			tax10Block.FontWeight = FontWeights.Bold;
 
-			var tax18Sum = waybill.Lines.Where(l => l.NDS == 18).Select(l => l.NDSAmount).Sum();
+			var tax18Sum = waybill.Lines.Where(l => l.Nds == 18).Select(l => l.NdsAmount).Sum();
 			var tax18Block = Block(string.Format("Итого НДС 18%: {0} руб", tax18Sum));
 			tax18Block.FontWeight = FontWeights.Bold;
 
