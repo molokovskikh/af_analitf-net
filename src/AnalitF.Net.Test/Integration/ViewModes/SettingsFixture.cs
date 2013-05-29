@@ -47,5 +47,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Refresh(settings);
 			Assert.That(settings.OverCostWarningPercent, Is.Not.EqualTo(value));
 		}
+
+		[Test]
+		public void Save_waybill_settings()
+		{
+			model.CurrentWaybillSettings.Value.Name = "test";
+			model.Save();
+			ScreenExtensions.TryDeactivate(model, true);
+			var waybillSettings = session.Load<WaybillSettings>(model.CurrentWaybillSettings.Value.Id);
+			Assert.AreEqual("test", waybillSettings.Name);
+		}
 	}
 }

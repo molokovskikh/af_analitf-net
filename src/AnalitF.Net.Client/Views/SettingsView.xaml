@@ -60,6 +60,24 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
+			<TabItem Header="Накладные" Name="WaybillTab">
+				<StackPanel>
+					<Label>Адрес заказа:</Label>
+					<ComboBox Style="{StaticResource ResourceKey=Select}" x:Name="Addresses" DisplayMemberPath="Name" />
+
+					<Label>Наименование:</Label>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Name"></TextBox>
+
+					<Label>Адрес:</Label>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Address"></TextBox>
+
+					<Label>Заведующая:</Label>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Director"></TextBox>
+
+					<Label>Бухгалтер:</Label>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant"></TextBox>
+				</StackPanel>
+			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">
 				<StackPanel>
 					<Label>Учетные данные</Label>

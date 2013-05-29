@@ -9,13 +9,21 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class SettingsViewModel : BaseScreen
 	{
+		private Address address;
+		private IList<WaybillSettings> waybillConfig;
+
 		public SettingsViewModel()
 		{
 			SelectedTab = new NotifyValue<string>("OverMarkupsTab");
+			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
+
 			FlushOnClose = false;
 			DisplayName = "Настройка";
 
 			Settings = Session.Query<Settings>().First();
+			waybillConfig = Session.Query<WaybillSettings>().ToList();
+			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+			CurrentAddress = Addresses.FirstOrDefault();
 
 			var markups = Session.Query<MarkupConfig>().Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
@@ -46,6 +54,23 @@ namespace AnalitF.Net.Client.ViewModels
 		public IList<MarkupConfig> VitallyImportantMarkups { get; set; }
 
 		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
+
+		public List<Address> Addresses { get; set; }
+
+		public Address CurrentAddress
+		{
+			get
+			{
+				return address;
+			}
+			set
+			{
+				address = value;
+				CurrentWaybillSettings.Value = waybillConfig.FirstOrDefault(c => c.BelongsToAddress == value);
+			}
+		}
+
+		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
 
 		public ValueDescription<DiffCalcMode> CurrentDiffCalculationType
 		{
