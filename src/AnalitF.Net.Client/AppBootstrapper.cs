@@ -122,6 +122,7 @@ namespace AnalitF.Net.Client
 		{
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
+			Shell.Quit = ((App)Application).Quit;
 
 			Deserialize();
 

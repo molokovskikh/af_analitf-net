@@ -50,7 +50,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult PrintPriceTags()
 		{
-			return null;
+			return new DialogResult(new PrintPreviewViewModel {
+				DisplayName = "Ценники",
+				Document = new PriceTagDocument().Build(Waybill, waybillSettings, Settings)
+			});
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
@@ -60,7 +63,7 @@ namespace AnalitF.Net.Client.ViewModels
 				ShowFixed = true
 			};
 			var doc = new RegistryDocument(Waybill, waybillSettings, docSettings);
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", doc)));
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Реестр", doc)));
 		}
 
 		public IEnumerable<IResult> PrintWaybill()

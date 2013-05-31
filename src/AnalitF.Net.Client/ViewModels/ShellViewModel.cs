@@ -55,6 +55,8 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
+		public bool Quit;
+
 		public ShellViewModel()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
@@ -189,6 +191,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var request = Settings.Value.CheckUpdateCondition();
+			if (Quit)
+				request = null;
+
 			if (!String.IsNullOrEmpty(request) && Confirm(request))
 				Update();
 		}

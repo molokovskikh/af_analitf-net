@@ -87,7 +87,7 @@
 				<DataGridTextColumn Width="*" Header="Цена поставщика без НДС"
 					Binding="{Binding SupplierCostWithoutNds}" />
 				<DataGridTextColumn Header="НДС"
-					Binding="{Binding NDS}"
+					Binding="{Binding Nds}"
 					Width="SizeToHeader" />
 				<DataGridTextColumn Width="*" Header="Цена поставщика с НДС"
 					Binding="{Binding SupplierCost}" />

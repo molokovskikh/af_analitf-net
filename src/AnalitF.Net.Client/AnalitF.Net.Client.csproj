@@ -38,7 +38,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>AnalitF.Net.Client.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Assets\images\mainicon_original.ico</ApplicationIcon>
@@ -58,6 +58,7 @@
     <Reference Include="ionic.zip" />
     <Reference Include="log4net" />
     <Reference Include="mysql.data" />
+    <Reference Include="ndesk.options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
     <Reference Include="npoi" />
@@ -187,10 +188,12 @@
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\Print\BaseDocument.cs" />
     <Compile Include="Models\Print\CatalogOfferDocument.cs" />
+    <Compile Include="Models\Print\FixedDocumentHelper.cs" />
     <Compile Include="Models\Print\InvoiceDocument.cs" />
     <Compile Include="Models\Print\OrderDocument.cs" />
     <Compile Include="Models\Print\OrderLinesDocument.cs" />
     <Compile Include="Models\Print\PriceOfferDocument.cs" />
+    <Compile Include="Models\Print\PriceTagDocument.cs" />
     <Compile Include="Models\Print\RackingMapDocument.cs" />
     <Compile Include="Models\Print\RegistryDocument.cs" />
     <Compile Include="Models\Print\RejectsDocument.cs" />
@@ -220,6 +223,7 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\About.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
@@ -570,6 +574,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\images\logo.png" />
+    <Resource Include="Assets\images\price-tag-log.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <ItemGroup>

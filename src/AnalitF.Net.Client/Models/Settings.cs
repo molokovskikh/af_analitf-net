@@ -44,6 +44,42 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
+	public enum PriceTagType
+	{
+		[Description("Стандартный размер")] Normal,
+		[Description("Малый размер")] Small,
+		[Description("Малый размер с большой ценой")] BigCost,
+		[Description("Малый размер с большой ценой №2")] BigCost2,
+	}
+
+	public class PriceTagSettings
+	{
+		public PriceTagSettings()
+		{
+			PrintProduct  = true;
+			PrintCountry  = true;
+			PrintProducer  = true;
+			PrintPeriod  = true;
+			PrintProviderDocumentId  = true;
+			PrintSupplier  = true;
+			PrintSerialNumber  = true;
+			PrintDocumentDate  = true;
+		}
+
+		public virtual PriceTagType Type { get; set; }
+		public virtual bool PrintEmpty { get; set; }
+		public virtual bool HideNotPrinted { get; set; }
+
+		public virtual bool PrintProduct { get; set; }
+		public virtual bool PrintCountry { get; set; }
+		public virtual bool PrintProducer { get; set; }
+		public virtual bool PrintPeriod { get; set; }
+		public virtual bool PrintProviderDocumentId { get; set; }
+		public virtual bool PrintSupplier { get; set; }
+		public virtual bool PrintSerialNumber { get; set; }
+		public virtual bool PrintDocumentDate { get; set; }
+	}
+
 	public enum RackingMapSize
 	{
 		[Description("Стандартный размер")] Normal,
@@ -85,6 +121,7 @@ namespace AnalitF.Net.Client.Models
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
 			RackingMap = new RackingMapSettings();
+			PriceTag = new PriceTagSettings();
 		}
 
 		public virtual int Id { get; set; }
@@ -111,6 +148,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool LookupMarkByProducerCost { get; set; }
 
 		public virtual RackingMapSettings RackingMap { get; set; }
+
+		public virtual PriceTagSettings PriceTag { get; set; }
 
 		public virtual bool IsValid
 		{

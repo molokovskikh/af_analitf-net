@@ -109,5 +109,10 @@ namespace AnalitF.Net.Client.Models
 				return ((int)(value * 10))/10m;
 			return value;
 		}
+
+		public virtual string SupplierName
+		{
+			get { return Waybill.Supplier == null ? null : Waybill.Supplier.Name; }
+		}
 	}
 }

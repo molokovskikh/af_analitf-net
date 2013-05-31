@@ -8,12 +8,5 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			return o is int || o is uint || o is decimal || o is double || o is float;
 		}
-
-		public static T GetValueOrDefault<K, T>(this IDictionary<K,T> dict, K key)
-		{
-			var value = default(T);
-			dict.TryGetValue(key, out value);
-			return value;
-		}
 	}
 }

@@ -11,13 +11,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class RackingMapDocument
 	{
-		private Size pageSize = new Size(816.0, 1056.0);
-
 		private GridLength defaultHeight;
 		private GridLength bigHeight;
 		private GridLength labelColumnWidth;
 		private GridLength valueColumnWidth;
-		private int columnCount;
 		private Dictionary<string, Style> styles = new Dictionary<string, Style> {
 			{"Наименование ЛС", new Style(typeof(TextBlock)) {
 				Setters = {
@@ -38,19 +35,19 @@ namespace AnalitF.Net.Client.Models.Print
 		};
 
 		private Settings settings;
+		private IDictionary<string, object> properties;
 
 		public FixedDocument Build(Waybill waybill, WaybillSettings waybillSettings, Settings settings)
 		{
+			properties = ObjectExtentions.ToDictionary(settings.RackingMap);
 			this.settings = settings;
 			if (settings.RackingMap.Size == RackingMapSize.Big) {
-				columnCount = 2;
 				bigHeight = new GridLength(63);
 				defaultHeight = new GridLength(21);
 				labelColumnWidth = new GridLength(143);
 				valueColumnWidth = new GridLength(147);
 			}
 			else {
-				columnCount = 3;
 				bigHeight = new GridLength(45);
 				defaultHeight = new GridLength(15);
 				labelColumnWidth = new GridLength(101);
@@ -62,64 +59,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 
-			var document = new FixedDocument();
-			var start = 0;
-			do {
-				var panel = new StackPanel();
-				var label = new Label {
-					Padding = new Thickness(0, 5, 0, 5),
-					Content = String.Format("{0} {1}", waybill.ProviderDocumentId, waybillSettings.FullName),
-					FontFamily = new FontFamily("Arial"),
-				};
-				panel.Children.Add(label);
-				panel.Children.Add(BuildMapGrid(waybill, pageSize, ref start));
-				var page = new PageContent();
-				page.Child = new FixedPage();
-				var border = new Border {
-					Margin = new Thickness(25),
-					Child = panel,
-				};
-				page.Child.Children.Add(border);
-				document.Pages.Add(page);
-			} while (start < waybill.Lines.Count - 1);
-			return document;
-		}
-
-		private FrameworkElement BuildMapGrid(Waybill waybill, Size size, ref int start)
-		{
-			var panel = new Grid();
-			for (var i = 0; i < columnCount; i++)
-				panel.ColumnDefinitions.Add(new ColumnDefinition());
-			for (var i = 0; i < waybill.Lines.Count / columnCount; i ++)
-				panel.RowDefinitions.Add(new RowDefinition());
-			var border = new Border {
-				Child = panel,
-				BorderBrush = Brushes.Black,
-				SnapsToDevicePixels = true,
-				BorderThickness = new Thickness(2.5, 2.5, 0, 0)
-			};
-
-			var height = size.Height - border.BorderThickness.Top - border.BorderThickness.Bottom;
-
-			for (var i = start; i < waybill.Lines.Count; i++) {
-				start = i;
-				var element = Map(waybill.Lines[i]);
-				element.Measure(size);
-				var columnIndex = i % columnCount;
-				var rowIndex = i / columnCount;
-				if (columnIndex == 0) {
-					if (height < element.DesiredSize.Height) {
-						break;
-					}
-					else {
-						height -= element.DesiredSize.Height;
-					}
-				}
-				element.SetValue(Grid.RowProperty, rowIndex);
-				element.SetValue(Grid.ColumnProperty, columnIndex);
-				panel.Children.Add(element);
-			}
-			return border;
+			return FixedDocumentHelper.BuildFixedDoc(waybill, waybillSettings, Map, 2.5);
 		}
 
 		private Grid Map(WaybillLine line)
@@ -134,7 +74,8 @@ namespace AnalitF.Net.Client.Models.Print
 				FontSize = 8,
 				Content = "Стелажная карта",
 				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0, 0, 2.5, 2.5)
+				BorderThickness = new Thickness(0, 0, 2.5, 2.5),
+				FontFamily = new FontFamily("Arial"),
 			};
 			header.SetValue(Grid.RowProperty, 0);
 			header.SetValue(Grid.ColumnSpanProperty, 2);
@@ -156,7 +97,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private void Line(Grid grid, string key, string label, string value, GridLength rowHeight, ref int row)
 		{
-			var properties = ObjectExtentions.ToDictionary(settings.RackingMap);
 			var printValue = (bool)properties[key];
 			if (!printValue)
 				value = "";

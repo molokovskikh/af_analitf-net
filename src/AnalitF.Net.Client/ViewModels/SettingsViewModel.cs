@@ -39,6 +39,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 			RackingMapSizes = Settings.RackingMap.Size.ToDescriptions<RackingMapSize>();
+			PriceTagTypes = Settings.PriceTag.Type.ToDescriptions<PriceTagType>();
+			CanConfigurePriceTag = new NotifyValue<bool>(() => CurrentPriceTagType.Value == PriceTagType.Normal);
 
 			if (string.IsNullOrEmpty(Settings.UserName)) {
 				SelectedTab.Value = "LoginTab";
@@ -85,6 +87,20 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return RackingMapSizes.First(x => x.Value == Settings.RackingMap.Size); }
 			set { Settings.RackingMap.Size = value.Value; }
 		}
+
+		public List<ValueDescription<PriceTagType>> PriceTagTypes { get; set; }
+
+		public ValueDescription<PriceTagType> CurrentPriceTagType
+		{
+			get { return PriceTagTypes.FirstOrDefault(t => t.Value == Settings.PriceTag.Type); }
+			set
+			{
+				Settings.PriceTag.Type = value.Value;
+				CanConfigurePriceTag.Recalculate();
+			}
+		}
+
+		public NotifyValue<bool> CanConfigurePriceTag { get; set; }
 
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{

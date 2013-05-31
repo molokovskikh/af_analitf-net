@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
-using Common.Tools;
 
 namespace AnalitF.Net.Client
 {
@@ -21,6 +11,8 @@ namespace AnalitF.Net.Client
 		private Color activeColor;
 		private ResourceDictionary resources;
 		private Style baseStyle;
+
+		public bool Quit;
 
 		public void RegisterResources()
 		{
