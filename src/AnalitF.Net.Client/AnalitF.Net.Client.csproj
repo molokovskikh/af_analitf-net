@@ -221,6 +221,7 @@
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\About.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseOrderViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
@@ -255,6 +256,9 @@
     <Compile Include="ViewModels\WaitViewModel.cs" />
     <Compile Include="ViewModels\WaybillDetails.cs" />
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
+    <Compile Include="Views\AboutView.xaml.cs">
+      <DependentUpon>AboutView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CatalogNameView.xaml.cs">
       <DependentUpon>CatalogNameView.xaml</DependentUpon>
     </Compile>
@@ -362,6 +366,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Assets\styles\PopupSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AboutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -561,6 +569,7 @@
     <Resource Include="Assets\images\update.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\images\logo.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <ItemGroup>

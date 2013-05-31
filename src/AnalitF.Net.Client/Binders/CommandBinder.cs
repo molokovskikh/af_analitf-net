@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
@@ -21,10 +22,11 @@ namespace AnalitF.Net.Client.Binders
 
 		private static void NavigateUri(object sender, ExecutedRoutedEventArgs e)
 		{
-			if (e.Parameter == null)
+			var uri = e.Parameter ?? (e.OriginalSource is Hyperlink ? ((Hyperlink)e.OriginalSource).NavigateUri : null);
+			if (uri == null)
 				return;
 
-			new OpenResult(e.Parameter.ToString()).Execute(new ActionExecutionContext());
+			new OpenResult(uri.ToString()).Execute(new ActionExecutionContext());
 		}
 
 		public static void InvokeViewModel(object sender, ExecutedRoutedEventArgs e)

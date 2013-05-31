@@ -53,6 +53,10 @@
 					<MenuItem Header="Создание базы данных с сохранение отправленных заказов" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="CleanDb"></MenuItem>
 				</MenuItem>
 			</MenuItem>
+
+			<MenuItem Header="Справка">
+				<MenuItem Header="О программе..." Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowAbout" />
+			</MenuItem>
 		</Menu>
 
 		<ToolBarTray Grid.Row="1">

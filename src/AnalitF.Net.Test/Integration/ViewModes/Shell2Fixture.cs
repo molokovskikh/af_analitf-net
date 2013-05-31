@@ -127,6 +127,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(command, Is.EqualTo("SendOrders"));
 		}
 
+		[Test]
+		public void Show_about()
+		{
+			shell.ShowAbout();
+		}
+
 		private void ContinueWithDialog<T>(Action<T> action)
 		{
 			manager.ContinueViewDialog = m => {

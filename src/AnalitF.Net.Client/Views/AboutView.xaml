@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.AboutView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	Padding="30"
+	binders:FocusBehavior.DefaultFocus="{x:Reference TryClose}">
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+	</UserControl.InputBindings>
+
+	<StackPanel>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition></RowDefinition>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+			<Canvas Width="95" Height="90">
+				<Image Grid.Row="0" Grid.Column="0" Panel.ZIndex="0"
+					Source="/AnalitF.Net.Client;component/assets/images/Logo.png"
+					Width="79"
+					Height="74" />
+				<Image Grid.Row="0" Grid.Column="0" Panel.ZIndex="1"
+					Source="/AnalitF.Net.Client;component/assets/images/mainicon_original.ico"
+					Height="32"
+					Width="32"
+					Canvas.Left="63"
+					Canvas.Top="58"/>
+			</Canvas>
+			<Label Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">АналитФАРМАЦИЯ</Label>
+		</Grid>
+		<Label>
+			<TextBlock>
+				<Run>Версия:</Run>
+				<Run x:Name="Version"></Run>
+			</TextBlock>
+		</Label>
+		<Label>
+			<TextBlock>
+				<Run>Идентификация:</Run>
+				<Run x:Name="User_Id"></Run>
+			</TextBlock>
+		</Label>
+		<Label>Адреса для доставки накладных и отказов:</Label>
+		<TextBox Name="AboutText" IsReadOnly="True"
+			VerticalScrollBarVisibility="Auto"
+			HorizontalScrollBarVisibility="Auto"
+			TextWrapping="Wrap"
+			Height="170"
+			Width="350"></TextBox>
+		<DockPanel LastChildFill="False" Margin="5">
+			<TextBlock VerticalAlignment="Center">
+				<Hyperlink NavigateUri="http://www.analit.net" Command="binders:Commands.NavigateUri">АК "Инфорум"</Hyperlink>
+			</TextBlock>
+			<Button MinWidth="70" DockPanel.Dock="Right" Name="TryClose">OK</Button>
+		</DockPanel>
+	</StackPanel>
+</UserControl>

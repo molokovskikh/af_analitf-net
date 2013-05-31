@@ -286,6 +286,11 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowDialog(new PrintPreviewViewModel(printResult));
 		}
 
+		public void ShowAbout()
+		{
+			windowManager.ShowFixedDialog(new About());
+		}
+
 		public bool CanShowCatalog
 		{
 			get { return Settings.Value.LastUpdate != null; }

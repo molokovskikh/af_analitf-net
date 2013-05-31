@@ -81,6 +81,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			var price = supplier.RegionalData[0];
 			price.SupportPhone = "473-2727092";
+			price.AdminMail = "kvasovtest@analit.net";
 			price.ContactInfo = @"р/с 40702810213360100306
 в Центрально-Черноземный банк СБ РФ г.Воронеж, к/с 30101810600000000681,
 БИК 042007681, ОКПО 4790682, ОКОНХ 71100,

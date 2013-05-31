@@ -86,7 +86,7 @@
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<TextBlock>
-								<Hyperlink Command="binders:Commands.NavigateUri" CommandParameter="{Binding Uri}">
+								<Hyperlink Command="binders:Commands.NavigateUri" NavigateUri="{Binding Uri}">
 									<Run Text="{Binding Name}"></Run>
 								</Hyperlink>
 							</TextBlock>
