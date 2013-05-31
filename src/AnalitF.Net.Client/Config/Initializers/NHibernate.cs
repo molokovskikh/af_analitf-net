@@ -11,6 +11,7 @@ using NHibernate;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Type;
 using log4net;
+using NHibernate.Cfg.MappingSchema;
 using Cascade = NHibernate.Mapping.ByCode.Cascade;
 using Configuration = NHibernate.Cfg.Configuration;
 using Environment = NHibernate.Cfg.Environment;
@@ -128,6 +129,15 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));
 			var mapping = mapper.CompileMappingFor(types);
+
+			var components = mapping.RootClasses.SelectMany(c => c.Properties).OfType<HbmComponent>().Where(c => c.Name != "OfferId");
+			foreach (var component in components) {
+				var columns = component.Properties.OfType<HbmProperty>();
+				foreach (var column in columns) {
+					column.column = component.Name + column.name;
+				}
+			}
+
 			if (debug)
 				Console.WriteLine(mapping.AsString());
 

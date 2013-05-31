@@ -4,6 +4,14 @@ using System.Linq;
 
 namespace AnalitF.Net.Client.Models
 {
+	public class Contractor
+	{
+		public virtual string Name { get; set; }
+		public virtual string Address { get; set; }
+		public virtual string Inn { get; set; }
+		public virtual string Kpp { get; set; }
+	}
+
 	public class Waybill
 	{
 		public Waybill()
@@ -21,6 +29,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal TaxSum { get; set; }
+
+		public virtual Contractor Seller { get; set; }
+		public virtual Contractor Buyer { get; set; }
+		public virtual string ShipperNameAndAddress { get; set; }
+		public virtual string ConsigneeNameAndAddress { get; set; }
+
 
 		public virtual IList<WaybillLine> Lines { get; set; }
 

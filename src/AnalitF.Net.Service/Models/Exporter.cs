@@ -274,10 +274,21 @@ select dh.Id,
 	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
 	dh.DocumentDate,
 	dh.AddressId,
-	dh.FirmCode as SupplierId
+	dh.FirmCode as SupplierId,
+	i.SellerName,
+	i.SellerAddress,
+	i.SellerInn,
+	i.SellerKpp,
+	i.BuyerName,
+	i.BuyerAddress,
+	i.BuyerInn,
+	i.BuyerKpp,
+	i.ConsigneeInfo as ConsigneeNameAndAddress,
+	i.ShipperInfo as ShipperNameAndAddress
 from Logs.DocumentSendLogs ds
 	join Logs.Document_logs d on d.RowId = ds.DocumentId
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
+			left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where ds.UserId = ?UserId
 	and ds.Committed = 0
 group by dh.Id";
