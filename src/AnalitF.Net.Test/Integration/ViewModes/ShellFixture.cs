@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -17,9 +12,6 @@ using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
-using ReactiveUI;
-using Test.Support.log4net;
-using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -102,7 +94,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			session.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			shell.Arguments = new[] { "cmd.exe", "import" };
-			WithDispatcher(() => {
+			WpfHelper.WithDispatcher(() => {
 				shell.OnLoaded();
 			});
 
@@ -124,7 +116,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				return UpdateResult.OK;
 			};
 
-			var dispatcher = WithDispatcher(() => {
+			var dispatcher = WpfHelper.WithDispatcher(() => {
 				taskCompleted.Set();
 				shell.Update();
 				Assert.That(manager.Dialogs.Count, Is.EqualTo(1));
@@ -152,29 +144,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.UserName = null;
 			settings.Password = null;
 			session.Flush();
-		}
-
-		public static Dispatcher WithDispatcher(Action action)
-		{
-			var started = new ManualResetEventSlim();
-			var dispatcherThread = new Thread(() => {
-				// This is here just to force the dispatcher infrastructure to be setup on this thread
-				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
-
-				// Run the dispatcher so it starts processing the message loop
-				Dispatcher.Run();
-			});
-
-			dispatcherThread.SetApartmentState(ApartmentState.STA);
-			dispatcherThread.IsBackground = true;
-			dispatcherThread.Start();
-			started.Wait();
-			var dispatcher = Dispatcher.FromThread(dispatcherThread);
-			dispatcher.Invoke(new Action(() => {
-				RxApp.DeferredScheduler = DispatcherScheduler.Current;
-				action();
-			}));
-			return dispatcher;
 		}
 	}
 }

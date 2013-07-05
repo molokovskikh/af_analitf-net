@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Printing;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Xps.Packaging;
 using System.Windows.Xps.Serialization;
@@ -25,12 +27,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var paginator = result.Paginator;
-			var outputXps = Path.GetTempFileName();
-			paginator.SaveToXps(outputXps);
-			var xpsDoc = new XpsDocument(outputXps, FileAccess.Read);
-			Document = xpsDoc.GetFixedDocumentSequence();
+			Orientation = PrintResult.GetPageOrientation(paginator);
+			Document = PrintHelper.ToFixedDocument(paginator);
 		}
 
 		public IDocumentPaginatorSource Document { get; set; }
+		public PageOrientation Orientation { get; set; }
 	}
 }

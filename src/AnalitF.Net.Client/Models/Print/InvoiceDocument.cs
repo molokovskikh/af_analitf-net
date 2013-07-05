@@ -61,15 +61,15 @@ namespace AnalitF.Net.Client.Models.Print
 			Landscape();
 
 			Header(string.Format("Счет-фактура {0} от {1:d}", waybill.ProviderDocumentId, waybill.DocumentDate));
-			Block(string.Format("Продавец: {0}", waybill.Seller.Name));
-			Block(string.Format("Адрес продавца: {0}", waybill.Seller.Address));
-			Block(string.Format("ИНН/КПП: {0}/{1}", waybill.Seller.Inn, waybill.Seller.Kpp));
+			Block(string.Format("Продавец: {0}", waybill.Seller == null ? "" : waybill.Seller.Name));
+			Block(string.Format("Адрес продавца: {0}", waybill.Seller == null ? "" : waybill.Seller.Address));
+			Block(string.Format("ИНН/КПП: {0}/{1}", waybill.Seller == null ? "" : waybill.Seller.Inn, waybill.Seller == null ? "" : waybill.Seller.Kpp));
 			Block(string.Format("Грузоотправитель и его адрес: {0}", waybill.ShipperNameAndAddress));
 			Block(string.Format("Грузополучатель и его адрес: {0}", waybill.ConsigneeNameAndAddress));
 			Block("К платежно-расчетному документу №_______________ от _______________");
-			Block(string.Format("Покупатель: {0}", waybill.Buyer.Name));
-			Block(string.Format("Адрес покупателя: {0}", waybill.Buyer.Address));
-			Block(string.Format("ИНН/КПП покупателя: {0}/{1}", waybill.Buyer.Inn, waybill.Buyer.Kpp));
+			Block(string.Format("Покупатель: {0}", waybill.Buyer == null ? "" : waybill.Buyer.Name));
+			Block(string.Format("Адрес покупателя: {0}", waybill.Buyer == null ? "" : waybill.Buyer.Address));
+			Block(string.Format("ИНН/КПП покупателя: {0}/{1}", waybill.Buyer == null ? "" : waybill.Buyer.Inn, waybill.Buyer == null ? "" : waybill.Buyer.Kpp));
 			var headerTable = TwoColumns(GridLength.Auto, "", "Вылюта: россиский рубль");
 			headerTable.CellSpacing = 0;
 			headerTable.Margin = new Thickness(0, 0, 0, 0);

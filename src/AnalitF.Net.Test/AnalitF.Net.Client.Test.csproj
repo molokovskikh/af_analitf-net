@@ -57,6 +57,7 @@
     <Reference Include="npoi" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFrameWork" />
+    <Reference Include="ReachFramework" />
     <Reference Include="ReactiveUI" />
     <Reference Include="ReactiveUI.Routing, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -149,6 +150,7 @@
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DbFixture.cs" />
+    <Compile Include="TestHelpers\WpfHelper.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
     <Compile Include="Unit\MarkupConfigFixture.cs" />

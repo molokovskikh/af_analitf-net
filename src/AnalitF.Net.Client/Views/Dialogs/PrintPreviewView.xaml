@@ -2,12 +2,13 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls"
 	binders:FocusBehavior.DefaultFocus="{x:Reference Document}">
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
 	</UserControl.InputBindings>
 	<Grid>
-		<DocumentViewer Name="Document"></DocumentViewer>
+		<Controls:DocumentViewerV2 x:Name="Document" Orientation="{Binding Orientation}"></Controls:DocumentViewerV2>
 	</Grid>
 </UserControl>

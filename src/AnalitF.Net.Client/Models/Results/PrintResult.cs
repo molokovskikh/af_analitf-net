@@ -59,13 +59,21 @@ namespace AnalitF.Net.Client.Models.Results
 
 			foreach (var doc in docs) {
 				var documentPaginator = GetPaginator(doc);
-				if (documentPaginator.PageSize.Width > documentPaginator.PageSize.Height)
-					dialog.PrintTicket.PageOrientation = PageOrientation.Landscape;
+				var orientation = GetPageOrientation(documentPaginator);
+				if (orientation != PageOrientation.Unknown)
+					dialog.PrintTicket.PageOrientation = orientation;
 				dialog.PrintDocument(documentPaginator, name);
 			}
 
 			if (Completed != null)
 				Completed(this, new ResultCompletionEventArgs());
+		}
+
+		public static PageOrientation GetPageOrientation(DocumentPaginator documentPaginator)
+		{
+			if (documentPaginator.PageSize.Width > documentPaginator.PageSize.Height)
+				return PageOrientation.Landscape;
+			return PageOrientation.Unknown;
 		}
 
 		public WrapDocumentPaginator Paginator

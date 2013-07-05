@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -71,7 +73,6 @@ namespace AnalitF.Net.Test.Integration
 		public static void SaveToPng(FlowDocument doc)
 		{
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			//paginator.PageSize = size;
 			var count = paginator.PageCount;
 			for(var i = 0; i <= count; i++) {
 				var page = paginator.GetPage(i);
