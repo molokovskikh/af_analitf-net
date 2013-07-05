@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
+using Common.MySql;
 using Common.Tools;
 using Devart.Data.MySql;
 using NHibernate;
@@ -104,7 +106,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
-				var propertyType = ((PropertyInfo)member.LocalMember).PropertyType;
+				var propertyInfo = ((PropertyInfo)member.LocalMember);
+				var propertyType = propertyInfo.PropertyType;
 				if (member.GetContainerEntity(inspector) == typeof(ProductDescription)) {
 					if (propertyType == typeof(string)) {
 						customizer.Length(10000);
@@ -116,6 +119,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				}
 
 				if (propertyType.IsValueType && !propertyType.IsNullable()) {
+					customizer.Column(c => c.Default(GetDefaultValue(propertyInfo)));
 					customizer.NotNullable(true);
 				}
 			};
@@ -130,13 +134,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));
 			var mapping = mapper.CompileMappingFor(types);
 
-			var components = mapping.RootClasses.SelectMany(c => c.Properties).OfType<HbmComponent>().Where(c => c.Name != "OfferId");
-			foreach (var component in components) {
-				var columns = component.Properties.OfType<HbmProperty>();
-				foreach (var column in columns) {
-					column.column = component.Name + column.name;
-				}
-			}
+			PatchComponentColumnName(mapping);
 
 			if (debug)
 				Console.WriteLine(mapping.AsString());
@@ -165,6 +163,37 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
 			Factory = Configuration.BuildSessionFactory();
+		}
+
+		private static void PatchComponentColumnName(HbmMapping mapping)
+		{
+			var components = mapping.RootClasses.SelectMany(c => c.Properties).OfType<HbmComponent>().Where(c => c.Name != "OfferId");
+			foreach (var component in components) {
+				var columns = component.Properties.OfType<HbmProperty>();
+				foreach (var property in columns) {
+					if (!property.Columns.Any())
+						property.column = component.Name + property.name;
+					else
+						property.Columns.Each(c => c.name = component.Name + c.name);
+				}
+			}
+		}
+
+		private static object GetDefaultValue(PropertyInfo propertyInfo)
+		{
+			var instance = Activator.CreateInstance(propertyInfo.DeclaringType);
+			var defaultValue = propertyInfo.GetValue(instance, null);
+			if (defaultValue is bool)
+				return Convert.ToInt32(defaultValue);
+			if (defaultValue is Enum)
+				return Convert.ToInt32(defaultValue);
+			if (defaultValue is int || defaultValue is uint || defaultValue is UInt64)
+				return defaultValue.ToString();
+			if (defaultValue is DateTime)
+				return "'" + ((DateTime)defaultValue).ToString(MySqlConsts.MySQLDateFormat) + "'";
+			if (defaultValue is decimal)
+				return ((decimal)defaultValue).ToString(CultureInfo.InvariantCulture);
+			throw new Exception(propertyInfo.PropertyType.ToString());
 		}
 
 		public static string FixRelativePaths(string connectionString)

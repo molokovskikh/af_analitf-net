@@ -26,7 +26,7 @@ namespace AnalitF.Net.Test.Integration
 			Factory = AppBootstrapper.NHibernate.Factory;
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 
-			if (!Directory.Exists("data")) {
+			if (!Directory.Exists("data") || !Directory.Exists("backup")) {
 				FileHelper.InitDir("data");
 				ImportData();
 				BackupData();

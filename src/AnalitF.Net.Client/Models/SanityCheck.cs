@@ -16,22 +16,24 @@ namespace AnalitF.Net.Client.Models
 		private string dataPath;
 		private ILog log = LogManager.GetLogger(typeof(SanityCheck));
 
+		public static bool Debug;
+		private Configuration configuration;
+
 		public SanityCheck(string dataPath)
 		{
 			this.dataPath = dataPath;
+			configuration = AppBootstrapper.NHibernate.Configuration;
 		}
 
 		public void Check(bool updateSchema = false)
 		{
 			var factory = AppBootstrapper.NHibernate.Factory;
-			var configuration = AppBootstrapper.NHibernate.Configuration;
-
 			if (!Directory.Exists(dataPath)) {
 				Directory.CreateDirectory(dataPath);
-				InitDb(configuration);
+				InitDb();
 			}
 			else if (updateSchema) {
-				UpdateDb(configuration);
+				UpdateDb();
 			}
 
 			var crushOnFirstTry = false;
@@ -40,7 +42,7 @@ namespace AnalitF.Net.Client.Models
 			}
 			catch(GenericADOException e) {
 				//Unknown column '%s' in '%s'
-				//Message: Table '%s.%s' doesn't exist
+				//Table '%s.%s' doesn't exist
 				//http://dev.mysql.com/doc/refman/4.1/en/error-messages-server.html
 				if (e.InnerException is MySqlException &&
 					(((MySqlException)e.InnerException).Code == 1054
@@ -55,7 +57,7 @@ namespace AnalitF.Net.Client.Models
 
 			//если свалились на первой попытке нужно попытаться починить базу и попробовать еще разик
 			if (crushOnFirstTry) {
-				UpdateDb(configuration);
+				UpdateDb();
 				CheckSettings(factory);
 			}
 		}
@@ -91,17 +93,17 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		private static void UpdateDb(Configuration configuration)
+		public void UpdateDb()
 		{
 			var export = new SchemaUpdate(configuration);
-			export.Execute(false, true);
+			export.Execute(Debug, true);
 		}
 
-		private static void InitDb(Configuration configuration)
+		public void InitDb()
 		{
 			var export = new SchemaExport(configuration);
-			export.Drop(false, true);
-			export.Create(false, true);
+			export.Drop(Debug, true);
+			export.Create(Debug, true);
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -11,22 +12,8 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class OrderFixture
+	public class OrderFixture : DbFixture
 	{
-		private ISession session;
-
-		[SetUp]
-		public void Setup()
-		{
-			session = SetupFixture.Factory.OpenSession();
-		}
-
-		[TearDown]
-		public void Teardown()
-		{
-			session.Dispose();
-		}
-
 		//тест для ситуации когда для загруженных объектов не работает биндинг
 		//измещение о новыйх данных ui не обрабатывает
 		//проблема в том что ui биндится к прокси а объект посылает извещения от себя

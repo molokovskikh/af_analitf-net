@@ -1,27 +1,21 @@
 ﻿using System.IO;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Devart.Data.MySql;
+using System.Linq;
+using NHibernate.Linq;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class SanityCheckFixture
+	public class SanityCheckFixture : DbFixture
 	{
-		[TestFixtureSetUp]
-		public void FixtureSetup()
+		[TearDown]
+		public void TearDown()
 		{
-			FileHelper.InitDir("backup");
-			Directory.GetFiles("data")
-				.Each(f => File.Copy(f, Path.Combine("backup", Path.GetFileName(f)), true));
-		}
-
-		[TestFixtureTearDown]
-		public void FixtureTearDown()
-		{
-			Directory.GetFiles("backup")
-				.Each(f => File.Copy(f, Path.Combine("data", Path.GetFileName(f)), true));
+			SetupFixture.RestoreData(session);
 		}
 
 		[Test]
@@ -29,6 +23,22 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			var check = new SanityCheck("data");
 			check.Check();
+		}
+
+		[Test]
+		public void Update_schema()
+		{
+			var columns = typeof(PriceTagSettings).GetProperties().Select(p => "drop column PriceTag" + p.Name).Implode();
+			try {
+				session.CreateSQLQuery("alter table Settings " + columns).ExecuteUpdate();
+			}
+			catch {
+			}
+			var check = new SanityCheck("data");
+			check.Check();
+
+			var settings = session.Query<Settings>().First();
+			Assert.IsTrue(settings.PriceTag.PrintProduct);
 		}
 
 		[Test, Ignore("Тест не работает тк нельзя удалить директорию с данными тк в ней сидит mysql а способа остановить mysql нет")]

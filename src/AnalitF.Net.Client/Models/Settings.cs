@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate;

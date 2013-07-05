@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		private IDisposable disposeTestShedule;
 
-		protected Client.Extentions.WindowManager manager;
+		protected Extentions.WindowManager manager;
 		protected ISession session;
 		protected TestScheduler testScheduler;
 

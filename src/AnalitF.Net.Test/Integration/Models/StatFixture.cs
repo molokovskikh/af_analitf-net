@@ -1,22 +1,22 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate.Linq;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class StatFixture
+	public class StatFixture : DbFixture
 	{
 		[Test]
 		public void Load_stat()
 		{
-			using(var session = SetupFixture.Factory.OpenSession()) {
-				session.DeleteEach<Order>();
-				var address = session.Query<Address>().First();
-				var stat = Stat.Update(session, address);
-			}
+			session.DeleteEach<Order>();
+			var address = session.Query<Address>().First();
+			var stat = Stat.Update(session, address);
+			Assert.AreEqual(0, stat.OrdersCount);
 		}
 
 		[Test]
