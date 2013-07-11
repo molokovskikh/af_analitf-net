@@ -38,21 +38,21 @@
 		<c:DataGrid x:Name="Waybills" Grid.Row="1"
 			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="№"
+				<DataGridTextColumn Width="64*" Header="№"
 					Binding="{Binding Id}" />
-				<DataGridTextColumn Width="*" Header="№ поставщика"
+				<DataGridTextColumn Width="64*" Header="№ поставщика"
 					Binding="{Binding ProviderDocumentId}" />
 				<DataGridTextColumn Width="150*" Header="Дата документа"
 					Binding="{Binding DocumentDate}" />
-				<DataGridTextColumn Width="*" Header="Дата получения документа"
+				<DataGridTextColumn Width="64*" Header="Дата получения документа"
 					Binding="{Binding WriteTime}" />
 				<DataGridTextColumn Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
-				<DataGridTextColumn Width="*" Header="Поставщик"
+				<DataGridTextColumn Width="64*" Header="Поставщик"
 					Binding="{Binding Supplier.Name}" />
-				<DataGridTextColumn Width="*" Header="Сумма опт"
+				<DataGridTextColumn Width="64*" Header="Сумма опт"
 					Binding="{Binding Sum}" />
-				<DataGridTextColumn Width="*" Header="Сумма розница"
+				<DataGridTextColumn Width="64*" Header="Сумма розница"
 					Binding="{Binding RetailSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid>

@@ -61,23 +61,24 @@
 		<c:DataGrid Grid.Row="2" x:Name="Lines"
 			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Наименование"
+				<DataGridTextColumn Width="180*" Header="Наименование"
 					Binding="{Binding Product}" />
-				<DataGridTextColumn Width="*" Header="Производитель"
+				<DataGridTextColumn Width="180*" Header="Производитель"
 					Binding="{Binding Producer}" />
-				<DataGridTextColumn Width="*" Header="Страна"
+				<DataGridTextColumn Width="100*" Header="Страна"
 					Binding="{Binding Country}" />
-				<DataGridTextColumn Width="*" Header="Печатать" />
-				<DataGridTextColumn Width="*" Header="Срок годности"
+				<DataGridTextColumn Width="SizeToHeader" Header="Печатать" />
+				<DataGridTextColumn Width="160*" Header="Срок годности"
 					Binding="{Binding Period}" />
-				<DataGridTextColumn Width="*" Header="Серия товара"
+				<DataGridTextColumn Width="160*" Header="Серия товара"
 					Binding="{Binding SerialNumber}" />
 				<DataGridTextColumn Header="Сертификаты"
 					Width="SizeToHeader" />
 				<DataGridTextColumn Header="Получить"
 					Width="SizeToHeader" />
-				<DataGridTextColumn Width="*" Header="Номер сертификата"
-					Binding="{Binding Certificates}" />
+				<DataGridTextColumn Width="180*" Header="Номер сертификата"
+					Binding="{Binding Certificates}"
+					Visibility="Collapsed" />
 				<DataGridTextColumn Width="*" Header="Цена производителя без НДС"
 					Binding="{Binding ProducerCost}" />
 				<DataGridTextColumn Width="*" Header="Цена ГР"

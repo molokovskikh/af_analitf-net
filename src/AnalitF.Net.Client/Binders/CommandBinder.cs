@@ -31,11 +31,7 @@ namespace AnalitF.Net.Client.Binders
 
 		public static void InvokeViewModel(object sender, ExecutedRoutedEventArgs e)
 		{
-			var name = e.Parameter as string;
-			if (String.IsNullOrEmpty(name))
-				name = ((RoutedCommand)e.Command).Name;
-
-			ViewModelHelper.InvokeDataContext(sender, name, e);
+			ViewModelHelper.InvokeDataContext(sender, e);
 		}
 
 		public static void CanInvokeViewModel(object sender, CanExecuteRoutedEventArgs e)

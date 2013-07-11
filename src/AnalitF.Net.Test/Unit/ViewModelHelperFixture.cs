@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using Caliburn.Micro;
 using NUnit.Framework;
@@ -67,6 +69,24 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var result = ViewModelHelper.InvokeDataContext(element, "CanTest");
 			Assert.That(result, Is.EqualTo(false));
+		}
+
+		[Test]
+		public void Invoke_view_model()
+		{
+			ViewModelHelper.InvokeDataContext(element, "Test", EventArgs.Empty);
+			Assert.AreEqual(1, model.Count);
+		}
+
+		[Test]
+		public void Invoke_with_anonymous_object()
+		{
+			var param = new { Method = "Test" };
+			var args = (ExecutedRoutedEventArgs)typeof(ExecutedRoutedEventArgs)
+				.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(ICommand), typeof(object) }, null)
+				.Invoke(new object[] { new RoutedUICommand(), param });
+			var result = ViewModelHelper.InvokeDataContext(element, args);
+			Assert.AreEqual(1, model.Count);
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using Caliburn.Micro;
 using Common.Tools;
 
@@ -9,19 +10,24 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class ViewModelHelper
 	{
-		public static object InvokeDataContext(object sender, object methodOrMethodAndArgs, params object[] args)
+		public static object InvokeDataContext(object sender, ExecutedRoutedEventArgs args)
 		{
-			if (methodOrMethodAndArgs is string) {
-				return InvokeDataContext(sender, methodOrMethodAndArgs as string, args);
+			var name = args.Parameter as string;
+			var parameters = new object[] { args };
+
+			if (String.IsNullOrEmpty(name))
+				name = ((RoutedCommand)args.Command).Name;
+
+			if (String.IsNullOrEmpty(name) && args.Parameter != null) {
+				var values = ObjectExtentions.ToDictionary(args.Parameter);
+				name = values.GetValueOrDefault("Method") as string;
+				parameters = values.Where(k => k.Key != "Method").Select(k => k.Value).ToArray();
 			}
-			else {
-				var values = ObjectExtentions.ToDictionary(methodOrMethodAndArgs);
-				if (values.ContainsKey("Method")) {
-					args = values.Where(k => k.Key != "Method").Select(k => k.Value).ToArray();
-					return InvokeDataContext(sender, values["Method"] as string, args);
-				}
+
+			if (String.IsNullOrEmpty(name))
 				return null;
-			}
+
+			return InvokeDataContext(sender, name, parameters);
 		}
 
 		public static object InvokeDataContext(object sender, string method, params object[] args)

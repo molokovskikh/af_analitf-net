@@ -119,20 +119,6 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
-		public void Invoke_view_model_with_parameters()
-		{
-			ViewModelHelper.InvokeDataContext(view, new { Method = "Reset", i = 1 });
-			Assert.That(model.ResetValue, Is.EqualTo(1));
-		}
-
-		[Test]
-		public void Invoke_view_model()
-		{
-			ViewModelHelper.InvokeDataContext(view, "Reset", EventArgs.Empty);
-			Assert.That(model.ResetValue, Is.EqualTo(100));
-		}
-
-		[Test]
 		public void Bind_multiselector()
 		{
 			model.Items = new List<string> {"a", "b", "c"};
