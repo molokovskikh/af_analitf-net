@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration;
@@ -18,6 +19,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	public class BaseFixture
 	{
 		private IDisposable disposeTestShedule;
+		private CompositeDisposable disposable;
 
 		protected Extentions.WindowManager manager;
 		protected ISession session;
@@ -46,17 +48,20 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			settings = session.Query<Settings>().FirstOrDefault();
 			shell = new ShellViewModel();
 			ScreenExtensions.TryActivate(shell);
+
+			disposable = new CompositeDisposable {
+				disposeTestShedule,
+				session
+			};
 		}
 
 		[TearDown]
 		public void BaseFixtureTearDown()
 		{
-			if (Restore) {
+			if (Restore)
 				SetupFixture.RestoreData(session);
-			}
 
-			disposeTestShedule.Dispose();
-			session.Dispose();
+			disposable.Dispose();
 		}
 
 		protected void StubWindowManager()
@@ -78,6 +83,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected T Init<T>(T model) where T : BaseScreen
 		{
+			if (model.IsInitialized)
+				return model;
+
+			disposable.Add(model);
 			model.Parent = shell;
 			ScreenExtensions.TryActivate(model);
 			return model;

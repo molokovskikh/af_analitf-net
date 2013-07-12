@@ -3,31 +3,12 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	public class TestTraceListner : TraceListener
-	{
-		private List<string> traces;
-
-		public TestTraceListner(List<string> traces)
-		{
-			this.traces = traces;
-		}
-
-		public override void Write(string message)
-		{
-			traces.Add(message);
-		}
-
-		public override void WriteLine(string message)
-		{
-			traces.Add(message);
-		}
-	}
-
 	public class ViewFixtureSetup
 	{
 		private static bool init;
@@ -44,7 +25,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			init = true;
 			PresentationTraceSources.Refresh();
 			PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
-			PresentationTraceSources.DataBindingSource.Listeners.Add(new TestTraceListner(BindingErrors));
+			PresentationTraceSources.DataBindingSource.Listeners.Add(new MemoryTraceListner(BindingErrors));
 
 			var app = new Client.App();
 			AssemblySource.Instance.Add(typeof(App).Assembly);

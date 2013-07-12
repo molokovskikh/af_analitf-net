@@ -6,3 +6,5 @@
 \src\Test.Support\Test.Support\log4net\EventFilter.cs
 \src\Test.Support\Test.Support.Web\WatinSetup.cs
 \src\AnalitF.Net.Test\Acceptance\BaseFixture.cs
+\src\AnalitF.Net.Client\Program.cs
+\src\AnalitF.Net.Client\Helpers\XamlExtentions.cs

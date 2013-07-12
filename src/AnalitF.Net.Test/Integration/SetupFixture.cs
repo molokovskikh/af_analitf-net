@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using AnalitF.Net.Client;
+using Common.Models;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
+using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
 using Test.Support;
@@ -26,10 +29,23 @@ namespace AnalitF.Net.Test.Integration
 			Factory = AppBootstrapper.NHibernate.Factory;
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 
-			if (!Directory.Exists("data") || !Directory.Exists("backup")) {
+			if (IsStale()) {
 				FileHelper.InitDir("data");
 				ImportData();
 				BackupData();
+			}
+		}
+
+		private static bool IsStale()
+		{
+			return !Directory.Exists("data") || !Directory.Exists("backup") || IsDbStale();
+		}
+
+		private static bool IsDbStale()
+		{
+			//если пользователя нет, значит база была перезалита и локальная база не актуальна
+			using(var session = IntegrationFixture.Factory.OpenSession()) {
+				return !session.Query<TestUser>().Any(u => u.Login == System.Environment.UserName);
 			}
 		}
 

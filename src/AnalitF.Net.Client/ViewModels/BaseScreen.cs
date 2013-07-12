@@ -25,11 +25,8 @@ using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class BaseScreen : Screen, IActivateEx, IExportable
+	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
-		private Dictionary<string, List<ColumnSettings>> viewDefaults
-			= new Dictionary<string, List<ColumnSettings>>();
-
 		protected ILog log;
 
 		protected virtual ShellViewModel Shell
@@ -53,6 +50,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
+		private TableSettings tableSettings;
 
 		public BaseScreen()
 		{
@@ -68,6 +66,7 @@ namespace AnalitF.Net.Client.ViewModels
 			User = Session.Query<User>().FirstOrDefault();
 
 			excelExporter = new ExcelExporter(this);
+			tableSettings = new TableSettings();
 		}
 
 		public bool IsSuccessfulActivated { get; protected set; }
@@ -79,46 +78,14 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return excelExporter.CanExport; }
 		}
 
-		public virtual void NavigateBackward()
-		{
-			var canClose = Shell == null || Shell.NavigationStack.Any();
-			if (canClose)
-				TryClose();
-		}
-
 		protected override void OnInitialize()
 		{
 			Load();
 			Restore();
-		}
 
-		private void Load()
-		{
-			if (Shell == null)
-				return;
-
-			if (Shell.CurrentAddress != null)
-				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
-		}
-
-		private void Restore()
-		{
-			if (Shell == null)
-				return;
-
-			var key = GetType().FullName;
-			if (Shell.ViewModelSettings.ContainsKey(key)) {
-				try {
-					IsNotifying = false;
-					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, JsonHelper.SerializerSettings());
-				}
-				catch (Exception e) {
-					log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
-				}
-				finally {
-					IsNotifying = true;
-					Shell.ViewModelSettings.Remove(key);
-				}
+			if (Shell != null) {
+				tableSettings.Persisted = Shell.ViewSettings;
+				tableSettings.Prefix = GetType().Name + ".";
 			}
 		}
 
@@ -148,13 +115,27 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (close) {
 				Save();
-				SaveView(GetView());
+				tableSettings.SaveView(GetView());
 			}
 
-			if (close && Session.IsOpen) {
-				StatelessSession.Dispose();
-				Session.Dispose();
-			}
+			if (close)
+				Dispose();
+		}
+
+		private void Load()
+		{
+			if (Shell == null)
+				return;
+
+			if (Shell.CurrentAddress != null)
+				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
+		}
+
+		public virtual void NavigateBackward()
+		{
+			var canClose = Shell == null || Shell.NavigationStack.Any();
+			if (canClose)
+				TryClose();
 		}
 
 		private void Save()
@@ -174,79 +155,35 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.ViewModelSettings.Add(key, json);
 		}
 
-		private void SaveView(object view)
+		public void Restore()
 		{
-			if (view == null)
+			if (Shell == null)
 				return;
 
-			foreach (var grid in GetControls(view)) {
-				SaveView(grid, Shell.ViewSettings);
-			}
-		}
-
-		private void SaveView(DataGrid grid, Dictionary<string, List<ColumnSettings>> storage)
-		{
-			var key = GetViewKey(grid);
-			if (storage.ContainsKey(key)) {
-				storage.Remove(key);
-			}
-			storage.Add(key, grid.Columns.Select((c, i) => new ColumnSettings(c, i)).ToList());
-		}
-
-		protected void RestoreView(object view)
-		{
-			foreach (var grid in GetControls(view)) {
-				SaveView(grid, viewDefaults);
-				RestoreView(grid, Shell.ViewSettings);
+			var key = GetType().FullName;
+			if (Shell.ViewModelSettings.ContainsKey(key)) {
+				try {
+					IsNotifying = false;
+					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, JsonHelper.SerializerSettings());
+				}
+				catch (Exception e) {
+					log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
+				}
+				finally {
+					IsNotifying = true;
+					Shell.ViewModelSettings.Remove(key);
+				}
 			}
 		}
 
 		public void ResetView(DataGrid grid)
 		{
-			RestoreView(grid, viewDefaults);
-		}
-
-		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
-		{
-			var key = GetViewKey(dataGrid);
-			if (!storage.ContainsKey(key))
-				return;
-
-			var settings = storage[key];
-			if (settings == null)
-				return;
-
-			foreach (var setting in settings) {
-				var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(setting.Name));
-				if (column == null)
-					return;
-				setting.Restore(column);
-			}
-		}
-
-		private string GetViewKey(DataGrid grid)
-		{
-			return GetType().Name + "." + grid.Name;
-		}
-
-		public IEnumerable<DataGrid> GetControls(object view)
-		{
-			var dependencyObject = view as DependencyObject;
-			if (dependencyObject == null || Shell == null)
-				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.DeepChildren()
-				.OfType<DataGrid>()
-				.Where(c => (bool)c.GetValue(ContextMenuBehavior.PersistColumnSettingsProperty));
+			tableSettings.Reset(grid);
 		}
 
 		protected override void OnViewAttached(object view, object context)
 		{
-			RestoreView(view);
-		}
-
-		public override string ToString()
-		{
-			return DisplayName;
+			tableSettings.RestoreView(view);
 		}
 
 		public IResult Export()
@@ -286,6 +223,20 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			currentReject.ValueUpdated()
 				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
+		}
+
+		public override string ToString()
+		{
+			return DisplayName;
+		}
+
+		public void Dispose()
+		{
+			if (StatelessSession != null)
+				StatelessSession.Dispose();
+
+			if (Session != null)
+				Session.Dispose();
 		}
 	}
 }

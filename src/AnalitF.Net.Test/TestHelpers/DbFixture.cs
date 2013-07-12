@@ -17,7 +17,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
-			session.Dispose();
+			if (session != null)
+				session.Dispose();
 		}
 	}
 }

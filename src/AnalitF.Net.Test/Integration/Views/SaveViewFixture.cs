@@ -93,5 +93,23 @@ namespace AnalitF.Net.Test.Integration.Views
 			model.ResetView(grid);
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Visible));
 		}
+
+		[Test]
+		public void Do_not_override_user_settings_activation()
+		{
+			ScreenExtensions.TryDeactivate(model, true);
+			InitView();
+
+			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			var column = grid.Columns[0];
+			Assert.AreNotEqual(351, column.Width.Value);
+			column.Width = new DataGridLength(351);
+
+			view.SetValue(ViewModelBinder.ConventionsAppliedProperty, true);
+			//AttachView вызывается каждый раз при активации\деактивации
+			//в этом случае не нужно сбрасывать настройки
+			((IViewAware)model).AttachView(view);
+			Assert.AreEqual(351, column.Width.Value);
+		}
 	}
 }
