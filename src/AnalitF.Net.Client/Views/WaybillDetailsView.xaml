@@ -17,13 +17,32 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
-			<Button Name="PrintPriceTags" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать ценников</Button>
-			<Button Name="PrintRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать реестра</Button>
-			<Button Name="PrintWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать накладной</Button>
-			<Button Name="PrintInvoice" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать счет-фактуры</Button>
-			<Button Name="PrintRackingMap" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Стелажная карта</Button>
-			<Button Name="ExportRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Реестр в Excel</Button>
-			<Button Name="ExportWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Накладная в Excel</Button>
+			<StackPanel Margin="4, 0">
+				<CheckBox Name="RoundToSingleDigit">Отбрасывать розничную цену до 10 коп. в "меньше"</CheckBox>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock VerticalAlignment="Center" Margin="0, 5, 5, 5">НДС:</TextBlock>
+					<ComboBox Style="{StaticResource Select}" x:Name="Taxes" DisplayMemberPath="Name" />
+				</StackPanel>
+			</StackPanel>
+			<Grid Margin="4, 0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition></ColumnDefinition>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать ценников</Button>
+				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать реестра</Button>
+				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать накладной</Button>
+				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Печать счет-фактуры</Button>
+				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Стелажная карта</Button>
+				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Реестр в Excel</Button>
+				<Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Накладная в Excel</Button>
+			</Grid>
 		</StackPanel>
 
 		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
@@ -59,51 +78,83 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Lines"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:ContextMenuBehavior.PersistColumnSettings="true"
+			IsReadOnly="False">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="180*" Header="Наименование"
-					Binding="{Binding Product}" />
-				<DataGridTextColumn Width="180*" Header="Производитель"
-					Binding="{Binding Producer}" />
-				<DataGridTextColumn Width="100*" Header="Страна"
-					Binding="{Binding Country}" />
-				<DataGridTextColumn Width="SizeToHeader" Header="Печатать" />
-				<DataGridTextColumn Width="160*" Header="Срок годности"
-					Binding="{Binding Period}" />
-				<DataGridTextColumn Width="160*" Header="Серия товара"
-					Binding="{Binding SerialNumber}" />
-				<DataGridTextColumn Header="Сертификаты"
+				<c:DataGridTextColumnEx Width="180*" Header="Наименование"
+					Binding="{Binding Product}"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Width="180*" Header="Производитель"
+					Binding="{Binding Producer}"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Width="100*" Header="Страна"
+					Binding="{Binding Country}"
+					IsReadOnly="True" />
+				<DataGridCheckBoxColumn Width="SizeToHeader" Header="Печатать" Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}" />
+				<c:DataGridTextColumnEx Width="160*" Header="Срок годности"
+					Binding="{Binding Period}"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Width="160*" Header="Серия товара"
+					Binding="{Binding SerialNumber}"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Сертификаты"
+					Width="SizeToHeader"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Получить"
 					Width="SizeToHeader" />
-				<DataGridTextColumn Header="Получить"
-					Width="SizeToHeader" />
-				<DataGridTextColumn Width="180*" Header="Номер сертификата"
+				<c:DataGridTextColumnEx Width="180*" Header="Номер сертификата"
 					Binding="{Binding Certificates}"
-					Visibility="Collapsed" />
-				<DataGridTextColumn Width="*" Header="Цена производителя без НДС"
-					Binding="{Binding ProducerCost}" />
-				<DataGridTextColumn Width="*" Header="Цена ГР"
-					Binding="{Binding RegistryCost}" />
-				<DataGridTextColumn Width="*" Header="Торговая наценка оптовика"
-					Binding="{Binding SupplierPriceMarkup}" />
-				<DataGridTextColumn Width="*" Header="Цена поставщика без НДС"
-					Binding="{Binding SupplierCostWithoutNds}" />
-				<DataGridTextColumn Header="НДС"
+					Visibility="Collapsed"
+					IsReadOnly="True" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена производителя без НДС"
+					Binding="{Binding ProducerCost}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена ГР"
+					Binding="{Binding RegistryCost}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Торговая наценка оптовика"
+					Binding="{Binding SupplierPriceMarkup}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика без НДС"
+					Binding="{Binding SupplierCostWithoutNds}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Header="НДС"
 					Binding="{Binding Nds}"
-					Width="SizeToHeader" />
-				<DataGridTextColumn Width="*" Header="Цена поставщика с НДС"
-					Binding="{Binding SupplierCost}" />
-				<DataGridTextColumn Width="*" Header="Макс. розничная наценка"
-					Binding="{Binding MaxRetailMarkup}" />
-				<DataGridTextColumn Width="*" Header="Розничная наценка"
-					Binding="{Binding RetailMarkup}" />
-				<DataGridTextColumn Width="*" Header="Реальная наценка"
-					Binding="{Binding RealRetailMarkup}" />
-				<DataGridTextColumn Width="*" Header="Розничная цена"
-					Binding="{Binding RetailCost}" />
-				<DataGridTextColumn Width="*" Header="Заказ"
-					Binding="{Binding Quantity}" />
-				<DataGridTextColumn Width="*" Header="Розничная сумма"
-					Binding="{Binding RetailSum}" />
+					Width="SizeToHeader"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика с НДС"
+					Binding="{Binding SupplierCost}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Макс. розничная наценка"
+					Binding="{Binding MaxRetailMarkup}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Розничная наценка"
+					Binding="{Binding RetailMarkup}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Реальная наценка"
+					Binding="{Binding RealRetailMarkup}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Розничная цена"
+					Binding="{Binding RetailCost}"
+					IsReadOnly="True"
+					TextAlignment="Right"/>
+				<c:DataGridTextColumnEx Width="*" Header="Заказ"
+					Binding="{Binding Quantity}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Розничная сумма"
+					Binding="{Binding RetailSum}"
+					IsReadOnly="True"
+					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 	</Grid>

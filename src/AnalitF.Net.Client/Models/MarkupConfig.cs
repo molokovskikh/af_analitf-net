@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public static decimal Calculate(List<MarkupConfig> markups, BaseOffer currentOffer)
+		public static decimal Calculate(IList<MarkupConfig> markups, BaseOffer currentOffer)
 		{
 			if (currentOffer == null)
 				return 0;

@@ -153,6 +153,7 @@
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />
     <Compile Include="TestHelpers\WpfHelper.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
+    <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
     <Compile Include="Unit\MarkupConfigFixture.cs" />
     <Compile Include="Unit\MySqlFixture.cs" />

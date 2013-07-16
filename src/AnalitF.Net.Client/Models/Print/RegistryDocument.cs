@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -40,12 +41,14 @@ namespace AnalitF.Net.Client.Models.Print
 		private Waybill waybill;
 		private WaybillSettings settings;
 		private RegistryDocumentSettings docSettings;
+		private IList<WaybillLine> lines;
 
-		public RegistryDocument(Waybill waybill, WaybillSettings settings, RegistryDocumentSettings docSettings)
+		public RegistryDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, RegistryDocumentSettings docSettings)
 		{
 			this.waybill = waybill;
 			this.docSettings = docSettings;
 			this.settings = settings;
+			this.lines = lines;
 
 			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {
@@ -129,7 +132,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var columnGrops = new [] {
 				new ColumnGroup("Предприятие - изготовитель", 4, 6)
 			};
-			var rows = waybill.Lines.Select((l, i) => new object[] {
+			var rows = lines.Select((l, i) => new object[] {
 				++i,
 				l.Product,
 				l.SerialNumber,
@@ -149,15 +152,17 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 				BuildTable(rows, columns, columnGrops);
 
-			block = Block("Продажная сумма: " + RusCurrency.Str((double)waybill.RetailSum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.RetailSum.ToString()))) {
+			var retailsSum = lines.Sum(l => l.RetailSum);
+			block = Block("Продажная сумма: " + RusCurrency.Str((double)retailsSum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(retailsSum.ToString()))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),
 				Margin = new Thickness(0)
 			});
-			block = Block("Сумма поставки: " + RusCurrency.Str((double)waybill.Sum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.Sum.ToString()))) {
+			var sum = lines.Sum(l => l.Amount);
+			block = Block("Сумма поставки: " + RusCurrency.Str((double)sum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(sum.ToString()))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),

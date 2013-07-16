@@ -24,7 +24,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected List<Offer> offers;
 		protected string currentProducer;
 		private Offer currentOffer;
-		protected List<MarkupConfig> markups = new List<MarkupConfig>();
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
@@ -41,8 +40,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public BaseOfferViewModel()
 		{
-			markups = Session.Query<MarkupConfig>().ToList();
-
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
@@ -226,7 +223,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void CalculateRetailCost()
 		{
 			foreach (var offer in Offers)
-				offer.CalculateRetailCost(markups);
+				offer.CalculateRetailCost(Settings.Markups);
 		}
 
 		public void OfferUpdated()

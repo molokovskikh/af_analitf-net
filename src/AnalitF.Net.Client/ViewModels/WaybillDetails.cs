@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -19,10 +21,22 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
+			CurrentTax = new NotifyValue<ValueDescription<int?>>();
+			RoundToSingleDigit = new NotifyValue<bool>(true);
+			RoundToSingleDigit.Changes()
+				.Subscribe(v => Waybill.Calculate(Settings, Settings.Markups, RoundToSingleDigit.Value));
+			Lines = new NotifyValue<IList<WaybillLine>>(() => (Waybill ?? new Waybill())
+				.Lines
+				.Where(l => l.Nds == CurrentTax.Value.Value || CurrentTax.Value.Value == -1)
+				.ToList(), CurrentTax);
 		}
 
 		public Waybill Waybill { get; set; }
-		public IList<WaybillLine> Lines { get; set; }
+		public NotifyValue<IList<WaybillLine>> Lines { get; set; }
+		//TODO: при фильтрации обновляются данные для печати
+		public List<ValueDescription<int?>> Taxes { get; set; }
+		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
+		public NotifyValue<bool> RoundToSingleDigit { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -33,18 +47,24 @@ namespace AnalitF.Net.Client.ViewModels
 			waybillSettings = Session.Query<WaybillSettings>().FirstOrDefault(s => s.BelongsToAddress.Id == addressId);
 			if (waybillSettings == null)
 				waybillSettings = new WaybillSettings();
-			var markups = Session.Query<MarkupConfig>().ToList();
 
-			Waybill.Calculate(Settings, markups, true);
+			Waybill.Calculate(Settings, Settings.Markups, RoundToSingleDigit);
 
-			Lines = Waybill.Lines;
+			Lines.Value = Waybill.Lines;
+			Taxes = new List<ValueDescription<int?>> {
+				new ValueDescription<int?>("Все", -1),
+			};
+			Taxes.AddRange(Lines.Value.Select(l => l.Nds).Distinct()
+				.OrderBy(t => t)
+				.Select(t => new ValueDescription<int?>(((object)t ?? "Нет значения").ToString(), t)));
+			CurrentTax.Value = Taxes.FirstOrDefault();
 		}
 
 		public IResult PrintRackingMap()
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стелажная карта",
-				Document = new RackingMapDocument().Build(Waybill, waybillSettings, Settings)
+				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings, waybillSettings).Build()
 			});
 		}
 
@@ -52,7 +72,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Ценники",
-				Document = new PriceTagDocument().Build(Waybill, waybillSettings, Settings)
+				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings, waybillSettings).Build()
 			});
 		}
 
@@ -62,7 +82,7 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new SimpleSettings(docSettings)) {
 				ShowFixed = true
 			};
-			var doc = new RegistryDocument(Waybill, waybillSettings, docSettings);
+			var doc = new RegistryDocument(Waybill, PrintableLines(), waybillSettings, docSettings);
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Реестр", doc)));
 		}
 
@@ -72,8 +92,13 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new SimpleSettings(docSettings)) {
 				ShowFixed = true
 			};
-			var doc = new WaybillDocument(Waybill, waybillSettings, docSettings);
+			var doc = new WaybillDocument(Waybill, PrintableLines(), waybillSettings, docSettings);
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", doc)));
+		}
+
+		private IList<WaybillLine> PrintableLines()
+		{
+			return Lines.Value.Where(l => l.Print).ToList();
 		}
 
 		public IResult PrintInvoice()
@@ -100,7 +125,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"Кол-во",
 				"Розн. сумма, руб"
 			};
-			var items = Lines.Select((l, i) => new object[] {
+			var items = PrintableLines().Select((l, i) => new object[] {
 				i + 1,
 				l.Product,
 				String.Format("{0} {1}", l.SerialNumber, l.Certificates),
@@ -168,7 +193,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"Кол-во",
 				"Розн. сумма, руб"
 			};
-			var items = Lines.Select((l, i) => new object[] {
+			var items = PrintableLines().Select((l, i) => new object[] {
 				i + 1,
 				l.Product,
 				l.SerialNumber,

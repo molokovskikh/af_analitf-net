@@ -123,6 +123,7 @@ namespace AnalitF.Net.Client.Models
 			OverCostWarningPercent = 5;
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
+			Markups = new List<MarkupConfig>();
 		}
 
 		public virtual int Id { get; set; }
@@ -151,6 +152,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual RackingMapSettings RackingMap { get; set; }
 
 		public virtual PriceTagSettings PriceTag { get; set; }
+
+		public virtual IList<MarkupConfig> Markups { get; set; }
 
 		public virtual bool IsValid
 		{

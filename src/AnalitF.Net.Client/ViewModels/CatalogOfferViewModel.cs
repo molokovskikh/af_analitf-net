@@ -223,7 +223,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			get
 			{
-				return retailMarkup == 0 ? MarkupConfig.Calculate(markups, CurrentOffer) : retailMarkup;
+				return retailMarkup == 0 ? MarkupConfig.Calculate(Settings.Markups, CurrentOffer) : retailMarkup;
 			}
 			set
 			{

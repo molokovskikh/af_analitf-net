@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -17,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels
 			SelectedTab = new NotifyValue<string>("OverMarkupsTab");
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 
-			FlushOnClose = false;
+			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
 
 			Settings = Session.Query<Settings>().First();
@@ -25,26 +27,24 @@ namespace AnalitF.Net.Client.ViewModels
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
 
-			var markups = Session.Query<MarkupConfig>().Where(t => t.Type == MarkupType.Over)
+			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
-				.ToList();
-			MarkupConfig.Validate(markups.ToArray());
-			Markups = new PersistentList<MarkupConfig>(markups, Session);
+				.LinkTo(Settings.Markups);
+			MarkupConfig.Validate(Markups);
 
-			var vitiallyImportant = Session.Query<MarkupConfig>().Where(t => t.Type == MarkupType.VitallyImportant)
+			VitallyImportantMarkups = Settings.Markups
+				.Where(t => t.Type == MarkupType.VitallyImportant)
 				.OrderBy(m => m.Begin)
 				.ToList();
-			MarkupConfig.Validate(vitiallyImportant.ToArray());
-			VitallyImportantMarkups = new PersistentList<MarkupConfig>(vitiallyImportant, Session);
+			MarkupConfig.Validate(VitallyImportantMarkups);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 			RackingMapSizes = Settings.RackingMap.Size.ToDescriptions<RackingMapSize>();
 			PriceTagTypes = Settings.PriceTag.Type.ToDescriptions<PriceTagType>();
 			CanConfigurePriceTag = new NotifyValue<bool>(() => CurrentPriceTagType.Value == PriceTagType.Normal);
 
-			if (string.IsNullOrEmpty(Settings.UserName)) {
+			if (string.IsNullOrEmpty(Settings.UserName))
 				SelectedTab.Value = "LoginTab";
-			}
 		}
 
 		public NotifyValue<string> SelectedTab { get; set; }
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			FlushOnClose = true;
+			Session.FlushMode = FlushMode.Auto;
 			Settings.ApplyChanges(Session);
 			TryClose();
 		}

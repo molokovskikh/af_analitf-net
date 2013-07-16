@@ -38,7 +38,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Extentions.WindowManager Manager { get; private set; }
 
-		protected bool FlushOnClose = true;
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
 
@@ -106,11 +105,12 @@ namespace AnalitF.Net.Client.ViewModels
 			if (close)
 				OnCloseDisposable.Dispose();
 
-			if (FlushOnClose && Session.IsOpen) {
+			if (Session.IsOpen) {
+				if (Session.FlushMode != FlushMode.Never)
+					Session.Flush();
+
 				if (Session.Transaction.IsActive)
 					Session.Transaction.Commit();
-
-				Session.Flush();
 			}
 
 			if (close) {

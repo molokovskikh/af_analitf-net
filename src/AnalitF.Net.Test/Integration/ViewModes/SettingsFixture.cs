@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
@@ -18,6 +19,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
+			Restore = true;
 			model = Init(new SettingsViewModel());
 		}
 
@@ -29,13 +31,28 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		}
 
 		[Test]
-		public void Save_changes()
+		public void Not_save_invalid_data()
 		{
-			var count = model.Markups.Count;
+			var origin = model.Markups.Count;
+			Assert.AreEqual(0, model.Markups[0].Begin);
 			model.Markups.Add(new MarkupConfig());
 			model.Save();
+			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
+			ScreenExtensions.TryDeactivate(model, true);
+
 			model = Init(new SettingsViewModel());
-			Assert.That(model.Markups.Count, Is.EqualTo(count + 1));
+			Assert.AreEqual(origin, model.Markups.Count);
+		}
+
+		[Test]
+		public void Save_changes()
+		{
+			model.Markups.ToArray().Each(v => model.Markups.Remove(v));
+			model.Markups.Add(new MarkupConfig());
+			model.Save();
+			Assert.AreEqual("", manager.MessageBoxes.Implode());
+			model = Init(new SettingsViewModel());
+			Assert.That(model.Markups.Count, Is.EqualTo(1));
 		}
 
 		[Test]

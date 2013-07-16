@@ -27,9 +27,9 @@ namespace AnalitF.Net.Client.ViewModels
 			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
 
 			Observable.Merge(
-				Begin.Changes(),
-				End.Changes(),
-				IsFilterByDocumentDate.Changes())
+				Begin.Changes().Select(v => (object)v),
+				End.Changes().Select(v => (object)v),
+				IsFilterByDocumentDate.Changes().Select(v => (object)v))
 				.Subscribe(_ => Update());
 		}
 

@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual decimal RetailCost { get; set; }
 
-		public virtual void CalculateRetailCost(List<MarkupConfig> markups)
+		public virtual void CalculateRetailCost(IList<MarkupConfig> markups)
 		{
 			var markup = MarkupConfig.Calculate(markups, this);
 			RetailCost = Math.Round(Cost * (1 + markup / 100), 2);

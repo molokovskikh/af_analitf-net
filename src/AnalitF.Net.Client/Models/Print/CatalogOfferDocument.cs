@@ -7,18 +7,6 @@ using System.Windows.Media;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PrintColumnDeclaration
-	{
-		public PrintColumnDeclaration(string name, int width)
-		{
-			Name = name;
-			Width = width;
-		}
-
-		public string Name;
-		public int Width;
-	}
-
 	public class CatalogOfferDocument : BaseDocument
 	{
 		private List<Offer> offers;

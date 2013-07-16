@@ -46,7 +46,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)) || type.BaseType == typeof(BaseStatelessObject))
 					&& modelInspector.IsEntity(type);
 			});
-
+			mapper.Class<Settings>(m => {
+				m.Bag(o => o.Markups, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
+			});
 			mapper.Class<MinOrderSumRule>(m => {
 				m.ComposedId(c => {
 					c.ManyToOne(p => p.Address);

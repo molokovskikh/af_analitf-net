@@ -11,43 +11,6 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class DocumentTemplate
-	{
-		public List<FrameworkContentElement> Parts = new List<FrameworkContentElement>();
-
-		public Block ToBlock()
-		{
-			var table = new Table {
-				Columns = {
-					new TableColumn {
-						Width = GridLength.Auto
-					},
-					new TableColumn {
-						Width = GridLength.Auto
-					},
-				},
-				RowGroups = {
-					new TableRowGroup {
-						Rows = {
-							new TableRow {
-								Cells = {
-									new TableCell((Block)Parts[0]),
-									new TableCell((Block)Parts[1])
-								}
-							}
-						}
-					}
-				}
-			};
-			return table;
-		}
-
-		public bool IsReady
-		{
-			get { return Parts.Count == 2; }
-		}
-	}
-
 	[Description("Настройка печати накладной")]
 	public class WaybillDocumentSettings
 	{
@@ -82,12 +45,14 @@ namespace AnalitF.Net.Client.Models.Print
 		private WaybillSettings settings;
 		private DocumentTemplate template;
 		private WaybillDocumentSettings docSettings;
+		private IList<WaybillLine> lines;
 
-		public WaybillDocument(Waybill waybill, WaybillSettings settings, WaybillDocumentSettings docSettings)
+		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, WaybillDocumentSettings docSettings)
 		{
 			this.waybill = waybill;
 			this.settings = settings;
 			this.docSettings = docSettings;
+			this.lines = lines;
 
 			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {
@@ -149,7 +114,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var columnGrops = new [] {
 				new ColumnGroup("Предприятие - изготовитель", 5, 6)
 			};
-			var rows = waybill.Lines.Select((l, i) => new object[] {
+			var rows = lines.Select((l, i) => new object[] {
 				++i,
 				l.Product,
 				l.SerialNumber,
@@ -169,16 +134,18 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			BuildTable(rows, columns, columnGrops);
 
-			var block = Block("Продажная сумма: " + RusCurrency.Str((double)waybill.RetailSum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.RetailSum.ToString()))) {
+			var retailSum = lines.Sum(l => l.RetailSum);
+			var block = Block("Продажная сумма: " + RusCurrency.Str((double)retailSum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(retailSum.ToString()))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),
 				Margin = new Thickness(0)
 			});
 
-			block = Block("Сумма поставки: " + RusCurrency.Str((double)waybill.Sum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(waybill.Sum.ToString()))) {
+			var sum = lines.Sum(l => l.Amount);
+			block = Block("Сумма поставки: " + RusCurrency.Str((double)sum));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(sum.ToString()))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),
@@ -243,20 +210,6 @@ namespace AnalitF.Net.Client.Models.Print
 				doc.Blocks.Add(template.ToBlock());
 				template = null;
 			}
-		}
-	}
-
-	public class ColumnGroup
-	{
-		public string Name;
-		public int First;
-		public int Last;
-
-		public ColumnGroup(string name, int first, int last)
-		{
-			Name = name;
-			First = first;
-			Last = last;
 		}
 	}
 }

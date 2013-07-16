@@ -40,11 +40,10 @@ namespace AnalitF.Net.Client.Models
 
 			using (var transaction = session.BeginTransaction()) {
 				var settings = session.Query<Settings>().First();
-				var markups = session.Query<MarkupConfig>().ToList();
 
 				var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
 				foreach (var waybill in newWaybills) {
-					waybill.Calculate(settings, markups, true);
+					waybill.Calculate(settings, settings.Markups, true);
 				}
 
 				settings.LastUpdate = DateTime.Now;

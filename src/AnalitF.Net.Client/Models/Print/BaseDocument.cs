@@ -10,6 +10,69 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
+	public class PrintColumnDeclaration
+	{
+		public PrintColumnDeclaration(string name, int width)
+		{
+			Name = name;
+			Width = width;
+		}
+
+		public string Name;
+		public int Width;
+	}
+
+	public class DocumentTemplate
+	{
+		public List<FrameworkContentElement> Parts = new List<FrameworkContentElement>();
+
+		public Block ToBlock()
+		{
+			var table = new Table {
+				Columns = {
+					new TableColumn {
+						Width = GridLength.Auto
+					},
+					new TableColumn {
+						Width = GridLength.Auto
+					},
+				},
+				RowGroups = {
+					new TableRowGroup {
+						Rows = {
+							new TableRow {
+								Cells = {
+									new TableCell((Block)Parts[0]),
+									new TableCell((Block)Parts[1])
+								}
+							}
+						}
+					}
+				}
+			};
+			return table;
+		}
+
+		public bool IsReady
+		{
+			get { return Parts.Count == 2; }
+		}
+	}
+
+	public class ColumnGroup
+	{
+		public string Name;
+		public int First;
+		public int Last;
+
+		public ColumnGroup(string name, int first, int last)
+		{
+			Name = name;
+			First = first;
+			Last = last;
+		}
+	}
+
 	public class DefaultDocument : BaseDocument
 	{
 		public FlowDocument Document

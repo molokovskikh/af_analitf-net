@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class CollectionHelper
+	public static class CollectionHelper
 	{
 		public static void Bind(IList source, IList target)
 		{
@@ -22,6 +25,13 @@ namespace AnalitF.Net.Client.Helpers
 						args.NewItems.Cast<object>().Each(i => target.Add(i));
 				}
 			};
+		}
+
+		public static IList<T> LinkTo<T>(this IEnumerable<T> src, IList<T> dst)
+		{
+			var result = new ObservableCollection<T>(src.ToList());
+			Bind(result, (IList)dst);
+			return result;
 		}
 	}
 }

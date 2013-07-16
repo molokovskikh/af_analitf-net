@@ -23,7 +23,6 @@ namespace AnalitF.Net.Client.ViewModels
 	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable
 	{
 		private OrderLine currentLine;
-		private List<MarkupConfig> markups;
 		private Price currentPrice;
 
 		private Editor editor;
@@ -47,7 +46,6 @@ namespace AnalitF.Net.Client.ViewModels
 			editor = new Editor(OrderWarning, Manager);
 
 			DisplayName = "Сводный заказ";
-			markups = Session.Query<MarkupConfig>().ToList();
 
 			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
 			Dep(Update, m => m.CurrentPrice, m => m.AddressSelector.All.Value);
@@ -182,7 +180,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected void CalculateRetailCost()
 		{
 			foreach (var offer in Lines.Value)
-				offer.CalculateRetailCost(markups);
+				offer.CalculateRetailCost(Settings.Markups);
 		}
 
 		public List<Price> Prices { get; set; }

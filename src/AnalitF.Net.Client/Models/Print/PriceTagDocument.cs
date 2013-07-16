@@ -15,8 +15,6 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class PriceTagDocument
 	{
-		private WaybillSettings waybillSettings;
-		private Settings settings;
 		private IDictionary<string, object> properties;
 
 		private Dictionary<string, Style> styles = new Dictionary<string, Style> {
@@ -70,10 +68,21 @@ namespace AnalitF.Net.Client.Models.Print
 			}},
 		};
 
-		public FixedDocument Build(Waybill waybill, WaybillSettings waybillSettings, Settings settings)
+		private Waybill waybill;
+		private Settings settings;
+		private WaybillSettings waybillSettings;
+		private IList<WaybillLine> lines;
+
+		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, WaybillSettings waybillSettings)
 		{
+			this.waybill = waybill;
 			this.waybillSettings = waybillSettings;
 			this.settings = settings;
+			this.lines = lines;
+		}
+
+		public FixedDocument Build()
+		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
 			Func<WaybillLine, FrameworkElement> map = Normal;
 
@@ -84,11 +93,14 @@ namespace AnalitF.Net.Client.Models.Print
 			else if (settings.PriceTag.Type == PriceTagType.BigCost2)
 				map = Big2;
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, waybillSettings, l => Border(map(l), 0.5), 0.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
 		}
 
-		private static string FormatCost(WaybillLine line)
+		private string FormatCost(WaybillLine line)
 		{
+			if (settings.PriceTag.PrintEmpty)
+				return "";
+
 			var format = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
 			format.NumberDecimalSeparator = "-";
 			return String.Format(format, "{0:0.00}", line.RetailCost);

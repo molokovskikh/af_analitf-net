@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ShipperNameAndAddress { get; set; }
 		public virtual string ConsigneeNameAndAddress { get; set; }
 
-
 		public virtual IList<WaybillLine> Lines { get; set; }
 
 		public virtual decimal SumWithoutTax

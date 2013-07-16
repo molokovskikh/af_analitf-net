@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -10,7 +11,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private static Size pageSize = new Size(816.0, 1056.0);
 
-		public static FixedDocument BuildFixedDoc(Waybill waybill, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
+		public static FixedDocument BuildFixedDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
 		{
 			var document = new FixedDocument();
 			var start = 0;
@@ -31,10 +32,10 @@ namespace AnalitF.Net.Client.Models.Print
 				label.Measure(pageSize);
 				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
 					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
-				panel.Children.Add(BuildMapGrid(i => map(waybill.Lines[i]), waybill.Lines.Count, leftSize, ref start, borderThickness));
+				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref start, borderThickness));
 				page.Child.Children.Add(border);
 				document.Pages.Add(page);
-			} while (start < waybill.Lines.Count - 1);
+			} while (start < lines.Count - 1);
 			return document;
 		}
 

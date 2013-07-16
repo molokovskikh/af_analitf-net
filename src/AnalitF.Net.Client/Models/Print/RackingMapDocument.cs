@@ -35,12 +35,22 @@ namespace AnalitF.Net.Client.Models.Print
 		};
 
 		private Settings settings;
+		private WaybillSettings waybillSettings;
+		private Waybill waybill;
+		private IList<WaybillLine> lines;
 		private IDictionary<string, object> properties;
 
-		public FixedDocument Build(Waybill waybill, WaybillSettings waybillSettings, Settings settings)
+		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, WaybillSettings waybillSettings)
+		{
+			this.settings = settings;
+			this.waybillSettings = waybillSettings;
+			this.waybill = waybill;
+			this.lines = lines;
+		}
+
+		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.RackingMap);
-			this.settings = settings;
 			if (settings.RackingMap.Size == RackingMapSize.Big) {
 				bigHeight = new GridLength(63);
 				defaultHeight = new GridLength(21);
@@ -59,7 +69,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, waybillSettings, Map, 2.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, Map, 2.5);
 		}
 
 		private Grid Map(WaybillLine line)

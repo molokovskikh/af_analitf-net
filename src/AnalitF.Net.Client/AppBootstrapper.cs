@@ -73,6 +73,7 @@ namespace AnalitF.Net.Client
 			LogManager.GetLog = t => new Log4net(t);
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);
+				CheckShutdown(args.ExceptionObject as Exception);
 			};
 		}
 
@@ -80,11 +81,20 @@ namespace AnalitF.Net.Client
 		{
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
+			CheckShutdown(e.Exception);
+		}
+
+		private void CheckShutdown(Exception e)
+		{
 			if (!IsInitialized) {
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение
-				MessageBox.Show(
-						ErrorHelper.TranslateException(e.Exception) ?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Exception.Message),
+				var message = ErrorHelper.TranslateException(e) ?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Message);
+				if (Application != null && ((App)Application).Quit)
+					Console.WriteLine(message);
+				else
+					MessageBox.Show(
+						message,
 						"АналитФАРМАЦИЯ: Внимание",
 						MessageBoxButton.OK,
 						MessageBoxImage.Warning);

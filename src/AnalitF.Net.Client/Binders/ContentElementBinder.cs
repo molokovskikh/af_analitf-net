@@ -55,6 +55,8 @@ namespace AnalitF.Net.Client.Binders
 		public static void Register()
 		{
 			ConventionManager.Singularize = s => {
+				if (s == "Taxes")
+					return "Tax";
 				if (s == "Value")
 					return s;
 				return s.InflectTo().Singularized;

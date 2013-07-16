@@ -1,13 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class WaybillLine
+	public class WaybillLine : INotifyPropertyChanged
 	{
+		private decimal? _retailCost;
+		private decimal? _realRetailMarkup;
+		private decimal? _retailMarkup;
+		private decimal? _maxRetailMarkup;
+
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
 		public WaybillLine()
 		{
+			Print = true;
 		}
 
 		public WaybillLine(Waybill waybill)
@@ -50,16 +59,49 @@ namespace AnalitF.Net.Client.Models
 		public virtual int? Quantity { get; set; }
 
 		[Ignore]
-		public virtual decimal? MaxRetailMarkup { get; set; }
+		public virtual decimal? MaxRetailMarkup
+		{
+			get { return _maxRetailMarkup; }
+			set
+			{
+				_maxRetailMarkup = value;
+				OnPropertyChanged("MaxRetailMarkup");
+			}
+		}
 
 		[Ignore]
-		public virtual decimal? RetailMarkup { get; set; }
+		public virtual decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				_retailMarkup = value;
+				OnPropertyChanged("RetailMarkup");
+			}
+		}
 
 		[Ignore]
-		public virtual decimal? RealRetailMarkup { get; set; }
+		public virtual decimal? RealRetailMarkup
+		{
+			get { return _realRetailMarkup; }
+			set
+			{
+				_realRetailMarkup = value;
+				OnPropertyChanged("RealRetailMarkup");
+			}
+		}
 
 		[Ignore]
-		public virtual decimal? RetailCost { get; set; }
+		public virtual decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				_retailCost = value;
+				OnPropertyChanged("RetailSum");
+				OnPropertyChanged("RetailCost");
+			}
+		}
 
 		[Ignore]
 		public virtual decimal? RetailSum
@@ -75,6 +117,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? ProducerCostWithTax
 		{
 			get { return ProducerCost * (1 + (decimal?) Nds / 100); }
+		}
+
+		public virtual string SupplierName
+		{
+			get { return Waybill.Supplier == null ? null : Waybill.Supplier.Name; }
 		}
 
 		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups, bool round)
@@ -110,9 +157,11 @@ namespace AnalitF.Net.Client.Models
 			return value;
 		}
 
-		public virtual string SupplierName
+		protected virtual void OnPropertyChanged(string propertyName)
 		{
-			get { return Waybill.Supplier == null ? null : Waybill.Supplier.Name; }
+			var handler = PropertyChanged;
+			if (handler != null)
+				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

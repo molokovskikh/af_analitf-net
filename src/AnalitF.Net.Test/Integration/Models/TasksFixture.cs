@@ -266,7 +266,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			Update();
 
 			var waybills = localSession.Query<Waybill>().ToList();
-			Assert.That(waybills.Count(), Is.EqualTo(1));
+			Assert.That(waybills.Count(), Is.GreaterThan(1));
 			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
 			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
 		}

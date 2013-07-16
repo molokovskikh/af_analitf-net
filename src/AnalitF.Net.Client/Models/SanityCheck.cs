@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Common.Tools;
 using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
@@ -64,18 +65,23 @@ namespace AnalitF.Net.Client.Models
 
 		private void CheckSettings(ISessionFactory factory)
 		{
-			using (var session = factory.OpenSession()) {
+			using (var session = factory.OpenSession())
+			using (var transaction = session.BeginTransaction()) {
 				var settings = session.Query<Settings>().FirstOrDefault();
 				if (settings == null) {
-					session.Save(new Settings());
+					settings = new Settings();
+					settings.Markups = MarkupConfig.Defaults().ToList();
+					session.Save(settings);
 				}
+				else {
+					//проверяем что данные коректны и если не коректны
+					//пытаемся восстановить их
+					if (settings.Markups.Count == 0)
+						session.Query<MarkupConfig>().Each(settings.Markups.Add);
 
-				var markups = session.Query<MarkupConfig>().ToList();
-				if (markups.Count == 0) {
-					var defaults = MarkupConfig.Defaults();
-					foreach (var markup in defaults) {
-						session.Save(markup);
-					}
+					//если ничего восстановить не удалось тогда берем значения по умолчанию
+					if (settings.Markups.Count == 0)
+						MarkupConfig.Defaults().Each(settings.Markups.Add);
 				}
 
 				var addresses = session.Query<Address>().ToList();
@@ -90,6 +96,7 @@ namespace AnalitF.Net.Client.Models
 						}
 					}
 				}
+				transaction.Commit();
 			}
 		}
 

@@ -35,7 +35,7 @@ namespace AnalitF.Net.Test.Integration
 			localSession.Dispose();
 		}
 
-		[Test, Ignore]
+		[Test, Explicit]
 		public void Load_data()
 		{
 			var supplier = TestSupplier.CreateNaked();
