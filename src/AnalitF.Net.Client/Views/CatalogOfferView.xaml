@@ -74,7 +74,7 @@
 				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
 				<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="26*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" TextAlignment="Right" />

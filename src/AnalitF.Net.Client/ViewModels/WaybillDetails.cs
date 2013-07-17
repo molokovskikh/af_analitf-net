@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Linq;
@@ -23,17 +23,22 @@ namespace AnalitF.Net.Client.ViewModels
 			this.id = id;
 			CurrentTax = new NotifyValue<ValueDescription<int?>>();
 			RoundToSingleDigit = new NotifyValue<bool>(true);
-			RoundToSingleDigit.Changes()
-				.Subscribe(v => Waybill.Calculate(Settings, Settings.Markups, RoundToSingleDigit.Value));
+			RoundToSingleDigit.Changed()
+				.Merge(Settings.Changed())
+				.Subscribe(v => Calculate());
 			Lines = new NotifyValue<IList<WaybillLine>>(() => (Waybill ?? new Waybill())
 				.Lines
 				.Where(l => l.Nds == CurrentTax.Value.Value || CurrentTax.Value.Value == -1)
 				.ToList(), CurrentTax);
 		}
 
+		private void Calculate()
+		{
+			Waybill.Calculate(Settings.Value, Settings.Value.Markups, RoundToSingleDigit.Value);
+		}
+
 		public Waybill Waybill { get; set; }
 		public NotifyValue<IList<WaybillLine>> Lines { get; set; }
-		//TODO: при фильтрации обновляются данные для печати
 		public List<ValueDescription<int?>> Taxes { get; set; }
 		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
 		public NotifyValue<bool> RoundToSingleDigit { get; set; }
@@ -48,7 +53,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (waybillSettings == null)
 				waybillSettings = new WaybillSettings();
 
-			Waybill.Calculate(Settings, Settings.Markups, RoundToSingleDigit);
+			Calculate();
 
 			Lines.Value = Waybill.Lines;
 			Taxes = new List<ValueDescription<int?>> {
@@ -64,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стелажная карта",
-				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings, waybillSettings).Build()
+				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, waybillSettings).Build()
 			});
 		}
 
@@ -72,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Ценники",
-				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings, waybillSettings).Build()
+				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value, waybillSettings).Build()
 			});
 		}
 

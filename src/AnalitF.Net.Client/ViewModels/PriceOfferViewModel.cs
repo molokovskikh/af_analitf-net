@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (showLeaders)
 				currentFilter = filters[2];
 
-			OnCloseDisposable.Add(SearchText.Changes()
+			OnCloseDisposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search()));

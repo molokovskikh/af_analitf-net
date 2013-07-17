@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,50 +28,63 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
+		private TableSettings tableSettings = new TableSettings();
+
 		protected ILog log;
+		protected ExcelExporter excelExporter;
+		protected ISession Session;
+		protected IStatelessSession StatelessSession;
+
+		protected Address Address;
+		protected IMessageBus Bus = RxApp.MessageBus;
+		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
+
+		public static bool UnitTesting { get; set; }
+		public static IScheduler TestSchuduler;
+
+		public NotifyValue<Settings> Settings;
+		public Extentions.WindowManager Manager { get; private set; }
+		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
+		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
+
+		public BaseScreen()
+		{
+			DisplayName = "АналитФАРМАЦИЯ";
+			log = log4net.LogManager.GetLogger(GetType());
+			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+
+			if (!UnitTesting) {
+				var factory = AppBootstrapper.NHibernate.Factory;
+				StatelessSession = factory.OpenStatelessSession();
+				Session = factory.OpenSession();
+				Session.BeginTransaction();
+
+				Settings = new NotifyValue<Settings>(Session.Query<Settings>().First());
+
+				User = Session.Query<User>().FirstOrDefault();
+			}
+			else {
+				Settings = new NotifyValue<Settings>(new Settings());
+			}
+
+			excelExporter = new ExcelExporter(this);
+			OnCloseDisposable.Add(Bus.Listen<string>()
+				.Where(m => m == "UpdateSettings")
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => {
+					Session.Refresh(Settings.Value);
+					Settings.Refresh();
+				}));
+		}
 
 		protected virtual ShellViewModel Shell
 		{
 			get { return ((ShellViewModel)Parent); }
 		}
 
-		protected ExcelExporter excelExporter;
-
-		public Extentions.WindowManager Manager { get; private set; }
-
-		protected ISession Session;
-		protected IStatelessSession StatelessSession;
-
-		protected Settings Settings;
-		protected Address Address;
-
-		public static IScheduler TestSchuduler;
-		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
-		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
-		protected IMessageBus Bus = RxApp.MessageBus;
-		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
-		private TableSettings tableSettings;
-
-		public BaseScreen()
-		{
-			log = log4net.LogManager.GetLogger(GetType());
-			var factory = AppBootstrapper.NHibernate.Factory;
-			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
-
-			StatelessSession = factory.OpenStatelessSession();
-			Session = factory.OpenSession();
-			Session.BeginTransaction();
-
-			Settings = Session.Query<Settings>().First();
-			User = Session.Query<User>().FirstOrDefault();
-
-			excelExporter = new ExcelExporter(this);
-			tableSettings = new TableSettings();
-		}
-
 		public bool IsSuccessfulActivated { get; protected set; }
 
-		public User User { get; private set; }
+		public User User { get; set; }
 
 		public bool CanExport
 		{
@@ -116,10 +130,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (close) {
 				Save();
 				tableSettings.SaveView(GetView());
-			}
-
-			if (close)
 				Dispose();
+			}
 		}
 
 		private void Load()

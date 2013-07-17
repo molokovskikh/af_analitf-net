@@ -59,7 +59,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding MinOrderSum}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />
@@ -111,7 +111,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding OrderCost}"
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding MinOrderSum}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />

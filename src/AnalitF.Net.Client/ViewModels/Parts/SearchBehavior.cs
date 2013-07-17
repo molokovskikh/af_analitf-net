@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
 
-			disposable.Add(SearchText.Changes()
+			disposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, backgroundScheduler)
 				.ObserveOn(uiScheduler)
 				.Subscribe(_ => Search()));

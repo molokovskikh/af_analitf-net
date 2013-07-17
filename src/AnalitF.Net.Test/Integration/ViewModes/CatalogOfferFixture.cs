@@ -74,18 +74,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
 
 			model.CurrentOffer = model.Offers[0];
-			Assert.That(model.RetailMarkup, Is.EqualTo(20));
+			Assert.That(model.RetailMarkup.Value, Is.EqualTo(20));
 			var expected = Math.Round(model.Offers[0].Cost * (decimal)1.2, 2);
-			Assert.That(model.RetailCost, Is.EqualTo(expected));
+			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
 			model.CurrentOffer = model.Offers[1];
-			Assert.That(model.RetailMarkup, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Cost);
+			Assert.That(model.RetailMarkup.Value, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Cost);
 			expected = Math.Round(model.Offers[1].Cost * (decimal)1.3, 2);
-			Assert.That(model.RetailCost, Is.EqualTo(expected));
+			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
-			model.RetailMarkup = 23;
+			model.RetailMarkup.Value = 23;
 			model.CurrentOffer = model.Offers[0];
-			Assert.That(model.RetailMarkup, Is.EqualTo(23));
+			Assert.That(model.RetailMarkup.Value, Is.EqualTo(23));
 		}
 
 		[Test]
@@ -195,7 +195,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 					Cost = 90
 				}
 			};
-			model.GroupByProduct = true;
+			model.GroupByProduct.Value = true;
 			Assert.That(model.Offers.Select(o => o.Cost).Implode(), Is.EqualTo("90, 120, 103, 105"));
 		}
 

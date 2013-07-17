@@ -134,5 +134,10 @@ namespace AnalitF.Net.Client.Models
 			var handler = PropertyChanged;
 			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
+
+		public override string ToString()
+		{
+			return string.Format("{2}: {0} - {1} {3}%", Begin, End, Type, Markup);
+		}
 	}
 }

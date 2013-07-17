@@ -61,6 +61,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+			Settings.Changed().Subscribe(_ => Calculate());
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -223,7 +224,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void CalculateRetailCost()
 		{
 			foreach (var offer in Offers)
-				offer.CalculateRetailCost(Settings.Markups);
+				offer.CalculateRetailCost(Settings.Value.Markups);
 		}
 
 		public void OfferUpdated()
@@ -233,7 +234,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			lastEditOffer = CurrentOffer;
 			LoadStat();
-			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, Settings, AutoCommentText));
+			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, Settings.Value, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -241,7 +242,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(Address, Settings, AutoCommentText));
+			ShowValidationError(lastEditOffer.SaveOrderLine(Address, Settings.Value, AutoCommentText));
 		}
 
 		protected void ShowValidationError(List<Message> messages)
@@ -269,14 +270,15 @@ namespace AnalitF.Net.Client.ViewModels
 		private void CalculateDiff()
 		{
 			decimal baseCost = 0;
-			if (Settings.DiffCalcMode == DiffCalcMode.MinCost)
+			var diffCalcMode = Settings.Value.DiffCalcMode;
+			if (diffCalcMode == DiffCalcMode.MinCost)
 				baseCost = Offers.Select(o => o.Cost).MinOrDefault();
-			else if (Settings.DiffCalcMode == DiffCalcMode.MinBaseCost)
+			else if (diffCalcMode == DiffCalcMode.MinBaseCost)
 				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
 
 			foreach (var offer in Offers) {
 				offer.CalculateDiff(baseCost);
-				if (Settings.DiffCalcMode == DiffCalcMode.PrevOffer)
+				if (diffCalcMode == DiffCalcMode.PrevOffer)
 					baseCost = offer.Cost;
 			}
 		}
@@ -382,7 +384,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			//переместить в общий блок то первый
 			//where применяться не будет
 			var addressId = Address.Id;
-			if (Settings.GroupByProduct) {
+			if (Settings.Value.GroupByProduct) {
 				var catalogId = CurrentOffer.CatalogId;
 				query = query.Where(o => o.CatalogId == catalogId)
 					.Where(o => o.Order.Address.Id == addressId);
@@ -408,7 +410,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return null;
 
 			var currentCacheKey = CurrentOffer.CatalogId;
-			if (!Settings.GroupByProduct)
+			if (!Settings.Value.GroupByProduct)
 				currentCacheKey = CurrentOffer.ProductId;
 			return currentCacheKey;
 		}

@@ -75,5 +75,38 @@ namespace AnalitF.Net.Test.Unit
 			old.Data = 1;
 			Assert.AreEqual(0, count);
 		}
+
+		[Test]
+		public void Notify_value_with_fallback()
+		{
+			var depended = new NotifyValue<int>(5);
+			var v = new NotifyValue<int>(true, () => depended + 1, depended);
+			var changed = v.Value;
+			v.Changed().Subscribe(_ => changed = v.Value);
+			Assert.AreEqual(6, v.Value);
+			depended.Value = 7;
+			Assert.AreEqual(8, v.Value);
+			Assert.AreEqual(8, changed);
+			v.Value = 1;
+			Assert.AreEqual(1, v.Value);
+			Assert.AreEqual(1, changed);
+			depended.Value = 50;
+			Assert.AreEqual(1, v.Value);
+			Assert.AreEqual(1, changed);
+		}
+
+		[Test]
+		public void Update_value_with_fallback()
+		{
+			var depended = new NotifyValue<int>(5);
+			var v = new NotifyValue<int>(true, () => depended + 1, depended);
+			var changed = v.Value;
+			v.Changed().Subscribe(_ => changed = v.Value);
+
+			depended.Value += 5;
+			depended.Value += 5;
+			Assert.AreEqual(v.Value, 16);
+			Assert.AreEqual(changed, 16);
+		}
 	}
 }

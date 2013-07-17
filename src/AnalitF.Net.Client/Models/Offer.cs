@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class Offer : BaseOffer, INotifyPropertyChanged, IInlineEditable
+	public class Offer : BaseOffer, IInlineEditable
 	{
 		private decimal? _diff;
 		private uint? orderCount;
@@ -192,14 +192,6 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual bool StatLoaded { get; set; }
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
 
 		public virtual List<Message> UpdateOrderLine(Address address, Settings settings, string comment = null, bool edit = true)
 		{

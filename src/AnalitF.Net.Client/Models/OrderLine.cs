@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class OrderLine : BaseOffer, INotifyPropertyChanged, IInlineEditable, IOrderLine
+	public class OrderLine : BaseOffer, IInlineEditable, IOrderLine
 	{
 		private uint count;
 		private string comment;
@@ -140,15 +140,6 @@ namespace AnalitF.Net.Client.Models
 				return 0;
 			}
 			return result;
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		[Ignore, JsonIgnore]

@@ -58,7 +58,7 @@
 				<c:DataGridTextColumnEx Width="103*" MinWidth="5" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Кратность" Binding="{Binding RequestRatio}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding OrderCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" TextAlignment="Right" />

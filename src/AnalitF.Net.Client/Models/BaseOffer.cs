@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class BaseOffer
+	public class BaseOffer : INotifyPropertyChanged
 	{
+		private decimal? _retailCost;
+
+		public virtual event PropertyChangedEventHandler PropertyChanged;
+
 		public BaseOffer()
 		{
 		}
@@ -112,7 +117,21 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Ignore]
-		public virtual decimal RetailCost { get; set; }
+		public virtual decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				_retailCost = value;
+				OnPropertyChanged("RetailCost");
+			}
+		}
+
+		protected virtual void OnPropertyChanged(string propertyName)
+		{
+			var handler = PropertyChanged;
+			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+		}
 
 		public virtual void CalculateRetailCost(IList<MarkupConfig> markups)
 		{

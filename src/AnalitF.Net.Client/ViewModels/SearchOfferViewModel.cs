@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice = Prices.First();
+			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
 			this.ObservableForProperty(m => m.SearchText)
 				.Throttle(Consts.SearchTimeout, Scheduler)
@@ -123,12 +124,16 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.Price.BasePrice);
 			}
 
-			var offer = query.Fetch(o => o.Price).ToList();
-			if (Settings.GroupByProduct) {
-				Offers = SortByMinCostInGroup(offer, o => o.ProductId);
+			SortOffers(query.Fetch(o => o.Price).ToList());
+		}
+
+		private void SortOffers(List<Offer> result)
+		{
+			if (Settings.Value.GroupByProduct) {
+				Offers = SortByMinCostInGroup(result, o => o.ProductId);
 			}
 			else {
-				Offers = SortByMinCostInGroup(offer, o => o.CatalogId);
+				Offers = SortByMinCostInGroup(result, o => o.CatalogId);
 			}
 		}
 	}

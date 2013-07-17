@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
@@ -6,8 +7,11 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
+using ReactiveUI.Testing;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -26,7 +30,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			waybill.Lines[0].Nds = 10;
 			waybill.Lines[0].ProducerCost = 15.13m;
 			waybill.Lines[0].SupplierCostWithoutNds = 18.25m;
-			waybill.Lines[0].SupplierCost = 19.8m;
+			waybill.Lines[0].SupplierCost = 20.8m;
 			session.Save(waybill);
 			session.Flush();
 
@@ -45,10 +49,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Recalculate_waybill()
 		{
-			Assert.AreEqual(23.8, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(24, model.Lines.Value[0].RetailCost);
 			Assert.IsTrue(model.RoundToSingleDigit);
 			model.RoundToSingleDigit.Value = false;
-			Assert.AreEqual(23.82, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(24.09, model.Lines.Value[0].RetailCost);
 		}
 
 		[Test]
@@ -56,6 +60,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			Assert.IsNotNull(model.Waybill);
 			Assert.IsNotNull(model.Lines);
+		}
+
+		[Test]
+		public void Reload_settings_on_change()
+		{
+			Restore = true;
+			Assert.AreEqual(24, model.Lines.Value[0].RetailCost);
+			var settings = Init<SettingsViewModel>();
+			settings.Markups[0].Markup = 50;
+			settings.Markups[0].MaxMarkup = 50;
+			settings.Save();
+			ScreenExtensions.TryDeactivate(settings, true);
+			testScheduler.AdvanceByMs(1000);
+			Assert.AreEqual("", manager.MessageBoxes.Implode());
+			Assert.AreEqual(30.1, model.Lines.Value[0].RetailCost);
 		}
 
 		[Test, RequiresSTA]

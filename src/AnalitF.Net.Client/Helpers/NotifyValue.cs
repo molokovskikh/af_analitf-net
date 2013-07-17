@@ -8,6 +8,7 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public class NotifyValue<T> : INotifyPropertyChanged
 	{
+		private bool respectValue;
 		private Func<T> calc;
 		private T value;
 
@@ -17,13 +18,19 @@ namespace AnalitF.Net.Client.Helpers
 		{
 		}
 
+		public NotifyValue(bool respectValue, Func<T> calc, params INotifyPropertyChanged[] props)
+			: this(calc, props)
+		{
+			this.respectValue = respectValue;
+		}
+
 		public NotifyValue(Func<T> calc, params INotifyPropertyChanged[] props)
 		{
 			this.calc = calc;
 			Recalculate();
-			foreach (var prop in props) {
+
+			foreach (var prop in props)
 				prop.PropertyChanged += (s, a) => Recalculate();
-			}
 		}
 
 		public NotifyValue(T value)
@@ -42,6 +49,9 @@ namespace AnalitF.Net.Client.Helpers
 				if (Equals(this.value, value))
 					return;
 
+				if (respectValue)
+					calc = null;
+
 				this.value = value;
 				OnPropertyChanged("Value");
 			}
@@ -49,7 +59,12 @@ namespace AnalitF.Net.Client.Helpers
 
 		public void Recalculate()
 		{
-			Value = calc();
+			if (calc != null) {
+				var origin = respectValue;
+				respectValue = false;
+				Value = calc();
+				respectValue = origin;
+			}
 		}
 
 		protected virtual void OnPropertyChanged(string propertyName)
@@ -81,9 +96,14 @@ namespace AnalitF.Net.Client.Helpers
 				.Switch();
 		}
 
-		public IObservable<EventPattern<PropertyChangedEventArgs>> Changes()
+		public IObservable<EventPattern<PropertyChangedEventArgs>> Changed()
 		{
 			return Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged");
+		}
+
+		public void Refresh()
+		{
+			OnPropertyChanged("Value");
 		}
 	}
 }

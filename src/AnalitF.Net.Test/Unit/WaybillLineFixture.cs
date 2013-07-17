@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.Linq;
+using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -63,7 +64,7 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 1
 			};
 			Calculate(line, false);
-			Assert.AreEqual(326.56, line.RetailCost);
+			Assert.AreEqual(326.55, line.RetailCost);
 			Assert.AreEqual(30, line.RetailMarkup);
 		}
 
@@ -80,6 +81,20 @@ namespace AnalitF.Net.Test.Unit
 			};
 			Calculate(line);
 			Assert.AreEqual(232.70, line.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_without_producer_cost1()
+		{
+			var line = new WaybillLine(waybill) {
+				Nds = 10,
+				SupplierCost = 370.35m,
+				SupplierCostWithoutNds = 336.68m,
+				ProducerCost = 327.27m,
+				Quantity = 2
+			};
+			Calculate(line);
+			Assert.AreEqual(481.40, line.RetailCost);
 		}
 
 		private void Calculate(WaybillLine line, bool round = true)

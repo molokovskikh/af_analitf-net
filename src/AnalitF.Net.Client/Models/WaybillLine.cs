@@ -143,14 +143,12 @@ namespace AnalitF.Net.Client.Models
 
 		private decimal? CalculateRetailCost(Settings settings, decimal markup, bool rountTo1)
 		{
-			var vitallyImportant = VitallyImportant.GetValueOrDefault();
-			decimal value;
-			if (vitallyImportant) {
-				value = ((SupplierCostWithoutNds + ProducerCost * (markup / 100)) * (100 + Nds) / 100).GetValueOrDefault();
-			}
-			else {
-				value = (SupplierCost  + SupplierCostWithoutNds * (100 + Nds) / 100 * markup / 100).GetValueOrDefault();
-			}
+			var nds  = Nds.GetValueOrDefault(10);
+			var baseCost = ProducerCost;
+			if (!VitallyImportant.GetValueOrDefault())
+				baseCost = SupplierCostWithoutNds;
+
+			var value = ((SupplierCostWithoutNds + baseCost * markup / 100) * (100 + nds) / 100m).GetValueOrDefault();
 			value = Math.Round(value, 2);
 			if (rountTo1)
 				return ((int)(value * 10))/10m;

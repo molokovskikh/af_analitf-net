@@ -74,6 +74,8 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 			OnCloseDisposable.Add(observable.Subscribe(_ => Sum.Recalculate()));
 
+			Settings.Changed().Subscribe(_ => Calculate());
+
 			//пока устанавливаем значения не надо оповещать об изменения
 			//все равно будет запрос когда форма активируется
 			IsNotifying = false;
@@ -141,7 +143,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.ThenBy(l => l.ProducerSynonym)
 					.ToList());
 
-				CalculateRetailCost();
+				Calculate();
 			}
 			else {
 				var addressId = Address.Id;
@@ -177,10 +179,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(e => NotifyOfPropertyChange(name));
 		}
 
-		protected void CalculateRetailCost()
+		protected void Calculate()
 		{
 			foreach (var offer in Lines.Value)
-				offer.CalculateRetailCost(Settings.Markups);
+				offer.CalculateRetailCost(Settings.Value.Markups);
 		}
 
 		public List<Price> Prices { get; set; }

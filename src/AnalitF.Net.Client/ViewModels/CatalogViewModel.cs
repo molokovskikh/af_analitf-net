@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
@@ -53,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public CatalogViewModel()
 		{
 			ViewOffersByCatalog = true;
-			ViewOffersByCatalogEnabled = Settings.CanViewOffersByCatalogName;
+			ViewOffersByCatalogEnabled = new NotifyValue<bool>(() => Settings.Value.CanViewOffersByCatalogName, Settings);
 
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new [] {
@@ -286,7 +287,7 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return !CatalogSearch; }
 		}
 
-		public bool ViewOffersByCatalogEnabled { get; private set; }
+		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 
 		protected override void OnActivate()
 		{

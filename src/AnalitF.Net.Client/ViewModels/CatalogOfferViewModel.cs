@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -16,9 +17,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private string currentRegion;
 		private List<string> regions;
 		private string currentFilter;
-		private bool groupByProduct;
 
-		private decimal retailMarkup;
 		private List<MaxProducerCost> maxProducerCosts;
 
 		private CatalogName filterCatalogName;
@@ -28,11 +27,21 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			NeedToCalculateDiff = true;
 			DisplayName = "Сводный прайс-лист";
-			GroupByProduct = Settings.GroupByProduct;
 			Filters = new [] { "Все", "Основные", "Неосновные" };
 			CurrentFilter = Filters[0];
 			CurrentRegion = Consts.AllRegionLabel;
 			CurrentProducer = Consts.AllProducerLabel;
+
+			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
+			GroupByProduct.Changed().Subscribe(_ => Offers = Sort(Offers));
+			RetailMarkup = new NotifyValue<decimal>(true,
+				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer),
+				Settings);
+			RetailCost = new NotifyValue<decimal?>(() => {
+				if (CurrentOffer == null)
+					return null;
+				return Math.Round(CurrentOffer.Cost * (1 + RetailMarkup / 100), 2);
+			}, RetailMarkup);
 
 			this.ObservableForProperty(m => m.CurrentRegion)
 				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
@@ -40,10 +49,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(e => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
-				.Subscribe(_ => NotifyOfPropertyChange("RetailMarkup"));
-
-			this.ObservableForProperty(m => m.RetailMarkup)
-				.Subscribe(_ => NotifyOfPropertyChange("RetailCost"));
+				.Subscribe(_ => {
+					RetailCost.Recalculate();
+					RetailMarkup.Recalculate();
+				});
 		}
 
 		public CatalogOfferViewModel(Catalog catalog)
@@ -63,6 +72,67 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public string Name { get; private set; }
+
+		public bool IsFilterByCatalogName
+		{
+			get
+			{
+				return filterCatalogName != null;
+			}
+		}
+
+		public string[] Filters { get; set; }
+
+		public List<MaxProducerCost> MaxProducerCosts
+		{
+			get { return maxProducerCosts; }
+			set
+			{
+				maxProducerCosts = value;
+				NotifyOfPropertyChange("MaxProducerCosts");
+			}
+		}
+
+		public string CurrentFilter
+		{
+			get { return currentFilter; }
+			set
+			{
+				currentFilter = value;
+				NotifyOfPropertyChange("CurrentFilter");
+			}
+		}
+
+		public List<string> Regions
+		{
+			get { return regions; }
+			set
+			{
+				regions = value;
+				NotifyOfPropertyChange("Regions");
+			}
+		}
+
+		public string CurrentRegion
+		{
+			get { return currentRegion; }
+			set
+			{
+				currentRegion = value;
+				NotifyOfPropertyChange("CurrentRegion");
+			}
+		}
+
+		public NotifyValue<bool> GroupByProduct { get; set; }
+
+		public NotifyValue<decimal?> RetailCost { get; set; }
+
+		public NotifyValue<decimal> RetailMarkup { get; set; }
+
+		public bool CanPrint
+		{
+			get { return true; }
+		}
 
 		protected override void OnInitialize()
 		{
@@ -148,90 +218,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Offers = offers;
 		}
 
-		public bool IsFilterByCatalogName
-		{
-			get
-			{
-				return filterCatalogName != null;
-			}
-		}
-
-		public string[] Filters { get; set; }
-
-		public List<MaxProducerCost> MaxProducerCosts
-		{
-			get { return maxProducerCosts; }
-			set
-			{
-				maxProducerCosts = value;
-				NotifyOfPropertyChange("MaxProducerCosts");
-			}
-		}
-
-		public string CurrentFilter
-		{
-			get { return currentFilter; }
-			set
-			{
-				currentFilter = value;
-				NotifyOfPropertyChange("CurrentFilter");
-			}
-		}
-
-		public List<string> Regions
-		{
-			get { return regions; }
-			set
-			{
-				regions = value;
-				NotifyOfPropertyChange("Regions");
-			}
-		}
-
-		public string CurrentRegion
-		{
-			get { return currentRegion; }
-			set
-			{
-				currentRegion = value;
-				NotifyOfPropertyChange("CurrentRegion");
-			}
-		}
-
-		public bool GroupByProduct
-		{
-			get { return groupByProduct; }
-			set
-			{
-				groupByProduct = value;
-				Offers = Sort(Offers);
-				NotifyOfPropertyChange("GroupByProduct");
-			}
-		}
-
-		public decimal RetailCost
-		{
-			get
-			{
-				if (CurrentOffer == null)
-					return 0;
-				return Math.Round(CurrentOffer.Cost * (1 + RetailMarkup / 100), 2);
-			}
-		}
-
-		public decimal RetailMarkup
-		{
-			get
-			{
-				return retailMarkup == 0 ? MarkupConfig.Calculate(Settings.Markups, CurrentOffer) : retailMarkup;
-			}
-			set
-			{
-				retailMarkup = value;
-				NotifyOfPropertyChange("RetailMarkup");
-			}
-		}
-
 		private List<Offer> Sort(List<Offer> offers)
 		{
 			if (offers == null)
@@ -243,11 +229,6 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				return SortByMinCostInGroup(offers, o => o.CatalogId, false);
 			}
-		}
-
-		public bool CanPrint
-		{
-			get { return true; }
 		}
 
 		public PrintResult Print()

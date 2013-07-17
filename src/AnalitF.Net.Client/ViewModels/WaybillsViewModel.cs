@@ -27,9 +27,9 @@ namespace AnalitF.Net.Client.ViewModels
 			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
 
 			Observable.Merge(
-				Begin.Changes().Select(v => (object)v),
-				End.Changes().Select(v => (object)v),
-				IsFilterByDocumentDate.Changes().Select(v => (object)v))
+				Begin.Changed().Select(v => (object)v),
+				End.Changed().Select(v => (object)v),
+				IsFilterByDocumentDate.Changed().Select(v => (object)v))
 				.Subscribe(_ => Update());
 		}
 
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> OpenFolders()
 		{
-			return Settings.DocumentDirs.Select(dir => new OpenResult(dir));
+			return Settings.Value.DocumentDirs.Select(dir => new OpenResult(dir));
 		}
 
 		public IResult AltExport()
