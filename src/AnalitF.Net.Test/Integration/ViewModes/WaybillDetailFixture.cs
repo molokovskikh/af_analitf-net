@@ -23,17 +23,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			var waybill = new Waybill {
-				Address = address
-			};
-			waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(waybill)).ToList();
-			waybill.Lines[0].Nds = 10;
-			waybill.Lines[0].ProducerCost = 15.13m;
-			waybill.Lines[0].SupplierCostWithoutNds = 18.25m;
-			waybill.Lines[0].SupplierCost = 20.8m;
-			session.Save(waybill);
-			session.Flush();
-
+			var waybill = data.CreateWaybill(address, settings);
 			model = Init(new WaybillDetails(waybill.Id));
 		}
 
@@ -65,13 +55,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Reload_settings_on_change()
 		{
-			Restore = true;
+			restore = true;
 			Assert.AreEqual(24, model.Lines.Value[0].RetailCost);
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
 			settings.Save();
-			ScreenExtensions.TryDeactivate(settings, true);
+			Close(settings);
 			testScheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
 			Assert.AreEqual(30.1, model.Lines.Value[0].RetailCost);
@@ -88,7 +78,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test, RequiresSTA]
 		public void Print_invoice()
 		{
-			var result = (DialogResult)model.PrintInvoice();
+			var result = (DialogResult)model.PrintInvoice().First();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview.Document);
 		}

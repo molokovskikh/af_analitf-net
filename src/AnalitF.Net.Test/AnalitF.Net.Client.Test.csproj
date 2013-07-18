@@ -149,6 +149,7 @@
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
+    <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\DbFixture.cs" />
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />
     <Compile Include="TestHelpers\WpfHelper.cs" />

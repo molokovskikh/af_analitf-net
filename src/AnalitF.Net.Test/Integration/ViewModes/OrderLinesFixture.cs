@@ -61,7 +61,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Filter_by_address()
 		{
-			Restore = true;
+			restore = true;
 			session.DeleteEach(session.Query<Address>().Skip(1));
 
 			var newAddress = new Address("Тестовый адрес доставки");
@@ -111,7 +111,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
 			Assert.That(model.Sum.Value, Is.EqualTo(0));
 
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			session.Clear();
 			Assert.That(session.Get<Order>(order.Id), Is.Null);

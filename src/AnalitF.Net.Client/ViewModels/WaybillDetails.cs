@@ -83,22 +83,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> PrintRegistry()
 		{
-			var docSettings = new RegistryDocumentSettings(Waybill);
-			yield return new DialogResult(new SimpleSettings(docSettings)) {
-				ShowFixed = true
-			};
-			var doc = new RegistryDocument(Waybill, PrintableLines(), waybillSettings, docSettings);
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Реестр", doc)));
+			var doc = new RegistryDocument(Waybill, PrintableLines(), waybillSettings);
+			return Preview("Реестр", doc);
 		}
 
 		public IEnumerable<IResult> PrintWaybill()
 		{
-			var docSettings = new WaybillDocumentSettings(Waybill);
-			yield return new DialogResult(new SimpleSettings(docSettings)) {
-				ShowFixed = true
-			};
-			var doc = new WaybillDocument(Waybill, PrintableLines(), waybillSettings, docSettings);
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult("Накладная", doc)));
+			var doc = new WaybillDocument(Waybill, PrintableLines(), waybillSettings);
+			return Preview("Накладная", doc);
 		}
 
 		private IList<WaybillLine> PrintableLines()
@@ -106,9 +98,20 @@ namespace AnalitF.Net.Client.ViewModels
 			return Lines.Value.Where(l => l.Print).ToList();
 		}
 
-		public IResult PrintInvoice()
+		public IEnumerable<IResult> PrintInvoice()
 		{
-			return new DialogResult(new PrintPreviewViewModel(new PrintResult("Счет-фактура", new InvoiceDocument(Waybill))));
+			return Preview("Счет-фактура", new InvoiceDocument(Waybill));
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null) {
+				yield return new DialogResult(new SimpleSettings(docSettings)) {
+					ShowFixed = true
+				};
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)));
 		}
 
 		public IResult ExportWaybill()

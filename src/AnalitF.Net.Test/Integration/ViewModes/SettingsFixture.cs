@@ -19,7 +19,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			Restore = true;
+			restore = true;
 			model = Init(new SettingsViewModel());
 		}
 
@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Markups.Add(new MarkupConfig());
 			model.Save();
 			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			model = Init(new SettingsViewModel());
 			Assert.AreEqual(origin, model.Markups.Count);
@@ -60,7 +60,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var value = Generator.Random(10000).First();
 			model.Settings.OverCostWarningPercent = value;
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			session.Refresh(settings);
 			Assert.That(settings.OverCostWarningPercent, Is.Not.EqualTo(value));
 		}
@@ -70,7 +70,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			model.CurrentWaybillSettings.Value.Name = "test";
 			model.Save();
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			var waybillSettings = session.Load<WaybillSettings>(model.CurrentWaybillSettings.Value.Id);
 			Assert.AreEqual("test", waybillSettings.Name);
 		}

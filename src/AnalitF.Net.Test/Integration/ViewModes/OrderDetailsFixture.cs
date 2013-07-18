@@ -22,7 +22,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Delete();
 			Assert.That(model.Lines.Count, Is.EqualTo(0));
 
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			session.Clear();
 			Assert.IsNull(session.Get<Order>(order.Id));

@@ -29,7 +29,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Auto_open_single_price()
 		{
-			Restore = true;
+			restore = true;
 			var price = session.Query<Price>().First(p => p.PositionCount > 0);
 			session.DeleteEach(session.Query<Price>().ToList().Where(p => p.Id != price.Id));
 			session.Flush();
@@ -59,7 +59,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var model = Init(new PriceViewModel());
 			var price = model.Prices[1];
 			model.CurrentPrice.Value = price;
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			model = Init(new PriceViewModel());
 			Assert.That(model.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
@@ -75,7 +75,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var model = Init(new PriceViewModel());
 			ScreenExtensions.TryActivate(model);
-			ScreenExtensions.TryDeactivate(model, false);
+			Deactivate(model);
 
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);

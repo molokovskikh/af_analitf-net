@@ -48,8 +48,6 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name).ToList();
-
-			Update();
 		}
 
 		public void Delete()
@@ -111,7 +109,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.Navigate(new WaybillLineSearch(Begin.Value, End.Value.AddDays(1)));
 		}
 
-		private void Update()
+		protected override void Update()
 		{
 			var query = StatelessSession.Query<Waybill>();
 

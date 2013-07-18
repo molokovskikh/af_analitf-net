@@ -40,7 +40,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Teardown()
 		{
 			if (lazyModel.IsValueCreated && model.IsActive)
-				ScreenExtensions.TryDeactivate(model, true);
+				Close(model);
 		}
 
 		[Test]
@@ -55,7 +55,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
 			testScheduler.AdvanceByMs(5000);
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 
 			session.Clear();
@@ -131,7 +131,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Reorder()
 		{
-			Restore = true;
+			restore = true;
 
 			session.DeleteEach<Order>();
 			var offer = session.Query<Offer>().First();
@@ -149,7 +149,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Reorder_sent_order()
 		{
-			Restore = true;
+			restore = true;
 
 			session.DeleteEach<Order>();
 			session.DeleteEach<SentOrder>();
@@ -224,7 +224,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			session.DeleteEach<Order>();
 
-			Restore = true;
+			restore = true;
 			var newAddress = new Address { Name = "Тестовый адрес доставки" };
 			session.Save(newAddress);
 			MakeOrder();
@@ -277,7 +277,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Move()
 		{
-			Restore = true;
+			restore = true;
 
 			var newAddress = new Address("Тестовый адрес доставки");
 			session.Save(newAddress);

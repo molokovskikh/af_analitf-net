@@ -133,6 +133,8 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public abstract FlowDocument Build();
 
+		public object Settings { get; protected set; }
+
 		public virtual FrameworkContentElement GetHeader(int page, int pageCount)
 		{
 			//250 это примерный размер блока с датой, нужно молиться что бы хватило

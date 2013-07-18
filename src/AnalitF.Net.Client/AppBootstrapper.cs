@@ -254,6 +254,8 @@ namespace AnalitF.Net.Client
 			//это приведет к тому что делегаты будут вызываться рекурсивно
 			if (IsUiInitialized)
 				return;
+
+			MessageBus.Current.RegisterScheduler<string>(ImmediateScheduler.Instance);
 			//нужно затем что бы можно было делать модели без суффикса ViewModel
 			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(

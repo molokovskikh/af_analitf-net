@@ -49,7 +49,7 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Serialize_current_address()
 		{
-			Restore = true;
+			restore = true;
 
 			session.Save(new Address("Тестовый адрес доставки"));
 

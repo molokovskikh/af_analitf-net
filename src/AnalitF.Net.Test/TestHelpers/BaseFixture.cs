@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -29,14 +30,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Address address;
 		protected Settings settings;
-		protected bool Restore;
+		protected bool restore;
+		protected DataMother data;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
-			Restore = false;
+			restore = false;
 
 			RxApp.MessageBus = new MessageBus();
+			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance);
 			testScheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = testScheduler;
 			disposeTestShedule = TestUtils.WithScheduler(testScheduler);
@@ -44,6 +47,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			StubWindowManager();
 
 			session = SetupFixture.Factory.OpenSession();
+			data = new DataMother(session);
+
 			address = session.Query<Address>().FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
 			shell = new ShellViewModel();
@@ -58,7 +63,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void BaseFixtureTearDown()
 		{
-			if (Restore)
+			if (restore)
 				SetupFixture.RestoreData(session);
 
 			disposable.Dispose();
@@ -88,7 +93,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			disposable.Add(model);
 			model.Parent = shell;
-			ScreenExtensions.TryActivate(model);
+			Activate(model);
 			return model;
 		}
 
@@ -147,6 +152,21 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			session.Save(order);
 			session.Flush();
 			return order;
+		}
+
+		protected void Deactivate(Screen model)
+		{
+			ScreenExtensions.TryDeactivate(model, false);
+		}
+
+		protected void Close(object model)
+		{
+			ScreenExtensions.TryDeactivate(model, true);
+		}
+
+		protected void Activate(object model)
+		{
+			ScreenExtensions.TryActivate(model);
 		}
 	}
 }

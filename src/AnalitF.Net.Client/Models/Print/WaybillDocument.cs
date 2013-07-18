@@ -44,15 +44,16 @@ namespace AnalitF.Net.Client.Models.Print
 		private Waybill waybill;
 		private WaybillSettings settings;
 		private DocumentTemplate template;
-		private WaybillDocumentSettings docSettings;
 		private IList<WaybillLine> lines;
+		private WaybillDocumentSettings docSettings;
 
-		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, WaybillDocumentSettings docSettings)
+		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings)
 		{
 			this.waybill = waybill;
 			this.settings = settings;
-			this.docSettings = docSettings;
 			this.lines = lines;
+			docSettings = new WaybillDocumentSettings(waybill);
+			Settings = doc;
 
 			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {

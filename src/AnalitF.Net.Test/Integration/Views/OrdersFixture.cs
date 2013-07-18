@@ -17,7 +17,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Show_address_column()
 		{
-			Restore = true;
+			restore = true;
 
 			session.Save(new Address { Name = "Тестовый адрес доставки" });
 

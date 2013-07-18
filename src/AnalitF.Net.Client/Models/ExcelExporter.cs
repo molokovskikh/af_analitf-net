@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.Tools;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 
@@ -69,7 +70,7 @@ namespace AnalitF.Net.Client.Models
 			foreach (var item in items) {
 				row = sheet.CreateRow(rowIndex++);
 				for(var i = 0; i < columns.Length; i++) {
-					SetCellValue(row.CreateCell(i), GetValue(columns[i], item));
+					SetCellValue(row, i, GetValue(columns[i], item));
 				}
 			}
 
@@ -118,24 +119,31 @@ namespace AnalitF.Net.Client.Models
 			return value;
 		}
 
-		public static void SetCellValue(ICell cell, object value)
+		public static void SetCellValue(IRow row, int i, object value)
 		{
+			value = NullableHelper.GetNullableValue(value);
 			if (value == null)
 				return;
 
 			if (value is bool) {
+				var cell = row.CreateCell(i);
 				if ((bool)value)
 					cell.SetCellValue("Да");
 				else
 					cell.SetCellValue("Нет");
 			}
 			if (value is DateTime) {
+				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue((DateTime)value);
 			}
 			if (Util.IsDigitValue(value)) {
+				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue(Convert.ToDouble(value));
 			}
-			cell.SetCellValue(value.ToString());
+			else {
+				var cell = row.CreateCell(i);
+				cell.SetCellValue(value.ToString());
+			}
 		}
 
 		public HSSFWorkbook ExportTable(string[] columns, IEnumerable<object[]> items, int startRow = 0)
@@ -150,8 +158,8 @@ namespace AnalitF.Net.Client.Models
 			}
 			foreach (var item in items) {
 				row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < columns.Length; i++) {
-					SetCellValue(row.CreateCell(i), item[i]);
+				for(var i = 0; i < item.Length; i++) {
+					SetCellValue(row, i, item[i]);
 				}
 			}
 

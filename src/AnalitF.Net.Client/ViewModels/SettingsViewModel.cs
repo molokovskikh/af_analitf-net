@@ -13,7 +13,6 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
-		private bool broadcast;
 
 		public SettingsViewModel()
 		{
@@ -103,14 +102,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> CanConfigurePriceTag { get; set; }
 
-		protected override void OnDeactivate(bool close)
-		{
-			base.OnDeactivate(close);
-
-			if (broadcast)
-				Bus.SendMessage("UpdateSettings");
-		}
-
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
 			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
@@ -124,11 +115,17 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			broadcast = Session.IsDirty();
+			Session.IsDirty();
 
 			Session.FlushMode = FlushMode.Auto;
 			Settings.ApplyChanges(Session);
 			TryClose();
+		}
+
+
+		protected override void Broadcast()
+		{
+			Bus.SendMessage("UpdateSettings");
 		}
 	}
 }

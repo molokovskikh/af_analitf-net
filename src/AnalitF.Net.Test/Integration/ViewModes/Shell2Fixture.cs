@@ -65,7 +65,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Run_update_after_configure()
 		{
-			Restore = true;
+			restore = true;
 
 			settings.LastUpdate = null;
 			settings.UserName = null;
@@ -92,7 +92,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Check_last_update_time()
 		{
-			Restore = true;
+			restore = true;
 
 			settings.LastUpdate = DateTime.Now.AddDays(-1);
 			settings.UserName = "test";
@@ -139,7 +139,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				if (m is T) {
 					ScreenExtensions.TryActivate(m);
 					action((T)m);
-					ScreenExtensions.TryDeactivate(m, true);
+					Close(m);
 				}
 			};
 		}

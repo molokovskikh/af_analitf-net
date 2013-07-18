@@ -43,12 +43,13 @@ namespace AnalitF.Net.Client.Models.Print
 		private RegistryDocumentSettings docSettings;
 		private IList<WaybillLine> lines;
 
-		public RegistryDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, RegistryDocumentSettings docSettings)
+		public RegistryDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings)
 		{
 			this.waybill = waybill;
-			this.docSettings = docSettings;
 			this.settings = settings;
 			this.lines = lines;
+			docSettings = new RegistryDocumentSettings(waybill);
+			Settings = docSettings;
 
 			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {

@@ -43,7 +43,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Save_settings()
 		{
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			var settings = shell.ViewSettings["CatalogOfferViewModel.Offers"];
 			Assert.That(settings.Count, Is.GreaterThan(0));
@@ -52,7 +52,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Serialize_data()
 		{
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			var data = JsonConvert.SerializeObject(shell);
 			shell.ViewSettings.Clear();
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
 			grid.Columns[0].Visibility = Visibility.Collapsed;
 
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			InitView();
 			grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Collapsed));
@@ -97,7 +97,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Do_not_override_user_settings_activation()
 		{
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			InitView();
 
 			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");

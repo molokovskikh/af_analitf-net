@@ -41,7 +41,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Filter_by_producer()
 		{
-			Restore = true;
+			restore = true;
 
 			var baseOffer = session.Query<Offer>().First(o => o.CatalogId == catalog.Id);
 			var newOffer = new Offer(baseOffer.Price, baseOffer, baseOffer.Cost + 50) {
@@ -224,7 +224,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.CurrentOffer.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			var renewModel = Init(new CatalogOfferViewModel(catalog));
 			Assert.That(renewModel.CurrentOffer.OrderCount, Is.EqualTo(1));

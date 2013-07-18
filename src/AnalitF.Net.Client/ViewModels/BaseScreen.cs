@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
 		private TableSettings tableSettings = new TableSettings();
+		private bool updateOnActivate = true;
 
 		protected ILog log;
 		protected ExcelExporter excelExporter;
@@ -57,10 +58,12 @@ namespace AnalitF.Net.Client.ViewModels
 				var factory = AppBootstrapper.NHibernate.Factory;
 				StatelessSession = factory.OpenStatelessSession();
 				Session = factory.OpenSession();
+				//для mysql это все бутафория
+				//нужно что бы nhibernate делал flush перед запросами
+				//если транзакции нет он это делать не будет
 				Session.BeginTransaction();
 
 				Settings = new NotifyValue<Settings>(Session.Query<Settings>().First());
-
 				User = Session.Query<User>().FirstOrDefault();
 			}
 			else {
@@ -75,6 +78,16 @@ namespace AnalitF.Net.Client.ViewModels
 					Session.Refresh(Settings.Value);
 					Settings.Refresh();
 				}));
+
+			//для сообщений типа string используется ImmediateScheduler
+			//те вызов произойдет в той же нитке что и SendMessage
+			//если делать это как показано выше .ObserveOn(UiScheduler)
+			//то вызов произойдет после того как Dispatcher поделает все дела
+			//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
+			//установка флага произойдет позже нежеле вызов для которого этот флаг устанавливается
+			OnCloseDisposable.Add(Bus.Listen<string>()
+				.Where(m => m == "DbChanged")
+				.Subscribe(_ => updateOnActivate = true));
 		}
 
 		protected virtual ShellViewModel Shell
@@ -112,6 +125,11 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnActivate()
 		{
 			IsSuccessfulActivated = true;
+
+			if (updateOnActivate) {
+				updateOnActivate = false;
+				Update();
+			}
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -119,7 +137,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (close)
 				OnCloseDisposable.Dispose();
 
+			var broacast = false;
 			if (Session.IsOpen) {
+				broacast = Session.IsDirty();
 				if (Session.FlushMode != FlushMode.Never)
 					Session.Flush();
 
@@ -132,6 +152,14 @@ namespace AnalitF.Net.Client.ViewModels
 				tableSettings.SaveView(GetView());
 				Dispose();
 			}
+
+			if (broacast)
+				Broadcast();
+		}
+
+		protected virtual void Broadcast()
+		{
+			Bus.SendMessage("DbChanged");
 		}
 
 		private void Load()
@@ -141,6 +169,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (Shell.CurrentAddress != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
+		}
+
+		//метод вызывается если нужно обновить данные на форме
+		//это нужно при открытии формы
+		//и если форма была деактивирована а затем вновь активирована
+		//и данные в базе изменились
+		protected virtual void Update()
+		{
 		}
 
 		public virtual void NavigateBackward()

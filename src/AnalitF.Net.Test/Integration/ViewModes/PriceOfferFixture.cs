@@ -99,7 +99,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Price.Value.Order, Is.Null);
 			Assert.That(model.Offers[0].OrderLine, Is.Null);
 
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			session.Clear();
 			Assert.That(session.Get<Order>(order.Id), Is.Null);
 		}
