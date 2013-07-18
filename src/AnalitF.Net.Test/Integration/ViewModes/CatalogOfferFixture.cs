@@ -53,7 +53,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var count = model.Offers.Count;
 			Assert.That(count, Is.GreaterThan(2));
-			model.CurrentProducer = model.Producers[1];
+			model.CurrentProducer.Value = model.Producers.Value[1];
 			Assert.That(model.Offers.Count, Is.LessThan(count));
 		}
 
@@ -112,14 +112,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeDifferentCategory(catalog);
 
 			var count = model.Offers.Count;
-			model.CurrentFilter = model.Filters[1];
+			model.CurrentFilter.Value = model.Filters[1];
 			Assert.That(model.Offers.Count, Is.EqualTo(1));
 			Assert.That(model.Offers[0].Price.BasePrice, Is.True);
 
-			model.CurrentFilter = model.Filters[0];
+			model.CurrentFilter.Value = model.Filters[0];
 			Assert.That(model.Offers.Count, Is.EqualTo(count));
 
-			model.CurrentFilter = model.Filters[2];
+			model.CurrentFilter.Value = model.Filters[2];
 			Assert.That(model.Offers.Count, Is.EqualTo(count - 1));
 			Assert.That(model.Offers[0].Price.BasePrice, Is.False, model.Offers[0].Price.Id.ToString());
 		}
@@ -134,7 +134,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				price.BasePrice = true;
 			session.Flush();
 
-			model.CurrentFilter = model.Filters[2];
+			model.CurrentFilter.Value = model.Filters[2];
 		}
 
 		[Test]
@@ -146,7 +146,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalogId = session.Query<Offer>().First(o => o.Price.Id == currentPrice && o.VitallyImportant).CatalogId;
 			catalog = session.Load<Catalog>(catalogId);
 
-			Assert.That(model.MaxProducerCosts.Count, Is.GreaterThan(0));
+			Assert.That(model.MaxProducerCosts.Value.Count, Is.GreaterThan(0));
 		}
 
 		[Test]

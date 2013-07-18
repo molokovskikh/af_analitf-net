@@ -22,7 +22,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Full_filter_values()
 		{
-			Assert.That(model.Producers.Count, Is.GreaterThan(0));
+			Assert.That(model.Producers.Value.Count, Is.GreaterThan(0));
 			Assert.That(model.Prices.Count, Is.GreaterThan(0));
 		}
 
@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var originCount = model.Offers.Count;
 			Assert.That(originCount, Is.GreaterThan(0));
 
-			model.OnlyBase = true;
+			model.OnlyBase.Value = true;
 			Assert.That(model.Offers.Count, Is.LessThan(originCount));
 			foreach (var offer in model.Offers) {
 				Assert.That(offer.Price.BasePrice, Is.True);

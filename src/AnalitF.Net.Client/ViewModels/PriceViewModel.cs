@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
@@ -16,17 +17,16 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class PriceViewModel : BaseScreen
 	{
-		private Price currentPrice;
-		private bool showLeader;
-
 		public bool OpenSinglePrice;
 
 		public PriceViewModel()
 		{
 			DisplayName = "Прайс-листы фирм";
+			CurrentPrice = new NotifyValue<Price>();
+			ShowLeaders = new NotifyValue<bool>();
 			QuickSearch = new QuickSearch<Price>(UiScheduler,
 				t => Prices.FirstOrDefault(p => p.Name.ToLower().Contains(t)),
-				p => CurrentPrice = p);
+				p => CurrentPrice.Value = p);
 		}
 
 		public QuickSearch<Price> QuickSearch { get; set; }
@@ -35,26 +35,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public List<Price> Prices { get; set; }
 
 		[DataMember]
-		public Price CurrentPrice
-		{
-			get { return currentPrice; }
-			set
-			{
-				currentPrice = value;
-				NotifyOfPropertyChange("CurrentPrice");
-			}
-		}
+		public NotifyValue<Price> CurrentPrice { get; set; }
 
 		[DataMember]
-		public bool ShowLeaders
-		{
-			get { return showLeader; }
-			set
-			{
-				showLeader = value;
-				NotifyOfPropertyChange("ShowLeaders");
-			}
-		}
+		public NotifyValue<bool> ShowLeaders { get; set; }
 
 		//при активации надо обновить данные тк можно войти в прайс, сделать заказ а потом вернуться
 		protected override void OnActivate()
@@ -69,7 +53,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (OpenSinglePrice) {
 				OpenSinglePrice = false;
 				if (Prices.Count == 1 && Prices[0].PositionCount > 0) {
-					CurrentPrice = Prices.FirstOrDefault();
+					CurrentPrice.Value = Prices.FirstOrDefault();
 					EnterPrice();
 				}
 			}
@@ -77,7 +61,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void SwitchShowLeaders()
 		{
-			ShowLeaders = !ShowLeaders;
+			ShowLeaders.Value = !ShowLeaders.Value;
 		}
 
 		private void Update()
@@ -101,8 +85,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			Prices = prices;
-			if (CurrentPrice != null) {
-				CurrentPrice = Prices.Where(p => p.Id == CurrentPrice.Id)
+			if (CurrentPrice.Value != null) {
+				CurrentPrice.Value = Prices.Where(p => p.Id == CurrentPrice.Value.Id)
 					.DefaultIfEmpty(Prices.FirstOrDefault())
 					.First();
 			}
@@ -124,7 +108,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentPrice == null)
 				return;
 
-			Shell.Navigate(new PriceOfferViewModel(CurrentPrice.Id, ShowLeaders));
+			Shell.Navigate(new PriceOfferViewModel(CurrentPrice.Value.Id, ShowLeaders));
 		}
 	}
 }

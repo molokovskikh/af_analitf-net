@@ -43,7 +43,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			shell.ShowPrice();
 			var prices = (PriceViewModel)shell.ActiveItem;
-			prices.CurrentPrice = prices.Prices.First(p => p.PositionCount > 0);
+			prices.CurrentPrice.Value = prices.Prices.First(p => p.PositionCount > 0);
 			prices.EnterPrice();
 			var offers = (PriceOfferViewModel)shell.ActiveItem;
 			offers.CurrentOffer.OrderCount = 1;

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
@@ -11,6 +13,32 @@ namespace AnalitF.Net.Client.Binders
 		public static void Register()
 		{
 			var defaultSetBinding = ConventionManager.SetBinding;
+
+			//ConventionManager.ApplyItemTemplate - Будет пытаться установить шаблон для NotifyValue<List<string>> Producers
+			//тк будет думать что NotifyValue биндинг будет производиться к Producers а на самом деле бундинг будет к Producers.Value
+			//это сделает ConventionManager.Set
+			ConventionManager.AddElementConvention<Selector>(Selector.ItemsSourceProperty,
+				"SelectedItem",
+				"SelectionChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					var ignore = ConventionManager.SetBindingWithoutBindingOrValueOverwrite(viewModelType,
+						path,
+						property,
+						element,
+						convention,
+						ItemsControl.ItemsSourceProperty);
+
+					if (!ignore)
+						return false;
+
+					ConventionManager.ConfigureSelectedItem(element, Selector.SelectedItemProperty, viewModelType, path);
+					if (IsNotifyValue(property))
+						property = property.PropertyType.GetProperty("Value");
+
+					ConventionManager.ApplyItemTemplate((ItemsControl)element, property);
+
+					return true;
+				};
 
 			ConventionManager.ConfigureSelectedItem =
 				(selector, selectedItemProperty, viewModelType, path) => {
@@ -30,7 +58,12 @@ namespace AnalitF.Net.Client.Binders
 								selectionPath += ".Value";
 
 							var binding = new Binding(selectionPath) { Mode = BindingMode.TwoWay };
-							var shouldApplyBinding = ConventionManager.ConfigureSelectedItemBinding(selector, selectedItemProperty, viewModelType, selectionPath, binding);
+							var shouldApplyBinding = ConventionManager.ConfigureSelectedItemBinding(selector,
+								selectedItemProperty,
+								viewModelType,
+								selectionPath,
+								binding);
+
 							if (shouldApplyBinding) {
 								BindingOperations.SetBinding(selector, selectedItemProperty, binding);
 								return;
@@ -43,7 +76,7 @@ namespace AnalitF.Net.Client.Binders
 				(viewModelType, path, property, element, convention, bindableProperty) => {
 					if (IsNotifyValue(property)) {
 						path += ".Value";
-						property = typeof(NotifyValue<>).GetProperty("Value");
+						property = property.PropertyType.GetProperty("Value");
 						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
 					}
 					else {
@@ -55,9 +88,7 @@ namespace AnalitF.Net.Client.Binders
 			ActionMessage.PrepareContext = context => {
 				ActionMessage.SetMethodBinding(context);
 				if (context.Target == null || context.Method == null)
-				{
 					return;
-				}
 
 				var guardName = "Can" + context.Method.Name;
 				var targetType = context.Target.GetType();

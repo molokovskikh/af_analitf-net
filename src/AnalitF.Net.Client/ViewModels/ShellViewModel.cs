@@ -64,6 +64,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
+			ErrorCount = new NotifyValue<int>();
+			HaveErrors = new NotifyValue<bool>(() => ErrorCount.Value > 0, ErrorCount);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			Arguments = Environment.GetCommandLineArgs();
 
@@ -120,6 +122,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }
+
+		public NotifyValue<int> ErrorCount { get; set; }
+		public NotifyValue<bool> HaveErrors { get; set; }
+
 		public string Version { get; set; }
 
 		public List<Address> Addresses

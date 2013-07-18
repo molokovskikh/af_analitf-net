@@ -26,10 +26,9 @@ namespace AnalitF.Net.Client.ViewModels
 			IsFilterByWriteTime = new NotifyValue<bool>();
 			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
 
-			Observable.Merge(
-				Begin.Changed().Select(v => (object)v),
-				End.Changed().Select(v => (object)v),
-				IsFilterByDocumentDate.Changed().Select(v => (object)v))
+			Begin.Changed()
+				.Merge(End.Changed())
+				.Merge(IsFilterByDocumentDate.Changed())
 				.Subscribe(_ => Update());
 		}
 

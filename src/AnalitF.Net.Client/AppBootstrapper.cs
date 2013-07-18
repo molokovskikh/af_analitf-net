@@ -67,6 +67,11 @@ namespace AnalitF.Net.Client
 #if DEBUG
 			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
 			PresentationTraceSources.Refresh();
+
+			PresentationTraceSources.DataBindingSource.Listeners.Add(new DelegateTraceListner(_ => {
+				if (Shell != null)
+					Shell.ErrorCount.Value++;
+			}));
 #endif
 
 			XmlConfigurator.Configure();
@@ -86,10 +91,14 @@ namespace AnalitF.Net.Client
 
 		private void CheckShutdown(Exception e)
 		{
+			if (Shell != null)
+				Shell.ErrorCount.Value++;
+
 			if (!IsInitialized) {
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение
-				var message = ErrorHelper.TranslateException(e) ?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Message);
+				var message = ErrorHelper.TranslateException(e)
+					?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Message);
 				if (Application != null && ((App)Application).Quit)
 					Console.WriteLine(message);
 				else
@@ -248,7 +257,9 @@ namespace AnalitF.Net.Client
 			//нужно затем что бы можно было делать модели без суффикса ViewModel
 			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(
-				@"(?<nsbefore>([A-Za-z_]\w*\.)*)(?<subns>ViewModels\.)(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)(?!<suffix>ViewModel)$",
+				@"(?<nsbefore>([A-Za-z_]\w*\.)*)(?<subns>ViewModels\.)"
+				+ @"(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)"
+				+ @"(?!<suffix>ViewModel)$",
 				"${nsbefore}Views.${nsafter}${basename}View");
 
 			ContentElementBinder.Register();

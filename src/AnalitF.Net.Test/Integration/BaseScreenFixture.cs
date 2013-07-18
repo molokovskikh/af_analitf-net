@@ -51,7 +51,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			shell.ShowPrice();
 			var price = (PriceViewModel)shell.ActiveItem;
-			price.CurrentPrice = price.Prices.FirstOrDefault();
+			price.CurrentPrice.Value = price.Prices.FirstOrDefault();
 			price.EnterPrice();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<PriceOfferViewModel>());
 			shell.ShowCatalog();

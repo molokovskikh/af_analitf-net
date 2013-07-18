@@ -29,8 +29,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			CanMark = new NotifyValue<bool>(() => CurrentReject.Value != null, CurrentReject);
 
-			this.ObservableForProperty(m => m.Begin.Value)
-				.Merge(this.ObservableForProperty(m => m.End.Value))
+			Begin.Changed()
+				.Merge(End.Changed())
 				.Subscribe(_ => Update());
 
 			WatchForUpdate(CurrentReject);

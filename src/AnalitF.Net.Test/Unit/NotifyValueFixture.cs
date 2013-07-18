@@ -47,7 +47,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var count = 0;
 			var p = new NotifyValue<MyClass>();
-			p.ValueUpdated().Subscribe(_ => count++);
+			p.ChangedValue().Subscribe(_ => count++);
 			p.Value = new MyClass();
 
 			Assert.AreEqual(count, 0);
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var count = 0;
 			var p = new NotifyValue<MyClass>();
-			p.ValueUpdated().Subscribe(_ => count++);
+			p.ChangedValue().Subscribe(_ => count++);
 			p.Value = new MyClass();
 			var old = p.Value;
 			p.Value = null;

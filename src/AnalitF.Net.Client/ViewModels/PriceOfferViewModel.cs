@@ -40,7 +40,6 @@ namespace AnalitF.Net.Client.ViewModels
 			"Лучшие предложения (F6)",
 		};
 
-		private string currentFilter;
 		private string activeSearchTerm;
 		private PriceComposedId priceId;
 
@@ -57,19 +56,18 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Заявка поставщику";
 
 			Filters = filters;
-			currentProducer = Consts.AllProducerLabel;
-			currentFilter = filters[0];
+			CurrentFilter = new NotifyValue<string>(filters[0]);
 			if (showLeaders)
-				currentFilter = filters[2];
+				FilterLeader();
 
 			OnCloseDisposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search()));
 
-			this.ObservableForProperty(m => m.CurrentFilter)
-				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
-				.Subscribe(e => Update());
+			CurrentProducer.Changed()
+				.Merge(CurrentFilter.Changed())
+				.Subscribe(_ => Update());
 
 			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
 			//но если не удалить подписку будет утечка памяти
@@ -91,14 +89,21 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public string CurrentFilter
+		public NotifyValue<string> CurrentFilter { get; set; }
+
+		public bool CanDeleteOrder
 		{
-			get { return currentFilter; }
-			set
-			{
-				currentFilter = value;
-				NotifyOfPropertyChange("CurrentFilter");
-			}
+			get { return Price.Value.Order != null && Address != null; }
+		}
+
+		public bool CanShowHistoryOrders
+		{
+			get { return CurrentCatalog != null; }
+		}
+
+		public bool CanPrint
+		{
+			get { return true; }
 		}
 
 		protected override void OnActivate()
@@ -118,13 +123,15 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void Query()
 		{
 			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == priceId);
-			if (CurrentProducer != Consts.AllProducerLabel) {
-				query = query.Where(o => o.Producer == CurrentProducer);
+			var producer = CurrentProducer.Value;
+			if (producer != Consts.AllProducerLabel) {
+				query = query.Where(o => o.Producer == producer);
 			}
-			if (CurrentFilter == filters[2]) {
+			var filter = CurrentFilter.Value;
+			if (filter == filters[2]) {
 				query = query.Where(o => o.LeaderPrice.Id == priceId);
 			}
-			if (currentFilter == filters[1]) {
+			if (filter == filters[1]) {
 				//если мы установили фильтр по заказанным позициям то нужно
 				//выполнить сохранение
 				Session.Flush();
@@ -155,17 +162,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void CancelFilter()
 		{
-			CurrentFilter = Filters[0];
+			CurrentFilter.Value = Filters[0];
 		}
 
 		public void FilterOrdered()
 		{
-			CurrentFilter = Filters[1];
+			CurrentFilter.Value = Filters[1];
 		}
 
 		public void FilterLeader()
 		{
-			CurrentFilter = Filters[2];
+			CurrentFilter.Value = Filters[2];
 		}
 
 		public IResult Search()
@@ -191,20 +198,10 @@ namespace AnalitF.Net.Client.ViewModels
 			return HandledResult.Handled();
 		}
 
-		public bool CanPrint
-		{
-			get { return true; }
-		}
-
 		public PrintResult Print()
 		{
 			var doc = new PriceOfferDocument(offers, Price, Address);
 			return new PrintResult(DisplayName, doc);
-		}
-
-		public bool CanShowHistoryOrders
-		{
-			get { return CurrentCatalog != null; }
 		}
 
 		public IResult ShowHistoryOrders()
@@ -219,14 +216,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult EnterOffer()
 		{
 			return ShowHistoryOrders();
-		}
-
-		public bool CanDeleteOrder
-		{
-			get
-			{
-				return Price.Value.Order != null && Address != null;
-			}
 		}
 
 		public void DeleteOrder()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -11,9 +12,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class SearchOfferViewModel : BaseOfferViewModel
 	{
 		private string searchText;
-		private Price currentPrice;
 		private string activeSearchTerm;
-		private bool onlyBase;
 
 		public SearchOfferViewModel()
 		{
@@ -21,13 +20,20 @@ namespace AnalitF.Net.Client.ViewModels
 			NeedToCalculateDiff = true;
 			NavigateOnShowCatalog = true;
 
-			var producers = StatelessSession.Query<Offer>().Select(o => o.Producer).ToList().Distinct().OrderBy(p => p);
-			Producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
-			CurrentProducer = Consts.AllProducerLabel;
+			OnlyBase = new NotifyValue<bool>();
+
+			var producers = StatelessSession.Query<Offer>()
+				.Select(o => o.Producer)
+				.Distinct()
+				.ToList()
+				.OrderBy(p => p)
+				.ToList();
+			producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
+			Producers = new NotifyValue<List<string>>(producers);
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
-			CurrentPrice = Prices.First();
+			CurrentPrice = new NotifyValue<Price>(Prices.First());
 			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
 			this.ObservableForProperty(m => m.SearchText)
@@ -35,9 +41,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => Search());
 
-			this.ObservableForProperty(m => (object)m.CurrentPrice)
-				.Merge(this.ObservableForProperty(m => (object)m.CurrentProducer))
-				.Merge(this.ObservableForProperty(m => (object)m.OnlyBase))
+			CurrentPrice.Changed()
+				.Merge(OnlyBase.Changed())
+				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
 		}
 
@@ -82,28 +88,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public List<Price> Prices { get; set; }
 
-		public Price CurrentPrice
-		{
-			get { return currentPrice; }
-			set
-			{
-				currentPrice = value;
-				NotifyOfPropertyChange("CurrentPrice");
-			}
-		}
+		public NotifyValue<Price> CurrentPrice { get; set; }
 
-		public bool OnlyBase
-		{
-			get
-			{
-				return onlyBase;
-			}
-			set
-			{
-				onlyBase = value;
-				NotifyOfPropertyChange("OnlyBase");
-			}
-		}
+		public NotifyValue<bool> OnlyBase { get; set; }
 
 		protected override void Query()
 		{
@@ -111,18 +98,18 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
-			if (currentPrice != null && currentPrice.Id != null) {
-				var priceId = currentPrice.Id;
+			var price = CurrentPrice.Value;
+			if (price != null && price.Id != null) {
+				var priceId = price.Id;
 				query = query.Where(o => o.Price.Id == priceId);
 			}
 
-			if (CurrentProducer != null && CurrentProducer != Consts.AllProducerLabel) {
-				query = query.Where(o => o.Producer == CurrentProducer);
-			}
+			var producer = CurrentProducer.Value;
+			if (producer != Consts.AllProducerLabel)
+				query = query.Where(o => o.Producer == producer);
 
-			if (OnlyBase) {
+			if (OnlyBase)
 				query = query.Where(o => o.Price.BasePrice);
-			}
 
 			SortOffers(query.Fetch(o => o.Price).ToList());
 		}

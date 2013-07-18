@@ -71,7 +71,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.DeleteEach<Order>();
 			session.Flush();
 
-			model.CurrentFilter = model.Filters[1];
+			model.CurrentFilter.Value = model.Filters[1];
 			Assert.That(model.Offers.Count, Is.EqualTo(0));
 		}
 
@@ -113,7 +113,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.OfferUpdated();
 			model.OfferCommitted();
 
-			model.CurrentFilter = model.Filters[1];
+			model.CurrentFilter.Value = model.Filters[1];
 			Assert.That(model.Offers.Count, Is.EqualTo(1));
 		}
 	}

@@ -14,12 +14,6 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
 	{
-		private string currentRegion;
-		private List<string> regions;
-		private string currentFilter;
-
-		private List<MaxProducerCost> maxProducerCosts;
-
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
 
@@ -28,9 +22,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NeedToCalculateDiff = true;
 			DisplayName = "Сводный прайс-лист";
 			Filters = new [] { "Все", "Основные", "Неосновные" };
-			CurrentFilter = Filters[0];
-			CurrentRegion = Consts.AllRegionLabel;
-			CurrentProducer = Consts.AllProducerLabel;
+
+			MaxProducerCosts = new NotifyValue<List<MaxProducerCost>>();
+			CurrentFilter = new NotifyValue<string>(Filters[0]);
+			Regions = new NotifyValue<List<string>>();
+			CurrentRegion = new NotifyValue<string>(Consts.AllRegionLabel);
 
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
 			GroupByProduct.Changed().Subscribe(_ => Offers = Sort(Offers));
@@ -43,10 +39,10 @@ namespace AnalitF.Net.Client.ViewModels
 				return Math.Round(CurrentOffer.Cost * (1 + RetailMarkup / 100), 2);
 			}, RetailMarkup);
 
-			this.ObservableForProperty(m => m.CurrentRegion)
-				.Merge(this.ObservableForProperty(m => m.CurrentProducer))
-				.	Merge(this.ObservableForProperty(m => m.CurrentFilter))
-				.Subscribe(e => Update());
+			CurrentRegion.Changed()
+				.Merge(CurrentFilter.Changed())
+				.Merge(CurrentProducer.Changed())
+				.Subscribe(_ => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => {
@@ -75,58 +71,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool IsFilterByCatalogName
 		{
-			get
-			{
-				return filterCatalogName != null;
-			}
+			get { return filterCatalogName != null; }
 		}
 
 		public string[] Filters { get; set; }
 
-		public List<MaxProducerCost> MaxProducerCosts
-		{
-			get { return maxProducerCosts; }
-			set
-			{
-				maxProducerCosts = value;
-				NotifyOfPropertyChange("MaxProducerCosts");
-			}
-		}
-
-		public string CurrentFilter
-		{
-			get { return currentFilter; }
-			set
-			{
-				currentFilter = value;
-				NotifyOfPropertyChange("CurrentFilter");
-			}
-		}
-
-		public List<string> Regions
-		{
-			get { return regions; }
-			set
-			{
-				regions = value;
-				NotifyOfPropertyChange("Regions");
-			}
-		}
-
-		public string CurrentRegion
-		{
-			get { return currentRegion; }
-			set
-			{
-				currentRegion = value;
-				NotifyOfPropertyChange("CurrentRegion");
-			}
-		}
-
+		public NotifyValue<string> CurrentFilter { get; set; }
+		public NotifyValue<List<MaxProducerCost>> MaxProducerCosts { get; set; }
+		public NotifyValue<List<string>> Regions { get; set; }
+		public NotifyValue<string> CurrentRegion { get; set; }
 		public NotifyValue<bool> GroupByProduct { get; set; }
-
 		public NotifyValue<decimal?> RetailCost { get; set; }
-
 		public NotifyValue<decimal> RetailMarkup { get; set; }
 
 		public bool CanPrint
@@ -167,7 +122,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var catalogId = CurrentCatalog.Id;
-			MaxProducerCosts = StatelessSession.Query<MaxProducerCost>()
+			MaxProducerCosts.Value = StatelessSession.Query<MaxProducerCost>()
 				.Where(c => c.CatalogId == catalogId)
 				.OrderBy(c => c.Product)
 				.ThenBy(c => c.Producer)
@@ -176,8 +131,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void UpdateRegions()
 		{
-			var offerRegions = Offers.Select(o => o.Price).Distinct().Select(p => p.RegionName).OrderBy(r => r).ToList();
-			Regions = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
+			var offerRegions = Offers.Select(o => o.Price.RegionName).Distinct()
+				.OrderBy(r => r)
+				.ToList();
+			Regions.Value = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
 		}
 
 		protected override void Query()
@@ -197,23 +154,28 @@ namespace AnalitF.Net.Client.ViewModels
 					.Where(o => ids.Contains(o.CatalogId));
 			}
 
-			if (CurrentRegion != Consts.AllRegionLabel) {
-				queryable = queryable.Where(o => o.Price.RegionName == CurrentRegion);
+			var region = CurrentRegion.Value;
+			if (region != Consts.AllRegionLabel) {
+				queryable = queryable.Where(o => o.Price.RegionName == region);
 			}
-			if (CurrentProducer != Consts.AllProducerLabel) {
-				queryable = queryable.Where(o => o.Producer == CurrentProducer);
+			var producer = CurrentProducer.Value;
+			if (producer != Consts.AllProducerLabel) {
+				queryable = queryable.Where(o => o.Producer == producer);
 			}
-			if (CurrentFilter == Filters[1]) {
+			var filter = CurrentFilter.Value;
+			if (filter == Filters[1]) {
 				queryable = queryable.Where(o => o.Price.BasePrice);
 			}
-			if (CurrentFilter == Filters[2]) {
+			if (filter == Filters[2]) {
 				queryable = queryable.Where(o => !o.Price.BasePrice);
 			}
 
 			var offers = queryable.Fetch(o => o.Price).ToList();
 			offers = Sort(offers);
 			if (IsFilterByCatalogName) {
-				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId).Select(c => c.FullName).FirstOrDefault());
+				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId)
+					.Select(c => c.FullName)
+					.FirstOrDefault());
 			}
 			Offers = offers;
 		}
@@ -244,7 +206,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var price = CurrentOffer.Price;
 			var catalogViewModel = new PriceViewModel {
-				CurrentPrice = price
+				CurrentPrice = {
+					Value = price
+				}
 			};
 			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders);
 

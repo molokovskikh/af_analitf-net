@@ -30,7 +30,7 @@
 
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices"
 			CellStyle="{StaticResource Price}"
-			CurrentItemStub="{Binding CurrentPrice}"
+			CurrentItemStub="{Binding CurrentPrice.Value}"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}"
 			binders:ContextMenuBehavior.PersistColumnSettings="true">
 			<DataGrid.Columns>

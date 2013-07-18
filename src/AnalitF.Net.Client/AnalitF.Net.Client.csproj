@@ -157,6 +157,7 @@
     <Compile Include="Controls\PopupSelector.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
+    <Compile Include="Helpers\DelegateTraceListner.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />
@@ -251,15 +252,15 @@
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
-    <Compile Include="ViewModels\PrintPreviewViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\WaybillLineSearch.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\PriceViewModel.cs" />
-    <Compile Include="ViewModels\SyncViewModel.cs" />
-    <Compile Include="ViewModels\WaitViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\SyncViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\WaitViewModel.cs" />
     <Compile Include="ViewModels\WaybillDetails.cs" />
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">

@@ -58,13 +58,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var model = Init(new PriceViewModel());
 			var price = model.Prices[1];
-			model.CurrentPrice = price;
+			model.CurrentPrice.Value = price;
 			ScreenExtensions.TryDeactivate(model, true);
 
 			model = Init(new PriceViewModel());
-			Assert.That(model.CurrentPrice.Id, Is.EqualTo(price.Id));
-			var persistedPrice = model.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Id);
-			Assert.That(model.CurrentPrice, Is.EqualTo(persistedPrice));
+			Assert.That(model.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
+			var persistedPrice = model.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
+			Assert.That(model.CurrentPrice.Value, Is.EqualTo(persistedPrice));
 		}
 
 		[Test]

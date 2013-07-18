@@ -22,7 +22,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private Catalog currentCatalog;
 		protected List<string> producers;
 		protected List<Offer> offers;
-		protected string currentProducer;
 		private Offer currentOffer;
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменений приходит после
@@ -40,6 +39,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public BaseOfferViewModel()
 		{
+			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
+			Producers = new NotifyValue<List<string>>();
+
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
@@ -87,15 +89,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public List<string> Producers
-		{
-			get { return producers; }
-			set
-			{
-				producers = value;
-				NotifyOfPropertyChange("Producers");
-			}
-		}
+		public NotifyValue<List<string>> Producers { get; set; }
+
+		public NotifyValue<string> CurrentProducer { get; set; }
 
 		[Export]
 		public List<Offer> Offers
@@ -105,16 +101,6 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				offers = value;
 				NotifyOfPropertyChange("Offers");
-			}
-		}
-
-		public string CurrentProducer
-		{
-			get { return currentProducer; }
-			set
-			{
-				currentProducer = value;
-				NotifyOfPropertyChange("CurrentProducer");
 			}
 		}
 
@@ -218,7 +204,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected void UpdateProducers()
 		{
 			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
-			Producers = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
+			Producers.Value = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
 		}
 
 		private void CalculateRetailCost()

@@ -233,7 +233,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void WatchForUpdate(NotifyValue<Reject> currentReject)
 		{
-			currentReject.ValueUpdated()
+			currentReject.ChangedValue()
 				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
 		}
 

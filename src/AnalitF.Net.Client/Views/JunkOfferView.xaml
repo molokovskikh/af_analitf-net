@@ -1,7 +1,6 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.JunkOfferView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"

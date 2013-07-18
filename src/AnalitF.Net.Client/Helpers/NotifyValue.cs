@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.Helpers
 			return value.ToString();
 		}
 
-		public IObservable<EventPattern<PropertyChangedEventArgs>> ValueUpdated()
+		public IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue()
 		{
 			return this.ObservableForProperty(v => v.Value)
 				.Select(v => v.Value as INotifyPropertyChanged)

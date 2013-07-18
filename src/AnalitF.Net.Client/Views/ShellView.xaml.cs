@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.Views
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
 			Collect.Visibility = Visibility.Collapsed;
+			ErrorCount.Visibility = Visibility.Collapsed;
 #endif
 		}
 	}
