@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IMessageBus Bus = RxApp.MessageBus;
 		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
 
-		public static bool UnitTesting { get; set; }
+		public static bool UnitTesting;
 		public static IScheduler TestSchuduler;
 
 		public NotifyValue<Settings> Settings;

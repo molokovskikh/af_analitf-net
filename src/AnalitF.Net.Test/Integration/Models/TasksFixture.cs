@@ -10,16 +10,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Service;
+using AnalitF.Net.Service.Config;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Newtonsoft.Json;
 using Test.Support;
 using Test.Support.Documents;
+using Test.Support.Suppliers;
 using Test.Support.log4net;
 using log4net.Config;
 
@@ -31,7 +36,6 @@ namespace AnalitF.Net.Test.Integration.Models
 		private ISession localSession;
 		private Task<UpdateResult> task;
 		private CancellationTokenSource cancelletion;
-		private string updatePath;
 		private BehaviorSubject<Progress> progress;
 		private CancellationToken token;
 
@@ -39,21 +43,18 @@ namespace AnalitF.Net.Test.Integration.Models
 		private Uri uri;
 		private bool restoreUser;
 
+		private Config serviceConfig;
+
 		[TestFixtureSetUp]
 		public void FixtureSetup()
 		{
-			FileHelper.InitDir("service",
-				"service/data/export",
-				"service/data/result",
-				"service/data/update",
-				"service/data/ads");
+			FileHelper.InitDir("var");
 			uri = new Uri("http://localhost:7018");
 			var cfg = new HttpSelfHostConfiguration(uri);
 			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
 
-			Application.Init();
-			Application.Configure(cfg);
+			serviceConfig = Application.InitApp(cfg);
 
 			server = new HttpSelfHostServer(cfg);
 			server.OpenAsync().Wait();
@@ -64,7 +65,6 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			restoreUser = false;
 
-			updatePath = @"service/data/update";
 			Tasks.BaseUri = uri;
 			Tasks.ArchiveFile = Path.Combine("temp", "archive.zip");
 			Tasks.ExtractPath = Path.Combine("temp", "update");
@@ -75,7 +75,7 @@ namespace AnalitF.Net.Test.Integration.Models
 				File.Delete(file);
 			}
 
-			FileHelper.InitDir(updatePath, Tasks.RootPath, "temp");
+			FileHelper.InitDir(serviceConfig.UpdatePath, Tasks.RootPath, "temp");
 
 			localSession = SetupFixture.Factory.OpenSession();
 			cancelletion = new CancellationTokenSource();
@@ -122,8 +122,8 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Import_version_update()
 		{
-			File.WriteAllBytes(Path.Combine(updatePath, "updater.exe"), new byte[0]);
-			File.WriteAllText(Path.Combine(updatePath, "version.txt"), "99.99.99.99");
+			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
+			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
 			task.Start();
 			task.Wait();
@@ -216,6 +216,70 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
+			var waybill = CreateWaybill(supplier, user);
+			var log = waybill.Log;
+			session.Save(waybill);
+			var sendLog = new TestDocumentSendLog(user, log);
+			session.Save(sendLog);
+
+			var file = String.Format("{0}/waybills/{1}_{2}.txt",
+				waybill.Address.Id,
+				log.Id,
+				waybill.Supplier.Name);
+			file = Path.Combine(serviceConfig.DocsPath, file);
+			FileHelper.CreateDirectoryRecursive(Path.GetDirectoryName(file));
+			File.WriteAllText(file, "waybill content");
+
+			Update();
+
+			var waybills = localSession.Query<Waybill>().ToList();
+			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
+			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
+			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
+
+			var settings = localSession.Query<Settings>().First();
+			var path = settings.MapPath("Waybills");
+			var files = Directory.GetFiles(path).Select(Path.GetFileName);
+			Assert.That(files, Contains.Item(Path.GetFileName(file)));
+			session.Refresh(sendLog);
+			Assert.IsTrue(sendLog.Committed);
+			Assert.IsTrue(sendLog.FileDelivered);
+			Assert.IsTrue(sendLog.DocumentDelivered);
+		}
+
+		[Test]
+		public void Import_after_update()
+		{
+			File.Copy(Directory.GetFiles(serviceConfig.ResultPath).Last(), Tasks.ArchiveFile);
+			using(var file = new ZipFile(Tasks.ArchiveFile))
+				file.ExtractAll(Tasks.ExtractPath);
+
+			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
+			Tasks.Import(null, token, progress);
+			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Clean_after_import()
+		{
+			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
+			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
+
+			task.Start();
+			task.Wait();
+			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
+
+			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
+			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
+
+			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
+			task.Start();
+			task.Wait();
+			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
+		}
+
+		private static TestWaybill CreateWaybill(TestSupplier supplier, TestUser user)
+		{
 			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
 			var waybill = new TestWaybill(log);
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
@@ -252,76 +316,14 @@ namespace AnalitF.Net.Test.Integration.Models
 				BillOfEntryNumber = "10609010/101209/0004305/1",
 				EAN13 = "4605635002748",
 			});
-			for(var i = 0; i < 30; i++)
+			for (var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
 					Product = "Доксазозин 4мг таб. Х30 (R)",
 					Certificates = "РОСС RU.ФМ08.Д38737",
 					Period = "01.05.2017",
 					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
 				});
-			session.Save(waybill);
-			var sendLog = new TestDocumentSendLog(user, log);
-			session.Save(sendLog);
-
-			Update();
-
-			var waybills = localSession.Query<Waybill>().ToList();
-			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
-			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
-			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
-		}
-
-		[Test]
-		public void Repair_data_base()
-		{
-			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
-			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
-
-			var result = Tasks.CheckAndRepairDb(cancelletion.Token);
-
-			Assert.That(result, Is.False);
-			Assert.That(Directory.GetFiles("data", "mnns.*").Length, Is.EqualTo(3));
-			Assert.That(new FileInfo(Path.Combine("data", "markupconfigs.frm")).Length, Is.GreaterThan(0));
-		}
-
-		[Test]
-		public void Clean_db()
-		{
-			Tasks.CleanDb(token);
-
-			Assert.That(localSession.Query<Offer>().Count(), Is.EqualTo(0));
-			Assert.That(localSession.Query<Settings>().Count(), Is.EqualTo(1));
-		}
-
-		[Test]
-		public void Import_after_update()
-		{
-			File.Copy(Directory.GetFiles(@"service/data/result").Last(), Tasks.ArchiveFile);
-			using(var file = new ZipFile(Tasks.ArchiveFile))
-				file.ExtractAll(Tasks.ExtractPath);
-
-			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			Tasks.Import(null, token, progress);
-			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
-		}
-
-		[Test]
-		public void Clean_after_import()
-		{
-			File.WriteAllBytes(Path.Combine(updatePath, "updater.exe"), new byte[0]);
-			File.WriteAllText(Path.Combine(updatePath, "version.txt"), "99.99.99.99");
-
-			task.Start();
-			task.Wait();
-			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
-
-			File.Delete(Path.Combine(updatePath, "updater.exe"));
-			File.Delete(Path.Combine(updatePath, "version.txt"));
-
-			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
-			task.Start();
-			task.Wait();
-			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
+			return waybill;
 		}
 
 		private void Update()

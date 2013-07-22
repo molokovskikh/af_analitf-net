@@ -32,6 +32,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Components.Binder">
+      <HintPath>..\..\packages\Castle.Components.Binder.2.5.5\lib\net40\Castle.Components.Binder.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Components.Validator, Version=2.5.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Castle.Components.Validator.2.5.4\lib\net40\Castle.Components.Validator.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Core, Version=3.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL" />
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="ionic.zip" />
     <Reference Include="log4net" />
     <Reference Include="microsoft.web.infrastructure">
@@ -58,20 +68,28 @@
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\Environments\Development.cs" />
+    <Compile Include="Config\Environments\Production.cs" />
+    <Compile Include="Config\Initializers\Mvc.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Controllers\LogsController.cs" />
+    <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Global.asax.cs">
     </Compile>
     <Compile Include="Controllers\MainController.cs">
     </Compile>
+    <Compile Include="Helpers\RequestHelper.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\ClientOrder.cs" />
+    <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Models\UserPrice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Web.config">
       <SubType>Designer</SubType>
     </None>

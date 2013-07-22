@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="Castle.ActiveRecord" />
     <Reference Include="ionic.zip" />
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="NHibernate">
       <HintPath>..\AnalitF.Net\bin\NHibernate.dll</HintPath>
     </Reference>

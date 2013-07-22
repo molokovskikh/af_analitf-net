@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AnalitF.Net.Models;
+using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
 using Ionic.Zip;
@@ -117,8 +117,8 @@ namespace AnalitF.Net.Service.Test
 			session.Transaction.Commit();
 
 			var files = exporter.Export();
-			var offers = files.First(t => t.Item1.EndsWith("offers.txt"));
-			var text = File.ReadAllText(offers.Item1);
+			var offers = files.First(t => t.ArchiveFileName.EndsWith("offers.txt"));
+			var text = File.ReadAllText(offers.LocalFileName);
 			Assert.That(text, Is.StringContaining(core1.Id.ToString()));
 			Assert.That(text, Is.StringContaining(core2.Id.ToString()));
 		}

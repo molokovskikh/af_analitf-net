@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			address = session.Query<Address>().FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
 			shell = new ShellViewModel();
+			shell.UnitTesting = true;
 			ScreenExtensions.TryActivate(shell);
 
 			disposable = new CompositeDisposable {

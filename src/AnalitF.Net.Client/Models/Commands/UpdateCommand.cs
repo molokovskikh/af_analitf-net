@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -19,18 +20,23 @@ namespace AnalitF.Net.Client.Models.Commands
 		private string archiveFile;
 		private string extractPath;
 		private string logPath;
+		private string rootPath;
+
+		public ProgressReporter Reporter;
 
 		public UpdateCommand(string file, string extractPath, string logPath)
 		{
 			this.archiveFile = file;
 			this.extractPath = extractPath;
 			this.logPath = logPath;
+			this.rootPath = logPath;
 		}
 
 		protected override UpdateResult Execute()
 		{
-			var reporter = new ProgressReporter(Progress, 25);
-			reporter.StageCount(4);
+			Reporter = new ProgressReporter(Progress);
+			Reporter.StageCount(4);
+
 			var currentUri = new Uri(BaseUri, new Uri("Main/?reset=true", UriKind.Relative));
 			var done = false;
 			HttpResponseMessage response = null;
@@ -44,11 +50,12 @@ namespace AnalitF.Net.Client.Models.Commands
 				currentUri = new Uri(BaseUri, "Main");
 				if (response.StatusCode != HttpStatusCode.OK
 					&& response.StatusCode != HttpStatusCode.Accepted)
-					throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+					throw new RequestException(
+						String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
 							response.StatusCode,
 							response.Content.ReadAsStringAsync().Result),
 						response.StatusCode);
-				reporter.Stage("Подготовка данных");
+				Reporter.Stage("Подготовка данных");
 				done = response.StatusCode == HttpStatusCode.OK;
 				if (!done) {
 					Token.WaitHandle.WaitOne(TimeSpan.FromSeconds(15));
@@ -56,16 +63,16 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 
-			reporter.Stage("Загрузка данных");
-			Download(response, archiveFile, reporter);
+			Reporter.Stage("Загрузка данных");
+			Download(response, archiveFile, Reporter);
 
-			var result = ProcessUpdate(archiveFile, reporter);
-			Log(sendLogsTask);
+			var result = ProcessUpdate();
+			WaitAndLog(sendLogsTask, "Отправка логов");
 
 			return result;
 		}
 
-		public UpdateResult ProcessUpdate(string archiveFile, ProgressReporter reporter)
+		public UpdateResult ProcessUpdate()
 		{
 			if (Directory.Exists(extractPath))
 				Directory.Delete(extractPath, true);
@@ -80,8 +87,54 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (File.Exists(Path.Combine(extractPath, "update", "Updater.exe")))
 				return UpdateResult.UpdatePending;
 
-			Tasks.Import(archiveFile, reporter);
+			Import();
 			return UpdateResult.OK;
+		}
+
+		public void Import()
+		{
+			Reporter.Stage("Импорт данных");
+			List<System.Tuple<string, string[]>> data;
+			using (var zip = new ZipFile(archiveFile))
+				data = GetDbData(zip.Select(z => z.FileName));
+			Reporter.Weight(data.Count);
+
+			using (var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
+				var importer = new Importer(session);
+				importer.Import(data, Reporter);
+				session.Flush();
+			}
+
+			var settings = new Settings();
+			foreach (var dir in settings.DocumentDirs)
+				FileHelper.CreateDirectoryRecursive(dir);
+
+			var map = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
+				{ "ads", Path.Combine(rootPath, "ads") },
+				{ "waybills", settings.MapPath("waybills") },
+				{ "docs", settings.MapPath("docs") },
+				{ "rejects", settings.MapPath("rejects") }
+			};
+
+			Directory.GetDirectories(extractPath)
+				.Select(d => Tuple.Create(d, map.GetValueOrDefault(Path.GetFileName(d))))
+				.Where(t => t.Item2 != null)
+				.Each(t => Copy(t.Item1, t.Item2));
+
+			Directory.Delete(extractPath, true);
+			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
+		{
+			return files.Where(f => f.EndsWith("meta.txt"))
+				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
+					.Match(f.Replace(".meta.txt", "")))))
+				.Where(t => t.Item2 != null)
+				.Select(t => Tuple.Create(
+					Path.GetFullPath(Path.Combine(extractPath, t.Item2)),
+					File.ReadAllLines(Path.Combine(extractPath, t.Item1))))
+				.ToList();
 		}
 
 		private static void Download(HttpResponseMessage response, string filename, ProgressReporter reporter)
@@ -105,21 +158,45 @@ namespace AnalitF.Net.Client.Models.Commands
 			var prices = Session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
 			var clientPrices = prices.Select(p => new { p.Id.PriceId, p.Id.RegionId, p.Active }).ToArray();
 
-			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(), new SyncRequest(clientPrices), Formatter, token).Result;
+			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(),
+				new SyncRequest(clientPrices),
+				Formatter,
+				token)
+				.Result;
 			CheckResult(response);
 		}
 
-		private void Log(Task<HttpResponseMessage> task)
+		private void WaitAndLog(Task<HttpResponseMessage> task, string name)
 		{
 			if (task == null)
 				return;
 
-			if (task.IsFaulted || (task.IsCompleted && !IsOkStatusCode(task.Result.StatusCode))) {
-				if (task.Exception != null)
-					log.Error("Ошибка при отправке логов {0}", task.Exception);
-				else
-					log.ErrorFormat("Ошибка при отправке логов {0}", task.Result);
+			try {
+				task.Wait();
+				if (!IsOkStatusCode(task.Result.StatusCode))
+					log.ErrorFormat("Задача '{0}' завершилась ошибкой {1}", name, task.Result.StatusCode);
 			}
+			catch(AggregateException e) {
+				log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
+			}
+		}
+
+		private static void Copy(string source, string destination)
+		{
+			if (Directory.Exists(source)) {
+				if (!Directory.Exists(destination)) {
+					Directory.CreateDirectory(destination);
+				}
+
+				foreach (var file in Directory.GetFiles(source)) {
+					File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+				}
+			}
+		}
+
+		public Task<HttpResponseMessage> Confirm()
+		{
+			return Client.DeleteAsync(new Uri(BaseUri, "Main"));
 		}
 
 		public Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)

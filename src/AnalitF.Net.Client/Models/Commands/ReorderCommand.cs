@@ -1,20 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using NHibernate;
 using NHibernate.Linq;
+using Environment = System.Environment;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	public abstract class DbCommand
-	{
-		public ISession Session;
-
-		public abstract void Execute();
-
-		public object Result;
-	}
-
 	public class ReorderCommand<T> : DbCommand where T : class, IOrder
 	{
 		private uint id;

@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client
 		private ResourceDictionary resources;
 		private Style baseStyle;
 
-		public bool Quit;
+		public bool Quiet;
 
 		public void RegisterResources()
 		{

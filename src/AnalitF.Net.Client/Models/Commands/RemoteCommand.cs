@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Reactive.Subjects;
 using System.Threading;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using NHibernate;
 using log4net;
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			log = LogManager.GetLogger(GetType());
 
 			Formatter = new JsonMediaTypeFormatter {
-				SerializerSettings = { ContractResolver = new NHibernateResolver() }
+				SerializerSettings = JsonHelper.SerializerSettings()
 			};
 		}
 
@@ -52,13 +53,17 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public UpdateResult Run()
 		{
-			try
-			{
+			return Process(Execute);
+		}
+
+		public T Process<T>(Func<T> method)
+		{
+			try {
 				return RemoteTask(Credentials, Token, Progress, c => {
 					Client = c;
 					using (Session = AppBootstrapper.NHibernate.Factory.OpenSession())
 					using (var transaction = Session.BeginTransaction()) {
-						var result = Execute();
+						var result = method();
 						transaction.Commit();
 						return result;
 					}
@@ -67,6 +72,27 @@ namespace AnalitF.Net.Client.Models.Commands
 			finally {
 				Session = null;
 				Client = null;
+			}
+		}
+
+		public static T RemoteTask<T>(ICredentials credentials, CancellationToken cancellation,
+			BehaviorSubject<Progress> progress,
+			Func<HttpClient, T> action)
+		{
+			var version = typeof(Tasks).Assembly.GetName().Version;
+
+			progress.OnNext(new Progress("Соединение", 0, 0));
+			var handler = new HttpClientHandler {
+				Credentials = credentials,
+				PreAuthenticate = true,
+			};
+			if (handler.Credentials == null)
+				handler.UseDefaultCredentials = true;
+			using (handler) {
+				using (var client = new HttpClient(handler)) {
+					client.DefaultRequestHeaders.Add("Version", version.ToString());
+					return action(client);
+				}
 			}
 		}
 
@@ -92,25 +118,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		public static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
 		{
 			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
-		}
-
-		public static UpdateResult RemoteTask(ICredentials credentials, CancellationToken cancellation, BehaviorSubject<Progress> progress, Func<HttpClient, UpdateResult> action)
-		{
-			var version = typeof(Tasks).Assembly.GetName().Version;
-
-			progress.OnNext(new Progress("Соединение", 0, 0));
-			var handler = new HttpClientHandler {
-				Credentials = credentials,
-				PreAuthenticate = true,
-			};
-			if (handler.Credentials == null)
-				handler.UseDefaultCredentials = true;
-			using (handler) {
-				using (var client = new HttpClient(handler)) {
-					client.DefaultRequestHeaders.Add("Version", version.ToString());
-					return action(client);
-				}
-			}
 		}
 	}
 }

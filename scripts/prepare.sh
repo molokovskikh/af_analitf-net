@@ -1,8 +1,6 @@
 #!/bin/sh
 
-bake InstallPackages
-bake GenerateAssemblyInfo
-bake packages
+bake packages:install GenerateAssemblyInfo
 msbuild.exe /nologo /verbosity:quiet src/AnalitF.Net.sln
 mkdir src/data
 mkdir src/data/update

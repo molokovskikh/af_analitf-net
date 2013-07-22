@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class PriceFixture : DbFixture
+	public class PriceFixture : DbCommandFixture
 	{
 		[Test]
 		public void Date_time_value_should_be_converted_to_local()

@@ -1,7 +1,7 @@
 ﻿using System;
 using Common.Models;
 
-namespace AnalitF.Net.Models
+namespace AnalitF.Net.Service.Models
 {
 	public class SyncRequest
 	{

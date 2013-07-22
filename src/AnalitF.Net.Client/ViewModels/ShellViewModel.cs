@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
-		public bool Quit;
+		public bool Quiet;
 
 		public ShellViewModel()
 		{
@@ -173,9 +173,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (Stat.Value.OrdersCount > 0) {
-				if (Confirm("Обнаружены неотправленные заказы. Отправить их сейчас?")) {
-					SendOrders();
+			if (!Quiet) {
+				if (Stat.Value.OrdersCount > 0) {
+					if (Confirm("Обнаружены неотправленные заказы. Отправить их сейчас?")) {
+						SendOrders();
+					}
 				}
 			}
 			base.CanClose(callback);
@@ -197,7 +199,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var request = Settings.Value.CheckUpdateCondition();
-			if (Quit)
+			if (Quiet)
 				request = null;
 
 			if (!String.IsNullOrEmpty(request) && Confirm(request))
@@ -456,7 +458,11 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			RunTask(
 				new WaitViewModel("Производится восстановление базы данных.\r\nПодождите..."),
-				Tasks.CheckAndRepairDb,
+				new Task<bool>(() => {
+					var command = new RepairDb();
+					command.Execute();
+					return command.Result;
+				}),
 				t => {
 					if (t.Result) {
 						windowManager.Notify("Проверка базы данных завершена.\r\nОшибок не найдено.");
@@ -479,7 +485,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			RunTask(
 				new WaitViewModel("Производится очистка базы данных.\r\nПодождите..."),
-				Tasks.CleanDb,
+				new Task<object>(() => {
+					var command = new CleanDb();
+					command.Execute();
+					return command.Result;
+				}),
 				t => Update());
 			Reload();
 		}
@@ -517,8 +527,10 @@ namespace AnalitF.Net.Client.ViewModels
 		private void RunUpdate()
 		{
 			windowManager.Warning("Получена новая версия программы. Сейчас будет выполнено обновление.");
-			var updateExePath = Path.Combine(AppBootstrapper.TempPath, "update", "Updater.exe");
-			Process.Start(updateExePath, Process.GetCurrentProcess().Id.ToString());
+			var updateExePath = Path.Combine(Tasks.ExtractPath, "update", "Updater.exe");
+			StartProcess(updateExePath, Process.GetCurrentProcess().Id.ToString());
+			//не нужно ничего запрашивать нужно просто выйти
+			Quiet = true;
 			TryClose();
 		}
 

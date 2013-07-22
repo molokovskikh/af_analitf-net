@@ -6,12 +6,14 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using AnalitF.Net.Controllers;
-using AnalitF.Net.Models;
+using AnalitF.Net.Service.Controllers;
+using AnalitF.Net.Service.Models;
 using Common.Models;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Newtonsoft.Json;
 using Test.Support;
 using Test.Support.Suppliers;
 using Test.Support.log4net;
@@ -28,7 +30,6 @@ namespace AnalitF.Net.Service.Test
 		[SetUp]
 		public void Setup()
 		{
-			ConfigurationManager.AppSettings["ExportPath"] = ".";
 			var client = TestClient.CreateNaked();
 			session.Save(client);
 			session.Flush();
@@ -103,7 +104,7 @@ namespace AnalitF.Net.Service.Test
 			localSession.Save(job);
 			localSession.Transaction.Commit();
 
-			var task = MainController.StartJob(job.Id, localSession.SessionFactory);
+			var task = MainController.StartJob(job.Id, FixtureSetup.Config, localSession.SessionFactory);
 			task.Wait();
 			localSession.Clear();
 			localSession.Refresh(job);
@@ -118,9 +119,13 @@ namespace AnalitF.Net.Service.Test
 			var job = new RequestLog(user, new Version());
 			localSession.Save(job);
 			localSession.Transaction.Commit();
-			ConfigurationManager.AppSettings["ExportPath"] = "asdasd";
 
-			var task = MainController.StartJob(job.Id, localSession.SessionFactory);
+			var config = new Config.Config();
+			var data = JsonConvert.SerializeObject(FixtureSetup.Config);
+			JsonConvert.PopulateObject(data, config);
+			config.ExportPath = "non-exist-path";
+
+			var task = MainController.StartJob(job.Id, config, localSession.SessionFactory);
 			task.Wait();
 			localSession.Refresh(job);
 			Assert.That(job.Error, Is.Not.Null);

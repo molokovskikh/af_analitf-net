@@ -12,7 +12,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class OrderFixture : DbFixture
+	public class OrderFixture : DbCommandFixture
 	{
 		//тест для ситуации когда для загруженных объектов не работает биндинг
 		//измещение о новыйх данных ui не обрабатывает

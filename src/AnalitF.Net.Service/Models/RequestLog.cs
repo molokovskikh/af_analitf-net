@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Common.Models;
 
-namespace AnalitF.Net.Models
+namespace AnalitF.Net.Service.Models
 {
 	public class RequestLog
 	{

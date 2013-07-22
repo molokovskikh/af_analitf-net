@@ -114,6 +114,7 @@
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
     <Compile Include="Integration\ExportImportFixture.cs" />
+    <Compile Include="Integration\Models\DbCommandFixture.cs" />
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />

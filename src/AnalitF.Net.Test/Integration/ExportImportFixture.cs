@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reactive.Subjects;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Models;
+using AnalitF.Net.Service.Models;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Tool.hbm2ddl;
@@ -56,8 +56,15 @@ namespace AnalitF.Net.Test.Integration
 			};
 			var files = exporter.Export();
 
+			var result = files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
+				.Where(g => g.Count() > 1)
+				.Select(g => Tuple.Create(g.First(f => f.Content == null).LocalFileName,
+					g.First(f => f.Content != null).Content.Split(new[] { "\r\n" },
+						StringSplitOptions.RemoveEmptyEntries)))
+				.ToList();
+
 			var importer = new Importer(localSession);
-			importer.Import(files, new ProgressReporter());
+			importer.Import(result, new ProgressReporter());
 
 			var settings = localSession.Query<Settings>().First();
 			settings.UserName = "test";

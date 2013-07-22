@@ -28,7 +28,7 @@ using LogManager = Caliburn.Micro.LogManager;
 
 namespace AnalitF.Net.Client
 {
-	public class AppBootstrapper : Bootstrapper<ShellViewModel>, IDisposable
+	public class AppBootstrapper : BootstrapperBase, IDisposable
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private SingleInstance instance;
@@ -55,6 +55,7 @@ namespace AnalitF.Net.Client
 		public AppBootstrapper(bool useApplication = true, string name = null)
 			: base(useApplication)
 		{
+			Start();
 			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
 			instance = new SingleInstance(this.name);
 			SettingsPath = this.name + ".data";
@@ -99,7 +100,7 @@ namespace AnalitF.Net.Client
 				//если запуск состоялся просто проглатываем исключение
 				var message = ErrorHelper.TranslateException(e)
 					?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Message);
-				if (Application != null && ((App)Application).Quit)
+				if (Application != null && ((App)Application).Quiet)
 					Console.WriteLine(message);
 				else
 					MessageBox.Show(
@@ -142,7 +143,7 @@ namespace AnalitF.Net.Client
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
 			if (Application != null)
-				Shell.Quit = ((App)Application).Quit;
+				Shell.Quiet = ((App)Application).Quiet;
 
 			Deserialize();
 
@@ -230,10 +231,6 @@ namespace AnalitF.Net.Client
 			Tasks.BaseUri = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
 			Tasks.ExtractPath = Path.Combine(TempPath, "update");
-			if (import && File.Exists(Path.Combine(TempPath, "update", "Updater.exe"))) {
-				Tasks.ExtractPath = TempPath;
-				Tasks.DeleteExtractPath = false;
-			}
 			Tasks.RootPath = FileHelper.MakeRooted(".");
 			return true;
 		}

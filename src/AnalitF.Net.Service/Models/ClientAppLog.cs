@@ -19,6 +19,7 @@ namespace AnalitF.Net.Service.Models
 		public virtual uint Id { get; set; }
 		public virtual DateTime CreatedOn { get; set; }
 		public virtual User User { get; set; }
+		public virtual Version Version { get; set; }
 		public virtual string Text { get; set; }
 	}
 }

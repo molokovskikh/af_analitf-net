@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
-using AnalitF.Net.Models;
+using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
@@ -10,12 +13,10 @@ using Ionic.Zip;
 using NHibernate;
 using log4net;
 
-namespace AnalitF.Net.Controllers
+namespace AnalitF.Net.Service.Controllers
 {
 	public class LogsController : ApiController
 	{
-		private FileCleaner cleaner = new FileCleaner();
-
 		public static ILog log = LogManager.GetLogger(typeof(LogsController));
 
 		public ISession Session { get; set; }
@@ -24,26 +25,20 @@ namespace AnalitF.Net.Controllers
 		public void Post(HttpRequestMessage request)
 		{
 			var requestStream = request.Content.ReadAsStreamAsync().Result;
-			var file = Path.GetTempFileName();
-			cleaner.Watch(file);
-			using (var stream = File.OpenWrite(file)) {
-				requestStream.CopyTo(stream);
-			}
-			using(var zip = new ZipFile(file)) {
+
+			using(var zip = ZipFile.Read(requestStream)) {
 				foreach (var entry in zip) {
 					var memory = new MemoryStream();
 					entry.Extract(memory);
 					memory.Position = 0;
-					Session.Save(new ClientAppLog(CurrentUser, new StreamReader(memory).ReadToEnd()));
+					var log = new ClientAppLog(CurrentUser, new StreamReader(memory).ReadToEnd());
+					log.Version = RequestHelper.GetVersion(Request);
+					if (String.IsNullOrWhiteSpace(log.Text))
+						continue;
+
+					Session.Save(log);
 				}
 			}
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
-
-			cleaner.Dispose();
 		}
 	}
 }

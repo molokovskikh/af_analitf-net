@@ -12,6 +12,10 @@ namespace AnalitF.Net.Client.Models
 	public class Importer
 	{
 		private ISession session;
+		private string[] notTruncable = new[] {
+			"Waybills",
+			"WaybillLines"
+		};
 
 		public Importer(ISession session)
 		{
@@ -22,10 +26,17 @@ namespace AnalitF.Net.Client.Models
 		{
 			foreach (var table in tables) {
 				try {
-					var sql = String.Format("TRUNCATE {1}; LOAD DATA INFILE '{0}' INTO TABLE {1} ({2})",
+					var tableName = Path.GetFileNameWithoutExtension(table.Item1);
+					var sql = "";
+
+					if (!notTruncable.Contains(tableName, StringComparer.CurrentCultureIgnoreCase))
+						sql += String.Format("TRUNCATE {0}; ", tableName);
+
+					sql += String.Format("LOAD DATA INFILE '{0}' REPLACE INTO TABLE {1} ({2})",
 						table.Item1.Replace("\\", "/"),
-						Path.GetFileNameWithoutExtension(table.Item1),
+						tableName,
 						table.Item2.Implode());
+
 					var dbCommand = session.Connection.CreateCommand();
 					dbCommand.CommandText = sql;
 					dbCommand.ExecuteNonQuery();

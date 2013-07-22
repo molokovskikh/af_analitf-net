@@ -4,16 +4,31 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Common.Models;
 using Common.Models.Repositories;
 using Common.Tools;
-using Ionic.Zip;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
 using MySql.Data.MySqlClient;
 using NHibernate;
+using NHibernate.Linq;
 using log4net;
 
-namespace AnalitF.Net.Models
+namespace AnalitF.Net.Service.Models
 {
+	public class UpdateData
+	{
+		public string LocalFileName { get; set; }
+		public string ArchiveFileName { get; set; }
+		public string Content { get; set; }
+
+		public UpdateData(string archiveFileName)
+		{
+			ArchiveFileName = archiveFileName;
+		}
+	}
+
 	public class Exporter : IDisposable
 	{
 		private ILog log = LogManager.GetLogger(typeof(Exporter));
@@ -31,6 +46,7 @@ namespace AnalitF.Net.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string UpdatePath;
+		public string DocsPath = "";
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -43,9 +59,9 @@ namespace AnalitF.Net.Models
 		}
 
 		//Все даты передаются в UTC!
-		public List<Tuple<string, string[]>> Export()
+		public List<UpdateData> Export()
 		{
-			var result = new List<Tuple<string, string[]>>();
+			var result = new List<UpdateData>();
 
 			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
 				"drop temporary table if exists usersettings.activeprices;" +
@@ -67,7 +83,7 @@ select Id,
 	CauseRejects
 from Farm.Rejects
 where CancelDate is null";
-			result.Add(Export(sql, "Rejects"));
+			Export(result, sql, "Rejects");
 
 			sql = @"
 select a.Id,
@@ -75,7 +91,7 @@ a.Address as Name
 from Customers.Addresses a
 join Customers.UserAddresses ua on ua.AddressId = a.Id
 where a.Enabled = 1 and ua.UserId = ?userId";
-			result.Add(Export(sql, "Addresses", new { userId }));
+			Export(result, sql, "Addresses", new { userId });
 
 			sql = @"
 select u.Id,
@@ -84,7 +100,7 @@ select u.Id,
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 where u.Id = ?userId";
-			result.Add(Export(sql, "Users", new { userId }));
+			Export(result, sql, "Users", new { userId });
 
 			sql = @"
 drop temporary table if exists Usersettings.MaxProducerCosts;
@@ -132,10 +148,10 @@ from
 where u.Id = ?UserId
 	and a.Enabled = 1
 ";
-			result.Add(Export(sql, "MinOrderSumRules", new { userId }));
+			Export(result, sql, "MinOrderSumRules", new { userId });
 
 			sql = @"select * from Usersettings.MaxProducerCosts";
-			result.Add(Export(sql, "MaxProducerCosts"));
+			Export(result, sql, "MaxProducerCosts");
 
 			sql = @"select
 p.PriceCode as PriceId,
@@ -162,7 +178,7 @@ from Usersettings.Prices p
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
 ";
 
-			result.Add(Export(sql, "prices"));
+			Export(result, sql, "prices");
 
 			sql = @"select
 s.Id,
@@ -170,7 +186,7 @@ s.Name,
 s.FullName
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
-			result.Add(Export(sql, "suppliers"));
+			Export(result, sql, "suppliers");
 
 			var offerQuery = new OfferQuery();
 			offerQuery.Select("m.MinCost as LeaderCost",
@@ -203,7 +219,7 @@ from Customers.Suppliers s
 				.Replace("as PriceCode,", "as PriceId,")
 				.Replace("as OrderCost,", "as MinOrderSum,")
 				.Replace("c0.VitallyImportant as VitallyImportant", "c0.VitallyImportant or cl.VitallyImportant as VitallyImportant");
-			result.Add(Export(sql, "offers"));
+			Export(result, sql, "offers");
 
 			sql = @"
 select
@@ -222,7 +238,7 @@ select
 	Expiration,
 	Composition
 from Catalogs.Descriptions";
-			result.Add(Export(sql, "ProductDescriptions"));
+			Export(result, sql, "ProductDescriptions");
 
 			sql = @"
 select Id,
@@ -235,7 +251,7 @@ select Id,
 		where m.Id = cn.MnnId) as HaveOffers
 from Catalogs.Mnn m";
 
-			result.Add(Export(sql, "mnns"));
+			Export(result, sql, "mnns");
 
 			sql = @"
 select cn.Id,
@@ -252,7 +268,7 @@ select cn.Id,
 from Catalogs.CatalogNames cn
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 group by cn.Id";
-			result.Add(Export(sql, "catalognames"));
+			Export(result, sql, "catalognames");
 
 			sql = @"
 select
@@ -266,13 +282,58 @@ select
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where Hidden = 0";
-			result.Add(Export(sql, "catalogs"));
+			Export(result, sql, "catalogs");
 
-			sql = @"
+			ExportDocs(result);
+			return result;
+		}
+
+		private void ExportDocs(List<UpdateData> result)
+		{
+			string sql;
+
+			session.CreateSQLQuery(@"update Logs.DocumentSendLogs
+set WaitConfirm = 0
+where UserId = :userId")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			var logs = session.Query<DocumentSendLog>()
+				.Where(l => !l.Committed && l.UserId == userId)
+				.Take(400)
+				.ToArray();
+
+
+			if (logs.Length == 0)
+				return;
+
+			foreach (var log in logs) {
+				log.WaitConfirm = true;
+				log.Committed = false;
+				log.FileDelivered = false;
+				log.DocumentDelivered = false;
+			}
+			try {
+				foreach (var log in logs) {
+					log.FileDelivered = true;
+					var type = log.Document.DocumentType.ToString();
+					var path = Path.Combine(DocsPath,
+						log.Document.AddressId.ToString(),
+						type);
+					var files = Directory.GetFiles(path, String.Format("{0}_*", log.Document.Id));
+					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) { LocalFileName = f}));
+				}
+			}
+			catch(Exception e) {
+				log.Warn("Ошибка при экспорте файлов накладных", e);
+			}
+
+			var ids = logs.Select(d => d.Document.Id).Implode();
+			sql = String.Format(@"
 select dh.Id,
 	dh.ProviderDocumentId,
 	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
-	dh.DocumentDate,
+	convert_tz(dh.DocumentDate, @@session.time_zone,'+00:00') as DocumentDate,
 	dh.AddressId,
 	dh.FirmCode as SupplierId,
 	i.SellerName,
@@ -285,16 +346,14 @@ select dh.Id,
 	i.BuyerKpp,
 	i.ConsigneeInfo as ConsigneeNameAndAddress,
 	i.ShipperInfo as ShipperNameAndAddress
-from Logs.DocumentSendLogs ds
-	join Logs.Document_logs d on d.RowId = ds.DocumentId
-		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
-			left join Documents.InvoiceHeaders i on i.Id = dh.Id
-where ds.UserId = ?UserId
-	and ds.Committed = 0
-group by dh.Id";
-			result.Add(Export(sql, "Waybills", new { userId }));
+from Logs.Document_logs d
+	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
+		left join Documents.InvoiceHeaders i on i.Id = dh.Id
+where d.RowId in ({0})
+group by dh.Id", ids);
+			Export(result, sql, "Waybills", new { userId });
 
-			sql = @"
+			sql = String.Format(@"
 select db.Id,
 	db.DocumentId as WaybillId,
 	db.Product,
@@ -313,17 +372,27 @@ select db.Id,
 	db.Unit,
 	db.BillOfEntryNumber,
 	db.ExciseTax
-from Logs.DocumentSendLogs ds
-	join Logs.Document_logs d on d.RowId = ds.DocumentId
+from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
-where ds.UserId = ?UserId
-	and ds.Committed = 0";
-			result.Add(Export(sql, "WaybillLines", new { userId }));
-			return result;
+where d.RowId in ({0})
+group by dh.Id, db.Id", ids);
+			Export(result, sql, "WaybillLines", new { userId });
+
+			var documentExported = session.CreateSQLQuery(@"
+select d.RowId
+from Logs.Document_logs d
+	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
+where d.RowId in (:ids)
+group by dh.Id")
+				.SetParameter("ids", ids)
+				.List<uint>();
+
+			logs.Where(l => documentExported.Contains(l.Document.Id))
+				.Each(l => l.DocumentDelivered = true);
 		}
 
-		public Tuple<string, string[]> Export(string sql, string file, object parameters = null)
+		public void Export(List<UpdateData> data, string sql, string file, object parameters = null)
 		{
 			var dataAdapter = new MySqlDataAdapter(sql + " limit 0", (MySqlConnection)session.Connection);
 			if (parameters != null)
@@ -349,27 +418,52 @@ where ds.UserId = ?UserId
 
 			cleaner.Watch(path);
 
-			return Tuple.Create(mysqlPath, columns);
+			data.Add(new UpdateData(file + ".meta.txt") { Content = columns.Implode("\r\n") });
+			data.Add(new UpdateData(file + ".txt") { LocalFileName = path });
 		}
 
 		public string ExportCompressed(string file)
 		{
 			var files = Export();
-			using (var zip = new ZipFile()) {
+			var watch = new Stopwatch();
+			watch.Start();
+			file = Path.Combine(ResultPath, file);
+			using (var zip = ZipFile.Create(file)) {
+				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
+				zip.BeginUpdate();
 				foreach (var tuple in files) {
-					var entry = zip.AddFile(tuple.Item1);
-					var dataname = Path.GetFileName(tuple.Item1);
-					dataname = dataname.Replace(Prefix, "");
-					var metaname = Path.ChangeExtension(dataname, ".meta.txt");
-					entry.FileName = dataname;
-					zip.AddEntry(metaname, tuple.Item2.Implode("\r\n"));
+					if (String.IsNullOrEmpty(tuple.LocalFileName)) {
+						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
+						zip.Add(content, tuple.ArchiveFileName);
+					}
+					else {
+						zip.Add(tuple.LocalFileName, tuple.ArchiveFileName);
+					}
 				}
 				CheckUpdate(zip);
 				CheckAds(zip);
-				file = Path.Combine(ResultPath, file);
-				zip.Save(file);
+				zip.CommitUpdate();
 			}
+			watch.Stop();
+
+			log.DebugFormat("Архив создан за {0}, размер {1}", watch.Elapsed, new FileInfo(file).Length);
+
 			return file;
+		}
+
+		public class MemoryDataSource : IStaticDataSource
+		{
+			private Stream data;
+
+			public MemoryDataSource(Stream data)
+			{
+				this.data = data;
+			}
+
+			public Stream GetSource()
+			{
+				return data;
+			}
 		}
 
 		public void CheckAds(ZipFile zip)
@@ -382,7 +476,21 @@ where ds.UserId = ?UserId
 			if (String.IsNullOrEmpty(dir))
 				return;
 
-			zip.AddDirectory(dir, "ads");
+			AddDir(zip, dir, "ads");
+		}
+
+		private static void AddDir(ZipFile zip, string dir, string name)
+		{
+			var transform = new ZipNameTransform();
+			transform.TrimPrefix = dir;
+
+			var scanned = new FileSystemScanner(".+");
+			scanned.ProcessFile += (sender, args) => {
+				if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
+					return;
+				zip.Add(args.Name, name + "/" + transform.TransformFile(args.Name));
+			};
+			scanned.Scan(dir, true);
 		}
 
 		private void CheckUpdate(ZipFile zip)
@@ -395,7 +503,7 @@ where ds.UserId = ?UserId
 			if (updateVersion <= version)
 				return;
 
-			zip.AddDirectory(UpdatePath, "update");
+			AddDir(zip, UpdatePath, "update");
 		}
 
 		public void Dispose()

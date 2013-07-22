@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Models
 			behavior = new BehaviorSubject<Progress>(new Progress());
 		}
 
-		public ProgressReporter(BehaviorSubject<Progress> behavior, int total = 0)
+		public ProgressReporter(BehaviorSubject<Progress> behavior)
 		{
 			this.behavior = behavior;
 		}

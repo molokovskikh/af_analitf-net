@@ -1,45 +1,58 @@
-﻿using System.Web;
+﻿using System.Configuration;
+using System.Web;
 using System.Web.Http;
-using System.Web.Routing;
-using AnalitF.Net.Models;
-using Common.Web.Service.Filters;
+using AnalitF.Net.Service.Config.Environments;
+using AnalitF.Net.Service.Config.Initializers;
+using Castle.Components.Binder;
 using NHibernate;
+using log4net;
 using log4net.Config;
 
-namespace AnalitF.Net
+namespace AnalitF.Net.Service
 {
 	public class Application : HttpApplication
 	{
+		private ILog log = LogManager.GetLogger(typeof(Application));
+
 		public static ISessionFactory SessionFactory;
 
 		protected void Application_Start()
 		{
-			Init();
-
-			Configure(GlobalConfiguration.Configuration);
+			InitApp(GlobalConfiguration.Configuration);
 		}
 
-		public static void Init()
+		protected void Application_Error()
+		{
+			log.Error("Ошибка в приложении", Server.GetLastError());
+		}
+
+		public static Config.Config InitApp(HttpConfiguration httpConfig)
 		{
 			XmlConfigurator.Configure();
+
+			var config = ReadConfig();
+			if (config.Environment == "Development")
+				new Development().Run(config);
+			else
+				new Production().Run(config);
 
 			var nhibernate = new Config.Initializers.NHibernate();
 			nhibernate.Init();
 			SessionFactory = nhibernate.Factory;
+			var mvc = new Mvc();
+			mvc.Run(httpConfig, nhibernate, config);
+
+			return config;
 		}
 
-		public static void Configure(HttpConfiguration config)
+		public static Config.Config ReadConfig()
 		{
-			config.Properties[typeof(ISessionFactory)] = SessionFactory;
-			var routes = config.Routes;
-			routes.MapHttpRoute(
-				name: "DefaultApi",
-				routeTemplate: "{controller}/{id}",
-				defaults: new { id = RouteParameter.Optional });
-
-			config.Filters.Add(new ExceptionFilter());
-			config.Filters.Add(new SessionFilter());
-			config.Filters.Add(new UserFilter());
+			var config = new Config.Config();
+			var builder = new TreeBuilder();
+			var tree = builder.BuildSourceNode(ConfigurationManager.AppSettings);
+			var binder = new DataBinder();
+			binder.BindObjectInstance(config, "", tree);
+			return config;
 		}
 	}
 }

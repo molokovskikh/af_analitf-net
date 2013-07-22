@@ -4,20 +4,19 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using AnalitF.Net.Models;
+using AnalitF.Net.Service.Helpers;
+using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.MySql;
 using Common.Tools;
-using Ionic.Zip;
 using MySql.Data.MySqlClient;
 using NHibernate;
 using NHibernate.Linq;
 using log4net;
 
-namespace AnalitF.Net.Controllers
+namespace AnalitF.Net.Service.Controllers
 {
 	public class MainController : ApiController
 	{
@@ -25,6 +24,7 @@ namespace AnalitF.Net.Controllers
 
 		public ISession Session { get; set; }
 		public User CurrentUser { get; set; }
+		public Config.Config Config;
 
 		public HttpResponseMessage Get(bool reset = false)
 		{
@@ -46,22 +46,35 @@ namespace AnalitF.Net.Controllers
 					Version.TryParse(headers.FirstOrDefault(), out version);
 				}
 
-				existsJob  = new RequestLog(CurrentUser, version);
+				existsJob  = new RequestLog(CurrentUser, RequestHelper.GetVersion(Request));
 				Session.Save(existsJob);
 				Session.Transaction.Commit();
 
-				StartJob(existsJob.Id, Session.SessionFactory);
+				StartJob(existsJob.Id, Config, Session.SessionFactory);
 			}
 
 			if (!existsJob.IsCompleted)
 				return new HttpResponseMessage(HttpStatusCode.Accepted);
 
 			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(existsJob.GetResult(FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"])))
+				Content = new StreamContent(existsJob.GetResult(Config.ResultPath))
 			};
 		}
 
-		public static Task StartJob(uint jobId, ISessionFactory sessionFactory)
+		public HttpResponseMessage Delete()
+		{
+			Session.CreateSQLQuery(@"
+update Logs.DocumentSendLogs
+set WaitConfirm = 0, Committed = 1
+where WaitConfirm = 1
+	and UserId = :userId;")
+				.SetParameter("userId", CurrentUser.Id)
+				.ExecuteUpdate();
+
+			return new HttpResponseMessage();
+		}
+
+		public static Task StartJob(uint jobId, Config.Config config, ISessionFactory sessionFactory)
 		{
 			var task = new Task(() => {
 				try {
@@ -73,12 +86,13 @@ namespace AnalitF.Net.Controllers
 							using(var exportTransaction = exportSession.BeginTransaction()) {
 								var exporter = new Exporter(exportSession, job.User.Id, job.Version) {
 									Prefix = job.Id.ToString(),
-									ExportPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ExportPath"]),
-									ResultPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["ResultPath"]),
-									UpdatePath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["UpdatePath"]),
-									AdsPath = FileHelper.MakeRooted(ConfigurationManager.AppSettings["AdsPath"]),
-									MaxProducerCostPriceId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostPriceId"]),
-									MaxProducerCostCostId = SafeConvert.ToUInt32(ConfigurationManager.AppSettings["MaxProducerCostCostId"]),
+									ExportPath = config.ExportPath,
+									ResultPath = config.ResultPath,
+									UpdatePath = config.UpdatePath,
+									AdsPath = config.AdsPath,
+									DocsPath = config.DocsPath,
+									MaxProducerCostPriceId = config.MaxProducerCostPriceId,
+									MaxProducerCostCostId = config.MaxProducerCostCostId,
 								};
 								using (exporter) {
 									exporter.ExportCompressed(job.OutputFile);

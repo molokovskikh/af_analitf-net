@@ -162,6 +162,7 @@
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
+    <Compile Include="Helpers\NHibernateResolver.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />
     <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\PrintHelper.cs" />
@@ -175,6 +176,9 @@
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ColumnSettings.cs" />
+    <Compile Include="Models\Commands\CleanDb.cs" />
+    <Compile Include="Models\Commands\RepairDb.cs" />
+    <Compile Include="Models\Commands\DbCommand.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
     <Compile Include="Models\Commands\ReorderCommand.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />

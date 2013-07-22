@@ -35,6 +35,12 @@ namespace AnalitF.Net.Client.Binders
 					if (IsNotifyValue(property))
 						property = property.PropertyType.GetProperty("Value");
 
+					if (property.PropertyType.IsArray) {
+						var itemType = property.PropertyType.GetElementType();
+						if (itemType.IsValueType || typeof(string).IsAssignableFrom(itemType)) {
+							return true;
+						}
+					}
 					ConventionManager.ApplyItemTemplate((ItemsControl)element, property);
 
 					return true;

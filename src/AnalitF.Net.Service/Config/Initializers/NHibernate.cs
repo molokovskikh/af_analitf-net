@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Reflection;
-using AnalitF.Net.Models;
 using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using NHibernate;
@@ -9,7 +8,7 @@ using NHibernate.Mapping.Attributes;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
-namespace AnalitF.Net.Config.Initializers
+namespace AnalitF.Net.Service.Config.Initializers
 {
 	public class NHibernate : BaseNHibernate
 	{
@@ -17,10 +16,6 @@ namespace AnalitF.Net.Config.Initializers
 		{
 			Mapper.Class<ClientAppLog>(m => {
 				m.Property(p => p.Text, c => c.Length(10000));
-			});
-
-			Mapper.Class<RequestLog>(m => {
-				m.Property(l => l.Version, pm => pm.Type<VersionType>());
 			});
 
 			Mapper.Class<UserPrice>(m => {
@@ -35,6 +30,11 @@ namespace AnalitF.Net.Config.Initializers
 				m.Property(p => p.RegionId);
 			});
 
+			Mapper.Class<DocumentLog>(m => {
+				m.Table("Document_Logs");
+				m.Id(l => l.Id, i => i.Column("RowId"));
+			});
+
 			Mapper.AfterMapClass += (i, t, c) => {
 				if (t.Name.EndsWith("Log")) {
 					c.Schema("Logs");
@@ -42,9 +42,13 @@ namespace AnalitF.Net.Config.Initializers
 			};
 
 			Mapper.AfterMapProperty += (inspector, member, customizer) => {
-				if (typeof(ValueType).IsAssignableFrom(((PropertyInfo)member.LocalMember).PropertyType)) {
+				var propertyType = ((PropertyInfo)member.LocalMember).PropertyType;
+				if (typeof(ValueType).IsAssignableFrom(propertyType)) {
 					customizer.NotNullable(true);
 				}
+
+				if (propertyType == typeof(Version))
+					customizer.Type<VersionType>();
 			};
 
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));

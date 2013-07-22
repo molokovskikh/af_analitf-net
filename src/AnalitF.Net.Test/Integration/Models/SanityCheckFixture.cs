@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class SanityCheckFixture : DbFixture
+	public class SanityCheckFixture : DbCommandFixture
 	{
 		[TearDown]
 		public void TearDown()

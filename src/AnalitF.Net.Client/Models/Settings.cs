@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
-using AnalitF.Net.Client.Config.Initializers;
-using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -164,11 +163,28 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				var root = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-				root = Path.Combine(root, "АналитФАРМАЦИЯ");
-				var dirs = new [] {"Документы", "Отказы", "Накладные"};
-				return dirs.Select(d => Path.Combine(root, d));
+				return new [] {
+					MapPath("waybills"),
+					MapPath("rejects"),
+					MapPath("docs"),
+				};
 			}
+		}
+
+		public virtual string MapPath(string name)
+		{
+			var root = ConfigurationManager.AppSettings["ClientDocPath"] ??
+				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+			root = FileHelper.MakeRooted(root);
+			root = Path.Combine(root, "АналитФАРМАЦИЯ");
+			if (name.Match("Waybills"))
+				return Path.Combine(root, "Накладные");
+			if (name.Match("docs"))
+				return Path.Combine(root, "Документы");
+			if (name.Match("Rejects"))
+				return Path.Combine(root, "Отказы");
+			return null;
 		}
 
 		public virtual void ApplyChanges(ISession session)

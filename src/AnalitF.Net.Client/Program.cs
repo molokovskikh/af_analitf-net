@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client
 			var options = new OptionSet {
 				{"help", "Показать справку", v => help = true},
 				{"version", "Показать информацию о версии", v => version = true},
-				{"quit", "Не выводить предупреждения при запуске", v => app.Quit = true},
+				{"quiet", "Не выводить предупреждения при запуске", v => app.Quiet = true},
 			};
 			options.Parse(args);
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
@@ -33,6 +35,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				command = "SendOrders";
 				return UpdateResult.OK;
 			};
+			Tasks.ExtractPath = Path.Combine("temp", "update");
 		}
 
 		[Test]
@@ -131,6 +134,35 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Show_about()
 		{
 			shell.ShowAbout();
+		}
+
+		[Test]
+		public void On_pending_update_close_shell_and_execute_updater()
+		{
+			Tasks.Update = (credentials, token, arg3) => {
+				return UpdateResult.UpdatePending;
+			};
+
+			shell.Update();
+			var messages = manager.MessageBoxes.Implode();
+			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
+			Assert.IsFalse(shell.IsActive);
+			Assert.That(shell.StartedProcess[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+		}
+
+		[Test]
+		public void Do_not_warn_on_mandatory_exit()
+		{
+			Tasks.Update = (credentials, token, arg3) => {
+				return UpdateResult.UpdatePending;
+			};
+			MakeOrder();
+
+			shell.Update();
+			var messages = manager.MessageBoxes.Implode();
+			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
+			Assert.IsFalse(shell.IsActive);
+			Assert.That(shell.StartedProcess[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)
