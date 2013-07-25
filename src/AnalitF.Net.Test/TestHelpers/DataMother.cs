@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate;
+using Test.Support;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -33,6 +34,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			session.Flush();
 
 			return waybill;
+		}
+
+		public static TestWaybill CreateWaybill(ISession session, TestUser user)
+		{
+			return global::Test.Data.DataMother.CreateWaybill(session, user);
 		}
 	}
 }

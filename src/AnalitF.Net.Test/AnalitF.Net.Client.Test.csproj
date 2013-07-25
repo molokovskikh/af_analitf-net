@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AnalitF.Net.Client.Test</RootNamespace>
     <AssemblyName>AnalitF.Net.Client.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -119,7 +119,7 @@
     <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\StatFixture.cs" />
-    <Compile Include="Integration\Models\TasksFixture.cs" />
+    <Compile Include="Integration\Models\UPdateFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
@@ -191,6 +191,10 @@
     <ProjectReference Include="..\Common.Tools\Common.Tools\Common.Tools.csproj">
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Test.Data\Test.Data.csproj">
+      <Project>{140789c3-8c40-4ab7-a538-ff4141761305}</Project>
+      <Name>Test.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\Test.Support\Test.Support\Test.Support.csproj">
       <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>

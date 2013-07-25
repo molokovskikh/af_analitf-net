@@ -10,7 +10,9 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.Documents;
 using Test.Support.Suppliers;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Service.Test
 {
@@ -28,8 +30,6 @@ namespace AnalitF.Net.Service.Test
 		{
 			client = TestClient.CreateNaked();
 			session.Save(client);
-			session.Flush();
-			session.Transaction.Commit();
 
 			localSession = FixtureSetup.Factory.OpenSession();
 			localSession.BeginTransaction();
@@ -43,7 +43,8 @@ namespace AnalitF.Net.Service.Test
 				Prefix = "1",
 				ExportPath = "export",
 				ResultPath = "data",
-				UpdatePath = "update"
+				UpdatePath = "update",
+				DocsPath = FixtureSetup.Config.DocsPath
 			};
 		}
 
@@ -60,16 +61,16 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllText("update\\version.txt", "1.2");
 			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[0]);
 
-			file = exporter.ExportCompressed(file);
+			ExportCompressed();
 			var files = lsZip();
+
 			Assert.That(files.Implode(), Is.StringContaining("update/analitf.net.client.exe"));
 		}
 
 		[Test]
 		public void Export_meta()
 		{
-			file = exporter.ExportCompressed(file);
-
+			ExportCompressed();
 			var zipEntries = lsZip().Implode();
 
 			Assert.That(File.Exists(file), "{0} не существует", file);
@@ -90,9 +91,9 @@ namespace AnalitF.Net.Service.Test
 			exporter.AdsPath = "ads";
 			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[0]);
 
-			file = exporter.ExportCompressed(file);
-
+			ExportCompressed();
 			var zipEntries = lsZip();
+
 			Assert.That(zipEntries.Implode(), Is.StringContaining("ads/2block.gif"));
 		}
 
@@ -113,14 +114,46 @@ namespace AnalitF.Net.Service.Test
 			session.Flush();
 			session.Save(core1);
 			session.Save(core2);
-			session.Flush();
-			session.Transaction.Commit();
 
-			var files = exporter.Export();
+			var files = Export();
+
 			var offers = files.First(t => t.ArchiveFileName.EndsWith("offers.txt"));
 			var text = File.ReadAllText(offers.LocalFileName);
 			Assert.That(text, Is.StringContaining(core1.Id.ToString()));
 			Assert.That(text, Is.StringContaining(core2.Id.ToString()));
+		}
+
+		[Test]
+		public void Export_waybills()
+		{
+			var testUser = session.Load<TestUser>(user.Id);
+			var waybill = DataMother.CreateWaybill(session, testUser);
+			var log = waybill.Log;
+			session.Save(waybill);
+			var sendLog = new TestDocumentSendLog(testUser, log);
+			session.Save(sendLog);
+			var waybillFile = waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
+
+			exporter.UpdateType = "Waybills";
+			ExportCompressed();
+			var files = lsZip().Implode();
+			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
+				+ " WaybillLines.meta.txt, WaybillLines.txt",
+				Path.GetFileName(waybillFile)));
+		}
+
+		private List<UpdateData> Export()
+		{
+			session.Transaction.Commit();
+			var files = new List<UpdateData>();
+			exporter.Export(files);
+			return files;
+		}
+
+		private void ExportCompressed()
+		{
+			session.Transaction.Commit();
+			file = exporter.ExportCompressed(file);
 		}
 
 		private List<string> lsZip()

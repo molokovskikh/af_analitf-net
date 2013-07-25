@@ -54,7 +54,8 @@ namespace AnalitF.Net.Test.Integration
 				MaxProducerCostPriceId = maxProducerCosts.Id,
 				MaxProducerCostCostId = maxProducerCosts.Costs[0].Id
 			};
-			var files = exporter.Export();
+			var files = new List<UpdateData>();
+			exporter.Export(files);
 
 			var result = files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
 				.Where(g => g.Count() > 1)

@@ -105,6 +105,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanShowJunkOffers");
 					NotifyOfPropertyChange("CanShowRejects");
 					NotifyOfPropertyChange("CanShowWaybills");
+					NotifyOfPropertyChange("CanMicroUpdate");
 				});
 
 			Bus.Listen<Stat>()
@@ -425,11 +426,21 @@ namespace AnalitF.Net.Client.ViewModels
 				ActivateItem(screen);
 		}
 
+		public bool CanMicroUpdate
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void MicroUpdate()
+		{
+			Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath) {
+				SyncData = new [] {"Waybills"}
+			});
+		}
+
 		public void Update()
 		{
-			Sync("Обновление завершено успешно.",
-				"Не удалось получить обновление. Попробуйте повторить операцию позднее.",
-				Tasks.Update);
+			Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
 		}
 
 		public bool CanSendOrders
@@ -442,9 +453,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void SendOrders()
 		{
-			Sync("Отправка заказов завершена успешно.",
-				"Не удалось отправить заказы. Попробуйте повторить операцию позднее.",
-				(c, t, b) => Tasks.SendOrders(c, t, b, CurrentAddress));
+			Sync(new SendOrders(CurrentAddress));
 		}
 
 		private void Import()
@@ -500,7 +509,26 @@ namespace AnalitF.Net.Client.ViewModels
 			return result == MessageBoxResult.Yes;
 		}
 
-		private void Sync(string sucessMessage, string errorMessage, Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
+		public void Sync(RemoteCommand command)
+		{
+			if(UnitTesting) {
+				command = OnCommandExecuting(command);
+			}
+
+			Sync(command.SuccessMessage,
+				command.ErrorMessage,
+				(c, t, p) => {
+					command.BaseUri = Tasks.BaseUri;
+					command.Credentials = c;
+					command.Token = t;
+					command.Progress = p;
+					return command.Run();
+				});
+		}
+
+		private void Sync(string sucessMessage,
+			string errorMessage,
+			Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
 		{
 			if (!CheckSettings())
 				return;
@@ -647,7 +675,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Snoop()
 		{
-			var assembly = Assembly.Load("snoop");
+			var assembly = Assembly.LoadFrom(@"C:\Chocolatey\lib\snoop.2.7.1\tools\snoop.exe");
 			var type = assembly.GetType("Snoop.SnoopUI");
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}

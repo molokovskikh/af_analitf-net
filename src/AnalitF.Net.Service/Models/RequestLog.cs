@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Common.Models;
+using Newtonsoft.Json;
 
 namespace AnalitF.Net.Service.Models
 {
@@ -32,6 +33,8 @@ namespace AnalitF.Net.Service.Models
 		public virtual string Error { get; set; }
 
 		public virtual Version Version { get; set; }
+
+		public virtual string UpdateType { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

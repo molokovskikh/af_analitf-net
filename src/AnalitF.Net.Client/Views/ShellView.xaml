@@ -2,6 +2,8 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:h="clr-namespace:AnalitF.Net.Client.Helpers"
+	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+	xmlns:cal="http://www.caliburnproject.org"
 	MinHeight="600" MinWidth="800" Name="Shell">
 	<Window.InputBindings>
 		<KeyBinding Gesture="CTRL+S" Command="binders:Commands.InvokeViewModel" CommandParameter="SendOrders" />
@@ -24,48 +26,55 @@
 
 		<Menu Grid.Row="0">
 			<MenuItem Header="Файл">
-				<MenuItem Header="Получить данные" InputGestureText="Ctrl+R" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="Update" />
-				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="SendOrders" />
+				<MenuItem Header="Получить данные" InputGestureText="Ctrl+R" cal:Message.Attach="Update" />
+				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S" cal:Message.Attach="SendOrders" />
 				<Separator></Separator>
-				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="Export"></MenuItem>
-				<MenuItem Header="Предварительный просмотр..." Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="PrintPreview"></MenuItem>
-				<MenuItem Header="Печать" InputGestureText="Ctrl+P" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="Print"></MenuItem>
+				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T" cal:Message.Attach="Export"></MenuItem>
+				<MenuItem Header="Предварительный просмотр..." cal:Message.Attach="PrintPreview"></MenuItem>
+				<MenuItem Header="Печать" InputGestureText="Ctrl+P" cal:Message.Attach="Print"></MenuItem>
 				<Separator></Separator>
-				<MenuItem Header="Выход" InputGestureText="Alt+F4" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="TryClose"></MenuItem>
-
+				<MenuItem Header="Выход" InputGestureText="Alt+F4" cal:Message.Attach="TryClose"></MenuItem>
 			</MenuItem>
 
 			<MenuItem Header="Заказ">
-				<MenuItem Header="Список препаратов" InputGestureText="F8" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowCatalog"></MenuItem>
-				<MenuItem Header="Уцененные препараты" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowJunkOffers"></MenuItem>
-				<MenuItem Header="Прайс-листы" InputGestureText="F9" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowPrice"></MenuItem>
+				<MenuItem Header="Список препаратов" InputGestureText="F8" cal:Message.Attach="ShowCatalog"></MenuItem>
+				<MenuItem Header="Уцененные препараты" cal:Message.Attach="ShowJunkOffers"></MenuItem>
+				<MenuItem Header="Прайс-листы" InputGestureText="F9" cal:Message.Attach="ShowPrice"></MenuItem>
 				<Separator></Separator>
-				<MenuItem Header="Сводный заказ" InputGestureText="F10" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowOrderLines"></MenuItem>
+				<MenuItem Header="Сводный заказ" InputGestureText="F10" cal:Message.Attach="ShowOrderLines"></MenuItem>
 				<Separator></Separator>
-				<MenuItem Header="Заказы" InputGestureText="F12" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowOrders"></MenuItem>
+				<MenuItem Header="Заказы" InputGestureText="F12" cal:Message.Attach="ShowOrders"></MenuItem>
 			</MenuItem>
 
 			<MenuItem Header="Сервис">
-				<MenuItem Header="Конфигурация" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowSettings"></MenuItem>
-				<MenuItem Header="Восстановление базы данных" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="CheckDb"></MenuItem>
+				<MenuItem Header="Конфигурация" cal:Message.Attach="ShowSettings"></MenuItem>
+				<MenuItem Header="Восстановление базы данных" cal:Message.Attach="CheckDb"></MenuItem>
 				<MenuItem Header="Служебные">
-					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ResetNavigation"></MenuItem>
+					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4" cal:Message.Attach="ResetNavigation"></MenuItem>
 					<Separator></Separator>
-					<MenuItem Header="Создание базы данных с сохранение отправленных заказов" Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="CleanDb"></MenuItem>
+					<MenuItem Header="Создание базы данных с сохранение отправленных заказов" cal:Message.Attach="CleanDb"></MenuItem>
 				</MenuItem>
 			</MenuItem>
 
 			<MenuItem Header="Справка">
-				<MenuItem Header="О программе..." Command="binders:Commands.InvokeViewModel" CommandTarget="{Binding ElementName=Shell}" CommandParameter="ShowAbout" />
+				<MenuItem Header="О программе..." cal:Message.Attach="ShowAbout" />
 			</MenuItem>
 		</Menu>
 
 		<ToolBarTray Grid.Row="1">
 			<ToolBar Band="1" BandIndex="1">
 
-				<Button x:Name="Update" ToolTip="Получить данные">
+				<!--todo что бы выглядело как следует нужно для кнопки которая внутри применить ToolBar.ButtonStyleKey -->
+				<xctk:SplitButton x:Name="Update" ToolTip="Получить данные" Background="Transparent">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico" Style="{StaticResource ButtonImage}"></Image>
-				</Button>
+					<xctk:SplitButton.DropDownContent>
+						<ItemsControl>
+							<MenuItem Header="Получить данные" InputGestureText="Ctrl+R" cal:Message.Attach="Update" />
+							<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S" cal:Message.Attach="SendOrders" />
+							<MenuItem Header="Загрузить и получить накладные, сертификаты" cal:Message.Attach="MicroUpdate" />
+						</ItemsControl>
+					</xctk:SplitButton.DropDownContent>
+				</xctk:SplitButton>
 
 				<Button x:Name="SendOrders" ToolTip="Отправить заказы">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico" Style="{StaticResource ButtonImage}"></Image>
@@ -124,6 +133,10 @@
 				</Button>
 
 				<Separator />
+
+				<Button x:Name="MicroUpdate" ToolTip="Загрузить и получить накладные, сертификаты">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/WayBill_32.ico" Style="{StaticResource ButtonImage}"></Image>
+				</Button>
 
 				<Button x:Name="ShowWaybills" ToolTip="Накладные">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico" Style="{StaticResource ButtonImage}"></Image>

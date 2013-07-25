@@ -30,15 +30,17 @@ namespace AnalitF.Net.Client.Models.Commands
 	public abstract class RemoteCommand
 	{
 		protected ILog log;
-		public Uri BaseUri;
+		protected ISession Session;
 		protected HttpClient Client;
 		protected JsonMediaTypeFormatter Formatter;
+
+		public Uri BaseUri;
 		public ICredentials Credentials;
 		public CancellationToken Token;
 
 		public BehaviorSubject<Progress> Progress;
-
-		protected ISession Session;
+		public string ErrorMessage;
+		public string SuccessMessage;
 
 		protected RemoteCommand()
 		{
@@ -51,7 +53,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		protected abstract UpdateResult Execute();
 
-		public UpdateResult Run()
+		public virtual UpdateResult Run()
 		{
 			return Process(Execute);
 		}

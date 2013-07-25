@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using AnalitF.Net.Client.Models.Commands;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Binders
@@ -13,6 +15,14 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public bool UnitTesting;
 		public List<string> StartedProcess = new List<string>();
+		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
+
+		public RemoteCommand OnCommandExecuting(RemoteCommand c)
+		{
+			if (CommandExecuting != null)
+				return CommandExecuting(c) ?? c;
+			return c;
+		}
 
 		protected override void ChangeActiveItem(IScreen newItem, bool closePrevious)
 		{

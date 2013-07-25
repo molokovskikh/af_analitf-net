@@ -13,6 +13,7 @@ using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config;
@@ -31,7 +32,7 @@ using log4net.Config;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class TasksFixture : IntegrationFixture
+	public class UpdateFixture : IntegrationFixture
 	{
 		private ISession localSession;
 		private Task<UpdateResult> task;
@@ -82,7 +83,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			token = cancelletion.Token;
 			progress = new BehaviorSubject<Progress>(new Progress());
 
-			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
+			var command = new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath);
+			task = CreateTask(command);
 		}
 
 		[TearDown]
@@ -182,7 +184,8 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Send_orders()
 		{
 			var address = localSession.Query<Address>().First();
-			task = new Task<UpdateResult>(t => Tasks.SendOrders(null, token, progress, address), token);
+
+			task = CreateTask(new SendOrders(address));
 
 			var begin = DateTime.Now;
 			Offer offer;
@@ -215,20 +218,12 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Import_waybill()
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
-			var waybill = CreateWaybill(supplier, user);
+			var waybill = DataMother.CreateWaybill(session, user);
 			var log = waybill.Log;
 			session.Save(waybill);
 			var sendLog = new TestDocumentSendLog(user, log);
 			session.Save(sendLog);
-
-			var file = String.Format("{0}/waybills/{1}_{2}.txt",
-				waybill.Address.Id,
-				log.Id,
-				waybill.Supplier.Name);
-			file = Path.Combine(serviceConfig.DocsPath, file);
-			FileHelper.CreateDirectoryRecursive(Path.GetDirectoryName(file));
-			File.WriteAllText(file, "waybill content");
+			var file = waybill.Log.CreateFile(serviceConfig.DocsPath, "waybill content");
 
 			Update();
 
@@ -272,58 +267,18 @@ namespace AnalitF.Net.Test.Integration.Models
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
 
-			task = new Task<UpdateResult>(t => Tasks.UpdateTask(null, token, progress), token);
+			task = CreateTask(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
 			task.Start();
 			task.Wait();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
 		}
 
-		private static TestWaybill CreateWaybill(TestSupplier supplier, TestUser user)
+		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand
 		{
-			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
-			var waybill = new TestWaybill(log);
-			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Азарга капли глазные 5мл Фл.-кап. Х1",
-				Certificates = "РОСС BE.ФМ11.Д06711",
-				CertificatesDate = "01.16.2013",
-				Period = "30.09.2014",
-				Producer = "Алкон-Куврер н.в. с.а.",
-				Country = "БЕЛЬГИЯ",
-				SupplierCostWithoutNDS = 536.17m,
-				SupplierCost = 589.79m,
-				Quantity = 1,
-				SerialNumber = "A 565",
-				Amount = 589.79m,
-				NDS = 10,
-				NDSAmount = 53.62m,
-			});
-			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Доксазозин 4мг таб. Х30 (R)",
-				Certificates = "РОСС RU.ФМ08.Д38737",
-				Period = "01.05.2017",
-				Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
-				ProducerCost = 213.18m,
-				RegistryCost = 382.89m,
-				SupplierPriceMarkup = -5.746m,
-				SupplierCostWithoutNDS = 200.93m,
-				SupplierCost = 221.03m,
-				Quantity = 2,
-				VitallyImportant = true,
-				NDS = 10,
-				SerialNumber = "21012",
-				Amount = 442.05m,
-				NDSAmount = 40.19m,
-				BillOfEntryNumber = "10609010/101209/0004305/1",
-				EAN13 = "4605635002748",
-			});
-			for (var i = 0; i < 30; i++)
-				waybill.Lines.Add(new TestWaybillLine(waybill) {
-					Product = "Доксазозин 4мг таб. Х30 (R)",
-					Certificates = "РОСС RU.ФМ08.Д38737",
-					Period = "01.05.2017",
-					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
-				});
-			return waybill;
+			command.Token = token;
+			command.Progress = progress;
+			command.BaseUri = uri;
+			return new Task<UpdateResult>(t => command.Run(), token);
 		}
 
 		private void Update()

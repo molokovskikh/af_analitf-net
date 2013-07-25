@@ -13,6 +13,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public SendOrders(Address address)
 		{
+			SuccessMessage = "Отправка заказов завершена успешно.";
+			ErrorMessage = "Не удалось отправить заказы. Попробуйте повторить операцию позднее.";
 			Address = address;
 		}
 

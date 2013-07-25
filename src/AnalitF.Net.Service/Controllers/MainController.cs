@@ -14,6 +14,7 @@ using Common.Tools;
 using MySql.Data.MySqlClient;
 using NHibernate;
 using NHibernate.Linq;
+using Newtonsoft.Json;
 using log4net;
 
 namespace AnalitF.Net.Service.Controllers
@@ -26,7 +27,7 @@ namespace AnalitF.Net.Service.Controllers
 		public User CurrentUser { get; set; }
 		public Config.Config Config;
 
-		public HttpResponseMessage Get(bool reset = false)
+		public HttpResponseMessage Get(bool reset = false, string updateType = null)
 		{
 			var existsJob = Session.Query<RequestLog>()
 				.OrderByDescending(j => j.CreatedOn)
@@ -40,13 +41,8 @@ namespace AnalitF.Net.Service.Controllers
 			}
 
 			if (existsJob == null) {
-				var version = new Version();
-				IEnumerable<string> headers;
-				if (Request.Headers.TryGetValues("Version", out headers)) {
-					Version.TryParse(headers.FirstOrDefault(), out version);
-				}
-
 				existsJob  = new RequestLog(CurrentUser, RequestHelper.GetVersion(Request));
+				existsJob.UpdateType = updateType;
 				Session.Save(existsJob);
 				Session.Transaction.Commit();
 
@@ -84,7 +80,7 @@ where WaitConfirm = 1
 						try {
 							using(var exportSession = sessionFactory.OpenSession())
 							using(var exportTransaction = exportSession.BeginTransaction()) {
-								var exporter = new Exporter(exportSession, job.User.Id, job.Version) {
+								var exporter = new Exporter(exportSession, job.User.Id, job.Version, job.UpdateType) {
 									Prefix = job.Id.ToString(),
 									ExportPath = config.ExportPath,
 									ResultPath = config.ResultPath,

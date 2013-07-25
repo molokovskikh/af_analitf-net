@@ -17,23 +17,42 @@ using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
+	public class StubRemoteCommand : RemoteCommand
+	{
+		private UpdateResult result;
+
+		public StubRemoteCommand(UpdateResult result)
+		{
+			this.result = result;
+		}
+
+		protected override UpdateResult Execute()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override UpdateResult Run()
+		{
+			return result;
+		}
+	}
+
 	[TestFixture]
 	public class Shell2Fixture : BaseFixture
 	{
-		private string command;
+		private RemoteCommand command;
+		private UpdateResult result;
 
 		[SetUp]
 		public void Setup()
 		{
-			command = "";
-			Tasks.Update = (credentials, token, arg3) => {
-				command = "Update";
-				return UpdateResult.OK;
-			};
-
-			Tasks.SendOrders = (credentials, token, arg3, arg4) => {
-				command = "SendOrders";
-				return UpdateResult.OK;
+			result = UpdateResult.OK;
+			shell.CommandExecuting += remoteCommand => {
+				command = remoteCommand;
+				var stub = new StubRemoteCommand(result);
+				stub.ErrorMessage = remoteCommand.ErrorMessage;
+				stub.SuccessMessage = remoteCommand.SuccessMessage;
+				return stub;
 			};
 			Tasks.ExtractPath = Path.Combine("temp", "update");
 		}
@@ -89,7 +108,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(manager.MessageBoxes[0], Is.StringContaining("необходимо заполнить учетные данные"));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("База данных программы не заполнена"));
 			Assert.That(manager.MessageBoxes[2], Is.StringContaining("Обновление завершено успешно"));
-			Assert.That(command, Is.EqualTo("Update"));
+			Assert.That(command, Is.InstanceOf<UpdateCommand>());
 		}
 
 		[Test]
@@ -106,7 +125,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.StartCheck();
 			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Вы работаете с устаревшим набором данных."));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Обновление завершено успешно"));
-			Assert.That(command, Is.EqualTo("Update"));
+			Assert.That(command, Is.InstanceOf<UpdateCommand>());
 		}
 
 		[Test]
@@ -127,7 +146,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(canClose);
 			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Обнаружены неотправленные заказы."));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Отправка заказов завершена успешно."));
-			Assert.That(command, Is.EqualTo("SendOrders"));
+			Assert.That(command, Is.InstanceOf<SendOrders>());
 		}
 
 		[Test]
@@ -139,10 +158,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void On_pending_update_close_shell_and_execute_updater()
 		{
-			Tasks.Update = (credentials, token, arg3) => {
-				return UpdateResult.UpdatePending;
-			};
-
+			result = UpdateResult.UpdatePending;
 			shell.Update();
 			var messages = manager.MessageBoxes.Implode();
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
@@ -153,9 +169,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Do_not_warn_on_mandatory_exit()
 		{
-			Tasks.Update = (credentials, token, arg3) => {
-				return UpdateResult.UpdatePending;
-			};
+			result = UpdateResult.UpdatePending;
 			MakeOrder();
 
 			shell.Update();

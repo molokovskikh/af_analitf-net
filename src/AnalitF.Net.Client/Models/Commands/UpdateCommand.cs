@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Tools;
@@ -23,13 +24,16 @@ namespace AnalitF.Net.Client.Models.Commands
 		private string rootPath;
 
 		public ProgressReporter Reporter;
+		public string[] SyncData = new string[0];
 
-		public UpdateCommand(string file, string extractPath, string logPath)
+		public UpdateCommand(string file, string extractPath, string rootPath)
 		{
+			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
+			SuccessMessage = "Обновление завершено успешно.";
 			this.archiveFile = file;
 			this.extractPath = extractPath;
-			this.logPath = logPath;
-			this.rootPath = logPath;
+			this.logPath = rootPath;
+			this.rootPath = rootPath;
 		}
 
 		protected override UpdateResult Execute()
@@ -37,17 +41,44 @@ namespace AnalitF.Net.Client.Models.Commands
 			Reporter = new ProgressReporter(Progress);
 			Reporter.StageCount(4);
 
-			var currentUri = new Uri(BaseUri, new Uri("Main/?reset=true", UriKind.Relative));
+			var queryString = new List<KeyValuePair<string, string>> {
+				new KeyValuePair<string, string>("reset", "true")
+			};
+			foreach (var data in SyncData) {
+				queryString.Add(new KeyValuePair<string, string>("data", data));
+			}
+
+			var stringBuilder = new StringBuilder();
+			foreach (var keyValuePair in queryString) {
+				if (stringBuilder.Length > 0)
+					stringBuilder.Append('&');
+				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Key));
+				stringBuilder.Append('=');
+				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
+			}
+			var builder = new UriBuilder(new Uri(BaseUri, "Main")) {
+				Query = stringBuilder.ToString(),
+			};
+			var url = builder.Uri;
+
+			var sendLogsTask = SendLogs(Client, Token);
+			SendPrices(Client, Token);
+
+			var response = Wait(new Uri(BaseUri, "Main"), Client.GetAsync(url, Token));
+			Reporter.Stage("Загрузка данных");
+			Download(response, archiveFile, Reporter);
+			var result = ProcessUpdate();
+
+			WaitAndLog(sendLogsTask, "Отправка логов");
+			return result;
+		}
+
+		private HttpResponseMessage Wait(Uri url, Task<HttpResponseMessage> task)
+		{
 			var done = false;
 			HttpResponseMessage response = null;
-
-			SendPrices(Client, Token);
-			var sendLogsTask = SendLogs(Client, Token);
-
 			while (!done) {
-				var request = Client.GetAsync(currentUri, HttpCompletionOption.ResponseHeadersRead, Token);
-				response = request.Result;
-				currentUri = new Uri(BaseUri, "Main");
+				response = task.Result;
 				if (response.StatusCode != HttpStatusCode.OK
 					&& response.StatusCode != HttpStatusCode.Accepted)
 					throw new RequestException(
@@ -55,21 +86,17 @@ namespace AnalitF.Net.Client.Models.Commands
 							response.StatusCode,
 							response.Content.ReadAsStringAsync().Result),
 						response.StatusCode);
-				Reporter.Stage("Подготовка данных");
+
 				done = response.StatusCode == HttpStatusCode.OK;
+				Reporter.Stage("Подготовка данных");
 				if (!done) {
 					Token.WaitHandle.WaitOne(TimeSpan.FromSeconds(15));
 					Token.ThrowIfCancellationRequested();
 				}
+
+				task = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
 			}
-
-			Reporter.Stage("Загрузка данных");
-			Download(response, archiveFile, Reporter);
-
-			var result = ProcessUpdate();
-			WaitAndLog(sendLogsTask, "Отправка логов");
-
-			return result;
+			return response;
 		}
 
 		public UpdateResult ProcessUpdate()
@@ -233,6 +260,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var uri = new Uri(BaseUri, "Logs");
 			var stream = File.OpenRead(file);
 			var post = client.PostAsync(uri, new StreamContent(stream), token);
+			//TODO мы никогда не узнаем об ошибке
 			post.ContinueWith(t => {
 				stream.Dispose();
 				cleaner.Dispose();

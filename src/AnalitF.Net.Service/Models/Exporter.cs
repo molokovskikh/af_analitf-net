@@ -41,6 +41,8 @@ namespace AnalitF.Net.Service.Models
 		private uint userId;
 		private Version version;
 
+		public string UpdateType;
+
 		public string Prefix = "";
 		public string ExportPath = "";
 		public string ResultPath = "";
@@ -51,18 +53,17 @@ namespace AnalitF.Net.Service.Models
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
 
-		public Exporter(ISession session, uint userId, Version version)
+		public Exporter(ISession session, uint userId, Version version, string updateType = null)
 		{
 			this.session = session;
 			this.userId = userId;
 			this.version = version;
+			this.UpdateType = updateType;
 		}
 
 		//Все даты передаются в UTC!
-		public List<UpdateData> Export()
+		public void Export(List<UpdateData> result)
 		{
-			var result = new List<UpdateData>();
-
 			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
 				"drop temporary table if exists usersettings.activeprices;" +
 				"call Customers.GetOffers(:userId);" +
@@ -285,7 +286,6 @@ where Hidden = 0";
 			Export(result, sql, "catalogs");
 
 			ExportDocs(result);
-			return result;
 		}
 
 		private void ExportDocs(List<UpdateData> result)
@@ -302,7 +302,6 @@ where UserId = :userId")
 				.Where(l => !l.Committed && l.UserId == userId)
 				.Take(400)
 				.ToArray();
-
 
 			if (logs.Length == 0)
 				return;
@@ -424,7 +423,16 @@ group by dh.Id")
 
 		public string ExportCompressed(string file)
 		{
-			var files = Export();
+			var files = new List<UpdateData>();
+			if (UpdateType.Match("waybills")) {
+				ExportDocs(files);
+			}
+			else {
+				Export(files);
+				CheckUpdate(files);
+				CheckAds(files);
+			}
+
 			var watch = new Stopwatch();
 			watch.Start();
 			file = Path.Combine(ResultPath, file);
@@ -440,8 +448,6 @@ group by dh.Id")
 						zip.Add(tuple.LocalFileName, tuple.ArchiveFileName);
 					}
 				}
-				CheckUpdate(zip);
-				CheckAds(zip);
 				zip.CommitUpdate();
 			}
 			watch.Stop();
@@ -466,7 +472,7 @@ group by dh.Id")
 			}
 		}
 
-		public void CheckAds(ZipFile zip)
+		public void CheckAds(List<UpdateData> zip)
 		{
 			var user = session.Load<User>(userId);
 			if (!Directory.Exists(AdsPath))
@@ -479,7 +485,7 @@ group by dh.Id")
 			AddDir(zip, dir, "ads");
 		}
 
-		private static void AddDir(ZipFile zip, string dir, string name)
+		private static void AddDir(List<UpdateData> zip, string dir, string name)
 		{
 			var transform = new ZipNameTransform();
 			transform.TrimPrefix = dir;
@@ -488,12 +494,14 @@ group by dh.Id")
 			scanned.ProcessFile += (sender, args) => {
 				if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
 					return;
-				zip.Add(args.Name, name + "/" + transform.TransformFile(args.Name));
+				zip.Add(new UpdateData(name + "/" + transform.TransformFile(args.Name)) {
+					LocalFileName = args.Name
+				});
 			};
 			scanned.Scan(dir, true);
 		}
 
-		private void CheckUpdate(ZipFile zip)
+		private void CheckUpdate(List<UpdateData> zip)
 		{
 			var file = Path.Combine(UpdatePath, "version.txt");
 			if (!File.Exists(file))

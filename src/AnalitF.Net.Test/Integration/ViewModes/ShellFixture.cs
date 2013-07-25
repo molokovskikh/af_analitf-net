@@ -110,11 +110,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var dialogClosed = new ManualResetEventSlim();
 			var taskCompleted = new ManualResetEventSlim();
-			Tasks.Update = (c, t, p) => {
-				Thread.Sleep(100);
-				taskCompleted.Wait();
-				return UpdateResult.OK;
-			};
+			//Tasks.Update = (c, t, p) => {
+			//	Thread.Sleep(100);
+			//	taskCompleted.Wait();
+			//	return UpdateResult.OK;
+			//};
 
 			var dispatcher = WpfHelper.WithDispatcher(() => {
 				taskCompleted.Set();
