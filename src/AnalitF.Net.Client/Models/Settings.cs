@@ -180,7 +180,7 @@ namespace AnalitF.Net.Client.Models
 			root = Path.Combine(root, "АналитФАРМАЦИЯ");
 			if (name.Match("Waybills"))
 				return Path.Combine(root, "Накладные");
-			if (name.Match("docs"))
+			if (name.Match("Docs"))
 				return Path.Combine(root, "Документы");
 			if (name.Match("Rejects"))
 				return Path.Combine(root, "Отказы");

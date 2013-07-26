@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using NHibernate;
+using NHibernate.Linq;
 using Test.Support;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -21,6 +22,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				Address = address,
 				WriteTime = DateTime.Now,
 				DocumentDate = DateTime.Now,
+				Supplier = session.Query<Supplier>().First()
 			};
 			waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(waybill)).ToList();
 			var line = waybill.Lines[0];

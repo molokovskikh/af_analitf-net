@@ -329,7 +329,7 @@ where UserId = :userId")
 
 			var ids = logs.Select(d => d.Document.Id).Implode();
 			sql = String.Format(@"
-select dh.Id,
+select d.RowId as Id,
 	dh.ProviderDocumentId,
 	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
 	convert_tz(dh.DocumentDate, @@session.time_zone,'+00:00') as DocumentDate,
@@ -354,7 +354,7 @@ group by dh.Id", ids);
 
 			sql = String.Format(@"
 select db.Id,
-	db.DocumentId as WaybillId,
+	d.RowId as WaybillId,
 	db.Product,
 	db.Producer,
 	db.Country,

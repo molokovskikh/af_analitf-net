@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
+using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
@@ -18,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public WaybillsViewModel()
 		{
 			DisplayName = "Документы";
+			SelectedWaybills = new List<Waybill>();
 			Waybills = new NotifyValue<ObservableCollection<Waybill>>();
 			CurrentWaybill = new NotifyValue<Waybill>();
 			Begin = new NotifyValue<DateTime>(DateTime.Today.FirstDayOfMonth());
@@ -37,6 +40,7 @@ namespace AnalitF.Net.Client.ViewModels
 		[Export]
 		public NotifyValue<ObservableCollection<Waybill>> Waybills { get; set; }
 		public NotifyValue<Waybill> CurrentWaybill { get; set; }
+		public List<Waybill> SelectedWaybills { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<bool> IsFilterByDocumentDate { get; set; }
@@ -58,9 +62,17 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Удалить выбранные документы (накладные, отказы, документы)?"))
 				return;
 
-			var waybill = CurrentWaybill.Value;
-			Waybills.Value.Remove(waybill);
-			StatelessSession.Delete(waybill);
+			foreach (var waybill in SelectedWaybills.ToArray()) {
+				Waybills.Value.Remove(waybill);
+				StatelessSession.Delete(waybill);
+				var files = Directory.GetFiles(Settings.Value.MapPath("Waybills"), waybill.Id + "_*");
+				try {
+					files.Each(f => File.Delete(f));
+				}
+				catch(Exception e) {
+					log.Warn(String.Format("Ошибка при удалении документа {0}", waybill.Id), e);
+				}
+			}
 		}
 
 		public IEnumerable<IResult> OpenFolders()
@@ -111,6 +123,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Update()
 		{
+			//скорбная песнь: при переходе на форму сводный заказ
+			//wpf обновит состояние флага IsFilterByDocumentDate
+			//когда эта форма уже закрыта
+			//RadioButton имеет внутри статичный список всех кнопок на форме и обновляет их состояние
+			//наверно в качестве родителя считается окно и для всех потомков с одинаковым GroupName
+			//производится обновление
+			if (!StatelessSession.IsOpen)
+				return;
+
 			var query = StatelessSession.Query<Waybill>();
 
 			var begin = Begin.Value;

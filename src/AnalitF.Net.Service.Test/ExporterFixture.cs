@@ -9,6 +9,7 @@ using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Data;
 using Test.Support;
 using Test.Support.Documents;
 using Test.Support.Suppliers;

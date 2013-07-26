@@ -38,6 +38,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		}
 
 		[Test]
+		public void Delete()
+		{
+			var waybill = model.Waybills.Value.First(w => w.Supplier != null);
+			var file = Path.Combine(settings.MapPath("Waybills"), string.Format("{0}_{1}.txt",
+				waybill.Id,
+				waybill.Supplier.Name));
+			File.WriteAllText(file, "test content");
+			model.CurrentWaybill.Value = waybill;
+			model.SelectedWaybills.Add(waybill);
+			model.Delete();
+			Assert.That(model.Waybills.Value.Select(w => w.Id), Is.Not.Contains(waybill.Id));
+			Assert.IsFalse(File.Exists(file));
+		}
+
+		[Test]
 		public void Refresh_data_on_reactivate()
 		{
 			restore = true;

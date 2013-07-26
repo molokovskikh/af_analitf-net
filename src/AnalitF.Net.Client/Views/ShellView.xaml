@@ -180,12 +180,32 @@
 						<Style TargetType="Label">
 							<Style.Triggers>
 								<DataTrigger Binding="{Binding HaveErrors.Value}" Value="True">
-									<Setter Property="Foreground" Value="Red"></Setter>
+									<DataTrigger.EnterActions>
+										<BeginStoryboard>
+											<Storyboard>
+												<ColorAnimation
+													Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+													From="#00FFFFFF" To="Red" Duration="0:0:1" >
+												</ColorAnimation>
+												<ColorAnimation
+													Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+													From="Black" To="White" Duration="0:0:1" >
+												</ColorAnimation>
+												<ColorAnimation
+													Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+													BeginTime="0:0:10" From="Red" To="#00FFFFFF" Duration="0:0:5" >
+												</ColorAnimation>
+												<ColorAnimation
+													Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+													BeginTime="0:0:10" From="White" To="Red" Duration="0:0:5" >
+												</ColorAnimation>
+											</Storyboard>
+										</BeginStoryboard>
+									</DataTrigger.EnterActions>
 								</DataTrigger>
 							</Style.Triggers>
 						</Style>
 					</Label.Style>
-					Collect
 				</Label>
 			</StatusBarItem>
 

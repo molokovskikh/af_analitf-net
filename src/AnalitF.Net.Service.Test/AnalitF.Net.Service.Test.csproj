@@ -74,6 +74,10 @@
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Test.Data\Test.Data.csproj">
+      <Project>{140789c3-8c40-4ab7-a538-ff4141761305}</Project>
+      <Name>Test.Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Test.Support\Test.Support\Test.Support.csproj">
       <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
       <Name>Test.Support</Name>
