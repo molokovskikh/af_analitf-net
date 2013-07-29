@@ -16,7 +16,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				action(window);
 				window.Closed += (s, e) => window.Dispatcher.InvokeShutdown();
 				window.Show();
-				Dispatcher.Run();
 			});
 
 			t.SetApartmentState(ApartmentState.STA);
@@ -37,10 +36,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			dispatcherThread.Start();
 			started.Wait();
 			var dispatcher = Dispatcher.FromThread(dispatcherThread);
-			dispatcher.Invoke(new Action(() => {
+			dispatcher.Invoke(() => {
 				RxApp.DeferredScheduler = DispatcherScheduler.Current;
 				action();
-			}));
+			});
 			return dispatcher;
 		}
 	}

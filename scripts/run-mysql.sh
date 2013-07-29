@@ -6,4 +6,5 @@ defaults=${defaults/\\/\//}
 mysqldb=$(dirname $(dirname $(which mysqld)))/data/mysql
 cp $mysqldb $path -r
 mysqld --defaults-file="${defaults}" --console --standalone --port=3310 --datadir="${path/\\/\//}"&
-mysql --user=root --port=3310
+mysql data --user=root --port=3310 "${@:2}"
+mysqladmin --user=root --port=3310 shutdown

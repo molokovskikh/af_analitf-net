@@ -28,11 +28,11 @@
 				<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
 				<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
 			</StackPanel>
-			<ComboBox VerticalAlignment="Center" Style="{StaticResource Filter}" x:Name="Suppliers" DisplayMemberPath="FullName"></ComboBox>
-			<Button Name="AltExport" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Списко в Excel</Button>
-			<Button Name="SearchLine" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Поиск товара</Button>
-			<Button Name="OpenFolders" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Открыть папки</Button>
-			<Button Name="Delete" Style="{StaticResource FilterElement}" VerticalAlignment="Center">Удалить</Button>
+			<c:PopupSelector VerticalAlignment="Center" Margin="0, 2, 4, 0" x:Name="Suppliers" ButtonContent="Поставщики" Member="Item.FullName" />
+			<Button Name="AltExport" Style="{StaticResource FilterElement}">Списко в Excel</Button>
+			<Button Name="SearchLine" Style="{StaticResource FilterElement}">Поиск товара</Button>
+			<Button Name="OpenFolders" Style="{StaticResource FilterElement}">Открыть папки</Button>
+			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 		</StackPanel>
 
 		<c:DataGrid x:Name="Waybills" Grid.Row="1"

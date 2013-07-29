@@ -111,13 +111,6 @@
 				Value="Both"/>
 		<Setter Property="Stylus.IsFlicksEnabled"
 				Value="False"/>
-		<Setter Property="ItemTemplate">
-			<Setter.Value>
-				<DataTemplate>
-					<MenuItem IsCheckable="True" Header="{Binding Item.Name}" IsChecked="{Binding IsSelected}"></MenuItem>
-				</DataTemplate>
-			</Setter.Value>
-		</Setter>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="MultiSelector">
@@ -132,6 +125,7 @@
 								AllowsTransparency="true"
 								Grid.ColumnSpan="2"
 								Placement="Bottom"
+								StaysOpen="False"
 								Margin="1"
 								PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}"
 								IsOpen="{Binding Path=IsOpen, RelativeSource={RelativeSource TemplatedParent}}">

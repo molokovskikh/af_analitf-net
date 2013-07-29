@@ -21,9 +21,12 @@ namespace AnalitF.Net.Client.Controls
 
 		static DocumentViewerV2()
 		{
-			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2), new CommandBinding(ApplicationCommands.Print, Execute, CanExecute));
-			CommandManager.RegisterClassInputBinding(typeof(DocumentViewerV2), new InputBinding(ApplicationCommands.Print, new KeyGesture(Key.P, ModifierKeys.Control)));
-			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2), new CommandBinding(ApplicationCommands.CancelPrint, Execute, CanExecute));
+			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2),
+				new CommandBinding(ApplicationCommands.Print, Execute, CanExecute));
+			CommandManager.RegisterClassInputBinding(typeof(DocumentViewerV2),
+				new InputBinding(ApplicationCommands.Print, new KeyGesture(Key.P, ModifierKeys.Control)));
+			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2),
+				new CommandBinding(ApplicationCommands.CancelPrint, Execute, CanExecute));
 		}
 
 		public PageOrientation Orientation

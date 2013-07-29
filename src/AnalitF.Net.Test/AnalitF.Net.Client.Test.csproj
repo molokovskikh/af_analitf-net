@@ -140,6 +140,7 @@
     <Compile Include="Integration\ViewModes\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
+    <Compile Include="Integration\Views\ControlsFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />

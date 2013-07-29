@@ -70,7 +70,8 @@ namespace AnalitF.Net.Client.Binders
 			ConventionManager.AddElementConvention<MultiSelector>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) =>
 				{
-					var parentApplied = ConventionManager.GetElementConvention(typeof(Selector)).ApplyBinding(viewModelType, path, property, element, convention);
+					var parentApplied = ConventionManager.GetElementConvention(typeof(Selector))
+						.ApplyBinding(viewModelType, path, property, element, convention);
 					var index = path.LastIndexOf('.');
 					index = index == -1 ? 0 : index + 1;
 					var baseName = path.Substring(index);

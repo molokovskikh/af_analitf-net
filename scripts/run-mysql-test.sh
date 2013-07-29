@@ -1,2 +1,2 @@
 #!/bin/sh
-./scripts/run-mysql.sh src/AnalitF.Net.Test/bin/Debug
+./scripts/run-mysql.sh src/AnalitF.Net.Test/bin/Debug "$@"

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -28,14 +30,9 @@ namespace AnalitF.Net.Client.ViewModels
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
 			IsFilterByWriteTime = new NotifyValue<bool>();
 			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
-
-			Begin.Changed()
-				.Merge(End.Changed())
-				.Merge(IsFilterByDocumentDate.Changed())
-				.Subscribe(_ => Update());
 		}
 
-		public IList<Supplier> Suppliers { get; set; }
+		public IList<Selectable<Supplier>> Suppliers { get; set; }
 
 		[Export]
 		public NotifyValue<ObservableCollection<Waybill>> Waybills { get; set; }
@@ -51,7 +48,22 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name).ToList();
+			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name)
+				.ToList()
+				.Select(i => new Selectable<Supplier>(i))
+				.ToList();
+
+			var supplierSelectionChanged = Suppliers
+				.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
+				.Merge()
+				.Throttle(Consts.FilterUpdateTimeout, UiScheduler);
+
+			var subscription = Begin.Changed()
+				.Merge(End.Changed())
+				.Merge(IsFilterByDocumentDate.Changed())
+				.Merge(supplierSelectionChanged)
+				.Subscribe(_ => Update());
+			OnCloseDisposable.Add(subscription);
 		}
 
 		public void Delete()
@@ -142,6 +154,9 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				query = query.Where(w => w.WriteTime >= begin && w.WriteTime <= end);
 			}
+
+			var ids = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
+			query = query.Where(w => ids.Contains(w.Supplier.Id));
 
 			Waybills.Value = new ObservableCollection<Waybill>(query
 				.OrderBy(w => w.WriteTime)

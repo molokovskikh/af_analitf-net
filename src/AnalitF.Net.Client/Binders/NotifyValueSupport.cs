@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
@@ -41,7 +42,8 @@ namespace AnalitF.Net.Client.Binders
 							return true;
 						}
 					}
-					ConventionManager.ApplyItemTemplate((ItemsControl)element, property);
+					if (!(element is PopupSelector))
+						ConventionManager.ApplyItemTemplate((ItemsControl)element, property);
 
 					return true;
 				};

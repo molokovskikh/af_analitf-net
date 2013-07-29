@@ -18,7 +18,9 @@ namespace AnalitF.Net.Client.Controls
 
 		private void SyncProperty(FrameworkElement element, DependencyProperty property)
 		{
-			var isDefault = DependencyPropertyHelper.GetValueSource(this, property).BaseValueSource == BaseValueSource.Default;
+			var isDefault = DependencyPropertyHelper
+				.GetValueSource(this, property)
+				.BaseValueSource == BaseValueSource.Default;
 			if (!isDefault) {
 				element.SetValue(property, GetValue(property));
 			}

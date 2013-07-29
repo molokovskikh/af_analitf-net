@@ -21,7 +21,10 @@ namespace AnalitF.Net.Client.Controls
 			var type = typeof(DataGridCell);
 			//наш обработчик должен быть зарегистрирован после обработчика в DataGridCell
 			RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-			EventManager.RegisterClassHandler(type, UIElement.MouseLeftButtonDownEvent, new MouseButtonEventHandler(MouseDown), true);
+			EventManager.RegisterClassHandler(type,
+				UIElement.MouseLeftButtonDownEvent,
+				new MouseButtonEventHandler(MouseDown),
+				true);
 			DataGridOwner = type.GetProperty("DataGridOwner", BindingFlags.NonPublic | BindingFlags.Instance);
 		}
 

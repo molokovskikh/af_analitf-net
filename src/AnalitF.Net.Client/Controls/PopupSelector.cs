@@ -3,8 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using Common.Tools;
 
@@ -51,11 +54,21 @@ namespace AnalitF.Net.Client.Controls
 		public static RoutedUICommand UnselectAllCommand = new RoutedUICommand();
 		public static RoutedUICommand SelectAllCommand = new RoutedUICommand();
 
+		public static DependencyProperty MemberProperty = DependencyProperty.Register("Member",
+			typeof(string),
+			typeof(PopupSelector),
+			new FrameworkPropertyMetadata(UpdateMember));
+
 		static PopupSelector()
 		{
-			EventManager.RegisterClassHandler(typeof(PopupSelector), Mouse.MouseDownEvent, new MouseButtonEventHandler(OnMouseButtonDown), true);
-			CommandManager.RegisterClassCommandBinding(typeof(PopupSelector), new CommandBinding(UnselectAllCommand, UnselectAll));
-			CommandManager.RegisterClassCommandBinding(typeof(PopupSelector), new CommandBinding(SelectAllCommand, SelectAll));
+			EventManager.RegisterClassHandler(typeof(PopupSelector),
+				Mouse.MouseDownEvent,
+				new MouseButtonEventHandler(OnMouseButtonDown),
+				true);
+			CommandManager.RegisterClassCommandBinding(typeof(PopupSelector),
+				new CommandBinding(UnselectAllCommand, UnselectAll));
+			CommandManager.RegisterClassCommandBinding(typeof(PopupSelector),
+				new CommandBinding(SelectAllCommand, SelectAll));
 		}
 
 		private static void UnselectAll(object sender, ExecutedRoutedEventArgs args)
@@ -69,10 +82,45 @@ namespace AnalitF.Net.Client.Controls
 		}
 
 		public static DependencyProperty IsOpenProperty
-			= DependencyProperty.RegisterAttached("IsOpen", typeof(bool), typeof(PopupSelector), new PropertyMetadata(false, IsOpenChanged));
+			= DependencyProperty.RegisterAttached("IsOpen",
+				typeof(bool),
+				typeof(PopupSelector),
+				new PropertyMetadata(false, IsOpenChanged));
 
 		public static DependencyProperty ButtonContentProperty
-			= DependencyProperty.RegisterAttached("ButtonContent", typeof(object), typeof(PopupSelector), new PropertyMetadata());
+			= DependencyProperty.RegisterAttached("ButtonContent",
+				typeof(object),
+				typeof(PopupSelector),
+				new PropertyMetadata());
+
+		private static void UpdateMember(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var selector = (PopupSelector)d;
+			selector.ItemTemplate = new DataTemplate();
+			var factory = new FrameworkElementFactory(typeof(MenuItem));
+			factory.SetBinding(MenuItem.HeaderProperty, new Binding(selector.Member));
+			factory.SetBinding(MenuItem.IsCheckedProperty, new Binding("IsSelected"));
+			factory.SetValue(MenuItem.IsCheckableProperty, true);
+			selector.ItemTemplate.VisualTree = factory;
+			selector.ItemTemplate.Seal();
+		}
+
+		public PopupSelector()
+		{
+			Member = "Item.Name";
+			Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(this, OnMouseDownOutsideCapturedElement);
+		}
+
+		private void OnMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+		{
+			Close();
+		}
+
+		public string Member
+		{
+			get { return (string)GetValue(MemberProperty); }
+			set { SetValue(MemberProperty, value); }
+		}
 
 		public bool IsOpened
 		{

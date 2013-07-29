@@ -584,6 +584,8 @@ namespace AnalitF.Net.Client.ViewModels
 				continueWith(task);
 			}
 			else if (task.IsFaulted) {
+				if (task.Exception.GetBaseException() is TaskCanceledException)
+					return task;
 				log.Error(task.Exception);
 				var error = ErrorHelper.TranslateException(task.Exception)
 					?? viewModel.GenericErrorMessage;

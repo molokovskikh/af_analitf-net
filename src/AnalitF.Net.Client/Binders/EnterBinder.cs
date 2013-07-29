@@ -35,7 +35,9 @@ namespace AnalitF.Net.Client.Binders
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 
 			var mouseDoubleClick = Observable.FromEventPattern<MouseButtonEventArgs>(element, "MouseDoubleClick")
-				.Select(a => ((DependencyObject)a.EventArgs.OriginalSource).Parents().OfType<DataGridCell>().FirstOrDefault());
+				.Select(a => ((DependencyObject)a.EventArgs.OriginalSource)
+					.Parents()
+					.OfType<DataGridCell>().FirstOrDefault());
 
 			var enterObservable = keydown.Merge(mouseDoubleClick).Where(i => i != null);
 
@@ -53,7 +55,8 @@ namespace AnalitF.Net.Client.Binders
 			var triggers = Interaction.GetTriggers(element);
 			triggers.Add(trigger);
 
-			var property = (DependencyProperty)(typeof(Message).GetField("MessageTriggersProperty", BindingFlags.Static | BindingFlags.NonPublic))
+			var property = (DependencyProperty)(typeof(Message).GetField("MessageTriggersProperty",
+				BindingFlags.Static | BindingFlags.NonPublic))
 				.GetValue(null);
 			element.SetValue(property, new[] { trigger });
 		}

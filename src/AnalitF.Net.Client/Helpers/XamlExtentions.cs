@@ -98,11 +98,34 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			for(var i = 0; i < offset; i++)
 				Console.Write('\t');
-			Console.WriteLine(visual.GetType());
+			if (visual is TextBlock)
+				Console.WriteLine("{0} {1}", visual, ((TextBlock)visual).Text);
+			else
+				Console.WriteLine(visual);
 			var count = VisualTreeHelper.GetChildrenCount(visual);
 			for(var i = 0; i < count; i++) {
 				PrintVisualTree((Visual)VisualTreeHelper.GetChild(visual, i), offset + 1);
 			}
+		}
+
+		public static string ToText(DependencyObject item)
+		{
+			if (item is TextBlock) {
+				return ((TextBlock)item).Text;
+			}
+
+			if (item is ContentControl && ((ContentControl)item).Content is string) {
+				return (string)((ContentControl)item).Content;
+			}
+			return null;
+		}
+
+		public static string AsText(DependencyObject item)
+		{
+			return item.DeepChildren()
+				.Select(ToText)
+				.Where(c => c != null)
+				.Implode(Environment.NewLine);
 		}
 	}
 }

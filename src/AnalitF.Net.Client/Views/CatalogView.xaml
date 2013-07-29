@@ -19,7 +19,7 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}"  Grid.Row="0">
-			<ComboBox Style="{StaticResource ResourceKey=Filter}" x:Name="Filters"></ComboBox>
+			<ComboBox Style="{StaticResource ResourceKey=Filter}" x:Name="Filters" DisplayMemberPath="Name"></ComboBox>
 
 			<ToggleButton x:Name="FilterByMnn">
 				<ToggleButton.Style>
