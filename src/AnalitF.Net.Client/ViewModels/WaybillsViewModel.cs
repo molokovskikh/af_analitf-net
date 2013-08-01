@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var items = Waybills.Value.Select(w => new object[] {
 				w.DocumentDate,
 				w.ProviderDocumentId,
-				w.Supplier != null ? w.Supplier.FullName : "",
+				w.SupplierName,
 				w.SumWithoutTax,
 				w.Sum,
 				w.RetailSum,

@@ -14,6 +14,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
@@ -35,13 +36,27 @@
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
 				</Grid.RowDefinitions>
-				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">Печать ценников</Button>
-				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">Печать реестра</Button>
-				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">Печать накладной</Button>
-				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">Печать счет-фактуры</Button>
-				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">Стелажная карта</Button>
-				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">Реестр в Excel</Button>
-				<Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">Накладная в Excel</Button>
+				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
+					Печать ценников
+				</Button>
+				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
+					Печать реестра
+				</Button>
+				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
+					Печать накладной
+				</Button>
+				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">
+					Печать счет-фактуры
+				</Button>
+				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
+					Стелажная карта
+				</Button>
+				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
+					Реестр в Excel
+				</Button>
+				<Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
+					Накладная в Excel
+				</Button>
 			</Grid>
 		</StackPanel>
 
@@ -90,7 +105,8 @@
 				<c:DataGridTextColumnEx Width="100*" Header="Страна"
 					Binding="{Binding Country}"
 					IsReadOnly="True" />
-				<DataGridCheckBoxColumn Width="SizeToHeader" Header="Печатать" Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}" />
+				<DataGridCheckBoxColumn Width="SizeToHeader" Header="Печатать"
+					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}" />
 				<c:DataGridTextColumnEx Width="160*" Header="Срок годности"
 					Binding="{Binding Period}"
 					IsReadOnly="True" />
@@ -137,15 +153,12 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Розничная наценка"
 					Binding="{Binding RetailMarkup}"
-					IsReadOnly="True"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Реальная наценка"
 					Binding="{Binding RealRetailMarkup}"
-					IsReadOnly="True"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Розничная цена"
 					Binding="{Binding RetailCost}"
-					IsReadOnly="True"
 					TextAlignment="Right"/>
 				<c:DataGridTextColumnEx Width="*" Header="Заказ"
 					Binding="{Binding Quantity}"
@@ -157,5 +170,6 @@
 					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+		<StackPanel Grid.Row="3" Name="Legend"></StackPanel>
 	</Grid>
 </UserControl>

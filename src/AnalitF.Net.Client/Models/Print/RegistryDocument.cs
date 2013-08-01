@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Models.Print
 					docSettings.Date,
 					waybill.ProviderDocumentId,
 					waybill.DocumentDate,
-					waybill.Supplier == null ? "" : waybill.Supplier.Name));
+					waybill.SupplierName));
 			header.TextAlignment = TextAlignment.Center;
 
 			var columns = new [] {

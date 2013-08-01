@@ -31,7 +31,7 @@
 					</StackPanel>
 				</StackPanel>
 			</GroupBox>
-			<ComboBox VerticalAlignment="Center" Style="{StaticResource Filter}" x:Name="Prices" DisplayMemberPath="Name"></ComboBox>
+			<ComboBox Style="{StaticResource Filter}" x:Name="Prices" DisplayMemberPath="Name"></ComboBox>
 			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 

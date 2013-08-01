@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace AnalitF.Net.Client.Models
 			Begin = begin;
 			End = end;
 			Markup = markup;
+			MaxMarkup = markup;
 			Type = type;
 		}
 
@@ -36,7 +38,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal End { get; set; }
 		public virtual decimal Markup { get; set; }
 		public virtual decimal MaxMarkup { get; set; }
-		public virtual decimal MaxSupplierMarkup { get; set; }
+		public virtual decimal? MaxSupplierMarkup { get; set; }
 		public virtual MarkupType Type { get; set; }
 
 		[Ignore]
@@ -110,21 +112,26 @@ namespace AnalitF.Net.Client.Models
 			};
 		}
 
-		public static bool Validate(IEnumerable<MarkupConfig> markups)
+		public static Tuple<bool, string> Validate(IEnumerable<MarkupConfig> markups)
 		{
 			var data = markups.OrderBy(m => m.Begin).ToArray();
 			foreach (var markup in data) {
 				markup.EndLessThanBegin = markup.End < markup.Begin;
 			}
 
-			var  prev = data.First();
+			string validationError = null;
+			var prev = data.First();
 			foreach (var markup in data.Skip(1)) {
 				markup.BeginOverlap = prev.End > markup.Begin;
 				markup.HaveGap = prev.End < markup.Begin;
+				if (markup.Markup > markup.MaxMarkup)
+					validationError = "Максимальная наценка меньше наценки.";
 				prev = markup;
 			}
 
-			return !data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap);
+			var isValid = !data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap)
+				&& string.IsNullOrEmpty(validationError);
+			return Tuple.Create(isValid, validationError);
 		}
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;

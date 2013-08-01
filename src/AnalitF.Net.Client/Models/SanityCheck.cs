@@ -37,9 +37,9 @@ namespace AnalitF.Net.Client.Models
 				UpdateDb();
 			}
 
-			var crushOnFirstTry = false;
+			bool crushOnFirstTry;
 			try {
-				CheckSettings(factory);
+				crushOnFirstTry = CheckSettings(factory, updateSchema);
 			}
 			catch(GenericADOException e) {
 				//Unknown column '%s' in '%s'
@@ -59,21 +59,28 @@ namespace AnalitF.Net.Client.Models
 			//если свалились на первой попытке нужно попытаться починить базу и попробовать еще разик
 			if (crushOnFirstTry) {
 				UpdateDb();
-				CheckSettings(factory);
+				CheckSettings(factory, true);
 			}
 		}
 
-		private void CheckSettings(ISessionFactory factory)
+		private bool CheckSettings(ISessionFactory factory, bool overrideHash)
 		{
 			using (var session = factory.OpenSession())
 			using (var transaction = session.BeginTransaction()) {
 				var settings = session.Query<Settings>().FirstOrDefault();
+				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
 					settings = new Settings();
+					settings.MappingToken = mappingToken;
 					settings.Markups = MarkupConfig.Defaults().ToList();
 					session.Save(settings);
 				}
 				else {
+					if (overrideHash)
+						settings.MappingToken = mappingToken;
+
+					if (settings.MappingToken != mappingToken)
+						return true;
 					//проверяем что данные коректны и если не коректны
 					//пытаемся восстановить их
 					if (settings.Markups.Count == 0)
@@ -98,6 +105,7 @@ namespace AnalitF.Net.Client.Models
 				}
 				transaction.Commit();
 			}
+			return false;
 		}
 
 		public void UpdateDb()

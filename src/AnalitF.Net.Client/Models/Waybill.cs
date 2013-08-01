@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Client.Models
 		public Waybill()
 		{
 			Lines = new List<WaybillLine>();
+			RoundTo1 = true;
 		}
 
 		public virtual uint Id { get; set; }
@@ -36,6 +38,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ConsigneeNameAndAddress { get; set; }
 
 		public virtual IList<WaybillLine> Lines { get; set; }
+
+		[Ignore]
+		public virtual bool RoundTo1 { get; set; }
 
 		public virtual decimal SumWithoutTax
 		{
@@ -57,12 +62,22 @@ namespace AnalitF.Net.Client.Models
 			get { return "Накладная"; }
 		}
 
-		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups, bool round)
+		public virtual string SupplierName
+		{
+			get { return Supplier == null ? null : Supplier.FullName; }
+		}
+
+		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups)
 		{
 			foreach (var waybillLine in Lines)
-				waybillLine.Calculate(settings, markups, round);
+				waybillLine.Calculate(settings, markups);
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			CalculateRetailSum();
+		}
+
+		public virtual void CalculateRetailSum()
+		{
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();
 		}
 	}

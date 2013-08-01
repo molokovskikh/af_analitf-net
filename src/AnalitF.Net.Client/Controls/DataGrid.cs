@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Controls
 
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter)
+			if (e.Key == Key.Enter && IsReadOnly)
 				return;
 
 			base.OnKeyDown(e);

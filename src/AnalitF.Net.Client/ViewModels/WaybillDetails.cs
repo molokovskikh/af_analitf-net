@@ -34,7 +34,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Calculate()
 		{
-			Waybill.Calculate(Settings.Value, Settings.Value.Markups, RoundToSingleDigit.Value);
+			Waybill.RoundTo1 = RoundToSingleDigit.Value;
+			Waybill.Calculate(Settings.Value, Settings.Value.Markups);
 		}
 
 		public Waybill Waybill { get; set; }
@@ -221,9 +222,11 @@ namespace AnalitF.Net.Client.ViewModels
 			var book = excelExporter.ExportTable(columns, items, 5);
 			var sheet = book.GetSheetAt(0);
 			sheet.CreateRow(1).CreateCell(6).SetCellValue("Реестр");
-			sheet.CreateRow(2).CreateCell(3).SetCellValue("розничных цен на лекарственные средства и изделия медицинского назначения,");
-			sheet.CreateRow(3).CreateCell(3).SetCellValue(String.Format("полученные от {0}-по счету (накладной) №{1} от {2}",
-				Waybill.Supplier != null ? Waybill.Supplier.FullName : "",
+			sheet.CreateRow(2).CreateCell(3)
+				.SetCellValue("розничных цен на лекарственные средства и изделия медицинского назначения,");
+			sheet.CreateRow(3).CreateCell(3)
+				.SetCellValue(String.Format("полученные от {0}-по счету (накладной) №{1} от {2}",
+				Waybill.SupplierName,
 				Waybill.ProviderDocumentId,
 				Waybill.DocumentDate.ToShortDateString()));
 			return excelExporter.Export(book);

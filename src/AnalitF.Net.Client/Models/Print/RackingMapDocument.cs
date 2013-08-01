@@ -97,7 +97,7 @@ namespace AnalitF.Net.Client.Models.Print
 			Line(grid, "PrintSerialNumber", "Серия", line.SerialNumber, defaultHeight, ref row);
 			Line(grid, "PrintPeriod", "Срок годности", line.Period, defaultHeight, ref row);
 			Line(grid, "PrintQuantity", "Количество", line.Quantity.ToString(), defaultHeight, ref row);
-			Line(grid, "PrintSupplier", "Поставщик", line.Waybill.Supplier != null ? line.Waybill.Supplier.FullName : "", defaultHeight, ref row);
+			Line(grid, "PrintSupplier", "Поставщик", line.Waybill.SupplierName, defaultHeight, ref row);
 			Line(grid, "PrintCertificates", "Номер сертификата", line.Certificates, defaultHeight, ref row);
 			Line(grid, "PrintDocumentDate", "Дата поступления", line.Waybill.DocumentDate.ToString(), defaultHeight, ref row);
 			Line(grid, "PrintRetailCost", "Цена", line.RetailCost.ToString(), defaultHeight, ref row);

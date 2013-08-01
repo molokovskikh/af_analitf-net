@@ -359,7 +359,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(serialNumberBorder);
 
 			var supplierNameLabel = new TextBlock {
-				Text = line.SupplierName,
+				Text = line.Waybill.SupplierName,
 				TextAlignment = TextAlignment.Center,
 				FontSize = 4,
 				Width = 81,
@@ -470,7 +470,7 @@ namespace AnalitF.Net.Client.Models.Print
 			if (haveValue || !settings.PriceTag.HideNotPrinted) {
 				var value = String.Format("{0:d}{1}",
 					settings.PriceTag.PrintDocumentDate ? (DateTime?)line.Waybill.DocumentDate : null,
-					settings.PriceTag.PrintSupplier ? line.SupplierName : "");
+					settings.PriceTag.PrintSupplier ? line.Waybill.SupplierName : "");
 
 				var label = new Label {
 					FontSize = 6,

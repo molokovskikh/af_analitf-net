@@ -149,6 +149,7 @@
     <Compile Include="Integration\Views\SaveViewFixture.cs" />
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
+    <Compile Include="Integration\Views\WaybillDetailsFixture.cs" />
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
@@ -168,9 +169,10 @@
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
+    <Compile Include="Unit\StyleBuilderFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
-    <Compile Include="Unit\WaybillLineFixture.cs" />
+    <Compile Include="Unit\WaybillFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

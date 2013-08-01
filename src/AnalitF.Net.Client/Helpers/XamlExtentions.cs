@@ -11,6 +11,13 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public static class XamlExtentions
 	{
+		public static void AddRange(this UIElementCollection dst, IEnumerable<UIElement> src)
+		{
+			foreach (var element in src) {
+				dst.Add(element);
+			}
+		}
+
 		public static IEnumerable<DependencyObject> Children(this Visual visual)
 		{
 			var count = VisualTreeHelper.GetChildrenCount(visual);

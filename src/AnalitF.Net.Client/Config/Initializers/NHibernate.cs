@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 		public ISessionFactory Factory;
 		public Configuration Configuration;
+		public int MappingHash;
 
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
@@ -83,6 +84,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Inverse(true);
 				});
 			});
+			mapper.Class<WaybillLine>(m => {
+				m.Property(l => l.RetailCost, p => p.Access(Accessor.Field));
+				m.Property(l => l.RetailMarkup, p => p.Access(Accessor.Field));
+				m.Property(l => l.RealRetailMarkup, p => p.Access(Accessor.Field));
+			});
+
 			mapper.Class<Address>(m => m.Bag(o => o.Orders, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
@@ -137,6 +144,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);
+
+			MappingHash = mapping.AsString().GetHashCode();
 
 			if (debug)
 				Console.WriteLine(mapping.AsString());

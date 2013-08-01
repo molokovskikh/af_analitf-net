@@ -109,9 +109,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Save()
 		{
-			var isValid = MarkupConfig.Validate(Markups) && MarkupConfig.Validate(VitallyImportantMarkups);
+			var result1 = MarkupConfig.Validate(VitallyImportantMarkups);
+			var result2 = MarkupConfig.Validate(Markups);
+			var total = Tuple.Create(result1.Item1 && result2.Item1, result1.Item2 ?? result2.Item2);
+			var isValid = total.Item1;
+
 			if (!isValid) {
-				Manager.Warning("Некорректно введены границы цен.");
+				Manager.Warning(total.Item2 ?? "Некорректно введены границы цен.");
 				return;
 			}
 
@@ -121,7 +125,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.ApplyChanges(Session);
 			TryClose();
 		}
-
 
 		protected override void Broadcast()
 		{

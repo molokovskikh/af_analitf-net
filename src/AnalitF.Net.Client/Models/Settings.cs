@@ -154,6 +154,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<MarkupConfig> Markups { get; set; }
 
+		public virtual int MappingToken { get; set; }
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }

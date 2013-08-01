@@ -14,14 +14,25 @@
 
 					<DataGrid x:Name="Markups" Grid.Column="0">
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}"
+								Header="Левая граница"
+								Binding="{Binding Begin}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}"
+								Header="Правая граница"
+								Binding="{Binding End}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Наценка(%)"
+								Binding="{Binding Markup}" />
+							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
+								Binding="{Binding MaxMarkup}" />
+							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.зване(%)"
+								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
 
 					<StackPanel Grid.Column="1">
-						<Button Margin="3" CommandTarget="{x:Reference Markups}" Command="ApplicationCommands.Delete">Удалить</Button>
+						<Button Margin="3" CommandTarget="{x:Reference Markups}" Command="ApplicationCommands.Delete">
+							Удалить
+						</Button>
 
 						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
@@ -42,14 +53,28 @@
 					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0"
 						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}" Header="Левая граница" Binding="{Binding Begin}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}" Header="Правая граница" Binding="{Binding End}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" Header="Наценка (%)" Binding="{Binding Markup}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*"
+								CellStyle="{DynamicResource BeginMarkup}"
+								Header="Левая граница"
+								Binding="{Binding Begin}" />
+							<DataGridTextColumn Width="*"
+								CellStyle="{DynamicResource EndMarkup}"
+								Header="Правая граница"
+								Binding="{Binding End}"></DataGridTextColumn>
+							<DataGridTextColumn Width="*" Header="Наценка(%)"
+								Binding="{Binding Markup}" />
+							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
+								Binding="{Binding MaxMarkup}" />
+							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.зване(%)"
+								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
 
 					<StackPanel Grid.Column="1">
-						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}" Command="ApplicationCommands.Delete">Удалить</Button>
+						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}"
+							Command="ApplicationCommands.Delete">
+							Удалить
+						</Button>
 
 						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>

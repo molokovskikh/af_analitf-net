@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Models
 
 				var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
 				foreach (var waybill in newWaybills) {
-					waybill.Calculate(settings, settings.Markups, true);
+					waybill.Calculate(settings, settings.Markups);
 				}
 
 				settings.LastUpdate = DateTime.Now;

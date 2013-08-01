@@ -1,7 +1,13 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using AnalitF.Net.Client.Models;
+using NHibernate.Hql.Ast.ANTLR;
 
 namespace AnalitF.Net.Client
 {
@@ -65,14 +71,52 @@ namespace AnalitF.Net.Client
 			AddTriggers(style, "HaveGap",  true, Color.FromRgb(0x80, 0, 0), activeColor, inactiveColor);
 			resources.Add("BeginMarkup", style);
 
-			style = new Style(typeof(DataGridCell), baseStyle);
-			AddTriggers(style, "EndLessThanBegin", true, Colors.Red, activeColor, inactiveColor);
-			resources.Add("EndMarkup", style);
+			SimpleStyle("EndMarkup", "EndLessThanBegin", Colors.Red);
 
 			var offerBaseStyle = (Style)Resources["VitallyImportant"];
 			style = new Style(typeof(DataGridCell), offerBaseStyle);
 			style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("OrderColumn", style);
+			BuildStyles(resources, Resources, typeof(WaybillLine), activeColor, inactiveColor, baseStyle);
+		}
+
+		public static void BuildStyles(ResourceDictionary resources,
+			ResourceDictionary appResource,
+			Type type,
+			Color activeColor,
+			Color inactiveColor,
+			Style baseStyle = null)
+		{
+			var map = (from p in type.GetProperties()
+				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+				from c in ((StyleAttribute)a).Columns
+				group p by c into g
+				select g);
+			var legends = from p in type.GetProperties()
+				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+				let d = ((StyleAttribute)a).Description
+				where !String.IsNullOrEmpty(d)
+				select new {p, d};
+
+			foreach (var legend in legends) {
+				var style = new Style(typeof(Label), (Style)appResource["Legend"]);
+				style.Setters.Add(new Setter(Label.BackgroundProperty, Brushes.Red));
+				style.Setters.Add(new Setter(Label.ContentProperty, legend.d));
+				resources.Add(LegendKey(legend.p), style);
+			}
+
+			foreach (var column in map) {
+				var style = new Style(typeof(DataGridCell), baseStyle);
+				foreach (var property in column) {
+					AddTriggers(style, property.Name, true, Colors.Red, activeColor, inactiveColor);
+				}
+				resources.Add(type.Name + column.Key + "Cell", style);
+			}
+		}
+
+		public static string LegendKey(PropertyInfo property)
+		{
+			return property.DeclaringType.Name + property.Name + "Legend";
 		}
 
 		private Style SimpleStyle(string name, string property, Color color, bool value = true, params DataTrigger[] triggers)
@@ -116,7 +160,7 @@ namespace AnalitF.Net.Client
 			};
 		}
 
-		private void AddTriggers(Style style, string name, object value,
+		private static void AddTriggers(Style style, string name, object value,
 			Color baseColor,
 			Color active,
 			Color inactive)
@@ -165,7 +209,7 @@ namespace AnalitF.Net.Client
 			style.Triggers.Add(trigger);
 		}
 
-		public Color Mix(Color background, Color foreground, float factor)
+		public static Color Mix(Color background, Color foreground, float factor)
 		{
 			return (foreground - background) * factor + background;
 		}
