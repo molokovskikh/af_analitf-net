@@ -370,7 +370,10 @@ select db.Id,
 	db.NdsAmount,
 	db.Unit,
 	db.BillOfEntryNumber,
-	db.ExciseTax
+	db.ExciseTax,
+	db.VitallyImportant,
+	db.Period,
+	db.Certificates
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id

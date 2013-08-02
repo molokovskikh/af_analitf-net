@@ -47,7 +47,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual string SerialNumber { get; set; }
 		public virtual string Certificates { get; set; }
 		public virtual bool LoadCertificate { get; set; }
-		public virtual string CertificateNumber { get; set; }
 
 		public virtual string Unit { get; set; }
 		public virtual decimal? ExciseTax { get; set; }
@@ -142,6 +141,7 @@ namespace AnalitF.Net.Client.Models
 			get { return RetailMarkup > MaxRetailMarkup; }
 		}
 
+		//todo: если null?
 		[Style("RetailMarkup", "RetailCost", "RetailSum", "RealRetailMarkup",
 			Description = "Розничная цена: не рассчитана")]
 		public virtual bool IsMarkupInvalid

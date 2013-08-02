@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
@@ -15,9 +16,10 @@ namespace AnalitF.Net.Test.Unit
 			var resource = new ResourceDictionary();
 			var appResource = new ResourceDictionary();
 
-			App.BuildStyles(resource, appResource, typeof(WaybillLine), Colors.White, Colors.Black);
+			StyleHelper.BuildStyles(resource, appResource, typeof(WaybillLine), Colors.White, Colors.Black);
 			Assert.IsTrue(resource.Contains("WaybillLineNdsCell"));
-			Assert.IsTrue(resource.Contains("WaybillLineIsNdsInvalidLegend"));
+			Assert.IsTrue(resource.Contains("WaybillLineIsNdsInvalidLegend"), "WaybillLineIsNdsInvalidLegend");
+			Assert.IsTrue(resource.Contains("WaybillLineRow"), "WaybillLineRow");
 		}
 	}
 }

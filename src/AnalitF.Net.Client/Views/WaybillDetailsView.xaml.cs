@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -39,10 +41,12 @@ namespace AnalitF.Net.Client.Views
 				dataGridColumn.CellStyle = resource;
 			}
 
+			StyleHelper.Apply(type, grid, resources);
+
 			Legend.Children.Add(new Label { Content = "Подсказка" });
 			var styles = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
-				let key = App.LegendKey(p)
+				let key = StyleHelper.LegendKey(p)
 				let style = resources[key] as Style
 				where style != null
 				select new Label{ Style = style };
@@ -50,6 +54,17 @@ namespace AnalitF.Net.Client.Views
 			stack.Orientation = Orientation.Horizontal;
 			stack.Children.AddRange(styles);
 			Legend.Children.Add(stack);
+
+			var column = grid.Columns.First(c => c.Header.Equals("Розничная наценка"));
+			grid.TextInput += (sender, args) => {
+				if (grid.SelectedItem == null)
+					return;
+				var isDigit = args.Text.All(char.IsDigit);
+				if (!isDigit)
+					return;
+				grid.CurrentCell = new DataGridCellInfo(grid.SelectedItem, column);
+				grid.BeginEdit(args);
+			};
 		}
 	}
 }

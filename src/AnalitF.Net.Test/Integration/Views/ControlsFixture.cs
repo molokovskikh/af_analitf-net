@@ -18,8 +18,6 @@ namespace AnalitF.Net.Test.Integration.Views
 	[TestFixture, RequiresSTA, Explicit("Тесты показывают окна")]
 	public class ControlsFixture
 	{
-		private ManualResetEvent done = new ManualResetEvent(false);
-
 		public class Model
 		{
 			public Model()
@@ -44,12 +42,10 @@ namespace AnalitF.Net.Test.Integration.Views
 				selector.Loaded += (sender, args) => {
 					text = XamlExtentions.AsText(selector);
 					w.Close();
-					done.Set();
 				};
 				w.DataContext = new Model();
 				ViewModelBinder.Bind(w.DataContext, w, null);
 			});
-			done.WaitOne(20.Second());
 			Assert.That(text, Is.StringContaining("test2"));
 		}
 	}
