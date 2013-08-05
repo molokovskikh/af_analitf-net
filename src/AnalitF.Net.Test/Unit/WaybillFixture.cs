@@ -17,6 +17,7 @@ namespace AnalitF.Net.Test.Unit
 		private MarkupConfig[] markups;
 		private Waybill waybill;
 		private Settings settings;
+		private WaybillSettings waybillSettings;
 
 		[SetUp]
 		public void Setup()
@@ -37,6 +38,9 @@ namespace AnalitF.Net.Test.Unit
 				}
 			};
 			settings.Markups = markups;
+			waybillSettings = new WaybillSettings();
+			settings.Waybills.Add(waybillSettings);
+
 			waybill = new Waybill();
 		}
 
@@ -68,7 +72,7 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 1
 			};
 			Calculate(line);
-			Assert.AreEqual(326.55, line.RetailCost);
+			Assert.AreEqual(326.56, line.RetailCost);
 			Assert.AreEqual(30, line.RetailMarkup);
 		}
 
@@ -229,6 +233,32 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(492, waybill.RetailSum);
 		}
 
+		[Test]
+		public void Ignore_nds()
+		{
+			waybillSettings.Taxation = Taxation.Envd;
+			waybillSettings.IncludeNds = false;
+			var line = Line();
+			Calculate(line);
+			Assert.AreEqual(53.8, line.RetailCost);
+		}
+
+		[Test]
+		public void Do_not_change_markup_on_tax_factor_Change()
+		{
+			var line = Line();
+			line.VitallyImportant = true;
+			Calculate(line);
+			line.RetailMarkup = 10;
+			waybillSettings.IncludeNdsForVitallyImportant = false;
+			Calculate(line);
+			Assert.AreEqual(9.73, line.RetailMarkup);
+
+			waybillSettings.IncludeNdsForVitallyImportant = true;
+			Calculate(line);
+			Assert.AreEqual(9.72, line.RetailMarkup);
+		}
+
 		private WaybillLine Line()
 		{
 			markups[0].Markup = 30;
@@ -256,6 +286,7 @@ namespace AnalitF.Net.Test.Unit
 
 		private void Calculate(WaybillLine line)
 		{
+			waybill.WaybillSettings = waybillSettings;
 			waybill.Lines.Add(line);
 			waybill.Calculate(settings);
 		}

@@ -73,10 +73,10 @@ namespace AnalitF.Net.Client.Models.Print
 		private WaybillSettings waybillSettings;
 		private IList<WaybillLine> lines;
 
-		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, WaybillSettings waybillSettings)
+		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings)
 		{
 			this.waybill = waybill;
-			this.waybillSettings = waybillSettings;
+			this.waybillSettings = waybill.WaybillSettings;
 			this.settings = settings;
 			this.lines = lines;
 		}

@@ -101,6 +101,17 @@
 
 					<Label>Бухгалтер:</Label>
 					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant"></TextBox>
+
+					<Label>Способ налогообложения:</Label>
+					<ComboBox Style="{StaticResource Select}" x:Name="Taxations" DisplayMemberPath="Name" />
+
+					<CheckBox x:Name="CurrentWaybillSettings_Value_IncludeNdsForVitallyImportant">
+						Включать входную НДС в расчет розничной надбавки для ЖНВЛС при ЕНВД
+					</CheckBox>
+
+					<CheckBox x:Name="CurrentWaybillSettings_Value_IncludeNds">
+						Включать входную НДС в расчет розничной надбавки для НеЖНВЛС при ЕНВД
+					</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">

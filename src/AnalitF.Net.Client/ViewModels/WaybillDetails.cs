@@ -9,13 +9,13 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NHibernate.Linq;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.ViewModels
 {
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
-		private WaybillSettings waybillSettings;
 
 		public WaybillDetails(uint id)
 		{
@@ -49,10 +49,6 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Waybill = Session.Load<Waybill>(id);
-			var addressId = Waybill.Address.Id;
-			waybillSettings = Session.Query<WaybillSettings>().FirstOrDefault(s => s.BelongsToAddress.Id == addressId);
-			if (waybillSettings == null)
-				waybillSettings = new WaybillSettings();
 
 			Calculate();
 
@@ -70,7 +66,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
-				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, waybillSettings).Build()
+				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
 			});
 		}
 
@@ -78,30 +74,29 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Ценники",
-				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value, waybillSettings).Build()
+				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value).Build()
 			});
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
 		{
-			var doc = new RegistryDocument(Waybill, PrintableLines(), waybillSettings);
+			var doc = new RegistryDocument(Waybill, PrintableLines());
 			return Preview("Реестр", doc);
 		}
 
 		public IEnumerable<IResult> PrintWaybill()
 		{
-			var doc = new WaybillDocument(Waybill, PrintableLines(), waybillSettings);
-			return Preview("Накладная", doc);
-		}
-
-		private IList<WaybillLine> PrintableLines()
-		{
-			return Lines.Value.Where(l => l.Print).ToList();
+			return Preview("Накладная", new WaybillDocument(Waybill, PrintableLines()));
 		}
 
 		public IEnumerable<IResult> PrintInvoice()
 		{
 			return Preview("Счет-фактура", new InvoiceDocument(Waybill));
+		}
+
+		private IList<WaybillLine> PrintableLines()
+		{
+			return Lines.Value.Where(l => l.Print).ToList();
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
@@ -154,7 +149,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var book = excelExporter.ExportTable(columns, items, 8);
 			var sheet = book.GetSheetAt(0);
 			sheet.CreateRow(1).CreateCell(6).SetCellValue(String.Format("Наименование организации: Сотрудник {0}",
-				waybillSettings.FullName));
+				Waybill.WaybillSettings.FullName));
 			var row = sheet.CreateRow(2);
 			row.CreateCell(3).SetCellValue("Отдел:");
 			row.CreateCell(4).SetCellValue("_______________________________________");

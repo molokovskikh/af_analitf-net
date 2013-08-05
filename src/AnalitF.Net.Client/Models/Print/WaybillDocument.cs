@@ -47,13 +47,13 @@ namespace AnalitF.Net.Client.Models.Print
 		private IList<WaybillLine> lines;
 		private WaybillDocumentSettings docSettings;
 
-		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings)
+		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines)
 		{
 			this.waybill = waybill;
-			this.settings = settings;
+			this.settings = waybill.WaybillSettings;
 			this.lines = lines;
 			docSettings = new WaybillDocumentSettings(waybill);
-			Settings = doc;
+			Settings = docSettings;
 
 			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {

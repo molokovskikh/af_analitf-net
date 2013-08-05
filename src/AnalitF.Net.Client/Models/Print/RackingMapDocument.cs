@@ -40,11 +40,11 @@ namespace AnalitF.Net.Client.Models.Print
 		private IList<WaybillLine> lines;
 		private IDictionary<string, object> properties;
 
-		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, WaybillSettings waybillSettings)
+		public RackingMapDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings)
 		{
 			this.settings = settings;
-			this.waybillSettings = waybillSettings;
 			this.waybill = waybill;
+			this.waybillSettings = waybill.WaybillSettings;
 			this.lines = lines;
 		}
 

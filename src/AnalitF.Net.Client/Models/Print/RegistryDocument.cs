@@ -43,11 +43,11 @@ namespace AnalitF.Net.Client.Models.Print
 		private RegistryDocumentSettings docSettings;
 		private IList<WaybillLine> lines;
 
-		public RegistryDocument(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings)
+		public RegistryDocument(Waybill waybill, IList<WaybillLine> lines)
 		{
 			this.waybill = waybill;
-			this.settings = settings;
 			this.lines = lines;
+			settings = waybill.WaybillSettings;
 			docSettings = new RegistryDocumentSettings(waybill);
 			Settings = docSettings;
 

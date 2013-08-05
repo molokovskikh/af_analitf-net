@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,6 +15,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 	{
 		private object settings;
 
+		public Tuple<PropertyInfo, object[]>[] Properties;
+
 		public SimpleSettings(object settings)
 		{
 			this.settings = settings;
@@ -22,6 +25,12 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			if (attributes.Length > 0) {
 				DisplayName = ((DescriptionAttribute)attributes[0]).Description;
 			}
+			Properties = settings.GetType()
+				.GetProperties()
+				.Select(p => Tuple.Create(p, p.GetCustomAttributes(typeof(DisplayAttribute), true)))
+				.Where(t => t.Item2.Length > 0)
+				.OrderBy(t => ((DisplayAttribute)t.Item2[0]).Order)
+				.ToArray();
 		}
 
 		public void OK()
@@ -33,18 +42,11 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			base.OnViewAttached(view, context);
 
-			var properties = settings.GetType()
-				.GetProperties()
-				.Select(p => Tuple.Create(p, p.GetCustomAttributes(typeof(DisplayAttribute), true)))
-				.Where(t => t.Item2.Length > 0)
-				.OrderBy(t => ((DisplayAttribute)t.Item2[0]).Order)
-				.ToArray();
-
 			var grid = (Grid)((FrameworkElement)view).FindName("Data");
 			grid.DataContext = settings;
-			for(var i = 0; i < properties.Length; i ++) {
+			for(var i = 0; i < Properties.Length; i ++) {
 				grid.RowDefinitions.Add(new RowDefinition());
-				var property = properties[i];
+				var property = Properties[i];
 				var label = new Label {
 					Content = ((DisplayAttribute)property.Item2[0]).Name
 				};

@@ -22,6 +22,11 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static List<ValueDescription<T>> ToDescriptions<T>(this Enum value)
 		{
+			return GetDescription<T>();
+		}
+
+		public static List<ValueDescription<T>> GetDescription<T>()
+		{
 			var enumType = typeof(T);
 			return Enum.GetValues(enumType)
 				.Cast<T>()

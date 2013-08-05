@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
@@ -39,10 +40,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Recalculate_waybill()
 		{
-			Assert.AreEqual(24, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(24.8, model.Lines.Value[0].RetailCost);
 			Assert.IsTrue(model.RoundToSingleDigit);
 			model.RoundToSingleDigit.Value = false;
-			Assert.AreEqual(24.09, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(24.82, model.Lines.Value[0].RetailCost);
 		}
 
 		[Test]
@@ -56,7 +57,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Reload_settings_on_change()
 		{
 			restore = true;
-			Assert.AreEqual(24, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(24.8, model.Lines.Value[0].RetailCost);
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
@@ -64,7 +65,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(settings);
 			testScheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
-			Assert.AreEqual(30.1, model.Lines.Value[0].RetailCost);
+			Assert.AreEqual(30.8, model.Lines.Value[0].RetailCost);
+		}
+
+		[Test]
+		public void Print_waybill()
+		{
+			var results = model.PrintWaybill();
+			var settings = (SimpleSettings)((DialogResult)results.First()).Model;
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
 		}
 
 		[Test, RequiresSTA]

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Views;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -17,13 +18,23 @@ namespace AnalitF.Net.Client.Models
 		[Description("От минимальной цены в основных поставщиках")] MinBaseCost,
 	}
 
+	public enum Taxation
+	{
+		[Description("ЕНВД")] Envd,
+		[Description("НДС")] Nds,
+	}
+
 	public class WaybillSettings
 	{
 		public WaybillSettings()
 		{
+			IncludeNds = true;
+			IncludeNdsForVitallyImportant = true;
+			Taxation = Taxation.Envd;
 		}
 
 		public WaybillSettings(User user, Address address)
+			: this()
 		{
 			Name = user.FullName;
 			Address = address.Name;
@@ -37,6 +48,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Director { get; set; }
 		public virtual string Accountant { get; set; }
 		public virtual Address BelongsToAddress { get; set; }
+		public virtual Taxation Taxation { get; set; }
+		public virtual bool IncludeNds { get; set; }
+		public virtual bool IncludeNdsForVitallyImportant { get; set; }
 
 		public virtual string FullName
 		{
@@ -123,6 +137,7 @@ namespace AnalitF.Net.Client.Models
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
+			Waybills = new List<WaybillSettings>();
 		}
 
 		public virtual int Id { get; set; }
@@ -153,6 +168,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual PriceTagSettings PriceTag { get; set; }
 
 		public virtual IList<MarkupConfig> Markups { get; set; }
+
+		public virtual IList<WaybillSettings> Waybills { get; set; }
 
 		public virtual int MappingToken { get; set; }
 

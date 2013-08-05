@@ -146,7 +146,7 @@ namespace AnalitF.Net.Client.Models
 			Description = "Розничная цена: не рассчитана")]
 		public virtual bool IsMarkupInvalid
 		{
-			get { return RetailMarkup < 0; }
+			get { return RetailMarkup  == null; }
 		}
 
 		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]
@@ -186,7 +186,7 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRetailMarkup()
 		{
-			_retailCost = CalculateRetailCost(RetailMarkup.GetValueOrDefault());
+			_retailCost = CalculateRetailCost(RetailMarkup);
 			RecalculateMarkups();
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
@@ -238,13 +238,26 @@ namespace AnalitF.Net.Client.Models
 			if (!IsCalculable())
 				return;
 
-			var taxFactor = (1 + Nds.GetValueOrDefault(10) / 100m);
 			if (ActualVitallyImportant)
-				_retailMarkup = Round((RetailCost / taxFactor - SupplierCostWithoutNds) / ProducerCost * 100);
+				_retailMarkup = Round((RetailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100);
 			else
 				_retailMarkup = Round((RetailCost - SupplierCost) / SupplierCost * 100);
 
 			_realRetailMarkup = Round((RetailCost - SupplierCost) / SupplierCost * 100);
+		}
+
+		private decimal TaxFactor
+		{
+			get
+			{
+				var nds = Nds.GetValueOrDefault(10);
+				if (Waybill.WaybillSettings.Taxation == Taxation.Envd
+					&& ((ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNdsForVitallyImportant)
+						|| !ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNds)) {
+					nds = 0;
+				}
+				return (1 + nds / 100m);
+			}
 		}
 
 		private bool IsCalculable()
@@ -263,12 +276,11 @@ namespace AnalitF.Net.Client.Models
 
 		private decimal? CalculateRetailCost(decimal? markup)
 		{
-			var nds  = Nds.GetValueOrDefault(10);
 			var baseCost = ProducerCost;
 			if (!ActualVitallyImportant)
 				baseCost = SupplierCostWithoutNds;
 
-			var value = (SupplierCostWithoutNds + baseCost * markup / 100) * (100 + nds) / 100m;
+			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			return RoundCost(value);
 		}
 

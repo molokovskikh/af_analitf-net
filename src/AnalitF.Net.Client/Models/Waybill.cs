@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Models
 
 		public Waybill()
 		{
+			WaybillSettings = new WaybillSettings();
 			Lines = new List<WaybillLine>();
 			RoundTo1 = true;
 		}
@@ -96,9 +97,18 @@ namespace AnalitF.Net.Client.Models
 			get { return Supplier == null ? null : Supplier.FullName; }
 		}
 
+		[Ignore]
+		public virtual WaybillSettings WaybillSettings { get; set; }
+
 		public virtual void Calculate(Settings settings)
 		{
 			_settings = settings;
+			WaybillSettings = settings.Waybills
+				.FirstOrDefault(s => s.BelongsToAddress != null
+					&& Address != null
+					&& s.BelongsToAddress.Id == Address.Id)
+				?? WaybillSettings;
+
 			foreach (var waybillLine in Lines)
 				waybillLine.Calculate(_settings, _settings.Markups);
 

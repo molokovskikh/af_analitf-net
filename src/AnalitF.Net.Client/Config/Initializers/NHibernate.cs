@@ -51,6 +51,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			});
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
+				m.Bag(o => o.Waybills, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
 			});
 			mapper.Class<MinOrderSumRule>(m => {
 				m.ComposedId(c => {
@@ -183,7 +184,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 		private static void PatchComponentColumnName(HbmMapping mapping)
 		{
-			var components = mapping.RootClasses.SelectMany(c => c.Properties).OfType<HbmComponent>().Where(c => c.Name != "OfferId");
+			var components = mapping.RootClasses.SelectMany(c => c.Properties).OfType<HbmComponent>()
+				.Where(c => c.Name != "OfferId");
 			foreach (var component in components) {
 				var columns = component.Properties.OfType<HbmProperty>();
 				foreach (var property in columns) {

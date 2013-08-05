@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Common.Tools;
 using Devart.Data.MySql;
+using Iesi.Collections;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Exceptions;
@@ -86,6 +87,9 @@ namespace AnalitF.Net.Client.Models
 					if (settings.Markups.Count == 0)
 						session.Query<MarkupConfig>().Each(settings.Markups.Add);
 
+					if (settings.Waybills.Count == 0)
+						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
+
 					//если ничего восстановить не удалось тогда берем значения по умолчанию
 					if (settings.Markups.Count == 0)
 						MarkupConfig.Defaults().Each(settings.Markups.Add);
@@ -94,12 +98,12 @@ namespace AnalitF.Net.Client.Models
 				var addresses = session.Query<Address>().ToList();
 				if (addresses.Count > 0) {
 					var user = session.Query<User>().First();
-					var waybillSettings = session.Query<WaybillSettings>().ToList();
+					var waybillSettings = settings.Waybills;
 					foreach (var address in addresses) {
 						var waybillSetting = waybillSettings.FirstOrDefault(s => s.BelongsToAddress == address);
 						if (waybillSetting == null) {
 							waybillSetting = new WaybillSettings(user, address);
-							session.Save(waybillSetting);
+							settings.Waybills.Add(waybillSetting);
 						}
 					}
 				}

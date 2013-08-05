@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -13,17 +15,18 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
+		private static string lastTab;
 
 		public SettingsViewModel()
 		{
-			SelectedTab = new NotifyValue<string>("OverMarkupsTab");
+			SelectedTab = new NotifyValue<string>(lastTab ?? "OverMarkupsTab");
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
 
 			Settings = Session.Query<Settings>().First();
-			waybillConfig = Session.Query<WaybillSettings>().ToList();
+			waybillConfig = Settings.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
 
@@ -41,10 +44,14 @@ namespace AnalitF.Net.Client.ViewModels
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
 			RackingMapSizes = Settings.RackingMap.Size.ToDescriptions<RackingMapSize>();
 			PriceTagTypes = Settings.PriceTag.Type.ToDescriptions<PriceTagType>();
+			Taxations = DescriptionHelper.GetDescription<Taxation>();
 			CanConfigurePriceTag = new NotifyValue<bool>(() => CurrentPriceTagType.Value == PriceTagType.Normal);
+			CurrentWaybillSettings.Changed().Subscribe(_ => NotifyOfPropertyChange("CurrentTaxation"));
 
 			if (string.IsNullOrEmpty(Settings.UserName))
 				SelectedTab.Value = "LoginTab";
+
+			SelectedTab.Changed().Subscribe(_ => lastTab = SelectedTab.Value);
 		}
 
 		public NotifyValue<string> SelectedTab { get; set; }
@@ -105,6 +112,24 @@ namespace AnalitF.Net.Client.ViewModels
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
 			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
+		}
+
+		public List<ValueDescription<Taxation>> Taxations { get; set; }
+
+		public ValueDescription<Taxation> CurrentTaxation
+		{
+			get
+			{
+				return CurrentWaybillSettings.Value == null
+					? null
+					: Taxations.First(t => t.Value == CurrentWaybillSettings.Value.Taxation) ;
+			}
+			set
+			{
+				if (CurrentWaybillSettings.Value == null || value == null)
+					return;
+				CurrentWaybillSettings.Value.Taxation = value.Value;
+			}
 		}
 
 		public void Save()
