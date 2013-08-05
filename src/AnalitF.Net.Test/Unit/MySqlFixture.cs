@@ -11,7 +11,8 @@ namespace AnalitF.Net.Test.Unit
 		public void Fix_connection_string()
 		{
 			var value = "User Id=root; Server Parameters=\"--basedir=.;--datadir=.;--innodb=OFF\"; Embedded=True; Database=data";
-			var result = Client.Config.Initializers.NHibernate.FixRelativePaths(value);
+			var nhibernate = new Client.Config.Initializers.NHibernate();
+			var result = nhibernate.FixRelativePaths(value);
 			Assert.That(result, Is.StringContaining("--basedir=" + Environment.CurrentDirectory.Replace("\\", "/")));
 		}
 	}

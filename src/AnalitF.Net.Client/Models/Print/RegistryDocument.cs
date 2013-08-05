@@ -93,8 +93,8 @@ namespace AnalitF.Net.Client.Models.Print
 			doc.Blocks.Add(block);
 
 			block = new Paragraph { Style = BlockStyle };
-			//WrapDirection = WrapDirection.None нужно что бы текст заголовка не пытался заполнить пустое пространстрво
-			//а распологался отдельно
+			//WrapDirection = WrapDirection.None нужно что бы текст заголовка не пытался заполнить пустое пространство
+			//а располагался отдельно
 			block.Inlines.Add(new Figure(new Paragraph(new Run("УТВЕРЖДАЮ\n"
 				+ String.Format("Зав.аптекой ______________{0}", settings.Director)))) {
 					HorizontalAnchor = FigureHorizontalAnchor.PageRight,

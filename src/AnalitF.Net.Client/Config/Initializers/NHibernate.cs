@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public ISessionFactory Factory;
 		public Configuration Configuration;
 		public int MappingHash;
+		public bool UseRelativePath;
 
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
@@ -44,7 +45,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				var modelInspector = ((IModelInspector)simpleModelInspector);
 				return declared || (type.IsClass && type.BaseType != null
 					//если наследуемся от класса который не маплен то это простое наследование
-					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType)) || type.BaseType == typeof(BaseStatelessObject))
+					&& (typeof(object) == type.BaseType || !modelInspector.IsEntity(type.BaseType))
+						|| type.BaseType == typeof(BaseStatelessObject))
 					&& modelInspector.IsEntity(type);
 			});
 			mapper.Class<Settings>(m => {
@@ -100,7 +102,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Insert(false);
 					c.Update(false);
 				});
-				m.ManyToOne(o => o.LeaderPrice, c => c.Columns(cm => cm.Name("LeaderPriceId"), cm => cm.Name("LeaderRegionId")));
+				m.ManyToOne(o => o.LeaderPrice,
+					c => c.Columns(cm => cm.Name("LeaderPriceId"),
+					cm => cm.Name("LeaderRegionId")));
 			});
 			mapper.Class<SentOrder>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
@@ -140,7 +144,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;
-			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null || t == typeof(MinOrderSumRule));
+			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null
+				|| t == typeof(MinOrderSumRule));
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);
@@ -207,7 +212,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			throw new Exception(propertyInfo.PropertyType.ToString());
 		}
 
-		public static string FixRelativePaths(string connectionString)
+		public string FixRelativePaths(string connectionString)
 		{
 			var builder = new MySqlConnectionStringBuilder(connectionString);
 			var parameters = builder.ServerParameters;
@@ -220,7 +225,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var dirKeys = dictionary.Keys.Where(k => k.EndsWith("dir")).ToArray();
 			foreach (var key in dirKeys) {
 				var value = dictionary[key];
-				dictionary[key] = Path.GetFullPath(FileHelper.MakeRooted(value)).Replace("\\", "/");
+				string path;
+				if (UseRelativePath)
+					path = Path.GetFullPath(value);
+				else
+					path = Path.GetFullPath(FileHelper.MakeRooted(value));
+				dictionary[key] = path.Replace("\\", "/");
 			}
 
 			builder.ServerParameters = dictionary.Select(k => k.Key + "=" + k.Value).Implode(";");

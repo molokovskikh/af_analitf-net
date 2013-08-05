@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Padding = new Thickness(0),
 				HorizontalContentAlignment = HorizontalAlignment.Center,
 				FontSize = 8,
-				Content = "Стелажная карта",
+				Content = "Стеллажная карта",
 				BorderBrush = Brushes.Black,
 				BorderThickness = new Thickness(0, 0, 2.5, 2.5),
 				FontFamily = new FontFamily("Arial"),

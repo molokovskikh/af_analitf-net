@@ -24,7 +24,7 @@
 								Binding="{Binding Markup}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
 								Binding="{Binding MaxMarkup}" />
-							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.зване(%)"
+							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
 								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
@@ -65,7 +65,7 @@
 								Binding="{Binding Markup}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
 								Binding="{Binding MaxMarkup}" />
-							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.зване(%)"
+							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
 								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
@@ -135,11 +135,11 @@
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Настройка стелажной карты" Name="RackingMapSettings">
+			<TabItem Header="Настройка стеллажной карты" Name="RackingMapSettings">
 				<StackPanel>
 					<ComboBox Style="{StaticResource Select}" x:Name="RackingMapSizes" DisplayMemberPath="Name" />
 					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted">Удалять непечатаемые элементы</CheckBox>
-					<Label>Печатаемые элементы стелажной карты</Label>
+					<Label>Печатаемые элементы стеллажной карты</Label>
 					<CheckBox x:Name="Settings_RackingMap_PrintProduct">Наименование</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintProducer">Производитель</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintSerialNumber">Серия товара</CheckBox>

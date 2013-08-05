@@ -20,6 +20,9 @@
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<StackPanel Margin="4, 0">
 				<CheckBox Name="RoundToSingleDigit">Отбрасывать розничную цену до 10 коп. в "меньше"</CheckBox>
+				<CheckBox Name="Waybill_VitallyImportant" IsEnabled="{Binding Waybill.CanBeVitallyImportant}">
+					Рассчитать накладную как ЖНВЛС
+				</CheckBox>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock VerticalAlignment="Center" Margin="0, 5, 5, 5">НДС:</TextBlock>
 					<ComboBox Style="{StaticResource Select}" x:Name="Taxes" DisplayMemberPath="Name" />
@@ -49,7 +52,7 @@
 					Печать счет-фактуры
 				</Button>
 				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
-					Стелажная карта
+					Стеллажная карта
 				</Button>
 				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
 					Реестр в Excel

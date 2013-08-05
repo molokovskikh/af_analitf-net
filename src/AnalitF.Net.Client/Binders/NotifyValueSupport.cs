@@ -15,8 +15,10 @@ namespace AnalitF.Net.Client.Binders
 		{
 			var defaultSetBinding = ConventionManager.SetBinding;
 
-			//ConventionManager.ApplyItemTemplate - Будет пытаться установить шаблон для NotifyValue<List<string>> Producers
-			//тк будет думать что NotifyValue биндинг будет производиться к Producers а на самом деле бундинг будет к Producers.Value
+			//ConventionManager.ApplyItemTemplate - Будет пытаться установить
+			//шаблон для NotifyValue<List<string>> Producers
+			//тк будет думать что NotifyValue биндинг будет производиться
+			//к Producers а на самом деле биндинг будет к Producers.Value
 			//это сделает ConventionManager.Set
 			ConventionManager.AddElementConvention<Selector>(Selector.ItemsSourceProperty,
 				"SelectedItem",

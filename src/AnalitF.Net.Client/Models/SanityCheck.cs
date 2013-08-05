@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Models
 
 					if (settings.MappingToken != mappingToken)
 						return true;
-					//проверяем что данные коректны и если не коректны
+					//проверяем что данные корректны и если не корректны
 					//пытаемся восстановить их
 					if (settings.Markups.Count == 0)
 						session.Query<MarkupConfig>().Each(settings.Markups.Add);

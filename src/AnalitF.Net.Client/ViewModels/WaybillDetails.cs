@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void Calculate()
 		{
 			Waybill.RoundTo1 = RoundToSingleDigit.Value;
-			Waybill.Calculate(Settings.Value, Settings.Value.Markups);
+			Waybill.Calculate(Settings.Value);
 		}
 
 		public Waybill Waybill { get; set; }
@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult PrintRackingMap()
 		{
 			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Стелажная карта",
+				DisplayName = "Стеллажная карта",
 				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value, waybillSettings).Build()
 			});
 		}

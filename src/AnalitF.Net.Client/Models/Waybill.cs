@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Navigation;
 using AnalitF.Net.Client.Config.Initializers;
 
 namespace AnalitF.Net.Client.Models
@@ -15,6 +16,9 @@ namespace AnalitF.Net.Client.Models
 
 	public class Waybill
 	{
+		private bool _vitallyImportant;
+		private Settings _settings = new Settings();
+
 		public Waybill()
 		{
 			Lines = new List<WaybillLine>();
@@ -42,6 +46,31 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool RoundTo1 { get; set; }
 
+		[Ignore]
+		public virtual bool VitallyImportant
+		{
+			get { return _vitallyImportant; }
+			set
+			{
+				if (!CanBeVitallyImportant)
+					return;
+				if (_vitallyImportant == value)
+					return;
+
+				_vitallyImportant = value;
+				Calculate(_settings);
+			}
+		}
+
+		[Ignore]
+		public virtual bool CanBeVitallyImportant
+		{
+			get
+			{
+				return Lines.All(l => l.VitallyImportant == null);
+			}
+		}
+
 		public virtual decimal SumWithoutTax
 		{
 			get { return Sum - TaxSum; }
@@ -67,10 +96,11 @@ namespace AnalitF.Net.Client.Models
 			get { return Supplier == null ? null : Supplier.FullName; }
 		}
 
-		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups)
+		public virtual void Calculate(Settings settings)
 		{
+			_settings = settings;
 			foreach (var waybillLine in Lines)
-				waybillLine.Calculate(settings, markups);
+				waybillLine.Calculate(_settings, _settings.Markups);
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
 			CalculateRetailSum();

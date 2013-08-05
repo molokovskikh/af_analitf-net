@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			line.ProducerCost = 15.13m;
 			line.SupplierCostWithoutNds = 18.25m;
 			line.SupplierCost = 20.8m;
-			waybill.Calculate(settings, settings.Markups);
+			waybill.Calculate(settings);
 			session.Save(waybill);
 			session.Flush();
 

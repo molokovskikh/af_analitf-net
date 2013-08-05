@@ -9,3 +9,4 @@
 \src\AnalitF.Net.Client\Program.cs
 \src\AnalitF.Net.Client\Helpers\XamlExtentions.cs
 \src\AnalitF.Net.Client\AppBootstrapper.cs
+\src\AnalitF.Net.Test\Tasks\Fixture.cs

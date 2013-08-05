@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//если делать это как показано выше .ObserveOn(UiScheduler)
 			//то вызов произойдет после того как Dispatcher поделает все дела
 			//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
-			//установка флага произойдет позже нежеле вызов для которого этот флаг устанавливается
+			//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
 			OnCloseDisposable.Add(Bus.Listen<string>()
 				.Where(m => m == "DbChanged")
 				.Subscribe(_ => updateOnActivate = true));

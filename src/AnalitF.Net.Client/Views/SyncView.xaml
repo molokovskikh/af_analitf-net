@@ -14,7 +14,7 @@
 				<ProgressBar Height="20" Name="Progress_Current" />
 			</StackPanel>
 		</GroupBox>
-		<GroupBox Header="Общий ход выполенния">
+		<GroupBox Header="Общий ход выполнения">
 			<StackPanel>
 				<Label>
 					<TextBlock>Прошло времени: <Run Name="Time"></Run></TextBlock>

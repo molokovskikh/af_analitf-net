@@ -21,6 +21,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
+			settings = new Settings();
 			markups = new[] {
 				new MarkupConfig(0, 10000, 30) {
 					MaxMarkup = 35,
@@ -35,8 +36,8 @@ namespace AnalitF.Net.Test.Unit
 					MaxMarkup = 20,
 				}
 			};
+			settings.Markups = markups;
 			waybill = new Waybill();
-			settings = new Settings();
 		}
 
 		[Test]
@@ -167,10 +168,11 @@ namespace AnalitF.Net.Test.Unit
 		public void Do_not_recalculate_edited_cost()
 		{
 			var line = Line();
-			waybill.Calculate(settings, markups);
+			waybill.Lines.Add(line);
+			waybill.Calculate(settings);
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
-			waybill.Calculate(settings, markups);
+			waybill.Calculate(settings);
 			Assert.AreEqual(600, waybill.RetailSum);
 		}
 
@@ -213,6 +215,20 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(28.63, line.RetailMarkup);
 		}
 
+		[Test]
+		public void Waybill_as_vitally_important()
+		{
+			var line = Line();
+			line.Nds = 10;
+			line.SupplierCostWithoutNds = Math.Round(line.SupplierCost.Value / 1.1m, 2);
+			Calculate(line);
+			Assert.IsTrue(waybill.CanBeVitallyImportant);
+			waybill.VitallyImportant = true;
+			Assert.AreEqual(true, waybill.VitallyImportant);
+			Assert.AreEqual(49.2, line.RetailCost);
+			Assert.AreEqual(492, waybill.RetailSum);
+		}
+
 		private WaybillLine Line()
 		{
 			markups[0].Markup = 30;
@@ -223,7 +239,6 @@ namespace AnalitF.Net.Test.Unit
 				ProducerCost = 28.78m,
 				Quantity = 10
 			};
-			waybill.Lines.Add(line);
 			return line;
 		}
 		private static List<PropertyChangedEventArgs> Subscribe(INotifyPropertyChanged line)
@@ -241,7 +256,8 @@ namespace AnalitF.Net.Test.Unit
 
 		private void Calculate(WaybillLine line)
 		{
-			line.Calculate(settings, markups);
+			waybill.Lines.Add(line);
+			waybill.Calculate(settings);
 		}
 	}
 }

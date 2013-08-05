@@ -101,15 +101,14 @@
     <Reference Include="UIAutomationTypes" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="Acceptance\BaseFixture.cs" />
     <Compile Include="Acceptance\MemoryLeakFixture.cs" />
     <Compile Include="Acceptance\SetupFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
+    <Compile Include="Fixtures\UnknownWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
@@ -150,6 +149,7 @@
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Integration\Views\WaybillDetailsFixture.cs" />
+    <Compile Include="Tasks\Fixture.cs" />
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
@@ -206,6 +206,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <EmbeddedResource Include="Properties\licenses.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(StylecopPath)\tools\StyleCop.Targets" />
@@ -217,5 +218,8 @@
     <StyleCopAdditionalAddinPaths Include="$(StylecopAddonPath)\lib\4.0">
       <InProject>false</InProject>
     </StyleCopAdditionalAddinPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
 </Project>

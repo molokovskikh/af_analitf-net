@@ -70,7 +70,7 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(string.Format("Покупатель: {0}", waybill.Buyer == null ? "" : waybill.Buyer.Name));
 			Block(string.Format("Адрес покупателя: {0}", waybill.Buyer == null ? "" : waybill.Buyer.Address));
 			Block(string.Format("ИНН/КПП покупателя: {0}/{1}", waybill.Buyer == null ? "" : waybill.Buyer.Inn, waybill.Buyer == null ? "" : waybill.Buyer.Kpp));
-			var headerTable = TwoColumns(GridLength.Auto, "", "Вылюта: россиский рубль");
+			var headerTable = TwoColumns(GridLength.Auto, "", "Валюта: российский рубль");
 			headerTable.CellSpacing = 0;
 			headerTable.Margin = new Thickness(0, 0, 0, 0);
 			doc.Blocks.Add(headerTable);
@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var tax18Block = Block(string.Format("Итого НДС 18%: {0} руб", tax18Sum));
 			tax18Block.FontWeight = FontWeights.Bold;
 
-			var table = TwoColumns(GridLength.Auto, "Руководитель органзации _____________________", "Главный бухгалтер _____________________");
+			var table = TwoColumns(GridLength.Auto, "Руководитель организации _____________________", "Главный бухгалтер _____________________");
 			table.Margin = new Thickness(0);
 			doc.Blocks.Add(table);
 			Block("(индивидуальный предприниматель)");

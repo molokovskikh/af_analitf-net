@@ -131,7 +131,7 @@ namespace AnalitF.Net.Client.Models
 		[Style("Nds", Description = "НДС: не установлен для ЖНВЛС")]
 		public virtual bool IsNdsInvalid
 		{
-			get { return VitallyImportant.GetValueOrDefault() && Nds.GetValueOrDefault(10) != 10;}
+			get { return ActualVitallyImportant && Nds.GetValueOrDefault(10) != 10;}
 		}
 
 		[Style("RetailMarkup", "MaxRetailMarkup",
@@ -149,7 +149,7 @@ namespace AnalitF.Net.Client.Models
 			get { return RetailMarkup < 0; }
 		}
 
-		[Style("SupplierPriceMarkup", Description = "Торвовая наценка оптовика: превышение наценки оптовика")]
+		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]
 		public virtual bool IsSupplierPriceMarkupInvalid
 		{
 			get { return SupplierPriceMarkup > _maxSupplierMarkup; }
@@ -163,6 +163,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? AmountExcludeTax
 		{
 			get { return Amount - NdsAmount; }
+		}
+
+		private bool ActualVitallyImportant
+		{
+			get { return Waybill != null && Waybill.VitallyImportant || VitallyImportant.GetValueOrDefault(); }
 		}
 
 		public virtual decimal? ProducerCostWithTax
@@ -200,7 +205,7 @@ namespace AnalitF.Net.Client.Models
 			if (!IsCalculable())
 				return;
 
-			var vitallyImportant = VitallyImportant.GetValueOrDefault();
+			var vitallyImportant = ActualVitallyImportant;
 			var lookByProducerCost = vitallyImportant && settings.LookupMarkByProducerCost;
 			var sourceCost = (lookByProducerCost ? ProducerCost : SupplierCostWithoutNds).GetValueOrDefault();
 			if (sourceCost == 0)
@@ -213,14 +218,16 @@ namespace AnalitF.Net.Client.Models
 			MaxRetailMarkup = markup.MaxMarkup;
 			_maxSupplierMarkup = markup.MaxSupplierMarkup;
 			if (!Edited) {
-				_retailCost = CalculateRetailCost(markup.Markup);
-				UpdateMarkups();
-				OnPropertyChanged("RetailCost");
-				OnPropertyChanged("RetailSum");
-				OnPropertyChanged("RetailMarkup");
-				OnPropertyChanged("RealRetailMarkup");
-				OnPropertyChanged("IsMarkupInvalid");
+				_retailMarkup = markup.Markup;
 			}
+
+			_retailCost = CalculateRetailCost(RetailMarkup);
+			UpdateMarkups();
+			OnPropertyChanged("RetailCost");
+			OnPropertyChanged("RetailSum");
+			OnPropertyChanged("RetailMarkup");
+			OnPropertyChanged("RealRetailMarkup");
+			OnPropertyChanged("IsMarkupInvalid");
 			//после пересчета состояние флагов валидации могло измениться
 			OnPropertyChanged("IsMarkupToBig");
 			OnPropertyChanged("IsSupplierPriceMarkupInvalid");
@@ -232,7 +239,7 @@ namespace AnalitF.Net.Client.Models
 				return;
 
 			var taxFactor = (1 + Nds.GetValueOrDefault(10) / 100m);
-			if (VitallyImportant.GetValueOrDefault())
+			if (ActualVitallyImportant)
 				_retailMarkup = Round((RetailCost / taxFactor - SupplierCostWithoutNds) / ProducerCost * 100);
 			else
 				_retailMarkup = Round((RetailCost - SupplierCost) / SupplierCost * 100);
@@ -244,7 +251,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			if (SupplierCost.GetValueOrDefault() == 0)
 				return false;
-			if (VitallyImportant.GetValueOrDefault() && ProducerCost.GetValueOrDefault() == 0)
+			if (ActualVitallyImportant && ProducerCost.GetValueOrDefault() == 0)
 				return false;
 			return true;
 		}
@@ -254,11 +261,11 @@ namespace AnalitF.Net.Client.Models
 			return RoundCost(realMarkup / 100 * SupplierCost + SupplierCost);
 		}
 
-		private decimal? CalculateRetailCost(decimal markup)
+		private decimal? CalculateRetailCost(decimal? markup)
 		{
 			var nds  = Nds.GetValueOrDefault(10);
 			var baseCost = ProducerCost;
-			if (!VitallyImportant.GetValueOrDefault())
+			if (!ActualVitallyImportant)
 				baseCost = SupplierCostWithoutNds;
 
 			var value = (SupplierCostWithoutNds + baseCost * markup / 100) * (100 + nds) / 100m;
