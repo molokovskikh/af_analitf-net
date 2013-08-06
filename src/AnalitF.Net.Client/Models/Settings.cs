@@ -134,6 +134,10 @@ namespace AnalitF.Net.Client.Models
 		{
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
+			ConfirmDeleteOldOrders = true;
+			DeleteOrdersOlderThan = 35;
+			ConfirmDeleteOldWaybills = true;
+			DeleteWaybillsOlderThan = 150;
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
@@ -170,6 +174,14 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<MarkupConfig> Markups { get; set; }
 
 		public virtual IList<WaybillSettings> Waybills { get; set; }
+
+		public virtual bool ConfirmDeleteOldOrders { get; set; }
+
+		public virtual int DeleteOrdersOlderThan { get; set; }
+
+		public virtual bool ConfirmDeleteOldWaybills { get; set; }
+
+		public virtual int DeleteWaybillsOlderThan { get; set; }
 
 		public virtual int MappingToken { get; set; }
 

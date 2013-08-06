@@ -75,15 +75,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			foreach (var waybill in SelectedWaybills.ToArray()) {
+				waybill.DeleteFiles(Settings.Value);
 				Waybills.Value.Remove(waybill);
 				StatelessSession.Delete(waybill);
-				var files = Directory.GetFiles(Settings.Value.MapPath("Waybills"), waybill.Id + "_*");
-				try {
-					files.Each(f => File.Delete(f));
-				}
-				catch(Exception e) {
-					log.Warn(String.Format("Ошибка при удалении документа {0}", waybill.Id), e);
-				}
 			}
 		}
 

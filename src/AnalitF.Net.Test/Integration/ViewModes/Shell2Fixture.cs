@@ -9,8 +9,10 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.MySql;
 using Common.Tools;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
@@ -177,6 +179,27 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
 			Assert.IsFalse(shell.IsActive);
 			Assert.That(shell.StartedProcess[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+		}
+
+		[Test]
+		public void Delete_old_orders()
+		{
+			session.DeleteEach(session.Query<Order>());
+			var order = MakeSentOrder();
+			order.SentOn = order.SentOn.AddMonths(-2);
+			session.Save(order);
+			session.Flush();
+
+			var canClose = false;
+			shell.UpdateStat();
+			shell.CanClose(b => canClose = b);
+
+			session.Evict(order);
+			var reloaded = session.Get<SentOrder>(order.Id);
+			Assert.IsTrue(canClose);
+			Assert.IsNull(reloaded);
+			Assert.AreEqual("В архиве заказов обнаружены заказы, сделанные более 35 дней назад. Удалить их?",
+				manager.MessageBoxes.Implode());
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)
