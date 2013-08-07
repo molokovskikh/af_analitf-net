@@ -167,6 +167,7 @@
     <Compile Include="Helpers\ObservableHelper.cs" />
     <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\PrintHelper.cs" />
+    <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="Helpers\SessionExtentions.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />

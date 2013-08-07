@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -6,8 +7,10 @@ using System.Reactive.Subjects;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using NHibernate;
-using log4net;
+using ILog = log4net.ILog;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -41,6 +44,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public BehaviorSubject<Progress> Progress;
 		public string ErrorMessage;
 		public string SuccessMessage;
+		public List<IResult> Results = new List<IResult>();
 
 		protected RemoteCommand()
 		{
@@ -105,10 +109,13 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (log.IsDebugEnabled) {
 					try {
 						var content = response.Content.ReadAsStringAsync().Result;
-						log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}", response.RequestMessage, response, content);
+						log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}",
+							response.RequestMessage, response, content);
 					}
 					catch(Exception e) {
-						log.Warn(String.Format("Не удалось получить отладочную информацию об ошибке при обработке запроса {0}", response.RequestMessage), e);
+						log.Warn(String.Format("Не удалось получить отладочную" +
+							" информацию об ошибке при обработке запроса {0}",
+							response.RequestMessage), e);
 					}
 				}
 				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}",

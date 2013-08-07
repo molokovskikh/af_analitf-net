@@ -8,11 +8,13 @@ using System.Net.Http.Formatting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Models.Results;
+using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
-using log4net;
 using log4net.Config;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -143,13 +145,49 @@ namespace AnalitF.Net.Client.Models.Commands
 				{ "rejects", settings.MapPath("rejects") }
 			};
 
-			Directory.GetDirectories(extractPath)
+			var files = Directory.GetDirectories(extractPath)
 				.Select(d => Tuple.Create(d, map.GetValueOrDefault(Path.GetFileName(d))))
 				.Where(t => t.Item2 != null)
-				.Each(t => Copy(t.Item1, t.Item2));
+				.ToArray();
+			files.Each(t => Copy(t.Item1, t.Item2));
+
+			OpenResultFiles(settings);
 
 			Directory.Delete(extractPath, true);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private void OpenResultFiles(Settings settings)
+		{
+			var groups = new[] {
+				Tuple.Create("waybills", settings.OpenWaybills),
+				Tuple.Create("rejects", settings.OpenRejects)
+			};
+			var files = groups.ToDictionary(g => g, g => GetFiles(settings, g.Item1));
+
+			var openDir = files.Sum(g => g.Value.Length) > 5;
+
+			foreach (var filesInGroup in files) {
+				if (filesInGroup.Value.Length > 0) {
+					if (!openDir && filesInGroup.Key.Item2) {
+						Results.AddRange(filesInGroup.Value.Select(f => new OpenResult(f)));
+					}
+					else {
+						Results.Add(new OpenResult(settings.MapPath(filesInGroup.Key.Item1)));
+					}
+				}
+			}
+		}
+
+		private string[] GetFiles(Settings settings, string name)
+		{
+			var path = Path.Combine(extractPath, name);
+			if (!Directory.Exists(path))
+				return new string[0];
+
+			return Directory.GetFiles(path)
+				.Select(f => Path.Combine(settings.MapPath(name), Path.GetFileName(f)))
+				.ToArray();
 		}
 
 		private List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)

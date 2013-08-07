@@ -307,7 +307,7 @@ where UserId = :userId")
 				return;
 
 			foreach (var log in logs) {
-				log.WaitConfirm = true;
+				log.WaitConfirm = false;
 				log.Committed = false;
 				log.FileDelivered = false;
 				log.DocumentDelivered = false;
@@ -320,7 +320,9 @@ where UserId = :userId")
 						log.Document.AddressId.ToString(),
 						type);
 					var files = Directory.GetFiles(path, String.Format("{0}_*", log.Document.Id));
-					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) { LocalFileName = f}));
+					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
+						LocalFileName = f
+					}));
 				}
 			}
 			catch(Exception e) {
@@ -392,6 +394,9 @@ group by dh.Id")
 
 			logs.Where(l => documentExported.Contains(l.Document.Id))
 				.Each(l => l.DocumentDelivered = true);
+
+			logs.Where(l => l.DocumentDelivered || l.FileDelivered)
+				.Each(l => l.WaitConfirm = true);
 		}
 
 		public void Export(List<UpdateData> data, string sql, string file, object parameters = null)

@@ -34,11 +34,14 @@
 							Удалить
 						</Button>
 
-						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="Red"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
-						<Label Margin="3" Height="13" Width="30" Background="#808000" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="#808000"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
-						<Label Margin="3" Height="13" Width="30" Background="#800000" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="#800000"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
 					</StackPanel>
 				</Grid>
@@ -76,11 +79,14 @@
 							Удалить
 						</Button>
 
-						<Label Margin="3" Height="13" Width="30" Background="Red" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="Red"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
-						<Label Margin="3" Height="13" Width="30" Background="#808000" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="#808000"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
-						<Label Margin="3" Height="13" Width="30" Background="#800000" HorizontalAlignment="Left"></Label>
+						<Label Margin="3" Height="13" Width="30" Background="#800000"
+							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
 					</StackPanel>
 				</Grid>
@@ -120,7 +126,10 @@
 					<Label>Имя</Label>
 					<TextBox x:Name="Settings_UserName"></TextBox>
 					<Label>Пароль</Label>
-					<PasswordBox x:Name="Settings_Password" Binders:ContentElementBinder.Password="{Binding Path=Settings.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></PasswordBox>
+					<PasswordBox x:Name="Settings_Password"
+						Binders:ContentElementBinder.Password="{Binding Path=Settings.Password,
+							Mode=TwoWay,
+							UpdateSourceTrigger=PropertyChanged}" />
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Дополнительно" Name="AdditionSettingsTab">
@@ -146,6 +155,12 @@
 							</CheckBox>
 						</StackPanel>
 					</GroupBox>
+					<CheckBox x:Name="Settings_OpenWaybills">
+						Открывать накладные с помощью ассоциированного приложения
+					</CheckBox>
+					<CheckBox x:Name="Settings_OpenRejects">
+						Открывать отказы с помощью ассоциированного приложения
+					</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Визуализация" Name="ViewSettingsTab">
@@ -189,18 +204,46 @@
 			</TabItem>
 			<TabItem Header="Настройка печати ценников" Name="PriceTagSettings">
 				<StackPanel>
-					<ComboBox Style="{StaticResource Select}" x:Name="PriceTagTypes" DisplayMemberPath="Name" />
+					<ComboBox Style="{StaticResource Select}" x:Name="PriceTagTypes"
+						DisplayMemberPath="Name" />
 					<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted" IsEnabled="{Binding CanConfigurePriceTag.Value}">Удалять непечатаемые элементы</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Удалять непечатаемые элементы
+					</CheckBox>
 					<Label>Печатаемые элементы ценника</Label>
-					<CheckBox x:Name="Settings_PriceTag_PrintProduct" IsEnabled="{Binding CanConfigurePriceTag.Value}">Наименование</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintCountry" IsEnabled="{Binding CanConfigurePriceTag.Value}">Страна</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintProducer" IsEnabled="{Binding CanConfigurePriceTag.Value}">Производитель</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintPeriod" IsEnabled="{Binding CanConfigurePriceTag.Value}">Срок годности</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId" IsEnabled="{Binding CanConfigurePriceTag.Value}">Номер накладной</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintSupplier" IsEnabled="{Binding CanConfigurePriceTag.Value}">Поставщик</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber" IsEnabled="{Binding CanConfigurePriceTag.Value}">Серия товара</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate" IsEnabled="{Binding CanConfigurePriceTag.Value}">Дата накладной</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Наименование
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintCountry"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Страна
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintProducer"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Производитель
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Срок годности
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Номер накладной
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Поставщик
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Серия товара
+					</CheckBox>
+					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
+						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						Дата накладной
+					</CheckBox>
 				</StackPanel>
 			</TabItem>
 		</TabControl>

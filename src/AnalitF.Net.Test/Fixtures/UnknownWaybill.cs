@@ -8,6 +8,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class UnknownWaybill
 	{
+		public bool Local = true;
+
 		public void Execute(ISession session)
 		{
 			var data = new DataMother(session);

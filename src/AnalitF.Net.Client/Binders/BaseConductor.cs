@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Caliburn.Micro;
 
@@ -14,7 +15,6 @@ namespace AnalitF.Net.Client.Binders
 	public class BaseConductor : Conductor<IScreen>
 	{
 		public bool UnitTesting;
-		public List<string> StartedProcess = new List<string>();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
 
 		public RemoteCommand OnCommandExecuting(RemoteCommand c)
@@ -36,12 +36,7 @@ namespace AnalitF.Net.Client.Binders
 
 		protected void StartProcess(string exe, string args = "")
 		{
-			if (UnitTesting) {
-				StartedProcess.Add(exe + " " + args);
-				return;
-			}
-
-			Process.Start(exe, args);
+			ProcessHelper.Start(new ProcessStartInfo(exe, args));
 		}
 
 		public override void TryClose(bool? dialogResult)

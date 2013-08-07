@@ -164,7 +164,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var import = Arguments.LastOrDefault().Match("import");
 			if (import) {
-				Import();
+				Coroutine.BeginExecute(Import().GetEnumerator());
 			}
 			else {
 				StartCheck();
@@ -468,16 +468,16 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return Settings.Value.LastUpdate != null; }
 		}
 
-		public void MicroUpdate()
+		public IEnumerable<IResult> MicroUpdate()
 		{
-			Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath) {
+			return Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath) {
 				SyncData = new [] {"Waybills"}
 			});
 		}
 
-		public void Update()
+		public IEnumerable<IResult> Update()
 		{
-			Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
+			return Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
 		}
 
 		public bool CanSendOrders
@@ -488,15 +488,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public void SendOrders()
+		public IEnumerable<IResult> SendOrders()
 		{
-			Sync(new SendOrders(CurrentAddress));
+			return Sync(new SendOrders(CurrentAddress));
 		}
 
-		private void Import()
+		private IEnumerable<IResult> Import()
 		{
-			Sync("Обновление завершено успешно.",
+			return Sync("Обновление завершено успешно.",
 				"Не удалось получить обновление. Попробуйте повторить операцию позднее.",
+				null,
 				Tasks.Import);
 		}
 
@@ -546,14 +547,15 @@ namespace AnalitF.Net.Client.ViewModels
 			return result == MessageBoxResult.Yes;
 		}
 
-		public void Sync(RemoteCommand command)
+		public IEnumerable<IResult> Sync(RemoteCommand command)
 		{
 			if(UnitTesting) {
 				command = OnCommandExecuting(command);
 			}
 
-			Sync(command.SuccessMessage,
+			return Sync(command.SuccessMessage,
 				command.ErrorMessage,
+				command,
 				(c, t, p) => {
 					command.BaseUri = Tasks.BaseUri;
 					command.Credentials = c;
@@ -563,12 +565,13 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 		}
 
-		private void Sync(string sucessMessage,
+		private IEnumerable<IResult> Sync(string sucessMessage,
 			string errorMessage,
+			RemoteCommand command,
 			Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
 		{
 			if (!CheckSettings())
-				return;
+				return Enumerable.Empty<IResult>();
 
 			var progress = new BehaviorSubject<Progress>(new Progress());
 			var wait = new SyncViewModel(progress) {
@@ -576,6 +579,7 @@ namespace AnalitF.Net.Client.ViewModels
 			};
 			var credential = new NetworkCredential(Settings.Value.UserName, Settings.Value.Password);
 
+			var results = new IResult[0];
 			RunTask(wait,
 				t => func(credential, t, progress),
 				t => {
@@ -584,9 +588,12 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 					else {
 						windowManager.Notify(sucessMessage);
+						if (command != null)
+							results = command.Results.ToArray();
 					}
 				});
 			Reload();
+			return results;
 		}
 
 		private void RunUpdate()

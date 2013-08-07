@@ -13,6 +13,7 @@ using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
@@ -28,6 +29,7 @@ using Test.Support.Documents;
 using Test.Support.Suppliers;
 using Test.Support.log4net;
 using log4net.Config;
+using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Models
 {
@@ -45,6 +47,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		private bool restoreUser;
 
 		private Config serviceConfig;
+		private UpdateCommand command;
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
@@ -83,7 +86,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			token = cancelletion.Token;
 			progress = new BehaviorSubject<Progress>(new Progress());
 
-			var command = new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath);
+			command = new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath);
 			task = CreateTask(command);
 		}
 
@@ -271,6 +274,26 @@ namespace AnalitF.Net.Test.Integration.Models
 			task.Start();
 			task.Wait();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
+		}
+
+		[Test]
+		public void Open_reject()
+		{
+			var fixture = LoadFixture<Reject>();
+			Update();
+
+			Assert.AreEqual(
+				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_Тестовый поставщик(test).txt",
+					fixture.Document.Id),
+				command.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
+		}
+
+		private T LoadFixture<T>()
+		{
+			var fixture = (dynamic)Activator.CreateInstance<T>();
+			fixture.Config = serviceConfig;
+			fixture.Execute(session);
+			return fixture;
 		}
 
 		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand

@@ -108,6 +108,7 @@
     <Compile Include="Acceptance\SetupFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
+    <Compile Include="Fixtures\Reject.cs" />
     <Compile Include="Fixtures\UnknownWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration;
@@ -37,6 +38,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public void BaseFixtureSetup()
 		{
 			restore = false;
+
+			ProcessHelper.UnitTesting = true;
+			ProcessHelper.ExecutedProcesses.Clear();
 
 			RxApp.MessageBus = new MessageBus();
 			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance);

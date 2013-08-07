@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Results
@@ -16,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Results
 		//TODO: Обработка ошибок?
 		public void Execute(ActionExecutionContext context)
 		{
-			Process.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
+			ProcessHelper.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
 			if (Completed != null)
 				Completed(this, new ResultCompletionEventArgs());
 		}

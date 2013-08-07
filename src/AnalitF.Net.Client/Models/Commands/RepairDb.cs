@@ -72,13 +72,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (!messages.Any())
 				return RepairStatus.Ok;
 
-			var notExist = messages.Where(m => m[2].Match("error")).Any(m => Regex.Match(m[3], "Table .+ doesn't exist").Success);
+			var notExist = messages.Where(m => m[2].Match("error"))
+				.Any(m => Regex.Match(m[3], "Table .+ doesn't exist").Success);
 			if (notExist)
 				return RepairStatus.NotExist;
 
 			var ok = messages.Where(m => m[2].Match("status")).Any(m => m[3].Match("OK"));
 			if (ok) {
-				var rowsChanged = messages.Where(m => m[2].Match("error")).Any(m => m[3].StartsWith("Number of rows changed"));
+				var rowsChanged = messages.Where(m => m[2].Match("error"))
+					.Any(m => m[3].StartsWith("Number of rows changed"));
 				if (rowsChanged)
 					return RepairStatus.NumberOfRowsChanged;
 				return RepairStatus.Ok;

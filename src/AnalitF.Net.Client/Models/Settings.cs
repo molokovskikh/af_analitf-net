@@ -138,6 +138,7 @@ namespace AnalitF.Net.Client.Models
 			DeleteOrdersOlderThan = 35;
 			ConfirmDeleteOldWaybills = true;
 			DeleteWaybillsOlderThan = 150;
+			OpenRejects = true;
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
@@ -182,6 +183,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool ConfirmDeleteOldWaybills { get; set; }
 
 		public virtual int DeleteWaybillsOlderThan { get; set; }
+
+		public virtual bool OpenRejects { get; set; }
+
+		public virtual bool OpenWaybills { get; set; }
 
 		public virtual int MappingToken { get; set; }
 

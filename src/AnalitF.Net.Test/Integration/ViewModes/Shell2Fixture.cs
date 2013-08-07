@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -21,7 +23,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	public class StubRemoteCommand : RemoteCommand
 	{
-		private UpdateResult result;
+		public UpdateResult result;
 
 		public StubRemoteCommand(UpdateResult result)
 		{
@@ -43,15 +45,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class Shell2Fixture : BaseFixture
 	{
 		private RemoteCommand command;
-		private UpdateResult result;
+		private StubRemoteCommand stub;
 
 		[SetUp]
 		public void Setup()
 		{
-			result = UpdateResult.OK;
+			stub = new StubRemoteCommand(UpdateResult.OK);
 			shell.CommandExecuting += remoteCommand => {
 				command = remoteCommand;
-				var stub = new StubRemoteCommand(result);
 				stub.ErrorMessage = remoteCommand.ErrorMessage;
 				stub.SuccessMessage = remoteCommand.SuccessMessage;
 				return stub;
@@ -160,25 +161,25 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void On_pending_update_close_shell_and_execute_updater()
 		{
-			result = UpdateResult.UpdatePending;
+			stub.result = UpdateResult.UpdatePending;
 			shell.Update();
 			var messages = manager.MessageBoxes.Implode();
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
 			Assert.IsFalse(shell.IsActive);
-			Assert.That(shell.StartedProcess[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+			Assert.That(ProcessHelper.ExecutedProcesses[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
 		}
 
 		[Test]
 		public void Do_not_warn_on_mandatory_exit()
 		{
-			result = UpdateResult.UpdatePending;
+			stub.result = UpdateResult.UpdatePending;
 			MakeOrder();
 
 			shell.Update();
 			var messages = manager.MessageBoxes.Implode();
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
 			Assert.IsFalse(shell.IsActive);
-			Assert.That(shell.StartedProcess[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+			Assert.That(ProcessHelper.ExecutedProcesses[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
 		}
 
 		[Test]
@@ -200,6 +201,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNull(reloaded);
 			Assert.AreEqual("В архиве заказов обнаружены заказы, сделанные более 35 дней назад. Удалить их?",
 				manager.MessageBoxes.Implode());
+		}
+
+		[Test]
+		public void Execute_command_results()
+		{
+			stub.Results.Add(new OpenResult("test.txt"));
+			shell.Update().Each(r => r.Execute(null));
+			var process = ProcessHelper.ExecutedProcesses.Implode();
+			Assert.AreEqual("test.txt Open", process);
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)
