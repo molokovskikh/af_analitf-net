@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
 using AnalitF.Net.Test.Integration.Views;
@@ -47,12 +48,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			view.Arrange(new Rect(size));
 		}
 
-		protected UIElement Bind(BaseScreen priceViewModel)
+		protected UserControl Bind(BaseScreen priceViewModel)
 		{
 			var model = Init(priceViewModel);
 			var view = InitView(model);
 			ForceBinding(view);
-			return view;
+			return (UserControl)view;
 		}
 	}
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using Common.Tools.Calendar;
@@ -19,6 +21,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var window = new Window();
 				try {
 					window.Dispatcher.UnhandledException += (sender, args) => {
+						args.Handled = true;
 						exceptions.Add(args.Exception);
 						window.Close();
 					};
@@ -28,8 +31,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					exceptions.Add(e);
 					throw;
 				}
-				window.Closed += (s, e) => window.Dispatcher.InvokeShutdown();
 				window.Show();
+				try {
+					window.Dispatcher.InvokeShutdown();
+				}
+				catch(Exception) {
+				}
 			}) {
 				IsBackground = true
 			};
@@ -37,7 +44,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			t.SetApartmentState(ApartmentState.STA);
 			t.Start();
 			t.Join(20.Second());
-			if (exceptions.Count > 0)
+			if (exceptions.Count > 0 && !(exceptions.FirstOrDefault() is TaskCanceledException))
 				throw new AggregateException(exceptions);
 		}
 

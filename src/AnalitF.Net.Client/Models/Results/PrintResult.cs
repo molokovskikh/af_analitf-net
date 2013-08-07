@@ -8,34 +8,37 @@ using System.Windows.Documents;
 using AnalitF.Net.Client.Models.Print;
 using Caliburn.Micro;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models.Results
 {
 	public class PrintResult : IResult
 	{
 		private string name = "";
-		private IEnumerable<FlowDocument> docs = new FlowDocument[0];
-		private BaseDocument baseDocument = new DefaultDocument();
+		private IEnumerable<Lazy<Tuple<FlowDocument, BaseDocument>>> docs
+			= new Lazy<Tuple<FlowDocument, BaseDocument>>[0];
 
-		public PrintResult(string name, BaseDocument doc)
+		public PrintResult(string name, IEnumerable<BaseDocument> docs)
 		{
-			baseDocument = doc;
-			docs = new [] { doc.Build() };
-			docs.Each(Prepare);
+			this.docs = docs.Select(b => new Lazy<Tuple<FlowDocument, BaseDocument>>(
+				() => Tuple.Create(b.Build(), b)));
 			this.name = name;
 		}
 
-		public PrintResult(string name, params FlowDocument[] docs)
+		public PrintResult(string name, params BaseDocument[] baseDocs)
+			: this(name, (IEnumerable<BaseDocument>)baseDocs)
 		{
-			this.docs = docs;
-			this.docs.Each(Prepare);
-			this.name = name;
+		}
+
+		public PrintResult(string name, params FlowDocument[] docs)
+			: this(name, (IEnumerable<FlowDocument>)docs)
+		{
 		}
 
 		public PrintResult(string name, IEnumerable<FlowDocument> docs)
 		{
-			this.docs = docs.ToArray();
-			this.docs.Each(Prepare);
+			this.docs = docs.Select(d => new Lazy<Tuple<FlowDocument, BaseDocument>>(
+				() => Tuple.Create(d, (BaseDocument)null)));
 			this.name = name;
 		}
 
@@ -58,7 +61,7 @@ namespace AnalitF.Net.Client.Models.Results
 				return;
 
 			foreach (var doc in docs) {
-				var documentPaginator = GetPaginator(doc);
+				var documentPaginator = GetPaginator(doc.Value.Item1, doc.Value.Item2);
 				var orientation = GetPageOrientation(documentPaginator);
 				if (orientation != PageOrientation.Unknown)
 					dialog.PrintTicket.PageOrientation = orientation;
@@ -81,18 +84,19 @@ namespace AnalitF.Net.Client.Models.Results
 			get
 			{
 				var doc = docs.First();
-				return GetPaginator(doc);
+				return GetPaginator(doc.Value.Item1, doc.Value.Item2);
 			}
 		}
 
-		private WrapDocumentPaginator GetPaginator(FlowDocument doc)
+		private WrapDocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
 		{
+			baseDoc = baseDoc ?? new DefaultDocument {
+				Document = doc
+			};
+
+			Prepare(doc);
 			var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			var defaultDocument = baseDocument as DefaultDocument;
-			if (defaultDocument != null) {
-				defaultDocument.Document = doc;
-			}
-			return new WrapDocumentPaginator(documentPaginator, baseDocument);
+			return new WrapDocumentPaginator(documentPaginator, baseDoc);
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;

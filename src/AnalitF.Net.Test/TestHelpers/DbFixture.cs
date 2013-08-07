@@ -9,13 +9,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected ISession session;
 
 		[SetUp]
-		public void Setup()
+		public void DbSetup()
 		{
 			session = SetupFixture.Factory.OpenSession();
 		}
 
 		[TearDown]
-		public void TearDown()
+		public void DbTearDown()
 		{
 			if (session != null)
 				session.Dispose();

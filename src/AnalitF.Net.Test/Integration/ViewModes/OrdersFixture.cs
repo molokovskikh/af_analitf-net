@@ -65,11 +65,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_order_on_open_tab()
 		{
-			var view = Init(new OrdersViewModel());
-			Assert.That(view.SentOrders, Is.Null);
-			view.IsSentSelected = true;
-			view.IsCurrentSelected = false;
-			Assert.That(view.SentOrders, Is.Not.Null);
+			Assert.That(model.SentOrders, Is.Null);
+			model.IsSentSelected = true;
+			model.IsCurrentSelected = false;
+			Assert.That(model.SentOrders, Is.Not.Null);
 		}
 
 		[Test]
@@ -78,6 +77,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder(session.Query<Offer>().First());
 
 			model.CurrentOrder = model.Orders.First();
+			Assert.That(model.CanPrint, Is.True);
+			var doc = model.Print().Paginator;
+			Assert.That(doc, Is.Not.Null);
+		}
+
+		[Test]
+		public void Print_sent_order()
+		{
+			MakeSentOrder();
+			model.IsSentSelected = true;
+			model.IsCurrentSelected = false;
 			Assert.That(model.CanPrint, Is.True);
 			var doc = model.Print().Paginator;
 			Assert.That(doc, Is.Not.Null);

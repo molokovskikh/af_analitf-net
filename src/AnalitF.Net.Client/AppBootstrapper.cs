@@ -31,6 +31,7 @@ namespace AnalitF.Net.Client
 	public class AppBootstrapper : BootstrapperBase, IDisposable
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
+		private bool catchExceptions;
 		private SingleInstance instance;
 		private bool import;
 		private string name;
@@ -56,6 +57,7 @@ namespace AnalitF.Net.Client
 			: base(useApplication)
 		{
 			Start();
+			catchExceptions = useApplication;
 			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
 			instance = new SingleInstance(this.name);
 			SettingsPath = this.name + ".data";
@@ -65,6 +67,8 @@ namespace AnalitF.Net.Client
 
 		private void InitLog()
 		{
+			if (!catchExceptions)
+				return;
 #if DEBUG
 			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
 			PresentationTraceSources.Refresh();
@@ -85,6 +89,8 @@ namespace AnalitF.Net.Client
 
 		protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 		{
+			if (!catchExceptions)
+				return;
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
 			CheckShutdown(e.Exception);

@@ -153,7 +153,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Broadcast()
 		{
-			Bus.SendMessage("UpdateSettings");
+			Bus.SendMessage<Settings>(null);
 		}
 	}
 }

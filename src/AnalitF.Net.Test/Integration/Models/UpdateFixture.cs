@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
@@ -192,13 +193,7 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			var begin = DateTime.Now;
 			Offer offer;
-			using (localSession.BeginTransaction()) {
-				localSession.CreateSQLQuery("delete from orders").ExecuteUpdate();
-				offer = localSession.Query<Offer>().First();
-				var order = new Order(offer.Price, address);
-				order.AddLine(offer, 1);
-				localSession.Save(order);
-			}
+			offer = MakeOrder(address);
 
 			Update();
 
@@ -218,16 +213,28 @@ namespace AnalitF.Net.Test.Integration.Models
 		}
 
 		[Test]
+		public void Print_send_orders()
+		{
+			var address = localSession.Query<Address>().First();
+			var settings = localSession.Query<Settings>().First();
+			settings.PrintOrdersAfterSend = true;
+			localSession.Save(settings);
+			localSession.Flush();
+
+			var command = new SendOrders(address);
+			task = CreateTask(command);
+			MakeOrder(address);
+			Update();
+			var results = command.Results.ToArray();
+			Assert.AreEqual(1, results.Length);
+			Assert.IsNotNull(((PrintResult)results[0]).Paginator);
+		}
+
+		[Test]
 		public void Import_waybill()
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-			var waybill = DataMother.CreateWaybill(session, user);
-			var log = waybill.Log;
-			session.Save(waybill);
-			var sendLog = new TestDocumentSendLog(user, log);
-			session.Save(sendLog);
-			var file = waybill.Log.CreateFile(serviceConfig.DocsPath, "waybill content");
-
+			var fixture = LoadFixture<LoadWaybill>();
+			var sendLog = fixture.SendLog;
 			Update();
 
 			var waybills = localSession.Query<Waybill>().ToList();
@@ -238,7 +245,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			var settings = localSession.Query<Settings>().First();
 			var path = settings.MapPath("Waybills");
 			var files = Directory.GetFiles(path).Select(Path.GetFileName);
-			Assert.That(files, Contains.Item(Path.GetFileName(file)));
+			Assert.That(files, Contains.Item(Path.GetFileName(fixture.Filename)));
 			session.Refresh(sendLog);
 			Assert.IsTrue(sendLog.Committed);
 			Assert.IsTrue(sendLog.FileDelivered);
@@ -294,6 +301,19 @@ namespace AnalitF.Net.Test.Integration.Models
 			fixture.Config = serviceConfig;
 			fixture.Execute(session);
 			return fixture;
+		}
+
+		private Offer MakeOrder(Address address)
+		{
+			Offer offer;
+			using (localSession.BeginTransaction()) {
+				localSession.CreateSQLQuery("delete from orders").ExecuteUpdate();
+				offer = localSession.Query<Offer>().First();
+				var order = new Order(offer.Price, address);
+				order.AddLine(offer, 1);
+				localSession.Save(order);
+			}
+			return offer;
 		}
 
 		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand

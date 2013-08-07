@@ -8,6 +8,7 @@ using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
+using NHibernate.Loader.Entity;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -81,10 +82,7 @@ namespace AnalitF.Net.Client.Binders
 
 		private static void AttachToCurrentCell(DataGrid grid, CompositeDisposable disposible, TextBox text)
 		{
-			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item);
-			if (container == null)
-				return;
-			var cell = DataGridHelper.GetCell(container, grid.CurrentCell.Column);
+			var cell = DataGridHelper.GetCell(grid, grid.CurrentCell);
 			if (cell == null)
 				return;
 

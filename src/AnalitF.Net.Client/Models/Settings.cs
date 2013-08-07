@@ -190,6 +190,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int MappingToken { get; set; }
 
+		public virtual bool ConfirmSendOrders { get; set; }
+
+		public virtual bool PrintOrdersAfterSend { get; set; }
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }

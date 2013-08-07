@@ -60,6 +60,15 @@ namespace AnalitF.Net.Client.Helpers
 			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
 		}
 
+		public static DataGridCell GetCell(DataGrid grid, DataGridCellInfo info)
+		{
+			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(info.Item);
+			if (container == null)
+				return null;
+			var cell = GetCell(container, info.Column);
+			return cell;
+		}
+
 		public static void CalculateColumnWidth(Controls.DataGrid dataGrid, string template, string header)
 		{
 			var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(header));

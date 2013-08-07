@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.MySql;
 using Common.Tools;
@@ -210,6 +211,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.Update().Each(r => r.Execute(null));
 			var process = ProcessHelper.ExecutedProcesses.Implode();
 			Assert.AreEqual("test.txt Open", process);
+		}
+
+		[Test]
+		public void Reload_settings()
+		{
+			restore = true;
+			var settingsModel = Init<SettingsViewModel>();
+			settingsModel.Settings.OpenRejects = !settingsModel.Settings.OpenRejects;
+			settingsModel.Save();
+			Close(settingsModel);
+
+			testScheduler.AdvanceByMs(1000);
+			Assert.AreEqual(settingsModel.Settings.OpenRejects,
+				shell.Settings.Value.OpenRejects);
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)

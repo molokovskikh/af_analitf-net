@@ -18,8 +18,10 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using log4net;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -460,9 +462,21 @@ namespace AnalitF.Net.Client.ViewModels
 				docs = Orders.Select(o => new OrderDocument(o).Build());
 			}
 			else {
-				docs = SentOrders.Select(o => new OrderDocument(o).Build());
+				docs = SentOrders.Select(BuildPrintOrderDocument);
 			}
 			return new PrintResult(DisplayName, docs);
+		}
+
+		private FlowDocument BuildPrintOrderDocument(SentOrder order)
+		{
+			var id = order.Id;
+			var result = StatelessSession.Query<SentOrder>()
+				.Where(o => o.Id == id)
+				.Fetch(o => o.Price)
+				.Fetch(o => o.Address)
+				.Fetch(o => o.Lines)
+				.First();
+			return new OrderDocument(result).Build();
 		}
 
 		public IResult Run(DbCommand command)

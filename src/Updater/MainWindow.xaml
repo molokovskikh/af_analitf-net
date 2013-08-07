@@ -7,7 +7,7 @@
 			<TextBlock>Внимание! Происходит обновление программы.</TextBlock>
 		</Label>
 		<Label>
-			<TextBlock>Пожалйста, подождите...</TextBlock>
+			<TextBlock>Пожалуйста, подождите...</TextBlock>
 		</Label>
 	</StackPanel>
 </Window>

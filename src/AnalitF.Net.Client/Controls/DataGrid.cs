@@ -60,8 +60,15 @@ namespace AnalitF.Net.Client.Controls
 
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
-			if (e.Key == Key.Enter && IsReadOnly)
-				return;
+			if (e.Key == Key.Enter) {
+				if (IsReadOnly)
+					return;
+				var cell = Helpers.DataGridHelper.GetCell(this, CurrentCell);
+				if (cell == null)
+					return;
+				if (!cell.IsEditing)
+					return;
+			}
 
 			base.OnKeyDown(e);
 		}
@@ -86,7 +93,6 @@ namespace AnalitF.Net.Client.Controls
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
 			base.OnItemsSourceChanged(oldValue, newValue);
-
 
 			if (SelectedItem != null) {
 				ScrollIntoView(SelectedItem);

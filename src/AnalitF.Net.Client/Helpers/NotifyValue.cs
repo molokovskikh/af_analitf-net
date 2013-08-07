@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using NHibernate;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Helpers
@@ -104,6 +106,22 @@ namespace AnalitF.Net.Client.Helpers
 		public void Refresh()
 		{
 			OnPropertyChanged("Value");
+		}
+	}
+
+	public class NotifyValueHelper
+	{
+		public static IDisposable LiveValue<T>(NotifyValue<T> value,
+			IMessageBus bus,
+			IScheduler scheduler,
+			ISession session)
+		{
+			return bus.Listen<T>()
+				.ObserveOn(scheduler)
+				.Subscribe(_ => {
+					session.Refresh(value.Value);
+					value.Refresh();
+				});
 		}
 	}
 }

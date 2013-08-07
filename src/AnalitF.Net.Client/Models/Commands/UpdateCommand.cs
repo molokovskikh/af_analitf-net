@@ -122,19 +122,17 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Import()
 		{
+			var settings = Session.Query<Settings>().First();
+
 			Reporter.Stage("Импорт данных");
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(archiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
 			Reporter.Weight(data.Count);
 
-			using (var session = AppBootstrapper.NHibernate.Factory.OpenSession()) {
-				var importer = new Importer(session);
-				importer.Import(data, Reporter);
-				session.Flush();
-			}
+			var importer = new Importer(Session);
+			importer.Import(data, Reporter);
 
-			var settings = new Settings();
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
 

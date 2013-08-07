@@ -114,6 +114,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Bus.Listen<Stat>()
 				.Subscribe(e => Stat.Value = new Stat(e, Stat.Value));
+			NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session);
 		}
 
 		public string[] Arguments;
@@ -490,6 +491,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> SendOrders()
 		{
+			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
+				return Enumerable.Empty<IResult>();
 			return Sync(new SendOrders(CurrentAddress));
 		}
 

@@ -141,7 +141,7 @@ namespace Updater
 			try {
 				return Process.GetProcessById(pid);
 			}
-			//если процесс уже завершилса
+			//если процесс уже завершился
 			catch (ArgumentException) {}
 			return null;
 		}

@@ -161,6 +161,12 @@
 					<CheckBox x:Name="Settings_OpenRejects">
 						Открывать отказы с помощью ассоциированного приложения
 					</CheckBox>
+					<CheckBox x:Name="Settings_PrintOrdersAfterSend">
+						Распечатать заказы при отправке
+					</CheckBox>
+					<CheckBox x:Name="Settings_ConfirmSendOrders">
+						Подтверждать отправку заказов
+					</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Визуализация" Name="ViewSettingsTab">

@@ -71,13 +71,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			excelExporter = new ExcelExporter(this);
-			OnCloseDisposable.Add(Bus.Listen<string>()
-				.Where(m => m == "UpdateSettings")
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => {
-					Session.Refresh(Settings.Value);
-					Settings.Refresh();
-				}));
+			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
 
 			//для сообщений типа string используется ImmediateScheduler
 			//те вызов произойдет в той же нитке что и SendMessage

@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Models
 	public class Importer
 	{
 		private ISession session;
-		private string[] notTruncable = new[] {
+		private string[] notTruncable = {
 			"Waybills",
 			"WaybillLines"
 		};
@@ -49,18 +49,13 @@ namespace AnalitF.Net.Client.Models
 
 			new SanityCheck(AppBootstrapper.DataPath).Check();
 
-			using (var transaction = session.BeginTransaction()) {
-				var settings = session.Query<Settings>().First();
+			var settings = session.Query<Settings>().First();
+			var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
+			foreach (var waybill in newWaybills)
+				waybill.Calculate(settings);
 
-				var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
-				foreach (var waybill in newWaybills) {
-					waybill.Calculate(settings);
-				}
-
-				settings.LastUpdate = DateTime.Now;
-				settings.ApplyChanges(session);
-				transaction.Commit();
-			}
+			settings.LastUpdate = DateTime.Now;
+			settings.ApplyChanges(session);
 		}
 	}
 }
