@@ -14,17 +14,18 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public Service.Config.Config Config;
 		public TestDocumentLog Document;
 		public TestDocumentSendLog SendLog;
+		public TestWaybill Waybill;
 		public string Filename;
 
 		public void Execute(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-			var waybill = DataMother.CreateWaybill(session, user);
-			var log = waybill.Log;
-			session.Save(waybill);
+			Waybill = DataMother.CreateWaybill(session, user);
+			var log = Waybill.Log;
+			session.Save(Waybill);
 			SendLog = new TestDocumentSendLog(user, log);
 			session.Save(SendLog);
-			Filename = waybill.Log.CreateFile(Config.DocsPath, "waybill content");
+			Filename = Waybill.Log.CreateFile(Config.DocsPath, "waybill content");
 		}
 	}
 }

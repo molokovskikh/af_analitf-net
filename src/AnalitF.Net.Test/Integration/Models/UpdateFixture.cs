@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reactive.Subjects;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
-using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config;
 using Common.Tools;
@@ -24,12 +18,7 @@ using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Newtonsoft.Json;
 using Test.Support;
-using Test.Support.Documents;
-using Test.Support.Suppliers;
-using Test.Support.log4net;
-using log4net.Config;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Models
@@ -49,6 +38,8 @@ namespace AnalitF.Net.Test.Integration.Models
 
 		private Config serviceConfig;
 		private UpdateCommand command;
+		private Settings settings;
+		private DateTime begin;
 
 		[TestFixtureSetUp]
 		public void FixtureSetup()
@@ -68,6 +59,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[SetUp]
 		public void Setup()
 		{
+			begin = DateTime.Now;
 			restoreUser = false;
 
 			Tasks.BaseUri = uri;
@@ -89,6 +81,8 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			command = new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath);
 			task = CreateTask(command);
+
+			settings = localSession.Query<Settings>().First();
 		}
 
 		[TearDown]
@@ -118,9 +112,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
-			task.Start();
-			task.Wait();
-			Assert.That(task.Exception, Is.Null);
+			Update();
 			var offers = localSession.CreateSQLQuery("select * from offers").List();
 			Assert.That(offers.Count, Is.GreaterThan(0));
 		}
@@ -131,8 +123,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
-			task.Start();
-			task.Wait();
+			Update();
+
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
 		}
 
@@ -147,10 +139,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
-			localSession.Flush();
 
-			task.Start();
-			task.Wait();
+			Update();
 
 			localSession.Refresh(price);
 			Assert.That(price.Active, Is.False, price.Id.ToString());
@@ -160,7 +150,8 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			var priceSettings = session
-				.CreateSQLQuery("select * from Customers.UserPrices where UserId = :userId and PriceId = :priceId and RegionId = :regionId")
+				.CreateSQLQuery("select * from Customers.UserPrices" +
+					" where UserId = :userId and PriceId = :priceId and RegionId = :regionId")
 				.SetParameter("userId", user.Id)
 				.SetParameter("priceId", price.Id.PriceId)
 				.SetParameter("regionId", price.Id.RegionId)
@@ -171,13 +162,13 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Send_logs()
 		{
-			var begin = DateTime.Now;
 			File.WriteAllText(@"app\AnalitF.Net.Client.log", "123");
-			task.Start();
-			task.Wait();
+
+			Update();
 
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-			var text = session.CreateSQLQuery("select Text from Logs.ClientAppLogs where UserId = :userId and CreatedOn >= :date")
+			var text = session.CreateSQLQuery("select Text from Logs.ClientAppLogs" +
+				" where UserId = :userId and CreatedOn >= :date")
 				.SetParameter("userId", user.Id)
 				.SetParameter("date", begin)
 				.UniqueResult<string>();
@@ -188,13 +179,9 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Send_orders()
 		{
 			var address = localSession.Query<Address>().First();
+			var offer = MakeOrder(address);
 
 			task = CreateTask(new SendOrders(address));
-
-			var begin = DateTime.Now;
-			Offer offer;
-			offer = MakeOrder(address);
-
 			Update();
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
@@ -216,10 +203,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Print_send_orders()
 		{
 			var address = localSession.Query<Address>().First();
-			var settings = localSession.Query<Settings>().First();
 			settings.PrintOrdersAfterSend = true;
-			localSession.Save(settings);
-			localSession.Flush();
 
 			var command = new SendOrders(address);
 			task = CreateTask(command);
@@ -242,7 +226,6 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
 			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
 
-			var settings = localSession.Query<Settings>().First();
 			var path = settings.MapPath("Waybills");
 			var files = Directory.GetFiles(path).Select(Path.GetFileName);
 			Assert.That(files, Contains.Item(Path.GetFileName(fixture.Filename)));
@@ -250,6 +233,22 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.IsTrue(sendLog.Committed);
 			Assert.IsTrue(sendLog.FileDelivered);
 			Assert.IsTrue(sendLog.DocumentDelivered);
+		}
+
+		[Test]
+		public void Group_waybill()
+		{
+			settings.GroupWaybillsBySupplier = true;
+			settings.OpenWaybills = true;
+
+			var fixture = LoadFixture<LoadWaybill>();
+			Update();
+
+			var path = Path.Combine(settings.MapPath("Waybills"), fixture.Waybill.Supplier.Name);
+			var files = Directory.GetFiles(path).Select(Path.GetFileName);
+			Assert.That(files, Contains.Item("test.txt"));
+			var results = command.Results.OfType<OpenResult>().Implode(r => r.Filename);
+			Assert.AreEqual(Path.Combine(path, "test.txt"), results);
 		}
 
 		[Test]
@@ -270,16 +269,14 @@ namespace AnalitF.Net.Test.Integration.Models
 			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
-			task.Start();
-			task.Wait();
+			Update();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
 
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
 
 			task = CreateTask(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
-			task.Start();
-			task.Wait();
+			Update();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
 		}
 
@@ -326,8 +323,10 @@ namespace AnalitF.Net.Test.Integration.Models
 
 		private void Update()
 		{
+			localSession.Flush();
 			session.Flush();
-			session.Transaction.Commit();
+			if (session.Transaction.IsActive)
+				session.Transaction.Commit();
 
 			task.Start();
 			task.Wait();

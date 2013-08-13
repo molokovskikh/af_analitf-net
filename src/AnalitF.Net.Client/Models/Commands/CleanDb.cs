@@ -9,9 +9,9 @@ namespace AnalitF.Net.Client.Models.Commands
 		public override void Execute()
 		{
 			var ignored = new [] { "SentOrders", "SentOrderLines", "Settings", "WaybillSettings", "MarkupConfigs"};
-			var tables = Tables(configuration).Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
+			var tables = Tables(Configuration).Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
-			using(var sesssion = factory.OpenSession()) {
+			using(var sesssion = Factory.OpenSession()) {
 				var settings = sesssion.Query<Settings>().FirstOrDefault();
 				if (settings != null)
 					settings.LastUpdate = null;

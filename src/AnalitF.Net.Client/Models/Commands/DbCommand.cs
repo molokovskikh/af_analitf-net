@@ -7,24 +7,29 @@ using log4net;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	public abstract class DbCommand<T>
+	public class BaseCommand
 	{
 		protected ILog log;
-		protected Configuration configuration;
-		protected ISessionFactory factory;
-		protected string dataPath;
+		protected Configuration Configuration;
+		protected ISessionFactory Factory;
+		protected string DataPath;
 
 		public CancellationToken Token;
 		public ISession Session;
-		public T Result;
+		public IStatelessSession StatelessSession;
 
-		protected DbCommand()
+		protected BaseCommand()
 		{
 			log = LogManager.GetLogger(GetType());
-			configuration = AppBootstrapper.NHibernate.Configuration;
-			factory = AppBootstrapper.NHibernate.Factory;
-			dataPath = AppBootstrapper.DataPath;
+			Configuration = AppBootstrapper.NHibernate.Configuration;
+			Factory = AppBootstrapper.NHibernate.Factory;
+			DataPath = AppBootstrapper.DataPath;
 		}
+	}
+
+	public abstract class DbCommand<T> : BaseCommand
+	{
+		public T Result;
 
 		public abstract void Execute();
 

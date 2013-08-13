@@ -194,6 +194,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool PrintOrdersAfterSend { get; set; }
 
+		public virtual bool GroupWaybillsBySupplier { get; set; }
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }

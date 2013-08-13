@@ -1,4 +1,6 @@
-﻿namespace AnalitF.Net.Service.Models
+﻿using Common.Models;
+
+namespace AnalitF.Net.Service.Models
 {
 	public enum DocType
 	{
@@ -12,6 +14,8 @@
 		public virtual uint Id { get; set; }
 		public virtual uint? AddressId { get; set; }
 		public virtual DocType DocumentType { get; set; }
+		public virtual Supplier Supplier { get; set; }
+		public virtual string Filename { get; set; }
 	}
 
 	public class DocumentSendLog

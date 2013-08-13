@@ -4,12 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
-using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
@@ -18,6 +17,30 @@ using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
+	public class ResultDir
+	{
+		public ResultDir(string name, Settings settings, string dstRoot, string srcRoot)
+		{
+			Name = name;
+			Src = Path.Combine(srcRoot, Name);
+			Dst = settings.MapPath(name) ?? Path.Combine(dstRoot, name);
+			if (name.Match("waybills")) {
+				Open = settings.OpenWaybills;
+				GroupBySupplier = settings.GroupWaybillsBySupplier;
+			}
+			if (name.Match("rejects")) {
+				Open = settings.OpenRejects;
+			}
+		}
+
+		public string Name { get; set; }
+		public string Src { get; set; }
+		public string Dst { get; set; }
+		public bool Open { get; set; }
+		public bool GroupBySupplier;
+		public IList<string> ResultFiles = new List<string>();
+	}
+
 	public class UpdateCommand : RemoteCommand
 	{
 		private string archiveFile;
@@ -136,56 +159,102 @@ namespace AnalitF.Net.Client.Models.Commands
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
 
-			var map = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {
-				{ "ads", Path.Combine(rootPath, "ads") },
-				{ "waybills", settings.MapPath("waybills") },
-				{ "docs", settings.MapPath("docs") },
-				{ "rejects", settings.MapPath("rejects") }
+			var dirs = new List<ResultDir> {
+				new ResultDir("ads", settings, rootPath, extractPath),
+				new ResultDir("waybills", settings, rootPath, extractPath),
+				new ResultDir("docs", settings, rootPath, extractPath),
+				new ResultDir("rejects", settings, rootPath, extractPath),
 			};
 
-			var files = Directory.GetDirectories(extractPath)
-				.Select(d => Tuple.Create(d, map.GetValueOrDefault(Path.GetFileName(d))))
-				.Where(t => t.Item2 != null)
+			var resultDirs = Directory.GetDirectories(extractPath)
+				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
+				.Where(d => d != null)
 				.ToArray();
-			files.Each(t => Copy(t.Item1, t.Item2));
 
-			OpenResultFiles(settings);
+			resultDirs.Each(Move);
+			OpenResultFiles(resultDirs);
 
 			Directory.Delete(extractPath, true);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
 		}
 
-		private void OpenResultFiles(Settings settings)
+		private void Move(ResultDir source)
 		{
-			var groups = new[] {
-				Tuple.Create("waybills", settings.OpenWaybills),
-				Tuple.Create("rejects", settings.OpenRejects)
-			};
-			var files = groups.ToDictionary(g => g, g => GetFiles(settings, g.Item1));
-
-			var openDir = files.Sum(g => g.Value.Length) > 5;
-
-			foreach (var filesInGroup in files) {
-				if (filesInGroup.Value.Length > 0) {
-					if (!openDir && filesInGroup.Key.Item2) {
-						Results.AddRange(filesInGroup.Value.Select(f => new OpenResult(f)));
-					}
-					else {
-						Results.Add(new OpenResult(settings.MapPath(filesInGroup.Key.Item1)));
-					}
-				}
+			if (source.GroupBySupplier) {
+				source.ResultFiles = MoveToPerSupplierDir(source.Src, DocumentType.Waybills);
+			}
+			else {
+				source.ResultFiles = Move(source.Src, source.Dst);
 			}
 		}
 
-		private string[] GetFiles(Settings settings, string name)
+		private static List<string> Move(string source, string destination)
 		{
-			var path = Path.Combine(extractPath, name);
-			if (!Directory.Exists(path))
-				return new string[0];
+			var files = new List<string>();
+			if (Directory.Exists(source)) {
+				if (!Directory.Exists(destination)) {
+					Directory.CreateDirectory(destination);
+				}
 
-			return Directory.GetFiles(path)
-				.Select(f => Path.Combine(settings.MapPath(name), Path.GetFileName(f)))
-				.ToArray();
+				foreach (var file in Directory.GetFiles(source)) {
+					var dst = Path.Combine(destination, Path.GetFileName(file));
+					File.Move(file, dst);
+					files.Add(dst);
+				}
+			}
+			return files;
+		}
+
+		private List<string> MoveToPerSupplierDir(string srcDir, DocumentType type)
+		{
+			var result = new List<string>();
+			if (!Directory.Exists(srcDir))
+				return result;
+
+			var waybills = StatelessSession.Query<LoadedDocument>()
+				.Fetch(d => d.Supplier)
+				.Where(d => d.Type == type && d.Supplier != null);
+			//todo review query
+			var maps = StatelessSession.Query<DirMap>()
+				.Fetch(m => m.Supplier)
+				.Where(m => m.Supplier != null)
+				.ToList();
+			foreach (var doc in waybills) {
+				try {
+					var map = maps.First(m => m.Supplier.Id == doc.Supplier.Id);
+					var dst = map.Dir;
+					if (!Directory.Exists(dst))
+						FileHelper.CreateDirectoryRecursive(dst);
+
+					var files = Directory.GetFiles(srcDir, String.Format("{0}_*", doc.Id));
+					foreach (var src in files) {
+						dst = FileHelper2.Uniq(Path.Combine(dst, doc.OriginFilename));
+						File.Move(src, dst);
+						result.Add(dst);
+					}
+				}
+				catch(Exception e) {
+					log.Error("Ошибка перемещения файла", e);
+				}
+			}
+			return result;
+		}
+
+		private void OpenResultFiles(IEnumerable<ResultDir> groups)
+		{
+			var toOpen = groups.Where(g => g.Open);
+			var openDir = toOpen.Sum(g => g.ResultFiles.Count) > 5;
+
+			foreach (var dir in toOpen) {
+				if (dir.ResultFiles.Count > 0) {
+					if (openDir) {
+						Results.Add(new OpenResult(dir.Dst));
+					}
+					else {
+						Results.AddRange(dir.ResultFiles.Select(f => new OpenResult(f)));
+					}
+				}
+			}
 		}
 
 		private List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
@@ -241,19 +310,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			catch(AggregateException e) {
 				log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
-			}
-		}
-
-		private static void Copy(string source, string destination)
-		{
-			if (Directory.Exists(source)) {
-				if (!Directory.Exists(destination)) {
-					Directory.CreateDirectory(destination);
-				}
-
-				foreach (var file in Directory.GetFiles(source)) {
-					File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
-				}
 			}
 		}
 

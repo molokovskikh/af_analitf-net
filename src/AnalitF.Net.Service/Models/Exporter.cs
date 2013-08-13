@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Common.Models;
 using Common.Models.Repositories;
 using Common.Tools;
@@ -383,6 +385,16 @@ where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
 			Export(result, sql, "WaybillLines", new { userId });
 
+			Export(result,
+				"LoadedDocuments",
+				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
+				logs.Where(l => l.FileDelivered).Select(l => new object[] {
+					l.Document.Id,
+					(int)l.Document.DocumentType,
+					l.Document.Supplier.Id,
+					l.Document.Filename,
+				}));
+
 			var documentExported = session.CreateSQLQuery(@"
 select d.RowId
 from Logs.Document_logs d
@@ -397,6 +409,30 @@ group by dh.Id")
 
 			logs.Where(l => l.DocumentDelivered || l.FileDelivered)
 				.Each(l => l.WaitConfirm = true);
+		}
+
+		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData)
+		{
+			var filename = Path.GetFullPath(Path.Combine(ExportPath, Prefix + name + ".txt"));
+			data.Add(new UpdateData(name + ".meta.txt") { Content = meta.Implode("\r\n") });
+			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
+			try {
+				using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
+					foreach (var item in exportData) {
+						for(var i = 0; i < item.Length; i++) {
+							if (item[i] == null)
+								file.Write(@"\N");
+							else
+								file.Write(item[i]);
+							file.Write("\t");
+						}
+					}
+					file.WriteLine();
+				}
+			}
+			finally {
+				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+			}
 		}
 
 		public void Export(List<UpdateData> data, string sql, string file, object parameters = null)

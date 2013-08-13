@@ -5,6 +5,8 @@ using System.Runtime.Serialization;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
+using Caliburn.Micro;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
@@ -21,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			SelectedTab = new NotifyValue<string>(lastTab ?? "OverMarkupsTab");
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
+			CurrentDirMap = new NotifyValue<DirMap>();
 
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
@@ -29,6 +32,8 @@ namespace AnalitF.Net.Client.ViewModels
 			waybillConfig = Settings.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
+			DirMaps = Session.Query<DirMap>().OrderBy(d => d.Supplier.FullName).ToList();
+			CurrentDirMap.Value = DirMaps.FirstOrDefault();
 
 			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
@@ -53,6 +58,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			SelectedTab.Changed().Subscribe(_ => lastTab = SelectedTab.Value);
 		}
+
+		public List<DirMap> DirMaps { get; set; }
+		public NotifyValue<DirMap> CurrentDirMap { get; set; }
 
 		public NotifyValue<string> SelectedTab { get; set; }
 
@@ -130,6 +138,16 @@ namespace AnalitF.Net.Client.ViewModels
 					return;
 				CurrentWaybillSettings.Value.Taxation = value.Value;
 			}
+		}
+
+		public IEnumerable<IResult> SelectDir()
+		{
+			if (CurrentDirMap.Value == null)
+				yield break;
+
+			var dialog = new SelectDirResult(CurrentDirMap.Value.Dir);
+			yield return dialog;
+			CurrentDirMap.Value.Dir = dialog.Result;
 		}
 
 		public void Save()

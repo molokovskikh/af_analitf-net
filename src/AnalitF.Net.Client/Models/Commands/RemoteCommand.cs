@@ -30,16 +30,13 @@ namespace AnalitF.Net.Client.Models.Commands
 		UpdatePending,
 	}
 
-	public abstract class RemoteCommand
+	public abstract class RemoteCommand : BaseCommand
 	{
-		protected ILog log;
-		protected ISession Session;
 		protected HttpClient Client;
 		protected JsonMediaTypeFormatter Formatter;
 
 		public Uri BaseUri;
 		public ICredentials Credentials;
-		public CancellationToken Token;
 
 		public BehaviorSubject<Progress> Progress;
 		public string ErrorMessage;
@@ -67,7 +64,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			try {
 				return RemoteTask(Credentials, Token, Progress, c => {
 					Client = c;
-					using (Session = AppBootstrapper.NHibernate.Factory.OpenSession())
+					var factory = Factory;
+					using (Session = factory.OpenSession())
+					using (StatelessSession = factory.OpenStatelessSession())
 					using (var transaction = Session.BeginTransaction()) {
 						var result = method();
 						transaction.Commit();

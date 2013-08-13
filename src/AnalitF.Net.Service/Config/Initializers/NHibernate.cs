@@ -33,6 +33,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 			Mapper.Class<DocumentLog>(m => {
 				m.Table("Document_Logs");
 				m.Id(l => l.Id, i => i.Column("RowId"));
+				m.ManyToOne(l => l.Supplier, i => i.Column("FirmCode"));
 			});
 
 			Mapper.AfterMapClass += (i, t, c) => {

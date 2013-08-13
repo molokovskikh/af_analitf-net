@@ -104,6 +104,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -155,10 +156,12 @@
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
+    <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\DelegateTraceListner.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />
+    <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
@@ -188,8 +191,10 @@
     <Compile Include="Models\Commands\UnfreezeCommand.cs" />
     <Compile Include="Models\Commands\UpdateCommand.cs" />
     <Compile Include="Models\DebugPipe.cs" />
+    <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\Importer.cs" />
+    <Compile Include="Models\LoadedDocument.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\MaxProducerCost.cs" />
     <Compile Include="Models\MinOrderSumRule.cs" />
@@ -220,6 +225,7 @@
     <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
     <Compile Include="Models\Results\SaveFileResult.cs" />
+    <Compile Include="Models\Results\SelectDirResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />
     <Compile Include="Models\SentOrder.cs" />

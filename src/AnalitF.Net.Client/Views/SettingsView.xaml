@@ -2,7 +2,8 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
-	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700">
+	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
 	<StackPanel>
 		<TabControl SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
 			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab">
@@ -120,6 +121,21 @@
 					</CheckBox>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Настройки поставщиков" Name="DirMapTab">
+				<StackPanel>
+					<Label>Поставщик</Label>
+					<ComboBox Style="{StaticResource Select}" x:Name="DirMaps" DisplayMemberPath="Supplier.FullName" />
+					<Label>Папка для оигинальных накладных</Label>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition></ColumnDefinition>
+							<ColumnDefinition Width="Auto"></ColumnDefinition>
+						</Grid.ColumnDefinitions>
+						<TextBox Grid.Column="0" Name="CurrentDirMap_Value_Dir"></TextBox>
+						<Button Grid.Column="1" Name="SelectDir">...</Button>
+					</Grid>
+				</StackPanel>
+			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">
 				<StackPanel>
 					<Label>Учетные данные</Label>
@@ -167,6 +183,14 @@
 					<CheckBox x:Name="Settings_ConfirmSendOrders">
 						Подтверждать отправку заказов
 					</CheckBox>
+					<CheckBox x:Name="Settings_GroupWaybillsBySupplier">
+						Группировать файлы накладных по поставщику
+					</CheckBox>
+					<TextBlock>
+						<Hyperlink Command="binders:Commands.NavigateUri" NavigateUri="http://stat.analit.net/ci/">
+							Сервер управления
+						</Hyperlink>
+					</TextBlock>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Визуализация" Name="ViewSettingsTab">

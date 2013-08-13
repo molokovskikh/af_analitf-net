@@ -20,10 +20,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public override void Execute()
 		{
-			var tables = Tables(configuration);
+			var tables = Tables(Configuration);
 			var results = new List<RepairStatus>();
 
-			using(var session = factory.OpenSession()) {
+			using(var session = Factory.OpenSession()) {
 				foreach (var table in tables) {
 					Token.ThrowIfCancellationRequested();
 
@@ -44,12 +44,12 @@ namespace AnalitF.Net.Client.Models.Commands
 						//если заголовок таблицы поврежден то drop table не даст результатов
 						//файлы останутся а при попытке создать таблицу будет ошибка
 						//нужно удалить файлы
-						Directory.GetFiles(dataPath, table + ".*").Each(File.Delete);
+						Directory.GetFiles(DataPath, table + ".*").Each(File.Delete);
 					}
 				}
 			}
 
-			new SanityCheck(dataPath).Check(true);
+			new SanityCheck(DataPath).Check(true);
 
 			Result = results.All(r => r == RepairStatus.Ok);
 		}

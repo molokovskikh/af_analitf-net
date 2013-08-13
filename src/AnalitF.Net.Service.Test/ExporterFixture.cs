@@ -139,7 +139,7 @@ namespace AnalitF.Net.Service.Test
 			ExportCompressed();
 			var files = lsZip().Implode();
 			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
-				+ " WaybillLines.meta.txt, WaybillLines.txt",
+				+ " WaybillLines.meta.txt, WaybillLines.txt, LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				Path.GetFileName(waybillFile)));
 		}
 

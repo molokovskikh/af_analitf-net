@@ -4,6 +4,7 @@ using System.Linq;
 using AnalitF.Net.Client;
 using Common.Models;
 using Common.Tools;
+using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
@@ -30,6 +31,7 @@ namespace AnalitF.Net.Test.Integration
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 
 			if (IsStale()) {
+				MySqlConnection.ClearAllPools(true);
 				FileHelper.InitDir("data");
 				ImportData();
 				BackupData();
@@ -43,6 +45,16 @@ namespace AnalitF.Net.Test.Integration
 
 		private static bool IsDbStale()
 		{
+			using(var localSession = Factory.OpenSession()) {
+				try {
+					var settings = localSession.Query<Client.Models.Settings>().First();
+					if (settings.MappingToken != AppBootstrapper.NHibernate.MappingHash)
+						return true;
+				}
+				catch(Exception e) {
+					return true;
+				}
+			}
 			//если пользователя нет, значит база была перезалита и локальная база не актуальна
 			using(var session = IntegrationFixture.Factory.OpenSession()) {
 				return !session.Query<TestUser>().Any(u => u.Login == System.Environment.UserName);

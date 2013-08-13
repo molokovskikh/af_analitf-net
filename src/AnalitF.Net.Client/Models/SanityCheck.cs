@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Devart.Data.MySql;
 using Iesi.Collections;
@@ -95,18 +96,29 @@ namespace AnalitF.Net.Client.Models
 						MarkupConfig.Defaults().Each(settings.Markups.Add);
 				}
 
+				//если есть адреса то должен быть и пользователь
+				//если только база не была поломана
+				var user = session.Query<User>().FirstOrDefault()
+					?? new User();
+
 				var addresses = session.Query<Address>().ToList();
-				if (addresses.Count > 0) {
-					var user = session.Query<User>().First();
-					var waybillSettings = settings.Waybills;
-					foreach (var address in addresses) {
-						var waybillSetting = waybillSettings.FirstOrDefault(s => s.BelongsToAddress == address);
-						if (waybillSetting == null) {
-							waybillSetting = new WaybillSettings(user, address);
-							settings.Waybills.Add(waybillSetting);
-						}
-					}
+				settings.Waybills.AddEach(addresses
+					.Except(settings.Waybills.Select(w => w.BelongsToAddress))
+					.Select(a => new WaybillSettings(user, a)));
+
+				var suppliers = session.Query<Supplier>().ToList();
+				var dirMaps = session.Query<DirMap>().ToList();
+				var newDirMaps = suppliers
+					.Except(dirMaps.Select(m => m.Supplier))
+					.Select(s => new DirMap(settings, s))
+					.ToArray();
+				session.SaveEach(newDirMaps);
+
+				foreach (var dirMap in dirMaps.Concat(newDirMaps)) {
+					if (!Directory.Exists(dirMap.Dir))
+						FileHelper.CreateDirectoryRecursive(dirMap.Dir);
 				}
+
 				transaction.Commit();
 			}
 			return false;
