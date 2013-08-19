@@ -153,7 +153,9 @@ namespace AnalitF.Net.Client
 
 			Deserialize();
 
-			windowManager.ShowWindow(Shell);
+			windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
+				{"WindowState", WindowState.Maximized}
+			});
 			IsInitialized = true;
 		}
 
