@@ -508,11 +508,12 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			RunTask(
 				new WaitViewModel("Производится восстановление базы данных.\r\nПодождите..."),
-				new Task<bool>(() => {
+				token => {
 					var command = new RepairDb();
+					command.Token = token;
 					command.Execute();
 					return command.Result;
-				}),
+				},
 				t => {
 					if (t.Result) {
 						windowManager.Notify("Проверка базы данных завершена.\r\nОшибок не найдено.");
@@ -535,11 +536,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			RunTask(
 				new WaitViewModel("Производится очистка базы данных.\r\nПодождите..."),
-				new Task<object>(() => {
+				token => {
 					var command = new CleanDb();
+					command.Token = token;
 					command.Execute();
 					return command.Result;
-				}),
+				},
 				t => Update());
 			Reload();
 		}
@@ -609,53 +611,59 @@ namespace AnalitF.Net.Client.ViewModels
 			TryClose();
 		}
 
-		private Task<T> RunTask<T>(WaitViewModel viewModel, Task<T> task, Action<Task<T>> continueWith)
+		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> success)
 		{
 			ResetNavigation();
 
-			TaskScheduler scheduler;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-			else
-				scheduler = TaskScheduler.Current;
+			bool done;
+			int count = 0;
+			do {
+				count++;
+				done = true;
+				TaskScheduler scheduler;
+				if (SynchronizationContext.Current != null)
+					scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+				else
+					scheduler = TaskScheduler.Current;
 
-			task.ContinueWith(t => {
-				viewModel.IsCompleted = true;
-				viewModel.TryClose();
-			}, scheduler);
-			task.Start();
+				//если это вторая итерация то нужно пересодать cancellation
+				//тк у предыдущего уже будет стоять флаг IsCancellationRequested
+				//и ничего не запустится
+				viewModel.Cancellation = new CancellationTokenSource();
+				var token = viewModel.Cancellation.Token;
+				var task = new Task<T>(() => func(token), token);
+				task.ContinueWith(t => {
+					viewModel.IsCompleted = true;
+					viewModel.TryClose();
+				}, scheduler);
+				task.Start();
 
-			windowManager.ShowFixedDialog(viewModel);
+				windowManager.ShowFixedDialog(viewModel);
 
-			if (!task.IsCanceled && !task.IsFaulted) {
-				continueWith(task);
-			}
-			else if (task.IsFaulted) {
-				if (task.Exception.GetBaseException() is TaskCanceledException)
-					return task;
-				log.Error(task.Exception);
-				var error = ErrorHelper.TranslateException(task.Exception)
-					?? viewModel.GenericErrorMessage;
-				windowManager.Error(error);
-			}
-			return task;
-		}
+				if (!task.IsCanceled && !task.IsFaulted) {
+					success(task);
+				}
+				else if (task.IsFaulted) {
+					var baseException = task.Exception.GetBaseException();
+					if (baseException is TaskCanceledException)
+						return;
+					log.Error(task.Exception);
 
-		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> success)
-		{
-			var token = viewModel.Cancellation.Token;
-			var task = new Task<T>(() => func(token), token);
-			RunTask(viewModel, task, success);
-		}
+					var error = ErrorHelper.TranslateException(task.Exception)
+						?? viewModel.GenericErrorMessage;
+					windowManager.Error(error);
 
-		private void RunTask(WaitViewModel viewModel, Action<CancellationToken> action, Action<Task> success)
-		{
-			var token = viewModel.Cancellation.Token;
-			var task = new Task<object>(() => {
-				action(token);
-				return null;
-			}, token);
-			RunTask(viewModel, task, success);
+					//показывать форму с настройками нужно только один раз
+					if (count == 1
+						&& baseException is RequestException
+						&& ((RequestException)baseException).StatusCode == HttpStatusCode.Unauthorized) {
+						var model = new SettingsViewModel();
+						model.SelectedTab.Value = "LoginTab";
+						windowManager.ShowFixedDialog(model);
+						done = !model.IsCredentialsChanged;
+					}
+				}
+			} while (!done);
 		}
 
 		public void Navigate(IScreen item)

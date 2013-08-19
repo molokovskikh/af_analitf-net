@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -25,6 +26,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class StubRemoteCommand : RemoteCommand
 	{
 		public UpdateResult result;
+		public Exception Exception;
 
 		public StubRemoteCommand(UpdateResult result)
 		{
@@ -38,6 +40,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		public override UpdateResult Run()
 		{
+			if (Exception != null)
+				throw Exception;
 			return result;
 		}
 	}
@@ -225,6 +229,32 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			testScheduler.AdvanceByMs(1000);
 			Assert.AreEqual(settingsModel.Settings.OpenRejects,
 				shell.Settings.Value.OpenRejects);
+		}
+
+		//todo await?
+		[Test]
+		public void Repeat_request_on_unathorized_exception()
+		{
+			restore = true;
+			var settings = false;
+			stub.Exception = new RequestException("Unauthorized", HttpStatusCode.Unauthorized);
+			manager.ContinueViewDialog = d => {
+				if (d is WaitViewModel)
+					((WaitViewModel)d).Closed.WaitOne();
+				else {
+					settings = true;
+					stub.Exception = null;
+					var model = (SettingsViewModel)d;
+					model.Settings.Password = "aioxct2";
+					model.Save();
+					Close(model);
+				}
+			};
+			shell.Update();
+
+			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
+			Assert.IsTrue(settings);
+			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Обновление завершено успешно"));
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)

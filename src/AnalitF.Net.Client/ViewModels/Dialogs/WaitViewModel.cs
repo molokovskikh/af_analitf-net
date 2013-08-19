@@ -19,15 +19,22 @@ namespace AnalitF.Net.Client.ViewModels
 			Text = text;
 		}
 
+		public AutoResetEvent Closed = new AutoResetEvent(false);
+
 		public CancellationTokenSource Cancellation;
 		public string Text { get; set; }
 		public bool IsCompleted { get; set; }
-
 		public string GenericErrorMessage { get; set; }
 
 		public void Cancel()
 		{
 			Cancellation.Cancel();
+		}
+
+		public override void TryClose()
+		{
+			base.TryClose();
+			Closed.Set();
 		}
 
 		public override void CanClose(Action<bool> callback)

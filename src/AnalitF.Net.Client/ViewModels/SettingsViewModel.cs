@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
@@ -18,6 +19,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
 		private static string lastTab;
+		public bool IsCredentialsChanged;
 
 		public SettingsViewModel()
 		{
@@ -161,6 +163,9 @@ namespace AnalitF.Net.Client.ViewModels
 				Manager.Warning(total.Item2 ?? "Некорректно введены границы цен.");
 				return;
 			}
+
+			IsCredentialsChanged = Session.IsChanged(Settings, s => s.Password)
+				|| Session.IsChanged(Settings, s => s.UserName);
 
 			Session.IsDirty();
 

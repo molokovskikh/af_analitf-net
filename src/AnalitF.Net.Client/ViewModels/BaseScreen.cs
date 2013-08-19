@@ -8,6 +8,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -47,6 +48,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public Extentions.WindowManager Manager { get; private set; }
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
+
+		public AutoResetEvent Closed = new AutoResetEvent(false);
 
 		public BaseScreen()
 		{
@@ -265,6 +268,12 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			currentReject.ChangedValue()
 				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
+		}
+
+		public override void TryClose()
+		{
+			Closed.Set();
+			base.TryClose();
 		}
 
 		public override string ToString()
