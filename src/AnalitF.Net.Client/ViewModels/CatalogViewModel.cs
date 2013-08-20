@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -71,7 +72,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => m.CatalogSearch)
 				.Subscribe(_ => NotifyOfPropertyChange("ViewOffersByCatalogVisible"));
-			Ad = FileHelper.MakeRooted(@"ads\2block.gif");
+
+			var filename = FileHelper.MakeRooted(@"ads\2block.gif");
+			if (File.Exists(filename))
+				Ad = filename;
 		}
 
 		public string Ad { get; private set; }

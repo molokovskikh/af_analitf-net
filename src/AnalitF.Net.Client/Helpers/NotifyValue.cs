@@ -8,13 +8,11 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class NotifyValue<T> : INotifyPropertyChanged
+	public class NotifyValue<T> : BaseNotify
 	{
 		private bool respectValue;
 		private Func<T> calc;
 		private T value;
-
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		public NotifyValue()
 		{
@@ -67,13 +65,6 @@ namespace AnalitF.Net.Client.Helpers
 				Value = calc();
 				respectValue = origin;
 			}
-		}
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		public static implicit operator T(NotifyValue<T> value)

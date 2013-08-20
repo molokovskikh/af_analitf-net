@@ -107,6 +107,7 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+			AddressSelector.Init();
 		}
 
 		protected override void OnActivate()

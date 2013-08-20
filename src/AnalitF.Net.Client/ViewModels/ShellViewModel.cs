@@ -125,6 +125,9 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
+		[DataMember]
+		public bool ShowAllAddresses { get; set; }
+
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }

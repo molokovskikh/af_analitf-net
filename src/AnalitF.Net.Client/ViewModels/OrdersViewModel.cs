@@ -111,6 +111,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			AddressSelector.Init();
 			var addressId = Address != null ? Address.Id : 0;
 			AddressesToMove = Session.Query<Address>()
 				.Where(a => a.Id != addressId)

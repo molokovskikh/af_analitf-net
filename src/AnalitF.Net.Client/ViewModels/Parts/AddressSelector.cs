@@ -17,8 +17,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	[DataContract]
 	public class AddressSelector : ViewAware
 	{
+		private BaseOrderViewModel screen;
+
 		public AddressSelector(ISession session, IScheduler scheduler, BaseOrderViewModel screen)
 		{
+			this.screen = screen;
 			All = new NotifyValue<bool>();
 			AddressesEnabled = new NotifyValue<bool>(() => All.Value, All);
 			Addresses = session.Query<Address>()
@@ -30,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Subscribe(_ => screen.Update());
 		}
 
-		[DataMember]
 		public NotifyValue<bool> All { get; set; }
 
 		public bool AllVisible
@@ -46,5 +48,14 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		}
 
 		public NotifyValue<bool> AddressesEnabled { get; set; }
+
+		public void Init()
+		{
+			var shell = screen.Parent as ShellViewModel;
+			if (shell != null) {
+				All.Value = shell.ShowAllAddresses;
+				All.Changed().Subscribe(_ => shell.ShowAllAddresses = All);
+			}
+		}
 	}
 }

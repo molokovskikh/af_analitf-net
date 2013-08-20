@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -317,7 +318,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 
-
 		[Test]
 		public void Enter_sent_order()
 		{
@@ -327,6 +327,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var currentMode = (OrderDetailsViewModel)shell.ActiveItem;
 			Assert.AreEqual(currentMode.Lines.Count, 1);
+		}
+
+		[Test]
+		public void Share_all_address_settings()
+		{
+			model.AddressSelector.All.Value = true;
+			Assert.IsTrue(shell.ShowAllAddresses);
 		}
 	}
 }
