@@ -108,5 +108,12 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(v.Value, 16);
 			Assert.AreEqual(changed, 16);
 		}
+
+		[Test]
+		public void Initial_value()
+		{
+			var v = new NotifyValue<string>("123", () => { throw new NotImplementedException(); });
+			Assert.AreEqual("123", v.Value);
+		}
 	}
 }

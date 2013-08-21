@@ -32,6 +32,12 @@ namespace AnalitF.Net.Client.ViewModels
 		private TableSettings tableSettings = new TableSettings();
 		private bool updateOnActivate = true;
 
+		/// <summary>
+		/// Флаг отвечает за обновление данных на форме активации
+		/// если форма отображает только статичные данные, которые не могут быть отредактированы на других формах
+		/// тогда нужно устаносить этот флаг что бы избежать лишних обновлений
+		/// </summary>
+		protected bool Readonly;
 		protected ILog log;
 		protected ExcelExporter excelExporter;
 		protected ISession Session;
@@ -76,15 +82,17 @@ namespace AnalitF.Net.Client.ViewModels
 			excelExporter = new ExcelExporter(this);
 			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
 
-			//для сообщений типа string используется ImmediateScheduler
-			//те вызов произойдет в той же нитке что и SendMessage
-			//если делать это как показано выше .ObserveOn(UiScheduler)
-			//то вызов произойдет после того как Dispatcher поделает все дела
-			//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
-			//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
-			OnCloseDisposable.Add(Bus.Listen<string>()
-				.Where(m => m == "DbChanged")
-				.Subscribe(_ => updateOnActivate = true));
+			if (!Readonly) {
+				//для сообщений типа string используется ImmediateScheduler
+				//те вызов произойдет в той же нитке что и SendMessage
+				//если делать это как показано выше .ObserveOn(UiScheduler)
+				//то вызов произойдет после того как Dispatcher поделает все дела
+				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
+				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
+				OnCloseDisposable.Add(Bus.Listen<string>()
+					.Where(m => m == "DbChanged")
+					.Subscribe(_ => updateOnActivate = true));
+			}
 		}
 
 		protected virtual ShellViewModel Shell

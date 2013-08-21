@@ -40,14 +40,6 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public NotifyValue<bool> ShowLeaders { get; set; }
 
-		//при активации надо обновить данные тк можно войти в прайс, сделать заказ а потом вернуться
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-
-			Update();
-		}
-
 		public override void PostActivated()
 		{
 			if (OpenSinglePrice) {
@@ -64,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowLeaders.Value = !ShowLeaders.Value;
 		}
 
-		private void Update()
+		protected override void Update()
 		{
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {

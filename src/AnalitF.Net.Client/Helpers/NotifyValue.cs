@@ -24,13 +24,18 @@ namespace AnalitF.Net.Client.Helpers
 			this.respectValue = respectValue;
 		}
 
-		public NotifyValue(Func<T> calc, params INotifyPropertyChanged[] props)
+		public NotifyValue(T value, Func<T> calc, params INotifyPropertyChanged[] props)
 		{
+			this.value = value;
 			this.calc = calc;
-			Recalculate();
-
 			foreach (var prop in props)
 				prop.PropertyChanged += (s, a) => Recalculate();
+		}
+
+		public NotifyValue(Func<T> calc, params INotifyPropertyChanged[] props)
+			: this(default(T), calc, props)
+		{
+			Recalculate();
 		}
 
 		public NotifyValue(T value)

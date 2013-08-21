@@ -19,20 +19,23 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		public RejectsViewModel()
 		{
+			Readonly = true;
 			DisplayName = "Забракованные препараты";
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3));
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			ShowCauseReason = new NotifyValue<bool>();
-
-			Rejects = new NotifyValue<List<Reject>>();
 			CurrentReject = new NotifyValue<Reject>();
-
 			CanMark = new NotifyValue<bool>(() => CurrentReject.Value != null, CurrentReject);
 
-			Begin.Changed()
-				.Merge(End.Changed())
-				.Subscribe(_ => Update());
-
+			Rejects = new NotifyValue<List<Reject>>(new List<Reject>(),
+				() => {
+					var begin = Begin.Value;
+					var end = End.Value.AddDays(1);
+					return StatelessSession.Query<Reject>()
+						.Where(r => r.LetterDate >= begin && r.LetterDate < end)
+						.OrderBy(r => r.LetterDate)
+						.ToList();
+				}, End, Begin);
 			WatchForUpdate(CurrentReject);
 		}
 
@@ -49,21 +52,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> CanMark { get; set; }
 
-		protected override void OnActivate()
+		protected override void Update()
 		{
-			base.OnActivate();
-
-			Update();
-		}
-
-		public void Update()
-		{
-			var begin = Begin.Value;
-			var end = End.Value.AddDays(1);
-			Rejects.Value = StatelessSession.Query<Reject>()
-				.Where(r => r.LetterDate >= begin && r.LetterDate < end)
-				.OrderBy(r => r.LetterDate)
-				.ToList();
+			Rejects.Recalculate();
 		}
 
 		public void Mark()
