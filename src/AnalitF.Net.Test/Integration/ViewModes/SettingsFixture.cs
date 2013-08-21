@@ -41,7 +41,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(model);
 
 			model = Init(new SettingsViewModel());
+			var all = session.Query<MarkupConfig>().ToList();
 			Assert.AreEqual(origin, model.Markups.Count);
+			//не должно быть потеряных записей
+			Assert.AreEqual(model.Markups.Count + model.VitallyImportantMarkups.Count, all.Count);
 		}
 
 		[Test]

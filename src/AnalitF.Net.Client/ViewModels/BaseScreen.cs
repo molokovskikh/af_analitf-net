@@ -136,9 +136,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var broacast = false;
 			if (Session.IsOpen) {
-				broacast = Session.IsDirty();
-				if (Session.FlushMode != FlushMode.Never)
+
+				if (Session.FlushMode != FlushMode.Never) {
+					//IsDirty - приведет к тому что все изменения будут сохранены
+					//по этому делаем проверку только если нужно сохранить изменения
+					broacast = Session.IsDirty();
 					Session.Flush();
+				}
 
 				if (Session.Transaction.IsActive)
 					Session.Transaction.Commit();

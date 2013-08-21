@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
 	{
-		private string[] filters = new[] {
+		private string[] filters = {
 			"Прайс-лист (F4)",
 			"Заказы (F5)",
 			"Лучшие предложения (F6)",

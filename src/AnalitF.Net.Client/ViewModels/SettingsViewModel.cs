@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.ViewModels
 			VitallyImportantMarkups = Settings.Markups
 				.Where(t => t.Type == MarkupType.VitallyImportant)
 				.OrderBy(m => m.Begin)
-				.ToList();
+				.LinkTo(Settings.Markups);
 			MarkupConfig.Validate(VitallyImportantMarkups);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
@@ -160,14 +160,13 @@ namespace AnalitF.Net.Client.ViewModels
 			var isValid = total.Item1;
 
 			if (!isValid) {
+				Session.FlushMode = FlushMode.Never;
 				Manager.Warning(total.Item2 ?? "Некорректно введены границы цен.");
 				return;
 			}
 
 			IsCredentialsChanged = Session.IsChanged(Settings, s => s.Password)
 				|| Session.IsChanged(Settings, s => s.UserName);
-
-			Session.IsDirty();
 
 			Session.FlushMode = FlushMode.Auto;
 			Settings.ApplyChanges(Session);

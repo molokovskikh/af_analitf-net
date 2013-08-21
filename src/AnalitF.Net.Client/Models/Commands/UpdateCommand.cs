@@ -198,6 +198,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 				foreach (var file in Directory.GetFiles(source)) {
 					var dst = Path.Combine(destination, Path.GetFileName(file));
+					if (File.Exists(dst))
+						File.Delete(dst);
 					File.Move(file, dst);
 					files.Add(dst);
 				}
