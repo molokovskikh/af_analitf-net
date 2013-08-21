@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -16,15 +18,13 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class WaybillLine : INotifyPropertyChanged
+	public class WaybillLine : BaseNotify
 	{
 		private decimal? _retailCost;
 		private decimal? _realRetailMarkup;
 		private decimal? _retailMarkup;
 		private decimal? _maxRetailMarkup;
 		private decimal? _maxSupplierMarkup;
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
 
 		public WaybillLine()
 		{
@@ -239,11 +239,11 @@ namespace AnalitF.Net.Client.Models
 				return;
 
 			if (ActualVitallyImportant)
-				_retailMarkup = Round((RetailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100);
+				_retailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
 			else
-				_retailMarkup = Round((RetailCost - SupplierCost) / SupplierCost * 100);
+				_retailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / SupplierCost * 100, 2);
 
-			_realRetailMarkup = Round((RetailCost - SupplierCost) / SupplierCost * 100);
+			_realRetailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / SupplierCost * 100, 2);
 		}
 
 		private decimal TaxFactor
@@ -286,24 +286,10 @@ namespace AnalitF.Net.Client.Models
 
 		private decimal? RoundCost(decimal? value)
 		{
-			value = Round(value);
+			value = NullableHelper.Round(value, 2);
 			if (Waybill.RoundTo1)
 				return ((int?)(value * 10)) / 10m;
 			return value;
-		}
-
-		private decimal? Round(decimal? value)
-		{
-			if (!value.HasValue)
-				return null;
-			return Math.Round(value.Value, 2);
-		}
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

@@ -219,6 +219,13 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(offer.OrderCount, Is.Null);
 		}
 
+		[Test]
+		public void Invalid_supplier_markup()
+		{
+			offer.ProducerCost = 0;
+			Assert.IsNull(offer.SupplierMarkup);
+		}
+
 		private void Validate()
 		{
 			var message = offer.UpdateOrderLine(address, settings);

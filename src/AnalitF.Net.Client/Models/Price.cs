@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
 using Remotion.Linq.Utilities;
@@ -93,7 +94,7 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class Price : INotifyPropertyChanged
+	public class Price : BaseNotify
 	{
 		private Order order;
 
@@ -195,14 +196,6 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return Name;
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

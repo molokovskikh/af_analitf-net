@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class Reject : BaseStatelessObject, INotifyPropertyChanged
+	public class Reject : BaseStatelessObject
 	{
 		private bool marked;
 
@@ -36,14 +36,6 @@ namespace AnalitF.Net.Client.Models
 				marked = value;
 				OnPropertyChanged("Marked");
 			}
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

@@ -41,7 +41,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.IsTrue(settings.PriceTag.PrintProduct);
 		}
 
-		[Test, Ignore("Тест не работает тк нельзя удалить директорию с данными тк в ней сидит mysql а способа остановить mysql нет")]
+		[Test]
 		public void Create_local_db()
 		{
 			MySqlConnection.ClearAllPools(true);

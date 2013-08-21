@@ -4,12 +4,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class Editor : INotifyPropertyChanged
+	public class Editor : BaseNotify
 	{
 		private OrderLine lastEdit;
 		private InlineEditWarning warning;
@@ -102,14 +103,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			CurrentEdit.Count = 0;
 			CheckForDelete(CurrentEdit);
-		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

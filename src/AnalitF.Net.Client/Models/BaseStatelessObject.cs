@@ -1,6 +1,8 @@
+using AnalitF.Net.Client.Helpers;
+
 namespace AnalitF.Net.Client.Models
 {
-	public abstract class BaseStatelessObject
+	public abstract class BaseStatelessObject : BaseNotify
 	{
 		public abstract uint Id { get; set; }
 

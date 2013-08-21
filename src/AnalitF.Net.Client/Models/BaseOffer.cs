@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
@@ -99,19 +101,21 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal Cost { get; set; }
 
+		[IgnoreDataMember]
 		public virtual decimal? SupplierCost
 		{
 			get { return Cost; }
 		}
 
+		[IgnoreDataMember]
 		public virtual decimal? SupplierMarkup
 		{
 			get
 			{
-				if (ProducerCost == null)
+				if (ProducerCost == 0)
 					return null;
 				var nds = NDS ?? 10.0m;
-				return Math.Round((Cost / (ProducerCost.Value * (nds / 100 + 1)) - 1) * 100, 2);
+				return NullableHelper.Round((Cost / (ProducerCost * (nds / 100 + 1)) - 1) * 100, 2);
 			}
 		}
 

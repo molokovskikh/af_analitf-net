@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -73,7 +74,7 @@ namespace AnalitF.Net.Client.Models
 		IEnumerable<IOrderLine> Lines { get; }
 	}
 
-	public class SentOrder : IOrder, INotifyPropertyChanged
+	public class SentOrder : BaseNotify, IOrder
 	{
 		private string personalComment;
 
@@ -139,14 +140,6 @@ namespace AnalitF.Net.Client.Models
 			{
 				return String.Format("{0} от {1}", Price, PriceDate);
 			}
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

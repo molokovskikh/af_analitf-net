@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Proxy;
@@ -41,7 +42,7 @@ namespace AnalitF.Net.Client.Models
 		public OrderLine[] Items;
 	}
 
-	public class Order : INotifyPropertyChanged, IOrder
+	public class Order : BaseNotify, IOrder
 	{
 		private decimal sum;
 		private int linesCount;
@@ -190,15 +191,6 @@ namespace AnalitF.Net.Client.Models
 				Comment = Comment,
 				Items = Lines.ToArray(),
 			};
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null)
-				handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 	}
 }

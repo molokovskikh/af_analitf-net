@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Controls
@@ -18,7 +19,7 @@ namespace AnalitF.Net.Client.Controls
 		bool IsSelected {get; set; }
 	}
 
-	public class Selectable<T> : ISelectable, INotifyPropertyChanged
+	public class Selectable<T> : BaseNotify, ISelectable
 	{
 		private bool isSelected;
 
@@ -39,14 +40,6 @@ namespace AnalitF.Net.Client.Controls
 		}
 
 		public T Item { get; set; }
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-		}
 	}
 
 	public class PopupSelector : MultiSelector

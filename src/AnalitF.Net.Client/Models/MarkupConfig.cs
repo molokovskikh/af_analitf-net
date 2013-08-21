@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -12,7 +13,7 @@ namespace AnalitF.Net.Client.Models
 		VitallyImportant
 	}
 
-	public class MarkupConfig : INotifyPropertyChanged
+	public class MarkupConfig : BaseNotify
 	{
 		private bool beginOverlap;
 		private bool haveGap;
@@ -132,14 +133,6 @@ namespace AnalitF.Net.Client.Models
 			var isValid = !data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap)
 				&& string.IsNullOrEmpty(validationError);
 			return Tuple.Create(isValid, validationError);
-		}
-
-		public virtual event PropertyChangedEventHandler PropertyChanged;
-
-		protected virtual void OnPropertyChanged(string propertyName)
-		{
-			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 		}
 
 		public override string ToString()
