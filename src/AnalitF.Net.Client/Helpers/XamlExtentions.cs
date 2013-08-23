@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using Common.Tools;
@@ -11,6 +12,27 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public static class XamlExtentions
 	{
+		private class PropertyLogger
+		{
+			DependencyProperty Property;
+			DependencyObject O;
+
+			public PropertyLogger(DependencyObject o, DependencyProperty property)
+			{
+				O = o;
+				Property = property;
+			}
+
+			public object Logger
+			{
+				get { return  null; }
+				set { Console.WriteLine("{1}.{2} = {0}",
+					value,
+					((FrameworkElement)O).Name,
+					Property.Name); }
+			}
+		}
+
 		public static void AddRange(this UIElementCollection dst, IEnumerable<UIElement> src)
 		{
 			foreach (var element in src) {
@@ -88,6 +110,25 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		public static IEnumerable<DependencyObject> VisualParents(this DependencyObject o)
+		{
+			if (!(o is Visual) && !(o is Visual3D))
+				yield break;
+
+			var parent = VisualParent(o);
+			while (parent != null) {
+				yield return parent;
+				parent = VisualParent(parent);
+			}
+		}
+
+		public static DependencyObject VisualParent(DependencyObject o)
+		{
+			if (o is Visual || o is Visual3D)
+				return VisualTreeHelper.GetParent(o);
+			return null;
+		}
+
 		public static DependencyObject Parent(this DependencyObject o)
 		{
 			var frameworkElement = o as FrameworkElement;
@@ -133,6 +174,30 @@ namespace AnalitF.Net.Client.Helpers
 				.Select(ToText)
 				.Where(c => c != null)
 				.Implode(Environment.NewLine);
+		}
+
+		/// <summary>
+		/// предназначен для отладки, протоколирует события
+		/// </summary>
+		public static void TraceEvent(Type type, RoutedEvent @event)
+		{
+			EventManager.RegisterClassHandler(type, @event,
+				new RoutedEventHandler(
+					(sender, args) => {
+						Console.WriteLine("{0} {1}.{2}", @event.Name, ((FrameworkElement)sender).Name, sender);
+					}));
+		}
+
+		/// <summary>
+		/// предназначен для отладки, протоколирует изменения свойств
+		/// </summary>
+		public static void TraceProperty(DependencyObject o, DependencyProperty property)
+		{
+			BindingOperations.SetBinding(o, property, new Binding("Logger") {
+				Source = new PropertyLogger(o, property),
+				BindsDirectlyToSource = true,
+				Mode = BindingMode.OneWayToSource
+			});
 		}
 	}
 }

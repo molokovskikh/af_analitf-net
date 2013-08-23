@@ -5,9 +5,11 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Common.Tools.Calendar;
 using NHibernate.Mapping;
+using NHibernate.Util;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -66,6 +68,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				action();
 			});
 			return dispatcher;
+		}
+
+		public static TextCompositionEventArgs TextArgs(string text)
+		{
+			return new TextCompositionEventArgs(Keyboard.PrimaryDevice, new TextComposition(null, null, text)) {
+				RoutedEvent = UIElement.TextInputEvent
+			};
+		}
+
+		public static KeyEventArgs KeyEventArgs(DependencyObject o, Key key)
+		{
+			var keyEventArgs = new KeyEventArgs(Keyboard.PrimaryDevice,
+				PresentationSource.CurrentSources.OfType<PresentationSource>().First(),
+				0,
+				key);
+			keyEventArgs.RoutedEvent = UIElement.KeyDownEvent;
+			return keyEventArgs;
 		}
 	}
 }

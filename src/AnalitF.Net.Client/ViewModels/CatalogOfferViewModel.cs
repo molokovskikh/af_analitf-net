@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -218,15 +219,18 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
 
-		public void SearchInCatalog(string text)
+		public void SearchInCatalog(object sender, TextCompositionEventArgs args)
 		{
+			var text = args.Text;
 			if (Shell == null)
 				return;
-
 			var catalog = Shell.NavigationStack.LastOrDefault() as CatalogViewModel;
 			if (catalog == null)
 				return;
+			if (text.All(char.IsControl))
+				return;
 
+			args.Handled = true;
 			catalog.SearchText = text;
 			TryClose();
 		}

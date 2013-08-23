@@ -1,5 +1,11 @@
+using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -7,8 +13,12 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
+using Common.Tools.Calendar;
+using Devart.Common;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
+using ReactiveUI;
 
 namespace AnalitF.Net.Test.Integration.Views
 {

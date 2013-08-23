@@ -19,14 +19,6 @@ namespace AnalitF.Net.Client.Views
 			};
 
 			EditBehavior.Attach(grid);
-
-			Offers.TextInput += (sender, args) => {
-				args.Handled = true;
-				var model = DataContext as CatalogOfferViewModel;
-				if (model != null)
-					model.SearchInCatalog(args.Text);
-			};
-
 			DataGridHelper.CalculateColumnWidths(Offers);
 		}
 	}

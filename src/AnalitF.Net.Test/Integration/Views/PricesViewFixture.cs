@@ -49,10 +49,7 @@ namespace AnalitF.Net.Test.Integration.Views
 						subscription.Dispose();
 						w.Dispatcher.Invoke(w.Close);
 					});
-					var keyEventArgs = new KeyEventArgs(Keyboard.PrimaryDevice,
-						PresentationSource.FromDependencyObject(grid),
-						0,
-						Key.Enter);
+					var keyEventArgs = WpfHelper.KeyEventArgs(grid, Key.Enter);
 					keyEventArgs.RoutedEvent = DataGrid.KeyDownEvent;
 					grid.RaiseEvent(keyEventArgs);
 				};

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
@@ -162,7 +163,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<CatalogName>());
 		}
 
-		[Test]
+		[Test, RequiresSTA]
 		public void Search_in_catalog_names()
 		{
 			var name = (CatalogNameViewModel)catalogModel.ActiveItem;
@@ -170,7 +171,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			name.CurrentCatalog = name.Catalogs.First();
 			name.EnterCatalog();
 			var offer = (CatalogOfferViewModel)shell.ActiveItem;
-			offer.SearchInCatalog("а");
+			offer.SearchInCatalog(null, WpfHelper.TextArgs("а"));
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
 			Assert.That(catalogModel.SearchText, Is.EqualTo("а"));
 			Assert.That(catalogModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));

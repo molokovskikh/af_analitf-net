@@ -1,6 +1,9 @@
-﻿using System.Windows;
+using System;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
@@ -23,14 +26,21 @@ namespace AnalitF.Net.Client.Binders
 			IInputElement lastFocusedElement = null;
 			element.Loaded += (sender, args) => {
 				if (lastFocusedElement != null) {
-					Keyboard.Focus(lastFocusedElement);
+					if (lastFocusedElement is DataGridCell) {
+						var grid = ((DataGridCell)lastFocusedElement).VisualParents().OfType<DataGrid>().FirstOrDefault();
+						if (grid != null)
+							DataGridHelper.Focus(grid);
+					}
+					else
+						Keyboard.Focus(lastFocusedElement);
 				}
 				else {
 					var defaultFocus = GetDefaultFocus(view) ?? FromContent(view);
 					if (defaultFocus == null)
 						return;
-					if (defaultFocus is DataGrid)
+					if (defaultFocus is DataGrid) {
 						DataGridHelper.Focus((DataGrid)defaultFocus);
+					}
 					else
 						Keyboard.Focus(defaultFocus);
 				}

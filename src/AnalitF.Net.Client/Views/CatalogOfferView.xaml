@@ -61,7 +61,8 @@
 		<c:DataGrid x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
 			CellStyle="{StaticResource ResourceKey=VitallyImportant}"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:ContextMenuBehavior.PersistColumnSettings="true"
+			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="89*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />

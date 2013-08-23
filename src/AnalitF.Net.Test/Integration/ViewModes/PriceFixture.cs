@@ -8,6 +8,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI;
 using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -74,13 +75,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 
 			var model = Init(new PriceViewModel());
-			ScreenExtensions.TryActivate(model);
+			Activate(model);
 			Deactivate(model);
 
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
+			RxApp.MessageBus.SendMessage("DbChanged");
 
-			ScreenExtensions.TryActivate(model);
+			Activate(model);
 
 			var price = model.Prices.First(p => p.Id == offer.Price.Id);
 			Assert.That(price.Order, Is.Not.Null);

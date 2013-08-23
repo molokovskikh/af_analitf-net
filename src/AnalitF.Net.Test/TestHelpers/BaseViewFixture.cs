@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return view as T;
 		}
 
-		protected UIElement InitView(BaseScreen model)
+		protected UIElement InitView(object model)
 		{
 			var view = ViewLocator.LocateForModel(model, null, null);
 			ViewModelBinder.Bind(model, view, null);
