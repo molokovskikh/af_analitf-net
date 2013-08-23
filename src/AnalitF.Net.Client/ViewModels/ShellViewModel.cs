@@ -164,7 +164,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Reload();
 		}
 
-		protected override void OnViewLoaded(object view)
+		public override void OnViewReady()
 		{
 			var import = Arguments.LastOrDefault().Match("import");
 			if (import) {
@@ -173,11 +173,6 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				StartCheck();
 			}
-		}
-
-		public void OnLoaded()
-		{
-			OnViewLoaded(GetView());
 		}
 
 		public override void CanClose(Action<bool> callback)

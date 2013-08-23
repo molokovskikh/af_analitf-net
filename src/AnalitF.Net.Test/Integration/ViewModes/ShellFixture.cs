@@ -23,7 +23,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			ResetCredentials();
 
-			shell.OnLoaded();
+			shell.OnViewReady();
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
 			Assert.That(manager.Dialogs[0].DataContext, Is.TypeOf<SettingsViewModel>());
 		}
@@ -33,7 +33,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			ResetCredentials();
 
-			shell.OnLoaded();
+			shell.OnViewReady();
 			manager.MessageBoxes.Clear();
 			manager.Dialogs[0].Close();
 			manager.Dialogs.Clear();
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			shell.Arguments = new[] { "cmd.exe", "import" };
 			WpfHelper.WithDispatcher(() => {
-				shell.OnLoaded();
+				shell.OnViewReady();
 			});
 
 			var closed = new ManualResetEventSlim();

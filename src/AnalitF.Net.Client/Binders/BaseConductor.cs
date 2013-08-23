@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Caliburn.Micro;
@@ -16,6 +17,23 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public bool UnitTesting;
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
+
+		/// <summary>
+		/// После загрузки формы нам нужно показать сообщения
+		/// если это делать в обработчике то сообщение отобразится на фоне пустой формы
+		/// тк форма еще не успеет нарисовать себя
+		/// по этому планируем показ сообщений после того как форма будет нарисована
+		/// </summary>
+		protected override void OnViewLoaded(object view)
+		{
+			Dispatcher.CurrentDispatcher.BeginInvoke(
+				DispatcherPriority.ContextIdle,
+				new System.Action(OnViewReady));
+		}
+
+		public virtual void OnViewReady()
+		{
+		}
 
 		public RemoteCommand OnCommandExecuting(RemoteCommand c)
 		{
