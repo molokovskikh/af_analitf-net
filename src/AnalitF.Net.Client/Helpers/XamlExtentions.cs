@@ -134,7 +134,12 @@ namespace AnalitF.Net.Client.Helpers
 			var frameworkElement = o as FrameworkElement;
 			if (frameworkElement != null)
 				return frameworkElement.Parent;
-			return VisualTreeHelper.GetParent(o);
+			var content = o as FrameworkContentElement;
+			if (content != null)
+				return content.Parent;
+			if (o is Visual || o is Visual3D)
+				return VisualTreeHelper.GetParent(o);
+			return null;
 		}
 
 		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)

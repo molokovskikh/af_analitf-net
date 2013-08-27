@@ -55,8 +55,8 @@ namespace AnalitF.Net.Client.Binders
 			var triggers = Interaction.GetTriggers(element);
 			triggers.Add(trigger);
 
-			var property = (DependencyProperty)(typeof(Message).GetField("MessageTriggersProperty",
-				BindingFlags.Static | BindingFlags.NonPublic))
+			var property = (DependencyProperty)(typeof(Message)
+				.GetField("MessageTriggersProperty", BindingFlags.Static | BindingFlags.NonPublic))
 				.GetValue(null);
 			element.SetValue(property, new[] { trigger });
 		}

@@ -213,7 +213,7 @@ namespace AnalitF.Net.Client.ViewModels
 			};
 			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders);
 
-			//временно не работает пока не придумаю решения по лучше
+			//todo: временно не работает пока не придумаю решения по лучше
 			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
 
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);

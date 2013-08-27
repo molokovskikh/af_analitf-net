@@ -101,7 +101,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 				currentCatalog = value;
 				//если нас вызвала другая форма
-				if (CurrentCatalogName == null || CurrentCatalog.Name.Id != CurrentCatalogName.Id) {
+				if (CurrentCatalogName == null
+					|| (CurrentCatalog != null && CurrentCatalog.Name.Id != CurrentCatalogName.Id)) {
 					CurrentCatalogName = currentCatalog.Name;
 				}
 

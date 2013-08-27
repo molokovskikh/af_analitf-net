@@ -146,6 +146,15 @@ namespace AnalitF.Net.Test.Integration
 			Assert.That(model.CurrentItem.Value, Is.EqualTo("a"));
 		}
 
+		[Test]
+		public void Get_parent_for_framework_content_element()
+		{
+			var block = new TextBlock();
+			var item = new Run();
+			block.Inlines.Add(item);
+			Assert.AreEqual(block, item.Parent());
+		}
+
 		public class ViewModel
 		{
 			public ViewModel()
