@@ -112,9 +112,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			model.Term = new NotifyValue<string>("123");
 			var textBox = new TextBox { Name = "Term" };
-			view.Content = textBox;
-			ViewModelBinder.Bind(model, view, null);
-
+			Bind(textBox);
 			Assert.That(textBox.Text, Is.EqualTo("123"));
 		}
 
@@ -154,6 +152,13 @@ namespace AnalitF.Net.Test.Integration
 			block.Inlines.Add(item);
 			Assert.AreEqual(block, item.Parent());
 		}
+
+		private void Bind(object content)
+		{
+			view.Content = content;
+			ViewModelBinder.Bind(model, view, null);
+		}
+
 
 		public class ViewModel
 		{

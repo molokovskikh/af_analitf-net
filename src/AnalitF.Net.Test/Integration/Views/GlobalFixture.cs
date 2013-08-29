@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,11 +13,14 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools.Calendar;
 using log4net.Config;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
 
@@ -31,6 +36,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Setup()
 		{
 			shell.Quiet = true;
+			shell.ViewModelSettings.Clear();
 		}
 
 		[TearDown]
@@ -48,9 +54,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public async void Open_catalog_on_quick_search()
 		{
-			var loaded = Start();
-			await loaded.WaitAsync();
-			WaitIdle(dispatcher);
+			Start();
 
 			//открытие окна на весь экран нужно что бы отображалось максимальное колиечство элементов
 			window.Dispatcher.Invoke(() => {
@@ -81,9 +85,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public async void Open_catalog_offers()
 		{
-			var loaded = Start();
-			await loaded.WaitAsync();
-			WaitIdle(dispatcher);
+			Start();
 
 			dispatcher.Invoke(() => {
 				shell.ShowCatalog();
@@ -112,7 +114,34 @@ namespace AnalitF.Net.Test.Integration.Views
 			Assert.That(offers.Offers.Count, Is.GreaterThan(0));
 		}
 
-		private SemaphoreSlim Start()
+		[Test]
+		public async void Open_catalog()
+		{
+			session.DeleteEach<Order>();
+			session.Flush();
+
+			Start();
+
+			dispatcher.Invoke(() => {
+				shell.ShowCatalog();
+			});
+
+			var catalog = await ViewLoaded<CatalogViewModel>();
+			await ViewLoaded(catalog.ActiveItem);
+			var name = (CatalogNameViewModel)catalog.ActiveItem;
+			var offers = await OpenOffers(name);
+			WaitIdle(dispatcher);
+			Input((FrameworkElement)offers.GetView(), "Offers", "1");
+			dispatcher.Invoke(() => {
+				shell.ShowOrderLines();
+			});
+			var lines = (OrderLinesViewModel)shell.ActiveItem;
+			await ViewLoaded(lines);
+			Input((FrameworkElement)lines.GetView(), "Lines", Key.Enter);
+			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
+		}
+
+		private async void Start()
 		{
 			var loaded = new SemaphoreSlim(0, 1);
 
@@ -122,14 +151,14 @@ namespace AnalitF.Net.Test.Integration.Views
 				ViewModelBinder.Bind(shell, window, null);
 				window.Show();
 			});
-			return loaded;
+
+			await loaded.WaitAsync();
+			WaitIdle(dispatcher);
 		}
 
 		private void WaitIdle(Dispatcher dispatcher)
 		{
-			var wait = new ManualResetEventSlim();
-			dispatcher.InvokeAsync(wait.Set, DispatcherPriority.ContextIdle);
-			wait.Wait();
+			dispatcher.Invoke(() => {}, DispatcherPriority.ContextIdle);
 		}
 
 		private void AssertQuickSearch(Dispatcher d, CatalogViewModel catalog)
@@ -153,6 +182,15 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private async Task OpenAndReturnOnSearch(Window window, CatalogNameViewModel viewModel)
 		{
+			var offers = await OpenOffers(viewModel);
+			Input((FrameworkElement)offers.GetView(), "Offers", "б");
+			await ViewLoaded<CatalogViewModel>();
+
+			WaitIdle(window.Dispatcher);
+		}
+
+		private async Task<CatalogOfferViewModel> OpenOffers(CatalogNameViewModel viewModel)
+		{
 			var view = (FrameworkElement)viewModel.GetView();
 			if (view == null)
 				throw new Exception(String.Format("Не удалось получить view из {0}", viewModel.GetType()));
@@ -160,11 +198,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Input(view, "Catalogs", Key.Enter);
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			await ViewLoaded(offers);
-			Thread.Sleep(1000);
-			Input((FrameworkElement)offers.GetView(), "Offers", "б");
-			await ViewLoaded<CatalogViewModel>();
-
-			WaitIdle(window.Dispatcher);
+			return offers;
 		}
 
 		public void DoubleClick(FrameworkElement view, UIElement element, object origin = null)
@@ -205,29 +239,30 @@ namespace AnalitF.Net.Test.Integration.Views
 			return (T)shell.ActiveItem;
 		}
 
-		private Task ViewLoaded(Screen viewModel)
+		private async Task ViewLoaded(Screen viewModel)
 		{
-			var loaded = new SemaphoreSlim(0, 1);
-			var view = viewModel.GetView();
-			if (view != null)
-				loaded.Release();
-			else {
-				EventHandler<ViewAttachedEventArgs> attached = null;
-				attached = (sender, args) => {
-					if (args.View is UserControl) {
-						var userControl = ((UserControl)args.View);
-						RoutedEventHandler loadedHandler = null;
-						loadedHandler = (o, eventArgs) => {
-							userControl.Loaded -= loadedHandler;
-							viewModel.ViewAttached -= attached;
-							loaded.Release();
-						};
-						userControl.Loaded += loadedHandler;
-					}
-				};
-				viewModel.ViewAttached += attached;
+			var view = viewModel.GetView() as FrameworkElement;
+			if (view == null) {
+				await Observable.FromEventPattern(viewModel, "ViewAttached")
+					.Take(1)
+					.ToTask();
+				view = viewModel.GetView() as FrameworkElement;
 			}
-			return loaded.WaitAsync(5.Second());
+
+			IObservable<EventPattern<EventArgs>> wait = null;
+			dispatcher.Invoke(() => {
+				if (!view.IsLoaded) {
+					wait = Observable.FromEventPattern(view, "Loaded").Take(1);
+					//todo: не понятно почему но если не делать здесь subscribe, wait.ToTask()
+					//не завершится, может событие происходит до того как мы успеваем сделать ToTask
+					//но это происходит стабильно и почему помогает Subscribe?
+					wait.Subscribe(_ => {});
+				}
+				else {
+					wait = Observable.Return(new EventPattern<EventArgs>(null, null));
+				}
+			});
+			await wait.ToTask();
 		}
 	}
 }

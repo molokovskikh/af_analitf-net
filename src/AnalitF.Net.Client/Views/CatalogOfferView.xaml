@@ -10,51 +10,59 @@
 	binders:FocusBehavior.DefaultFocus="{x:Reference Offers}">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowPrice" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="ShowPrice" />
+		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<DockPanel Grid.Row="0" LastChildFill="False">
-			<Label x:Name="Name" Style="{StaticResource HeaderLabel}"></Label>
+			<Label x:Name="Name" Style="{StaticResource HeaderLabel}" />
 			<Grid DockPanel.Dock="Right">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"></RowDefinition>
-					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
+					<ColumnDefinition />
+					<ColumnDefinition />
+					<ColumnDefinition />
 				</Grid.ColumnDefinitions>
-				<Parts:AutoComment Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:AutoComment>
+				<Parts:AutoComment Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+					cal:Bind.ModelWithoutContext="{Binding}" />
 				<ToggleButton Grid.Row="0" Grid.Column="1" Name="GroupByProduct">
 					<FrameworkElement.Style>
 						<Style TargetType="ToggleButton" BasedOn="{StaticResource FilterToggleButton}">
 							<Style.Triggers>
 								<Trigger Property="IsChecked" Value="True">
-									<Setter Property="Content" Value="Разгруппировать"></Setter>
+									<Setter Property="Content" Value="Разгруппировать" />
 								</Trigger>
 								<Trigger Property="IsChecked" Value="False">
-									<Setter Property="Content" Value="Группировать"></Setter>
+									<Setter Property="Content" Value="Группировать" />
 								</Trigger>
 							</Style.Triggers>
 						</Style>
 					</FrameworkElement.Style>
 				</ToggleButton>
-				<ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Filter}" x:Name="Filters"></ComboBox>
-				<ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Filter}" x:Name="Producers"></ComboBox>
-				<ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource Filter}" x:Name="Regions"></ComboBox>
+				<ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Filter}"
+					x:Name="Filters" />
+				<ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Filter}"
+					x:Name="Producers" />
+				<ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource Filter}"
+					x:Name="Regions" />
 			</Grid>
 		</DockPanel>
 
@@ -64,37 +72,67 @@
 			binders:ContextMenuBehavior.PersistColumnSettings="true"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="177*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название" Binding="{Binding ProductSynonym}" />
-				<c:DataGridTextColumnEx Width="89*" CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель" Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ" Binding="{Binding Doc}" />
+				<DataGridTextColumn Width="177*"
+					CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название"
+					Binding="{Binding ProductSynonym}" />
+				<c:DataGridTextColumnEx Width="89*"
+					CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель"
+					Binding="{Binding ProducerSynonym}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Кат.производитель" Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+					Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="56*" MinWidth="5" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
-				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион" Binding="{Binding Price.RegionName}" />
-				<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа" Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность" Binding="{Binding RequestRatio}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="26*" Visibility="Collapsed" Header="Разница, %" Binding="{Binding Diff}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="59*" CellStyle="{StaticResource ResourceKey=Junk}" FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="39*" Header="Остаток" Binding="{Binding Quantity}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена" Binding="{Binding RetailCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="50*" Header="Комментарий" Binding="{Binding OrderLine.Comment}" />
-				<c:DataGridTextColumnEx Width="34*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ" Binding="{Binding OrderCount}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="51*" CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма" Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="56*" MinWidth="5"
+					CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн."
+					Binding="{Binding Period}" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
+					Binding="{Binding Price.Name}" />
+				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
+					Binding="{Binding Price.RegionName}" />
+				<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
+					Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
+					Binding="{Binding RequestRatio}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="26*" Visibility="Collapsed" Header="Разница, %"
+					Binding="{Binding Diff}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена"
+					Binding="{Binding RegistryCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
+					Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
+					Binding="{Binding ProducerCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
+					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="59*" CellStyle="{StaticResource ResourceKey=Junk}"
+					FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="39*" Header="Остаток" Binding="{Binding Quantity}"
+					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
+					Binding="{Binding RetailCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
+					Binding="{Binding OrderLine.Comment}" />
+				<c:DataGridTextColumnEx Width="34*"
+					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ"
+					Binding="{Binding OrderCount}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="51*"
+					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма"
+					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 			<ItemsControl.GroupStyle>
 				<GroupStyle>
 					<GroupStyle.HeaderTemplate>
 						<DataTemplate>
-							<Border SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1" >
+							<Border SnapsToDevicePixels="True" BorderBrush="Black"
+								BorderThickness="0, 0, 0, 1">
 								<StackPanel Background="#d8f1ff">
 									<TextBlock Text="{Binding Path=Name}" FontWeight="Bold" />
 								</StackPanel>
@@ -107,7 +145,7 @@
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
-		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"></Parts:ProductInfoView>
+		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />
 
 		<StackPanel Grid.Row="3">
 			<Label>Подсказка</Label>
@@ -121,24 +159,36 @@
 
 		<Grid Grid.Row="4" Height="120">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
-				<ColumnDefinition></ColumnDefinition>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
 
 			<DockPanel Grid.Column="0">
 				<Label DockPanel.Dock="Top">Предыдущие заказы</Label>
 				<Label DockPanel.Dock="Bottom" FontWeight="Bold">
-					<TextBlock>Средняя цена/заказ по предыдущим заказам: <Run Name="CurrentOffer_PrevOrderAvgCost"></Run>/<Run Name="CurrentOffer_PrevOrderAvgCount"></Run></TextBlock>
+					<TextBlock>
+						Средняя цена/заказ по предыдущим заказам:
+						<Run Name="CurrentOffer_PrevOrderAvgCost" />
+						/
+						<Run Name="CurrentOffer_PrevOrderAvgCount" />
+					</TextBlock>
 				</Label>
 				<c:DataGrid Width="460" x:Name="HistoryOrders">
 					<DataGrid.Columns>
-						<DataGridTextColumn Width="110*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></DataGridTextColumn>
-						<DataGridTextColumn Width="102*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
-						<c:DataGridTextColumnEx Width="SizeToHeader" CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
-						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}" TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="49" CellStyle="{StaticResource ResourceKey=Junk}" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}" TextAlignment="Center" />
+						<DataGridTextColumn Width="110*" Header="Прайс-лист"
+							Binding="{Binding Order.Price.Name}" />
+						<DataGridTextColumn Width="102*" Header="Производитель"
+							Binding="{Binding Producer}" />
+						<c:DataGridTextColumnEx Width="SizeToHeader"
+							CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн."
+							Binding="{Binding Period}" TextAlignment="Center" />
+						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
+							TextAlignment="Right" />
+						<c:DataGridTextColumnEx Width="49" CellStyle="{StaticResource ResourceKey=Junk}"
+							Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
+						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}"
+							TextAlignment="Center" />
 					</DataGrid.Columns>
 				</c:DataGrid>
 			</DockPanel>
@@ -147,11 +197,15 @@
 				<TabItem Header="Информация о поставщике">
 					<Grid>
 						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto"></RowDefinition>
-							<RowDefinition></RowDefinition>
+							<RowDefinition Height="Auto" />
+							<RowDefinition />
 						</Grid.RowDefinitions>
-						<TextBlock Grid.Row="0" FontWeight="Bold">Телефон: <Run Name="CurrentOffer_Price_Phone"></Run></TextBlock>
-						<TextBox Grid.Row="1" Style="{StaticResource ReadOnlyText}" FontWeight="Bold" Name="CurrentOffer_Price_OperativeInfo"></TextBox>
+						<TextBlock Grid.Row="0" FontWeight="Bold">
+							Телефон:
+							<Run Name="CurrentOffer_Price_Phone" />
+						</TextBlock>
+						<TextBox Grid.Row="1" Style="{StaticResource ReadOnlyText}" FontWeight="Bold"
+							Name="CurrentOffer_Price_OperativeInfo" />
 					</Grid>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
@@ -159,11 +213,14 @@
 						<FrameworkElement.Style>
 							<Style TargetType="c:DataGrid" BasedOn="{StaticResource {x:Type c:DataGrid}}">
 								<Style.Triggers>
-									<Trigger Property="HasItems" Value="False" >
+									<Trigger Property="HasItems" Value="False">
 										<Setter Property="Control.Template">
 											<Setter.Value>
 												<ControlTemplate>
-													<Label HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16">Предельных отпускных цен производителей на ЖНВЛС нет.</Label>
+													<Label HorizontalAlignment="Center" VerticalAlignment="Center"
+														FontSize="16">
+														Предельных отпускных цен производителей на ЖНВЛС нет.
+													</Label>
 												</ControlTemplate>
 											</Setter.Value>
 										</Setter>
@@ -172,9 +229,11 @@
 							</Style>
 						</FrameworkElement.Style>
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="50*" Header="Наименование" Binding="{Binding Product}"></DataGridTextColumn>
-							<DataGridTextColumn Width="34*" Header="Производитель" Binding="{Binding Producer}"></DataGridTextColumn>
-							<c:DataGridTextColumnEx Width="16*" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
+							<DataGridTextColumn Width="50*" Header="Наименование" Binding="{Binding Product}" />
+							<DataGridTextColumn Width="34*" Header="Производитель"
+								Binding="{Binding Producer}" />
+							<c:DataGridTextColumnEx Width="16*" Header="Цена" Binding="{Binding Cost}"
+								TextAlignment="Right" />
 						</DataGrid.Columns>
 					</c:DataGrid>
 				</TabItem>
@@ -182,17 +241,19 @@
 
 			<StackPanel Grid.Column="2">
 				<Label>Наценка</Label>
-				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left"></xctk:IntegerUpDown>
-				<Label Name="RetailCost"></Label>
+				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left" />
+				<Label Name="RetailCost" />
 				<Label>Сумма</Label>
 				<Label Name="CurrentOffer_OrderLine_Order_Sum">
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}" Value="true">
+								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}"
+									Value="true">
 									<Setter Property="Foreground" Value="Green" />
 								</DataTrigger>
-								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}" Value="false">
+								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsValid}"
+									Value="false">
 									<Setter Property="Foreground" Value="Red" />
 								</DataTrigger>
 							</Style.Triggers>

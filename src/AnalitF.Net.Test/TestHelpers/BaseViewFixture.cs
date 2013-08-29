@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		[TearDown]
-		public void TearDown()
+		public void BaseViewFixtureTearDown()
 		{
 			if (ViewFixtureSetup.BindingErrors.Count > 0) {
 				throw new Exception(ViewFixtureSetup.BindingErrors.Implode(Environment.NewLine));

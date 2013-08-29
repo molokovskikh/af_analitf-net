@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.NHibernate;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;

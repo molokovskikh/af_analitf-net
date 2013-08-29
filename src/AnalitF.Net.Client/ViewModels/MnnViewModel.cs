@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 		}
 
-		protected override void Update()
+		public override void Update()
 		{
 			Mnns.Recalculate();
 		}

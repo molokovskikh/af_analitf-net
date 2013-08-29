@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Commands

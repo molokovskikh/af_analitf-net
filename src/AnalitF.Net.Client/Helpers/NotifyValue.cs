@@ -18,12 +18,22 @@ namespace AnalitF.Net.Client.Helpers
 		{
 		}
 
+		/// <summary>
+		/// этот конструктор предназначен для создания поля с изменяемым начальным значением
+		/// суть в том что это поле которое можно редактировать, но у него есть начальное значение
+		/// которое зависит от других полей
+		/// </summary>
 		public NotifyValue(bool respectValue, Func<T> calc, params INotifyPropertyChanged[] props)
 			: this(calc, props)
 		{
 			this.respectValue = respectValue;
 		}
 
+		/// <summary>
+		/// конструктор создает поле с начальным значением и функцией которая вычисляет следующее значение
+		/// следующее значение поля будет вычислено когда изменится одно из зависимыг полей
+		/// или будет вызван метод Recalculate
+		/// </summary>
 		public NotifyValue(T value, Func<T> calc, params INotifyPropertyChanged[] props)
 		{
 			this.value = value;
@@ -72,6 +82,11 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		public void Mute(T value)
+		{
+			this.value = value;
+		}
+
 		public static implicit operator T(NotifyValue<T> value)
 		{
 			return value.value;
@@ -84,6 +99,7 @@ namespace AnalitF.Net.Client.Helpers
 			return value.ToString();
 		}
 
+
 		public IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue()
 		{
 			return this.ObservableForProperty(v => v.Value)
@@ -92,11 +108,6 @@ namespace AnalitF.Net.Client.Helpers
 					? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()
 					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))
 				.Switch();
-		}
-
-		public IObservable<EventPattern<PropertyChangedEventArgs>> Changed()
-		{
-			return Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged");
 		}
 
 		public void Refresh()

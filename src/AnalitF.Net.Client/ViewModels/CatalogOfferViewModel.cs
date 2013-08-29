@@ -18,7 +18,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
 
-		private CatalogOfferViewModel()
+		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
+			: base(initOfferId)
 		{
 			NeedToCalculateDiff = true;
 			DisplayName = "Сводный прайс-лист";
@@ -52,8 +53,8 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 		}
 
-		public CatalogOfferViewModel(Catalog catalog)
-			: this()
+		public CatalogOfferViewModel(Catalog catalog, OfferComposedId initOfferId = null)
+			: this(initOfferId)
 		{
 			filterCatalog = catalog;
 			Name = catalog.FullName;
@@ -211,11 +212,7 @@ namespace AnalitF.Net.Client.ViewModels
 					Value = price
 				}
 			};
-			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders);
-
-			//todo: временно не работает пока не придумаю решения по лучше
-			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == CurrentOffer.Id);
-
+			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders, CurrentOffer.Id);
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
 

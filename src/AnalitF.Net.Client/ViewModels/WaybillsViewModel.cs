@@ -127,7 +127,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.Navigate(new WaybillLineSearch(Begin.Value, End.Value.AddDays(1)));
 		}
 
-		protected override void Update()
+		public override void Update()
 		{
 			//скорбная песнь: при переходе на форму сводный заказ
 			//wpf обновит состояние флага IsFilterByDocumentDate

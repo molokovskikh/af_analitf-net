@@ -2,6 +2,7 @@
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
+using Common.NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 

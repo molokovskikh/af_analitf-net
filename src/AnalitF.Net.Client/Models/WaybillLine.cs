@@ -141,12 +141,11 @@ namespace AnalitF.Net.Client.Models
 			get { return RetailMarkup > MaxRetailMarkup; }
 		}
 
-		//todo: если null?
 		[Style("RetailMarkup", "RetailCost", "RetailSum", "RealRetailMarkup",
 			Description = "Розничная цена: не рассчитана")]
 		public virtual bool IsMarkupInvalid
 		{
-			get { return RetailMarkup  == null; }
+			get { return RetailMarkup == null; }
 		}
 
 		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]

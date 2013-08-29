@@ -130,9 +130,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowCatalog)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = StatelessSession.Get<Offer>(offerId);
-
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog, offerId);
 			Shell.Navigate(offerViewModel);
 		}
 

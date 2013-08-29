@@ -1,33 +1,27 @@
 ﻿using System;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
 	public abstract class BaseOrderViewModel : BaseScreen
 	{
-		private DateTime begin;
-		private DateTime end;
-
-		private bool isSentSelected;
-		private bool isCurrentSelected;
 		private bool isSendInit;
 
 		public BaseOrderViewModel()
 		{
-			IsCurrentSelected = true;
-			this.ObservableForProperty(m => m.Begin)
-				.Merge(this.ObservableForProperty(m => m.End))
-				.Subscribe(n => Update());
+			IsCurrentSelected = new NotifyValue<bool>(true);
+			IsSentSelected = new NotifyValue<bool>();
+			Begin = new NotifyValue<DateTime>(DateTime.Today);
+			End = new NotifyValue<DateTime>(DateTime.Today);
+			BeginEnabled = new NotifyValue<bool>(() => IsSentSelected, IsSentSelected);
+			EndEnabled = new NotifyValue<bool>(() => IsSentSelected, IsSentSelected);
+			Begin.Changed().Merge(End.Changed())
+				.Subscribe(_ => Update());
 
-			this.ObservableForProperty(m => m.IsSentSelected)
-				.Subscribe(m => {
-					NotifyOfPropertyChange("BeginEnabled");
-					NotifyOfPropertyChange("EndEnabled");
-				});
-
-			this.ObservableForProperty(m => m.IsSentSelected)
-				.Merge(this.ObservableForProperty(m => m.IsCurrentSelected))
+			IsSentSelected.Changed()
+				.Merge(IsCurrentSelected.Changed())
 				.Skip(1)
 				.Take(1)
 				.Repeat()
@@ -39,56 +33,11 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 		}
 
-		public abstract void Update();
-
-		public bool IsCurrentSelected
-		{
-			get { return isCurrentSelected; }
-			set
-			{
-				isCurrentSelected = value;
-				NotifyOfPropertyChange("IsCurrentSelected");
-			}
-		}
-
-		public bool IsSentSelected
-		{
-			get { return isSentSelected; }
-			set
-			{
-				isSentSelected = value;
-				NotifyOfPropertyChange("IsSentSelected");
-			}
-		}
-
-		public DateTime Begin
-		{
-			get { return begin; }
-			set
-			{
-				begin = value;
-				NotifyOfPropertyChange("Begin");
-			}
-		}
-
-		public bool BeginEnabled
-		{
-			get { return IsSentSelected; }
-		}
-
-		public DateTime End
-		{
-			get { return end; }
-			set
-			{
-				end = value;
-				NotifyOfPropertyChange("End");
-			}
-		}
-
-		public bool EndEnabled
-		{
-			get { return IsSentSelected; }
-		}
+		public NotifyValue<bool> IsCurrentSelected { get; set ;}
+		public NotifyValue<bool> IsSentSelected { get; set; }
+		public NotifyValue<DateTime> Begin { get; set; }
+		public NotifyValue<bool> BeginEnabled { get; set; }
+		public NotifyValue<DateTime> End { get; set; }
+		public NotifyValue<bool> EndEnabled { get; set; }
 	}
 }

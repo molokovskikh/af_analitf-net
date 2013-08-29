@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			manager.DefaultResult = MessageBoxResult.Yes;
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(1));
-			model.CurrentLine = model.Lines.Value.First(l => l.Id == offer.OrderLine.Id);
+			model.CurrentLine.Value = model.Lines.Value.First(l => l.Id == offer.OrderLine.Id);
 			model.Delete();
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
 		}
@@ -52,8 +53,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_sent_orders()
 		{
-			model.IsSentSelected = true;
-			model.IsCurrentSelected = false;
+			model.IsSentSelected.Value = true;
+			model.IsCurrentSelected.Value = false;
 
 			Assert.That(model.SentLines, Is.Not.Null);
 		}
@@ -83,7 +84,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			MakeOrder(session.Query<Offer>().First());
 
-			model.CurrentLine = model.Lines.Value.First();
+			model.CurrentLine.Value = model.Lines.Value.First();
 			Assert.That(model.ProductInfo.CanShowCatalog, Is.True);
 			model.ProductInfo.ShowCatalog();
 
@@ -103,8 +104,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var order = MakeOrder(session.Query<Offer>().First());
 
-			model.CurrentLine = model.Lines.Value.FirstOrDefault();
-			model.CurrentLine.Count = 0;
+			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
+			model.CurrentLine.Value.Count = 0;
 			model.OfferUpdated();
 			model.OfferCommitted();
 			testScheduler.AdvanceByMs(5000);
@@ -122,11 +123,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Update_stat_on_delete()
 		{
 			MakeOrder(session.Query<Offer>().First());
-			model.CurrentLine = model.Lines.Value.FirstOrDefault();
+			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 
 			shell.NotifyOfPropertyChange("CurrentAddress");
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
-			model.CurrentLine.Count = 0;
+			model.CurrentLine.Value.Count = 0;
 			model.OfferUpdated();
 			testScheduler.AdvanceByMs(1000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
@@ -136,12 +137,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Update_stat()
 		{
 			MakeOrder(session.Query<Offer>().First());
-			model.CurrentLine = model.Lines.Value.FirstOrDefault();
-			model.CurrentLine.Count = 100;
+			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
+			model.CurrentLine.Value.Count = 100;
 			model.OfferUpdated();
 			model.OfferCommitted();
 			testScheduler.AdvanceByMs(1000);
-			Assert.That(shell.Stat.Value.Sum, Is.EqualTo(model.CurrentLine.Sum));
+			Assert.That(shell.Stat.Value.Sum, Is.EqualTo(model.CurrentLine.Value.Sum));
 		}
 
 		[Test]
@@ -151,13 +152,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder();
 
 			Assert.That(model.Sum.Value, Is.GreaterThan(0));
-			model.IsCurrentSelected = false;
-			model.IsSentSelected = true;
+			model.IsCurrentSelected.Value = false;
+			model.IsSentSelected.Value = true;
 
 			Assert.That(model.Sum.Value, Is.EqualTo(0));
 
-			model.IsSentSelected = false;
-			model.IsCurrentSelected = true;
+			model.IsSentSelected.Value = false;
+			model.IsCurrentSelected.Value = true;
 			Assert.That(model.Sum.Value, Is.GreaterThan(0));
 		}
 	}

@@ -30,7 +30,7 @@
 		</StackPanel>
 
 		<TabControl Grid.Row="1" Grid.Column="0">
-			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected}">
+			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected.Value}">
 				<c:DataGrid x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
 					CellStyle="{StaticResource ResourceKey=BaseOrder}"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}"
@@ -66,7 +66,7 @@
 					</DataGrid.Columns>
 				</c:DataGrid>
 			</TabItem>
-			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected}">
+			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected.Value}">
 				<c:DataGrid x:Name="SentOrders" CanUserDeleteRows="True"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}"
 					binders:ContextMenuBehavior.PersistColumnSettings="true">
@@ -98,7 +98,7 @@
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
 			<Label>Сообщение поставщику</Label>
-			<TextBox Name="EditableOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected}"></TextBox>
+			<TextBox Name="EditableOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected.Value}"></TextBox>
 			<Label>Личные комментарии</Label>
 			<TextBox Name="EditableOrder_PersonalComment" Width="279" Height="104"></TextBox>
 		</StackPanel>

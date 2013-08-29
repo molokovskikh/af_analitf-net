@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -70,6 +71,16 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return true; }
 		}
 
+		public bool ShowPriceVisible
+		{
+			get { return IsCurrentOrder; }
+		}
+
+		public bool CanShowPrice
+		{
+			get { return Order.Price != null && IsCurrentOrder; }
+		}
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -77,11 +88,25 @@ namespace AnalitF.Net.Client.ViewModels
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
 		}
 
-		protected override void OnActivate()
+		protected override void OnViewAttached(object view, object context)
 		{
-			base.OnActivate();
+			base.OnViewAttached(view, context);
 
-			Order = (IOrder)Session.Load(type, orderId);
+			Attach(view, ProductInfo.Bindings);
+		}
+
+		public override void Update()
+		{
+			//Update - может быть вызван повторно если
+			//мы вернулись на текущую форму с другой формы где были отредактированы данные
+			if (Order != null)
+				Session.Evict(Order);
+			Order = (IOrder)Session.Get(type, orderId);
+			//если заказ был удален
+			if (Order == null) {
+				IsSuccessfulActivated = false;
+				return;
+			}
 			Lines = new ObservableCollection<IOrderLine>(Order.Lines);
 			Lines.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
@@ -89,13 +114,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (IsCurrentOrder)
 				editor.Lines = Lines as IList;
-		}
-
-		protected override void OnViewAttached(object view, object context)
-		{
-			base.OnViewAttached(view, context);
-
-			Attach(view, ProductInfo.Bindings);
 		}
 
 		public PrintResult Print()
@@ -108,26 +126,14 @@ namespace AnalitF.Net.Client.ViewModels
 			ProductInfo.ShowCatalog();
 		}
 
-		public bool ShowPriceVisible
-		{
-			get { return IsCurrentOrder; }
-		}
-
-		public bool CanShowPrice
-		{
-			get { return Order.Price != null && IsCurrentOrder; }
-		}
-
 		public void ShowPrice()
 		{
 			if (!CanShowPrice)
 				return;
 
-			var offerViewModel = new PriceOfferViewModel(Order.Price.Id, false);
-			//временно не работает пока не придумаю решения по лучше
-			//var offerId = ((OrderLine)CurrentLine).OfferId;
-			//offerViewModel.CurrentOffer = offerViewModel.Offers.FirstOrDefault(o => o.Id == offerId);
-
+			var offerViewModel = new PriceOfferViewModel(Order.Price.Id,
+				false,
+				CurrentLine == null ? null : ((OrderLine)CurrentLine).OfferId);
 			Shell.Navigate(offerViewModel);
 		}
 
@@ -139,7 +145,6 @@ namespace AnalitF.Net.Client.ViewModels
 			var model = new SearchOfferViewModel();
 			model.SearchText = args.Text;
 			Shell.Navigate(model);
-
 		}
 
 		public void Delete()

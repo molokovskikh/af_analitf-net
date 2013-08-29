@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> CanMark { get; set; }
 
-		protected override void Update()
+		public override void Update()
 		{
 			Rejects.Recalculate();
 		}

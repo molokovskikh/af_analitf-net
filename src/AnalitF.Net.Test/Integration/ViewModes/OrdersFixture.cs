@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -67,8 +68,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Load_order_on_open_tab()
 		{
 			Assert.That(model.SentOrders, Is.Null);
-			model.IsSentSelected = true;
-			model.IsCurrentSelected = false;
+			model.IsSentSelected.Value = true;
+			model.IsCurrentSelected.Value = false;
 			Assert.That(model.SentOrders, Is.Not.Null);
 		}
 
@@ -87,8 +88,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Print_sent_order()
 		{
 			MakeSentOrder();
-			model.IsSentSelected = true;
-			model.IsCurrentSelected = false;
+			model.IsSentSelected.Value = true;
+			model.IsCurrentSelected.Value = false;
 			Assert.That(model.CanPrint, Is.True);
 			var doc = model.Print().Paginator;
 			Assert.That(doc, Is.Not.Null);
@@ -215,8 +216,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.CanRestore, Is.True);
 			model.Restore();
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
-			model.IsCurrentSelected = true;
-			model.IsSentSelected = false;
+			model.IsCurrentSelected.Value = true;
+			model.IsSentSelected.Value = false;
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
 
@@ -256,34 +257,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			return newOffer;
 		}
 
-		private Order PrepareCurrent()
-		{
-			session.DeleteEach<Order>();
-
-			var order = MakeOrder();
-			model.IsCurrentSelected = true;
-			model.CurrentOrder = model.Orders.First();
-			model.SelectedOrders.Add(model.CurrentOrder);
-			return order;
-		}
-
-		private SentOrder PrepareSent()
-		{
-			session.DeleteEach<Order>();
-			session.DeleteEach<SentOrder>();
-			var order = MakeSentOrder();
-
-			SelectSent();
-			return order;
-		}
-
-		private void SelectSent()
-		{
-			model.IsCurrentSelected = false;
-			model.IsSentSelected = true;
-			model.CurrentSentOrder = model.SentOrders.First();
-			model.SelectedSentOrders.Add(model.CurrentSentOrder);
-		}
 
 		[Test]
 		public void Move()
@@ -334,6 +307,50 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			model.AddressSelector.All.Value = true;
 			Assert.IsTrue(shell.ShowAllAddresses);
+		}
+
+		[Test]
+		public void Update_order()
+		{
+			var order = PrepareCurrent();
+			shell.Navigate(model);
+
+			model.EnterOrder();
+			var lines = (OrderDetailsViewModel)shell.ActiveItem;
+			lines.CurrentLine = lines.Lines.First();
+			lines.Delete();
+			Assert.AreEqual(0, lines.Lines.Count);
+			Assert.AreEqual(model, shell.ActiveItem);
+			Assert.That(model.Orders.Select(o => o.Id), Is.Not.Contains(order.Id));
+		}
+
+		private Order PrepareCurrent()
+		{
+			session.DeleteEach<Order>();
+
+			var order = MakeOrder();
+			model.IsCurrentSelected.Value = true;
+			model.CurrentOrder = model.Orders.First();
+			model.SelectedOrders.Add(model.CurrentOrder);
+			return order;
+		}
+
+		private SentOrder PrepareSent()
+		{
+			session.DeleteEach<Order>();
+			session.DeleteEach<SentOrder>();
+			var order = MakeSentOrder();
+
+			SelectSent();
+			return order;
+		}
+
+		private void SelectSent()
+		{
+			model.IsCurrentSelected.Value = false;
+			model.IsSentSelected.Value = true;
+			model.CurrentSentOrder = model.SentOrders.First();
+			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
 	}
 }

@@ -22,41 +22,39 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable
 	{
-		private OrderLine currentLine;
-		private Price currentPrice;
-
 		private Editor editor;
 
 		public OrderLinesViewModel()
 		{
+			DisplayName = "Сводный заказ";
+			CurrentLine = new NotifyValue<OrderLine>();
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
+			CurrentPrice = new NotifyValue<Price>();
+			CanDelete = new NotifyValue<bool>(() =>  CurrentLine.Value != null && IsCurrentSelected,
+				CurrentLine, IsCurrentSelected);
 
 			Sum = new NotifyValue<decimal>(() => {
 				if (IsCurrentSelected)
 					return Lines.Value.Sum(l => l.Sum);
 				return SentLines.Value.Sum(l => l.Sum);
-			}, SentLines, Lines);
+			}, SentLines, Lines, IsCurrentSelected);
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
 				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
-				l => CurrentLine = l);
+				l => CurrentLine.Value = l);
 			AddressSelector = new AddressSelector(Session, UiScheduler, this);
 			editor = new Editor(OrderWarning, Manager);
 
-			DisplayName = "Сводный заказ";
+			AddressSelector.All.Changed()
+				.Merge(CurrentPrice.Changed())
+				.Subscribe(_ => Update());
 
-			Dep(m => m.CanDelete, m => m.CurrentLine, m => m.IsCurrentSelected);
-			Dep(Update, m => m.CurrentPrice, m => m.AddressSelector.All.Value);
-
-			this.ObservableForProperty(m => m.IsCurrentSelected)
-				.Subscribe(_ => Sum.Recalculate());
-
-			this.ObservableForProperty(m => m.CurrentLine)
+			this.ObservableForProperty(m => m.CurrentLine.Value)
 				.Subscribe(e => ProductInfo.CurrentOffer = e.Value);
 
-			this.ObservableForProperty(m => m.CurrentLine)
+			this.ObservableForProperty(m => m.CurrentLine.Value)
 				.Select(e => e.Value)
 				.BindTo(editor, e => e.CurrentEdit);
 
@@ -66,9 +64,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			editor.ObservableForProperty(e => e.CurrentEdit)
 				.Select(e => e.Value)
-				.BindTo(this, m => m.CurrentLine);
+				.BindTo(this, m => m.CurrentLine.Value);
 
-			var observable = this.ObservableForProperty(m => m.CurrentLine.Count)
+			var observable = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
@@ -78,19 +76,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			//пока устанавливаем значения не надо оповещать об изменения
 			//все равно будет запрос когда форма активируется
-			IsNotifying = false;
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
-			CurrentPrice = Prices.FirstOrDefault();
-
-			Begin = DateTime.Today;
-			End = DateTime.Today;
-			IsNotifying = true;
+			CurrentPrice.Mute(Prices.FirstOrDefault());
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
-		[DataMember]
 		public AddressSelector AddressSelector { get; set; }
 		public ProductInfo ProductInfo { get; set; }
 
@@ -110,27 +102,22 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressSelector.Init();
 		}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-
-			Update();
-		}
-
 		public override void Update()
 		{
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>()
 					.Where(l => !l.Order.Frozen);
 
-				if (CurrentPrice != null && CurrentPrice.Id != null) {
-					var priceId = CurrentPrice.Id;
+				if (CurrentPrice.Value != null && CurrentPrice.Value.Id != null) {
+					var priceId = CurrentPrice.Value.Id;
 					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
 				if (!AddressSelector.All.Value) {
-					var addressId = Address.Id;
-					query = query.Where(l => l.Order.Address.Id == addressId);
+					if (Address != null) {
+						var addressId = Address.Id;
+						query = query.Where(l => l.Order.Address.Id == addressId);
+					}
 				}
 				else {
 					var addresses = AddressSelector.Addresses.Where(i => i.IsSelected)
@@ -148,14 +135,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			else {
 				var addressId = Address.Id;
+				var begin = Begin.Value;
+				var end = End.Value.AddDays(1);
 				var query = StatelessSession.Query<SentOrderLine>()
 					.Fetch(l => l.Order)
 					.ThenFetch(o => o.Price)
-					.Where(l => l.Order.SentOn > Begin && l.Order.SentOn < End.AddDays(1))
+					.Where(l => l.Order.SentOn > begin && l.Order.SentOn < end)
 					.Where(l => l.Order.Address.Id == addressId);
 
-				if (CurrentPrice != null && CurrentPrice.Id != null) {
-					var priceId = CurrentPrice.Id;
+				if (CurrentPrice.Value != null && CurrentPrice.Value.Id != null) {
+					var priceId = CurrentPrice.Value.Id;
 					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
@@ -165,21 +154,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private void Dep(Action action, params Expression<Func<OrderLinesViewModel, object>>[] to)
-		{
-			to.Select(e => this.ObservableForProperty(e))
-				.Merge()
-				.Subscribe(e => action());
-		}
-
-		protected void Dep(Expression<Func<OrderLinesViewModel, object>> from, params Expression<Func<OrderLinesViewModel, object>>[] to)
-		{
-			var name = @from.GetProperty();
-			to.Select(e => this.ObservableForProperty(e))
-				.Merge()
-				.Subscribe(e => NotifyOfPropertyChange(name));
-		}
-
 		protected void Calculate()
 		{
 			foreach (var offer in Lines.Value)
@@ -187,16 +161,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public List<Price> Prices { get; set; }
-
-		public Price CurrentPrice
-		{
-			get { return currentPrice; }
-			set
-			{
-				currentPrice = value;
-				NotifyOfPropertyChange("CurrentPrice");
-			}
-		}
+		public NotifyValue<Price> CurrentPrice { get; set; }
 
 		[Export]
 		public NotifyValue<ObservableCollection<OrderLine>> Lines { get; set; }
@@ -206,27 +171,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<decimal> Sum { get; set; }
 
-		public OrderLine CurrentLine
-		{
-			get { return currentLine; }
-			set
-			{
-				if (currentLine == value)
-					return;
+		public NotifyValue<OrderLine> CurrentLine { get; set; }
 
-				currentLine = value;
-				NotifyOfPropertyChange("CurrentLine");
-			}
+		public NotifyValue<bool> CanDelete { get; set; }
+
+		public bool CanPrint
+		{
+			get { return true; }
 		}
 
 		public void EnterLine()
 		{
 			ProductInfo.ShowCatalog();
-		}
-
-		public bool CanDelete
-		{
-			get { return CurrentLine != null && IsCurrentSelected; }
 		}
 
 		public void Delete()
@@ -245,11 +201,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public void OfferCommitted()
 		{
 			editor.Committed();
-		}
-
-		public bool CanPrint
-		{
-			get { return true; }
 		}
 
 		public PrintResult Print()

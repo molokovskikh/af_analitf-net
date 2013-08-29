@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<List<WaybillLine>> Lines { get; set; }
 
-		protected override void Update()
+		public override void Update()
 		{
 			var query = StatelessSession.Query<WaybillLine>()
 				.Where(l => l.Waybill.WriteTime >= begin && l.Waybill.WriteTime < end);

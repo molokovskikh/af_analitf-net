@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowLeaders.Value = !ShowLeaders.Value;
 		}
 
-		protected override void Update()
+		public override void Update()
 		{
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {

@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -32,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private IList<Order> orders;
 		private IList<SentOrder> sentOrders;
 		private SentOrder currentSentOrder;
-		private bool forceCurrentUpdate;
 
 		public OrdersViewModel()
 		{
@@ -42,13 +42,11 @@ namespace AnalitF.Net.Client.ViewModels
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
 
-			IsNotifying = false;
-			Begin = DateTime.Today.AddMonths(-3).FirstDayOfMonth();
-			End = DateTime.Today;
-			IsNotifying = true;
+			Begin.Mute(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
+			End.Mute(DateTime.Today);
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
-				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected))
+				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
 					NotifyOfPropertyChange("CanFreeze");
@@ -64,7 +62,8 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("EditableOrder");
 				}));
 
-			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsCurrentSelected)
+			OnCloseDisposable.Add(IsCurrentSelected
+				.Changed()
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("FreezeVisible");
 					NotifyOfPropertyChange("UnfreezeVisible");
@@ -100,7 +99,6 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 		}
 
-		[DataMember]
 		public AddressSelector AddressSelector { get; set; }
 
 		public List<Address> AddressesToMove { get; set; }
@@ -119,19 +117,14 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToList();
 		}
 
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-
-			Update();
-		}
-
 		public override void Update()
 		{
 			if (IsSentSelected) {
 				var filterAddresses = AddressFilter().Select(a => a.Id).ToArray();
+				var begin = Begin.Value;
+				var end = End.Value.AddDays(1);
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
-					.Where(o => o.SentOn >= Begin && o.SentOn < End.AddDays(1)
+					.Where(o => o.SentOn >= begin && o.SentOn < end
 						&& filterAddresses.Contains(o.Address.Id))
 					.OrderBy(o => o.SentOn)
 					.Fetch(o => o.Price)
@@ -140,8 +133,13 @@ namespace AnalitF.Net.Client.ViewModels
 					.ToList());
 			}
 
-			if (IsCurrentSelected || forceCurrentUpdate) {
-				if (forceCurrentUpdate)
+			//обновить данные нужно в нескольких ситуациях
+			//изменился фильтр
+			//изменились данные в базе
+			//если изменился фильтры данные загружать не нужно
+			//если изменилилсь данные то нужно загрузить данные повторно
+			if (IsCurrentSelected || updateOnActivate) {
+				if (updateOnActivate)
 					RebuildSessionIfNeeded();
 
 				//этот вызов должен быть после RebuildSessionIfNeeded
@@ -171,7 +169,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void RebuildSessionIfNeeded()
 		{
-			forceCurrentUpdate = false;
 			Session.Flush();
 			Session.Clear();
 			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые
@@ -487,7 +484,7 @@ namespace AnalitF.Net.Client.ViewModels
 			using(var transaction = session.BeginTransaction()) {
 				command.Session = session;
 				command.Execute();
-				forceCurrentUpdate = session.IsDirty();
+				updateOnActivate = session.IsDirty();
 				transaction.Commit();
 			}
 			Update();

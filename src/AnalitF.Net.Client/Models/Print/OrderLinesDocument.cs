@@ -30,8 +30,8 @@ namespace AnalitF.Net.Client.Models.Print
 			else {
 				Header(String.Format("Отправленный сводный заказ {0}", address == null ? "" : address.Name));
 				var text = String.Format("Период: {0} - {1}",
-					model.Begin.ToShortDateString(),
-					model.End.ToShortDateString());
+					model.Begin.Value.ToShortDateString(),
+					model.End.Value.ToShortDateString());
 				Header(text);
 			}
 			var headers = new [] {

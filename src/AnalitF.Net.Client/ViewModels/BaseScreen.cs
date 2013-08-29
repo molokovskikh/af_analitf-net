@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
 		private TableSettings tableSettings = new TableSettings();
-		private bool updateOnActivate = true;
+		protected bool updateOnActivate = true;
 
 		/// <summary>
 		/// Флаг отвечает за обновление данных на форме после активации
@@ -132,8 +132,8 @@ namespace AnalitF.Net.Client.ViewModels
 			IsSuccessfulActivated = true;
 
 			if (updateOnActivate) {
-				updateOnActivate = false;
 				Update();
+				updateOnActivate = false;
 			}
 		}
 
@@ -184,7 +184,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//это нужно при открытии формы
 		//и если форма была деактивирована а затем вновь активирована
 		//и данные в базе изменились
-		protected virtual void Update()
+		public virtual void Update()
 		{
 		}
 

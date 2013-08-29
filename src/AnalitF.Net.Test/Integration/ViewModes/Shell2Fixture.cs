@@ -14,6 +14,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.MySql;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;

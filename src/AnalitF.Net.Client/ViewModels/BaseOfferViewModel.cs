@@ -20,25 +20,25 @@ namespace AnalitF.Net.Client.ViewModels
 	public abstract class BaseOfferViewModel : BaseScreen
 	{
 		private Catalog currentCatalog;
-		protected List<string> producers;
-		protected List<Offer> offers;
-		private Offer currentOffer;
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		private Offer lastEditOffer;
-
-		protected bool NeedToCalculateDiff;
-
-		protected string autoCommentText;
-		protected bool resetAutoComment;
-
-		protected bool NavigateOnShowCatalog;
-
 		private object orderHistoryCacheKey;
+		private Offer currentOffer;
 
-		public BaseOfferViewModel()
+		private string autoCommentText;
+		private bool resetAutoComment;
+
+		protected List<string> producers;
+		protected List<Offer> offers;
+		protected bool NeedToCalculateDiff;
+		protected bool NavigateOnShowCatalog;
+		private OfferComposedId initOfferId;
+
+		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
+			this.initOfferId = initOfferId;
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
 			Producers = new NotifyValue<List<string>>();
 
@@ -169,8 +169,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer == null)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog);
-			offerViewModel.CurrentOffer = CurrentOffer;
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog,
+				CurrentOffer == null ? null : CurrentOffer.Id);
 
 			if (NavigateOnShowCatalog) {
 				Shell.Navigate(offerViewModel);
@@ -315,6 +315,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Update()
 		{
 			Query();
+			if (CurrentOffer == null)
+				CurrentOffer = Offers.Where(o => o.Id == initOfferId)
+					.DefaultIfEmpty(Offers.FirstOrDefault())
+					.FirstOrDefault();
 			Calculate();
 			LoadOrderItems();
 		}

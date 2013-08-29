@@ -1,4 +1,5 @@
 ﻿using AnalitF.Net.Client.Models;
+using Common.NHibernate;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Helpers

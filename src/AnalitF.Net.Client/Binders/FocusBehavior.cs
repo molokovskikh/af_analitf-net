@@ -27,7 +27,9 @@ namespace AnalitF.Net.Client.Binders
 			element.Loaded += (sender, args) => {
 				if (lastFocusedElement != null) {
 					if (lastFocusedElement is DataGridCell) {
-						var grid = ((DataGridCell)lastFocusedElement).VisualParents().OfType<DataGrid>().FirstOrDefault();
+						var grid = ((DataGridCell)lastFocusedElement).VisualParents()
+							.OfType<DataGrid>()
+							.FirstOrDefault();
 						if (grid != null)
 							DataGridHelper.Focus(grid);
 					}

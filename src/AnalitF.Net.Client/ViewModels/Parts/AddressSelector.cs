@@ -14,7 +14,6 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	[DataContract]
 	public class AddressSelector : ViewAware
 	{
 		private BaseOrderViewModel screen;

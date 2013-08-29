@@ -2,6 +2,9 @@
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Test.Fixtures;
+using AnalitF.Net.Client.Test.Tasks;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Models;
 using Common.Tools;
 using Devart.Data.MySql;
@@ -51,7 +54,7 @@ namespace AnalitF.Net.Test.Integration
 					if (settings.MappingToken != AppBootstrapper.NHibernate.MappingHash)
 						return true;
 				}
-				catch(Exception e) {
+				catch(Exception) {
 					return true;
 				}
 			}
@@ -63,12 +66,12 @@ namespace AnalitF.Net.Test.Integration
 
 		private void ImportData()
 		{
-			var import = new ExportImportFixture();
-			import.IntegrationSetup();
-			import.Setup();
-			import.Load_data();
-			import.Teardown();
-			import.IntegrationTearDown();
+			var sampleData = new SampleData();
+			FixtureHelper.RunFixture(sampleData);
+			FixtureHelper.RunFixture(new LoadSampleData {
+				Client = sampleData.Client,
+				MaxProducerCosts = sampleData.MaxProducerCosts
+			});
 		}
 
 		private void BackupData()

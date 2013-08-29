@@ -43,7 +43,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private string activeSearchTerm;
 		private PriceComposedId priceId;
 
-		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders)
+		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders, OfferComposedId initOfferId = null)
+			: base(initOfferId)
 		{
 			//мы не можем принимать объект который принадлежит другой форме
 			//это может вызвать исключение если сессия в которой был загружен объект будет закрыта

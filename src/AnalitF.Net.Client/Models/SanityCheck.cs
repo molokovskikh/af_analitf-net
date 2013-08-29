@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
+using Common.NHibernate;
 using Common.Tools;
 using Devart.Data.MySql;
 using Iesi.Collections;

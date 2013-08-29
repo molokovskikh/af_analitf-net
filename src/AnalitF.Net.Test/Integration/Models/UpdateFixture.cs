@@ -131,7 +131,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Sent_price_settings_changes()
 		{
-			ExportImportFixture.CreateUser(session);
+			SampleData.CreateUser(session);
 			session.Transaction.Commit();
 			restoreUser = true;
 
