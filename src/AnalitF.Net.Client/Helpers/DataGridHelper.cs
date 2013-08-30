@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -11,7 +13,7 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static void Centrify(DataGrid grid)
 		{
-			var scrollViewer = grid.DeepChildren().OfType<ScrollViewer>().FirstOrDefault();
+			var scrollViewer = grid.DeepChildren<ScrollViewer>().FirstOrDefault();
 			if (scrollViewer == null)
 				return;
 			var selected = grid.SelectedItem;
@@ -41,7 +43,8 @@ namespace AnalitF.Net.Client.Helpers
 
 			grid.ScrollIntoView(item);
 			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(item);
-			var column = grid.CurrentCell.Column;
+			var column = grid.CurrentCell.Column
+				?? grid.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible);
 			var cell = GetCell(container, column);
 			if (cell != null)
 				Keyboard.Focus(cell);

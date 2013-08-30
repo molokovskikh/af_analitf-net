@@ -147,6 +147,11 @@ namespace AnalitF.Net.Client.Helpers
 			return view.Children().Flat(Children);
 		}
 
+		public static IEnumerable<T> DeepChildren<T>(this DependencyObject view)
+		{
+			return view.Children().Flat(Children).OfType<T>();
+		}
+
 		public static void PrintVisualTree(Visual visual, int offset = 0)
 		{
 			for(var i = 0; i < offset; i++)

@@ -4,11 +4,14 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Loader.Entity;
+using ReactiveUI.Xaml;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -26,6 +29,16 @@ namespace AnalitF.Net.Client.Binders
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
 			AttachInput(grid, searchText);
+			var binding = BindingOperations.GetBinding(grid, Selector.SelectedItemProperty);
+			//если биндинга нет это странно
+			//магия что бы пофиксить ошибку в .net 4.0 см комментарий к CurrentItemStubProperty
+			if (binding != null) {
+				BindingOperations.SetBinding(grid,
+					Controls.DataGrid.CurrentItemStubProperty,
+					new Binding {
+						Path = new PropertyPath(binding.Path.Path, binding.Path.PathParameters),
+					});
+			}
 
 			grid.KeyDown += (sender, args) => {
 				if (!searchText.IsEnabled)

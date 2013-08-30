@@ -9,12 +9,12 @@ using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Client.Binders
 {
-	public class ContextMenuBehavior
+	public class Persistable
 	{
 		public static readonly DependencyProperty PersistColumnSettingsProperty =
 			DependencyProperty.RegisterAttached("PersistColumnSettings",
 				typeof(bool),
-				typeof(ContextMenuBehavior),
+				typeof(Persistable),
 				new PropertyMetadata(false, PropertyChangedCallback));
 
 		public static bool GetPersistColumnSettings(DependencyObject o)

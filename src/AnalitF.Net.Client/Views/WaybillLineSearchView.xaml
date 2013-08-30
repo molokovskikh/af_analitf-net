@@ -19,7 +19,7 @@
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" x:Name="Lines"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Дата документа"
 					Binding="{Binding Waybill.WriteTime}" />

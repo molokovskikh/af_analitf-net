@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateOnShowCatalog = true;
 
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
-				t => Offers.FirstOrDefault(o => o.ProductSynonym.ToLower().Contains(t)),
+				t => Offers.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				o => CurrentOffer = o);
 		}
 

@@ -28,7 +28,8 @@ namespace AnalitF.Net.Client.Models
 		public void Restore(DataGridColumn column)
 		{
 			column.Width = Width;
-			column.Visibility = Visible;
+			if (Name != "Адрес заказа")
+				column.Visibility = Visible;
 			//мы не можем установить неопределенный индекс
 			if (DisplayIndex != -1)
 				column.DisplayIndex = DisplayIndex;

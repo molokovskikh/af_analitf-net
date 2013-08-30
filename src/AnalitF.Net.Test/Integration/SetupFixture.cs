@@ -5,6 +5,7 @@ using AnalitF.Net.Client;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
+using Castle.ActiveRecord;
 using Common.Models;
 using Common.Tools;
 using Devart.Data.MySql;
@@ -69,8 +70,7 @@ namespace AnalitF.Net.Test.Integration
 			var sampleData = new SampleData();
 			FixtureHelper.RunFixture(sampleData);
 			FixtureHelper.RunFixture(new LoadSampleData {
-				Client = sampleData.Client,
-				MaxProducerCosts = sampleData.MaxProducerCosts
+				Files = sampleData.Files,
 			});
 		}
 

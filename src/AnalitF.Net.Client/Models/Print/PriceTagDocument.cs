@@ -118,12 +118,12 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private static void ApplyDefaults(DependencyObject canvas)
 		{
-			canvas.DeepChildren().OfType<TextBlock>()
+			canvas.DeepChildren<TextBlock>()
 				.Each(e => {
 					e.Padding = new Thickness(2, 2, 0, 0);
 					e.FontFamily = new FontFamily("Arial");
 				});
-			canvas.DeepChildren().OfType<Label>()
+			canvas.DeepChildren<Label>()
 				.Each(e => {
 					e.FontFamily = new FontFamily("Arial");
 				});

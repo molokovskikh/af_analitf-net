@@ -36,7 +36,7 @@
 		</StackPanel>
 
 		<c:DataGrid x:Name="Waybills" Grid.Row="1"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="64*" Header="№"
 					Binding="{Binding Id}"

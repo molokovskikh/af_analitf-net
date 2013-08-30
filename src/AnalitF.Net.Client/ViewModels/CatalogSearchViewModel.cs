@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<Catalog>(UiScheduler,
-				v => Catalogs.FirstOrDefault(c => c.Name.Name.ToLower().StartsWith(v)),
+				v => Catalogs.FirstOrDefault(c => c.Name.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				v => CurrentCatalog = v);
 			QuickSearch.IsEnabled = false;
 

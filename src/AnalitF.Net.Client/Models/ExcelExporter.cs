@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.Models
 			var view = (UserControl) model.GetView();
 			if (view == null)
 				return null;
-			return view.DeepChildren().OfType<DataGrid>().Where(g => names.Contains(g.Name))
+			return view.DeepChildren<DataGrid>().Where(g => names.Contains(g.Name))
 				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 100 + Convert.ToUInt32(g.IsVisible) * 10)
 				.FirstOrDefault();
 		}

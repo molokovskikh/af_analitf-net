@@ -10,7 +10,6 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 			EditBehavior.Attach(Offers);
-			QuickSearchBehavior.AttachSearch(Offers, QuickSearch_SearchText);
 			DataGridHelper.CalculateColumnWidths(Offers);
 		}
 	}

@@ -11,22 +11,13 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class LoadSampleData
 	{
-		public bool Local = false;
-		public TestClient Client;
-		public TestPrice MaxProducerCosts;
+		public bool Local = true;
+		public List<UpdateData> Files;
 
 		public void Execute(ISession session)
 		{
 			new SanityCheck("").InitDb();
-
-			var exporter = new Exporter(session, Client.Users[0].Id, new Version()) {
-				MaxProducerCostPriceId = MaxProducerCosts.Id,
-				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id
-			};
-			var files = new List<UpdateData>();
-			exporter.Export(files);
-
-			var result = files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
+			var result = Files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
 				.Where(g => g.Count() > 1)
 				.Select(g => Tuple.Create(g.First(f => f.Content == null).LocalFileName,
 					g.First(f => f.Content != null).Content.Split(new[] { "\r\n" },

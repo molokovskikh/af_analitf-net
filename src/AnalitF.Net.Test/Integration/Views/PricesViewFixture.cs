@@ -27,8 +27,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var view = Bind(new PriceViewModel());
 
-			var search = view.DeepChildren().OfType<Control>().First(e => e.Name == "QuickSearch");
-			var text = search.DeepChildren().OfType<TextBox>().FirstOrDefault();
+			var search = view.DeepChildren<Control>().First(e => e.Name == "QuickSearch");
+			var text = search.DeepChildren<TextBox>().FirstOrDefault();
 
 			Assert.That(text, Is.Not.Null);
 		}

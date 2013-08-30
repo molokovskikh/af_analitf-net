@@ -96,7 +96,7 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Lines"
-			binders:ContextMenuBehavior.PersistColumnSettings="true"
+			binders:Persistable.PersistColumnSettings="true"
 			IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="180*" Header="Наименование"

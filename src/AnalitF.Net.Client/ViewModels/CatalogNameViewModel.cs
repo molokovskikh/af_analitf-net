@@ -27,11 +27,11 @@ namespace AnalitF.Net.Client.ViewModels
 			ParentModel = catalogViewModel;
 
 			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
-				v => CatalogNames.FirstOrDefault(n => n.Name.ToLower().StartsWith(v)),
+				v => CatalogNames.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalogName = c);
 
 			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,
-				v => Catalogs.FirstOrDefault(n => n.Form.ToLower().StartsWith(v)),
+				v => Catalogs.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalog = c);
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)

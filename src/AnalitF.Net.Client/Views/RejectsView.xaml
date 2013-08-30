@@ -6,23 +6,28 @@
 	binders:FocusBehavior.DefaultFocus="{x:Reference Rejects}">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel" CommandParameter="Mark" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="Mark" />
 	</UserControl.InputBindings>
 
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="*"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="Begin"></DatePicker>
+			<DatePicker Style="{StaticResource FilterElement}" Name="Begin" />
 			<Label>по</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="End"></DatePicker>
-			<CheckBox Name="ShowCauseReason" VerticalAlignment="Center" Style="{StaticResource FilterElement}">Выводить причину забраковки</CheckBox>
+			<DatePicker Style="{StaticResource FilterElement}" Name="End" />
+			<CheckBox Name="ShowCauseReason"
+				Style="{StaticResource FilterElement}">
+				Выводить причину забраковки
+			</CheckBox>
 			<Button Name="Mark" Style="{StaticResource FilterElement}">Пометить</Button>
 			<Button Name="ClearMarks" Style="{StaticResource FilterElement}">Снять все пометки</Button>
 		</StackPanel>
@@ -47,25 +52,28 @@
 
 		<Grid Grid.Row="2">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
-				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
 			<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Серия:</Label>
-			<Label Grid.Row="0" Grid.Column="1" Name="CurrentReject_Value_Series" FontWeight="Bold"></Label>
+			<Label Grid.Row="0" Grid.Column="1" Name="CurrentReject_Value_Series"
+				FontWeight="Bold" />
 			<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Номер письма:</Label>
 			<Label Grid.Row="1" Grid.Column="1" FontWeight="Bold">
 				<TextBlock>
-					<Run Name="CurrentReject_Value_LetterNo"></Run>
+					<Run Name="CurrentReject_Value_LetterNo" />
 					<Run> от </Run>
-					<Run Name="CurrentReject_Value_LetterDate"></Run>
+					<Run Name="CurrentReject_Value_LetterDate" />
 				</TextBlock>
 			</Label>
-			<TextBox FontWeight="Bold" Grid.Row="2" Grid.ColumnSpan="2" Height="30" Style="{StaticResource ReadOnlyText}" Padding="5" x:Name="CurrentReject_Value_CauseRejects"></TextBox>
+			<TextBox FontWeight="Bold" Grid.Row="2" Grid.ColumnSpan="2" Height="30"
+				Style="{StaticResource ReadOnlyText}" Padding="5"
+				x:Name="CurrentReject_Value_CauseRejects" />
 		</Grid>
 	</Grid>
 </UserControl>

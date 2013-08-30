@@ -128,7 +128,7 @@
     <Compile Include="Binders\CommandBinder.cs" />
     <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
-    <Compile Include="Binders\ContextMenuBehavior.cs" />
+    <Compile Include="Binders\Persistable.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\FocusBehavior.cs" />

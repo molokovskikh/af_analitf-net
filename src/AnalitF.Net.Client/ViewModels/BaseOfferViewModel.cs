@@ -316,9 +316,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Query();
 			if (CurrentOffer == null)
-				CurrentOffer = Offers.Where(o => o.Id == initOfferId)
-					.DefaultIfEmpty(Offers.FirstOrDefault())
-					.FirstOrDefault();
+				CurrentOffer = Offers.FirstOrDefault(o => o.Id == initOfferId);
 			Calculate();
 			LoadOrderItems();
 		}

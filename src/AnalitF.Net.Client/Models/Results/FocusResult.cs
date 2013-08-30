@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Execute(ActionExecutionContext context)
 		{
-			var element = context.View.DeepChildren().OfType<FrameworkElement>().First(o => o.Name == name);
+			var element = context.View.DeepChildren<FrameworkElement>().First(o => o.Name == name);
 			if (element is DataGrid)
 				DataGridHelper.Focus((DataGrid)element);
 			else

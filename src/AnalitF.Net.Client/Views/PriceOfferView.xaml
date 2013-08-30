@@ -54,7 +54,7 @@
 
 		<c:DataGrid Grid.Row="2" x:Name="Offers" CellStyle="{StaticResource ResourceKey=VitallyImportant}"
 			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="26*" Header="Код" Binding="{Binding Code}" />
 				<c:SearchableDataGridColumn Width="218*" Header="Название" Binding="{Binding ProductSynonym}"

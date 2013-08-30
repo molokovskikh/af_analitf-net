@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Integration
 					new TabItem { Content = new DataGrid() },
 				}
 			};
-			var count = view.DeepChildren().OfType<DataGrid>().Count();
+			var count = view.DeepChildren<DataGrid>().Count();
 			Assert.That(count, Is.EqualTo(2));
 		}
 

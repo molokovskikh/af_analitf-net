@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -26,7 +27,6 @@ namespace AnalitF.Net.Client.Controls
 				typeof(object),
 				typeof(DataGrid),
 				new FrameworkPropertyMetadata(null, CurrentItemStubChanged));
-
 
 		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Controls
 			if (e.Key == Key.Enter) {
 				if (IsReadOnly)
 					return;
-				var cell = Helpers.DataGridHelper.GetCell(this, CurrentCell);
+				var cell = DataGridHelper.GetCell(this, CurrentCell);
 				if (cell == null)
 					return;
 				if (!cell.IsEditing)
@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.Controls
 				//а затем почти мгновенно в другом
 				Dispatcher.BeginInvoke(DispatcherPriority.Background,
 					new DispatcherOperationCallback(a => {
-						Helpers.DataGridHelper.Centrify(this);
+						DataGridHelper.Centrify(this);
 						return null;
 					}),
 					this);

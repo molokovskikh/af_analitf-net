@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentPrice = new NotifyValue<Price>();
 			ShowLeaders = new NotifyValue<bool>();
 			QuickSearch = new QuickSearch<Price>(UiScheduler,
-				t => Prices.FirstOrDefault(p => p.Name.ToLower().Contains(t)),
+				t => Prices.FirstOrDefault(p => p.Name.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				p => CurrentPrice.Value = p);
 		}
 

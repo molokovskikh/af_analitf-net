@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
-				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.ToLower().Contains(s)),
+				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				l => CurrentLine.Value = l);
 			AddressSelector = new AddressSelector(Session, UiScheduler, this);
 			editor = new Editor(OrderWarning, Manager);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -9,17 +10,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools.Calendar;
 using log4net.Config;
+using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
@@ -66,11 +71,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded(catalog);
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
 			var name = names.CurrentCatalogName.Name;
-			WaitIdle(dispatcher);
+			WaitIdle();
 
+			var term = "б";
 			//нужно сделать две итерации тк что бы FocusBehavior попытался восстановить выбранный элемент
-			await OpenAndReturnOnSearch(window, names);
-			AssertQuickSearch(dispatcher, catalog);
+			await OpenAndReturnOnSearch(names, term);
+			AssertQuickSearch(catalog, term);
 
 			names = (CatalogNameViewModel)catalog.ActiveItem;
 			var frameworkElement = (FrameworkElement)names.GetView();
@@ -78,8 +84,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			frameworkElement.Dispatcher.Invoke(() => {
 				names.CurrentCatalogName = names.CatalogNames.First(n => n.Name == name);
 			});
-			await OpenAndReturnOnSearch(window, names);
-			AssertQuickSearch(dispatcher, catalog);
+			await OpenAndReturnOnSearch(names, term);
+			AssertQuickSearch(catalog, term);
 		}
 
 		[Test]
@@ -90,7 +96,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				shell.ShowCatalog();
 			});
-			WaitIdle(dispatcher);
+			WaitIdle();
 			var catalog = await ViewLoaded<CatalogViewModel>();
 			dispatcher.Invoke(() => {
 				catalog.CatalogSearch = true;
@@ -101,12 +107,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			var view = (FrameworkElement)search.GetView();
 			Input(view, "SearchText", "бак");
 			Input(view, "SearchText", Key.Enter);
-			WaitIdle(dispatcher);
+			WaitIdle();
 
 			dispatcher.Invoke(() => {
 				var grid = (DataGrid)view.FindName("Catalogs");
-				var selectMany = grid.DeepChildren()
-					.OfType<DataGridCell>().SelectMany(c => c.DeepChildren().OfType<Run>())
+				var selectMany = grid.DeepChildren<DataGridCell>()
+					.SelectMany(c => c.DeepChildren<Run>())
 					.Where(r => r.Text.ToLower() == "бак");
 				DoubleClick(view, grid, selectMany.First());
 			});
@@ -130,7 +136,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded(catalog.ActiveItem);
 			var name = (CatalogNameViewModel)catalog.ActiveItem;
 			var offers = await OpenOffers(name);
-			WaitIdle(dispatcher);
+			WaitIdle();
 			Input((FrameworkElement)offers.GetView(), "Offers", "1");
 			dispatcher.Invoke(() => {
 				shell.ShowOrderLines();
@@ -139,6 +145,93 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded(lines);
 			Input((FrameworkElement)lines.GetView(), "Lines", Key.Enter);
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
+		}
+
+		[Test]
+		public async void Quick_search()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder(toAddress: session.Query<Client.Models.Address>().OrderBy(a => a.Name).First());
+			var offer = session.Query<Offer>().First(o => o.ProductSynonym != order.Lines[0].ProductSynonym);
+			order.AddLine(offer, 1);
+			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
+			var term = source[1].ProductSynonym.Except(source[0].ProductSynonym).First().ToString();
+			session.Flush();
+
+			Start();
+			Click("ShowOrderLines");
+			var lines = await ViewLoaded<OrderLinesViewModel>();
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)lines.GetView();
+				var grid = (DataGrid)view.FindName("Lines");
+				Assert.IsTrue(grid.IsKeyboardFocusWithin);
+				Assert.AreEqual(source[0].Id, ((OrderLine)grid.SelectedItem).Id);
+				Assert.AreEqual(source[0].Id, ((OrderLine)grid.CurrentItem).Id);
+
+				Input(grid, term);
+				Assert.AreEqual(source[1].Id, ((OrderLine)grid.SelectedItem).Id);
+				Assert.AreEqual(source[1].Id, ((OrderLine)grid.CurrentItem).Id);
+				var text = Find<TextBox>(view, "QuickSearch", "SearchText");
+				Assert.True(text.IsVisible);
+				Assert.AreEqual(term, text.Text);
+			});
+		}
+
+		[Test]
+		public async void Current_address_visivility()
+		{
+			restore = true;
+			new CreateAddress().Execute(session);
+			Start();
+			Click("ShowOrderLines");
+			var lines = await ViewLoaded<OrderLinesViewModel>();
+			Assert.IsFalse(lines.AddressSelector.All.Value);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)lines.GetView();
+				var box = Find<CheckBox>(view, "AddressSelector", "All");
+				Assert.IsFalse(box.IsChecked.Value);
+
+				var grid = (DataGrid)view.FindName("Lines");
+				var column = grid.Columns.First(c => "Адрес заказа".Equals(c.Header));
+				Assert.AreEqual(Visibility.Collapsed, column.Visibility);
+			});
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)lines.GetView();
+				var box = Find<CheckBox>(view, "AddressSelector", "All");
+				box.IsChecked = true;
+
+				var grid = (DataGrid)view.FindName("Lines");
+				var column = grid.Columns.First(c => "Адрес заказа".Equals(c.Header));
+				Assert.IsTrue(box.IsChecked.Value);
+				Assert.IsTrue(lines.AddressSelector.All.Value);
+				Assert.AreEqual(Visibility.Visible, column.Visibility);
+
+				box.IsChecked = false;
+			});
+			Click("ShowOrders");
+			WaitIdle();
+			Click("ShowOrderLines");
+			lines = await ViewLoaded<OrderLinesViewModel>();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)lines.GetView();
+				var box = Find<CheckBox>(view, "AddressSelector", "All");
+				Assert.IsFalse(box.IsChecked.Value);
+
+				var grid = (DataGrid)view.FindName("Lines");
+				var column = grid.Columns.First(c => "Адрес заказа".Equals(c.Header));
+				Assert.AreEqual(Visibility.Collapsed, column.Visibility);
+			});
+		}
+
+		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement
+		{
+			return view.DeepChildren<FrameworkElement>()
+				.First(e => e.Name == root)
+				.DeepChildren<T>()
+				.First(e => e.Name == name);
 		}
 
 		private async void Start()
@@ -153,23 +246,23 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 
 			await loaded.WaitAsync();
-			WaitIdle(dispatcher);
+			WaitIdle();
 		}
 
-		private void WaitIdle(Dispatcher dispatcher)
+		private void WaitIdle()
 		{
 			dispatcher.Invoke(() => {}, DispatcherPriority.ContextIdle);
 		}
 
-		private void AssertQuickSearch(Dispatcher d, CatalogViewModel catalog)
+		private void AssertQuickSearch(CatalogViewModel catalog, string term)
 		{
 			var view = (FrameworkElement)catalog.ActiveItem.GetView();
 			view.Dispatcher.Invoke(() => {
-				var text = (TextBox)view.FindName("CatalogNamesSearch_SearchText");
+				var text = Find<TextBox>(view, "CatalogNamesSearch", "SearchText");
 				Assert.AreEqual(Visibility.Visible, text.Visibility);
-				Assert.AreEqual("б", text.Text);
+				Assert.AreEqual(term, text.Text);
 				var names = (CatalogNameViewModel)catalog.ActiveItem;
-				var name = names.CatalogNames.First(n => n.Name.ToLower().StartsWith("б"));
+				var name = names.CatalogNames.First(n => n.Name.ToLower().StartsWith(term));
 				var grid = (DataGrid)view.FindName("CatalogNames");
 				Assert.AreEqual(name, grid.SelectedItem);
 				Assert.AreEqual(name, grid.CurrentItem);
@@ -177,16 +270,16 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			//после активации формы нужно подождать что бы произошли фоновые дела
 			//layout, redner и тд если этого не делать код будет работать не верно
-			WaitIdle(d);
+			WaitIdle();
 		}
 
-		private async Task OpenAndReturnOnSearch(Window window, CatalogNameViewModel viewModel)
+		private async Task OpenAndReturnOnSearch(CatalogNameViewModel viewModel, string term)
 		{
 			var offers = await OpenOffers(viewModel);
-			Input((FrameworkElement)offers.GetView(), "Offers", "б");
+			Input((FrameworkElement)offers.GetView(), "Offers", term);
 			await ViewLoaded<CatalogViewModel>();
 
-			WaitIdle(window.Dispatcher);
+			WaitIdle();
 		}
 
 		private async Task<CatalogOfferViewModel> OpenOffers(CatalogNameViewModel viewModel)
@@ -195,7 +288,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			if (view == null)
 				throw new Exception(String.Format("Не удалось получить view из {0}", viewModel.GetType()));
 			Input(view, "CatalogNames", Key.Enter);
-			Input(view, "Catalogs", Key.Enter);
+			if (viewModel.Catalogs.Count > 1)
+				Input(view, "Catalogs", Key.Enter);
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			await ViewLoaded(offers);
 			return offers;
@@ -209,14 +303,32 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		public void Click(ButtonBase element)
+		{
+			Contract.Assert(element != null);
+			AssertInputable(element);
+			element.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, element));
+		}
+
+		public void Click(string name)
+		{
+			dispatcher.Invoke(() => {
+				Click((ButtonBase)window.FindName(name));
+			});
+		}
+
 		private void Input(FrameworkElement view, string name, string text)
 		{
 			view.Dispatcher.Invoke(() => {
-				var element = (UIElement)view.FindName(name);
-				if (element == null)
-					throw new Exception(String.Format("Не могу найти {0}", name));
-				element.RaiseEvent(WpfHelper.TextArgs(text));
+				Input((UIElement)view.FindName(name), text);
 			});
+		}
+
+		private void Input(UIElement element, string text)
+		{
+			Contract.Assert(element != null);
+			AssertInputable(element);
+			element.RaiseEvent(WpfHelper.TextArgs(text));
 		}
 
 		private void Input(FrameworkElement view, string name, Key key)
@@ -225,8 +337,15 @@ namespace AnalitF.Net.Test.Integration.Views
 				var element = (UIElement)view.FindName(name);
 				if (element == null)
 					throw new Exception(String.Format("Не могу найти {0}", name));
+				AssertInputable(element);
 				element.RaiseEvent(WpfHelper.KeyEventArgs(element, key));
 			});
+		}
+
+		private static void AssertInputable(UIElement element)
+		{
+			Assert.IsTrue(element.IsVisible);
+			Assert.IsTrue(element.IsEnabled);
 		}
 
 		private async Task<T> ViewLoaded<T>()

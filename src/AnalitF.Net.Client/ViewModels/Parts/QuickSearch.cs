@@ -68,7 +68,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 						if (result != null) {
 							notify = true;
 							searchText = value;
-
 							update(result);
 						}
 					}
@@ -95,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			base.OnViewAttached(view, context);
 			var d = view as DependencyObject;
 			if (d != null) {
-				var box = d.DeepChildren().OfType<TextBox>().FirstOrDefault();
+				var box = d.DeepChildren<TextBox>().FirstOrDefault();
 				if (box == null)
 					return;
 

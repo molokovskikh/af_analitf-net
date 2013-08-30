@@ -99,10 +99,7 @@ namespace AnalitF.Net.Client.ViewModels
 			UpdateMaxProducers();
 
 			if (CurrentOffer == null)
-				CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice);
-
-			if (CurrentOffer == null)
-				CurrentOffer = offers.FirstOrDefault();
+				CurrentOffer = Offers.FirstOrDefault(o => o.Price.BasePrice) ?? offers.FirstOrDefault();
 
 			UpdateRegions();
 			UpdateProducers();

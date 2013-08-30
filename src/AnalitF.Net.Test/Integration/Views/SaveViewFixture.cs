@@ -65,19 +65,19 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Restore_settings()
 		{
-			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			var grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Offers");
 			grid.Columns[0].Visibility = Visibility.Collapsed;
 
 			Close(model);
 			InitView();
-			grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Offers");
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Collapsed));
 		}
 
 		[Test]
 		public void Restore_display_index()
 		{
-			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			var grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Offers");
 			ForceBinding(view);
 			grid.Columns[0].DisplayIndex = 5;
 			model.ResetView(grid);
@@ -88,7 +88,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Reset_settings()
 		{
-			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			var grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Offers");
 			grid.Columns[0].Visibility = Visibility.Collapsed;
 			model.ResetView(grid);
 			Assert.That(grid.Columns[0].Visibility, Is.EqualTo(Visibility.Visible));
@@ -100,7 +100,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Close(model);
 			InitView();
 
-			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Offers");
+			var grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Offers");
 			var column = grid.Columns[0];
 			Assert.AreNotEqual(351, column.Width.Value);
 			column.Width = new DataGridLength(351);

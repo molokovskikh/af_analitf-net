@@ -287,8 +287,9 @@ namespace AnalitF.Net.Test.Integration.Models
 			Update();
 
 			Assert.AreEqual(
-				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_Тестовый поставщик(test).txt",
-					fixture.Document.Id),
+				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_{1}(test).txt",
+					fixture.Document.Id,
+					fixture.Document.Supplier.Name),
 				command.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
 		}
 

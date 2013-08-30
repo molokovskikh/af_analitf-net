@@ -8,46 +8,58 @@
 	binders:FocusBehavior.DefaultFocus="{x:Reference Prices}">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
-		<KeyBinding Gesture="F3" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchShowLeaders" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="F3" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="SwitchShowLeaders" />
 	</UserControl.InputBindings>
 
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition></ColumnDefinition>
-			<ColumnDefinition Width="200"></ColumnDefinition>
+			<ColumnDefinition />
+			<ColumnDefinition Width="200" />
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0"
+			Grid.Column="0" Grid.ColumnSpan="2">
 			<TextBlock Margin="5" FontWeight="Bold">
-				Всего прайс листов: <Run x:Name="Prices_Count"></Run>
+				Всего прайс листов: <Run x:Name="Prices_Count" />
 			</TextBlock>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices"
 			CellStyle="{StaticResource Price}"
-			CurrentItemStub="{Binding CurrentPrice.Value}"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}"
-			binders:ContextMenuBehavior.PersistColumnSettings="true">
+			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}" Header="Прайс-лист"
+				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}"
+					Header="Прайс-лист"
 					Binding="{Binding Name}"
 					IsReadOnly="True" />
 				<DataGridTextColumn Width="57*" Header="Регион"
 					Binding="{Binding RegionName}"
 					IsReadOnly="True" />
-				<c:DataGridTextColumnEx Width="36*" Header="Склад" Binding="{Binding Storage, Converter={StaticResource BoolToChar}}" IsReadOnly="True" TextAlignment="Center" />
-				<DataGridCheckBoxColumn Width="65*" Header="В работе" Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
-				<c:DataGridTextColumnEx Width="50*" Header="Позиций" Binding="{Binding PositionCount}" IsReadOnly="True" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="45*" Header="Заказ" Binding="{Binding Order.LinesCount}" IsReadOnly="True" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.Sum}" IsReadOnly="True" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа" Binding="{Binding PriceDate}" IsReadOnly="True" TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="60*" Header="Месячный заказ" Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ" Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="36*" Header="Склад"
+					Binding="{Binding Storage, Converter={StaticResource BoolToChar}}" IsReadOnly="True"
+					TextAlignment="Center" />
+				<DataGridCheckBoxColumn Width="65*" Header="В работе"
+					Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
+				<c:DataGridTextColumnEx Width="50*" Header="Позиций"
+					Binding="{Binding PositionCount}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="45*" Header="Заказ"
+					Binding="{Binding Order.LinesCount}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.Sum}"
+					IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа"
+					Binding="{Binding PriceDate}" IsReadOnly="True" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="60*" Header="Месячный заказ"
+					Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ"
+					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -55,39 +67,40 @@
 
 		<Grid Grid.Row="1" Grid.Column="1">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition></RowDefinition>
+				<RowDefinition Height="Auto" />
+				<RowDefinition />
 
-				<RowDefinition Height="Auto"></RowDefinition>
-				<RowDefinition></RowDefinition>
+				<RowDefinition Height="Auto" />
+				<RowDefinition />
 			</Grid.RowDefinitions>
 
 			<Label Grid.Row="0">Информация</Label>
-			<TextBlock Grid.Row="1" x:Name="CurrentPrice_SupplierFullName" Style="{StaticResource PriceInfo}"></TextBlock>
+			<TextBlock Grid.Row="1" x:Name="CurrentPrice_SupplierFullName"
+				Style="{StaticResource PriceInfo}" />
 
 			<TextBlock Grid.Row="2" Style="{StaticResource PriceInfo}">
-				Телефон: <Run x:Name="CurrentPrice_Phone"></Run>
+				Телефон: <Run x:Name="CurrentPrice_Phone" />
 			</TextBlock>
 
 			<TextBlock Grid.Row="3" Style="{StaticResource PriceInfo}">
-				Минимальный заказ: <Run x:Name="CurrentPrice_MinOrderSum_MinOrderSum"></Run>
+				Минимальный заказ: <Run x:Name="CurrentPrice_MinOrderSum_MinOrderSum" />
 			</TextBlock>
 
 			<StackPanel Grid.Row="4">
-				<TextBlock Grid.Row="4" Style="{StaticResource PriceInfo}">Email:</TextBlock>
+				<TextBlock Style="{StaticResource PriceInfo}">Email:</TextBlock>
 				<ItemsControl Padding="20, 0, 5, 5" Name="CurrentPrice_Emails">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<TextBlock>
 								<Hyperlink Command="binders:Commands.NavigateUri" NavigateUri="{Binding Uri}">
-									<Run Text="{Binding Name}"></Run>
+									<Run Text="{Binding Name}" />
 								</Hyperlink>
 							</TextBlock>
 						</DataTemplate>
@@ -96,14 +109,19 @@
 			</StackPanel>
 
 			<Label Grid.Row="5">Контактная информация:</Label>
-			<TextBox Grid.Row="6" Padding="5" Style="{StaticResource ReadOnlyText}" x:Name="CurrentPrice_ContactInfo"></TextBox>
+			<TextBox Grid.Row="6" Padding="5" Style="{StaticResource ReadOnlyText}"
+				x:Name="CurrentPrice_ContactInfo" />
 
 			<Label Grid.Row="7">Оперативная информация:</Label>
-			<TextBox Grid.Row="8" Style="{StaticResource ReadOnlyText}" Padding="5" x:Name="CurrentPrice_OperativeInfo"></TextBox>
+			<TextBox Grid.Row="8" Style="{StaticResource ReadOnlyText}" Padding="5"
+				x:Name="CurrentPrice_OperativeInfo" />
 		</Grid>
 
-		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
-			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}" Name="ShowLeaders">Показать только лидирующие позиции (F3)</CheckBox>
+		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+			Style="{StaticResource ResourceKey=FilterPanel}">
+			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}" Name="ShowLeaders">
+				Показать только лидирующие позиции (F3)
+			</CheckBox>
 		</StackPanel>
 	</Grid>
 </UserControl>

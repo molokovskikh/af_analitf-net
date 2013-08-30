@@ -69,7 +69,7 @@
 		<c:DataGrid x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
 			CellStyle="{StaticResource ResourceKey=VitallyImportant}"
-			binders:ContextMenuBehavior.PersistColumnSettings="true"
+			binders:Persistable.PersistColumnSettings="true"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"

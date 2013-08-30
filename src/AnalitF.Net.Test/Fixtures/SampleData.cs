@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Service.Models;
+using Castle.ActiveRecord;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -14,23 +15,38 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	public class SampleData
 	{
 		public bool Local = false;
+		public Service.Config.Config Config;
 		public TestClient Client;
 		public TestPrice MaxProducerCosts;
+		public List<UpdateData> Files;
 
 		public void Execute(ISession session)
 		{
-			var supplier = TestSupplier.CreateNaked();
-			supplier.Name += " " + supplier.Id;
-			CreateSampleContactInfo(supplier);
-			CreateSampleCore(supplier);
+			var origin = session;
+			using (var scope = new SessionScope()) {
+				var holder = ActiveRecordMediator.GetSessionFactoryHolder();
+				session = holder.CreateSession(typeof(ActiveRecordBase));
+				var supplier = TestSupplier.CreateNaked();
+				supplier.Name += " " + supplier.Id;
+				CreateSampleContactInfo(supplier);
+				CreateSampleCore(supplier);
 
-			var supplier1 = TestSupplier.CreateNaked();
-			supplier1.Name += " " + supplier1.Id;
-			CreateSampleContactInfo(supplier1);
-			CreateSampleCore(supplier1);
+				var supplier1 = TestSupplier.CreateNaked();
+				supplier1.Name += " " + supplier1.Id;
+				CreateSampleContactInfo(supplier1);
+				CreateSampleCore(supplier1);
 
-			MaxProducerCosts = CreateMaxProduceCosts(supplier);
-			Client = CreateUser(session);
+				MaxProducerCosts = CreateMaxProduceCosts(supplier);
+				Client = CreateUser(session);
+				holder.ReleaseSession(session);
+			}
+
+			var exporter = new Exporter(origin, Client.Users[0].Id, new Version()) {
+				MaxProducerCostPriceId = MaxProducerCosts.Id,
+				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id
+			};
+			Files = new List<UpdateData>();
+			exporter.Export(Files);
 		}
 
 		public static TestClient CreateUser(ISession session)

@@ -54,9 +54,8 @@ namespace AnalitF.Net.Client.Models
 			var dependencyObject = view as DependencyObject;
 			if (dependencyObject == null)
 				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.DeepChildren()
-				.OfType<DataGrid>()
-				.Where(c => (bool)c.GetValue(ContextMenuBehavior.PersistColumnSettingsProperty));
+			return dependencyObject.DeepChildren<DataGrid>()
+				.Where(c => (bool)c.GetValue(Persistable.PersistColumnSettingsProperty));
 		}
 
 		private string GetViewKey(DataGrid grid)

@@ -24,9 +24,9 @@ namespace AnalitF.Net.Test.Integration.Views
 			var model = new OrdersViewModel();
 			var view = Bind(model);
 
-			var all = view.DeepChildren().OfType<CheckBox>().First(c => c.Name == "All");
+			var all = view.DeepChildren<CheckBox>().First(c => c.Name == "All");
 			Assert.That(all.Visibility, Is.EqualTo(Visibility.Visible));
-			var grid = view.DeepChildren().OfType<DataGrid>().First(c => c.Name == "Orders");
+			var grid = view.DeepChildren<DataGrid>().First(c => c.Name == "Orders");
 			var column = grid.Columns.First(c => c.Header.Equals("Адрес заказа"));
 
 			Assert.That(column.Visibility, Is.EqualTo(Visibility.Collapsed));
