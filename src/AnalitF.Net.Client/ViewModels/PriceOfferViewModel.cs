@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -40,7 +41,6 @@ namespace AnalitF.Net.Client.ViewModels
 			"Лучшие предложения (F6)",
 		};
 
-		private string activeSearchTerm;
 		private PriceComposedId priceId;
 
 		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders, OfferComposedId initOfferId = null)
@@ -74,22 +74,12 @@ namespace AnalitF.Net.Client.ViewModels
 			//но если не удалить подписку будет утечка памяти
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
 				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
+			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
 		}
 
+		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<Price> Price { get; set; }
-
 		public string[] Filters { get; set; }
-
-		public string ActiveSearchTerm
-		{
-			get { return activeSearchTerm; }
-			set
-			{
-				activeSearchTerm = value;
-				NotifyOfPropertyChange("ActiveSearchTerm");
-			}
-		}
-
 		public NotifyValue<string> CurrentFilter { get; set; }
 
 		public bool CanDeleteOrder
@@ -142,8 +132,9 @@ namespace AnalitF.Net.Client.ViewModels
 					&& !l.Order.Frozen
 					&& l.Order.Price.Id == priceId) > 0);
 			}
-			if (!String.IsNullOrEmpty(ActiveSearchTerm)) {
-				query = query.Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
+			var term = SearchBehavior.ActiveSearchTerm.Value;
+			if (!String.IsNullOrEmpty(term)) {
+				query = query.Where(o => o.ProductSynonym.Contains(term));
 			}
 
 			Offers = query
@@ -178,25 +169,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult Search()
 		{
-			if (string.IsNullOrEmpty(SearchText.Value) || SearchText.Value.Length < 3) {
-				return HandledResult.Skip();
-			}
-
-			ActiveSearchTerm = SearchText;
-			SearchText.Value = "";
-			Update();
-			return HandledResult.Handled();
+			return SearchBehavior.Search();
 		}
 
 		public IResult ClearSearch()
 		{
-			if (String.IsNullOrEmpty(ActiveSearchTerm))
-				return HandledResult.Skip();
-
-			ActiveSearchTerm = "";
-			SearchText.Value = "";
-			Update();
-			return HandledResult.Handled();
+			return SearchBehavior.ClearSearch();
 		}
 
 		public PrintResult Print()

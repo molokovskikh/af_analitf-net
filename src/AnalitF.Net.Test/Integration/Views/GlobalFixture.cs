@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -82,7 +83,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var frameworkElement = (FrameworkElement)names.GetView();
 			Input(frameworkElement, "CatalogNames", Key.Escape);
 			frameworkElement.Dispatcher.Invoke(() => {
-				names.CurrentCatalogName = names.CatalogNames.First(n => n.Name == name);
+				names.CurrentCatalogName = names.CatalogNames.Value.First(n => n.Name == name);
 			});
 			await OpenAndReturnOnSearch(names, term);
 			AssertQuickSearch(catalog, term);
@@ -110,7 +111,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			WaitIdle();
 
 			dispatcher.Invoke(() => {
-				var grid = (DataGrid)view.FindName("Catalogs");
+				var grid = (DataGrid)view.FindName("Items");
 				var selectMany = grid.DeepChildren<DataGridCell>()
 					.SelectMany(c => c.DeepChildren<Run>())
 					.Where(r => r.Text.ToLower() == "бак");
@@ -262,7 +263,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.AreEqual(Visibility.Visible, text.Visibility);
 				Assert.AreEqual(term, text.Text);
 				var names = (CatalogNameViewModel)catalog.ActiveItem;
-				var name = names.CatalogNames.First(n => n.Name.ToLower().StartsWith(term));
+				var name = names.CatalogNames.Value.First(n => n.Name.ToLower().StartsWith(term));
 				var grid = (DataGrid)view.FindName("CatalogNames");
 				Assert.AreEqual(name, grid.SelectedItem);
 				Assert.AreEqual(name, grid.CurrentItem);
@@ -288,7 +289,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			if (view == null)
 				throw new Exception(String.Format("Не удалось получить view из {0}", viewModel.GetType()));
 			Input(view, "CatalogNames", Key.Enter);
-			if (viewModel.Catalogs.Count > 1)
+			if (viewModel.Catalogs.Value.Count > 1)
 				Input(view, "Catalogs", Key.Enter);
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			await ViewLoaded(offers);

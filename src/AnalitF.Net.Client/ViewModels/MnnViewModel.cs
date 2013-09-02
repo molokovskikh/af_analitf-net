@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels
 				},
 				ShowWithoutOffers);
 
-			SearchBehavior = new SearchBehavior(OnCloseDisposable, UiScheduler, Scheduler, Update);
+			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

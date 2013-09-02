@@ -31,13 +31,16 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool resetAutoComment;
 
 		protected List<string> producers;
-		protected List<Offer> offers;
+		protected List<Offer> offers = new List<Offer>();
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
 		private OfferComposedId initOfferId;
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
+			Readonly = true;
+			updateOnActivate = true;
+
 			this.initOfferId = initOfferId;
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
 			Producers = new NotifyValue<List<string>>();
@@ -312,7 +315,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected abstract void Query();
 
-		public void Update()
+		public override void Update()
 		{
 			Query();
 			if (CurrentOffer == null)

@@ -11,17 +11,17 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class SearchBehavior
 	{
-		private Action update;
+		private BaseScreen screen;
 
-		public SearchBehavior(CompositeDisposable disposable, IScheduler uiScheduler, IScheduler backgroundScheduler, Action update)
+		public SearchBehavior(CompositeDisposable disposable, BaseScreen screen)
 		{
-			this.update = update;
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
+			this.screen = screen;
 
 			disposable.Add(SearchText.Changed()
-				.Throttle(Consts.SearchTimeout, backgroundScheduler)
-				.ObserveOn(uiScheduler)
+				.Throttle(Consts.SearchTimeout, screen.Scheduler)
+				.ObserveOn(screen.UiScheduler)
 				.Subscribe(_ => Search()));
 		}
 
@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = "";
 			SearchText.Value = "";
-			update();
+			screen.Update();
 			return HandledResult.Handled();
 		}
 
@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = SearchText.Value;
 			SearchText.Value = "";
-			update();
+			screen.Update();
 			return HandledResult.Handled();
 		}
 	}

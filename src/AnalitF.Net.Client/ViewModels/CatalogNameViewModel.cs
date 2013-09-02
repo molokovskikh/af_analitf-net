@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -17,21 +18,22 @@ namespace AnalitF.Net.Client.ViewModels
 		private CatalogName currentCatalogName;
 		private Catalog currentCatalog;
 
-		private List<Catalog> catalogs = new List<Catalog>();
-		private List<CatalogName> catalogNames = new List<CatalogName>();
-		private object currentItem;
 		private Type activeItemType = typeof(CatalogName);
 
 		public CatalogNameViewModel(CatalogViewModel catalogViewModel)
 		{
+			Readonly = true;
 			ParentModel = catalogViewModel;
+			CatalogNames = new NotifyValue<List<CatalogName>>();
+			Catalogs = new NotifyValue<List<Catalog>>();
+			CurrentItem = new NotifyValue<object>();
 
 			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
-				v => CatalogNames.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
+				v => CatalogNames.Value.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalogName = c);
 
 			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,
-				v => Catalogs.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
+				v => Catalogs.Value.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalog = c);
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
@@ -60,15 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
 
-		public List<CatalogName> CatalogNames
-		{
-			get { return catalogNames; }
-			set
-			{
-				catalogNames = value;
-				NotifyOfPropertyChange("CatalogNames");
-			}
-		}
+		public NotifyValue<List<CatalogName>> CatalogNames { get; set; }
 
 		public CatalogName CurrentCatalogName
 		{
@@ -80,7 +74,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 				currentCatalogName = value;
 				if (activeItemType == typeof(CatalogName))
-					CurrentItem = value;
+					CurrentItem.Value = value;
 				NotifyOfPropertyChange("CurrentCatalogName");
 				LoadCatalogs();
 			}
@@ -107,43 +101,17 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 
 				if (activeItemType == typeof(Catalog))
-					CurrentItem = value;
+					CurrentItem.Value = value;
 
 				NotifyOfPropertyChange("CurrentCatalog");
 			}
 		}
 
-		public List<Catalog> Catalogs
-		{
-			get { return catalogs; }
-			set
-			{
-				catalogs = value;
-				NotifyOfPropertyChange("Catalogs");
-			}
-		}
+		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 
-		public object CurrentItem
-		{
-			get
-			{
-				return currentItem;
-			}
-			set
-			{
-				currentItem = value;
-				NotifyOfPropertyChange("CurrentItem");
-			}
-		}
+		public NotifyValue<object> CurrentItem { get; set; }
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-
-			Update();
-		}
-
-		private void Update()
+		public override void Update()
 		{
 			var queryable = StatelessSession.Query<CatalogName>();
 			if (!ParentModel.ShowWithoutOffers) {
@@ -159,18 +127,18 @@ namespace AnalitF.Net.Client.ViewModels
 				var mnnId = ParentModel.FiltredMnn.Id;
 				queryable = queryable.Where(n => n.Mnn.Id == mnnId);
 			}
-			CatalogNames = queryable.OrderBy(c => c.Name)
+			CatalogNames.Value = queryable.OrderBy(c => c.Name)
 				.Fetch(c => c.Mnn)
 				.ToList();
 
 			if (CurrentCatalogName == null)
-				CurrentCatalogName = CatalogNames.FirstOrDefault();
+				CurrentCatalogName = CatalogNames.Value.FirstOrDefault();
 		}
 
 		private void LoadCatalogs()
 		{
 			if (CurrentCatalogName == null) {
-				Catalogs = Enumerable.Empty<Catalog>().ToList();
+				Catalogs.Value = Enumerable.Empty<Catalog>().ToList();
 				return;
 			}
 
@@ -181,7 +149,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(c => c.Name.Id == nameId);
 			queryable = ParentModel.ApplyFilter(queryable);
 
-			Catalogs = queryable
+			Catalogs.Value = queryable
 				.OrderBy(c => c.Form)
 				.ToList();
 		}
@@ -191,7 +159,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//то выделение переместится к этому товару но прокрутка не будет произведена
 		public IResult EnterCatalogName()
 		{
-			if (CurrentCatalogName == null || Catalogs.Count == 0)
+			if (CurrentCatalogName == null || Catalogs.Value.Count == 0)
 				return null;
 
 			if (!ParentModel.ViewOffersByCatalog) {
@@ -203,13 +171,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return null;
 			}
 
-			if (Catalogs.Count == 1) {
-				CurrentCatalog = Catalogs.First();
+			if (Catalogs.Value.Count == 1) {
+				CurrentCatalog = Catalogs.Value.First();
 				return EnterCatalog();
 			}
-			else {
-				return new FocusResult("Catalogs");
-			}
+			return new FocusResult("Catalogs");
 		}
 
 		public IResult EnterCatalog()
@@ -227,13 +193,13 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ActivateCatalog()
 		{
 			activeItemType = typeof(Catalog);
-			CurrentItem = CurrentCatalog;
+			CurrentItem.Value = CurrentCatalog;
 		}
 
 		public void ActivateCatalogName()
 		{
 			activeItemType = typeof(CatalogName);
-			CurrentItem = CurrentCatalogName;
+			CurrentItem.Value = CurrentCatalogName;
 		}
 	}
 }

@@ -124,6 +124,7 @@
     <Compile Include="Integration\Models\StatFixture.cs" />
     <Compile Include="Integration\Models\UPdateFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
+    <Compile Include="Integration\QueryFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />

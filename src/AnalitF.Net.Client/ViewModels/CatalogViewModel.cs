@@ -87,14 +87,14 @@ namespace AnalitF.Net.Client.ViewModels
 				if (ActiveItem is CatalogNameViewModel)
 					return ((CatalogNameViewModel)ActiveItem).CatalogNamesSearch.SearchText;
 				else
-					return ((CatalogSearchViewModel)ActiveItem).SearchText;
+					return ((CatalogSearchViewModel)ActiveItem).SearchBehavior.SearchText;
 			}
 			set
 			{
 				if (ActiveItem is CatalogNameViewModel)
 					((CatalogNameViewModel)ActiveItem).CatalogNamesSearch.SearchText = value;
 				else
-					((CatalogSearchViewModel)ActiveItem).SearchText = value;
+					((CatalogSearchViewModel)ActiveItem).SearchBehavior.SearchText.Value = value;
 			}
 		}
 
@@ -142,7 +142,7 @@ namespace AnalitF.Net.Client.ViewModels
 			get
 			{
 				if (activeItem is CatalogSearchViewModel) {
-					var catalog = ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+					var catalog = ((CatalogSearchViewModel)activeItem).CurrentCatalog.Value;
 					return catalog == null ? null : catalog.Name;
 				}
 				return ((CatalogNameViewModel)activeItem).CurrentCatalogName;
@@ -154,14 +154,14 @@ namespace AnalitF.Net.Client.ViewModels
 			get
 			{
 				if (activeItem is CatalogSearchViewModel) {
-					return ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+					return ((CatalogSearchViewModel)activeItem).CurrentCatalog.Value;
 				}
 				return ((CatalogNameViewModel)activeItem).CurrentCatalog;
 			}
 			set
 			{
 				if (activeItem is CatalogSearchViewModel) {
-					((CatalogSearchViewModel)activeItem).CurrentCatalog = value;
+					((CatalogSearchViewModel)activeItem).CurrentCatalog.Value = value;
 				}
 				((CatalogNameViewModel)activeItem).CurrentCatalog = value;
 			}
@@ -172,9 +172,9 @@ namespace AnalitF.Net.Client.ViewModels
 			get
 			{
 				if (activeItem is CatalogSearchViewModel) {
-					return ((CatalogSearchViewModel)activeItem).CurrentCatalog;
+					return ((CatalogSearchViewModel)activeItem).CurrentCatalog.Value;
 				}
-				return ((CatalogNameViewModel)activeItem).CurrentItem;
+				return ((CatalogNameViewModel)activeItem).CurrentItem.Value;
 			}
 		}
 
@@ -316,7 +316,7 @@ namespace AnalitF.Net.Client.ViewModels
 					CleanCache();
 
 					var model = new CatalogSearchViewModel(this);
-					observable = model.ObservableForProperty(m => m.CurrentCatalog)
+					observable = model.ObservableForProperty(m => m.CurrentCatalog.Value)
 						.Subscribe(_ => {
 							NotifyOfPropertyChange("CurrentItem");
 							NotifyOfPropertyChange("CurrentCatalog");
@@ -332,7 +332,7 @@ namespace AnalitF.Net.Client.ViewModels
 					var model = new CatalogNameViewModel(this);
 					var composite = new CompositeDisposable {
 						model
-							.ObservableForProperty(m => m.CurrentItem)
+							.ObservableForProperty(m => m.CurrentItem.Value)
 							.Subscribe(_ => NotifyOfPropertyChange("CurrentItem")),
 						model
 							.ObservableForProperty(m => m.CurrentCatalog)

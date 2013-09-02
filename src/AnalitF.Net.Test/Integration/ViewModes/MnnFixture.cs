@@ -25,8 +25,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
 			Assert.IsTrue(catalog.FilterByMnn, model.CurrentMnn.ToString());
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentMnn), model.CurrentMnn.ToString());
-			Assert.That(names.CatalogNames.Count, Is.GreaterThan(0), model.CurrentMnn.ToString());
-			Assert.IsTrue(names.CatalogNames.All(n => n.Mnn.Id == model.CurrentMnn.Id), names.CatalogNames.Implode());
+			Assert.That(names.CatalogNames.Value.Count, Is.GreaterThan(0), model.CurrentMnn.ToString());
+			Assert.IsTrue(names.CatalogNames.Value.All(n => n.Mnn.Id == model.CurrentMnn.Id),
+				names.CatalogNames.Value.Implode());
 			Assert.That(catalog.ShowWithoutOffers, Is.True);
 		}
 	}

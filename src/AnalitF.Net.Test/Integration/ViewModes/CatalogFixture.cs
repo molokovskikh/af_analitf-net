@@ -27,7 +27,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test, RequiresSTA, Ignore]
 		public void Show_catalog_view()
 		{
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.First();
+			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First();
 			catalogModel.ShowDescription();
 		}
 
@@ -43,17 +43,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			ApplyMnnFilter();
 
-			Assert.That(nameViewModel.CatalogNames.Select(c => c.Name).ToList(),
+			Assert.That(nameViewModel.CatalogNames.Value.Select(c => c.Name).ToList(),
 				Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName.Name }));
 			catalogModel.FilterByMnn = false;
-			Assert.That(nameViewModel.CatalogNames.Count, Is.GreaterThan(1));
+			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(1));
 		}
 
 		[Test]
 		public void Filter_description()
 		{
 			ApplyMnnFilter();
-			Assert.That(catalogModel.FilterDescription, Is.EqualTo(String.Format("Фильтр по \"{0}\"", catalogModel.FiltredMnn.Name)));
+			Assert.That(catalogModel.FilterDescription,
+				Is.EqualTo(String.Format("Фильтр по \"{0}\"", catalogModel.FiltredMnn.Name)));
 
 			catalogModel.CurrentFilter = catalogModel.Filters[1];
 			Assert.That(catalogModel.FilterDescription, Is.EqualTo("Фильтр по жизненно важным"));
@@ -95,7 +96,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.Where(g => g.Count() == 1)
 				.Select(g => g.Key)
 				.ToList();
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.First(f => f.Id == catalogId[0].Id);
+			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First(f => f.Id == catalogId[0].Id);
 			nameViewModel.EnterCatalogName();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}
@@ -113,14 +114,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var term = catalog.Name.Name.Slice(3);
 			catalogModel.SearchText = term;
 			searchModel.Search();
-			Assert.That(searchModel.SearchText, Is.Empty);
-			Assert.That(searchModel.ActiveSearchTerm, Is.EqualTo(term));
-			Assert.That(searchModel.Catalogs.Count, Is.GreaterThan(0));
-			Assert.That(searchModel.CurrentCatalog, Is.Not.Null);
+			Assert.That(searchModel.SearchBehavior.SearchText.Value, Is.Empty);
+			Assert.That(searchModel.SearchBehavior.ActiveSearchTerm.Value, Is.EqualTo(term));
+			Assert.That(searchModel.Items.Value.Count, Is.GreaterThan(0));
+			Assert.That(searchModel.CurrentCatalog.Value, Is.Not.Null);
 
-			Assert.That(catalogModel.CurrentItem, Is.EqualTo(searchModel.CurrentCatalog));
-			Assert.That(catalogModel.CurrentCatalog, Is.EqualTo(searchModel.CurrentCatalog));
-			Assert.That(catalogModel.CurrentCatalogName, Is.EqualTo(searchModel.CurrentCatalog.Name));
+			Assert.That(catalogModel.CurrentItem, Is.EqualTo(searchModel.CurrentCatalog.Value));
+			Assert.That(catalogModel.CurrentCatalog, Is.EqualTo(searchModel.CurrentCatalog.Value));
+			Assert.That(catalogModel.CurrentCatalogName, Is.EqualTo(searchModel.CurrentCatalog.Value.Name));
 		}
 
 		[Test]
@@ -130,13 +131,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
-			var total = searchModel.Catalogs.Count;
+			var total = searchModel.Items.Value.Count;
 			var term = catalog.Name.Name.Slice(3);
 			catalogModel.SearchText = term;
 			searchModel.Search();
 			searchModel.ClearSearch();
-			Assert.That(searchModel.ActiveSearchTerm, Is.Empty);
-			Assert.That(searchModel.Catalogs.Count, Is.EqualTo(total));
+			Assert.That(searchModel.SearchBehavior.ActiveSearchTerm.Value, Is.Empty);
+			Assert.That(searchModel.Items.Value.Count, Is.EqualTo(total));
 		}
 
 		[Test]
@@ -146,16 +147,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers && c.Name.Mnn != null);
-			var total = searchModel.Catalogs.Count;
-			searchModel.CurrentCatalog = catalog;
+			var total = searchModel.Items.Value.Count;
+			searchModel.CurrentCatalog.Value = catalog;
 			catalogModel.FilterByMnn = true;
-			Assert.That(searchModel.Catalogs.Count, Is.LessThan(total));
+			Assert.That(searchModel.Items.Value.Count, Is.LessThan(total));
 		}
 
 		[Test]
 		public void Activate_item()
 		{
-			nameViewModel.CurrentCatalog = nameViewModel.Catalogs.First();
+			nameViewModel.CurrentCatalog = nameViewModel.Catalogs.Value.First();
 			nameViewModel.ActivateCatalog();
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<Catalog>());
 
@@ -168,7 +169,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var name = (CatalogNameViewModel)catalogModel.ActiveItem;
 			shell.ActiveItem = catalogModel;
-			name.CurrentCatalog = name.Catalogs.First();
+			name.CurrentCatalog = name.Catalogs.Value.First();
 			name.EnterCatalog();
 			var offer = (CatalogOfferViewModel)shell.ActiveItem;
 			offer.SearchInCatalog(null, WpfHelper.TextArgs("а"));
@@ -179,7 +180,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		private void ApplyMnnFilter()
 		{
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.First(n => n.Mnn != null);
+			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);
 			catalogModel.FilterByMnn = true;
 		}
 	}

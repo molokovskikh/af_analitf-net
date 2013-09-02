@@ -1,32 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using Common.Tools;
+using Devart.Data.MySql;
 using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class CatalogDisplayItem
+	{
+		public uint CatalogId { get; set; }
+		public string Name { get; set; }
+		public string Form { get; set; }
+		public bool HaveOffers { get; set; }
+		public bool VitallyImportant { get; set; }
+
+		public CatalogDisplayItem(uint id, string name, string form, bool haveOffers, bool vitallyImportant)
+		{
+			CatalogId = id;
+			Name = name;
+			Form = form;
+			HaveOffers = haveOffers;
+			VitallyImportant = vitallyImportant;
+		}
+
+		//перегрузка Equals и GetHashCode
+		//нужна что бы DataGrid сохранял выделенную позицию после обновления данных
+		public override bool Equals(object obj)
+		{
+			var that = obj as CatalogDisplayItem;
+			if (that == null)
+				return false;
+
+			if (CatalogId == 0 && that.CatalogId == 0)
+				return base.Equals(obj);
+
+			return CatalogId == that.CatalogId;
+		}
+
+		public override int GetHashCode()
+		{
+			if (CatalogId == 0)
+				return base.GetHashCode();
+			return CatalogId.GetHashCode();
+		}
+	}
+
 	public class CatalogSearchViewModel : BaseScreen
 	{
-		private List<Catalog> catalogs = new List<Catalog>();
-		private string searchText;
-		private Catalog currentCatalog;
-		private string _activeSearchTerm;
-
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
+			Readonly = true;
+
+			Items = new NotifyValue<List<CatalogDisplayItem>>();
+			CurrentItem = new NotifyValue<CatalogDisplayItem>();
+			CurrentCatalog = new NotifyValue<Catalog>(() => {
+				if (CurrentItem.Value == null)
+					return null;
+				var catalogId = CurrentItem.Value.CatalogId;
+				return StatelessSession.Query<Catalog>()
+					.Fetch(c => c.Name)
+					.ThenFetch(n => n.Mnn)
+					.FirstOrDefault(c => c.Id == catalogId);
+			}, CurrentItem);
 			ParentModel = catalog;
-			QuickSearch = new QuickSearch<Catalog>(UiScheduler,
-				v => Catalogs.FirstOrDefault(c => c.Name.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
-				v => CurrentCatalog = v);
+			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,
+				v => Items.Value.FirstOrDefault(c => c.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
+				v => CurrentItem.Value = v);
 			QuickSearch.IsEnabled = false;
 
 			//после закрытия формы нужно отписаться от событий родительской формы
@@ -36,17 +87,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Subscribe(_ => Update()));
 
-			OnCloseDisposable.Add(this.ObservableForProperty(m => m.SearchText)
-				.Throttle(Consts.SearchTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => Search()));
-		}
-
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-
-			Update();
+			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
 		}
 
 		protected override ShellViewModel Shell
@@ -58,102 +99,88 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public CatalogViewModel ParentModel { get; set; }
-
-		public QuickSearch<Catalog> QuickSearch { get; set; }
-
-		public string SearchText
-		{
-			get { return searchText; }
-			set
-			{
-				searchText = value;
-				NotifyOfPropertyChange("SearchText");
-			}
-		}
-
-		public string ActiveSearchTerm
-		{
-			get { return _activeSearchTerm; }
-			set
-			{
-				_activeSearchTerm = value;
-				NotifyOfPropertyChange("ActiveSearchTerm");
-			}
-		}
+		public SearchBehavior SearchBehavior { get; set; }
+		public QuickSearch<CatalogDisplayItem> QuickSearch { get; set; }
 
 		public IResult Search()
 		{
-			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3) {
-				return new HandledResult(false);
-			}
-
-			ActiveSearchTerm = SearchText;
-			SearchText = "";
-			Update();
-			return new HandledResult();
+			return SearchBehavior.Search();
 		}
 
 		public IResult ClearSearch()
 		{
-			if (!String.IsNullOrEmpty(SearchText)) {
-				SearchText = "";
-				return HandledResult.Handled();
-			}
-
-			if (String.IsNullOrEmpty(ActiveSearchTerm))
-				return HandledResult.Skip();
-
-			ActiveSearchTerm = "";
-			Update();
-			return HandledResult.Handled();
+			return SearchBehavior.ClearSearch();
 		}
 
-		public void Update()
+		public override void Update()
 		{
-			IQueryable<Catalog> query = StatelessSession.Query<Catalog>()
-				.Fetch(c => c.Name)
-				.ThenFetch(n => n.Mnn);
-			if (!string.IsNullOrEmpty(ActiveSearchTerm))
-				query = query.Where(c => c.Name.Name.Contains(ActiveSearchTerm) || c.Form.Contains(ActiveSearchTerm));
-			query = ParentModel.ApplyFilter(query);
+			//мы не можем использовать nhibernate для выборки данных тк объем данных слишком велик
+			//выборка может достигать 10**5 записей
+			var connection = StatelessSession.Connection;
+			var command = connection.CreateCommand();
+			var conditions = new List<string>();
 
 			if (ParentModel.FiltredMnn != null) {
-				var mnnId = ParentModel.FiltredMnn.Id;
-				query = query.Where(c => c.Name.Mnn.Id == mnnId);
+				conditions.Add("cn.MnnId = @mnnId");
+
+				var paramets = command.CreateParameter();
+				paramets.ParameterName = "mnnId";
+				paramets.Value = ParentModel.FiltredMnn.Id;
 			}
 
-			Catalogs = query.OrderBy(c => c.Name.Name).ThenBy(c => c.Form).ToList();
-
-			if (CurrentCatalog == null)
-				CurrentCatalog = Catalogs.FirstOrDefault();
-		}
-
-		public List<Catalog> Catalogs
-		{
-			get { return catalogs; }
-			set
-			{
-				catalogs = value;
-				NotifyOfPropertyChange("Catalogs");
+			if (!string.IsNullOrEmpty(SearchBehavior.ActiveSearchTerm.Value)) {
+				conditions.Add("(cn.Name like @term or c.Form like @term)");
+				var paramets = command.CreateParameter();
+				paramets.ParameterName = "@term";
+				paramets.Value = SearchBehavior.ActiveSearchTerm.Value;
+				paramets.Direction = ParameterDirection.Input;
+				paramets.Value = "%" + SearchBehavior.ActiveSearchTerm.Value + "%";
+				command.Parameters.Add(paramets);
 			}
-		}
 
-		public Catalog CurrentCatalog
-		{
-			get { return currentCatalog; }
-			set
-			{
-				currentCatalog = value;
-				NotifyOfPropertyChange("CurrentCatalog");
+			if (!ParentModel.ShowWithoutOffers) {
+				conditions.Add("c.HaveOffers = 1");
 			}
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[1]) {
+				conditions.Add("c.VitallyImportant = 1");
+			}
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[2]) {
+				conditions.Add("c.MandatoryList = 1");
+			}
+
+			command.CommandText = "select c.Id, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant"
+				+ " from Catalogs c"
+				+ " join CatalogNames cn on cn.Id = c.NameId"
+				+ (conditions.Count > 0 ? " where " + conditions.Implode(" and ") : "")
+				+ " order by cn.Name, c.Form";
+			var items = new List<CatalogDisplayItem>();
+			using (var reader = command.ExecuteReader()) {
+				while (reader.Read()) {
+					items.Add(new CatalogDisplayItem(
+						(uint)reader.GetInt32(0),
+						reader.GetString(1),
+						reader.GetString(2),
+						reader.GetBoolean(3),
+						reader.GetBoolean(4)));
+				}
+			}
+			Items.Value = items;
+			if (CurrentItem.Value == null)
+				CurrentItem.Value = items.FirstOrDefault();
 		}
 
-		public IResult EnterCatalog()
+		public NotifyValue<List<CatalogDisplayItem>> Items { get; set;}
+		public NotifyValue<CatalogDisplayItem> CurrentItem { get; set; }
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
+
+		public IResult EnterItem()
 		{
-			if (CurrentCatalog == null)
+			if (CurrentCatalog.Value == null)
 				return null;
 
-			if (!CurrentCatalog.HaveOffers)
+			if (!CurrentCatalog.Value.HaveOffers)
 				return new ShowPopupResult();
 
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
