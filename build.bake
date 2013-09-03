@@ -1,10 +1,3 @@
-import file from AssemblyInfo.bake
-import file from Db.bake
-import file from Migration.bake
-import file from Deploy.bake
-import file from Web.bake
-import file from AppSupport.bake
-import file from WebSiteSupport.bake
 import System
 import System.Reflection
 import System.IO
@@ -55,7 +48,7 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
-task @DeployService, [@DeployPipeline]
+task @DeployWebService, [@DeployPipeline]
 
 task @deploy, [@Tag, @DeployService, @DeployClient]
 

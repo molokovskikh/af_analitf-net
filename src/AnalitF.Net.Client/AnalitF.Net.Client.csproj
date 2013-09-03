@@ -524,6 +524,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="App.release.config" />
+    <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
     <Resource Include="Assets\shaders\grayscale.ps" />
   </ItemGroup>

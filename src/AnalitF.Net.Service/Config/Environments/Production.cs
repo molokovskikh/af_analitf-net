@@ -13,7 +13,7 @@ namespace AnalitF.Net.Service.Config.Environments
 
 			foreach (var property in properties) {
 				var value = (string)property.GetValue(config, null);
-				if (!Path.IsPathRooted(value))
+				if (value != null && !Path.IsPathRooted(value))
 					value = FileHelper.MakeRooted(value);
 
 				property.SetValue(config, value, null);
