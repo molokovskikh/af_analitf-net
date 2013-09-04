@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Parts;
+using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -11,9 +13,6 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class SearchOfferViewModel : BaseOfferViewModel
 	{
-		private string searchText;
-		private string activeSearchTerm;
-
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
@@ -36,54 +35,24 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentPrice = new NotifyValue<Price>(Prices.First());
 			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
-			this.ObservableForProperty(m => m.SearchText)
-				.Throttle(Consts.SearchTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => Search());
-
 			CurrentPrice.Changed()
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
+			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
 		}
 
-		public void Search()
-		{
-			if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 3) {
-				return;
-			}
+		public SearchBehavior SearchBehavior { get; set; }
 
-			ActiveSearchTerm = SearchText;
-			SearchText = "";
-			Update();
+		public IResult Search()
+		{
+			return SearchBehavior.Search();
 		}
 
-		public void ClearSearch()
+		public IResult ClearSearch()
 		{
-			ActiveSearchTerm = "";
-			SearchText = "";
-			CurrentOffer = null;
 			Offers = new List<Offer>();
-		}
-
-		public string SearchText
-		{
-			get { return searchText; }
-			set
-			{
-				searchText = value;
-				NotifyOfPropertyChange("SearchText");
-			}
-		}
-
-		public string ActiveSearchTerm
-		{
-			get { return activeSearchTerm; }
-			set
-			{
-				activeSearchTerm = value;
-				NotifyOfPropertyChange("ActiveSearchTerm");
-			}
+			return SearchBehavior.ClearSearch();
 		}
 
 		public List<Price> Prices { get; set; }
@@ -94,10 +63,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Query()
 		{
-			if (String.IsNullOrEmpty(ActiveSearchTerm))
+			var term = SearchBehavior.ActiveSearchTerm.Value;
+			if (String.IsNullOrEmpty(term))
 				return;
 
-			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(ActiveSearchTerm));
+			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(term));
 			var price = CurrentPrice.Value;
 			if (price != null && price.Id != null) {
 				var priceId = price.Id;

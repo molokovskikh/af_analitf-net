@@ -32,7 +32,9 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
-			<TextBox x:Name="SearchText" Style="{StaticResource ResourceKey=SearchText}"
+			<TextBox x:Name="SearchText"
+				Style="{StaticResource ResourceKey=SearchText}"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				binders:SearchBinder.Grid="Offers" />
 			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name" />
 			<CheckBox x:Name="OnlyBase"
@@ -53,7 +55,7 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="2" CellStyle="{StaticResource VitallyImportant}"
 			CanUserSortColumns="False"
-			c:SearchableDataGridColumn.SearchTerm="{Binding ActiveSearchTerm}"
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn Width="196*"

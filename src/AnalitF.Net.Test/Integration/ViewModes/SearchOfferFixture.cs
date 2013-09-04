@@ -32,7 +32,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalog = FindMultiOfferCatalog();
 			MakeDifferentCategory(catalog);
 
-			model.SearchText = catalog.Name.Name.Slice(3);
+			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
 			model.Search();
 
 			var originCount = model.Offers.Count;

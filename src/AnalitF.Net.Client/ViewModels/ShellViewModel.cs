@@ -333,7 +333,12 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var printResult = ((IPrintable)ActiveItem).Print();
-			windowManager.ShowDialog(new PrintPreviewViewModel(printResult));
+			windowManager.ShowDialog(
+				new PrintPreviewViewModel(printResult),
+				null,
+				new Dictionary<string, object> {
+					{"WindowState", WindowState.Maximized}
+				});
 		}
 
 		public void ShowAbout()

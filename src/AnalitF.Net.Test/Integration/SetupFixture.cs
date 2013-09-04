@@ -5,6 +5,7 @@ using AnalitF.Net.Client;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels;
 using Castle.ActiveRecord;
 using Common.Models;
 using Common.Tools;
@@ -27,6 +28,7 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
+			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
 			global::Test.Support.Setup.Initialize("server");
 			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();

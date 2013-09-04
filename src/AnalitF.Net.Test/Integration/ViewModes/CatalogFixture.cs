@@ -8,6 +8,7 @@ using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI.Testing;
 using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -27,7 +28,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test, RequiresSTA, Ignore]
 		public void Show_catalog_view()
 		{
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First();
+			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First();
 			catalogModel.ShowDescription();
 		}
 
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			ApplyMnnFilter();
 
 			Assert.That(nameViewModel.CatalogNames.Value.Select(c => c.Name).ToList(),
-				Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName.Name }));
+				Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName.Value.Name }));
 			catalogModel.FilterByMnn = false;
 			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(1));
 		}
@@ -96,7 +97,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.Where(g => g.Count() == 1)
 				.Select(g => g.Key)
 				.ToList();
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First(f => f.Id == catalogId[0].Id);
+			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(f => f.Id == catalogId[0].Id);
 			nameViewModel.EnterCatalogName();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}
@@ -180,7 +181,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		private void ApplyMnnFilter()
 		{
-			nameViewModel.CurrentCatalogName = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);
+			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);
 			catalogModel.FilterByMnn = true;
 		}
 	}

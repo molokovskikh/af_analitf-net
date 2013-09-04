@@ -22,7 +22,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var view = InitView<SearchOfferView>(model);
 
 			var offer = session.Query<Offer>().First();
-			model.SearchText = offer.ProductSynonym.Slice(3);
+			model.SearchBehavior.SearchText.Value = offer.ProductSynonym.Slice(3);
 			model.Search();
 
 			ForceBinding(view);

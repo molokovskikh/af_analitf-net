@@ -71,7 +71,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			await ViewLoaded(catalog);
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			var name = names.CurrentCatalogName.Name;
+			var name = names.CurrentCatalogName.Value.Name;
 			WaitIdle();
 
 			var term = "б";
@@ -83,7 +83,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var frameworkElement = (FrameworkElement)names.GetView();
 			Input(frameworkElement, "CatalogNames", Key.Escape);
 			frameworkElement.Dispatcher.Invoke(() => {
-				names.CurrentCatalogName = names.CatalogNames.Value.First(n => n.Name == name);
+				names.CurrentCatalogName.Value = names.CatalogNames.Value.First(n => n.Name == name);
 			});
 			await OpenAndReturnOnSearch(names, term);
 			AssertQuickSearch(catalog, term);

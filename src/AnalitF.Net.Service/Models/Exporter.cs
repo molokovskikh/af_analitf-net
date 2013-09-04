@@ -240,7 +240,8 @@ select
 	Storage,
 	Expiration,
 	Composition
-from Catalogs.Descriptions";
+from Catalogs.Descriptions
+where NeedCorrect = 0";
 			Export(result, sql, "ProductDescriptions");
 
 			sql = @"
@@ -256,10 +257,12 @@ from Catalogs.Mnn m";
 
 			Export(result, sql, "mnns");
 
+			//todo: когда будет накопительное обновление
+			//нужно обработать обновление descriptionid когда станет NeedCorrect = 0
 			sql = @"
 select cn.Id,
 	cn.Name,
-	cn.DescriptionId,
+	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
 	cn.MnnId,
 	exists(select *
 		from usersettings.Core cr
@@ -269,6 +272,7 @@ select cn.Id,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
 from Catalogs.CatalogNames cn
+	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 group by cn.Id";
 			Export(result, sql, "catalognames");

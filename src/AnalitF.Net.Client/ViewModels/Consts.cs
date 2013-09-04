@@ -1,4 +1,5 @@
 ﻿using System;
+using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -7,10 +8,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public const string AllPricesLabel = "Все прайс-листы";
 		public const string AllRegionLabel = "Все регионы";
 		public const string AllProducerLabel = "Все производители";
-		public static TimeSpan SearchTimeout = TimeSpan.FromMilliseconds(5000);
-		public static TimeSpan LoadOrderHistoryTimeout = TimeSpan.FromMilliseconds(2000);
+		public static TimeSpan SearchTimeout = 5.Second();
+		public static TimeSpan LoadOrderHistoryTimeout = 2.Second();
 		public static TimeSpan RefreshOrderStatTimeout = TimeSpan.FromMilliseconds(500);
-		public static readonly TimeSpan WarningTimeout = TimeSpan.FromSeconds(5);
-		public readonly static TimeSpan FilterUpdateTimeout = TimeSpan.FromMilliseconds(500);
+		public static TimeSpan WarningTimeout = 5.Second();
+		public static TimeSpan FilterUpdateTimeout = TimeSpan.FromMilliseconds(500);
+		public static TimeSpan ScrollLoadTimeout = TimeSpan.FromMilliseconds(100);
 	}
 }

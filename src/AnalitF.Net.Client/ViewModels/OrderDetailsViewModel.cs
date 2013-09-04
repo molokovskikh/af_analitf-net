@@ -143,7 +143,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var model = new SearchOfferViewModel();
-			model.SearchText = args.Text;
+			model.SearchBehavior.SearchText.Value = args.Text;
 			Shell.Navigate(model);
 		}
 

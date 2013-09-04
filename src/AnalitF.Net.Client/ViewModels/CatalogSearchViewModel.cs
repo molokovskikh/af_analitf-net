@@ -122,20 +122,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (ParentModel.FiltredMnn != null) {
 				conditions.Add("cn.MnnId = @mnnId");
-
-				var paramets = command.CreateParameter();
-				paramets.ParameterName = "mnnId";
-				paramets.Value = ParentModel.FiltredMnn.Id;
+				var parameter = command.CreateParameter();
+				parameter.ParameterName = "@mnnId";
+				parameter.Value = ParentModel.FiltredMnn.Id;
+				command.Parameters.Add(parameter);
 			}
 
 			if (!string.IsNullOrEmpty(SearchBehavior.ActiveSearchTerm.Value)) {
 				conditions.Add("(cn.Name like @term or c.Form like @term)");
-				var paramets = command.CreateParameter();
-				paramets.ParameterName = "@term";
-				paramets.Value = SearchBehavior.ActiveSearchTerm.Value;
-				paramets.Direction = ParameterDirection.Input;
-				paramets.Value = "%" + SearchBehavior.ActiveSearchTerm.Value + "%";
-				command.Parameters.Add(paramets);
+				var parameter = command.CreateParameter();
+				parameter.ParameterName = "@term";
+				parameter.Value = SearchBehavior.ActiveSearchTerm.Value;
+				parameter.Direction = ParameterDirection.Input;
+				parameter.Value = "%" + SearchBehavior.ActiveSearchTerm.Value + "%";
+				command.Parameters.Add(parameter);
 			}
 
 			if (!ParentModel.ShowWithoutOffers) {

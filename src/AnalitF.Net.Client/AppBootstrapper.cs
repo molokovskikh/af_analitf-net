@@ -80,7 +80,6 @@ namespace AnalitF.Net.Client
 			}));
 #endif
 
-			XmlConfigurator.Configure();
 			LogManager.GetLog = t => new Log4net(t);
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);

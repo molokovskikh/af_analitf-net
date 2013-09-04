@@ -65,6 +65,15 @@ namespace AnalitF.Net.Client.ViewModels
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
+			this.ObservableForProperty(m => m.CurrentOffer)
+#if !DEBUG
+				.Throttle(Consts.ScrollLoadTimeout)
+				.ObserveOn(UiScheduler)
+#endif
+				.Subscribe(_ => {
+					if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
+						CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
+				});
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 			Settings.Changed().Subscribe(_ => Calculate());
 		}
@@ -118,8 +127,6 @@ namespace AnalitF.Net.Client.ViewModels
 					AutoCommentText = commentText;
 				}
 				NotifyOfPropertyChange("CurrentOffer");
-				if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
-					CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 			}
 		}
 

@@ -82,20 +82,20 @@
 			</Grid.RowDefinitions>
 
 			<Label Grid.Row="0">Информация</Label>
-			<TextBlock Grid.Row="1" x:Name="CurrentPrice_SupplierFullName"
+			<TextBlock Grid.Row="1" x:Name="CurrentPrice_Value_SupplierFullName"
 				Style="{StaticResource PriceInfo}" />
 
 			<TextBlock Grid.Row="2" Style="{StaticResource PriceInfo}">
-				Телефон: <Run x:Name="CurrentPrice_Phone" />
+				Телефон: <Run x:Name="CurrentPrice_Value_Phone" />
 			</TextBlock>
 
 			<TextBlock Grid.Row="3" Style="{StaticResource PriceInfo}">
-				Минимальный заказ: <Run x:Name="CurrentPrice_MinOrderSum_MinOrderSum" />
+				Минимальный заказ: <Run x:Name="CurrentPrice_Value_MinOrderSum_MinOrderSum" />
 			</TextBlock>
 
 			<StackPanel Grid.Row="4">
 				<TextBlock Style="{StaticResource PriceInfo}">Email:</TextBlock>
-				<ItemsControl Padding="20, 0, 5, 5" Name="CurrentPrice_Emails">
+				<ItemsControl Padding="20, 0, 5, 5" Name="CurrentPrice_Value_Emails">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<TextBlock>
@@ -110,11 +110,11 @@
 
 			<Label Grid.Row="5">Контактная информация:</Label>
 			<TextBox Grid.Row="6" Padding="5" Style="{StaticResource ReadOnlyText}"
-				x:Name="CurrentPrice_ContactInfo" />
+				x:Name="CurrentPrice_Value_ContactInfo" />
 
 			<Label Grid.Row="7">Оперативная информация:</Label>
 			<TextBox Grid.Row="8" Style="{StaticResource ReadOnlyText}" Padding="5"
-				x:Name="CurrentPrice_OperativeInfo" />
+				x:Name="CurrentPrice_Value_OperativeInfo" />
 		</Grid>
 
 		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"

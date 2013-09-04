@@ -6,16 +6,19 @@
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
 		</Grid.RowDefinitions>
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<Button Name="NavigateBackward" Style="{StaticResource FilterElement}">Назад</Button>
-			<TextBox x:Name="SearchText" Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SearchText}" binders:SearchBinder.Grid="Lines"></TextBox>
+			<TextBox x:Name="SearchText"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+				Style="{StaticResource SearchText}" binders:SearchBinder.Grid="Lines" />
 		</StackPanel>
 		<c:DataGrid Grid.Row="1" x:Name="Lines"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
