@@ -81,14 +81,6 @@
 		<Setter Property="Background" Value="#C0DCC0"></Setter>
 	</Style>
 
-	<Style TargetType="Label" x:Key="FrozenLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-		<Setter Property="Background" Value="Silver" />
-	</Style>
-
-	<Style TargetType="Label" x:Key="NotValidOrderLegend" BasedOn="{StaticResource ResourceKey=Legend}">
-		<Setter Property="Background" Value="Red" />
-	</Style>
-
 	<Style TargetType="ComboBox" x:Key="Select">
 		<Setter Property="IsEditable" Value="False" />
 		<Setter Property="IsReadOnly" Value="True" />

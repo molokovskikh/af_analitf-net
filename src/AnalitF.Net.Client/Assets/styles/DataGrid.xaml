@@ -77,19 +77,6 @@
 		</Style.Triggers>
 	</Style>
 
-	<Style x:Key="OrderRow" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource ResourceKey={x:Type DataGridCell}}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding Valid}" Value="false">
-				<Setter Property="Background" Value="Red"/>
-				<Setter Property="BorderBrush" Value="Red"/>
-			</DataTrigger>
-			<DataTrigger Binding="{Binding Frozen}" Value="true">
-				<Setter Property="Background" Value="Silver"/>
-				<Setter Property="BorderBrush" Value="Silver"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
 	<Style x:Key="DataGridHighlight" TargetType="Run">
 		<Setter Property="Background" Value="#FEFEA7"></Setter>
 	</Style>

@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models
 			{
 				sum = value;
 				OnPropertyChanged("Sum");
-				OnPropertyChanged("IsValid");
+				OnPropertyChanged("IsInvalid");
 			}
 		}
 
@@ -107,6 +107,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Style(Description = "\"Заморожен\"")]
 		public virtual bool Frozen
 		{
 			get { return frozen; }
@@ -130,13 +131,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
-		public virtual bool IsValid
+		[Style("MinOrderSum.MinOrderSum", Description = "Не удовлетворяет минимальной сумме")]
+		public virtual bool IsInvalid
 		{
 			get
 			{
 				if (MinOrderSum == null)
 					return true;
-				return Sum >= MinOrderSum.MinOrderSum;
+				return Sum < MinOrderSum.MinOrderSum;
 			}
 		}
 

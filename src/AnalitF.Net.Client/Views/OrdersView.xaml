@@ -32,7 +32,6 @@
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected.Value}">
 				<c:DataGrid x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
-					CellStyle="{StaticResource ResourceKey=BaseOrder}"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}"
 					binders:Persistable.PersistColumnSettings="true">
 					<DataGrid.Columns>
@@ -98,24 +97,18 @@
 
 		<StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
 			<Label>Сообщение поставщику</Label>
-			<TextBox Name="EditableOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected.Value}"></TextBox>
+			<TextBox Name="EditableOrder_Comment" Width="279" Height="104" IsEnabled="{Binding IsCurrentSelected.Value}" />
 			<Label>Личные комментарии</Label>
 			<TextBox Name="EditableOrder_PersonalComment" Width="279" Height="104"></TextBox>
 		</StackPanel>
 
-		<StackPanel Grid.Row="2" Grid.ColumnSpan="2">
-			<Label>Подсказка</Label>
-			<StackPanel Orientation="Horizontal">
-				<Label Style="{StaticResource NotValidOrderLegend}">Не удовлетворяет минимальной сумме</Label>
-				<Label Style="{StaticResource FrozenLegend}">"Заморожен"</Label>
-			</StackPanel>
-		</StackPanel>
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Name="Legend" />
 
 		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button x:Name="Freeze" Style="{StaticResource FilterElement}">"Заморозить" заказы</Button>
 			<Button x:Name="Unfreeze" Style="{StaticResource FilterElement}">"Разморозить" заказы</Button>
-			<Button x:Name="Move" Padding="4, 3, 4, 3" Style="{StaticResource FilterElement}"
+			<Button x:Name="Move" Style="{StaticResource FilterElement}"
 				c:ContextMenuOnClick.ShowContextMenu="true"
 				c:ContextMenuOnClick.SelectedItem="{Binding AddressToMove, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
 				c:ContextMenuOnClick.Items="{Binding AddressesToMove}">

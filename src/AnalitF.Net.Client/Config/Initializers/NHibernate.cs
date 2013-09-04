@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			mapper.Class<Order>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				m.ManyToOne(o => o.MinOrderSum, c => {
-					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("AddressId"), cm => cm.Name("RegionId"));
+					c.Columns(cm => cm.Name("AddressId"), cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
 					c.Update(false);
 				});

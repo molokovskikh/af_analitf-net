@@ -16,7 +16,16 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static Dictionary<string, Func<DataTrigger>> KnownStyles
 			= new Dictionary<string, Func<DataTrigger>> {
-				{ "VitallyImportant", App.VitallyImportant }
+				{ "VitallyImportant", App.VitallyImportant },
+				{ "Frozen",
+					() => new DataTrigger {
+						Binding = new Binding("Frozen"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, Brushes.Silver)
+						}
+					}
+				}
 			};
 
 		public static void BuildStyles(ResourceDictionary resources,
@@ -53,8 +62,17 @@ namespace AnalitF.Net.Client.Helpers
 			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)appResource["Legend"]);
-				style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Red));
+				var result = KnownStyles.GetValueOrDefault(legend.p.Name);
+				if (result == null) {
+					style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Red));
+				}
+				else {
+					var trigger = result();
+					trigger.Setters.OfType<Setter>()
+						.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
+				}
 				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.d.Description));
+				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.d.Description));
 				resources.Add(LegendKey(legend.p), style);
 			}
 
@@ -212,6 +230,33 @@ namespace AnalitF.Net.Client.Helpers
 		public static Color Mix(Color background, Color foreground, float factor)
 		{
 			return (foreground - background) * factor + background;
+		}
+
+		public static void ApplyStyles(Type type, Controls.DataGrid grid, ResourceDictionary resources, StackPanel legend)
+		{
+			foreach (var dataGridColumn in grid.Columns.OfType<DataGridBoundColumn>()) {
+				var binding = dataGridColumn.Binding as Binding;
+				if (binding == null)
+					continue;
+				var resource = resources[type.Name + binding.Path.Path + "Cell"] as Style;
+				if (resource == null)
+					continue;
+				dataGridColumn.CellStyle = resource;
+			}
+
+			Apply(type, grid, resources);
+
+			legend.Children.Add(new Label { Content = "Подсказка" });
+			var styles = from p in type.GetProperties()
+				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+				let key = LegendKey(p)
+				let style = resources[key] as Style
+				where style != null
+				select new Label { Style = style };
+			var stack = new StackPanel();
+			stack.Orientation = Orientation.Horizontal;
+			stack.Children.AddRange(styles);
+			legend.Children.Add(stack);
 		}
 	}
 }

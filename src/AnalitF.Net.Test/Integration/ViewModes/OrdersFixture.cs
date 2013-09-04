@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
@@ -247,17 +248,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
 
-		private Offer MakeReordarable(Offer offer)
-		{
-			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);
-			var newOffer = new Offer(price, offer, offer.Cost + 50);
-			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
-			session.Save(newOffer);
-
-			return newOffer;
-		}
-
-
 		[Test]
 		public void Move()
 		{
@@ -324,11 +314,29 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Orders.Select(o => o.Id), Is.Not.Contains(order.Id));
 		}
 
-		private Order PrepareCurrent()
+		[Test(Description = "Тест на ошибку в мапинге хибера, похоже мапинг композитных ключей зависит от порядка полей")]
+		public void Min_order_rule()
+		{
+			var rules = session.Query<MinOrderSumRule>().Select(r => r.Price.Id.PriceId).ToList();
+			PrepareCurrent(session.Query<Offer>().First(o => rules.Contains(o.PriceId)));
+			Assert.IsNotNull(model.Orders[0].MinOrderSum);
+		}
+
+		private Offer MakeReordarable(Offer offer)
+		{
+			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);
+			var newOffer = new Offer(price, offer, offer.Cost + 50);
+			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
+			session.Save(newOffer);
+
+			return newOffer;
+		}
+
+		private Order PrepareCurrent(Offer offer = null)
 		{
 			session.DeleteEach<Order>();
 
-			var order = MakeOrder();
+			var order = MakeOrder(offer);
 			model.IsCurrentSelected.Value = true;
 			model.CurrentOrder = model.Orders.First();
 			model.SelectedOrders.Add(model.CurrentOrder);

@@ -37,12 +37,12 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var order = new Order(price, address);
 			order.AddLine(offer, 1);
-			Assert.That(order.IsValid, Is.True);
+			Assert.That(order.IsInvalid, Is.True);
 
 			order.Address.Rules.Add(new MinOrderSumRule(order.Address, order.Price, 1000));
 			order = new Order(price, address);
 			order.AddLine(offer, 1);
-			Assert.That(order.IsValid, Is.False);
+			Assert.IsTrue(order.IsInvalid);
 		}
 
 		[Test]

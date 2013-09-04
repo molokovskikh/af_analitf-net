@@ -57,7 +57,6 @@ namespace AnalitF.Net.Client
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
 
-			SimpleStyle("BaseOrder", "Frozen", Colors.Silver);
 			SimpleStyle("Reject", "Marked", Colors.Silver);
 
 			resources.Add("VitallyImportant", BaseStyle(activeColor, inactiveColor));
@@ -68,7 +67,7 @@ namespace AnalitF.Net.Client
 			style = CellStyle(activeColor, inactiveColor, "HaveOffers", false, Colors.Silver);
 			resources.Add("HaveOffers", style);
 
-			style = CellStyle(activeColor, inactiveColor, "Leader", false, Color.FromRgb(0xC0, 0xDC, 0xC0));
+			style = CellStyle(activeColor, inactiveColor, "Leader", true, Color.FromRgb(0xC0, 0xDC, 0xC0));
 			resources.Add("Leader", style);
 
 			style = CellStyle(activeColor,
@@ -106,6 +105,12 @@ namespace AnalitF.Net.Client
 				activeColor,
 				inactiveColor,
 				(Style)Resources["DefaultEditableCell"]);
+			StyleHelper.BuildStyles(resources,
+				Resources,
+				typeof(Order),
+				activeColor,
+				inactiveColor,
+				baseStyle);
 		}
 
 		private Style SimpleStyle(string name,

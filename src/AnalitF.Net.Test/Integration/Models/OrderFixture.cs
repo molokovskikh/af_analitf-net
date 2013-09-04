@@ -36,7 +36,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			Assert.That(events.Count, Is.EqualTo(2));
 			Assert.That(events[0].Item2.PropertyName, Is.EqualTo("Sum"));
 			Assert.That(events[0].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
-			Assert.That(events[1].Item2.PropertyName, Is.EqualTo("IsValid"));
+			Assert.That(events[1].Item2.PropertyName, Is.EqualTo("IsInvalid"));
 			Assert.That(events[1].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
 		}
 	}
