@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var term = SearchBehavior.ActiveSearchTerm.Value;
 			if (!String.IsNullOrEmpty(term))
-				query = query.Where(m => m.SerialNumber.Contains(term));
+				query = query.Where(m => m.SerialNumber.Contains(term) || m.Product.Contains(term));
 
 			Lines.Value = query
 				.OrderBy(l => l.Product)

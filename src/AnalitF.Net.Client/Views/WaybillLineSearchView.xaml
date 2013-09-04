@@ -28,7 +28,8 @@
 					Binding="{Binding Waybill.WriteTime}" />
 				<DataGridTextColumn Width="*" Header="Поставщик"
 					Binding="{Binding Waybill.Supplier.FullName}" />
-				<DataGridTextColumn Width="*" Header="Наименование"
+				<c:SearchableDataGridColumn Width="*" Header="Наименование"
+					HighlightStyle="{StaticResource DataGridHighlight}"
 					Binding="{Binding Product}" />
 				<c:SearchableDataGridColumn Width="*" Header="Серия товара"
 					HighlightStyle="{StaticResource DataGridHighlight}"
