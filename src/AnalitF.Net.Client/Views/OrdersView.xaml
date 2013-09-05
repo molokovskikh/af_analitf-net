@@ -116,7 +116,7 @@
 					<TextBlock>Переместить на др.адрес</TextBlock>
 					<Path Visibility="{Binding (c:ContextMenuOnClick.IsCanChose),
 							RelativeSource={RelativeSource AncestorType=Button},
-							Converter={StaticResource BooleanToVisibilityConverterResource}}"
+							Converter={StaticResource BoolToCollapsed}}"
 						Style="{StaticResource Arrow}" />
 				</StackPanel>
 			</Button>

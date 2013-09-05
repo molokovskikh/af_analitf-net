@@ -114,12 +114,6 @@ namespace AnalitF.Net.Client.Models
 					.Select(s => new DirMap(settings, s))
 					.ToArray();
 				session.SaveEach(newDirMaps);
-
-				foreach (var dirMap in dirMaps.Concat(newDirMaps)) {
-					if (!Directory.Exists(dirMap.Dir))
-						FileHelper.CreateDirectoryRecursive(dirMap.Dir);
-				}
-
 				transaction.Commit();
 			}
 			return false;

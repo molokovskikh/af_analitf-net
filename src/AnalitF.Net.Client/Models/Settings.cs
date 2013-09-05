@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
 using NHibernate;
@@ -128,8 +129,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool PrintRetailCost { get; set; }
 	}
 
-	public class Settings
+	public class Settings : BaseNotify
 	{
+		private bool groupWaybillBySupplier;
+
 		public Settings()
 		{
 			OverCountWarningFactor = 5;
@@ -194,7 +197,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool PrintOrdersAfterSend { get; set; }
 
-		public virtual bool GroupWaybillsBySupplier { get; set; }
+		public virtual bool GroupWaybillsBySupplier
+		{
+			get { return groupWaybillBySupplier; }
+			set
+			{
+				groupWaybillBySupplier = value;
+				OnPropertyChanged("GroupWaybillsBySupplier");
+			}
+		}
 
 		public virtual bool IsValid
 		{

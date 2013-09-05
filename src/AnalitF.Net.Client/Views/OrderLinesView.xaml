@@ -39,7 +39,7 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
-			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BooleanToVisibilityConverterResource}}"
+			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
@@ -105,7 +105,7 @@
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
 		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
-			Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BooleanToVisibilityConverterResource}}"
+			Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="255*" Header="Наименование"

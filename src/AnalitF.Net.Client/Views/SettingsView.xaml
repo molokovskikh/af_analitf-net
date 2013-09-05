@@ -121,7 +121,9 @@
 					</CheckBox>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Настройки поставщиков" Name="DirMapTab">
+			<TabItem Header="Настройки поставщиков" Name="DirMapTab"
+				Visibility="{Binding Settings.GroupWaybillsBySupplier,
+					Converter={StaticResource BoolToCollapsed}}">
 				<StackPanel>
 					<Label>Поставщик</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="DirMaps" DisplayMemberPath="Supplier.FullName" />

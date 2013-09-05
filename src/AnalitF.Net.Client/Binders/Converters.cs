@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Extentions
 		}
 	}
 
-	public class BoolToCharConverter : IValueConverter
+	public class BoolToMarkerConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Extentions
 		}
 	}
 
-	public class BoolToVisibilityConverter : IValueConverter
+	public class BoolToHiddenConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{

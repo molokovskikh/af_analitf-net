@@ -3,6 +3,6 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<TextBox Style="{StaticResource PopupSearch}"
 		x:Name="SearchText"
-		Visibility="{Binding SearchTextVisible, Converter={StaticResource VisibilityConverter}}"
+		Visibility="{Binding SearchTextVisible, Converter={StaticResource BoolToHidden}}"
 		IsEnabled="{Binding IsEnabled}"></TextBox>
 </UserControl>

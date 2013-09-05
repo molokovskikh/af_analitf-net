@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
@@ -8,6 +9,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.NHibernate;
+using Common.Tools;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
@@ -146,6 +148,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (CurrentDirMap.Value == null)
 				yield break;
+
+			if (!Directory.Exists(CurrentDirMap.Value.Dir))
+				FileHelper.CreateDirectoryRecursive(CurrentDirMap.Value.Dir);
 
 			var dialog = new SelectDirResult(CurrentDirMap.Value.Dir);
 			yield return dialog;

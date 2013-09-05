@@ -18,11 +18,11 @@
 			</Grid.RowDefinitions>
 			<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
 				<Label Foreground="Green"
-					Visibility="{Binding Path=CurrentItem.VitallyImportant, Converter={StaticResource VisibilityConverter}, FallbackValue=Hidden}">
+					Visibility="{Binding Path=CurrentItem.VitallyImportant, Converter={StaticResource BoolToHidden}, FallbackValue=Hidden}">
 					ЖНВЛС
 				</Label>
 				<Label Foreground="Red"
-					Visibility="{Binding Path=CurrentItem.MandatoryList, Converter={StaticResource VisibilityConverter}, FallbackValue=Hidden}">
+					Visibility="{Binding Path=CurrentItem.MandatoryList, Converter={StaticResource BoolToHidden}, FallbackValue=Hidden}">
 					Обяз. список
 				</Label>
 			</StackPanel>

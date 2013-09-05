@@ -3,9 +3,9 @@
 	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls">
 
-	<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverterResource" />
-	<Extentions:BoolToVisibilityConverter x:Key="VisibilityConverter" />
-	<Extentions:BoolToCharConverter x:Key="BoolToChar" />
+	<BooleanToVisibilityConverter x:Key="BoolToCollapsed" />
+	<Extentions:BoolToHiddenConverter x:Key="BoolToHidden" />
+	<Extentions:BoolToMarkerConverter x:Key="BoolToMarker" />
 
 	<Style TargetType="Image" x:Key="ButtonImage">
 		<Style.Triggers>

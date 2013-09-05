@@ -44,7 +44,7 @@
 					Binding="{Binding RegionName}"
 					IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="36*" Header="Склад"
-					Binding="{Binding Storage, Converter={StaticResource BoolToChar}}" IsReadOnly="True"
+					Binding="{Binding Storage, Converter={StaticResource BoolToMarker}}" IsReadOnly="True"
 					TextAlignment="Center" />
 				<DataGridCheckBoxColumn Width="65*" Header="В работе"
 					Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
