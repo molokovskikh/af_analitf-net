@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Models
 			var dependencyObject = view as DependencyObject;
 			if (dependencyObject == null)
 				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.DeepChildren<DataGrid>()
+			return dependencyObject.Descendants<DataGrid>()
 				.Where(c => (bool)c.GetValue(Persistable.PersistColumnSettingsProperty));
 		}
 

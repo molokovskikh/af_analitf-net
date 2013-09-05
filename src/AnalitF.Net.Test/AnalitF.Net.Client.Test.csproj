@@ -122,7 +122,7 @@
     <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\StatFixture.cs" />
-    <Compile Include="Integration\Models\UPdateFixture.cs" />
+    <Compile Include="Integration\Models\UpdateFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\QueryFixture.cs" />
     <Compile Include="Integration\SetupFixture.cs" />
@@ -177,6 +177,7 @@
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\StyleBuilderFixture.cs" />
+    <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
     <Compile Include="Unit\WaybillFixture.cs" />

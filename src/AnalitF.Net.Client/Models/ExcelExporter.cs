@@ -70,7 +70,8 @@ namespace AnalitF.Net.Client.Models
 			foreach (var item in items) {
 				row = sheet.CreateRow(rowIndex++);
 				for(var i = 0; i < columns.Length; i++) {
-					SetCellValue(row, i, GetValue(columns[i], item));
+					var path = ((Binding)columns[i].Binding).Path.Path;
+					SetCellValue(row, i, Util.GetValue(item, path));
 				}
 			}
 
@@ -96,27 +97,9 @@ namespace AnalitF.Net.Client.Models
 			var view = (UserControl) model.GetView();
 			if (view == null)
 				return null;
-			return view.DeepChildren<DataGrid>().Where(g => names.Contains(g.Name))
+			return view.Descendants<DataGrid>().Where(g => names.Contains(g.Name))
 				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 100 + Convert.ToUInt32(g.IsVisible) * 10)
 				.FirstOrDefault();
-		}
-
-		private object GetValue(DataGridBoundColumn column, object offer)
-		{
-			var path = ((Binding)column.Binding).Path.Path;
-			var parts = path.Split('.');
-
-			var value = offer;
-			foreach (var part in parts) {
-				if (value == null)
-					return null;
-				var type = value.GetType();
-				var property = type.GetProperty(part);
-				if (property == null)
-					return null;
-				value = property.GetValue(value, null);
-			}
-			return value;
 		}
 
 		public static void SetCellValue(IRow row, int i, object value)

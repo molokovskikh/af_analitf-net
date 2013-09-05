@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static void Centrify(DataGrid grid)
 		{
-			var scrollViewer = grid.DeepChildren<ScrollViewer>().FirstOrDefault();
+			var scrollViewer = grid.Descendants<ScrollViewer>().FirstOrDefault();
 			if (scrollViewer == null)
 				return;
 			var selected = grid.SelectedItem;
@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Helpers
 			var columnIndex = 0;
 			if (column != null)
 				columnIndex = column.DisplayIndex;
-			var presenter = rowContainer.GetVisualChild<DataGridCellsPresenter>();
+			var presenter = rowContainer.VisualChild<DataGridCellsPresenter>();
 			if (presenter == null)
 				return null;
 			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);

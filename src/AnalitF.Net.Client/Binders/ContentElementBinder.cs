@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Binders
 		public static void Bind(object viewModel, DependencyObject view, object context)
 		{
 			var viewModelType = viewModel.GetType();
-			var elements = view.DeepChildren<FrameworkContentElement>()
+			var elements = view.Descendants<FrameworkContentElement>()
 				.Where(e => !string.IsNullOrEmpty(e.Name))
 				.Distinct()
 				.ToList();

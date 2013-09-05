@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			base.OnViewAttached(view, context);
 			var d = view as DependencyObject;
 			if (d != null) {
-				var box = d.DeepChildren<TextBox>().FirstOrDefault();
+				var box = d.Descendants<TextBox>().FirstOrDefault();
 				if (box == null)
 					return;
 

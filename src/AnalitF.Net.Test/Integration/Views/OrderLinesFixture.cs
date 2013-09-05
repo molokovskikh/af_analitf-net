@@ -18,7 +18,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var view = Bind(new OrderLinesViewModel());
 
-			var all = view.DeepChildren<Control>().First(e => e.Name == "All");
+			var all = view.Descendants<Control>().First(e => e.Name == "All");
 			Assert.That(all.Visibility, Is.EqualTo(Visibility.Collapsed));
 		}
 	}

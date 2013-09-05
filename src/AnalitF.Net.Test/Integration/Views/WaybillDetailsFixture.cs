@@ -62,9 +62,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 				grid.Loaded += (sender, args) => {
 					grid.SelectedItem = waybill.Lines[0];
-					grid.RaiseEvent(new TextCompositionEventArgs(Keyboard.PrimaryDevice, new TextComposition(null, null, "1")) {
-						RoutedEvent = DataGrid.TextInputEvent
-					});
+					grid.RaiseEvent(WpfHelper.TextArgs("1"));
 					var column = grid.Columns.First(c => c.Header.Equals("Розничная наценка"));
 					var cell = DataGridHelper.GetCell(
 						(DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item),

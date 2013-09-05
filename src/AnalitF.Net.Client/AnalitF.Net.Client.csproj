@@ -156,6 +156,7 @@
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
+    <Compile Include="Controls\Selectable.cs" />
     <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />

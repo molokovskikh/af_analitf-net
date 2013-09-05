@@ -42,7 +42,7 @@ namespace AnalitF.Net.Test.Integration
 			text.Inlines.Add(item);
 			view.Content = text;
 
-			Assert.That(view.DeepChildren().Count(), Is.GreaterThan(0));
+			Assert.That(view.Descendants().Count(), Is.GreaterThan(0));
 			ViewModelBinder.Bind(model, view, null);
 			Assert.That(item.Text, Is.EqualTo("123"));
 		}
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Integration
 					new TabItem { Content = new DataGrid() },
 				}
 			};
-			var count = view.DeepChildren<DataGrid>().Count();
+			var count = view.Descendants<DataGrid>().Count();
 			Assert.That(count, Is.EqualTo(2));
 		}
 
@@ -67,7 +67,7 @@ namespace AnalitF.Net.Test.Integration
 			var checkBox = new CheckBox { Name = "Is" };
 			view.Content = checkBox;
 
-			Assert.That(view.DeepChildren().Count(), Is.GreaterThan(0));
+			Assert.That(view.Descendants().Count(), Is.GreaterThan(0));
 			ViewModelBinder.Bind(model, view, null);
 			Assert.That(checkBox.IsEnabled, Is.False);
 		}
@@ -79,7 +79,7 @@ namespace AnalitF.Net.Test.Integration
 			var checkBox = new CheckBox { Name = "Is" };
 			view.Content = checkBox;
 
-			Assert.That(view.DeepChildren().Count(), Is.GreaterThan(0));
+			Assert.That(view.Descendants().Count(), Is.GreaterThan(0));
 			ViewModelBinder.Bind(model, view, null);
 			Assert.That(checkBox.Visibility, Is.EqualTo(Visibility.Collapsed));
 		}

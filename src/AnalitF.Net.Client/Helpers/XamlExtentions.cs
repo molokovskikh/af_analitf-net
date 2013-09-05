@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		public static T GetVisualChild<T>(this Visual parent) where T : Visual
+		public static T VisualChild<T>(this Visual parent) where T : Visual
 		{
 			var child = default(T);
 
@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Helpers
 				child = v as T;
 				if (child == null)
 				{
-					child = GetVisualChild<T>(v);
+					child = VisualChild<T>(v);
 				}
 				if (child != null)
 				{
@@ -102,6 +102,11 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		public static IEnumerable<T> Parents<T>(this DependencyObject o)
+		{
+			return Parents(o).OfType<T>();
+		}
+
 		public static IEnumerable<object> Parents(this DependencyObject o)
 		{
 			var parent = Parent(o);
@@ -109,6 +114,11 @@ namespace AnalitF.Net.Client.Helpers
 				yield return parent;
 				parent = Parent(parent);
 			}
+		}
+
+		public static IEnumerable<T> VisualParents<T>(this DependencyObject o)
+		{
+			return o.VisualParents().OfType<T>();
 		}
 
 		public static IEnumerable<DependencyObject> VisualParents(this DependencyObject o)
@@ -143,12 +153,20 @@ namespace AnalitF.Net.Client.Helpers
 			return null;
 		}
 
-		public static IEnumerable<DependencyObject> DeepChildren(this DependencyObject view)
+		public static IEnumerable<DependencyObject> Descendants(this DependencyObject view)
 		{
 			return view.Children().Flat(Children);
 		}
 
-		public static IEnumerable<T> DeepChildren<T>(this DependencyObject view)
+		public static IEnumerable<T> Siblings<T>(this DependencyObject view)
+		{
+			var parent = view.Parent();
+			if (parent == null)
+				return Enumerable.Empty<T>();
+			return parent.Children().Except(new [] { view }).OfType<T>();
+		}
+
+		public static IEnumerable<T> Descendants<T>(this DependencyObject view)
 		{
 			return view.Children().Flat(Children).OfType<T>();
 		}
@@ -181,7 +199,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static string AsText(DependencyObject item)
 		{
-			return item.DeepChildren()
+			return item.Descendants()
 				.Select(ToText)
 				.Where(c => c != null)
 				.Implode(Environment.NewLine);

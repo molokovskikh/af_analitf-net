@@ -23,6 +23,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
+using Common.Tools;
 using Common.Tools.Calendar;
 using log4net.Config;
 using NHibernate.Linq;
@@ -112,8 +113,8 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			dispatcher.Invoke(() => {
 				var grid = (DataGrid)view.FindName("Items");
-				var selectMany = grid.DeepChildren<DataGridCell>()
-					.SelectMany(c => c.DeepChildren<Run>())
+				var selectMany = grid.Descendants<DataGridCell>()
+					.SelectMany(c => XamlExtentions.Descendants<Run>(c))
 					.Where(r => r.Text.ToLower() == "бак");
 				DoubleClick(view, grid, selectMany.First());
 			});
@@ -184,6 +185,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			restore = true;
 			new CreateAddress().Execute(session);
+
 			Start();
 			Click("ShowOrderLines");
 			var lines = await ViewLoaded<OrderLinesViewModel>();
@@ -227,11 +229,36 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Select_printing_by_header()
+		{
+			new UnknownWaybill().Execute(session);
+
+			Start();
+			Click("ShowWaybills");
+			WaitIdle();
+			Input("Waybills", Key.Enter);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)((WaybillDetails)shell.ActiveItem).GetView();
+				var datagrid = (DataGrid)view.FindName("Lines");
+				var printColumn = datagrid.Columns.First(c => !(c.Header is String));
+				var all = datagrid.Descendants<CheckBox>().First(c => "Печатать".Equals(c.Content));
+				Assert.IsTrue(all.IsChecked.Value);
+				all.IsChecked = false;
+
+				datagrid.Descendants<DataGridCell>()
+					.Where(c => c.Column == printColumn)
+					.SelectMany(c => c.Descendants<CheckBox>())
+					.Each(c => Assert.IsFalse(c.IsChecked.Value));
+			});
+		}
+
 		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement
 		{
-			return view.DeepChildren<FrameworkElement>()
+			return view.Descendants<FrameworkElement>()
 				.First(e => e.Name == root)
-				.DeepChildren<T>()
+				.Descendants<T>()
 				.First(e => e.Name == name);
 		}
 
@@ -330,6 +357,14 @@ namespace AnalitF.Net.Test.Integration.Views
 			Contract.Assert(element != null);
 			AssertInputable(element);
 			element.RaiseEvent(WpfHelper.TextArgs(text));
+		}
+
+		private void Input(string name, Key key)
+		{
+			var item = (BaseScreen)shell.ActiveItem;
+			var view = item.GetView();
+			Contract.Assert(view != null);
+			Input((FrameworkElement)view, name, key);
 		}
 
 		private void Input(FrameworkElement view, string name, Key key)

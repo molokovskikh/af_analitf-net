@@ -42,7 +42,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			model.OrderWarning.OrderWarning = "test";
 
-			var item = view.DeepChildren<ContentControl>().First(c => c.Name == "OrderWarning");
+			var item = view.Descendants<ContentControl>().First(c => c.Name == "OrderWarning");
 			Assert.That(item.Content, Is.InstanceOf<InlineEditWarningView>());
 			Assert.That(XamlExtentions.AsText(item), Is.EqualTo("test"));
 		}

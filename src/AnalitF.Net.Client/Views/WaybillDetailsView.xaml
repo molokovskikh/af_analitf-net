@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.InputBindings>
@@ -108,8 +109,17 @@
 				<c:DataGridTextColumnEx Width="100*" Header="Страна"
 					Binding="{Binding Country}"
 					IsReadOnly="True" />
-				<DataGridCheckBoxColumn Width="SizeToHeader" Header="Печатать"
-					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}" />
+				<DataGridCheckBoxColumn Width="SizeToHeader"
+					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}">
+					<DataGridCheckBoxColumn.Header>
+						<CheckBox IsChecked="True">
+							<i:Interaction.Behaviors>
+								<c:Selectable />
+							</i:Interaction.Behaviors>
+							Печатать
+						</CheckBox>
+					</DataGridCheckBoxColumn.Header>
+				</DataGridCheckBoxColumn>
 				<c:DataGridTextColumnEx Width="160*" Header="Срок годности"
 					Binding="{Binding Period}"
 					IsReadOnly="True" />

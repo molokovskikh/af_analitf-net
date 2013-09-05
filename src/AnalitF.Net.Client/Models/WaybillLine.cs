@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.Models
 		private decimal? _retailMarkup;
 		private decimal? _maxRetailMarkup;
 		private decimal? _maxSupplierMarkup;
+		private bool print;
 
 		public WaybillLine()
 		{
@@ -42,7 +43,17 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Product { get; set; }
 		public virtual string Producer { get; set; }
 		public virtual string Country { get; set; }
-		public virtual bool Print { get; set; }
+
+		public virtual bool Print
+		{
+			get { return print; }
+			set
+			{
+				print = value;
+				OnPropertyChanged("Print");
+			}
+		}
+
 		public virtual string Period { get; set; }
 		public virtual string SerialNumber { get; set; }
 		public virtual string Certificates { get; set; }
