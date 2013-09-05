@@ -64,11 +64,14 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
 
+#if DEBUG
+			if (!UnitTesting)
+				Debug = new DebugViewModel();
+#endif
+
 			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
-			ErrorCount = new NotifyValue<int>();
-			HaveErrors = new NotifyValue<bool>(() => ErrorCount.Value > 0, ErrorCount);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			Arguments = Environment.GetCommandLineArgs();
 
@@ -131,9 +134,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }
-
-		public NotifyValue<int> ErrorCount { get; set; }
-		public NotifyValue<bool> HaveErrors { get; set; }
 
 		public string Version { get; set; }
 
@@ -726,6 +726,8 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 #if DEBUG
+		public DebugViewModel Debug { get; set; }
+
 		public void Collect()
 		{
 			GC.Collect();
@@ -738,6 +740,11 @@ namespace AnalitF.Net.Client.ViewModels
 			var assembly = Assembly.LoadFrom(@"C:\Chocolatey\lib\snoop.2.7.1\tools\snoop.exe");
 			var type = assembly.GetType("Snoop.SnoopUI");
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
+		}
+
+		public void ShowDebug()
+		{
+			windowManager.ShowWindow(Debug);
 		}
 #endif
 	}

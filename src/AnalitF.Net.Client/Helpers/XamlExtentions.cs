@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -189,12 +190,16 @@ namespace AnalitF.Net.Client.Helpers
 		/// <summary>
 		/// предназначен для отладки, протоколирует события
 		/// </summary>
-		public static void TraceEvent(Type type, RoutedEvent @event)
+		public static void TraceEvent(Type type, RoutedEvent @event, bool trace = false)
 		{
 			EventManager.RegisterClassHandler(type, @event,
 				new RoutedEventHandler(
 					(sender, args) => {
-						Console.WriteLine("{0} {1}.{2}", @event.Name, ((FrameworkElement)sender).Name, sender);
+						Console.WriteLine("{0} {1}.{2} {3}",
+							@event.Name,
+							((FrameworkElement)sender).Name,
+							sender,
+							trace ? new StackTrace() : null);
 					}));
 		}
 

@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using log4net;
 using log4net.Config;
 using NDesk.Options;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client
 {

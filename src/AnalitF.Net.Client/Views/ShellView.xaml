@@ -208,11 +208,11 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Label x:Name="ErrorCount">
+				<Label x:Name="Debug_ErrorCount">
 					<Label.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding HaveErrors.Value}" Value="True">
+								<DataTrigger Binding="{Binding Debug.HaveErrors.Value}" Value="True">
 									<DataTrigger.EnterActions>
 										<BeginStoryboard>
 											<Storyboard>
@@ -236,6 +236,11 @@
 						</Style>
 					</Label.Style>
 				</Label>
+			</StatusBarItem>
+
+			<StatusBarItem>
+				<Button x:Name="ShowDebug" Content="{Binding Debug.SqlCount.Value}">
+				</Button>
 			</StatusBarItem>
 
 			<StatusBarItem>

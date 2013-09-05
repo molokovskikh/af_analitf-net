@@ -12,9 +12,11 @@ namespace AnalitF.Net.Client.Helpers
 			this.action = action;
 		}
 
-		public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string format, params object[] args)
+		public override void TraceEvent(TraceEventCache eventCache, string source,
+			TraceEventType eventType, int id, string format, params object[] args)
 		{
-			action(String.Format(format, args));
+			if (eventType == TraceEventType.Error || eventType == TraceEventType.Critical)
+				action(String.Format(format, args));
 		}
 
 		public override void Write(string message)

@@ -70,15 +70,6 @@ namespace AnalitF.Net.Client
 		{
 			if (!catchExceptions)
 				return;
-#if DEBUG
-			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
-			PresentationTraceSources.Refresh();
-
-			PresentationTraceSources.DataBindingSource.Listeners.Add(new DelegateTraceListner(_ => {
-				if (Shell != null)
-					Shell.ErrorCount.Value++;
-			}));
-#endif
 
 			LogManager.GetLog = t => new Log4net(t);
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
@@ -98,9 +89,6 @@ namespace AnalitF.Net.Client
 
 		private void CheckShutdown(Exception e)
 		{
-			if (Shell != null)
-				Shell.ErrorCount.Value++;
-
 			if (!IsInitialized) {
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение

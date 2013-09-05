@@ -102,6 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnActivate();
 
 			Update();
+			CurrentOffer = CurrentOffer ?? Offers.FirstOrDefault();
 			UpdateProducers();
 
 			var haveOffers = StatelessSession.Query<Offer>().Any(o => o.Price.Id == priceId);
@@ -141,13 +142,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Fetch(o => o.Price)
 				.Fetch(o => o.LeaderPrice)
 				.ToList();
-			CurrentOffer = offers.FirstOrDefault();
 
-			if (CurrentOffer != null)
-				Price.Value = CurrentOffer.Price;
-
-			if (Price.Value == null)
-				Price.Value = StatelessSession.Get<Price>(priceId);
+			Price.Value = Offers.Select(o => o.Price).FirstOrDefault()
+				?? StatelessSession.Get<Price>(priceId);
 		}
 
 		public NotifyValue<string> SearchText { get; set; }
@@ -207,9 +204,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Address.Orders.Remove(Price.Value.Order);
 			Price.Value.Order = null;
-			foreach (var offer in Offers) {
+			foreach (var offer in Offers)
 				offer.OrderLine = null;
-			}
 		}
 	}
 }

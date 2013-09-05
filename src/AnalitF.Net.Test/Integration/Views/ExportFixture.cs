@@ -6,6 +6,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using NHibernate.Linq;
+using NPOI.HSSF.UserModel;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Views
@@ -13,6 +14,15 @@ namespace AnalitF.Net.Test.Integration.Views
 	[TestFixture, RequiresSTA]
 	public class ExportFixture : BaseViewFixture
 	{
+		private OpenResult result;
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (result != null)
+				File.Delete(result.Filename);
+		}
+
 		[Test]
 		public void Export()
 		{
@@ -26,6 +36,13 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var model = new PriceViewModel();
 			CheckExport(model);
+			using(var file = File.OpenRead(result.Filename)) {
+				var book = new HSSFWorkbook(file);
+				var sheet = book.GetSheetAt(0);
+				//флаг в Работе
+				var cell = sheet.GetRow(1).GetCell(3);
+				Assert.AreEqual("Да", cell.StringCellValue);
+			}
 		}
 
 		private void CheckExport(BaseScreen model)
@@ -34,9 +51,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			InitView(model);
 
 			Assert.That(model.CanExport, Is.True);
-			var result = (OpenResult)model.Export();
+			result = (OpenResult)model.Export();
 			Assert.That(File.Exists(result.Filename), result.Filename);
-			File.Delete(result.Filename);
 		}
 	}
 }

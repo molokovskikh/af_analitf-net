@@ -3,13 +3,17 @@ using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using log4net;
 using NHibernate;
 using ReactiveUI;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public class NotifyValue<T> : BaseNotify
 	{
+		private static ILog log = LogManager.GetLogger(typeof(NotifyValue<>));
+
 		private bool respectValue;
 		private Func<T> calc;
 		private T value;
@@ -46,6 +50,16 @@ namespace AnalitF.Net.Client.Helpers
 			: this(default(T), calc, props)
 		{
 			Recalculate();
+		}
+
+		public NotifyValue(Func<T> calc, IObservable<object> trigger)
+			: this(calc)
+		{
+#if DEBUG
+			trigger.Subscribe(_ => Recalculate());
+#else
+			trigger.Subscribe(_ => Recalculate(), e => log.Error("Ошибка при обновлении значения", e));
+#endif
 		}
 
 		public NotifyValue(T value)

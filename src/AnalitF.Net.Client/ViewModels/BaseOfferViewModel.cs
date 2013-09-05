@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
 			Readonly = true;
-			updateOnActivate = true;
+			updateOnActivate = false;
 
 			this.initOfferId = initOfferId;
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
@@ -325,8 +325,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			Query();
-			if (CurrentOffer == null)
-				CurrentOffer = Offers.FirstOrDefault(o => o.Id == initOfferId);
+			CurrentOffer = CurrentOffer ?? Offers.FirstOrDefault(o => o.Id == initOfferId);
 			Calculate();
 			LoadOrderItems();
 		}

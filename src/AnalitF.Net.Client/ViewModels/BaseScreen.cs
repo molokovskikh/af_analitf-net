@@ -81,18 +81,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			excelExporter = new ExcelExporter(this);
 			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
-
-			if (!Readonly) {
-				//для сообщений типа string используется ImmediateScheduler
-				//те вызов произойдет в той же нитке что и SendMessage
-				//если делать это как показано выше .ObserveOn(UiScheduler)
-				//то вызов произойдет после того как Dispatcher поделает все дела
-				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
-				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
-				OnCloseDisposable.Add(Bus.Listen<string>()
-					.Where(m => m == "DbChanged")
-					.Subscribe(_ => updateOnActivate = true));
-			}
 		}
 
 		protected virtual ShellViewModel Shell
@@ -111,6 +99,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
+			if (!Readonly) {
+				//для сообщений типа string используется ImmediateScheduler
+				//те вызов произойдет в той же нитке что и SendMessage
+				//если делать это как показано выше .ObserveOn(UiScheduler)
+				//то вызов произойдет после того как Dispatcher поделает все дела
+				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
+				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
+				OnCloseDisposable.Add(Bus.Listen<string>()
+					.Where(m => m == "DbChanged")
+					.Subscribe(_ => updateOnActivate = true));
+			}
+
 			Load();
 			Restore();
 
@@ -144,7 +144,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var broacast = false;
 			if (Session.IsOpen) {
-
 				if (Session.FlushMode != FlushMode.Never) {
 					//IsDirty - приведет к тому что все изменения будут сохранены
 					//по этому делаем проверку только если нужно сохранить изменения

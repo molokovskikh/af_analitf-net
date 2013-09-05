@@ -132,11 +132,11 @@ namespace AnalitF.Net.Client.Models
 				else
 					cell.SetCellValue("Нет");
 			}
-			if (value is DateTime) {
+			else if (value is DateTime) {
 				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue((DateTime)value);
 			}
-			if (Util.IsDigitValue(value)) {
+			else if (Util.IsDigitValue(value)) {
 				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue(Convert.ToDouble(value));
 			}

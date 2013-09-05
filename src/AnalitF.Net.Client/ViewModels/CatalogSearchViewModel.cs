@@ -65,6 +65,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Items = new NotifyValue<List<CatalogDisplayItem>>();
 			CurrentItem = new NotifyValue<CatalogDisplayItem>();
+			var changes = CurrentItem.Changed()
+#if !DEBUG
+				.Throttle(Consts.ScrollLoadTimeout)
+				.ObserveOn(UiScheduler)
+#endif
+				;
 			CurrentCatalog = new NotifyValue<Catalog>(() => {
 				if (CurrentItem.Value == null)
 					return null;
@@ -73,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.Fetch(c => c.Name)
 					.ThenFetch(n => n.Mnn)
 					.FirstOrDefault(c => c.Id == catalogId);
-			}, CurrentItem);
+			}, changes);
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,
 				v => Items.Value.FirstOrDefault(c => c.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),

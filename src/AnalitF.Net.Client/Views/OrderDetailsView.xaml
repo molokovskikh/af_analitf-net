@@ -133,7 +133,7 @@
 
 			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto"></TextBox>
+				<TextBox Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
 			</DockPanel>
 		</Grid>
 

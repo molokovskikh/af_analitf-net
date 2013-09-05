@@ -247,6 +247,7 @@
     <Compile Include="ViewModels\CatalogSearchViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
+    <Compile Include="ViewModels\DebugViewModel.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
@@ -285,6 +286,9 @@
     </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DebugView.xaml.cs">
+      <DependentUpon>DebugView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
@@ -400,6 +404,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CatalogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DebugView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -544,6 +552,10 @@
     <ProjectReference Include="..\Common.Tools\Common.Tools\Common.Tools.csproj">
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Condition="$(DefineConstants.Contains('DEBUG'))" Include="..\Test.Support\Test.Support\Test.Support.csproj">
+      <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
+      <Name>Test.Support</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -43,6 +43,11 @@
 		<Setter Property="Data" Value="{DynamicResource DownArrowGeometry}"></Setter>
 		<Setter Property="HorizontalAlignment" Value="Center"></Setter>
 		<Setter Property="VerticalAlignment" Value="Center"></Setter>
+		<Style.Triggers>
+			<Trigger Property="IsEnabled" Value="false">
+				<Setter Property="Fill" Value="#AFAFAF"/>
+			</Trigger>
+		</Style.Triggers>
 	</Style>
 
 	<Style x:Key="ComboBoxReadonlyToggleButton"
