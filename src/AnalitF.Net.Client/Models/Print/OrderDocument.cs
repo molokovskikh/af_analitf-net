@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var sum = lines.Sum(l => l.Sum);
 			var rows = lines.Select((l, i) => new object[] {
 				i + 1,
-				l.ProducerSynonym,
+				l.ProductSynonym,
 				l.ProducerSynonym,
 				l.Period,
 				l.Cost,

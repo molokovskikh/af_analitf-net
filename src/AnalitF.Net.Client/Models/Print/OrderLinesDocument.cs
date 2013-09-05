@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Models.Print
 				count = lines.Value.Count;
 				sum = lines.Value.Sum(l => l.Sum);
 				rows = model.Lines.Value.Select(l => new object[] {
-					l.ProducerSynonym,
+					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
 					l.Cost,
@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Models.Print
 				count = lines.Value.Count;
 				sum = lines.Value.Sum(l => l.Count * l.Cost);
 				rows = model.SentLines.Value.Select(l => new object[] {
-					l.ProducerSynonym,
+					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
 					l.Cost,

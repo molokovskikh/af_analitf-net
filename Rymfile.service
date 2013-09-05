@@ -1,0 +1,3 @@
+bin=src/AnalitF.Net.Test/bin/debug/AnalitF.Net.Client.Test.dll
+config=src/AnalitF.Net.Service/web.config
+work-dir=src/AnalitF.Net.Service/

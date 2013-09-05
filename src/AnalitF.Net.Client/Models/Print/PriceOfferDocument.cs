@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 			var rows = offers.Select((o, i) => new object[]{
 				i + 1,
-				o.ProducerSynonym,
+				o.ProductSynonym,
 				o.ProducerSynonym,
 				o.Cost,
 				o.OrderLine == null ? null : (uint?)o.OrderLine.Count,
