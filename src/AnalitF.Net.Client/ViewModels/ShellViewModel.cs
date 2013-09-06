@@ -212,7 +212,7 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 
 				if (Stat.Value.OrdersCount > 0) {
-					if (Confirm("Обнаружены неотправленные заказы. Отправить их сейчас?")) {
+					if (Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
 						SendOrders();
 					}
 				}

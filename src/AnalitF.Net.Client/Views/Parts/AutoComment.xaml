@@ -1,7 +1,7 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.Parts.AutoComment"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<GroupBox Header="Автокомментарий">
+	<GroupBox Header="Авто-комментарий">
 		<StackPanel>
 			<TextBox Name="AutoCommentText"></TextBox>
 			<CheckBox Name="ResetAutoComment">Очищать комментарий</CheckBox>

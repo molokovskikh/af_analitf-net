@@ -153,7 +153,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.CanClose(b => canClose = b);
 
 			Assert.IsTrue(canClose);
-			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Обнаружены неотправленные заказы."));
+			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Обнаружены не отправленные заказы."));
 			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Отправка заказов завершена успешно."));
 			Assert.That(command, Is.InstanceOf<SendOrders>());
 		}

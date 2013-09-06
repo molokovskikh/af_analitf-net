@@ -127,7 +127,7 @@
 				<StackPanel>
 					<Label>Поставщик</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="DirMaps" DisplayMemberPath="Supplier.FullName" />
-					<Label>Папка для оигинальных накладных</Label>
+					<Label>Папка для оригинальных накладных</Label>
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition></ColumnDefinition>

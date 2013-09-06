@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//изменился фильтр
 			//изменились данные в базе
 			//если изменился фильтры данные загружать не нужно
-			//если изменилилсь данные то нужно загрузить данные повторно
+			//если изменились данные то нужно загрузить данные повторно
 			if (IsCurrentSelected || updateOnActivate) {
 				if (updateOnActivate)
 					RebuildSessionIfNeeded();

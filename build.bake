@@ -50,7 +50,7 @@ task @DeployApp, [@WebDeploy]
 
 task "deploy:service", [@DeployPipeline]
 
-task @deploy, ["git:tag", "deploy:app", "deploy:client", "deploy:update"]
+task @deploy, ["git:tag", "deploy:service", "deploy:client", "deploy:update"]
 
 task "deploy:client", ["build:client"]:
 	Cp("output/setup/setup.exe", "//offdc/MMedia/Квасов Роман/", true)
@@ -96,4 +96,10 @@ task "build:update", ["before:build:update", @BuildApp]:
 	Rm(FileSet("output/Updater/*.pdb"))
 
 task "git:tag":
-	Bash("./scripts/changes.sh")
+	return if Globals.Environment == @test
+	kind = Configuration.Maybe.kind
+	unless kind:
+		raise "Нужно указать тип релиза с помощью параметра kind,"\
+			+ " доступные значения major, minor, patch,"\
+			+ " подробней о версионности http://semver.org/"
+	Bash("./scripts/tag-release.sh $kind")
