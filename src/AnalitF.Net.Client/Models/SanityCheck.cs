@@ -22,27 +22,29 @@ namespace AnalitF.Net.Client.Models
 
 		public static bool Debug;
 		private Configuration configuration;
+		private ISessionFactory factory;
 
 		public SanityCheck(string dataPath)
 		{
 			this.dataPath = dataPath;
 			configuration = AppBootstrapper.NHibernate.Configuration;
+			factory = AppBootstrapper.NHibernate.Factory;
 		}
 
 		public void Check(bool updateSchema = false)
 		{
-			var factory = AppBootstrapper.NHibernate.Factory;
 			if (!Directory.Exists(dataPath)) {
 				Directory.CreateDirectory(dataPath);
 				InitDb();
 			}
 			else if (updateSchema) {
-				UpdateDb();
+				UpgradeSchema();
+				UpgradeData();
 			}
 
 			bool crushOnFirstTry;
 			try {
-				crushOnFirstTry = CheckSettings(factory, updateSchema);
+				crushOnFirstTry = CheckSettings(updateSchema);
 			}
 			catch(GenericADOException e) {
 				//Unknown column '%s' in '%s'
@@ -61,12 +63,12 @@ namespace AnalitF.Net.Client.Models
 
 			//если свалились на первой попытке нужно попытаться починить базу и попробовать еще разик
 			if (crushOnFirstTry) {
-				UpdateDb();
-				CheckSettings(factory, true);
+				UpgradeSchema();
+				CheckSettings(true);
 			}
 		}
 
-		private bool CheckSettings(ISessionFactory factory, bool overrideHash)
+		private bool CheckSettings(bool overrideHash)
 		{
 			using (var session = factory.OpenSession())
 			using (var transaction = session.BeginTransaction()) {
@@ -119,7 +121,18 @@ namespace AnalitF.Net.Client.Models
 			return false;
 		}
 
-		public void UpdateDb()
+		public void UpgradeData()
+		{
+			using (var session = factory.OpenSession())
+			using (var transaction = session.BeginTransaction()) {
+				session.Query<MarkupConfig>()
+					.Where(c => c.MaxMarkup < c.Markup)
+					.Each(c => c.MaxMarkup = c.Markup);
+				transaction.Commit();
+			}
+		}
+
+		public void UpgradeSchema()
 		{
 			var export = new SchemaUpdate(configuration);
 			export.Execute(Debug, true);

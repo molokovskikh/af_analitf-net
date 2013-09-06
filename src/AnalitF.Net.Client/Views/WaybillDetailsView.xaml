@@ -110,7 +110,8 @@
 					Binding="{Binding Country}"
 					IsReadOnly="True" />
 				<DataGridCheckBoxColumn Width="SizeToHeader"
-					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}">
+					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}"
+					binders:Persistable.Description="Печатать">
 					<DataGridCheckBoxColumn.Header>
 						<CheckBox IsChecked="True">
 							<i:Interaction.Behaviors>

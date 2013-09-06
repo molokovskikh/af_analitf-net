@@ -93,6 +93,10 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public async void Open_catalog_offers()
 		{
+			string term = session.Query<CatalogName>()
+				.Where(n => n.HaveOffers && n.Name.StartsWith("б"))
+				.First().Name.Slice(3).ToLower();
+
 			Start();
 
 			dispatcher.Invoke(() => {
@@ -107,15 +111,15 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded(catalog.ActiveItem);
 			var search = (CatalogSearchViewModel)catalog.ActiveItem;
 			var view = (FrameworkElement)search.GetView();
-			Input(view, "SearchText", "бак");
+			Input(view, "SearchText", term);
 			Input(view, "SearchText", Key.Enter);
 			WaitIdle();
 
 			dispatcher.Invoke(() => {
 				var grid = (DataGrid)view.FindName("Items");
 				var selectMany = grid.Descendants<DataGridCell>()
-					.SelectMany(c => XamlExtentions.Descendants<Run>(c))
-					.Where(r => r.Text.ToLower() == "бак");
+					.SelectMany(c => c.Descendants<Run>())
+					.Where(r => r.Text.ToLower() == term);
 				DoubleClick(view, grid, selectMany.First());
 			});
 			var offers = await ViewLoaded<CatalogOfferViewModel>();

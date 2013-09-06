@@ -298,14 +298,13 @@ where Hidden = 0";
 		{
 			string sql;
 
-			session.CreateSQLQuery(@"update Logs.DocumentSendLogs
-set WaitConfirm = 0
-where UserId = :userId")
+			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
+				+ " where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.UserId == userId)
+				.Where(l => !l.Committed && l.User.Id == userId)
 				.Take(400)
 				.ToArray();
 
@@ -313,22 +312,24 @@ where UserId = :userId")
 				return;
 
 			foreach (var log in logs) {
-				log.WaitConfirm = false;
 				log.Committed = false;
 				log.FileDelivered = false;
 				log.DocumentDelivered = false;
 			}
 			try {
 				foreach (var log in logs) {
-					log.FileDelivered = true;
 					var type = log.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
 						log.Document.AddressId.ToString(),
 						type);
+					if (!Directory.Exists(path))
+						continue;
 					var files = Directory.GetFiles(path, String.Format("{0}_*", log.Document.Id));
 					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
 						LocalFileName = f
 					}));
+					if (files.Length > 0)
+						log.FileDelivered = true;
 				}
 			}
 			catch(Exception e) {
@@ -405,14 +406,15 @@ from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 where d.RowId in (:ids)
 group by dh.Id")
-				.SetParameter("ids", ids)
+				.SetParameterList("ids", logs.Select(d => d.Document.Id).ToArray())
 				.List<uint>();
 
 			logs.Where(l => documentExported.Contains(l.Document.Id))
 				.Each(l => l.DocumentDelivered = true);
 
 			logs.Where(l => l.DocumentDelivered || l.FileDelivered)
-				.Each(l => l.WaitConfirm = true);
+				.Select(l => new PendingDocLog(l))
+				.Each(p => session.Save(p));
 		}
 
 		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData)

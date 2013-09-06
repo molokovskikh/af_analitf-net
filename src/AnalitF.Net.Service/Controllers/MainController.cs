@@ -60,10 +60,13 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Delete()
 		{
 			Session.CreateSQLQuery(@"
-update Logs.DocumentSendLogs
-set WaitConfirm = 0, Committed = 1
-where WaitConfirm = 1
-	and UserId = :userId;")
+update Logs.DocumentSendLogs l
+	join Logs.PendingDocLogs p on p.SendLogId = l.Id
+set l.Committed = 1
+where p.UserId = :userId;
+
+delete from Logs.PendingDocLogs
+where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();
 

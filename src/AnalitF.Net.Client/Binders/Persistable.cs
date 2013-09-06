@@ -17,6 +17,10 @@ namespace AnalitF.Net.Client.Binders
 				typeof(Persistable),
 				new PropertyMetadata(false, PropertyChangedCallback));
 
+		public static readonly DependencyProperty DescriptionProperty
+			= DependencyProperty.RegisterAttached("Description",
+				typeof(string), typeof(Persistable), new PropertyMetadata(default(string)));
+
 		public static bool GetPersistColumnSettings(DependencyObject o)
 		{
 			return (bool)o.GetValue(PersistColumnSettingsProperty);
@@ -63,9 +67,10 @@ namespace AnalitF.Net.Client.Binders
 				CommandParameter = new { Method = "ResetView", grid },
 			});
 			contextMenu.Items.Add(new Separator());
-			foreach (var column in grid.Columns) {
+			foreach (DataGridColumn column in grid.Columns) {
+				var header = GetDescription(column) ?? column.Header;
 				var menuItem = new MenuItem {
-					Header = column.Header,
+					Header = header,
 					IsCheckable = true
 				};
 				var binding = new Binding("Visibility") {
@@ -76,6 +81,16 @@ namespace AnalitF.Net.Client.Binders
 				contextMenu.Items.Add(menuItem);
 			}
 			grid.ContextMenu = contextMenu;
+		}
+
+		public static string GetDescription(DependencyObject element)
+		{
+			return (string)element.GetValue(DescriptionProperty);
+		}
+
+		public static void SetDescription(DependencyObject element, string value)
+		{
+			element.SetValue(DescriptionProperty, value);
 		}
 	}
 }

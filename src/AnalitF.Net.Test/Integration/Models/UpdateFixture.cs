@@ -19,6 +19,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Models
