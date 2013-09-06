@@ -7,7 +7,7 @@ rm -rf $output
 mkdir $output
 
 cp $input/* $output/
-bake UpdateSetupFiles
+bake setup:preprocess
 cd $output
 
 version=`cat version.txt`

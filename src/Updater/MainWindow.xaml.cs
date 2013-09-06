@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -58,8 +59,12 @@ namespace Updater
 
 			ResizeMode = ResizeMode.NoResize;
 			SizeToContent = SizeToContent.Manual;
-			var task = new Task(() => Update(pid, mainModule));
+			var task = new Task(() => {
+				Update(pid, mainModule);
+				Start(mainModule);
+			});
 			task.ContinueWith(t => {
+				log.Error("Процесс обновления завершился ошибкой", t.Exception);
 				if (t.IsFaulted) {
 					App.NotifyAboutException(t.Exception);
 				}
@@ -68,12 +73,21 @@ namespace Updater
 			task.Start();
 		}
 
-		public void Update(int pid, string parentExecutable = null)
+		private void Start(string exe)
+		{
+			if (!String.IsNullOrEmpty(exe)) {
+				var arguments = "import";
+				log.DebugFormat("запускаю процесс {0} {1}", exe, arguments);
+				Process.Start(exe, arguments);
+			}
+		}
+
+		public void Update(int pid, string exe)
 		{
 			WaitForPid(pid);
 
 			var sourceRootPath = FileHelper.MakeRooted(".");
-			var destRootPath = Path.Combine(sourceRootPath, "..\\..");
+			var destRootPath = Path.GetDirectoryName(exe);
 
 			var selfExe = Path.GetFileName(typeof(MainWindow).Assembly.Location);
 			var version = File.ReadAllText(Path.Combine(sourceRootPath, "version.txt")).Trim();
@@ -81,6 +95,10 @@ namespace Updater
 			var oldBinPath = Path.Combine(destRootPath, "bin");
 			var exePath = destRootPath;
 			var files = Directory.GetFiles(sourceRootPath);
+
+			//что бы обойти ошибку в сборке 12
+			var ignoreReg = new Regex(@"\.txt$");
+			files = files.Where(f => !ignoreReg.IsMatch(f)).ToArray();
 
 			var ignore = new [] {selfExe, selfExe + ".config", "version.txt"};
 
@@ -106,12 +124,6 @@ namespace Updater
 				Directory.Move(newBinPath, oldBinPath);
 			}
 			CopyFiles(exeFiles, exePath);
-
-			if (!String.IsNullOrEmpty(parentExecutable)) {
-				var arguments = "import";
-				log.DebugFormat("запускаю процесс {0} {1}", parentExecutable, arguments);
-				Process.Start(parentExecutable, arguments);
-			}
 		}
 
 		private void WaitForPid(int pid)
@@ -120,12 +132,12 @@ namespace Updater
 			if (process == null)
 				return;
 
-			var waitTimeout = 60 * 1000;
+			var waitTimeout = TimeSpan.FromSeconds(30);
 			log.DebugFormat("Жду завершения процесса {0}", process.Id);
-			var exited = process.WaitForExit(waitTimeout);
+			var exited = process.WaitForExit((int)waitTimeout.TotalMilliseconds);
 			if (!exited) {
 				try {
-					log.DebugFormat("Процесс {0} не завершился за 1 минуту, завершаю принудительно", pid);
+					log.ErrorFormat("Процесс {0} не завершился за {1}, завершаю принудительно", pid, waitTimeout);
 					process.Kill();
 				}
 				//если пока думали все завершилось
@@ -141,8 +153,9 @@ namespace Updater
 			try {
 				return Process.GetProcessById(pid);
 			}
-			//если процесс уже завершился
-			catch (ArgumentException) {}
+			catch (ArgumentException) {
+				//если процесс уже завершился
+			}
 			return null;
 		}
 

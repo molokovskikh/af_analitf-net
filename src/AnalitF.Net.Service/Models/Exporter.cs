@@ -544,7 +544,9 @@ group by dh.Id")
 			scanned.ProcessFile += (sender, args) => {
 				if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
 					return;
-				zip.Add(new UpdateData(name + "/" + transform.TransformFile(args.Name)) {
+				if (name != "")
+					name = name + "/";
+				zip.Add(new UpdateData(name + transform.TransformFile(args.Name)) {
 					LocalFileName = args.Name
 				});
 			};
@@ -561,7 +563,14 @@ group by dh.Id")
 			if (updateVersion <= version)
 				return;
 
-			AddDir(zip, UpdatePath, "update");
+			//в сборке 12 ошибка, обходим ее
+			if (version.Revision == 12) {
+				AddDir(zip, UpdatePath, "");
+				AddDir(zip, UpdatePath, "update");
+			}
+			else {
+				AddDir(zip, UpdatePath, "update");
+			}
 		}
 
 		public void Dispose()

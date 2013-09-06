@@ -48,28 +48,33 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
-task @DeployWebService, [@DeployPipeline]
+task "deploy:service", [@DeployPipeline]
 
-task @deploy, [@Tag, @DeployService, @DeployClient]
+task @deploy, ["git:tag", "deploy:app", "deploy:client", "deploy:update"]
 
-task @BuildClient, [@BeforeBuildApp, @BuildApp, @CopyNativeLib, @BuildSetup, @BuildUpdatePackage, @AfterBuildApp]
-
-task @CopyNativeLib:
-	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
-
-task @BeforeBuildApp:
-	Globals.Project = "AnalitF.Net.Client"
-
-task @AfterBuildApp:
-	Globals.Project = "AnalitF.Net.Service"
-
-task @DeployClient, [@BuildClient]:
+task "deploy:client", ["build:client"]:
 	Cp("output/setup/setup.exe", "//offdc/MMedia/Квасов Роман/", true)
 
-task @BuildSetup:
+task "deploy:update", ["build:client"]:
+	dir = Globals.UpdateDeployRoot
+	Rm("$dir/*")
+	Cp("output/Updater/*", dir, true)
+
+task "build:client", ["before:build:client", @BuildApp, "client:postprocess", "build:setup", "build:update", "after:build:client"]
+
+task "client:postprocess":
+	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
+
+task "before:build:client":
+	Globals.Project = "AnalitF.Net.Client"
+
+task "after:build:client":
+	Globals.Project = "AnalitF.Net.Service"
+
+task "build:setup":
 	Bash("./scripts/wix.sh")
 
-task @UpdateSetupFiles:
+task "setup:preprocess":
 	assembly = Assembly.LoadFile(Path.GetFullPath("output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"))
 	File.WriteAllText("output/setup/version.txt", assembly.GetName().Version.ToString())
 	name = "output/setup/files.wxs"
@@ -81,19 +86,14 @@ task @UpdateSetupFiles:
 	AddDirectory("INSTALLFOLDER", path, document, manager)
 	document.Save(name)
 
-task @BeforeBuildUpdater:
+task "before:build:update":
 	Engine.Tasks.First({t| t.Name == @BuildApp}).Executed = false
 	Globals.Project = "Updater"
 
-task @BuildUpdatePackage, [@BeforeBuildUpdater, @BuildApp]:
+task "build:update", ["before:build:update", @BuildApp]:
 	Cp("output/setup/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 	Rm(FileSet("output/Updater/*.pdb"))
 
-task @DeployUpdatePackage, [@BuildUpdatePackage]:
-	dir = Globals.UpdateDeployRoot
-	Rm("$dir/*")
-	Cp("output/Updater/*", dir, true)
-
-task @Tag:
+task "git:tag":
 	Bash("./scripts/changes.sh")
