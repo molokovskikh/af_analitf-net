@@ -98,8 +98,4 @@ task "build:update", ["before:build:update", @BuildApp]:
 task "git:tag":
 	return if Globals.Environment == @test
 	kind = Configuration.Maybe.kind
-	unless kind:
-		raise "Нужно указать тип релиза с помощью параметра kind,"\
-			+ " доступные значения major, minor, patch,"\
-			+ " подробней о версионности http://semver.org/"
 	Bash("./scripts/tag-release.sh $kind")

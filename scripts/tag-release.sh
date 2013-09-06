@@ -1,5 +1,20 @@
 #!/bin/sh
 
+git show head --decorate | grep "tag: v" > /dev/null
+if [ $? -eq 0 ]
+then
+	exit
+fi
+
+if [ -z "$1"  ]
+then
+	echo "Нужно указать тип релиза с помощью параметра kind
+доступные значения major, minor, patch
+подробней о версионности http://semver.org
+"
+	exit
+fi
+
 lastTag=`git tag |  sort -g | tail -n1`
 git log $lastTag...head > output/changes.txt
 parts=(`echo $lastTag | egrep -o [0-9]+`)
