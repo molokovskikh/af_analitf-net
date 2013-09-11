@@ -11,8 +11,10 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config;
+using Common.Models.Helpers;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
@@ -38,7 +40,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		private bool restoreUser;
 
 		private Config serviceConfig;
-		private UpdateCommand command;
+		private RemoteCommand command;
 		private Settings settings;
 		private DateTime begin;
 
@@ -149,7 +151,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			var offersCount = localSession.Query<Offer>().Count(o => o.Price == price);
 			Assert.That(offersCount, Is.EqualTo(0));
 
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = ServerUser();
 			var priceSettings = session
 				.CreateSQLQuery("select * from Customers.UserPrices" +
 					" where UserId = :userId and PriceId = :priceId and RegionId = :regionId")
@@ -167,7 +169,7 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			Update();
 
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = ServerUser();
 			var text = session.CreateSQLQuery("select Text from Logs.ClientAppLogs" +
 				" where UserId = :userId and CreatedOn >= :date")
 				.SetParameter("userId", user.Id)
@@ -180,10 +182,10 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Send_orders()
 		{
 			var address = localSession.Query<Address>().First();
-			var offer = MakeOrder(address);
+			var order = MakeOrder(address);
+			var line = order.Lines[0];
 
-			task = CreateTask(new SendOrders(address));
-			Update();
+			Update(new SendOrders(address));
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
 			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
@@ -195,9 +197,30 @@ namespace AnalitF.Net.Test.Integration.Models
 			var resultOrder = orders[0];
 			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
 			var item = resultOrder.Items[0];
-			Assert.That(item.CodeFirmCr, Is.EqualTo(offer.ProducerId));
-			Assert.That(item.SynonymCode, Is.EqualTo(offer.ProductSynonymId));
-			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(offer.ProducerSynonymId));
+			Assert.That(item.CodeFirmCr, Is.EqualTo(line.ProducerId));
+			Assert.That(item.SynonymCode, Is.EqualTo(line.ProductSynonymId));
+			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
+		}
+
+		[Test]
+		public void Reject_order_by_min_req()
+		{
+			var address = localSession.Query<Address>().First();
+			var offer = localSession.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
+			var order = MakeOrder(address, offer);
+
+			Update(new SendOrders(address));
+
+			var text = command.Results
+				.OfType<DialogResult>()
+				.Select(d => d.Model)
+				.OfType<TextViewModel>()
+				.Select(t => t.Text)
+				.FirstOrDefault();
+			var expected = String.Format("прайс-лист {0} - Поставщик отказал в приеме заказа." +
+				" Сумма заказа меньше минимально допустимой." +
+				" Минимальный заказ {1:C} заказано {2:C}.", order.Price.Name, 1500, order.Sum);
+			Assert.AreEqual(expected, text);
 		}
 
 		[Test]
@@ -205,11 +228,10 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			var address = localSession.Query<Address>().First();
 			settings.PrintOrdersAfterSend = true;
-
-			var command = new SendOrders(address);
-			task = CreateTask(command);
 			MakeOrder(address);
-			Update();
+
+			Update(new SendOrders(address));
+
 			var results = command.Results.ToArray();
 			Assert.AreEqual(1, results.Length);
 			Assert.IsNotNull(((PrintResult)results[0]).Paginator);
@@ -294,6 +316,18 @@ namespace AnalitF.Net.Test.Integration.Models
 				command.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
 		}
 
+		private TestUser ServerUser()
+		{
+			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+		}
+
+		private void Update(RemoteCommand cmd)
+		{
+			command = cmd;
+			task = CreateTask(cmd);
+			Update();
+		}
+
 		private T LoadFixture<T>()
 		{
 			var fixture = (dynamic)Activator.CreateInstance<T>();
@@ -302,17 +336,16 @@ namespace AnalitF.Net.Test.Integration.Models
 			return fixture;
 		}
 
-		private Offer MakeOrder(Address address)
+		private Order MakeOrder(Address address, Offer offer = null)
 		{
-			Offer offer;
 			using (localSession.BeginTransaction()) {
 				localSession.CreateSQLQuery("delete from orders").ExecuteUpdate();
-				offer = localSession.Query<Offer>().First();
+				offer = offer ?? localSession.Query<Offer>().First();
 				var order = new Order(offer.Price, address);
 				order.AddLine(offer, 1);
 				localSession.Save(order);
+				return order;
 			}
-			return offer;
 		}
 
 		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand

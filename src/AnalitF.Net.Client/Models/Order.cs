@@ -29,6 +29,13 @@ namespace AnalitF.Net.Client.Models
 		public ClientOrder[] Orders;
 	}
 
+	public class OrderResult
+	{
+		public uint ClientOrderId;
+		public ulong ServerOrderId;
+		public string Error;
+	}
+
 	public class ClientOrder
 	{
 		public uint ClientOrderId;
@@ -122,6 +129,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PersonalComment { get; set; }
 
+		public virtual string SendError { get; set; }
+
 		public virtual IList<OrderLine> Lines { get; set; }
 
 		IEnumerable<IOrderLine> IOrder.Lines
@@ -130,6 +139,9 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
+
+		[Ignore]
+		public virtual ulong ServerId { get; set; }
 
 		[Style("MinOrderSum.MinOrderSum", Description = "Не удовлетворяет минимальной сумме")]
 		public virtual bool IsInvalid

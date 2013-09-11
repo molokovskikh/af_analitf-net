@@ -256,6 +256,12 @@ namespace AnalitF.Net.Client
 				+ @"(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)"
 				+ @"(?!<suffix>ViewModel)$",
 				"${nsbefore}Views.${nsafter}${basename}View");
+			//что бы не нужно было использовать суфиксы View и ViewModel
+			ViewLocator.NameTransformer.AddRule(
+				@"(?<nsbefore>([A-Za-z_]\w*\.)*)(?<subns>ViewModels\.)"
+				+ @"(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)"
+				+ @"(?!<suffix>)$",
+				"${nsbefore}Views.${nsafter}${basename}");
 
 			ContentElementBinder.Register();
 			SaneCheckboxEditor.Register();

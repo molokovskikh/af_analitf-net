@@ -21,6 +21,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
@@ -177,47 +178,50 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (!Quiet) {
+			if (Quiet) {
+				base.CanClose(callback);
+				return;
+			}
 
-				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
-				var orderQuery = statelessSession.Query<SentOrder>()
-					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
-				if (orderQuery.Any()) {
-					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
-						Confirm(String.Format("В архиве заказов обнаружены заказы," +
-							" сделанные более {0} дней назад. Удалить их?", Settings.Value.DeleteOrdersOlderThan));
-					if (deleteOldOrders) {
-						var orders = orderQuery.ToArray();
-						foreach (var order in orders) {
-							statelessSession.Delete(order);
-						}
-					}
-				}
-
-				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
-				var query = statelessSession.Query<Waybill>()
-					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
-				if (query.Any()) {
-					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
-						Confirm(String.Format("В архиве заказов обнаружены документы (накладные, отказы)," +
-							" сделанные более {0} дней назад. Удалить их?",
-								Settings.Value.DeleteWaybillsOlderThan));
-					if (deleteOldWaybills) {
-						var waybills = query.ToArray();
-						foreach (var waybill in waybills) {
-							waybill.DeleteFiles(Settings);
-							statelessSession.Delete(waybill);
-						}
-					}
-				}
-
-				if (Stat.Value.OrdersCount > 0) {
-					if (Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
-						SendOrders();
+			var orderDays = -Settings.Value.DeleteOrdersOlderThan;
+			var orderQuery = statelessSession.Query<SentOrder>()
+				.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
+			if (orderQuery.Any()) {
+				var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
+					Confirm(String.Format("В архиве заказов обнаружены заказы," +
+						" сделанные более {0} дней назад. Удалить их?", Settings.Value.DeleteOrdersOlderThan));
+				if (deleteOldOrders) {
+					var orders = orderQuery.ToArray();
+					foreach (var order in orders) {
+						statelessSession.Delete(order);
 					}
 				}
 			}
-			base.CanClose(callback);
+
+			var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
+			var query = statelessSession.Query<Waybill>()
+				.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
+			if (query.Any()) {
+				var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
+					Confirm(String.Format("В архиве заказов обнаружены документы (накладные, отказы)," +
+						" сделанные более {0} дней назад. Удалить их?",
+							Settings.Value.DeleteWaybillsOlderThan));
+				if (deleteOldWaybills) {
+					var waybills = query.ToArray();
+					foreach (var waybill in waybills) {
+						waybill.DeleteFiles(Settings);
+						statelessSession.Delete(waybill);
+					}
+				}
+			}
+
+			if (Stat.Value.OrdersCount > 0
+				&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
+				Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
+			}
+			else {
+				base.CanClose(callback);
+			}
 		}
 
 		public void UpdateStat()
@@ -495,8 +499,22 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> SendOrders()
 		{
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
-				return Enumerable.Empty<IResult>();
-			return Sync(new SendOrders(CurrentAddress));
+				yield break;
+
+			var warningOrders = statelessSession.Query<Order>()
+				.Fetch(o => o.Price)
+				.Fetch(o => o.MinOrderSum)
+				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
+			if (warningOrders.Count > 0) {
+				var orderWarning = new OrderWarning(warningOrders);
+				yield return new DialogResult(orderWarning) {
+					ShowFixed = true
+				};
+			}
+
+			var results = Sync(new SendOrders(CurrentAddress));
+			foreach (var result in results)
+				yield return result;
 		}
 
 		private IEnumerable<IResult> Import()
@@ -594,11 +612,11 @@ namespace AnalitF.Net.Client.ViewModels
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
 					}
-					else {
+					else if (t.Result == UpdateResult.OK) {
 						windowManager.Notify(sucessMessage);
-						if (command != null)
-							results = command.Results.ToArray();
 					}
+					if (command != null)
+						results = command.Results.ToArray();
 				});
 			Reload();
 			return results;

@@ -250,6 +250,7 @@
     <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\DebugViewModel.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
@@ -293,6 +294,9 @@
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\OrderWarning.xaml.cs">
+      <DependentUpon>OrderWarning.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SimpleSettingsView.xaml.cs">
       <DependentUpon>SimpleSettingsView.xaml</DependentUpon>
@@ -413,6 +417,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DescriptionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\OrderWarning.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

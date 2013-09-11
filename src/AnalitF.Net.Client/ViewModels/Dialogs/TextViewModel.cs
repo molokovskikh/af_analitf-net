@@ -10,15 +10,19 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 	public class TextViewModel : Screen
 	{
 		private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(TextViewModel));
-		private WindowManager manager;
+
+		protected TextViewModel()
+		{
+		}
 
 		public TextViewModel(string text)
 		{
 			DisplayName = "Не найденные позиции";
+			Header = "Предложения по данным позициям из заказа отсутствуют:";
 			Text = text;
-			manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 		}
 
+		public string Header { get; set; }
 		public string Text { get; set; }
 
 		public IEnumerable<IResult> Save()
@@ -26,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			var saveFileResult = new SaveFileResult {
 				Dialog = {
 					DefaultExt = ".txt",
-					Filter = "Текстовые файлы (.txt)|*.txt"
+					Filter = "Текстовые файлы|*.txt"
 				}
 			};
 			yield return saveFileResult;
@@ -48,6 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		private void Report(Exception e)
 		{
 			logger.Warn("Не критическая ошибка", e);
+			var manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 			manager.Error(e.Message);
 		}
 	}

@@ -84,6 +84,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					return manager;
 				return @base(type, key);
 			};
+
+			IoC.BuildUp  = o => {};
 		}
 
 		protected T Init<T>() where T : BaseScreen, new()

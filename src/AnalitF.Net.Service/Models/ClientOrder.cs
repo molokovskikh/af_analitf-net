@@ -29,6 +29,29 @@ namespace AnalitF.Net.Service.Models
 		public ClientOrderItem[] Items;
 	}
 
+	public class PostOrderResult
+	{
+		public uint ClientOrderId;
+		public ulong ServerOrderId;
+		public string Error;
+
+		public PostOrderResult()
+		{
+		}
+
+		public PostOrderResult(uint? clientOrderId, string error)
+		{
+			ClientOrderId = clientOrderId.GetValueOrDefault();
+			Error = error;
+		}
+
+		public PostOrderResult(Order order)
+		{
+			ClientOrderId = order.ClientOrderId.GetValueOrDefault();
+			ServerOrderId = order.RowId;
+		}
+	}
+
 	public class OfferComposedId
 	{
 		public ulong RegionId { get; set; }

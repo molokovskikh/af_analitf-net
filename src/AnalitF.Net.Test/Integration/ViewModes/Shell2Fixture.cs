@@ -140,6 +140,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Check_orders_on_close()
 		{
+			session.DeleteEach<Order>();
 			MakeOrder();
 
 			settings.LastUpdate = DateTime.Now.AddDays(-1);

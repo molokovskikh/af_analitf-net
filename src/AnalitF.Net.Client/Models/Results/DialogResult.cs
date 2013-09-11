@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Execute(ActionExecutionContext context)
 		{
-			var windowManager = ((BaseScreen)context.Target).Manager;
+			var manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
 			var args = new ResultCompletionEventArgs();
 			IDictionary<string, object> settings = null;
 			if (FullScreen) {
@@ -33,9 +33,9 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 			if (ShowFixed)
-				args.WasCancelled = !windowManager.ShowFixedDialog(Model).GetValueOrDefault();
+				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else
-				args.WasCancelled = !windowManager.ShowDialog(Model, null, settings).GetValueOrDefault();
+				args.WasCancelled = !manager.ShowDialog(Model, null, settings).GetValueOrDefault(true);
 			if (Completed != null)
 				Completed(this, args);
 		}

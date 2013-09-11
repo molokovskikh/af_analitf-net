@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
+using Common.Tools;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -25,6 +28,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		protected override UpdateResult Execute()
 		{
+			var updateResult = UpdateResult.OK;
 			Progress.OnNext(new Progress("Соединение", 100, 0));
 			Progress.OnNext(new Progress("Отправка заказов", 0, 50));
 			var orders =
@@ -42,22 +46,49 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			CheckResult(response);
 
-			var sentOrders = orders.Select(o => new SentOrder(o)).ToArray();
+			var acceptedOrders = orders;
+			var rejectedOrders = new List<Order>();
+
+			var results = response.Content.ReadAsAsync<OrderResult[]>().Result;
+			if (results != null) {
+				foreach (var result in results) {
+					var order = orders.FirstOrDefault(o => o.Id == result.ClientOrderId);
+					if (order == null)
+						continue;
+					if (String.IsNullOrEmpty(result.Error)) {
+						order.ServerId = result.ServerOrderId;
+					}
+					else {
+						order.SendError = result.Error;
+						acceptedOrders.Remove(order);
+						rejectedOrders.Add(order);
+					}
+				}
+			}
+			var sentOrders = acceptedOrders.Select(o => new SentOrder(o)).ToArray();
 
 			Session.SaveEach(sentOrders);
-			foreach (var order in orders)
-				Session.Delete(order);
+			Session.DeleteEach(acceptedOrders);
 
 			Progress.OnNext(new Progress("Отправка заказов", 100, 100));
 
 			var settings = Session.Query<Settings>().First();
-			if (settings.PrintOrdersAfterSend) {
-				Results = new List<IResult> {
-					new PrintResult("Отправленные заказы", sentOrders.Select(o => new OrderDocument(o)))
+			if (rejectedOrders.Count > 0) {
+				var resultText = rejectedOrders.Implode(
+					o => String.Format("прайс-лист {0} - {1}", o.Price.Name, o.SendError),
+					Environment.NewLine);
+				var text = new TextViewModel(resultText) {
+					Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",
+					DisplayName = "Неотправленные заказы"
 				};
+				Results.Add(new DialogResult(text) { ShowFixed = true });
+				updateResult = UpdateResult.Other;
+			}
+			if (settings.PrintOrdersAfterSend && sentOrders.Length > 0) {
+				Results.Add(new PrintResult("Отправленные заказы", sentOrders.Select(o => new OrderDocument(o))));
 			}
 
-			return UpdateResult.OK;
+			return updateResult;
 		}
 	}
 }

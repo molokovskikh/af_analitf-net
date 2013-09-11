@@ -7,6 +7,7 @@ using Castle.ActiveRecord;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using Test.Support;
 using Test.Support.Suppliers;
 
@@ -36,8 +37,26 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				CreateSampleContactInfo(supplier1);
 				CreateSampleCore(supplier1);
 
+				var minReqSupplier = TestSupplier.CreateNaked();
+				minReqSupplier.Name += " минимальный заказ " + minReqSupplier.Id;
+				CreateSampleContactInfo(minReqSupplier);
+				//устанавливаем максимальную цену товара такую что бы при заказе одной позиции
+				//она всегда не добирала до минимального заказа тк тесты ожидают этого
+				CreateSampleCore(minReqSupplier, 1000);
+
 				MaxProducerCosts = CreateMaxProduceCosts(supplier);
 				Client = CreateUser(session);
+
+				var user = Client.Users.First();
+				var rules = session.Query<TestAddressIntersection>()
+					.Where(i => i.Intersection.Price.Supplier.Id == minReqSupplier.Id
+						&& i.Intersection.Client == user.Client)
+					.ToList();
+				rules.Each(r => {
+					r.MinReq = 1500;
+					r.ControlMinReq = true;
+				});
+
 				holder.ReleaseSession(session);
 			}
 
@@ -130,7 +149,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			return price;
 		}
 
-		public void CreateSampleCore(TestSupplier supplier)
+		public void CreateSampleCore(TestSupplier supplier, double maxCost = 10000)
 		{
 			var price = supplier.Prices[0];
 			var random = new Random();
@@ -170,7 +189,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					Junk = random.Next(100) < 5,
 				};
 				core.SaveAndFlush();
-				core.AddCost((decimal)(random.NextDouble() * 10000));
+				core.AddCost((decimal)(random.NextDouble() * maxCost));
 				price.Core.Add(core);
 				core.SaveAndFlush();
 			}

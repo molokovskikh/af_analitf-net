@@ -93,6 +93,7 @@ namespace AnalitF.Net.Client.Models
 			Sum = order.Sum;
 			Comment = order.Comment;
 			PersonalComment = order.PersonalComment;
+			ServerId = order.ServerId;
 
 			Lines = order.Lines
 				.Select(l => new SentOrderLine(this, l))
@@ -116,6 +117,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual int LinesCount { get; set; }
 
 		public virtual decimal Sum { get; set; }
+
+		public virtual ulong ServerId { get; set; }
 
 		public virtual string PersonalComment
 		{

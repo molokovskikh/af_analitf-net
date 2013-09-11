@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.Models.Commands
 	public enum UpdateResult
 	{
 		OK,
+		Other,
 		UpdatePending,
 	}
 
