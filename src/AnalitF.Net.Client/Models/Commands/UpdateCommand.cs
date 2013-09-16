@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
@@ -156,6 +157,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			var importer = new Importer(Session);
 			importer.Import(data, Reporter);
 
+			var offersImported = data.Any(t => Path.GetFileNameWithoutExtension(t.Item1).Match("offers"));
+			if (offersImported) {
+				RestoreOrders();
+			}
+
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
 
@@ -176,6 +182,29 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			Directory.Delete(extractPath, true);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private void RestoreOrders()
+		{
+			var orders = Session.Query<Order>()
+				.Fetch(o => o.Address)
+				.Fetch(o => o.Price)
+				.Where(o => !o.Frozen)
+				.ToArray();
+
+			orders.Each(o => o.Frozen = true);
+			var ids = orders.Select(o => o.Id).ToArray();
+			var command = new UnfreezeCommand<Order>(ids);
+			var report = (string)RunCommand(command);
+
+			if (!String.IsNullOrEmpty(report)) {
+				Results.Add(new DialogResult(new TextViewModel(report) {
+					Header = "Предложения по данным позициям из заказа отсутствуют",
+					DisplayName = "Не найденые позиции"
+				}) {
+					ShowFixed = true
+				});
+			}
 		}
 
 		private void Move(ResultDir source)

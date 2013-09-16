@@ -64,6 +64,8 @@ namespace AnalitF.Net.Client.Models
 		public Offer(Price price, decimal cost)
 		{
 			Id = new OfferComposedId();
+			Id.RegionId = price.Id.RegionId;
+			PriceId = price.Id.PriceId;
 			Price = price;
 			Cost = cost;
 		}
@@ -80,10 +82,10 @@ namespace AnalitF.Net.Client.Models
 		public Offer(Price price, Offer clone, decimal cost)
 			: this(clone, cost)
 		{
-			Price = price;
-			PriceId = price.Id.PriceId;
+			Id = new OfferComposedId();
 			Id.RegionId = price.Id.RegionId;
-			Cost = cost;
+			PriceId = price.Id.PriceId;
+			Price = price;
 		}
 
 		public virtual OfferComposedId Id { get; set; }

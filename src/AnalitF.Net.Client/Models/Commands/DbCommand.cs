@@ -25,6 +25,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			Factory = AppBootstrapper.NHibernate.Factory;
 			DataPath = AppBootstrapper.DataPath;
 		}
+
+		protected T RunCommand<T>(DbCommand<T> command)
+		{
+			command.Session = Session;
+			command.StatelessSession = StatelessSession;
+			command.Token = Token;
+			command.Execute();
+			return command.Result;
+		}
 	}
 
 	public abstract class DbCommand<T> : BaseCommand

@@ -260,7 +260,9 @@ where UserId = :userId;")
 					Session.Delete(userPrice);
 				}
 				else if (setting.Active && userPrice == null) {
-					var price = Session.Load<PriceList>(setting.PriceId);
+					var price = Session.Get<PriceList>(setting.PriceId);
+					if (price == null)
+						return;
 					Session.Save(new UserPrice(CurrentUser, setting.RegionId, price));
 				}
 			}

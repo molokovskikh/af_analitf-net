@@ -155,6 +155,7 @@
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Integration\Views\WaybillDetailsFixture.cs" />
+    <Compile Include="Tasks\Debug.cs" />
     <Compile Include="Tasks\Fixture.cs" />
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />

@@ -54,12 +54,16 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.User = new User();
 			model.Settings.Value.Markups = MarkupConfig.Defaults().ToArray();
 			model.Offers = new List<Offer> {
-				new Offer(new Price(), 100) {
+				new Offer(new Price {
+					Id = new PriceComposedId()
+				}, 100) {
 					Id = {
 						OfferId = 1
 					}
 				},
-				new Offer(new Price(), 150) {
+				new Offer(new Price {
+					Id = new PriceComposedId()
+				}, 150) {
 					Id = {
 						OfferId = 2
 					}

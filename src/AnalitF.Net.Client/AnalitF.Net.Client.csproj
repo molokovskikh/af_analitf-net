@@ -221,6 +221,7 @@
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
+    <Compile Include="Models\Results\MessageResult.cs" />
     <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
     <Compile Include="Models\Results\SaveFileResult.cs" />

@@ -15,6 +15,7 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config;
 using Common.Models.Helpers;
+using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
@@ -314,6 +315,44 @@ namespace AnalitF.Net.Test.Integration.Models
 					fixture.Document.Id,
 					fixture.Document.Supplier.Name),
 				command.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
+		}
+
+		[Test]
+		public void Freeze_order_without_offers()
+		{
+			session.DeleteEach<Order>();
+
+			var order = MakeOrder(localSession.Query<Address>().First());
+
+			var newOffer = new Offer(order.Price, 150);
+			var random = Generator.Random(int.MaxValue);
+			newOffer.Id.OfferId += (ulong)random.First();
+			var catalog = localSession.Query<Catalog>().First(c => !c.HaveOffers);
+			newOffer.ProducerSynonym = catalog.FullName;
+			newOffer.ProductId = catalog.Id;
+			newOffer.CatalogId = catalog.Id;
+			newOffer.ProducerSynonymId = (uint?)random.First();
+			localSession.Save(newOffer);
+
+			order.AddLine(newOffer, 1);
+
+			Update();
+
+			var text = command.Results.OfType<DialogResult>()
+				.Select(r => (TextViewModel)r.Model)
+				.Select(m => m.Text)
+				.First();
+
+			localSession.Clear();
+
+			Assert.That(text, Is.StringContaining("Предложений не найдено"));
+			order = localSession.Load<Order>(order.Id);
+			Assert.IsTrue(order.Frozen);
+			Assert.AreEqual(1, order.Lines.Count);
+			var orders = localSession.Query<Order>().ToList();
+			Assert.AreEqual(2, orders.Count);
+			var newOrder = orders.First(o => o.Id != order.Id);
+			Assert.AreEqual(1, newOrder.Lines.Count);
 		}
 
 		private TestUser ServerUser()

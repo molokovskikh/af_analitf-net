@@ -11,6 +11,7 @@ using Common.Tools;
 using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Mapping.ByCode;
+using NHibernate.Proxy;
 using NHibernate.Type;
 using log4net;
 using NHibernate.Cfg.MappingSchema;

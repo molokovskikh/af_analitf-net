@@ -459,11 +459,12 @@ group by dh.Id")
 			if (parameters != null)
 				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
 
+			log.DebugFormat("Запрос {0}", sql);
 			var watch = new Stopwatch();
 			watch.Start();
 			command.ExecuteNonQuery();
 			watch.Stop();
-			log.DebugFormat("Запрос {0} занял {1}с", sql, watch.Elapsed.TotalSeconds);
+			log.DebugFormat("Занял {0}с", watch.Elapsed.TotalSeconds);
 
 			cleaner.Watch(path);
 
