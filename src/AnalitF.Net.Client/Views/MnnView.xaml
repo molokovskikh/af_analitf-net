@@ -25,7 +25,6 @@
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
-					CellStyle="{StaticResource MnnHaveOffers}"
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					Width="*" Header="МНН" Binding="{Binding Name}" />
 			</DataGrid.Columns>

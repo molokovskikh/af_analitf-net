@@ -11,17 +11,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
-	/// <summary>
-	/// Interaction logic for RejectsView.xaml
-	/// </summary>
 	public partial class RejectsView : UserControl
 	{
 		public RejectsView()
 		{
 			InitializeComponent();
+
+			StyleHelper.ApplyStyles(typeof(Reject), Rejects, Application.Current.Resources);
 		}
 	}
 }

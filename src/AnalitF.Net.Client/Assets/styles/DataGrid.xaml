@@ -60,23 +60,6 @@
 		<Setter Property="VerticalAlignment" Value="Bottom"></Setter>
 	</Style>
 
-	<Style x:Key="Price" TargetType="DataGridCell" BasedOn="{StaticResource ResourceKey={x:Type DataGridCell}}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding HaveOrder}" Value="true">
-				<Setter Property="FontWeight" Value="Bold"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
-	<Style x:Key="NotBasePrice" TargetType="DataGridCell" BasedOn="{StaticResource Price}">
-		<Style.Triggers>
-			<DataTrigger Binding="{Binding BasePrice}" Value="false">
-				<Setter Property="Background" Value="#F0F0F0"/>
-				<Setter Property="BorderBrush" Value="#F0F0F0"/>
-			</DataTrigger>
-		</Style.Triggers>
-	</Style>
-
 	<Style x:Key="DataGridHighlight" TargetType="Run">
 		<Setter Property="Background" Value="#FEFEA7"></Setter>
 	</Style>

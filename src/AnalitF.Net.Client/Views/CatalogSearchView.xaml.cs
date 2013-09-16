@@ -1,5 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -8,6 +11,7 @@ namespace AnalitF.Net.Client.Views
 		public CatalogSearchView()
 		{
 			InitializeComponent();
+			StyleHelper.ApplyStyles(typeof(CatalogDisplayItem), Items, Application.Current.Resources);
 		}
 	}
 }

@@ -27,9 +27,9 @@
 				<c:DataGridTextColumnEx Width="109*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></c:DataGridTextColumnEx>
 				<c:DataGridTextColumnEx Width="94*" Header="Регион" Binding="{Binding Order.Price.RegionName}"></c:DataGridTextColumnEx>
 				<c:DataGridTextColumnEx Width="85*" Header="Дата" Binding="{Binding Order.SentOn}" TextAlignment="Center"></c:DataGridTextColumnEx>
-				<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}" CellStyle="{StaticResource ResourceKey=Junk}" TextAlignment="Center"></c:DataGridTextColumnEx>
+				<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center"></c:DataGridTextColumnEx>
 				<c:DataGridTextColumnEx Width="57*" Header="Заказ" Binding="{Binding Count}" TextAlignment="Right"></c:DataGridTextColumnEx>
-				<c:DataGridTextColumnEx Width="82*" Header="Цена" Binding="{Binding Cost}" CellStyle="{StaticResource ResourceKey=Junk}" TextAlignment="Right"></c:DataGridTextColumnEx>
+				<c:DataGridTextColumnEx Width="82*" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right"></c:DataGridTextColumnEx>
 			</DataGrid.Columns>
 		</c:DataGrid>
 

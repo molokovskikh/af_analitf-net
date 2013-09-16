@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.DebugView"
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Debug"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,11 +7,10 @@
 	Width="800">
 	<TabControl>
 		<TabItem Header="Sql">
-			<TextBox TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-				Text="{Binding Sql, Mode=OneWay}"></TextBox>
+			<TextBox Name="Sql" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
 		</TabItem>
 		<TabItem Header="Error">
-			<TextBox Name="Error"></TextBox>
+			<TextBox Name="Error" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
 		</TabItem>
 	</TabControl>
 </UserControl>

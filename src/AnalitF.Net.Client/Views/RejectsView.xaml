@@ -32,8 +32,7 @@
 			<Button Name="ClearMarks" Style="{StaticResource FilterElement}">Снять все пометки</Button>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Rejects"
-			CellStyle="{StaticResource Reject}">
+		<c:DataGrid Grid.Row="1" x:Name="Rejects">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="189*" Header="Товар"
 					Binding="{Binding Product}" />

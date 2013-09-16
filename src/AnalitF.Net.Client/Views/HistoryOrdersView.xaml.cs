@@ -1,4 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Net.Mime;
+using System.Windows;
+using System.Windows.Controls;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -7,6 +11,7 @@ namespace AnalitF.Net.Client.Views
 		public HistoryOrdersView()
 		{
 			InitializeComponent();
+			StyleHelper.ApplyStyles(typeof(SentOrderLine), Lines, Application.Current.Resources);
 		}
 	}
 }

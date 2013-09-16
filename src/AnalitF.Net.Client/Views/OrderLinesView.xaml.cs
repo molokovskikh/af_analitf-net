@@ -1,6 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -11,6 +13,7 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			DataGridHelper.CalculateColumnWidths(Lines);
+			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend);
 			DataGridHelper.CalculateColumnWidths(SentLines);
 			EditBehavior.Attach(Lines);
 		}

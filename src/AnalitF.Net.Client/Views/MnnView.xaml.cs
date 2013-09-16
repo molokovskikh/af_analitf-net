@@ -11,17 +11,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
-	/// <summary>
-	/// Interaction logic for MnnView.xaml
-	/// </summary>
 	public partial class MnnView : UserControl
 	{
 		public MnnView()
 		{
 			InitializeComponent();
+			StyleHelper.ApplyStyles(typeof(Mnn), Mnns, Application.Current.Resources);
 		}
 	}
 }

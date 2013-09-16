@@ -23,7 +23,7 @@
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
-					CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Header="Наименование"
+					Header="Наименование"
 					Binding="{Binding Name}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
@@ -42,7 +42,7 @@
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
-					CellStyle="{StaticResource ResourceKey=CatalogHaveOffers}" Header="Форма выпуска"
+					Header="Форма выпуска"
 					Binding="{Binding Form}" />
 			</DataGrid.Columns>
 		</c:DataGrid>

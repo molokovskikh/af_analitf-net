@@ -24,7 +24,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public string Name { get; set; }
 		public string Form { get; set; }
 		public bool HaveOffers { get; set; }
+		[Style(Description = "Жизнненно важный")]
 		public bool VitallyImportant { get; set; }
+
+		[Style(Description = "Предложения отсутствуют")]
+		public virtual bool DoNotHaveOffers
+		{
+			get { return !HaveOffers; }
+		}
 
 		public CatalogDisplayItem(uint id, string name, string form, bool haveOffers, bool vitallyImportant)
 		{

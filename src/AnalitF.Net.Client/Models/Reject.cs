@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string CauseRejects { get; set; }
 
+		[Style(Description = "Установлена метка")]
 		public virtual bool Marked
 		{
 			get { return marked; }

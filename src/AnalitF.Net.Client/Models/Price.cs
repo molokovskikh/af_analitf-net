@@ -143,6 +143,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime? Timestamp { get; set; }
 
+		[Style("Name")]
+		public virtual bool NotBase
+		{
+			get { return !BasePrice; }
+		}
+
 		[Ignore]
 		public virtual bool Active
 		{
@@ -184,7 +190,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Ignore]
+		[Ignore, Style]
 		public virtual bool HaveOrder
 		{
 			get { return Order != null; }

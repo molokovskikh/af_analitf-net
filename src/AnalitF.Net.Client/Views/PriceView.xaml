@@ -32,11 +32,10 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices"
-			CellStyle="{StaticResource Price}"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="75*" CellStyle="{StaticResource ResourceKey=NotBasePrice}"
+				<DataGridTextColumn Width="75*"
 					Header="Прайс-лист"
 					Binding="{Binding Name}"
 					IsReadOnly="True" />

@@ -248,7 +248,7 @@
     <Compile Include="ViewModels\CatalogSearchViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
-    <Compile Include="ViewModels\DebugViewModel.cs" />
+    <Compile Include="ViewModels\Debug.cs" />
     <Compile Include="ViewModels\DescriptionViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
@@ -289,8 +289,8 @@
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DebugView.xaml.cs">
-      <DependentUpon>DebugView.xaml</DependentUpon>
+    <Compile Include="Views\Debug.xaml.cs">
+      <DependentUpon>Debug.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DescriptionView.xaml.cs">
       <DependentUpon>DescriptionView.xaml</DependentUpon>
@@ -412,7 +412,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DebugView.xaml">
+    <Page Include="Views\Debug.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -27,12 +27,12 @@
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
-					CellStyle="{StaticResource CatalogHaveOffers}" Width="*"
+					Width="*"
 					Header="Наименование"
 					Binding="{Binding Name}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:SearchableDataGridColumn
-					CellStyle="{StaticResource CatalogHaveOffers}" Width="*"
+					Width="*"
 					Header="Формы выпуска"
 					Binding="{Binding Form}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />

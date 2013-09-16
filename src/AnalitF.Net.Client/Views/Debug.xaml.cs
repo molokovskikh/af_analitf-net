@@ -17,9 +17,9 @@ namespace AnalitF.Net.Client.Views
 	/// <summary>
 	/// Interaction logic for Debug.xaml
 	/// </summary>
-	public partial class DebugView : UserControl
+	public partial class Debug : UserControl
 	{
-		public DebugView()
+		public Debug()
 		{
 			InitializeComponent();
 		}

@@ -11,12 +11,12 @@ using Test.Support.log4net;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class DebugViewModel : Screen, IAppender
+	public class Debug : Screen, IAppender
 	{
-		private SimpleLayout layout = new SimpleLayout();
+		private LayoutSkeleton layout = new PatternLayout("%d{dd.MM.yyyy HH:mm:ss.fff} [%t] %-5p %c - %m%n%exception%n");
 		private int limit = 10000;
 
-		public DebugViewModel()
+		public Debug()
 		{
 			layout.ActivateOptions();
 			Error = "";

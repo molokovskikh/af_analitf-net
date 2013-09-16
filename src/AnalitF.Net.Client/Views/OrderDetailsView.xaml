@@ -64,7 +64,7 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+		<c:DataGrid Grid.Row="2" x:Name="Lines"
 			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
@@ -75,9 +75,7 @@
 					Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="65*" Header="Срок годн."
 					Binding="{Binding Period}"
-					CellStyle="{StaticResource ResourceKey=JunkOrderLine}"
 					TextAlignment="Center" />
-
 				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
@@ -93,7 +91,6 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
 					Binding="{Binding Cost}"
-					CellStyle="{StaticResource ResourceKey=JunkOrderLine}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
@@ -108,14 +105,7 @@
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
-		<StackPanel Grid.Row="3">
-			<Label>Подсказка</Label>
-			<StackPanel Orientation="Horizontal">
-				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
-				<Label Style="{StaticResource BannedLegend}">Препарат запрещен к заказу</Label>
-				<Label Style="{StaticResource VitallyImportantLegend}">Жизненно важные препараты</Label>
-			</StackPanel>
-		</StackPanel>
+		<StackPanel Grid.Row="3" Name="Legend" />
 
 		<Grid Grid.Row="4">
 			<Grid.ColumnDefinitions>
@@ -125,7 +115,7 @@
 
 			<StackPanel Grid.Column="0">
 				<ContentControl Name="ProductInfo"></ContentControl>
-				<StackPanel Grid.Row="3">
+				<StackPanel>
 					<Label>Комментарий</Label>
 					<TextBox Name="CurrentLine_Comment"></TextBox>
 				</StackPanel>

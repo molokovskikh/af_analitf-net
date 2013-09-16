@@ -1,4 +1,6 @@
-﻿namespace AnalitF.Net.Client.Models
+﻿using System.ComponentModel;
+
+namespace AnalitF.Net.Client.Models
 {
 	public class Catalog : BaseStatelessObject
 	{
@@ -19,11 +21,18 @@
 
 		public virtual CatalogName Name { get; set; }
 
+		[Style(Description = "Жизнненно важный")]
 		public virtual bool VitallyImportant { get; set; }
 
 		public virtual bool MandatoryList { get; set; }
 
 		public virtual bool HaveOffers { get; set; }
+
+		[Style(Description = "Предложения отсутствуют")]
+		public virtual bool DoNotHaveOffers
+		{
+			get { return !HaveOffers; }
+		}
 
 		public virtual string FullName
 		{

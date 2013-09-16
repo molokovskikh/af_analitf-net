@@ -25,8 +25,55 @@ namespace AnalitF.Net.Client.Helpers
 							new Setter(Control.BackgroundProperty, Brushes.Silver)
 						}
 					}
-				}
+				},
+				{ "DoNotHaveOffers",
+					() => new DataTrigger {
+						Binding = new Binding("DoNotHaveOffers"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, Brushes.Silver)
+						}
+					}
+				},
+				{ "Marked",
+					() => new DataTrigger {
+						Binding = new Binding("Marked"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, Brushes.Silver)
+						}
+					}
+				},
+				{ "Junk",
+					() => new DataTrigger {
+						Binding = new Binding("Junk"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xf2, 0x9e, 0x66)))
+						}
+					}
+				},
+				{ "NotBase",
+					() => new DataTrigger {
+						Binding = new Binding("NotBase"),
+						Value = true,
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xF0, 0xF0, 0xF0)))
+						}
+					}
+				},
+				{ "HaveOrder",
+					() => new DataTrigger {
+						Binding = new Binding("HaveOrder"),
+						Value = true,
+						Setters = {
+							new Setter(Control.FontWeightProperty, FontWeights.Bold)
+						}
+					}
+				},
 			};
+
+		private static SolidColorBrush DefaultColor = Brushes.Red;
 
 		public static void BuildStyles(ResourceDictionary resources,
 			ResourceDictionary appResource,
@@ -43,15 +90,29 @@ namespace AnalitF.Net.Client.Helpers
 			var legends = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
 				let d = (StyleAttribute)a
-				select new {p, d};
+				select new {type, p, d};
 
 			var rowStyles = legends.Where(l => l.d.Columns == null || l.d.Columns.Length == 0);
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
 			foreach (var style in rowStyles) {
-				var result = KnownStyles.GetValueOrDefault(style.p.Name);
-				if (result == null)
-					return;
-				rowStyle.Triggers.Add(result());
+				var property = style.p;
+				var result = KnownStyles.GetValueOrDefault(property.Name);
+				if (result != null) {
+					var trigger = result();
+					var background = trigger.Setters.OfType<Setter>()
+						.FirstOrDefault(s => s.Property == Control.BackgroundProperty);
+					if (background == null) {
+						rowStyle.Triggers.Add(trigger);
+					}
+					else {
+						var color = ((SolidColorBrush)background.Value);
+						AddTriggers(rowStyle, property.Name, true, color, activeColor, inactiveColor);
+					}
+
+				}
+				else {
+					AddTriggers(rowStyle, property.Name, true, DefaultColor, activeColor, inactiveColor);
+				}
 			}
 
 			if (rowStyle.Triggers.Count > 0) {
@@ -64,7 +125,7 @@ namespace AnalitF.Net.Client.Helpers
 				var style = new Style(typeof(Label), (Style)appResource["Legend"]);
 				var result = KnownStyles.GetValueOrDefault(legend.p.Name);
 				if (result == null) {
-					style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Red));
+					style.Setters.Add(new Setter(Control.BackgroundProperty, DefaultColor));
 				}
 				else {
 					var trigger = result();
@@ -73,27 +134,43 @@ namespace AnalitF.Net.Client.Helpers
 				}
 				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.d.Description));
 				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.d.Description));
-				resources.Add(LegendKey(legend.p), style);
+				resources.Add(LegendKey(legend.type, legend.p), style);
 			}
 
 			foreach (var column in map) {
 				var style = new Style(typeof(DataGridCell), baseStyle);
 				foreach (var property in column) {
-					AddTriggers(style, property.Name, true, Colors.Red, activeColor, inactiveColor);
-					GetValue(style, property.Name, true, Brushes.Red);
+					var baseColor = DefaultColor;
+					var result = KnownStyles.GetValueOrDefault(property.Name);
+					if (result != null) {
+						var setter = result().Setters.OfType<Setter>()
+							.FirstOrDefault(s => s.Property == Control.BackgroundProperty);
+						if (setter != null) {
+							baseColor = ((SolidColorBrush)setter.Value);
+						}
+					}
+					AddTriggers(style, property.Name, true, baseColor, activeColor, inactiveColor);
+					GetValue(style, property.Name, true, baseColor);
 				}
 				resources.Add(type.Name + column.Key + "Cell", style);
 			}
 		}
 
-		public static void Apply(Type type, DataGrid grid, ResourceDictionary resource)
+		private static void Apply(Type type, DataGrid grid, ResourceDictionary resource)
 		{
 			grid.CellStyle = (Style)resource[type.Name + "Row"];
 		}
 
-		public static string LegendKey(PropertyInfo property)
+		public static string LegendKey(Type type, PropertyInfo property)
 		{
-			return property.DeclaringType.Name + property.Name + "Legend";
+			return type.Name + property.Name + "Legend";
+		}
+		public static void AddTriggers(Style style, string name, object value,
+			SolidColorBrush baseColor,
+			Color active,
+			Color inactive)
+		{
+			AddTriggers(style, name, value, baseColor.Color, active, inactive);
 		}
 
 		public static void AddTriggers(Style style, string name, object value,
@@ -214,7 +291,8 @@ namespace AnalitF.Net.Client.Helpers
 				Conditions = {
 					new Condition(new Binding(name), value),
 					new Condition(new Binding("(IsFocused)") { RelativeSource = RelativeSource.Self }, true),
-					new Condition(new Binding("(IsSelected)") { RelativeSource = RelativeSource.Self }, true),
+					new Condition(new Binding(
+						"(IsSelected)") { RelativeSource = RelativeSource.Self }, true),
 					new Condition(
 						new Binding("(Selector.IsSelectionActive)") { RelativeSource = RelativeSource.Self },
 						true),
@@ -232,7 +310,8 @@ namespace AnalitF.Net.Client.Helpers
 			return (foreground - background) * factor + background;
 		}
 
-		public static void ApplyStyles(Type type, Controls.DataGrid grid, ResourceDictionary resources, StackPanel legend)
+		public static void ApplyStyles(Type type, Controls.DataGrid grid, ResourceDictionary resources,
+			StackPanel legend = null)
 		{
 			foreach (var dataGridColumn in grid.Columns.OfType<DataGridBoundColumn>()) {
 				var binding = dataGridColumn.Binding as Binding;
@@ -246,10 +325,18 @@ namespace AnalitF.Net.Client.Helpers
 
 			Apply(type, grid, resources);
 
+			BuildLegend(type, resources, legend);
+		}
+
+		private static void BuildLegend(Type type, ResourceDictionary resources, StackPanel legend)
+		{
+			if (legend == null)
+				return;
+
 			legend.Children.Add(new Label { Content = "Подсказка" });
 			var styles = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
-				let key = LegendKey(p)
+				let key = LegendKey(type, p)
 				let style = resources[key] as Style
 				where style != null
 				select new Label { Style = style };

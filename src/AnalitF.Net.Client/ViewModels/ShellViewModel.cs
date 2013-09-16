@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 #if DEBUG
 			if (!UnitTesting)
-				Debug = new DebugViewModel();
+				Debug = new Debug();
 #endif
 
 			Stat = new NotifyValue<Stat>(new Stat());
@@ -744,7 +744,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 #if DEBUG
-		public DebugViewModel Debug { get; set; }
+		public Debug Debug { get; set; }
 
 		public void Collect()
 		{

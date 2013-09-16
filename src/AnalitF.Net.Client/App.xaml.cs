@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using NHibernate.Hql.Ast.ANTLR;
 
 namespace AnalitF.Net.Client
@@ -30,42 +31,16 @@ namespace AnalitF.Net.Client
 			resources = Resources.MergedDictionaries[1];
 
 			baseStyle = (Style)Resources[typeof(DataGridCell)];
+
 			var style = new Style(typeof(DataGridCell), baseStyle);
-			style.Triggers.Add(new DataTrigger {
-				Binding = new Binding("VitallyImportant"),
-				Value = true,
-				Setters = {
-					new Setter(Control.ForegroundProperty, Brushes.Green)
-				}
-			});
-			resources.Add("BaseOrderLine", style);
-
-			SimpleStyle("CatalogHaveOffers", "HaveOffers", Colors.Silver, false, VitallyImportant());
-			SimpleStyle("MnnHaveOffers", "HaveOffers", Colors.Silver, false);
-
-			style = new Style(typeof(DataGridCell), baseStyle);
-			StyleHelper.AddTriggers(style,
-				"Junk",
-				true,
-				Color.FromRgb(0xf2, 0x9e, 0x66),
-				activeColor,
-				inactiveColor);
-			resources.Add("JunkOrderLine", style);
-
-			style = new Style(typeof(DataGridCell), baseStyle);
 			style.Setters.Add(new Setter(Control.BackgroundProperty,
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
-
-			SimpleStyle("Reject", "Marked", Colors.Silver);
 
 			resources.Add("VitallyImportant", BaseStyle(activeColor, inactiveColor));
 
 			style = CellStyle(activeColor, inactiveColor, "Junk", true, Color.FromRgb(0xf2, 0x9e, 0x66));
 			resources.Add("Junk", style);
-
-			style = CellStyle(activeColor, inactiveColor, "HaveOffers", false, Colors.Silver);
-			resources.Add("HaveOffers", style);
 
 			style = CellStyle(activeColor, inactiveColor, "Leader", true, Color.FromRgb(0xC0, 0xDC, 0xC0));
 			resources.Add("Leader", style);
@@ -99,18 +74,23 @@ namespace AnalitF.Net.Client
 			style.Setters.Add(new Setter(Control.BackgroundProperty,
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("OrderColumn", style);
-			StyleHelper.BuildStyles(resources,
-				Resources,
-				typeof(WaybillLine),
-				activeColor,
-				inactiveColor,
-				(Style)Resources["DefaultEditableCell"]);
-			StyleHelper.BuildStyles(resources,
-				Resources,
-				typeof(Order),
-				activeColor,
-				inactiveColor,
-				baseStyle);
+
+			var ignore = new [] { typeof(BaseOffer) };
+			var types = GetType().Assembly.GetTypes()
+				.Except(ignore)
+				.Where(t => t.GetProperties().Any(p => p.GetCustomAttributes(typeof(StyleAttribute), true).Length > 0))
+				.ToArray();
+			foreach (var type in types) {
+				var mainStyle = type == typeof (WaybillLine)
+					? (Style)Resources["DefaultEditableCell"]
+					: baseStyle;
+				StyleHelper.BuildStyles(resources,
+					Resources,
+					type,
+					activeColor,
+					inactiveColor,
+					mainStyle);
+			}
 		}
 
 		private Style SimpleStyle(string name,

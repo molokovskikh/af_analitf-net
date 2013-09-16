@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Doc { get; set; }
 
+		[Style("Period", "Cost", Description = "Уцененные препараты")]
 		public virtual bool Junk { get; set; }
 
 
@@ -70,6 +71,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? MaxBoundCost { get; set; }
 
 
+		[Style(Description = "Жизненно важные препараты")]
 		public virtual bool VitallyImportant { get; set; }
 
 		public virtual decimal? RegistryCost { get; set; }

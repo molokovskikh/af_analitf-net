@@ -17,6 +17,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
@@ -38,7 +39,7 @@
 			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Lines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+		<c:DataGrid Grid.Row="1" x:Name="Lines"
 			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
 			binders:Persistable.PersistColumnSettings="true">
@@ -56,7 +57,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="61*"
-					CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн."
+					Header="Срок годн."
 					Binding="{Binding Period}"
 					TextAlignment="Center" />
 
@@ -83,7 +84,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="67*" CellStyle="{StaticResource ResourceKey=JunkOrderLine}"
+				<c:DataGridTextColumnEx Width="67*"
 					Header="Цена" Binding="{Binding Cost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
@@ -104,7 +105,7 @@
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
-		<c:DataGrid Grid.Row="1" x:Name="SentLines" CellStyle="{StaticResource ResourceKey=BaseOrderLine}"
+		<c:DataGrid Grid.Row="1" x:Name="SentLines"
 			Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
@@ -121,7 +122,7 @@
 				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="61*"
-					CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Срок годн."
+					Header="Срок годн."
 					Binding="{Binding Period}"
 					TextAlignment="Center" />
 
@@ -154,7 +155,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="67*"
-					CellStyle="{StaticResource ResourceKey=JunkOrderLine}" Header="Цена"
+					Header="Цена"
 					Binding="{Binding Cost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
@@ -175,14 +176,17 @@
 			</DataGrid.Columns>
 		</c:DataGrid>
 
-		<ContentControl x:Name="ProductInfo" Grid.Row="2" />
+		<StackPanel Grid.Row="2" Name="Legend">
+		</StackPanel>
 
-		<StackPanel Grid.Row="3">
+		<ContentControl x:Name="ProductInfo" Grid.Row="3" />
+
+		<StackPanel Grid.Row="4">
 			<Label>Комментарий</Label>
 			<TextBox Name="CurrentLine_Value_Comment"></TextBox>
 		</StackPanel>
 
-		<StackPanel Grid.Row="4" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="5" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
 
 			<Button x:Name="ShowCatalog"

@@ -8,6 +8,7 @@
 
 		public virtual bool HaveOffers { get; set; }
 
+		[Style(Description = "Жизнненно важный")]
 		public virtual bool VitallyImportant { get; set; }
 
 		public virtual bool MandatoryList { get; set; }
@@ -15,6 +16,12 @@
 		public virtual Mnn Mnn { get; set; }
 
 		public virtual ProductDescription Description { get; set; }
+
+		[Style(Description = "Предложения отсутствуют")]
+		public virtual bool DoNotHaveOffers
+		{
+			get { return !HaveOffers; }
+		}
 
 		//на форме список препаратов нужно отображать
 		//наименование или наименование + форму в зависимости
