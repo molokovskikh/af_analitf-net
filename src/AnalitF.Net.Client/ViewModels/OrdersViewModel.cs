@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
@@ -89,7 +90,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
 			var update = ordersChanged
-				.SelectMany(e => Observable.FromEventPattern<ListChangedEventArgs>(e.Value, "ListChanged"));
+				.SelectMany(e => e.Value.Changed());
 
 			var observable = ordersChanged.Cast<object>()
 				.Merge(update)
@@ -495,11 +496,9 @@ namespace AnalitF.Net.Client.ViewModels
 		private static IResult ProcessCommandResult(DbCommand command)
 		{
 			var text = command.Result as string;
-			if (!String.IsNullOrEmpty(text)) {
-				return new DialogResult(new TextViewModel(text)) {
-					ShowFixed = true
-				};
-			}
+			if (!String.IsNullOrEmpty(text))
+				return new DialogResult(new TextViewModel(text), @fixed: true);
+
 			return null;
 		}
 	}

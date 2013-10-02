@@ -67,9 +67,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
 				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}) {
-				FullScreen = true
-			};
+			}, fullScreen :true);
 		}
 
 		public IResult PrintPriceTags()
@@ -77,9 +75,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Ценники",
 				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}) {
-				FullScreen = true
-			};
+			}, fullScreen: true);
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
@@ -107,13 +103,11 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var docSettings = doc.Settings;
 			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings)) {
+				yield return new DialogResult(new SimpleSettings(docSettings), @fixed: true) {
 					ShowFixed = true
 				};
 			}
-			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc))) {
-				FullScreen = true
-			};
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
 		public IResult ExportWaybill()

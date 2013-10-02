@@ -27,6 +27,10 @@
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"
 				Style="{StaticResource ResourceKey=FilterButton}">Показать синонимы (Ctrl+N)</Button>
 			<Button x:Name="ShowPrice" Style="{StaticResource ResourceKey=FilterButton}">В прайс</Button>
+			<CheckBox x:Name="OnlyWarning"
+				Style="{StaticResource FilterElement}">
+				Только позиции с корректировкой
+			</CheckBox>
 		</StackPanel>
 
 		<StackPanel Grid.Row="1" Style="{StaticResource ResourceKey=FilterPanel}">
@@ -48,7 +52,7 @@
 				<Label Grid.Row="0" Grid.Column="1" Name="Order_Id" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
-				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Count" FontWeight="Bold"></Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Source_Count" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
 				<Label Grid.Row="0" Grid.Column="3" Name="Order_CreatedOn" FontWeight="Bold"></Label>
@@ -115,9 +119,16 @@
 
 			<StackPanel Grid.Column="0">
 				<ContentControl Name="ProductInfo"></ContentControl>
+
 				<StackPanel>
-					<Label>Комментарий</Label>
-					<TextBox Name="CurrentLine_Comment"></TextBox>
+					<Label Padding="5, 2, 2, 0">Комментарий</Label>
+					<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Comment"></TextBox>
+				</StackPanel>
+
+				<StackPanel Visibility="{Binding OnlyWarningVisible.Value, Converter={StaticResource BoolToCollapsed}}">
+					<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
+					<TextBox Name="ErrorText" Padding="3, 0, 0, 0" Text="{Binding CurrentLine.Value.LongSendError, Mode=OneWay}"
+						Style="{StaticResource ReadOnlyText}" />
 				</StackPanel>
 			</StackPanel>
 

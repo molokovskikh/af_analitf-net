@@ -71,6 +71,20 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsSendError",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xA0, 0xA0, 0xA4)))
+						}
+					}
+				},
+				{ "IsOrderLineSendError",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xA0, 0xA0, 0xA4)))
+						}
+					}
+				},
 			};
 
 		private static SolidColorBrush DefaultColor = Brushes.Red;
@@ -139,7 +153,13 @@ namespace AnalitF.Net.Client.Helpers
 
 			foreach (var column in map) {
 				var style = new Style(typeof(DataGridCell), baseStyle);
+				string context = null;
 				foreach (var property in column) {
+					context = property.GetCustomAttributes(typeof(StyleAttribute), true)
+						.Cast<StyleAttribute>()
+						.Select(a => a.Context)
+						.FirstOrDefault();
+
 					var baseColor = DefaultColor;
 					var result = KnownStyles.GetValueOrDefault(property.Name);
 					if (result != null) {
@@ -152,7 +172,7 @@ namespace AnalitF.Net.Client.Helpers
 					AddTriggers(style, property.Name, true, baseColor, activeColor, inactiveColor);
 					GetValue(style, property.Name, true, baseColor);
 				}
-				resources.Add(type.Name + column.Key + "Cell", style);
+				resources.Add(CellKey(type, column.Key, context), style);
 			}
 		}
 
@@ -311,13 +331,15 @@ namespace AnalitF.Net.Client.Helpers
 		}
 
 		public static void ApplyStyles(Type type, Controls.DataGrid grid, ResourceDictionary resources,
-			StackPanel legend = null)
+			StackPanel legend = null,
+			string context = null)
 		{
 			foreach (var dataGridColumn in grid.Columns.OfType<DataGridBoundColumn>()) {
 				var binding = dataGridColumn.Binding as Binding;
 				if (binding == null)
 					continue;
-				var resource = resources[type.Name + binding.Path.Path + "Cell"] as Style;
+				var resource = resources[CellKey(type, binding.Path.Path)] as Style
+					?? resources[CellKey(type, binding.Path.Path, context)] as Style;
 				if (resource == null)
 					continue;
 				dataGridColumn.CellStyle = resource;
@@ -326,6 +348,14 @@ namespace AnalitF.Net.Client.Helpers
 			Apply(type, grid, resources);
 
 			BuildLegend(type, resources, legend);
+		}
+
+		private static string CellKey(Type type, string path, string context = null)
+		{
+			if (context == null)
+				return type.Name + path + "Cell";
+			else
+				return context + type.Name + path + "Cell";
 		}
 
 		private static void BuildLegend(Type type, ResourceDictionary resources, StackPanel legend)

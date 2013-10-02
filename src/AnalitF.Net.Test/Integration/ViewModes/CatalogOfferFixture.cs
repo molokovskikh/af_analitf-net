@@ -47,9 +47,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var baseOffer = session.Query<Offer>().First(o => o.CatalogId == catalog.Id);
 			var newOffer = new Offer(baseOffer.Price, baseOffer, baseOffer.Cost + 50) {
 				Producer = "Тестовый",
-				ProducerId = (uint?)Generator.Random(int.MaxValue).First()
+				ProducerId = (uint?)Generator.Random().First()
 			};
-			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
+			newOffer.Id.OfferId += (ulong)Generator.Random().First();
 			session.Save(newOffer);
 
 			var count = model.Offers.Count;
@@ -286,7 +286,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Check_prev_order_count()
 		{
-			var offer = model.Offers.First();
+			var offer = model.Offers.First(o => !o.Junk);
 			MakeSentOrder(offer);
 
 			model.CurrentOffer = offer;

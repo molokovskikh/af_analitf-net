@@ -92,7 +92,7 @@ namespace AnalitF.Net.Test.Integration
 			Execute.ResetWithoutDispatcher();
 			//setup - переопределяет windowmanager но AppBootstrapper вернет все назад
 			//нужно восстановить тестовый windowmanager а то тесты начнут показывать окна
-			StubWindowManager();
+			manager = StubWindowManager();
 			return app;
 		}
 	}

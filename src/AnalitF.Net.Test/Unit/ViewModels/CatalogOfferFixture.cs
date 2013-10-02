@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using BaseFixture = AnalitF.Net.Client.Test.TestHelpers.BaseFixture;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
@@ -30,14 +32,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			BaseScreen.TestSchuduler = scheduler;
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
 
-			manager = new WindowManager();
-			manager.UnderTest = true;
-			var @base = IoC.GetInstance;
-			IoC.GetInstance = (type, key) => {
-				if (type == typeof(IWindowManager))
-					return manager;
-				return @base(type, key);
-			};
+			manager = BaseFixture.StubWindowManager();
 		}
 
 		[TearDown]

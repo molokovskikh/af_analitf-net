@@ -18,6 +18,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
@@ -37,6 +38,9 @@
 			</GroupBox>
 			<ComboBox Style="{StaticResource Filter}" x:Name="Prices" DisplayMemberPath="Name" />
 			<ContentControl x:Name="AddressSelector" />
+			<CheckBox Style="{StaticResource FilterElement}" x:Name="OnlyWarning">
+				Только позиции с корректировкой
+			</CheckBox>
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="1" x:Name="Lines"
@@ -166,10 +170,10 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=CountColumn}" />
+					CellStyle="{StaticResource CountColumn}" />
 				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=CountColumn}" />
+					CellStyle="{StaticResource CountColumn}" />
 				<c:DataGridTextColumnEx Width="65*" Header="Отправлено"
 					Binding="{Binding Order.SentOn}"
 					TextAlignment="Center" />
@@ -182,16 +186,23 @@
 		<ContentControl x:Name="ProductInfo" Grid.Row="3" />
 
 		<StackPanel Grid.Row="4">
-			<Label>Комментарий</Label>
-			<TextBox Name="CurrentLine_Value_Comment"></TextBox>
+			<Label Padding="5, 2, 2, 0">Комментарий</Label>
+			<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
 		</StackPanel>
 
-		<StackPanel Grid.Row="5" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="5" Visibility="{Binding OnlyWarningVisible.Value,
+			Converter={StaticResource BoolToCollapsed}}">
+			<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
+			<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
+				Style="{StaticResource ReadOnlyText}" />
+		</StackPanel>
+
+		<StackPanel Grid.Row="6" Style="{StaticResource ResourceKey=FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
 
 			<Button x:Name="ShowCatalog"
 				Command="{x:Static Parts:ProductInfo.ShowCatalogCommand}"
-				Style="{StaticResource ResourceKey=FilterButton}">В каталог (F2)</Button>
+				Style="{StaticResource FilterButton}">В каталог (F2)</Button>
 
 			<Button x:Name="ShowCatalogWithMnnFilter"
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"

@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CLIENT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -33,7 +33,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;CLIENT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -124,6 +124,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="..\AnalitF.Net.Service\Models\Contract.cs">
+      <Link>Models\Contract.cs</Link>
+    </Compile>
     <Compile Include="Binders\BaseConductor.cs" />
     <Compile Include="Binders\CommandBinder.cs" />
     <Compile Include="Binders\Commands.cs" />
@@ -138,6 +141,7 @@
     <Compile Include="Binders\QuickSearchBehavior.cs" />
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Binders\ViewModelHelper.cs" />
+    <Compile Include="Config\Initializers\Caliburn.cs" />
     <Compile Include="Config\Initializers\DevartDriver.cs" />
     <Compile Include="Config\Initializers\DevartMySqlDialect.cs" />
     <Compile Include="Config\Initializers\DevartMySqlSchema.cs" />
@@ -260,6 +264,7 @@
     <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
     <Compile Include="ViewModels\OrderLinesViewModel.cs" />
     <Compile Include="ViewModels\OrdersViewModel.cs" />
+    <Compile Include="ViewModels\Orders\Correction.cs" />
     <Compile Include="ViewModels\Parts\AddressSelector.cs" />
     <Compile Include="ViewModels\Parts\Editor.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
@@ -304,6 +309,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Orders\Correction.xaml.cs">
+      <DependentUpon>Correction.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\AddressSelectorView.xaml.cs">
       <DependentUpon>AddressSelectorView.xaml</DependentUpon>
@@ -430,6 +438,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Orders\Correction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -625,5 +637,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

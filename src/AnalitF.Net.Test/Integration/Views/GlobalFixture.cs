@@ -42,6 +42,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[SetUp]
 		public void Setup()
 		{
+			window = null;
+			dispatcher = null;
 			shell.Quiet = true;
 			shell.ViewModelSettings.Clear();
 		}
@@ -49,8 +51,11 @@ namespace AnalitF.Net.Test.Integration.Views
 		[TearDown]
 		public void TearDown()
 		{
-			dispatcher.Invoke(() => window.Close());
-			dispatcher.InvokeShutdown();
+			if (dispatcher != null) {
+				if (window != null)
+					dispatcher.Invoke(() => window.Close());
+				dispatcher.InvokeShutdown();
+			}
 		}
 
 		//тестирует очень специфичную ошибку
@@ -161,7 +166,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var offer = session.Query<Offer>().First(o => o.ProductSynonym != order.Lines[0].ProductSynonym);
 			order.AddLine(offer, 1);
 			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
-			var term = source[1].ProductSynonym.Except(source[0].ProductSynonym).First().ToString();
+			var term = source[1].ProductSynonym.ToLower().Except(source[0].ProductSynonym.ToLower()).First().ToString();
 			session.Flush();
 
 			Start();
@@ -176,7 +181,8 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.AreEqual(source[0].Id, ((OrderLine)grid.CurrentItem).Id);
 
 				Input(grid, term);
-				Assert.AreEqual(source[1].Id, ((OrderLine)grid.SelectedItem).Id);
+				Assert.AreEqual(source[1].Id, ((OrderLine)grid.SelectedItem).Id,
+					"term = {0}, value = {1}", term, grid.SelectedItem);
 				Assert.AreEqual(source[1].Id, ((OrderLine)grid.CurrentItem).Id);
 				var text = Find<TextBox>(view, "QuickSearch", "SearchText");
 				Assert.True(text.IsVisible);
@@ -255,6 +261,75 @@ namespace AnalitF.Net.Test.Integration.Views
 					.Where(c => c.Column == printColumn)
 					.SelectMany(c => c.Descendants<CheckBox>())
 					.Each(c => Assert.IsFalse(c.IsChecked.Value));
+			});
+		}
+
+		[Test]
+		public void Order_details()
+		{
+			restore = true;
+
+			session.DeleteEach<Order>();
+
+			var user = session.Query<User>().First();
+			user.IsPreprocessOrders = true;
+
+			new CorrectOrder().Execute(session);
+			session.Flush();
+
+			Start();
+			Click("ShowOrders");
+			WaitIdle();
+			Input("Orders", Key.Enter);
+			WaitIdle();
+
+			dispatcher.Invoke(() => {
+				var details = (OrderDetailsViewModel)shell.ActiveItem;
+				var view = (FrameworkElement)details.GetView();
+				var check = (CheckBox)view.FindName("OnlyWarning");
+				Assert.IsTrue(check.IsVisible);
+
+				var count = (Label)view.FindName("Source_Count");
+				Assert.AreEqual(2, count.Content);
+				Assert.False(check.IsChecked.Value);
+				check.IsChecked = true;
+
+				details.CurrentLine.Value = details.Lines.Value.First();
+
+				var text = (TextBox)view.FindName("ErrorText");
+				Assert.IsTrue(text.IsVisible);
+				Assert.AreEqual("предложение отсутствует ", text.Text);
+			});
+		}
+
+		[Test]
+		public void Edit_order_count()
+		{
+		}
+
+		[Test]
+		public void Delete_order_line()
+		{
+		}
+
+		[Test]
+		public void Activete_search()
+		{
+		}
+
+		[Test]
+		public void Open_prices()
+		{
+			Start();
+
+			Click("ShowPrice");
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var view = (FrameworkElement)((PriceViewModel)shell.ActiveItem).GetView();
+				var block = (TextBlock)view.FindName("CurrentPrice_Value_SupplierFullName");
+				Assert.That(block.Text, Is.StringContaining("Тестовый"));
+				var text = (TextBox)view.FindName("CurrentPrice_Value_ContactInfo");
+				Assert.That(text.Text, Is.StringContaining("тестовая контактная информация"));
 			});
 		}
 

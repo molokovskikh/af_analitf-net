@@ -30,11 +30,21 @@ namespace AnalitF.Net.Test.Integration
 		{
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
-			global::Test.Support.Setup.Initialize("server");
-			AppBootstrapper.NHibernate = new Client.Config.Initializers.NHibernate();
+
+			//server.Configuration
+			global::Test.Support.Setup.BuildConfiguration("server");
+			var server = new Service.Config.Initializers.NHibernate();
+			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
+			server.Configuration = holder.GetConfiguration(typeof(ActiveRecordBase));
+			server.Init();
+			global::Test.Support.Setup.SessionFactory = holder.GetSessionFactory(typeof(ActiveRecordBase));
+			//global::Test.Support.Setup.Initialize("server");
+
+			var nhibernate = new Client.Config.Initializers.NHibernate();
+			AppBootstrapper.NHibernate = nhibernate;
 			AppBootstrapper.NHibernate.Init("client");
-			Factory = AppBootstrapper.NHibernate.Factory;
-			Configuration = AppBootstrapper.NHibernate.Configuration;
+			Factory = nhibernate.Factory;
+			Configuration = nhibernate.Configuration;
 
 			if (IsStale()) {
 				MySqlConnection.ClearAllPools(true);

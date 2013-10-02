@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Input;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using NHibernate;
@@ -45,11 +46,15 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public CommandBinding[] Bindings;
 
-		public ProductInfo(IStatelessSession session, WindowManager manager, ShellViewModel shell)
+		public ProductInfo(IStatelessSession session, WindowManager manager, ShellViewModel shell,
+			NotifyValue<OrderLine> value = null)
 		{
 			StatelessSession = session;
 			Manager = manager;
 			Shell = shell;
+
+			if (value != null)
+				value.Changed().Subscribe(_ => CurrentOffer = value.Value);
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => {

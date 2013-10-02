@@ -29,12 +29,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private string autoCommentText;
 		private bool resetAutoComment;
+		private OfferComposedId initOfferId;
 
 		protected List<string> producers;
 		protected List<Offer> offers = new List<Offer>();
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
-		private OfferComposedId initOfferId;
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -45,16 +45,8 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
 			Producers = new NotifyValue<List<string>>();
 
-			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
-
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => InvalidateHistoryOrders());
-
-			this.ObservableForProperty(m => m.CurrentOffer)
-				.Where(o => o != null)
-				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => LoadHistoryOrders());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
@@ -62,9 +54,20 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowCatalogWithMnnFilter"));
 
-			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
-				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
-				.Select(e => new Stat(Address));
+			Settings.Changed().Subscribe(_ => Calculate());
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
+			this.ObservableForProperty(m => m.CurrentOffer)
+				.Where(o => o != null)
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
+				.ObserveOn(UiScheduler)
+				.Subscribe(_ => LoadHistoryOrders());
+
 			this.ObservableForProperty(m => m.CurrentOffer)
 #if !DEBUG
 				.Throttle(Consts.ScrollLoadTimeout)
@@ -74,8 +77,12 @@ namespace AnalitF.Net.Client.ViewModels
 					if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 						CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
 				});
+
+			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
+				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+				.Select(e => new Stat(Address));
+
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
-			Settings.Changed().Subscribe(_ => Calculate());
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }

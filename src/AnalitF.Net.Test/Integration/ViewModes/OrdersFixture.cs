@@ -289,7 +289,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.EnterSentOrder();
 
 			var currentMode = (OrderDetailsViewModel)shell.ActiveItem;
-			Assert.AreEqual(currentMode.Lines.Count, 1);
+			Assert.AreEqual(currentMode.Lines.Value.Count, 1);
 		}
 
 		[Test]
@@ -307,9 +307,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.EnterOrder();
 			var lines = (OrderDetailsViewModel)shell.ActiveItem;
-			lines.CurrentLine = lines.Lines.First();
+			lines.CurrentLine.Value = lines.Lines.Value.First();
 			lines.Delete();
-			Assert.AreEqual(0, lines.Lines.Count);
+			Assert.AreEqual(0, lines.Lines.Value.Count);
 			Assert.AreEqual(model, shell.ActiveItem);
 			Assert.That(model.Orders.Select(o => o.Id), Is.Not.Contains(order.Id));
 		}
@@ -326,7 +326,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);
 			var newOffer = new Offer(price, offer, offer.Cost + 50);
-			newOffer.Id.OfferId += (ulong)Generator.Random(int.MaxValue).First();
+			newOffer.Id.OfferId += (ulong)Generator.Random().First();
 			session.Save(newOffer);
 
 			return newOffer;

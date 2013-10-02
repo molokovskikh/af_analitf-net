@@ -19,10 +19,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private Type activeItemType = typeof(CatalogName);
 
-		public CatalogNameViewModel(CatalogViewModel catalogViewModel)
+		public CatalogNameViewModel(CatalogViewModel catalog)
 		{
 			Readonly = true;
-			ParentModel = catalogViewModel;
+			Shell = catalog.Shell;
+			ParentModel = catalog;
 			CatalogNames = new NotifyValue<List<CatalogName>>();
 			Catalogs = new NotifyValue<List<Catalog>>(new List<Catalog>());
 			CurrentItem = new NotifyValue<object>();
@@ -62,14 +63,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 #endif
 				.Subscribe(_ => LoadCatalogs());
-		}
-
-		protected override ShellViewModel Shell
-		{
-			get
-			{
-				return (ShellViewModel)ParentModel.Parent;
-			}
 		}
 
 		public CatalogViewModel ParentModel { get; private set; }

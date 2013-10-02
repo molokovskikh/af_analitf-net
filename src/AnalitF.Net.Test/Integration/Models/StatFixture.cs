@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.Models
 {
 	[TestFixture]
-	public class StatFixture : DbCommandFixture
+	public class StatFixture : DbFixture
 	{
 		[Test]
 		public void Load_stat()

@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			BaseScreen.TestSchuduler = testScheduler;
 			disposeTestShedule = TestUtils.WithScheduler(testScheduler);
 
-			StubWindowManager();
+			manager = StubWindowManager();
 
 			session = SetupFixture.Factory.OpenSession();
 			data = new DataMother(session);
@@ -74,9 +74,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			disposable.Dispose();
 		}
 
-		protected void StubWindowManager()
+		public static Extentions.WindowManager StubWindowManager()
 		{
-			manager = new Extentions.WindowManager();
+			var manager = new Extentions.WindowManager();
 			manager.UnderTest = true;
 			var @base = IoC.GetInstance;
 			IoC.GetInstance = (type, key) => {
@@ -86,6 +86,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			};
 
 			IoC.BuildUp  = o => {};
+			return manager;
 		}
 
 		protected T Init<T>() where T : BaseScreen, new()
@@ -98,6 +99,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (model.IsInitialized)
 				return model;
 
+			session.Flush();
 			disposable.Add(model);
 			model.Parent = shell;
 			Activate(model);

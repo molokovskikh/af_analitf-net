@@ -1,11 +1,11 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 
-#if DEBUG
 namespace AnalitF.Net.Client.Models
 {
 	public class DebugPipe

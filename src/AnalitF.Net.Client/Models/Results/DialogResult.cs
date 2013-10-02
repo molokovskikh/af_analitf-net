@@ -9,18 +9,19 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class DialogResult : IResult
 	{
-		public DialogResult(Screen model)
+		public ShellViewModel Shell;
+		public Screen Model;
+		public bool ShowFixed;
+		public bool FullScreen;
+
+		public DialogResult(Screen model, bool fullScreen = false, bool @fixed = false)
 		{
 			Model = model;
+			FullScreen = fullScreen;
+			ShowFixed = @fixed;
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
-
-		public Screen Model { get; private set; }
-
-		public bool ShowFixed { get; set; }
-
-		public bool FullScreen { get; set; }
 
 		public void Execute(ActionExecutionContext context)
 		{
@@ -32,6 +33,11 @@ namespace AnalitF.Net.Client.Models.Results
 					{"WindowState", WindowState.Maximized}
 				};
 			}
+
+			var baseScreen = Model as BaseScreen;
+			if (baseScreen != null)
+				baseScreen.Shell = Shell;
+
 			if (ShowFixed)
 				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else

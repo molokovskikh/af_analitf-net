@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
 	public class Address
 	{
+		private BindingList<Order> bindable;
+
 		public Address(string name)
 			: this()
 		{
@@ -26,6 +30,18 @@ namespace AnalitF.Net.Client.Models
 
 		[IgnoreDataMember]
 		public virtual IList<Order> Orders { get; set; }
+
+		[IgnoreDataMember]
+		public virtual BindingList<Order> BindableOrders
+		{
+			get
+			{
+				if (bindable == null) {
+					bindable = new BindingList<Order>(Orders);
+				}
+				return bindable;
+			}
+		}
 
 		public override string ToString()
 		{

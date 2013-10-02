@@ -30,9 +30,20 @@ namespace AnalitF.Net.Client.Models.Commands
 				var order = Session.Load<T>(id);
 				try {
 					NHibernateUtil.Initialize(order.Address);
+				}
+				catch(ObjectNotFoundException) {
+					var currentOrder = order as Order;
+					if (currentOrder != null)
+						currentOrder.Address = null;
+				}
+				try {
 					NHibernateUtil.Initialize(order.Price);
 				}
-				catch(ObjectNotFoundException) {}
+				catch(ObjectNotFoundException) {
+					var currentOrder = order as Order;
+					if (currentOrder != null)
+						currentOrder.Price = null;
+				}
 				var address = Session.Get<Address>(addressId);
 				Unfreeze(order, address, Session, log);
 			}
@@ -42,12 +53,12 @@ namespace AnalitF.Net.Client.Models.Commands
 		public static Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
 			var address = addressToOverride ?? sourceOrder.Address;
-			if (address == null || !NHibernateUtil.IsInitialized(address)) {
+			if (address == null) {
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. адрес доставки больше не доступен.", sourceOrder.Id));
 				return null;
 			}
 
-			if (sourceOrder.Price == null || !NHibernateUtil.IsInitialized(sourceOrder.Price)) {
+			if (sourceOrder.Price == null) {
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. прайс-листа нет в обзоре.", sourceOrder.Id));
 				return null;
 			}

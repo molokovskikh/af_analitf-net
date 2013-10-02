@@ -30,6 +30,10 @@ namespace AnalitF.Net.Client.ViewModels
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
 		private TableSettings tableSettings = new TableSettings();
+		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
+		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
+		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestSchuduler ?? DispatcherScheduler.Current);
+
 		protected bool updateOnActivate = true;
 
 		/// <summary>
@@ -53,9 +57,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Settings> Settings;
 		public Extentions.WindowManager Manager { get; private set; }
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
-		public IScheduler UiScheduler = TestSchuduler ?? DispatcherScheduler.Current;
 
 		public AutoResetEvent Closed = new AutoResetEvent(false);
+		public ShellViewModel Shell;
 
 		public BaseScreen()
 		{
@@ -80,12 +84,11 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			excelExporter = new ExcelExporter(this);
-			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
 		}
 
-		protected virtual ShellViewModel Shell
+		public IScheduler UiScheduler
 		{
-			get { return ((ShellViewModel)Parent); }
+			get { return uiSheduler.Value; }
 		}
 
 		public bool IsSuccessfulActivated { get; protected set; }
@@ -99,6 +102,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
+			Shell = Shell ?? Parent as ShellViewModel;
+
+			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
 			if (!Readonly) {
 				//для сообщений типа string используется ImmediateScheduler
 				//те вызов произойдет в той же нитке что и SendMessage

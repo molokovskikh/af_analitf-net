@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public string[] Columns;
 		public string Description;
+		public string Context;
 
 		public StyleAttribute(params string[] columns)
 		{

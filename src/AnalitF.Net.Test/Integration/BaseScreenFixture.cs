@@ -17,7 +17,7 @@ namespace AnalitF.Net.Test.Integration
 			ScreenExtensions.TryActivate(parent);
 			parent.NavigateBackward();
 
-			parent.Parent = shell;
+			parent.Shell = shell;
 			shell.ActivateItem(parent);
 			Assert.That(shell.ActiveItem, Is.EqualTo(parent));
 			parent.NavigateBackward();

@@ -7,5 +7,7 @@
 		public virtual string FullName { get; set; }
 
 		public virtual bool IsPriceEditDisabled { get; set; }
+
+		public virtual bool IsPreprocessOrders { get; set; }
 	}
 }

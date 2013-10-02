@@ -201,9 +201,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				Results.Add(new DialogResult(new TextViewModel(report) {
 					Header = "Предложения по данным позициям из заказа отсутствуют",
 					DisplayName = "Не найденые позиции"
-				}) {
-					ShowFixed = true
-				});
+				}, @fixed: true));
 			}
 		}
 
@@ -319,7 +317,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var settings = Session.Query<Settings>().First();
 			var lastUpdate = settings.LastUpdate;
 			var prices = Session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
-			var clientPrices = prices.Select(p => new { p.Id.PriceId, p.Id.RegionId, p.Active }).ToArray();
+			var clientPrices = prices.Select(p => new PriceSettings(p.Id.PriceId, p.Id.RegionId, p.Active)).ToArray();
 
 			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(),
 				new SyncRequest(clientPrices),

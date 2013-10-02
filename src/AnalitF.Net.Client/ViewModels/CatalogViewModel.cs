@@ -293,6 +293,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			var baseScreen = ActiveItem as BaseScreen;
+			if (baseScreen != null)
+				baseScreen.Shell = Shell;
+		}
+
 		protected override void OnActivate()
 		{
 			base.OnActivate();

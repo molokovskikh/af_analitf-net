@@ -496,7 +496,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> SendOrders()
+		public IEnumerable<IResult> SendOrders(bool force = false)
 		{
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
@@ -507,12 +507,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
-				yield return new DialogResult(orderWarning) {
-					ShowFixed = true
-				};
+				yield return new DialogResult(orderWarning, @fixed: true);
 			}
 
-			var results = Sync(new SendOrders(CurrentAddress));
+			var results = Sync(new SendOrders(CurrentAddress, force));
 			foreach (var result in results)
 				yield return result;
 		}

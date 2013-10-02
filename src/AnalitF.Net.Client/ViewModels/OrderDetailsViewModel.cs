@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -18,7 +19,6 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint orderId;
 		private Type type;
-		private IOrderLine currentLine;
 		private Editor editor;
 
 		public OrderDetailsViewModel(IOrder order)
@@ -27,22 +27,25 @@ namespace AnalitF.Net.Client.ViewModels
 			type = order.GetType();
 			DisplayName = "Архивный заказ";
 
-			this.ObservableForProperty(m => m.CurrentLine)
+			OnlyWarning = new NotifyValue<bool>();
+			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
+			CurrentLine = new NotifyValue<IOrderLine>();
+			CurrentLine.Changed()
 				.Subscribe(_ => {
-					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine;
-					editor.CurrentEdit = CurrentLine as OrderLine;
+					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
+					editor.CurrentEdit = CurrentLine.Value as OrderLine;
 				});
-			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
-			editor = new Editor(OrderWarning, Manager);
-			editor.ObservableForProperty(e => e.CurrentEdit)
-				.Select(e => e.Value)
-				.BindTo(this, m => m.CurrentLine);
 		}
+
+		public IList<IOrderLine> Source { get; set; }
 
 		public bool IsCurrentOrder
 		{
 			get { return type == typeof(Order); }
 		}
+
+		public NotifyValue<bool> OnlyWarning { get; set; }
+		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 
 		public InlineEditWarning OrderWarning { get; set; }
 
@@ -51,20 +54,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public IOrder Order { get; set; }
 
 		[Export]
-		public IList<IOrderLine> Lines { get; set; }
+		public NotifyValue<IList<IOrderLine>> Lines { get; set; }
 
-		public IOrderLine CurrentLine
-		{
-			get { return currentLine; }
-			set
-			{
-				if (currentLine == value)
-					return;
-
-				currentLine = value;
-				NotifyOfPropertyChange("CurrentLine");
-			}
-		}
+		public NotifyValue<IOrderLine> CurrentLine { get; set; }
 
 		public bool CanPrint
 		{
@@ -86,6 +78,16 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+			editor = new Editor(OrderWarning, Manager);
+			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
+			OnlyWarningVisible = new NotifyValue<bool>(() => User.IsPreprocessOrders && IsCurrentOrder);
+
+			editor.ObservableForProperty(e => e.CurrentEdit)
+				.Select(e => e.Value)
+				.BindTo(this, m => m.CurrentLine.Value);
+
+			Lines.Changed()
+				.Subscribe(_ => editor.Lines = Lines.Value as IList);
 		}
 
 		protected override void OnViewAttached(object view, object context)
@@ -93,6 +95,16 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnViewAttached(view, context);
 
 			Attach(view, ProductInfo.Bindings);
+		}
+
+		private IList<IOrderLine> Filter()
+		{
+			if (OnlyWarning)
+				return Source
+					.OfType<OrderLine>().Where(l => l.SendResult != LineResultStatus.OK)
+					.LinkTo(Source);
+
+			return Source;
 		}
 
 		public override void Update()
@@ -107,13 +119,12 @@ namespace AnalitF.Net.Client.ViewModels
 				IsSuccessfulActivated = false;
 				return;
 			}
-			Lines = new ObservableCollection<IOrderLine>(Order.Lines);
-			Lines.ObservableForProperty(c => c.Count)
+			Source = new ObservableCollection<IOrderLine>(Order.Lines);
+			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
 				.Subscribe(_ => TryClose());
 
-			if (IsCurrentOrder)
-				editor.Lines = Lines as IList;
+			Lines.Recalculate();
 		}
 
 		public PrintResult Print()
@@ -133,7 +144,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var offerViewModel = new PriceOfferViewModel(Order.Price.Id,
 				false,
-				CurrentLine == null ? null : ((OrderLine)CurrentLine).OfferId);
+				CurrentLine.Value == null ? null : ((OrderLine)CurrentLine).OfferId);
 			Shell.Navigate(offerViewModel);
 		}
 

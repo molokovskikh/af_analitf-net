@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class OrderLine : BaseOffer, IInlineEditable, IOrderLine
+	public class OrderLine : BaseOffer, IInlineEditable, IOrderLine, IFormattable
 	{
 		private uint count;
 		private string comment;
@@ -30,8 +30,64 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
+		public virtual string SendError { get; set; }
+
+		public virtual LineResultStatus SendResult { get; set; }
+
+		public virtual decimal? ServerCost { get; set; }
+
+		public virtual uint? ServerQuantity { get; set; }
+
 		[JsonIgnore]
 		public virtual Order Order { get; set; }
+
+		public virtual decimal? NewCost
+		{
+			get { return  IsCostChanged ? ServerCost : null; }
+		}
+
+		public virtual decimal? OldCost
+		{
+			get { return IsCostChanged ? Cost : (decimal?)null; }
+		}
+
+		[Style("NewCost", "OldCost")]
+		public virtual bool IsCostChanged
+		{
+			get { return (SendResult & LineResultStatus.CostChanged) > 0; }
+		}
+
+		public virtual uint? NewQuantity
+		{
+			get { return IsQuantityChanged ? ServerQuantity : null; }
+		}
+
+		public virtual uint? OldQuantity
+		{
+			get { return IsQuantityChanged ? Count : (uint?)null; }
+		}
+
+		[Style("NewQuantity", "OldQuantity")]
+		public virtual bool IsQuantityChanged
+		{
+			get { return (SendResult & LineResultStatus.QuantityChanged) > 0; }
+		}
+
+		[Style("ProductSynonym", Context = "Correction")]
+		public virtual bool IsRejected
+		{
+			get {
+				return SendResult != LineResultStatus.OK
+					&& (SendResult & LineResultStatus.CostChanged) == 0
+					&& (SendResult & LineResultStatus.QuantityChanged) == 0;
+			}
+		}
+
+		[Style("Sum", Description = "Корректировка по цене и/или по количеству")]
+		public virtual bool IsSendError
+		{
+			get { return SendResult != LineResultStatus.OK; }
+		}
 
 		public virtual string Comment
 		{
@@ -175,20 +231,101 @@ namespace AnalitF.Net.Client.Models
 
 			if (rest > 0) {
 				if (rest == Count) {
-					log.AppendLine(String.Format("{0} : {1} - {2} ; Предложений не найдено",
+					log.AppendLine(String.Format("{0} : {1} ; Предложений не найдено",
 						order.Price.Name,
-						ProductSynonym,
-						ProducerSynonym));
+						this));
 				}
 				else {
-					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказное количество {3} вместо {4}",
+					log.AppendLine(String.Format("{0} : {1} ; Уменьшено заказное количество {2} вместо {3}",
 						Order.Price.Name,
-						ProductSynonym,
-						ProducerSynonym,
+						this,
 						Count - rest,
 						Count));
 				}
 			}
+		}
+
+		public virtual void Apply(OrderLineResult result)
+		{
+			if (result == null) {
+				SendResult = LineResultStatus.OK;
+				SendError = "";
+				ServerCost = null;
+				ServerQuantity = null;
+				return;
+			}
+			ServerCost = result.ServerCost;
+			ServerQuantity = result.ServerQuantity;
+			SendResult = result.Result;
+			if (result.Result == LineResultStatus.CostChanged) {
+				SendError = "имеется различие в цене препарата";
+			}
+			else if (result.Result == LineResultStatus.QuantityChanged) {
+				SendError = "доступное количество препарата в прайс-листе меньше заказанного ранее";
+			}
+			else if (result.Result == (LineResultStatus.QuantityChanged | LineResultStatus.CostChanged)) {
+				SendError = "имеются различия с прайс-листом в цене и количестве заказанного препарата";
+			}
+			else if (result.Result == LineResultStatus.NoOffers) {
+				SendError = "предложение отсутствует";
+			}
+			else {
+				SendError = "";
+			}
+		}
+
+		public override string ToString()
+		{
+			return String.Format("{0} - {1}", ProductSynonym, ProducerSynonym);
+		}
+
+		public virtual string ToString(string format, IFormatProvider formatProvider)
+		{
+			switch (format) {
+				case "r":
+					return String.Join(" ", new [] {
+						ToString() + ":",
+						LongSendError
+					});
+				default:
+					return ToString();
+			}
+		}
+
+		public virtual string LongSendError
+		{
+			get
+			{
+				var datum = new List<string>();
+				if (IsCostChanged)
+					datum.Add(String.Format("старая цена: {0:C}", OldCost));
+				if (IsQuantityChanged)
+					datum.Add(String.Format("старый заказ: {0:C}", OldQuantity));
+				if (IsCostChanged)
+					datum.Add(String.Format("новая цена: {0:C}", NewCost));
+				if (IsQuantityChanged)
+					datum.Add(String.Format("текущий заказ: {0:C}", NewCost));
+
+				var data = "";
+				if (datum.Count > 0)
+					data = "(" + datum.Implode("; ") + ")";
+				return String.Join(" ", SendError, data);
+			}
+		}
+
+		public static string SendReport(IEnumerable<OrderLine> lines)
+		{
+			var builder = new StringBuilder();
+			foreach (var group in lines.GroupBy(l => l.Order)) {
+				builder.AppendFormat("прайс-лист {0}", group.Key.Price.Name);
+				if (group.Key.SendResult == OrderResultStatus.Reject)
+					builder.AppendFormat(" - {0}", group.Key.SendError);
+				builder.AppendLine();
+				foreach (var orderLine in group) {
+					builder.AppendLine(String.Format("    {0:r}", orderLine));
+				}
+			}
+			return builder.ToString();
 		}
 	}
 }

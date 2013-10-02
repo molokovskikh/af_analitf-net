@@ -150,11 +150,7 @@ namespace AnalitF.Net.Service.Test
 
 			controller.Post(new SyncRequest {
 				Prices = new[] {
-					new PriceSettings {
-						Active = false,
-						PriceId = price.Id,
-						RegionId = 1
-					}
+					new PriceSettings(price.Id, 1, false)
 				}
 			});
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 
@@ -29,6 +31,12 @@ namespace AnalitF.Net.Client.Helpers
 				if (requestException.StatusCode == HttpStatusCode.Forbidden) {
 					return "Доступ запрещен.\r\nОбратитесь в АК Инфорум.";
 				}
+			}
+
+			if (baseException is HttpRequestException
+				&& baseException.InnerException is WebException
+				&& baseException.InnerException.InnerException is SocketException) {
+				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
 			}
 
 			var endUserError = baseException as EndUserError;

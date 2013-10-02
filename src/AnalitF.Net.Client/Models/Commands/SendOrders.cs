@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
@@ -19,11 +20,14 @@ namespace AnalitF.Net.Client.Models.Commands
 	{
 		private Address address;
 
-		public SendOrders(Address address)
+		public bool Force;
+
+		public SendOrders(Address address, bool force = false)
 		{
 			SuccessMessage = "Отправка заказов завершена успешно.";
 			ErrorMessage = "Не удалось отправить заказы. Попробуйте повторить операцию позднее.";
 			this.address = address;
+			this.Force = force;
 		}
 
 		protected override UpdateResult Execute()
@@ -40,31 +44,18 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var response =
 				Client.PostAsync(new Uri(BaseUri, "Main").ToString(),
-					new SyncRequest(clientOrders),
+					new SyncRequest(clientOrders, Force),
 					Formatter,
 					Token).Result;
 
 			CheckResult(response);
 
-			var acceptedOrders = orders;
-			var rejectedOrders = new List<Order>();
+			var results = response.Content.ReadAsAsync<OrderResult[]>().Result
+				?? new OrderResult[0];
+			orders.Each(o => o.Apply(results.FirstOrDefault(r => r.ClientOrderId == o.Id)));
+			var acceptedOrders = orders.Where(o => o.IsAccepted).ToArray();
+			var rejectedOrders = orders.Where(o => !o.IsAccepted).ToArray();
 
-			var results = response.Content.ReadAsAsync<OrderResult[]>().Result;
-			if (results != null) {
-				foreach (var result in results) {
-					var order = orders.FirstOrDefault(o => o.Id == result.ClientOrderId);
-					if (order == null)
-						continue;
-					if (String.IsNullOrEmpty(result.Error)) {
-						order.ServerId = result.ServerOrderId;
-					}
-					else {
-						order.SendError = result.Error;
-						acceptedOrders.Remove(order);
-						rejectedOrders.Add(order);
-					}
-				}
-			}
 			var sentOrders = acceptedOrders.Select(o => new SentOrder(o)).ToArray();
 
 			Session.SaveEach(sentOrders);
@@ -73,15 +64,31 @@ namespace AnalitF.Net.Client.Models.Commands
 			Progress.OnNext(new Progress("Отправка заказов", 100, 100));
 
 			var settings = Session.Query<Settings>().First();
-			if (rejectedOrders.Count > 0) {
-				var resultText = rejectedOrders.Implode(
-					o => String.Format("прайс-лист {0} - {1}", o.Price.Name, o.SendError),
-					Environment.NewLine);
-				var text = new TextViewModel(resultText) {
-					Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",
-					DisplayName = "Неотправленные заказы"
-				};
-				Results.Add(new DialogResult(text) { ShowFixed = true });
+			if (rejectedOrders.Any()) {
+				var user = Session.Query<User>().First();
+
+				//если мы получили заказ без номера заказа с сервера значит он не принят
+				//тк включена опция предзаказа и есть проблемы с другими заказами
+				//если сервер уже знает что опция включена а клиент еще нет
+				if (!user.IsPreprocessOrders)
+					user.IsPreprocessOrders = rejectedOrders
+						.SelectMany(r => r.Lines)
+						.Any(l => l.SendResult != LineResultStatus.OK)
+					|| rejectedOrders.Any(o => o.SendResult == OrderResultStatus.OK && o.ServerId == 0);
+
+				if (!user.IsPreprocessOrders) {
+					var resultText = rejectedOrders.Implode(
+						o => String.Format("прайс-лист {0} - {1}", o.Price.Name, o.SendError),
+						Environment.NewLine);
+					var text = new TextViewModel(resultText) {
+						Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",
+						DisplayName = "Неотправленные заказы"
+					};
+					Results.Add(new DialogResult(text, @fixed: true));
+				}
+				else {
+					Results.Add(new DialogResult(new Correction(), fullScreen: true));
+				}
 				updateResult = UpdateResult.Other;
 			}
 			if (settings.PrintOrdersAfterSend && sentOrders.Length > 0) {

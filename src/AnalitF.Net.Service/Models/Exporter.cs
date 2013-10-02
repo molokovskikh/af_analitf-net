@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Common.Models;
+using Common.Models.Helpers;
 using Common.Models.Repositories;
 using Common.Tools;
 using ICSharpCode.SharpZipLib.Core;
@@ -40,7 +41,7 @@ namespace AnalitF.Net.Service.Models
 		private FileCleaner cleaner = new FileCleaner();
 		private bool disposed;
 
-		private uint userId;
+		private User user;
 		private Version version;
 
 		public string UpdateType;
@@ -58,9 +59,9 @@ namespace AnalitF.Net.Service.Models
 		public Exporter(ISession session, uint userId, Version version, string updateType = null)
 		{
 			this.session = session;
-			this.userId = userId;
 			this.version = version;
 			this.UpdateType = updateType;
+			user = session.Load<User>(userId);
 		}
 
 		//Все даты передаются в UTC!
@@ -70,8 +71,11 @@ namespace AnalitF.Net.Service.Models
 				"drop temporary table if exists usersettings.activeprices;" +
 				"call Customers.GetOffers(:userId);" +
 				"call Customers.GetPrices(:userId);")
-				.SetParameter("userId", userId)
+				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
+
+			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
+
 			string sql;
 
 			sql = @"
@@ -94,16 +98,17 @@ a.Address as Name
 from Customers.Addresses a
 join Customers.UserAddresses ua on ua.AddressId = a.Id
 where a.Enabled = 1 and ua.UserId = ?userId";
-			Export(result, sql, "Addresses", new { userId });
+			Export(result, sql, "Addresses", new { userId = user.Id });
 
 			sql = @"
 select u.Id,
 	u.InheritPricesFrom is not null as IsPriceEditDisabled,
-	c.FullName as FullName #version-tag-13
+	u.UseAdjustmentOrders as IsPreprocessOrders,
+	c.FullName as FullName
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 where u.Id = ?userId";
-			Export(result, sql, "Users", new { userId });
+			Export(result, sql, "Users", new { userId = user.Id });
 
 			sql = @"
 drop temporary table if exists Usersettings.MaxProducerCosts;
@@ -151,7 +156,7 @@ from
 where u.Id = ?UserId
 	and a.Enabled = 1
 ";
-			Export(result, sql, "MinOrderSumRules", new { userId });
+			Export(result, sql, "MinOrderSumRules", new { userId = user.Id });
 
 			sql = @"select * from Usersettings.MaxProducerCosts";
 			Export(result, sql, "MaxProducerCosts");
@@ -300,11 +305,11 @@ where Hidden = 0";
 
 			session.CreateSQLQuery(@"delete from Logs.PendingDocLogs"
 				+ " where UserId = :userId;")
-				.SetParameter("userId", userId)
+				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.User.Id == userId)
+				.Where(l => !l.Committed && l.User.Id == user.Id)
 				.Take(400)
 				.ToArray();
 
@@ -359,7 +364,7 @@ from Logs.Document_logs d
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id", ids);
-			Export(result, sql, "Waybills", new { userId });
+			Export(result, sql, "Waybills", new { userId = user.Id });
 
 			sql = String.Format(@"
 select db.Id,
@@ -388,7 +393,7 @@ from Logs.Document_logs d
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
-			Export(result, sql, "WaybillLines", new { userId });
+			Export(result, sql, "WaybillLines", new { userId = user.Id });
 
 			Export(result,
 				"LoadedDocuments",
@@ -525,7 +530,6 @@ group by dh.Id")
 
 		public void CheckAds(List<UpdateData> zip)
 		{
-			var user = session.Load<User>(userId);
 			if (!Directory.Exists(AdsPath))
 				return;
 			var template = String.Format("_{0}", user.Client.RegionCode);
@@ -564,7 +568,7 @@ group by dh.Id")
 			if (updateVersion <= version)
 				return;
 
-			//в сборке 12 ошибка, обходим ее
+			//hack: в сборке 12 ошибка, обходим ее
 			if (version.Revision == 12) {
 				AddDir(zip, UpdatePath, "");
 				AddDir(zip, UpdatePath, "update");

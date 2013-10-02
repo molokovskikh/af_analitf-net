@@ -96,7 +96,7 @@ namespace Updater
 			var exePath = destRootPath;
 			var files = Directory.GetFiles(sourceRootPath);
 
-			//что бы обойти ошибку в сборке 12
+			//hack: что бы обойти ошибку в сборке 12
 			var ignoreReg = new Regex(@"\.txt$");
 			files = files.Where(f => !ignoreReg.IsMatch(f)).ToArray();
 

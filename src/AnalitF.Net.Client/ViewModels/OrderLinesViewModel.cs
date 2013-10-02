@@ -27,11 +27,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public OrderLinesViewModel()
 		{
 			DisplayName = "Сводный заказ";
+
+			OnlyWarning = new NotifyValue<bool>();
 			CurrentLine = new NotifyValue<OrderLine>();
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
 			CurrentPrice = new NotifyValue<Price>();
-			CanDelete = new NotifyValue<bool>(() =>  CurrentLine.Value != null && IsCurrentSelected,
+			CanDelete = new NotifyValue<bool>(
+				() => CurrentLine.Value != null && IsCurrentSelected,
 				CurrentLine, IsCurrentSelected);
 
 			Sum = new NotifyValue<decimal>(() => {
@@ -49,6 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			AddressSelector.All.Changed()
 				.Merge(CurrentPrice.Changed())
+				.Merge(OnlyWarning.Changed())
 				.Subscribe(_ => Update());
 
 			this.ObservableForProperty(m => m.CurrentLine.Value)
@@ -86,6 +90,29 @@ namespace AnalitF.Net.Client.ViewModels
 		public AddressSelector AddressSelector { get; set; }
 		public ProductInfo ProductInfo { get; set; }
 
+		public List<Price> Prices { get; set; }
+		public NotifyValue<Price> CurrentPrice { get; set; }
+
+		public NotifyValue<bool> OnlyWarningVisible { get; set; }
+		public NotifyValue<bool> OnlyWarning { get; set; }
+
+		[Export]
+		public NotifyValue<ObservableCollection<OrderLine>> Lines { get; set; }
+
+		[Export]
+		public NotifyValue<List<SentOrderLine>> SentLines { get; set; }
+
+		public NotifyValue<decimal> Sum { get; set; }
+
+		public NotifyValue<OrderLine> CurrentLine { get; set; }
+
+		public NotifyValue<bool> CanDelete { get; set; }
+
+		public bool CanPrint
+		{
+			get { return true; }
+		}
+
 		protected override void OnViewAttached(object view, object context)
 		{
 			base.OnViewAttached(view, context);
@@ -98,6 +125,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			OnlyWarningVisible = new NotifyValue<bool>(() => IsCurrentSelected && User.IsPreprocessOrders, IsCurrentSelected);
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
 			AddressSelector.Init();
 		}
@@ -107,6 +135,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>()
 					.Where(l => !l.Order.Frozen);
+
+				if (OnlyWarning.Value)
+					query = query.Where(l => l.SendResult != LineResultStatus.OK);
 
 				if (CurrentPrice.Value != null && CurrentPrice.Value.Id != null) {
 					var priceId = CurrentPrice.Value.Id;
@@ -158,26 +189,6 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			foreach (var offer in Lines.Value)
 				offer.CalculateRetailCost(Settings.Value.Markups);
-		}
-
-		public List<Price> Prices { get; set; }
-		public NotifyValue<Price> CurrentPrice { get; set; }
-
-		[Export]
-		public NotifyValue<ObservableCollection<OrderLine>> Lines { get; set; }
-
-		[Export]
-		public NotifyValue<List<SentOrderLine>> SentLines { get; set; }
-
-		public NotifyValue<decimal> Sum { get; set; }
-
-		public NotifyValue<OrderLine> CurrentLine { get; set; }
-
-		public NotifyValue<bool> CanDelete { get; set; }
-
-		public bool CanPrint
-		{
-			get { return true; }
 		}
 
 		public void EnterLine()

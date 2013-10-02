@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Proxy;
@@ -13,42 +14,6 @@ using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class SyncRequest
-	{
-		public SyncRequest(object[] prices)
-		{
-			Prices = prices;
-		}
-
-		public SyncRequest(ClientOrder[] orders)
-		{
-			Orders = orders;
-		}
-
-		public object[] Prices;
-		public ClientOrder[] Orders;
-	}
-
-	public class OrderResult
-	{
-		public uint ClientOrderId;
-		public ulong ServerOrderId;
-		public string Error;
-	}
-
-	public class ClientOrder
-	{
-		public uint ClientOrderId;
-		public uint PriceId;
-		public uint AddressId;
-		public ulong RegionId;
-		public DateTime CreatedOn;
-		public DateTime PriceDate;
-		public string Comment;
-
-		public OrderLine[] Items;
-	}
-
 	public class Order : BaseNotify, IOrder
 	{
 		private decimal sum;
@@ -129,6 +94,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PersonalComment { get; set; }
 
+		public virtual OrderResultStatus SendResult { get; set; }
+
 		public virtual string SendError { get; set; }
 
 		public virtual IList<OrderLine> Lines { get; set; }
@@ -152,6 +119,12 @@ namespace AnalitF.Net.Client.Models
 					return true;
 				return Sum < MinOrderSum.MinOrderSum;
 			}
+		}
+
+		[Style("Sum", Description = "Имеется позиция с корректировкой по цене и/или по количеству")]
+		public virtual bool IsOrderLineSendError
+		{
+			get { return Lines.Any(l => l.IsSendError); }
 		}
 
 		public virtual bool IsEmpty
@@ -205,6 +178,29 @@ namespace AnalitF.Net.Client.Models
 				Comment = Comment,
 				Items = Lines.ToArray(),
 			};
+		}
+
+		public virtual bool IsAccepted
+		{
+			get { return SendResult == OrderResultStatus.OK && ServerId > 0; }
+		}
+
+		public virtual void Apply(OrderResult result)
+		{
+			result = result ?? new OrderResult { Result = OrderResultStatus.Reject };
+
+			SendResult = result.Result;
+			SendError = result.Error;
+			ServerId = result.ServerOrderId;
+
+			if (SendResult != OrderResultStatus.OK
+				&& String.IsNullOrEmpty(SendError)) {
+				SendError = "Неизвестная ошибка сервера";
+			}
+
+			if (SendResult != OrderResultStatus.OK) {
+				Lines.Each(l => l.Apply(result.Lines.FirstOrDefault(r => r.ClientLineId == l.Id)));
+			}
 		}
 	}
 }

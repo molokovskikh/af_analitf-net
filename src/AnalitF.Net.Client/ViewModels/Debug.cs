@@ -38,9 +38,16 @@ namespace AnalitF.Net.Client.ViewModels
 			catcherSql.Start();
 
 			var catcher = new QueryCatcher("AnalitF.Net.Client");
+			catcher.Additivity = true;
 			catcher.Level = Level.Warn;
 			catcher.Appender = this;
 			catcher.Start();
+
+			var caliburncatcher = new QueryCatcher("Caliburn.Micro");
+			caliburncatcher.Additivity = true;
+			caliburncatcher.Level = Level.Warn;
+			caliburncatcher.Appender = this;
+			caliburncatcher.Start();
 		}
 
 		public string Name { get; set; }

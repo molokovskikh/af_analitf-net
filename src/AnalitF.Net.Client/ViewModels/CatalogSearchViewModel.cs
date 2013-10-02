@@ -70,6 +70,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Readonly = true;
 
+			Shell = catalog.Shell;
 			Items = new NotifyValue<List<CatalogDisplayItem>>();
 			CurrentItem = new NotifyValue<CatalogDisplayItem>();
 			var changes = CurrentItem.Changed()
@@ -103,17 +104,16 @@ namespace AnalitF.Net.Client.ViewModels
 			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
 		}
 
-		protected override ShellViewModel Shell
-		{
-			get
-			{
-				return (ShellViewModel)ParentModel.Parent;
-			}
-		}
-
 		public CatalogViewModel ParentModel { get; set; }
 		public SearchBehavior SearchBehavior { get; set; }
 		public QuickSearch<CatalogDisplayItem> QuickSearch { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			Shell = ParentModel.Shell;
+		}
 
 		public IResult Search()
 		{
