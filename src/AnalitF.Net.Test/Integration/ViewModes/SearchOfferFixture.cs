@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SearchOfferFixture : BaseFixture
+	public class SearchOfferFixture : ViewModelFixture
 	{
 		private SearchOfferViewModel model;
 
@@ -35,12 +35,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
 			model.Search();
 
-			var originCount = model.Offers.Count;
+			var originCount = model.Offers.Value.Count;
 			Assert.That(originCount, Is.GreaterThan(0));
 
 			model.OnlyBase.Value = true;
-			Assert.That(model.Offers.Count, Is.LessThan(originCount));
-			foreach (var offer in model.Offers) {
+			Assert.That(model.Offers.Value.Count, Is.LessThan(originCount));
+			foreach (var offer in model.Offers.Value) {
 				Assert.That(offer.Price.BasePrice, Is.True);
 			}
 		}

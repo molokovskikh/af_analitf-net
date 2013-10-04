@@ -4,13 +4,13 @@ using System.Linq;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Acceptance;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
-using BaseFixture = AnalitF.Net.Client.Test.TestHelpers.BaseFixture;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
@@ -20,7 +20,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 	{
 		private TestScheduler scheduler;
 		private CompositeDisposable cleanup;
-		private WindowManager manager;
 
 		[SetUp]
 		public void Setup()
@@ -32,7 +31,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			BaseScreen.TestSchuduler = scheduler;
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
 
-			manager = BaseFixture.StubWindowManager();
+			ViewModelFixture.StubWindowManager();
 		}
 
 		[TearDown]
@@ -48,7 +47,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			model.User = new User();
 			model.Settings.Value.Markups = MarkupConfig.Defaults().ToArray();
-			model.Offers = new List<Offer> {
+			model.Offers.Value = new List<Offer> {
 				new Offer(new Price {
 					Id = new PriceComposedId()
 				}, 100) {
@@ -64,10 +63,10 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					}
 				}
 			};
-			model.CurrentOffer = model.Offers[0];
+			model.CurrentOffer = model.Offers.Value[0];
 			Assert.AreEqual(model.RetailMarkup.Value, 20);
 			Assert.AreEqual(model.RetailCost.Value, 120);
-			model.CurrentOffer = model.Offers[1];
+			model.CurrentOffer = model.Offers.Value[1];
 			Assert.AreEqual(model.RetailCost.Value, 180);
 		}
 	}

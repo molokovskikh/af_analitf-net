@@ -11,6 +11,8 @@ namespace AnalitF.Net.Client.Models.Commands
 		private uint[] ids;
 		private uint addressId;
 
+		public bool CalculateStatus;
+
 		public UnfreezeCommand(uint id)
 		{
 			ids = new[] { id };
@@ -28,40 +30,50 @@ namespace AnalitF.Net.Client.Models.Commands
 			var log = new StringBuilder();
 			foreach (var id in ids) {
 				var order = Session.Load<T>(id);
-				try {
-					NHibernateUtil.Initialize(order.Address);
-				}
-				catch(ObjectNotFoundException) {
-					var currentOrder = order as Order;
-					if (currentOrder != null)
-						currentOrder.Address = null;
-				}
-				try {
-					NHibernateUtil.Initialize(order.Price);
-				}
-				catch(ObjectNotFoundException) {
-					var currentOrder = order as Order;
-					if (currentOrder != null)
-						currentOrder.Price = null;
-				}
 				var address = Session.Get<Address>(addressId);
 				Unfreeze(order, address, Session, log);
 			}
 			Result = log.ToString();
 		}
 
-		public static Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
+		public Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
-			var address = addressToOverride ?? sourceOrder.Address;
-			if (address == null) {
+			bool addressNotFound;
+			try {
+				addressNotFound = sourceOrder.Address == null || sourceOrder.Address.Name == "";
+			}
+			catch(ObjectNotFoundException) {
+				addressNotFound = true;
+			}
+
+			if (addressNotFound) {
+				if (ShouldCalculateStatus(sourceOrder)) {
+					var order = ((Order)sourceOrder);
+					order.SendResult = OrderResultStatus.Reject;
+					order.SendError = "Адрес доставки больше не доступен";
+				}
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. адрес доставки больше не доступен.", sourceOrder.Id));
 				return null;
 			}
 
-			if (sourceOrder.Price == null) {
+			bool priceNotFound;
+			try {
+				priceNotFound = sourceOrder.Price == null || sourceOrder.Price.Name == "";
+			}
+			catch(ObjectNotFoundException) {
+				priceNotFound = true;
+			}
+
+			if (priceNotFound) {
+				if (ShouldCalculateStatus(sourceOrder)) {
+					var order = ((Order)sourceOrder);
+					order.SendResult = OrderResultStatus.Reject;
+					order.SendError = "Прайс-листа нет в обзоре";
+				}
 				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. прайс-листа нет в обзоре.", sourceOrder.Id));
 				return null;
 			}
+			var address = addressToOverride ?? sourceOrder.Address;
 
 			var destOrder = session.Query<Order>().FirstOrDefault(o => o.Id != sourceOrder.Id
 				&& o.Address == address
@@ -98,43 +110,68 @@ namespace AnalitF.Net.Client.Models.Commands
 			return destOrder;
 		}
 
-		public static void Merge(Order order, IOrder sourceOrder, IOrderLine orderline, Offer[] offers, StringBuilder log)
+		public void Merge(Order order, IOrder sourceOrder, IOrderLine orderline, Offer[] offers, StringBuilder log)
 		{
 			var rest = orderline.Count;
 			foreach (var offer in offers) {
 				if (rest == 0)
 					break;
 
-				var line = order.Lines.FirstOrDefault(l => l.OfferId == offer.Id);
-				if (line == null) {
-					line = new OrderLine(order, offer, rest);
+				var existLine = order.Lines.FirstOrDefault(l => l.OfferId == offer.Id);
+				if (existLine == null) {
+					var line = new OrderLine(order, offer, rest);
 					line.Count = line.CalculateAvailableQuantity(line.Count);
+					if (ShouldCalculateStatus(line)) {
+						if (line.Cost != orderline.Cost) {
+							line.SendResult |= LineResultStatus.CostChanged;
+							line.NewCost = line.Cost;
+							line.OldCost = orderline.Cost;
+							line.HumanizeSendError();
+						}
+						if (line.Count != orderline.Count) {
+							line.SendResult |= LineResultStatus.QuantityChanged;
+							line.NewQuantity = line.Count;
+							line.OldQuantity = orderline.Count;
+							line.HumanizeSendError();
+						}
+					}
 					if (line.Count > 0)
 						order.AddLine(line);
 					rest = rest - line.Count;
 				}
 				else {
-					var toOrder = line.Count + rest;
-					line.Count = line.CalculateAvailableQuantity(toOrder);
-					rest = toOrder - line.Count;
+					var toOrder = existLine.Count + rest;
+					existLine.Count = existLine.CalculateAvailableQuantity(toOrder);
+					rest = toOrder - existLine.Count;
 				}
 			}
 
 			if (sourceOrder is Order) {
-				if (rest == 0)
-					((Order)sourceOrder).RemoveLine((OrderLine)orderline);
-				else
-					((OrderLine)orderline).Count = rest;
+				var srcLine = ((OrderLine)orderline);
+				if (rest == 0) {
+					((Order)sourceOrder).RemoveLine(srcLine);
+				}
+				else {
+					srcLine.Count = rest;
+				}
 			}
 
 			if (rest > 0) {
 				if (rest == orderline.Count) {
+					if (ShouldCalculateStatus(orderline)) {
+						((OrderLine)orderline).SendResult = LineResultStatus.NoOffers;
+						((OrderLine)orderline).HumanizeSendError();
+					}
 					log.AppendLine(String.Format("{0} : {1} - {2} ; Предложений не найдено",
 						order.Price.Name,
 						orderline.ProductSynonym,
 						orderline.ProducerSynonym));
 				}
 				else {
+					if (ShouldCalculateStatus(orderline)) {
+						((OrderLine)orderline).SendResult = LineResultStatus.CountReduced;
+						((OrderLine)orderline).HumanizeSendError();
+					}
 					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказное количество {3} вместо {4}",
 						sourceOrder.Price.Name,
 						orderline.ProductSynonym,
@@ -143,6 +180,16 @@ namespace AnalitF.Net.Client.Models.Commands
 						orderline.Count));
 				}
 			}
+		}
+
+		private bool ShouldCalculateStatus(IOrder sourceOrder)
+		{
+			return sourceOrder is Order && CalculateStatus;
+		}
+
+		private bool ShouldCalculateStatus(IOrderLine orderline)
+		{
+			return orderline is OrderLine && CalculateStatus;
 		}
 	}
 }

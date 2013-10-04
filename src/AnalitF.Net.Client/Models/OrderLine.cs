@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 using NHibernate.Cfg;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -34,22 +35,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual LineResultStatus SendResult { get; set; }
 
-		public virtual decimal? ServerCost { get; set; }
-
-		public virtual uint? ServerQuantity { get; set; }
-
 		[JsonIgnore]
 		public virtual Order Order { get; set; }
 
-		public virtual decimal? NewCost
-		{
-			get { return  IsCostChanged ? ServerCost : null; }
-		}
+		public virtual decimal? NewCost { get; set; }
 
-		public virtual decimal? OldCost
-		{
-			get { return IsCostChanged ? Cost : (decimal?)null; }
-		}
+		public virtual decimal? OldCost { get; set; }
 
 		[Style("NewCost", "OldCost")]
 		public virtual bool IsCostChanged
@@ -57,15 +48,21 @@ namespace AnalitF.Net.Client.Models
 			get { return (SendResult & LineResultStatus.CostChanged) > 0; }
 		}
 
-		public virtual uint? NewQuantity
+		[Style("NewCost", "OldCost")]
+		public virtual bool IsCostIncreased
 		{
-			get { return IsQuantityChanged ? ServerQuantity : null; }
+			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost > OldCost; }
 		}
 
-		public virtual uint? OldQuantity
+		[Style("NewCost", "OldCost")]
+		public virtual bool IsCostDecreased
 		{
-			get { return IsQuantityChanged ? Count : (uint?)null; }
+			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost < OldCost; }
 		}
+
+		public virtual uint? NewQuantity { get; set; }
+
+		public virtual uint? OldQuantity { get; set;  }
 
 		[Style("NewQuantity", "OldQuantity")]
 		public virtual bool IsQuantityChanged
@@ -87,6 +84,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsSendError
 		{
 			get { return SendResult != LineResultStatus.OK; }
+		}
+
+		//заглушка что бы работало смешение цветов от IsSendError
+		[Style("Sum")]
+		public virtual bool SelectCount
+		{
+			get { return !IsSendError; }
 		}
 
 		public virtual string Comment
@@ -130,7 +134,7 @@ namespace AnalitF.Net.Client.Models
 				Count = 65535;
 			}
 
-			var quantity = SafeConvert.ToUInt32(Quantity);
+			var quantity = SafeConverter.ToUInt32(Quantity);
 			if (quantity > 0 && Count > quantity) {
 				Count = CalculateAvailableQuantity(Count);
 				result.Add(Message.Error(String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", Count)));
@@ -185,7 +189,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CalculateAvailableQuantity(uint quantity)
 		{
-			var topBound = SafeConvert.ToUInt32(Quantity);
+			var topBound = SafeConverter.ToUInt32(Quantity);
 			if (topBound == 0)
 				topBound = uint.MaxValue;
 			topBound = Math.Min(topBound, quantity);
@@ -248,26 +252,47 @@ namespace AnalitF.Net.Client.Models
 		public virtual void Apply(OrderLineResult result)
 		{
 			if (result == null) {
-				SendResult = LineResultStatus.OK;
-				SendError = "";
-				ServerCost = null;
-				ServerQuantity = null;
+				ResetStatus();
 				return;
 			}
-			ServerCost = result.ServerCost;
-			ServerQuantity = result.ServerQuantity;
 			SendResult = result.Result;
-			if (result.Result == LineResultStatus.CostChanged) {
+			if (IsCostChanged) {
+				NewCost = result.ServerCost;
+				OldCost = Cost;
+			}
+			if (IsQuantityChanged) {
+				NewQuantity = result.ServerQuantity;
+				OldQuantity = NullableConvert.ToUInt32(Quantity);
+			}
+			HumanizeSendError();
+		}
+
+		private void ResetStatus()
+		{
+			SendResult = LineResultStatus.OK;
+			SendError = "";
+			NewCost = null;
+			OldCost = null;
+			NewQuantity = null;
+			OldQuantity = null;
+		}
+
+		public virtual void HumanizeSendError()
+		{
+			if (SendResult == LineResultStatus.CostChanged) {
 				SendError = "имеется различие в цене препарата";
 			}
-			else if (result.Result == LineResultStatus.QuantityChanged) {
+			else if (SendResult == LineResultStatus.QuantityChanged) {
 				SendError = "доступное количество препарата в прайс-листе меньше заказанного ранее";
 			}
-			else if (result.Result == (LineResultStatus.QuantityChanged | LineResultStatus.CostChanged)) {
+			else if (SendResult == (LineResultStatus.QuantityChanged | LineResultStatus.CostChanged)) {
 				SendError = "имеются различия с прайс-листом в цене и количестве заказанного препарата";
 			}
-			else if (result.Result == LineResultStatus.NoOffers) {
+			else if (SendResult == LineResultStatus.NoOffers) {
 				SendError = "предложение отсутствует";
+			}
+			else if (SendResult == LineResultStatus.CountReduced) {
+				SendError = "Уменьшено заказное количество";
 			}
 			else {
 				SendError = "";
@@ -296,6 +321,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
+				if (string.IsNullOrEmpty(SendError))
+					return "";
 				var datum = new List<string>();
 				if (IsCostChanged)
 					datum.Add(String.Format("старая цена: {0:C}", OldCost));
@@ -313,16 +340,31 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public static string SendReport(IEnumerable<OrderLine> lines)
+		public static string SendReport(IEnumerable<OrderLine> lines, bool groupByAddress)
 		{
+			var offset = "    ";
+			var currentOffset = "";
 			var builder = new StringBuilder();
-			foreach (var group in lines.GroupBy(l => l.Order)) {
-				builder.AppendFormat("прайс-лист {0}", group.Key.Price.Name);
-				if (group.Key.SendResult == OrderResultStatus.Reject)
-					builder.AppendFormat(" - {0}", group.Key.SendError);
-				builder.AppendLine();
-				foreach (var orderLine in group) {
-					builder.AppendLine(String.Format("    {0:r}", orderLine));
+			var addressGroups = lines.GroupBy(l => l.Order.Address);
+			foreach (var addressGroup in addressGroups) {
+				if (groupByAddress)
+					builder.AppendFormat("адрес доставки {0}", addressGroup.Key.Name)
+						.AppendLine();
+				foreach (var group in addressGroup.GroupBy(l => l.Order)) {
+					if (groupByAddress)
+						currentOffset = offset;
+					builder
+						.AppendFormat(currentOffset)
+						.AppendFormat("прайс-лист {0}", group.Key.Price.Name);
+					if (group.Key.SendResult == OrderResultStatus.Reject)
+						builder.AppendFormat(" - {0}", group.Key.SendError);
+					builder.AppendLine();
+					currentOffset += offset;
+					foreach (var orderLine in group) {
+						builder
+							.Append(currentOffset)
+							.AppendLine(String.Format("{0:r}", orderLine));
+					}
 				}
 			}
 			return builder.ToString();

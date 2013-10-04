@@ -15,7 +15,7 @@
 			<RowDefinition></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Vertical">
 					<RadioButton GroupName="Source" Name="IsFilterByDocumentDate">по дате накладной</RadioButton>

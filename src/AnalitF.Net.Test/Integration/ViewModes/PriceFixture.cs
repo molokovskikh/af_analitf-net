@@ -15,7 +15,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class PriceFixture : BaseFixture
+	public class PriceFixture : ViewModelFixture
 	{
 		[Test]
 		public void Load_order()

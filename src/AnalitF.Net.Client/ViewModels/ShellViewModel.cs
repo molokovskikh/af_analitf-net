@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private ISession session;
 		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
-		private List<Address> addresses;
+		private List<Address> addresses = new List<Address>();
 		private Address currentAddress;
 
 		protected IScheduler Scheduler = BaseScreen.TestSchuduler ?? DefaultScheduler.Instance;
@@ -60,6 +60,8 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IMessageBus Bus = RxApp.MessageBus;
 
 		public bool Quiet;
+		public string[] Arguments = new string[0];
+		public Config.Config Config = new Config.Config();
 
 		public ShellViewModel()
 		{
@@ -121,7 +123,6 @@ namespace AnalitF.Net.Client.ViewModels
 			NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session);
 		}
 
-		public string[] Arguments;
 
 		[DataMember]
 		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
@@ -478,14 +479,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> MicroUpdate()
 		{
-			return Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath) {
+			return Sync(new UpdateCommand {
 				SyncData = new [] {"Waybills"}
 			});
 		}
 
 		public IEnumerable<IResult> Update()
 		{
-			return Sync(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
+			return Sync(new UpdateCommand());
 		}
 
 		public bool CanSendOrders
@@ -517,10 +518,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private IEnumerable<IResult> Import()
 		{
-			return Sync("Обновление завершено успешно.",
-				"Не удалось получить обновление. Попробуйте повторить операцию позднее.",
-				null,
-				Tasks.Import);
+			var command = new UpdateCommand();
+			return Sync(command,
+				c => {
+					return c.Process(() => {
+						((UpdateCommand)c).Import();
+						return UpdateResult.OK;
+					});
+				});
 		}
 
 		public void CheckDb()
@@ -530,6 +535,7 @@ namespace AnalitF.Net.Client.ViewModels
 				token => {
 					var command = new RepairDb();
 					command.Token = token;
+					command.Config = Config;
 					command.Execute();
 					return command.Result;
 				},
@@ -558,6 +564,7 @@ namespace AnalitF.Net.Client.ViewModels
 				token => {
 					var command = new CleanDb();
 					command.Token = token;
+					command.Config = Config;
 					command.Execute();
 					return command.Result;
 				},
@@ -571,50 +578,42 @@ namespace AnalitF.Net.Client.ViewModels
 			return result == MessageBoxResult.Yes;
 		}
 
-		public IEnumerable<IResult> Sync(RemoteCommand command)
+		private IEnumerable<IResult> Sync(RemoteCommand command)
 		{
-			if(UnitTesting) {
-				command = OnCommandExecuting(command);
-			}
-
-			return Sync(command.SuccessMessage,
-				command.ErrorMessage,
-				command,
-				(c, t, p) => {
-					command.BaseUri = Tasks.BaseUri;
-					command.Credentials = c;
-					command.Token = t;
-					command.Progress = p;
-					return command.Run();
-				});
+			return Sync(command, c => c.Run());
 		}
 
-		private IEnumerable<IResult> Sync(string sucessMessage,
-			string errorMessage,
-			RemoteCommand command,
-			Func<ICredentials, CancellationToken, BehaviorSubject<Progress>, UpdateResult> func)
+		private IEnumerable<IResult> Sync(RemoteCommand command, Func<RemoteCommand, UpdateResult> func)
 		{
 			if (!CheckSettings())
 				return Enumerable.Empty<IResult>();
 
 			var progress = new BehaviorSubject<Progress>(new Progress());
 			var wait = new SyncViewModel(progress) {
-				GenericErrorMessage = errorMessage
+				GenericErrorMessage = command.ErrorMessage
 			};
 			var credential = new NetworkCredential(Settings.Value.UserName, Settings.Value.Password);
+			command.Config = Config;
+			command.Credentials = credential;
+			command.Progress = progress;
+
+			if(UnitTesting)
+				command = OnCommandExecuting(command);
 
 			var results = new IResult[0];
 			RunTask(wait,
-				t => func(credential, t, progress),
+				t => {
+					command.Token = t;
+					return func(command);
+				},
 				t => {
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
 					}
 					else if (t.Result == UpdateResult.OK) {
-						windowManager.Notify(sucessMessage);
+						windowManager.Notify(command.SuccessMessage);
 					}
-					if (command != null)
-						results = command.Results.ToArray();
+					results = command.Results.ToArray();
 				});
 			Reload();
 			return results;
@@ -623,7 +622,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void RunUpdate()
 		{
 			windowManager.Warning("Получена новая версия программы. Сейчас будет выполнено обновление.");
-			var updateExePath = Path.Combine(Tasks.ExtractPath, "update", "Updater.exe");
+			var updateExePath = Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe");
 			StartProcess(updateExePath, Process.GetCurrentProcess().Id.ToString());
 			//не нужно ничего запрашивать нужно просто выйти
 			Quiet = true;

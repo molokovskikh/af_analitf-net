@@ -12,7 +12,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SettingsFixture : BaseFixture
+	public class SettingsFixture : ViewModelFixture
 	{
 		private SettingsViewModel model;
 

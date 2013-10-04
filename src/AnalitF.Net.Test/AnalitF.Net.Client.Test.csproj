@@ -112,6 +112,7 @@
     <Compile Include="Fixtures\CreateAddress.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
+    <Compile Include="Fixtures\MakeOrder.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
     <Compile Include="Fixtures\Reject.cs" />
     <Compile Include="Fixtures\SampleData.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
+    <Compile Include="Integration\Models\RestoreOrderFixture.cs" />
     <Compile Include="Integration\Remote\OrderFixture.cs" />
     <Compile Include="Integration\Models\DbCommandFixture.cs" />
     <Compile Include="Integration\Models\OrderFixture.cs" />
@@ -159,9 +161,10 @@
     <Compile Include="Integration\Views\SearchOfferFixture.cs" />
     <Compile Include="Integration\Views\ViewFixtureSetup.cs" />
     <Compile Include="Integration\Views\WaybillDetailsFixture.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\Debug.cs" />
     <Compile Include="Tasks\Fixture.cs" />
-    <Compile Include="TestHelpers\BaseFixture.cs" />
+    <Compile Include="TestHelpers\ViewModelFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\DbFixture.cs" />
@@ -223,7 +226,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <EmbeddedResource Include="Properties\licenses.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

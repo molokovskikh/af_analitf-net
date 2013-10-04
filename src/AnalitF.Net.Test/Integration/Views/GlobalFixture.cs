@@ -98,9 +98,9 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public async void Open_catalog_offers()
 		{
-			string term = session.Query<CatalogName>()
-				.Where(n => n.HaveOffers && n.Name.StartsWith("б"))
-				.First().Name.Slice(3).ToLower();
+			var term = session.Query<CatalogName>()
+				.First(n => n.HaveOffers && n.Name.StartsWith("б"))
+				.Name.Slice(3).ToLower();
 
 			Start();
 
@@ -128,7 +128,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				DoubleClick(view, grid, selectMany.First());
 			});
 			var offers = await ViewLoaded<CatalogOfferViewModel>();
-			Assert.That(offers.Offers.Count, Is.GreaterThan(0));
+			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
 		}
 
 		[Test]

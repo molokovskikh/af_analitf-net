@@ -12,7 +12,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class WaybillsFixture : BaseFixture
+	public class WaybillsFixture : ViewModelFixture
 	{
 		private WaybillsViewModel model;
 		private Waybill waybill;

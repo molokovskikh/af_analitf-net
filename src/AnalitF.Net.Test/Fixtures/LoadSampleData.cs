@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 						StringSplitOptions.RemoveEmptyEntries)))
 				.ToList();
 
-			var importer = new Importer(session);
+			var importer = new Importer(session, new Config.Config { DbDir = "data" });
 			importer.Import(result, new ProgressReporter());
 
 			var settings = session.Query<Settings>().First();

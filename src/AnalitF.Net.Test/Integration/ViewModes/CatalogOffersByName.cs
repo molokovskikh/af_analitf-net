@@ -10,7 +10,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class CatalogOffersByName : BaseFixture
+	public class CatalogOffersByName : ViewModelFixture
 	{
 		[Test]
 		public void Show_grouped_offers()
@@ -20,7 +20,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var model = Init(new CatalogOfferViewModel(catalog.Name));
 			Assert.That(model.IsFilterByCatalogName, Is.True);
-			Assert.That(model.Offers[0].GroupName, Is.Not.Null);
+			Assert.That(model.Offers.Value[0].GroupName, Is.Not.Null);
 		}
 	}
 }

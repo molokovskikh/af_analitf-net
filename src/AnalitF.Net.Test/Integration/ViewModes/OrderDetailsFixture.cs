@@ -12,7 +12,7 @@ using ReactiveUI;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OrderDetailsFixture : BaseFixture
+	public class OrderDetailsFixture : ViewModelFixture
 	{
 		[Test]
 		public void Delete_line()

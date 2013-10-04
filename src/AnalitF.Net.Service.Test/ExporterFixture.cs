@@ -20,7 +20,6 @@ namespace AnalitF.Net.Service.Test
 	[TestFixture]
 	public class ExporterFixture : IntegrationFixture
 	{
-		private ISession localSession;
 		private User user;
 		private Exporter exporter;
 		private string file;
@@ -32,15 +31,12 @@ namespace AnalitF.Net.Service.Test
 			client = TestClient.CreateNaked();
 			session.Save(client);
 
-			localSession = FixtureSetup.Factory.OpenSession();
-			localSession.BeginTransaction();
-
-			user = localSession.Load<User>(client.Users[0].Id);
+			user = session.Load<User>(client.Users[0].Id);
 			FileHelper.InitDir("export", "data", "update");
 
 			file = "data.zip";
 			File.Delete(file);
-			exporter = new Exporter(localSession, user.Id, Version.Parse("1.1")) {
+			exporter = new Exporter(session, user.Id, Version.Parse("1.1")) {
 				Prefix = "1",
 				ExportPath = "export",
 				ResultPath = "data",
@@ -52,7 +48,6 @@ namespace AnalitF.Net.Service.Test
 		[TearDown]
 		public void TearDown()
 		{
-			localSession.Dispose();
 			exporter.Dispose();
 		}
 
@@ -145,7 +140,6 @@ namespace AnalitF.Net.Service.Test
 
 		private List<UpdateData> Export()
 		{
-			session.Transaction.Commit();
 			var files = new List<UpdateData>();
 			exporter.Export(files);
 			return files;
@@ -153,7 +147,6 @@ namespace AnalitF.Net.Service.Test
 
 		private void ExportCompressed()
 		{
-			session.Transaction.Commit();
 			file = exporter.ExportCompressed(file);
 		}
 

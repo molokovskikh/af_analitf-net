@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reactive.Disposables;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.MySql;
@@ -48,22 +52,28 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	}
 
 	[TestFixture]
-	public class Shell2Fixture : BaseFixture
+	public class Shell2Fixture : ViewModelFixture
 	{
 		private RemoteCommand command;
 		private StubRemoteCommand stub;
+		private List<Screen> dialogs;
 
 		[SetUp]
 		public void Setup()
 		{
+			dialogs = new List<Screen>();
 			stub = new StubRemoteCommand(UpdateResult.OK);
 			shell.CommandExecuting += remoteCommand => {
 				command = remoteCommand;
-				stub.ErrorMessage = remoteCommand.ErrorMessage;
-				stub.SuccessMessage = remoteCommand.SuccessMessage;
+				if (stub != null) {
+					stub.ErrorMessage = remoteCommand.ErrorMessage;
+					stub.SuccessMessage = remoteCommand.SuccessMessage;
+				}
+				else {
+					command.Credentials = null;
+				}
 				return stub;
 			};
-			Tasks.ExtractPath = Path.Combine("temp", "update");
 		}
 
 		[Test]
@@ -76,6 +86,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var prices = (PriceViewModel)shell.ActiveItem;
 			prices.CurrentPrice.Value = prices.Prices.First(p => p.PositionCount > 0);
 			prices.EnterPrice();
+			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem,
+				prices.CurrentPrice.Value.Id + manager.MessageBoxes.Implode());
 			var offers = (PriceOfferViewModel)shell.ActiveItem;
 			offers.CurrentOffer.OrderCount = 1;
 			offers.OfferUpdated();
@@ -257,6 +269,35 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
 			Assert.IsTrue(settings);
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Обновление завершено успешно"));
+		}
+
+		[Test]
+		public void Show_correction()
+		{
+			stub = null;
+			var order = Fixture<MakeOrder>().Order;
+			Fixture<RandCost>();
+
+			Collect(shell.Update());
+			Assert.AreEqual(1, dialogs.Count);
+
+			var correction = (Correction)dialogs[0];
+			Activate(correction);
+			Assert.That(correction.Lines.Count, Is.GreaterThan(0));
+			correction.CurrentLine.Value = correction.Lines.First();
+			var offers = correction.Offers.Value;
+			Assert.IsFalse(correction.IsOrderSend);
+			Assert.That(offers.Count, Is.GreaterThan(0));
+			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
+			Assert.AreEqual(1, offer.OrderCount);
+		}
+
+		private void Collect(IEnumerable<IResult> results)
+		{
+			dialogs.AddRange(results.OfType<DialogResult>().Select(d => d.Model));
+			foreach (var dialog in dialogs.OfType<BaseScreen>()) {
+				dialog.Shell = shell;
+			}
 		}
 
 		private void ContinueWithDialog<T>(Action<T> action)

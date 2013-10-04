@@ -2,20 +2,15 @@
 using System.IO;
 using System.Linq;
 using System.Reactive.Subjects;
-using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.Fixtures;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Service;
-using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
@@ -23,7 +18,7 @@ using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
-using BaseFixture = AnalitF.Net.Client.Test.TestHelpers.BaseFixture;
+using Address = AnalitF.Net.Client.Models.Address;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Remote
@@ -37,8 +32,6 @@ namespace AnalitF.Net.Test.Integration.Remote
 		private BehaviorSubject<Progress> progress;
 		private CancellationToken token;
 
-		private HttpSelfHostServer server;
-		private Uri uri;
 		private bool restoreUser;
 
 		private Service.Config.Config serviceConfig;
@@ -48,51 +41,36 @@ namespace AnalitF.Net.Test.Integration.Remote
 		private Address address;
 		private bool revertToDefaults;
 
-		[TestFixtureSetUp]
-		public void FixtureSetup()
-		{
-			FileHelper.InitDir("var");
-			uri = new Uri("http://localhost:7018");
-			var cfg = new HttpSelfHostConfiguration(uri);
-			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
-
-			serviceConfig = Application.InitApp(cfg);
-
-			server = new HttpSelfHostServer(cfg);
-			server.OpenAsync().Wait();
-		}
+		private Client.Config.Config clientConfig;
 
 		[SetUp]
 		public void Setup()
 		{
+			clientConfig = SetupFixture.clientConfig;
+			serviceConfig = SetupFixture.serviceConfig;
+
 			begin = DateTime.Now;
 			restoreUser = false;
-
-			Tasks.BaseUri = uri;
-			Tasks.ArchiveFile = Path.Combine("temp", "archive.zip");
-			Tasks.ExtractPath = Path.Combine("temp", "update");
-			Tasks.RootPath = "app";
 
 			var files = Directory.GetFiles(".", "*.txt");
 			foreach (var file in files) {
 				File.Delete(file);
 			}
 
-			FileHelper.InitDir(serviceConfig.UpdatePath, Tasks.RootPath, "temp");
+			FileHelper.InitDir(serviceConfig.UpdatePath, clientConfig.RootDir, clientConfig.TmpDir);
 
 			localSession = SetupFixture.Factory.OpenSession();
 			cancelletion = new CancellationTokenSource();
 			token = cancelletion.Token;
 			progress = new BehaviorSubject<Progress>(new Progress());
 
-			command = new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath);
+			command = new UpdateCommand();
 			task = CreateTask(command);
 
 			settings = localSession.Query<Settings>().First();
 			address = localSession.Query<Address>().First();
 
-			BaseFixture.StubWindowManager();
+			ViewModelFixture.StubWindowManager();
 		}
 
 		[TearDown]
@@ -112,13 +90,6 @@ namespace AnalitF.Net.Test.Integration.Remote
 				var user = ServerUser();
 				user.UseAdjustmentOrders = false;
 			}
-		}
-
-		[TestFixtureTearDown]
-		public void FixtureTearDown()
-		{
-			server.CloseAsync().Wait();
-			server.Dispose();
 		}
 
 		[Test]
@@ -285,12 +256,17 @@ namespace AnalitF.Net.Test.Integration.Remote
 		[Test]
 		public void Import_after_update()
 		{
-			File.Copy(Directory.GetFiles(serviceConfig.ResultPath).Last(), Tasks.ArchiveFile);
-			using(var file = new ZipFile(Tasks.ArchiveFile))
-				file.ExtractAll(Tasks.ExtractPath);
+			File.Copy(Directory.GetFiles(serviceConfig.ResultPath).Last(), clientConfig.ArchiveFile);
+			using(var file = new ZipFile(clientConfig.ArchiveFile))
+				file.ExtractAll(clientConfig.UpdateTmpDir);
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			Tasks.Import(null, token, progress);
+			command.Config = clientConfig;
+			command.Progress = progress;
+			command.Process(() => {
+				((UpdateCommand)command).Import();
+				return UpdateResult.OK;
+			});
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 		}
 
@@ -306,7 +282,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
 
-			task = CreateTask(new UpdateCommand(Tasks.ArchiveFile, Tasks.ExtractPath, Tasks.RootPath));
+			task = CreateTask(new UpdateCommand());
 			Update();
 			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
 		}
@@ -387,14 +363,15 @@ namespace AnalitF.Net.Test.Integration.Remote
 			localSession.Clear();
 			normalOrder = localSession.Get<Order>(normalOrder.Id);
 			Assert.IsNotNull(normalOrder);
-			Assert.IsNullOrEmpty(normalOrder.SendError);
+			Assert.IsNullOrEmpty(normalOrder.SendError,
+				normalOrder.Lines.Implode(l => l.LongSendError));
 
 			changedOrder = localSession.Get<Order>(changedOrder.Id);
 			Assert.IsNotNull(changedOrder);
 			Assert.AreEqual("В заказе обнаружены позиции с измененной ценой или количеством", changedOrder.SendError);
 			var line = changedOrder.Lines[0];
 			Assert.AreEqual("имеется различие в цене препарата", line.SendError);
-			Assert.AreEqual(newCost, line.ServerCost);
+			Assert.AreEqual(newCost, line.NewCost);
 			Assert.AreEqual(LineResultStatus.CostChanged, line.SendResult);
 
 			var dialog = command.Results.OfType<DialogResult>().First();
@@ -441,9 +418,9 @@ namespace AnalitF.Net.Test.Integration.Remote
 
 		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand
 		{
+			command.Config = clientConfig;
 			command.Token = token;
 			command.Progress = progress;
-			command.BaseUri = uri;
 			return new Task<UpdateResult>(t => command.Run(), token);
 		}
 

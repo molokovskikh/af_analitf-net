@@ -3,16 +3,117 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
+	<UserControl.Resources>
+		<Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
+			<Setter Property="Height" Value="8"/>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Cursor" Value="SizeNS"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type Thumb}">
+						<Border Padding="{TemplateBinding Padding}"
+							Background="{TemplateBinding Background}"/>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+
+		<Style x:Key="Parentless" TargetType="{x:Type DataGridRowHeader}">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+						<Grid>
+							<themes:DataGridHeaderBorder IsSelected="{TemplateBinding IsRowSelected}"
+													IsHovered ="{TemplateBinding IsMouseOver}"
+													IsPressed="{TemplateBinding IsPressed}"
+													Background="{TemplateBinding Background}"
+													BorderBrush="{TemplateBinding BorderBrush}"
+													BorderThickness="{TemplateBinding BorderThickness}"
+													Padding ="{TemplateBinding Padding}"
+													Orientation="Horizontal"
+													SeparatorVisibility="{TemplateBinding SeparatorVisibility}"
+													SeparatorBrush="{TemplateBinding SeparatorBrush}">
+								<StackPanel Orientation="Horizontal">
+									<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+								</StackPanel>
+							</themes:DataGridHeaderBorder>
+							<Thumb x:Name="PART_TopHeaderGripper"
+													VerticalAlignment="Top"
+													Style="{StaticResource RowHeaderGripperStyle}"/>
+							<Thumb x:Name="PART_BottomHeaderGripper"
+													VerticalAlignment="Bottom"
+													Style="{StaticResource RowHeaderGripperStyle}"/>
+						</Grid>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</UserControl.Resources>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" x:Name="OffersRow" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<c:DataGrid x:Name="Lines" Grid.Row="0">
+			<c:DataGrid.Resources>
+				<GroupStyle x:Key="OrderGroup">
+					<GroupStyle.HeaderTemplate>
+						<DataTemplate>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"></ColumnDefinition>
+									<ColumnDefinition Width="*"></ColumnDefinition>
+								</Grid.ColumnDefinitions>
+								<DataGridRowHeader Grid.Column="0" Style="{StaticResource Parentless}"/>
+								<Border Grid.Column="1" SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding Name.Price.Name}" FontWeight="Bold" Padding="5, 0, 5, 0" />
+										<CheckBox IsChecked="{Binding Name.Send, UpdateSourceTrigger=PropertyChanged}">
+											Отправить
+										</CheckBox>
+										<TextBlock Padding="5, 0, 5, 0" Text="{Binding Name.SendError}"></TextBlock>
+									</StackPanel>
+								</Border>
+							</Grid>
+						</DataTemplate>
+					</GroupStyle.HeaderTemplate>
+					<GroupStyle.Panel>
+						<ItemsPanelTemplate>
+							<DataGridRowsPresenter />
+						</ItemsPanelTemplate>
+					</GroupStyle.Panel>
+				</GroupStyle>
+				<GroupStyle x:Key="AddressGroup">
+					<GroupStyle.HeaderTemplate>
+						<DataTemplate>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"></ColumnDefinition>
+									<ColumnDefinition Width="*"></ColumnDefinition>
+								</Grid.ColumnDefinitions>
+								<DataGridRowHeader Grid.Column="0" Style="{StaticResource Parentless}"/>
+								<Border Grid.Column="1" SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1">
+									<TextBlock Text="{Binding Name.Name}" FontWeight="Bold" Padding="5, 0, 5, 0" />
+								</Border>
+							</Grid>
+						</DataTemplate>
+					</GroupStyle.HeaderTemplate>
+					<GroupStyle.Panel>
+						<ItemsPanelTemplate>
+							<DataGridRowsPresenter />
+						</ItemsPanelTemplate>
+					</GroupStyle.Panel>
+				</GroupStyle>
+			</c:DataGrid.Resources>
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="330*"
 					Header="Наименование"
@@ -33,29 +134,6 @@
 					Header="Новая цена"
 					Binding="{Binding NewCost}" />
 			</DataGrid.Columns>
-
-			<ItemsControl.GroupStyle>
-				<GroupStyle>
-					<GroupStyle.HeaderTemplate>
-						<DataTemplate>
-							<Border SnapsToDevicePixels="True" BorderBrush="Black" BorderThickness="0, 0, 0, 1">
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Text="{Binding Name.Price.Name}" FontWeight="Bold" Padding="5, 0, 5, 0" />
-									<CheckBox IsChecked="{Binding Name.Send, UpdateSourceTrigger=PropertyChanged}">
-										Отправить
-									</CheckBox>
-									<TextBlock Padding="5, 0, 5, 0" Text="{Binding Name.SendError}"></TextBlock>
-								</StackPanel>
-							</Border>
-						</DataTemplate>
-					</GroupStyle.HeaderTemplate>
-					<GroupStyle.Panel>
-						<ItemsPanelTemplate>
-							<DataGridRowsPresenter />
-						</ItemsPanelTemplate>
-					</GroupStyle.Panel>
-				</GroupStyle>
-			</ItemsControl.GroupStyle>
 		</c:DataGrid>
 
 		<StackPanel Grid.Row="1">
@@ -63,13 +141,94 @@
 			<TextBox Name="CurrentLine_Value_SendError" Style="{StaticResource ReadOnlyText}" />
 		</StackPanel>
 
-		<ContentControl x:Name="ProductInfo" Grid.Row="2" />
+		<GridSplitter Grid.Row="2"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Stretch"
+			ShowsPreview="True"
+			Width="5"
+			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />
 
-		<StackPanel Orientation="Horizontal" Grid.Row="3" Margin="5">
-			<Button Name="Save" Style="{StaticResource FilterButton}">Сохранить отчет</Button>
-			<Button Name="Send" Style="{StaticResource FilterButton}">Отправить как есть</Button>
-			<Button Name="LoadUpdate" Style="{StaticResource FilterButton}">Получить данные</Button>
-			<Button Name="Edit" Style="{StaticResource FilterButton}">Редактировать заказы</Button>
+		<c:DataGrid Grid.Row="3" x:Name="Offers" CanUserSortColumns="False"
+			CellStyle="{StaticResource VitallyImportant}"
+			binders:Persistable.PersistColumnSettings="true"
+			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="196*"
+						CellStyle="{StaticResource NotBaseOffer}" Header="Название"
+						Binding="{Binding ProductSynonym}" />
+				<c:DataGridTextColumnEx Width="85*"
+						CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
+						Binding="{Binding ProducerSynonym}" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+						Header="Кат.производитель" Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Width="63*" Header="Упаковка" Binding="{Binding Volume}"
+						TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+						Binding="{Binding Doc}" />
+				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
+				<c:DataGridTextColumnEx Width="85*" MinWidth="5"
+						CellStyle="{StaticResource Junk}" Header="Срок годн."
+						Binding="{Binding Period}" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="103*" Header="Прайс-лист"
+						Binding="{Binding Price.Name}" />
+				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
+						Binding="{Binding Price.RegionName}" />
+				<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
+						Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
+				<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
+						Binding="{Binding RequestRatio}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+						Header="Мин.сумма" Binding="{Binding MinOrderSum}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+						Header="Мин.кол-во" Binding="{Binding MinOrderCount}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="26*" Visibility="Collapsed" Header="Разница, %"
+						Binding="{Binding Diff}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена"
+						Binding="{Binding RegistryCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
+						Binding="{Binding MaxProducerCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
+						Binding="{Binding ProducerCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
+						Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
+						TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="55*" CellStyle="{StaticResource Junk}"
+						FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
+						TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
+						Binding="{Binding RetailCost}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="47*"
+						CellStyle="{StaticResource OrderColumn}" Header="Заказ"
+						Binding="{Binding OrderCount}" TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="70*"
+						CellStyle="{StaticResource OrderColumn}" Header="Сумма"
+						Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
+			</DataGrid.Columns>
+		</c:DataGrid>
+
+		<ContentControl x:Name="OrderWarning" Grid.Row="3"
+			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />
+
+		<ContentControl x:Name="ProductInfo" Grid.Row="4" />
+
+		<StackPanel Orientation="Horizontal" Grid.Row="5" Margin="5">
+			<Button Name="Save" Style="{StaticResource FilterButton}">
+				Сохранить отчет
+			</Button>
+			<Button Name="Send" Style="{StaticResource FilterButton}"
+				Visibility="{Binding IsOrderSend, Converter={StaticResource BoolToCollapsed}}">
+				Отправить как есть
+			</Button>
+			<Button Name="LoadUpdate" Style="{StaticResource FilterButton}"
+				Visibility="{Binding IsOrderSend, Converter={StaticResource BoolToCollapsed}}">
+				Получить данные
+			</Button>
+			<Button Name="Edit" Style="{StaticResource FilterButton}"
+				Visibility="{Binding IsOrderSend, Converter={StaticResource BoolToCollapsed}}">
+				Редактировать заказы
+			</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>

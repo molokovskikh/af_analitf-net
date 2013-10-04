@@ -31,8 +31,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool resetAutoComment;
 		private OfferComposedId initOfferId;
 
-		protected List<string> producers;
-		protected List<Offer> offers = new List<Offer>();
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
 
@@ -42,8 +40,15 @@ namespace AnalitF.Net.Client.ViewModels
 			updateOnActivate = false;
 
 			this.initOfferId = initOfferId;
+
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
-			Producers = new NotifyValue<List<string>>();
+			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
+			Producers = new NotifyValue<List<string>>(
+				new List<string>(),
+				() => new[] { Consts.AllProducerLabel }
+					.Concat(Offers.Value.Select(o => o.Producer).Distinct().OrderBy(p => p))
+					.ToList(),
+				Offers);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => InvalidateHistoryOrders());
@@ -113,15 +118,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<string> CurrentProducer { get; set; }
 
 		[Export]
-		public List<Offer> Offers
-		{
-			get { return offers; }
-			set
-			{
-				offers = value;
-				NotifyOfPropertyChange("Offers");
-			}
-		}
+		public NotifyValue<List<Offer>> Offers { get; set; }
 
 		public Offer CurrentOffer
 		{
@@ -218,15 +215,10 @@ namespace AnalitF.Net.Client.ViewModels
 			return offers;
 		}
 
-		protected void UpdateProducers()
-		{
-			var offerProducers = Offers.Select(o => o.Producer).Distinct().OrderBy(p => p);
-			Producers.Value = new[] { Consts.AllProducerLabel }.Concat(offerProducers).ToList();
-		}
 
 		private void CalculateRetailCost()
 		{
-			foreach (var offer in Offers)
+			foreach (var offer in Offers.Value)
 				offer.CalculateRetailCost(Settings.Value.Markups);
 		}
 
@@ -274,12 +266,13 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			decimal baseCost = 0;
 			var diffCalcMode = Settings.Value.DiffCalcMode;
+			var offers = Offers.Value;
 			if (diffCalcMode == DiffCalcMode.MinCost)
-				baseCost = Offers.Select(o => o.Cost).MinOrDefault();
+				baseCost = offers.Select(o => o.Cost).MinOrDefault();
 			else if (diffCalcMode == DiffCalcMode.MinBaseCost)
-				baseCost = Offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
+				baseCost = offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
 
-			foreach (var offer in Offers) {
+			foreach (var offer in offers) {
 				offer.CalculateDiff(baseCost);
 				if (diffCalcMode == DiffCalcMode.PrevOffer)
 					baseCost = offer.Cost;
@@ -319,7 +312,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var lines = Address.Orders.Where(o => !o.Frozen).SelectMany(o => o.Lines).ToList();
 
-			foreach (var offer in Offers) {
+			foreach (var offer in Offers.Value) {
 				var line = lines.FirstOrDefault(l => l.OfferId == offer.Id);
 				if (line != null) {
 					offer.AttachOrderLine(line);
@@ -332,7 +325,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			Query();
-			CurrentOffer = CurrentOffer ?? Offers.FirstOrDefault(o => o.Id == initOfferId);
+			CurrentOffer = CurrentOffer ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
 			Calculate();
 			LoadOrderItems();
 		}

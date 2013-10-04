@@ -24,7 +24,6 @@ namespace AnalitF.Net.Service.Test
 	public class ControllerFixture : IntegrationFixture
 	{
 		private MainController controller;
-		private ISession localSession;
 		private User user;
 
 		[SetUp]
@@ -32,24 +31,13 @@ namespace AnalitF.Net.Service.Test
 		{
 			var client = TestClient.CreateNaked();
 			session.Save(client);
-			session.Flush();
-			session.Transaction.Commit();
 
-			localSession = FixtureSetup.Factory.OpenSession();
-			localSession.BeginTransaction();
-
-			user = localSession.Load<User>(client.Users[0].Id);
+			user = session.Load<User>(client.Users[0].Id);
 			controller = new MainController {
 				Request = new HttpRequestMessage(),
-				Session = localSession,
+				Session = session,
 				CurrentUser = user
 			};
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			localSession.Dispose();
 		}
 
 		[Test]
@@ -64,13 +52,10 @@ namespace AnalitF.Net.Service.Test
 		{
 			controller.Get(true);
 
-			localSession.Dispose();
-			localSession = FixtureSetup.Factory.OpenSession();
-			localSession.BeginTransaction();
-			controller.Session = localSession;
+			session.Transaction.Begin();
 			controller.Get(true);
 
-			var requests = localSession.Query<RequestLog>().Where(r => r.User == user).ToList();
+			var requests = session.Query<RequestLog>().Where(r => r.User == user).ToList();
 			Assert.That(requests.Count, Is.EqualTo(2));
 		}
 
@@ -79,7 +64,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			var job = new RequestLog(user, new Version());
 			job.CreatedOn = DateTime.Now.AddMonths(-1);
-			localSession.Save(job);
+			session.Save(job);
 
 			var response = controller.Get();
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
@@ -92,7 +77,7 @@ namespace AnalitF.Net.Service.Test
 				IsCompleted = true,
 				IsFaulted = true
 			};
-			localSession.Save(job);
+			session.Save(job);
 			var response = controller.Get(true);
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
 		}
@@ -101,13 +86,13 @@ namespace AnalitF.Net.Service.Test
 		public void Process_request()
 		{
 			var job = new RequestLog(user, new Version());
-			localSession.Save(job);
-			localSession.Transaction.Commit();
+			session.Save(job);
+			session.Transaction.Commit();
 
-			var task = MainController.StartJob(job.Id, FixtureSetup.Config, localSession.SessionFactory);
+			var task = MainController.StartJob(job.Id, FixtureSetup.Config, session.SessionFactory);
 			task.Wait();
-			localSession.Clear();
-			localSession.Refresh(job);
+
+			session.Refresh(job);
 			Assert.That(job.Error, Is.Null);
 			Assert.That(job.IsCompleted, Is.True);
 			Assert.That(job.IsFaulted, Is.False);
@@ -117,17 +102,17 @@ namespace AnalitF.Net.Service.Test
 		public void Log_broken_job()
 		{
 			var job = new RequestLog(user, new Version());
-			localSession.Save(job);
-			localSession.Transaction.Commit();
+			session.Save(job);
 
 			var config = new Config.Config();
 			var data = JsonConvert.SerializeObject(FixtureSetup.Config);
 			JsonConvert.PopulateObject(data, config);
 			config.ExportPath = "non-exist-path";
 
-			var task = MainController.StartJob(job.Id, config, localSession.SessionFactory);
+			session.Transaction.Commit();
+			var task = MainController.StartJob(job.Id, config, session.SessionFactory);
 			task.Wait();
-			localSession.Refresh(job);
+			session.Refresh(job);
 			Assert.That(job.Error, Is.Not.Null);
 			Assert.That(job.IsCompleted, Is.True);
 			Assert.That(job.IsFaulted, Is.True);
@@ -136,15 +121,13 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Save_price_settings()
 		{
-			session.BeginTransaction();
 			var supplier = TestSupplier.CreateNaked();
 			session.Save(supplier);
 			supplier.Maintain();
-			session.Transaction.Commit();
 
 			var price = supplier.Prices[0];
 
-			var userPrices = localSession.Query<UserPrice>().Where(p => p.User == user).ToList();
+			var userPrices = session.Query<UserPrice>().Where(p => p.User == user).ToList();
 			var disabledPrice = userPrices.FirstOrDefault(p => p.RegionId == 1 && p.Price.PriceCode == price.Id);
 			Assert.That(disabledPrice, Is.Not.Null);
 
@@ -154,7 +137,7 @@ namespace AnalitF.Net.Service.Test
 				}
 			});
 
-			userPrices = localSession.Query<UserPrice>().Where(p => p.User == user).ToList();
+			userPrices = session.Query<UserPrice>().Where(p => p.User == user).ToList();
 			disabledPrice = userPrices.FirstOrDefault(p => p.RegionId == 1 && p.Price.PriceCode == price.Id);
 			Assert.That(disabledPrice, Is.Null);
 		}
@@ -162,14 +145,12 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Send_order_for_disabled_price()
 		{
-			session.BeginTransaction();
 			var supplier = TestSupplier.CreateNaked();
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
 			session.Save(supplier);
 			supplier.Maintain();
-			session.Transaction.Commit();
 
 			var offer = price.Core[0];
 			controller.Post(new SyncRequest {
@@ -197,7 +178,7 @@ namespace AnalitF.Net.Service.Test
 				}
 			});
 
-			var orders = localSession.Query<Order>()
+			var orders = session.Query<Order>()
 				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
 				.ToList();
 

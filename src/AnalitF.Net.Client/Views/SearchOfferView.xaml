@@ -31,9 +31,9 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
 			<TextBox x:Name="SearchText"
-				Style="{StaticResource ResourceKey=SearchText}"
+				Style="{StaticResource SearchText}"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				binders:SearchBinder.Grid="Offers" />
 			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name" />
@@ -47,7 +47,7 @@
 			</Button>
 		</StackPanel>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="1">
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="1">
 			<ComboBox x:Name="Producers"
 				Style="{StaticResource Filter}" />
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
@@ -59,12 +59,12 @@
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn Width="196*"
-					CellStyle="{StaticResource ResourceKey=NotBaseOffer}"
+					CellStyle="{StaticResource NotBaseOffer}"
 					Header="Название"
 					Binding="{Binding ProductSynonym}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:DataGridTextColumnEx Width="85*"
-					CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель"
+					CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
 					Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Кат.производитель" Binding="{Binding Producer}" />
@@ -73,7 +73,7 @@
 				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="85*" CellStyle="{StaticResource ResourceKey=Junk}"
+				<c:DataGridTextColumnEx Width="85*" CellStyle="{StaticResource Junk}"
 					Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="85*" Header="Прайс-лист"
 					Binding="{Binding Price.Name}" />
@@ -102,7 +102,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="55*" MinWidth="5"
-					CellStyle="{StaticResource ResourceKey=Junk}" FontWeight="Bold" Header="Цена"
+					CellStyle="{StaticResource Junk}" FontWeight="Bold" Header="Цена"
 					Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Visibility="Collapsed" Header="Разница, %"
 					Binding="{Binding Diff}" TextAlignment="Right" />
@@ -111,10 +111,10 @@
 				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="47*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ"
+					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
 					Binding="{Binding OrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="70*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма"
+					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
@@ -159,11 +159,11 @@
 					<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
 						TextAlignment="Right" />
 					<c:DataGridTextColumnEx Width="49*" Header="Цена" Binding="{Binding Cost}"
-						CellStyle="{StaticResource ResourceKey=Junk}" TextAlignment="Right" />
+						CellStyle="{StaticResource Junk}" TextAlignment="Right" />
 					<c:DataGridTextColumnEx Width="68*" Header="Дата" Binding="{Binding Order.SentOn}"
 						TextAlignment="Center" />
 					<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}"
-						CellStyle="{StaticResource ResourceKey=Junk}" TextAlignment="Center" />
+						CellStyle="{StaticResource Junk}" TextAlignment="Center" />
 				</DataGrid.Columns>
 			</c:DataGrid>
 		</DockPanel>

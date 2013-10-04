@@ -15,7 +15,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[TearDown]
 		public void TearDown()
 		{
-			SetupFixture.RestoreData(session);
+			restore = true;
 		}
 
 		[Test]
@@ -24,10 +24,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
 			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
 
-			var cancelletion = new CancellationTokenSource();
-			var command = new RepairDb {
-				Token = cancelletion.Token
-			};
+
+			var command = InitCmd(new RepairDb());
 			command.Execute();
 			var result = command.Result;
 
@@ -39,7 +37,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Clean_db()
 		{
-			var command = new CleanDb();
+			var command = InitCmd(new CleanDb());
 			command.Execute();
 
 			Assert.That(session.Query<Offer>().Count(), Is.EqualTo(0));

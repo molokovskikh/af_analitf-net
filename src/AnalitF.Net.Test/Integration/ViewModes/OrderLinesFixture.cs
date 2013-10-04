@@ -17,7 +17,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OrderLinesFixture : BaseFixture
+	public class OrderLinesFixture : ViewModelFixture
 	{
 		Lazy<OrderLinesViewModel> lazyModel;
 

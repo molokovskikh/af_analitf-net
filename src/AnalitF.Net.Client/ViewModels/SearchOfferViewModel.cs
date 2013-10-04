@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult ClearSearch()
 		{
-			Offers = new List<Offer>();
+			Offers.Value = new List<Offer>();
 			return SearchBehavior.ClearSearch();
 		}
 
@@ -87,10 +87,10 @@ namespace AnalitF.Net.Client.ViewModels
 		private void SortOffers(List<Offer> result)
 		{
 			if (Settings.Value.GroupByProduct) {
-				Offers = SortByMinCostInGroup(result, o => o.ProductId);
+				Offers.Value = SortByMinCostInGroup(result, o => o.ProductId);
 			}
 			else {
-				Offers = SortByMinCostInGroup(result, o => o.CatalogId);
+				Offers.Value = SortByMinCostInGroup(result, o => o.CatalogId);
 			}
 		}
 	}

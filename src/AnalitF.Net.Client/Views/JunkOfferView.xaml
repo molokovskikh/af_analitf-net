@@ -28,7 +28,7 @@
 		</Grid.RowDefinitions>
 
 		<c:DataGrid x:Name="Offers" Grid.Row="0"
-			CellStyle="{StaticResource ResourceKey=VitallyImportant}"
+			CellStyle="{StaticResource VitallyImportant}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название"
@@ -42,7 +42,7 @@
 				<c:DataGridTextColumnEx Width="37*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource ResourceKey=Junk}"
+				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource Junk}"
 					Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="92*" Header="Прайс-лист"
 					Binding="{Binding Price.Name}" />
@@ -68,17 +68,17 @@
 					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="63*" CellStyle="{StaticResource ResourceKey=Junk}"
+				<c:DataGridTextColumnEx Width="63*" CellStyle="{StaticResource Junk}"
 					FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="50*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="37*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="46*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ"
+					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
 					Binding="{Binding OrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="51*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма"
+					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
@@ -88,7 +88,7 @@
 
 		<Parts:ProductInfoView Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}" />
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="2">
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="2">
 			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
 			<Label FontWeight="Bold">Позиций:</Label>

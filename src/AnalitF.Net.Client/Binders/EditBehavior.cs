@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.Binders
 			var item = dataGrid.SelectedItem as IInlineEditable;
 			if (item == null)
 				return;
-			item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString(), e));
+			item.Value = SafeConverter.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString(), e));
 			var viewModel = dataGrid.DataContext;
 			if (viewModel != null)
 				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");

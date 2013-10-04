@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SaveViewModelFixture : BaseFixture
+	public class SaveViewModelFixture : ViewModelFixture
 	{
 		private Model model;
 

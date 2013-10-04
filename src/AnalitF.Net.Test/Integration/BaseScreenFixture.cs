@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture]
-	public class BaseScreenFixture : BaseFixture
+	public class BaseScreenFixture : ViewModelFixture
 	{
 		[Test]
 		public void Close_screen_if_navigation_chain_not_empty()

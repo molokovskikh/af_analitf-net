@@ -85,6 +85,34 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsCostDecreased",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xb8, 0xff, 0x71)))
+						}
+					}
+				},
+				{ "IsCostIncreased",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(239, 82, 117)))
+						}
+					}
+				},
+				{ "IsQuantityChanged",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(239, 82, 117)))
+						}
+					}
+				},
+				{"SelectCount",
+					() => new DataTrigger {
+						Setters = {
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF)))
+						}
+					}
+				}
 			};
 
 		private static SolidColorBrush DefaultColor = Brushes.Red;

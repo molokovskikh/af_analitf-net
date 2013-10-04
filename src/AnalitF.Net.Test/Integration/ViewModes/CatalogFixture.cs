@@ -13,7 +13,7 @@ using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
-	public class CatalogFixture : BaseFixture
+	public class CatalogFixture : ViewModelFixture
 	{
 		private CatalogNameViewModel nameViewModel;
 		private CatalogViewModel catalogModel;

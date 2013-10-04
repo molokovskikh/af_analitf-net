@@ -24,7 +24,7 @@
 			<RowDefinition />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0"
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0"
 			Grid.Column="0" Grid.ColumnSpan="2">
 			<TextBlock Margin="5" FontWeight="Bold">
 				Всего прайс листов: <Run x:Name="Prices_Count" />
@@ -117,8 +117,8 @@
 		</Grid>
 
 		<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-			Style="{StaticResource ResourceKey=FilterPanel}">
-			<CheckBox Style="{StaticResource ResourceKey=FilterCheckBox}" Name="ShowLeaders">
+			Style="{StaticResource FilterPanel}">
+			<CheckBox Style="{StaticResource FilterCheckBox}" Name="ShowLeaders">
 				Показать только лидирующие позиции (F3)
 			</CheckBox>
 		</StackPanel>

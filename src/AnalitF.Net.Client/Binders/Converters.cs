@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Extentions
 		}
 	}
 
-	public class VisibilityToBoolConverter : IValueConverter
+	public class BoolCollapsedConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{

@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
-	public class BaseViewFixture : BaseFixture
+	public class BaseViewFixture : ViewModelFixture
 	{
 		[SetUp]
 		public void BaseViewFixtureSetup()

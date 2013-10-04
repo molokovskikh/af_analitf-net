@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentRegion = new NotifyValue<string>(Consts.AllRegionLabel);
 
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
-			GroupByProduct.Changed().Subscribe(_ => Offers = Sort(Offers));
+			GroupByProduct.Changed().Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer),
 				Settings);
@@ -99,17 +99,16 @@ namespace AnalitF.Net.Client.ViewModels
 			UpdateMaxProducers();
 
 			CurrentOffer = CurrentOffer
-				?? Offers.FirstOrDefault(o => o.Price.BasePrice)
-				?? offers.FirstOrDefault();
+				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
+				?? Offers.Value.FirstOrDefault();
 			UpdateRegions();
-			UpdateProducers();
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
 
-			if (Offers.Count == 0) {
+			if (Offers.Value.Count == 0) {
 				Manager.Warning("Нет предложений");
 				IsSuccessfulActivated = false;
 			}
@@ -130,7 +129,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void UpdateRegions()
 		{
-			var offerRegions = Offers.Select(o => o.Price.RegionName).Distinct()
+			var offerRegions = Offers.Value.Select(o => o.Price.RegionName).Distinct()
 				.OrderBy(r => r)
 				.ToList();
 			Regions.Value = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
@@ -176,7 +175,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.Select(c => c.FullName)
 					.FirstOrDefault());
 			}
-			Offers = offers;
+			Offers.Value = offers;
 		}
 
 		private List<Offer> Sort(List<Offer> offers)
@@ -194,7 +193,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			var doc = new CatalogOfferDocument(Offers, Name);
+			var doc = new CatalogOfferDocument(Offers.Value, Name);
 			return new PrintResult(DisplayName, doc);
 		}
 

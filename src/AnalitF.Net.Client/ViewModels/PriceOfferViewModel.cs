@@ -102,8 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnActivate();
 
 			Update();
-			CurrentOffer = CurrentOffer ?? Offers.FirstOrDefault();
-			UpdateProducers();
+			CurrentOffer = CurrentOffer ?? Offers.Value.FirstOrDefault();
 
 			var haveOffers = StatelessSession.Query<Offer>().Any(o => o.Price.Id == priceId);
 			if (!haveOffers) {
@@ -138,12 +137,12 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(o => o.ProductSynonym.Contains(term));
 			}
 
-			Offers = query
+			Offers.Value = query
 				.Fetch(o => o.Price)
 				.Fetch(o => o.LeaderPrice)
 				.ToList();
 
-			Price.Value = Offers.Select(o => o.Price).FirstOrDefault()
+			Price.Value = Offers.Value.Select(o => o.Price).FirstOrDefault()
 				?? StatelessSession.Get<Price>(priceId);
 		}
 
@@ -176,7 +175,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			var doc = new PriceOfferDocument(offers, Price, Address);
+			var doc = new PriceOfferDocument(Offers.Value, Price, Address);
 			return new PrintResult(DisplayName, doc);
 		}
 
@@ -204,7 +203,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Address.Orders.Remove(Price.Value.Order);
 			Price.Value.Order = null;
-			foreach (var offer in Offers)
+			foreach (var offer in Offers.Value)
 				offer.OrderLine = null;
 		}
 	}

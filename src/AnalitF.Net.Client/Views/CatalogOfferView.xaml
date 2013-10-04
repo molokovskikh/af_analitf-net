@@ -68,15 +68,15 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
-			CellStyle="{StaticResource ResourceKey=VitallyImportant}"
+			CellStyle="{StaticResource VitallyImportant}"
 			binders:Persistable.PersistColumnSettings="true"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"
-					CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Название"
+					CellStyle="{StaticResource NotBaseOffer}" Header="Название"
 					Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="89*"
-					CellStyle="{StaticResource ResourceKey=NotBaseOffer}" Header="Производитель"
+					CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
 					Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Кат.производитель" Binding="{Binding Producer}" />
@@ -86,7 +86,7 @@
 					Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="56*" MinWidth="5"
-					CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн."
+					CellStyle="{StaticResource Junk}" Header="Срок годн."
 					Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
 					Binding="{Binding Price.Name}" />
@@ -112,7 +112,7 @@
 					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="59*" CellStyle="{StaticResource ResourceKey=Junk}"
+				<c:DataGridTextColumnEx Width="59*" CellStyle="{StaticResource Junk}"
 					FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="39*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
@@ -121,10 +121,10 @@
 				<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
 					Binding="{Binding OrderLine.Comment}" />
 				<c:DataGridTextColumnEx Width="34*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Заказ"
+					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
 					Binding="{Binding OrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="51*"
-					CellStyle="{StaticResource ResourceKey=OrderColumn}" Header="Сумма"
+					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 			<ItemsControl.GroupStyle>
@@ -181,11 +181,11 @@
 						<DataGridTextColumn Width="102*" Header="Производитель"
 							Binding="{Binding Producer}" />
 						<c:DataGridTextColumnEx Width="SizeToHeader"
-							CellStyle="{StaticResource ResourceKey=Junk}" Header="Срок годн."
+							CellStyle="{StaticResource Junk}" Header="Срок годн."
 							Binding="{Binding Period}" TextAlignment="Center" />
 						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
 							TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="49" CellStyle="{StaticResource ResourceKey=Junk}"
+						<c:DataGridTextColumnEx Width="49" CellStyle="{StaticResource Junk}"
 							Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}"
 							TextAlignment="Center" />

@@ -16,7 +16,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class PriceOfferFixture : BaseFixture
+	public class PriceOfferFixture : ViewModelFixture
 	{
 		Lazy<PriceOfferViewModel> lazyModel;
 		Price price;
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.Contains(o.CatalogId));
 			price = session.Load<Price>(offer.Price.Id);
 
-			model.CurrentOffer = model.Offers.First(o => o.Id == offer.Id);
+			model.CurrentOffer = model.Offers.Value.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
 			var catalog = (CatalogViewModel)shell.ActiveItem;
@@ -73,13 +73,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 
 			model.CurrentFilter.Value = model.Filters[1];
-			Assert.That(model.Offers.Count, Is.EqualTo(0));
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(0));
 		}
 
 		[Test]
 		public void Show_history_orders()
 		{
-			MakeSentOrder(model.Offers.First());
+			MakeSentOrder(model.Offers.Value.First());
 
 			var history = (DialogResult)model.ShowHistoryOrders();
 			var lines = ((HistoryOrdersViewModel)history.Model).Lines;
@@ -95,10 +95,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var order = MakeOrder(offer);
 
 			Assert.That(model.Price.Value.Order, Is.Not.Null);
-			Assert.That(model.Offers[0].OrderLine, Is.Not.Null);
+			Assert.That(model.Offers.Value[0].OrderLine, Is.Not.Null);
 			model.DeleteOrder();
 			Assert.That(model.Price.Value.Order, Is.Null);
-			Assert.That(model.Offers[0].OrderLine, Is.Null);
+			Assert.That(model.Offers.Value[0].OrderLine, Is.Null);
 
 			Close(model);
 			session.Clear();
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.OfferCommitted();
 
 			model.CurrentFilter.Value = model.Filters[1];
-			Assert.That(model.Offers.Count, Is.EqualTo(1));
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(1));
 		}
 	}
 }

@@ -36,7 +36,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected HttpClient Client;
 		protected JsonMediaTypeFormatter Formatter;
 
-		public Uri BaseUri;
 		public ICredentials Credentials;
 
 		public BehaviorSubject<Progress> Progress;
@@ -85,7 +84,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			BehaviorSubject<Progress> progress,
 			Func<HttpClient, T> action)
 		{
-			var version = typeof(Tasks).Assembly.GetName().Version;
+			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
 
 			progress.OnNext(new Progress("Соединение", 0, 0));
 			var handler = new HttpClientHandler {

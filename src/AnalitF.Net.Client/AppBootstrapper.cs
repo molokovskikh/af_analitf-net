@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -32,7 +33,7 @@ namespace AnalitF.Net.Client
 	public class AppBootstrapper : BootstrapperBase, IDisposable
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
-		private bool catchExceptions;
+		private bool FailFast;
 		private SingleInstance instance;
 		private bool import;
 		private string name;
@@ -43,11 +44,10 @@ namespace AnalitF.Net.Client
 		public string SettingsPath;
 		public ShellViewModel Shell;
 
-		private static bool IsUiInitialized;
+		private static bool isUiInitialized;
 
 		public static Config.Initializers.NHibernate NHibernate;
-		public static string DataPath = "data";
-		public static string TempPath = "temp";
+		public Config.Config Config = new Config.Config();
 
 		public AppBootstrapper()
 			: this(true)
@@ -57,21 +57,26 @@ namespace AnalitF.Net.Client
 		public AppBootstrapper(bool useApplication = true, string name = null)
 			: base(useApplication)
 		{
-			Start();
-			catchExceptions = useApplication;
+			FailFast = !useApplication;
 			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
 			instance = new SingleInstance(this.name);
 			SettingsPath = this.name + ".data";
+
+			Start();
 		}
 
 		public bool IsInitialized { get; private set; }
 
 		private void InitLog()
 		{
-			if (!catchExceptions)
+			if (FailFast)
 				return;
 
 			LogManager.GetLog = t => new Log4net(t);
+			TaskScheduler.UnobservedTaskException += (sender, args) => {
+				args.SetObserved();
+				log.Error("Ошибка пир выполнении задачи", args.Exception.GetBaseException());
+			};
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);
 				CheckShutdown(args.ExceptionObject as Exception);
@@ -80,7 +85,7 @@ namespace AnalitF.Net.Client
 
 		protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 		{
-			if (!catchExceptions)
+			if (FailFast)
 				return;
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
@@ -136,6 +141,7 @@ namespace AnalitF.Net.Client
 		{
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
+			Shell.Config = Config;
 			if (Application != null)
 				Shell.Quiet = ((App)Application).Quiet;
 
@@ -218,32 +224,30 @@ namespace AnalitF.Net.Client
 				return false;
 
 			var args = Environment.GetCommandLineArgs();
+			Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
+			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
+			Config.TmpDir = FileHelper.MakeRooted(Config.TmpDir);
+			Config.DbDir = FileHelper.MakeRooted(Config.DbDir);
+
 #if DEBUG
 			debugPipe = new DebugPipe(args);
 #endif
-			TempPath = FileHelper.MakeRooted(TempPath);
-			DataPath = FileHelper.MakeRooted(DataPath);
 			SettingsPath = FileHelper.MakeRooted(SettingsPath);
-
 			import = args.LastOrDefault().Match("import");
 
-			if (Directory.Exists(TempPath)) {
+			if (Directory.Exists(Config.TmpDir)) {
 				if (!import) {
 					try {
-						Directory.Delete(TempPath, true);
-						Directory.CreateDirectory(TempPath);
+						Directory.Delete(Config.TmpDir, true);
+						Directory.CreateDirectory(Config.TmpDir);
 					}
 					catch(Exception) {}
 				}
 			}
 			else {
-				Directory.CreateDirectory(TempPath);
+				Directory.CreateDirectory(Config.TmpDir);
 			}
 
-			Tasks.BaseUri = new Uri(ConfigurationManager.AppSettings["Uri"]);
-			Tasks.ArchiveFile = Path.Combine(TempPath, "archive.zip");
-			Tasks.ExtractPath = Path.Combine(TempPath, "update");
-			Tasks.RootPath = FileHelper.MakeRooted(".");
 			return true;
 		}
 
@@ -254,19 +258,19 @@ namespace AnalitF.Net.Client
 				NHibernate.Init();
 			}
 
-			new SanityCheck(DataPath).Check(import);
+			new SanityCheck(Config.DbDir).Check(import);
 		}
 
 		public static void InitUi()
 		{
 			//в тестах мы можем дважды инициализировать ui
 			//это приведет к тому что делегаты будут вызываться рекурсивно
-			if (IsUiInitialized)
+			if (isUiInitialized)
 				return;
 
 			new Config.Initializers.Caliburn().Init();
 
-			IsUiInitialized = true;
+			isUiInitialized = true;
 		}
 
 		public void Dispose()

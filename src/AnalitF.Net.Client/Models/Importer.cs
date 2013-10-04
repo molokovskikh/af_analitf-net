@@ -12,14 +12,17 @@ namespace AnalitF.Net.Client.Models
 	public class Importer
 	{
 		private ISession session;
+		private Config.Config config;
+
 		private string[] notTruncable = {
 			"Waybills",
 			"WaybillLines"
 		};
 
-		public Importer(ISession session)
+		public Importer(ISession session, Config.Config config)
 		{
 			this.session = session;
+			this.config = config;
 		}
 
 		public void Import(List<System.Tuple<string, string[]>> tables, ProgressReporter reporter)
@@ -47,7 +50,7 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 
-			new SanityCheck(AppBootstrapper.DataPath).Check();
+			new SanityCheck(config.DbDir).Check();
 
 			var settings = session.Query<Settings>().First();
 			var newWaybills = session.Query<Waybill>().Where(w => w.Sum == 0).ToList();

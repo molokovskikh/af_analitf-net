@@ -19,21 +19,21 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="0" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<Button x:Name="ShowCatalog"
 				Command="{x:Static Parts:ProductInfo.ShowCatalogCommand}"
-				Style="{StaticResource ResourceKey=FilterButton}">В каталог (F2)</Button>
+				Style="{StaticResource FilterButton}">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter"
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"
-				Style="{StaticResource ResourceKey=FilterButton}">Показать синонимы (Ctrl+N)</Button>
-			<Button x:Name="ShowPrice" Style="{StaticResource ResourceKey=FilterButton}">В прайс</Button>
+				Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
+			<Button x:Name="ShowPrice" Style="{StaticResource FilterButton}">В прайс</Button>
 			<CheckBox x:Name="OnlyWarning"
 				Style="{StaticResource FilterElement}">
 				Только позиции с корректировкой
 			</CheckBox>
 		</StackPanel>
 
-		<StackPanel Grid.Row="1" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -99,10 +99,10 @@
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
-					CellStyle="{StaticResource ResourceKey=CountColumn}"
+					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding Sum}"
-					CellStyle="{StaticResource ResourceKey=CountColumn}"
+					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>

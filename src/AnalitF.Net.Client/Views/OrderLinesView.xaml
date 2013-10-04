@@ -21,7 +21,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource ResourceKey=FilterPanel}" Grid.Row="0">
+		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
 			<GroupBox Header="Источник" Margin="0, 0, 4, 0">
 				<StackPanel Orientation="Vertical">
 					<RadioButton GroupName="Source" Name="IsCurrentSelected">Выбирать из текущих</RadioButton>
@@ -99,10 +99,10 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=CountColumn}" />
+					CellStyle="{StaticResource CountColumn}" />
 				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
 					TextAlignment="Right"
-					CellStyle="{StaticResource ResourceKey=CountColumn}" />
+					CellStyle="{StaticResource CountColumn}" />
 			</DataGrid.Columns>
 		</c:DataGrid>
 
@@ -172,8 +172,7 @@
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
 				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
-					TextAlignment="Right"
-					CellStyle="{StaticResource CountColumn}" />
+					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Отправлено"
 					Binding="{Binding Order.SentOn}"
 					TextAlignment="Center" />
@@ -197,8 +196,8 @@
 				Style="{StaticResource ReadOnlyText}" />
 		</StackPanel>
 
-		<StackPanel Grid.Row="6" Style="{StaticResource ResourceKey=FilterPanel}">
-			<Button x:Name="Delete" Style="{StaticResource ResourceKey=FilterButton}">Удалить</Button>
+		<StackPanel Grid.Row="6" Style="{StaticResource FilterPanel}">
+			<Button x:Name="Delete" Style="{StaticResource FilterButton}">Удалить</Button>
 
 			<Button x:Name="ShowCatalog"
 				Command="{x:Static Parts:ProductInfo.ShowCatalogCommand}"
@@ -206,7 +205,7 @@
 
 			<Button x:Name="ShowCatalogWithMnnFilter"
 				Command="{x:Static Parts:ProductInfo.ShowMnnCommand}"
-				Style="{StaticResource ResourceKey=FilterButton}">Показать синонимы (Ctrl+N)</Button>
+				Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>
 
 			<TextBlock Margin="5" FontWeight="Bold">
 				Позиций: <Run x:Name="Lines_Value_Count"/> на сумму: <Run x:Name="Sum_Value"/>

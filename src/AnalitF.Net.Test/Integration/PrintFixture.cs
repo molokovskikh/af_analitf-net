@@ -23,14 +23,14 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration
 {
 	[TestFixture]
-	public class PrintFixture : BaseFixture
+	public class PrintFixture : ViewModelFixture
 	{
 		[Test]
 		public void Print()
 		{
 			var view = new CatalogOfferViewModel(new Catalog("тест"));
 			view.CurrentCatalog = new Catalog { Name = new CatalogName(), Form = "Папаверин" };
-			view.Offers = Offers();
+			view.Offers.Value = Offers();
 			var result = view.Print();
 			Assert.That(result.Paginator, Is.Not.Null);
 		}

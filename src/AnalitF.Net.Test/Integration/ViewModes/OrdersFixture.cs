@@ -21,7 +21,7 @@ using log4net.Config;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OrdersFixture : BaseFixture
+	public class OrdersFixture : ViewModelFixture
 	{
 		private Lazy<OrdersViewModel> lazyModel;
 		private OrdersViewModel model

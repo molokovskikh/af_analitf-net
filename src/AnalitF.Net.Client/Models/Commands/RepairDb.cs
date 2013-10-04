@@ -44,12 +44,12 @@ namespace AnalitF.Net.Client.Models.Commands
 						//если заголовок таблицы поврежден то drop table не даст результатов
 						//файлы останутся а при попытке создать таблицу будет ошибка
 						//нужно удалить файлы
-						Directory.GetFiles(DataPath, table + ".*").Each(File.Delete);
+						Directory.GetFiles(Config.DbDir, table + ".*").Each(File.Delete);
 					}
 				}
 			}
 
-			new SanityCheck(DataPath).Check(true);
+			new SanityCheck(Config.DbDir).Check(true);
 
 			Result = results.All(r => r == RepairStatus.Ok);
 		}

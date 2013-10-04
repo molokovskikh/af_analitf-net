@@ -10,7 +10,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class RejectsFixture : BaseFixture
+	public class RejectsFixture : ViewModelFixture
 	{
 		private RejectsViewModel model;
 

@@ -1,11 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.ServiceModel;
+using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Http.SelfHost;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Service;
+using AnalitF.Net.Service.Config;
 using Castle.ActiveRecord;
 using Common.Models;
 using Common.Tools;
@@ -24,21 +31,26 @@ namespace AnalitF.Net.Test.Integration
 	{
 		public static ISessionFactory Factory;
 		public static Configuration Configuration;
+		public static Client.Config.Config clientConfig = new Client.Config.Config();
+
+		public static Config serviceConfig;
+		private HttpSelfHostServer server;
 
 		[SetUp]
 		public void Setup()
 		{
+			clientConfig.BaseUrl = new Uri("http://localhost:7018");
+			clientConfig.RootDir = "app";
+
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
 
-			//server.Configuration
 			global::Test.Support.Setup.BuildConfiguration("server");
 			var server = new Service.Config.Initializers.NHibernate();
 			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
 			server.Configuration = holder.GetConfiguration(typeof(ActiveRecordBase));
 			server.Init();
 			global::Test.Support.Setup.SessionFactory = holder.GetSessionFactory(typeof(ActiveRecordBase));
-			//global::Test.Support.Setup.Initialize("server");
 
 			var nhibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate = nhibernate;
@@ -48,10 +60,32 @@ namespace AnalitF.Net.Test.Integration
 
 			if (IsStale()) {
 				MySqlConnection.ClearAllPools(true);
-				FileHelper.InitDir("data");
+
+				FileHelper.Persistent(() => FileHelper.InitDir("data"),
+					typeof(IOException),
+					typeof(UnauthorizedAccessException));
 				ImportData();
 				BackupData();
 			}
+			InitWebServer();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			server.Dispose();
+		}
+
+		public void InitWebServer()
+		{
+			FileHelper.InitDir("var");
+			var cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
+			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
+
+			serviceConfig = Application.InitApp(cfg);
+			server = new HttpSelfHostServer(cfg);
+			server.OpenAsync();
 		}
 
 		private static bool IsStale()

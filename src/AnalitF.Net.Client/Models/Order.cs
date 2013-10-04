@@ -36,6 +36,12 @@ namespace AnalitF.Net.Client.Models
 			MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
 		}
 
+		public Order(Address address, Offer offer)
+			: this(offer.Price, address)
+		{
+			AddLine(offer, 1);
+		}
+
 		public virtual uint Id { get; set; }
 
 		public virtual DateTime CreatedOn { get; set; }
@@ -85,7 +91,10 @@ namespace AnalitF.Net.Client.Models
 			get { return frozen; }
 			set
 			{
+				if (frozen == value)
+					return;
 				frozen = value;
+				ResetStatus();
 				OnPropertyChanged("Frozen");
 			}
 		}
@@ -140,6 +149,13 @@ namespace AnalitF.Net.Client.Models
 					return null;
 				return Price.ToString();
 			}
+		}
+
+		public virtual void ResetStatus()
+		{
+			SendError = "";
+			SendResult = OrderResultStatus.OK;
+			Lines.Each(l => l.Apply(null));
 		}
 
 		public virtual void RemoveLine(OrderLine line)

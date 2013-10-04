@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Binders
 					IsCheckable = true
 				};
 				var binding = new Binding("Visibility") {
-					Converter = new VisibilityToBoolConverter(),
+					Converter = new BoolCollapsedConverter(),
 					Source = column
 				};
 				menuItem.SetBinding(MenuItem.IsCheckedProperty, binding);

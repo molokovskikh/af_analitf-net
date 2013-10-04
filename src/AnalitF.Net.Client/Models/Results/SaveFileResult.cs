@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			try
 			{
-				using(var f = new StreamWriter(File.OpenWrite(Dialog.FileName))) {
+				using(var f = new StreamWriter(Dialog.FileName)) {
 					f.Write(text);
 				}
 			}

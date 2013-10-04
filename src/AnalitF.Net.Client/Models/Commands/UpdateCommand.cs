@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
@@ -44,22 +45,13 @@ namespace AnalitF.Net.Client.Models.Commands
 
 	public class UpdateCommand : RemoteCommand
 	{
-		private string archiveFile;
-		private string extractPath;
-		private string logPath;
-		private string rootPath;
-
 		public ProgressReporter Reporter;
 		public string[] SyncData = new string[0];
 
-		public UpdateCommand(string file, string extractPath, string rootPath)
+		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
 			SuccessMessage = "Обновление завершено успешно.";
-			this.archiveFile = file;
-			this.extractPath = extractPath;
-			this.logPath = rootPath;
-			this.rootPath = rootPath;
 		}
 
 		protected override UpdateResult Execute()
@@ -70,9 +62,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var queryString = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("reset", "true")
 			};
-			foreach (var data in SyncData) {
-				queryString.Add(new KeyValuePair<string, string>("data", data));
-			}
+			queryString.AddRange(SyncData.Select(data => new KeyValuePair<string, string>("data", data)));
 
 			var stringBuilder = new StringBuilder();
 			foreach (var keyValuePair in queryString) {
@@ -82,7 +72,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				stringBuilder.Append('=');
 				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
 			}
-			var builder = new UriBuilder(new Uri(BaseUri, "Main")) {
+			var builder = new UriBuilder(new Uri(Config.BaseUrl, "Main")) {
 				Query = stringBuilder.ToString(),
 			};
 			var url = builder.Uri;
@@ -90,9 +80,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			var sendLogsTask = SendLogs(Client, Token);
 			SendPrices(Client, Token);
 
-			var response = Wait(new Uri(BaseUri, "Main"), Client.GetAsync(url, Token));
+			var response = Wait(new Uri(Config.BaseUrl, "Main"), Client.GetAsync(url, Token));
 			Reporter.Stage("Загрузка данных");
-			Download(response, archiveFile, Reporter);
+			Download(response, Config.ArchiveFile, Reporter);
 			var result = ProcessUpdate();
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
@@ -127,17 +117,17 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public UpdateResult ProcessUpdate()
 		{
-			if (Directory.Exists(extractPath))
-				Directory.Delete(extractPath, true);
+			if (Directory.Exists(Config.UpdateTmpDir))
+				Directory.Delete(Config.UpdateTmpDir, true);
 
-			if (!Directory.Exists(extractPath))
-				Directory.CreateDirectory(extractPath);
+			if (!Directory.Exists(Config.UpdateTmpDir))
+				Directory.CreateDirectory(Config.UpdateTmpDir);
 
-			using (var zip = new ZipFile(archiveFile)) {
-				zip.ExtractAll(extractPath, ExtractExistingFileAction.OverwriteSilently);
+			using (var zip = new ZipFile(Config.ArchiveFile)) {
+				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
 			}
 
-			if (File.Exists(Path.Combine(extractPath, "update", "Updater.exe")))
+			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe")))
 				return UpdateResult.UpdatePending;
 
 			Import();
@@ -146,15 +136,18 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Import()
 		{
+			if (Reporter == null)
+				Reporter = new ProgressReporter(Progress);
+
 			var settings = Session.Query<Settings>().First();
 
 			Reporter.Stage("Импорт данных");
 			List<System.Tuple<string, string[]>> data;
-			using (var zip = new ZipFile(archiveFile))
+			using (var zip = new ZipFile(Config.ArchiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
 			Reporter.Weight(data.Count);
 
-			var importer = new Importer(Session);
+			var importer = new Importer(Session, Config);
 			importer.Import(data, Reporter);
 
 			var offersImported = data.Any(t => Path.GetFileNameWithoutExtension(t.Item1).Match("offers"));
@@ -166,13 +159,13 @@ namespace AnalitF.Net.Client.Models.Commands
 				FileHelper.CreateDirectoryRecursive(dir);
 
 			var dirs = new List<ResultDir> {
-				new ResultDir("ads", settings, rootPath, extractPath),
-				new ResultDir("waybills", settings, rootPath, extractPath),
-				new ResultDir("docs", settings, rootPath, extractPath),
-				new ResultDir("rejects", settings, rootPath, extractPath),
+				new ResultDir("ads", settings, Config.RootDir, Config.UpdateTmpDir),
+				new ResultDir("waybills", settings, Config.RootDir, Config.UpdateTmpDir),
+				new ResultDir("docs", settings, Config.RootDir, Config.UpdateTmpDir),
+				new ResultDir("rejects", settings, Config.RootDir, Config.UpdateTmpDir),
 			};
 
-			var resultDirs = Directory.GetDirectories(extractPath)
+			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
 				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
 				.Where(d => d != null)
 				.ToArray();
@@ -180,7 +173,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			resultDirs.Each(Move);
 			OpenResultFiles(resultDirs);
 
-			Directory.Delete(extractPath, true);
+			Directory.Delete(Config.UpdateTmpDir, true);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
 		}
 
@@ -189,19 +182,32 @@ namespace AnalitF.Net.Client.Models.Commands
 			var orders = Session.Query<Order>()
 				.Fetch(o => o.Address)
 				.Fetch(o => o.Price)
-				.Where(o => !o.Frozen)
 				.ToArray();
 
+			var ids = orders.Where(o => !o.Frozen).Select(o => o.Id).ToArray();
+			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете
+			//каждый раз
+			orders.Each(o => o.ResetStatus());
 			orders.Each(o => o.Frozen = true);
-			var ids = orders.Select(o => o.Id).ToArray();
 			var command = new UnfreezeCommand<Order>(ids);
+			command.CalculateStatus = true;
 			var report = (string)RunCommand(command);
 
-			if (!String.IsNullOrEmpty(report)) {
-				Results.Add(new DialogResult(new TextViewModel(report) {
-					Header = "Предложения по данным позициям из заказа отсутствуют",
-					DisplayName = "Не найденые позиции"
-				}, @fixed: true));
+			var user = Session.Query<User>().First();
+			if (user.IsPreprocessOrders) {
+				var problemCount = Session.Query<OrderLine>()
+					.Count(l => l.SendResult != LineResultStatus.OK
+						|| l.Order.SendResult != OrderResultStatus.OK);
+				if (problemCount > 0)
+					Results.Add(new DialogResult(new Correction(), fullScreen: true));
+			}
+			else {
+				if (!String.IsNullOrEmpty(report)) {
+					Results.Add(new DialogResult(new TextViewModel(report) {
+						Header = "Предложения по данным позициям из заказа отсутствуют",
+						DisplayName = "Не найденые позиции"
+					}, @fixed: true));
+				}
 			}
 		}
 
@@ -293,8 +299,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					.Match(f.Replace(".meta.txt", "")))))
 				.Where(t => t.Item2 != null)
 				.Select(t => Tuple.Create(
-					Path.GetFullPath(Path.Combine(extractPath, t.Item2)),
-					File.ReadAllLines(Path.Combine(extractPath, t.Item1))))
+					Path.GetFullPath(Path.Combine(Config.UpdateTmpDir, t.Item2)),
+					File.ReadAllLines(Path.Combine(Config.UpdateTmpDir, t.Item1))))
 				.ToList();
 		}
 
@@ -319,7 +325,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var prices = Session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
 			var clientPrices = prices.Select(p => new PriceSettings(p.Id.PriceId, p.Id.RegionId, p.Active)).ToArray();
 
-			var response = client.PostAsync(new Uri(BaseUri, "Main").ToString(),
+			var response = client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),
 				new SyncRequest(clientPrices),
 				Formatter,
 				token)
@@ -344,7 +350,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public Task<HttpResponseMessage> Confirm()
 		{
-			return Client.DeleteAsync(new Uri(BaseUri, "Main"));
+			return Client.DeleteAsync(new Uri(Config.BaseUrl, "Main"));
 		}
 
 		public Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
@@ -356,7 +362,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			LogManager.ResetConfiguration();
 			try
 			{
-				var logs = Directory.GetFiles(logPath, "*.log")
+				var logs = Directory.GetFiles(Config.RootDir, "*.log")
 					.Where(f => new FileInfo(f).Length > 0)
 					.ToArray();
 
@@ -378,7 +384,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				XmlConfigurator.Configure();
 			}
 
-			var uri = new Uri(BaseUri, "Logs");
+			var uri = new Uri(Config.BaseUrl, "Logs");
 			var stream = File.OpenRead(file);
 			var post = client.PostAsync(uri, new StreamContent(stream), token);
 			//TODO мы никогда не узнаем об ошибке

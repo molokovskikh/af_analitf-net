@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateOnShowCatalog = true;
 
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
-				t => Offers.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
+				t => Offers.Value.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				o => CurrentOffer = o);
 		}
 
@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Query()
 		{
-			Offers = StatelessSession.Query<Offer>()
+			Offers.Value = StatelessSession.Query<Offer>()
 				.Where(o => o.Junk)
 				.OrderBy(o => o.ProductSynonym)
 				.Fetch(o => o.Price)

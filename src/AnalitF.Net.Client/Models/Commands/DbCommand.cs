@@ -12,18 +12,17 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected ILog log;
 		protected Configuration Configuration;
 		protected ISessionFactory Factory;
-		protected string DataPath;
 
 		public CancellationToken Token;
 		public ISession Session;
 		public IStatelessSession StatelessSession;
+		public Config.Config Config = new Config.Config();
 
 		protected BaseCommand()
 		{
 			log = LogManager.GetLogger(GetType());
 			Configuration = AppBootstrapper.NHibernate.Configuration;
 			Factory = AppBootstrapper.NHibernate.Factory;
-			DataPath = AppBootstrapper.DataPath;
 		}
 
 		protected T RunCommand<T>(DbCommand<T> command)

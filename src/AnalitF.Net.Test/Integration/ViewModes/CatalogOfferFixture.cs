@@ -18,7 +18,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class CatalogOfferFixture : BaseFixture
+	public class CatalogOfferFixture : ViewModelFixture
 	{
 		private Lazy<CatalogOfferViewModel> lazyModel;
 		private Catalog catalog;
@@ -52,10 +52,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			newOffer.Id.OfferId += (ulong)Generator.Random().First();
 			session.Save(newOffer);
 
-			var count = model.Offers.Count;
+			var count = model.Offers.Value.Count;
 			Assert.That(count, Is.GreaterThan(2));
 			model.CurrentProducer.Value = model.Producers.Value[1];
-			Assert.That(model.Offers.Count, Is.LessThan(count));
+			Assert.That(model.Offers.Value.Count, Is.LessThan(count));
 		}
 
 		[Test]
@@ -72,28 +72,28 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups.Add(new MarkupConfig(splitCost, 100 * splitCost, 30, markupType));
 			session.Save(settings);
 
-			Assert.That(model.Offers[0].RetailCost, Is.Not.EqualTo(0));
+			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));
 
-			model.CurrentOffer = model.Offers[0];
+			model.CurrentOffer = model.Offers.Value[0];
 			Assert.That(model.RetailMarkup.Value, Is.EqualTo(20));
-			var expected = Math.Round(model.Offers[0].Cost * (decimal)1.2, 2);
+			var expected = Math.Round(model.Offers.Value[0].Cost * (decimal)1.2, 2);
 			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
-			model.CurrentOffer = model.Offers[1];
+			model.CurrentOffer = model.Offers.Value[1];
 			Assert.That(model.RetailMarkup.Value, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Cost);
-			expected = Math.Round(model.Offers[1].Cost * (decimal)1.3, 2);
+			expected = Math.Round(model.Offers.Value[1].Cost * (decimal)1.3, 2);
 			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
 			model.RetailMarkup.Value = 23;
-			model.CurrentOffer = model.Offers[0];
+			model.CurrentOffer = model.Offers.Value[0];
 			Assert.That(model.RetailMarkup.Value, Is.EqualTo(23));
 		}
 
 		[Test]
 		public void Calculate_diff()
 		{
-			Assert.That(model.Offers[0].Diff, Is.Null);
-			Assert.That(model.Offers[1].Diff, Is.Not.EqualTo(0));
+			Assert.That(model.Offers.Value[0].Diff, Is.Null);
+			Assert.That(model.Offers.Value[1].Diff, Is.Not.EqualTo(0));
 		}
 
 		[Test]
@@ -102,8 +102,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalog = FindMultiOfferCatalog();
 			MakeDifferentCategory(catalog);
 
-			var baseOffer = model.Offers.First(o => o.Price.BasePrice);
-			Assert.That(model.CurrentOffer.Id, Is.EqualTo(baseOffer.Id), model.Offers.Implode(o => o.Id));
+			var baseOffer = model.Offers.Value.First(o => o.Price.BasePrice);
+			Assert.That(model.CurrentOffer.Id, Is.EqualTo(baseOffer.Id), model.Offers.Value.Implode(o => o.Id));
 		}
 
 		[Test]
@@ -112,23 +112,24 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalog = FindMultiOfferCatalog();
 			MakeDifferentCategory(catalog);
 
-			var count = model.Offers.Count;
+			var count = model.Offers.Value.Count;
 			model.CurrentFilter.Value = model.Filters[1];
-			Assert.That(model.Offers.Count, Is.EqualTo(1));
-			Assert.That(model.Offers[0].Price.BasePrice, Is.True);
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(1));
+			Assert.That(model.Offers.Value[0].Price.BasePrice, Is.True);
 
 			model.CurrentFilter.Value = model.Filters[0];
-			Assert.That(model.Offers.Count, Is.EqualTo(count));
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(count));
 
 			model.CurrentFilter.Value = model.Filters[2];
-			Assert.That(model.Offers.Count, Is.EqualTo(count - 1));
-			Assert.That(model.Offers[0].Price.BasePrice, Is.False, model.Offers[0].Price.Id.ToString());
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(count - 1));
+			Assert.That(model.Offers.Value[0].Price.BasePrice,
+				Is.False, model.Offers.Value[0].Price.Id.ToString());
 		}
 
 		[Test]
 		public void Filter_result_empty()
 		{
-			var ids = model.Offers.Select(o => o.Price.Id).Distinct().ToList();
+			var ids = model.Offers.Value.Select(o => o.Price.Id).Distinct().ToList();
 			var prices = session.Query<Price>().ToList().Where(p => ids.Contains(p.Id)).ToList();
 
 			foreach (var price in prices)
@@ -174,7 +175,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Change_sort()
 		{
-			model.Offers = new List<Offer> {
+			model.Offers.Value = new List<Offer> {
 				new Offer {
 					CatalogId = 1,
 					ProductId = 2,
@@ -197,7 +198,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				}
 			};
 			model.GroupByProduct.Value = true;
-			Assert.That(model.Offers.Select(o => o.Cost).Implode(), Is.EqualTo("90, 120, 103, 105"));
+			Assert.That(model.Offers.Value.Select(o => o.Cost).Implode(), Is.EqualTo("90, 120, 103, 105"));
 		}
 
 		[Test]
@@ -264,10 +265,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.OfferCommitted();
 			Assert.That(model.CurrentOffer.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
 
-			model.CurrentOffer = model.Offers[1];
+			model.CurrentOffer = model.Offers.Value[1];
 			Assert.That(model.AutoCommentText, Is.Null);
 
-			model.CurrentOffer = model.Offers[0];
+			model.CurrentOffer = model.Offers.Value[0];
 			Assert.That(model.AutoCommentText, Is.EqualTo("тестовый комментарий"));
 		}
 
@@ -286,7 +287,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Check_prev_order_count()
 		{
-			var offer = model.Offers.First(o => !o.Junk);
+			var offer = model.Offers.Value.First(o => !o.Junk);
 			MakeSentOrder(offer);
 
 			model.CurrentOffer = offer;

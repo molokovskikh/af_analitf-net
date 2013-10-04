@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 			});
 			mapper.Class<Order>(m => {
+				m.Property(o => o.Frozen, om => om.Access(Accessor.Field));
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				m.ManyToOne(o => o.MinOrderSum, c => {
 					c.Columns(cm => cm.Name("AddressId"), cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));

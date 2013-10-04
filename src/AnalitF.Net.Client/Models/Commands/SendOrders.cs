@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var clientOrders = orders.Select(o => o.ToClientOrder()).Where(o => o != null).ToArray();
 
 			var response =
-				Client.PostAsync(new Uri(BaseUri, "Main").ToString(),
+				Client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),
 					new SyncRequest(clientOrders, Force),
 					Formatter,
 					Token).Result;
@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Results.Add(new DialogResult(text, @fixed: true));
 				}
 				else {
-					Results.Add(new DialogResult(new Correction(), fullScreen: true));
+					Results.Add(new DialogResult(new Correction(address.Id), fullScreen: true));
 				}
 				updateResult = UpdateResult.Other;
 			}

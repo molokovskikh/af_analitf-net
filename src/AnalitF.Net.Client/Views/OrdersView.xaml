@@ -21,7 +21,7 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource ResourceKey=FilterPanel}">
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Label>Вывести за период с</Label>
 			<DatePicker Style="{StaticResource FilterElement}" Name="Begin"></DatePicker>
 			<Label>по</Label>
