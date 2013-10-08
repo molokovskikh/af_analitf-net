@@ -277,6 +277,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			stub = null;
 			var order = Fixture<MakeOrder>().Order;
 			Fixture<RandCost>();
+			session.Flush();
 
 			Collect(shell.Update());
 			Assert.AreEqual(1, dialogs.Count);
