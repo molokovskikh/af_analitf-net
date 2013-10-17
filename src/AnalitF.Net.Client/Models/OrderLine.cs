@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Models
 				Count = 65535;
 			}
 
-			var quantity = SafeConverter.ToUInt32(Quantity);
+			var quantity = SafeConvert.ToUInt32(Quantity);
 			if (quantity > 0 && Count > quantity) {
 				Count = CalculateAvailableQuantity(Count);
 				result.Add(Message.Error(String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", Count)));
@@ -189,7 +189,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CalculateAvailableQuantity(uint quantity)
 		{
-			var topBound = SafeConverter.ToUInt32(Quantity);
+			var topBound = SafeConvert.ToUInt32(Quantity);
 			if (topBound == 0)
 				topBound = uint.MaxValue;
 			topBound = Math.Min(topBound, quantity);

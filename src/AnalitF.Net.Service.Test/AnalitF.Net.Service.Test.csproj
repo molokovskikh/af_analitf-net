@@ -56,6 +56,7 @@
     <Compile Include="ControllerFixture.cs" />
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />
+    <Compile Include="TestHelpers\ZipHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Service\AnalitF.Net.Service.csproj">
@@ -90,7 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="TestHelpers\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

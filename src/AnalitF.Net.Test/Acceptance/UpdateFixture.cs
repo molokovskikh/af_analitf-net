@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitForMessage("Обновление завершено успешно.");
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void Check_auto_update()
 		{
 			Click("Update");
@@ -63,9 +63,26 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitForElement("CatalogNames");
 		}
 
-		[Test(Description = "После применения\\отмены фильтров в таблице выбранная строка должна быть по центру таблицы")]
-		public void Centrify_on_selected_item()
+		[Test]
+		public void Send_order()
 		{
+			HandleDialogs();
+			Activate();
+
+			Click("ShowCatalog");
+			var mnns = WaitForElement("CatalogNames");
+			mnns.SetFocus();
+			Keyboard.Press(Key.Return);
+			Keyboard.Press(Key.Return);
+			var offers = WaitForElement("Offers");
+			offers.SetFocus();
+			Keyboard.Press(Key.D1);
+
+			//кнопка активируется с задержкой
+			Thread.Sleep(700);
+			Click("SendOrders");
+			SkipUpdateDialog();
+			WaitForMessage("Отправка заказов завершена успешно.");
 		}
 
 		[Test]

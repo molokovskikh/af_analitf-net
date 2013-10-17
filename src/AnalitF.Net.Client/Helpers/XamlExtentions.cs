@@ -174,9 +174,11 @@ namespace AnalitF.Net.Client.Helpers
 		public static void PrintVisualTree(Visual visual, int offset = 0)
 		{
 			for(var i = 0; i < offset; i++)
-				Console.Write('\t');
+				Console.Write("  ");
 			if (visual is TextBlock)
 				Console.WriteLine("{0} {1}", visual, ((TextBlock)visual).Text);
+			else if (visual is FrameworkElement)
+				Console.WriteLine("{0} {1}", visual, ((FrameworkElement)visual).Name);
 			else
 				Console.WriteLine(visual);
 			var count = VisualTreeHelper.GetChildrenCount(visual);

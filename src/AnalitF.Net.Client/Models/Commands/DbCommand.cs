@@ -21,8 +21,10 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected BaseCommand()
 		{
 			log = LogManager.GetLogger(GetType());
-			Configuration = AppBootstrapper.NHibernate.Configuration;
-			Factory = AppBootstrapper.NHibernate.Factory;
+			if (AppBootstrapper.NHibernate != null) {
+				Configuration = AppBootstrapper.NHibernate.Configuration;
+				Factory = AppBootstrapper.NHibernate.Factory;
+			}
 		}
 
 		protected T RunCommand<T>(DbCommand<T> command)

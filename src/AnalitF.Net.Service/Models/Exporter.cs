@@ -321,25 +321,27 @@ where Hidden = 0";
 				log.FileDelivered = false;
 				log.DocumentDelivered = false;
 			}
-			try {
-				foreach (var log in logs) {
-					var type = log.Document.DocumentType.ToString();
+
+			foreach (var doc in logs) {
+				try {
+					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
-						log.Document.AddressId.ToString(),
+						doc.Document.AddressId.ToString(),
 						type);
 					if (!Directory.Exists(path))
 						continue;
-					var files = Directory.GetFiles(path, String.Format("{0}_*", log.Document.Id));
+					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
 					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
-						log.FileDelivered = true;
+						doc.FileDelivered = true;
+				}
+				catch(Exception e) {
+					log.Warn("Ошибка при экспорте файлов накладных", e);
 				}
 			}
-			catch(Exception e) {
-				log.Warn("Ошибка при экспорте файлов накладных", e);
-			}
+
 
 			var ids = logs.Select(d => d.Document.Id).Implode();
 			sql = String.Format(@"
@@ -427,9 +429,16 @@ group by dh.Id")
 			var filename = Path.GetFullPath(Path.Combine(ExportPath, Prefix + name + ".txt"));
 			data.Add(new UpdateData(name + ".meta.txt") { Content = meta.Implode("\r\n") });
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
+			var originCulture = Thread.CurrentThread.CurrentCulture;
 			try {
+				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+				var first = true;
 				using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
 					foreach (var item in exportData) {
+						if (first) {
+							first = false;
+							file.WriteLine();
+						}
 						for(var i = 0; i < item.Length; i++) {
 							if (item[i] == null)
 								file.Write(@"\N");
@@ -438,11 +447,10 @@ group by dh.Id")
 							file.Write("\t");
 						}
 					}
-					file.WriteLine();
 				}
 			}
 			finally {
-				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+				Thread.CurrentThread.CurrentCulture = originCulture;
 			}
 		}
 

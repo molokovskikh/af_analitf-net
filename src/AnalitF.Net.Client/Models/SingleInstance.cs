@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Models
 
 		public SingleInstance(string name)
 		{
-			this.name = name;
+			this.name = name + "-" + typeof(SingleInstance).Assembly.Location.GetHashCode();
 		}
 
 		[DllImport("user32.dll")]

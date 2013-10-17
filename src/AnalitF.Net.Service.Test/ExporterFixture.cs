@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Service.Models;
+using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Models;
 using Common.Tools;
 using Ionic.Zip;
@@ -58,7 +59,7 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[0]);
 
 			ExportCompressed();
-			var files = lsZip();
+			var files = ZipHelper.lsZip(file);
 
 			Assert.That(files.Implode(), Is.StringContaining("update/analitf.net.client.exe"));
 		}
@@ -67,7 +68,7 @@ namespace AnalitF.Net.Service.Test
 		public void Export_meta()
 		{
 			ExportCompressed();
-			var zipEntries = lsZip().Implode();
+			var zipEntries = ZipHelper.lsZip(file).Implode();
 
 			Assert.That(File.Exists(file), "{0} не существует", file);
 			Assert.That(zipEntries, Is.StringContaining("Addresses.txt"));
@@ -88,7 +89,7 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[0]);
 
 			ExportCompressed();
-			var zipEntries = lsZip();
+			var zipEntries = ZipHelper.lsZip(file);
 
 			Assert.That(zipEntries.Implode(), Is.StringContaining("ads/2block.gif"));
 		}
@@ -132,7 +133,7 @@ namespace AnalitF.Net.Service.Test
 
 			exporter.UpdateType = "Waybills";
 			ExportCompressed();
-			var files = lsZip().Implode();
+			var files = ZipHelper.lsZip(file).Implode();
 			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
 				+ " WaybillLines.meta.txt, WaybillLines.txt, LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				Path.GetFileName(waybillFile)));
@@ -148,13 +149,6 @@ namespace AnalitF.Net.Service.Test
 		private void ExportCompressed()
 		{
 			file = exporter.ExportCompressed(file);
-		}
-
-		private List<string> lsZip()
-		{
-			using(var zip = ZipFile.Read(file)) {
-				return zip.Select(z => z.FileName).ToList();
-			}
 		}
 	}
 }

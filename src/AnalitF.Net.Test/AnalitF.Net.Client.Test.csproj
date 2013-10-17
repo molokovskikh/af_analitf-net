@@ -186,6 +186,7 @@
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\StyleBuilderFixture.cs" />
+    <Compile Include="Unit\UpdateCommandFixture.cs" />
     <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
@@ -195,6 +196,10 @@
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>AnalitF.Net.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AnalitF.Net.Service.Test\AnalitF.Net.Service.Test.csproj">
+      <Project>{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}</Project>
+      <Name>AnalitF.Net.Service.Test</Name>
     </ProjectReference>
     <ProjectReference Include="..\AnalitF.Net.Service\AnalitF.Net.Service.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>

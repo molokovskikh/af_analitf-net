@@ -480,7 +480,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> MicroUpdate()
 		{
 			return Sync(new UpdateCommand {
-				SyncData = new [] {"Waybills"}
+				SyncData = "Waybills"
 			});
 		}
 

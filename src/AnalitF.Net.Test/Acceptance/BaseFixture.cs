@@ -10,6 +10,7 @@ using System.Windows.Automation;
 using Common.Tools;
 using Microsoft.Test.Input;
 using NUnit.Framework;
+using Condition = System.Windows.Automation.Condition;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
@@ -114,7 +115,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
-			Console.WriteLine(sender);
 			if (MainWindow == null) {
 				MainWindow = AutomationElement.FromHandle(Process.MainWindowHandle);
 			}

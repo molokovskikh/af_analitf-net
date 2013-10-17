@@ -20,10 +20,6 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 		id = Path.GetFileName(dir)
 		AddDirectory(id, dir, document, manager)
 
-def Bash(cmd as string):
-	path = Environment.CurrentDirectory.Replace("\\", "/")
-	Sh("bash -l -c \"cd $path;$cmd\"")
-
 Global(
 	Project: "AnalitF.Net.Service",
 	HumanReadableName: "AnalitF.Net",

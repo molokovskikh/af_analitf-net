@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Service.Test.TestHelpers;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
@@ -99,6 +100,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 
 			Update();
 			var offers = localSession.CreateSQLQuery("select * from offers").List();
+			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(offers.Count, Is.GreaterThan(0));
 		}
 
@@ -376,6 +378,23 @@ namespace AnalitF.Net.Test.Integration.Remote
 
 			var dialog = command.Results.OfType<DialogResult>().First();
 			Assert.IsInstanceOf<Correction>(dialog.Model);
+		}
+
+		[Test]
+		public void Load_only_waybills()
+		{
+			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
+				+ " where UserId = :userId;")
+				.SetParameter("userId", ServerUser().Id)
+				.ExecuteUpdate();
+			((UpdateCommand)command).SyncData = "Waybills";
+
+			session.Transaction.Commit();
+			command.Run();
+
+			var files = ZipHelper.lsZip(clientConfig.ArchiveFile).Implode();
+			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
+			Assert.AreEqual("", files);
 		}
 
 		private TestUser ServerUser()

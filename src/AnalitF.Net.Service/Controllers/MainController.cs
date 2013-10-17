@@ -31,7 +31,7 @@ namespace AnalitF.Net.Service.Controllers
 		public User CurrentUser { get; set; }
 		public Config.Config Config;
 
-		public HttpResponseMessage Get(bool reset = false, string updateType = null)
+		public HttpResponseMessage Get(bool reset = false, string data = null)
 		{
 			var existsJob = Session.Query<RequestLog>()
 				.OrderByDescending(j => j.CreatedOn)
@@ -46,7 +46,7 @@ namespace AnalitF.Net.Service.Controllers
 
 			if (existsJob == null) {
 				existsJob  = new RequestLog(CurrentUser, RequestHelper.GetVersion(Request));
-				existsJob.UpdateType = updateType;
+				existsJob.UpdateType = data;
 				Session.Save(existsJob);
 				Session.Transaction.Commit();
 

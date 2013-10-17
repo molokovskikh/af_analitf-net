@@ -46,12 +46,27 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class UpdateCommand : RemoteCommand
 	{
 		public ProgressReporter Reporter;
-		public string[] SyncData = new string[0];
+		private string syncData = "";
 
 		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
 			SuccessMessage = "Обновление завершено успешно.";
+		}
+
+		public string SyncData
+		{
+			get { return syncData; }
+			set
+			{
+				syncData = value ?? "";
+				if (syncData.Match("Waybills")) {
+					SuccessMessage = "Получение документов завершено успешно.";
+				}
+				else {
+					SuccessMessage = "Обновление завершено успешно.";
+				}
+			}
 		}
 
 		protected override UpdateResult Execute()
@@ -60,9 +75,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			Reporter.StageCount(4);
 
 			var queryString = new List<KeyValuePair<string, string>> {
-				new KeyValuePair<string, string>("reset", "true")
+				new KeyValuePair<string, string>("reset", "true"),
+				new KeyValuePair<string, string>("data", syncData)
 			};
-			queryString.AddRange(SyncData.Select(data => new KeyValuePair<string, string>("data", data)));
 
 			var stringBuilder = new StringBuilder();
 			foreach (var keyValuePair in queryString) {
@@ -106,7 +121,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				done = response.StatusCode == HttpStatusCode.OK;
 				Reporter.Stage("Подготовка данных");
 				if (!done) {
-					Token.WaitHandle.WaitOne(TimeSpan.FromSeconds(15));
+					Token.WaitHandle.WaitOne(Config.RequestDelay);
 					Token.ThrowIfCancellationRequested();
 				}
 
@@ -149,6 +164,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var importer = new Importer(Session, Config);
 			importer.Import(data, Reporter);
+
+			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
+				SuccessMessage = "Новых файлов документов нет.";
+			}
 
 			var offersImported = data.Any(t => Path.GetFileNameWithoutExtension(t.Item1).Match("offers"));
 			if (offersImported) {

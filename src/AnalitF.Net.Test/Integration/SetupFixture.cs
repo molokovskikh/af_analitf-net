@@ -16,6 +16,7 @@ using AnalitF.Net.Service.Config;
 using Castle.ActiveRecord;
 using Common.Models;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
@@ -41,6 +42,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			clientConfig.BaseUrl = new Uri("http://localhost:7018");
 			clientConfig.RootDir = "app";
+			clientConfig.RequestDelay = 1.Second();
 
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
@@ -95,6 +97,12 @@ namespace AnalitF.Net.Test.Integration
 
 		private static bool IsDbStale()
 		{
+			//если пользователя нет, значит база была перезалита и локальная база не актуальна
+			using(var session = IntegrationFixture.Factory.OpenSession()) {
+				if (!session.Query<TestUser>().Any(u => u.Login == System.Environment.UserName))
+					return true;
+			}
+
 			using(var localSession = Factory.OpenSession()) {
 				try {
 					var settings = localSession.Query<Client.Models.Settings>().First();
@@ -105,10 +113,7 @@ namespace AnalitF.Net.Test.Integration
 					return true;
 				}
 			}
-			//если пользователя нет, значит база была перезалита и локальная база не актуальна
-			using(var session = IntegrationFixture.Factory.OpenSession()) {
-				return !session.Query<TestUser>().Any(u => u.Login == System.Environment.UserName);
-			}
+			return false;
 		}
 
 		private void ImportData()
