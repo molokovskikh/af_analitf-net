@@ -16,10 +16,11 @@ using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NUnit.Framework;
+using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class PricesViewFixture : BaseViewFixture
 	{
 		[Test]
@@ -28,7 +29,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var view = Bind(new PriceViewModel());
 
 			var search = view.Descendants<Control>().First(e => e.Name == "QuickSearch");
-			var text = XamlExtentions.Descendants<TextBox>(search).FirstOrDefault();
+			var text = search.Descendants<TextBox>().FirstOrDefault();
 
 			Assert.That(text, Is.Not.Null);
 		}
@@ -41,17 +42,11 @@ namespace AnalitF.Net.Test.Integration.Views
 
 				var grid = (DataGrid)view.FindName("Prices");
 				w.Loaded += (sender, args) => {
-					IDisposable subscription = null;
-					//ловим изменение ActiveItems
-					//нужно что бы wpf успел сделать какие то свои магичекские дела
-					//если не ждать тогда nre
-					subscription = shell.Changed().Throttle(TimeSpan.FromMilliseconds(1)).Subscribe(_ => {
-						subscription.Dispose();
-						w.Dispatcher.Invoke(w.Close);
-					});
 					var keyEventArgs = WpfHelper.KeyEventArgs(grid, Key.Enter);
 					keyEventArgs.RoutedEvent = DataGrid.KeyDownEvent;
 					grid.RaiseEvent(keyEventArgs);
+
+					WpfHelper.Shutdown(w);
 				};
 				w.Content = view;
 			});

@@ -20,7 +20,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Test.Integration
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class BinderFixture
 	{
 		private UserControl view;

@@ -25,7 +25,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			nameViewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
 		}
 
-		[Test, RequiresSTA, Ignore]
+		[Test, Ignore]
 		public void Show_catalog_view()
 		{
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First();
@@ -165,7 +165,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<CatalogName>());
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Search_in_catalog_names()
 		{
 			var name = (CatalogNameViewModel)catalogModel.ActiveItem;

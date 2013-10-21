@@ -14,7 +14,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class AppBootstrapperFixture : ViewModelFixture
 	{
 		private AppBootstrapper app;

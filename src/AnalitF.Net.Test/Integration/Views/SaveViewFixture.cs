@@ -20,7 +20,7 @@ using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class SaveViewFixture : BaseViewFixture
 	{
 		private CatalogOfferViewModel model;

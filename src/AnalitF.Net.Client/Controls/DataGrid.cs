@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -90,12 +91,38 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
+		public override void OnApplyTemplate()
+		{
+			base.OnApplyTemplate();
+
+			var viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
+			if (viewer != null) {
+				viewer.Focusable = true;
+			}
+		}
+
+		protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
+		{
+			base.OnItemsChanged(e);
+
+			//если строка удаляет с помощью функции datagrid то после удалени фокус остается в datagrid
+			//если же удаление производится из коллекции ItemsSource то CurrentItem сбрасывается в null
+			//и таблица теряет фокус
+			if (e.Action == NotifyCollectionChangedAction.Remove) {
+				var index = Math.Min(e.OldStartingIndex, Items.Count - 1);
+				if (index >= 0) {
+					CurrentItem = Items[index];
+					SelectedItem = Items[index];
+				}
+			}
+		}
+
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
 			base.OnItemsSourceChanged(oldValue, newValue);
 
+			//порядок вызово важен нужно сначала центрировать а потом ставить фокус
 			if (SelectedItem != null) {
-				ScrollIntoView(SelectedItem);
 				//скорбная песнь, для того что бы вычислить вертикальное смещение
 				//что бы отобразить строку по центру используется ViewportHeight
 				//но при изменение ItemsSource меняется и ViewportHeight
@@ -104,12 +131,19 @@ namespace AnalitF.Net.Client.Controls
 				//по этому мы говорим планировщику что нужно выполнить Centrify после того как он поделает все дела
 				//это приводит к неприятному эффекту "дергания" когда таблица рисуется в одном положении
 				//а затем почти мгновенно в другом
-				Dispatcher.BeginInvoke(DispatcherPriority.Background,
-					new DispatcherOperationCallback(a => {
-						DataGridHelper.Centrify(this);
-						return null;
-					}),
-					this);
+				ScrollIntoView(SelectedItem);
+				Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => {
+					DataGridHelper.Centrify(this);
+				}));
+			}
+
+			//после обновление ItemsSource все визуальные элементы будут перестроены
+			//и потеряют фокус
+			//для того что бы восстановить фокус нужно запланировать это после того как новые элементы будут построены
+			if(IsKeyboardFocusWithin) {
+				Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => {
+					DataGridHelper.Focus(this);
+				}));
 			}
 		}
 	}

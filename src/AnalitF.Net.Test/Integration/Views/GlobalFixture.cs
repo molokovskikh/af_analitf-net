@@ -33,7 +33,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class GlobalFixture : BaseViewFixture
 	{
 		private Dispatcher dispatcher;
@@ -331,6 +331,12 @@ namespace AnalitF.Net.Test.Integration.Views
 				var text = (TextBox)view.FindName("CurrentPrice_Value_ContactInfo");
 				Assert.That(text.Text, Is.StringContaining("тестовая контактная информация"));
 			});
+		}
+
+		[Test]
+		public void Offers_search()
+		{
+			throw new NotImplementedException();
 		}
 
 		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement

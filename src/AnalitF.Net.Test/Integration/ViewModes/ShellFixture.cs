@@ -21,7 +21,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture, Ignore("Тесты сломаны, из-за обработки даилога я не знаю как их чинить")]
 	public class ShellFixture : ViewModelFixture
 	{
-		[Test, RequiresSTA]
+		[Test]
 		public void If_user_name_empty_open_configuration_form()
 		{
 			ResetCredentials();
@@ -31,7 +31,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(manager.Dialogs[0].DataContext, Is.TypeOf<SettingsViewModel>());
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Reject_update_with_empty_user_name()
 		{
 			ResetCredentials();
@@ -84,7 +84,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.NavigationStack, Is.Empty);
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Import_if_argument_specified()
 		{
 			//todo: чинить

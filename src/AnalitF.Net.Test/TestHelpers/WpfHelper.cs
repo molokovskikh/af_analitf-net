@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 						args.Handled = true;
 						exceptions.Add(args.Exception);
 						window.Close();
+						window.Dispatcher.InvokeShutdown();
 					};
 					action(window);
 				}
@@ -34,11 +35,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					throw;
 				}
 				window.Show();
-				try {
-					window.Dispatcher.InvokeShutdown();
-				}
-				catch(Exception) {
-				}
+				Dispatcher.Run();
 			}) {
 				IsBackground = true
 			};
@@ -90,6 +87,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				key);
 			keyEventArgs.RoutedEvent = UIElement.KeyDownEvent;
 			return keyEventArgs;
+		}
+
+		//InvokeShutdown можно вызвать не всегда а только после того как окно загрузилось
+		//если вызвать в onload то будет nre
+		//что бы избежать этого делаем планируем запуск когда wpf сделает все свои дела
+		public static void Shutdown(Window window)
+		{
+			window.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => {
+				window.Close();
+				window.Dispatcher.InvokeShutdown();
+			}));
 		}
 	}
 }

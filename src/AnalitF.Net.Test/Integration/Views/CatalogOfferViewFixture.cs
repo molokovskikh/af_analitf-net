@@ -22,7 +22,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class CatalogOfferViewFixture : BaseViewFixture
 	{
 		[Test]

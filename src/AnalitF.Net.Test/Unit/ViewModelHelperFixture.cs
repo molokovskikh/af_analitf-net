@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class ViewModelHelperFixture
 	{
 		private TestViewModel model;

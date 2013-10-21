@@ -10,7 +10,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class OrderLinesFixture : BaseViewFixture
 	{
 		[Test]

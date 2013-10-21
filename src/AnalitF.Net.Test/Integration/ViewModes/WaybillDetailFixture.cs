@@ -76,7 +76,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Print_racking_map()
 		{
 			var result = (DialogResult)model.PrintRackingMap();
@@ -84,7 +84,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNotNull(preview);
 		}
 
-		[Test, RequiresSTA]
+		[Test]
 		public void Print_invoice()
 		{
 			var result = (DialogResult)model.PrintInvoice().First();

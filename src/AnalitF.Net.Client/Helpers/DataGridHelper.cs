@@ -38,8 +38,13 @@ namespace AnalitF.Net.Client.Helpers
 			if (grid.SelectedItem == null)
 				grid.SelectedItem = grid.Items.Cast<object>().FirstOrDefault();
 			var item = grid.SelectedItem;
-			if (item == null)
+			if (item == null) {
+				var scroll = grid.Descendants<ScrollViewer>().FirstOrDefault(v => v.Name == "DG_ScrollViewer");
+				if (scroll != null) {
+					scroll.Focus();
+				}
 				return;
+			}
 
 			grid.ScrollIntoView(item);
 			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(item);
@@ -57,6 +62,8 @@ namespace AnalitF.Net.Client.Helpers
 			var columnIndex = 0;
 			if (column != null)
 				columnIndex = column.DisplayIndex;
+			if (columnIndex == -1)
+				return null;
 			var presenter = rowContainer.VisualChild<DataGridCellsPresenter>();
 			if (presenter == null)
 				return null;

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -13,7 +14,7 @@ using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
-	[TestFixture, RequiresSTA]
+	[TestFixture]
 	public class WaybillDetailsFixture
 	{
 		private WaybillDetailsView view;
@@ -69,6 +70,8 @@ namespace AnalitF.Net.Test.Integration.Views
 						column);
 					isEditing = cell.IsEditing;
 					text = ((TextBox)cell.Content).Text;
+
+					WpfHelper.Shutdown(w);
 				};
 			});
 			Assert.IsTrue(isEditing);
