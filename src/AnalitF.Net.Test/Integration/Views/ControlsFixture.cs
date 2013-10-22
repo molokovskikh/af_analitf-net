@@ -16,6 +16,7 @@ using Caliburn.Micro;
 using Common.Tools.Calendar;
 using Microsoft.Test.Input;
 using NUnit.Framework;
+using Remotion.Linq.Parsing;
 using Action = System.Action;
 using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 using Keyboard = System.Windows.Input.Keyboard;
@@ -99,15 +100,21 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
-		private static void Idle(Window w, Action target)
-		{
-			w.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(target));
-		}
-
 		[Test]
 		public void Focus_on_empty_data_grid()
 		{
-			throw new NotImplementedException();
+			WpfHelper.WithWindow(w => {
+				var grid = new DataGrid();
+				grid.AutoGenerateColumns = false;
+				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
+				w.Content = grid;
+				grid.ItemsSource = Enumerable.Empty<Tuple<string>>().ToList();
+				Idle(w, () => {
+					DataGridHelper.Focus(grid);
+					Assert.IsTrue(grid.IsKeyboardFocusWithin);
+					WpfHelper.Shutdown(w);
+				});
+			});
 		}
 
 		[Test]
@@ -133,6 +140,11 @@ namespace AnalitF.Net.Test.Integration.Views
 					});
 				});
 			});
+		}
+
+		private static void Idle(Window w, Action target)
+		{
+			w.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(target));
 		}
 	}
 }

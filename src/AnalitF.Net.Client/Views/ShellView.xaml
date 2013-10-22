@@ -29,7 +29,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
-			<RowDefinition />
+			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
@@ -175,6 +175,11 @@
 
 				<Separator />
 
+				<Button x:Name="ShowMain" ToolTip="На главную страницу">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Home 2_32.ico"
+						Style="{StaticResource ButtonImage}" />
+				</Button>
+
 				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
@@ -190,7 +195,7 @@
 			</ToolBar>
 		</ToolBarTray>
 
-		<ContentControl Grid.Row="2" Width="Auto" Height="Auto" x:Name="ActiveItem" />
+		<ContentControl Grid.Row="2" x:Name="ActiveItem" />
 
 		<StatusBar Grid.Row="3">
 			<StatusBar.ItemsPanel>

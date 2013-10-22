@@ -452,6 +452,11 @@ namespace AnalitF.Net.Client.ViewModels
 			ActivateRootItem(new WaybillsViewModel());
 		}
 
+		public void ShowMain()
+		{
+			ResetNavigation();
+		}
+
 		private void ActivateRootItem(IScreen screen)
 		{
 			if (ActiveItem != null && ActiveItem.GetType() == screen.GetType())

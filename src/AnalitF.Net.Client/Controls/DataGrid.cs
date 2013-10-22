@@ -2,12 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 
@@ -145,6 +148,44 @@ namespace AnalitF.Net.Client.Controls
 					DataGridHelper.Focus(this);
 				}));
 			}
+		}
+
+		protected override Size MeasureOverride(Size availableSize)
+		{
+			var size = base.MeasureOverride(availableSize);
+
+			//в текущей реализации datagrid вычислении ширины колонок происходит асинхронно
+			//посе того как таблица была нарисована, это приводит к странному эфекту когда таблица рисуется
+			//с одним размером колонок а затем почти мгновенно с другим
+			//зачем так происходит понять невозможно, мне кажется это продолжение безумия
+			//с асинхронной механикой рисования в wpf
+			//ниже я вызываю приватные методы что бы вычислить ширину колонок до этапа рисования
+			//это не решает проблему перерисовки полность но решает ее значительнуюу часть
+			//перерисовка все равно производится но она затрагивает только заголовок таблицы
+			//это неприятно не лучше чем было
+			var value = GetProperty(this, "InternalColumns");
+			Invoke(value, "ComputeColumnWidths");
+			SetField(value, "_columnWidthsComputationPending", false);
+			return size;
+		}
+
+		private void SetField(object target, string name, bool value)
+		{
+			var f = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+			f.SetValue(target, value);
+		}
+
+		private void Invoke(object value, string name)
+		{
+			var m = value.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic, null,
+				new[] { typeof(object) }, null);
+			m.Invoke(value, new object[] { null });
+		}
+
+		private object GetProperty(DataGrid dataGrid, string name)
+		{
+			var prop = typeof(DataGrid).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
+			return prop.GetValue(dataGrid, null);
 		}
 	}
 }
