@@ -2,9 +2,6 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions">
-	<UserControl.Resources>
-		<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
-	</UserControl.Resources>
 	<StackPanel>
 		<Grid>
 			<Grid.ColumnDefinitions>

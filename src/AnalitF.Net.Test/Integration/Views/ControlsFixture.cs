@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +41,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			public List<Selectable<Tuple<string, string>>> Items { get; set; }
 		}
 
-		[Test]
+		[Test, Explicit("тест конфликтует с пользовательским вводом")]
 		public void Popup_selector()
 		{
 			WpfHelper.WithWindow(w => {
@@ -81,7 +82,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
-		[Test]
+		[Test, Explicit("тест управляет мышкой и движения пользователя могут его сломать")]
 		public void Set_focus_on_empty_grid()
 		{
 			WpfHelper.WithWindow(w => {

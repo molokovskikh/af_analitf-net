@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			Landscape();
 
@@ -75,17 +75,17 @@ namespace AnalitF.Net.Client.Models.Print
 			headerTable.Margin = new Thickness(0, 0, 0, 0);
 			doc.Blocks.Add(headerTable);
 			var columns = new[] {
-				new PrintColumnDeclaration("Наименование товара (описание выполненных работ, оказанных услуг)", 303),
-				new PrintColumnDeclaration("Ед. изм.", 29),
-				new PrintColumnDeclaration("Кол-во", 44),
-				new PrintColumnDeclaration("Цена (тариф) за ед. изм.", 69),
-				new PrintColumnDeclaration("Стоимость товаров (работ, услуг) всего без налога", 85),
-				new PrintColumnDeclaration("В том числе акциз", 39),
-				new PrintColumnDeclaration("Налоговая ставка", 39),
-				new PrintColumnDeclaration("Сумма налога", 71),
-				new PrintColumnDeclaration("Стоимость товаров (работ, услуг), всего с налогом", 85),
-				new PrintColumnDeclaration("Страна происхождения", 99),
-				new PrintColumnDeclaration("Номер грузовой таможенной декларации", 135)
+				new PrintColumn("Наименование товара (описание выполненных работ, оказанных услуг)", 303),
+				new PrintColumn("Ед. изм.", 29),
+				new PrintColumn("Кол-во", 44),
+				new PrintColumn("Цена (тариф) за ед. изм.", 69),
+				new PrintColumn("Стоимость товаров (работ, услуг) всего без налога", 85),
+				new PrintColumn("В том числе акциз", 39),
+				new PrintColumn("Налоговая ставка", 39),
+				new PrintColumn("Сумма налога", 71),
+				new PrintColumn("Стоимость товаров (работ, услуг), всего с налогом", 85),
+				new PrintColumn("Страна происхождения", 99),
+				new PrintColumn("Номер грузовой таможенной декларации", 135)
 			};
 			var dataTable = BuildTableHeader(columns);
 			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
@@ -219,7 +219,6 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 			table.RowGroups[0].Rows[0].Cells[1].TextAlignment = TextAlignment.Left;
 			doc.Blocks.Add(table);
-			return doc;
 		}
 
 		private Table TwoColumns(GridLength leftWidth, string left, string right)

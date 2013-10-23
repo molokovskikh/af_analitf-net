@@ -21,11 +21,11 @@ namespace AnalitF.Net.Client.Models.Commands
 {
 	public class ResultDir
 	{
-		public ResultDir(string name, Settings settings, string dstRoot, string srcRoot)
+		public ResultDir(string name, Settings settings, Config.Config confg)
 		{
 			Name = name;
-			Src = Path.Combine(srcRoot, Name);
-			Dst = settings.MapPath(name) ?? Path.Combine(dstRoot, name);
+			Src = Path.Combine(confg.UpdateTmpDir, Name);
+			Dst = settings.MapPath(name) ?? Path.Combine(confg.RootDir, name);
 			if (name.Match("waybills")) {
 				Open = settings.OpenWaybills;
 				GroupBySupplier = settings.GroupWaybillsBySupplier;
@@ -178,10 +178,11 @@ namespace AnalitF.Net.Client.Models.Commands
 				FileHelper.CreateDirectoryRecursive(dir);
 
 			var dirs = new List<ResultDir> {
-				new ResultDir("ads", settings, Config.RootDir, Config.UpdateTmpDir),
-				new ResultDir("waybills", settings, Config.RootDir, Config.UpdateTmpDir),
-				new ResultDir("docs", settings, Config.RootDir, Config.UpdateTmpDir),
-				new ResultDir("rejects", settings, Config.RootDir, Config.UpdateTmpDir),
+				new ResultDir("ads", settings, Config),
+				new ResultDir("newses", settings, Config),
+				new ResultDir("waybills", settings, Config),
+				new ResultDir("docs", settings, Config),
+				new ResultDir("rejects", settings, Config),
 			};
 
 			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)

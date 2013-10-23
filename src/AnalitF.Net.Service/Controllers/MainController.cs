@@ -94,6 +94,7 @@ where UserId = :userId;")
 									UpdatePath = config.UpdatePath,
 									AdsPath = config.AdsPath,
 									DocsPath = config.DocsPath,
+									Config = config,
 									MaxProducerCostPriceId = config.MaxProducerCostPriceId,
 									MaxProducerCostCostId = config.MaxProducerCostCostId,
 								};

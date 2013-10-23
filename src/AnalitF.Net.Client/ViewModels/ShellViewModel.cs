@@ -22,6 +22,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Parts;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
@@ -30,7 +31,9 @@ using NHibernate;
 using NHibernate.Impl;
 using NHibernate.Linq;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
+using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
@@ -45,9 +48,9 @@ namespace AnalitF.Net.Client.ViewModels
 	}
 
 	[DataContract]
-	public class ShellViewModel : BaseConductor
+	public class ShellViewModel : BaseShell, IDisposable
 	{
-		private Stack<IScreen> navigationStack = new Stack<IScreen>();
+		private Config.Config config = new Config.Config();
 		private WindowManager windowManager;
 		private ISession session;
 		private IStatelessSession statelessSession;
@@ -55,17 +58,26 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<Address> addresses = new List<Address>();
 		private Address currentAddress;
 
+		private Main defaultItem;
+
 		protected IScheduler Scheduler = BaseScreen.TestSchuduler ?? DefaultScheduler.Instance;
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
 		public bool Quiet;
 		public string[] Arguments = new string[0];
-		public Config.Config Config = new Config.Config();
+		[DataMember]
+		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
+		[DataMember]
+		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
+
+		private Navigator navigator;
 
 		public ShellViewModel()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
+			defaultItem = new Main(Config);
+			navigator = new Navigator(this, defaultItem);
 
 #if DEBUG
 			if (!UnitTesting)
@@ -123,12 +135,15 @@ namespace AnalitF.Net.Client.ViewModels
 			NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session);
 		}
 
-
-		[DataMember]
-		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
-
-		[DataMember]
-		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
+		public Config.Config Config
+		{
+			get { return config; }
+			set
+			{
+				config = value;
+				defaultItem.Config = value;
+			}
+		}
 
 		[DataMember]
 		public bool ShowAllAddresses { get; set; }
@@ -164,6 +179,12 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnInitialize()
 		{
 			Reload();
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+			navigator.Activate();
 		}
 
 		public override void OnViewReady()
@@ -274,6 +295,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
+			defaultItem.Update();
 		}
 
 		protected void UpdateDisplayName()
@@ -358,7 +380,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
-			ActivateRootItem(new CatalogViewModel());
+			NavigateRoot(new CatalogViewModel());
 		}
 
 		public bool CanShowPrice
@@ -371,7 +393,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var model = new PriceViewModel {
 				OpenSinglePrice = true
 			};
-			ActivateRootItem(model);
+			NavigateRoot(model);
 		}
 
 		public bool CanShowMnn
@@ -381,7 +403,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMnn()
 		{
-			ActivateRootItem(new MnnViewModel());
+			NavigateRoot(new MnnViewModel());
 		}
 
 		public bool CanSearchOffers
@@ -391,7 +413,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void SearchOffers()
 		{
-			ActivateRootItem(new SearchOfferViewModel());
+			NavigateRoot(new SearchOfferViewModel());
 		}
 
 		public void ShowSettings()
@@ -406,7 +428,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrderLines()
 		{
-			ActivateRootItem(new OrderLinesViewModel());
+			NavigateRoot(new OrderLinesViewModel());
 		}
 
 		public bool CanShowJunkOffers
@@ -416,7 +438,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowJunkOffers()
 		{
-			ActivateRootItem(new JunkOfferViewModel());
+			NavigateRoot(new JunkOfferViewModel());
 		}
 
 		public bool CanShowRejects
@@ -426,7 +448,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowRejects()
 		{
-			ActivateRootItem(new RejectsViewModel());
+			NavigateRoot(new RejectsViewModel());
 		}
 
 		public bool CanShowOrders
@@ -439,7 +461,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (ActiveItem is CatalogOfferViewModel)
 				Navigate(new OrdersViewModel());
 			else
-				ActivateRootItem(new OrdersViewModel());
+				NavigateRoot(new OrdersViewModel());
 		}
 
 		public bool CanShowWaybills
@@ -449,32 +471,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowWaybills()
 		{
-			ActivateRootItem(new WaybillsViewModel());
+			NavigateRoot(new WaybillsViewModel());
 		}
 
 		public void ShowMain()
 		{
-			ResetNavigation();
-		}
-
-		private void ActivateRootItem(IScreen screen)
-		{
-			if (ActiveItem != null && ActiveItem.GetType() == screen.GetType())
-				return;
-
-			while (navigationStack.Count > 0) {
-				var closing = navigationStack.Peek();
-				if (closing.GetType() == screen.GetType())
-					break;
-				navigationStack.Pop();
-				closing.TryClose();
-			}
-
-			if (ActiveItem != null)
-				ActiveItem.TryClose();
-
-			if (ActiveItem == null)
-				ActivateItem(screen);
+			NavigateRoot(defaultItem);
 		}
 
 		public bool CanMicroUpdate
@@ -616,11 +618,11 @@ namespace AnalitF.Net.Client.ViewModels
 						RunUpdate();
 					}
 					else if (t.Result == UpdateResult.OK) {
+						Reload();
 						windowManager.Notify(command.SuccessMessage);
 					}
 					results = command.Results.ToArray();
 				});
-			Reload();
 			return results;
 		}
 
@@ -689,52 +691,34 @@ namespace AnalitF.Net.Client.ViewModels
 			} while (!done);
 		}
 
-		public void Navigate(IScreen item)
-		{
-			if (ActiveItem != null) {
-				navigationStack.Push(ActiveItem);
-				DeactivateItem(ActiveItem, false);
-			}
-
-			ActivateItem(item);
-		}
-
 		public IEnumerable<IScreen> NavigationStack
 		{
-			get { return navigationStack; }
+			get { return navigator.NavigationStack; }
+		}
+
+		private void NavigateRoot(IScreen screen)
+		{
+			navigator.NavigateRoot(screen);
+		}
+
+		public void Navigate(IScreen item)
+		{
+			navigator.Navigate(item);
 		}
 
 		public void ResetNavigation()
 		{
-			while (navigationStack.Count > 0) {
-				var screen = navigationStack.Pop();
-				screen.TryClose();
-			}
-
-			if (ActiveItem != null)
-				ActiveItem.TryClose();
+			navigator.ResetNavigation();
 		}
 
 		public void NavigateAndReset(params IScreen[] views)
 		{
-			ResetNavigation();
-
-			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
-			foreach (var screen in chain) {
-				navigationStack.Push(screen);
-			}
-			ActivateItem(views.Last());
+			navigator.NavigateAndReset(views);
 		}
 
 		public override void DeactivateItem(IScreen item, bool close)
 		{
-			base.DeactivateItem(item, close);
-
-			if (close) {
-				if (ActiveItem == null && navigationStack.Count > 0) {
-					ActivateItem(navigationStack.Pop());
-				}
-			}
+			navigator.DeactivateItem(item, close, base.DeactivateItem);
 		}
 
 		protected override void OnActivationProcessed(IScreen item, bool success)
@@ -767,5 +751,33 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowWindow(Debug);
 		}
 #endif
+		public void Dispose()
+		{
+			IsNotifying = false;
+
+			foreach (var screen in navigator.NavigationStack.OfType<IDisposable>())
+				screen.Dispose();
+			((Stack<IScreen>)navigator.NavigationStack).Clear();
+
+			if (ActiveItem is IDisposable) {
+				((IDisposable)ActiveItem).Dispose();
+				ActiveItem = null;
+			}
+
+			if (session != null) {
+				session.Dispose();
+				session = null;
+			}
+
+			if (statelessSession != null) {
+				statelessSession.Dispose();
+				statelessSession = null;
+			}
+
+			if (defaultItem != null) {
+				defaultItem.Dispose();
+				defaultItem = null;
+			}
+		}
 	}
 }

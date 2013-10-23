@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			Landscape();
 
@@ -113,22 +113,22 @@ namespace AnalitF.Net.Client.Models.Print
 			header.TextAlignment = TextAlignment.Center;
 
 			var columns = new [] {
-				new PrintColumnDeclaration("№ пп", 27),
-				new PrintColumnDeclaration("Наименование и краткая характеристика товара", 200),
-				new PrintColumnDeclaration("Серия товара", 84),
-				new PrintColumnDeclaration("Срок годности", 60),
-				new PrintColumnDeclaration("Наименование", 100),
-				new PrintColumnDeclaration("Цена без НДС, руб", 56),
-				new PrintColumnDeclaration("Цена с НДС, руб", 56),
-				new PrintColumnDeclaration("Цена ГР, руб", 56),
-				new PrintColumnDeclaration("Опт. надб. %", 32),
-				new PrintColumnDeclaration("Отпуск. цена пост - ка без НДС, руб", 56),
-				new PrintColumnDeclaration("НДС пост-ка, руб", 40),
-				new PrintColumnDeclaration("Отпуск. цена пост-ка с НДС, руб", 56),
-				new PrintColumnDeclaration("Розн. торг. надб. %", 33),
-				new PrintColumnDeclaration("Розн. цена. за ед., руб", 56),
-				new PrintColumnDeclaration("Кол-во", 36),
-				new PrintColumnDeclaration("Розн. сумма, руб", 56),
+				new PrintColumn("№ пп", 27),
+				new PrintColumn("Наименование и краткая характеристика товара", 200),
+				new PrintColumn("Серия товара", 84),
+				new PrintColumn("Срок годности", 60),
+				new PrintColumn("Наименование", 100),
+				new PrintColumn("Цена без НДС, руб", 56),
+				new PrintColumn("Цена с НДС, руб", 56),
+				new PrintColumn("Цена ГР, руб", 56),
+				new PrintColumn("Опт. надб. %", 32),
+				new PrintColumn("Отпуск. цена пост - ка без НДС, руб", 56),
+				new PrintColumn("НДС пост-ка, руб", 40),
+				new PrintColumn("Отпуск. цена пост-ка с НДС, руб", 56),
+				new PrintColumn("Розн. торг. надб. %", 33),
+				new PrintColumn("Розн. цена. за ед., руб", 56),
+				new PrintColumn("Кол-во", 36),
+				new PrintColumn("Розн. сумма, руб", 56),
 			};
 			var columnGrops = new [] {
 				new ColumnGroup("Предприятие - изготовитель", 4, 6)
@@ -151,7 +151,7 @@ namespace AnalitF.Net.Client.Models.Print
 				l.Quantity,
 				l.RetailSum,
 			});
-				BuildTable(rows, columns, columnGrops);
+			BuildTable(rows, columns, columnGrops);
 
 			var retailsSum = lines.Sum(l => l.RetailSum);
 			block = Block("Продажная сумма: " + RusCurrency.Str((double)retailsSum));
@@ -173,8 +173,6 @@ namespace AnalitF.Net.Client.Models.Print
 				+ String.Format("_{0}____/             /\n", docSettings.CommitteeMember1)
 				+ String.Format("_{0}____/             /\n", docSettings.CommitteeMember2)
 				+ String.Format("_{0}____/             /", docSettings.CommitteeMember3));
-
-			return doc;
 		}
 
 		public override FrameworkContentElement GetHeader(int page, int pageCount)

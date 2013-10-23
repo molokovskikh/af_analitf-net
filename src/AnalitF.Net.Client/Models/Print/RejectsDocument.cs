@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.showReason = showReason;
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			var size = paginator.PageSize;
@@ -25,11 +25,11 @@ namespace AnalitF.Net.Client.Models.Print
 
 			Header("Препараты, предписанные к изъятию из аптечной сети");
 			var headers = new [] {
-				new PrintColumnDeclaration("Серия", 96),
-				new PrintColumnDeclaration("Наименование", 364),
-				new PrintColumnDeclaration("Фирма-изготовитель", 208),
-				new PrintColumnDeclaration("Номер письма", 180),
-				new PrintColumnDeclaration("Дата", 148),
+				new PrintColumn("Серия", 96),
+				new PrintColumn("Наименование", 364),
+				new PrintColumn("Фирма-изготовитель", 208),
+				new PrintColumn("Номер письма", 180),
+				new PrintColumn("Дата", 148),
 			};
 			var rows = rejects.Select(r => new object[] {
 				r.Series,
@@ -44,10 +44,9 @@ namespace AnalitF.Net.Client.Models.Print
 			else {
 				BuildTable(rows, headers);
 			}
-			return doc;
 		}
 
-		private void BuildTableWithReason(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers)
+		private void BuildTableWithReason(IEnumerable<object[]> rows, PrintColumn[] headers)
 		{
 			var table = BuildTableHeader(headers);
 			var rowGroup = table.RowGroups[0];

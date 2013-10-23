@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Models;
@@ -78,6 +79,14 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(Directory.GetFiles("data")[0], Is.EquivalentTo("data\\data.zip"));
 			exporter.Dispose();
 			Assert.That(Directory.GetFiles("export"), Is.Empty);
+		}
+
+		[Test]
+		public void Export_news()
+		{
+			ExportCompressed();
+			var files = ZipHelper.lsZip(file);
+			Assert.IsTrue(files.Any(f => Regex.IsMatch(f, @"newses/\d+.html")), files.Implode());
 		}
 
 		[Test]

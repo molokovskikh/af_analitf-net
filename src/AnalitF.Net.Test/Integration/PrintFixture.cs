@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,11 +29,18 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Print()
 		{
-			var view = new CatalogOfferViewModel(new Catalog("тест"));
-			view.CurrentCatalog = new Catalog { Name = new CatalogName(), Form = "Папаверин" };
+			var catalog = new Catalog("Папаверин");
+			var view = new CatalogOfferViewModel(catalog);
+			view.CurrentCatalog = catalog;
 			view.Offers.Value = Offers();
 			var result = view.Print();
 			Assert.That(result.Paginator, Is.Not.Null);
+			var doc = (FlowDocument)result.Paginator.Source;
+			var asText = FlowDocumentToText(doc);
+			Assert.AreEqual("Папаверин\r\n" +
+				"|Наименование|Производитель|Прайс-лист|Срок год.|Дата пр.|Разн.|Цена\r\n" +
+				"|Папаверин|ВоронежФарм|||01.01.0001 0:00:00||0\r\n" +
+				"Общее количество предложений: 1", asText);
 		}
 
 		[Test]
@@ -55,10 +63,31 @@ namespace AnalitF.Net.Test.Integration
 			Assert.IsNotNull(doc);
 		}
 
+		private static string FlowDocumentToText(FlowDocument doc)
+		{
+			var builder = new StringBuilder();
+			foreach (var el in doc.Descendants().Distinct()) {
+				if (el is Paragraph && !(((Paragraph)el).Parent is TableCell)) {
+					builder.AppendLine();
+				}
+				if (el is Run) {
+					builder.Append((((Run)el).Text ?? "").Trim());
+				}
+				if (el is TableRow) {
+					builder.AppendLine();
+				}
+				if (el is TableCell) {
+					builder.Append("|");
+				}
+			}
+			return builder.ToString().Trim();
+		}
+
+
 		private static List<Offer> Offers()
 		{
 			return new List<Offer> {
-				new Offer { ProducerSynonym = "123", ProductSynonym = "123", Price = new Price() }
+				new Offer { ProductSynonym = "Папаверин", ProducerSynonym = "ВоронежФарм", Price = new Price() }
 			};
 		}
 

@@ -98,7 +98,7 @@
 					<ItemsControl.ItemTemplate>
 						<DataTemplate>
 							<TextBlock>
-								<Hyperlink Command="binders:Commands.NavigateUri" NavigateUri="{Binding Uri}">
+								<Hyperlink NavigateUri="{Binding Uri}">
 									<Run Text="{Binding Name}" />
 								</Hyperlink>
 							</TextBlock>

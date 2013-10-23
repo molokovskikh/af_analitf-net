@@ -18,8 +18,23 @@ namespace AnalitF.Net.Client.Models.Print
 			reportHeader = header;
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
+			doc.Blocks.Add(new Paragraph());
+			doc.Blocks.Add(new Paragraph(new Run(reportHeader)) {
+				FontWeight = FontWeights.Bold,
+				FontSize = 16
+			});
+
+			var headers = new [] {
+				new PrintColumn("Наименование", 216),
+				new PrintColumn("Производитель", 136),
+				new PrintColumn("Прайс-лист", 112),
+				new PrintColumn("Срок год.", 85),
+				new PrintColumn("Дата пр.", 85),
+				new PrintColumn("Разн.", 48),
+				new PrintColumn("Цена", 55)
+			};
 			var rows = offers.Select((o, i) => new object[] {
 				o.ProductSynonym,
 				o.ProducerSynonym,
@@ -30,33 +45,8 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Cost
 			});
 
-			return BuildDocument(rows);
-		}
-
-		private FlowDocument BuildDocument(IEnumerable<object[]> rows)
-		{
-			var totalRows = offers.Count();
-			var doc = new FlowDocument();
-
-			doc.Blocks.Add(new Paragraph());
-			doc.Blocks.Add(new Paragraph(new Run(reportHeader)) {
-				FontWeight = FontWeights.Bold,
-				FontSize = 16
-			});
-
-			var headers = new [] {
-				new PrintColumnDeclaration("Наименование", 216),
-				new PrintColumnDeclaration("Производитель", 136),
-				new PrintColumnDeclaration("Прайс-лист", 112),
-				new PrintColumnDeclaration("Срок год.", 85),
-				new PrintColumnDeclaration("Дата пр.", 85),
-				new PrintColumnDeclaration("Разн.", 48),
-				new PrintColumnDeclaration("Цена", 55)
-			};
-
 			BuildTable(rows, headers);
-			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", totalRows))));
-			return doc;
+			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", offers.Count()))));
 		}
 	}
 }

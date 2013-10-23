@@ -53,7 +53,10 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			if (dispatcher != null) {
 				if (window != null)
-					dispatcher.Invoke(() => window.Close());
+					dispatcher.Invoke(() => {
+						window.Close();
+						shell.Dispose();
+					});
 				dispatcher.InvokeShutdown();
 			}
 		}
@@ -336,7 +339,21 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Offers_search()
 		{
-			throw new NotImplementedException();
+			var term = new string(session.Query<Offer>().First().ProductSynonym.Take(3).ToArray());
+			Start();
+
+			Click("SearchOffers");
+			WaitIdle();
+
+			var search = (SearchOfferViewModel)shell.ActiveItem;
+			var view = (FrameworkElement)search.GetView();
+
+			Input(view, "Offers", term);
+			Input(view, "Offers", Key.Enter);
+			dispatcher.Invoke(() => {
+				var offers = (DataGrid)view.FindName("Offers");
+				Assert.That(offers.Items.Count, Is.GreaterThan(0));
+			});
 		}
 
 		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement

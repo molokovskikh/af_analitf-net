@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Printing;
@@ -18,10 +19,12 @@ namespace AnalitF.Net.Client.Models.Results
 		private IEnumerable<Lazy<Tuple<FlowDocument, BaseDocument>>> docs
 			= new Lazy<Tuple<FlowDocument, BaseDocument>>[0];
 
+		private Lazy<Tuple<FlowDocument, BaseDocument>>[] buffered;
+
 		public PrintResult(string name, IEnumerable<BaseDocument> docs)
 		{
-			this.docs = docs.Select(b => new Lazy<Tuple<FlowDocument, BaseDocument>>(
-				() => Tuple.Create(b.Build(), b)));
+			this.docs = docs
+				.Select(b => new Lazy<Tuple<FlowDocument, BaseDocument>>(() => Tuple.Create(b.Build(), b)));
 			this.name = name;
 		}
 
@@ -36,10 +39,8 @@ namespace AnalitF.Net.Client.Models.Results
 		}
 
 		public PrintResult(string name, IEnumerable<FlowDocument> docs)
+			: this(name, docs.Select(d => new DefaultDocument(d)))
 		{
-			this.docs = docs.Select(d => new Lazy<Tuple<FlowDocument, BaseDocument>>(
-				() => Tuple.Create(d, (BaseDocument)null)));
-			this.name = name;
 		}
 
 		private void Prepare(FlowDocument doc)
@@ -53,14 +54,12 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Execute(ActionExecutionContext context)
 		{
-			if (docs == null)
-				return;
-
 			var dialog = new PrintDialog();
 			if (dialog.ShowDialog() != true)
 				return;
 
-			foreach (var doc in docs) {
+			CheckBuffer();
+			foreach (var doc in buffered) {
 				var documentPaginator = GetPaginator(doc.Value.Item1, doc.Value.Item2);
 				var orientation = GetPageOrientation(documentPaginator);
 				if (orientation != PageOrientation.Unknown)
@@ -83,17 +82,20 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			get
 			{
-				var doc = docs.First();
+				CheckBuffer();
+				var doc = buffered.First();
 				return GetPaginator(doc.Value.Item1, doc.Value.Item2);
 			}
 		}
 
+		private void CheckBuffer()
+		{
+			if (buffered == null)
+				buffered = docs.ToArray();
+		}
+
 		private WrapDocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
 		{
-			baseDoc = baseDoc ?? new DefaultDocument {
-				Document = doc
-			};
-
 			Prepare(doc);
 			var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			return new WrapDocumentPaginator(documentPaginator, baseDoc);

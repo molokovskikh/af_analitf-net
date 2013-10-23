@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.NHibernate;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -57,11 +58,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.Select(c => c.Id)
 				.Contains(o.CatalogId));
 			price = session.Load<Price>(offer.Price.Id);
-
 			model.CurrentOffer = model.Offers.Value.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
+
 			var catalog = (CatalogViewModel)shell.ActiveItem;
+			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0), shell.NavigationStack.Implode());
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Name.Mnn));
 		}

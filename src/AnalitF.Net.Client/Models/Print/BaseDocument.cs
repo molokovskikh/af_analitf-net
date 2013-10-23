@@ -10,9 +10,9 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PrintColumnDeclaration
+	public class PrintColumn
 	{
-		public PrintColumnDeclaration(string name, int width)
+		public PrintColumn(string name, int width)
 		{
 			Name = name;
 			Width = width;
@@ -75,20 +75,19 @@ namespace AnalitF.Net.Client.Models.Print
 
 	public class DefaultDocument : BaseDocument
 	{
-		public FlowDocument Document
+		public DefaultDocument(FlowDocument doc)
 		{
-			get { return doc; }
-			set { doc = value; }
+			this.doc = doc;
 		}
 
-		public override FlowDocument Build()
-		{
-			return doc;
-		}
+		protected override void BuildDoc()
+		{}
 	}
 
 	public abstract class BaseDocument
 	{
+		private bool builded;
+
 		protected FlowDocument doc = new FlowDocument();
 		protected Style BlockStyle;
 		protected Style HeaderStyle;
@@ -131,7 +130,17 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 		}
 
-		public abstract FlowDocument Build();
+		public FlowDocument Build()
+		{
+			if (!builded) {
+				BuildDoc();
+				builded = true;
+			}
+
+			return doc;
+		}
+
+		protected abstract void BuildDoc();
 
 		public object Settings { get; protected set; }
 
@@ -227,7 +236,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return paragraph;
 		}
 
-		protected Table BuildTable(IEnumerable<object[]> rows, PrintColumnDeclaration[] columns, IEnumerable<ColumnGroup> groups = null)
+		protected Table BuildTable(IEnumerable<object[]> rows, PrintColumn[] columns, IEnumerable<ColumnGroup> groups = null)
 		{
 			var table = BuildTableHeader(columns, groups);
 			BuildRows(rows, columns, table);
@@ -235,7 +244,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return table;
 		}
 
-		protected void BuildRows(IEnumerable<object[]> rows, PrintColumnDeclaration[] headers, Table table)
+		protected void BuildRows(IEnumerable<object[]> rows, PrintColumn[] headers, Table table)
 		{
 			var tableRowGroup = table.RowGroups[0];
 
@@ -244,7 +253,7 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 		}
 
-		protected void BuildRow(PrintColumnDeclaration[] headers, TableRowGroup tableRowGroup, object[] data)
+		protected void BuildRow(PrintColumn[] headers, TableRowGroup tableRowGroup, object[] data)
 		{
 			var row = new TableRow();
 			tableRowGroup.Rows.Add(row);
@@ -270,7 +279,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return cell;
 		}
 
-		protected Table BuildTableHeader(PrintColumnDeclaration[] columns, IEnumerable<ColumnGroup> groups = null)
+		protected Table BuildTableHeader(PrintColumn[] columns, IEnumerable<ColumnGroup> groups = null)
 		{
 			var table = new Table {
 				Style = TableStyle,

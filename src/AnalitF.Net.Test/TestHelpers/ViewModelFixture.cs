@@ -45,6 +45,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			shell = new ShellViewModel();
 			shell.UnitTesting = true;
 			shell.Config = config;
+			disposable.Add(shell);
 			ScreenExtensions.TryActivate(shell);
 		}
 

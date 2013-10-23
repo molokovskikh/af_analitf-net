@@ -46,6 +46,8 @@ namespace AnalitF.Net.Service.Models
 
 		public string UpdateType;
 
+		public Config.Config Config;
+
 		public string Prefix = "";
 		public string ExportPath = "";
 		public string ResultPath = "";
@@ -247,7 +249,7 @@ select
 	Composition
 from Catalogs.Descriptions
 where NeedCorrect = 0";
-			Export(result, sql, "ProductDescriptions");
+			CachedExport(result, sql, "ProductDescriptions");
 
 			sql = @"
 select Id,
@@ -296,7 +298,67 @@ from Catalogs.Catalog c
 where Hidden = 0";
 			Export(result, sql, "catalogs");
 
+			sql = @"
+select Id, PublicationDate, Header
+from Usersettings.News
+where PublicationDate < curdate() + interval 1 day
+	and Deleted = 0
+	and DestinationType in (1, 2)";
+			Export(result, sql, "News");
+
+			var newses = session.CreateSQLQuery(@"select Id, Body
+from Usersettings.News
+where PublicationDate < curdate() + interval 1 day
+	and Deleted = 0
+	and DestinationType in (1, 2)")
+				.List<object[]>();
+
+			var template = "<html>"
+				+ "<head>"
+				+ "<meta charset=\"utf-8\">"
+				+ "</head>"
+				+ "<body>"
+				+ "{0}"
+				+ "<body>"
+				+ "</html>";
+			foreach (var news in newses) {
+				var name = news[0] + ".html";
+				result.Add(new UpdateData("newses/" + name) {
+					Content = String.Format(template, news[1])
+				});
+			}
+
 			ExportDocs(result);
+		}
+
+		private void CachedExport(List<UpdateData> result, string sql, string tag)
+		{
+			if (Config == null) {
+				Export(result, sql, tag);
+				return;
+			}
+
+			var cacheData = Path.Combine(Config.CachePath, tag + ".txt");
+			var cacheMeta = Path.Combine(Config.CachePath, tag + ".meta.txt");
+			if (IsCacheStale(cacheData)) {
+				Export(result, sql, tag);
+				//если другая нитка успела обновить кеш раньше
+				if (IsCacheStale(tag)) {
+					var data = result.First(r => r.ArchiveFileName == tag + ".txt");
+					File.Copy(data.LocalFileName, cacheData, true);
+					var meta = result.First(r => r.ArchiveFileName == tag + ".meta.txt");
+					File.WriteAllText(cacheMeta, meta.Content);
+				}
+			}
+			else {
+				result.Add(new UpdateData(tag + ".meta.txt") { LocalFileName = cacheMeta });
+				result.Add(new UpdateData(tag + ".txt") { LocalFileName = cacheData });
+			}
+		}
+
+		private bool IsCacheStale(string filename)
+		{
+			return new FileInfo(filename).LastWriteTime.Date != DateTime.Today;
 		}
 
 		private void ExportDocs(List<UpdateData> result)

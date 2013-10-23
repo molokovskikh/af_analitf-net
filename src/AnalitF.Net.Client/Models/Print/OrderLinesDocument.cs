@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.model = model;
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			var address = ((ShellViewModel)model.Parent).CurrentAddress;
 			if (model.IsCurrentSelected) {
@@ -35,12 +35,12 @@ namespace AnalitF.Net.Client.Models.Print
 				Header(text);
 			}
 			var headers = new [] {
-				new PrintColumnDeclaration("Наименование", 232),
-				new PrintColumnDeclaration("Производитель", 168),
-				new PrintColumnDeclaration("Прайс-лист", 132),
-				new PrintColumnDeclaration("Цена", 52),
-				new PrintColumnDeclaration("Заказ", 40),
-				new PrintColumnDeclaration("Сумма", 60)
+				new PrintColumn("Наименование", 232),
+				new PrintColumn("Производитель", 168),
+				new PrintColumn("Прайс-лист", 132),
+				new PrintColumn("Цена", 52),
+				new PrintColumn("Заказ", 40),
+				new PrintColumn("Сумма", 60)
 			};
 
 			int count;
@@ -98,8 +98,6 @@ namespace AnalitF.Net.Client.Models.Print
 					}
 				});
 			}
-
-			return doc;
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.order = order;
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			var header = String.Format("Заявка № {0} от на {1} от {2}",
 				order.Id,
@@ -28,13 +28,13 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(order.Comment);
 
 			var headers = new [] {
-				new PrintColumnDeclaration("№ п/п", 40),
-				new PrintColumnDeclaration("Наименование", 220),
-				new PrintColumnDeclaration("Производитель", 165),
-				new PrintColumnDeclaration("Срок годн.", 73),
-				new PrintColumnDeclaration("Цена", 66),
-				new PrintColumnDeclaration("Заказ", 40),
-				new PrintColumnDeclaration("Сумма", 80)
+				new PrintColumn("№ п/п", 40),
+				new PrintColumn("Наименование", 220),
+				new PrintColumn("Производитель", 165),
+				new PrintColumn("Срок годн.", 73),
+				new PrintColumn("Цена", 66),
+				new PrintColumn("Заказ", 40),
+				new PrintColumn("Сумма", 80)
 			};
 
 			var lines = order.Lines;
@@ -75,8 +75,6 @@ namespace AnalitF.Net.Client.Models.Print
 					}
 				});
 			}
-
-			return doc;
 		}
 	}
 }

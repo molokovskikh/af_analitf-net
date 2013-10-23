@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.address = address;
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			doc.Blocks.Add(new Paragraph());
 
@@ -32,12 +32,12 @@ namespace AnalitF.Net.Client.Models.Print
 			if (price.Order != null)
 				doc.Blocks.Add(new Paragraph(new Run(price.Order.PersonalComment)));
 			var headers = new [] {
-				new PrintColumnDeclaration("№ п/п", 40),
-				new PrintColumnDeclaration("Наименование", 260),
-				new PrintColumnDeclaration("Производитель", 196),
-				new PrintColumnDeclaration("Цена", 68),
-				new PrintColumnDeclaration("Заказ", 40),
-				new PrintColumnDeclaration("Сумма", 80)
+				new PrintColumn("№ п/п", 40),
+				new PrintColumn("Наименование", 260),
+				new PrintColumn("Производитель", 196),
+				new PrintColumn("Цена", 68),
+				new PrintColumn("Заказ", 40),
+				new PrintColumn("Сумма", 80)
 			};
 			var rows = offers.Select((o, i) => new object[]{
 				i + 1,
@@ -74,8 +74,6 @@ namespace AnalitF.Net.Client.Models.Print
 				}
 			});
 			doc.Blocks.Add(table);
-
-			return doc;
 		}
 	}
 }

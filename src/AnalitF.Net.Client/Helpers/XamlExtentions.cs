@@ -168,7 +168,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static IEnumerable<T> Descendants<T>(this DependencyObject view)
 		{
-			return view.Children().Flat(Children).OfType<T>();
+			return view.Descendants().OfType<T>();
 		}
 
 		public static void PrintVisualTree(Visual visual, int offset = 0)

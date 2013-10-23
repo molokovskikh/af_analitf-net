@@ -128,7 +128,7 @@
     <Compile Include="..\AnalitF.Net.Service\Models\Contract.cs">
       <Link>Models\Contract.cs</Link>
     </Compile>
-    <Compile Include="Binders\BaseConductor.cs" />
+    <Compile Include="Binders\BaseShell.cs" />
     <Compile Include="Binders\CommandBinder.cs" />
     <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
@@ -204,6 +204,7 @@
     <Compile Include="Models\MaxProducerCost.cs" />
     <Compile Include="Models\MinOrderSumRule.cs" />
     <Compile Include="Models\Mnn.cs" />
+    <Compile Include="Models\News.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\Print\BaseDocument.cs" />
     <Compile Include="Models\Print\CatalogOfferDocument.cs" />
@@ -260,6 +261,7 @@
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
+    <Compile Include="ViewModels\Main.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\CatalogOfferViewModel.cs" />
     <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
@@ -269,6 +271,7 @@
     <Compile Include="ViewModels\Parts\AddressSelector.cs" />
     <Compile Include="ViewModels\Parts\Editor.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
+    <Compile Include="ViewModels\Parts\Navigator.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
@@ -310,6 +313,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main.xaml.cs">
+      <DependentUpon>Main.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Orders\Correction.xaml.cs">
       <DependentUpon>Correction.xaml</DependentUpon>
@@ -439,6 +445,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Main.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -25,6 +25,7 @@ using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using Main = AnalitF.Net.Client.ViewModels.Main;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -291,6 +292,31 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(offers.Count, Is.GreaterThan(0));
 			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
 			Assert.AreEqual(1, offer.OrderCount);
+		}
+
+		[Test]
+		public void Show_default_item()
+		{
+			var current = shell.ActiveItem;
+			Assert.IsInstanceOf<Main>(current);
+			shell.ResetNavigation();
+			Assert.AreEqual(current, shell.ActiveItem);
+		}
+
+		[Test]
+		public void Activate_view()
+		{
+			shell.ShowCatalog();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+			shell.ShowPrice();
+			Assert.IsInstanceOf<PriceViewModel>(shell.ActiveItem);
+		}
+
+		[Test]
+		public void Init_newses_url()
+		{
+			var main = (Main)shell.ActiveItem;
+			Assert.IsNotNull(main.Newses[0].Url);
 		}
 
 		private void Collect(IEnumerable<IResult> results)

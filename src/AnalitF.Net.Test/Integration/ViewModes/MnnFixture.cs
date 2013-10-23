@@ -14,7 +14,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void On_open_catalog_update_have_offers_flag()
 		{
-			var catalogName = session.Query<CatalogName>().First(n => n.HaveOffers == false && n.Mnn != null);
+			var catalogName = session.Query<CatalogName>()
+				.First(n => !n.HaveOffers
+					&& n.Mnn != null
+					&& !n.Mnn.HaveOffers);
 			var model = Init(new MnnViewModel());
 			Assert.That(model.Mnns.Value.Count, Is.GreaterThan(0));
 			model.ShowWithoutOffers.Value = true;

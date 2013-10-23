@@ -57,6 +57,14 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					r.ControlMinReq = true;
 				});
 
+				session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
+					+ " values(:publicationDate, :header, :body, :destinationType)")
+					.SetParameter("publicationDate", DateTime.Now)
+					.SetParameter("header", "Тестовая новость")
+					.SetParameter("body", "<h1>Тесто</h1>")
+					.SetParameter("destinationType", "1")
+					.ExecuteUpdate();
+
 				holder.ReleaseSession(session);
 			}
 

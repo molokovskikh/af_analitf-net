@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 		}
 
-		public override FlowDocument Build()
+		protected override void BuildDoc()
 		{
 			Landscape();
 
@@ -95,22 +95,22 @@ namespace AnalitF.Net.Client.Models.Print
 				+ "Доверенность № _______от \"______\" ________20__г\n");
 
 			var columns = new [] {
-				new PrintColumnDeclaration("№ пп", 27),
-				new PrintColumnDeclaration("Наименование и краткая характеристика товара", 200),
-				new PrintColumnDeclaration("Серия товара", 50),
-				new PrintColumnDeclaration("Сертификат", 66),
-				new PrintColumnDeclaration("Срок годности", 60),
-				new PrintColumnDeclaration("Наименование", 124),
-				new PrintColumnDeclaration("Цена без НДС, руб", 56),
-				new PrintColumnDeclaration("Затребован.колич.", 56),
-				new PrintColumnDeclaration("Опт. надб. %", 32),
-				new PrintColumnDeclaration("Отпуск. цена пост-ка без НДС, руб", 56),
-				new PrintColumnDeclaration("НДС пост-ка, руб", 40),
-				new PrintColumnDeclaration("Отпуск. цена пост-ка с НДС, руб", 56),
-				new PrintColumnDeclaration("Розн. торг. надб. %", 33),
-				new PrintColumnDeclaration("Розн. цена. за ед., руб", 56),
-				new PrintColumnDeclaration("Кол-во", 36),
-				new PrintColumnDeclaration("Розн. сумма, руб", 56),
+				new PrintColumn("№ пп", 27),
+				new PrintColumn("Наименование и краткая характеристика товара", 200),
+				new PrintColumn("Серия товара", 50),
+				new PrintColumn("Сертификат", 66),
+				new PrintColumn("Срок годности", 60),
+				new PrintColumn("Наименование", 124),
+				new PrintColumn("Цена без НДС, руб", 56),
+				new PrintColumn("Затребован.колич.", 56),
+				new PrintColumn("Опт. надб. %", 32),
+				new PrintColumn("Отпуск. цена пост-ка без НДС, руб", 56),
+				new PrintColumn("НДС пост-ка, руб", 40),
+				new PrintColumn("Отпуск. цена пост-ка с НДС, руб", 56),
+				new PrintColumn("Розн. торг. надб. %", 33),
+				new PrintColumn("Розн. цена. за ед., руб", 56),
+				new PrintColumn("Кол-во", 36),
+				new PrintColumn("Розн. сумма, руб", 56),
 			};
 			var columnGrops = new [] {
 				new ColumnGroup("Предприятие - изготовитель", 5, 6)
@@ -161,7 +161,6 @@ namespace AnalitF.Net.Client.Models.Print
 				+ String.Format("Получил:Принял(получил)______________{0}\n\n", docSettings.GotBy)
 				+ String.Format("Руководитель учреждения_____________{0}\n\n", settings.Director)
 				+ String.Format("Главный (старший)бухгалтер ________________{0}\n", settings.Accountant));
-			return doc;
 		}
 
 		private void TwoColumns()

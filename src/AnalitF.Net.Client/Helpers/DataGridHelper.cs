@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Helpers
 				new Typeface(dataGrid.FontFamily, dataGrid.FontStyle, dataGrid.FontWeight, dataGrid.FontStretch),
 				dataGrid.FontSize,
 				dataGrid.Foreground);
-			column.Width = new DataGridLength(text.Width, DataGridLengthUnitType.Star);
+			column.Width = new DataGridLength(text.Width, DataGridLengthUnitType.Pixel);
 		}
 
 		public static void CalculateColumnWidths(Controls.DataGrid grid)

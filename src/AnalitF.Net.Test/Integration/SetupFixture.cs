@@ -47,12 +47,7 @@ namespace AnalitF.Net.Test.Integration
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
 
-			global::Test.Support.Setup.BuildConfiguration("server");
-			var server = new Service.Config.Initializers.NHibernate();
-			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
-			server.Configuration = holder.GetConfiguration(typeof(ActiveRecordBase));
-			server.Init();
-			global::Test.Support.Setup.SessionFactory = holder.GetSessionFactory(typeof(ActiveRecordBase));
+			global::Test.Support.Setup.SessionFactory = ServerNHConfig("server");
 
 			var nhibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate = nhibernate;
@@ -70,6 +65,16 @@ namespace AnalitF.Net.Test.Integration
 				BackupData();
 			}
 			InitWebServer();
+		}
+
+		public static ISessionFactory ServerNHConfig(string connectionStringName)
+		{
+			global::Test.Support.Setup.BuildConfiguration(connectionStringName);
+			var server = new Service.Config.Initializers.NHibernate();
+			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
+			server.Configuration = holder.GetConfiguration(typeof(ActiveRecordBase));
+			server.Init();
+			return holder.GetSessionFactory(typeof(ActiveRecordBase));
 		}
 
 		[TearDown]

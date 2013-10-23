@@ -10,7 +10,7 @@ namespace AnalitF.Net.Test.Unit
 	[TestFixture]
 	public class BaseConductorFixture
 	{
-		private BaseConductor conductor;
+		private BaseShell conductor;
 
 		public class TestScreen : Screen, IActivateEx
 		{
@@ -25,7 +25,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
-			conductor = new BaseConductor();
+			conductor = new BaseShell();
 		}
 
 		[Test]

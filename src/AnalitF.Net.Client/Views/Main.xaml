@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Main"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="1*" />
+			<RowDefinition Height="3*" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="240" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.Column="0" Margin="10">
+			<Grid Margin="0, 0, 0, 5">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Image Grid.Column="0" Source="/AnalitF.Net.Client;component/assets/images/Logo.png"
+					Width="79"
+					Height="74" />
+				<StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<TextBlock x:Name="EtalogLabel" FontSize="22" Foreground="#336488">ИНФОРУМ</TextBlock>
+					<TextBlock FontSize="16" Foreground="#336488">аналитическая</TextBlock>
+					<TextBlock x:Name="SmallLabel" FontSize="16" Foreground="#336488">компания</TextBlock>
+				</StackPanel>
+			</Grid>
+			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба поддержки пользователей:</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">
+				тел.:
+				<Span FontWeight="Bold">260-00-00</Span>
+			</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">Режим работы:</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">будни: с 07:00 до 19:00</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">
+				E-mail:
+				<Hyperlink NavigateUri="mailto:tech@analit.net">
+					tech@analit.net
+				</Hyperlink>
+			</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">
+				<Hyperlink NavigateUri="http://www.analit.net">www.analit.net</Hyperlink>
+			</TextBlock>
+		</StackPanel>
+
+		<Grid Grid.Row="0" Grid.Column="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<Label Grid.Row="0">Новости</Label>
+			<c:DataGrid Grid.Row="1" x:Name="Newses" BorderThickness="0">
+				<c:DataGrid.Columns>
+					<c:DataGridTextColumnEx Width="*" Header="Дата"
+						Binding="{Binding PublicationDate}" />
+					<DataGridHyperlinkColumn Width="*" Header="Тема"
+						ContentBinding="{Binding Header}"
+						Binding="{Binding Url}" />
+				</c:DataGrid.Columns>
+			</c:DataGrid>
+		</Grid>
+
+		<ScrollViewer Grid.Row="1" Grid.ColumnSpan="2"
+			HorizontalScrollBarVisibility="Auto"
+			VerticalScrollBarVisibility="Auto">
+			<Image
+				VerticalAlignment="Center"
+				HorizontalAlignment="Center"
+				Source="{Binding Ad, Converter={StaticResource UriToBitmap}}" />
+		</ScrollViewer>
+	</Grid>
+</UserControl>
