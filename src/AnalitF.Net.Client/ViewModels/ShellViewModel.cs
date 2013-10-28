@@ -189,6 +189,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void OnViewReady()
 		{
+			Bus.SendMessage("Startup");
 			var import = Arguments.LastOrDefault().Match("import");
 			if (import) {
 				Coroutine.BeginExecute(Import().GetEnumerator());

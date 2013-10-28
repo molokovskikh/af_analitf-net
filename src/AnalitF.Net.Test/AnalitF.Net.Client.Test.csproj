@@ -103,9 +103,11 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="Acceptance\AccentanceSetup.cs" />
     <Compile Include="Acceptance\BaseFixture.cs" />
     <Compile Include="Acceptance\MemoryLeakFixture.cs" />
     <Compile Include="Acceptance\SetupFixture.cs" />
+    <Compile Include="Acceptance\StartFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
@@ -188,6 +190,7 @@
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
+    <Compile Include="Unit\SingleInstanceFixture.cs" />
     <Compile Include="Unit\StyleBuilderFixture.cs" />
     <Compile Include="Unit\UpdateCommandFixture.cs" />
     <Compile Include="Unit\UtilFixture.cs" />

@@ -65,19 +65,6 @@ namespace AnalitF.Net.Test.Integration
 			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
 		}
 
-		[Test]
-		public void Reject_start_second_time()
-		{
-			ConfigurationManager.AppSettings["Uri"] = "http://localhost";
-			var app = CreateBootstrapper();
-			app.Init();
-			Assert.IsTrue(app.IsInitialized);
-
-			var app1 = CreateBootstrapper();
-			Assert.Throws<EndUserError>(app1.Init);
-			Assert.IsFalse(app1.IsInitialized);
-		}
-
 		private void StartShell()
 		{
 			app.InitShell();

@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -7,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Microsoft.Test.Input;
 using NUnit.Framework;
@@ -16,23 +18,34 @@ namespace AnalitF.Net.Client.Test.Acceptance
 {
 	public class BaseFixture
 	{
-		[DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
-		public static extern IntPtr FindWindowByCaption(IntPtr ZeroOnly, string lpWindowName);
+		protected string root;
+		protected string exe;
 
-		protected TimeSpan Timeout = TimeSpan.FromSeconds(5);
+		protected TimeSpan Timeout;
 
 		protected Process Process;
 
 		protected AutomationElement MainWindow;
-		protected string Exe;
 		protected StreamWriter Writer;
 
-		protected Action<AutomationElement> WindowHandler;
+		protected Action<AutomationElement> DialogHandle = w => {};
+		protected Action<AutomationElement> WindowHandle = w => {};
 
 		[SetUp]
 		public void Setup()
 		{
-			Exe = @"..\..\..\AnalitF.Net.Client\bin\Debug";
+			WindowHandle = w => {};
+			DialogHandle = w => {};
+
+			Timeout = TimeSpan.FromSeconds(5);
+			root = @"..\..\..\AnalitF.Net.Client\bin\Debug";
+			exe = Path.Combine(root, "AnalitF.Net.Client.exe");
+
+			Automation.AddAutomationEventHandler(
+				WindowPatternIdentifiers.WindowOpenedEvent,
+				AutomationElement.RootElement,
+				TreeScope.Subtree,
+				OnActivated);
 		}
 
 		[TearDown]
@@ -47,6 +60,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				if (!Process.HasExited)
 					Process.Kill();
 			}
+			Automation.RemoveAllEventHandlers();
 		}
 
 		protected AutomationElement FindByName(string name, AutomationElement element = null)
@@ -75,22 +89,14 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				.FirstOrDefault();
 		}
 
-		protected void StartProcess(string fileName, string dir = "", string arguments = "")
+		protected Process StartProcess(string fileName, string dir = "", string arguments = "")
 		{
-			Process = new Process();
-			Process.StartInfo.FileName = fileName;
-			Process.StartInfo.Arguments = arguments;
-			//Process.StartInfo.WorkingDirectory = dir;
-			Process.Start();
-			Process.EnableRaisingEvents = true;
-
-			Automation.AddAutomationEventHandler(
-				WindowPatternIdentifiers.WindowOpenedEvent,
-				AutomationElement.RootElement,
-				TreeScope.Subtree,
-				OnActivated);
-
-			Wait(() => MainWindow == null);
+			var process = new Process();
+			process.StartInfo.FileName = fileName;
+			process.StartInfo.Arguments = arguments;
+			process.Start();
+			process.EnableRaisingEvents = true;
+			return process;
 		}
 
 		protected void ClickByName(string name, AutomationElement element = null)
@@ -115,17 +121,27 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
+			var el = sender as AutomationElement;
+			WindowHandle(el);
 			if (MainWindow == null) {
-				MainWindow = AutomationElement.FromHandle(Process.MainWindowHandle);
+				var id = (string)el.GetCurrentPropertyValue(AutomationElement.AutomationIdProperty);
+				if (id == "Shell") {
+					MainWindow = el;
+				}
 			}
-			else if (WindowHandler != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
-				WindowHandler(sender as AutomationElement);
+			else if (DialogHandle != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
+				DialogHandle(el);
 			}
 		}
 
 		protected static void Dump(AutomationElementCollection elements)
 		{
-			foreach (var element in elements.Cast<AutomationElement>()) {
+			Dump(elements.Cast<AutomationElement>());
+		}
+
+		protected static void Dump(IEnumerable<AutomationElement> elements)
+		{
+			foreach (var element in elements) {
 				Dump(element);
 			}
 		}
@@ -135,14 +151,20 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			if (element == null)
 				return;
 
-			Console.WriteLine("--------------");
+			Console.WriteLine("--------");
+			Console.WriteLine("{0} {1}", element, element.GetHashCode());
+			Console.WriteLine("--props--");
 			foreach (var p in element.GetSupportedProperties()) {
-				Console.WriteLine("{0} = {1}", p.ProgrammaticName, element.GetCurrentPropertyValue(p));
+				var value = element.GetCurrentPropertyValue(p);
+				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName, value,
+					value != null ? value.GetType().ToString() : "");
 			}
 
+			Console.WriteLine("--patterns--");
 			foreach (var pattern in element.GetSupportedPatterns()) {
 				Console.WriteLine(pattern.ProgrammaticName);
 			}
+			Console.WriteLine("--------");
 		}
 
 		protected AutomationElementCollection FindTextElements(string text)
@@ -173,8 +195,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		public void WaitWindow(string caption)
 		{
-			Wait(() => FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ") == IntPtr.Zero);
-			MainWindow = AutomationElement.FromHandle(FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ"));
+			Wait(() => WinApi.FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ") == IntPtr.Zero);
+			MainWindow = AutomationElement.FromHandle(WinApi.FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ"));
 		}
 
 		protected void WaitText(string text)
@@ -190,45 +212,14 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected void Activate()
 		{
-			var root = "acceptance";
-			Prepare(Exe, root);
-
 			var debugPipe = Guid.NewGuid().ToString();
 			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
 			Writer = new StreamWriter(pipe);
 
-			StartProcess(Path.Combine(root, "AnalitF.Net.Client.exe"), root, "--debug-pipe=" + debugPipe);
+			Process = StartProcess(exe, root, "--debug-pipe=" + debugPipe);
+			WaitMainWindow();
 			pipe.WaitForConnection();
 			Writer.AutoFlush = true;
-		}
-
-		protected static void CopyDir(string src, string dst)
-		{
-			if (!Directory.Exists(dst)) {
-				Directory.CreateDirectory(dst);
-			}
-
-			foreach (var file in Directory.GetFiles(src)) {
-				File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
-			}
-
-			foreach (var dir in Directory.GetDirectories(src)) {
-				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
-			}
-		}
-
-		protected static void Prepare(string exe, string root)
-		{
-			if (!Directory.Exists(root))
-				Directory.CreateDirectory(root);
-
-			var files = Directory.GetFiles(exe, "*.exe")
-				.Concat(Directory.GetFiles(exe, "*.dll"))
-				.Concat(Directory.GetFiles(exe, "*.config"));
-			files.Each(f => File.Copy(f, Path.Combine(root, Path.GetFileName(f)), true));
-
-			CopyDir("share", Path.Combine(root, "share"));
-			CopyDir("backup", Path.Combine(root, "data"));
 		}
 
 		protected static void DoubleClickCell(AutomationElement table, int row, int column)
@@ -252,6 +243,19 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var rect = (Rect)element.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
 			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 10, (int)rect.Y + 10));
 			Mouse.DoubleClick(MouseButton.Right);
+		}
+
+		protected void WaitMainWindow()
+		{
+			Wait(() => MainWindow == null);
+		}
+
+		protected void HandleDialogs()
+		{
+			DialogHandle = e => {
+				//отказываемся от всего
+				ClickByName("Нет", e);
+			};
 		}
 	}
 }

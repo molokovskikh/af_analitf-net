@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Automation;
@@ -91,7 +92,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Activate();
 			Click("ShowPrice");
 			var prices = WaitForElement("Prices");
-			WindowHandler = e => {
+			DialogHandle = e => {
 				Dump(e);
 			};
 			RightClick(prices);
@@ -107,17 +108,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private AutomationElement WaitWindow()
 		{
 			AutomationElement window = null;
-			WindowHandler = e => { window = e; };
+			DialogHandle = e => { window = e; };
 			Wait(() => window == null);
 			return window;
-		}
-
-		private void HandleDialogs()
-		{
-			WindowHandler = e => {
-				//отказываемся от всего
-				ClickByName("Нет", e);
-			};
 		}
 
 		private void WaitForMessage(string message)

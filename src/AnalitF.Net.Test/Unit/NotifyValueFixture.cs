@@ -19,7 +19,7 @@ namespace AnalitF.Net.Test.Unit
 			Assert.That(p2.Value, Is.EqualTo(3));
 		}
 
-		public class MyClass : INotifyPropertyChanged
+		public class MyClass : BaseNotify
 		{
 			private int data;
 
@@ -31,14 +31,6 @@ namespace AnalitF.Net.Test.Unit
 					data = value;
 					OnPropertyChanged("Data");
 				}
-			}
-
-			public event PropertyChangedEventHandler PropertyChanged;
-
-			protected virtual void OnPropertyChanged(string propertyName)
-			{
-				var handler = PropertyChanged;
-				if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
 			}
 		}
 

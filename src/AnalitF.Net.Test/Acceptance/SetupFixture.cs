@@ -22,7 +22,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			//VBoxManage.exe guestcontrol "Windows 7" exec --image "C:\Windows\notepad.exe" --username "test" --wait-stdout --verbose
 			var file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "setup.exe");
 			File.Copy(source, file, true);
-			StartProcess(file);
+			Process = StartProcess(file);
+			WaitMainWindow();
 
 			WaitWindow("АналитФАРМАЦИЯ");
 			Click("Установить");

@@ -20,5 +20,20 @@ namespace AnalitF.Net.Client.Helpers
 				.DefaultIfEmpty(posibleNames.First())
 				.First();
 		}
+
+		public static void CopyDir(string src, string dst)
+		{
+			if (!Directory.Exists(dst)) {
+				Directory.CreateDirectory(dst);
+			}
+
+			foreach (var file in Directory.GetFiles(src)) {
+				File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
+			}
+
+			foreach (var dir in Directory.GetDirectories(src)) {
+				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
+			}
+		}
 	}
 }

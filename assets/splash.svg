@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="600"
+   height="350"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="splash.png">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient5303"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5305" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5297"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5299" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5261">
+      <stop
+         style="stop-color:#4d7da2;stop-opacity:1;"
+         offset="0"
+         id="stop5263" />
+      <stop
+         style="stop-color:#4d7da2;stop-opacity:0;"
+         offset="1"
+         id="stop5265" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5213"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000080;stop-opacity:1;"
+         offset="0"
+         id="stop5215" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.4"
+     inkscape:cx="238.16221"
+     inkscape:cy="80.853563"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1880"
+     inkscape:window-height="1130"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2989"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-702.36218)">
+    <rect
+       style="fill:#4d7da2;fill-opacity:1;stroke:#4d7da2;stroke-width:9.77864265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2999"
+       width="590.22137"
+       height="340.22134"
+       x="4.8893213"
+       y="707.25153" />
+    <g
+       id="g3031">
+      <text
+         sodipodi:linespacing="125%"
+         id="text5269"
+         y="877.38171"
+         x="125.43945"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Segoe UI;-inkscape-font-specification:Segoe UI"
+         xml:space="preserve"><tspan
+           y="877.38171"
+           x="125.43945"
+           id="tspan5271"
+           sodipodi:role="line">АналитФАРМАЦИЯ</tspan></text>
+      <text
+         transform="scale(0.98574619,1.0144599)"
+         sodipodi:linespacing="125%"
+         id="text5273"
+         y="889.50006"
+         x="129.55574"
+         style="font-size:19.71492386px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans"
+         xml:space="preserve"><tspan
+           y="889.50006"
+           x="129.55574"
+           id="tspan5275"
+           sodipodi:role="line">идет загрузка, пожалуйста подождите</tspan></text>
+    </g>
+  </g>
+</svg>

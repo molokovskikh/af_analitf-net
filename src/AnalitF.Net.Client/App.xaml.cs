@@ -22,6 +22,8 @@ namespace AnalitF.Net.Client
 		private Style baseStyle;
 
 		public bool Quiet;
+		public SplashScreen Splash;
+		public bool FaultInject;
 
 		public void RegisterResources()
 		{

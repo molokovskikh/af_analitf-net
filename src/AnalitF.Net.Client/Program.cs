@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using log4net;
 using log4net.Config;
 using NDesk.Options;
+using ReactiveUI;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client
 {
@@ -20,15 +28,19 @@ namespace AnalitF.Net.Client
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			XmlConfigurator.Configure();
+			SingleInstance instance = null;
 			try {
-				var app = new App();
+				XmlConfigurator.Configure();
+
 				var help = false;
 				var version  = false;
+				var quiet = false;
+				var faultInject = false;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
-					{"quiet", "Не выводить предупреждения при запуске", v => app.Quiet = v != null},
+					{"quiet", "Не выводить предупреждения при запуске", v => quiet = v != null},
+					{"fault-inject", "", v => faultInject = v != null}
 				};
 				options.Parse(args);
 
@@ -52,11 +64,51 @@ namespace AnalitF.Net.Client
 					return;
 				}
 
+				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
+				if (!instance.TryStart())
+					return;
+
+				RxApp.MessageBus.Listen<string>()
+					.Where(m => m == "Startup")
+					.Subscribe(_ => instance.SignalStartup());
+
+				RxApp.MessageBus.Listen<string>()
+					.Where(m => m == "Shutdown")
+					.Subscribe(_ => instance.SignalShutdown());
+
+				var splash = new SplashScreen(@"assets/images/splash.png");
+				if (!quiet) {
+					try {
+						splash.Show(true);
+					}
+					catch(Exception e) {
+						log.Error("Ошибка при отображение заставки", e);
+					}
+				}
+
+				instance.Wait();
+
+				var app = new App {
+					Quiet = quiet,
+					Splash = splash,
+					FaultInject = faultInject
+				};
 				app.InitializeComponent();
 				app.Run();
 			}
+			catch(EndUserError e) {
+				MessageBox.Show(
+					e.Message,
+					"АналитФАРМАЦИЯ: Внимание",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+			}
 			catch(Exception e) {
 				log.Error("Ошибка при запуске приложения", e);
+			}
+			finally {
+				if (instance != null)
+					instance.SignalShutdown();
 			}
 		}
 	}

@@ -316,7 +316,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Init_newses_url()
 		{
 			var main = (Main)shell.ActiveItem;
-			Assert.IsNotNull(main.Newses[0].Url);
+			Assert.IsNotNull(main.Newses.Value[0].Url);
 		}
 
 		private void Collect(IEnumerable<IResult> results)

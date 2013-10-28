@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
@@ -15,21 +16,22 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Config = config;
 			DisplayName = "";
-			Newses = new List<News>();
 			Readonly = true;
+			Newses = new NotifyValue<List<News>>();
+			Ad = new NotifyValue<string>();
 		}
 
-		public List<News> Newses { get; set; }
-		public string Ad { get; set; }
+		public NotifyValue<List<News>> Newses { get; set; }
+		public NotifyValue<string> Ad { get; set; }
 
 		public override void Update()
 		{
-			Newses = StatelessSession.Query<News>().OrderByDescending(n => n.PublicationDate).ToList();
-			Newses.Each(n => n.Init(Config));
+			Newses.Value = StatelessSession.Query<News>().OrderByDescending(n => n.PublicationDate).ToList();
+			Newses.Value.Each(n => n.Init(Config));
 
 			var filename = FileHelper.MakeRooted(@"ads\index.gif");
 			if (File.Exists(filename))
-				Ad = filename;
+				Ad.Value = filename;
 		}
 	}
 }

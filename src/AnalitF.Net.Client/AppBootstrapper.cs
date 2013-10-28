@@ -34,7 +34,6 @@ namespace AnalitF.Net.Client
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
-		private SingleInstance instance;
 		private bool import;
 		private string name;
 #if DEBUG
@@ -59,7 +58,6 @@ namespace AnalitF.Net.Client
 		{
 			FailFast = !useApplication;
 			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
-			instance = new SingleInstance(this.name);
 			SettingsPath = this.name + ".data";
 
 			Start();
@@ -87,6 +85,7 @@ namespace AnalitF.Net.Client
 		{
 			if (FailFast)
 				return;
+
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
 			CheckShutdown(e.Exception);
@@ -95,10 +94,15 @@ namespace AnalitF.Net.Client
 		private void CheckShutdown(Exception e)
 		{
 			if (!IsInitialized) {
+				var app = ((App)Application);
+				if (app != null && app.Splash != null) {
+					app.Splash.Close(TimeSpan.Zero);
+				}
+
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение
 				var message = ErrorHelper.TranslateException(e)
-					?? String.Format("Не удалось запустить приложение из-за ошибки {0}", e.Message);
+					?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e.Message);
 				if (Application != null && ((App)Application).Quiet)
 					Console.WriteLine(message);
 				else
@@ -115,6 +119,7 @@ namespace AnalitF.Net.Client
 		protected override void OnExit(object sender, EventArgs e)
 		{
 			Serialize();
+			RxApp.MessageBus.SendMessage("Shutdown");
 		}
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
@@ -130,8 +135,12 @@ namespace AnalitF.Net.Client
 				return;
 			}
 
-			if (Application != null)
-				((App)Application).RegisterResources();
+			var app = ((App)Application);
+			if (app != null) {
+				app.RegisterResources();
+				if (app.FaultInject)
+					throw new Exception("Ошибка при инициализации");
+			}
 			InitUi();
 			InitDb();
 			InitShell();
@@ -219,10 +228,6 @@ namespace AnalitF.Net.Client
 
 		private bool InitApp()
 		{
-			var isSingle = instance.Check();
-			if (!isSingle)
-				return false;
-
 			var args = Environment.GetCommandLineArgs();
 			Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
@@ -275,7 +280,8 @@ namespace AnalitF.Net.Client
 
 		public void Dispose()
 		{
-			instance.Dispose();
+			if (Shell != null)
+				Shell.Dispose();
 		}
 	}
 }

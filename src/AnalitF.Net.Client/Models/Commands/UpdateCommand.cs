@@ -46,6 +46,7 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class UpdateCommand : RemoteCommand
 	{
 		public ProgressReporter Reporter;
+		public bool Clean = true;
 		private string syncData = "";
 
 		public UpdateCommand()
@@ -194,6 +195,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			OpenResultFiles(resultDirs);
 
 			Directory.Delete(Config.UpdateTmpDir, true);
+			if (Clean)
+				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
 		}
 

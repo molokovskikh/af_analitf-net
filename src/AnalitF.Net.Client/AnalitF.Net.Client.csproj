@@ -180,6 +180,7 @@
     <Compile Include="Helpers\StyleHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
+    <Compile Include="Helpers\WinApi.cs" />
     <Compile Include="Helpers\XamlExtentions.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\BaseOffer.cs" />
@@ -643,6 +644,7 @@
   <ItemGroup>
     <Resource Include="Assets\images\logo.png" />
     <Resource Include="Assets\images\price-tag-log.png" />
+    <Resource Include="Assets\images\splash.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <ItemGroup>

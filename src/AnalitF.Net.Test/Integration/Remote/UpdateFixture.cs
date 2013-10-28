@@ -388,6 +388,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			((UpdateCommand)command).SyncData = "Waybills";
+			((UpdateCommand)command).Clean = false;
 
 			session.Transaction.Commit();
 			command.Run();
