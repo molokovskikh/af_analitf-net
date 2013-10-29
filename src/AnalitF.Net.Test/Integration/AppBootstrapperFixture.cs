@@ -24,12 +24,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			File.Delete("AnalitF.Net.Client.Test.data");
 			app = CreateBootstrapper();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			app.Dispose();
+			disposable.Add(app);
 		}
 
 		[Test]
@@ -68,18 +63,19 @@ namespace AnalitF.Net.Test.Integration
 		private void StartShell()
 		{
 			app.InitShell();
-			ScreenExtensions.TryActivate(app.Shell);
-			shell = app.Shell;
+			Activate(app.Shell);
+		}
+
+		protected override ShellViewModel shell
+		{
+			get { return app.Shell; }
 		}
 
 		private AppBootstrapper CreateBootstrapper()
 		{
 			//нужно переопределить имя что бы избежать конфликтов с запущеным приложением
-			var app = new AppBootstrapper(false, "AnalitF.Net.Client.Test");
+			var app = new AppBootstrapper(false, false, "AnalitF.Net.Client.Test");
 			Execute.ResetWithoutDispatcher();
-			//setup - переопределяет windowmanager но AppBootstrapper вернет все назад
-			//нужно восстановить тестовый windowmanager а то тесты начнут показывать окна
-			manager = StubWindowManager();
 			return app;
 		}
 	}

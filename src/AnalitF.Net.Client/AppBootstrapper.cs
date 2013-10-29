@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
-		private bool import;
+		private bool isImport;
 		private string name;
 #if DEBUG
 		private DebugPipe debugPipe;
@@ -47,20 +47,23 @@ namespace AnalitF.Net.Client
 
 		public static Config.Initializers.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
+		public string[] Args = new string[0];
+		public string DebugPipeName;
 
 		public AppBootstrapper()
 			: this(true)
 		{
 		}
 
-		public AppBootstrapper(bool useApplication = true, string name = null)
+		public AppBootstrapper(bool useApplication = true, bool start = true, string name = null)
 			: base(useApplication)
 		{
 			FailFast = !useApplication;
 			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
 			SettingsPath = this.name + ".data";
 
-			Start();
+			if (start)
+				Start();
 		}
 
 		public bool IsInitialized { get; private set; }
@@ -94,16 +97,17 @@ namespace AnalitF.Net.Client
 		private void CheckShutdown(Exception e)
 		{
 			if (!IsInitialized) {
+				//нужно закрыть заставку прежде чем показывать сообщение
+				//иначе окно с сообщение будет закрыто и не отобразится
 				var app = ((App)Application);
 				if (app != null && app.Splash != null) {
-					app.Splash.Close(TimeSpan.Zero);
+						app.Splash.Close(TimeSpan.Zero);
 				}
-
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение
 				var message = ErrorHelper.TranslateException(e)
 					?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e.Message);
-				if (Application != null && ((App)Application).Quiet)
+				if (Config.Quit)
 					Console.WriteLine(message);
 				else
 					MessageBox.Show(
@@ -151,9 +155,7 @@ namespace AnalitF.Net.Client
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
 			Shell.Config = Config;
-			if (Application != null)
-				Shell.Quiet = ((App)Application).Quiet;
-
+			Shell.IsImport = isImport;
 			Deserialize();
 
 			windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
@@ -217,31 +219,24 @@ namespace AnalitF.Net.Client
 
 			base.BuildUp(instance);
 
-			var shell = instance.GetType().GetField("Shell");
-			if (shell != null)
-				shell.SetValue(instance, Shell);
-
-			var manager = instance.GetType().GetField("Manager");
-			if (manager != null)
-				manager.SetValue(instance, GetInstance(typeof(IWindowManager), null));
+			Util.SetValue(instance, "Manager", GetInstance(typeof(IWindowManager), null));
+			Util.SetValue(instance, "Shell", Shell);
 		}
 
 		private bool InitApp()
 		{
-			var args = Environment.GetCommandLineArgs();
 			Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
 			Config.TmpDir = FileHelper.MakeRooted(Config.TmpDir);
 			Config.DbDir = FileHelper.MakeRooted(Config.DbDir);
-
 #if DEBUG
-			debugPipe = new DebugPipe(args);
+			debugPipe = new DebugPipe(DebugPipeName);
 #endif
 			SettingsPath = FileHelper.MakeRooted(SettingsPath);
-			import = args.LastOrDefault().Match("import");
+			isImport = Args.Any(a => a.Match("import"));
 
 			if (Directory.Exists(Config.TmpDir)) {
-				if (!import) {
+				if (!isImport) {
 					try {
 						Directory.Delete(Config.TmpDir, true);
 						Directory.CreateDirectory(Config.TmpDir);
@@ -263,7 +258,7 @@ namespace AnalitF.Net.Client
 				NHibernate.Init();
 			}
 
-			new SanityCheck(Config.DbDir).Check(import);
+			new SanityCheck(Config.DbDir).Check(isImport);
 		}
 
 		public static void InitUi()

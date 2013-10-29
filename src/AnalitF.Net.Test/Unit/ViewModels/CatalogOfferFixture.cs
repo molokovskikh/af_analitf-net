@@ -11,7 +11,6 @@ using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
 {
@@ -46,7 +45,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		{
 			var model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			model.User = new User();
-			model.Settings.Value.Markups = MarkupConfig.Defaults().ToArray();
 			model.Offers.Value = new List<Offer> {
 				new Offer(new Price {
 					Id = new PriceComposedId()

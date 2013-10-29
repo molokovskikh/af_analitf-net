@@ -75,9 +75,7 @@ namespace AnalitF.Net.Client.Models
 				var settings = session.Query<Settings>().FirstOrDefault();
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
-					settings = new Settings();
-					settings.MappingToken = mappingToken;
-					settings.Markups = MarkupConfig.Defaults().ToList();
+					settings = new Settings(defaults: true, token: mappingToken);
 					session.Save(settings);
 				}
 				else {
@@ -89,14 +87,14 @@ namespace AnalitF.Net.Client.Models
 					//проверяем что данные корректны и если не корректны
 					//пытаемся восстановить их
 					if (settings.Markups.Count == 0)
-						session.Query<MarkupConfig>().Each(settings.Markups.Add);
-
-					if (settings.Waybills.Count == 0)
-						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
+						session.Query<MarkupConfig>().Each(settings.AddMarkup);
 
 					//если ничего восстановить не удалось тогда берем значения по умолчанию
 					if (settings.Markups.Count == 0)
-						MarkupConfig.Defaults().Each(settings.Markups.Add);
+						MarkupConfig.Defaults().Each(settings.AddMarkup);
+
+					if (settings.Waybills.Count == 0)
+						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
 				}
 
 				//если есть адреса то должен быть и пользователь

@@ -121,6 +121,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				m.Settings.UserName = "test";
 				m.Settings.Password = "123";
 				m.Save();
+				Deactivate(m);
 			});
 
 			shell.StartCheck();

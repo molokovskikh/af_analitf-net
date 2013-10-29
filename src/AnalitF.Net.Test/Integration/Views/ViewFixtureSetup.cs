@@ -27,8 +27,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
 			PresentationTraceSources.DataBindingSource.Listeners.Add(new MemoryTraceListner(BindingErrors));
 
-			var app = new Client.App();
 			AssemblySource.Instance.Add(typeof(App).Assembly);
+			var app = new App();
 			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			app.RegisterResources();
 			//при инициализации caliburn будет думать что у нас есть dispatcher

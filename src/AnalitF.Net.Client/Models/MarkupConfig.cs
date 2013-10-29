@@ -18,6 +18,8 @@ namespace AnalitF.Net.Client.Models
 		private bool beginOverlap;
 		private bool haveGap;
 		private bool endLessThanBegin;
+		private decimal begin;
+		private decimal end;
 
 		public MarkupConfig()
 		{}
@@ -35,12 +37,40 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual decimal Begin { get; set; }
-		public virtual decimal End { get; set; }
+
+		public virtual decimal Begin
+		{
+			get { return begin; }
+			set
+			{
+				begin = value;
+				Validate();
+			}
+		}
+
+		public virtual decimal End
+		{
+			get { return end; }
+			set
+			{
+				end = value;
+				Validate();
+			}
+		}
+
 		public virtual decimal Markup { get; set; }
 		public virtual decimal MaxMarkup { get; set; }
 		public virtual decimal? MaxSupplierMarkup { get; set; }
 		public virtual MarkupType Type { get; set; }
+		public virtual Settings Settings { get; set; }
+
+		private void Validate()
+		{
+			if (Settings == null)
+				return;
+
+			Settings.ValidateMarkups();
+		}
 
 		[Ignore]
 		public virtual bool BeginOverlap
@@ -51,6 +81,9 @@ namespace AnalitF.Net.Client.Models
 			}
 			set
 			{
+				if (beginOverlap == value)
+					return;
+
 				beginOverlap = value;
 				OnPropertyChanged("BeginOverlap");
 			}
@@ -65,6 +98,9 @@ namespace AnalitF.Net.Client.Models
 			}
 			set
 			{
+				if (haveGap == value)
+					return;
+
 				haveGap = value;
 				OnPropertyChanged("HaveGap");
 			}
@@ -76,12 +112,14 @@ namespace AnalitF.Net.Client.Models
 			get { return endLessThanBegin; }
 			set
 			{
+				if (endLessThanBegin == value)
+					return;
 				endLessThanBegin = value;
 				OnPropertyChanged("EndLessThanBegin");
 			}
 		}
 
-		public static decimal Calculate(IList<MarkupConfig> markups, BaseOffer currentOffer)
+		public static decimal Calculate(IEnumerable<MarkupConfig> markups, BaseOffer currentOffer)
 		{
 			if (currentOffer == null)
 				return 0;
@@ -99,8 +137,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			return markups
 				.Where(m => m.Type == type)
-				.Where(m => cost > m.Begin && cost <= m.End)
-				.FirstOrDefault();
+				.FirstOrDefault(m => cost > m.Begin && cost <= m.End);
 		}
 
 		public static IEnumerable<MarkupConfig> Defaults()
@@ -113,26 +150,31 @@ namespace AnalitF.Net.Client.Models
 			};
 		}
 
-		public static Tuple<bool, string> Validate(IEnumerable<MarkupConfig> markups)
+		public static string Validate(IEnumerable<MarkupConfig> source)
 		{
-			var data = markups.OrderBy(m => m.Begin).ToArray();
-			foreach (var markup in data) {
-				markup.EndLessThanBegin = markup.End < markup.Begin;
-			}
+			var groups = source.GroupBy(c => c.Type);
+			var errors = new List<string>();
+			foreach (var markups in groups) {
+				var data = markups.OrderBy(m => m.Begin).ToArray();
+				foreach (var markup in data) {
+					markup.EndLessThanBegin = markup.End < markup.Begin;
+				}
 
-			string validationError = null;
-			var prev = data.First();
-			foreach (var markup in data.Skip(1)) {
-				markup.BeginOverlap = prev.End > markup.Begin;
-				markup.HaveGap = prev.End < markup.Begin;
-				if (markup.Markup > markup.MaxMarkup)
-					validationError = "Максимальная наценка меньше наценки.";
-				prev = markup;
-			}
+				var prev = data.First();
+				foreach (var markup in data.Skip(1)) {
+					markup.BeginOverlap = prev.End > markup.Begin;
+					markup.HaveGap = prev.End < markup.Begin;
+					if (markup.Markup > markup.MaxMarkup) {
+						errors.Add("Максимальная наценка меньше наценки.");
+					}
+					prev = markup;
+				}
 
-			var isValid = !data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap)
-				&& string.IsNullOrEmpty(validationError);
-			return Tuple.Create(isValid, validationError);
+				if (data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap)) {
+					errors.Add("Некорректно введены границы цен.");
+				}
+			}
+			return errors.FirstOrDefault();
 		}
 
 		public override string ToString()

@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Util;
 using ReactiveUI;
 using System.Reactive.Linq;
 

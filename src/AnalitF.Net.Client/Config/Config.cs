@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.Config
 			DbDir = "data";
 		}
 
+		public bool Quit;
 		public Uri BaseUrl;
 		public string TmpDir;
 		public string RootDir;

@@ -36,11 +36,15 @@ namespace AnalitF.Net.Client
 				var version  = false;
 				var quiet = false;
 				var faultInject = false;
+				var debugpipe = "";
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
 					{"quiet", "Не выводить предупреждения при запуске", v => quiet = v != null},
-					{"fault-inject", "", v => faultInject = v != null}
+					{"fault-inject", "", v => faultInject = v != null},
+#if DEBUG
+					{"debug-pipe=", "", v => debugpipe = v},
+#endif
 				};
 				options.Parse(args);
 
@@ -89,11 +93,13 @@ namespace AnalitF.Net.Client
 				instance.Wait();
 
 				var app = new App {
-					Quiet = quiet,
 					Splash = splash,
 					FaultInject = faultInject
 				};
 				app.InitializeComponent();
+				var bootstapper = new AppBootstrapper();
+				bootstapper.Config.Quit = quiet;
+				bootstapper.DebugPipeName = debugpipe;
 				app.Run();
 			}
 			catch(EndUserError e) {

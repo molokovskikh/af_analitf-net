@@ -1,7 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
@@ -20,6 +22,7 @@ namespace AnalitF.Net.Client.Views
 
 			EditBehavior.Attach(grid);
 			DataGridHelper.CalculateColumnWidths(Offers);
+			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);
 		}
 	}
 }

@@ -8,9 +8,6 @@
 				<ResourceDictionary Source="Assets/styles/Application.xaml" />
 				<ResourceDictionary Source="Assets/styles/DataGrid.xaml" />
 				<ResourceDictionary Source="Assets/styles/PopupSelector.xaml" />
-				<ResourceDictionary>
-					<local:AppBootstrapper x:Key="bootstrapper" />
-				</ResourceDictionary>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Application.Resources>

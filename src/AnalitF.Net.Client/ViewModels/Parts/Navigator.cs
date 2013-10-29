@@ -85,8 +85,12 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				closing.TryClose();
 			}
 
+			HideDefault();
+
 			if (conductor.ActiveItem != null)
 				conductor.ActiveItem.TryClose();
+
+			HideDefault();
 
 			if (IsEmptyOrDefault())
 				conductor.ActivateItem(screen);

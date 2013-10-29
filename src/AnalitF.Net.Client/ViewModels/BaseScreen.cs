@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.ViewModels
 				User = Session.Query<User>().FirstOrDefault();
 			}
 			else {
-				Settings = new NotifyValue<Settings>(new Settings());
+				Settings = new NotifyValue<Settings>(new Settings(defaults: true));
 			}
 
 			excelExporter = new ExcelExporter(this);
@@ -150,16 +150,19 @@ namespace AnalitF.Net.Client.ViewModels
 				OnCloseDisposable.Dispose();
 
 			var broacast = false;
-			if (Session.IsOpen) {
-				if (Session.FlushMode != FlushMode.Never) {
-					//IsDirty - приведет к тому что все изменения будут сохранены
-					//по этому делаем проверку только если нужно сохранить изменения
-					broacast = Session.IsDirty();
-					Session.Flush();
-				}
+			//в тестах может быть синуация когда мы дважды освобождаем объект
+			if (Session != null) {
+				if (Session.IsOpen) {
+					if (Session.FlushMode != FlushMode.Never) {
+						//IsDirty - приведет к тому что все изменения будут сохранены
+						//по этому делаем проверку только если нужно сохранить изменения
+						broacast = Session.IsDirty();
+						Session.Flush();
+					}
 
-				if (Session.Transaction.IsActive)
-					Session.Transaction.Commit();
+					if (Session.Transaction.IsActive)
+						Session.Transaction.Commit();
+				}
 			}
 
 			if (close) {
@@ -301,15 +304,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Dispose()
 		{
-			if (this is Main) {
-				Debugger.Break();
-				Console.WriteLine("Main.Dispose");
-			}
-			if (StatelessSession != null)
+			if (StatelessSession != null) {
 				StatelessSession.Dispose();
+				StatelessSession = null;
+			}
 
-			if (Session != null)
+			if (Session != null) {
 				Session.Dispose();
+				Session = null;
+			}
+		}
+
+		~BaseScreen()
+		{
+			Dispose();
 		}
 	}
 }

@@ -10,10 +10,12 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using AnalitF.Net.Client.Helpers;
 using Test.Support.log4net;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -68,8 +70,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			settings.Markups.Clear();
 			var markupType = catalog.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			settings.Markups.Add(new MarkupConfig(0, splitCost, 20, markupType));
-			settings.Markups.Add(new MarkupConfig(splitCost, 100 * splitCost, 30, markupType));
+			settings.AddMarkup(new MarkupConfig(0, splitCost, 20, markupType));
+			settings.AddMarkup(new MarkupConfig(splitCost, 100 * splitCost, 30, markupType));
 			session.Save(settings);
 
 			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));
@@ -154,22 +156,26 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_history_orders()
 		{
-			var offer = model.CurrentOffer;
+			session.DeleteEach<SentOrder>();
 
-			CleanSendOrders(offer);
-
+			var offer = session.Query<Offer>().First(o => o.CatalogId == catalog.Id);
 			var order = new Order(offer.Price, address);
 			order.AddLine(offer, 1);
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
-			session.Flush();
 
+			model.CurrentOffer = model.Offers.Value.First(o => o.Id == offer.Id);
 			testScheduler.AdvanceToMs(4000);
 
-			Assert.That(model.HistoryOrders.Count, Is.EqualTo(1), model.HistoryOrders.Implode(l => l.Id));
-			Assert.That(model.HistoryOrders[0].Count, Is.EqualTo(1));
-			Assert.That(model.CurrentOffer.PrevOrderAvgCost, Is.EqualTo(offer.Cost));
-			Assert.That(model.CurrentOffer.PrevOrderAvgCount, Is.EqualTo(1));
+			Assert.AreEqual(1, model.HistoryOrders.Count, model.HistoryOrders.Implode(l => l.Id));
+			Assert.AreEqual(1, model.HistoryOrders[0].Count);
+			Assert.AreEqual(offer.Cost, model.CurrentOffer.PrevOrderAvgCost);
+			Assert.AreEqual(1, model.CurrentOffer.PrevOrderAvgCount);
+
+			model.CurrentOffer = null;
+			Assert.IsNull(model.HistoryOrders);
+			model.CurrentOffer = model.Offers.Value.First();
+			Assert.AreEqual(1, model.HistoryOrders.Count);
 		}
 
 		[Test]
@@ -205,14 +211,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Load_order_history()
 		{
 			session.DeleteEach<SentOrder>();
-
-			CleanSendOrders(model.CurrentOffer);
 			model.LoadHistoryOrders();
 		}
 
-		[Test, Ignore]
+		[Test]
 		public void Load_order_history_without_address()
 		{
+			restore = true;
 			session.DeleteEach<Order>();
 			session.DeleteEach<SentOrder>();
 			session.DeleteEach<Address>();

@@ -10,19 +10,15 @@ namespace AnalitF.Net.Client.Models
 {
 	public class DebugPipe
 	{
-		public DebugPipe(string[] args)
+		public DebugPipe(string name)
 		{
-			var token = "--debug-pipe=";
-			var name = args.FirstOrDefault(a => a.StartsWith(token)) ?? "";
-			name = name.Replace(token, "");
-
 			if (string.IsNullOrEmpty(name))
 				return;
 
 			var pipe = new NamedPipeClientStream(name);
 			pipe.Connect();
 			Observe(pipe)
-				.Subscribe(c => Dispatcher(c));
+				.Subscribe(Dispatcher);
 		}
 
 		private void Dispatcher(string command)

@@ -41,13 +41,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Markups);
+				.LinkTo(Settings.Markups, i => Settings.AddMarkup((MarkupConfig)i));
 			MarkupConfig.Validate(Markups);
 
 			VitallyImportantMarkups = Settings.Markups
 				.Where(t => t.Type == MarkupType.VitallyImportant)
 				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Markups);
+				.LinkTo(Settings.Markups, i => Settings.AddMarkup((MarkupConfig)i));
 			MarkupConfig.Validate(VitallyImportantMarkups);
 
 			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
@@ -159,14 +159,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Save()
 		{
-			var result1 = MarkupConfig.Validate(VitallyImportantMarkups);
-			var result2 = MarkupConfig.Validate(Markups);
-			var total = Tuple.Create(result1.Item1 && result2.Item1, result1.Item2 ?? result2.Item2);
-			var isValid = total.Item1;
+			var error = Settings.ValidateMarkups();
 
-			if (!isValid) {
+			if (!String.IsNullOrEmpty(error)) {
 				Session.FlushMode = FlushMode.Never;
-				Manager.Warning(total.Item2 ?? "Некорректно введены границы цен.");
+				Manager.Warning(error);
 				return;
 			}
 

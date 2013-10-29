@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 			Timeout = 30.Second();
 			Process = Start();
-			Console.WriteLine(Process.Id);
 			WaitMainWindow();
 
 			Assert.IsTrue(oldProcess.HasExited);

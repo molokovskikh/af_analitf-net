@@ -13,7 +13,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -26,10 +28,21 @@ using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
 using log4net.Config;
+using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
+using ReactiveUI.Testing;
+using Action = System.Action;
+using ButtonBase = System.Windows.Controls.Primitives.ButtonBase;
+using CheckBox = System.Windows.Controls.CheckBox;
+using Control = System.Windows.Controls.Control;
+using DataGrid = System.Windows.Controls.DataGrid;
+using DataGridCell = System.Windows.Controls.DataGridCell;
+using Label = System.Windows.Controls.Label;
+using Screen = Caliburn.Micro.Screen;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -37,26 +50,42 @@ namespace AnalitF.Net.Test.Integration.Views
 	public class GlobalFixture : BaseViewFixture
 	{
 		private Dispatcher dispatcher;
-		private Window window;
+		private Window activeWindow;
+		public List<Window> windows;
 
 		[SetUp]
 		public void Setup()
 		{
-			window = null;
+			windows = new List<Window>();
+			activeWindow = null;
 			dispatcher = null;
-			shell.Quiet = true;
+			shell.Config.Quit = true;
 			shell.ViewModelSettings.Clear();
+
+			manager.UnitTesting = false;
+			manager.SkipApp = true;
+			disposable.Add(manager.Windows.Subscribe(w => {
+				activeWindow = w;
+				windows.Add(w);
+				w.Closed += (sender, args) => {
+					windows.Remove(w);
+					activeWindow = windows.LastOrDefault();
+				};
+			}));
+			disposable.Add(BindingChecker.Track());
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			shell.Config.Quit = false;
 			if (dispatcher != null) {
-				if (window != null)
-					dispatcher.Invoke(() => {
+				dispatcher.Invoke(() => {
+					foreach (var window in windows.ToArray().Reverse())
 						window.Close();
-						shell.Dispose();
-					});
+				});
+				WaitIdle();
+				dispatcher.Invoke(() => shell.Dispose());
 				dispatcher.InvokeShutdown();
 			}
 		}
@@ -72,8 +101,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 
 			//открытие окна на весь экран нужно что бы отображалось максимальное колиечство элементов
-			window.Dispatcher.Invoke(() => {
-				window.WindowState = WindowState.Maximized;
+			activeWindow.Dispatcher.Invoke(() => {
+				activeWindow.WindowState = WindowState.Maximized;
 			});
 
 			dispatcher.Invoke(() => shell.ShowCatalog());
@@ -142,19 +171,14 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Start();
 
-			dispatcher.Invoke(() => {
-				shell.ShowCatalog();
-			});
-
+			Click("ShowCatalog");
 			var catalog = await ViewLoaded<CatalogViewModel>();
 			await ViewLoaded(catalog.ActiveItem);
 			var name = (CatalogNameViewModel)catalog.ActiveItem;
 			var offers = await OpenOffers(name);
-			WaitIdle();
 			Input((FrameworkElement)offers.GetView(), "Offers", "1");
-			dispatcher.Invoke(() => {
-				shell.ShowOrderLines();
-			});
+
+			Click("ShowOrderLines");
 			var lines = (OrderLinesViewModel)shell.ActiveItem;
 			await ViewLoaded(lines);
 			Input((FrameworkElement)lines.GetView(), "Lines", Key.Enter);
@@ -228,7 +252,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				box.IsChecked = false;
 			});
 			Click("ShowOrders");
-			WaitIdle();
 			Click("ShowOrderLines");
 			lines = await ViewLoaded<OrderLinesViewModel>();
 			dispatcher.Invoke(() => {
@@ -249,7 +272,6 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Start();
 			Click("ShowWaybills");
-			WaitIdle();
 			Input("Waybills", Key.Enter);
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -282,7 +304,6 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Start();
 			Click("ShowOrders");
-			WaitIdle();
 			Input("Orders", Key.Enter);
 			WaitIdle();
 
@@ -308,16 +329,19 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Edit_order_count()
 		{
+			throw new NotImplementedException();
 		}
 
 		[Test]
 		public void Delete_order_line()
 		{
+			throw new NotImplementedException();
 		}
 
 		[Test]
 		public void Activete_search()
 		{
+			throw new NotImplementedException();
 		}
 
 		[Test]
@@ -326,7 +350,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 
 			Click("ShowPrice");
-			WaitIdle();
 			dispatcher.Invoke(() => {
 				var view = (FrameworkElement)((PriceViewModel)shell.ActiveItem).GetView();
 				var block = (TextBlock)view.FindName("CurrentPrice_Value_SupplierFullName");
@@ -343,7 +366,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 
 			Click("SearchOffers");
-			WaitIdle();
 
 			var search = (SearchOfferViewModel)shell.ActiveItem;
 			var view = (FrameworkElement)search.GetView();
@@ -359,7 +381,70 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Load_order_history()
 		{
-			throw new NotImplementedException();
+			var order = MakeSentOrder();
+			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+			session.Flush();
+
+			Start();
+			Click("ShowCatalog");
+			var catalogModel = (CatalogViewModel)shell.ActiveItem;
+			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
+			var view = (FrameworkElement)viewModel.GetView();
+			dispatcher.Invoke(() => {
+				var names = (DataGrid)view.FindName("CatalogNames");
+				names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(n => n.Id == catalog.Name.Id);
+				var catalogs = (DataGrid)view.FindName("Catalogs");
+				catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(n => n.Id == catalog.Id);
+			});
+			Input(view, "CatalogNames", Key.Enter);
+			if (viewModel.Catalogs.Value.Count > 1)
+				Input(view, "Catalogs", Key.Enter);
+			((TestScheduler)BaseScreen.TestSchuduler).AdvanceByMs(3000);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
+				var grid = (DataGrid)element.FindName("HistoryOrders");
+				Assert.That(grid.Items.Count, Is.GreaterThan(0));
+			});
+		}
+
+		[Test]
+		public void Dynamic_recalculate_markup_validation()
+		{
+			Start();
+			dispatcher.BeginInvoke(new Action(() => {
+				Click((ButtonBase)activeWindow.FindName("ShowSettings"));
+			}));
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var tab = (TabItem)content.FindName("VitallyImportantMarkupsTab");
+				tab.IsSelected = true;
+			});
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
+				EditCell(grid, 0, 1, "30");
+				Assert.AreEqual(Color.FromRgb(0x80, 0x80, 0).ToString(), GetCell(grid, 0, 1).Background.ToString());
+			});
+		}
+
+		private void EditCell(DataGrid grid, int column, int row, string text)
+		{
+			var cell = GetCell(grid, column, row);
+			cell.Focus();
+			Input(cell, Key.F2);
+			var edit = cell.Descendants<TextBox>().First();
+			Input(edit, text);
+			Input(cell, Key.Enter);
+		}
+
+		private DataGridCell GetCell(DataGrid grid, int column, int row)
+		{
+			var gridRow = (DataGridRow)grid.ItemContainerGenerator.ContainerFromIndex(row);
+			var presenter = gridRow.VisualChild<DataGridCellsPresenter>();
+			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
 		}
 
 		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement
@@ -375,10 +460,11 @@ namespace AnalitF.Net.Test.Integration.Views
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfHelper.WithDispatcher(() => {
-				window = (Window)ViewLocator.LocateForModel(shell, null, null);
-				window.Loaded += (sender, args) => loaded.Release();
-				ViewModelBinder.Bind(shell, window, null);
-				window.Show();
+				activeWindow = (Window)ViewLocator.LocateForModel(shell, null, null);
+				windows.Add(activeWindow);
+				activeWindow.Loaded += (sender, args) => loaded.Release();
+				ViewModelBinder.Bind(shell, activeWindow, null);
+				activeWindow.Show();
 			});
 
 			await loaded.WaitAsync();
@@ -414,8 +500,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			var offers = await OpenOffers(viewModel);
 			Input((FrameworkElement)offers.GetView(), "Offers", term);
 			await ViewLoaded<CatalogViewModel>();
-
-			WaitIdle();
 		}
 
 		private async Task<CatalogOfferViewModel> OpenOffers(CatalogNameViewModel viewModel)
@@ -428,6 +512,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Input(view, "Catalogs", Key.Enter);
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			await ViewLoaded(offers);
+			WaitIdle();
 			return offers;
 		}
 
@@ -449,8 +534,9 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Click(string name)
 		{
 			dispatcher.Invoke(() => {
-				Click((ButtonBase)window.FindName(name));
+				Click((ButtonBase)activeWindow.FindName(name));
 			});
+			WaitIdle();
 		}
 
 		private void Input(FrameworkElement view, string name, string text)
@@ -467,6 +553,13 @@ namespace AnalitF.Net.Test.Integration.Views
 			element.RaiseEvent(WpfHelper.TextArgs(text));
 		}
 
+		private static void Input(UIElement element, Key key)
+		{
+			Contract.Assert(element != null);
+			AssertInputable(element);
+			element.RaiseEvent(WpfHelper.KeyEventArgs(element, key));
+		}
+
 		private void Input(string name, Key key)
 		{
 			var item = (BaseScreen)shell.ActiveItem;
@@ -481,8 +574,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var element = (UIElement)view.FindName(name);
 				if (element == null)
 					throw new Exception(String.Format("Не могу найти {0}", name));
-				AssertInputable(element);
-				element.RaiseEvent(WpfHelper.KeyEventArgs(element, key));
+				Input(element, key);
 			});
 		}
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {

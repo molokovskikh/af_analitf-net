@@ -173,7 +173,7 @@
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />
-    <Compile Include="Helpers\ObservableHelper.cs" />
+    <Compile Include="Helpers\RxHelper.cs" />
     <Compile Include="Helpers\PersistentList.cs" />
     <Compile Include="Helpers\PrintHelper.cs" />
     <Compile Include="Helpers\ProcessHelper.cs" />

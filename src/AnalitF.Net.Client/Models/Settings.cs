@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
@@ -132,6 +133,16 @@ namespace AnalitF.Net.Client.Models
 	public class Settings : BaseNotify
 	{
 		private bool groupWaybillBySupplier;
+
+		public Settings(bool defaults, int token = 0) : this()
+		{
+			if (defaults) {
+				foreach (var markup in MarkupConfig.Defaults()) {
+					AddMarkup(markup);
+				}
+			}
+			MappingToken = token;
+		}
 
 		public Settings()
 		{
@@ -277,6 +288,21 @@ namespace AnalitF.Net.Client.Models
 				return "Вы работаете с устаревшим набором данных. Выполнить обновление?";
 
 			return null;
+		}
+
+		public virtual void AddMarkup(MarkupConfig markup)
+		{
+			if (Markups.Contains(markup))
+				return;
+
+			markup.Settings = this;
+			Markups.Add(markup);
+			ValidateMarkups();
+		}
+
+		public virtual string ValidateMarkups()
+		{
+			return MarkupConfig.Validate(Markups);
 		}
 	}
 }

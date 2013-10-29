@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using NHibernate.Mapping;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -22,22 +23,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
-			settings = new Settings();
-			markups = new[] {
-				new MarkupConfig(0, 10000, 30) {
-					MaxMarkup = 35,
-				},
-				new MarkupConfig(0, 50, 20, MarkupType.VitallyImportant) {
-					MaxMarkup = 20,
-				},
-				new MarkupConfig(50, 500, 20, MarkupType.VitallyImportant) {
-					MaxMarkup = 20,
-				},
-				new MarkupConfig(500, 1000000, 20, MarkupType.VitallyImportant) {
-					MaxMarkup = 20,
-				}
-			};
-			settings.Markups = markups;
+			settings = new Settings(true);
 			waybillSettings = new WaybillSettings();
 			settings.Waybills.Add(waybillSettings);
 
@@ -55,10 +41,10 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 10
 			};
 			Calculate(line);
-			Assert.AreEqual(35, line.MaxRetailMarkup);
-			Assert.AreEqual(107.40, line.RetailCost);
-			Assert.AreEqual(1074, line.RetailSum);
-			Assert.AreEqual(29.98, line.RetailMarkup);
+			Assert.AreEqual(20, line.MaxRetailMarkup);
+			Assert.AreEqual(99.1, line.RetailCost);
+			Assert.AreEqual(991, line.RetailSum);
+			Assert.AreEqual(19.93, line.RetailMarkup);
 		}
 
 		[Test]
@@ -72,8 +58,8 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 1
 			};
 			Calculate(line);
-			Assert.AreEqual(326.56, line.RetailCost);
-			Assert.AreEqual(30, line.RetailMarkup);
+			Assert.AreEqual(301.44, line.RetailCost);
+			Assert.AreEqual(20, line.RetailMarkup);
 		}
 
 		[Test]
@@ -102,7 +88,7 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 2
 			};
 			Calculate(line);
-			Assert.AreEqual(481.40, line.RetailCost);
+			Assert.AreEqual(444.4, line.RetailCost);
 		}
 
 		[Test]
@@ -128,7 +114,7 @@ namespace AnalitF.Net.Test.Unit
 			Calculate(line);
 			Assert.AreEqual(55.70, line.RetailCost);
 			Assert.AreEqual(29.84, line.RealRetailMarkup);
-			var items = Subscribe(line.Changed());
+			var items = RxHelper.CollectChanges(line);
 			line.RetailMarkup = 50;
 			Assert.AreEqual(64.30, line.RetailCost);
 			Assert.AreEqual(49.88, line.RetailMarkup);
@@ -152,7 +138,7 @@ namespace AnalitF.Net.Test.Unit
 
 			Assert.AreEqual(55.70, line.RetailCost);
 			Assert.AreEqual(29.84, line.RealRetailMarkup);
-			var items = Subscribe(line);
+			var items = RxHelper.CollectChanges(line);
 			line.RetailCost = 50;
 			Assert.AreEqual(50, line.RetailCost);
 			Assert.AreEqual(16.55, line.RetailMarkup);
@@ -183,7 +169,7 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Check_max_supplier_markup()
 		{
-			markups[0].MaxSupplierMarkup = 5;
+			settings.Markups[0].MaxSupplierMarkup = 5;
 			var line = Line();
 			Calculate(line);
 			line.SupplierPriceMarkup = 10;
@@ -195,7 +181,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var line = Line();
 			Calculate(line);
-			var changes = Subscribe(line);
+			var changes = RxHelper.CollectChanges(line);
 			line.RetailCost = 100;
 			Assert.IsTrue(line.IsMarkupToBig);
 			Assert.That(changes.Implode(e => e.PropertyName), Is.StringContaining("IsMarkupToBig"));
@@ -261,7 +247,7 @@ namespace AnalitF.Net.Test.Unit
 
 		private WaybillLine Line()
 		{
-			markups[0].Markup = 30;
+			settings.Markups[0].Markup = 30;
 			var line = new WaybillLine(waybill) {
 				SupplierCost = 42.90m,
 				SupplierCostWithoutNds = 36.36m,
@@ -270,18 +256,6 @@ namespace AnalitF.Net.Test.Unit
 				Quantity = 10
 			};
 			return line;
-		}
-		private static List<PropertyChangedEventArgs> Subscribe(INotifyPropertyChanged line)
-		{
-			return Subscribe(line.Changed());
-		}
-
-		private static List<PropertyChangedEventArgs> Subscribe(
-			IObservable<EventPattern<PropertyChangedEventArgs>> observable)
-		{
-			var items = new List<PropertyChangedEventArgs>();
-			observable.Subscribe(e => items.Add(e.EventArgs));
-			return items;
 		}
 
 		private void Calculate(WaybillLine line)

@@ -132,12 +132,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		private void PrepareForSync()
 		{
-			var settings = session.Query<Settings>().First();
-			settings.UserName = "test";
-			settings.Password = "123";
-			session.Flush();
-			shell = new ShellViewModel();
-			ScreenExtensions.TryActivate(shell);
+			//var settings = session.Query<Settings>().First();
+			//settings.UserName = "test";
+			//settings.Password = "123";
+			//session.Flush();
+			//shell = new ShellViewModel();
+			//ScreenExtensions.TryActivate(shell);
 		}
 
 		private void ResetCredentials()

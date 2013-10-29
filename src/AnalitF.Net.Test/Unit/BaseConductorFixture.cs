@@ -26,6 +26,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Setup()
 		{
 			conductor = new BaseShell();
+			ScreenExtensions.TryActivate(conductor);
 		}
 
 		[Test]

@@ -166,6 +166,7 @@
     <Compile Include="Properties\AssemblyInfo.local.cs" />
     <Compile Include="Tasks\Debug.cs" />
     <Compile Include="Tasks\Fixture.cs" />
+    <Compile Include="TestHelpers\BindingChecker.cs" />
     <Compile Include="TestHelpers\ViewModelFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
@@ -174,7 +175,7 @@
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />
     <Compile Include="TestHelpers\WpfHelper.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
-    <Compile Include="Unit\NavigationFixture.cs" />
+    <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
     <Compile Include="Unit\ExcelExporterFixture.cs" />

@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		protected Extentions.WindowManager manager;
 		protected TestScheduler testScheduler;
-		protected ShellViewModel shell;
+		protected Lazy<ShellViewModel> lazyshell;
 		protected DataMother data;
 
 		[SetUp]
@@ -38,29 +38,43 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			BaseScreen.TestSchuduler = testScheduler;
 			disposable.Add(TestUtils.WithScheduler(testScheduler));
 
-			manager = StubWindowManager();
+			manager = StubWindowManager(lazyshell);
 
 			data = new DataMother(session);
 
-			shell = new ShellViewModel();
-			shell.UnitTesting = true;
-			shell.Config = config;
-			disposable.Add(shell);
-			ScreenExtensions.TryActivate(shell);
+			lazyshell = new Lazy<ShellViewModel>(() => {
+				var value = new ShellViewModel();
+				value.UnitTesting = true;
+				value.Config = config;
+				disposable.Add(value);
+				ScreenExtensions.TryActivate(value);
+				return value;
+			});
 		}
 
-		public static Extentions.WindowManager StubWindowManager()
+		protected virtual ShellViewModel shell
+		{
+			get { return lazyshell.Value; }
+		}
+
+		public static Extentions.WindowManager StubWindowManager(Lazy<ShellViewModel> shell = null)
 		{
 			var manager = new Extentions.WindowManager();
-			manager.UnderTest = true;
-			var @base = IoC.GetInstance;
+			manager.UnitTesting = true;
 			IoC.GetInstance = (type, key) => {
 				if (type == typeof(IWindowManager))
 					return manager;
-				return @base(type, key);
+				return Activator.CreateInstance(type);
 			};
 
-			IoC.BuildUp  = o => {};
+			IoC.GetAllInstances = type => new[] { Activator.CreateInstance(type) };
+
+			IoC.BuildUp = instance => {
+				Util.SetValue(instance, "Manager", manager);
+				if (shell != null)
+					Util.SetValue(instance, "Shell", shell.Value);
+			};
+
 			return manager;
 		}
 

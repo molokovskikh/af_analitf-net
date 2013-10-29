@@ -6,6 +6,7 @@ using Devart.Data.MySql;
 using System.Linq;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.Models
 {

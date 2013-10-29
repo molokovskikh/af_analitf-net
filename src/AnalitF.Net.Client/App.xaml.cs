@@ -10,6 +10,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using NHibernate.Hql.Ast.ANTLR;
 
 namespace AnalitF.Net.Client
@@ -21,7 +22,6 @@ namespace AnalitF.Net.Client
 		private ResourceDictionary resources;
 		private Style baseStyle;
 
-		public bool Quiet;
 		public SplashScreen Splash;
 		public bool FaultInject;
 

@@ -50,9 +50,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Save_changes()
 		{
-			model.Markups.ToArray().Each(v => model.Markups.Remove(v));
+			model.Markups.RemoveEach(model.Markups);
 			model.Markups.Add(new MarkupConfig());
 			model.Save();
+			Close(model);
+
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
 			model = Init(new SettingsViewModel());
 			Assert.That(model.Markups.Count, Is.EqualTo(1));

@@ -17,6 +17,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -50,8 +51,8 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class ShellViewModel : BaseShell, IDisposable
 	{
-		private Config.Config config = new Config.Config();
 		private WindowManager windowManager;
+		private Config.Config config = new Config.Config();
 		private ISession session;
 		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -64,8 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
-		public bool Quiet;
-		public string[] Arguments = new string[0];
+		public bool IsImport;
 		[DataMember]
 		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
 		[DataMember]
@@ -86,7 +86,6 @@ namespace AnalitF.Net.Client.ViewModels
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
-			Arguments = Environment.GetCommandLineArgs();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
 			session = factory.OpenSession();
@@ -188,8 +187,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void OnViewReady()
 		{
 			Bus.SendMessage("Startup");
-			var import = Arguments.LastOrDefault().Match("import");
-			if (import) {
+			if (IsImport) {
 				Coroutine.BeginExecute(Import().GetEnumerator());
 			}
 			else {
@@ -199,7 +197,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (Quiet) {
+			if (Config.Quit) {
 				base.CanClose(callback);
 				return;
 			}
@@ -258,12 +256,11 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Settings.Value.IsValid)
 				return;
 
-			var request = Settings.Value.CheckUpdateCondition();
-			if (Quiet)
-				request = null;
-
-			if (!String.IsNullOrEmpty(request) && Confirm(request))
-				Update();
+			if (!Config.Quit) {
+				var request = Settings.Value.CheckUpdateCondition();
+				if (!String.IsNullOrEmpty(request) && Confirm(request))
+					Update();
+			}
 		}
 
 		private bool CheckSettings()
@@ -415,6 +412,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowSettings()
 		{
 			windowManager.ShowFixedDialog(new SettingsViewModel());
+			//настройки будут обновлены автоматически но в случае если
+			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
+			//это будет слишком позно
+			session.Refresh(Settings.Value);
 		}
 
 		public bool CanShowOrderLines
@@ -626,7 +627,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var updateExePath = Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe");
 			StartProcess(updateExePath, Process.GetCurrentProcess().Id.ToString());
 			//не нужно ничего запрашивать нужно просто выйти
-			Quiet = true;
+			Config.Quit = true;
 			TryClose();
 		}
 
@@ -749,8 +750,9 @@ namespace AnalitF.Net.Client.ViewModels
 			((Stack<IScreen>)Navigator.NavigationStack).Clear();
 
 			if (ActiveItem is IDisposable) {
-				((IDisposable)ActiveItem).Dispose();
+				var item = ((IDisposable)ActiveItem);
 				ActiveItem = null;
+				item.Dispose();
 			}
 
 			if (session != null) {

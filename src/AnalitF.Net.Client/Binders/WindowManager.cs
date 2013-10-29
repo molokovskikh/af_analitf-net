@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
@@ -9,19 +10,20 @@ namespace AnalitF.Net.Client.Extentions
 {
 	public class WindowManager : Caliburn.Micro.WindowManager
 	{
-		public bool UnderTest;
+		public bool UnitTesting;
+		public bool SkipApp;
 		public MessageBoxResult DefaultQuestsionResult = MessageBoxResult.Yes;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
 		public Action<object> ContinueViewDialog = d => {  };
 
+		public Subject<Window> Windows = new Subject<Window>();
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 
 		public override void ShowWindow(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-			if (UnderTest)
+			if (UnitTesting)
 				return;
-
 			base.ShowWindow(rootModel, context, settings);
 		}
 
@@ -40,7 +42,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-			if (UnderTest) {
+			if (UnitTesting) {
 				ContinueViewDialog(rootModel);
 				return true;
 			}
@@ -69,12 +71,21 @@ namespace AnalitF.Net.Client.Extentions
 		{
 			var window = base.CreateWindow(rootModel, isDialog, context, settings);
 			window.Language = XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag);
+			if (SkipApp)
+				Windows.OnNext(window);
 			return window;
+		}
+
+		protected override Window InferOwnerOf(Window window)
+		{
+			if (UnitTesting || SkipApp)
+				return null;
+			return base.InferOwnerOf(window);
 		}
 
 		private bool? ShowDialog(Window window)
 		{
-			if (UnderTest) {
+			if (UnitTesting) {
 				window.Closed += (sender, args) => Dialogs.Remove(window);
 				Dialogs.Add(window);
 				return true;
@@ -84,7 +95,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
 		{
-			if (UnderTest) {
+			if (UnitTesting) {
 				MessageBoxes.Add(text);
 				return icon == MessageBoxImage.Warning ? DefaultQuestsionResult : DefaultResult;
 			}

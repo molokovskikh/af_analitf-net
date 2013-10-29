@@ -51,8 +51,15 @@ namespace AnalitF.Net.Client.Config.Initializers
 					&& modelInspector.IsEntity(type);
 			});
 			mapper.Class<Settings>(m => {
-				m.Bag(o => o.Markups, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
+				m.Bag(o => o.Markups, c => {
+					c.Inverse(true);
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+				});
 				m.Bag(o => o.Waybills, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
+			});
+			mapper.Class<MarkupConfig>(m => {
+				m.Property(o => o.Begin, om => om.Access(Accessor.Field));
+				m.Property(o => o.End, om => om.Access(Accessor.Field));
 			});
 			mapper.Class<MinOrderSumRule>(m => {
 				m.ComposedId(c => {

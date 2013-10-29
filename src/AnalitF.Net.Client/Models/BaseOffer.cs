@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual void CalculateRetailCost(IList<MarkupConfig> markups)
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups)
 		{
 			var markup = MarkupConfig.Calculate(markups, this);
 			RetailCost = Math.Round(Cost * (1 + markup / 100), 2);

@@ -181,11 +181,11 @@
 						<DataGridTextColumn Width="102*" Header="Производитель"
 							Binding="{Binding Producer}" />
 						<c:DataGridTextColumnEx Width="SizeToHeader"
-							CellStyle="{StaticResource Junk}" Header="Срок годн."
+							Header="Срок годн."
 							Binding="{Binding Period}" TextAlignment="Center" />
 						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
 							TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="49" CellStyle="{StaticResource Junk}"
+						<c:DataGridTextColumnEx Width="49"
 							Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}"
 							TextAlignment="Center" />

@@ -12,6 +12,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Util;
 using ReactiveUI;
 using Message = Common.Tools.Message;
 
@@ -19,12 +20,12 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public abstract class BaseOfferViewModel : BaseScreen
 	{
+		private SimpleMRUCache cache = new SimpleMRUCache(10);
 		private Catalog currentCatalog;
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		private Offer lastEditOffer;
-		private object orderHistoryCacheKey;
 		private Offer currentOffer;
 
 		private string autoCommentText;
@@ -354,10 +355,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		private void InvalidateHistoryOrders()
 		{
-			if (Equals(orderHistoryCacheKey, HistoryOrdersCacheKey()))
-				return;
-
-			HistoryOrders = new List<SentOrderLine>();
+			HistoryOrders = (List<SentOrderLine>)cache[HistoryOrdersCacheKey()];
 		}
 
 		public void LoadHistoryOrders()
@@ -370,41 +368,44 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (CurrentOffer == null || Address == null)
 				return;
 
-			var currentCacheKey = HistoryOrdersCacheKey();
-
-			if (Equals(currentCacheKey, orderHistoryCacheKey))
-				return;
-
-			IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
-				.OrderByDescending(o => o.Order.SentOn);
-			//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
-			//переместить в общий блок то первый
-			//where применяться не будет
-			var addressId = Address.Id;
-			if (Settings.Value.GroupByProduct) {
-				var catalogId = CurrentOffer.CatalogId;
-				query = query.Where(o => o.CatalogId == catalogId)
-					.Where(o => o.Order.Address.Id == addressId);
+			var key = HistoryOrdersCacheKey();
+			var cached = (List<SentOrderLine>)cache[key];
+			if (cached != null) {
+				HistoryOrders = cached;
 			}
 			else {
-				var productId = CurrentOffer.ProductId;
-				query = query.Where(o => o.ProductId == productId)
-					.Where(o => o.Order.Address.Id == addressId);
+				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
+					.OrderByDescending(o => o.Order.SentOn);
+				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
+				//переместить в общий блок то первый
+				//where применяться не будет
+				var addressId = Address.Id;
+				if (Settings.Value.GroupByProduct) {
+					var catalogId = CurrentOffer.CatalogId;
+					query = query.Where(o => o.CatalogId == catalogId)
+						.Where(o => o.Order.Address.Id == addressId);
+				}
+				else {
+					var productId = CurrentOffer.ProductId;
+					query = query.Where(o => o.ProductId == productId)
+						.Where(o => o.Order.Address.Id == addressId);
+				}
+				cached = query
+					.Fetch(l => l.Order)
+					.ThenFetch(o => o.Price)
+					.Take(20)
+					.ToList();
+				cache.Put(key, cached);
 			}
-			HistoryOrders = query
-				.Fetch(l => l.Order)
-				.ThenFetch(o => o.Price)
-				.Take(20)
-				.ToList();
+			HistoryOrders = cached;
 
-			orderHistoryCacheKey = currentCacheKey;
 			LoadStat();
 		}
 
 		private object HistoryOrdersCacheKey()
 		{
 			if (CurrentOffer == null || Address == null)
-				return null;
+				return 0;
 
 			var currentCacheKey = CurrentOffer.CatalogId;
 			if (!Settings.Value.GroupByProduct)
