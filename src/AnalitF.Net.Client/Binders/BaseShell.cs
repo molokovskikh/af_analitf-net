@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Binders
@@ -15,8 +16,15 @@ namespace AnalitF.Net.Client.Binders
 
 	public class BaseShell : Conductor<IScreen>
 	{
+		public Navigator Navigator;
+
 		public bool UnitTesting;
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
+
+		public BaseShell()
+		{
+			Navigator = new Navigator(this);
+		}
 
 		/// <summary>
 		/// После загрузки формы нам нужно показать сообщения
@@ -46,9 +54,11 @@ namespace AnalitF.Net.Client.Binders
 		{
 			base.ChangeActiveItem(newItem, closePrevious);
 
-			var activateEx = newItem as IActivateEx;
-			if (activateEx != null && !activateEx.IsSuccessfulActivated) {
-				this.CloseItem(ActiveItem);
+			if (IsActive) {
+				var activateEx = newItem as IActivateEx;
+				if (activateEx != null && !activateEx.IsSuccessfulActivated) {
+					this.CloseItem(ActiveItem);
+				}
 			}
 		}
 
@@ -77,6 +87,17 @@ namespace AnalitF.Net.Client.Binders
 						if (r)
 							ScreenExtensions.TryDeactivate(this, true);
 					});
+			}
+		}
+
+		public override void DeactivateItem(IScreen item, bool close)
+		{
+			base.DeactivateItem(item, close);
+
+			if (close) {
+				if (ActiveItem == null) {
+					Navigator.NavigateBack();
+				}
 			}
 		}
 	}

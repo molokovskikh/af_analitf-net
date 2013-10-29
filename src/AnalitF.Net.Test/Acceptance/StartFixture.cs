@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				(int)w.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty),
 				String.Format("{0}({1})",
 					w.GetCurrentPropertyValue(AutomationElement.LocalizedControlTypeProperty),
-					w.GetCurrentPropertyValue(AutomationElement.NameProperty))));
+					w.GetName())));
 
 			Process = Start();
 			Thread.Sleep(300);
@@ -66,8 +66,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void Close()
 		{
-			var close = (WindowPattern)MainWindow.GetCurrentPattern(WindowPattern.Pattern);
-			close.WaitForInputIdle((int)10.Second().TotalMilliseconds);
+			var close = WaitIdle();
 			close.Close();
 			close.WaitForInputIdle((int)10.Second().TotalMilliseconds);
 			MainWindow = null;

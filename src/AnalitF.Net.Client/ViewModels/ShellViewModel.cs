@@ -71,13 +71,11 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
-		private Navigator navigator;
-
 		public ShellViewModel()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
 			defaultItem = new Main(Config);
-			navigator = new Navigator(this, defaultItem);
+			Navigator.DefaultScreen = defaultItem;
 
 #if DEBUG
 			if (!UnitTesting)
@@ -184,7 +182,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			navigator.Activate();
+			Navigator.Activate();
 		}
 
 		public override void OnViewReady()
@@ -257,8 +255,6 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Settings.Value.IsValid)
 				CheckSettings();
 
-			Reload();
-
 			if (!Settings.Value.IsValid)
 				return;
 
@@ -272,7 +268,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private bool CheckSettings()
 		{
-			Reload();
 			if (!Settings.Value.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
 				ShowSettings();
@@ -528,12 +523,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var command = new UpdateCommand();
 			return Sync(command,
-				c => {
-					return c.Process(() => {
-						((UpdateCommand)c).Import();
-						return UpdateResult.OK;
-					});
-				});
+				c => c.Process(() => {
+					((UpdateCommand)c).Import();
+					return UpdateResult.OK;
+				}));
 		}
 
 		public void CheckDb()
@@ -694,32 +687,27 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IScreen> NavigationStack
 		{
-			get { return navigator.NavigationStack; }
+			get { return Navigator.NavigationStack; }
 		}
 
 		private void NavigateRoot(IScreen screen)
 		{
-			navigator.NavigateRoot(screen);
+			Navigator.NavigateRoot(screen);
 		}
 
 		public void Navigate(IScreen item)
 		{
-			navigator.Navigate(item);
+			Navigator.Navigate(item);
 		}
 
 		public void ResetNavigation()
 		{
-			navigator.ResetNavigation();
+			Navigator.ResetNavigation();
 		}
 
 		public void NavigateAndReset(params IScreen[] views)
 		{
-			navigator.NavigateAndReset(views);
-		}
-
-		public override void DeactivateItem(IScreen item, bool close)
-		{
-			navigator.DeactivateItem(item, close, base.DeactivateItem);
+			Navigator.NavigateAndReset(views);
 		}
 
 		protected override void OnActivationProcessed(IScreen item, bool success)
@@ -756,9 +744,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 
-			foreach (var screen in navigator.NavigationStack.OfType<IDisposable>())
+			foreach (var screen in Navigator.NavigationStack.OfType<IDisposable>())
 				screen.Dispose();
-			((Stack<IScreen>)navigator.NavigationStack).Clear();
+			((Stack<IScreen>)Navigator.NavigationStack).Clear();
 
 			if (ActiveItem is IDisposable) {
 				((IDisposable)ActiveItem).Dispose();

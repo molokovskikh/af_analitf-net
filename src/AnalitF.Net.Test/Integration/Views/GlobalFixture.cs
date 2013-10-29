@@ -356,6 +356,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Load_order_history()
+		{
+			throw new NotImplementedException();
+		}
+
 		private static T Find<T>(FrameworkElement view, string root, string name) where T : FrameworkElement
 		{
 			return view.Descendants<FrameworkElement>()

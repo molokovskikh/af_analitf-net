@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Microsoft.Test.Input;
 using NUnit.Framework;
 using Condition = System.Windows.Automation.Condition;
@@ -31,14 +35,18 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected Action<AutomationElement> DialogHandle = w => {};
 		protected Action<AutomationElement> WindowHandle = w => {};
 
+		protected Subject<AutomationElement> Opened;
+
 		[SetUp]
 		public void Setup()
 		{
+			Opened = new Subject<AutomationElement>();
+
 			WindowHandle = w => {};
 			DialogHandle = w => {};
 
 			Timeout = TimeSpan.FromSeconds(5);
-			root = @"..\..\..\AnalitF.Net.Client\bin\Debug";
+			root = @"acceptance";
 			exe = Path.Combine(root, "AnalitF.Net.Client.exe");
 
 			Automation.AddAutomationEventHandler(
@@ -51,14 +59,27 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[TearDown]
 		public void Teardown()
 		{
+			Opened.OnCompleted();
+			Opened.Dispose();
+
 			MainWindow = null;
 			if (Process != null) {
 				if (!Process.HasExited)
 					Process.CloseMainWindow();
 
 				Process.WaitForExit(TimeSpan.FromSeconds(10).Milliseconds);
-				if (!Process.HasExited)
+				if (!Process.HasExited) {
 					Process.Kill();
+					SpinWait.SpinUntil(() => {
+						try {
+							Process.GetProcessById(Process.Id);
+							return false;
+						}
+						catch(ArgumentException) {
+							return true;
+						}
+					});
+				}
 			}
 			Automation.RemoveAllEventHandlers();
 		}
@@ -121,6 +142,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
+			Opened.OnNext(sender as AutomationElement);
+
 			var el = sender as AutomationElement;
 			WindowHandle(el);
 			if (MainWindow == null) {
@@ -220,6 +243,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitMainWindow();
 			pipe.WaitForConnection();
 			Writer.AutoFlush = true;
+
+			WaitIdle();
 		}
 
 		protected static void DoubleClickCell(AutomationElement table, int row, int column)
@@ -256,6 +281,13 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				//отказываемся от всего
 				ClickByName("Нет", e);
 			};
+		}
+
+		protected WindowPattern WaitIdle()
+		{
+			var close = (WindowPattern)MainWindow.GetCurrentPattern(WindowPattern.Pattern);
+			close.WaitForInputIdle((int)10.Second().TotalMilliseconds);
+			return close;
 		}
 	}
 }

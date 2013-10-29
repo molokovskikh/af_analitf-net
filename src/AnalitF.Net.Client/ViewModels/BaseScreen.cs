@@ -301,6 +301,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Dispose()
 		{
+			if (this is Main) {
+				Debugger.Break();
+				Console.WriteLine("Main.Dispose");
+			}
 			if (StatelessSession != null)
 				StatelessSession.Dispose();
 

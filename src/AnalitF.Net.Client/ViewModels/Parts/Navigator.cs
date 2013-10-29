@@ -8,12 +8,12 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	public class Navigator
 	{
 		private ConductorBaseWithActiveItem<IScreen> conductor;
-		private Screen defaultScreen;
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
 
-		public Navigator(ConductorBaseWithActiveItem<IScreen> conductor, Screen defaultScreen)
+		public IScreen DefaultScreen;
+
+		public Navigator(Conductor<IScreen> conductor)
 		{
-			this.defaultScreen = defaultScreen;
 			this.conductor = conductor;
 		}
 
@@ -24,12 +24,20 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Navigate(IScreen item)
 		{
-			if (!IsEmptyOrDefault()) {
+			HideDefault();
+
+			if (conductor.ActiveItem != null) {
 				navigationStack.Push(conductor.ActiveItem);
 				conductor.DeactivateItem(conductor.ActiveItem, false);
 			}
 
 			conductor.ActivateItem(item);
+		}
+
+		private void HideDefault()
+		{
+			if (conductor.ActiveItem != null && conductor.ActiveItem == DefaultScreen)
+				conductor.DeactivateItem(conductor.ActiveItem, false);
 		}
 
 		public void ResetNavigation()
@@ -39,13 +47,16 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				screen.TryClose();
 			}
 
-			if (conductor.ActiveItem != null && conductor.ActiveItem != defaultScreen)
-				defaultScreen.TryClose();
+			if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
+				conductor.ActiveItem.TryClose();
+			if (conductor.ActiveItem == null)
+				conductor.ActiveItem = DefaultScreen;
 		}
 
 		public void NavigateAndReset(params IScreen[] views)
 		{
 			ResetNavigation();
+			HideDefault();
 
 			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
 			foreach (var screen in chain) {
@@ -56,13 +67,15 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Activate()
 		{
-			NavigateRoot(defaultScreen);
+			NavigateRoot(DefaultScreen);
 		}
 
 		public void NavigateRoot(IScreen screen)
 		{
 			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType())
 				return;
+
+			HideDefault();
 
 			while (navigationStack.Count > 0) {
 				var closing = navigationStack.Peek();
@@ -81,25 +94,15 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		private bool IsEmptyOrDefault()
 		{
-			return conductor.ActiveItem == null || conductor.ActiveItem == defaultScreen;
+			return conductor.ActiveItem == null;
 		}
 
-		public void DeactivateItem(IScreen item, bool close, Action<IScreen, bool> @base)
+		public void NavigateBack()
 		{
-			if (item == defaultScreen)
-				close = false;
-
-			@base(item, close);
-
-			if (close) {
-				if (conductor.ActiveItem == null) {
-					if (navigationStack.Count > 0)
-						conductor.ActivateItem(navigationStack.Pop());
-					else
-						conductor.ActivateItem(defaultScreen);
-				}
-			}
-
+			if (navigationStack.Count > 0)
+				conductor.ActivateItem(navigationStack.Pop());
+			else if (DefaultScreen != null)
+				conductor.ActiveItem = DefaultScreen;
 		}
 	}
 }

@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Windows.Automation;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Microsoft.Test.Input;
 using NUnit.Framework;
 
@@ -19,23 +23,20 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Activate();
 
 			Click("Update");
-			SkipUpdateDialog();
-			WaitForMessage("Обновление завершено успешно.");
+			AssertUpdate("Обновление завершено успешно.");
 
 			Click("ShowCatalog");
 			WaitForElement("CatalogNames");
 
 			Click("Update");
-			SkipUpdateDialog();
-			WaitForMessage("Обновление завершено успешно.");
+			AssertUpdate("Обновление завершено успешно.");
 		}
 
 		[Test, Ignore]
 		public void Check_auto_update()
 		{
 			Click("Update");
-			SkipUpdateDialog();
-			WaitForMessage("Получена новая версия программы");
+			AssertUpdate("Получена новая версия программы");
 
 			//AssertWindowTest("Внимание! Происходит обновление программы.");
 
@@ -46,7 +47,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Mnn_search()
 		{
+			HandleDialogs();
 			Activate();
+
 			Click("ShowMnn");
 			var mnns = WaitForElement("Mnns");
 			mnns.SetFocus();
@@ -82,11 +85,29 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			//кнопка активируется с задержкой
 			Thread.Sleep(700);
 			Click("SendOrders");
-			SkipUpdateDialog();
-			WaitForMessage("Отправка заказов завершена успешно.");
+			AssertUpdate("Отправка заказов завершена успешно.");
 		}
 
 		[Test]
+		public void Empty_update()
+		{
+			Directory.Delete(Path.Combine("acceptance", "data"), true);
+
+			Activate();
+			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
+
+			var dialog = WaitDialog("Настройка");
+			Type("Settings_UserName", "test");
+			Type("Settings_Password", "123");
+
+			Click("Save", dialog);
+
+			WaitIdle();
+			Click("Update", MainWindow);
+			AssertUpdate("Обновление завершено успешно.");
+		}
+
+		[Test, Ignore]
 		public void Restore_grid_settings()
 		{
 			Activate();
@@ -99,33 +120,71 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Thread.Sleep(1000);
 		}
 
-		private void SkipUpdateDialog()
+		private void WaitMessage(string message)
+		{
+			var window = FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();
+			Assert.AreEqual(message, ToText(window));
+			ClickByName("ОК", window);
+		}
+
+		private static AutomationElement FindWindow(string name)
+		{
+			AutomationElement window = null;
+			var handle = WinApi.FindWindowByCaption(IntPtr.Zero, name);
+			if (handle != IntPtr.Zero)
+				window = AutomationElement.FromHandle(handle);
+			return window;
+		}
+
+		private AutomationElement WaitDialog(string name)
+		{
+			return FindWindow(name) ?? Opened.Timeout(Timeout).First();
+		}
+
+		private void Type(string el, string text)
+		{
+			var username = WaitForElement(el);
+			username.SetFocus();
+			Keyboard.Type(text);
+		}
+
+		private void AssertUpdate(string result)
 		{
 			Timeout = TimeSpan.FromSeconds(50);
-			WaitWindow();
+			var update = FindWindow("Обмен данными") ?? Opened.Timeout(5.Second()).First();
+			Assert.AreEqual("Обмен данными", update.GetName());
+			var dialog = Opened.Timeout(50.Second()).First();
+
+			Assert.AreEqual(result, ToText(dialog));
+			ClickByName("Закрыть", dialog);
 		}
 
 		private AutomationElement WaitWindow()
 		{
-			AutomationElement window = null;
-			DialogHandle = e => { window = e; };
-			Wait(() => window == null);
-			return window;
+			return Opened.Timeout(5.Second()).First();
 		}
 
 		private void WaitForMessage(string message)
 		{
 			var window = WaitWindow();
 			var text = ToText(window);
-			ClickByName("ОК", window);
 			Assert.That(text, Is.StringContaining(message));
+			ClickByName("ОК", window);
 		}
 
 		private string ToText(AutomationElement window)
 		{
 			return FindTextElements(window)
 				.Cast<AutomationElement>()
-				.Implode(e => e.GetCurrentPropertyValue(AutomationElement.NameProperty), Environment.NewLine);
+				.Implode(e => e.GetName(), Environment.NewLine);
+		}
+	}
+
+	public static class AutomationHelper
+	{
+		public static string GetName(this AutomationElement e)
+		{
+			return (string)e.GetCurrentPropertyValue(AutomationElement.NameProperty);
 		}
 	}
 }
