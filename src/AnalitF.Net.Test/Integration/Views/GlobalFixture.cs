@@ -106,7 +106,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				activeWindow.WindowState = WindowState.Maximized;
 			});
 
-			dispatcher.Invoke(() => shell.ShowCatalog());
+			Click("ShowCatalog");
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			await ViewLoaded(catalog);
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
@@ -136,11 +136,8 @@ namespace AnalitF.Net.Test.Integration.Views
 				.Name.Slice(3).ToLower();
 
 			Start();
+			Click("ShowCatalog");
 
-			dispatcher.Invoke(() => {
-				shell.ShowCatalog();
-			});
-			WaitIdle();
 			var catalog = await ViewLoaded<CatalogViewModel>();
 			dispatcher.Invoke(() => {
 				catalog.CatalogSearch = true;
@@ -168,7 +165,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		public async void Open_catalog()
 		{
 			session.DeleteEach<Order>();
-			session.Flush();
 
 			Start();
 
@@ -195,7 +191,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			order.AddLine(offer, 1);
 			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
 			var term = source[1].ProductSynonym.ToLower().Except(source[0].ProductSynonym.ToLower()).First().ToString();
-			session.Flush();
 
 			Start();
 			Click("ShowOrderLines");
@@ -269,7 +264,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Select_printing_by_header()
 		{
-			new UnknownWaybill().Execute(session);
+			Fixture(new UnknownWaybill());
 
 			Start();
 			Click("ShowWaybills");
@@ -294,14 +289,10 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Order_details()
 		{
 			restore = true;
-
 			session.DeleteEach<Order>();
-
 			var user = session.Query<User>().First();
 			user.IsPreprocessOrders = true;
-
-			new CorrectOrder().Execute(session);
-			session.Flush();
+			Fixture(new CorrectOrder());
 
 			Start();
 			Click("ShowOrders");
@@ -365,7 +356,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var term = new string(session.Query<Offer>().First().ProductSynonym.Take(3).ToArray());
 			Start();
-
 			Click("SearchOffers");
 
 			var search = (SearchOfferViewModel)shell.ActiveItem;
@@ -384,7 +374,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var order = MakeSentOrder();
 			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
-			session.Flush();
 
 			Start();
 			Click("ShowCatalog");
@@ -431,6 +420,26 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Update_catalog_info()
+		{
+			Start();
+			Click("ShowCatalog");
+
+			var catalogModel = (CatalogViewModel)shell.ActiveItem;
+			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
+			var view = (FrameworkElement)viewModel.GetView();
+			dispatcher.Invoke(() => {
+				var names = (DataGrid)view.FindName("CatalogNames");
+				var current = (CatalogName)names.SelectedItem;
+				var toSelect = names.ItemsSource.Cast<CatalogName>().First(n => n.Id != current.Id && n.Mnn != null);
+				names.SelectedItem = toSelect;
+
+				var mnn = view.Descendants<Label>().First(l => l.Name == "CurrentCatalogName_Mnn_Name");
+				Assert.AreEqual(toSelect.Mnn.Name, mnn.Content);
+			});
+		}
+
 		private void EditCell(DataGrid grid, int column, int row, string text)
 		{
 			var cell = GetCell(grid, column, row);
@@ -458,6 +467,8 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private async void Start()
 		{
+			session.Flush();
+
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfHelper.WithDispatcher(() => {

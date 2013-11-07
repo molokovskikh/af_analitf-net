@@ -145,7 +145,7 @@ namespace AnalitF.Net.Client.ViewModels
 					var catalog = ((CatalogSearchViewModel)activeItem).CurrentCatalog.Value;
 					return catalog == null ? null : catalog.Name;
 				}
-				return ((CatalogNameViewModel)activeItem).CurrentCatalogName;
+				return ((CatalogNameViewModel)activeItem).CurrentCatalogName.Value;
 			}
 		}
 
@@ -347,7 +347,7 @@ namespace AnalitF.Net.Client.ViewModels
 							.ObservableForProperty(m => m.CurrentCatalog)
 							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalog")),
 						model
-							.ObservableForProperty(m => m.CurrentCatalogName)
+							.ObservableForProperty(m => m.CurrentCatalogName.Value)
 							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalogName"))
 					};
 					observable = composite;
