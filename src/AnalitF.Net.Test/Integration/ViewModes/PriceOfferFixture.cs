@@ -90,7 +90,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Delete_order()
 		{
-			manager.DefaultResult = MessageBoxResult.Yes;
 			session.DeleteEach<Order>();
 			var offer = session.Query<Offer>().First(o => o.Price == price);
 			var order = MakeOrder(offer);

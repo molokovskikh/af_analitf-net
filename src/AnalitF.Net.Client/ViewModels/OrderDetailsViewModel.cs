@@ -78,8 +78,8 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
-			editor = new Editor(OrderWarning, Manager);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
+			editor = new Editor(OrderWarning, Manager);
 			OnlyWarningVisible = new NotifyValue<bool>(() => User.IsPreprocessOrders && IsCurrentOrder);
 
 			editor.ObservableForProperty(e => e.CurrentEdit)

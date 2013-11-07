@@ -15,12 +15,23 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class OrderDetailsFixture : ViewModelFixture
 	{
 		[Test]
+		public void Edit_order()
+		{
+			var order = MakeOrder();
+			var model = Init(new OrderDetailsViewModel(order));
+
+			model.CurrentLine.Value = model.Lines.Value.First();
+			((OrderLine)model.CurrentLine.Value).Count = 1;
+			model.OfferUpdated();
+			Close(model);
+		}
+
+		[Test]
 		public void Delete_line()
 		{
-			manager.DefaultResult = MessageBoxResult.Yes;
 			var order = MakeOrder();
-
 			var model = Init(new OrderDetailsViewModel(order));
+
 			model.CurrentLine.Value = model.Lines.Value.First();
 			model.Delete();
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
@@ -34,7 +45,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Close_on_last_delete()
 		{
-			manager.DefaultResult = MessageBoxResult.Yes;
 			MakeOrder();
 
 			shell.ShowOrders();
@@ -56,6 +66,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var order = MakeOrder();
 			var model = Init(new OrderDetailsViewModel(order));
+
 			Assert.That(model.CanShowPrice, Is.True);
 			Assert.That(model.ShowPriceVisible, Is.True);
 			model.ShowPrice();
@@ -66,11 +77,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Filter_on_warning()
 		{
-			var fixture = new CorrectOrder();
-			fixture.Execute(session);
+			var fixture = Fixture<CorrectOrder>();
 			var order = fixture.Order;
-
-			session.Flush();
 
 			shell.ShowOrders();
 			var orders = (OrdersViewModel)shell.ActiveItem;

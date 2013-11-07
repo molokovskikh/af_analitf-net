@@ -43,7 +43,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
 
-			manager.DefaultResult = MessageBoxResult.Yes;
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(1));
 			model.CurrentLine.Value = model.Lines.Value.First(l => l.Id == offer.OrderLine.Id);
 			model.Delete();

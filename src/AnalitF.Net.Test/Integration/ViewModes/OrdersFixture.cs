@@ -32,7 +32,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			manager.DefaultResult = MessageBoxResult.Yes;
 			lazyModel = new Lazy<OrdersViewModel>(() => {
 				session.Flush();
 				return Init(new OrdersViewModel());

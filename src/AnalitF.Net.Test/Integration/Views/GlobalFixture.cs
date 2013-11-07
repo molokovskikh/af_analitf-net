@@ -292,7 +292,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			session.DeleteEach<Order>();
 			var user = session.Query<User>().First();
 			user.IsPreprocessOrders = true;
-			Fixture(new CorrectOrder());
+			Fixture<CorrectOrder>();
 
 			Start();
 			Click("ShowOrders");
@@ -321,7 +321,25 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Edit_order_count()
 		{
-			throw new NotImplementedException();
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			Start();
+			Click("ShowOrders");
+			Input("Orders", Key.Enter);
+			WaitIdle();
+
+			Input("Lines", "2");
+
+			dispatcher.Invoke(() => {
+				var grid = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
+				var column = grid.Columns.First(c => c.Header.Equals("Заказ"));
+				var cell = GetCell(grid, column.DisplayIndex, 0);
+				Assert.AreEqual("2", ((TextBlock)cell.Content).Text);
+			});
+			Input("Lines", Key.Escape);
+
+			session.Refresh(order);
+			Assert.AreEqual(2, order.Lines[0].Count);
 		}
 
 		[Test]
@@ -578,6 +596,14 @@ namespace AnalitF.Net.Test.Integration.Views
 			var view = item.GetView();
 			Contract.Assert(view != null);
 			Input((FrameworkElement)view, name, key);
+		}
+
+		private void Input(string name, string text)
+		{
+			var item = (BaseScreen)shell.ActiveItem;
+			var view = item.GetView();
+			Contract.Assert(view != null);
+			Input((FrameworkElement)view, name, text);
 		}
 
 		private void Input(FrameworkElement view, string name, Key key)
