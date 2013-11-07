@@ -44,6 +44,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
+		public virtual uint? ExportId { get; set; }
+
 		public virtual DateTime CreatedOn { get; set; }
 
 		public virtual Address Address { get; set; }

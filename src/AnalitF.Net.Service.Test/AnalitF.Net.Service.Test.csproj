@@ -57,6 +57,7 @@
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />
     <Compile Include="TestHelpers\ZipHelper.cs" />
+    <Compile Include="Unit\MySqlHelperFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Service\AnalitF.Net.Service.csproj">

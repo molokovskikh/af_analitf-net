@@ -38,7 +38,6 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public ICredentials Credentials;
 
-		public BehaviorSubject<Progress> Progress;
 		public string ErrorMessage;
 		public string SuccessMessage;
 		public List<IResult> Results = new List<IResult>();

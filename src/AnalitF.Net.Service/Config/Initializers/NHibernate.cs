@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using AnalitF.Net.Service.Models;
+using Common.Models;
 using Common.NHibernate;
 using NHibernate.Mapping.Attributes;
+using NHibernate.Mapping.ByCode;
 
 namespace AnalitF.Net.Service.Config.Initializers
 {
@@ -11,6 +14,14 @@ namespace AnalitF.Net.Service.Config.Initializers
 		public override void Init()
 		{
 			Excludes.Add(typeof(ClientOrderItem));
+			Excludes.Add(typeof(ClientOrder));
+
+			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
+
+			Mapper.Class<UserSettings>(m => {
+				m.Schema("Customers");
+				m.Table("Users");
+			});
 
 			Mapper.Class<ClientAppLog>(m => {
 				m.Property(p => p.Text, c => c.Length(10000));
@@ -40,7 +51,6 @@ namespace AnalitF.Net.Service.Config.Initializers
 				}
 			};
 
-			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			base.Init();
 		}
 	}

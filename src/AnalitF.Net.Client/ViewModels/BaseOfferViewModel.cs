@@ -381,13 +381,13 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				//where применяться не будет
 				var addressId = Address.Id;
 				if (Settings.Value.GroupByProduct) {
-					var catalogId = CurrentOffer.CatalogId;
-					query = query.Where(o => o.CatalogId == catalogId)
+					var productId = CurrentOffer.ProductId;
+					query = query.Where(o => o.ProductId == productId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
 				else {
-					var productId = CurrentOffer.ProductId;
-					query = query.Where(o => o.ProductId == productId)
+					var catalogId = CurrentOffer.CatalogId;
+					query = query.Where(o => o.CatalogId == catalogId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
 				cached = query
@@ -407,10 +407,10 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (CurrentOffer == null || Address == null)
 				return 0;
 
-			var currentCacheKey = CurrentOffer.CatalogId;
-			if (!Settings.Value.GroupByProduct)
-				currentCacheKey = CurrentOffer.ProductId;
-			return currentCacheKey;
+			if (Settings.Value.GroupByProduct)
+				return CurrentOffer.ProductId;
+			else
+				return CurrentOffer.CatalogId;
 		}
 	}
 }

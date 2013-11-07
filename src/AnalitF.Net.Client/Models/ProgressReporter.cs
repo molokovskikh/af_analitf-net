@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Models
 			behavior.OnNext(new Progress(stage, 0, total));
 		}
 
-		public void Progress(int value)
+		public void Progress(int value = 1)
 		{
 			if (weight <= 0)
 				return;

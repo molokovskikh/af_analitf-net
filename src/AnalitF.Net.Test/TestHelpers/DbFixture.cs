@@ -1,11 +1,14 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Test.Integration;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -23,15 +26,24 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected Config.Config config;
 		protected bool restore;
 
+		protected FileCleaner cleaner;
+
+		private FixtureHelper fixtureHelper;
+
 		[SetUp]
 		public void DbSetup()
 		{
 			restore = false;
 			disposable = new CompositeDisposable();
+			cleaner = new FileCleaner();
+			disposable.Add(cleaner);
+
+			fixtureHelper = new FixtureHelper();
+			disposable.Add(fixtureHelper);
 
 			session = SetupFixture.Factory.OpenSession();
-			session.Transaction.Begin();
 			disposable.Add(session);
+			session.Transaction.Begin();
 
 			config = SetupFixture.clientConfig;
 			user = session.Query<User>().FirstOrDefault();
@@ -49,31 +61,33 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}
 			if (restore)
 				SetupFixture.RestoreData(session);
-			disposable.Dispose();
+			if (disposable != null)
+				disposable.Dispose();
 		}
 
 		protected T Fixture<T>()
 		{
-			return (T)Fixture(typeof(T));
+			return fixtureHelper.Run<T>();
 		}
 
-		protected object Fixture(Type type)
+		protected void Fixture(object fixture)
 		{
-			var fixture = Activator.CreateInstance(type);
-			FixtureHelper.RunFixture(fixture);
-
-			var reset = Util.GetValue(fixture, "Reset");
-			if (reset != null)
-				disposable.Add(Disposable.Create(() => Fixture((Type)reset)));
-
-			return fixture;
+			fixtureHelper.Run(fixture);
 		}
 
-		protected T InitCmd<T>(T command) where T : BaseCommand
+		protected T InitCmd<T>(T cmd) where T : BaseCommand
 		{
-			command.Config = config;
-			command.Token = new CancellationTokenSource().Token;
-			return command;
+			cmd.Config = config;
+			cmd.Token = new CancellationTokenSource().Token;
+			cmd.Session = session;
+			return cmd;
+		}
+
+		protected string TempFile(string filename, string content)
+		{
+			cleaner.Watch(filename);
+			File.WriteAllText(filename, content);
+			return filename;
 		}
 	}
 }

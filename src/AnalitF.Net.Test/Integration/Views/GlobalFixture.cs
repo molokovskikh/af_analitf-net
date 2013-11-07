@@ -34,6 +34,7 @@ using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using Test.Support.log4net;
 using Action = System.Action;
 using ButtonBase = System.Windows.Controls.Primitives.ButtonBase;
 using CheckBox = System.Windows.Controls.CheckBox;

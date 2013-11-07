@@ -36,6 +36,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual LineResultStatus SendResult { get; set; }
 
 		[JsonIgnore]
+		public virtual uint? ExportOrderId { get; set; }
+
+		[JsonIgnore]
 		public virtual Order Order { get; set; }
 
 		public virtual decimal? NewCost { get; set; }

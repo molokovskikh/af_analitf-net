@@ -24,6 +24,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
 using Test.Support;
+using User = AnalitF.Net.Client.Models.User;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -36,6 +37,9 @@ namespace AnalitF.Net.Test.Integration
 
 		public static Config serviceConfig;
 		private HttpSelfHostServer server;
+		private static Task InitServerTask;
+		private uint serverUserId;
+
 
 		[SetUp]
 		public void Setup()
@@ -43,6 +47,8 @@ namespace AnalitF.Net.Test.Integration
 			clientConfig.BaseUrl = new Uri("http://localhost:7018");
 			clientConfig.RootDir = "app";
 			clientConfig.RequestDelay = 1.Second();
+
+			FileHelper.InitDir("var");
 
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
@@ -55,16 +61,40 @@ namespace AnalitF.Net.Test.Integration
 			Factory = nhibernate.Factory;
 			Configuration = nhibernate.Configuration;
 
-			if (IsStale()) {
-				MySqlConnection.ClearAllPools(true);
-
-				FileHelper.Persistent(() => FileHelper.InitDir("data"),
-					typeof(IOException),
-					typeof(UnauthorizedAccessException));
+			if (IsServerStale()) {
+				FileHelper.InitDir("data", "backup");
+			}
+			if (IsClientStale()) {
 				ImportData();
 				BackupData();
 			}
 			InitWebServer();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			server.Dispose();
+		}
+
+		private bool IsServerStale()
+		{
+			//если пользователя нет, значит база была перезалита и локальная база не актуальна
+			using(var session = IntegrationFixture.Factory.OpenSession()) {
+				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == System.Environment.UserName);
+				if (user != null)
+					serverUserId = user.Id;
+				return user == null;
+			}
+		}
+
+		private bool IsClientStale()
+		{
+			new SanityCheck(clientConfig.DbDir).Check();
+			using(var session = Factory.OpenSession()) {
+				var user = session.Query<User>().FirstOrDefault();
+				return user == null || serverUserId != user.Id;
+			}
 		}
 
 		public static ISessionFactory ServerNHConfig(string connectionStringName)
@@ -77,15 +107,8 @@ namespace AnalitF.Net.Test.Integration
 			return holder.GetSessionFactory(typeof(ActiveRecordBase));
 		}
 
-		[TearDown]
-		public void TearDown()
-		{
-			server.Dispose();
-		}
-
 		public void InitWebServer()
 		{
-			FileHelper.InitDir("var");
 			var cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
 			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 			cfg.ClientCredentialType = HttpClientCredentialType.Windows;
@@ -95,37 +118,12 @@ namespace AnalitF.Net.Test.Integration
 			server.OpenAsync();
 		}
 
-		private static bool IsStale()
-		{
-			return !Directory.Exists("data") || !Directory.Exists("backup") || IsDbStale();
-		}
-
-		private static bool IsDbStale()
-		{
-			//если пользователя нет, значит база была перезалита и локальная база не актуальна
-			using(var session = IntegrationFixture.Factory.OpenSession()) {
-				if (!session.Query<TestUser>().Any(u => u.Login == System.Environment.UserName))
-					return true;
-			}
-
-			using(var localSession = Factory.OpenSession()) {
-				try {
-					var settings = localSession.Query<Client.Models.Settings>().First();
-					if (settings.MappingToken != AppBootstrapper.NHibernate.MappingHash)
-						return true;
-				}
-				catch(Exception) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private void ImportData()
 		{
 			var sampleData = new SampleData();
-			FixtureHelper.RunFixture(sampleData);
-			FixtureHelper.RunFixture(new LoadSampleData {
+			var helper = new FixtureHelper();
+			helper.Run(sampleData);
+			helper.Run(new LoadSampleData {
 				Files = sampleData.Files,
 			});
 		}

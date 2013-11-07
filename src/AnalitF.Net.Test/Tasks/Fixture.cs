@@ -32,8 +32,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 				return;
 			}
 
-			var fixture = (dynamic)Activator.CreateInstance(type);
-			FixtureHelper.RunFixture(fixture);
+			new FixtureHelper().Run(type);
 		}
 
 		private static IEnumerable<Type> GetTypes()

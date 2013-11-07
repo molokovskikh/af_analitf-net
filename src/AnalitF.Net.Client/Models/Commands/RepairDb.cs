@@ -20,7 +20,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public override void Execute()
 		{
-			var tables = Tables(Configuration);
+			var tables = TableNames().ToArray();
+			Reporter.Weight(tables.Length);
 			var results = new List<RepairStatus>();
 
 			using(var session = Factory.OpenSession()) {
@@ -46,6 +47,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						//нужно удалить файлы
 						Directory.GetFiles(Config.DbDir, table + ".*").Each(File.Delete);
 					}
+
+					Reporter.Progress();
 				}
 			}
 

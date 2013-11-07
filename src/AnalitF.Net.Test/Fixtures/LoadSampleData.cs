@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Service.Models;
 using NHibernate;
 using NHibernate.Linq;
@@ -13,6 +14,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	{
 		public bool Local = true;
 		public List<UpdateData> Files;
+		public Config.Config Config;
 
 		public void Execute(ISession session)
 		{
@@ -24,8 +26,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 						StringSplitOptions.RemoveEmptyEntries)))
 				.ToList();
 
-			var importer = new Importer(session, new Config.Config { DbDir = "data" });
-			importer.Import(result, new ProgressReporter());
+			var importer = new ImportCommand(result);
+			importer.Session = session;
+			importer.Execute();
 
 			var settings = session.Query<Settings>().First();
 			settings.UserName = "test";

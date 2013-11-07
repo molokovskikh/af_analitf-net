@@ -81,14 +81,17 @@
     </Compile>
     <Compile Include="Controllers\MainController.cs">
     </Compile>
+    <Compile Include="Helpers\MySqlHelper.cs" />
     <Compile Include="Helpers\RequestHelper.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\PendingDocLog.cs" />
+    <Compile Include="Models\PendingOrderLog.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Models\UserPrice.cs" />
+    <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

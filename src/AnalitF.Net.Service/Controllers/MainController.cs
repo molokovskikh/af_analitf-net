@@ -70,6 +70,14 @@ set l.Committed = 1
 where p.UserId = :userId;
 
 delete from Logs.PendingDocLogs
+where UserId = :userId;
+
+update Orders.OrdersHead oh
+	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
+set oh.Deleted = 1
+where l.UserId = :userId;
+
+delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();

@@ -157,14 +157,13 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var settings = Session.Query<Settings>().First();
 
-			Reporter.Stage("Импорт данных");
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(Config.ArchiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
-			Reporter.Weight(data.Count);
 
-			var importer = new Importer(Session, Config);
-			importer.Import(data, Reporter);
+			RunCommand(new ImportCommand(data));
+
+			SyncOrders();
 
 			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
 				SuccessMessage = "Новых файлов документов нет.";
@@ -198,6 +197,23 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private void SyncOrders()
+		{
+			Session.CreateSQLQuery("update OrderLines ol "
+				+ "join Orders o on o.ExportId = ol.ExportOrderId "
+				+ "set ol.OrderId = o.Id "
+				+ "where ol.ExportOrderId is not null;"
+				+ "update OrderLines set ExportOrderId = null;"
+				+ "update Orders set ExportId = null")
+				.ExecuteUpdate();
+
+			var loaded = Session.Query<Order>().Where(o => o.LinesCount == 0).ToArray();
+			foreach (var order in loaded) {
+				order.LinesCount = order.Lines.Count;
+				order.Sum = order.Lines.Sum(l => l.Sum);
+			}
 		}
 
 		private void RestoreOrders()

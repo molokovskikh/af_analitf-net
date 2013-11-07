@@ -3,22 +3,24 @@ using Common.Models;
 
 namespace AnalitF.Net.Service.Models
 {
-	public class PendingDocLog
+	public class PendingOrderLog
 	{
-		public PendingDocLog()
+		public PendingOrderLog()
 		{
 		}
 
-		public PendingDocLog(DocumentSendLog log)
+		public PendingOrderLog(Order order, User user, uint exportId)
 		{
 			WriteTime = DateTime.Now;
-			User = log.User;
-			SendLog = log;
+			Order = order;
+			User = user;
+			ExportId = exportId;
 		}
 
 		public virtual uint Id { get; set; }
 		public virtual DateTime WriteTime { get; set; }
-		public virtual DocumentSendLog SendLog { get; set; }
 		public virtual User User { get; set; }
+		public virtual Order Order { get; set; }
+		public virtual uint ExportId { get; set; }
 	}
 }

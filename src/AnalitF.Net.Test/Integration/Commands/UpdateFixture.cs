@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -12,64 +10,36 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Service.Test.TestHelpers;
+using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
-using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
-using Address = AnalitF.Net.Client.Models.Address;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
-namespace AnalitF.Net.Test.Integration.Remote
+namespace AnalitF.Net.Test.Integration.Commands
 {
 	[TestFixture]
-	public class UpdateFixture : IntegrationFixture
+	public class UpdateFixture : MixedFixture
 	{
-		private ISession localSession;
 		private Task<UpdateResult> task;
-		private CancellationTokenSource cancelletion;
-		private BehaviorSubject<Progress> progress;
-		private CancellationToken token;
 
 		private bool restoreUser;
 
-		private Service.Config.Config serviceConfig;
 		private RemoteCommand command;
-		private Settings settings;
 		private DateTime begin;
-		private Address address;
 		private bool revertToDefaults;
-
-		private Client.Config.Config clientConfig;
 
 		[SetUp]
 		public void Setup()
 		{
-			clientConfig = SetupFixture.clientConfig;
-			serviceConfig = SetupFixture.serviceConfig;
-
 			begin = DateTime.Now;
 			restoreUser = false;
 
-			var files = Directory.GetFiles(".", "*.txt");
-			foreach (var file in files) {
-				File.Delete(file);
-			}
-
-			FileHelper.InitDir(serviceConfig.UpdatePath, clientConfig.RootDir, clientConfig.TmpDir);
-
-			localSession = SetupFixture.Factory.OpenSession();
-			cancelletion = new CancellationTokenSource();
-			token = cancelletion.Token;
-			progress = new BehaviorSubject<Progress>(new Progress());
-
 			command = new UpdateCommand();
 			task = CreateTask(command);
-
-			settings = localSession.Query<Settings>().First();
-			address = localSession.Query<Address>().First();
 
 			ViewModelFixture.StubWindowManager();
 		}
@@ -107,7 +77,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 		[Test]
 		public void Import_version_update()
 		{
-			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
+			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
 			Update();
@@ -221,7 +191,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 		[Test]
 		public void Import_waybill()
 		{
-			var fixture = LoadFixture<LoadWaybill>();
+			var fixture = Fixture<LoadWaybill>();
 			var sendLog = fixture.SendLog;
 			Update();
 
@@ -245,7 +215,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 			settings.GroupWaybillsBySupplier = true;
 			settings.OpenWaybills = true;
 
-			var fixture = LoadFixture<LoadWaybill>();
+			var fixture = Fixture<LoadWaybill>();
 			Update();
 
 			var path = Path.Combine(settings.MapPath("Waybills"), fixture.Waybill.Supplier.Name);
@@ -264,7 +234,6 @@ namespace AnalitF.Net.Test.Integration.Remote
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			command.Config = clientConfig;
-			command.Progress = progress;
 			command.Process(() => {
 				((UpdateCommand)command).Import();
 				return UpdateResult.OK;
@@ -275,7 +244,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 		[Test]
 		public void Clean_after_import()
 		{
-			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[0]);
+			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
 			Update();
@@ -292,7 +261,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 		[Test]
 		public void Open_reject()
 		{
-			var fixture = LoadFixture<Reject>();
+			var fixture = Fixture<Reject>();
 			Update();
 
 			Assert.AreEqual(
@@ -410,14 +379,6 @@ namespace AnalitF.Net.Test.Integration.Remote
 			Update();
 		}
 
-		private T LoadFixture<T>()
-		{
-			var fixture = (dynamic)Activator.CreateInstance<T>();
-			fixture.Config = serviceConfig;
-			fixture.Execute(session);
-			return fixture;
-		}
-
 		private Order MakeOrderClean(Address address = null, Offer offer = null)
 		{
 			localSession.DeleteEach<Order>();
@@ -439,9 +400,7 @@ namespace AnalitF.Net.Test.Integration.Remote
 		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand
 		{
 			command.Config = clientConfig;
-			command.Token = token;
-			command.Progress = progress;
-			return new Task<UpdateResult>(t => command.Run(), token);
+			return new Task<UpdateResult>(command.Run);
 		}
 
 		private void Update()

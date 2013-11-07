@@ -10,13 +10,16 @@ using System.Threading;
 using Common.Models;
 using Common.Models.Helpers;
 using Common.Models.Repositories;
+using Common.MySql;
 using Common.Tools;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 using MySql.Data.MySqlClient;
 using NHibernate;
 using NHibernate.Linq;
 using log4net;
+using MySqlHelper = AnalitF.Net.Service.Helpers.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
 {
@@ -42,6 +45,7 @@ namespace AnalitF.Net.Service.Models
 		private bool disposed;
 
 		private User user;
+		private UserSettings settings;
 		private Version version;
 
 		public string UpdateType;
@@ -64,6 +68,7 @@ namespace AnalitF.Net.Service.Models
 			this.version = version;
 			this.UpdateType = updateType;
 			user = session.Load<User>(userId);
+			settings = session.Load<UserSettings>(userId);
 		}
 
 		//Все даты передаются в UTC!
@@ -329,6 +334,7 @@ where PublicationDate < curdate() + interval 1 day
 			}
 
 			ExportDocs(result);
+			ExportOrders(result);
 		}
 
 		private void CachedExport(List<UpdateData> result, string sql, string tag)
@@ -359,6 +365,102 @@ where PublicationDate < curdate() + interval 1 day
 		private bool IsCacheStale(string filename)
 		{
 			return new FileInfo(filename).LastWriteTime.Date != DateTime.Today;
+		}
+
+		private void ExportOrders(List<UpdateData> result)
+		{
+			if (!settings.AllowDownloadUnconfirmedOrders)
+				return;
+
+			session.CreateSQLQuery("delete from Logs.PendingOrderLogs where UserId = :userId")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
+
+			var addresses = user.AvaliableAddresses.Select(a => (uint?)a.Id).ToArray();
+			var prices = session.Query<ActivePrice>().Select(p => p.Id).ToArray();
+			var orders = session.Query<Order>()
+				.Where(o => !o.Deleted
+					&& !o.Processed
+					&& !o.Submited
+					&& o.UserId != user.Id
+					&& addresses.Contains(o.AddressId))
+				.ToArray();
+			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
+
+			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
+			foreach (var @group in groups) {
+				foreach (var order in group) {
+					session.Save(new PendingOrderLog(order, user, group.First().RowId));
+				}
+			}
+
+			Export(result, "Orders",
+				new[] {
+					"ExportId",
+					"CreatedOn",
+					"AddressId",
+					"PriceId",
+					"RegionId",
+					"Comment"
+				},
+				groups.Select(g => new object[] {
+					g.First().RowId,
+					g.First().WriteTime.ToUniversalTime(),
+					g.Key.AddressId,
+					g.Key.PriceList.PriceCode,
+					g.Key.RegionCode,
+					g.Implode(o => o.ClientAddition)
+				}),
+				false);
+
+			var sql = @"
+select l.ExportId as ExportOrderId,
+	ol.Quantity as Count,
+	p.Id as ProductId,
+	p.CatalogId as CatalogId,
+	ol.SynonymCode as ProductSynonymId,
+	pr.Name as Producer,
+	ol.CodeFirmCr as ProducerId,
+	ol.SynonymFirmCrCode as ProducerSynonymId,
+	ol.Code,
+	ol.CodeCr,
+	oo.Unit,
+	oo.Volume,
+	oo.Quantity,
+	oo.Note,
+	oo.Period,
+	oo.Doc,
+	ol.Junk,
+	oo.MinBoundCost,
+	oo.MaxBoundCost,
+	oo.VitallyImportant,
+	oo.RegistryCost,
+	mx.Cost as MaxProducerCost,
+	ol.RequestRatio,
+	ol.OrderCost as MinOrderSum,
+	ol.MinOrderCount,
+	oo.ProducerCost,
+	oo.NDS,
+	ol.EAN13,
+	ol.CodeOKP,
+	ol.Series,
+	st.Synonym as ProductSynonym,
+	si.Synonym as ProducerSynonym,
+	ol.Cost,
+	oh.RegionCode as RegionId,
+	ol.CoreId as OfferId
+from Logs.PendingOrderLogs l
+	join Orders.OrdersList ol on ol.OrderId = l.OrderId
+		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
+		join Catalogs.Products p on p.Id = ol.ProductId
+		left join farm.synonymArchive st on st.SynonymCode = ol.SynonymCode
+		left join farm.synonymFirmCr si on si.SynonymFirmCrCode = ol.SynonymFirmCrCode
+		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
+		left join Orders.OrderedOffers oo on oo.Id = ol.RowId
+		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
+where l.UserId = ?userId
+group by ol.RowId";
+			Export(result, sql, "OrderLines", new { userId = user.Id }, false);
 		}
 
 		private void ExportDocs(List<UpdateData> result)
@@ -404,7 +506,6 @@ where PublicationDate < curdate() + interval 1 day
 				}
 			}
 
-
 			var ids = logs.Select(d => d.Document.Id).Implode();
 			sql = String.Format(@"
 select d.RowId as Id,
@@ -428,7 +529,7 @@ from Logs.Document_logs d
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id", ids);
-			Export(result, sql, "Waybills", new { userId = user.Id });
+			Export(result, sql, "Waybills", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select db.Id,
@@ -457,7 +558,7 @@ from Logs.Document_logs d
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
-			Export(result, sql, "WaybillLines", new { userId = user.Id });
+			Export(result, sql, "WaybillLines", new { userId = user.Id }, false);
 
 			Export(result,
 				"LoadedDocuments",
@@ -486,37 +587,17 @@ group by dh.Id")
 				.Each(p => session.Save(p));
 		}
 
-		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData)
+		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData, bool truncate = true)
 		{
 			var filename = Path.GetFullPath(Path.Combine(ExportPath, Prefix + name + ".txt"));
-			data.Add(new UpdateData(name + ".meta.txt") { Content = meta.Implode("\r\n") });
+			data.Add(BuildMeta(name, truncate, meta));
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
-			var originCulture = Thread.CurrentThread.CurrentCulture;
-			try {
-				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-				var first = true;
-				using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
-					foreach (var item in exportData) {
-						if (first) {
-							first = false;
-							file.WriteLine();
-						}
-						for(var i = 0; i < item.Length; i++) {
-							if (item[i] == null)
-								file.Write(@"\N");
-							else
-								file.Write(item[i]);
-							file.Write("\t");
-						}
-					}
-				}
-			}
-			finally {
-				Thread.CurrentThread.CurrentCulture = originCulture;
+			using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
+				MySqlHelper.Export(exportData, file);
 			}
 		}
 
-		public void Export(List<UpdateData> data, string sql, string file, object parameters = null)
+		public void Export(List<UpdateData> data, string sql, string file, object parameters = null, bool truncate = true)
 		{
 			var dataAdapter = new MySqlDataAdapter(sql + " limit 0", (MySqlConnection)session.Connection);
 			if (parameters != null)
@@ -543,8 +624,18 @@ group by dh.Id")
 
 			cleaner.Watch(path);
 
-			data.Add(new UpdateData(file + ".meta.txt") { Content = columns.Implode("\r\n") });
+			data.Add(BuildMeta(file, truncate, columns));
 			data.Add(new UpdateData(file + ".txt") { LocalFileName = path });
+		}
+
+		private static UpdateData BuildMeta(string file, bool truncate, string[] columns)
+		{
+			var content = new StringWriter();
+			if (truncate)
+				content.WriteLine("truncate");
+			columns.Each(c => content.WriteLine(c));
+			var updateData = new UpdateData(file + ".meta.txt") { Content = content.ToString() };
+			return updateData;
 		}
 
 		public string ExportCompressed(string file)
@@ -566,12 +657,15 @@ group by dh.Id")
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
 				foreach (var tuple in files) {
-					if (String.IsNullOrEmpty(tuple.LocalFileName)) {
+					var filename = tuple.LocalFileName;
+					if (String.IsNullOrEmpty(filename)) {
 						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
 						zip.Add(content, tuple.ArchiveFileName);
 					}
 					else {
-						zip.Add(tuple.LocalFileName, tuple.ArchiveFileName);
+						//экспоритровать пусты файлы важно тк пустой файл привед к тому что таблица бедет очищена
+						//напимер в случае если последний адрес доставки был отключен
+						zip.Add(filename, tuple.ArchiveFileName);
 					}
 				}
 				zip.CommitUpdate();

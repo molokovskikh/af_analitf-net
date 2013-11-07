@@ -189,6 +189,7 @@
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
+    <Compile Include="Models\Commands\ImportCommand.cs" />
     <Compile Include="Models\Commands\RepairDb.cs" />
     <Compile Include="Models\Commands\DbCommand.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
@@ -199,7 +200,6 @@
     <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
-    <Compile Include="Models\Importer.cs" />
     <Compile Include="Models\LoadedDocument.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
     <Compile Include="Models\MaxProducerCost.cs" />

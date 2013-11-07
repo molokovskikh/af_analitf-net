@@ -104,7 +104,7 @@ namespace AnalitF.Net.Test.Integration
 			ViewModelBinder.Bind(model, view, null);
 
 			Assert.That(view.CommandBindings.Count, Is.EqualTo(2));
-			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Commands.InvokeViewModel));
+			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Client.Binders.Commands.InvokeViewModel));
 		}
 
 		[Test]

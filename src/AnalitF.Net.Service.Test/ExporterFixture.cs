@@ -57,7 +57,7 @@ namespace AnalitF.Net.Service.Test
 		public void Export_update()
 		{
 			File.WriteAllText("update\\version.txt", "1.2");
-			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[0]);
+			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[] { 0x00 });
 
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Service.Test
 			FileHelper.InitDir("ads");
 			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
 			exporter.AdsPath = "ads";
-			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[0]);
+			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 } );
 
 			ExportCompressed();
 			var zipEntries = ZipHelper.lsZip(file);

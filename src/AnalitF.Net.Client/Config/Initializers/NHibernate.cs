@@ -36,10 +36,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
 			var mapper = new ConventionModelMapper();
-			var basInspector = new SimpleModelInspector();
+			var baseInspector = new SimpleModelInspector();
 			var simpleModelInspector = ((SimpleModelInspector)mapper.ModelInspector);
 			simpleModelInspector.IsPersistentProperty((m, declared) => {
-				return ((IModelInspector)basInspector).IsPersistentProperty(m)
+				return ((IModelInspector)baseInspector).IsPersistentProperty(m)
 					&& m.GetCustomAttributes(typeof(IgnoreAttribute), false).Length == 0;
 			});
 			simpleModelInspector.IsRootEntity((type, declared) => {
