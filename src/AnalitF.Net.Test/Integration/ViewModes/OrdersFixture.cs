@@ -321,6 +321,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNotNull(model.Orders[0].MinOrderSum);
 		}
 
+		[Test]
+		public void Calculate_order_stat()
+		{
+			var order = MakeOrder();
+			MakeSentOrder(session.Load<Offer>(order.Lines[0].OfferId));
+
+			var modelOrder = model.Orders.First(o => o.Id == order.Id);
+			Assert.That(modelOrder.Price.MonthlyOrderSum, Is.GreaterThan(0));
+			Assert.That(modelOrder.Price.WeeklyOrderSum, Is.GreaterThan(0));
+		}
+
 		private Offer MakeReordarable(Offer offer)
 		{
 			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);

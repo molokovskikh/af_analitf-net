@@ -9,6 +9,8 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Devart.Common;
+using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Linq;
 
@@ -63,15 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.Evict(Address);
 				Address = Session.Load<Address>(Address.Id);
 
-				var weekBegin = DateTime.Today.FirstDayOfWeek();
-				var monthBegin = DateTime.Today.FirstDayOfMonth();
-				var monthlyStat = OrderStat(monthBegin);
-				var weeklyStat = OrderStat(weekBegin);
-
-				prices.Each(p => p.WeeklyOrderSum = weeklyStat.Where(s => s.Item1 == p.Id)
-					.Select(s => (decimal?)s.Item2).FirstOrDefault());
-				prices.Each(p => p.MonthlyOrderSum = monthlyStat.Where(s => s.Item1 == p.Id)
-					.Select(s => (decimal?)s.Item2).FirstOrDefault());
+				Price.LoadOrderStat(prices, Address, StatelessSession);
 				prices.Each(p => p.Order = Address.Orders.Where(o => !o.Frozen).FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));
 			}
@@ -82,17 +76,6 @@ namespace AnalitF.Net.Client.ViewModels
 					.DefaultIfEmpty(Prices.FirstOrDefault())
 					.First();
 			}
-		}
-
-		private List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from)
-		{
-			var addressId = Address.Id;
-
-			return StatelessSession.Query<SentOrder>()
-				.Where(o => o.Address.Id == addressId && o.SentOn >= from)
-				.GroupBy(o => o.Price)
-				.Select(g => Tuple.Create(g.Key.Id, g.Sum(o => o.Sum)))
-				.ToList();
 		}
 
 		public void EnterPrice()

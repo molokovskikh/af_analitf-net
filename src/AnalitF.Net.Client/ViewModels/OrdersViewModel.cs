@@ -150,6 +150,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.OrderBy(o => o.CreatedOn)
 					.ToList();
 				Orders = new BindingList<Order>(orders);
+				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}
 

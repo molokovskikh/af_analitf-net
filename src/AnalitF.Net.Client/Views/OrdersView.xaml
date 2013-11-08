@@ -56,10 +56,10 @@
 						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
 							TextAlignment="Right"
 							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding MonthlyOrderSum}"
+						<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding Price.MonthlyOrderSum}"
 							TextAlignment="Right"
 							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding WeeklyOrderSum}"
+						<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding Price.WeeklyOrderSum}"
 							TextAlignment="Right"
 							IsReadOnly="True" />
 					</DataGrid.Columns>

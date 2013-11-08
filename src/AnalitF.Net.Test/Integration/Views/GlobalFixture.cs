@@ -355,6 +355,12 @@ namespace AnalitF.Net.Test.Integration.Views
 		}
 
 		[Test]
+		public void Make_order_correction()
+		{
+			throw new NotImplementedException();
+		}
+
+		[Test]
 		public void Open_prices()
 		{
 			Start();

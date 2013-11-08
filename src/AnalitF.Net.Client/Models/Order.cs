@@ -73,10 +73,6 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual decimal MonthlyOrderSum { get; set; }
-
-		public virtual decimal WeeklyOrderSum { get; set; }
-
 		public virtual bool Send
 		{
 			get { return send; }

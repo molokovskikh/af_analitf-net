@@ -5,7 +5,10 @@ using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Newtonsoft.Json;
+using NHibernate;
+using NHibernate.Linq;
 using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
@@ -202,6 +205,40 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return Name;
+		}
+
+		private static List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
+			Address address, IStatelessSession session)
+		{
+			var addressId = address.Id;
+
+			return session.Query<SentOrder>()
+				.Where(o => o.Address.Id == addressId && o.SentOn >= @from)
+				.GroupBy(o => o.Price)
+				.Select(g => Tuple.Create(g.Key.Id, g.Sum(o => o.Sum)))
+				.ToList();
+		}
+
+		public static void LoadOrderStat(IEnumerable<Price> prices, Address address, IStatelessSession session)
+		{
+			if (address == null)
+				return;
+
+			var weekBegin = DateTime.Today.FirstDayOfWeek();
+			var monthBegin = DateTime.Today.FirstDayOfMonth();
+			var monthlyStat = OrderStat(monthBegin, address, session);
+			var weeklyStat = OrderStat(weekBegin, address, session);
+
+			prices.Each(p => {
+				//у нас могут быть заказы без прайс листов
+				//ловим исключения для таких заказов
+				try {
+					p.WeeklyOrderSum = weeklyStat.Where(s => s.Item1 == p.Id)
+						.Select(s => (decimal?)s.Item2).FirstOrDefault();
+					p.MonthlyOrderSum = monthlyStat.Where(s => s.Item1 == p.Id)
+						.Select(s => (decimal?)s.Item2).FirstOrDefault();
+				} catch(ObjectNotFoundException) {  }
+			});
 		}
 	}
 }
