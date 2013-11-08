@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var local = fixture.Local;
 			ISessionFactory factory;
 			if (local) {
-				if (SetupFixture.Factory == null) {
+				if (IntegrationSetup.Factory == null) {
 					var nhibernate = new Config.Initializers.NHibernate();
 					nhibernate.UseRelativePath = true;
 					nhibernate.Init();
@@ -49,19 +49,19 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					factory = nhibernate.Factory;
 				}
 				else {
-					factory = SetupFixture.Factory;
+					factory = IntegrationSetup.Factory;
 				}
 			}
 			else {
 				factory = Setup.SessionFactory;
-				fixture.Config = SetupFixture.serviceConfig;
+				fixture.Config = IntegrationSetup.serviceConfig;
 				if (factory == null) {
 					var config = Application.ReadConfig();
 					var development = new Development();
 					development.BasePath = Environment.CurrentDirectory;
 					development.Run(config);
 					fixture.Config = config;
-					factory = SetupFixture.ServerNHConfig("local");
+					factory = IntegrationSetup.ServerNHConfig("local");
 				}
 			}
 

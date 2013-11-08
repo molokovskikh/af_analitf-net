@@ -41,11 +41,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			fixtureHelper = new FixtureHelper();
 			disposable.Add(fixtureHelper);
 
-			session = SetupFixture.Factory.OpenSession();
+			session = IntegrationSetup.Factory.OpenSession();
 			disposable.Add(session);
 			session.Transaction.Begin();
 
-			config = SetupFixture.clientConfig;
+			config = IntegrationSetup.clientConfig;
 			user = session.Query<User>().FirstOrDefault();
 			address = session.Query<Address>().FirstOrDefault();
 			settings = session.Query<Settings>().FirstOrDefault();
@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					session.Transaction.Commit();
 			}
 			if (restore)
-				SetupFixture.RestoreData(session);
+				IntegrationSetup.RestoreData(session);
 			if (disposable != null)
 				disposable.Dispose();
 		}

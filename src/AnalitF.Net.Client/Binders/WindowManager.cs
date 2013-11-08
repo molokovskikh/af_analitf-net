@@ -16,7 +16,8 @@ namespace AnalitF.Net.Client.Extentions
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
 		public Action<object> ContinueViewDialog = d => {  };
 
-		public Subject<Window> Windows = new Subject<Window>();
+		public Subject<Window> WindowOpened = new Subject<Window>();
+		public Subject<string> MessageOpened = new Subject<string>();
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 
@@ -72,7 +73,7 @@ namespace AnalitF.Net.Client.Extentions
 			var window = base.CreateWindow(rootModel, isDialog, context, settings);
 			window.Language = XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag);
 			if (SkipApp)
-				Windows.OnNext(window);
+				WindowOpened.OnNext(window);
 			return window;
 		}
 
@@ -96,9 +97,12 @@ namespace AnalitF.Net.Client.Extentions
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
 		{
 			if (UnitTesting) {
+				MessageOpened.OnNext(text);
 				MessageBoxes.Add(text);
 				return icon == MessageBoxImage.Warning ? DefaultQuestsionResult : DefaultResult;
 			}
+			if (SkipApp)
+				MessageOpened.OnNext(text);
 
 			var window = InferOwnerOf(null);
 			if (window == null)

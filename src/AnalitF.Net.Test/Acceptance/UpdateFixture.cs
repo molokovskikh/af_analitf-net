@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private static AutomationElement FindWindow(string name)
 		{
 			AutomationElement window = null;
-			var handle = WinApi.FindWindowByCaption(IntPtr.Zero, name);
+			var handle = WinApi.FindWindow(IntPtr.Zero, name);
 			if (handle != IntPtr.Zero)
 				window = AutomationElement.FromHandle(handle);
 			return window;

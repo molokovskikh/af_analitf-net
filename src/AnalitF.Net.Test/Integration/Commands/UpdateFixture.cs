@@ -47,7 +47,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[TearDown]
 		public void Teardown()
 		{
-			SetupFixture.RestoreData(localSession);
+			Integration.IntegrationSetup.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();

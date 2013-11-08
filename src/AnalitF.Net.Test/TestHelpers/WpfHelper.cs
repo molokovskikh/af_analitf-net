@@ -52,12 +52,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var started = new ManualResetEventSlim();
 			var dispatcherThread = new Thread(() => {
 				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
-				try {
-					Dispatcher.Run();
-				}
-				catch(Exception e) {
-					Console.WriteLine(e);
-				}
+				Dispatcher.Run();
 			});
 
 			dispatcherThread.SetApartmentState(ApartmentState.STA);

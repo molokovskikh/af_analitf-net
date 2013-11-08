@@ -15,16 +15,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void BaseViewFixtureSetup()
 		{
-			ViewFixtureSetup.BindingErrors.Clear();
-			ViewFixtureSetup.Setup();
-		}
-
-		[TearDown]
-		public void BaseViewFixtureTearDown()
-		{
-			if (ViewFixtureSetup.BindingErrors.Count > 0) {
-				throw new Exception(ViewFixtureSetup.BindingErrors.Implode(Environment.NewLine));
-			}
+			disposable.Add(BindingChecker.Track());
+			ViewSetup.Setup();
 		}
 
 		protected T InitView<T>(BaseScreen model) where T : DependencyObject, new()

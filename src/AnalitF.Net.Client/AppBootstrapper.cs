@@ -43,8 +43,7 @@ namespace AnalitF.Net.Client
 		public string SettingsPath;
 		public ShellViewModel Shell;
 
-		private static bool isUiInitialized;
-
+		public static Config.Initializers.Caliburn Caliburn;
 		public static Config.Initializers.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
 		public string[] Args = new string[0];
@@ -70,8 +69,10 @@ namespace AnalitF.Net.Client
 
 		private void InitLog()
 		{
-			if (FailFast)
+			if (FailFast) {
+				LogManager.GetLog = t => new FailFastLog(t);
 				return;
+			}
 
 			LogManager.GetLog = t => new Log4net(t);
 			TaskScheduler.UnobservedTaskException += (sender, args) => {
@@ -134,10 +135,7 @@ namespace AnalitF.Net.Client
 		public void Init()
 		{
 			InitLog();
-			if (!InitApp()) {
-				Application.Current.Shutdown();
-				return;
-			}
+			InitApp();
 
 			var app = ((App)Application);
 			if (app != null) {
@@ -145,6 +143,7 @@ namespace AnalitF.Net.Client
 				if (app.FaultInject)
 					throw new Exception("Ошибка при инициализации");
 			}
+
 			InitUi();
 			InitDb();
 			InitShell();
@@ -223,7 +222,7 @@ namespace AnalitF.Net.Client
 			Util.SetValue(instance, "Shell", Shell);
 		}
 
-		private bool InitApp()
+		private void InitApp()
 		{
 			Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
 			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
@@ -247,17 +246,15 @@ namespace AnalitF.Net.Client
 			else {
 				Directory.CreateDirectory(Config.TmpDir);
 			}
-
-			return true;
 		}
 
 		private void InitDb()
 		{
-			if (NHibernate == null) {
-				NHibernate = new Config.Initializers.NHibernate();
-				NHibernate.Init();
-			}
+			if (NHibernate != null)
+				return;
 
+			NHibernate = new Config.Initializers.NHibernate();
+			NHibernate.Init();
 			new SanityCheck(Config.DbDir).Check(isImport);
 		}
 
@@ -265,12 +262,11 @@ namespace AnalitF.Net.Client
 		{
 			//в тестах мы можем дважды инициализировать ui
 			//это приведет к тому что делегаты будут вызываться рекурсивно
-			if (isUiInitialized)
+			if (Caliburn != null)
 				return;
 
-			new Config.Initializers.Caliburn().Init();
-
-			isUiInitialized = true;
+			Caliburn = new Config.Initializers.Caliburn();
+			Caliburn.Init();
 		}
 
 		public void Dispose()

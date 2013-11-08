@@ -168,6 +168,7 @@
     <Compile Include="Helpers\DataGridHelper.cs" />
     <Compile Include="Helpers\DelegateTraceListner.cs" />
     <Compile Include="Helpers\ErrorHelper.cs" />
+    <Compile Include="Helpers\FailFastLog.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />

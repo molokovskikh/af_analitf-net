@@ -23,8 +23,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[SetUp]
 		public void BaseViewFixtureSetup()
 		{
-			ViewFixtureSetup.BindingErrors.Clear();
-			ViewFixtureSetup.Setup();
+			ViewSetup.BindingErrors.Clear();
+			ViewSetup.Setup();
 
 			view = new WaybillDetailsView();
 			grid = (DataGrid)view.FindName("Lines");
@@ -36,8 +36,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[TearDown]
 		public void TearDown()
 		{
-			if (ViewFixtureSetup.BindingErrors.Count > 0) {
-				throw new Exception(ViewFixtureSetup.BindingErrors.Implode(Environment.NewLine));
+			if (ViewSetup.BindingErrors.Count > 0) {
+				throw new Exception(ViewSetup.BindingErrors.Implode(Environment.NewLine));
 			}
 		}
 

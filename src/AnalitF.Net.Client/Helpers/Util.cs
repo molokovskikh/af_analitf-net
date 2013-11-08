@@ -20,9 +20,15 @@ namespace AnalitF.Net.Client.Helpers
 					return null;
 				var type = value.GetType();
 				var property = type.GetProperty(part);
-				if (property == null)
-					return null;
-				value = property.GetValue(value, null);
+				if (property != null) {
+					value = property.GetValue(value, null);
+				}
+				else {
+					var field = type.GetField(part);
+					if (field == null)
+						return null;
+					value = field.GetValue(value);
+				}
 			}
 			return value;
 		}
@@ -38,16 +44,22 @@ namespace AnalitF.Net.Client.Helpers
 					return;
 				var type = current.GetType();
 				property = type.GetProperty(parts[i]);
-				if (property == null)
-					return;
-
-				if (i < parts.Length - 1)
-					current = property.GetValue(current, null);
+				if (property != null) {
+					if (i < parts.Length - 1)
+						current = property.GetValue(current, null);
+					else
+						property.SetValue(current, value, null);
+				}
+				else {
+					var field = type.GetField(parts[i]);
+					if (field == null)
+						return;
+					if (i < parts.Length - 1)
+						current = field.GetValue(current);
+					else
+						field.SetValue(current, value);
+				}
 			}
-
-			if (property == null)
-				return;
-			property.SetValue(current, value, null);
 		}
 	}
 }

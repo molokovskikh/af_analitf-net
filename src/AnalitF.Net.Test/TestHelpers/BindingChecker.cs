@@ -8,14 +8,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public class BindingChecker
 	{
-		public static List<string> BindingErrors = new List<string>();
-
 		public static IDisposable Track()
 		{
-			BindingErrors.Clear();
+			ViewSetup.BindingErrors.Clear();
 			return Disposable.Create(() => {
-				BindingErrors.Clear();
-				var errors = BindingErrors.ToArray();
+				var errors = ViewSetup.BindingErrors.ToArray();
 				if (errors.Length > 0) {
 					throw new Exception(errors.Implode(Environment.NewLine));
 				}

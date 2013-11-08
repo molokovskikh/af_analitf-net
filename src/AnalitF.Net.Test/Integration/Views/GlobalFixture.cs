@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
@@ -13,7 +14,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -35,6 +35,7 @@ using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using Xceed.Wpf.Toolkit;
 using Action = System.Action;
 using ButtonBase = System.Windows.Controls.Primitives.ButtonBase;
 using CheckBox = System.Windows.Controls.CheckBox;
@@ -44,6 +45,7 @@ using DataGridCell = System.Windows.Controls.DataGridCell;
 using Label = System.Windows.Controls.Label;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
+using WindowState = System.Windows.WindowState;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -53,10 +55,12 @@ namespace AnalitF.Net.Test.Integration.Views
 		private Dispatcher dispatcher;
 		private Window activeWindow;
 		public List<Window> windows;
+		public List<Exception> exceptions;
 
 		[SetUp]
 		public void Setup()
 		{
+			exceptions = new List<Exception>();
 			windows = new List<Window>();
 			activeWindow = null;
 			dispatcher = null;
@@ -65,7 +69,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			manager.UnitTesting = false;
 			manager.SkipApp = true;
-			disposable.Add(manager.Windows.Subscribe(w => {
+			disposable.Add(manager.WindowOpened.Subscribe(w => {
 				activeWindow = w;
 				windows.Add(w);
 				w.Closed += (sender, args) => {
@@ -73,7 +77,12 @@ namespace AnalitF.Net.Test.Integration.Views
 					activeWindow = windows.LastOrDefault();
 				};
 			}));
+
 			disposable.Add(BindingChecker.Track());
+			disposable.Add(Disposable.Create(() => {
+				if (exceptions.Count > 0)
+					throw new AggregateException(exceptions);
+			}));
 		}
 
 		[TearDown]
@@ -357,7 +366,36 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Make_order_correction()
 		{
-			throw new NotImplementedException();
+			MakeOrder();
+			Fixture<RandCost>();
+
+			Start();
+			AsyncClick("Update");
+
+			WaitMessageBox("Обновление завершено успешно.");
+			WaitWindow("Корректировка восстановленных заказов");
+		}
+
+		private void WaitWindow(string title)
+		{
+			var opened = manager.WindowOpened.Timeout(3.Second()).First();
+			opened.Dispatcher.Invoke(() => {
+				Assert.AreEqual(title, opened.Title);
+			});
+		}
+
+		private void WaitMessageBox(string message)
+		{
+			var opened = manager.MessageOpened.Timeout(15.Second()).First();
+			Assert.AreEqual(opened, message);
+			var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+			for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
+				Thread.Sleep(20);
+				window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+			}
+			if (window == IntPtr.Zero)
+				throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
+			WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
 		}
 
 		[Test]
@@ -426,10 +464,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Dynamic_recalculate_markup_validation()
 		{
 			Start();
-			dispatcher.BeginInvoke(new Action(() => {
-				Click((ButtonBase)activeWindow.FindName("ShowSettings"));
-			}));
-			WaitIdle();
+			AsyncClick("ShowSettings");
 			dispatcher.Invoke(() => {
 				var content = (FrameworkElement)activeWindow.Content;
 				var tab = (TabItem)content.FindName("VitallyImportantMarkupsTab");
@@ -502,6 +537,10 @@ namespace AnalitF.Net.Test.Integration.Views
 				ViewModelBinder.Bind(shell, activeWindow, null);
 				activeWindow.Show();
 			});
+			dispatcher.UnhandledException += (sender, args) => {
+				args.Handled = true;
+				exceptions.Add(args.Exception);
+			};
 
 			await loaded.WaitAsync();
 			WaitIdle();
@@ -560,20 +599,34 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
-		public void Click(ButtonBase element)
+		public void InternalClick(ButtonBase element)
 		{
 			Contract.Assert(element != null);
 			AssertInputable(element);
 			element.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, element));
 		}
 
+		private void InternalClick(string name)
+		{
+			var el = activeWindow.FindName(name);
+			if (el is SplitButton)
+				InternalClick(((SplitButton)el).Descendants<ButtonBase>().First());
+			else
+				InternalClick((ButtonBase)el);
+		}
+
 		public void Click(string name)
 		{
-			dispatcher.Invoke(() => {
-				Click((ButtonBase)activeWindow.FindName(name));
-			});
+			dispatcher.Invoke(() => InternalClick(name));
 			WaitIdle();
 		}
+
+		private void AsyncClick(string name)
+		{
+			dispatcher.BeginInvoke(new Action(() => InternalClick(name)));
+			WaitIdle();
+		}
+
 
 		private void Input(FrameworkElement view, string name, string text)
 		{

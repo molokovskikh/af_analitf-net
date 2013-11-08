@@ -32,8 +32,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			fixtureHelper = new FixtureHelper();
 			disposable.Add(fixtureHelper);
 
-			clientConfig = SetupFixture.clientConfig;
-			serviceConfig = SetupFixture.serviceConfig;
+			clientConfig = Net.Test.Integration.IntegrationSetup.clientConfig;
+			serviceConfig = Net.Test.Integration.IntegrationSetup.serviceConfig;
 
 			var files = Directory.GetFiles(".", "*.txt");
 			foreach (var file in files) {
@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			FileHelper.InitDir(serviceConfig.UpdatePath, clientConfig.RootDir, clientConfig.TmpDir);
 
-			localSession = SetupFixture.Factory.OpenSession();
+			localSession = Net.Test.Integration.IntegrationSetup.Factory.OpenSession();
 
 			settings = localSession.Query<Settings>().First();
 			address = localSession.Query<Address>().First();

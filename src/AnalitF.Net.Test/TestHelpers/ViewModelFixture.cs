@@ -38,10 +38,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			BaseScreen.TestSchuduler = testScheduler;
 			disposable.Add(TestUtils.WithScheduler(testScheduler));
 
-			manager = StubWindowManager(lazyshell);
-
-			data = new DataMother(session);
-
 			lazyshell = new Lazy<ShellViewModel>(() => {
 				var value = new ShellViewModel();
 				value.UnitTesting = true;
@@ -50,6 +46,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				ScreenExtensions.TryActivate(value);
 				return value;
 			});
+			manager = StubWindowManager(lazyshell);
+
+			data = new DataMother(session);
 		}
 
 		protected virtual ShellViewModel shell

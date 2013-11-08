@@ -218,8 +218,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		public void WaitWindow(string caption)
 		{
-			Wait(() => WinApi.FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ") == IntPtr.Zero);
-			MainWindow = AutomationElement.FromHandle(WinApi.FindWindowByCaption(IntPtr.Zero, "АналитФАРМАЦИЯ"));
+			Wait(() => WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ") == IntPtr.Zero);
+			MainWindow = AutomationElement.FromHandle(WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ"));
 		}
 
 		protected void WaitText(string text)

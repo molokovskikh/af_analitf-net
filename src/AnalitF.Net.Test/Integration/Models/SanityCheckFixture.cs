@@ -16,7 +16,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		[TearDown]
 		public void TearDown()
 		{
-			SetupFixture.RestoreData(session);
+			IntegrationSetup.RestoreData(session);
 		}
 
 		[Test]
