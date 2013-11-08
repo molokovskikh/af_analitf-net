@@ -262,13 +262,14 @@
     <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
+    <Compile Include="ViewModels\Orders\HistoryOrdersViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\Main.cs" />
     <Compile Include="ViewModels\MnnViewModel.cs" />
     <Compile Include="ViewModels\CatalogOfferViewModel.cs" />
-    <Compile Include="ViewModels\OrderDetailsViewModel.cs" />
-    <Compile Include="ViewModels\OrderLinesViewModel.cs" />
-    <Compile Include="ViewModels\OrdersViewModel.cs" />
+    <Compile Include="ViewModels\Orders\OrderDetailsViewModel.cs" />
+    <Compile Include="ViewModels\Orders\OrderLinesViewModel.cs" />
+    <Compile Include="ViewModels\Orders\OrdersViewModel.cs" />
     <Compile Include="ViewModels\Orders\Correction.cs" />
     <Compile Include="ViewModels\Parts\AddressSelector.cs" />
     <Compile Include="ViewModels\Parts\Editor.cs" />
@@ -355,13 +356,13 @@
     <Compile Include="Views\CatalogOfferView.xaml.cs">
       <DependentUpon>CatalogOfferView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OrderLinesView.xaml.cs">
+    <Compile Include="Views\Orders\OrderLinesView.xaml.cs">
       <DependentUpon>OrderLinesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OrdersView.xaml.cs">
+    <Compile Include="Views\Orders\OrdersView.xaml.cs">
       <DependentUpon>OrdersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OrderDetailsView.xaml.cs">
+    <Compile Include="Views\Orders\OrderDetailsView.xaml.cs">
       <DependentUpon>OrderDetailsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\InlineEditWarningView.xaml.cs">
@@ -387,7 +388,7 @@
     <Compile Include="Views\Parts\ProductInfoView.xaml.cs">
       <DependentUpon>ProductInfoView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HistoryOrdersView.xaml.cs">
+    <Compile Include="Views\Orders\HistoryOrdersView.xaml.cs">
       <DependentUpon>HistoryOrdersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WaitView.xaml.cs">
@@ -498,15 +499,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OrderLinesView.xaml">
+    <Page Include="Views\Orders\OrderLinesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OrdersView.xaml">
+    <Page Include="Views\Orders\OrdersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OrderDetailsView.xaml">
+    <Page Include="Views\Orders\OrderDetailsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -538,7 +539,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\HistoryOrdersView.xaml">
+    <Page Include="Views\Orders\HistoryOrdersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -572,7 +573,6 @@
     <Resource Include="Assets\shaders\grayscale.ps" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\images\Download_16.ico" />
     <Resource Include="Assets\images\Download_32.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -594,46 +594,29 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\images\Address Book_16.ico" />
     <Resource Include="Assets\images\Address Book_32.ico" />
-    <Resource Include="Assets\images\Address Book_Original.ico" />
     <Resource Include="Assets\images\Clipboard_32.ico" />
     <Resource Include="Assets\images\Compose Email_32.ico" />
-    <Resource Include="Assets\images\Control Panel 1_16.ico" />
     <Resource Include="Assets\images\Control Panel 1_32.ico" />
     <Resource Include="Assets\images\Control Panel 2_32.ico" />
-    <Resource Include="Assets\images\Document Blank_16.ico" />
     <Resource Include="Assets\images\Document Blank_32.ico" />
-    <Resource Include="Assets\images\Document_16.ico" />
     <Resource Include="Assets\images\Document_32.ico" />
     <Resource Include="Assets\images\Email 2_32.ico" />
-    <Resource Include="Assets\images\Favourites.ico" />
-    <Resource Include="Assets\images\Favourites_16.ico" />
     <Resource Include="Assets\images\Favourites_32.ico" />
-    <Resource Include="Assets\images\Floppy Disk Green_16.ico" />
     <Resource Include="Assets\images\Floppy Disk Green_32.ico" />
-    <Resource Include="Assets\images\Folder Green_16.ico" />
     <Resource Include="Assets\images\Folder Green_32.ico" />
-    <Resource Include="Assets\images\Folder Orange_16.ico" />
     <Resource Include="Assets\images\Folder Orange_32.ico" />
-    <Resource Include="Assets\images\Folder Yellow_16.ico" />
     <Resource Include="Assets\images\Folder Yellow_32.ico" />
-    <Resource Include="Assets\images\Home 2_16.ico" />
     <Resource Include="Assets\images\Home 2_32.ico" />
     <Resource Include="Assets\images\My Documents3_32.ico" />
-    <Resource Include="Assets\images\Notepad2_16.ico" />
     <Resource Include="Assets\images\Notepad2_32.ico" />
-    <Resource Include="Assets\images\Notepad_16.ico" />
     <Resource Include="Assets\images\Notepad_32.ico" />
-    <Resource Include="Assets\images\Printer 2_16.ico" />
     <Resource Include="Assets\images\Printer 2_32.ico" />
     <Resource Include="Assets\images\Quest.ico" />
     <Resource Include="Assets\images\Recycle Bin Empty 1_32.ico" />
-    <Resource Include="Assets\images\Search_16.ico" />
     <Resource Include="Assets\images\Search_32.ico" />
     <Resource Include="Assets\images\View Doc_32.ico" />
     <Resource Include="Assets\images\WayBill_32.ico" />
-    <Resource Include="Assets\images\Work_16.ico" />
     <Resource Include="Assets\images\Work_32.ico" />
   </ItemGroup>
   <ItemGroup>

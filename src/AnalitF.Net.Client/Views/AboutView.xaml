@@ -10,19 +10,16 @@
 
 	<StackPanel>
 		<Grid>
-			<Grid.RowDefinitions>
-				<RowDefinition></RowDefinition>
-			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
 				<ColumnDefinition></ColumnDefinition>
 			</Grid.ColumnDefinitions>
 			<Canvas Width="95" Height="90">
-				<Image Grid.Row="0" Grid.Column="0" Panel.ZIndex="0"
+				<Image Panel.ZIndex="0"
 					Source="/AnalitF.Net.Client;component/assets/images/Logo.png"
 					Width="79"
 					Height="74" />
-				<Image Grid.Row="0" Grid.Column="0" Panel.ZIndex="1"
+				<Image Panel.ZIndex="1"
 					Source="/AnalitF.Net.Client;component/assets/images/mainicon_original.ico"
 					Height="32"
 					Width="32"
