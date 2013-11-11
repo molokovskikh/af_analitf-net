@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Binders
 				.Do(e => e.EventArgs.Handled = true)
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
-					var now = TimeSpan.FromTicks(Environment.TickCount);
+					var now = TimeSpan.FromMilliseconds(Environment.TickCount);
 					if ((now - lastEdit) > inputInterval)
 						return text;
 					else {
@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Binders
 
 			updated.Subscribe(a => {
 				UpdateValue(grid, a);
-				lastEdit = TimeSpan.FromTicks(Environment.TickCount);
+				lastEdit = TimeSpan.FromMilliseconds(Environment.TickCount);
 			});
 
 			//игнорировать события до тех пор пока не произошло событие редактирования

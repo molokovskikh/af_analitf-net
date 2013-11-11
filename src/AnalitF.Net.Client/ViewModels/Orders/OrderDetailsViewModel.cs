@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using NPOI.SS.Formula.Functions;
 using ReactiveUI;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -122,7 +123,9 @@ namespace AnalitF.Net.Client.ViewModels
 			Source = new ObservableCollection<IOrderLine>(Order.Lines);
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
-				.Subscribe(_ => TryClose());
+				.Subscribe(_ => {
+					TryClose();
+				});
 
 			Lines.Recalculate();
 		}

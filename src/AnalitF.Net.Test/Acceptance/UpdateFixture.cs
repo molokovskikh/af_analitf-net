@@ -120,6 +120,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Thread.Sleep(1000);
 		}
 
+		[Test]
+		public void Edit_order_line()
+		{
+			throw new NotImplementedException();
+		}
+
 		private void WaitMessage(string message)
 		{
 			var window = FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();

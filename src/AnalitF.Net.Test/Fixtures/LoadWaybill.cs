@@ -17,6 +17,17 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public TestWaybill Waybill;
 		public string Filename;
 
+		private bool createFile;
+
+		public LoadWaybill()
+		{
+		}
+
+		public LoadWaybill(bool createFile = true)
+		{
+			this.createFile = createFile;
+		}
+
 		public void Execute(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
@@ -25,7 +36,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(Waybill);
 			SendLog = new TestDocumentSendLog(user, log);
 			session.Save(SendLog);
-			Filename = Waybill.Log.CreateFile(Config.DocsPath, "waybill content");
+			if (!createFile)
+				Filename = Waybill.Log.CreateFile(Config.DocsPath, "waybill content");
 		}
 	}
 }

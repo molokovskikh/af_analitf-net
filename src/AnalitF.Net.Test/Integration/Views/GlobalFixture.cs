@@ -352,18 +352,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		}
 
 		[Test]
-		public void Delete_order_line()
-		{
-			throw new NotImplementedException();
-		}
-
-		[Test]
-		public void Activete_search()
-		{
-			throw new NotImplementedException();
-		}
-
-		[Test]
 		public void Make_order_correction()
 		{
 			MakeOrder();

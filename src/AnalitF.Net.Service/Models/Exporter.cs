@@ -560,16 +560,6 @@ where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
 			Export(result, sql, "WaybillLines", new { userId = user.Id }, false);
 
-			Export(result,
-				"LoadedDocuments",
-				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
-				logs.Where(l => l.FileDelivered).Select(l => new object[] {
-					l.Document.Id,
-					(int)l.Document.DocumentType,
-					l.Document.Supplier.Id,
-					l.Document.Filename,
-				}));
-
 			var documentExported = session.CreateSQLQuery(@"
 select d.RowId
 from Logs.Document_logs d
@@ -582,7 +572,18 @@ group by dh.Id")
 			logs.Where(l => documentExported.Contains(l.Document.Id))
 				.Each(l => l.DocumentDelivered = true);
 
-			logs.Where(l => l.DocumentDelivered || l.FileDelivered)
+			var delivered = logs.Where(l => l.DocumentDelivered || l.FileDelivered).ToArray();
+			Export(result,
+				"LoadedDocuments",
+				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
+				delivered.Select(l => new object[] {
+					l.Document.Id,
+					(int)l.Document.DocumentType,
+					l.Document.Supplier.Id,
+					l.FileDelivered ? l.Document.Filename : null,
+				}));
+
+			delivered
 				.Select(l => new PendingDocLog(l))
 				.Each(p => session.Save(p));
 		}

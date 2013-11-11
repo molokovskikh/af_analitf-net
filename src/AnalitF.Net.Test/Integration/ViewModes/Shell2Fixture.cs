@@ -320,6 +320,19 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNotNull(main.Newses.Value[0].Url);
 		}
 
+		[Test]
+		public void Do_not_warn_on_not_send_orders()
+		{
+			session.DeleteEach<Order>();
+			var offer = session.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
+			var order1 = MakeOrder(offer);
+			order1.Send = false;
+			MakeOrder();
+
+			var result = shell.SendOrders().ToArray();
+			Assert.AreEqual(0, result.Length, result.Implode());
+		}
+
 		private void Collect(IEnumerable<IResult> results)
 		{
 			dialogs.AddRange(results.OfType<DialogResult>().Select(d => d.Model));

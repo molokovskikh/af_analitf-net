@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -44,6 +45,11 @@ namespace AnalitF.Net.Client.Models.Results
 				args.WasCancelled = !manager.ShowDialog(Model, null, settings).GetValueOrDefault(true);
 			if (Completed != null)
 				Completed(this, args);
+		}
+
+		public override string ToString()
+		{
+			return String.Format("Диалог - {0}", Model);
 		}
 	}
 }

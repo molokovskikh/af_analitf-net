@@ -265,31 +265,33 @@ where UserId = :userId;")
 					CurrentUser.Id);
 
 				var ids = orders.SelectMany(o => o.OrderItems).Select(i => i.ProductId).ToArray();
-				var query = new OfferQuery();
-				query.Where("c0.ProductId in (:ProductIds)");
-				var offers = Session.CreateSQLQuery(query.ToSql())
-					.AddEntity("Offer", typeof(Offer))
-					.SetParameterList("ProductIds", ids)
-					.List<Offer>();
-				var activePrices = Session.Query<ActivePrice>().ToList();
-				offers.Each(o => o.PriceList = activePrices.First(
-					price => price.Id.Price.PriceCode == o.PriceCode && price.Id.RegionCode == o.Id.RegionCode));
+				if (ids.Length > 0) {
+					var query = new OfferQuery();
+					query.Where("c0.ProductId in (:ProductIds)");
+					var offers = Session.CreateSQLQuery(query.ToSql())
+						.AddEntity("Offer", typeof(Offer))
+						.SetParameterList("ProductIds", ids)
+						.List<Offer>();
+					var activePrices = Session.Query<ActivePrice>().ToList();
+					offers.Each(o => o.PriceList = activePrices.First(
+						price => price.Id.Price.PriceCode == o.PriceCode && price.Id.RegionCode == o.Id.RegionCode));
 
-				foreach (var order in orders.ToArray()) {
-					var results = new List<OrderLineResult>();
-					foreach (var item in order.OrderItems) {
-						var offer = FindOffer(offers, item);
-						var result = Check(offer, item,
-							order.ActivePrice.Id.Price.Supplier.Id == optimizer.SupplierId,
-							orderitemMap);
-						results.Add(result);
-					}
+					foreach (var order in orders.ToArray()) {
+						var results = new List<OrderLineResult>();
+						foreach (var item in order.OrderItems) {
+							var offer = FindOffer(offers, item);
+							var result = Check(offer, item,
+								order.ActivePrice.Id.Price.Supplier.Id == optimizer.SupplierId,
+								orderitemMap);
+							results.Add(result);
+						}
 
-					if (results.Any(r => r.Result != LineResultStatus.OK)) {
-						orders.Remove(order);
-						errors.Add(new OrderResult(order.ClientOrderId,
-							"В заказе обнаружены позиции с измененной ценой или количеством",
-							results));
+						if (results.Any(r => r.Result != LineResultStatus.OK)) {
+							orders.Remove(order);
+							errors.Add(new OrderResult(order.ClientOrderId,
+								"В заказе обнаружены позиции с измененной ценой или количеством",
+								results));
+						}
 					}
 				}
 			}

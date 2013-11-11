@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Models
 
 			var stat = new Stat();
 			stat.OrdersCount = session.Query<Order>().Count(o => o.Address == value && !o.Frozen);
-			stat.ReadyForSendOrdersCount = session.Query<Order>().Count(o => o.Address == value && !o.Frozen && o.Send);
+			stat.ReadyForSendOrdersCount = session.Query<Order>().ReadyToSend(value).Count();
 			stat.OrderLinesCount = session.Query<OrderLine>().Count(o => o.Order.Address == value && !o.Order.Frozen);
 			stat.Sum = session.Query<Order>().Where(o => o.Address == value && !o.Frozen).Sum(o => (decimal?)o.Sum)
 				.GetValueOrDefault();

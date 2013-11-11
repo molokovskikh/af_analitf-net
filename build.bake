@@ -26,13 +26,13 @@ Global(
 	Profile: @catalog,
 	Variables : {
 		@Production : {
-			@DeployRoot: """\\acdcserv.adc.analit.net\WWWRoot\TEST""",
-			@UpdateDeployRoot: """\\acdcserv\WWWRoot\TEST\var\update"""
+			@DeployRoot: """\\acdcserv\TEST\""",
+			@UpdateDeployRoot: """\\acdcserv\TEST\var\update"""
 		},
 		@Test : {
-			@DeployRoot: """\\acdcserv.adc.analit.net\WWWRoot\TEST""",
+			@DeployRoot: """\\acdcserv\TEST""",
 			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\acdcserv\WWWRoot\TEST\var-test\update"""
+			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update"""
 		}
 	},
 	JenkinsProject: "AnalitF.Net"

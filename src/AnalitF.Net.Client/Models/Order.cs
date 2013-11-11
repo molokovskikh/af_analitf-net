@@ -14,6 +14,15 @@ using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
+	public static class OrderQuery
+	{
+		public static IQueryable<Order> ReadyToSend(this IQueryable<Order> query, Address address)
+		{
+			var id = address != null ? address.Id : 0;
+			return query.Where(o => o.Address.Id == id && !o.Frozen && o.Send);
+		}
+	}
+
 	public class Order : BaseNotify, IOrder
 	{
 		private decimal sum;

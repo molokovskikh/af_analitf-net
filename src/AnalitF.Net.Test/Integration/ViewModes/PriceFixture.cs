@@ -81,7 +81,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
-			RxApp.MessageBus.SendMessage("DbChanged");
+			RxApp.MessageBus.SendMessage("Changed", "db");
 
 			Activate(model);
 

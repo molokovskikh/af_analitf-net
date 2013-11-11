@@ -113,8 +113,10 @@ namespace AnalitF.Net.Client.ViewModels
 				//то вызов произойдет после того как Dispatcher поделает все дела
 				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
 				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
-				OnCloseDisposable.Add(Bus.Listen<string>()
-					.Where(m => m == "DbChanged")
+				OnCloseDisposable.Add(Bus.Listen<string>("db")
+					.Where(m => {
+						return m == "Changed";
+					})
 					.Subscribe(_ => updateOnActivate = true));
 			}
 
@@ -150,7 +152,7 @@ namespace AnalitF.Net.Client.ViewModels
 				OnCloseDisposable.Dispose();
 
 			var broacast = false;
-			//в тестах может быть синуация когда мы дважды освобождаем объект
+			//в тестах может быть ситуация когда мы дважды освобождаем объект
 			if (Session != null) {
 				if (Session.IsOpen) {
 					if (Session.FlushMode != FlushMode.Never) {
@@ -177,7 +179,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected virtual void Broadcast()
 		{
-			Bus.SendMessage("DbChanged");
+			Bus.SendMessage("Changed", "db");
 		}
 
 		private void Load()

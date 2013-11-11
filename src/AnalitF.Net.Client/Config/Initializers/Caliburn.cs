@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 	{
 		public void Init()
 		{
-			MessageBus.Current.RegisterScheduler<string>(ImmediateScheduler.Instance);
+			MessageBus.Current.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 			//нужно затем что бы можно было делать модели без суффикса ViewModel
 			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(

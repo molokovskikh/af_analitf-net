@@ -367,6 +367,22 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.AreEqual("", files);
 		}
 
+		[Test]
+		public void Load_waybill_without_file()
+		{
+			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
+				+ " where UserId = :userId;")
+				.SetParameter("userId", ServerUser().Id)
+				.ExecuteUpdate();
+			session.Transaction.Commit();
+			Fixture(new LoadWaybill(createFile: false));
+
+			((UpdateCommand)command).SyncData = "Waybills";
+			command.Run();
+
+			Assert.AreEqual("Получение документов завершено успешно.", command.SuccessMessage);
+		}
+
 		private TestUser ServerUser()
 		{
 			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);

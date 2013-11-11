@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						Environment.NewLine);
 					var text = new TextViewModel(resultText) {
 						Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",
-						DisplayName = "Неотправленные заказы"
+						DisplayName = "Не отправленные заказы"
 					};
 					Results.Add(new DialogResult(text, @fixed: true));
 				}

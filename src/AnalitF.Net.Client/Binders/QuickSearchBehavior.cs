@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Binders
 			AttachInput(grid, searchText);
 			var binding = BindingOperations.GetBinding(grid, Selector.SelectedItemProperty);
 			//если биндинга нет это странно
-			//магия что бы пофиксить ошибку в .net 4.0 см комментарий к CurrentItemStubProperty
+			//магия что бы обойти ошибку в .net 4.0 см комментарий к CurrentItemStubProperty
 			if (binding != null) {
 				BindingOperations.SetBinding(grid,
 					Controls.DataGrid.CurrentItemStubProperty,

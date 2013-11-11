@@ -244,7 +244,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (!String.IsNullOrEmpty(report)) {
 					Results.Add(new DialogResult(new TextViewModel(report) {
 						Header = "Предложения по данным позициям из заказа отсутствуют",
-						DisplayName = "Не найденые позиции"
+						DisplayName = "Не найденные позиции"
 					}, @fixed: true));
 				}
 			}
@@ -295,6 +295,9 @@ namespace AnalitF.Net.Client.Models.Commands
 				.ToList();
 			foreach (var doc in waybills) {
 				try {
+					if (String.IsNullOrEmpty(doc.OriginFilename))
+						continue;
+
 					var map = maps.First(m => m.Supplier.Id == doc.Supplier.Id);
 					var dst = map.Dir;
 					if (!Directory.Exists(dst))

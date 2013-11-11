@@ -414,7 +414,7 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowFixedDialog(new SettingsViewModel());
 			//настройки будут обновлены автоматически но в случае если
 			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
-			//это будет слишком позно
+			//это будет слишком поздно
 			session.Refresh(Settings.Value);
 		}
 
@@ -503,12 +503,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> SendOrders(bool force = false)
 		{
+			if (!CanSendOrders)
+				yield break;
+
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
 
 			var warningOrders = statelessSession.Query<Order>()
 				.Fetch(o => o.Price)
 				.Fetch(o => o.MinOrderSum)
+				.ReadyToSend(CurrentAddress)
 				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
@@ -646,7 +650,7 @@ namespace AnalitF.Net.Client.ViewModels
 				else
 					scheduler = TaskScheduler.Current;
 
-				//если это вторая итерация то нужно пересодать cancellation
+				//если это вторая итерация то нужно пересоздать cancellation
 				//тк у предыдущего уже будет стоять флаг IsCancellationRequested
 				//и ничего не запустится
 				viewModel.Cancellation = new CancellationTokenSource();

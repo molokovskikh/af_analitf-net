@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ProcessHelper.ExecutedProcesses.Clear();
 
 			RxApp.MessageBus = new MessageBus();
-			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance);
+			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 
 			testScheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = testScheduler;

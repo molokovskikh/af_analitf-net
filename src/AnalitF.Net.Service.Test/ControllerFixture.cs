@@ -153,11 +153,49 @@ namespace AnalitF.Net.Service.Test
 			supplier.Maintain();
 
 			var offer = price.Core[0];
-			controller.Post(new SyncRequest {
+			controller.Post(ToClientOrder(offer));
+
+			var orders = session.Query<Order>()
+				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
+				.ToList();
+
+			Assert.That(orders.Count, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Reject_order()
+		{
+			var supplier = TestSupplier.CreateNaked();
+			var price = supplier.Prices[0];
+			supplier.CreateSampleCore();
+			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
+			session.Save(supplier);
+			supplier.Maintain();
+
+			var testUser = session.Load<TestUser>(user.Id);
+			var intersection = session
+				.Query<TestIntersection>().First(i => i.Price == price && i.Client == testUser.Client);
+			var addressIntersection = intersection.AddressIntersections[0];
+			addressIntersection.ControlMinReq = true;
+			addressIntersection.MinReq = 3000;
+
+			user.UseAdjustmentOrders = true;
+			session.Flush();
+			var offer = price.Core.First();
+			var result = (List<OrderResult>)((ObjectContent)controller.Post(ToClientOrder(offer)).Content).Value;
+			Assert.AreEqual(OrderResultStatus.Reject, result[0].Result);
+			Assert.AreEqual("Поставщик отказал в приеме заказа. Сумма заказа меньше минимально допустимой. Минимальный заказ 3 000,00р. заказано 100,00р..",
+				result[0].Error);
+		}
+
+		private SyncRequest ToClientOrder(TestCore offer)
+		{
+			var supplier = offer.Price.Supplier;
+			return new SyncRequest {
 				Orders = new [] {
 					new ClientOrder {
 						ClientOrderId = 1,
-						PriceId = price.Id,
+						PriceId = offer.Price.Id,
 						RegionId = supplier.HomeRegion.Id,
 						AddressId = user.AvaliableAddresses[0].Id,
 						CreatedOn = DateTime.Now,
@@ -176,13 +214,7 @@ namespace AnalitF.Net.Service.Test
 						}
 					}
 				}
-			});
-
-			var orders = session.Query<Order>()
-				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
-				.ToList();
-
-			Assert.That(orders.Count, Is.EqualTo(1));
+			};
 		}
 	}
 }
