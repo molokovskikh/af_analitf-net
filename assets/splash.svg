@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="splash.png">
+   sodipodi:docname="splash.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -62,7 +62,7 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="129.96489"
+     inkscape:cx="7.46489"
      inkscape:cy="104.53698"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -99,7 +99,7 @@
      transform="translate(0,-702.36218)"
      style="display:inline">
     <rect
-       style="fill:#4d7da2;fill-opacity:1;stroke:#4d7da2;stroke-width:9.77864265;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#4d7da2;fill-opacity:1;stroke:#4d7da2;stroke-width:9.77899999999999990;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2999"
        width="590.22137"
        height="340.22134"
