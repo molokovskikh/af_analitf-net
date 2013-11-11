@@ -26,8 +26,7 @@ Global(
 	Profile: @catalog,
 	Variables : {
 		@Production : {
-			@DeployRoot: """\\acdcserv\TEST\""",
-			@UpdateDeployRoot: """\\acdcserv\TEST\var\update"""
+			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update"""
 		},
 		@Test : {
 			@DeployRoot: """\\acdcserv\TEST""",
@@ -44,7 +43,14 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
-task "deploy:service", [@DeployPipeline]
+task "deploy:service", [@DeployPipeline, "init:dir"]
+
+task "init:dir":
+	MkDir("""\\acdcserv\WebApps\var\""")
+	MkDir("""\\acdcserv\WebApps\var\update\""")
+	MkDir("""\\acdcserv\WebApps\var\cache\""")
+	MkDir("""\\acdcserv\WebApps\var\result\""")
+	MkDir("""\\acdcserv\WebApps\var\export\""")
 
 task @deploy, ["git:tag", "deploy:service", "deploy:client", "deploy:update"]
 
@@ -56,10 +62,15 @@ task "deploy:update", ["build:client"]:
 	Rm("$dir/*")
 	Cp("output/Updater/*", dir, true)
 
-task "build:client", ["before:build:client", @BuildApp, "client:postprocess", "build:setup", "build:update", "after:build:client"]
+task "build:client", ["Production", "before:build:client", @BuildApp, "after:build:app", "build:setup", "build:update", "after:build:client"]
 
-task "client:postprocess":
-	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), "output/AnalitF.Net.Client")
+task "after:build:app":
+	output = "output/AnalitF.Net.Client"
+	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
+	Rm(FileSet("$output/*.xml"))
+	print Globals.Environment
+	if Globals.Environment == @Production:
+		Rm(FileSet("$output/*.pdb"))
 
 task "before:build:client":
 	Globals.Project = "AnalitF.Net.Client"
@@ -89,7 +100,9 @@ task "before:build:update":
 task "build:update", ["before:build:update", @BuildApp]:
 	Cp("output/setup/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
-	Rm(FileSet("output/Updater/*.pdb"))
+	Rm(FileSet("output/Updater/*.xml"))
+	if Globals.Environment == @Production:
+		Rm(FileSet("output/Updater/*.pdb"))
 
 task "git:tag":
 	return if Globals.Environment == @test
