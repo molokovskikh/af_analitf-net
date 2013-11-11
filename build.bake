@@ -43,14 +43,7 @@ task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
 
 task @DeployApp, [@WebDeploy]
 
-task "deploy:service", [@DeployPipeline, "init:dir"]
-
-task "init:dir":
-	MkDir("""\\acdcserv\WebApps\var\""")
-	MkDir("""\\acdcserv\WebApps\var\update\""")
-	MkDir("""\\acdcserv\WebApps\var\cache\""")
-	MkDir("""\\acdcserv\WebApps\var\result\""")
-	MkDir("""\\acdcserv\WebApps\var\export\""")
+task "deploy:service", [@DeployPipeline]
 
 task @deploy, ["git:tag", "deploy:service", "deploy:client", "deploy:update"]
 
