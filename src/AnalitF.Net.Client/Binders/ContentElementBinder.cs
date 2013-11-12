@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -12,6 +13,8 @@ using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
+using Inflector;
+using NHibernate.Mapping;
 using ReactiveUI;
 using Xceed.Wpf.Toolkit;
 
@@ -59,17 +62,20 @@ namespace AnalitF.Net.Client.Binders
 					return "Tax";
 				if (s == "Value")
 					return s;
-				return s.InflectTo().Singularized;
+				return s.Singularize();
 			};
 			ConventionManager.AddElementConvention<SplitButton>(SplitButton.ContentProperty, "DataContext", "Click");
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
 			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
 			ConventionManager.AddElementConvention<FlowDocumentScrollViewer>(FlowDocumentScrollViewer.DocumentProperty, "Document ", "DataContextChanged");
 			ConventionManager.AddElementConvention<DocumentViewerBase>(DocumentViewerBase.DocumentProperty, "Document ", "DataContextChanged");
-			ConventionManager.AddElementConvention<PasswordBox>(PasswordProperty, "Password", "PasswordChanged");
+			ConventionManager.AddElementConvention<PasswordBox>(PasswordProperty, "Password", "PasswordChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					((PasswordBox)element).FontFamily = SystemFonts.MessageFontFamily;
+					return ConventionManager.SetBindingWithoutBindingOverwrite(viewModelType, path, property, element, convention, convention.GetBindableProperty(element));
+				};
 			ConventionManager.AddElementConvention<MultiSelector>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
-				.ApplyBinding = (viewModelType, path, property, element, convention) =>
-				{
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
 					var parentApplied = ConventionManager.GetElementConvention(typeof(Selector))
 						.ApplyBinding(viewModelType, path, property, element, convention);
 					var index = path.LastIndexOf('.');
@@ -85,6 +91,50 @@ namespace AnalitF.Net.Client.Binders
 
 					return true;
 				};
+			ConventionManager.AddElementConvention<ComboBox>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					if (property.PropertyType.IsEnum) {
+
+						if (NotBindedAndNull(element, Selector.ItemsSourceProperty)
+							&& !ConventionManager.HasBinding(element, Selector.SelectedItemProperty)) {
+
+							var items = DescriptionHelper.GetDescription(property.PropertyType);
+							element.SetValue(Selector.DisplayMemberPathProperty, "Name");
+							element.SetValue(Selector.ItemsSourceProperty, items);
+
+							var binding = new Binding(path);
+							binding.Converter = new ComboBoxSelectedItemConverter();
+							binding.ConverterParameter = items;
+							BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
+						}
+					}
+					else {
+						var fallback = ConventionManager.GetElementConvention(typeof(Selector));
+						if (fallback != null) {
+							fallback.ApplyBinding(viewModelType, path, property, element, fallback);
+						}
+					}
+					return true;
+				};
+		}
+
+		public class ComboBoxSelectedItemConverter : IValueConverter
+		{
+			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
+			}
+
+			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				return ((ValueDescription)value).Value;
+			}
+		}
+
+		private static bool NotBindedAndNull(FrameworkElement element, DependencyProperty property)
+		{
+			return !ConventionManager.HasBinding(element, property)
+				&& element.GetValue(property) == null;
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)
@@ -108,13 +158,11 @@ namespace AnalitF.Net.Client.Binders
 				}
 
 				if(property == null) {
-					//Log.Info("Binding Convention Not Applied: Element {0} did not match a property.", element.Name);
 					continue;
 				}
 
 				var convention = ConventionManager.GetElementConvention(element.GetType());
 				if(convention == null) {
-					//Log.Warn("Binding Convention Not Applied: No conventions configured for {0}.", element.GetType());
 					continue;
 				}
 				Bind(convention, element, cleanName, property, viewModelType);

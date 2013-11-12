@@ -153,12 +153,29 @@ namespace AnalitF.Net.Test.Integration
 			Assert.AreEqual(block, item.Parent());
 		}
 
+		[Test]
+		public void Bind_enum()
+		{
+			var box = new ComboBox {
+				Name = "Enum"
+			};
+			Bind(box);
+			Assert.AreEqual(2, box.Items.Count);
+			box.SelectedItem = box.Items[1];
+			Assert.AreEqual(TestEnum.Item2, model.Enum);
+		}
+
 		private void Bind(object content)
 		{
 			view.Content = content;
 			ViewModelBinder.Bind(model, view, null);
 		}
 
+		public enum TestEnum
+		{
+			[System.ComponentModel.Description("Item 1")] Item1,
+			[System.ComponentModel.Description("Item 2")] Item2,
+		}
 
 		public class ViewModel
 		{
@@ -185,6 +202,8 @@ namespace AnalitF.Net.Test.Integration
 			public ReactiveCollection<string> SelectedItems { get; set; }
 
 			public NotifyValue<string> CurrentItem { get; set; }
+
+			public TestEnum Enum { get; set; }
 
 			public void Reset()
 			{

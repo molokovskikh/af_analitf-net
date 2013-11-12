@@ -11,6 +11,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
+using Inflector;
 using ReactiveUI.Blend;
 
 namespace AnalitF.Net.Client.Binders
@@ -66,7 +67,7 @@ namespace AnalitF.Net.Client.Binders
 			var pattern = "Enter";
 			var methods = type.GetMethods().Where(m => m.Name.StartsWith(pattern));
 			foreach (var method in methods) {
-				var name = method.Name.Replace(pattern, "").InflectTo().Pluralized;
+				var name = method.Name.Replace(pattern, "").Pluralize();
 				var element = elements.FindName(name);
 				if (element == null)
 					continue;

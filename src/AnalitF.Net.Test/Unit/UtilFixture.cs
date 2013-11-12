@@ -1,6 +1,8 @@
-﻿using System.Dynamic;
+﻿using System;
+using System.Dynamic;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
+using Inflector;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit

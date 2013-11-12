@@ -1,3 +1,4 @@
+using Inflector;
 using NHibernate.Cfg;
 
 namespace AnalitF.Net.Client.Config.Initializers
@@ -7,7 +8,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public string ClassToTableName(string className)
 		{
 			var name = DefaultNamingStrategy.Instance.ClassToTableName(className);
-			return name.InflectTo().Pluralized;
+			return name.Pluralize();
 		}
 
 		public string PropertyToColumnName(string propertyName)

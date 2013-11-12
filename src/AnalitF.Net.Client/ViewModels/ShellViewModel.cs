@@ -26,6 +26,7 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using Iesi.Collections;
 using NHibernate;
@@ -598,9 +599,9 @@ namespace AnalitF.Net.Client.ViewModels
 			var wait = new SyncViewModel(progress) {
 				GenericErrorMessage = command.ErrorMessage
 			};
-			var credential = new NetworkCredential(Settings.Value.UserName, Settings.Value.Password);
 			command.Config = Config;
-			command.Credentials = credential;
+			command.Credentials = Settings.Value.GetCredential();
+			command.Proxy = Settings.Value.GetProxy();
 			command.Progress = progress;
 
 			if(UnitTesting)

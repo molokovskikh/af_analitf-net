@@ -54,7 +54,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="iesi.collections" />
-    <Reference Include="inflector_extension" />
+    <Reference Include="Inflector">
+      <HintPath>..\..\packages\Inflector.1.0.0.0\lib\net40\Inflector.dll</HintPath>
+    </Reference>
     <Reference Include="ionic.zip" />
     <Reference Include="log4net" />
     <Reference Include="mysql.data" />
@@ -570,6 +572,7 @@
     <None Include="App.release.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
+    <None Include="packages.config" />
     <Resource Include="Assets\shaders\grayscale.ps" />
   </ItemGroup>
   <ItemGroup>

@@ -37,6 +37,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected JsonMediaTypeFormatter Formatter;
 
 		public ICredentials Credentials;
+		public IWebProxy Proxy;
 
 		public string ErrorMessage;
 		public string SuccessMessage;
@@ -61,7 +62,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public T Process<T>(Func<T> method)
 		{
 			try {
-				return RemoteTask(Credentials, Token, Progress, c => {
+				return RemoteTask(Token, Progress, c => {
 					Client = c;
 					var factory = Factory;
 					using (Session = factory.OpenSession())
@@ -79,7 +80,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		public static T RemoteTask<T>(ICredentials credentials, CancellationToken cancellation,
+		public T RemoteTask<T>(CancellationToken cancellation,
 			BehaviorSubject<Progress> progress,
 			Func<HttpClient, T> action)
 		{
@@ -87,8 +88,9 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			progress.OnNext(new Progress("Соединение", 0, 0));
 			var handler = new HttpClientHandler {
-				Credentials = credentials,
+				Credentials = Credentials,
 				PreAuthenticate = true,
+				Proxy = Proxy
 			};
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;

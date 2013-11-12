@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Views;
@@ -130,9 +131,17 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool PrintRetailCost { get; set; }
 	}
 
+	public enum ProxyType
+	{
+		[Description("Использовать настройки системы")] System,
+		[Description("Не использовать")] None,
+		[Description("Использовать собственные настройки")] User,
+	}
+
 	public class Settings : BaseNotify
 	{
 		private bool groupWaybillBySupplier;
+		private ProxyType proxyType;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -218,6 +227,30 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string ProxyHost { get; set; }
+
+		public virtual int ProxyPort { get; set; }
+
+		public virtual ProxyType ProxyType
+		{
+			get { return proxyType; }
+			set
+			{
+				proxyType = value;
+				OnPropertyChanged("ProxyType");
+				OnPropertyChanged("CanConfigureProxy");
+			}
+		}
+
+		public virtual string ProxyUserName { get; set; }
+
+		public virtual string ProxyPassword { get; set; }
+
+		public virtual bool CanConfigureProxy
+		{
+			get { return ProxyType == ProxyType.User; }
+		}
+
 		public virtual bool IsValid
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }
@@ -233,6 +266,20 @@ namespace AnalitF.Net.Client.Models
 					MapPath("docs"),
 				};
 			}
+		}
+
+		public virtual IWebProxy GetProxy()
+		{
+			if (ProxyType == ProxyType.None)
+				return null;
+			if (ProxyType == ProxyType.System)
+				return WebRequest.DefaultWebProxy;
+			if (ProxyHost == null)
+				return null;
+			var proxy = new WebProxy(ProxyHost, ProxyPort);
+			if (!String.IsNullOrEmpty(ProxyUserName))
+				proxy.Credentials = new NetworkCredential(ProxyUserName, ProxyPassword);
+			return proxy;
 		}
 
 		public virtual string MapPath(string name)
@@ -303,6 +350,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ValidateMarkups()
 		{
 			return MarkupConfig.Validate(Markups);
+		}
+
+		public virtual ICredentials GetCredential()
+		{
+			return new NetworkCredential(UserName, Password);
 		}
 	}
 }
