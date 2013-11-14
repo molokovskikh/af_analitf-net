@@ -110,7 +110,7 @@
 					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant"></TextBox>
 
 					<Label>Способ налогообложения:</Label>
-					<ComboBox Style="{StaticResource Select}" x:Name="Taxations" DisplayMemberPath="Name" />
+					<ComboBox Style="{StaticResource Select}" x:Name="CurrentWaybillSettings_Value_Taxation" />
 
 					<CheckBox x:Name="CurrentWaybillSettings_Value_IncludeNdsForVitallyImportant">
 						Включать входную НДС в расчет розничной надбавки для ЖНВЛС при ЕНВД
@@ -261,14 +261,14 @@
 					<TextBox x:Name="Settings_OverCountWarningFactor"></TextBox>
 
 					<Label>Расчет разницы в таблице предложений:</Label>
-					<ComboBox Style="{StaticResource Select}" x:Name="DiffCalculationTypes" DisplayMemberPath="Name" />
+					<ComboBox Style="{StaticResource Select}" x:Name="Settings_DiffCalcMode" />
 
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройка стеллажной карты" Name="RackingMapSettings">
 				<StackPanel>
-					<ComboBox Style="{StaticResource Select}" x:Name="RackingMapSizes" DisplayMemberPath="Name" />
+					<ComboBox Style="{StaticResource Select}" x:Name="Settings_RackingMap_Size" />
 					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted">Удалять непечатаемые элементы</CheckBox>
 					<Label>Печатаемые элементы стеллажной карты</Label>
 					<CheckBox x:Name="Settings_RackingMap_PrintProduct">Наименование</CheckBox>
@@ -284,44 +284,43 @@
 			</TabItem>
 			<TabItem Header="Настройка печати ценников" Name="PriceTagSettings">
 				<StackPanel>
-					<ComboBox Style="{StaticResource Select}" x:Name="PriceTagTypes"
-						DisplayMemberPath="Name" />
+					<ComboBox Style="{StaticResource Select}" x:Name="Settings_PriceTag_Type" />
 					<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Удалять непечатаемые элементы
 					</CheckBox>
 					<Label>Печатаемые элементы ценника</Label>
 					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Наименование
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintCountry"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Страна
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProducer"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Производитель
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Срок годности
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Номер накладной
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Поставщик
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Серия товара
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
-						IsEnabled="{Binding CanConfigurePriceTag.Value}">
+						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
 						Дата накладной
 					</CheckBox>
 				</StackPanel>

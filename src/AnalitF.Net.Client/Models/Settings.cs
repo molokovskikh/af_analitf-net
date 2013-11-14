@@ -70,8 +70,10 @@ namespace AnalitF.Net.Client.Models
 		[Description("Малый размер с большой ценой №2")] BigCost2,
 	}
 
-	public class PriceTagSettings
+	public class PriceTagSettings : BaseNotify
 	{
+		private PriceTagType type;
+
 		public PriceTagSettings()
 		{
 			PrintProduct  = true;
@@ -84,7 +86,16 @@ namespace AnalitF.Net.Client.Models
 			PrintDocumentDate  = true;
 		}
 
-		public virtual PriceTagType Type { get; set; }
+		public virtual PriceTagType Type
+		{
+			get { return type; }
+			set
+			{
+				type = value;
+				OnPropertyChanged("IsConfigurable");
+			}
+		}
+
 		public virtual bool PrintEmpty { get; set; }
 		public virtual bool HideNotPrinted { get; set; }
 
@@ -96,6 +107,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool PrintSupplier { get; set; }
 		public virtual bool PrintSerialNumber { get; set; }
 		public virtual bool PrintDocumentDate { get; set; }
+
+		public bool IsConfigurable
+		{
+			get { return Type == PriceTagType.Normal; }
+		}
 	}
 
 	public enum RackingMapSize

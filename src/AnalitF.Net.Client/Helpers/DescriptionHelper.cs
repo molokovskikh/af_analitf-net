@@ -33,11 +33,6 @@ namespace AnalitF.Net.Client.Helpers
 
 	public static class DescriptionHelper
 	{
-		public static List<ValueDescription<T>> ToDescriptions<T>(this Enum value)
-		{
-			return GetDescription<T>();
-		}
-
 		public static List<ValueDescription> GetDescription(Type type)
 		{
 			return Enum.GetValues(type)

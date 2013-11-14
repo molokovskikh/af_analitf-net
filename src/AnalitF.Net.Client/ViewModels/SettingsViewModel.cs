@@ -50,13 +50,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.LinkTo(Settings.Markups, i => Settings.AddMarkup((MarkupConfig)i));
 			MarkupConfig.Validate(VitallyImportantMarkups);
 
-			DiffCalculationTypes = Settings.DiffCalcMode.ToDescriptions<DiffCalcMode>();
-			RackingMapSizes = Settings.RackingMap.Size.ToDescriptions<RackingMapSize>();
-			PriceTagTypes = Settings.PriceTag.Type.ToDescriptions<PriceTagType>();
-			Taxations = DescriptionHelper.GetDescription<Taxation>();
-			CanConfigurePriceTag = new NotifyValue<bool>(() => CurrentPriceTagType.Value == PriceTagType.Normal);
-			CurrentWaybillSettings.Changed().Subscribe(_ => NotifyOfPropertyChange("CurrentTaxation"));
-
 			if (string.IsNullOrEmpty(Settings.UserName))
 				SelectedTab.Value = "LoginTab";
 
@@ -73,8 +66,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public IList<MarkupConfig> Markups { get; set; }
 
 		public IList<MarkupConfig> VitallyImportantMarkups { get; set; }
-
-		public List<ValueDescription<DiffCalcMode>> DiffCalculationTypes { get; set; }
 
 		public List<Address> Addresses { get; set; }
 
@@ -93,55 +84,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
 
-		public ValueDescription<DiffCalcMode> CurrentDiffCalculationType
-		{
-			get { return DiffCalculationTypes.First(t => t.Value ==  Settings.DiffCalcMode); }
-			set { Settings.DiffCalcMode = value.Value; }
-		}
-
-		public List<ValueDescription<RackingMapSize>> RackingMapSizes { get; set; }
-
-		public ValueDescription<RackingMapSize> CurrentRackingMapSize
-		{
-			get { return RackingMapSizes.First(x => x.Value == Settings.RackingMap.Size); }
-			set { Settings.RackingMap.Size = value.Value; }
-		}
-
-		public List<ValueDescription<PriceTagType>> PriceTagTypes { get; set; }
-
-		public ValueDescription<PriceTagType> CurrentPriceTagType
-		{
-			get { return PriceTagTypes.FirstOrDefault(t => t.Value == Settings.PriceTag.Type); }
-			set
-			{
-				Settings.PriceTag.Type = value.Value;
-				CanConfigurePriceTag.Recalculate();
-			}
-		}
-
-		public NotifyValue<bool> CanConfigurePriceTag { get; set; }
-
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
 			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
-		}
-
-		public List<ValueDescription<Taxation>> Taxations { get; set; }
-
-		public ValueDescription<Taxation> CurrentTaxation
-		{
-			get
-			{
-				return CurrentWaybillSettings.Value == null
-					? null
-					: Taxations.First(t => t.Value == CurrentWaybillSettings.Value.Taxation) ;
-			}
-			set
-			{
-				if (CurrentWaybillSettings.Value == null || value == null)
-					return;
-				CurrentWaybillSettings.Value.Taxation = value.Value;
-			}
 		}
 
 		public IEnumerable<IResult> SelectDir()
