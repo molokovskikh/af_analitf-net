@@ -602,6 +602,9 @@ namespace AnalitF.Net.Client.ViewModels
 			command.Config = Config;
 			command.Credentials = Settings.Value.GetCredential();
 			command.Proxy = Settings.Value.GetProxy();
+			if (Settings.Value.UseRas) {
+				command.RasConnection = Settings.Value.RasConnection;
+			}
 			command.Progress = progress;
 
 			if(UnitTesting)

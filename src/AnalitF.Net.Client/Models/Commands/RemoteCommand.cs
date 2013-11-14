@@ -8,6 +8,8 @@ using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using DotRas;
+using Iesi.Collections;
 using NHibernate;
 using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
@@ -38,6 +40,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public ICredentials Credentials;
 		public IWebProxy Proxy;
+		public string RasConnection;
 
 		public string ErrorMessage;
 		public string SuccessMessage;
@@ -62,7 +65,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public T Process<T>(Func<T> method)
 		{
 			try {
-				return RemoteTask(Token, Progress, c => {
+				return RemoteTask(Progress, c => {
 					Client = c;
 					var factory = Factory;
 					using (Session = factory.OpenSession())
@@ -80,13 +83,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		public T RemoteTask<T>(CancellationToken cancellation,
-			BehaviorSubject<Progress> progress,
+		private T RemoteTask<T>(BehaviorSubject<Progress> progress,
 			Func<HttpClient, T> action)
 		{
 			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
-
 			progress.OnNext(new Progress("Соединение", 0, 0));
+
 			var handler = new HttpClientHandler {
 				Credentials = Credentials,
 				PreAuthenticate = true,
@@ -94,15 +96,17 @@ namespace AnalitF.Net.Client.Models.Commands
 			};
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;
-			using (handler) {
-				using (var client = new HttpClient(handler)) {
-					client.DefaultRequestHeaders.Add("Version", version.ToString());
-					return action(client);
-				}
+
+			using (var ras = new RasHelper(RasConnection))
+			using (handler)
+			using (var client = new HttpClient(handler)) {
+				ras.Open();
+				client.DefaultRequestHeaders.Add("Version", version.ToString());
+				return action(client);
 			}
 		}
 
-		public void CheckResult(HttpResponseMessage response)
+		protected void CheckResult(HttpResponseMessage response)
 		{
 			if (!IsOkStatusCode(response.StatusCode)) {
 				//если включена отладка попробуем собрать дополнительную отладочную информацию
@@ -124,7 +128,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		public static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
+		protected static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
 		{
 			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
 		}

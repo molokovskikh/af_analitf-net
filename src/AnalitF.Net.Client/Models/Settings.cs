@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
+using DotRas;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -265,6 +266,23 @@ namespace AnalitF.Net.Client.Models
 					MapPath("rejects"),
 					MapPath("docs"),
 				};
+			}
+		}
+
+		public virtual bool UseRas { get; set; }
+
+		public virtual string RasConnection { get; set; }
+
+		public virtual string[] RasConnections
+		{
+			get
+			{
+				using(var user = new RasPhoneBook())
+				using(var all = new RasPhoneBook()) {
+					user.Open(RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.User));
+					all.Open(RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.AllUsers));
+					return user.Entries.Concat(all.Entries).Select(p => p.Name).Distinct().ToArray();
+				}
 			}
 		}
 

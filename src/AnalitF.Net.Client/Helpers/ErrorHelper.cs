@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using DotRas;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -36,6 +37,10 @@ namespace AnalitF.Net.Client.Helpers
 			if (baseException is HttpRequestException
 				&& baseException.InnerException is WebException
 				&& baseException.InnerException.InnerException is SocketException) {
+				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
+			}
+
+			if (baseException is RasException) {
 				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
 			}
 

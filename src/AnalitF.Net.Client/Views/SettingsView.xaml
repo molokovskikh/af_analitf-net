@@ -138,6 +138,17 @@
 					</Grid>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Соединение" Name="ConnectTab">
+				<StackPanel>
+					<Label>Соединение</Label>
+					<CheckBox x:Name="Settings_UseRas">
+						Устанавливать удаленное соединение
+					</CheckBox>
+					<ComboBox Style="{StaticResource Select}"
+						ItemsSource="{Binding Settings.RasConnections}"
+						SelectedItem="{Binding Settings.RasConnection}" />
+				</StackPanel>
+			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">
 				<StackPanel>
 					<Label>Учетные данные</Label>
