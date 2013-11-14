@@ -53,7 +53,6 @@ namespace AnalitF.Net.Service.Models
 		public Config.Config Config;
 
 		public string Prefix = "";
-		public string ExportPath = "";
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string UpdatePath;
@@ -590,9 +589,10 @@ group by dh.Id")
 
 		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData, bool truncate = true)
 		{
-			var filename = Path.GetFullPath(Path.Combine(ExportPath, Prefix + name + ".txt"));
+			var filename = Path.GetFullPath(Path.Combine(Config.LocalExportPath, Prefix + name + ".txt"));
 			data.Add(BuildMeta(name, truncate, meta));
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
+			cleaner.Watch(filename);
 			using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
 				MySqlHelper.Export(exportData, file);
 			}
@@ -608,7 +608,7 @@ group by dh.Id")
 			dataAdapter.Fill(table);
 			var columns = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
 
-			var path = Path.GetFullPath(Path.Combine(ExportPath, Prefix + file + ".txt"));
+			var path = Path.GetFullPath(Path.Combine(Config.RemoteExportPath, Prefix + file + ".txt"));
 			var mysqlPath = path.Replace(@"\", "/");
 			File.Delete(mysqlPath);
 			sql += " INTO OUTFILE '" + mysqlPath + "' ";

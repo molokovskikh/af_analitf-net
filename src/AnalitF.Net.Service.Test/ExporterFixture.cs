@@ -33,17 +33,18 @@ namespace AnalitF.Net.Service.Test
 			client = TestClient.CreateNaked();
 			session.Save(client);
 
+			var config = FixtureSetup.Config;
 			user = session.Load<User>(client.Users[0].Id);
-			FileHelper.InitDir("export", "data", "update");
+			FileHelper.InitDir(config.LocalExportPath, "data", "update");
 
 			file = "data.zip";
 			File.Delete(file);
 			exporter = new Exporter(session, user.Id, Version.Parse("1.1")) {
 				Prefix = "1",
-				ExportPath = "export",
 				ResultPath = "data",
 				UpdatePath = "update",
-				DocsPath = FixtureSetup.Config.DocsPath
+				DocsPath = FixtureSetup.Config.DocsPath,
+				Config = FixtureSetup.Config
 			};
 		}
 
@@ -75,10 +76,11 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(zipEntries, Is.StringContaining("Addresses.txt"));
 			Assert.That(zipEntries, Is.StringContaining("Addresses.meta.txt"));
 
-			Assert.That(Directory.GetFiles("export")[0], Is.EqualTo("export\\1Addresses.txt"));
+			Assert.That(Path.GetFileName(Directory.GetFiles(exporter.Config.LocalExportPath)[0]),
+				Is.EqualTo("1Addresses.txt"));
 			Assert.That(Directory.GetFiles("data")[0], Is.EquivalentTo("data\\data.zip"));
 			exporter.Dispose();
-			Assert.That(Directory.GetFiles("export"), Is.Empty);
+			Assert.That(Directory.GetFiles(exporter.Config.LocalExportPath), Is.Empty);
 		}
 
 		[Test]

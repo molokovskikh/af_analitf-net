@@ -107,7 +107,8 @@ namespace AnalitF.Net.Service.Test
 			var config = new Config.Config();
 			var data = JsonConvert.SerializeObject(FixtureSetup.Config);
 			JsonConvert.PopulateObject(data, config);
-			config.ExportPath = "non-exist-path";
+			config.LocalExportPath = "non-exist-path";
+			config.RemoteExportPath = "non-exist-path";
 
 			session.Transaction.Commit();
 			var task = MainController.StartJob(job.Id, config, session.SessionFactory);

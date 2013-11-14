@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -97,7 +97,6 @@ where UserId = :userId;")
 							using(var exportTransaction = exportSession.BeginTransaction()) {
 								var exporter = new Exporter(exportSession, job.User.Id, job.Version, job.UpdateType) {
 									Prefix = job.Id.ToString(),
-									ExportPath = config.ExportPath,
 									ResultPath = config.ResultPath,
 									UpdatePath = config.UpdatePath,
 									AdsPath = config.AdsPath,

@@ -17,7 +17,8 @@ namespace AnalitF.Net.Service.Config.Environments
 		public void Run(Config config)
 		{
 			var properties = config.GetType().GetProperties()
-				.Where(p => p.Name.EndsWith("Path") && p.PropertyType == typeof(string));
+				.Where(p => p.Name.EndsWith("Path") && p.PropertyType == typeof(string))
+				.Where(p => p.Name != "RemoteExportPath");
 
 			foreach (var property in properties) {
 				var value = (string)property.GetValue(config, null);
@@ -32,6 +33,8 @@ namespace AnalitF.Net.Service.Config.Environments
 				FileHelper.CreateDirectoryRecursive(value);
 				property.SetValue(config, value, null);
 			}
+
+			config.RemoteExportPath = config.LocalExportPath;
 		}
 	}
 }

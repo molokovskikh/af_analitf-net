@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Common.Tools;
 
@@ -8,6 +9,9 @@ namespace AnalitF.Net.Service.Config.Environments
 	{
 		public void Run(Config config)
 		{
+			if (!Path.IsPathRooted(config.RemoteExportPath))
+				config.RemoteExportPath = @"\\" + Environment.MachineName + @"\" + config.RemoteExportPath;
+
 			var properties = config.GetType().GetProperties()
 				.Where(p => p.Name.EndsWith("Path") && p.PropertyType == typeof(string));
 

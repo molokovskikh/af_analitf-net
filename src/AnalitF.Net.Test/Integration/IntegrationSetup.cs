@@ -61,6 +61,11 @@ namespace AnalitF.Net.Test.Integration
 			Factory = nhibernate.Factory;
 			Configuration = nhibernate.Configuration;
 
+			var cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
+			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+			serviceConfig = Application.InitApp(cfg);
+			server = new HttpSelfHostServer(cfg);
+
 			if (IsServerStale()) {
 				FileHelper.InitDir("data", "backup");
 			}
@@ -109,18 +114,13 @@ namespace AnalitF.Net.Test.Integration
 
 		public void InitWebServer()
 		{
-			var cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
-			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-			//cfg.ClientCredentialType = HttpClientCredentialType.Windows;
-
-			serviceConfig = Application.InitApp(cfg);
-			server = new HttpSelfHostServer(cfg);
 			server.OpenAsync();
 		}
 
 		private void ImportData()
 		{
 			var sampleData = new SampleData();
+			sampleData.Config = serviceConfig;
 			var helper = new FixtureHelper();
 			helper.Run(sampleData);
 			helper.Run(new LoadSampleData {

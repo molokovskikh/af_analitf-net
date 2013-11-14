@@ -70,7 +70,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			var exporter = new Exporter(origin, Client.Users[0].Id, new Version()) {
 				MaxProducerCostPriceId = MaxProducerCosts.Id,
-				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id
+				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id,
+				Config = Config
 			};
 			Files = new List<UpdateData>();
 			exporter.Export(Files);
