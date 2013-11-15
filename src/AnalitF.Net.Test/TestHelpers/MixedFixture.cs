@@ -3,8 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Service.Test;
 using AnalitF.Net.Test.Integration;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -24,9 +26,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected Address address;
 		protected CompositeDisposable disposable;
 
+		protected DateTime begin;
+
 		[SetUp]
 		public void Setup()
 		{
+			begin = DateTime.Now;
+
 			disposable = new CompositeDisposable();
 
 			fixtureHelper = new FixtureHelper();
@@ -65,6 +71,39 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Fixture(object fixture)
 		{
 			fixtureHelper.Run(fixture);
+		}
+
+		protected Order MakeOrder(Address address = null, Offer offer = null)
+		{
+			address = address ?? this.address;
+			using (localSession.BeginTransaction()) {
+				offer = offer ?? localSession.Query<Offer>().First();
+				var order = new Order(offer.Price, address);
+				order.AddLine(offer, 1);
+				localSession.Save(order);
+				return order;
+			}
+		}
+
+		protected Order MakeOrderClean(Address address = null, Offer offer = null)
+		{
+			localSession.DeleteEach<Order>();
+			return MakeOrder(address, offer);
+		}
+
+		protected UpdateResult Run<T>(T command) where T : RemoteCommand
+		{
+			localSession.Flush();
+			session.Flush();
+
+			if (session.Transaction.IsActive)
+				session.Transaction.Commit();
+
+			if (localSession.Transaction.IsActive)
+				localSession.Transaction.Commit();
+
+			command.Config = clientConfig;
+			return command.Run();
 		}
 	}
 }

@@ -24,24 +24,13 @@ namespace AnalitF.Net.Test.Integration.Commands
 	[TestFixture]
 	public class UpdateFixture : MixedFixture
 	{
-		private Task<UpdateResult> task;
-
 		private bool restoreUser;
-
-		private RemoteCommand command;
-		private DateTime begin;
 		private bool revertToDefaults;
 
 		[SetUp]
 		public void Setup()
 		{
-			begin = DateTime.Now;
 			restoreUser = false;
-
-			command = new UpdateCommand();
-			task = CreateTask(command);
-
-			ViewModelFixture.StubWindowManager();
 		}
 
 		[TearDown]
@@ -68,9 +57,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
-			Update();
+			var command1 = new UpdateCommand();
+			Run(command1);
 			var offers = localSession.CreateSQLQuery("select * from offers").List();
-			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
+			Assert.AreEqual("Обновление завершено успешно.", command1.SuccessMessage);
 			Assert.That(offers.Count, Is.GreaterThan(0));
 		}
 
@@ -80,9 +70,9 @@ namespace AnalitF.Net.Test.Integration.Commands
 			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
-			Update();
+			var result = Run(new UpdateCommand());
 
-			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
+			Assert.That(result, Is.EqualTo(UpdateResult.UpdatePending));
 		}
 
 		[Test]
@@ -97,7 +87,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
 
-			Update();
+			Run(new UpdateCommand());
 
 			localSession.Refresh(price);
 			Assert.That(price.Active, Is.False, price.Id.ToString());
@@ -121,7 +111,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			File.WriteAllText(@"app\AnalitF.Net.Client.log", "123");
 
-			Update();
+			Run(new UpdateCommand());
 
 			var user = ServerUser();
 			var text = session.CreateSQLQuery("select Text from Logs.ClientAppLogs" +
@@ -133,35 +123,13 @@ namespace AnalitF.Net.Test.Integration.Commands
 		}
 
 		[Test]
-		public void Send_orders()
-		{
-			var order = MakeOrderClean();
-			var line = order.Lines[0];
-
-			Update(new SendOrders(address));
-
-			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
-			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
-			Assert.That(sentOrders.Count, Is.EqualTo(1));
-			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
-
-			var orders = session.Query<TestOrder>().Where(o => o.WriteTime >= begin).ToList();
-			Assert.That(orders.Count, Is.EqualTo(1));
-			var resultOrder = orders[0];
-			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
-			var item = resultOrder.Items[0];
-			Assert.That(item.CodeFirmCr, Is.EqualTo(line.ProducerId));
-			Assert.That(item.SynonymCode, Is.EqualTo(line.ProductSynonymId));
-			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
-		}
-
-		[Test]
 		public void Reject_order_by_min_req()
 		{
 			var offer = localSession.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
 			var order = MakeOrderClean(address, offer);
 
-			Update(new SendOrders(address));
+			var command = new SendOrders(address);
+			Run(command);
 
 			var text = command.Results
 				.OfType<DialogResult>()
@@ -181,7 +149,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			settings.PrintOrdersAfterSend = true;
 			MakeOrderClean(address);
 
-			Update(new SendOrders(address));
+			var command = new SendOrders(address);
+			Run(command);
 
 			var results = command.Results.ToArray();
 			Assert.AreEqual(1, results.Length);
@@ -193,7 +162,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			var fixture = Fixture<LoadWaybill>();
 			var sendLog = fixture.SendLog;
-			Update();
+			Run(new UpdateCommand());
 
 			var waybills = localSession.Query<Waybill>().ToList();
 			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
@@ -216,12 +185,13 @@ namespace AnalitF.Net.Test.Integration.Commands
 			settings.OpenWaybills = true;
 
 			var fixture = Fixture<LoadWaybill>();
-			Update();
+			var command1 = new UpdateCommand();
+			Run(command1);
 
 			var path = Path.Combine(settings.MapPath("Waybills"), fixture.Waybill.Supplier.Name);
 			var files = Directory.GetFiles(path).Select(Path.GetFileName);
 			Assert.That(files, Contains.Item("test.txt"));
-			var results = command.Results.OfType<OpenResult>().Implode(r => r.Filename);
+			var results = command1.Results.OfType<OpenResult>().Implode(r => r.Filename);
 			Assert.AreEqual(Path.Combine(path, "test.txt"), results);
 		}
 
@@ -233,9 +203,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 				file.ExtractAll(clientConfig.UpdateTmpDir);
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			command.Config = clientConfig;
-			command.Process(() => {
-				((UpdateCommand)command).Import();
+			RemoteCommand command1 = new UpdateCommand();
+			command1.Config = clientConfig;
+			command1.Process(() => {
+				((UpdateCommand)command1).Import();
 				return UpdateResult.OK;
 			});
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
@@ -247,28 +218,28 @@ namespace AnalitF.Net.Test.Integration.Commands
 			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
 
-			Update();
-			Assert.That(task.Result, Is.EqualTo(UpdateResult.UpdatePending));
+			var result1 = Run(new UpdateCommand());
+			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
 			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
 
-			task = CreateTask(new UpdateCommand());
-			Update();
-			Assert.That(task.Result, Is.EqualTo(UpdateResult.OK));
+			var result2 = Run(new UpdateCommand());
+			Assert.That(result2, Is.EqualTo(UpdateResult.OK));
 		}
 
 		[Test]
 		public void Open_reject()
 		{
 			var fixture = Fixture<Reject>();
-			Update();
+			var command1 = new UpdateCommand();
+			Run(command1);
 
 			Assert.AreEqual(
 				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_{1}(test).txt",
 					fixture.Document.Id,
 					fixture.Document.Supplier.Name),
-				command.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
+				command1.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
 		}
 
 		[Test]
@@ -290,9 +261,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			order.AddLine(newOffer, 1);
 
-			Update();
+			var command1 = new UpdateCommand();
+			Run(command1);
 
-			var text = command.Results.OfType<DialogResult>()
+			var text = command1.Results.OfType<DialogResult>()
 				.Select(r => (TextViewModel)r.Model)
 				.Select(m => m.Text)
 				.First();
@@ -329,7 +301,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var offer = localSession.Query<Offer>().First(o => o.Price.Id.PriceId != changedOrder.Price.Id.PriceId);
 			var normalOrder = MakeOrder(offer: offer);
 
-			Update(new SendOrders(address));
+			var command = new SendOrders(address);
+			Run(command);
 
 			localSession.Clear();
 			normalOrder = localSession.Get<Order>(normalOrder.Id);
@@ -356,11 +329,11 @@ namespace AnalitF.Net.Test.Integration.Commands
 				+ " where UserId = :userId;")
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
-			((UpdateCommand)command).SyncData = "Waybills";
-			((UpdateCommand)command).Clean = false;
-
-			session.Transaction.Commit();
-			command.Run();
+			var command = new UpdateCommand {
+				SyncData = "Waybills",
+				Clean = false
+			};
+			Run(command);
 
 			var files = ZipHelper.lsZip(clientConfig.ArchiveFile).Implode();
 			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
@@ -377,8 +350,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 			session.Transaction.Commit();
 			Fixture(new LoadWaybill(createFile: false));
 
-			((UpdateCommand)command).SyncData = "Waybills";
-			command.Run();
+			var command = new UpdateCommand {
+				SyncData = "Waybills"
+			};
+			Run(command);
 
 			Assert.AreEqual("Получение документов завершено успешно.", command.SuccessMessage);
 		}
@@ -386,48 +361,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 		private TestUser ServerUser()
 		{
 			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-		}
-
-		private void Update(RemoteCommand cmd)
-		{
-			command = cmd;
-			task = CreateTask(cmd);
-			Update();
-		}
-
-		private Order MakeOrderClean(Address address = null, Offer offer = null)
-		{
-			localSession.DeleteEach<Order>();
-			return MakeOrder(address, offer);
-		}
-
-		private Order MakeOrder(Address address = null, Offer offer = null)
-		{
-			address = address ?? this.address;
-			using (localSession.BeginTransaction()) {
-				offer = offer ?? localSession.Query<Offer>().First();
-				var order = new Order(offer.Price, address);
-				order.AddLine(offer, 1);
-				localSession.Save(order);
-				return order;
-			}
-		}
-
-		private Task<UpdateResult> CreateTask<T>(T command) where T : RemoteCommand
-		{
-			command.Config = clientConfig;
-			return new Task<UpdateResult>(command.Run);
-		}
-
-		private void Update()
-		{
-			localSession.Flush();
-			session.Flush();
-			if (session.Transaction.IsActive)
-				session.Transaction.Commit();
-
-			task.Start();
-			task.Wait();
 		}
 	}
 }
