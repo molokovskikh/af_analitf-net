@@ -108,7 +108,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Leader
 		{
-			get { return LeaderPrice.Id == Price.Id; }
+			get { return LeaderCost == Cost; }
 		}
 
 		//Заглушка для реализации матрицы

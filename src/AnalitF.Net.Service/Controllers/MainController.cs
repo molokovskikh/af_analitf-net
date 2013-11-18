@@ -172,22 +172,34 @@ where UserId = :userId;")
 							PriceDate = clientOrder.PriceDate,
 							ClientAddition = clientOrder.Comment,
 						};
-						foreach (var item in clientOrder.Items) {
+						foreach (var sourceItem in clientOrder.Items) {
 							var offer = new Offer {
-								Id = new OfferKey(item.OfferId.OfferId, item.OfferId.RegionId),
-								Cost = (float)item.Cost,
+								Id = new OfferKey(sourceItem.OfferId.OfferId, sourceItem.OfferId.RegionId),
+								Cost = (float)sourceItem.Cost,
 								PriceList = activePrice,
 								PriceCode = price.PriceCode,
-								CodeFirmCr = item.ProducerId,
+								CodeFirmCr = sourceItem.ProducerId,
 							};
 
 							var properties = typeof(BaseOffer).GetProperties().Where(p => p.CanRead && p.CanWrite);
 							foreach (var property in properties) {
-								var value = property.GetValue(item, null);
+								var value = property.GetValue(sourceItem, null);
 								property.SetValue(offer, value, null);
 							}
 
-							orderitemMap.Add(order.AddOrderItem(offer, item.Count), item.Id);
+							var item = order.AddOrderItem(offer, sourceItem.Count);
+							if (sourceItem.MinCost != null) {
+								item.LeaderInfo = new OrderItemLeadersInfo {
+									OrderItem = item,
+									MinCost = (float?)sourceItem.MinCost,
+									PriceCode = sourceItem.MinPrice != null
+										? (uint?)sourceItem.MinPrice.PriceId : null,
+									LeaderMinCost = (float?)sourceItem.LeaderCost,
+									LeaderPriceCode = sourceItem.LeaderPrice != null
+										? (uint?)sourceItem.LeaderPrice.PriceId : null,
+								};
+							}
+							orderitemMap.Add(item, sourceItem.Id);
 						}
 						if (order.OrderItems.Count > 0) {
 							orders.Add(order);

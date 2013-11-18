@@ -45,6 +45,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? OldCost { get; set; }
 
+		[Ignore]
+		public virtual decimal? MinCost { get; set; }
+
+		[Ignore]
+		public virtual PriceComposedId MinPrice { get; set; }
+
+		[Ignore]
+		public virtual decimal? LeaderCost { get; set; }
+
+		[Ignore]
+		public virtual PriceComposedId LeaderPrice { get; set; }
+
 		[Style("NewCost", "OldCost")]
 		public virtual bool IsCostChanged
 		{

@@ -186,10 +186,51 @@ namespace AnalitF.Net.Client.Models
 			return line;
 		}
 
-		public virtual ClientOrder ToClientOrder()
+		public virtual ClientOrder ToClientOrder(ISession session)
 		{
-			if (Address == null || Price == null)
+			try {
+				if (Address == null || Price == null) {
+					Send = false;
+					return null;
+				}
+			}
+			catch(ObjectNotFoundException) {
+				Send = false;
 				return null;
+			}
+
+			foreach (var line in Lines) {
+				line.MinCost = session.Query<Offer>().Where(o => o.ProductId == line.ProductId
+					&& o.ProducerId == line.ProducerId
+					&& o.Junk == line.Junk)
+					.Min(o => (decimal?)o.Cost);
+				if (line.MinCost != null) {
+					if (line.MinCost == line.Cost) {
+						line.MinPrice = line.Order.Price.Id;
+					}
+					else {
+						line.LeaderPrice = session.Query<Offer>().Where(o => o.Cost == line.MinCost)
+							.Select(o => o.Price.Id)
+							.FirstOrDefault();
+					}
+				}
+
+				line.LeaderCost = session.Query<Offer>().Where(o => o.ProductId == line.ProductId
+					&& o.ProducerId == line.ProducerId
+					&& o.Junk == line.Junk
+					&& o.Price.BasePrice)
+					.Min(o => (decimal?)o.Cost);
+				if (line.LeaderCost != null) {
+					if (line.LeaderCost == line.Cost) {
+						line.LeaderPrice = line.Order.Price.Id;
+					}
+					else {
+						line.LeaderPrice = session.Query<Offer>().Where(o => o.Cost == line.LeaderCost && o.Price.BasePrice)
+							.Select(o => o.Price.Id)
+							.FirstOrDefault();
+					}
+				}
+			}
 
 			return new ClientOrder {
 				ClientOrderId = Id,

@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (orders.Count == 0)
 				throw new EndUserError("Не заказов для отправки");
 
-			var clientOrders = orders.Select(o => o.ToClientOrder()).Where(o => o != null).ToArray();
+			var clientOrders = orders.Select(o => o.ToClientOrder(Session)).Where(o => o != null).ToArray();
 
 			var response =
 				Client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),

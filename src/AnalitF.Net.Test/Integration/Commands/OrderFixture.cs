@@ -47,14 +47,17 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(sentOrders.Count, Is.EqualTo(1));
 			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
 
-			var orders = session.Query<TestOrder>().Where(o => o.WriteTime >= begin).ToList();
+			var orders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
 			Assert.That(orders.Count, Is.EqualTo(1));
 			var resultOrder = orders[0];
 			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
-			var item = resultOrder.Items[0];
+			var item = resultOrder.OrderItems[0];
 			Assert.That(item.CodeFirmCr, Is.EqualTo(line.ProducerId));
 			Assert.That(item.SynonymCode, Is.EqualTo(line.ProductSynonymId));
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
+
+			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
+			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0));
 		}
 	}
 }

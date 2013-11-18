@@ -152,6 +152,12 @@ namespace AnalitF.Net.Client.Models
 		public ulong OfferId;
 	}
 
+	public class PriceComposedId
+	{
+		public uint PriceId;
+		public ulong RegionId;
+	}
+
 	public class ClientOrderItem : BaseOffer
 	{
 		public uint Id;
@@ -159,6 +165,11 @@ namespace AnalitF.Net.Client.Models
 		public uint Count;
 		public uint? ProducerId;
 		public decimal Cost;
+
+		public decimal? LeaderCost;
+		public PriceComposedId LeaderPrice;
+		public decimal? MinCost;
+		public PriceComposedId MinPrice;
 	}
 #endif
 }

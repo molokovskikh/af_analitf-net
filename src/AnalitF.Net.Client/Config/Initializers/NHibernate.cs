@@ -107,6 +107,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 				c.Inverse(true);
 			}));
 			mapper.Class<Offer>(m => {
+				m.Property(o => o.CatalogId, c => c.Index("CatalogId"));
+				m.Property(o => o.ProductId, c => c.Index("ProductId"));
+				m.Property(o => o.Cost, c => c.Index("Cost"));
 				m.ManyToOne(o => o.Price, c => {
 					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
