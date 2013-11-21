@@ -1,13 +1,51 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+using Common.Tools;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public static class Util
 	{
-		public static bool IsDigitValue(object o)
+		public static bool IsNumeric(object o)
 		{
 			return o is int || o is uint || o is decimal || o is double || o is float;
+		}
+
+		public static bool IsDateTime(Type type)
+		{
+			if (TypeHelperExtensionMethods.IsNullable(type))
+				type = Nullable.GetUnderlyingType(type);
+
+			return type == typeof(DateTime);
+		}
+
+		public static bool IsNumeric(Type type)
+		{
+			if (TypeHelperExtensionMethods.IsNullable(type))
+				type = Nullable.GetUnderlyingType(type);
+
+			return type == typeof(int)
+				|| type == typeof(uint)
+				|| type == typeof(decimal)
+				|| type == typeof(double)
+				|| type == typeof(float);
+		}
+
+		public static PropertyInfo GetProperty(Type type, string path)
+		{
+			if (type == null)
+				return null;
+			var parts = path.Split('.');
+			PropertyInfo property = null;
+			foreach (var part in parts) {
+				property = type.GetProperty(part);
+				if (property == null)
+					return null;
+				type = property.PropertyType;
+			}
+			return property;
 		}
 
 		public static object GetValue(object item, string path)

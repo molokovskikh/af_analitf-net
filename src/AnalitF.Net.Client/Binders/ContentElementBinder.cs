@@ -9,14 +9,17 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
 using Inflector;
+using NHibernate.Bytecode.Lightweight;
 using NHibernate.Mapping;
 using ReactiveUI;
 using Xceed.Wpf.Toolkit;
+using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -62,7 +65,7 @@ namespace AnalitF.Net.Client.Binders
 					return "Tax";
 				if (s == "Value")
 					return s;
-				return s.Singularize();
+				return s.Singularize() ?? s;
 			};
 			ConventionManager.AddElementConvention<SplitButton>(SplitButton.ContentProperty, "DataContext", "Click");
 			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
@@ -94,7 +97,6 @@ namespace AnalitF.Net.Client.Binders
 			ConventionManager.AddElementConvention<ComboBox>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
 					if (property.PropertyType.IsEnum) {
-
 						if (NotBindedAndNull(element, Selector.ItemsSourceProperty)
 							&& !ConventionManager.HasBinding(element, Selector.SelectedItemProperty)) {
 
@@ -111,10 +113,40 @@ namespace AnalitF.Net.Client.Binders
 					else {
 						var fallback = ConventionManager.GetElementConvention(typeof(Selector));
 						if (fallback != null) {
-							fallback.ApplyBinding(viewModelType, path, property, element, fallback);
+							return fallback.ApplyBinding(viewModelType, path, property, element, fallback);
 						}
 					}
 					return true;
+				};
+			ConventionManager.AddElementConvention<DataGrid>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
+				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					var fallback = ConventionManager.GetElementConvention(typeof(Selector));
+					if (fallback != null) {
+						var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
+						if (result
+							&& property.PropertyType.IsGenericType
+							&& typeof(IList).IsAssignableFrom(property.PropertyType)) {
+							var columns = ((DataGrid)element).Columns.OfType<DataGridTextColumnEx>();
+							foreach (var column in columns) {
+								if (column.Binding is Binding) {
+									var columnPath = ((Binding)column.Binding).Path.Path;
+									var type = property.PropertyType.GetGenericArguments()[0];
+									var columnProperty = Util.GetProperty(type, columnPath);
+									if (columnProperty == null)
+										continue;
+									var columnType = columnProperty.PropertyType;
+									if (Util.IsNumeric(columnType)) {
+										column.TextAlignment = TextAlignment.Right;
+									}
+									if (Util.IsDateTime(columnType)) {
+										column.TextAlignment = TextAlignment.Center;
+									}
+								}
+							}
+						}
+						return result;
+					}
+					return false;
 				};
 		}
 

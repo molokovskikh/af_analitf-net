@@ -273,7 +273,7 @@ namespace AnalitF.Net.Client.Models.Print
 			cell.Style = CellStyle;
 			if (colspan > 0)
 				cell.ColumnSpan = colspan;
-			if (Util.IsDigitValue(value)) {
+			if (Util.IsNumeric(value)) {
 				cell.TextAlignment = TextAlignment.Right;
 			}
 			return cell;

@@ -199,7 +199,7 @@ namespace AnalitF.Net.Client.Helpers
 			return null;
 		}
 
-		public static string AsText(DependencyObject item)
+		public static string AsText(this DependencyObject item)
 		{
 			return item.Descendants()
 				.Select(ToText)

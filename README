@@ -18,6 +18,11 @@ lib/dcmysql72std.exe
 для компиляции шейдера нужен Direct3D Shader Compiler, fxc.exe должен быть в PATH
 есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
 
+Запуск
+
+Для запуска есть proc-файл
+запускается с помощью https://github.com/hecticjeff/shoreman
+
 NHibernate
 
 при работе с nhibernate нужно соблюдать правила

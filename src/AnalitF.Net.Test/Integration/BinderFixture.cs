@@ -10,6 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Test.Integration.Views;
@@ -17,6 +18,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI;
+using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -160,9 +162,26 @@ namespace AnalitF.Net.Test.Integration
 				Name = "Enum"
 			};
 			Bind(box);
+
 			Assert.AreEqual(2, box.Items.Count);
 			box.SelectedItem = box.Items[1];
 			Assert.AreEqual(TestEnum.Item2, model.Enum);
+		}
+
+		[Test]
+		public void Set_text_alignment()
+		{
+			var grid = new DataGrid {
+				Name = "ItemItems",
+				Columns = {
+					new DataGridTextColumnEx {
+						Binding = new Binding("I")
+					}
+				}
+			};
+			Bind(grid);
+
+			Assert.AreEqual(TextAlignment.Right, ((DataGridTextColumnEx)grid.Columns[0]).TextAlignment);
 		}
 
 		private void Bind(object content)
@@ -175,6 +194,11 @@ namespace AnalitF.Net.Test.Integration
 		{
 			[System.ComponentModel.Description("Item 1")] Item1,
 			[System.ComponentModel.Description("Item 2")] Item2,
+		}
+
+		public class Item
+		{
+			public int I { get; set; }
 		}
 
 		public class ViewModel
@@ -204,6 +228,8 @@ namespace AnalitF.Net.Test.Integration
 			public NotifyValue<string> CurrentItem { get; set; }
 
 			public TestEnum Enum { get; set; }
+
+			public List<Item> ItemItems { get; set; }
 
 			public void Reset()
 			{
