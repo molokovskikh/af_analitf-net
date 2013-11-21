@@ -91,6 +91,7 @@
     <Compile Include="Models\AnalitfNetData.cs" />
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
+    <Compile Include="Models\ClientSettings.cs" />
     <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />

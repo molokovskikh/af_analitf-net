@@ -240,6 +240,25 @@ namespace AnalitF.Net.Test.Unit
 			Assert.IsNull(offer.OrderCount);
 		}
 
+		[Test]
+		public void Delay_of_payment()
+		{
+			offer.Cost = 100;
+			Assert.AreEqual(100, offer.ResultCost);
+
+			offer.Price.DelayOfPayments.Add(new DelayOfPayment(50));
+			Assert.AreEqual(offer.ResultCost, 150);
+		}
+
+		[Test]
+		public void Delay_of_payment_per_day()
+		{
+			offer.Price.DelayOfPayments.Add(new DelayOfPayment(DateTime.Today.AddDays(-1).DayOfWeek, 10));
+			offer.Price.DelayOfPayments.Add(new DelayOfPayment(DateTime.Today.DayOfWeek, 20));
+			offer.Cost = 100;
+			Assert.AreEqual(120, offer.ResultCost);
+		}
+
 		private void Validate()
 		{
 			var message = offer.UpdateOrderLine(address, settings);

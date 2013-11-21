@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.Orders.Correction"
+<UserControl x:Class="AnalitF.Net.Client.Views.Orders.Correction"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
@@ -191,8 +191,9 @@
 						Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 						TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="55*"
-						FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
+					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
 						TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
@@ -202,7 +203,7 @@
 						Binding="{Binding OrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="70*"
 						CellStyle="{StaticResource OrderColumn}" Header="Сумма"
-						Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
+						Binding="{Binding OrderLine.ResultSum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 

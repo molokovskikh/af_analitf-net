@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Period,
 				o.Price.PriceDate,
 				o.Diff,
-				o.Cost
+				o.ResultCost
 			});
 
 			BuildTable(rows, headers);

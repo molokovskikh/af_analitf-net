@@ -409,13 +409,13 @@
     <Compile Include="Views\SyncView.xaml.cs">
       <DependentUpon>SyncView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\JunkOfferView.xaml.cs">
+    <Compile Include="Views\Offers\JunkOfferView.xaml.cs">
       <DependentUpon>JunkOfferView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MnnView.xaml.cs">
       <DependentUpon>MnnView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CatalogOfferView.xaml.cs">
+    <Compile Include="Views\Offers\CatalogOfferView.xaml.cs">
       <DependentUpon>CatalogOfferView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Orders\OrderLinesView.xaml.cs">
@@ -430,13 +430,13 @@
     <Compile Include="Views\Parts\InlineEditWarningView.xaml.cs">
       <DependentUpon>InlineEditWarningView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PriceOfferView.xaml.cs">
+    <Compile Include="Views\Offers\PriceOfferView.xaml.cs">
       <DependentUpon>PriceOfferView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PriceView.xaml.cs">
       <DependentUpon>PriceView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SearchOfferView.xaml.cs">
+    <Compile Include="Views\Offers\SearchOfferView.xaml.cs">
       <DependentUpon>SearchOfferView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
@@ -569,7 +569,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\JunkOfferView.xaml">
+    <Page Include="Views\Offers\JunkOfferView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -577,7 +577,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\CatalogOfferView.xaml">
+    <Page Include="Views\Offers\CatalogOfferView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -597,7 +597,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\PriceOfferView.xaml">
+    <Page Include="Views\Offers\PriceOfferView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -605,7 +605,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SearchOfferView.xaml">
+    <Page Include="Views\Offers\SearchOfferView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

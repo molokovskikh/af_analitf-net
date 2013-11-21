@@ -87,10 +87,12 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.BeginTransaction();
 
 				Settings = new NotifyValue<Settings>(Session.Query<Settings>().First());
-				User = Session.Query<User>().FirstOrDefault();
+				User = Session.Query<User>().FirstOrDefault()
+					?? new User();
 			}
 			else {
 				Settings = new NotifyValue<Settings>(new Settings(defaults: true));
+				User = new User();
 			}
 
 			excelExporter = new ExcelExporter(this, Path.GetTempPath());
@@ -105,9 +107,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public User User { get; set; }
 
-		public bool CanExport
+		public virtual bool CanExport
 		{
-			get { return excelExporter.CanExport; }
+			get
+			{
+				return excelExporter.CanExport
+					&& excelExporter.Properties.Any(k => User.CanExport(this, k.Name));
+			}
 		}
 
 		protected override void OnInitialize()

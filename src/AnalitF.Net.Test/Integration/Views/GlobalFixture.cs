@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -281,8 +281,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			dispatcher.Invoke(() => {
 				var grid = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
-				var column = grid.Columns.First(c => c.Header.Equals("Заказ"));
-				var cell = GetCell(grid, column.DisplayIndex, 0);
+				var cell = GetCell(grid, "Заказ");
 				Assert.AreEqual("2", ((TextBlock)cell.Content).Text);
 			});
 			Input("Lines", Key.Escape);
@@ -302,28 +301,6 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			WaitMessageBox("Обновление завершено успешно.");
 			WaitWindow("Корректировка восстановленных заказов");
-		}
-
-		private void WaitWindow(string title)
-		{
-			var opened = manager.WindowOpened.Timeout(30.Second()).First();
-			opened.Dispatcher.Invoke(() => {
-				Assert.AreEqual(title, opened.Title);
-			});
-		}
-
-		private void WaitMessageBox(string message)
-		{
-			var opened = manager.MessageOpened.Timeout(15.Second()).First();
-			Assert.AreEqual(opened, message);
-			var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
-			for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
-				Thread.Sleep(20);
-				window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
-			}
-			if (window == IntPtr.Zero)
-				throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
-			WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
 		}
 
 		[Test]
@@ -457,6 +434,45 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Delay_of_payment()
+		{
+			Fixture<Client.Test.Fixtures.DelayOfPayment>();
+			Start();
+			Click("ShowCatalog");
+			OpenOffers((CatalogNameViewModel)((CatalogViewModel)shell.ActiveItem).ActiveItem);
+
+			dispatcher.Invoke(() => {
+				var offers = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Offers");
+
+				var supplierCost = GetCell(offers, "Цена поставщика");
+				var cost = GetCell(offers, "Цена");
+				Assert.AreNotEqual(supplierCost.AsText(), cost.AsText());
+			});
+		}
+
+		private void WaitWindow(string title)
+		{
+			var opened = manager.WindowOpened.Timeout(3.Second()).First();
+			opened.Dispatcher.Invoke(() => {
+				Assert.AreEqual(title, opened.Title);
+			});
+		}
+
+		private void WaitMessageBox(string message)
+		{
+			var opened = manager.MessageOpened.Timeout(15.Second()).First();
+			Assert.AreEqual(opened, message);
+			var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+			for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
+				Thread.Sleep(20);
+				window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+			}
+			if (window == IntPtr.Zero)
+				throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
+			WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
+		}
+
 		private void EditCell(DataGrid grid, int column, int row, string text)
 		{
 			var cell = GetCell(grid, column, row);
@@ -465,6 +481,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			var edit = cell.Descendants<TextBox>().First();
 			Input(edit, text);
 			Input(cell, Key.Enter);
+		}
+
+		private DataGridCell GetCell(DataGrid grid, string name, int row = 0)
+		{
+			var column = grid.Columns.First(c => Equals(c.Header, name));
+			return GetCell(grid, column.DisplayIndex, row);
 		}
 
 		private DataGridCell GetCell(DataGrid grid, int column, int row)

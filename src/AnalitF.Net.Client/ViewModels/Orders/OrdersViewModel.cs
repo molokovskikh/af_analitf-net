@@ -184,6 +184,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (Address != null)
 				Address = Session.Load<Address>(Address.Id);
+			User = Session.Get<User>(User.Id) ?? User;
 
 			foreach (var item in AddressSelector.Addresses)
 				item.Item = Session.Load<Address>(item.Item.Id);
@@ -320,10 +321,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("\"Заморозить\" выбранные заявки?"))
 				return;
 
-			foreach (var selectedOrder in SelectedOrders) {
+			foreach (var selectedOrder in SelectedOrders)
 				selectedOrder.Frozen = true;
-				selectedOrder.Send = false;
-			}
 		}
 
 		public bool UnfreezeVisible
@@ -457,7 +456,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanPrint
 		{
-			get { return true; }
+			get
+			{
+				if (IsCurrentSelected)
+					return User.CanPrint<OrderDocument, Order>();
+				return User.CanPrint<OrderDocument, SentOrder>();
+			}
+		}
+
+		public override bool CanExport
+		{
+			get
+			{
+				var property = IsCurrentSelected ? "Orders" : "SentOrders";
+				return excelExporter.CanExport && User.CanExport(this, property);
+			}
 		}
 
 		public PrintResult Print()

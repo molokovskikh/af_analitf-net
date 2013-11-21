@@ -32,9 +32,11 @@ namespace AnalitF.Net.Client.Models
 
 		decimal Cost { get; }
 
+		decimal ResultCost { get; }
+
 		uint Count { get; }
 
-		decimal Sum { get; }
+		decimal ResultSum { get; }
 
 		uint? RequestRatio { get; }
 

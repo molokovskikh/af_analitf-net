@@ -77,9 +77,9 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		private void CheckForDelete(OrderLine orderLine)
 		{
+			var order = orderLine.Order;
 			if (orderLine.Count == 0) {
 				lastEdit = null;
-				var order = orderLine.Order;
 				if (order != null) {
 					order.RemoveLine(orderLine);
 					if (order.IsEmpty)
@@ -88,9 +88,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				Lines.Remove(orderLine);
 			}
 
-			if (orderLine.Order != null) {
-				orderLine.Order.Sum = orderLine.Order.Lines.Sum(l => l.Sum);
-			}
+			if (order != null)
+				order.UpdateSum();
 		}
 
 		public void Delete()

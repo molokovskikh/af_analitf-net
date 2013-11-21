@@ -31,6 +31,8 @@ namespace AnalitF.Net.Client.ViewModels
 						Update();
 					}
 				});
+			IsCurrentSelected.Changed().Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
+			IsCurrentSelected.Changed().Subscribe(_ => NotifyOfPropertyChange("CanExport"));
 		}
 
 		public NotifyValue<bool> IsCurrentSelected { get; set ;}

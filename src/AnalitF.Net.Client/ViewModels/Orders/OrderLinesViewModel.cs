@@ -41,8 +41,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Sum = new NotifyValue<decimal>(() => {
 				if (IsCurrentSelected)
-					return Lines.Value.Sum(l => l.Sum);
-				return SentLines.Value.Sum(l => l.Sum);
+					return Lines.Value.Sum(l => l.ResultSum);
+				return SentLines.Value.Sum(l => l.ResultSum);
 			}, SentLines, Lines, IsCurrentSelected);
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
@@ -111,7 +111,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanPrint
 		{
-			get { return true; }
+			get
+			{
+				if (IsCurrentSelected)
+					return User.CanPrint<OrderLinesDocument, OrderLine>();
+				return User.CanPrint<OrderLinesDocument, SentOrderLine>();
+			}
+		}
+
+		public override bool CanExport
+		{
+			get
+			{
+				var property = IsCurrentSelected ? "Lines" : "SentLines";
+				return excelExporter.CanExport && User.CanExport(this, property);
+			}
 		}
 
 		protected override void OnViewAttached(object view, object context)

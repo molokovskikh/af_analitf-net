@@ -42,6 +42,16 @@ namespace AnalitF.Net.Client.Models
 		[JsonIgnore]
 		public virtual Order Order { get; set; }
 
+		public virtual decimal ResultCost
+		{
+			get
+			{
+				if (Order == null)
+					return Cost;
+				return GetResultCost(Order.Price);
+			}
+		}
+
 		public virtual decimal? NewCost { get; set; }
 
 		public virtual decimal? OldCost { get; set; }
@@ -57,6 +67,10 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual PriceComposedId LeaderPrice { get; set; }
+
+		public virtual uint? NewQuantity { get; set; }
+
+		public virtual uint? OldQuantity { get; set;  }
 
 		[Style("NewCost", "OldCost")]
 		public virtual bool IsCostChanged
@@ -75,10 +89,6 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost < OldCost; }
 		}
-
-		public virtual uint? NewQuantity { get; set; }
-
-		public virtual uint? OldQuantity { get; set;  }
 
 		[Style("NewQuantity", "OldQuantity")]
 		public virtual bool IsQuantityChanged
@@ -127,6 +137,7 @@ namespace AnalitF.Net.Client.Models
 				count = value;
 				OnPropertyChanged();
 				OnPropertyChanged("Sum");
+				OnPropertyChanged("ResultSum");
 			}
 		}
 
@@ -134,10 +145,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal Sum
 		{
-			get
-			{
-				return Count * Cost;
-			}
+			get { return Count * Cost; }
+		}
+
+		public virtual decimal ResultSum
+		{
+			get { return Count * ResultCost; }
 		}
 
 		public virtual List<Message> EditValidate()

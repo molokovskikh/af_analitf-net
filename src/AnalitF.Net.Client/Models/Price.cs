@@ -13,6 +13,34 @@ using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
 {
+	public class DelayOfPayment
+	{
+		public DelayOfPayment()
+		{
+		}
+
+		public DelayOfPayment(decimal value)
+		{
+			OtherDelay = value;
+		}
+
+		public DelayOfPayment(DayOfWeek day, decimal value)
+		{
+			DayOfWeek = day;
+			OtherDelay = value;
+		}
+
+		public virtual uint Id { get; set; }
+
+		public virtual DayOfWeek DayOfWeek { get; set; }
+
+		public virtual decimal OtherDelay { get; set; }
+
+		public virtual decimal VitallyImportantDelay { get; set; }
+
+		//public virtual Price Price { get; set; }
+	}
+
 	[Serializable]
 	public class PriceComposedId : IEquatable<PriceComposedId>, IComparable
 	{
@@ -100,6 +128,13 @@ namespace AnalitF.Net.Client.Models
 	public class Price : BaseNotify
 	{
 		private Order order;
+		private decimal? vitallyImportantCostFactor;
+		private decimal? costFactor;
+
+		public Price()
+		{
+			DelayOfPayments = new List<DelayOfPayment>();
+		}
 
 		public virtual PriceComposedId Id { get; set; }
 
@@ -145,6 +180,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool DisabledByClient { get; set; }
 
 		public virtual DateTime? Timestamp { get; set; }
+
+		public virtual IList<DelayOfPayment> DelayOfPayments { get; set; }
 
 		[Style("Name")]
 		public virtual bool NotBase
@@ -202,9 +239,34 @@ namespace AnalitF.Net.Client.Models
 		[Ignore, JsonIgnore]
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
-		public override string ToString()
+		public virtual decimal CostFactor
 		{
-			return Name;
+			get
+			{
+				if (costFactor == null) {
+					var delayOfPayment = DelayOfPayments.Where(d => d.DayOfWeek == DateTime.Today.DayOfWeek)
+						.Concat(DelayOfPayments)
+						.Select(d => d.OtherDelay)
+						.FirstOrDefault();
+					return (delayOfPayment + 100) / 100;
+				}
+				return costFactor.Value;
+			}
+		}
+
+		public virtual decimal VitallyImportantCostFactor
+		{
+			get
+			{
+				if (vitallyImportantCostFactor == null) {
+					var delayOfPayment = DelayOfPayments.Where(d => d.DayOfWeek == DateTime.Today.DayOfWeek)
+						.Concat(DelayOfPayments)
+						.Select(d => d.VitallyImportantDelay)
+						.FirstOrDefault();
+					vitallyImportantCostFactor = (delayOfPayment + 100) / 100;
+				}
+				return vitallyImportantCostFactor.Value;
+			}
 		}
 
 		private static List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
@@ -239,6 +301,11 @@ namespace AnalitF.Net.Client.Models
 						.Select(s => (decimal?)s.Item2).FirstOrDefault();
 				} catch(ObjectNotFoundException) {  }
 			});
+		}
+
+		public override string ToString()
+		{
+			return Name;
 		}
 	}
 }

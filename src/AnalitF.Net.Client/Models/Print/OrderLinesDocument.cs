@@ -50,27 +50,27 @@ namespace AnalitF.Net.Client.Models.Print
 			if (model.IsCurrentSelected) {
 				var lines = model.Lines;
 				count = lines.Value.Count;
-				sum = lines.Value.Sum(l => l.Sum);
+				sum = lines.Value.Sum(l => l.ResultSum);
 				rows = model.Lines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
-					l.Cost,
+					l.ResultCost,
 					l.Count,
-					l.Sum
+					l.ResultSum
 				});
 			}
 			else {
 				var lines = model.SentLines;
 				count = lines.Value.Count;
-				sum = lines.Value.Sum(l => l.Count * l.Cost);
+				sum = lines.Value.Sum(l => l.ResultSum);
 				rows = model.SentLines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.Price.Name,
-					l.Cost,
+					l.ResultCost,
 					l.Count,
-					l.Count * l.Cost
+					l.ResultSum
 				});
 			}
 			var table = BuildTable(rows, headers);

@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -101,6 +102,17 @@ namespace AnalitF.Net.Client.Helpers
 			CalculateColumnWidth(grid, "000.00", "Цена производителя");
 			CalculateColumnWidth(grid, "000.00", "Пред.зарег.цена");
 			CalculateColumnWidth(grid, "0000.00", "Цена поставщика");
+
+			grid.Loaded += (sender, args) => {
+				var dataGrid = (DataGrid)sender;
+				var screen = dataGrid.DataContext as BaseScreen;
+				var removeSupplierCost = screen == null || screen.User == null || !screen.User.ShowSupplierCost;
+				if (removeSupplierCost) {
+					var column = dataGrid.Columns.FirstOrDefault(c => Equals(c.Header, "Цена поставщика"));
+					if (column != null)
+						dataGrid.Columns.Remove(column);
+				}
+			};
 		}
 	}
 }

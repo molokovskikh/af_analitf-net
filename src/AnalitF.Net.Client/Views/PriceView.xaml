@@ -50,7 +50,7 @@
 					Binding="{Binding PositionCount}" IsReadOnly="True" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="45*" Header="Заказ"
 					Binding="{Binding Order.LinesCount}" IsReadOnly="True" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.Sum}"
+				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.ResultSum}"
 					IsReadOnly="True" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа"
 					Binding="{Binding PriceDate}" IsReadOnly="True" TextAlignment="Center" />

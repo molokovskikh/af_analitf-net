@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var currentOrder = order as Order;
 			foreach (var line in order.Lines.ToArray()) {
 				var toOrder = offers.Where(o => o.ProductId == line.ProductId && o.ProducerId == line.ProducerId)
-					.OrderBy(o => o.Cost)
+					.OrderBy(o => o.ResultCost)
 					.ToArray();
 
 				if (toOrder.Length == 0)

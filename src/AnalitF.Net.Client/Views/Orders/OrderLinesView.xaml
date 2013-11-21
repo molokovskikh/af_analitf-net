@@ -87,8 +87,9 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="67*"
-					Header="Цена" Binding="{Binding Cost}"
+					Header="Цена" Binding="{Binding ResultCost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
 				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
@@ -99,7 +100,7 @@
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
-				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
+				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding ResultSum}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
 			</DataGrid.Columns>
@@ -158,7 +159,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="67*"
 					Header="Цена"
-					Binding="{Binding Cost}"
+					Binding="{Binding ResultCost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
 				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
@@ -169,7 +170,7 @@
 				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
-				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding Sum}"
+				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding ResultSum}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Отправлено"
 					Binding="{Binding Order.SentOn}"

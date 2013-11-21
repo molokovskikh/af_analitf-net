@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 			RetailCost = new NotifyValue<decimal?>(() => {
 				if (CurrentOffer == null)
 					return null;
-				return Math.Round(CurrentOffer.Cost * (1 + RetailMarkup / 100), 2);
+				return Math.Round(CurrentOffer.ResultCost * (1 + RetailMarkup / 100), 2);
 			}, RetailMarkup);
 
 			CurrentRegion.Changed()
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanPrint
 		{
-			get { return true; }
+			get { return User.CanPrint<CatalogOfferDocument>(); }
 		}
 
 		protected override void OnInitialize()

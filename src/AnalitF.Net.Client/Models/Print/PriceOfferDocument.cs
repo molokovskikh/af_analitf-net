@@ -43,12 +43,12 @@ namespace AnalitF.Net.Client.Models.Print
 				i + 1,
 				o.ProductSynonym,
 				o.ProducerSynonym,
-				o.Cost,
+				o.ResultCost,
 				o.OrderLine == null ? null : (uint?)o.OrderLine.Count,
-				o.OrderLine == null ? null : (decimal?)o.OrderLine.Sum,
+				o.OrderLine == null ? null : (decimal?)o.OrderLine.ResultSum,
 			});
 			var table = BuildTable(rows, headers);
-			var sum = offers.Where(o => o.OrderLine != null).Sum(o => o.OrderLine.Sum);
+			var sum = offers.Where(o => o.OrderLine != null).Sum(o => o.OrderLine.ResultSum);
 			var sumLabel = "";
 			if (sum > 0)
 				sumLabel = sum.ToString();

@@ -75,7 +75,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanPrint
 		{
-			get { return true; }
+			get { return User.CanPrint<RejectsDocument>(); }
 		}
 
 		public PrintResult Print()

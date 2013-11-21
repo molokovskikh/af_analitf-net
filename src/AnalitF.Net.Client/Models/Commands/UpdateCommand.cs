@@ -352,7 +352,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var loaded = Session.Query<Order>().Where(o => o.LinesCount == 0).ToArray();
 			foreach (var order in loaded) {
 				order.LinesCount = order.Lines.Count;
-				order.Sum = order.Lines.Sum(l => l.Sum);
+				order.UpdateSum();
 			}
 		}
 
@@ -366,7 +366,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			var ids = orders.Where(o => !o.Frozen).Select(o => o.Id).ToArray();
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете
 			//каждый раз
-			orders.Each(o => o.ResetStatus());
 			orders.Each(o => o.Frozen = true);
 			var command = new UnfreezeCommand<Order>(ids);
 			command.Restore = true;

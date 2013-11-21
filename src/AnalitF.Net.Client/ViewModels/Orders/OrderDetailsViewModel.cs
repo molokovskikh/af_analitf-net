@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
+using NHibernate;
 using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
@@ -25,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public OrderDetailsViewModel(IOrder order)
 		{
 			orderId = order.Id;
-			type = order.GetType();
+			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
 
 			OnlyWarning = new NotifyValue<bool>();
@@ -61,7 +62,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanPrint
 		{
-			get { return true; }
+			get { return User.CanPrint<OrderDocument>(type); }
+		}
+
+		public override bool CanExport
+		{
+			get { return User.CanExport(this, type.Name); }
 		}
 
 		public bool ShowPriceVisible

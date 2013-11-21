@@ -101,13 +101,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string ProducerSynonym { get; set; }
 
+		/// <summary>
+		/// цена поставщика
+		/// </summary>
 		public virtual decimal Cost { get; set; }
-
-		[IgnoreDataMember]
-		public virtual decimal? SupplierCost
-		{
-			get { return Cost; }
-		}
 
 		[IgnoreDataMember]
 		public virtual decimal? SupplierMarkup
@@ -136,6 +133,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			var markup = MarkupConfig.Calculate(markups, this);
 			RetailCost = Math.Round(Cost * (1 + markup / 100), 2);
+		}
+
+		protected virtual decimal GetResultCost(Price price)
+		{
+			if (price == null)
+				return Cost;
+
+			return Math.Round(VitallyImportant ? Cost * price.VitallyImportantCostFactor : Cost * price.CostFactor, 2);
 		}
 	}
 }

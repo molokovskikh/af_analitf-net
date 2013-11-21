@@ -65,8 +65,9 @@ namespace AnalitF.Net.Service.Models
 		private bool disposed;
 
 		private User user;
-		private UserSettings settings;
 		private AnalitfNetData data;
+		private UserSettings userSettings;
+		private ClientSettings clientSettings;
 		private Version version;
 
 		public string UpdateType;
@@ -88,8 +89,9 @@ namespace AnalitF.Net.Service.Models
 			this.version = version;
 			this.UpdateType = updateType;
 			user = session.Load<User>(userId);
-			settings = session.Load<UserSettings>(userId);
 			data = session.Get<AnalitfNetData>(user.Id);
+			userSettings = session.Load<UserSettings>(user.Id);
+			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 		}
 
 		//Все даты передаются в UTC!
@@ -153,11 +155,22 @@ where a.Enabled = 1 and ua.UserId = ?userId";
 select u.Id,
 	u.InheritPricesFrom is not null as IsPriceEditDisabled,
 	u.UseAdjustmentOrders as IsPreprocessOrders,
-	c.FullName as FullName
+	c.FullName as FullName,
+	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
+	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
 where u.Id = ?userId";
 			Export(result, sql, "Users", new { userId = user.Id });
+
+			sql = @"
+select up.Id,
+	up.Shortcut as Name,
+	a.UserId
+from Usersettings.AssignedPermissions a
+	join Usersettings.UserPermissions up on up.Id = a.PermissionId
+where a.UserId = ?userId";
+			Export(result, sql, "Permissions", new { userId = user.Id });
 
 			sql = @"
 drop temporary table if exists Usersettings.MaxProducerCosts;
@@ -244,6 +257,20 @@ s.FullName
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(result, sql, "suppliers");
+
+			sql = @"
+select
+	p.PriceCode as PriceId,
+	p.RegionCode as RegionId,
+	d.DayOfWeek,
+	d.VitallyImportantDelay,
+	d.OtherDelay
+from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
+	join UserSettings.PriceIntersections pi on pi.Id = d.PriceIntersectionId and pi.PriceId = p.PriceCode
+	join UserSettings.SupplierIntersection si on si.Id = pi.SupplierIntersectionId and si.SupplierID = p.FirmCode
+where
+	si.ClientId = ?clientId";
+			Export(result, sql, "DelayOfPayments", new { clientId = clientSettings.Id });
 
 			var offerQuery = new OfferQuery();
 			offerQuery.Select("m.MinCost as LeaderCost",
@@ -474,7 +501,7 @@ where a.MailId in ({0})", ids.Implode());
 
 		private void ExportOrders(List<UpdateData> result)
 		{
-			if (!settings.AllowDownloadUnconfirmedOrders)
+			if (!userSettings.AllowDownloadUnconfirmedOrders)
 				return;
 
 			session.CreateSQLQuery("delete from Logs.PendingOrderLogs where UserId = :userId")
@@ -811,6 +838,8 @@ group by dh.Id")
 
 		public void CheckAds(List<UpdateData> zip)
 		{
+			if (!clientSettings.ShowAdvertising)
+				return;
 			if (!Directory.Exists(AdsPath))
 				return;
 			var template = String.Format("_{0}", user.Client.RegionCode);

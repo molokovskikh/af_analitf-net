@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.Models
 	public class Order : BaseNotify, IOrder
 	{
 		private decimal sum;
+		private decimal resultSum;
 		private int linesCount;
 		private bool send;
 		private bool frozen;
@@ -82,11 +83,23 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual decimal ResultSum
+		{
+			get { return sum; }
+			set
+			{
+				sum = value;
+				OnPropertyChanged("ResultSum");
+			}
+		}
+
 		public virtual bool Send
 		{
 			get { return send; }
 			set
 			{
+				if (send == value)
+					return;
 				send = value;
 				OnPropertyChanged();
 			}
@@ -101,6 +114,8 @@ namespace AnalitF.Net.Client.Models
 				if (frozen == value)
 					return;
 				frozen = value;
+				if (frozen)
+					Send = false;
 				ResetStatus();
 				OnPropertyChanged();
 			}
@@ -168,15 +183,20 @@ namespace AnalitF.Net.Client.Models
 		public virtual void RemoveLine(OrderLine line)
 		{
 			Lines.Remove(line);
+			UpdateSum();
+		}
+
+		public virtual void UpdateSum()
+		{
 			Sum = Lines.Sum(l => l.Sum);
-			LinesCount = Lines.Count;
+			ResultSum = Lines.Sum(l => l.ResultSum);
 		}
 
 		public virtual void AddLine(OrderLine line)
 		{
 			Lines.Add(line);
-			Sum = Lines.Sum(l => l.Sum);
 			LinesCount = Lines.Count;
+			UpdateSum();
 		}
 
 		public virtual OrderLine AddLine(Offer offer, uint count)
@@ -200,33 +220,31 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			foreach (var line in Lines) {
-				line.MinCost = session.Query<Offer>().Where(o => o.ProductId == line.ProductId
+				var offers = session.Query<Offer>().Where(o => o.ProductId == line.ProductId
 					&& o.ProducerId == line.ProducerId
 					&& o.Junk == line.Junk)
-					.Min(o => (decimal?)o.Cost);
+					.ToArray();
+				line.MinCost = offers.Select(o => (decimal?)o.ResultCost).MinOrDefault();
 				if (line.MinCost != null) {
-					if (line.MinCost == line.Cost) {
+					if (line.MinCost == line.ResultCost) {
 						line.MinPrice = line.Order.Price.Id;
 					}
 					else {
-						line.MinPrice = session.Query<Offer>().Where(o => o.Cost == line.MinCost)
-							.Select(o => o.Price.Id)
+						line.MinPrice = offers.Where(o => o.ResultCost == line.MinCost)
+							.Select(p => p.Price.Id)
 							.FirstOrDefault();
 					}
 				}
 
-				line.LeaderCost = session.Query<Offer>().Where(o => o.ProductId == line.ProductId
-					&& o.ProducerId == line.ProducerId
-					&& o.Junk == line.Junk
-					&& o.Price.BasePrice)
-					.Min(o => (decimal?)o.Cost);
+				var baseOffers = offers.Where(o => o.Price.BasePrice).ToArray();
+				line.LeaderCost = baseOffers.Select(o => (decimal?)o.ResultCost).MinOrDefault();
 				if (line.LeaderCost != null) {
-					if (line.LeaderCost == line.Cost) {
+					if (line.LeaderCost == line.ResultCost) {
 						line.LeaderPrice = line.Order.Price.Id;
 					}
 					else {
-						line.LeaderPrice = session.Query<Offer>().Where(o => o.Cost == line.LeaderCost && o.Price.BasePrice)
-							.Select(o => o.Price.Id)
+						line.LeaderPrice = baseOffers.Where(o => o.ResultCost == line.LeaderCost)
+							.Select(p => p.Price.Id)
 							.FirstOrDefault();
 					}
 				}

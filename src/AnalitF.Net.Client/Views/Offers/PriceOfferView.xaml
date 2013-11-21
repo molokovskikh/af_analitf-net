@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.PriceOfferView"
+<UserControl x:Class="AnalitF.Net.Client.Views.PriceOfferView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
@@ -102,8 +102,9 @@
 					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="59*" MinWidth="5" FontWeight="Bold"
-					Header="Цена" Binding="{Binding Cost}"
+					Header="Цена" Binding="{Binding ResultCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="39*" MinWidth="5" Header="Остаток"
 					Binding="{Binding Quantity}" TextAlignment="Right" />
@@ -121,7 +122,7 @@
 					Binding="{Binding OrderCount}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="48*"
 					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
-					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
+					Binding="{Binding OrderLine.ResultSum}" TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 

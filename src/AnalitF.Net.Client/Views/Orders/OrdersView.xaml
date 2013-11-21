@@ -57,7 +57,7 @@
 							<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
 								TextAlignment="Right"
 								IsReadOnly="True" />
-							<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
+							<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding ResultSum}"
 								TextAlignment="Right"
 								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding Price.MonthlyOrderSum}"
@@ -93,7 +93,7 @@
 						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
 							TextAlignment="Right"
 							MinWidth="5" />
-						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
+						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding ResultSum}"
 							TextAlignment="Right"
 							MinWidth="5" />
 					</DataGrid.Columns>

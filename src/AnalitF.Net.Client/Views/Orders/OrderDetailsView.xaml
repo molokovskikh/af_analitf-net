@@ -92,15 +92,16 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
-					Binding="{Binding Cost}"
+					Binding="{Binding ResultCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding Sum}"
+				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding ResultSum}"
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
 			</DataGrid.Columns>

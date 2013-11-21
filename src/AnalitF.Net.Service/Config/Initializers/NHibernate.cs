@@ -32,6 +32,12 @@ namespace AnalitF.Net.Service.Config.Initializers
 				m.Table("Users");
 			});
 
+			Mapper.Class<ClientSettings>(m => {
+				m.Schema("Usersettings");
+				m.Table("RetClientsSet");
+				m.Id(e => e.Id, c => c.Column("ClientCode"));
+			});
+
 			Mapper.Class<ClientAppLog>(m => {
 				m.Property(p => p.Text, c => c.Length(10000));
 			});

@@ -204,9 +204,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)
 		{
 			var lookup = offer.GroupBy(key)
-				.ToDictionary(g => g.Key, g => g.Min(o => o.Cost));
+				.ToDictionary(g => g.Key, g => g.Min(o => o.ResultCost));
 
-			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.Cost)).ToList();
+			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.ResultCost)).ToList();
 
 			var indexes = lookup.OrderBy(k => k.Value)
 				.Select((k, i) => Tuple.Create(k.Key, i))
@@ -218,7 +218,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			return offers;
 		}
-
 
 		private void CalculateRetailCost()
 		{
@@ -272,14 +271,14 @@ namespace AnalitF.Net.Client.ViewModels
 			var diffCalcMode = Settings.Value.DiffCalcMode;
 			var offers = Offers.Value;
 			if (diffCalcMode == DiffCalcMode.MinCost)
-				baseCost = offers.Select(o => o.Cost).MinOrDefault();
+				baseCost = offers.Select(o => o.ResultCost).MinOrDefault();
 			else if (diffCalcMode == DiffCalcMode.MinBaseCost)
-				baseCost = offers.Where(o => o.Price.BasePrice).Select(o => o.Cost).MinOrDefault();
+				baseCost = offers.Where(o => o.Price.BasePrice).Select(o => o.ResultCost).MinOrDefault();
 
 			foreach (var offer in offers) {
 				offer.CalculateDiff(baseCost);
 				if (diffCalcMode == DiffCalcMode.PrevOffer)
-					baseCost = offer.Cost;
+					baseCost = offer.ResultCost;
 			}
 		}
 

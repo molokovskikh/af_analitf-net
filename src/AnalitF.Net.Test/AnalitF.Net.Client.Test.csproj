@@ -130,6 +130,7 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
+    <Compile Include="Fixtures\DelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
     <Compile Include="Fixtures\MailWithAttachment.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Fixtures\Reject.cs" />
     <Compile Include="Fixtures\RejectedWaybill.cs" />
     <Compile Include="Fixtures\SampleData.cs" />
+    <Compile Include="Fixtures\ServerFixture.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
     <Compile Include="Fixtures\UnknownWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
@@ -209,6 +211,7 @@
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
+    <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />

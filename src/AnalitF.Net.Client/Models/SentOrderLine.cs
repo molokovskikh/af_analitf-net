@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.Models
 			Order = order;
 			Count = orderLine.Count;
 			Comment = orderLine.Comment;
+			ResultCost = orderLine.ResultCost;
 		}
 
 		public virtual uint Id { get; set; }
@@ -19,9 +20,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Comment { get; set; }
 
-		public virtual decimal Sum
+		public virtual decimal ResultCost { get; set; }
+
+		public virtual decimal ResultSum
 		{
-			get { return Count * Cost; }
+			get { return Count * ResultCost; }
 		}
 
 		public virtual SentOrder Order { get; set; }

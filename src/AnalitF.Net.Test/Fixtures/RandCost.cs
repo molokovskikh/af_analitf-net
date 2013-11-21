@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Devart.Data.MySql;
+using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Exceptions;
-using NHibernate.Linq;
-using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -13,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	{
 		public override void Execute(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = User(session);
 			user.UseAdjustmentOrders = true;
 			try {
 				session.CreateSQLQuery("create table Farm.CoreCosts_Backup select * from Farm.CoreCosts")
@@ -28,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Rollback(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = User(session);
 			user.UseAdjustmentOrders = false;
 			session.CreateSQLQuery("delete from Farm.CoreCosts;" +
 				"insert into Farm.CoreCosts select * from Farm.CoreCosts_Backup;")

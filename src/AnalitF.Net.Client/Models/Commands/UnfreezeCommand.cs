@@ -98,7 +98,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					&& o.RequestRatio == line.RequestRatio
 					&& o.MinOrderCount == line.MinOrderCount
 					&& o.MinOrderSum == line.MinOrderSum)
-					.OrderBy(o => o.Cost)
+					.ToArray()
+					.OrderBy(o => o.ResultCost)
 					.ToArray();
 				Merge(destOrder, sourceOrder, line, offers, log);
 			}

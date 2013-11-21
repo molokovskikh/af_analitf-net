@@ -87,6 +87,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 				m.Property(p => p.MinOrderSum);
 			});
+
+			//mapper.Class<DelayOfPayment>(m => {
+			//	m.ManyToOne(p => p.Price, t => t.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+			//});
+
 			mapper.Class<Price>(m => {
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
@@ -94,6 +99,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Version(p => p.Timestamp, c => {
 					c.Type(new TimestampType());
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
+				m.Bag(o => o.DelayOfPayments, c => {
+					c.Inverse(true);
+					c.Key(k => k.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				});
 			});
 			mapper.Class<Order>(m => {

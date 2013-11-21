@@ -30,21 +30,21 @@ namespace AnalitF.Net.Client.Models
 
 	public class ExcelExporter
 	{
-		private PropertyInfo[] properties;
+		public PropertyInfo[] Properties;
 		private Screen model;
 		public string ExportDir;
 
 		public ExcelExporter(Screen model, string dir)
 		{
 			this.model = model;
-			properties = model.GetType().GetProperties()
+			Properties = model.GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
 				.ToArray();
 		}
 
 		public bool CanExport
 		{
-			get { return properties.Length > 0; }
+			get { return Properties.Length > 0; }
 		}
 
 		public IResult Export()
@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Models
 
 		private DataGrid FindGrid()
 		{
-			var names = properties.Select(p => p.Name).ToArray();
+			var names = Properties.Select(p => p.Name).ToArray();
 			var view = (UserControl) model.GetView();
 			if (view == null)
 				return null;

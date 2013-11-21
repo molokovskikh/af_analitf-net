@@ -6,6 +6,7 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Controls.Behaviors;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -154,10 +155,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateDiff(decimal cost)
 		{
-			if (cost == Cost || cost == 0)
+			if (cost == ResultCost || cost == 0)
 				return;
 
-			_diff = Math.Round((Cost - cost) / cost, 2);
+			_diff = Math.Round((ResultCost - cost) / cost, 2);
 		}
 
 		[Ignore]
@@ -223,7 +224,7 @@ namespace AnalitF.Net.Client.Models
 				else {
 					OrderLine.Count = OrderCount.Value;
 					OrderLine.Comment = comment;
-					OrderLine.Order.Sum = OrderLine.Order.Lines.Sum(l => l.Sum);
+					order.UpdateSum();
 				}
 
 				if (edit) {
@@ -282,6 +283,16 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return OrderCount.GetValueOrDefault(); }
 			set { OrderCount = value; }
+		}
+
+		/// <summary>
+		/// Результирующая цена, цена поставщика + корректировка назначеная аптекой
+		/// </summary>
+		public virtual decimal ResultCost
+		{
+			get {
+				return GetResultCost(Price);
+			}
 		}
 
 		//перегрузка Equals и GetHashCode

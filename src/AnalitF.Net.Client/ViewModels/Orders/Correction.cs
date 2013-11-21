@@ -89,7 +89,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Offers.Value = StatelessSession.Query<Offer>()
 				.Fetch(o => o.Price)
 				.Where(o => o.ProductId == productId)
-				.OrderBy(o => o.Cost)
+				.ToList()
+				.OrderBy(o => o.ResultCost)
 				.ToList();
 		}
 

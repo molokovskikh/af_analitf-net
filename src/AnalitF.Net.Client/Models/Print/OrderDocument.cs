@@ -39,15 +39,15 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var lines = order.Lines;
 			var count = lines.Count();
-			var sum = lines.Sum(l => l.Sum);
+			var sum = lines.Sum(l => l.ResultSum);
 			var rows = lines.Select((l, i) => new object[] {
 				i + 1,
 				l.ProductSynonym,
 				l.ProducerSynonym,
 				l.Period,
-				l.Cost,
+				l.ResultCost,
 				l.Count,
-				l.Sum
+				l.ResultSum
 			});
 
 			var table = BuildTable(rows, headers);
