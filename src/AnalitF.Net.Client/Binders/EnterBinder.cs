@@ -28,17 +28,16 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public static void Bind(MethodInfo method, FrameworkElement element)
 		{
-			var keydown = Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
+			var keydown = RxHelper.KeyDown(element)
 				.Where(a => a.EventArgs.Key == Key.Return
 					&& !a.EventArgs.Handled
 					&& ((DataGrid)a.Sender).SelectedItem != null)
 				.Do(a => a.EventArgs.Handled = true)
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 
-			var mouseDoubleClick = Observable.FromEventPattern<MouseButtonEventArgs>(element, "MouseDoubleClick")
+			var mouseDoubleClick = element.MouseDoubleClick()
 				.Select(a => ((DependencyObject)a.EventArgs.OriginalSource)
-					.Parents()
-					.OfType<DataGridCell>().FirstOrDefault());
+					.Parents<DataGridCell>().FirstOrDefault());
 
 			var enterObservable = keydown.Merge(mouseDoubleClick).Where(i => i != null);
 

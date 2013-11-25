@@ -13,6 +13,9 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using Ionic.Zip;
+using log4net.Appender;
+using log4net.Repository.Hierarchy;
+using NHibernate;
 using NHibernate.Linq;
 using log4net.Config;
 using LogManager = log4net.LogManager;
@@ -48,6 +51,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public ProgressReporter Reporter;
 		public bool Clean = true;
 		private string syncData = "";
+		private UpdateResult result = UpdateResult.OK;
 
 		public UpdateCommand()
 		{
@@ -147,7 +151,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				return UpdateResult.UpdatePending;
 
 			Import();
-			return UpdateResult.OK;
+			return result;
 		}
 
 		public void Import()
@@ -164,6 +168,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			RunCommand(new ImportCommand(data));
 
 			SyncOrders();
+			CalculateRejects(settings);
 
 			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
 				SuccessMessage = "Новых файлов документов нет.";
@@ -197,6 +202,90 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		public bool CalculateRejects(Settings settings)
+		{
+			//позиции перестают считаться новыми только когда мы получаем новую порцию позиций которые являются забраковкой
+			//.SetFlushMode(FlushMode.Auto)
+			//по умолчанию запросы имеют flush mode Unspecified
+			//это значит что изменения из сесси не будут сохранены в базу перед запросом
+			//а попадут в базу после commit
+			//те изменеия из сесии перетрут состояние флагов
+			var begin = DateTime.Today.AddDays(-settings.TrackRejectChangedDays);
+			var exists =  Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
+				"	join Waybills w on w.Id = l.WaybillId " +
+				"set l.RejectId = r.Id, l.IsRejectNew = 2, w.IsRejectChanged = 2 " +
+				"where l.RejectId is null " +
+				"	and r.Canceled = 0" +
+				"	and l.ProductId = r.ProductId " +
+				"	and l.ProducerId = r.ProducerId " +
+				"	and l.SerialNumber = r.Series " +
+				"	and l.ProductId is not null " +
+				"	and l.ProducerId is not null " +
+				"	and l.SerialNumber is not null " +
+				"	and w.WriteTime > :begin")
+				.SetParameter("begin", begin)
+				.SetFlushMode(FlushMode.Always)
+				.ExecuteUpdate() > 0;
+
+			exists |= Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
+				"	join Waybills w on w.Id = l.WaybillId " +
+				"set l.RejectId = r.Id, l.IsRejectNew = 2, w.IsRejectChanged = 2 " +
+				"where l.RejectId is null " +
+				"	and r.Canceled = 0" +
+				"	and l.ProductId = r.ProductId " +
+				"	and l.ProducerId is null " +
+				"	and r.ProducerId is null " +
+				"	and l.SerialNumber = r.Series " +
+				"	and l.ProductId is not null " +
+				"	and l.SerialNumber is not null " +
+				"	and w.WriteTime > :begin ")
+				.SetParameter("begin", begin)
+				.ExecuteUpdate() > 0;
+
+			exists |= Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
+				"	join Waybills w on w.Id = l.WaybillId " +
+				"set l.RejectId = r.Id, l.IsRejectNew = 2, w.IsRejectChanged = 2 " +
+				"where l.RejectId is null " +
+				"	and r.Canceled = 0" +
+				"	and l.ProductId = r.ProductId"  +
+				"	and l.ProducerId is null " +
+				"	and r.ProducerId is null " +
+				"	and l.SerialNumber = r.Series " +
+				"	and l.ProductId is not null " +
+				"	and l.SerialNumber is not null " +
+				"	and w.WriteTime > :begin")
+				.SetParameter("begin", begin)
+				.ExecuteUpdate() > 0;
+
+			exists |= Session.CreateSQLQuery("update WaybillLines as l " +
+				"	join Rejects r on r.Id = l.RejectId " +
+				"	join Waybills w on w.Id = l.WaybillId " +
+				"set l.IsRejectCanceled = 1, l.RejectId = null, w.IsRejectChanged = 2 " +
+				"where l.RejectId is not null " +
+				"	and r.Canceled = 1" +
+				"	and w.WriteTime > :begin")
+				.SetParameter("begin", begin)
+				.ExecuteUpdate() > 0;
+
+			if (exists) {
+				Session.CreateSQLQuery("update WaybillLines set IsRejectNew = 0 where IsRejectNew = 1")
+					.ExecuteUpdate();
+				Session.CreateSQLQuery("update WaybillLines set IsRejectNew = 1 where IsRejectNew = 2")
+					.ExecuteUpdate();
+				Session.CreateSQLQuery("update Waybills set IsRejectChanged = 0 where IsRejectChanged = 1")
+					.ExecuteUpdate();
+				Session.CreateSQLQuery("update Waybills set IsRejectChanged = 1 where IsRejectChanged = 2")
+					.ExecuteUpdate();
+
+				Results.Add(new DialogResult(new PostUpdate(), @fixed: true));
+				result = UpdateResult.Other;
+			}
+			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
+				.ExecuteUpdate();
+
+			return exists;
 		}
 
 		private void SyncOrders()
@@ -401,6 +490,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			var cleaner = new FileCleaner();
 			cleaner.Watch(file);
 
+			//TODO: в тестах сброс конфигурации может сильно испортить жизнь
+			//например если нужно подебажить запросы
 			LogManager.ResetConfiguration();
 			try
 			{

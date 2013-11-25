@@ -53,7 +53,7 @@
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="2" CellStyle="{StaticResource VitallyImportant}"
+		<c:DataGrid x:Name="Offers" Grid.Row="2"
 			CanUserSortColumns="False"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
 			binders:Persistable.PersistColumnSettings="true">
@@ -73,7 +73,7 @@
 				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="85*" CellStyle="{StaticResource Junk}"
+				<c:DataGridTextColumnEx Width="85*"
 					Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="85*" Header="Прайс-лист"
 					Binding="{Binding Price.Name}" />
@@ -102,7 +102,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="55*" MinWidth="5"
-					CellStyle="{StaticResource Junk}" FontWeight="Bold" Header="Цена"
+					FontWeight="Bold" Header="Цена"
 					Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Visibility="Collapsed" Header="Разница, %"
 					Binding="{Binding Diff}" TextAlignment="Right" />
@@ -123,12 +123,9 @@
 
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 
-		<StackPanel Grid.Row="4">
+		<StackPanel Grid.Row="4" Name="Legend">
 			<Label>Подсказка</Label>
 			<StackPanel Orientation="Horizontal">
-				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
-				<Label Style="{StaticResource BannedLegend}">Препарат запрещен к заказу</Label>
-				<Label Style="{StaticResource VitallyImportantLegend}">Жизненно важные препараты</Label>
 				<Label Style="{StaticResource NotBaseOfferLegend}">Неосновной поставщик</Label>
 			</StackPanel>
 		</StackPanel>
@@ -159,11 +156,11 @@
 					<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
 						TextAlignment="Right" />
 					<c:DataGridTextColumnEx Width="49*" Header="Цена" Binding="{Binding Cost}"
-						CellStyle="{StaticResource Junk}" TextAlignment="Right" />
+						TextAlignment="Right" />
 					<c:DataGridTextColumnEx Width="68*" Header="Дата" Binding="{Binding Order.SentOn}"
 						TextAlignment="Center" />
 					<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}"
-						CellStyle="{StaticResource Junk}" TextAlignment="Center" />
+						TextAlignment="Center" />
 				</DataGrid.Columns>
 			</c:DataGrid>
 		</DockPanel>

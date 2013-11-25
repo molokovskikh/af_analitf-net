@@ -38,5 +38,7 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged("Marked");
 			}
 		}
+
+		public virtual bool Canceled { get; set; }
 	}
 }

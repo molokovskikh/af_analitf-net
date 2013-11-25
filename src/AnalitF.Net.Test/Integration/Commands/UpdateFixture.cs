@@ -158,44 +158,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 		}
 
 		[Test]
-		public void Import_waybill()
-		{
-			var fixture = Fixture<LoadWaybill>();
-			var sendLog = fixture.SendLog;
-			Run(new UpdateCommand());
-
-			var waybills = localSession.Query<Waybill>().ToList();
-			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
-			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
-			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
-
-			var path = settings.MapPath("Waybills");
-			var files = Directory.GetFiles(path).Select(Path.GetFileName);
-			Assert.That(files, Contains.Item(Path.GetFileName(fixture.Filename)));
-			session.Refresh(sendLog);
-			Assert.IsTrue(sendLog.Committed);
-			Assert.IsTrue(sendLog.FileDelivered);
-			Assert.IsTrue(sendLog.DocumentDelivered);
-		}
-
-		[Test]
-		public void Group_waybill()
-		{
-			settings.GroupWaybillsBySupplier = true;
-			settings.OpenWaybills = true;
-
-			var fixture = Fixture<LoadWaybill>();
-			var command1 = new UpdateCommand();
-			Run(command1);
-
-			var path = Path.Combine(settings.MapPath("Waybills"), fixture.Waybill.Supplier.Name);
-			var files = Directory.GetFiles(path).Select(Path.GetFileName);
-			Assert.That(files, Contains.Item("test.txt"));
-			var results = command1.Results.OfType<OpenResult>().Implode(r => r.Filename);
-			Assert.AreEqual(Path.Combine(path, "test.txt"), results);
-		}
-
-		[Test]
 		public void Import_after_update()
 		{
 			File.Copy(Directory.GetFiles(serviceConfig.ResultPath).Last(), clientConfig.ArchiveFile);
@@ -320,47 +282,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			var dialog = command.Results.OfType<DialogResult>().First();
 			Assert.IsInstanceOf<Correction>(dialog.Model);
-		}
-
-		[Test]
-		public void Load_only_waybills()
-		{
-			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-				+ " where UserId = :userId;")
-				.SetParameter("userId", ServerUser().Id)
-				.ExecuteUpdate();
-			var command = new UpdateCommand {
-				SyncData = "Waybills",
-				Clean = false
-			};
-			Run(command);
-
-			var files = ZipHelper.lsZip(clientConfig.ArchiveFile).Implode();
-			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
-			Assert.AreEqual("", files);
-		}
-
-		[Test]
-		public void Load_waybill_without_file()
-		{
-			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
-				+ " where UserId = :userId;")
-				.SetParameter("userId", ServerUser().Id)
-				.ExecuteUpdate();
-			session.Transaction.Commit();
-			Fixture(new LoadWaybill(createFile: false));
-
-			var command = new UpdateCommand {
-				SyncData = "Waybills"
-			};
-			Run(command);
-
-			Assert.AreEqual("Получение документов завершено успешно.", command.SuccessMessage);
-		}
-
-		private TestUser ServerUser()
-		{
-			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 		}
 	}
 }

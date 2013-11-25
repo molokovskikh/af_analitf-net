@@ -8,7 +8,8 @@
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
 	</UserControl.InputBindings>
+
 	<Grid>
-		<Controls:DocumentViewerV2 x:Name="Document" Orientation="{Binding Orientation}"></Controls:DocumentViewerV2>
+		<Controls:DocumentViewerV2 x:Name="Document" Orientation="{Binding Orientation}"/>
 	</Grid>
 </UserControl>

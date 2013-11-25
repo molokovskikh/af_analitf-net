@@ -15,17 +15,13 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static bool IsDateTime(Type type)
 		{
-			if (TypeHelperExtensionMethods.IsNullable(type))
-				type = Nullable.GetUnderlyingType(type);
-
+			type = Nullable.GetUnderlyingType(type) ?? type;
 			return type == typeof(DateTime);
 		}
 
 		public static bool IsNumeric(Type type)
 		{
-			if (TypeHelperExtensionMethods.IsNullable(type))
-				type = Nullable.GetUnderlyingType(type);
-
+			type = Nullable.GetUnderlyingType(type) ?? type;
 			return type == typeof(int)
 				|| type == typeof(uint)
 				|| type == typeof(decimal)

@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Extentions
 {
@@ -70,6 +71,10 @@ namespace AnalitF.Net.Client.Extentions
 		//по этому для каждого вновь создаваемого окна принудительно указываем Language
 		protected override Window CreateWindow(object rootModel, bool isDialog, object context, IDictionary<string, object> settings)
 		{
+			var screen = rootModel as Screen;
+			if (screen != null)
+				screen.DisplayName = "АналитФАРМАЦИЯ";
+
 			var window = base.CreateWindow(rootModel, isDialog, context, settings);
 			window.Language = XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag);
 			if (SkipApp)

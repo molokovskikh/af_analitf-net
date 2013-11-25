@@ -8,7 +8,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class MakeOrder
 	{
-		public bool Local = true;
 		public Order Order;
 
 		public void Execute(ISession session)

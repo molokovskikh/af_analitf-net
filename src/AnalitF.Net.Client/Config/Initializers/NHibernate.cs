@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using AnalitF.Net.Client.Models;
 using Common.MySql;
@@ -27,6 +28,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 	public class NHibernate
 	{
 		private static ILog log = LogManager.GetLogger(typeof(NHibernate));
+		private List<PropertyInfo> indexes = new List<PropertyInfo>();
 
 		public ISessionFactory Factory;
 		public Configuration Configuration;
@@ -50,6 +52,20 @@ namespace AnalitF.Net.Client.Config.Initializers
 						|| type.BaseType == typeof(BaseStatelessObject))
 					&& modelInspector.IsEntity(type);
 			});
+
+			Index<Waybill>(w => w.WriteTime);
+			Index<WaybillLine>(w => w.ProductId);
+			Index<WaybillLine>(w => w.ProducerId);
+			Index<WaybillLine>(w => w.Product);
+			Index<WaybillLine>(w => w.SerialNumber);
+			Index<WaybillLine>(w => w.RejectId);
+			Index<Reject>(w => w.ProductId);
+			Index<Reject>(w => w.ProducerId);
+			Index<Reject>(w => w.Product);
+			Index<Reject>(w => w.Series);
+			Index<Offer>(o => o.ProductId);
+			Index<Offer>(o => o.CatalogId);
+
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => {
 					c.Inverse(true);
@@ -91,6 +107,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 			});
 			mapper.Class<Waybill>(m => {
+
 				m.Bag(o => o.Lines, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
@@ -107,9 +124,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 				c.Inverse(true);
 			}));
 			mapper.Class<Offer>(m => {
-				m.Property(o => o.CatalogId, c => c.Index("CatalogId"));
-				m.Property(o => o.ProductId, c => c.Index("ProductId"));
-				m.Property(o => o.Cost, c => c.Index("Cost"));
 				m.ManyToOne(o => o.Price, c => {
 					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
@@ -148,6 +162,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 					customizer.Column(c => c.Default(GetDefaultValue(propertyInfo)));
 					customizer.NotNullable(true);
 				}
+
+				if (indexes.Contains(propertyInfo))
+					customizer.Index(propertyInfo.Name);
 			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => {
 				customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
@@ -192,6 +209,13 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Configuration.SetNamingStrategy(new PluralizeNamingStrategy());
 			Configuration.AddDeserializedMapping(mapping, assembly.GetName().Name);
 			Factory = Configuration.BuildSessionFactory();
+		}
+
+		private void Index<T>(Expression<Func<T, object>> expr)
+		{
+			var info = expr.GetPropertyInfo();
+			if (info != null)
+				indexes.Add(info);
 		}
 
 		private static void PatchComponentColumnName(HbmMapping mapping)

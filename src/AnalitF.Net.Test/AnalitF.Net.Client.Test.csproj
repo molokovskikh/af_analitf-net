@@ -112,6 +112,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Extended.Wpf.Toolkit.1.9.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet.Core">
+      <HintPath>..\..\packages\YamlDotNet.Core.2.2.0\lib\net35\YamlDotNet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="YamlDotNet.RepresentationModel">
+      <HintPath>..\..\packages\YamlDotNet.RepresentationModel.2.2.0\lib\net35\YamlDotNet.RepresentationModel.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -129,6 +135,7 @@
     <Compile Include="Fixtures\MakeOrder.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
     <Compile Include="Fixtures\Reject.cs" />
+    <Compile Include="Fixtures\RejectedWaybill.cs" />
     <Compile Include="Fixtures\SampleData.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
     <Compile Include="Fixtures\UnknownWaybill.cs" />
@@ -136,6 +143,7 @@
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
     <Compile Include="Integration\Commands\ImportFixture.cs" />
+    <Compile Include="Integration\Commands\WaybillsFixture.cs" />
     <Compile Include="Integration\Models\RestoreOrderFixture.cs" />
     <Compile Include="Integration\Commands\OrderFixture.cs" />
     <Compile Include="Integration\Models\DbCommandFixture.cs" />
@@ -208,7 +216,7 @@
     <Compile Include="Unit\RasFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\SingleInstanceFixture.cs" />
-    <Compile Include="Unit\StyleBuilderFixture.cs" />
+    <Compile Include="Unit\StyleHelperFixture.cs" />
     <Compile Include="Unit\UpdateCommandFixture.cs" />
     <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />

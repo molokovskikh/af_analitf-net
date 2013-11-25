@@ -3,6 +3,11 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	binders:FocusBehavior.DefaultFocus="{x:Reference OK}">
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+	</UserControl.InputBindings>
+
 	<StackPanel>
 		<Grid Name="Data">
 			<Grid.ColumnDefinitions>

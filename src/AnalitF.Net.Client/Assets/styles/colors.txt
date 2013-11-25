@@ -1,0 +1,24 @@
+﻿IsRejectChanged: {
+	Background: "#ff8000"
+}
+IsRejectNew: {
+	Background: "#ff8000"
+}
+IsRejectCanceled: {
+	Background: "#808000"
+}
+IsReject: {
+	Background: "#a7ab9e"
+}
+Junk: {
+	Background: "#f29e66"
+}
+Leader: {
+	Background: "#C0DCC0"
+}
+BeginOverlap: {
+	Background: "#808000"
+}
+HaveGap: {
+	Background: "#800000"
+}

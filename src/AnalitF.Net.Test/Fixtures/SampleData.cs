@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Service.Models;
 using Castle.ActiveRecord;
 using Common.Tools;
@@ -13,15 +14,13 @@ using Test.Support.Suppliers;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class SampleData
+	public class SampleData : ServerFixture
 	{
-		public bool Local = false;
-		public Service.Config.Config Config;
 		public TestClient Client;
 		public TestPrice MaxProducerCosts;
 		public List<UpdateData> Files;
 
-		public void Execute(ISession session)
+		public override void Execute(ISession session)
 		{
 			var origin = session;
 			using (var scope = new SessionScope()) {

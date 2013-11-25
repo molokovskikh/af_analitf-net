@@ -1,6 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -12,6 +14,7 @@ namespace AnalitF.Net.Client.Views
 
 			EditBehavior.Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 		}
 	}
 }

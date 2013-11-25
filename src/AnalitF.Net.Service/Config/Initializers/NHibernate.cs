@@ -18,6 +18,15 @@ namespace AnalitF.Net.Service.Config.Initializers
 
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 
+			Mapper.Class<AnalitfNetData>(m => {
+				m.Schema("Customers");
+				m.Id(p => p.Id, c => {
+					c.Generator(Generators.Foreign<AnalitfNetData>(d => d.User));
+					c.Column("UserId");
+				});
+				m.OneToOne(p => p.User, c => c.ForeignKey("Id"));
+			});
+
 			Mapper.Class<UserSettings>(m => {
 				m.Schema("Customers");
 				m.Table("Users");

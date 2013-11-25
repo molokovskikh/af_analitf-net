@@ -12,8 +12,6 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public class NotifyValue<T> : BaseNotify
 	{
-		private static ILog log = LogManager.GetLogger(typeof(NotifyValue<>));
-
 		private bool respectValue;
 		private Func<T> calc;
 		private T value;
@@ -55,11 +53,7 @@ namespace AnalitF.Net.Client.Helpers
 		public NotifyValue(Func<T> calc, IObservable<object> trigger)
 			: this(calc)
 		{
-#if DEBUG
-			trigger.Subscribe(_ => Recalculate());
-#else
-			trigger.Subscribe(_ => Recalculate(), e => log.Error("Ошибка при обновлении значения", e));
-#endif
+			trigger.CatchSubscribe(_ => Recalculate());
 		}
 
 		public NotifyValue(T value)
@@ -112,7 +106,6 @@ namespace AnalitF.Net.Client.Helpers
 				return String.Empty;
 			return value.ToString();
 		}
-
 
 		public IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue()
 		{

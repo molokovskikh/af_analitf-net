@@ -7,7 +7,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class CorrectOrder
 	{
-		public bool Local = true;
 		public Order Order;
 
 		public void Execute(ISession session)

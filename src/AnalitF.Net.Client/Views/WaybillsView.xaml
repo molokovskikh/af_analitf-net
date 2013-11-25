@@ -13,9 +13,14 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
+			<StackPanel Orientation="Vertical">
+				<Label>Забраковка</Label>
+				<ComboBox Style="{StaticResource Select}" x:Name="RejectFilter" />
+			</StackPanel>
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Vertical">
 					<RadioButton GroupName="Source" Name="IsFilterByDocumentDate">по дате накладной</RadioButton>
@@ -61,5 +66,7 @@
 					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid>
+
+		<StackPanel Grid.Row="2" Name="Legend" />
 	</Grid>
 </UserControl>

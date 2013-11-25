@@ -12,7 +12,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class LoadSampleData
 	{
-		public bool Local = true;
 		public List<UpdateData> Files;
 		public Config.Config Config;
 

@@ -46,6 +46,7 @@ namespace AnalitF.Net.Service.Models
 
 		private User user;
 		private UserSettings settings;
+		private AnalitfNetData data;
 		private Version version;
 
 		public string UpdateType;
@@ -68,11 +69,14 @@ namespace AnalitF.Net.Service.Models
 			this.UpdateType = updateType;
 			user = session.Load<User>(userId);
 			settings = session.Load<UserSettings>(userId);
+			data = session.Get<AnalitfNetData>(user.Id);
 		}
 
 		//Все даты передаются в UTC!
 		public void Export(List<UpdateData> result)
 		{
+			data = data ?? new AnalitfNetData(user);
+
 			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
 				"drop temporary table if exists usersettings.activeprices;" +
 				"call Customers.GetOffers(:userId);" +
@@ -93,10 +97,27 @@ select Id,
 	Series,
 	LetterNo,
 	convert_tz(LetterDate, @@session.time_zone,'+00:00') as LetterDate,
-	CauseRejects
+	CauseRejects,
+	CancelDate is not null as Canceled
 from Farm.Rejects
-where CancelDate is null";
-			Export(result, sql, "Rejects");
+union
+select
+	l.RejectId,
+	l.Product,
+	l.ProductId,
+	l.Producer,
+	l.ProducerId,
+	l.Series,
+	l.LetterNo,
+	convert_tz(LetterDate, @@session.time_zone,'+00:00') as LetterDate,
+	l.CauseRejects,
+	1 as Canceled
+from
+	Logs.RejectLogs l
+where
+	l.LogTime >= ?lastUpdate
+and l.Operation = 2";
+			Export(result, sql, "Rejects", new { lastUpdate = data.LastUpdateAt });
 
 			sql = @"
 select a.Id,
@@ -476,8 +497,14 @@ group by ol.RowId";
 				.Take(400)
 				.ToArray();
 
-			if (logs.Length == 0)
+			if (logs.Length == 0) {
+				//мы должны передать LoadedDocuments что бы клиент очистил таблицу
+				Export(result,
+					"LoadedDocuments",
+					new[] { "Id", "Type", "SupplierId", "OriginFilename" },
+					new object[0][]);
 				return;
+			}
 
 			foreach (var log in logs) {
 				log.Committed = false;
@@ -533,7 +560,9 @@ group by dh.Id", ids);
 			sql = String.Format(@"
 select db.Id,
 	d.RowId as WaybillId,
+	db.ProductId,
 	db.Product,
+	db.ProducerId,
 	db.Producer,
 	db.Country,
 	db.ProducerCost,

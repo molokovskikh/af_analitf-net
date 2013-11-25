@@ -15,12 +15,12 @@
 
 					<DataGrid x:Name="Markups" Grid.Column="0">
 						<DataGrid.Columns>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource BeginMarkup}"
+							<DataGridTextColumn Width="*"
 								Header="Левая граница"
-								Binding="{Binding Begin}"></DataGridTextColumn>
-							<DataGridTextColumn Width="*" CellStyle="{DynamicResource EndMarkup}"
+								Binding="{Binding Begin}" />
+							<DataGridTextColumn Width="*"
 								Header="Правая граница"
-								Binding="{Binding End}"></DataGridTextColumn>
+								Binding="{Binding End}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
 								Binding="{Binding Markup}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
@@ -58,13 +58,11 @@
 						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
-								CellStyle="{DynamicResource BeginMarkup}"
 								Header="Левая граница"
 								Binding="{Binding Begin}" />
 							<DataGridTextColumn Width="*"
-								CellStyle="{DynamicResource EndMarkup}"
 								Header="Правая граница"
-								Binding="{Binding End}"></DataGridTextColumn>
+								Binding="{Binding End}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
 								Binding="{Binding Markup}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
@@ -264,6 +262,9 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_DiffCalcMode" />
 
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+
+					<Label>Показывать список измений в забраковке за (дни):</Label>
+					<TextBox x:Name="Settings_TrackRejectChangedDays"></TextBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройка стеллажной карты" Name="RackingMapSettings">

@@ -96,6 +96,7 @@ namespace AnalitF.Net.Client.Binders
 				};
 			ConventionManager.AddElementConvention<ComboBox>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					NotifyValueSupport.Patch(ref path, ref property);
 					if (property.PropertyType.IsEnum) {
 						if (NotBindedAndNull(element, Selector.ItemsSourceProperty)
 							&& !ConventionManager.HasBinding(element, Selector.SelectedItemProperty)) {
@@ -120,7 +121,7 @@ namespace AnalitF.Net.Client.Binders
 				};
 			ConventionManager.AddElementConvention<DataGrid>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					var fallback = ConventionManager.GetElementConvention(typeof(Selector));
+					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
 						var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
 						if (result

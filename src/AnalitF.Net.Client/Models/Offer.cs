@@ -106,6 +106,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal LeaderCost { get; set; }
 
+		[Style("LeaderPrice.RegionName", "LeaderPrice.Name", Description = "Прайс-лист - лидер")]
 		public virtual bool Leader
 		{
 			get { return LeaderCost == Cost; }

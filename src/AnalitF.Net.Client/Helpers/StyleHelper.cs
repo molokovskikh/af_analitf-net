@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,7 +12,9 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using NHibernate.Util;
 using NPOI.SS.Formula.Functions;
+using YamlDotNet.RepresentationModel.Serialization;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -41,15 +47,6 @@ namespace AnalitF.Net.Client.Helpers
 						Value = true,
 						Setters = {
 							new Setter(Control.BackgroundProperty, Brushes.Silver)
-						}
-					}
-				},
-				{ "Junk",
-					() => new DataTrigger {
-						Binding = new Binding("Junk"),
-						Value = true,
-						Setters = {
-							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xf2, 0x9e, 0x66)))
 						}
 					}
 				},
@@ -116,9 +113,96 @@ namespace AnalitF.Net.Client.Helpers
 			};
 
 		private static SolidColorBrush DefaultColor = Brushes.Red;
+		public static Color ActiveColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
+		public static Color InactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
+		private static ResourceDictionary localResources;
 
-		public static void BuildStyles(ResourceDictionary resources,
-			ResourceDictionary appResource,
+		public static void CollectStyles(ResourceDictionary resources)
+		{
+			var test = Assembly.GetEntryAssembly() == null
+				|| !Assembly.GetEntryAssembly().GetName().Name.Match("AnalitF.Net.Client");
+			if (test) {
+				BuildStyles(resources);
+			}
+			else {
+				var file = GetColorFile();
+				var watcher = new FileSystemWatcher(Path.GetDirectoryName(file));
+				watcher.EnableRaisingEvents = true;
+				Observable.FromEventPattern<FileSystemEventArgs>(watcher, "Changed")
+					.Merge(Observable.Return(new EventPattern<FileSystemEventArgs>(watcher,
+						new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.GetDirectoryName(file), Path.GetFileName(file)))))
+					.Where(e => e.EventArgs.FullPath.Match(file))
+					.CatchSubscribe(_ => {
+						BuildStyles(resources);
+					});
+			}
+		}
+
+		private static void ParseStyle(string file)
+		{
+			var des = new Deserializer();
+			using (var f = new StreamReader(File.OpenRead(file))) {
+				var data = des.Deserialize<Dictionary<string, Dictionary<string, string>>>(f);
+				foreach (var key in data) {
+					var trigger = new DataTrigger();
+					foreach (var values in key.Value) {
+						var property = DependencyPropertyDescriptor.FromName(values.Key, typeof(Control), typeof(Control));
+
+						var result = property.Converter.ConvertFrom(values.Value);
+						trigger.Setters.Add(new Setter(property.DependencyProperty, result));
+					}
+					if (KnownStyles.ContainsKey(key.Key))
+						KnownStyles.Remove(key.Key);
+					KnownStyles.Add(key.Key, () => trigger);
+				}
+			}
+		}
+
+		public static void BuildStyles(ResourceDictionary app)
+		{
+			ParseStyle(GetColorFile());
+
+			if (localResources == null) {
+				localResources = new ResourceDictionary();
+				app.MergedDictionaries.Add(localResources);
+			}
+			else {
+				localResources.Clear();
+			}
+
+			var ignore = new [] { typeof(BaseOffer) };
+			var types = typeof(StyleHelper).Assembly.GetTypes()
+				.Except(ignore)
+				.Where(t => t.GetProperties().Any(p => p.GetCustomAttributes(typeof(StyleAttribute), true).Length > 0))
+				.ToArray();
+			foreach (var type in types) {
+				var mainStyle = type == typeof (WaybillLine)
+					? (Style)app["DefaultEditableCell"]
+					: (Style)app[typeof(DataGridCell)];
+				BuildStyles(localResources, app,
+					type,
+					ActiveColor,
+					InactiveColor,
+					mainStyle);
+			}
+		}
+
+		private static string GetColorFile()
+		{
+			var test = Assembly.GetEntryAssembly() == null;
+			string file;
+			if (test) {
+				file = Path.GetFullPath(FileHelper.MakeRooted(@"..\..\..\AnalitF.Net.Client\Assets\styles\colors.txt"));
+			}
+			else {
+				file = Path.GetFullPath(FileHelper.MakeRooted(@"..\..\Assets\styles\colors.txt"));
+			}
+			return file;
+		}
+
+		public static void BuildStyles(
+			ResourceDictionary local,
+			ResourceDictionary app,
 			Type type,
 			Color activeColor,
 			Color inactiveColor,
@@ -158,13 +242,13 @@ namespace AnalitF.Net.Client.Helpers
 			}
 
 			if (rowStyle.Triggers.Count > 0) {
-				resources.Add(type.Name + "Row", rowStyle);
+				local.Add(type.Name + "Row", rowStyle);
 				baseStyle = rowStyle;
 			}
 
 			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
 			foreach (var legend in cellStyles) {
-				var style = new Style(typeof(Label), (Style)appResource["Legend"]);
+				var style = new Style(typeof(Label), (Style)app["Legend"]);
 				var result = KnownStyles.GetValueOrDefault(legend.p.Name);
 				if (result == null) {
 					style.Setters.Add(new Setter(Control.BackgroundProperty, DefaultColor));
@@ -176,7 +260,7 @@ namespace AnalitF.Net.Client.Helpers
 				}
 				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.d.Description));
 				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.d.Description));
-				resources.Add(LegendKey(legend.type, legend.p), style);
+				local.Add(LegendKey(legend.type, legend.p), style);
 			}
 
 			foreach (var column in map) {
@@ -200,19 +284,23 @@ namespace AnalitF.Net.Client.Helpers
 					AddTriggers(style, property.Name, true, baseColor, activeColor, inactiveColor);
 					GetValue(style, property.Name, true, baseColor);
 				}
-				resources.Add(CellKey(type, column.Key, context), style);
+				local.Add(CellKey(type, column.Key, context), style);
 			}
-		}
-
-		private static void Apply(Type type, DataGrid grid, ResourceDictionary resource)
-		{
-			grid.CellStyle = (Style)resource[type.Name + "Row"];
 		}
 
 		public static string LegendKey(Type type, PropertyInfo property)
 		{
 			return type.Name + property.Name + "Legend";
 		}
+
+		private static string CellKey(Type type, string path, string context = null)
+		{
+			if (context == null)
+				return type.Name + path + "Cell";
+			else
+				return context + type.Name + path + "Cell";
+		}
+
 		public static void AddTriggers(Style style, string name, object value,
 			SolidColorBrush baseColor,
 			Color active,
@@ -339,8 +427,7 @@ namespace AnalitF.Net.Client.Helpers
 				Conditions = {
 					new Condition(new Binding(name), value),
 					new Condition(new Binding("(IsFocused)") { RelativeSource = RelativeSource.Self }, true),
-					new Condition(new Binding(
-						"(IsSelected)") { RelativeSource = RelativeSource.Self }, true),
+					new Condition(new Binding("(IsSelected)") { RelativeSource = RelativeSource.Self }, true),
 					new Condition(
 						new Binding("(Selector.IsSelectionActive)") { RelativeSource = RelativeSource.Self },
 						true),
@@ -358,7 +445,7 @@ namespace AnalitF.Net.Client.Helpers
 			return (foreground - background) * factor + background;
 		}
 
-		public static void ApplyStyles(Type type, Controls.DataGrid grid, ResourceDictionary resources,
+		public static void ApplyStyles(Type type, DataGrid grid, ResourceDictionary resources,
 			StackPanel legend = null,
 			string context = null)
 		{
@@ -373,35 +460,39 @@ namespace AnalitF.Net.Client.Helpers
 				dataGridColumn.CellStyle = resource;
 			}
 
-			Apply(type, grid, resources);
-
-			BuildLegend(type, resources, legend);
+			grid.CellStyle = (Style)resources[type.Name + "Row"];
+			BuildLegend(type, grid, resources, legend);
 		}
 
-		private static string CellKey(Type type, string path, string context = null)
-		{
-			if (context == null)
-				return type.Name + path + "Cell";
-			else
-				return context + type.Name + path + "Cell";
-		}
-
-		private static void BuildLegend(Type type, ResourceDictionary resources, StackPanel legend)
+		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, StackPanel legend)
 		{
 			if (legend == null)
 				return;
 
-			legend.Children.Add(new Label { Content = "Подсказка" });
-			var styles = from p in type.GetProperties()
-				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+			var labels = from p in type.GetProperties()
+				from StyleAttribute a in p.GetCustomAttributes(typeof(StyleAttribute), true)
+				where grid.Columns.OfType<DataGridBoundColumn>().Any(c => IsApplicable(c, a))
+				orderby a.Description
 				let key = LegendKey(type, p)
 				let style = resources[key] as Style
 				where style != null
 				select new Label { Style = style };
-			var stack = new StackPanel();
-			stack.Orientation = Orientation.Horizontal;
-			stack.Children.AddRange(styles);
-			legend.Children.Add(stack);
+
+			if (legend.Children.Count == 0) {
+				legend.Children.Add(new Label { Content = "Подсказка" });
+				var stack = new StackPanel();
+				stack.Orientation = Orientation.Horizontal;
+				stack.Children.AddRange(labels);
+				legend.Children.Add(stack);
+			}
+			else {
+				legend.Children.OfType<StackPanel>().First().Children.AddRange(labels);
+			}
+		}
+
+		private static bool IsApplicable(DataGridBoundColumn col, StyleAttribute attr)
+		{
+			return attr.Columns.Length == 0 || (col.Binding != null &&  attr.Columns.Contains(((Binding)col.Binding).Path.Path));
 		}
 	}
 }

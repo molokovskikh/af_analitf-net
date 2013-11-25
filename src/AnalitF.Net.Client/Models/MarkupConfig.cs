@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Models
 			Settings.ValidateMarkups();
 		}
 
-		[Ignore]
+		[Ignore, Style("Begin")]
 		public virtual bool BeginOverlap
 		{
 			get
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Ignore]
+		[Ignore, Style("Begin")]
 		public virtual bool HaveGap
 		{
 			get
@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Ignore]
+		[Ignore, Style("End")]
 		public virtual bool EndLessThanBegin
 		{
 			get { return endLessThanBegin; }

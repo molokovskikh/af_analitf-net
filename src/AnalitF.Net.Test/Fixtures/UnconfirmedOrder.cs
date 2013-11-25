@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Models;
 using Common.Tools;
 using NHibernate;
@@ -9,12 +10,9 @@ using Test.Support.log4net;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class UnconfirmedOrder
+	public class UnconfirmedOrder : ServerFixture
 	{
 		private uint priceId;
-
-		public bool Local = false;
-		public Service.Config.Config Config;
 
 		public UnconfirmedOrder()
 		{
@@ -25,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			this.priceId = priceId;
 		}
 
-		public void Execute(ISession session)
+		public override void Execute(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			var client = user.Client;
@@ -56,7 +54,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(order);
 		}
 
-		public void Rollback(ISession session)
+		public override void Rollback(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			user.AllowDownloadUnconfirmedOrders = false;

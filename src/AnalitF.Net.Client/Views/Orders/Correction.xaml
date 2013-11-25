@@ -149,7 +149,6 @@
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />
 
 		<c:DataGrid Grid.Row="3" x:Name="Offers" CanUserSortColumns="False"
-			CellStyle="{StaticResource VitallyImportant}"
 			binders:Persistable.PersistColumnSettings="true"
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}">
 			<DataGrid.Columns>
@@ -167,7 +166,7 @@
 						Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="85*" MinWidth="5"
-						CellStyle="{StaticResource Junk}" Header="Срок годн."
+						Header="Срок годн."
 						Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="103*" Header="Прайс-лист"
 						Binding="{Binding Price.Name}" />
@@ -193,7 +192,7 @@
 						Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 						TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="55*" CellStyle="{StaticResource Junk}"
+				<c:DataGridTextColumnEx Width="55*"
 						FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
 						TextAlignment="Right" />

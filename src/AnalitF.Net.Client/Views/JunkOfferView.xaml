@@ -28,7 +28,6 @@
 		</Grid.RowDefinitions>
 
 		<c:DataGrid x:Name="Offers" Grid.Row="0"
-			CellStyle="{StaticResource VitallyImportant}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название"
@@ -42,7 +41,7 @@
 				<c:DataGridTextColumnEx Width="37*" Header="Примечание" Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="65*" CellStyle="{StaticResource Junk}"
+				<c:DataGridTextColumnEx Width="65*"
 					Header="Срок годн." Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="92*" Header="Прайс-лист"
 					Binding="{Binding Price.Name}" />
@@ -68,7 +67,7 @@
 					Binding="{Binding SupplierMarkup}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="63*" CellStyle="{StaticResource Junk}"
+				<c:DataGridTextColumnEx Width="63*"
 					FontWeight="Bold" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="50*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />

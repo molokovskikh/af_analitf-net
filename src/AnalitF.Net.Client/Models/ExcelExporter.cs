@@ -116,7 +116,7 @@ namespace AnalitF.Net.Client.Models
 				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue((DateTime)value);
 			}
-			else if (Util.IsDigitValue(value)) {
+			else if (Util.IsNumeric(value)) {
 				var cell = row.CreateCell(i, CellType.NUMERIC);
 				cell.SetCellValue(Convert.ToDouble(value));
 			}

@@ -105,5 +105,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			command.Config = clientConfig;
 			return command.Run();
 		}
+
+		protected TestUser ServerUser()
+		{
+			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+		}
 	}
 }

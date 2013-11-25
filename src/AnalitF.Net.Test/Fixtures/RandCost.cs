@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Exceptions;
@@ -8,14 +9,9 @@ using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class RandCost
+	public class RandCost : ServerFixture
 	{
-		public bool Local = false;
-		public Service.Config.Config Config;
-
-		public Type Reset = typeof(Reset);
-
-		public void Execute(ISession session)
+		public override void Execute(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			user.UseAdjustmentOrders = true;
@@ -29,14 +25,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.CreateSQLQuery(@"update Farm.CoreCosts set cost = round(rand() * 10000, 2)")
 				.ExecuteUpdate();
 		}
-	}
 
-	public class Reset
-	{
-		public bool Local = false;
-		public Service.Config.Config Config;
-
-		public void Execute(ISession session)
+		public override void Rollback(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			user.UseAdjustmentOrders = false;

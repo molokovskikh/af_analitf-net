@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Input;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using log4net;
 using ReactiveUI;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public static class RxHelper
 	{
+		private static ILog log = LogManager.GetLogger(typeof(RxHelper));
+
 		public static IObservable<T> Dump<T>(this IObservable<T> observable)
 		{
 			return observable.Do(i => Console.WriteLine(i));
@@ -36,6 +43,28 @@ namespace AnalitF.Net.Client.Helpers
 			var items = new List<T>();
 			source.Subscribe(items.Add);
 			return items;
+		}
+
+		public static IObservable<EventPattern<KeyEventArgs>> KeyDown(this FrameworkElement el)
+		{
+			return Observable.FromEventPattern<KeyEventArgs>(el, "KeyDown");
+		}
+
+		public static IObservable<EventPattern<KeyEventArgs>> MouseDoubleClick(this FrameworkElement el)
+		{
+			return Observable.FromEventPattern<KeyEventArgs>(el, "MouseDoubleClick");
+		}
+
+		public static IDisposable CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext)
+		{
+			return observable.Subscribe(e => {
+				try {
+					onNext(e);
+				}
+				catch(Exception ex) {
+					log.Error("Ошибка при обработке задачи", ex);
+				}
+			});
 		}
 	}
 }

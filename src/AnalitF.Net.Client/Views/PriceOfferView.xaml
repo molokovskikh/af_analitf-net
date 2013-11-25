@@ -67,7 +67,6 @@
 		</DockPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Offers"
-			CellStyle="{StaticResource VitallyImportant}"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
 			binders:Persistable.PersistColumnSettings="true">
 			<DataGrid.Columns>
@@ -86,7 +85,7 @@
 				<DataGridTextColumn Width="56*" MinWidth="5" Header="Примечание"
 					Binding="{Binding Note}" />
 				<c:DataGridTextColumnEx Width="58*" MinWidth="5"
-					CellStyle="{StaticResource Junk}" Header="Срок годн."
+					Header="Срок годн."
 					Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="31*" Header="Реестр.цена"
 					Binding="{Binding RegistryCost}" TextAlignment="Right" />
@@ -105,7 +104,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="59*" MinWidth="5" FontWeight="Bold"
-					CellStyle="{StaticResource Junk}" Header="Цена" Binding="{Binding Cost}"
+					Header="Цена" Binding="{Binding Cost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="39*" MinWidth="5" Header="Остаток"
 					Binding="{Binding Quantity}" TextAlignment="Right" />
@@ -113,9 +112,9 @@
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="51*" Header="Мин.цена" Binding="{Binding LeaderCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="70*" CellStyle="{StaticResource Leader}"
+				<c:DataGridTextColumnEx Width="70*"
 					Header="Прайс - лидер" Binding="{Binding LeaderPrice.Name}" />
-				<c:DataGridTextColumnEx Width="70*" CellStyle="{StaticResource Leader}"
+				<c:DataGridTextColumnEx Width="70*"
 					Visibility="Collapsed" Header="Регион - лидер"
 					Binding="{Binding LeaderPrice.RegionName}" />
 				<c:DataGridTextColumnEx Width="42*"
@@ -130,17 +129,7 @@
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
-
-		<StackPanel Grid.Row="4">
-			<Label>Подсказка</Label>
-			<StackPanel Orientation="Horizontal">
-				<Label Style="{StaticResource JunkLegend}">Уцененные препараты</Label>
-				<Label Style="{StaticResource BannedLegend}">Препарат запрещен к заказу</Label>
-				<Label Style="{StaticResource VitallyImportantLegend}">Жизненно важные препараты</Label>
-				<Label Style="{StaticResource LeaderLegend}">Прайс-лист - лидер</Label>
-			</StackPanel>
-		</StackPanel>
-
+		<StackPanel Grid.Row="4" Name="Legend" />
 		<StackPanel Grid.Row="5" Style="{StaticResource FilterPanel}">
 			<Button Style="{StaticResource FilterButton}" Name="ShowHistoryOrders">История</Button>
 			<Button Style="{StaticResource FilterButton}" Name="DeleteOrder">Удалить заказ</Button>

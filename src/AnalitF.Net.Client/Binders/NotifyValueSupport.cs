@@ -84,14 +84,8 @@ namespace AnalitF.Net.Client.Binders
 
 			ConventionManager.SetBinding =
 				(viewModelType, path, property, element, convention, bindableProperty) => {
-					if (IsNotifyValue(property)) {
-						path += ".Value";
-						property = property.PropertyType.GetProperty("Value");
-						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
-					}
-					else {
-						defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
-					}
+					Patch(ref path, ref property);
+					defaultSetBinding(viewModelType, path, property, element, convention, bindableProperty);
 				};
 
 			var basePrepareContext = ActionMessage.PrepareContext;
@@ -134,6 +128,14 @@ namespace AnalitF.Net.Client.Binders
 		{
 			return property.PropertyType.IsGenericType
 				&& property.PropertyType.GetGenericTypeDefinition() == typeof(NotifyValue<>);
+		}
+
+		public static void Patch(ref string path, ref PropertyInfo property)
+		{
+			if (IsNotifyValue(property)) {
+				path += ".Value";
+				property = property.PropertyType.GetProperty("Value");
+			}
 		}
 	}
 }

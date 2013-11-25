@@ -178,6 +178,7 @@ namespace AnalitF.Net.Client.Models
 			DeleteOrdersOlderThan = 35;
 			ConfirmDeleteOldWaybills = true;
 			DeleteWaybillsOlderThan = 150;
+			TrackRejectChangedDays = 90;
 			OpenRejects = true;
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
@@ -190,6 +191,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool CanViewOffersByCatalogName { get; set; }
 		public virtual bool GroupByProduct { get; set; }
 		public virtual bool ShowPriceName { get; set; }
+		public virtual uint TrackRejectChangedDays { get; set; }
 		public virtual int BaseFromCategory { get; set; }
 
 		public virtual decimal OverCountWarningFactor { get; set; }

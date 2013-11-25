@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using NPOI.SS.Formula.Functions;
@@ -35,10 +36,7 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			var baseScreen = Model as BaseScreen;
-			if (baseScreen != null)
-				baseScreen.Shell = Shell;
-
+			Util.SetValue(Model, "Shell", Shell);
 			if (ShowFixed)
 				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else

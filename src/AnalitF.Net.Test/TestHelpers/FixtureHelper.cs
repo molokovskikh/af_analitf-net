@@ -1,17 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Web.UI;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config.Environments;
 using AnalitF.Net.Service.Test;
 using AnalitF.Net.Test.Integration;
 using NHibernate;
+using NHibernate.Linq;
 using Test.Support;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
+	public abstract class ServerFixture
+	{
+		public Service.Config.Config Config;
+
+		public abstract void Execute(ISession session);
+
+		public virtual void Rollback(ISession session)
+		{
+		}
+
+		protected static TestUser User(ISession session)
+		{
+			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+		}
+	}
+
 	public class FixtureHelper : IDisposable
 	{
 		private List<Action> rollbacks = new List<Action>();
@@ -38,7 +57,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					rollbacks.Add(() => Run(fixture, rollback: true));
 			}
 
-			var local = fixture.Local;
+			var local = !(fixture is ServerFixture);
 			ISessionFactory factory;
 			if (local) {
 				if (IntegrationSetup.Factory == null) {

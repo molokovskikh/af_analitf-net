@@ -47,6 +47,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ShipperNameAndAddress { get; set; }
 		public virtual string ConsigneeNameAndAddress { get; set; }
 
+		[Style(Description = "Накладная с забраковкой")]
+		public virtual bool IsRejectChanged { get; set; }
+
 		public virtual IList<WaybillLine> Lines { get; set; }
 
 		[Ignore]

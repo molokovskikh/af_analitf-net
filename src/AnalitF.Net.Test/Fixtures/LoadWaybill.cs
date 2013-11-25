@@ -8,10 +8,8 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class LoadWaybill
+	public class LoadWaybill : ServerFixture
 	{
-		public bool Local = false;
-		public Service.Config.Config Config;
 		public TestDocumentLog Document;
 		public TestDocumentSendLog SendLog;
 		public TestWaybill Waybill;
@@ -21,6 +19,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public LoadWaybill()
 		{
+			createFile = true;
 		}
 
 		public LoadWaybill(bool createFile = true)
@@ -28,15 +27,15 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			this.createFile = createFile;
 		}
 
-		public void Execute(ISession session)
+		public override void Execute(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = User(session);
 			Waybill = DataMother.CreateWaybill(session, user);
 			var log = Waybill.Log;
 			session.Save(Waybill);
 			SendLog = new TestDocumentSendLog(user, log);
 			session.Save(SendLog);
-			if (!createFile)
+			if (createFile)
 				Filename = Waybill.Log.CreateFile(Config.DocsPath, "waybill content");
 		}
 	}

@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="Helpers\MySqlHelper.cs" />
     <Compile Include="Helpers\RequestHelper.cs" />
+    <Compile Include="Models\AnalitfNetData.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\DocumentSendLog.cs" />

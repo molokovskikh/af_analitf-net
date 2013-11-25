@@ -467,6 +467,21 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return Settings.Value.LastUpdate != null; }
 		}
 
+		public void ShowRejectedWaybills()
+		{
+			var rejectStat = statelessSession.Query<WaybillLine>().Where(l => l.IsRejectNew || l.IsRejectCanceled)
+				.GroupBy(l => l.Waybill.Address.Id)
+				.Select(g => new { addressId = g.Key, count = g.Count()})
+				.ToArray();
+			var addressId = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId).FirstOrDefault();
+			CurrentAddress = addresses.First(a => a.Id == addressId);
+
+			var model = new WaybillsViewModel();
+			model.RejectFilter.Value = RejectFilter.Changed;
+			model.Begin.Value = DateTime.Today.AddDays(-Settings.Value.TrackRejectChangedDays);
+			NavigateRoot(model);
+		}
+
 		public void ShowWaybills()
 		{
 			NavigateRoot(new WaybillsViewModel());

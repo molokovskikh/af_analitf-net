@@ -366,7 +366,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void WaitWindow(string title)
 		{
-			var opened = manager.WindowOpened.Timeout(3.Second()).First();
+			var opened = manager.WindowOpened.Timeout(30.Second()).First();
 			opened.Dispatcher.Invoke(() => {
 				Assert.AreEqual(title, opened.Title);
 			});
@@ -487,6 +487,29 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Warn_on_waybill_reject()
+		{
+			Fixture<RejectedWaybill>();
+			Start();
+			AsyncClick("Update");
+
+			WaitWindow("АналитФАРМАЦИЯ");
+			dispatcher.Invoke(() => {
+				Assert.That(activeWindow.AsText(),
+					Is.StringContaining("Обнаружены препараты," +
+						" предписанные к изъятию, в имеющихся у Вас электронных накладных."));
+			});
+			Click("Show");
+
+			var model = (WaybillsViewModel)shell.ActiveItem;
+			var view = (FrameworkElement)model.GetView();
+			dispatcher.Invoke(() => {
+				var waybills = (DataGrid)view.FindName("Waybills");
+				Assert.AreEqual(1, waybills.Items.Count);
+			});
+		}
+
 		private void EditCell(DataGrid grid, int column, int row, string text)
 		{
 			var cell = GetCell(grid, column, row);
@@ -596,7 +619,8 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void InternalClick(string name)
 		{
-			var el = activeWindow.FindName(name);
+			var el = activeWindow.FindName(name)
+				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
 			if (el is SplitButton)
 				InternalClick(((SplitButton)el).Descendants<ButtonBase>().First());
 			else

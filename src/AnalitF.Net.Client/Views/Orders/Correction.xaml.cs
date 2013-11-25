@@ -38,8 +38,10 @@ namespace AnalitF.Net.Client.Views.Orders
 
 			Offers.Items.Clear();
 			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, context: "Correction");
+
 			EditBehavior.Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources);
 		}
 	}
 }

@@ -41,7 +41,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 		public virtual Waybill Waybill { get; set; }
+		public virtual uint? ProductId { get; set; }
 		public virtual string Product { get; set; }
+		public virtual uint? ProducerId { get; set; }
 		public virtual string Producer { get; set; }
 		public virtual string Country { get; set; }
 
@@ -138,6 +140,20 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged("RetailSum");
 				OnPropertyChanged("RetailCost");
 			}
+		}
+
+		public virtual uint? RejectId { get; set; }
+
+		[Style(Description = "Новая разбракованя позиция")]
+		public virtual bool IsRejectCanceled { get; set; }
+
+		[Style(Description = "Новая забракованая позиция")]
+		public virtual bool IsRejectNew { get; set; }
+
+		[Style(Description = "Забракованая позиция")]
+		public virtual bool IsReject
+		{
+			get { return !IsRejectNew && RejectId != null; }
 		}
 
 		[Style("Nds", Description = "НДС: не установлен для ЖНВЛС")]

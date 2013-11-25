@@ -169,6 +169,17 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
+		public void Bind_notify_enum()
+		{
+			var box = new ComboBox {
+				Name = "NotifyEnum"
+			};
+			Bind(box);
+
+			Assert.AreEqual(2, box.Items.Count);
+		}
+
+		[Test]
 		public void Set_text_alignment()
 		{
 			var grid = new DataGrid {
@@ -228,6 +239,8 @@ namespace AnalitF.Net.Test.Integration
 			public NotifyValue<string> CurrentItem { get; set; }
 
 			public TestEnum Enum { get; set; }
+
+			public NotifyValue<TestEnum> NotifyEnum { get; set; }
 
 			public List<Item> ItemItems { get; set; }
 

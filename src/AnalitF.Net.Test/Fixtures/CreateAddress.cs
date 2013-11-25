@@ -5,8 +5,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class CreateAddress
 	{
-		public bool Local = true;
-
 		public void Execute(ISession session)
 		{
 			var address = new Address("Тестовый адрес");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate;
 using NHibernate.Linq;
 using Test.Support;
@@ -7,13 +8,11 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class Reject
+	public class Reject : ServerFixture
 	{
-		public bool Local = false;
 		public TestDocumentLog Document;
-		public Service.Config.Config Config;
 
-		public void Execute(ISession session)
+		public override void Execute(ISession session)
 		{
 			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;

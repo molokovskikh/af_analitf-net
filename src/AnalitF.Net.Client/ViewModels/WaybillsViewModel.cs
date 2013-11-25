@@ -17,6 +17,12 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public enum RejectFilter
+	{
+		[Description("Все")] All,
+		[Description("Измененные накладные")] Changed
+	}
+
 	public class WaybillsViewModel : BaseScreen
 	{
 		public WaybillsViewModel()
@@ -29,6 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
 			IsFilterByWriteTime = new NotifyValue<bool>();
+			RejectFilter = new NotifyValue<RejectFilter>();
 			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
 		}
 
@@ -43,6 +50,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsFilterByDocumentDate { get; set; }
 		public NotifyValue<bool> IsFilterByWriteTime { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
+		public NotifyValue<RejectFilter> RejectFilter { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -61,6 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var subscription = Begin.Changed()
 				.Merge(End.Changed())
 				.Merge(IsFilterByDocumentDate.Changed())
+				.Merge(RejectFilter.Changed())
 				.Merge(supplierSelectionChanged)
 				.Subscribe(_ => Update());
 			OnCloseDisposable.Add(subscription);
@@ -147,6 +156,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			else {
 				query = query.Where(w => w.WriteTime >= begin && w.WriteTime <= end);
+			}
+
+			if (RejectFilter.Value == ViewModels.RejectFilter.Changed) {
+				query = query.Where(w => w.IsRejectChanged);
 			}
 
 			var ids = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
