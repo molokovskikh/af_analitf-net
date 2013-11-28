@@ -5,7 +5,11 @@ using System.Reactive.Concurrency;
 using System.Windows;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.UI;
+using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Inflector;
+using NHibernate.Mapping;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Config.Initializers
@@ -15,6 +19,14 @@ namespace AnalitF.Net.Client.Config.Initializers
 		public void Init()
 		{
 			MessageBus.Current.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
+
+			ConventionManager.Singularize = s => {
+				if (s == "Taxes")
+					return "Tax";
+				if (s == "Value")
+					return s;
+				return s.Singularize() ?? s;
+			};
 			//нужно затем что бы можно было делать модели без суффикса ViewModel
 			//достаточно что бы они лежали в пространстве имен ViewModels
 			ViewLocator.NameTransformer.AddRule(
@@ -29,7 +41,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				+ @"(?!<suffix>)$",
 				"${nsbefore}Views.${nsafter}${basename}");
 
-			ContentElementBinder.Register();
+			Conventions.Register();
 			SaneCheckboxEditor.Register();
 			NotifyValueSupport.Register();
 
@@ -49,8 +61,14 @@ namespace AnalitF.Net.Client.Config.Initializers
 			ViewModelBinder.Bind = (viewModel, view, context) => {
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
-				CommandBinder.Bind(viewModel, view, context);
+				Commands.Bind(viewModel, view, context);
 				FocusBehavior.Bind(viewModel, view, context);
+				var baseScreen = viewModel as BaseScreen;
+				if (baseScreen != null) {
+					var disposable = baseScreen.ResultsSink
+						.Subscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()));
+					baseScreen.OnCloseDisposable.Add(disposable);
+				}
 			};
 
 			ViewModelBinder.BindProperties = (elements, type) => {

@@ -21,13 +21,13 @@
 				binders:SearchBinder.Grid="Mnns" />
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource FilterCheckBox}">Отображать весь каталог</CheckBox>
 		</StackPanel>
-		<c:DataGrid Grid.Row="1" x:Name="Mnns"
+		<c:DataGrid2 Grid.Row="1" x:Name="Mnns"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					Width="*" Header="МНН" Binding="{Binding Name}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 	</Grid>
 </UserControl>

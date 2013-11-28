@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (!Equals(_dir, value)) {
 					_dir = value;
-					OnPropertyChanged("Dir");
+					OnPropertyChanged();
 				}
 			}
 		}

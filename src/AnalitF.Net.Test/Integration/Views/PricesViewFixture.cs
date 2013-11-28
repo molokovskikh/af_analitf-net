@@ -17,6 +17,7 @@ using Common.Tools;
 using Common.Tools.Calendar;
 using NUnit.Framework;
 using Action = System.Action;
+using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {

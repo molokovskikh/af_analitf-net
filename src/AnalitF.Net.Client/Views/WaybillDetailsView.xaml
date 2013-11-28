@@ -97,7 +97,7 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Lines" IsReadOnly="False">
+		<c:DataGrid2 Grid.Row="2" x:Name="Lines" IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="180*" Header="Наименование"
 					Binding="{Binding Product}"
@@ -182,7 +182,7 @@
 					IsReadOnly="True"
 					TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 		<StackPanel Grid.Row="3" Name="Legend"></StackPanel>
 	</Grid>
 </UserControl>

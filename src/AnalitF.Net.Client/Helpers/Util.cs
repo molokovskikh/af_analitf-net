@@ -10,7 +10,13 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static bool IsNumeric(object o)
 		{
-			return o is int || o is uint || o is decimal || o is double || o is float;
+			return o is short || o is ushort
+				|| o is int || o is uint
+				|| o is long || o is ulong
+				|| o is byte
+				|| o is decimal
+				|| o is double
+				|| o is float;
 		}
 
 		public static bool IsDateTime(Type type)
@@ -22,8 +28,10 @@ namespace AnalitF.Net.Client.Helpers
 		public static bool IsNumeric(Type type)
 		{
 			type = Nullable.GetUnderlyingType(type) ?? type;
-			return type == typeof(int)
-				|| type == typeof(uint)
+			return type == typeof(short) || type == typeof(ushort)
+				|| type == typeof(int) || type == typeof(uint)
+				|| type == typeof(long) || type == typeof(ulong)
+				|| type == typeof(byte)
 				|| type == typeof(decimal)
 				|| type == typeof(double)
 				|| type == typeof(float);
@@ -94,6 +102,19 @@ namespace AnalitF.Net.Client.Helpers
 						field.SetValue(current, value);
 				}
 			}
+		}
+
+		public static string HumanizeSize(long size, string zero = "")
+		{
+			if (size == 0)
+				return "-";
+			if (size < 1024)
+				return size + " Б";
+			if (size < 1048576)
+				return (size / 1024f).ToString("#.##") + " КБ";
+			if (size < 1073741824)
+				return (size / 1048576f).ToString("#.##") + " МБ";
+			return (size / 1073741824f).ToString("#.##") + " ГБ";
 		}
 	}
 }

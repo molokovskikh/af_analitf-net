@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows;
@@ -37,11 +38,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected bool updateOnActivate = true;
 
-		/// <summary>
-		/// Флаг отвечает за обновление данных на форме после активации
-		/// если форма отображает только статичные данные, которые не могут быть отредактированы на других формах
-		/// тогда нужно установить этот флаг что бы избежать лишних обновлений
-		/// </summary>
+		//Флаг отвечает за обновление данных на форме после активации
+		//если форма отображает только статичные данные, которые не могут быть отредактированы на других формах
+		//тогда нужно установить этот флаг что бы избежать лишних обновлений
 		protected bool Readonly;
 		protected ILog log;
 		protected ExcelExporter excelExporter;
@@ -50,7 +49,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected Address Address;
 		protected IMessageBus Bus = RxApp.MessageBus;
-		protected CompositeDisposable OnCloseDisposable = new CompositeDisposable();
+		//освобождает ресурсы при закрытии формы
+		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();
+		//сигнал который подается при закрытии формы, может быть использован для отмены операций который выполняются в фоне
+		//например web запросов
+		public CancellationDisposable CloseCancellation = new CancellationDisposable();
 
 		public static bool UnitTesting;
 		public static IScheduler TestSchuduler;
@@ -59,14 +62,19 @@ namespace AnalitF.Net.Client.ViewModels
 		public Extentions.WindowManager Manager { get; private set; }
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 
-		public AutoResetEvent Closed = new AutoResetEvent(false);
 		public ShellViewModel Shell;
+		//источник результатов обработки данных которая производится в фоне
+		//в тестах на него можно подписаться и проверить что были обработаны нужные результаты
+		//в приложении его обрабатывает Coroutine см Config/Initializers/Caliburn
+		public Subject<IResult> ResultsSink = new Subject<IResult>();
 
 		public BaseScreen()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
 			log = log4net.LogManager.GetLogger(GetType());
 			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			OnCloseDisposable.Add(CloseCancellation);
+			OnCloseDisposable.Add(ResultsSink);
 
 			if (!UnitTesting) {
 				var factory = AppBootstrapper.NHibernate.Factory;
@@ -114,9 +122,7 @@ namespace AnalitF.Net.Client.ViewModels
 				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
 				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
 				OnCloseDisposable.Add(Bus.Listen<string>("db")
-					.Where(m => {
-						return m == "Changed";
-					})
+					.Where(m => m == "Changed")
 					.Subscribe(_ => updateOnActivate = true));
 			}
 
@@ -297,12 +303,6 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			currentReject.ChangedValue()
 				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
-		}
-
-		public override void TryClose()
-		{
-			Closed.Set();
-			base.TryClose();
 		}
 
 		public override string ToString()

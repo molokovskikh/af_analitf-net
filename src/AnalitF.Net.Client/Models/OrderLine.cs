@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				comment = value;
-				OnPropertyChanged("Comment");
+				OnPropertyChanged();
 			}
 		}
 
@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				count = value;
-				OnPropertyChanged("Count");
+				OnPropertyChanged();
 				OnPropertyChanged("Sum");
 			}
 		}

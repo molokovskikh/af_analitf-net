@@ -46,6 +46,7 @@ using Label = System.Windows.Controls.Label;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
 using WindowState = System.Windows.WindowState;
+using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {

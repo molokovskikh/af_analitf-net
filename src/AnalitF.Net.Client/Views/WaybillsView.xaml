@@ -42,7 +42,7 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Waybills" Grid.Row="1">
+		<c:DataGrid2 x:Name="Waybills" Grid.Row="1">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="64*" Header="№"
 					Binding="{Binding Id}"
@@ -64,7 +64,7 @@
 					Binding="{Binding RetailSum}"
 					TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<StackPanel Grid.Row="2" Name="Legend" />
 	</Grid>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Dynamic;
+using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 
@@ -106,6 +107,17 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var v = new NotifyValue<string>("123", () => { throw new NotImplementedException(); });
 			Assert.AreEqual("123", v.Value);
+		}
+
+		[Test]
+		public void Has_value()
+		{
+			var v = new NotifyValue<string>();
+			var changes = v.CollectChanges();
+			Assert.IsFalse(v.HasValue);
+			v.Value = "1";
+			Assert.IsTrue(v.HasValue);
+			Assert.AreEqual(1, changes.Count(c => c.PropertyName == "HasValue"));
 		}
 	}
 }

@@ -32,7 +32,7 @@
 			<Button Name="ClearMarks" Style="{StaticResource FilterElement}">Снять все пометки</Button>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Rejects">
+		<c:DataGrid2 Grid.Row="1" x:Name="Rejects">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="189*" Header="Товар"
 					Binding="{Binding Product}" />
@@ -47,7 +47,7 @@
 				<DataGridTextColumn Width="135*" Header="Причина"
 					Binding="{Binding CauseRejects}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<Grid Grid.Row="2">
 			<Grid.RowDefinitions>

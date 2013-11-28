@@ -32,7 +32,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Assert.That(column.Visibility, Is.EqualTo(Visibility.Collapsed));
 			model.AddressSelector.All.Value = true;
 			//биндинг почемуто не работает
-			((Client.Controls.DataGrid)grid).ShowAddressColumn = true;
+			((Client.Controls.DataGrid2)grid).ShowAddressColumn = true;
 			Assert.That(column.Visibility, Is.EqualTo(Visibility.Visible));
 		}
 	}

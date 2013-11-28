@@ -15,6 +15,7 @@ using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
+using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {

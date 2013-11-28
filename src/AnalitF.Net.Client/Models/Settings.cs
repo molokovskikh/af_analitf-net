@@ -242,7 +242,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				groupWaybillBySupplier = value;
-				OnPropertyChanged("GroupWaybillsBySupplier");
+				OnPropertyChanged();
 			}
 		}
 
@@ -256,7 +256,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				proxyType = value;
-				OnPropertyChanged("ProxyType");
+				OnPropertyChanged();
 				OnPropertyChanged("CanConfigureProxy");
 			}
 		}

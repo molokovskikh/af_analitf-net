@@ -86,7 +86,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
+			IsDataLoaded = new NotifyValue<bool>(
+				() => Settings.Value != null && Settings.Value.LastUpdate != null,
+				Settings);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
+			NewMailsCount = new NotifyValue<int>();
 
 			var factory = AppBootstrapper.NHibernate.Factory;
 			session = factory.OpenSession();
@@ -149,6 +153,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }
+		public NotifyValue<bool> IsDataLoaded { get; set; }
+		public NotifyValue<int> NewMailsCount { get; set; }
 
 		public string Version { get; set; }
 
@@ -283,6 +289,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//сбросит его
 			var addressId = CurrentAddress == null ? 0u : CurrentAddress.Id;
 
+			NewMailsCount.Value = session.Query<Mail>().Count(m => m.IsNew);
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -492,6 +499,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(defaultItem);
 		}
 
+		public void ShowMails()
+		{
+			NavigateRoot(new Mails());
+		}
+
 		public bool CanMicroUpdate
 		{
 			get { return Settings.Value.LastUpdate != null; }
@@ -615,12 +627,8 @@ namespace AnalitF.Net.Client.ViewModels
 				GenericErrorMessage = command.ErrorMessage
 			};
 			command.Config = Config;
-			command.Credentials = Settings.Value.GetCredential();
-			command.Proxy = Settings.Value.GetProxy();
-			if (Settings.Value.UseRas) {
-				command.RasConnection = Settings.Value.RasConnection;
-			}
 			command.Progress = progress;
+			command.Configure(Settings.Value);
 
 			if(UnitTesting)
 				command = OnCommandExecuting(command);

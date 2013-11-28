@@ -19,6 +19,7 @@ using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
+using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			var item = view.Descendants<ContentControl>().First(c => c.Name == "OrderWarning");
 			Assert.That(item.Content, Is.InstanceOf<InlineEditWarningView>());
-			Assert.That(XamlExtentions.AsText(item), Is.EqualTo("test"));
+			Assert.That(WpfHelper.AsText(item), Is.EqualTo("test"));
 		}
 	}
 }

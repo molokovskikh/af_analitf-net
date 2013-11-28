@@ -31,7 +31,7 @@
 			</TextBlock>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" Grid.Column="0" x:Name="Prices"
+		<c:DataGrid2 Grid.Row="1" Grid.Column="0" x:Name="Prices"
 			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*"
@@ -59,7 +59,7 @@
 				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ"
 					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" />
 

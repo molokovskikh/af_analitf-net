@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -28,8 +29,21 @@ namespace AnalitF.Net.Client.Helpers
 			return Observable.FromEventPattern<PropertyChangedEventArgs>(self, "PropertyChanged");
 		}
 
+		public static IObservable<EventPattern<PropertyChangedEventArgs>> Changed<T>(this NotifyValue<T> self)
+		{
+			return Observable.FromEventPattern<PropertyChangedEventArgs>(self, "PropertyChanged")
+				.Where(e => e.EventArgs.PropertyName == "Value");
+		}
+
+		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> Changed(this INotifyCollectionChanged self)
+		{
+			return Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
+		}
+
 		public static IObservable<EventPattern<ListChangedEventArgs>> Changed<T>(this IList<T> value)
 		{
+			if (value == null)
+				Observable.Empty<ListChangedEventArgs>();
 			return Observable.FromEventPattern<ListChangedEventArgs>(value, "ListChanged");
 		}
 

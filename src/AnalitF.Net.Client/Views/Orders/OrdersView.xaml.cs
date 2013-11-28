@@ -15,12 +15,12 @@ namespace AnalitF.Net.Client.Views
 
 			StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend);
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
-				CommandBinder.InvokeViewModel,
-				CommandBinder.CanInvokeViewModel));
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
 
 			SentOrders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
-				CommandBinder.InvokeViewModel,
-				CommandBinder.CanInvokeViewModel));
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
 		}
 	}
 }

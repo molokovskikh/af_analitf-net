@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.Models
 				if (OrderLine == null) {
 					OrderCount = null;
 				}
-				OnPropertyChanged("OrderLine");
+				OnPropertyChanged();
 			}
 		}
 
@@ -162,7 +162,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				orderCount = value;
-				OnPropertyChanged("OrderCount");
+				OnPropertyChanged();
 			}
 		}
 
@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				prevOrderAvgCost = value;
-				OnPropertyChanged("PrevOrderAvgCost");
+				OnPropertyChanged();
 			}
 		}
 
@@ -189,7 +189,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				prevOrderAvgCount = value;
-				OnPropertyChanged("PrevOrderAvgCount");
+				OnPropertyChanged();
 			}
 		}
 

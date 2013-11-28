@@ -76,7 +76,16 @@ namespace AnalitF.Net.Client.Helpers
 					calc = null;
 
 				this.value = value;
-				OnPropertyChanged("Value");
+				OnPropertyChanged("HasValue");
+				OnPropertyChanged();
+			}
+		}
+
+		public bool HasValue
+		{
+			get
+			{
+				return !Equals(value, default(T));
 			}
 		}
 

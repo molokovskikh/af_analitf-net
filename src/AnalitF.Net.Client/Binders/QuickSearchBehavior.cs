@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Binders
 			//магия что бы обойти ошибку в .net 4.0 см комментарий к CurrentItemStubProperty
 			if (binding != null) {
 				BindingOperations.SetBinding(grid,
-					Controls.DataGrid.CurrentItemStubProperty,
+					Controls.DataGrid2.CurrentItemStubProperty,
 					new Binding {
 						Path = new PropertyPath(binding.Path.Path, binding.Path.PathParameters),
 					});

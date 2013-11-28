@@ -63,8 +63,8 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:DataGrid x:Name="Lines" Grid.Row="0">
-			<c:DataGrid.Resources>
+		<c:DataGrid2 x:Name="Lines" Grid.Row="0">
+			<c:DataGrid2.Resources>
 				<GroupStyle x:Key="OrderGroup">
 					<GroupStyle.HeaderTemplate>
 						<DataTemplate>
@@ -113,7 +113,7 @@
 						</ItemsPanelTemplate>
 					</GroupStyle.Panel>
 				</GroupStyle>
-			</c:DataGrid.Resources>
+			</c:DataGrid2.Resources>
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="330*"
 					Header="Наименование"
@@ -134,7 +134,7 @@
 					Header="Новая цена"
 					Binding="{Binding NewCost}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<StackPanel Grid.Row="1">
 			<Label Padding="2, 2, 2, 0" FontWeight="SemiBold" FontSize="14">Причина</Label>
@@ -148,7 +148,7 @@
 			Width="5"
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />
 
-		<c:DataGrid Grid.Row="3" x:Name="Offers" CanUserSortColumns="False"
+		<c:DataGrid2 Grid.Row="3" x:Name="Offers" CanUserSortColumns="False"
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="196*"
@@ -204,7 +204,7 @@
 						CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 						Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="3"
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />

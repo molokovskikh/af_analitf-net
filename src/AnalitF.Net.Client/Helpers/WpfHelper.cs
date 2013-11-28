@@ -11,7 +11,7 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public static class XamlExtentions
+	public static class WpfHelper
 	{
 		private class PropertyLogger
 		{
@@ -209,6 +209,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		/// <summary>
 		/// предназначен для отладки, протоколирует события
+		/// пример WpfHelper.TraceEvent(typeof(UIElement), UIElement.GotFocusEvent, true);
 		/// </summary>
 		public static void TraceEvent(Type type, RoutedEvent @event, bool trace = false)
 		{

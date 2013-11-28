@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.Helpers
 			return cell;
 		}
 
-		public static void CalculateColumnWidth(Controls.DataGrid dataGrid, string template, string header)
+		public static void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
 		{
 			var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(header));
 			if (column == null)
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Helpers
 			column.Width = new DataGridLength(text.Width, DataGridLengthUnitType.Pixel);
 		}
 
-		public static void CalculateColumnWidths(Controls.DataGrid grid)
+		public static void CalculateColumnWidths(DataGrid grid)
 		{
 			CalculateColumnWidth(grid, "00.00", "Наценка поставщика");
 			CalculateColumnWidth(grid, "000.00", "Цена производителя");

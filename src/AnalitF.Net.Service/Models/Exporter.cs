@@ -11,6 +11,7 @@ using Common.Models;
 using Common.Models.Helpers;
 using Common.Models.Repositories;
 using Common.MySql;
+using Common.NHibernate;
 using Common.Tools;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
@@ -32,6 +33,13 @@ namespace AnalitF.Net.Service.Models
 		public UpdateData(string archiveFileName)
 		{
 			ArchiveFileName = archiveFileName;
+		}
+
+		public static UpdateData FromFile(string archivename, string filename)
+		{
+			return new UpdateData(archivename) {
+				LocalFileName = filename
+			};
 		}
 	}
 
@@ -76,6 +84,8 @@ namespace AnalitF.Net.Service.Models
 		public void Export(List<UpdateData> result)
 		{
 			data = data ?? new AnalitfNetData(user);
+			data.LastPendingUpdateAt = DateTime.Now;
+			session.Save(data);
 
 			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
 				"drop temporary table if exists usersettings.activeprices;" +
@@ -353,8 +363,73 @@ where PublicationDate < curdate() + interval 1 day
 				});
 			}
 
+			ExportMails(result);
 			ExportDocs(result);
 			ExportOrders(result);
+		}
+
+		private void ExportMails(List<UpdateData> result)
+		{
+			session.CreateSQLQuery("delete from Logs.PendingMailLogs where UserId = :userId")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
+
+			var mails = session.CreateSQLQuery(@"
+select m.Id,
+	if(m.IsVIPMail and (m.SupplierEmail like '%@analit.net' or m.SupplierEmail like '%.analit.net'), 1, 0)
+from documents.Mails m
+	join Logs.MailSendLogs ms on ms.MailId = m.Id
+	join Customers.Suppliers s on s.Id = m.SupplierId
+where
+	m.LogTime > curdate() - interval 30 day
+	and ms.UserId = :userId
+	and ms.Committed = 0
+	and m.Deleted = 0
+order by m.LogTime desc
+limit 200;")
+				.SetParameter("userId", user.Id)
+				.List<object[]>();
+			var ids = mails.Select(m => Convert.ToUInt32(m[0])).ToArray();
+			var loadMaiIds = mails.Where(m => Convert.ToBoolean(m[1])).Select(m => Convert.ToUInt32(m[0])).ToArray();
+
+			if (ids.Count() == 0)
+				return;
+
+			var pendingMails = session.Query<MailSendLog>().Where(l => ids.Contains(l.MailId)).ToArray()
+				.Select(l => new PendingMailLog(l));
+
+			var sql = String.Format(@"
+select m.Id,
+	convert_tz(m.LogTime, @@session.time_zone,'+00:00') as SentAt,
+	m.IsVIPMail as IsSpecial,
+	m.SupplierEmail as SenderEmail,
+	s.Name as Sender,
+	m.Subject,
+	m.Body,
+	1 as IsNew
+from Documents.Mails m
+	join customers.Suppliers s on s.Id = m.SupplierId
+where m.Id in ({0})", ids.Implode());
+
+			Export(result, sql, "mails", truncate: false);
+
+			sql = String.Format(@"
+select a.Id,
+	a.Filename as Name,
+	a.Size,
+	a.MailId,
+	if(m.IsVIPMail and (m.SupplierEmail like '%@analit.net' or m.SupplierEmail like '%.analit.net'), 1, 0) as IsDownloaded
+from Documents.Attachments a
+	join Documents.Mails m on m.Id = a.MailId
+where a.MailId in ({0})", ids.Implode());
+
+			Export(result, sql, "attachments", truncate: false);
+
+			IEnumerable<Attachment> loadable = session.Query<Attachment>()
+				.Where(a => loadMaiIds.Contains(a.MailId))
+				.ToArray();
+			result.AddRange(loadable.Select(attachment => UpdateData.FromFile(attachment.GetArchiveName(), attachment.GetFilename(Config))));
+			session.SaveEach(pendingMails);
 		}
 
 		private void CachedExport(List<UpdateData> result, string sql, string tag)
@@ -611,9 +686,8 @@ group by dh.Id")
 					l.FileDelivered ? l.Document.Filename : null,
 				}));
 
-			delivered
-				.Select(l => new PendingDocLog(l))
-				.Each(p => session.Save(p));
+			var pending = delivered.Select(l => new PendingDocLog(l));
+			session.SaveEach(pending);
 		}
 
 		public void Export(List<UpdateData> data, string name, string[] meta, IEnumerable<object[]> exportData, bool truncate = true)
@@ -688,14 +762,17 @@ group by dh.Id")
 				zip.BeginUpdate();
 				foreach (var tuple in files) {
 					var filename = tuple.LocalFileName;
+					//экспоритровать пустые файлы важно тк пустой файл привед к тому что таблица бедет очищена
+					//напимер в случае если последний адрес доставки был отключен
 					if (String.IsNullOrEmpty(filename)) {
 						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
 						zip.Add(content, tuple.ArchiveFileName);
 					}
-					else {
-						//экспоритровать пусты файлы важно тк пустой файл привед к тому что таблица бедет очищена
-						//напимер в случае если последний адрес доставки был отключен
+					else if (File.Exists(filename)) {
 						zip.Add(filename, tuple.ArchiveFileName);
+					}
+					else {
+						log.WarnFormat("Не найден файл для экспорта {0}", filename);
 					}
 				}
 				zip.CommitUpdate();

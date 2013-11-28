@@ -56,6 +56,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					r.ControlMinReq = true;
 				});
 
+				new MailWithAttachment {
+					Config = Config
+				}.Execute(session);
+
 				session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
 					+ " values(:publicationDate, :header, :body, :destinationType)")
 					.SetParameter("publicationDate", DateTime.Now)

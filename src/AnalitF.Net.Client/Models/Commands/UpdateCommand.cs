@@ -24,16 +24,19 @@ namespace AnalitF.Net.Client.Models.Commands
 {
 	public class ResultDir
 	{
+		private static string[] autoopen = {
+			"rejects", "waybills", "attachments"
+		};
+
 		public ResultDir(string name, Settings settings, Config.Config confg)
 		{
 			Name = name;
 			Src = Path.Combine(confg.UpdateTmpDir, Name);
 			Dst = settings.MapPath(name) ?? Path.Combine(confg.RootDir, name);
 			if (name.Match("waybills")) {
-				Open = settings.OpenWaybills;
 				GroupBySupplier = settings.GroupWaybillsBySupplier;
 			}
-			if (name.Match("rejects")) {
+			if (autoopen.Any(d => d.Match(name))) {
 				Open = settings.OpenRejects;
 			}
 		}
@@ -188,6 +191,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				new ResultDir("waybills", settings, Config),
 				new ResultDir("docs", settings, Config),
 				new ResultDir("rejects", settings, Config),
+				new ResultDir("attachments", settings, Config),
 			};
 
 			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
@@ -197,11 +201,27 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			resultDirs.Each(Move);
 			OpenResultFiles(resultDirs);
+			ProcessAttachments(resultDirs);
 
 			Directory.Delete(Config.UpdateTmpDir, true);
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private void ProcessAttachments(ResultDir[] resultDirs)
+		{
+			var dir = resultDirs.FirstOrDefault(d => d.Name.Match("attachments"));
+			if (dir == null)
+				return;
+			foreach (var filename in dir.ResultFiles) {
+				var id = SafeConvert.ToUInt32(Path.GetFileNameWithoutExtension(filename));
+				var attachment =  Session.Get<Attachment>(id);
+				if (attachment == null)
+					continue;
+				attachment.LocalFilename = filename;
+				Session.Save(attachment);
+			}
 		}
 
 		public bool CalculateRejects(Settings settings)

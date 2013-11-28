@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.MySql;
 using Common.Tools;
@@ -107,7 +108,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 			});
 			mapper.Class<Waybill>(m => {
-
 				m.Bag(o => o.Lines, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
@@ -139,6 +139,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
+				});
+			});
+			mapper.Class<Mail>(m => {
+				m.Bag(o => o.Attachments, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
 			});
 
@@ -174,7 +179,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;
-			var types = assembly.GetTypes().Where(t => !t.IsAbstract && t.GetProperty("Id") != null
+			var types = assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
 				|| t == typeof(MinOrderSumRule));
 			var mapping = mapper.CompileMappingFor(types);
 
@@ -235,18 +240,16 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 		private static object GetDefaultValue(PropertyInfo propertyInfo)
 		{
-			var instance = Activator.CreateInstance(propertyInfo.DeclaringType);
+			var instance = Activator.CreateInstance(propertyInfo.ReflectedType);
 			var defaultValue = propertyInfo.GetValue(instance, null);
 			if (defaultValue is bool)
 				return Convert.ToInt32(defaultValue);
 			if (defaultValue is Enum)
 				return Convert.ToInt32(defaultValue);
-			if (defaultValue is int || defaultValue is uint || defaultValue is UInt64)
-				return defaultValue.ToString();
 			if (defaultValue is DateTime)
 				return "'" + ((DateTime)defaultValue).ToString(MySqlConsts.MySQLDateFormat) + "'";
-			if (defaultValue is decimal)
-				return ((decimal)defaultValue).ToString(CultureInfo.InvariantCulture);
+			if (Util.IsNumeric(defaultValue))
+				return ((IFormattable)defaultValue).ToString(null, CultureInfo.InvariantCulture);
 			throw new Exception(propertyInfo.PropertyType.ToString());
 		}
 

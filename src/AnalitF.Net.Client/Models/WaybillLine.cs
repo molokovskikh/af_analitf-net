@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				print = value;
-				OnPropertyChanged("Print");
+				OnPropertyChanged();
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				_maxRetailMarkup = value;
-				OnPropertyChanged("MaxRetailMarkup");
+				OnPropertyChanged();
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace AnalitF.Net.Client.Models
 				RecalculateMarkups();
 				Waybill.CalculateRetailSum();
 				OnPropertyChanged("RetailSum");
-				OnPropertyChanged("RetailCost");
+				OnPropertyChanged();
 			}
 		}
 

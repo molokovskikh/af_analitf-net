@@ -31,7 +31,7 @@
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected.Value}">
-				<c:DataGrid x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
+				<c:DataGrid2 x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
@@ -62,10 +62,10 @@
 							TextAlignment="Right"
 							IsReadOnly="True" />
 					</DataGrid.Columns>
-				</c:DataGrid>
+				</c:DataGrid2>
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected.Value}">
-				<c:DataGrid x:Name="SentOrders" CanUserDeleteRows="True"
+				<c:DataGrid2 x:Name="SentOrders" CanUserDeleteRows="True"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
@@ -89,7 +89,7 @@
 							TextAlignment="Right"
 							MinWidth="5" />
 					</DataGrid.Columns>
-				</c:DataGrid>
+				</c:DataGrid2>
 			</TabItem>
 		</TabControl>
 

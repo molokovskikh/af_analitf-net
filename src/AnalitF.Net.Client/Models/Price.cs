@@ -189,7 +189,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				order = value;
-				OnPropertyChanged("Order");
+				OnPropertyChanged();
 			}
 		}
 

@@ -23,7 +23,7 @@
 			</CheckBox>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Items"
+		<c:DataGrid2 Grid.Row="1" x:Name="Items"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
@@ -37,7 +37,7 @@
 					Binding="{Binding Form}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
 		<Parts:CatalogPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"

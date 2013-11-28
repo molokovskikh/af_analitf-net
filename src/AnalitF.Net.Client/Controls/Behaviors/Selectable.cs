@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		private void Update()
 		{
-			var grid = AssociatedObject.VisualParents<DataGrid>().FirstOrDefault();
+			var grid = AssociatedObject.VisualParents<DataGrid2>().FirstOrDefault();
 			var cell = AssociatedObject.Parents<DataGridColumnHeader>().FirstOrDefault();
 			if (cell == null)
 				return;

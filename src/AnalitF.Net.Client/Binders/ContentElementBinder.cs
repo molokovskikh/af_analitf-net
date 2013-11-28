@@ -1,27 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Interactivity;
-using AnalitF.Net.Client.Controls;
-using AnalitF.Net.Client.Controls.Behaviors;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
-using Common.Tools;
-using Inflector;
-using NHibernate.Bytecode.Lightweight;
-using NHibernate.Mapping;
-using ReactiveUI;
-using Xceed.Wpf.Toolkit;
-using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -58,121 +42,6 @@ namespace AnalitF.Net.Client.Binders
 		{
 			var passwordBox = sender as PasswordBox;
 			SetPassword(passwordBox, passwordBox.Password);
-		}
-
-		public static void Register()
-		{
-			ConventionManager.Singularize = s => {
-				if (s == "Taxes")
-					return "Tax";
-				if (s == "Value")
-					return s;
-				return s.Singularize() ?? s;
-			};
-			ConventionManager.AddElementConvention<SplitButton>(SplitButton.ContentProperty, "DataContext", "Click");
-			ConventionManager.AddElementConvention<Run>(Run.TextProperty, "Text", "DataContextChanged");
-			ConventionManager.AddElementConvention<IntegerUpDown>(IntegerUpDown.ValueProperty, "Value", "ValueChanged");
-			ConventionManager.AddElementConvention<FlowDocumentScrollViewer>(FlowDocumentScrollViewer.DocumentProperty, "Document ", "DataContextChanged");
-			ConventionManager.AddElementConvention<DocumentViewerBase>(DocumentViewerBase.DocumentProperty, "Document ", "DataContextChanged");
-			ConventionManager.AddElementConvention<PasswordBox>(PasswordProperty, "Password", "PasswordChanged")
-				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					((PasswordBox)element).FontFamily = SystemFonts.MessageFontFamily;
-					return ConventionManager.SetBindingWithoutBindingOverwrite(viewModelType, path, property, element, convention, convention.GetBindableProperty(element));
-				};
-			ConventionManager.AddElementConvention<MultiSelector>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
-				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					var parentApplied = ConventionManager.GetElementConvention(typeof(Selector))
-						.ApplyBinding(viewModelType, path, property, element, convention);
-					var index = path.LastIndexOf('.');
-					index = index == -1 ? 0 : index + 1;
-					var baseName = path.Substring(index);
-					var propertyInfo = viewModelType.GetPropertyCaseInsensitive("Selected" + baseName);
-
-					if (propertyInfo == null || !typeof(IList).IsAssignableFrom(propertyInfo.PropertyType))
-						return parentApplied;
-
-					var target = (IList)propertyInfo.GetValue(element.DataContext, null);
-					CollectionHelper.Bind(((MultiSelector)element).SelectedItems, target);
-
-					return true;
-				};
-			ConventionManager.AddElementConvention<ComboBox>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
-				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					NotifyValueSupport.Patch(ref path, ref property);
-					if (property.PropertyType.IsEnum) {
-						if (NotBindedAndNull(element, Selector.ItemsSourceProperty)
-							&& !ConventionManager.HasBinding(element, Selector.SelectedItemProperty)) {
-
-							var items = DescriptionHelper.GetDescription(property.PropertyType);
-							element.SetValue(Selector.DisplayMemberPathProperty, "Name");
-							element.SetValue(Selector.ItemsSourceProperty, items);
-
-							var binding = new Binding(path);
-							binding.Converter = new ComboBoxSelectedItemConverter();
-							binding.ConverterParameter = items;
-							BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
-						}
-					}
-					else {
-						var fallback = ConventionManager.GetElementConvention(typeof(Selector));
-						if (fallback != null) {
-							return fallback.ApplyBinding(viewModelType, path, property, element, fallback);
-						}
-					}
-					return true;
-				};
-			ConventionManager.AddElementConvention<DataGrid>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
-				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					if (((DataGrid)element).Columns.Count > 1)
-						Interaction.GetBehaviors(element).Add(new Persistable());
-
-					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
-					if (fallback != null) {
-						var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
-						if (result
-							&& property.PropertyType.IsGenericType
-							&& typeof(IList).IsAssignableFrom(property.PropertyType)) {
-							var columns = ((DataGrid)element).Columns.OfType<DataGridTextColumnEx>();
-							foreach (var column in columns) {
-								if (column.Binding is Binding) {
-									var columnPath = ((Binding)column.Binding).Path.Path;
-									var type = property.PropertyType.GetGenericArguments()[0];
-									var columnProperty = Util.GetProperty(type, columnPath);
-									if (columnProperty == null)
-										continue;
-									var columnType = columnProperty.PropertyType;
-									if (Util.IsNumeric(columnType)) {
-										column.TextAlignment = TextAlignment.Right;
-									}
-									if (Util.IsDateTime(columnType)) {
-										column.TextAlignment = TextAlignment.Center;
-									}
-								}
-							}
-						}
-						return result;
-					}
-					return false;
-				};
-		}
-
-		public class ComboBoxSelectedItemConverter : IValueConverter
-		{
-			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
-			}
-
-			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((ValueDescription)value).Value;
-			}
-		}
-
-		private static bool NotBindedAndNull(FrameworkElement element, DependencyProperty property)
-		{
-			return !ConventionManager.HasBinding(element, property)
-				&& element.GetValue(property) == null;
 		}
 
 		public static void Bind(object viewModel, DependencyObject view, object context)

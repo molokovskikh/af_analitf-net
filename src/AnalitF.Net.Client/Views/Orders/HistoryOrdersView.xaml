@@ -21,7 +21,7 @@
 			<Label Name="Catalog_Form" FontWeight="Bold"></Label>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Lines" CanUserSortColumns="False" Grid.Row="1">
+		<c:DataGrid2 x:Name="Lines" CanUserSortColumns="False" Grid.Row="1">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="149*" Header="Производитель" Binding="{Binding Producer}"></c:DataGridTextColumnEx>
 				<c:DataGridTextColumnEx Width="109*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}"></c:DataGridTextColumnEx>
@@ -31,7 +31,7 @@
 				<c:DataGridTextColumnEx Width="57*" Header="Заказ" Binding="{Binding Count}" TextAlignment="Right"></c:DataGridTextColumnEx>
 				<c:DataGridTextColumnEx Width="82*" Header="Цена" Binding="{Binding Cost}" TextAlignment="Right"></c:DataGridTextColumnEx>
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<StackPanel Grid.Row="2" Orientation="Horizontal">
 			<Button Name="TryClose">Закрыть</Button>

@@ -53,7 +53,7 @@
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
 		</StackPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="2"
+		<c:DataGrid2 x:Name="Offers" Grid.Row="2"
 			CanUserSortColumns="False"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
@@ -116,7 +116,7 @@
 					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
@@ -146,7 +146,7 @@
 				</Label>
 			</StackPanel>
 
-			<c:DataGrid x:Name="HistoryOrders" CanUserSortColumns="False" Height="90">
+			<c:DataGrid2 x:Name="HistoryOrders" CanUserSortColumns="False" Height="90">
 				<DataGrid.Columns>
 					<c:DataGridTextColumnEx Width="110*" Header="Прайс-лист"
 						Binding="{Binding Order.Price.Name}" />
@@ -161,7 +161,7 @@
 					<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}"
 						TextAlignment="Center" />
 				</DataGrid.Columns>
-			</c:DataGrid>
+			</c:DataGrid2>
 		</DockPanel>
 	</Grid>
 </UserControl>

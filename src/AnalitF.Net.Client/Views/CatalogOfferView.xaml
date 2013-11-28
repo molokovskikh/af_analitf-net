@@ -66,7 +66,7 @@
 			</Grid>
 		</DockPanel>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="1"
+		<c:DataGrid2 x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
@@ -139,7 +139,7 @@
 					</GroupStyle.HeaderTemplate>
 				</GroupStyle>
 			</ItemsControl.GroupStyle>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
@@ -169,7 +169,7 @@
 						<Run Name="CurrentOffer_PrevOrderAvgCount" />
 					</TextBlock>
 				</Label>
-				<c:DataGrid Width="460" x:Name="HistoryOrders">
+				<c:DataGrid2 Width="460" x:Name="HistoryOrders">
 					<DataGrid.Columns>
 						<DataGridTextColumn Width="110*" Header="Прайс-лист"
 							Binding="{Binding Order.Price.Name}" />
@@ -185,7 +185,7 @@
 						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}"
 							TextAlignment="Center" />
 					</DataGrid.Columns>
-				</c:DataGrid>
+				</c:DataGrid2>
 			</DockPanel>
 
 			<TabControl Grid.Column="1">
@@ -204,9 +204,9 @@
 					</Grid>
 				</TabItem>
 				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
-					<c:DataGrid x:Name="MaxProducerCosts">
+					<c:DataGrid2 x:Name="MaxProducerCosts">
 						<FrameworkElement.Style>
-							<Style TargetType="c:DataGrid" BasedOn="{StaticResource {x:Type c:DataGrid}}">
+							<Style TargetType="c:DataGrid2" BasedOn="{StaticResource {x:Type c:DataGrid2}}">
 								<Style.Triggers>
 									<Trigger Property="HasItems" Value="False">
 										<Setter Property="Control.Template">
@@ -230,7 +230,7 @@
 							<c:DataGridTextColumnEx Width="16*" Header="Цена" Binding="{Binding Cost}"
 								TextAlignment="Right" />
 						</DataGrid.Columns>
-					</c:DataGrid>
+					</c:DataGrid2>
 				</TabItem>
 			</TabControl>
 

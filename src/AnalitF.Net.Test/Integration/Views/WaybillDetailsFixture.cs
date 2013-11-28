@@ -4,13 +4,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
 using NUnit.Framework;
-using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
+using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -18,7 +19,7 @@ namespace AnalitF.Net.Test.Integration.Views
 	public class WaybillDetailsFixture
 	{
 		private WaybillDetailsView view;
-		private DataGrid grid;
+		private DataGrid2 grid;
 
 		[SetUp]
 		public void BaseViewFixtureSetup()
@@ -27,7 +28,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			ViewSetup.Setup();
 
 			view = new WaybillDetailsView();
-			grid = (DataGrid)view.FindName("Lines");
+			grid = (DataGrid2)view.FindName("Lines");
 			var size = new Size(1000, 1000);
 			view.Measure(size);
 			view.Arrange(new Rect(size));
@@ -54,7 +55,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var text = "";
 			WpfHelper.WithWindow(w => {
 				view = new WaybillDetailsView();
-				grid = (DataGrid)view.FindName("Lines");
+				grid = (DataGrid2)view.FindName("Lines");
 
 				w.Content = view;
 				var waybill = new Waybill();

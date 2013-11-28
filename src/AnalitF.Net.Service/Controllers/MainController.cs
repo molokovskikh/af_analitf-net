@@ -63,13 +63,18 @@ namespace AnalitF.Net.Service.Controllers
 
 		public HttpResponseMessage Delete()
 		{
-			var data = Session.Get<AnalitfNetData>(CurrentUser.Id) ?? new AnalitfNetData(CurrentUser);
-			data.LastUpdateAt = DateTime.Now;
+			var data = Session.Load<AnalitfNetData>(CurrentUser.Id);
+			data.LastUpdateAt = data.LastPendingUpdateAt.GetValueOrDefault();
 			Session.Save(data);
 
 			Session.CreateSQLQuery(@"
 update Logs.DocumentSendLogs l
 	join Logs.PendingDocLogs p on p.SendLogId = l.Id
+set l.Committed = 1
+where p.UserId = :userId;
+
+update Logs.MailSendLogs l
+	join Logs.PendingMailLogs p on p.SendLogId = l.Id
 set l.Committed = 1
 where p.UserId = :userId;
 

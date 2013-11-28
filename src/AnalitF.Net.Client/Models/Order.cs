@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				linesCount = value;
-				OnPropertyChanged("LinesCount");
+				OnPropertyChanged();
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				sum = value;
-				OnPropertyChanged("Sum");
+				OnPropertyChanged();
 				OnPropertyChanged("IsInvalid");
 			}
 		}
@@ -88,7 +88,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				send = value;
-				OnPropertyChanged("Send");
+				OnPropertyChanged();
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 				frozen = value;
 				ResetStatus();
-				OnPropertyChanged("Frozen");
+				OnPropertyChanged();
 			}
 		}
 

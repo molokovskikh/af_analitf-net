@@ -27,7 +27,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="0">
+		<c:DataGrid2 x:Name="Offers" Grid.Row="0">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название"
 					Binding="{Binding ProductSynonym}" />
@@ -79,7 +79,7 @@
 					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 		<ContentControl x:Name="OrderWarning" Grid.Row="0" />

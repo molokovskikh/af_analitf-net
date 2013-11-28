@@ -12,11 +12,12 @@ namespace AnalitF.Net.Service.Models
 		public AnalitfNetData(User user)
 		{
 			User = user;
-			LastUpdateAt = DateTime.Now;
+			LastPendingUpdateAt = DateTime.Now;
 		}
 
 		public virtual uint Id { get; set; }
 		public virtual User User { get; set; }
-		public virtual DateTime? LastUpdateAt { get; set; }
+		public virtual DateTime LastUpdateAt { get; set; }
+		public virtual DateTime? LastPendingUpdateAt { get; set; }
 	}
 }

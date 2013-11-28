@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 					IsCheckable = true
 				};
 				var binding = new Binding("Visibility") {
-					Converter = new BoolCollapsedConverter(),
+					Converter = new BoolToCollapsedConverter(),
 					Source = column
 				};
 				menuItem.SetBinding(MenuItem.IsCheckedProperty, binding);

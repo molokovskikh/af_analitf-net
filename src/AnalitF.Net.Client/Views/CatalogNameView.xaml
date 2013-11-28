@@ -19,14 +19,14 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:DataGrid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
+		<c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 					Header="Наименование"
 					Binding="{Binding Name}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2"
 			Grid.Column="0" />
@@ -38,14 +38,14 @@
 			ShowsPreview="True"
 			Width="5" />
 
-		<c:DataGrid Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
+		<c:DataGrid2 Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 					Header="Форма выпуска"
 					Binding="{Binding Form}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2" />
 		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2"

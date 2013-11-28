@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Extentions
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return !(((int)value) > 0);
+			return ((int)value) > 0;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Extentions
 		}
 	}
 
-	public class BoolCollapsedConverter : IValueConverter
+	public class BoolToCollapsedConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
@@ -76,6 +76,19 @@ namespace AnalitF.Net.Client.Extentions
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			return ((bool)value) ? Visibility.Visible : Visibility.Collapsed;
+		}
+	}
+
+	public class IntToCollapsedConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return ((int)value) > 0? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

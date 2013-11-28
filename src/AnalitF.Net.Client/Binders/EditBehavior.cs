@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Binders
 		private static TimeSpan commitInterval = TimeSpan.FromMilliseconds(750);
 		public static DispatcherScheduler UIScheduler = DispatcherScheduler.Current;
 
-		public static void Attach(Controls.DataGrid grid)
+		public static void Attach(Controls.DataGrid2 grid)
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
 			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");

@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				personalComment = value;
-				OnPropertyChanged("PersonalComment");
+				OnPropertyChanged();
 			}
 		}
 

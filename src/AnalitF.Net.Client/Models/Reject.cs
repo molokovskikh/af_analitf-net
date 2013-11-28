@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				marked = value;
-				OnPropertyChanged("Marked");
+				OnPropertyChanged();
 			}
 		}
 

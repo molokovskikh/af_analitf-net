@@ -54,6 +54,9 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Core, Version=2.1.30214.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Interfaces, Version=2.1.30214.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Reactive.Linq, Version=2.1.30214.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -75,8 +78,10 @@
     <Compile Include="Config\Environments\Production.cs" />
     <Compile Include="Config\Initializers\Mvc.cs" />
     <Compile Include="Config\Initializers\NHibernate.cs" />
+    <Compile Include="Controllers\DownloadController.cs" />
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
+    <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Global.asax.cs">
     </Compile>
     <Compile Include="Controllers\MainController.cs">
@@ -84,11 +89,13 @@
     <Compile Include="Helpers\MySqlHelper.cs" />
     <Compile Include="Helpers\RequestHelper.cs" />
     <Compile Include="Models\AnalitfNetData.cs" />
+    <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\PendingDocLog.cs" />
+    <Compile Include="Models\PendingMailLog.cs" />
     <Compile Include="Models\PendingOrderLog.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Models\UserPrice.cs" />

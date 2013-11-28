@@ -16,12 +16,12 @@ using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Controls
 {
-	public class DataGrid : System.Windows.Controls.DataGrid
+	public class DataGrid2 : DataGrid
 	{
 		public static DependencyProperty ShowAddressColumnProperty
 			= DependencyProperty.RegisterAttached("ShowAddressColumn",
 				typeof(bool),
-				typeof(DataGrid),
+				typeof(DataGrid2),
 				new FrameworkPropertyMetadata(false, ShowAddressColumnPropertyChanged));
 
 		//свойство нужно тк в 4.0
@@ -29,12 +29,12 @@ namespace AnalitF.Net.Client.Controls
 		public static DependencyProperty CurrentItemStubProperty
 			= DependencyProperty.RegisterAttached("CurrentItemStub",
 				typeof(object),
-				typeof(DataGrid),
+				typeof(DataGrid2),
 				new FrameworkPropertyMetadata(null, CurrentItemStubChanged));
 
 		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			var grid = (DataGrid)d;
+			var grid = (DataGrid2)d;
 			grid.CurrentItem = e.NewValue;
 		}
 
@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Controls
 		//это фактически его эмуляция
 		private static void ShowAddressColumnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			var grid = (DataGrid)d;
+			var grid = (DataGrid2)d;
 			var column = grid.Columns.FirstOrDefault(c => c.Header.Equals("Адрес заказа"));
 			if (column == null)
 				return;
@@ -182,9 +182,9 @@ namespace AnalitF.Net.Client.Controls
 			m.Invoke(value, new object[] { null });
 		}
 
-		private object GetProperty(DataGrid dataGrid, string name)
+		private object GetProperty(DataGrid2 dataGrid, string name)
 		{
-			var prop = typeof(DataGrid).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
+			var prop = typeof(DataGrid2).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
 			return prop.GetValue(dataGrid, null);
 		}
 	}

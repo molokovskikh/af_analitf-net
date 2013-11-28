@@ -19,10 +19,10 @@ using Microsoft.Test.Input;
 using NUnit.Framework;
 using Remotion.Linq.Parsing;
 using Action = System.Action;
-using DataGrid = AnalitF.Net.Client.Controls.DataGrid;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;
+using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -44,16 +44,16 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test, Explicit("тест конфликтует с пользовательским вводом")]
 		public void Popup_selector()
 		{
-			WpfHelper.WithWindow(w => {
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
 				var selector = new PopupSelector();
 				selector.Name = "Items";
 				selector.Member = "Item.Item2";
 				w.Content = selector;
 				selector.Loaded += (sender, args) => {
-					var text = XamlExtentions.AsText(selector);
+					var text = WpfHelper.AsText(selector);
 					Assert.That(text, Is.StringContaining("test2"));
 
-					WpfHelper.Shutdown(w);
+					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 				};
 				w.DataContext = new Model();
 				ViewModelBinder.Bind(w.DataContext, w, null);
@@ -63,8 +63,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Do_not_reset_data_grid_focus()
 		{
-			WpfHelper.WithWindow(w => {
-				var grid = new DataGrid();
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
@@ -76,7 +76,7 @@ namespace AnalitF.Net.Test.Integration.Views
 						Assert.IsTrue(grid.IsKeyboardFocusWithin);
 						Assert.IsInstanceOf<DataGridCell>(Keyboard.FocusedElement);
 
-						WpfHelper.Shutdown(w);
+						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 					}));
 				};
 			});
@@ -85,8 +85,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test, Explicit("тест управляет мышкой и движения пользователя могут его сломать")]
 		public void Set_focus_on_empty_grid()
 		{
-			WpfHelper.WithWindow(w => {
-				var grid = new DataGrid();
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var grid = new DataGrid2();
 				w.Content = grid;
 				grid.Loaded += (sender, args) => {
 					Assert.IsFalse(grid.IsKeyboardFocusWithin);
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Test.Integration.Views
 					Mouse.Click(MouseButton.Left);
 					Idle(w, () => {
 						Assert.IsTrue(grid.IsKeyboardFocusWithin);
-						WpfHelper.Shutdown(w);
+						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 					});
 				};
 			});
@@ -104,8 +104,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Focus_on_empty_data_grid()
 		{
-			WpfHelper.WithWindow(w => {
-				var grid = new DataGrid();
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
@@ -113,7 +113,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Idle(w, () => {
 					DataGridHelper.Focus(grid);
 					Assert.IsTrue(grid.IsKeyboardFocusWithin);
-					WpfHelper.Shutdown(w);
+					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 				});
 			});
 		}
@@ -123,8 +123,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var items = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
 			var data = new ObservableCollection<Tuple<String>>(items);
-			WpfHelper.WithWindow(w => {
-				var grid = new DataGrid();
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
@@ -137,7 +137,7 @@ namespace AnalitF.Net.Test.Integration.Views
 					Idle(w, () => {
 						Assert.IsTrue(grid.IsKeyboardFocusWithin);
 						Assert.IsNotNull(grid.CurrentItem);
-						WpfHelper.Shutdown(w);
+						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 					});
 				});
 			});

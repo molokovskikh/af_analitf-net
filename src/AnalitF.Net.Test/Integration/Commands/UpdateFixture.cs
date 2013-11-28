@@ -283,5 +283,26 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var dialog = command.Results.OfType<DialogResult>().First();
 			Assert.IsInstanceOf<Correction>(dialog.Model);
 		}
+
+		[Test]
+		public void Load_mails()
+		{
+			var fixture = new MailWithAttachment {
+				IsSpecial = true,
+			};
+			Fixture(fixture);
+
+			var command = new UpdateCommand();
+			Run(command);
+
+			var mails = localSession.Load<Mail>(fixture.Mail.Id);
+			var attachment = mails.Attachments[0];
+			var open = command.Results.OfType<OpenResult>().First();
+
+			Assert.IsTrue(attachment.IsDownloaded);
+			Assert.IsTrue(File.Exists(attachment.LocalFilename), attachment.LocalFilename);
+			Assert.That(attachment.LocalFilename, Is.StringEnding(String.Format(@"attachments\{0}.txt", attachment.Id)));
+			Assert.AreEqual(open.Filename, attachment.LocalFilename);
+		}
 	}
 }

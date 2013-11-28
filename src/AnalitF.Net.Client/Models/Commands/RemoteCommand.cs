@@ -132,5 +132,14 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
 		}
+
+		public void Configure(Settings value)
+		{
+			Credentials = value.GetCredential();
+			Proxy = value.GetProxy();
+			if (value.UseRas) {
+				RasConnection = value.RasConnection;
+			}
+		}
 	}
 }

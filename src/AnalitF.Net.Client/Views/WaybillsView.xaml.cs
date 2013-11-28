@@ -19,8 +19,8 @@ namespace AnalitF.Net.Client.Views
 			StyleHelper.ApplyStyles(type, Waybills, resources, Legend);
 
 			Waybills.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
-				CommandBinder.InvokeViewModel,
-				CommandBinder.CanInvokeViewModel));
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
 		}
 	}
 }

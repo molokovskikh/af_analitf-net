@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				beginOverlap = value;
-				OnPropertyChanged("BeginOverlap");
+				OnPropertyChanged();
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				haveGap = value;
-				OnPropertyChanged("HaveGap");
+				OnPropertyChanged();
 			}
 		}
 
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.Models
 				if (endLessThanBegin == value)
 					return;
 				endLessThanBegin = value;
-				OnPropertyChanged("EndLessThanBegin");
+				OnPropertyChanged();
 			}
 		}
 

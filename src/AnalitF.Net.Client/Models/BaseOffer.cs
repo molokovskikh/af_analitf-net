@@ -128,7 +128,7 @@ namespace AnalitF.Net.Client.Models
 			set
 			{
 				_retailCost = value;
-				OnPropertyChanged("RetailCost");
+				OnPropertyChanged();
 			}
 		}
 

@@ -6,6 +6,8 @@
 	<BooleanToVisibilityConverter x:Key="BoolToCollapsed" />
 	<Extentions:BoolToHiddenConverter x:Key="BoolToHidden" />
 	<Extentions:BoolToMarkerConverter x:Key="BoolToMarker" />
+	<Extentions:IntToBoolConverter x:Key="IntToBool" />
+	<Extentions:IntToCollapsedConverter x:Key="IntToCollapsed" />
 	<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
 
 	<Style TargetType="Image" x:Key="ButtonImage">
@@ -54,7 +56,7 @@
 		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
 	</Style>
 
-	<Style TargetType="{x:Type Controls:DataGrid}">
+	<Style TargetType="{x:Type Controls:DataGrid2}">
 		<Setter Property="IsReadOnly" Value="True" />
 		<Setter Property="CanUserAddRows" Value="False" />
 		<Setter Property="CanUserDeleteRows" Value="False" />

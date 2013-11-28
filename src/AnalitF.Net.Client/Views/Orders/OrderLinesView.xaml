@@ -43,7 +43,7 @@
 			</CheckBox>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="1" x:Name="Lines"
+		<c:DataGrid2 Grid.Row="1" x:Name="Lines"
 			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
 			<DataGrid.Columns>
@@ -103,12 +103,12 @@
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
 
-		<c:DataGrid Grid.Row="1" x:Name="SentLines"
+		<c:DataGrid2 Grid.Row="1" x:Name="SentLines"
 			Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="255*" Header="Наименование"
@@ -175,7 +175,7 @@
 					Binding="{Binding Order.SentOn}"
 					TextAlignment="Center" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<StackPanel Grid.Row="2" Name="Legend">
 		</StackPanel>

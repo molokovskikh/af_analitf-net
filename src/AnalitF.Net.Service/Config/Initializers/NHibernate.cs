@@ -48,6 +48,8 @@ namespace AnalitF.Net.Service.Config.Initializers
 				m.Property(p => p.RegionId);
 			});
 
+			Mapper.Class<Attachment>(m => m.Schema("Documents"));
+
 			Mapper.Class<DocumentLog>(m => {
 				m.Table("Document_Logs");
 				m.Id(l => l.Id, i => i.Column("RowId"));

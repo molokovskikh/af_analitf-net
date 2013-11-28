@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (local) {
 				if (IntegrationSetup.Factory == null) {
 					var nhibernate = new Config.Initializers.NHibernate();
+					AppBootstrapper.NHibernate = nhibernate;
 					nhibernate.UseRelativePath = true;
 					nhibernate.Init();
 

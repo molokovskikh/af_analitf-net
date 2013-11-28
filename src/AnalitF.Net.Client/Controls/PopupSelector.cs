@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Controls
 			set
 			{
 				isSelected = value;
-				OnPropertyChanged("IsSelected");
+				OnPropertyChanged();
 			}
 		}
 

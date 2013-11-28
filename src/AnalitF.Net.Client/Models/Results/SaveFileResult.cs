@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public SaveFileResult(string defaultFilename = null)
 		{
-			Dialog.FileName = String.Format("{0} от {1:d}", defaultFilename, DateTime.Now);
+			Dialog.FileName = String.Format("{0} от {1:d}.txt", defaultFilename, DateTime.Now);
 			Dialog.DefaultExt = ".txt";
 			Dialog.Filter = "Текстовые файлы|*.txt";
 		}

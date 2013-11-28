@@ -175,6 +175,21 @@
 
 				<Separator />
 
+				<Button x:Name="ShowMails" ToolTip="Мини-почта" IsEnabled="{Binding IsDataLoaded.Value}">
+					<Grid>
+						<Image Source="/AnalitF.Net.Client;component/assets/images/Compose Email_32.ico"
+							Style="{StaticResource ButtonImage}" />
+						<TextBlock Padding="2, 0, 2, 2"
+							Background="Green"
+							Foreground="White"
+							VerticalAlignment="Top"
+							HorizontalAlignment="Left"
+							FontSize="10"
+							Name="NewMailsCount"
+							Visibility="{Binding NewMailsCount.Value, Converter={StaticResource IntToCollapsed}}" />
+					</Grid>
+				</Button>
+
 				<Button x:Name="ShowMain" ToolTip="На главную страницу">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Home 2_32.ico"
 						Style="{StaticResource ButtonImage}" />

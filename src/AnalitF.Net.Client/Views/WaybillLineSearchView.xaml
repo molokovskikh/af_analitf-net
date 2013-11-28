@@ -20,7 +20,7 @@
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				Style="{StaticResource SearchText}" binders:SearchBinder.Grid="Lines" />
 		</StackPanel>
-		<c:DataGrid Grid.Row="1" x:Name="Lines"
+		<c:DataGrid2 Grid.Row="1" x:Name="Lines"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Дата документа"
@@ -36,6 +36,6 @@
 				<DataGridTextColumn Width="*" Header="Получить" />
 				<DataGridTextColumn Width="*" Header="Сертификаты" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 	</Grid>
 </UserControl>

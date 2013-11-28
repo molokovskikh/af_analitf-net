@@ -66,7 +66,7 @@
 			</StackPanel>
 		</DockPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Offers"
+		<c:DataGrid2 Grid.Row="2" x:Name="Offers"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="26*" Header="Код" Binding="{Binding Code}" />
@@ -123,7 +123,7 @@
 					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
 					Binding="{Binding OrderLine.Sum}" TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid>
+		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 

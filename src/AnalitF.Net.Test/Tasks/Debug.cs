@@ -1,4 +1,5 @@
-﻿using NHibernate.Tool.hbm2ddl;
+﻿using System.IO;
+using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Tasks
