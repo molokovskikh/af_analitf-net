@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interactivity;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -39,8 +41,7 @@ namespace AnalitF.Net.Client.Models
 			if (dependencyObject == null)
 				return;
 
-			var isConventionApplied = (bool)dependencyObject.GetValue(ViewModelBinder.ConventionsAppliedProperty);
-			if (isConventionApplied)
+			if (defaults.Count != 0)
 				return;
 
 			foreach (var grid in GetControls(view)) {
@@ -55,7 +56,7 @@ namespace AnalitF.Net.Client.Models
 			if (dependencyObject == null)
 				return Enumerable.Empty<DataGrid>();
 			return dependencyObject.Descendants<DataGrid>()
-				.Where(c => (bool)c.GetValue(Persistable.PersistColumnSettingsProperty));
+				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
 		}
 
 		private string GetViewKey(DataGrid grid)

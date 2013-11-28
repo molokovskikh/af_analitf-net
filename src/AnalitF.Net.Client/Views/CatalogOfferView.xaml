@@ -68,8 +68,6 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
-			CellStyle="{StaticResource VitallyImportant}"
-			binders:Persistable.PersistColumnSettings="true"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"

@@ -4,6 +4,7 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
 
 	<UserControl.InputBindings>
@@ -96,9 +97,7 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid Grid.Row="2" x:Name="Lines"
-			binders:Persistable.PersistColumnSettings="true"
-			IsReadOnly="False">
+		<c:DataGrid Grid.Row="2" x:Name="Lines" IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="180*" Header="Наименование"
 					Binding="{Binding Product}"
@@ -111,11 +110,11 @@
 					IsReadOnly="True" />
 				<DataGridCheckBoxColumn Width="SizeToHeader"
 					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}"
-					binders:Persistable.Description="Печатать">
+					behaviors:Persistable.Description="Печатать">
 					<DataGridCheckBoxColumn.Header>
 						<CheckBox IsChecked="True">
 							<i:Interaction.Behaviors>
-								<c:Selectable />
+								<behaviors:Selectable />
 							</i:Interaction.Behaviors>
 							Печатать
 						</CheckBox>

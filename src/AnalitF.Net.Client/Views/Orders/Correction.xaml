@@ -149,7 +149,6 @@
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}" />
 
 		<c:DataGrid Grid.Row="3" x:Name="Offers" CanUserSortColumns="False"
-			binders:Persistable.PersistColumnSettings="true"
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="196*"

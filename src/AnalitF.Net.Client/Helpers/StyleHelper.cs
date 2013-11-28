@@ -117,6 +117,11 @@ namespace AnalitF.Net.Client.Helpers
 		public static Color InactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
 		private static ResourceDictionary localResources;
 
+		public static void Reset()
+		{
+			localResources = null;
+		}
+
 		public static void CollectStyles(ResourceDictionary resources)
 		{
 			var test = Assembly.GetEntryAssembly() == null

@@ -9,7 +9,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Interactivity;
 using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
@@ -121,6 +123,9 @@ namespace AnalitF.Net.Client.Binders
 				};
 			ConventionManager.AddElementConvention<DataGrid>(Selector.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					if (((DataGrid)element).Columns.Count > 1)
+						Interaction.GetBehaviors(element).Add(new Persistable());
+
 					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
 						var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);

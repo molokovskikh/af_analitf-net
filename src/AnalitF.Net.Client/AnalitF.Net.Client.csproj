@@ -158,7 +158,6 @@
     <Compile Include="Binders\CommandBinder.cs" />
     <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
-    <Compile Include="Binders\Persistable.cs" />
     <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\FocusBehavior.cs" />
@@ -178,6 +177,8 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Config\Initializers\UtcToLocalDateTimeType.cs" />
+    <Compile Include="Controls\Behaviors\Persistable.cs" />
+    <Compile Include="Controls\Behaviors\Selectable.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid.cs" />
     <Compile Include="Binders\Converters.cs" />
@@ -188,7 +189,6 @@
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
-    <Compile Include="Controls\Selectable.cs" />
     <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />

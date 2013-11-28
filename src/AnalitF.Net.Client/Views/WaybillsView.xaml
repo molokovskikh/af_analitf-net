@@ -42,8 +42,7 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 		</StackPanel>
 
-		<c:DataGrid x:Name="Waybills" Grid.Row="1"
-			binders:Persistable.PersistColumnSettings="true">
+		<c:DataGrid x:Name="Waybills" Grid.Row="1">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="64*" Header="№"
 					Binding="{Binding Id}"

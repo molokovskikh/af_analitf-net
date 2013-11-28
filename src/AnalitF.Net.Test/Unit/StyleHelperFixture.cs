@@ -49,6 +49,7 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Include_in_legend_only_posible_styles()
 		{
+			StyleHelper.Reset();
 			StyleHelper.CollectStyles(appResource);
 			var grid = new DataGrid();
 			grid.Columns.Add(new DataGridTextColumn {

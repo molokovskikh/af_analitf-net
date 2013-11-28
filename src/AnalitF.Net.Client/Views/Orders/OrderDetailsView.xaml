@@ -69,8 +69,7 @@
 		</StackPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Lines"
-			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]"
-			binders:Persistable.PersistColumnSettings="true">
+			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />

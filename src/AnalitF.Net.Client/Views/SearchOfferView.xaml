@@ -55,8 +55,7 @@
 
 		<c:DataGrid x:Name="Offers" Grid.Row="2"
 			CanUserSortColumns="False"
-			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
-			binders:Persistable.PersistColumnSettings="true">
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn Width="196*"
 					CellStyle="{StaticResource NotBaseOffer}"

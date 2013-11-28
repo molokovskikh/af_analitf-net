@@ -38,6 +38,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			model = Init(new CatalogOfferViewModel(catalog));
 			view = InitView<CatalogOfferView>(model);
+			model.SaveDefaults(view);
 		}
 
 		[Test]

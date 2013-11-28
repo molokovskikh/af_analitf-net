@@ -32,8 +32,7 @@
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected.Value}">
 				<c:DataGrid x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
-					ShowAddressColumn="{Binding AddressSelector.All.Value}"
-					binders:Persistable.PersistColumnSettings="true">
+					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
 							Visibility="Collapsed"
@@ -67,8 +66,7 @@
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected.Value}">
 				<c:DataGrid x:Name="SentOrders" CanUserDeleteRows="True"
-					ShowAddressColumn="{Binding AddressSelector.All.Value}"
-					binders:Persistable.PersistColumnSettings="true">
+					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
 							Visibility="Collapsed" />

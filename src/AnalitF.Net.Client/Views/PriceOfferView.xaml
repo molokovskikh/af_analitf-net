@@ -67,8 +67,7 @@
 		</DockPanel>
 
 		<c:DataGrid Grid.Row="2" x:Name="Offers"
-			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
-			binders:Persistable.PersistColumnSettings="true">
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="26*" Header="Код" Binding="{Binding Code}" />
 				<c:SearchableDataGridColumn Width="218*" Header="Название"

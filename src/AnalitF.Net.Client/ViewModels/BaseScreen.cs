@@ -249,7 +249,13 @@ namespace AnalitF.Net.Client.ViewModels
 			tableSettings.Reset(grid);
 		}
 
-		protected override void OnViewAttached(object view, object context)
+		protected override void OnViewLoaded(object view)
+		{
+			tableSettings.RestoreView(view);
+		}
+
+		//для тестов
+		public void SaveDefaults(object view)
 		{
 			tableSettings.RestoreView(view);
 		}

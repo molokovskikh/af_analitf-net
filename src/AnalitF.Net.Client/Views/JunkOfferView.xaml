@@ -27,8 +27,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:DataGrid x:Name="Offers" Grid.Row="0"
-			binders:Persistable.PersistColumnSettings="true">
+		<c:DataGrid x:Name="Offers" Grid.Row="0">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название"
 					Binding="{Binding ProductSynonym}" />

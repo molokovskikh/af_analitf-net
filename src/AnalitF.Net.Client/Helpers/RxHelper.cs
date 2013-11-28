@@ -45,16 +45,6 @@ namespace AnalitF.Net.Client.Helpers
 			return items;
 		}
 
-		public static IObservable<EventPattern<KeyEventArgs>> KeyDown(this FrameworkElement el)
-		{
-			return Observable.FromEventPattern<KeyEventArgs>(el, "KeyDown");
-		}
-
-		public static IObservable<EventPattern<KeyEventArgs>> MouseDoubleClick(this FrameworkElement el)
-		{
-			return Observable.FromEventPattern<KeyEventArgs>(el, "MouseDoubleClick");
-		}
-
 		public static IDisposable CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext)
 		{
 			return observable.Subscribe(e => {

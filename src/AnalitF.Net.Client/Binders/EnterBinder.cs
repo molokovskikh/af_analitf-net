@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
@@ -28,14 +29,14 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public static void Bind(MethodInfo method, FrameworkElement element)
 		{
-			var keydown = RxHelper.KeyDown(element)
+			var keydown = Observable.FromEventPattern<KeyEventArgs>(element, "KeyDown")
 				.Where(a => a.EventArgs.Key == Key.Return
 					&& !a.EventArgs.Handled
 					&& ((DataGrid)a.Sender).SelectedItem != null)
 				.Do(a => a.EventArgs.Handled = true)
 				.Select(a => ((DataGrid)a.Sender).SelectedItem);
 
-			var mouseDoubleClick = element.MouseDoubleClick()
+			var mouseDoubleClick = Observable.FromEventPattern<MouseButtonEventArgs>(element, "MouseDoubleClick")
 				.Select(a => ((DependencyObject)a.EventArgs.OriginalSource)
 					.Parents<DataGridCell>().FirstOrDefault());
 
