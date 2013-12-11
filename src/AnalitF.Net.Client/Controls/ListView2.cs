@@ -10,9 +10,6 @@ namespace AnalitF.Net.Client.Controls
 		{
 			base.OnItemsChanged(e);
 
-			//если строка удаляет с помощью функции datagrid то после удалени фокус остается в datagrid
-			//если же удаление производится из коллекции ItemsSource то CurrentItem сбрасывается в null
-			//и таблица теряет фокус
 			if (e.Action == NotifyCollectionChangedAction.Remove) {
 				var index = Math.Min(e.OldStartingIndex, Items.Count - 1);
 				if (index >= 0) {

@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Dynamic;
+using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Forms.VisualStyles;
+using System.Xaml;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Castle.Components.DictionaryAdapter;
 using Common.Tools;
 using Inflector;
+using Microsoft.Reactive.Testing;
 using NUnit.Framework;
+using ReactiveUI;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Unit
 {

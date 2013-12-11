@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
@@ -16,91 +11,31 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.Views;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
-using log4net.Config;
 using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
-using Xceed.Wpf.Toolkit;
-using Action = System.Action;
-using ButtonBase = System.Windows.Controls.Primitives.ButtonBase;
 using CheckBox = System.Windows.Controls.CheckBox;
-using Control = System.Windows.Controls.Control;
 using DataGrid = System.Windows.Controls.DataGrid;
 using DataGridCell = System.Windows.Controls.DataGridCell;
 using Label = System.Windows.Controls.Label;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
 using WindowState = System.Windows.WindowState;
-using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
 	[TestFixture]
-	public class GlobalFixture : BaseViewFixture
+	public class GlobalFixture : DispatcherFixture
 	{
-		private Dispatcher dispatcher;
-		private Window activeWindow;
-		public List<Window> windows;
-		public List<Exception> exceptions;
-
-		[SetUp]
-		public void Setup()
-		{
-			exceptions = new List<Exception>();
-			windows = new List<Window>();
-			activeWindow = null;
-			dispatcher = null;
-			shell.Config.Quit = true;
-			shell.ViewModelSettings.Clear();
-
-			manager.UnitTesting = false;
-			manager.SkipApp = true;
-			disposable.Add(manager.WindowOpened.Subscribe(w => {
-				activeWindow = w;
-				windows.Add(w);
-				w.Closed += (sender, args) => {
-					windows.Remove(w);
-					activeWindow = windows.LastOrDefault();
-				};
-			}));
-
-			disposable.Add(BindingChecker.Track());
-			disposable.Add(Disposable.Create(() => {
-				if (exceptions.Count > 0)
-					throw new AggregateException(exceptions);
-			}));
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			shell.Config.Quit = false;
-			if (dispatcher != null) {
-				dispatcher.Invoke(() => {
-					foreach (var window in windows.ToArray().Reverse())
-						window.Close();
-				});
-				WaitIdle();
-				dispatcher.Invoke(() => shell.Dispose());
-				dispatcher.InvokeShutdown();
-			}
-		}
-
 		//тестирует очень специфичную ошибку
 		//проблема повторяется если открыть каталок -> войти в пребложения
 		//вернуться в каталог "нажав букву" и если это повторная попытка поиска
@@ -440,7 +375,9 @@ namespace AnalitF.Net.Test.Integration.Views
 			Input(view, "CatalogNames", Key.Enter);
 			if (viewModel.Catalogs.Value.Count > 1)
 				Input(view, "Catalogs", Key.Enter);
-			((TestScheduler)BaseScreen.TestSchuduler).AdvanceByMs(3000);
+			dispatcher.Invoke(() => {
+				testScheduler.AdvanceByMs(3000);
+			});
 			WaitIdle();
 			dispatcher.Invoke(() => {
 				var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
@@ -536,33 +473,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				.First(e => e.Name == name);
 		}
 
-		private async void Start()
-		{
-			session.Flush();
-
-			var loaded = new SemaphoreSlim(0, 1);
-
-			dispatcher = WpfHelper.WithDispatcher(() => {
-				activeWindow = (Window)ViewLocator.LocateForModel(shell, null, null);
-				windows.Add(activeWindow);
-				activeWindow.Loaded += (sender, args) => loaded.Release();
-				ViewModelBinder.Bind(shell, activeWindow, null);
-				activeWindow.Show();
-			});
-			dispatcher.UnhandledException += (sender, args) => {
-				args.Handled = true;
-				exceptions.Add(args.Exception);
-			};
-
-			await loaded.WaitAsync();
-			WaitIdle();
-		}
-
-		private void WaitIdle()
-		{
-			dispatcher.Invoke(() => {}, DispatcherPriority.ContextIdle);
-		}
-
 		private void AssertQuickSearch(CatalogViewModel catalog, string term)
 		{
 			var view = (FrameworkElement)catalog.ActiveItem.GetView();
@@ -601,97 +511,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded(offers);
 			WaitIdle();
 			return offers;
-		}
-
-		public void DoubleClick(FrameworkElement view, UIElement element, object origin = null)
-		{
-			element.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) {
-				RoutedEvent = Control.MouseDoubleClickEvent,
-				Source = origin,
-			});
-		}
-
-		public void InternalClick(ButtonBase element)
-		{
-			Contract.Assert(element != null);
-			AssertInputable(element);
-			element.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, element));
-		}
-
-		private void InternalClick(string name)
-		{
-			var el = activeWindow.FindName(name)
-				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
-			if (el is SplitButton)
-				InternalClick(((SplitButton)el).Descendants<ButtonBase>().First());
-			else
-				InternalClick((ButtonBase)el);
-		}
-
-		public void Click(string name)
-		{
-			dispatcher.Invoke(() => InternalClick(name));
-			WaitIdle();
-		}
-
-		private void AsyncClick(string name)
-		{
-			dispatcher.BeginInvoke(new Action(() => InternalClick(name)));
-			WaitIdle();
-		}
-
-
-		private void Input(FrameworkElement view, string name, string text)
-		{
-			view.Dispatcher.Invoke(() => {
-				Input((UIElement)view.FindName(name), text);
-			});
-		}
-
-		private void Input(UIElement element, string text)
-		{
-			Contract.Assert(element != null);
-			AssertInputable(element);
-			element.RaiseEvent(WpfHelper.TextArgs(text));
-		}
-
-		private static void Input(UIElement element, Key key)
-		{
-			Contract.Assert(element != null);
-			AssertInputable(element);
-			element.RaiseEvent(WpfHelper.KeyEventArgs(element, key));
-		}
-
-		private void Input(string name, Key key)
-		{
-			var item = (BaseScreen)shell.ActiveItem;
-			var view = item.GetView();
-			Contract.Assert(view != null);
-			Input((FrameworkElement)view, name, key);
-		}
-
-		private void Input(string name, string text)
-		{
-			var item = (BaseScreen)shell.ActiveItem;
-			var view = item.GetView();
-			Contract.Assert(view != null);
-			Input((FrameworkElement)view, name, text);
-		}
-
-		private void Input(FrameworkElement view, string name, Key key)
-		{
-			view.Dispatcher.Invoke(() => {
-				var element = (UIElement)view.FindName(name);
-				if (element == null)
-					throw new Exception(String.Format("Не могу найти {0}", name));
-				Input(element, key);
-			});
-		}
-
-		private static void AssertInputable(UIElement element)
-		{
-			Assert.IsTrue(element.IsVisible);
-			Assert.IsTrue(element.IsEnabled);
 		}
 
 		private async Task<T> ViewLoaded<T>()

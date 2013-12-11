@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive.Disposables;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 
@@ -19,6 +22,7 @@ namespace AnalitF.Net.Client.Binders
 		public Navigator Navigator;
 
 		public bool UnitTesting;
+		public Env Env = new Env();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
 
 		public BaseShell()
@@ -52,6 +56,11 @@ namespace AnalitF.Net.Client.Binders
 
 		protected override void ChangeActiveItem(IScreen newItem, bool closePrevious)
 		{
+			var baseScreen = newItem as BaseScreen;
+			if (baseScreen != null) {
+				baseScreen.Env = Env;
+			}
+
 			base.ChangeActiveItem(newItem, closePrevious);
 
 			if (IsActive) {
@@ -77,6 +86,18 @@ namespace AnalitF.Net.Client.Binders
 		{
 			UnitTestClose();
 			base.TryClose();
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+
+			if (close) {
+				var disposable = this as IDisposable;
+				if (disposable != null) {
+					disposable.Dispose();
+				}
+			}
 		}
 
 		private void UnitTestClose()

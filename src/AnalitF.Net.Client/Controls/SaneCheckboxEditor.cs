@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Controls
 				&& !cell.IsEditing
 				&& !cell.IsReadOnly
 				&& cell.IsSelected) {
-				var dataGridOwner = (System.Windows.Controls.DataGrid)DataGridOwner.GetValue(cell, null);
+				var dataGridOwner = (DataGrid)DataGridOwner.GetValue(cell, null);
 				if (dataGridOwner != null)  {
 					dataGridOwner.BeginEdit(e);
 				}

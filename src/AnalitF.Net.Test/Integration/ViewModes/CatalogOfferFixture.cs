@@ -33,10 +33,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			lazyModel = new Lazy<CatalogOfferViewModel>(() => {
-				session.Flush();
-				return Init(new CatalogOfferViewModel(catalog));
-			});
+			lazyModel = new Lazy<CatalogOfferViewModel>(() => Init(new CatalogOfferViewModel(catalog)));
 			catalog = session.Query<Catalog>()
 				.First(c => c.HaveOffers && session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
 		}

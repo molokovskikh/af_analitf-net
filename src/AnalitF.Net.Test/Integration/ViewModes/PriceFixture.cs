@@ -15,7 +15,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class PriceFixture : ViewModelFixture
+	public class PriceFixture : ViewModelFixture<PriceViewModel>
 	{
 		[Test]
 		public void Load_order()
@@ -23,7 +23,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
 
-			var model = Init(new PriceViewModel());
 			Assert.That(model.Prices.First(p => p.Id == offer.Price.Id).Order, Is.Not.Null);
 			Assert.That(model.Prices[0].MinOrderSum, Is.Not.Null);
 		}
@@ -49,7 +48,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = session.Query<Offer>().First();
 			MakeSentOrder(offer);
 
-			var model = Init(new PriceViewModel());
 			var price = model.Prices.First(p => p.Id == offer.Price.Id);
 			Assert.That(price.WeeklyOrderSum, Is.GreaterThan(0));
 			Assert.That(price.MonthlyOrderSum, Is.GreaterThan(0));
@@ -58,24 +56,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Save_current_price()
 		{
-			var model = Init(new PriceViewModel());
 			var price = model.Prices[1];
 			model.CurrentPrice.Value = price;
 			Close(model);
 
-			model = Init(new PriceViewModel());
-			Assert.That(model.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
-			var persistedPrice = model.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
-			Assert.That(model.CurrentPrice.Value, Is.EqualTo(persistedPrice));
+			var model2 = Init(new PriceViewModel());
+			Assert.That(model2.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
+			var persistedPrice = model2.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
+			Assert.That(model2.CurrentPrice.Value, Is.EqualTo(persistedPrice));
 		}
 
 		[Test]
 		public void Reload_order_info_on_activate()
 		{
 			session.DeleteEach<Order>();
-			session.Flush();
 
-			var model = Init(new PriceViewModel());
 			Activate(model);
 			Deactivate(model);
 

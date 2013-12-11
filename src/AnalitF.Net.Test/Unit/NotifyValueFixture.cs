@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 
@@ -30,7 +32,7 @@ namespace AnalitF.Net.Test.Unit
 				set
 				{
 					data = value;
-					OnPropertyChanged("Data");
+					OnPropertyChanged();
 				}
 			}
 		}
@@ -118,6 +120,17 @@ namespace AnalitF.Net.Test.Unit
 			v.Value = "1";
 			Assert.IsTrue(v.HasValue);
 			Assert.AreEqual(1, changes.Count(c => c.PropertyName == "HasValue"));
+		}
+
+		[Test]
+		public void Notify_value_from_observable()
+		{
+			var s = new Subject<string>();
+			var v = s.ToValue();
+			var changes = v.Changed().Select(e => e.EventArgs.PropertyName).Collect();
+			s.OnNext("1");
+			Assert.AreEqual("1", v.Value);
+			Assert.That(changes, Is.EqualTo(new[] { "Value" }));
 		}
 	}
 }

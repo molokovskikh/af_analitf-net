@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -18,20 +19,40 @@ using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
+	public class ViewModelFixture<T> : ViewModelFixture where T : BaseScreen, new()
+	{
+		private Lazy<T> lazyModel;
+
+		protected T model
+		{
+			get { return lazyModel.Value; }
+		}
+
+		[SetUp]
+		public void Setup()
+		{
+			lazyModel = new Lazy<T>(Init<T>);
+		}
+	}
+
 	public class ViewModelFixture : DbFixture
 	{
 		protected Extentions.WindowManager manager;
 		protected TestScheduler testScheduler;
 		protected Lazy<ShellViewModel> lazyshell;
 		protected DataMother data;
+		protected MessageBus bus;
+		protected Env Env;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
+			Env = new Env();
 			ProcessHelper.UnitTesting = true;
 			ProcessHelper.ExecutedProcesses.Clear();
 
-			RxApp.MessageBus = new MessageBus();
+			bus = new MessageBus();
+			RxApp.MessageBus = bus;
 			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 
 			testScheduler = new TestScheduler();
@@ -42,6 +63,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var value = new ShellViewModel();
 				value.UnitTesting = true;
 				value.Config = config;
+				value.Env = Env;
 				disposable.Add(value);
 				ScreenExtensions.TryActivate(value);
 				return value;
@@ -90,6 +112,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			session.Flush();
 			disposable.Add(model);
 			model.Parent = shell;
+			model.Env = Env;
 			Activate(model);
 			return model;
 		}

@@ -9,16 +9,8 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SearchOfferFixture : ViewModelFixture
+	public class SearchOfferFixture : ViewModelFixture<SearchOfferViewModel>
 	{
-		private SearchOfferViewModel model;
-
-		[SetUp]
-		public void Setup()
-		{
-			model = new SearchOfferViewModel();
-		}
-
 		[Test]
 		public void Full_filter_values()
 		{

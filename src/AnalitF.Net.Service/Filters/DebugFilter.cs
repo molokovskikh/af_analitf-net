@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Web.Http.Controllers;
@@ -14,7 +15,9 @@ namespace AnalitF.Net.Service.Filters
 		{
 			IEnumerable<string> headers;
 			if (actionContext.Request.Headers.TryGetValues("debug-timeout", out headers))
-				Thread.Sleep(SafeConvert.ToInt32(headers.FirstOrDefault()).GetValueOrDefault());
+				Thread.Sleep((int)(SafeConvert.ToDecimal(headers.FirstOrDefault()) * 1000));
+			if (actionContext.Request.Headers.TryGetValues("debug-fault", out headers) && headers.Any())
+				throw new Exception("Тестовое исключение");
 			base.OnActionExecuting(actionContext);
 		}
 	}

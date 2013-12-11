@@ -5,6 +5,7 @@
 	xmlns:h="clr-namespace:AnalitF.Net.Client.Helpers"
 	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	MinHeight="600" MinWidth="800" Name="Shell">
 	<Window.InputBindings>
 		<KeyBinding Gesture="CTRL+S" Command="binders:Commands.InvokeViewModel"
@@ -61,6 +62,7 @@
 
 			<MenuItem Header="Сервис">
 				<MenuItem Header="Конфигурация" cal:Message.Attach="ShowSettings" />
+				<MenuItem Header="Журнал загрузок" cal:Message.Attach="ShowJournal" />
 				<MenuItem Header="Восстановление базы данных" cal:Message.Attach="CheckDb" />
 				<MenuItem Header="Служебные">
 					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4"
@@ -264,45 +266,75 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>Заказов:&#160;</Run>
-					<Run Name="Stat_Value_OrdersCount" />
-				</TextBlock>
+				<controls:TransitionContent VerticalAlignment="Center" Padding="5" x:Name="data">
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Margin="5">
+							<Run>Заказов:&#160;</Run>
+							<Run Name="Stat_Value_OrdersCount" />
+						</TextBlock>
+
+						<TextBlock Margin="5">
+							<Run>Позиций:&#160;</Run>
+							<Run Name="Stat_Value_OrderLinesCount" />
+						</TextBlock>
+
+						<TextBlock Margin="5">
+							<Run>Сумма:&#160;</Run>
+							<Run Name="Stat_Value_Sum" />
+						</TextBlock>
+
+						<TextBlock Margin="5">
+							<Run>Обновление:&#160;</Run>
+							<Run Name="Settings_Value_LastUpdate" />
+						</TextBlock>
+
+						<TextBlock Margin="5">
+							<Run>За неделю:&#160;</Run>
+							<Run Name="Stat_Value_WeeklySum" />
+						</TextBlock>
+
+						<TextBlock Margin="5">
+							<Run>За месяц:&#160;</Run>
+							<Run Name="Stat_Value_MonthlySum" />
+						</TextBlock>
+					</StackPanel>
+				</controls:TransitionContent>
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>Позиций:&#160;</Run>
-					<Run Name="Stat_Value_OrderLinesCount" />
-				</TextBlock>
-			</StatusBarItem>
-
-			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>Сумма:&#160;</Run>
-					<Run Name="Stat_Value_Sum" />
-				</TextBlock>
-			</StatusBarItem>
-
-			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>Обновление:&#160;</Run>
-					<Run Name="Settings_Value_LastUpdate" />
-				</TextBlock>
-			</StatusBarItem>
-
-			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>За неделю:&#160;</Run>
-					<Run Name="Stat_Value_WeeklySum" />
-				</TextBlock>
-			</StatusBarItem>
-
-			<StatusBarItem>
-				<TextBlock Margin="5">
-					<Run>За месяц:&#160;</Run>
-					<Run Name="Stat_Value_MonthlySum" />
-				</TextBlock>
+				<Button Name="ShowJournal" Padding="3, 2, 3, 2" ClipToBounds="True">
+					<StackPanel Orientation="Horizontal">
+						<Path Data="{StaticResource IconDownload}" Stretch="Uniform" Height="15" Fill="Black">
+							<Path.RenderTransform>
+								<TranslateTransform />
+							</Path.RenderTransform>
+							<Path.Style>
+								<Style TargetType="Path">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding PendingDownloads.Count, Converter={StaticResource IntToBool}}" Value="True">
+											<DataTrigger.EnterActions>
+												<BeginStoryboard Name="Spin">
+													<Storyboard>
+														<DoubleAnimationUsingKeyFrames BeginTime="00:00:00" RepeatBehavior="Forever"
+															Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+															<SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
+															<SplineDoubleKeyFrame KeyTime="00:00:00.750" Value="25" />
+															<SplineDoubleKeyFrame KeyTime="00:00:00.750" Value="-25" />
+															<SplineDoubleKeyFrame KeyTime="00:00:01.5" Value="0" />
+														</DoubleAnimationUsingKeyFrames>
+													</Storyboard>
+												</BeginStoryboard>
+											</DataTrigger.EnterActions>
+											<DataTrigger.ExitActions>
+												<RemoveStoryboard BeginStoryboardName="Spin" />
+											</DataTrigger.ExitActions>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</Path.Style>
+						</Path>
+					</StackPanel>
+				</Button>
 			</StatusBarItem>
 
 			<StatusBarItem DockPanel.Dock="Right">

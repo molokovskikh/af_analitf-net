@@ -18,6 +18,13 @@ lib/dcmysql72std.exe
 для компиляции шейдера нужен Direct3D Shader Compiler, fxc.exe должен быть в PATH
 есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
 
+Данные
+
+подготовка базы
+bake db:setup
+загрузка тестовых данных
+rym -f Rymfile.service fixture execute SampleData
+
 Запуск
 
 Для запуска есть proc-файл
@@ -42,7 +49,7 @@ session.Query<..>().Where(i => i.BelongTo.Id = filterId)
 
 передавать объекты между ViewModel нужно крайне осторожно
 лучше не передавать объекты из базы данных на прямуя а передавать
-ключи этих объектов что
+ключи этих объектов
 код в духе
 var model = new PriceViewModel()
 model.CurrentPrice = price;

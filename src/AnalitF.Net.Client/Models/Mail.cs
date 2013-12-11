@@ -13,6 +13,13 @@ namespace AnalitF.Net.Client.Models
 		private bool isNew;
 		private bool isImportant;
 
+		public Mail(string subject)
+			: this()
+		{
+			Subject = subject;
+			SentAt = DateTime.Now;
+		}
+
 		public Mail()
 		{
 			Attachments = new List<Attachment>();

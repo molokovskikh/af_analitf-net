@@ -16,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
@@ -67,6 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//в тестах на него можно подписаться и проверить что были обработаны нужные результаты
 		//в приложении его обрабатывает Coroutine см Config/Initializers/Caliburn
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
+		public Env Env = new Env();
 
 		public BaseScreen()
 		{
@@ -77,9 +79,8 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(ResultsSink);
 
 			if (!UnitTesting) {
-				var factory = AppBootstrapper.NHibernate.Factory;
-				StatelessSession = factory.OpenStatelessSession();
-				Session = factory.OpenSession();
+				StatelessSession = Env.Factory.OpenStatelessSession();
+				Session = Env.Factory.OpenSession();
 				//для mysql это все бутафория
 				//нужно что бы nhibernate делал flush перед запросами
 				//если транзакции нет он это делать не будет

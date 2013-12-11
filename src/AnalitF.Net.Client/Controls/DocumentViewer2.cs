@@ -9,23 +9,23 @@ using System.Windows.Xps;
 
 namespace AnalitF.Net.Client.Controls
 {
-	public class DocumentViewerV2 : DocumentViewer
+	public class DocumentViewer2 : DocumentViewer
 	{
 		public static DependencyProperty OrientationProperty
 			= DependencyProperty.RegisterAttached("Orientation",
 				typeof(PageOrientation),
-				typeof(DocumentViewerV2),
+				typeof(DocumentViewer2),
 				new FrameworkPropertyMetadata(PageOrientation.Unknown));
 
 		private XpsDocumentWriter _writer;
 
-		static DocumentViewerV2()
+		static DocumentViewer2()
 		{
-			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2),
+			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
 				new CommandBinding(ApplicationCommands.Print, Execute, CanExecute));
-			CommandManager.RegisterClassInputBinding(typeof(DocumentViewerV2),
+			CommandManager.RegisterClassInputBinding(typeof(DocumentViewer2),
 				new InputBinding(ApplicationCommands.Print, new KeyGesture(Key.P, ModifierKeys.Control)));
-			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewerV2),
+			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
 				new CommandBinding(ApplicationCommands.CancelPrint, Execute, CanExecute));
 		}
 
@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Controls
 
 		private static void CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
-			var doc = sender as DocumentViewerV2;
+			var doc = sender as DocumentViewer2;
 			if (e.Command == ApplicationCommands.Print) {
 				e.CanExecute = doc.Document != null && doc._writer == null;
 				e.Handled = true;
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Controls
 
 		private static void Execute(object sender, ExecutedRoutedEventArgs e)
 		{
-			var doc = sender as DocumentViewerV2;
+			var doc = sender as DocumentViewer2;
 			if (e.Command == ApplicationCommands.Print)
 				doc.OnPrintCommand();
 			else if (e.Command == ApplicationCommands.CancelPrint)

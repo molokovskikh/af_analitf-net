@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,9 +8,6 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
-using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
-using YamlDotNet.RepresentationModel.Serialization;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -109,13 +102,31 @@ namespace AnalitF.Net.Client.Helpers
 							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF)))
 						}
 					}
-				}
+				},
+				{ "IsRejectChanged", Background("#ff8000") },
+				{ "IsRejectNew", Background("#ff8000") },
+				{ "IsRejectCanceled", Background("#808000") },
+				{ "IsReject", Background("#a7ab9e") },
+				{ "Junk", Background("#f29e66") },
+				{ "Leader", Background("#C0DCC0") },
+				{ "BeginOverlap", Background("#808000") },
+				{ "HaveGap", Background("#800000") },
 			};
 
-		private static SolidColorBrush DefaultColor = Brushes.Red;
+		private static ResourceDictionary localResources;
+
+		public static SolidColorBrush DefaultColor = Brushes.Red;
 		public static Color ActiveColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
 		public static Color InactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
-		private static ResourceDictionary localResources;
+
+		private static Func<DataTrigger> Background(string color)
+		{
+			return () => new DataTrigger {
+				Setters = {
+					new Setter(Control.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)))
+				}
+			};
+		}
 
 		public static void Reset()
 		{
@@ -124,49 +135,11 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CollectStyles(ResourceDictionary resources)
 		{
-			var test = Assembly.GetEntryAssembly() == null
-				|| !Assembly.GetEntryAssembly().GetName().Name.Match("AnalitF.Net.Client");
-			if (test) {
-				BuildStyles(resources);
-			}
-			else {
-				var file = GetColorFile();
-				var watcher = new FileSystemWatcher(Path.GetDirectoryName(file));
-				watcher.EnableRaisingEvents = true;
-				Observable.FromEventPattern<FileSystemEventArgs>(watcher, "Changed")
-					.Merge(Observable.Return(new EventPattern<FileSystemEventArgs>(watcher,
-						new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.GetDirectoryName(file), Path.GetFileName(file)))))
-					.Where(e => e.EventArgs.FullPath.Match(file))
-					.CatchSubscribe(_ => {
-						BuildStyles(resources);
-					});
-			}
-		}
-
-		private static void ParseStyle(string file)
-		{
-			var des = new Deserializer();
-			using (var f = new StreamReader(File.OpenRead(file))) {
-				var data = des.Deserialize<Dictionary<string, Dictionary<string, string>>>(f);
-				foreach (var key in data) {
-					var trigger = new DataTrigger();
-					foreach (var values in key.Value) {
-						var property = DependencyPropertyDescriptor.FromName(values.Key, typeof(Control), typeof(Control));
-
-						var result = property.Converter.ConvertFrom(values.Value);
-						trigger.Setters.Add(new Setter(property.DependencyProperty, result));
-					}
-					if (KnownStyles.ContainsKey(key.Key))
-						KnownStyles.Remove(key.Key);
-					KnownStyles.Add(key.Key, () => trigger);
-				}
-			}
+			BuildStyles(resources);
 		}
 
 		public static void BuildStyles(ResourceDictionary app)
 		{
-			ParseStyle(GetColorFile());
-
 			if (localResources == null) {
 				localResources = new ResourceDictionary();
 				app.MergedDictionaries.Add(localResources);
@@ -190,19 +163,6 @@ namespace AnalitF.Net.Client.Helpers
 					InactiveColor,
 					mainStyle);
 			}
-		}
-
-		private static string GetColorFile()
-		{
-			var test = Assembly.GetEntryAssembly() == null;
-			string file;
-			if (test) {
-				file = Path.GetFullPath(FileHelper.MakeRooted(@"..\..\..\AnalitF.Net.Client\Assets\styles\colors.txt"));
-			}
-			else {
-				file = Path.GetFullPath(FileHelper.MakeRooted(@"..\..\Assets\styles\colors.txt"));
-			}
-			return file;
 		}
 
 		public static void BuildStyles(

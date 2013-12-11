@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client
 				var message = ErrorHelper.TranslateException(e)
 					?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e.Message);
 				if (Config.Quit)
-					Console.WriteLine(message);
+					Console.Out.WriteLine(message);
 				else
 					MessageBox.Show(
 						message,
@@ -220,6 +220,7 @@ namespace AnalitF.Net.Client
 
 			Util.SetValue(instance, "Manager", GetInstance(typeof(IWindowManager), null));
 			Util.SetValue(instance, "Shell", Shell);
+			Util.SetValue(instance, "Env", Shell.Env);
 		}
 
 		private void InitApp()

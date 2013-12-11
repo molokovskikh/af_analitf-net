@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -14,26 +14,16 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using AnalitF.Net.Client.ViewModels.Parts;
-using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
-using Common.NHibernate;
-using Common.Tools;
-using Iesi.Collections;
 using NHibernate;
-using NHibernate.Impl;
 using NHibernate.Linq;
-using Newtonsoft.Json;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
@@ -72,6 +62,9 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
+		public Subject<string> Notifications = new Subject<string>();
+		public CompositeDisposable CloseDisposable = new CompositeDisposable();
+
 		public ShellViewModel()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
@@ -91,10 +84,10 @@ namespace AnalitF.Net.Client.ViewModels
 				Settings);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			NewMailsCount = new NotifyValue<int>();
+			PendingDownloads = new ObservableCollection<Loadable>();
 
-			var factory = AppBootstrapper.NHibernate.Factory;
-			session = factory.OpenSession();
-			statelessSession = factory.OpenStatelessSession();
+			session = Env.Factory.OpenSession();
+			statelessSession = Env.Factory.OpenStatelessSession();
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -132,9 +125,16 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanMicroUpdate");
 				});
 
-			Bus.Listen<Stat>()
-				.Subscribe(e => Stat.Value = new Stat(e, Stat.Value));
-			NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session);
+			CloseDisposable.Add(Bus.Listen<Loadable>().ObserveOn(UiScheduler).Subscribe(l => {
+				CloseDisposable.Add(l.RequstCancellation);
+				PendingDownloads.Add(l);
+			}));
+			CloseDisposable.Add(Bus.Listen<Loadable>("completed").ObserveOn(UiScheduler).Subscribe(l => {
+				CloseDisposable.Remove(l.RequstCancellation);
+				PendingDownloads.Remove(l);
+			}));
+			CloseDisposable.Add(Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
+			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session));
 		}
 
 		public Config.Config Config
@@ -149,6 +149,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		[DataMember]
 		public bool ShowAllAddresses { get; set; }
+
+		public ObservableCollection<Loadable> PendingDownloads { get; set; }
 
 		public NotifyValue<Settings> Settings { get; set; }
 		public NotifyValue<User> User { get; set; }
@@ -504,6 +506,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Mails());
 		}
 
+		public void ShowJournal()
+		{
+			NavigateRoot(new Journal());
+		}
+
 		public bool CanMicroUpdate
 		{
 			get { return Settings.Value.LastUpdate != null; }
@@ -528,6 +535,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
 			}
 		}
+
 
 		public IEnumerable<IResult> SendOrders(bool force = false)
 		{
@@ -800,6 +808,7 @@ namespace AnalitF.Net.Client.ViewModels
 				defaultItem.Dispose();
 				defaultItem = null;
 			}
+			CloseDisposable.Dispose();
 		}
 	}
 }

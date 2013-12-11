@@ -46,7 +46,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			clientConfig.BaseUrl = new Uri("http://localhost:7018");
 			clientConfig.RootDir = "app";
-			clientConfig.RequestDelay = 1.Second();
+			clientConfig.RequestInterval = 1.Second();
 
 			FileHelper.InitDir("var");
 

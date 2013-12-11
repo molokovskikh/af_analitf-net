@@ -61,28 +61,25 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ISessionFactory factory;
 			if (local) {
 				if (IntegrationSetup.Factory == null) {
-					var nhibernate = new Config.Initializers.NHibernate();
-					AppBootstrapper.NHibernate = nhibernate;
-					nhibernate.UseRelativePath = true;
-					nhibernate.Init();
-
-					factory = nhibernate.Factory;
+					AppBootstrapper.NHibernate = new Config.Initializers.NHibernate();
+					AppBootstrapper.NHibernate.UseRelativePath = true;
+					AppBootstrapper.NHibernate.Init();
+					factory = AppBootstrapper.NHibernate.Factory;
 				}
 				else {
 					factory = IntegrationSetup.Factory;
 				}
 			}
 			else {
-				factory = Setup.SessionFactory;
-				fixture.Config = IntegrationSetup.serviceConfig;
-				if (factory == null) {
-					var config = Application.ReadConfig();
+				if (Setup.SessionFactory == null) {
+					IntegrationSetup.serviceConfig = Application.ReadConfig();
 					var development = new Development();
 					development.BasePath = Environment.CurrentDirectory;
-					development.Run(config);
-					fixture.Config = config;
-					factory = IntegrationSetup.ServerNHConfig("local");
+					development.Run(IntegrationSetup.serviceConfig);
+					Setup.SessionFactory = IntegrationSetup.ServerNHConfig("local");
 				}
+				fixture.Config = IntegrationSetup.serviceConfig;
+				factory = Setup.SessionFactory;
 			}
 
 			using (var session = factory.OpenSession()) {

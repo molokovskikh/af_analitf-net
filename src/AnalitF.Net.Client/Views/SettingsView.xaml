@@ -326,6 +326,13 @@
 					</CheckBox>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Отладка" Name="DebugTab">
+				<StackPanel>
+					<Label>Задержка в обработке запросов (секунд)</Label>
+					<TextBox Name="Settings_DebugTimeout" />
+					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
+				</StackPanel>
+			</TabItem>
 		</TabControl>
 		<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

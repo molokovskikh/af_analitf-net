@@ -61,6 +61,11 @@ namespace AnalitF.Net.Client.Helpers
 			this.value = value;
 		}
 
+		public NotifyValue(IObservable<T> observable)
+		{
+			observable.Subscribe(v => Value = v);
+		}
+
 		public T Value
 		{
 			get

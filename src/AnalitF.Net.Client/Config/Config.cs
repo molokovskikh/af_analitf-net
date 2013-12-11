@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Config
 		public string TmpDir;
 		public string RootDir;
 		public string DbDir;
-		public TimeSpan RequestDelay = TimeSpan.FromSeconds(15);
+		public TimeSpan RequestInterval = TimeSpan.FromSeconds(15);
 
 		public string ArchiveFile
 		{

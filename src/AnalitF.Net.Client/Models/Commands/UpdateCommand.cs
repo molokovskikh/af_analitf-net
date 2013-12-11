@@ -129,7 +129,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				done = response.StatusCode == HttpStatusCode.OK;
 				Reporter.Stage("Подготовка данных");
 				if (!done) {
-					Token.WaitHandle.WaitOne(Config.RequestDelay);
+					Token.WaitHandle.WaitOne(Config.RequestInterval);
 					Token.ThrowIfCancellationRequested();
 				}
 
@@ -219,7 +219,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var attachment =  Session.Get<Attachment>(id);
 				if (attachment == null)
 					continue;
-				attachment.LocalFilename = filename;
+				Session.Save(attachment.UpdateLocalFile(Path.GetFullPath(filename)));
 				Session.Save(attachment);
 			}
 		}

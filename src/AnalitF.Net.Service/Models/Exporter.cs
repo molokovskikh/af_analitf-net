@@ -405,8 +405,7 @@ select m.Id,
 	m.SupplierEmail as SenderEmail,
 	s.Name as Sender,
 	m.Subject,
-	m.Body,
-	1 as IsNew
+	m.Body
 from Documents.Mails m
 	join customers.Suppliers s on s.Id = m.SupplierId
 where m.Id in ({0})", ids.Implode());
@@ -417,8 +416,7 @@ where m.Id in ({0})", ids.Implode());
 select a.Id,
 	a.Filename as Name,
 	a.Size,
-	a.MailId,
-	if(m.IsVIPMail and (m.SupplierEmail like '%@analit.net' or m.SupplierEmail like '%.analit.net'), 1, 0) as IsDownloaded
+	a.MailId
 from Documents.Attachments a
 	join Documents.Mails m on m.Id = a.MailId
 where a.MailId in ({0})", ids.Implode());

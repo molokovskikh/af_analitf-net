@@ -70,14 +70,12 @@ namespace AnalitF.Net.Client.ViewModels
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
-				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
+				.Throttle(Consts.LoadOrderHistoryTimeout, UiScheduler)
 				.Subscribe(_ => LoadHistoryOrders());
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 #if !DEBUG
-				.Throttle(Consts.ScrollLoadTimeout)
-				.ObserveOn(UiScheduler)
+				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 #endif
 				.Subscribe(_ => {
 					if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))

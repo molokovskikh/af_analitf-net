@@ -24,7 +24,6 @@ namespace AnalitF.Net.Test.Integration.Models
 			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
 			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
 
-
 			var command = InitCmd(new RepairDb());
 			command.Execute();
 			var result = command.Result;

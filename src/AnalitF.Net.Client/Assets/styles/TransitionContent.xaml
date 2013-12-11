@@ -1,0 +1,92 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls">
+	<Style TargetType="c:TransitionContent">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate>
+					<Grid>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="PresentationStates">
+								<VisualState x:Name="Normal">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames BeginTime="00:00:00"
+											Storyboard.TargetName="PreviousContentPresentationSite"
+											Storyboard.TargetProperty="(UIElement.Visibility)">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Down">
+									<Storyboard>
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+											Storyboard.TargetName="CurrentContentPresentationSite"
+											Storyboard.TargetProperty="(UIElement.Opacity)">
+											<SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
+											<SplineDoubleKeyFrame KeyTime="00:00:00.300" Value="1" />
+										</DoubleAnimationUsingKeyFrames>
+
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+											Storyboard.TargetName="CurrentContentPresentationSite"
+											Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+											<SplineDoubleKeyFrame KeyTime="00:00:00" Value="-40" />
+											<SplineDoubleKeyFrame KeyTime="00:00:00.300" Value="0" />
+										</DoubleAnimationUsingKeyFrames>
+
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+											Storyboard.TargetName="PreviousContentPresentationSite"
+											Storyboard.TargetProperty="(UIElement.Opacity)">
+											<SplineDoubleKeyFrame KeyTime="00:00:00" Value="1" />
+											<SplineDoubleKeyFrame KeyTime="00:00:00.300" Value="0" />
+										</DoubleAnimationUsingKeyFrames>
+
+										<DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+											Storyboard.TargetName="PreviousContentPresentationSite"
+											Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+											<SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
+											<SplineDoubleKeyFrame KeyTime="00:00:00.300" Value="40" />
+										</DoubleAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+
+						<ContentPresenter x:Name="PreviousContentPresentationSite"
+							Content="{x:Null}"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+							<ContentPresenter.RenderTransform>
+								<TransformGroup>
+									<ScaleTransform />
+									<SkewTransform />
+									<RotateTransform />
+									<TranslateTransform />
+								</TransformGroup>
+							</ContentPresenter.RenderTransform>
+						</ContentPresenter>
+
+						<ContentPresenter x:Name="CurrentContentPresentationSite"
+							Content="{x:Null}"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+							<ContentPresenter.RenderTransform>
+								<TransformGroup>
+									<ScaleTransform />
+									<SkewTransform />
+									<RotateTransform />
+									<TranslateTransform />
+								</TransformGroup>
+							</ContentPresenter.RenderTransform>
+						</ContentPresenter>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+</ResourceDictionary>

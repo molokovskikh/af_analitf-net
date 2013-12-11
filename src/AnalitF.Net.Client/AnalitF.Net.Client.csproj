@@ -161,12 +161,6 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Xceed.Wpf.Toolkit" />
-    <Reference Include="YamlDotNet.Core">
-      <HintPath>..\..\packages\YamlDotNet.Core.2.2.0\lib\net35\YamlDotNet.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="YamlDotNet.RepresentationModel">
-      <HintPath>..\..\packages\YamlDotNet.RepresentationModel.2.2.0\lib\net35\YamlDotNet.RepresentationModel.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -189,6 +183,7 @@
     <Compile Include="Binders\SearchBinder.cs" />
     <Compile Include="Binders\ViewModelHelper.cs" />
     <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\Env.cs" />
     <Compile Include="Config\Initializers\Caliburn.cs" />
     <Compile Include="Config\Initializers\DevartDriver.cs" />
     <Compile Include="Config\Initializers\DevartMySqlDialect.cs" />
@@ -205,12 +200,13 @@
     <Compile Include="Binders\Converters.cs" />
     <Compile Include="Binders\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
-    <Compile Include="Controls\DocumentViewerV2.cs" />
+    <Compile Include="Controls\DocumentViewer2.cs" />
     <Compile Include="Controls\GrayScaleEffect.cs" />
     <Compile Include="Controls\ListView2.cs" />
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
+    <Compile Include="Controls\TransitionContent.cs" />
     <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\DataGridHelper.cs" />
@@ -221,6 +217,7 @@
     <Compile Include="Helpers\JsonHelper.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
+    <Compile Include="Helpers\NHHelper.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />
     <Compile Include="Helpers\RasHelper.cs" />
     <Compile Include="Helpers\RxHelper.cs" />
@@ -251,6 +248,7 @@
     <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
+    <Compile Include="Models\JournalRecord.cs" />
     <Compile Include="Models\LoadedDocument.cs" />
     <Compile Include="Models\Mail.cs" />
     <Compile Include="Models\MarkupConfig.cs" />
@@ -315,6 +313,7 @@
     <Compile Include="ViewModels\Dialogs\PostUpdate.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
+    <Compile Include="ViewModels\Journal.cs" />
     <Compile Include="ViewModels\Mails.cs" />
     <Compile Include="ViewModels\Orders\HistoryOrdersViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
@@ -373,6 +372,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Journal.xaml.cs">
+      <DependentUpon>Journal.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
@@ -471,7 +473,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Assets\styles\Icons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Assets\styles\PopupSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Assets\styles\TransitionContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -512,6 +522,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Journal.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -695,7 +709,6 @@
     <Resource Include="Assets\images\update.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\styles\colors.txt" />
     <Resource Include="Assets\images\logo.png" />
     <Resource Include="Assets\images\price-tag-log.png" />
     <Resource Include="Assets\images\splash.png" />
@@ -732,8 +745,4 @@
     </PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" />
-  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
-    <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
-    <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
-  </Target>
 </Project>

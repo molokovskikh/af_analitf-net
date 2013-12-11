@@ -5,10 +5,14 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Handlers;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
+using Common.Tools.Calendar;
 using DotRas;
 using NHibernate;
 using NHibernate.Linq;
@@ -303,6 +307,9 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 		}
+
+		public virtual double DebugTimeout { get; set; }
+		public virtual bool DebugFault { get; set; }
 
 		public virtual IWebProxy GetProxy()
 		{

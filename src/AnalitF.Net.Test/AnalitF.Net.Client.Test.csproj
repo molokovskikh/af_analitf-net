@@ -154,7 +154,6 @@
     <Compile Include="Integration\Models\StatFixture.cs" />
     <Compile Include="Integration\Commands\UpdateFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
-    <Compile Include="Integration\QueryFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
@@ -191,8 +190,10 @@
     <Compile Include="Properties\AssemblyInfo.local.cs" />
     <Compile Include="Tasks\Debug.cs" />
     <Compile Include="Tasks\Fixture.cs" />
+    <Compile Include="TestHelpers\DispatcherFixture.cs" />
     <Compile Include="TestHelpers\BindingChecker.cs" />
     <Compile Include="TestHelpers\MixedFixture.cs" />
+    <Compile Include="TestHelpers\MixedScheduler.cs" />
     <Compile Include="TestHelpers\ViewModelFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />

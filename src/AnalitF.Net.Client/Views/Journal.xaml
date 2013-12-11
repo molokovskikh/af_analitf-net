@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Journal"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:cal="http://www.caliburnproject.org">
+	<Grid>
+		<ListView Name="Items" HorizontalContentAlignment="Stretch">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<Grid Margin="0, 0, 0, 4"
+						cal:Message.Attach="[Event MouseDown] = [Action Open($dataContext)]"
+						Cursor="Hand"
+						ToolTip="Нажмите что бы открыть">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Image Source="{Binding FileTypeIcon}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />
+						<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CreateAt}" Foreground="Gray" />
+					</Grid>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+	</Grid>
+</UserControl>

@@ -17,6 +17,9 @@ namespace AnalitF.Net.Client.Views
 
 			StyleHelper.ApplyStyles(typeof(MarkupConfig), Markups, Application.Current.Resources);
 			StyleHelper.ApplyStyles(typeof(MarkupConfig), VitallyImportantMarkups, Application.Current.Resources);
+#if !DEBUG
+			DebugTab.Visibility = Visibility.Collapsed;
+#endif
 		}
 	}
 }

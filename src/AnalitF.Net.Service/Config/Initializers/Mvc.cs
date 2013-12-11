@@ -2,6 +2,7 @@
 using AnalitF.Net.Service.Filters;
 using Common.Web.Service.Filters;
 using NHibernate;
+using DebugFilter = AnalitF.Net.Service.Filters.DebugFilter;
 
 namespace AnalitF.Net.Service.Config.Initializers
 {
@@ -18,6 +19,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 				routeTemplate: "{controller}/{id}",
 				defaults: new { id = RouteParameter.Optional });
 			config.Filters.Add(new ExceptionFilter());
+			config.Filters.Add(new DebugFilter());
 			config.Filters.Add(new SessionFilter());
 			config.Filters.Add(new UserFilter());
 			config.Filters.Add(new ConfigFilter());

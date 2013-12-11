@@ -302,7 +302,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.IsTrue(attachment.IsDownloaded);
 			Assert.IsTrue(File.Exists(attachment.LocalFilename), attachment.LocalFilename);
 			Assert.That(attachment.LocalFilename, Is.StringEnding(String.Format(@"attachments\{0}.txt", attachment.Id)));
-			Assert.AreEqual(open.Filename, attachment.LocalFilename);
+			Assert.AreEqual(Path.GetFullPath(open.Filename), attachment.LocalFilename);
 		}
 	}
 }

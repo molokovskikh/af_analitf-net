@@ -17,24 +17,12 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OrderLinesFixture : ViewModelFixture
+	public class OrderLinesFixture : ViewModelFixture<OrderLinesViewModel>
 	{
-		Lazy<OrderLinesViewModel> lazyModel;
-
-		private OrderLinesViewModel model
-		{
-			get { return lazyModel.Value; }
-		}
-
 		[SetUp]
 		public void Setup()
 		{
 			session.DeleteEach<Order>();
-
-			lazyModel = new Lazy<OrderLinesViewModel>(() => {
-				session.Flush();
-				return Init(new OrderLinesViewModel());
-			});
 		}
 
 		[Test]

@@ -10,6 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
+using NHibernate;
+using NHibernate.Engine;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
@@ -37,6 +39,12 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual IDisposable RequstCancellation { get; set; }
+
+		[Ignore]
+		public virtual ISession Session { get; set; }
+
+		[Ignore]
+		public virtual EntityEntry Entry { get; set; }
 
 		public virtual string ErrorDetails
 		{
@@ -146,6 +154,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 		public virtual string Name { get; set; }
 		public virtual long Size { get; set; }
+		//review - в базе хранятся обсолютные пути что будет если приложение будет перемещено
 		public virtual string LocalFilename { get; set; }
 
 		public virtual string Details
@@ -184,6 +193,18 @@ namespace AnalitF.Net.Client.Models
 		{
 			//нужно нормализовать путь тк Icon.ExtractAssociatedIcon ну будет работать если путь не будет нормализован
 			return Path.GetFullPath(Path.Combine(config.RootDir, "attachments", Id + Path.GetExtension(Name)));
+		}
+
+		public virtual JournalRecord UpdateLocalFile(string filename)
+		{
+			LocalFilename = Path.GetFullPath(filename);
+			IsDownloaded = true;
+			return new JournalRecord(this);
+		}
+
+		public virtual JournalRecord UpdateLocalFile(Config.Config config)
+		{
+			return UpdateLocalFile(GetLocalFilename(config));
 		}
 	}
 }

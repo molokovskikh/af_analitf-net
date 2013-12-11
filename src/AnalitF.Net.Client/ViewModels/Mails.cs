@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,16 +12,15 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
-using Common.Tools.Calendar;
 using Ionic.Zip;
+using NHibernate;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
-using NPOI.Util;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -55,8 +53,7 @@ namespace AnalitF.Net.Client.ViewModels
 			IsAsc = new NotifyValue<bool>(false);
 
 			var update = Term.Changed()
-				.Throttle(TimeSpan.FromMilliseconds(100))
-				.ObserveOn(UiScheduler)
+				.Throttle(TimeSpan.FromMilliseconds(100), UiScheduler)
 				.Merge(CurrentSort.Changed())
 				.Merge(IsAsc.Changed());
 			Items = new NotifyValue<BindingList<Mail>>(Apply, update);
@@ -88,6 +85,12 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			var pendingDownloads = Shell.PendingDownloads;
+			foreach (var attachment in pendingDownloads.OfType<Attachment>().ToArray()) {
+				attachment.Session = Session;
+				attachment.Entry = NHHelper.Reassociate(Session, attachment, attachment.Entry);
+			}
+
 			Mail.TrackIsNew(UiScheduler, CurrentItem);
 			mails = Session.Query<Mail>().ToList();
 			Items.Recalculate();
@@ -98,9 +101,9 @@ namespace AnalitF.Net.Client.ViewModels
 			var sort = sortmap.GetValueOrDefault(CurrentSort.Value, sortmap.Values.First());
 			IEnumerable<Mail> items = mails;
 			if (!String.IsNullOrEmpty(Term))
-				items = mails.Where(m => m.Body.IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0
-					|| m.Subject.IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0
-					|| m.Sender.IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0);
+				items = mails.Where(m => (m.Body ?? "").IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0
+					|| (m.Subject ?? "").IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0
+					|| (m.Sender ?? "").IndexOf(Term.Value, StringComparison.CurrentCultureIgnoreCase) >= 0);
 			if (IsAsc)
 				return new BindingList<Mail>(items.OrderBy(sort).ToList());
 			else
@@ -108,13 +111,19 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		//todo - если соединение быстрое то загрузка происходит так быстро что элементы управления мигают
+		//черная магия будь бдителен все обработчики живут дольше чем форма и могут быть вызваны после того как форма была закрыта
+		//или с новой копией этой формы если человек ушем а затем вернулся
 		public void Download(Attachment attachment)
 		{
 			attachment.IsDownloading = true;
+			attachment.Session = Session;
+			attachment.Entry = Session.GetSessionImplementation().PersistenceContext.GetEntry(attachment);
 
 			var result = ObservLoad(attachment);
-			var disposable = new CompositeDisposable(2);
-			attachment.RequstCancellation = disposable;
+			var disposable = new CompositeDisposable(3);
+			disposable.Add(Disposable.Create(() => {
+				Bus.SendMessage<Loadable>(attachment, "completed");
+			}));
 			var progress = result.Item1
 				.ObserveOn(UiScheduler)
 				.Subscribe(p => attachment.Progress =  p.EventArgs.ProgressPercentage / 100d);
@@ -123,19 +132,43 @@ namespace AnalitF.Net.Client.ViewModels
 			var download = result.Item2
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => {
-						attachment.LocalFilename = attachment.GetLocalFilename(Shell.Config);
-						attachment.IsDownloaded = true;
-						ResultsSink.OnNext(Open(attachment));
+						var notification = "";
+						SessionGaurd(attachment.Session, attachment, (s, a) => {
+							var record = a.UpdateLocalFile(Shell.Config);
+							s.Save(record);
+							Bus.SendMessage(record);
+							notification = String.Format("Файл '{0}' загружен", a.Name);
+							if (IsActive)
+								ResultsSink.OnNext(Open(a));
+						});
+						Shell.Notifications.OnNext(notification);
 					},
 					_ => {
+						attachment.RequstCancellation.Dispose();
 						attachment.IsError = true;
 					},
 					() => {
 						attachment.RequstCancellation.Dispose();
-						OnCloseDisposable.Remove(attachment.RequstCancellation);
-						attachment.RequstCancellation = Disposable.Empty;
 					});
 			disposable.Add(download);
+			attachment.RequstCancellation = disposable;
+			Bus.SendMessage<Loadable>(attachment);
+		}
+
+		private void SessionGaurd<T>(ISession session, T entity, Action<ISession, T> action)
+		{
+			if (session != null && session.IsOpen) {
+				action(session, entity);
+			}
+			else {
+				using (var s = Env.Factory.OpenSession())
+				using (var t = s.BeginTransaction()) {
+					var e = s.Load<T>(Util.GetValue(entity, "Id"));
+					action(s, e);
+					s.Flush();
+					t.Commit();
+				}
+			}
 		}
 
 		public IResult Open(Attachment attachment)
@@ -145,10 +178,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Delete()
 		{
-			foreach (var mail in SelectedItems.ToArray()) {
-				Session.Delete(mail);
-				mails.Remove(mail);
-				Items.Value.Remove(mail);
+			using(var cleaner = new FileCleaner()) {
+				foreach (var mail in SelectedItems.ToArray()) {
+					Session.Delete(mail);
+					mails.Remove(mail);
+					Items.Value.Remove(mail);
+					cleaner.Watch(mail.Attachments.Select(a => a.LocalFilename).Where(f => f != null));
+				}
 			}
 			Items.Refresh();
 		}
@@ -171,7 +207,11 @@ namespace AnalitF.Net.Client.ViewModels
 				handler.UseDefaultCredentials = true;
 			var progress = new ProgressMessageHandler();
 			var client = HttpClientFactory.Create(handler, progress);
-			client.DefaultRequestHeaders.Add("Version", version.ToString());
+			client.DefaultRequestHeaders.Add("version", version.ToString());
+			if (Settings.Value.DebugTimeout > 0)
+				client.DefaultRequestHeaders.Add("debug-timeout", Settings.Value.DebugTimeout.ToString());
+			if (Settings.Value.DebugFault)
+				client.DefaultRequestHeaders.Add("debug-fault", "true");
 			client.BaseAddress = Shell.Config.BaseUrl;
 
 			var data = new [] {
@@ -181,7 +221,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//review - я не понимаю как это может быть но если сделать dispose у observable
 			//то ожидающий запрос тоже будет отменен и cancellationtoke не нужен
 			//очевидного способа как это может работать нет но как то оно работает
-			return Tuple.Create(
+			var result = Tuple.Create(
 				Observable.FromEventPattern<HttpProgressEventArgs>(progress, "HttpReceiveProgress"),
 				Observable
 					.Using(() => client, c => c.PostAsJsonAsync("Download", data).ToObservable())
@@ -190,6 +230,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.SubscribeOn(Scheduler)
 					.Select(s => Extract(s, attachment.GetLocalFilename(Shell.Config)))
 			);
+			return Env.WrapRequest(result);
 		}
 
 		private string Extract(Task<Stream> task, string name)

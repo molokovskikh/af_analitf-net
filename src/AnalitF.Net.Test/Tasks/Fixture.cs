@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 		}
 
 		[Description("Применяет указанный набор тестовых данных")]
-		public void Execute(string name)
+		public void Execute(string name, int count = 1)
 		{
 			var type = GetTypes().FirstOrDefault(t => t.Name.Match(name));
 			if (type == null) {
@@ -32,7 +32,8 @@ namespace AnalitF.Net.Client.Test.Tasks
 				return;
 			}
 
-			new FixtureHelper().Run(type);
+			for(var i = 0; i < count; i++)
+				new FixtureHelper().Run(type);
 		}
 
 		private static IEnumerable<Type> GetTypes()

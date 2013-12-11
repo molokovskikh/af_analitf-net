@@ -10,6 +10,6 @@
 	</UserControl.InputBindings>
 
 	<Grid>
-		<Controls:DocumentViewerV2 x:Name="Document" Orientation="{Binding Orientation}"/>
+		<Controls:DocumentViewer2 x:Name="Document" Orientation="{Binding Orientation}"/>
 	</Grid>
 </UserControl>

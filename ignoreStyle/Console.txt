@@ -1,7 +1,7 @@
 \src\AnalitF.Net.Client\AppBootstrapper.cs
 \src\AnalitF.Net.Client\Config\Initializers\NHibernate.cs
 \src\AnalitF.Net.Client\Helpers\TimeIt.cs
-\src\AnalitF.Net.Client\Helpers\XamlExtentions.cs
+\src\AnalitF.Net.Client\Helpers\WpfHelper.cs
 \src\AnalitF.Net.Client\Helpers\RxHelper.cs
 \src\AnalitF.Net.Client\Program.cs
 \src\AnalitF.Net.Test\Acceptance\BaseFixture.cs

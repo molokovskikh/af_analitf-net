@@ -12,16 +12,14 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class WaybillsFixture : ViewModelFixture
+	public class WaybillsFixture : ViewModelFixture<WaybillsViewModel>
 	{
-		private WaybillsViewModel model;
 		private Waybill waybill;
 
 		[SetUp]
 		public void Setup()
 		{
 			waybill = data.CreateWaybill(address, settings);
-			model = Init<WaybillsViewModel>();
 		}
 
 		[Test]

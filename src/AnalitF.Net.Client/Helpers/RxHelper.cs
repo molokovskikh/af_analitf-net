@@ -52,6 +52,11 @@ namespace AnalitF.Net.Client.Helpers
 			return Collect(source.Changed().Select(e => e.EventArgs));
 		}
 
+		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable)
+		{
+			return new NotifyValue<T>(observable);
+		}
+
 		public static List<T> Collect<T>(this IObservable<T> source)
 		{
 			var items = new List<T>();

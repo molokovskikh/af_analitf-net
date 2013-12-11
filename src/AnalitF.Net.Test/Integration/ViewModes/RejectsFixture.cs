@@ -10,16 +10,8 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class RejectsFixture : ViewModelFixture
+	public class RejectsFixture : ViewModelFixture<RejectsViewModel>
 	{
-		private RejectsViewModel model;
-
-		[SetUp]
-		public void Setup()
-		{
-			model = Init<RejectsViewModel>();
-		}
-
 		[Test]
 		public void Mark()
 		{
