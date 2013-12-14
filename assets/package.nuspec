@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>analitf.net</id>
+    <title>analitf.net</title>
+    <version></version>
+    <authors>kvasov</authors>
+    <owners>kvasov</owners>
+    <summary>analitf.net</summary>
+    <description>analitf.net</description>
+    <projectUrl>http://www.analit.net</projectUrl>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

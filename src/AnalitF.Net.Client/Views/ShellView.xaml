@@ -302,7 +302,7 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Button Name="ShowJournal" Padding="3, 2, 3, 2" ClipToBounds="True">
+				<Button Name="ShowJournal" Padding="3, 2, 3, 2" ClipToBounds="True" IsEnabled="{Binding IsDataLoaded.Value}">
 					<StackPanel Orientation="Horizontal">
 						<Path Data="{StaticResource IconDownload}" Stretch="Uniform" Height="15" Fill="Black">
 							<Path.RenderTransform>

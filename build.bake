@@ -6,6 +6,7 @@ import System.Xml
 import System.Xml.Linq
 import System.Linq.Enumerable
 import System.Xml.XPath.Extensions
+import Mono.Cecil
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
@@ -47,8 +48,30 @@ task "deploy:service", [@DeployPipeline]
 
 task @deploy, ["git:tag", "deploy:service", "deploy:client", "deploy:update"]
 
-task "deploy:client", ["build:client"]:
-	Cp("output/setup/setup.exe", "//offdc/MMedia/Квасов Роман/", true)
+task "deploy:client", ["deploy:client:package"]
+
+task "deploy:client:package", ["build:client:package"]:
+	Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
+
+task "build:client:package", ["build:client"]:
+	bin = "output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"
+	assembly = AssemblyDefinition.ReadAssembly(bin)
+	version = assembly.Name.Version.ToString()
+	build = Configuration.Maybe.buildId
+	if build:
+		version += "-build" + build
+	RmDir("output/package", true)
+	MkDir("output/package")
+	MkDir("output/package/tools")
+	Cp("output/setup/setup.exe", "output/package/tools/analitf.net.setup.exe", true)
+	Cp(FileSet("**.*", BaseDirectory: "output/analitf.net.client/"), "output/package/tools/", true)
+	spec = "output/package/analitf.net.nuspec"
+	Cp("assets/package.nuspec", spec)
+	specDoc = XDocument.Load(spec)
+	versionNode = specDoc.Descendants().First({n| n.Name.LocalName == "version"})
+	versionNode.Value = version
+	specDoc.Save(spec)
+	Exec("cmd.exe", "/C chocolatey.bat pack", BaseDirectory: "output/package").Execute()
 
 task "deploy:update", ["build:client"]:
 	dir = Globals.UpdateDeployRoot
@@ -75,8 +98,9 @@ task "build:setup":
 	Bash("./scripts/wix.sh")
 
 task "setup:preprocess":
-	assembly = Assembly.LoadFile(Path.GetFullPath("output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"))
-	File.WriteAllText("output/setup/version.txt", assembly.GetName().Version.ToString())
+	bin = "output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"
+	assembly = AssemblyDefinition.ReadAssembly(bin)
+	File.WriteAllText("output/setup/version.txt", assembly.Name.Version.ToString())
 	name = "output/setup/files.wxs"
 	document = XDocument.Load(name)
 	manager = XmlNamespaceManager(NameTable())
