@@ -86,6 +86,8 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_news()
 		{
+			DataMother.News(session);
+
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
 			Assert.IsTrue(files.Any(f => Regex.IsMatch(f, @"newses/\d+.html")), files.Implode());

@@ -11,6 +11,7 @@ using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using Test.Support;
 using Test.Support.Suppliers;
+using DataMother = Test.Data.DataMother;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -60,13 +61,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					Config = Config
 				}.Execute(session);
 
-				session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
-					+ " values(:publicationDate, :header, :body, :destinationType)")
-					.SetParameter("publicationDate", DateTime.Now)
-					.SetParameter("header", "Тестовая новость")
-					.SetParameter("body", "<h1>Тесто</h1>")
-					.SetParameter("destinationType", "1")
-					.ExecuteUpdate();
+				DataMother.News(session);
 
 				holder.ReleaseSession(session);
 			}

@@ -12,6 +12,7 @@ using Common.MySql;
 using Common.Tools;
 using Devart.Data.MySql;
 using NHibernate;
+using NHibernate.Cfg;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Proxy;
 using NHibernate.Type;
@@ -20,6 +21,7 @@ using NHibernate.Cfg.MappingSchema;
 using Cascade = NHibernate.Mapping.ByCode.Cascade;
 using Configuration = NHibernate.Cfg.Configuration;
 using Environment = NHibernate.Cfg.Environment;
+using Settings = AnalitF.Net.Client.Models.Settings;
 
 namespace AnalitF.Net.Client.Config.Initializers
 {

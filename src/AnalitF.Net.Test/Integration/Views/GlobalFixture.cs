@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -19,8 +21,10 @@ using AnalitF.Net.Client.ViewModels;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
+using log4net.Config;
 using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
+using NHibernate.Util;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CheckBox = System.Windows.Controls.CheckBox;
@@ -131,7 +135,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public async void Quick_search()
 		{
 			session.DeleteEach<Order>();
-			var order = MakeOrder(toAddress: session.Query<Client.Models.Address>().OrderBy(a => a.Name).First());
+			var order = MakeOrder(toAddress: session.Query<Address>().OrderBy(a => a.Name).First());
 			var offer = session.Query<Offer>().First(o => o.ProductSynonym != order.Lines[0].ProductSynonym);
 			order.AddLine(offer, 1);
 			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
@@ -340,7 +344,12 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Offers_search()
 		{
-			var term = new string(session.Query<Offer>().First().ProductSynonym.Take(3).ToArray());
+			//нам нужно лубое наименование где есть хотя бы 3 буквы
+			//тк цифры будут считаться вводом для редактирования
+			var term = session.Query<Offer>().Take(100).ToArray().Select(o => Regex.Match(o.ProductSynonym, "[a-zA-Zа-яА-Я]{3}"))
+				.Where(m => m.Success)
+				.Select(m => m.Captures[0].Value)
+				.First();
 			Start();
 			Click("SearchOffers");
 
