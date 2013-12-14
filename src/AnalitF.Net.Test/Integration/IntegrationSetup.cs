@@ -31,25 +31,32 @@ namespace AnalitF.Net.Test.Integration
 	[SetUpFixture]
 	public class IntegrationSetup
 	{
+		private HttpSelfHostConfiguration cfg;
+		private HttpSelfHostServer server;
+		private uint serverUserId;
+
+		public static bool isInitialized = false;
 		public static ISessionFactory Factory;
 		public static Configuration Configuration;
 		public static Client.Config.Config clientConfig = new Client.Config.Config();
 
 		public static Config serviceConfig;
-		private HttpSelfHostServer server;
-		private static Task InitServerTask;
-		private uint serverUserId;
-
 
 		[SetUp]
 		public void Setup()
 		{
+			if (isInitialized) {
+				if (server == null) {
+					InitWebServer(cfg);
+				}
+				return;
+			}
+
 			clientConfig.BaseUrl = new Uri("http://localhost:7018");
 			clientConfig.RootDir = "app";
 			clientConfig.RequestInterval = 1.Second();
 
 			FileHelper.InitDir("var");
-
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
 
@@ -61,10 +68,9 @@ namespace AnalitF.Net.Test.Integration
 			Factory = nhibernate.Factory;
 			Configuration = nhibernate.Configuration;
 
-			var cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
+			cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
 			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 			serviceConfig = Application.InitApp(cfg);
-			server = new HttpSelfHostServer(cfg);
 
 			if (IsServerStale()) {
 				FileHelper.InitDir("data", "backup");
@@ -73,13 +79,15 @@ namespace AnalitF.Net.Test.Integration
 				ImportData();
 				BackupData();
 			}
-			InitWebServer();
+			InitWebServer(cfg);
+			isInitialized = true;
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
 			server.Dispose();
+			server = null;
 		}
 
 		private bool IsServerStale()
@@ -112,8 +120,9 @@ namespace AnalitF.Net.Test.Integration
 			return holder.GetSessionFactory(typeof(ActiveRecordBase));
 		}
 
-		public void InitWebServer()
+		public void InitWebServer(HttpSelfHostConfiguration cfg)
 		{
+			server = new HttpSelfHostServer(cfg);
 			server.OpenAsync();
 		}
 

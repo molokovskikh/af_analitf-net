@@ -77,6 +77,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Cancel_loading()
 		{
+			Env.RequestDelay = 10.Second();
 			var attachment = Download();
 			Assert.IsTrue(attachment.IsDownloading);
 			WaitIdle();

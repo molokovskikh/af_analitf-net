@@ -360,7 +360,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Input(view, "Offers", Key.Enter);
 			dispatcher.Invoke(() => {
 				var offers = (DataGrid)view.FindName("Offers");
-				Assert.That(offers.Items.Count, Is.GreaterThan(0));
+				Assert.That(offers.Items.Count, Is.GreaterThan(0), "Поисковый запрос '{0}'", term);
 			});
 		}
 
