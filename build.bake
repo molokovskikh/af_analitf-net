@@ -51,6 +51,10 @@ task @deploy, ["git:tag", "deploy:service", "deploy:client", "deploy:update"]
 task "deploy:client", ["deploy:client:package"]
 
 task "deploy:client:package", ["build:client:package"]:
+	impersonate = globals.Configuration.Maybe.impersonate != null
+	if impersonate:
+		ImpersonateUser("deployer", '$sdfsd887!'):
+			Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
 	Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
 
 task "build:client:package", ["build:client"]:
