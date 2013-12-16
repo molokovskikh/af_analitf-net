@@ -183,10 +183,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			foreach (var data in synonyms) {
 				var productSynonymValue = data.Item1;
 				if (price.ProductSynonyms.Any(s => s.Name == productSynonymValue))
-					productSynonymValue += " " + random.Next(100000).ToString();
+					productSynonymValue += " " + random.Next();
 				var producerSynonymValue = data.Item3;
 				if (price.ProducerSynonyms.Any(s => s.Name == producerSynonymValue))
-					producerSynonymValue += " " + random.Next(10000).ToString();
+					producerSynonymValue += " " + random.Next();
 
 				var productSynonym = price.AddProductSynonym(productSynonymValue, data.Item2);
 				var producerSynonym = price.AddProducerSynonym(producerSynonymValue, data.Item4);
