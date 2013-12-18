@@ -111,18 +111,23 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalog = FindMultiOfferCatalog();
 			MakeDifferentCategory(catalog);
 
+			var baseCount = model.Offers.Value.Count(o => o.Price.BasePrice);
+			var notBaseCount = model.Offers.Value.Count(o => o.Price.NotBase);
 			var count = model.Offers.Value.Count;
+
+			Assert.That(baseCount, Is.GreaterThan(0));
+			Assert.That(notBaseCount, Is.GreaterThan(0));
 			model.CurrentFilter.Value = model.Filters[1];
-			Assert.That(model.Offers.Value.Count, Is.EqualTo(1));
-			Assert.That(model.Offers.Value[0].Price.BasePrice, Is.True);
+			Assert.AreEqual(baseCount, model.Offers.Value.Count);
+			Assert.IsTrue(model.Offers.Value[0].Price.BasePrice);
 
 			model.CurrentFilter.Value = model.Filters[0];
-			Assert.That(model.Offers.Value.Count, Is.EqualTo(count));
+			Assert.AreEqual(count, model.Offers.Value.Count);
 
 			model.CurrentFilter.Value = model.Filters[2];
-			Assert.That(model.Offers.Value.Count, Is.EqualTo(count - 1));
-			Assert.That(model.Offers.Value[0].Price.BasePrice,
-				Is.False, model.Offers.Value[0].Price.Id.ToString());
+			Assert.AreEqual(notBaseCount, model.Offers.Value.Count);
+			Assert.IsFalse(model.Offers.Value[0].Price.BasePrice,
+				model.Offers.Value[0].Price.Id.ToString());
 		}
 
 		[Test]
