@@ -1,5 +1,5 @@
 #!/bin/sh
-wixpath=$(cygpath -wa $(dirname `which candle`))
+wixpath=$(cygpath -wa "$(dirname "`which candle`")")
 output=output/setup
 input=build
 

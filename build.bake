@@ -55,7 +55,8 @@ task "deploy:client:package", ["build:client:package"]:
 	if impersonate:
 		ImpersonateUser("deployer", '$sdfsd887!'):
 			Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
-	Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
+	else:
+		Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
 
 task "build:client:package", ["build:client"]:
 	bin = "output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"
