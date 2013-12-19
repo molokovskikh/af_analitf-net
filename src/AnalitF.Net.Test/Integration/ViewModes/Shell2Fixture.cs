@@ -292,7 +292,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsFalse(correction.IsOrderSend);
 			Assert.That(offers.Count, Is.GreaterThan(0));
 			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
-			Assert.AreEqual(1, offer.OrderCount);
+			Assert.AreEqual(1, offer.OrderCount,
+				String.Format("рассматриваемый offerId = {0}, существующие = {1}",
+					order.Lines[0].OfferId,
+					session.Query<OrderLine>().Implode(l => String.Format("offerId = {0}, ошибка = {1}", l.OfferId, l.SendError))));
 		}
 
 		[Test]
