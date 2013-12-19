@@ -81,7 +81,12 @@ task "build:client:package", ["build:client"]:
 task "deploy:update", ["build:client"]:
 	dir = Globals.UpdateDeployRoot
 	Rm("$dir/*")
-	Cp("output/Updater/*", dir, true)
+	impersonate = Configuration.Maybe.impersonate != null
+	if impersonate:
+		ImpersonateUser("deployer", '$sdfsd887!'):
+			Cp("output/Updater/*", dir, true)
+	else:
+		Cp("output/Updater/*", dir, true)
 
 task "build:client", ["Production", "before:build:client", @BuildApp, "after:build:app", "build:setup", "build:update", "after:build:client"]
 
