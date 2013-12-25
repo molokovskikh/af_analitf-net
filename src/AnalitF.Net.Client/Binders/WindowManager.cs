@@ -45,6 +45,7 @@ namespace AnalitF.Net.Client.Extentions
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 			if (UnitTesting) {
+				ScreenExtensions.TryActivate(rootModel);
 				ContinueViewDialog(rootModel);
 				return true;
 			}

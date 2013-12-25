@@ -630,20 +630,21 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CheckSettings())
 				return Enumerable.Empty<IResult>();
 
+			if(UnitTesting)
+				command = OnCommandExecuting(command);
+
 			var progress = new BehaviorSubject<Progress>(new Progress());
 			var wait = new SyncViewModel(progress) {
 				GenericErrorMessage = command.ErrorMessage
 			};
 			command.Config = Config;
 			command.Progress = progress;
-			command.Configure(Settings.Value);
-
-			if(UnitTesting)
-				command = OnCommandExecuting(command);
 
 			var results = new IResult[0];
 			RunTask(wait,
 				t => {
+					//настраивать комманду нужно каждый раз тк учетны данные могут быть изменены в RunTask
+					command.Configure(Settings.Value);
 					command.Token = t;
 					return func(command);
 				},
@@ -720,6 +721,9 @@ namespace AnalitF.Net.Client.ViewModels
 						model.SelectedTab.Value = "LoginTab";
 						windowManager.ShowFixedDialog(model);
 						done = !model.IsCredentialsChanged;
+						if (!done) {
+							session.Refresh(Settings.Value);
+						}
 					}
 				}
 			} while (!done);

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -57,7 +58,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
 
 			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
-			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0));
+			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0), "номер строки заказа {0}", item.RowId);
 		}
 	}
 }

@@ -247,7 +247,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				shell.Settings.Value.OpenRejects);
 		}
 
-		//todo await?
 		[Test]
 		public void Repeat_request_on_unathorized_exception()
 		{
@@ -271,6 +270,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
 			Assert.IsTrue(settings);
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Обновление завершено успешно"));
+			Assert.AreEqual("test", ((NetworkCredential)stub.Credentials).UserName);
+			Assert.AreEqual("aioxct2", ((NetworkCredential)stub.Credentials).Password);
 		}
 
 		[Test]

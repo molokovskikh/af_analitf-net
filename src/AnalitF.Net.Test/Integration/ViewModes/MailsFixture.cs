@@ -134,7 +134,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 		private string WaitNotification()
 		{
-			return shell.Notifications.Dump().Timeout(10.Second()).First();
+			return shell.Notifications.Timeout(10.Second()).First();
 		}
 
 		private Attachment Download()

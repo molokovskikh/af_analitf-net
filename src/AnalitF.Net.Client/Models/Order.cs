@@ -209,7 +209,7 @@ namespace AnalitF.Net.Client.Models
 						line.MinPrice = line.Order.Price.Id;
 					}
 					else {
-						line.LeaderPrice = session.Query<Offer>().Where(o => o.Cost == line.MinCost)
+						line.MinPrice = session.Query<Offer>().Where(o => o.Cost == line.MinCost)
 							.Select(o => o.Price.Id)
 							.FirstOrDefault();
 					}
