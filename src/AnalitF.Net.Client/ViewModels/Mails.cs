@@ -206,7 +206,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;
 			var progress = new ProgressMessageHandler();
-			var client = HttpClientFactory.Create(handler, progress);
+			var handlers = Settings.Value.Handlers().Concat(new [] { progress }).ToArray();
+			var client = HttpClientFactory.Create(handler, handlers);
 			client.DefaultRequestHeaders.Add("version", version.ToString());
 			if (Settings.Value.DebugTimeout > 0)
 				client.DefaultRequestHeaders.Add("debug-timeout", Settings.Value.DebugTimeout.ToString());

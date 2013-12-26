@@ -5,6 +5,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -398,6 +399,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual ICredentials GetCredential()
 		{
 			return new NetworkCredential(UserName, Password);
+		}
+
+		public virtual DelegatingHandler[] Handlers()
+		{
+			return new [] {
+				new RasHandler(RasConnection),
+			};
 		}
 	}
 }

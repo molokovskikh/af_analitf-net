@@ -1,6 +1,15 @@
-﻿using AnalitF.Net.Client.Helpers;
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Handlers;
+using System.Reactive.Disposables;
+using System.Threading;
+using System.Threading.Tasks;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Devart.Data.MySql;
 using DotRas;
+using NPOI.HSSF.Record.Chart;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -58,6 +67,56 @@ namespace AnalitF.Net.Test.Unit
 				helper.Open();
 				Assert.AreEqual(0, RasConnection.GetActiveConnections().Count);
 			}
+		}
+
+		[Test]
+		public void Ras_download()
+		{
+			using (var client = RasHttp()) {
+				var t = client.GetAsync("http://google.com");
+				Safe(t.Wait);
+				Assert.AreEqual(1, RasConnection.GetActiveConnections().Count);
+			}
+			Assert.AreEqual(0, RasConnection.GetActiveConnections().Count);
+		}
+
+		[Test]
+		public void Concurent_connections()
+		{
+			using (var disposable = new CompositeDisposable()) {
+				var client1 = RasHttp();
+				disposable.Add(client1);
+				var r1 = client1.GetAsync("http://google.com");
+				Safe(r1.Wait);
+
+				var client2 = RasHttp();
+				disposable.Add(client2);
+				var r2 = client2.GetAsync("http://google.com");
+
+				client1.Dispose();
+				Assert.AreEqual(1, RasConnection.GetActiveConnections().Count);
+				client2.Dispose();
+				Assert.AreEqual(0, RasConnection.GetActiveConnections().Count);
+			}
+		}
+
+		public HttpClient RasHttp()
+		{
+			var handler = new HttpClientHandler();
+			var progress = new ProgressMessageHandler();
+			var ras = new RasHandler(EntryName);
+			return HttpClientFactory.Create(handler, ras, progress);
+		}
+
+		public Exception Safe(Action action)
+		{
+			try {
+				action();
+			}
+			catch(Exception e) {
+				return e;
+			}
+			return null;
 		}
 	}
 }
