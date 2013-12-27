@@ -284,13 +284,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			Collect(shell.Update());
 			Assert.AreEqual(1, dialogs.Count);
-
 			var correction = (Correction)dialogs[0];
 			Activate(correction);
+
 			Assert.That(correction.Lines.Count, Is.GreaterThan(0));
 			correction.CurrentLine.Value = correction.Lines.First();
 			var offers = correction.Offers.Value;
 			Assert.IsFalse(correction.IsOrderSend);
+			order = session.Query<Order>().First();
+			//тк мы оперируем случайными данными то мы можем изменить OfferId заказнной позиции если
+			//все остальные атрибуты совпали а цена у нее ниже
 			Assert.That(offers.Count, Is.GreaterThan(0));
 			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
 			Assert.AreEqual(1, offer.OrderCount,
