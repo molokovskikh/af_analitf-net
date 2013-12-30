@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -113,7 +114,16 @@ namespace AnalitF.Net.Client.Binders
 
 		public override void DeactivateItem(IScreen item, bool close)
 		{
-			base.DeactivateItem(item, close);
+			if (item == null)
+				return;
+			CloseStrategy.Execute(new[] { item }, (canClose, closable) => {
+				if (!canClose)
+					return;
+				if (item.Equals(ActiveItem))
+					ChangeActiveItem(null, close);
+				else
+					ScreenExtensions.TryDeactivate(item, close);
+			});
 
 			if (close) {
 				if (ActiveItem == null) {

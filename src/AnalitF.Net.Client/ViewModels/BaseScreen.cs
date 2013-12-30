@@ -313,6 +313,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Dispose()
 		{
+			OnCloseDisposable.Dispose();
 			if (StatelessSession != null) {
 				StatelessSession.Dispose();
 				StatelessSession = null;

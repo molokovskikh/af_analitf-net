@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Click("ShowMnn");
 			WaitForElement("Mnns");
 
-			CheckViewModelLeak(typeof(MnnViewModel));
+			CheckViewModelLeak(typeof(Main), typeof(MnnViewModel));
 		}
 
 		[Test]
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Click("ShowPrice");
 			WaitForElement("Prices");
 
-			CheckViewModelLeak(typeof(PriceViewModel));
+			CheckViewModelLeak(typeof(Main), typeof(PriceViewModel));
 		}
 
 		[Test]
@@ -65,11 +65,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitForElement("CatalogNames");
 
 			Toggle("CatalogSearch");
-			WaitForElement("Catalogs");
+			WaitForElement("Items");
 			Toggle("CatalogSearch");
 			WaitForElement("CatalogNames");
 
-			CheckViewModelLeak(typeof(CatalogViewModel), typeof(CatalogNameViewModel));
+			CheckViewModelLeak(typeof(Main), typeof(CatalogViewModel), typeof(CatalogNameViewModel));
 		}
 
 		private void Toggle(string id)

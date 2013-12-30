@@ -132,6 +132,7 @@ task "build:update", ["before:build:update", @BuildApp]:
 		Rm(FileSet("output/Updater/*.pdb"))
 
 task "git:tag":
-	return unless Globals.Environment == @production
+	print Globals.Environment
+	return unless Globals.Environment == @Production
 	kind = Configuration.Maybe.kind
 	Bash("./scripts/tag-release.sh $kind")

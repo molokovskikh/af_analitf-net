@@ -15,17 +15,33 @@ namespace AnalitF.Net.Test.Unit
 		private DefaultScreen defaultScreen;
 		private Navigator navigator;
 
-		public class Screen1 : Screen
+		public class TestScreen : Screen
+		{
+			public bool IsClosed;
+
+			protected override void OnDeactivate(bool close)
+			{
+				IsClosed = close;
+				base.OnDeactivate(close);
+			}
+		}
+
+		public class Screen1 : TestScreen
 		{
 		}
 
-		public class Screen2 : Screen
+		public class Screen2 : TestScreen
+		{
+		}
+
+		public class Screen3 : TestScreen
 		{
 		}
 
 		public class DefaultScreen : Screen, IActivateEx
 		{
 			public bool IsClosed;
+			public bool IsDisposed;
 
 			public override void TryClose(bool? dialogResult)
 			{
@@ -51,8 +67,10 @@ namespace AnalitF.Net.Test.Unit
 
 			protected override void OnDeactivate(bool close)
 			{
-				if (!IsClosed)
+				if (!IsClosed) {
 					IsClosed = close;
+					IsDisposed = true;
+				}
 				base.OnDeactivate(close);
 			}
 		}
@@ -151,6 +169,19 @@ namespace AnalitF.Net.Test.Unit
 			ScreenExtensions.TryActivate(shell);
 			Assert.IsTrue(shell.IsActive);
 			Assert.IsTrue(navigator.DefaultScreen.IsActive);
+		}
+
+		[Test]
+		public void Close_items_from_stack()
+		{
+			var s1 = new Screen1();
+			var s2 = new Screen2();
+			var s3 = new Screen3();
+			navigator.NavigateRoot(s1);
+			navigator.Navigate(s2);
+			navigator.NavigateRoot(s3);
+			Assert.IsTrue(s2.IsClosed);
+			Assert.IsTrue(s1.IsClosed);
 		}
 
 		private void Init()
