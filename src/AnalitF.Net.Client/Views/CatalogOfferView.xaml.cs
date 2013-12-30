@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Views
 
 			EditBehavior.Attach(grid);
 			DataGridHelper.CalculateColumnWidths(Offers);
-			StyleHelper.ApplyStyles(typeof(Offer), HistoryOrders, Application.Current.Resources, Legend);
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);
 		}
 	}
