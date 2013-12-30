@@ -44,8 +44,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			ApplyMnnFilter();
 
+			var expectedNames = session.Query<CatalogName>()
+				.Where(n => n.Mnn.Id == nameViewModel.CurrentCatalogName.Value.Mnn.Id && n.HaveOffers)
+				.ToArray();
 			Assert.That(nameViewModel.CatalogNames.Value.Select(c => c.Name).ToList(),
-				Is.EquivalentTo(new[] { nameViewModel.CurrentCatalogName.Value.Name }));
+				Is.EquivalentTo(expectedNames.Select(n => n.Name).ToArray()));
 			catalogModel.FilterByMnn = false;
 			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(1));
 		}
