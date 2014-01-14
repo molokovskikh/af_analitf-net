@@ -103,8 +103,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var docSettings = doc.Settings;
 			if (docSettings != null) {
-				yield return new DialogResult(new SimpleSettings(docSettings), @fixed: true) {
-					ShowFixed = true
+				yield return new DialogResult(new SimpleSettings(docSettings), sizeToContent: true) {
+					ShowSizeToContent = true
 				};
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);

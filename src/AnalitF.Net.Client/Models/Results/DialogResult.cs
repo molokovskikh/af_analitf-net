@@ -13,14 +13,14 @@ namespace AnalitF.Net.Client.Models.Results
 	{
 		public ShellViewModel Shell;
 		public Screen Model;
-		public bool ShowFixed;
+		public bool ShowSizeToContent;
 		public bool FullScreen;
 
-		public DialogResult(Screen model, bool fullScreen = false, bool @fixed = false)
+		public DialogResult(Screen model, bool fullScreen = false, bool sizeToContent = false)
 		{
 			Model = model;
 			FullScreen = fullScreen;
-			ShowFixed = @fixed;
+			ShowSizeToContent = sizeToContent;
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Models.Results
 			}
 
 			Util.SetValue(Model, "Shell", Shell);
-			if (ShowFixed)
+			if (ShowSizeToContent)
 				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else
 				args.WasCancelled = !manager.ShowDialog(Model, null, settings).GetValueOrDefault(true);

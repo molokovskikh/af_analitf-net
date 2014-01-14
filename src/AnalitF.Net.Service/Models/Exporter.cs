@@ -402,9 +402,52 @@ where PublicationDate < curdate() + interval 1 day
 				});
 			}
 
+			ExportPromotions(result);
 			ExportMails(result);
 			ExportDocs(result);
 			ExportOrders(result);
+		}
+
+		private void ExportPromotions(List<UpdateData> result)
+		{
+			if (!clientSettings.ShowAdvertising)
+				return;
+
+			var ids = session.CreateSQLQuery(@"
+select Id
+from usersettings.SupplierPromotions sp
+where sp.Status = 1 and (sp.RegionMask & :regionMask > 0)")
+				.SetParameter("regionMask", userSettings.WorkRegionMask)
+				.List<uint>();
+
+			string sql;
+			sql = @"
+select
+	sp.Id,
+	sp.SupplierId,
+	sp.Name,
+	sp.Annotation
+from usersettings.SupplierPromotions sp
+where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
+			Export(result, sql, "Promotions", new { regionMask = userSettings.WorkRegionMask });
+			sql = @"
+select
+	pc.CatalogId,
+	pc.PromotionId
+from usersettings.PromotionCatalogs pc
+	join usersettings.SupplierPromotions sp on pc.PromotionId = sp.Id
+where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
+			Export(result, sql, "PromotionCatalogs", new { regionMask = userSettings.WorkRegionMask });
+
+			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
+			if (Directory.Exists(Config.PromotionsPath)) {
+				foreach (var promotion in promotions) {
+					var local = promotion.GetFilename(Config);
+					if (String.IsNullOrEmpty(local))
+						continue;
+					result.Add(UpdateData.FromFile(promotion.GetArchiveName(local), local));
+				}
+			}
 		}
 
 		private void ExportMails(List<UpdateData> result)
@@ -787,8 +830,8 @@ group by dh.Id")
 			}
 			else {
 				Export(files);
-				CheckUpdate(files);
-				CheckAds(files);
+				ExportUpdate(files);
+				ExportAds(files);
 			}
 
 			var watch = new Stopwatch();
@@ -836,7 +879,7 @@ group by dh.Id")
 			}
 		}
 
-		public void CheckAds(List<UpdateData> zip)
+		public void ExportAds(List<UpdateData> zip)
 		{
 			if (!clientSettings.ShowAdvertising)
 				return;
@@ -868,7 +911,7 @@ group by dh.Id")
 			scanned.Scan(dir, true);
 		}
 
-		private void CheckUpdate(List<UpdateData> zip)
+		private void ExportUpdate(List<UpdateData> zip)
 		{
 			var file = Path.Combine(UpdatePath, "version.txt");
 			if (!File.Exists(file))

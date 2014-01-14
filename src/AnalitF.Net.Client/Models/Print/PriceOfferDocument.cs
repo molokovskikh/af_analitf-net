@@ -60,12 +60,16 @@ namespace AnalitF.Net.Client.Models.Print
 						FontWeight = FontWeights.Bold,
 						ColumnSpan = 2
 					},
-					new TableCell(new Paragraph(new Run("Позиций: " + offers.Count))) {
+					new TableCell(new Paragraph(new Run("Позиций: " + offers.Count)) {
+						KeepTogether = true
+					}) {
 						BorderBrush = Brushes.Black,
 						BorderThickness = new Thickness(1, 0, 0, 1),
 						FontWeight = FontWeights.Bold
 					},
-					new TableCell(new Paragraph(new Run("Сумма: " + sumLabel))) {
+					new TableCell(new Paragraph(new Run("Сумма: " + sumLabel)) {
+						KeepTogether = true
+					}) {
 						BorderBrush = Brushes.Black,
 						BorderThickness = new Thickness(1, 0, 1, 1),
 						FontWeight = FontWeights.Bold,

@@ -88,9 +88,14 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(p => p.MinOrderSum);
 			});
 
-			//mapper.Class<DelayOfPayment>(m => {
-			//	m.ManyToOne(p => p.Price, t => t.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
-			//});
+			mapper.Class<Promotion>(m => {
+				m.Bag(o => o.Catalogs, c => {
+					c.Table("PromotionCatalogs");
+					c.Key(km => km.Column("PromotionId"));
+				}, cm => {
+					cm.ManyToMany(km => km.Column("CatalogId"));
+				});
+			});
 
 			mapper.Class<Price>(m => {
 				m.ComponentAsId(c => c.Id);

@@ -4,6 +4,8 @@
 	{
 		public virtual uint Id { get; set; }
 
+		public virtual ulong WorkRegionMask { get; set; }
+
 		public virtual bool AllowDownloadUnconfirmedOrders { get; set; }
 	}
 }

@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client
 			TaskScheduler.UnobservedTaskException += (sender, args) => {
 				if (!FailFast)
 					args.SetObserved();
-				log.Error("Ошибка пир выполнении задачи", args.Exception.GetBaseException());
+				log.Error("Ошибка при выполнении задачи", args.Exception.GetBaseException());
 			};
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
 				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);

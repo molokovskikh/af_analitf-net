@@ -67,6 +67,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogViewModel ParentModel { get; private set; }
 
+		public PromotionPopup Promotions { get; set; }
+
 		public QuickSearch<CatalogName> CatalogNamesSearch { get; private set; }
 		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
 
@@ -105,6 +107,13 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 
 		public NotifyValue<object> CurrentItem { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			Promotions = new PromotionPopup(StatelessSession, Shell.Config);
+		}
 
 		public override void Update()
 		{
@@ -190,14 +199,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ActivateCatalog()
 		{
-			activeItemType = typeof(Catalog);
-			CurrentItem.Value = CurrentCatalog;
+			if (activeItemType != typeof(Catalog)) {
+				activeItemType = typeof(Catalog);
+				CurrentItem.Value = CurrentCatalog;
+				Promotions.Activate(CurrentCatalogName);
+			}
 		}
 
 		public void ActivateCatalogName()
 		{
 			activeItemType = typeof(CatalogName);
 			CurrentItem.Value = CurrentCatalogName.Value;
+			Promotions.Deactivate();
 		}
 	}
 }

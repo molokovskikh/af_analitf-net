@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
@@ -169,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Name.Description.Id));
 		}
 
 		public void ShowCatalogWithMnnFilter()

@@ -2,6 +2,11 @@
 using System.IO;
 using Common.MySql;
 using Iesi.Collections;
+using System.Linq;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using Inflector;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Config
 {
@@ -75,6 +80,20 @@ namespace AnalitF.Net.Client.Config
 				Directory.CreateDirectory(RootDir);
 			if (!Directory.Exists(TmpDir))
 				Directory.CreateDirectory(TmpDir);
+		}
+
+		public string MapToFile(object entity)
+		{
+			try
+			{
+				var clazz = NHibernateUtil.GetClass(entity);
+				var root = Path.Combine(RootDir, clazz.Name.Pluralize());
+				var id = Util.GetValue(entity, "Id");
+				return Directory.GetFiles(root, id + ".*").FirstOrDefault();
+			}
+			catch(DirectoryNotFoundException) {
+				return null;
+			}
 		}
 	}
 }

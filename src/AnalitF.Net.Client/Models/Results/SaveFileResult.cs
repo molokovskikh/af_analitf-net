@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.IO;
 using Caliburn.Micro;
+using Common.Tools;
 using Microsoft.Win32;
 
 namespace AnalitF.Net.Client.Models.Results
@@ -11,6 +14,13 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public SaveFileDialog Dialog = new SaveFileDialog();
 		public Extentions.WindowManager Manager;
+
+		public SaveFileResult(Dictionary<string, string> formats, string filename = null)
+		{
+			Dialog.FileName = filename;
+			Dialog.DefaultExt = formats.Values.FirstOrDefault();
+			Dialog.Filter = formats.Implode(k => String.Format("{0}|*{1}", k.Key, k.Value), "|");
+		}
 
 		public SaveFileResult(string defaultFilename = null)
 		{
@@ -36,7 +46,7 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			try
 			{
-				using(var f = new StreamWriter(Dialog.FileName)) {
+				using(var f = File.CreateText(Dialog.FileName)) {
 					f.Write(text);
 				}
 			}

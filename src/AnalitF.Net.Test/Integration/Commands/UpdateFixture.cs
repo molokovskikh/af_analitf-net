@@ -304,5 +304,32 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(attachment.LocalFilename, Is.StringEnding(String.Format(@"attachments\{0}.txt", attachment.Id)));
 			Assert.AreEqual(Path.GetFullPath(open.Filename), attachment.LocalFilename);
 		}
+
+		[Test]
+		public void Load_promotions()
+		{
+			var serverUser = ServerUser();
+			var supplier = serverUser.GetActivePrices(session).First().Supplier;
+			var catalog = session.Load<TestCatalogProduct>(localSession.Query<Catalog>().First(c => c.HaveOffers).Id);
+			var testPromotion = new TestPromotion {
+				Name = "Test",
+				Annotation = "Test",
+				Status = true,
+				Supplier = supplier,
+				RegionMask = serverUser.WorkRegionMask,
+				Catalogs = {
+					catalog
+				}
+			};
+			session.Save(testPromotion);
+			testPromotion.Save(serviceConfig.PromotionsPath, "test");
+
+			Run(new UpdateCommand());
+
+			Assert.That(localSession.Query<Promotion>().Count(), Is.GreaterThan(1));
+			var promotion = localSession.Get<Promotion>(testPromotion.Id);
+			promotion.Init(clientConfig);
+			Assert.IsTrue(File.Exists(promotion.LocalFilename));
+		}
 	}
 }

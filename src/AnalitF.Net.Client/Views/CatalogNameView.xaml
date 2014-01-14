@@ -28,8 +28,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2"
-			Grid.Column="0" />
+		<ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
 
 		<GridSplitter Grid.Row="1"
 			Grid.Column="1"
@@ -46,6 +45,10 @@
 					Binding="{Binding Form}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
+
+		<ContentControl Name="Promotions" Grid.Row="1" Grid.Column="2"
+			HorizontalAlignment="Center" VerticalAlignment="Center"
+			Visibility="{Binding Promotions.Visible.Value, Converter={StaticResource BoolToHidden}}" />
 
 		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2" />
 		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2"

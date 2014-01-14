@@ -4,6 +4,7 @@ using System.Windows.Input;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
@@ -145,7 +146,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DescriptionViewModel(CurrentCatalog.Name.Description));
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Name.Description.Id));
 		}
 
 		public void ShowCatalogWithMnnFilter()

@@ -14,6 +14,7 @@
 		public string DocsPath { get; set; }
 		public string CachePath { get; set; }
 		public string AttachmentsPath { get; set; }
+		public string PromotionsPath { get; set; }
 
 		public uint MaxProducerCostPriceId { get; set; }
 		public uint MaxProducerCostCostId { get; set; }

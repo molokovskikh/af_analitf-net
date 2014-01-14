@@ -98,6 +98,7 @@
     <Compile Include="Models\PendingDocLog.cs" />
     <Compile Include="Models\PendingMailLog.cs" />
     <Compile Include="Models\PendingOrderLog.cs" />
+    <Compile Include="Models\Promotion.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Models\UserPrice.cs" />
     <Compile Include="Models\UserSettings.cs" />

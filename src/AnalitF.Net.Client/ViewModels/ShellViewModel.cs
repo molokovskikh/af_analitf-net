@@ -555,7 +555,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
-				yield return new DialogResult(orderWarning, @fixed: true);
+				yield return new DialogResult(orderWarning, sizeToContent: true);
 			}
 
 			var results = Sync(new SendOrders(CurrentAddress, force));

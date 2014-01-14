@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
@@ -171,15 +172,38 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Search_in_catalog_names()
 		{
-			var name = (CatalogNameViewModel)catalogModel.ActiveItem;
 			shell.ActiveItem = catalogModel;
-			name.CurrentCatalog = name.Catalogs.Value.First();
-			name.EnterCatalog();
+			nameViewModel.CurrentCatalog = nameViewModel.Catalogs.Value.First();
+			nameViewModel.EnterCatalog();
+
 			var offer = (CatalogOfferViewModel)shell.ActiveItem;
 			offer.SearchInCatalog(null, WpfHelper.TextArgs("а"));
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
 			Assert.That(catalogModel.SearchText, Is.EqualTo("а"));
 			Assert.That(catalogModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));
+		}
+
+		[Test]
+		public void Load_promotion()
+		{
+			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
+			var promotion = new Promotion {
+				Supplier = session.Query<Supplier>().First(),
+				Name = "Тестовая промо-акция",
+				Annotation = "Тестовая промо-акция"
+			};
+			promotion.Catalogs.Add(catalog);
+			session.Save(promotion);
+
+			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Id == catalog.Name.Id);
+			var name = nameViewModel.CurrentCatalogName;
+			var promotions = nameViewModel.Promotions;
+			Assert.IsFalse(promotions.Visible.Value);
+			nameViewModel.ActivateCatalog();
+
+			Assert.IsTrue(promotions.Visible.Value);
+			Assert.AreEqual(name.Value.Name, promotions.Name.Value.Name);
+			Assert.That(promotions.Promotions.Value.Count, Is.GreaterThan(0));
 		}
 
 		private void ApplyMnnFilter()

@@ -275,6 +275,7 @@
     <Compile Include="Models\OrderLine.cs" />
     <Compile Include="Models\Price.cs" />
     <Compile Include="Models\ProgressReporter.cs" />
+    <Compile Include="Models\Promotion.cs" />
     <Compile Include="Models\Reject.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
@@ -308,7 +309,7 @@
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\Debug.cs" />
-    <Compile Include="ViewModels\DescriptionViewModel.cs" />
+    <Compile Include="ViewModels\Dialogs\DocModel.cs" />
     <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\PostUpdate.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
@@ -329,6 +330,7 @@
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
     <Compile Include="ViewModels\Parts\Navigator.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
+    <Compile Include="ViewModels\Parts\PromotionPopup.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\PriceOfferViewModel.cs" />
@@ -358,8 +360,8 @@
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DescriptionView.xaml.cs">
-      <DependentUpon>DescriptionView.xaml</DependentUpon>
+    <Compile Include="Views\Dialogs\DocModel.xaml.cs">
+      <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\OrderWarning.xaml.cs">
       <DependentUpon>OrderWarning.xaml</DependentUpon>
@@ -372,6 +374,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Parts\PromotionPopup.xaml.cs">
+      <DependentUpon>PromotionPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Journal.xaml.cs">
       <DependentUpon>Journal.xaml</DependentUpon>
@@ -505,7 +510,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DescriptionView.xaml">
+    <Page Include="Views\Dialogs\DocModel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -522,6 +527,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Parts\PromotionPopup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

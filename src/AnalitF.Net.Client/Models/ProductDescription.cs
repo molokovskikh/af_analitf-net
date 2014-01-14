@@ -1,10 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Windows;
 using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class ProductDescription
+	public interface IDocModel
+	{
+		string DisplayName { get; }
+		FlowDocument ToFlowDocument();
+	}
+
+	public class ProductDescription : IDocModel
 	{
 		public virtual uint Id { get; set; }
 		public virtual string Name { get; set; }
@@ -46,6 +55,46 @@ namespace AnalitF.Net.Client.Models
 		public virtual string FullName
 		{
 			get { return String.Format("{0} ({1})", Name, EnglishName); }
+		}
+
+		public virtual string DisplayName
+		{
+			get { return "Описание " + FullName; }
+		}
+
+		public virtual FlowDocument ToFlowDocument()
+		{
+			var document = new FlowDocument();
+			var properties = new List<Tuple<int, string, string>>();
+			foreach (var property in GetType().GetProperties()) {
+				var attribute = property.GetCustomAttributes(typeof(DisplayAttribute), true)
+					.OfType<DisplayAttribute>()
+					.FirstOrDefault();
+
+				if (attribute == null || String.IsNullOrEmpty(attribute.Name))
+					continue;
+
+				var value = property.GetValue(this, null) as string;
+
+				if (String.IsNullOrEmpty(value))
+					continue;
+
+				value = value.Trim();
+				properties.Add(Tuple.Create(attribute.Order, attribute.Name, value));
+			}
+
+			document.Blocks.Add(new Paragraph(new Run(FullName)) {
+				FontWeight = FontWeights.Bold,
+				FontSize = 20,
+				TextAlignment = TextAlignment.Center
+			});
+
+			foreach (var property in properties.OrderBy(p => p.Item1)) {
+				document.Blocks.Add(new Paragraph(new Run(property.Item2) { FontWeight = FontWeights.Bold }));
+				document.Blocks.Add(new Paragraph(new Run(property.Item3)));
+			}
+
+			return document;
 		}
 	}
 }

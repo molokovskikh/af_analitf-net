@@ -516,7 +516,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var text = command.Result as string;
 			if (!String.IsNullOrEmpty(text))
-				return new DialogResult(new TextViewModel(text), @fixed: true);
+				return new DialogResult(new TextViewModel(text), sizeToContent: true);
 
 			return null;
 		}

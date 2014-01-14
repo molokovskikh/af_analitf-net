@@ -110,14 +110,14 @@ namespace AnalitF.Net.Client.Models.Print
 					new Setter(TableCell.BorderBrushProperty, Brushes.Black),
 					new Setter(TableCell.BorderThicknessProperty, new Thickness(0, 0, 1, 1)),
 					new Setter(TableCell.LineStackingStrategyProperty, LineStackingStrategy.MaxHeight),
-					new Setter(TableCell.PaddingProperty, new Thickness(2, 0, 2, 0)),
+					new Setter(TableCell.PaddingProperty, new Thickness(2, 1, 2, 1)),
 				}
 			};
 			CellStyle = new Style(typeof(TableCell)) {
 				Setters = {
 					new Setter(TableCell.BorderBrushProperty, Brushes.Black),
 					new Setter(TableCell.BorderThicknessProperty, new Thickness(0, 0, 1, 1)),
-					new Setter(TableCell.PaddingProperty, new Thickness(2, 0, 2, 0)),
+					new Setter(TableCell.PaddingProperty, new Thickness(2, 1, 2, 1)),
 				}
 			};
 			TableStyle = new Style(typeof(Table)) {
@@ -269,7 +269,10 @@ namespace AnalitF.Net.Client.Models.Print
 			if (value != null)
 				text = value.ToString();
 
-			var cell = new TableCell(new Paragraph(new Run(text)));
+			//разделитель страницы может оказаться в середине ячейки
+			var cell = new TableCell(new Paragraph(new Run(text)) {
+				KeepTogether = true
+			});
 			cell.Style = CellStyle;
 			if (colspan > 0)
 				cell.ColumnSpan = colspan;

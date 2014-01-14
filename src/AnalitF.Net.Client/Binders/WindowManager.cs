@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Markup;
+using AnalitF.Net.Client.Binders;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Extentions
@@ -31,6 +33,11 @@ namespace AnalitF.Net.Client.Extentions
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+			if (UnitTesting) {
+				ScreenExtensions.TryActivate(rootModel);
+				ContinueViewDialog(rootModel);
+				return true;
+			}
 			var window = CreateWindow(rootModel, true, context, settings);
 			if (window.Owner != null) {
 				window.SizeToContent = SizeToContent.Manual;
@@ -97,6 +104,9 @@ namespace AnalitF.Net.Client.Extentions
 				Dialogs.Add(window);
 				return true;
 			}
+			window.InputBindings.Add(new KeyBinding(Commands.InvokeViewModel, new KeyGesture(Key.Escape)) {
+				CommandParameter = "TryClose"
+			});
 			return window.ShowDialog();
 		}
 

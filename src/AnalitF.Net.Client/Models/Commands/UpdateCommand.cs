@@ -223,6 +223,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				new ResultDir("docs", settings, Config),
 				new ResultDir("rejects", settings, Config),
 				new ResultDir("attachments", settings, Config),
+				new ResultDir("promotions", settings, Config),
 			};
 
 			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
@@ -330,7 +331,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				Session.CreateSQLQuery("update Waybills set IsRejectChanged = 1 where IsRejectChanged = 2")
 					.ExecuteUpdate();
 
-				Results.Add(new DialogResult(new PostUpdate(), @fixed: true));
+				Results.Add(new DialogResult(new PostUpdate(), sizeToContent: true));
 				result = UpdateResult.Other;
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
@@ -384,7 +385,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Results.Add(new DialogResult(new TextViewModel(report) {
 						Header = "Предложения по данным позициям из заказа отсутствуют",
 						DisplayName = "Не найденные позиции"
-					}, @fixed: true));
+					}, sizeToContent: true));
 				}
 			}
 		}

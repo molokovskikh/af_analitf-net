@@ -31,6 +31,10 @@ namespace AnalitF.Net.Service.Config.Initializers
 				m.Schema("Customers");
 				m.Table("Users");
 			});
+			Mapper.Class<Promotion>(m => {
+				m.Schema("UserSettings");
+				m.Table("SupplierPromotions");
+			});
 
 			Mapper.Class<ClientSettings>(m => {
 				m.Schema("Usersettings");

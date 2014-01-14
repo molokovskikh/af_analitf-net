@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Doc { get; set; }
 
-		[Style("Period", "Cost", Description = "Уцененные препараты")]
+		[Style("Period", "ResultCost", Description = "Уцененные препараты")]
 		public virtual bool Junk { get; set; }
 
 

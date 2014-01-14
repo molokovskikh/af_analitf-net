@@ -81,10 +81,5 @@ namespace AnalitF.Net.Client.Views
 			notificationTimer.Interval = 3.Second();
 			notificationTimer.Start();
 		}
-
-		private void @do(object sender, RoutedEventArgs e)
-		{
-			ShowJournal.IsEnabled = !ShowJournal.IsEnabled;
-		}
 	}
 }

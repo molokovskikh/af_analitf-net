@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
 using Common.Tools;
@@ -245,8 +246,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanShowDescription)
 				return;
 
-			var description = StatelessSession.Get<ProductDescription>(CurrentCatalogName.Description.Id);
-			Manager.ShowDialog(new DescriptionViewModel(description));
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalogName.Description.Id));
 		}
 
 		public override void NavigateBackward()
