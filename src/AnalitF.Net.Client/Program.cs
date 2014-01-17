@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -10,12 +11,26 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using log4net;
 using log4net.Config;
+using log4net.ObjectRenderer;
 using NDesk.Options;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client
 {
+	public class ExceptionRenderer : IObjectRenderer
+	{
+		public void RenderObject(RendererMap rendererMap, object obj, TextWriter writer)
+		{
+			var ex = obj as ReflectionTypeLoadException;
+			if (ex == null)
+				return;
+			foreach (var loaderException in ex.LoaderExceptions) {
+				writer.WriteLine(loaderException);
+			}
+		}
+	}
+
 	public class Program
 	{
 		private static ILog log = LogManager.GetLogger(typeof(Program));
@@ -31,6 +46,7 @@ namespace AnalitF.Net.Client
 			SingleInstance instance = null;
 			try {
 				XmlConfigurator.Configure();
+				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 
 				var help = false;
 				var version  = false;
