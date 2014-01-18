@@ -161,6 +161,8 @@ namespace AnalitF.Net.Service.Test
 				.ToList();
 
 			Assert.That(orders.Count, Is.EqualTo(1));
+			//todo: этой проверки здесь не место
+			Assert.IsFalse(orders[0].CalculateLeader);
 		}
 
 		[Test]

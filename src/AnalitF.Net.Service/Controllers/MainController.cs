@@ -180,6 +180,7 @@ where UserId = :userId;")
 							ClientOrderId = clientOrder.ClientOrderId,
 							PriceDate = clientOrder.PriceDate,
 							ClientAddition = clientOrder.Comment,
+							CalculateLeader = false
 						};
 						foreach (var sourceItem in clientOrder.Items) {
 							var offer = new Offer {
