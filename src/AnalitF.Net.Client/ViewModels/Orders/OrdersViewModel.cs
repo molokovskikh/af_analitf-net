@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class OrdersViewModel : BaseOrderViewModel, IPrintable
 	{
 		private Order currentOrder;
-		private IList<Order> orders;
+		private ReactiveCollection<Order> orders;
 		private IList<SentOrder> sentOrders;
 		private SentOrder currentSentOrder;
 
@@ -90,7 +90,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
 			var update = ordersChanged
-				.SelectMany(e => e.Value.Changed());
+				.SelectMany(e => {
+					return e.Value.ItemChanged.Cast<Object>().Merge(e.Value.Changed);
+				});
 
 			var observable = ordersChanged.Cast<object>()
 				.Merge(update)
@@ -149,7 +151,9 @@ namespace AnalitF.Net.Client.ViewModels
 				var orders = filterAddresses.SelectMany(a => a.Orders)
 					.OrderBy(o => o.CreatedOn)
 					.ToList();
-				Orders = new BindingList<Order>(orders);
+				Orders = new ReactiveCollection<Order>(orders) {
+					ChangeTrackingEnabled = true
+				};
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}
@@ -208,8 +212,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public List<Order> SelectedOrders { get; set; }
 
+		//используется ReactiveCollection тк нужно отслеживать состояние флага отправить
+		//для установки состояния кнопки отправить
+		//BindingList - не пригоден тк он запрещает сортировку
 		[Export]
-		public IList<Order> Orders
+		public ReactiveCollection<Order> Orders
 		{
 			get { return orders; }
 			set

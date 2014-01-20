@@ -40,7 +40,7 @@
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
 							TextAlignment="Center"
 							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price}"
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
 							IsReadOnly="True" />
 						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
 							IsReadOnly="True" />
@@ -78,7 +78,7 @@
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
 							MinWidth="5"
 							TextAlignment="Center" />
-						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price}"
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
 							MinWidth="5" />
 						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
 							MinWidth="5" />
