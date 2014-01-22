@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			windows = new List<Window>();
 			activeWindow = null;
 			dispatcher = null;
-			shell.Config.Quit = true;
+			shell.Config.Quiet = true;
 			shell.ViewModelSettings.Clear();
 
 			manager.UnitTesting = false;
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
-			shell.Config.Quit = false;
+			shell.Config.Quiet = false;
 			if (dispatcher != null) {
 				dispatcher.Invoke(() => {
 					foreach (var window in windows.ToArray().Reverse())

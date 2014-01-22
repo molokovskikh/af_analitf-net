@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
@@ -34,7 +35,6 @@ namespace AnalitF.Net.Client
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
-		private bool isImport;
 		private string name;
 #if DEBUG
 		private DebugPipe debugPipe;
@@ -47,7 +47,6 @@ namespace AnalitF.Net.Client
 		public static Config.Initializers.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
 		public string[] Args = new string[0];
-		public string DebugPipeName;
 
 		public AppBootstrapper()
 			: this(true)
@@ -76,7 +75,8 @@ namespace AnalitF.Net.Client
 
 			LogManager.GetLog = t => new Log4net(t);
 			TaskScheduler.UnobservedTaskException += (sender, args) => {
-				args.SetObserved();
+				if (!FailFast)
+					args.SetObserved();
 				log.Error("Ошибка пир выполнении задачи", args.Exception.GetBaseException());
 			};
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
@@ -102,22 +102,20 @@ namespace AnalitF.Net.Client
 				//иначе окно с сообщение будет закрыто и не отобразится
 				var app = ((App)Application);
 				if (app != null && app.Splash != null) {
-						app.Splash.Close(TimeSpan.Zero);
+					app.Splash.Close(TimeSpan.Zero);
 				}
 				//если не запустились то нужно сказать что случилась беда
 				//если запуск состоялся просто проглатываем исключение
 				var message = ErrorHelper.TranslateException(e)
 					?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e.Message);
-				if (Config.Quit)
-					Console.Out.WriteLine(message);
-				else
+				if (!Config.Quiet)
 					MessageBox.Show(
 						message,
 						"АналитФАРМАЦИЯ: Внимание",
 						MessageBoxButton.OK,
 						MessageBoxImage.Warning);
 
-				Application.Current.Shutdown();
+				Application.Current.Shutdown(1);
 			}
 		}
 
@@ -154,7 +152,6 @@ namespace AnalitF.Net.Client
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
 			Shell.Config = Config;
-			Shell.IsImport = isImport;
 			Deserialize();
 
 			windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
@@ -230,13 +227,12 @@ namespace AnalitF.Net.Client
 			Config.TmpDir = FileHelper.MakeRooted(Config.TmpDir);
 			Config.DbDir = FileHelper.MakeRooted(Config.DbDir);
 #if DEBUG
-			debugPipe = new DebugPipe(DebugPipeName);
+			debugPipe = new DebugPipe(Config.DebugPipeName);
 #endif
 			SettingsPath = FileHelper.MakeRooted(SettingsPath);
-			isImport = Args.Any(a => a.Match("import"));
 
 			if (Directory.Exists(Config.TmpDir)) {
-				if (!isImport) {
+				if (Config.Cmd.Match("import")) {
 					try {
 						Directory.Delete(Config.TmpDir, true);
 						Directory.CreateDirectory(Config.TmpDir);
@@ -256,7 +252,7 @@ namespace AnalitF.Net.Client
 
 			NHibernate = new Config.Initializers.NHibernate();
 			NHibernate.Init();
-			new SanityCheck(Config.DbDir).Check(isImport);
+			new SanityCheck(Config.DbDir).Check(Config.Cmd.Match("import"));
 		}
 
 		public static void InitUi()

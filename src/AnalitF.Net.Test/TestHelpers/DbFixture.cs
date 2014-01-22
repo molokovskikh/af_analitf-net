@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void DbTearDown()
 		{
-			config.Quit = false;
+			config.Quiet = false;
 			if (session != null) {
 				if (session.Transaction.IsActive)
 					session.Transaction.Commit();

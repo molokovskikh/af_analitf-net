@@ -22,6 +22,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -56,7 +57,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
-		public bool IsImport;
 		[DataMember]
 		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
 		[DataMember]
@@ -196,8 +196,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void OnViewReady()
 		{
 			Bus.SendMessage("Startup");
-			if (IsImport) {
+			if (Config.Cmd.Match("import")) {
 				Coroutine.BeginExecute(Import().GetEnumerator());
+			}
+			if (Config.Cmd.Match("start-check")) {
+				TryClose();
 			}
 			else {
 				StartCheck();
@@ -206,7 +209,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (Config.Quit) {
+			if (Config.Quiet) {
 				base.CanClose(callback);
 				return;
 			}
@@ -265,7 +268,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Settings.Value.IsValid)
 				return;
 
-			if (!Config.Quit) {
+			if (!Config.Quiet) {
 				var request = Settings.Value.CheckUpdateCondition();
 				if (!String.IsNullOrEmpty(request) && Confirm(request))
 					Update();
@@ -667,7 +670,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var updateExePath = Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe");
 			StartProcess(updateExePath, Process.GetCurrentProcess().Id.ToString());
 			//не нужно ничего запрашивать нужно просто выйти
-			Config.Quit = true;
+			Config.Quiet = true;
 			TryClose();
 		}
 

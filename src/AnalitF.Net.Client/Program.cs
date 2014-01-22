@@ -10,8 +10,11 @@ using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using log4net;
+using log4net.Appender;
 using log4net.Config;
+using log4net.Layout;
 using log4net.ObjectRenderer;
+using log4net.Repository.Hierarchy;
 using NDesk.Options;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
@@ -41,18 +44,19 @@ namespace AnalitF.Net.Client
 		public static extern bool AttachConsole(uint dwProcessId);
 
 		[STAThread]
-		public static void Main(string[] args)
+		public static int Main(string[] args)
 		{
 			SingleInstance instance = null;
+			var help = false;
+			var version  = false;
+			var quiet = false;
+			var faultInject = false;
+			var debugpipe = "";
+			int result;
 			try {
 				XmlConfigurator.Configure();
 				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 
-				var help = false;
-				var version  = false;
-				var quiet = false;
-				var faultInject = false;
-				var debugpipe = "";
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
@@ -62,7 +66,7 @@ namespace AnalitF.Net.Client
 					{"debug-pipe=", "", v => debugpipe = v},
 #endif
 				};
-				options.Parse(args);
+				var cmds = options.Parse(args);
 
 				//по умолчанию у gui приложения нет консоли, но если кто то запустил из консоли
 				//то нужно с ним говорить
@@ -70,7 +74,7 @@ namespace AnalitF.Net.Client
 
 				if (help) {
 					options.WriteOptionDescriptions(Console.Out);
-					return;
+					return 0;
 				}
 
 				if (version) {
@@ -81,12 +85,24 @@ namespace AnalitF.Net.Client
 						.Select(a => a.Copyright)
 						.FirstOrDefault();
 					Console.WriteLine(hash);
-					return;
+					return 0;
+				}
+
+				if (quiet) {
+					var repository = (Hierarchy)LogManager.GetRepository();
+					if (!repository.GetAppenders().OfType<ConsoleAppender>().Any()) {
+						var layout = new PatternLayout("%d{dd.MM.yyyy HH:mm:ss.fff} [%t] %-5p %c - %m%n");
+						layout.ActivateOptions();
+						var consoleAppender = new ConsoleAppender();
+						consoleAppender.Layout = layout;
+						consoleAppender.ActivateOptions();
+						repository.Root.AddAppender(consoleAppender);
+					}
 				}
 
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
-					return;
+					return 0;
 
 				RxApp.MessageBus.Listen<string>()
 					.Where(m => m == "Startup")
@@ -114,24 +130,32 @@ namespace AnalitF.Net.Client
 				};
 				app.InitializeComponent();
 				var bootstapper = new AppBootstrapper();
-				bootstapper.Config.Quit = quiet;
-				bootstapper.DebugPipeName = debugpipe;
-				app.Run();
+				bootstapper.Config.Quiet = quiet;
+				bootstapper.Config.DebugPipeName = debugpipe;
+				bootstapper.Config.Cmd = cmds.FirstOrDefault();
+				result = app.Run();
 			}
 			catch(EndUserError e) {
-				MessageBox.Show(
-					e.Message,
-					"АналитФАРМАЦИЯ: Внимание",
-					MessageBoxButton.OK,
-					MessageBoxImage.Warning);
+				result = 1;
+				log.Error("Ошибка при запуске приложения", e);
+				if (!quiet) {
+					MessageBox.Show(
+						e.Message,
+						"АналитФАРМАЦИЯ: Внимание",
+						MessageBoxButton.OK,
+						MessageBoxImage.Warning);
+				}
 			}
 			catch(Exception e) {
 				log.Error("Ошибка при запуске приложения", e);
+				result = 1;
 			}
 			finally {
 				if (instance != null)
 					instance.SignalShutdown();
 			}
+
+			return result;
 		}
 	}
 }
