@@ -51,7 +51,6 @@ namespace AnalitF.Net.Client.Models.Commands
 
 	public class UpdateCommand : RemoteCommand
 	{
-		public ProgressReporter Reporter;
 		public bool Clean = true;
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
@@ -79,7 +78,6 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		protected override UpdateResult Execute()
 		{
-			Reporter = new ProgressReporter(Progress);
 			Reporter.StageCount(4);
 
 			var queryString = new List<KeyValuePair<string, string>> {

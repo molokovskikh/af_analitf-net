@@ -33,7 +33,7 @@
   <ItemGroup>
     <Reference Include="Castle.ActiveRecord" />
     <Reference Include="ionic.zip" />
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json" />
     <Reference Include="NHibernate">
       <HintPath>..\AnalitF.Net\bin\NHibernate.dll</HintPath>
     </Reference>
@@ -44,7 +44,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http.Formatting" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Http" />
     <Reference Include="System.Xml.Linq" />

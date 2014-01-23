@@ -35,18 +35,25 @@ Global(
 			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update"""
 		}
 	},
-	JenkinsProject: "AnalitF.Net"
+	JenkinsProject: "AnalitF.Net",
+	Retarget: true
 )
 
-task @default, [@Build]
+task @default, [@build]
 
-task @Build, [@GenerateAssemblyInfo, @BuildWebSite]
+task @build, ["build:service", "build:client"]
+
+task @prepare, ["Production", "packages:install", "fix:packages", "generate:assembly:info"]
+
+task "build:service", ["prepare"]:
+	CleanWeb(Globals, "AnalitF.Net.Service")
+	BuildWeb(Globals, "AnalitF.Net.Service")
 
 task @DeployApp, [@WebDeploy]
 
 task "deploy:service", [@DeployPipeline]
 
-task @deploy, ["Production", "git:tag", "deploy:service", "deploy:client", "deploy:update"]
+task @deploy, ["prepare", "git:tag", "deploy:service", "deploy:client", "deploy:update"]
 
 task "deploy:client", ["deploy:client:package"]
 
@@ -88,21 +95,17 @@ task "deploy:update", ["build:client"]:
 	else:
 		Cp("output/Updater/*", dir, true)
 
-task "build:client", ["Production", "before:build:client", @BuildApp, "after:build:app", "build:setup", "build:update", "after:build:client"]
+task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
 
-task "after:build:app":
+task "build:client:bin":
+	Clean(Globals, "AnalitF.Net.Client")
+	Build(Globals, "AnalitF.Net.Client")
 	output = "output/AnalitF.Net.Client"
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
 	Rm(FileSet("$output/*.xml"))
 	print Globals.Environment
 	if Globals.Environment == @Production:
 		Rm(FileSet("$output/*.pdb"))
-
-task "before:build:client":
-	Globals.Project = "AnalitF.Net.Client"
-
-task "after:build:client":
-	Globals.Project = "AnalitF.Net.Service"
 
 task "build:setup":
 	arg = ""
@@ -123,11 +126,9 @@ task "setup:preprocess":
 	AddDirectory("INSTALLFOLDER", path, document, manager)
 	document.Save(name)
 
-task "before:build:update":
-	Engine.Tasks.First({t| t.Name == @BuildApp}).Executed = false
-	Globals.Project = "Updater"
-
-task "build:update", ["before:build:update", @BuildApp]:
+task "build:update":
+	Clean(Globals, "Updater")
+	Build(Globals, "Updater")
 	Cp("output/setup/version.txt", "output/Updater/", true)
 	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
 	Rm(FileSet("output/Updater/*.xml"))

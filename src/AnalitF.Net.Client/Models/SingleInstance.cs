@@ -166,7 +166,7 @@ namespace AnalitF.Net.Client.Models
 			WaitShutdown.Set();
 			try {
 				isStarted = mutex.WaitOne(Timeout);
-			} catch(AbandonedMutexException e) {
+			} catch(AbandonedMutexException) {
 				isStarted = true;
 			}
 			if (!isStarted)
