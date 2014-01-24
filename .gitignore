@@ -9,3 +9,4 @@ src/*.properties
 src/data
 AssemblyInfo.cs
 TestResult.xml
+*.gen.*

@@ -1,22 +1,20 @@
+Зависимости
+
+cygwin - скрипты, cinst cygwin
+wix - установщик, cinst wix, должен быть в PATH
+virtualbox - тесты, cinst virtualbox, должен быть в PATH
+lib/dcmysql72std.exe - драйвер mysql
+
 Сборка
-
-все скрипты предполагаю наличие cygwin
-
-для создания инсталятора используется wix
-http://wixtoolset.org/
-для того что билд скрипт мог сделать инсталятор нужно что wix был в PATH
-
-для того что начать работу нужно установить драйвер для mysql
-lib/dcmysql72std.exe
-
-пусть к msbuild должен быть в переменной среды PATH
-пусть к bake должен быть в переменной среды PATH
 
 перед началом работы нужно подготовить приложение
 для этого в корне проекта выполни комманду ./scripts/prepare.sh
 
 для компиляции шейдера нужен Direct3D Shader Compiler, fxc.exe должен быть в PATH
 есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
+
+пусть к msbuild должен быть в переменной среды PATH
+пусть к bake должен быть в переменной среды PATH
 
 Данные
 
