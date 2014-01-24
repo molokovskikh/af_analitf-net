@@ -55,7 +55,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Inflector.1.0.0.0\lib\net45\Inflector.dll</HintPath>
     </Reference>
-    <Reference Include="inflector_extension" />
     <Reference Include="Ionic.Zip" />
     <Reference Include="log4net" />
     <Reference Include="microsoft.reactive.testing" />
@@ -121,7 +120,6 @@
       <HintPath>..\..\packages\YamlDotNet.RepresentationModel.2.2.0\lib\net35\YamlDotNet.RepresentationModel.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Compile Include="Acceptance\AccentanceSetup.cs" />
     <Compile Include="Acceptance\BaseFixture.cs" />
