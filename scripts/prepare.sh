@@ -1,6 +1,6 @@
 #!/bin/sh
 
-bake packages:install GenerateAssemblyInfo
+bake prepare
 msbuild.exe /nologo /verbosity:quiet src/AnalitF.Net.sln
 bake generate:binding:redirection
 mkdir src/data
