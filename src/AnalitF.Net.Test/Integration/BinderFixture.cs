@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -180,6 +181,34 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
+		public void Bind_combobox()
+		{
+			model.NotifyItems.Value = new List<string> { "1", "2" };
+			model.CurrentNotifyItem.Value = "2";
+			var box = new ComboBox {
+				Name = "NotifyItems"
+			};
+			Bind(box);
+
+			Assert.IsNotNull(BindingOperations.GetBinding(box, ItemsControl.ItemsSourceProperty));
+			Assert.IsNotNull(BindingOperations.GetBinding(box, Selector.SelectedItemProperty));
+			Assert.AreEqual(2, box.Items.Count);
+			Assert.AreEqual("2", box.SelectedItem);
+		}
+
+		[Test]
+		public void Bind_array()
+		{
+			model.ArrayItems = new[] { "1", "2" };
+			var box = new ComboBox {
+				Name = "ArrayItems"
+			};
+			Bind(box);
+
+			Assert.AreEqual(2, box.Items.Count);
+		}
+
+		[Test]
 		public void Set_text_alignment()
 		{
 			var grid = new DataGrid {
@@ -218,6 +247,8 @@ namespace AnalitF.Net.Test.Integration
 			{
 				SelectedItems = new ReactiveCollection<string>();
 				CurrentItem = new NotifyValue<string>();
+				NotifyItems = new NotifyValue<List<string>>();
+				CurrentNotifyItem = new NotifyValue<string>();
 			}
 
 			public int ResetValue;
@@ -232,6 +263,9 @@ namespace AnalitF.Net.Test.Integration
 
 			public bool IsVisible { get; set; }
 
+			public NotifyValue<List<string>> NotifyItems { get; set; }
+			public NotifyValue<string> CurrentNotifyItem { get; set; }
+
 			public List<string> Items { get; set; }
 
 			public ReactiveCollection<string> SelectedItems { get; set; }
@@ -243,6 +277,8 @@ namespace AnalitF.Net.Test.Integration
 			public NotifyValue<TestEnum> NotifyEnum { get; set; }
 
 			public List<Item> ItemItems { get; set; }
+
+			public string[] ArrayItems { get; set; }
 
 			public void Reset()
 			{

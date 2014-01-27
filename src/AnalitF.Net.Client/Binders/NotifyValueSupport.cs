@@ -1,8 +1,13 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
@@ -24,6 +29,7 @@ namespace AnalitF.Net.Client.Binders
 				"SelectedItem",
 				"SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
+					Patch(ref path, ref property);
 					var ignore = ConventionManager.SetBindingWithoutBindingOrValueOverwrite(viewModelType,
 						path,
 						property,
@@ -35,15 +41,9 @@ namespace AnalitF.Net.Client.Binders
 						return false;
 
 					ConventionManager.ConfigureSelectedItem(element, Selector.SelectedItemProperty, viewModelType, path);
-					if (IsNotifyValue(property))
-						property = property.PropertyType.GetProperty("Value");
+					if (IsArrayOfPrimitive(property.PropertyType))
+						return true;
 
-					if (property.PropertyType.IsArray) {
-						var itemType = property.PropertyType.GetElementType();
-						if (itemType.IsValueType || typeof(string).IsAssignableFrom(itemType)) {
-							return true;
-						}
-					}
 					if (!(element is PopupSelector))
 						ConventionManager.ApplyItemTemplate((ItemsControl)element, property);
 
@@ -56,14 +56,16 @@ namespace AnalitF.Net.Client.Binders
 						return;
 					}
 
-					var index = path.LastIndexOf('.');
-					index = index == -1 ? 0 : index + 1;
-					var baseName = path.Substring(index);
+					var baseName = path;
+					if (path.EndsWith(".Value")) {
+						var index = path.LastIndexOf('.');
+						baseName = path.Substring(0, index);
+					}
 
 					foreach (var potentialName in ConventionManager.DerivePotentialSelectionNames(baseName)) {
 						var propertyInfo = viewModelType.GetPropertyCaseInsensitive(potentialName);
 						if (propertyInfo != null) {
-							var selectionPath = path.Replace(baseName, potentialName);
+							var selectionPath = potentialName;
 							if (IsNotifyValue(propertyInfo))
 								selectionPath += ".Value";
 
@@ -122,6 +124,16 @@ namespace AnalitF.Net.Client.Binders
 
 				context.CanExecute = () => (NotifyValue<bool>)guard.GetValue(context.Target, null);
 			};
+		}
+
+		public static bool IsArrayOfPrimitive(Type posibleArrayOrList)
+		{
+			if (posibleArrayOrList.IsArray) {
+				var elementType = posibleArrayOrList.GetElementType();
+				return elementType == typeof(string) || elementType.IsPrimitive;
+			}
+
+			return false;
 		}
 
 		public static bool IsNotifyValue(PropertyInfo property)
