@@ -9,6 +9,7 @@ using Common.Tools.Calendar;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
@@ -130,6 +131,12 @@ namespace AnalitF.Net.Client.Models
 		private Order order;
 		private decimal? vitallyImportantCostFactor;
 		private decimal? costFactor;
+
+		public Price(string name) : this()
+		{
+			Id = new PriceComposedId();
+			Name = name;
+		}
 
 		public Price()
 		{

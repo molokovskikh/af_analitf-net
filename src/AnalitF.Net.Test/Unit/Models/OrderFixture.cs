@@ -15,9 +15,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
-			price = new Price {
-				Id = new PriceComposedId()
-			};
+			price = new Price("test1");
 			address = new Address();
 			offer = new Offer(price, 100) {
 				ProductId = 1
@@ -117,12 +115,8 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Reorder()
 		{
-			var price1 = new Price {
-				Id = new PriceComposedId()
-			};
-			var price2 = new Price {
-				Id = new PriceComposedId()
-			};
+			var price1 = new Price("test2");
+			var price2 = new Price("test3");
 			var order = new Order(price, address);
 			order.AddLine(offer, 10);
 			var orders = new[] {

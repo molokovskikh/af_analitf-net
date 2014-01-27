@@ -95,10 +95,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var order = MakeOrder(offer);
 
 			Assert.That(model.Price.Value.Order, Is.Not.Null);
-			Assert.That(model.Offers.Value[0].OrderLine, Is.Not.Null);
+			Assert.That(model.Offers.Value.First(o => o.Id == offer.Id).OrderLine, Is.Not.Null);
 			model.DeleteOrder();
 			Assert.That(model.Price.Value.Order, Is.Null);
-			Assert.That(model.Offers.Value[0].OrderLine, Is.Null);
+			Assert.That(model.Offers.Value.First(o => o.Id == offer.Id).OrderLine, Is.Null);
 
 			Close(model);
 			session.Clear();

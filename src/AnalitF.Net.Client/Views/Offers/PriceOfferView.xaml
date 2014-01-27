@@ -113,10 +113,10 @@
 				<c:DataGridTextColumnEx Width="51*" Header="Мин.цена" Binding="{Binding LeaderCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="70*"
-					Header="Прайс - лидер" Binding="{Binding LeaderPrice.Name}" />
+					Header="Прайс - лидер" Binding="{Binding ResultLeaderPrice.Name}" />
 				<c:DataGridTextColumnEx Width="70*"
 					Visibility="Collapsed" Header="Регион - лидер"
-					Binding="{Binding LeaderPrice.RegionName}" />
+					Binding="{Binding ResultLeaderPrice.RegionName}" />
 				<c:DataGridTextColumnEx Width="42*"
 					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
 					Binding="{Binding OrderCount}" TextAlignment="Right" />

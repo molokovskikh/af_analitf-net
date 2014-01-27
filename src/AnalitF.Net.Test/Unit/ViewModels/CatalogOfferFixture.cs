@@ -46,16 +46,12 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			model.User = new User();
 			model.Offers.Value = new List<Offer> {
-				new Offer(new Price {
-					Id = new PriceComposedId()
-				}, 100) {
+				new Offer(new Price("test1"), 100) {
 					Id = {
 						OfferId = 1
 					}
 				},
-				new Offer(new Price {
-					Id = new PriceComposedId()
-				}, 150) {
+				new Offer(new Price("test2"), 150) {
 					Id = {
 						OfferId = 2
 					}

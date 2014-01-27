@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Forms.VisualStyles;
 using System.Xaml;
 using AnalitF.Net.Client.Helpers;

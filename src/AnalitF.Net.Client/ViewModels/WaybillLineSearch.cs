@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.ViewModels
 			this.end = end;
 
 			Lines = new NotifyValue<List<WaybillLine>>();
-			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
+			SearchBehavior = new SearchBehavior(this);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

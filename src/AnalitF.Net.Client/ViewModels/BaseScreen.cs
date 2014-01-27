@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
 
-		protected Address Address;
+		public Address Address;
 		protected IMessageBus Bus = RxApp.MessageBus;
 		//освобождает ресурсы при закрытии формы
 		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();

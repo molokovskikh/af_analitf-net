@@ -106,9 +106,22 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Price LeaderPrice { get; set; }
 
+		//Если есть более одно предложения с одинаковой ценой
+		//то в LeaderPrice может быть любой прайс и при отображении прайса лидера
+		//мы можем отобразить конкутента хотя должны били отображать самого себя
+		public virtual Price ResultLeaderPrice
+		{
+			get
+			{
+				if (Leader)
+					return Price;
+				return LeaderPrice;
+			}
+		}
+
 		public virtual decimal LeaderCost { get; set; }
 
-		[Style("LeaderPrice.RegionName", "LeaderPrice.Name", Description = "Прайс-лист - лидер")]
+		[Style("ResultLeaderPrice.RegionName", "ResultLeaderPrice.Name", Description = "Прайс-лист - лидер")]
 		public virtual bool Leader
 		{
 			get { return LeaderCost == Cost; }

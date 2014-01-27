@@ -12,11 +12,7 @@ namespace AnalitF.Net.Test.Unit.Models
 		[SetUp]
 		public void Setup()
 		{
-			var price = new Price {
-				Id = new PriceComposedId(),
-				Name = "АМП (Основной)"
-			};
-
+			var price = new Price("АМП (Основной)");
 			order = new Order(price, new Address("Тестовый адрес"));
 			var offer = new Offer(price, 100) {
 				ProductSynonym = "ЭХИНАЦЕЯ ТРАВА пачка 50г (18%)",

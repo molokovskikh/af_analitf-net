@@ -259,6 +259,14 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(120, offer.ResultCost);
 		}
 
+		[Test]
+		public void Actual_leader_price()
+		{
+			offer.LeaderPrice = new Price("Тест1");
+			offer.LeaderCost = offer.Cost;
+			Assert.AreEqual(offer.ResultLeaderPrice, offer.Price);
+		}
+
 		private void Validate()
 		{
 			var message = offer.UpdateOrderLine(address, settings);

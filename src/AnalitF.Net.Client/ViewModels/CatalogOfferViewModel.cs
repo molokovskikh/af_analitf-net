@@ -19,6 +19,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
 
+		private List<Offer> CatalogOffers = new List<Offer>();
+
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
 		{
@@ -102,14 +104,14 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentOffer = CurrentOffer
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
-			UpdateRegions();
+			UpdateFilters();
 		}
 
 		protected override void OnActivate()
 		{
 			base.OnActivate();
 
-			if (Offers.Value.Count == 0) {
+			if (CatalogOffers.Count == 0) {
 				Manager.Warning("Нет предложений");
 				IsSuccessfulActivated = false;
 			}
@@ -128,55 +130,67 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToList();
 		}
 
-		private void UpdateRegions()
+		private void UpdateFilters()
 		{
-			var offerRegions = Offers.Value.Select(o => o.Price.RegionName).Distinct()
-				.OrderBy(r => r)
+			Regions.Value = new[] { Consts.AllRegionLabel }
+				.Concat(CatalogOffers.Select(o => o.Price.RegionName).Distinct()
+					.OrderBy(r => r))
 				.ToList();
-			Regions.Value = new[] { Consts.AllRegionLabel }.Concat(offerRegions).ToList();
+
+			Producers.Value = new[] { Consts.AllRegionLabel }
+				.Concat(CatalogOffers.Select(o => o.Producer).Distinct()
+					.OrderBy(p => p))
+				.ToList();
 		}
 
 		protected override void Query()
 		{
-			Catalog[] catalogs = null;
-			IQueryable<Offer> queryable;
-			if (filterCatalog != null) {
-				var catalogId = filterCatalog.Id;
-				queryable = StatelessSession.Query<Offer>().Where(o => o.CatalogId == catalogId);
-			}
-			else {
-				catalogs = StatelessSession.Query<Catalog>()
-					.Fetch(c => c.Name)
-					.Where(c => c.Name == filterCatalogName).ToArray();
-				var ids = catalogs.Select(c => c.Id).ToArray();
-				queryable = StatelessSession.Query<Offer>()
-					.Where(o => ids.Contains(o.CatalogId));
+			if (CatalogOffers.Count == 0) {
+				if (IsFilterByCatalogName) {
+					var catalogs = StatelessSession.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.Where(c => c.Name == filterCatalogName).ToArray();
+					var ids = catalogs.Select(c => c.Id).ToArray();
+
+					CatalogOffers = StatelessSession.Query<Offer>()
+						.Where(o => ids.Contains(o.CatalogId))
+						.Fetch(o => o.Price)
+						.ToList();
+					CatalogOffers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId)
+						.Select(c => c.FullName)
+						.FirstOrDefault());
+				}
+				else {
+					var catalogId = filterCatalog.Id;
+					CatalogOffers = StatelessSession.Query<Offer>().Where(o => o.CatalogId == catalogId)
+						.Fetch(o => o.Price)
+						.ToList();
+				}
 			}
 
+			Filter();
+		}
+
+		public void Filter()
+		{
 			var region = CurrentRegion.Value;
+			IEnumerable<Offer> offers = CatalogOffers;
 			if (region != Consts.AllRegionLabel) {
-				queryable = queryable.Where(o => o.Price.RegionName == region);
+				offers = offers.Where(o => o.Price.RegionName == region);
 			}
 			var producer = CurrentProducer.Value;
 			if (producer != Consts.AllProducerLabel) {
-				queryable = queryable.Where(o => o.Producer == producer);
+				offers = offers.Where(o => o.Producer == producer);
 			}
 			var filter = CurrentFilter.Value;
 			if (filter == Filters[1]) {
-				queryable = queryable.Where(o => o.Price.BasePrice);
+				offers = offers.Where(o => o.Price.BasePrice);
 			}
 			if (filter == Filters[2]) {
-				queryable = queryable.Where(o => !o.Price.BasePrice);
+				offers = offers.Where(o => !o.Price.BasePrice);
 			}
 
-			var offers = queryable.Fetch(o => o.Price).ToList();
-			offers = Sort(offers);
-			if (IsFilterByCatalogName) {
-				offers.Each(o => o.GroupName = catalogs.Where(c => c.Id == o.CatalogId)
-					.Select(c => c.FullName)
-					.FirstOrDefault());
-			}
-			Offers.Value = offers;
+			Offers.Value = Sort(offers.ToList());
 		}
 
 		private List<Offer> Sort(List<Offer> offers)

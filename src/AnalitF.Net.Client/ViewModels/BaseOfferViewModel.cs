@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<SentOrderLine> historyOrders;
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
-		private Offer lastEditOffer;
+		protected Offer lastEditOffer;
 		private Offer currentOffer;
 
 		private string autoCommentText;
@@ -45,14 +45,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.initOfferId = initOfferId;
 
-			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
 			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
-			Producers = new NotifyValue<List<string>>(
-				new List<string>(),
-				() => new[] { Consts.AllProducerLabel }
-					.Concat(Offers.Value.Select(o => o.Producer).Distinct().OrderBy(p => p))
-					.ToList(),
-				Offers);
+			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
+			Producers = new NotifyValue<List<string>>(new List<string> { Consts.AllProducerLabel });
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Subscribe(_ => InvalidateHistoryOrders());
@@ -81,8 +76,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 #endif
 				.Subscribe(_ => {
-					if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
-						CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
+					if (Session != null) {
+						if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
+							CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
+					}
 				}, CloseCancellation.Token);
 
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
@@ -226,7 +223,7 @@ namespace AnalitF.Net.Client.ViewModels
 				offer.CalculateRetailCost(Settings.Value.Markups);
 		}
 
-		public void OfferUpdated()
+		public virtual void OfferUpdated()
 		{
 			if (CurrentOffer == null)
 				return;
@@ -356,6 +353,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			if (CurrentOffer.StatLoaded)
+				return;
+
+			if (StatelessSession == null)
 				return;
 
 			var begin = DateTime.Now.AddMonths(-1);

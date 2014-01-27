@@ -101,7 +101,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Subscribe(_ => Update()));
 
-			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
+			SearchBehavior = new SearchBehavior(this);
 		}
 
 		public CatalogViewModel ParentModel { get; set; }

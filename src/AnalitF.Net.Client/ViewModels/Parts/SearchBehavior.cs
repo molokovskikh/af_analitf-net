@@ -16,13 +16,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	{
 		private BaseScreen screen;
 
-		public SearchBehavior(CompositeDisposable disposable, BaseScreen screen)
+		public SearchBehavior(BaseScreen screen)
 		{
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
 			this.screen = screen;
 
-			disposable.Add(SearchText.Changed()
+			screen.OnCloseDisposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, screen.Scheduler)
 				.ObserveOn(screen.UiScheduler)
 				.Subscribe(_ => Search()));

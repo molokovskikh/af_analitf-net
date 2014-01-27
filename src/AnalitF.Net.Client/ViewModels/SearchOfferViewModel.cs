@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.OrderBy(p => p)
 				.ToList();
 			producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
-			Producers = new NotifyValue<List<string>>(producers);
+			Producers.Value = producers;
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
-			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
+			SearchBehavior = new SearchBehavior(this);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 		};
 
 		private PriceComposedId priceId;
+		public List<Offer> PriceOffers = new List<Offer>();
 
 		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders, OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -34,7 +36,6 @@ namespace AnalitF.Net.Client.ViewModels
 			//между формами можно передавать только примитивные объекты
 			this.priceId = priceId;
 
-			SearchText = new NotifyValue<string>();
 			Price = new NotifyValue<Price>();
 			DisplayName = "Заявка поставщику";
 
@@ -43,20 +44,15 @@ namespace AnalitF.Net.Client.ViewModels
 			if (showLeaders)
 				FilterLeader();
 
-			OnCloseDisposable.Add(SearchText.Changed()
-				.Throttle(Consts.SearchTimeout, Scheduler)
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => Search()));
-
 			CurrentProducer.Changed()
 				.Merge(CurrentFilter.Changed())
-				.Subscribe(_ => Update());
+				.Subscribe(_ => Filter());
 
 			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
 			//но если не удалить подписку будет утечка памяти
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
 				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
-			SearchBehavior = new SearchBehavior(OnCloseDisposable, this);
+			SearchBehavior = new SearchBehavior(this);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -86,49 +82,50 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 			CurrentOffer = CurrentOffer ?? Offers.Value.FirstOrDefault();
 
-			var haveOffers = StatelessSession.Query<Offer>().Any(o => o.Price.Id == priceId);
-			if (!haveOffers) {
+			if (PriceOffers.Count == 0) {
 				Manager.Warning("Выбранный прайс-лист отсутствует");
 				IsSuccessfulActivated = false;
 			}
 		}
 
-		protected override void Query()
+		public void Filter()
 		{
-			var query = StatelessSession.Query<Offer>().Where(o => o.Price.Id == priceId);
-			var producer = CurrentProducer.Value;
-			if (producer != Consts.AllProducerLabel) {
-				query = query.Where(o => o.Producer == producer);
-			}
 			var filter = CurrentFilter.Value;
+			IEnumerable<Offer> items = PriceOffers;
 			if (filter == filters[2]) {
-				query = query.Where(o => o.LeaderPrice.Id == priceId);
+				items = items.Where(o => o.Leader);
 			}
 			if (filter == filters[1]) {
-				//если мы установили фильтр по заказанным позициям то нужно
-				//выполнить сохранение
-				Session.Flush();
-				var addressId = Address != null ? Address.Id : 0;
-				query = query.Where(o => StatelessSession.Query<OrderLine>().Count(l => l.OfferId == o.Id
-					&& l.Order.Address.Id == addressId
-					&& !l.Order.Frozen
-					&& l.Order.Price.Id == priceId) > 0);
+				items = items.Where(o => o.OrderCount > 0);
+			}
+			if (CurrentProducer.Value != Consts.AllProducerLabel) {
+				items = items.Where(o => o.Producer == CurrentProducer.Value);
 			}
 			var term = SearchBehavior.ActiveSearchTerm.Value;
 			if (!String.IsNullOrEmpty(term)) {
-				query = query.Where(o => o.ProductSynonym.Contains(term));
+				items = items.Where(o => o.ProductSynonym.IndexOf(term ?? "", StringComparison.CurrentCultureIgnoreCase) >= 0);
 			}
-
-			Offers.Value = query
-				.Fetch(o => o.Price)
-				.Fetch(o => o.LeaderPrice)
-				.ToList();
-
-			Price.Value = Offers.Value.Select(o => o.Price).FirstOrDefault()
-				?? StatelessSession.Get<Price>(priceId);
+			Offers.Value = items.OrderBy(o => o.ProductSynonym).ToList();
 		}
 
-		public NotifyValue<string> SearchText { get; set; }
+		protected override void Query()
+		{
+			if (PriceOffers.Count == 0) {
+				PriceOffers = StatelessSession.Query<Offer>().Where(o => o.Price.Id == priceId)
+					.Fetch(o => o.Price)
+					.Fetch(o => o.LeaderPrice)
+					.ToList();
+
+				Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
+					?? StatelessSession.Get<Price>(priceId);
+			}
+			if (Producers.Value.Count == 1) {
+				Producers.Value = new[] { Consts.AllProducerLabel }
+					.Concat(PriceOffers.Select(o => o.Producer).Distinct().OrderBy(p => p))
+					.ToList();
+			}
+			Filter();
+		}
 
 		public void CancelFilter()
 		{
@@ -187,6 +184,19 @@ namespace AnalitF.Net.Client.ViewModels
 			Price.Value.Order = null;
 			foreach (var offer in Offers.Value)
 				offer.OrderLine = null;
+
+			if (CurrentFilter.Value == filters[1]) {
+				Filter();
+			}
+		}
+
+		public override void OfferUpdated()
+		{
+			base.OfferUpdated();
+
+			if (lastEditOffer.OrderLine == null && CurrentFilter.Value == filters[1]) {
+				Filter();
+			}
 		}
 	}
 }

@@ -236,6 +236,7 @@
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
+    <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
     <Compile Include="Unit\WaybillFixture.cs" />
   </ItemGroup>
   <ItemGroup>

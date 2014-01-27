@@ -194,6 +194,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			};
 			promotion.Catalogs.Add(catalog);
 			session.Save(promotion);
+			session.Flush();
 
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Id == catalog.Name.Id);
 			var name = nameViewModel.CurrentCatalogName;
