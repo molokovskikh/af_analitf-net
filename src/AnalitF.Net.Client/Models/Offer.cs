@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Controls.Behaviors;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models

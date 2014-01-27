@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -20,7 +21,7 @@ namespace AnalitF.Net.Client.Views
 					Offers.Items.GroupDescriptions.Add(new PropertyGroupDescription("GroupName"));
 			};
 
-			EditBehavior.Attach(grid);
+			new Editable().Attach(grid);
 			DataGridHelper.CalculateColumnWidths(Offers);
 			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Controls.Behaviors;
 using Common.Tools;
 using NHibernate.Cfg;
 using Newtonsoft.Json;

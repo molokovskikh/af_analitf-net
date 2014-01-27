@@ -7,7 +7,7 @@ using AnalitF.Net.Client.Extentions;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
 {
-	public class Persistable : Behavior<System.Windows.Controls.DataGrid>
+	public class Persistable : Behavior<DataGrid>
 	{
 		public static readonly DependencyProperty DescriptionProperty
 			= DependencyProperty.RegisterAttached("Description",

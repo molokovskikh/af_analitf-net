@@ -4,8 +4,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
+using Action = System.Action;
 
 namespace AnalitF.Net.Client.Binders
 {
@@ -41,10 +43,18 @@ namespace AnalitF.Net.Client.Binders
 					if (defaultFocus == null)
 						return;
 					if (defaultFocus is DataGrid) {
-						DataGridHelper.Focus((DataGrid)defaultFocus);
+						//иногда visual tree data grid оказывается не построенным хотя он и говорит что
+						//все загружено, если фокус не удалось установить всего скорее visual tree не создан
+						//нужно повторить операцию после того как все будет загружено
+						if (!DataGridHelper.Focus((DataGrid)defaultFocus)) {
+							Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => {
+								DataGridHelper.Focus((DataGrid)defaultFocus);
+							}));
+						}
 					}
-					else
+					else {
 						Keyboard.Focus(defaultFocus);
+					}
 				}
 			};
 			element.Unloaded += (sender, args) => {

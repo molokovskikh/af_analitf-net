@@ -176,6 +176,7 @@
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />
+    <Compile Include="Integration\Views\EditableFixture.cs" />
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\GlobalFixture.cs" />
     <Compile Include="Integration\Views\MailsFixture.cs" />

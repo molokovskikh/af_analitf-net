@@ -1,29 +1,32 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Controls.Behaviors
 {
 	public interface IInlineEditable
 	{
 		uint Value { get; set; }
 	}
 
-	public class EditBehavior
+	public class Editable
 	{
 		private static TimeSpan inputInterval = TimeSpan.FromMilliseconds(1500);
 		private static TimeSpan commitInterval = TimeSpan.FromMilliseconds(750);
-		public static DispatcherScheduler UIScheduler = DispatcherScheduler.Current;
+		private IScheduler scheduler;
 
-		public static void Attach(Controls.DataGrid2 grid)
+		public Editable(IScheduler scheduler = null)
+		{
+			this.scheduler = scheduler ?? DispatcherScheduler.Current;
+		}
+
+		public void Attach(DataGrid2 grid)
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
 			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");
@@ -60,20 +63,20 @@ namespace AnalitF.Net.Client.Binders
 			//игнорировать события до тех пор пока не произошло событие редактирования
 			//когда произошло взять одно событие и повторить, фактически это state machine
 			//которая генерирует событие OfferCommitted только если было событие редактирования
-			updated.Throttle(commitInterval)
+			updated.Throttle(commitInterval, scheduler)
 				.Merge(Observable.FromEventPattern<EventArgs>(grid, "CurrentCellChanged").Select(e => e.Sender))
 				.Merge(Observable.FromEventPattern<RoutedEventArgs>(grid, "Unloaded").Select(e => e.Sender))
 				.SkipUntil(updated)
 				.Take(1)
 				.Repeat()
-				.ObserveOn(UIScheduler)
+				.ObserveOn(scheduler)
 				.Subscribe(e => {
 					lastEdit = TimeSpan.Zero;
-					ViewModelHelper.InvokeDataContext(e, "OfferCommitted");
+					ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
 				});
 		}
 
-		public static void UpdateValue(object sender, Func<string, string> value)
+		private void UpdateValue(object sender, Func<string, string> value)
 		{
 			var dataGrid = (DataGrid)sender;
 			var item = dataGrid.SelectedItem as IInlineEditable;

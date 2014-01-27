@@ -173,7 +173,6 @@
     <Compile Include="Binders\BaseShell.cs" />
     <Compile Include="Binders\Commands.cs" />
     <Compile Include="Binders\ContentElementBinder.cs" />
-    <Compile Include="Binders\EditBehavior.cs" />
     <Compile Include="Binders\EnabledBinder.cs" />
     <Compile Include="Binders\FocusBehavior.cs" />
     <Compile Include="Binders\NotifyValueSupport.cs" />
@@ -193,6 +192,7 @@
     <Compile Include="Config\Initializers\NHibernate.cs" />
     <Compile Include="Config\Initializers\PluralizeNamingStrategy.cs" />
     <Compile Include="Config\Initializers\UtcToLocalDateTimeType.cs" />
+    <Compile Include="Controls\Behaviors\Editable.cs" />
     <Compile Include="Controls\Behaviors\Persistable.cs" />
     <Compile Include="Controls\Behaviors\Selectable.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
@@ -744,5 +744,4 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
-  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.13\tools\Microsoft.Bcl.Build.targets')" />
 </Project>

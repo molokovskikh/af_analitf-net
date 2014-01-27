@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Helpers
 		//и ввод обрабатывается KeyboardNavigation который стрелки интерпретирует
 		//как перевод фокуса нужно ставить фокус не на грид
 		//а на ячейку что бы фокус работал как следует
-		public static void Focus(DataGrid grid)
+		public static bool Focus(DataGrid grid)
 		{
 			if (grid.SelectedItem == null)
 				grid.SelectedItem = grid.Items.Cast<object>().FirstOrDefault();
@@ -41,9 +41,9 @@ namespace AnalitF.Net.Client.Helpers
 			if (item == null) {
 				var scroll = grid.Descendants<ScrollViewer>().FirstOrDefault(v => v.Name == "DG_ScrollViewer");
 				if (scroll != null) {
-					scroll.Focus();
+					return scroll.Focus();
 				}
-				return;
+				return false;
 			}
 
 			grid.ScrollIntoView(item);
@@ -52,7 +52,8 @@ namespace AnalitF.Net.Client.Helpers
 				?? grid.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible);
 			var cell = GetCell(container, column);
 			if (cell != null)
-				Keyboard.Focus(cell);
+				return cell.Focus();
+			return false;
 		}
 
 		public static DataGridCell GetCell(DataGridRow rowContainer, DataGridColumn column)
