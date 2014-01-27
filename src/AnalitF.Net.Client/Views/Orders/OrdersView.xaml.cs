@@ -4,6 +4,7 @@ using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -13,7 +14,13 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend);
+			Loaded += (sender, args) => {
+				var context = "";
+				if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+					context = "CorrectionEnabled";
+				StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
+			};
+
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));

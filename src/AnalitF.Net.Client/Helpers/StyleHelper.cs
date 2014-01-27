@@ -426,10 +426,11 @@ namespace AnalitF.Net.Client.Helpers
 			}
 
 			grid.CellStyle = (Style)resources[type.Name + "Row"];
-			BuildLegend(type, grid, resources, legend);
+			BuildLegend(type, grid, resources, legend, context);
 		}
 
-		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, StackPanel legend)
+		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, StackPanel legend,
+			string context)
 		{
 			if (legend == null)
 				return;
@@ -437,6 +438,7 @@ namespace AnalitF.Net.Client.Helpers
 			var labels = from p in type.GetProperties()
 				from StyleAttribute a in p.GetCustomAttributes(typeof(StyleAttribute), true)
 				where grid.Columns.OfType<DataGridBoundColumn>().Any(c => IsApplicable(c, a))
+					&& (String.IsNullOrEmpty(a.Context) || context == a.Context)
 				orderby a.Description
 				let key = LegendKey(type, p)
 				let style = resources[key] as Style

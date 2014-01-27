@@ -55,10 +55,31 @@ namespace AnalitF.Net.Test.Unit
 			grid.Columns.Add(new DataGridTextColumn {
 				Binding = new Binding("Period")
 			});
-			var legend = new StackPanel();
 			Build(typeof(Offer));
-			StyleHelper.ApplyStyles(typeof(Offer), grid, appResource, legend);
-			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nУцененные препараты", legend.AsText());
+			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nУцененные препараты", Legend(grid));
+		}
+
+		[Test]
+		public void Check_context_on_build_legend()
+		{
+			StyleHelper.Reset();
+			StyleHelper.CollectStyles(appResource);
+			var grid = new DataGrid();
+			grid.Columns.Add(new DataGridTextColumn {
+				Binding = new Binding("Sum")
+			});
+			Build(typeof(Order));
+
+			Assert.AreEqual("Подсказка\r\n\"Заморожен\"", Legend(grid));
+			Assert.AreEqual("Подсказка\r\n\"Заморожен\"" +
+				"\r\nИмеется позиция с корректировкой по цене и/или по количеству", Legend(grid, "Correction"));
+		}
+
+		private string Legend(DataGrid grid, string context = null)
+		{
+			var legend = new StackPanel();
+			StyleHelper.ApplyStyles(typeof(Order), grid, appResource, legend, context);
+			return legend.AsText();
 		}
 
 		private void Build(Type type)

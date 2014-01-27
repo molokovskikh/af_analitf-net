@@ -4,6 +4,7 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -13,8 +14,14 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
+			Loaded += (sender, args) => {
+				var context = "";
+				if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+					context = "CorrectionEnabled";
+				StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend, context);
+			};
+
 			DataGridHelper.CalculateColumnWidths(Lines);
-			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend);
 			DataGridHelper.CalculateColumnWidths(SentLines);
 			new Editable().Attach(Lines);
 		}

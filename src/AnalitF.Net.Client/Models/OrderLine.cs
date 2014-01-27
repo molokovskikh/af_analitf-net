@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Style("Sum", Description = "Корректировка по цене и/или по количеству")]
+		[Style("Sum", Description = "Корректировка по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsSendError
 		{
 			get { return SendResult != LineResultStatus.OK; }

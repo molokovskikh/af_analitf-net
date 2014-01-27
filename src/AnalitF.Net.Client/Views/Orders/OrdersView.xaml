@@ -18,7 +18,6 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 			<RowDefinition></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
@@ -31,38 +30,47 @@
 
 		<TabControl Grid.Row="1" Grid.Column="0">
 			<TabItem Header="Текущие" IsSelected="{Binding IsCurrentSelected.Value}">
-				<c:DataGrid2 x:Name="Orders" IsReadOnly="False" CanUserDeleteRows="True"
-					ShowAddressColumn="{Binding AddressSelector.All.Value}">
-					<DataGrid.Columns>
-						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
-							Visibility="Collapsed"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
-							TextAlignment="Center"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
-							TextAlignment="Right"
-							IsReadOnly="True" />
-						<DataGridCheckBoxColumn Width="56*" Header="Отправить"
-							Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}" />
-						<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
-							TextAlignment="Right"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
-							TextAlignment="Right"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding Price.MonthlyOrderSum}"
-							TextAlignment="Right"
-							IsReadOnly="True" />
-						<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding Price.WeeklyOrderSum}"
-							TextAlignment="Right"
-							IsReadOnly="True" />
-					</DataGrid.Columns>
-				</c:DataGrid2>
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+
+					<c:DataGrid2 x:Name="Orders" Grid.Row="0" IsReadOnly="False" CanUserDeleteRows="True"
+						ShowAddressColumn="{Binding AddressSelector.All.Value}">
+						<DataGrid.Columns>
+							<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
+								Visibility="Collapsed"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
+								TextAlignment="Center"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
+								TextAlignment="Right"
+								IsReadOnly="True" />
+							<DataGridCheckBoxColumn Width="56*" Header="Отправить"
+								Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}" />
+							<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
+								TextAlignment="Right"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
+								TextAlignment="Right"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding Price.MonthlyOrderSum}"
+								TextAlignment="Right"
+								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding Price.WeeklyOrderSum}"
+								TextAlignment="Right"
+								IsReadOnly="True" />
+						</DataGrid.Columns>
+					</c:DataGrid2>
+
+					<StackPanel Grid.Row="1" Grid.ColumnSpan="2" Name="Legend" />
+				</Grid>
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected.Value}">
 				<c:DataGrid2 x:Name="SentOrders" CanUserDeleteRows="True"
@@ -100,9 +108,7 @@
 			<TextBox Name="EditableOrder_PersonalComment" Width="279" Height="104"></TextBox>
 		</StackPanel>
 
-		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Name="Legend" />
-
-		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
+		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button x:Name="Freeze" Style="{StaticResource FilterElement}">"Заморозить" заказы</Button>
 			<Button x:Name="Unfreeze" Style="{StaticResource FilterElement}">"Разморозить" заказы</Button>

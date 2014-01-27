@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Style("Sum", Description = "Имеется позиция с корректировкой по цене и/или по количеству")]
+		[Style("Sum", Description = "Имеется позиция с корректировкой по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsOrderLineSendError
 		{
 			get { return Lines.Any(l => l.IsSendError); }
