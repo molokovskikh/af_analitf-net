@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanMove");
 				}));
 
-			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsSentSelected)
+			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsSentSelected.Value)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("RestoreVisible");
 					NotifyOfPropertyChange("CanReorder");
@@ -90,9 +90,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
 			var update = ordersChanged
-				.SelectMany(e => {
-					return e.Value.ItemChanged.Cast<Object>().Merge(e.Value.Changed);
-				});
+				.SelectMany(e => e.Value.ItemChanged.Cast<Object>().Merge(e.Value.Changed));
 
 			var observable = ordersChanged.Cast<object>()
 				.Merge(update)
