@@ -28,11 +28,10 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Delete_order_line()
 		{
-			var offer = session.Query<Offer>().First();
-			MakeOrder(offer);
+			var order = MakeOrder();
 
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(1));
-			model.CurrentLine.Value = model.Lines.Value.First(l => l.Id == offer.OrderLine.Id);
+			model.CurrentLine.Value = model.Lines.Value.First(l => l.Order.Id == order.Id);
 			model.Delete();
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
 		}
@@ -69,7 +68,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_catalog()
 		{
-			MakeOrder(session.Query<Offer>().First());
+			MakeOrder();
 
 			model.CurrentLine.Value = model.Lines.Value.First();
 			Assert.That(model.ProductInfo.CanShowCatalog, Is.True);
@@ -89,7 +88,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Delete_line_on_edit()
 		{
-			var order = MakeOrder(session.Query<Offer>().First());
+			var order = MakeOrder();
 
 			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 			model.CurrentLine.Value.Count = 0;
@@ -109,7 +108,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Update_stat_on_delete()
 		{
-			MakeOrder(session.Query<Offer>().First());
+			MakeOrder();
 			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 
 			shell.NotifyOfPropertyChange("CurrentAddress");
@@ -123,7 +122,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Update_stat()
 		{
-			MakeOrder(session.Query<Offer>().First());
+			MakeOrder();
 			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 			model.CurrentLine.Value.Count = 100;
 			model.OfferUpdated();
@@ -135,7 +134,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Update_sum_on_type_change()
 		{
-			session.DeleteEach<SentOrderLine>();
+			session.DeleteEach<SentOrder>();
 			MakeOrder();
 
 			Assert.That(model.Sum.Value, Is.GreaterThan(0));
@@ -147,6 +146,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.IsSentSelected.Value = false;
 			model.IsCurrentSelected.Value = true;
 			Assert.That(model.Sum.Value, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Show_catalog_info_on_sent_order_line()
+		{
+			session.DeleteEach<SentOrder>();
+			var sendOrder = MakeSentOrder();
+			var catalogId = sendOrder.Lines[0].CatalogId;
+			MakeOrder(session.Query<Offer>().First(o => o.CatalogId != catalogId));
+
+			model.IsCurrentSelected.Value = false;
+			model.IsSentSelected.Value = true;
+			model.SelectedSentLine.Value = model.SentLines.Value.First();
+			Assert.AreEqual(catalogId, model.ProductInfo.CurrentCatalog.Id);
 		}
 	}
 }

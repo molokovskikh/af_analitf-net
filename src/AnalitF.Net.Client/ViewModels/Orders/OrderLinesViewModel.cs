@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentLine = new NotifyValue<OrderLine>();
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
+			SelectedSentLine = new NotifyValue<SentOrderLine>();
 			CurrentPrice = new NotifyValue<Price>();
 			CanDelete = new NotifyValue<bool>(
 				() => CurrentLine.Value != null && IsCurrentSelected,
@@ -55,9 +56,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(CurrentPrice.Changed())
 				.Merge(OnlyWarning.Changed())
 				.Subscribe(_ => Update());
-
-			this.ObservableForProperty(m => m.CurrentLine.Value)
-				.Subscribe(e => ProductInfo.CurrentOffer = e.Value);
 
 			this.ObservableForProperty(m => m.CurrentLine.Value)
 				.Select(e => e.Value)
@@ -103,6 +101,8 @@ namespace AnalitF.Net.Client.ViewModels
 		[Export]
 		public NotifyValue<List<SentOrderLine>> SentLines { get; set; }
 
+		public NotifyValue<SentOrderLine> SelectedSentLine { get; set; }
+
 		public NotifyValue<decimal> Sum { get; set; }
 
 		public NotifyValue<OrderLine> CurrentLine { get; set; }
@@ -128,6 +128,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 			OnlyWarningVisible = new NotifyValue<bool>(() => IsCurrentSelected && User.IsPreprocessOrders, IsCurrentSelected);
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+			CurrentLine.Changed()
+				.Merge(SelectedSentLine.Changed())
+				.Merge(IsCurrentSelected.Changed())
+				.Subscribe(_ => {
+					if (IsCurrentSelected)
+						ProductInfo.CurrentOffer = CurrentLine.Value;
+					else
+						ProductInfo.CurrentOffer = SelectedSentLine.Value;
+				});
 			AddressSelector.Init();
 		}
 

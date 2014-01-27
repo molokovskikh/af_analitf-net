@@ -150,9 +150,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected SentOrder MakeSentOrder(Offer offer = null)
 		{
-			if (offer == null)
-				offer = session.Query<Offer>().First();
-
+			offer = offer ?? session.Query<Offer>().First();
 			var order = new Order(offer.Price, address);
 			order.AddLine(offer, 1);
 			var sentOrder = new SentOrder(order);
@@ -163,9 +161,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
-			if (offer == null)
-				offer = session.Query<Offer>().First();
-
+			offer = offer ?? session.Query<Offer>().First();
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.AddLine(offer, 1);
 			offer.OrderLine = order.Lines[0];
