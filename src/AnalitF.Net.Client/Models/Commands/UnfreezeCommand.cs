@@ -11,7 +11,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		private uint[] ids;
 		private uint addressId;
 
-		public bool CalculateStatus;
+		public bool Restore;
 
 		public UnfreezeCommand(uint id)
 		{
@@ -85,6 +85,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					Comment = sourceOrder.Comment,
 					PersonalComment = sourceOrder.PersonalComment
 				};
+				if (Restore) {
+					destOrder.CreatedOn = sourceOrder.CreatedOn;
+				}
 			}
 
 			foreach (var line in sourceOrder.Lines.ToArray()) {
@@ -184,12 +187,12 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private bool ShouldCalculateStatus(IOrder sourceOrder)
 		{
-			return sourceOrder is Order && CalculateStatus;
+			return sourceOrder is Order && Restore;
 		}
 
 		private bool ShouldCalculateStatus(IOrderLine orderline)
 		{
-			return orderline is OrderLine && CalculateStatus;
+			return orderline is OrderLine && Restore;
 		}
 	}
 }

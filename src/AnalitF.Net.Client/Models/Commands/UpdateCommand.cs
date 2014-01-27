@@ -336,7 +336,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			orders.Each(o => o.ResetStatus());
 			orders.Each(o => o.Frozen = true);
 			var command = new UnfreezeCommand<Order>(ids);
-			command.CalculateStatus = true;
+			command.Restore = true;
 			var report = (string)RunCommand(command);
 
 			var user = Session.Query<User>().First();

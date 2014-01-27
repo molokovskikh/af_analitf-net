@@ -60,5 +60,15 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
 			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0), "номер строки заказа {0}", item.RowId);
 		}
+
+		[Test]
+		public void Restore_orders()
+		{
+			var order = MakeOrderClean();
+			order.CreatedOn = order.CreatedOn.AddDays(-1);
+			Run(new UpdateCommand());
+			var reloaded = localSession.Query<Order>().First();
+			Assert.That(reloaded.CreatedOn, Is.EqualTo(order.CreatedOn).Within(1).Seconds);
+		}
 	}
 }

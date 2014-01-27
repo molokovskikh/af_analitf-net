@@ -30,7 +30,7 @@ namespace AnalitF.Net.Test.Integration.Models
 
 			order.Frozen = true;
 			var restore = new UnfreezeCommand<Order>(order.Id);
-			restore.CalculateStatus = true;
+			restore.Restore = true;
 			restore.Session = session;
 			restore.Execute();
 
