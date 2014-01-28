@@ -208,7 +208,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToDictionary(t => t.Item1, t => t.Item2);
 
 			offers.Each(o => {
-				o.SortKeyGroup = setGroupKey ? indexes[key(o)] % 2 : 0;
+				o.IsGrouped = setGroupKey ? indexes[key(o)] % 2 > 0 : false;
 			});
 
 			return offers;

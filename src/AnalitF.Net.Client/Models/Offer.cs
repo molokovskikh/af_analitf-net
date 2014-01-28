@@ -113,10 +113,6 @@ namespace AnalitF.Net.Client.Models
 			get { return LeaderCost == Cost; }
 		}
 
-		//Заглушка для реализации матрицы
-		[Ignore]
-		public virtual bool Banned { get; set; }
-
 		[Ignore]
 		public virtual OrderLine OrderLine
 		{
@@ -145,8 +141,8 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual string GroupName { get; set; }
 
-		[Ignore]
-		public virtual int SortKeyGroup { get; set; }
+		[Ignore, Style]
+		public virtual bool IsGrouped { get; set; }
 
 		public virtual void CalculateDiff(decimal cost)
 		{

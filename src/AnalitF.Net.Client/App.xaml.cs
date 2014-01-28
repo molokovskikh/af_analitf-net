@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client
 			style.Setters.Add(new Setter(Control.BackgroundProperty,
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
-			resources.Add("VitallyImportant", BaseStyle(StyleHelper.ActiveColor, StyleHelper.InactiveColor));
+			resources.Add("VitallyImportant", BaseStyle());
 
 			style = CellStyle(StyleHelper.ActiveColor,
 				StyleHelper.InactiveColor,
@@ -59,20 +59,11 @@ namespace AnalitF.Net.Client
 			return style;
 		}
 
-		private Style BaseStyle(Color active, Color inactive)
+		private Style BaseStyle()
 		{
 			var baseStyle = (Style)Resources[typeof(DataGridCell)];
 			var style = new Style(typeof(DataGridCell), baseStyle);
-			StyleHelper.AddTriggers(style,
-				"SortKeyGroup",
-				1,
-				Color.FromRgb(0xCC, 0xC1, 0xE3),
-				active,
-				inactive);
-			StyleHelper.AddTriggers(style, "Banned", true, Colors.Red, active, inactive);
-
 			style.Triggers.Add(VitallyImportant());
-
 			return style;
 		}
 

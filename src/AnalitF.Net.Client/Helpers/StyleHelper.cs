@@ -111,6 +111,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "Leader", Background("#C0DCC0") },
 				{ "BeginOverlap", Background("#808000") },
 				{ "HaveGap", Background("#800000") },
+				{ "IsGrouped", Background("#CCC1E3") },
 			};
 
 		private static ResourceDictionary localResources;
