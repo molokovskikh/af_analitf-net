@@ -88,9 +88,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 				currentCatalog = value;
 				//если нас вызвала другая форма
-				if (CurrentCatalogName.Value == null
-					|| (CurrentCatalog != null && CurrentCatalog.Name.Id != CurrentCatalogName.Value.Id)) {
-					CurrentCatalogName.Value = currentCatalog.Name;
+				if (currentCatalog != null) {
+					if (CurrentCatalogName.Value == null
+						|| CurrentCatalog.Name.Id != CurrentCatalogName.Value.Id) {
+						CurrentCatalogName.Value = currentCatalog.Name;
+					}
 				}
 
 				if (activeItemType == typeof(Catalog))
@@ -130,6 +132,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void LoadCatalogs()
 		{
+			if (StatelessSession == null)
+				return;
+
 			if (CurrentCatalogName.Value == null) {
 				Catalogs.Value = Enumerable.Empty<Catalog>().ToList();
 				return;
