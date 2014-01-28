@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Unit
 				Binding = new Binding("Period")
 			});
 			Build(typeof(Offer));
-			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nУцененные препараты", Legend(grid));
+			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nУцененные препараты", Legend(grid, typeof(Offer)));
 		}
 
 		[Test]
@@ -70,15 +70,15 @@ namespace AnalitF.Net.Test.Unit
 			});
 			Build(typeof(Order));
 
-			Assert.AreEqual("Подсказка\r\n\"Заморожен\"", Legend(grid));
+			Assert.AreEqual("Подсказка\r\n\"Заморожен\"", Legend(grid, typeof(Order)));
 			Assert.AreEqual("Подсказка\r\n\"Заморожен\"" +
-				"\r\nИмеется позиция с корректировкой по цене и/или по количеству", Legend(grid, "Correction"));
+				"\r\nИмеется позиция с корректировкой по цене и/или по количеству", Legend(grid, typeof(Order), "CorrectionEnabled"));
 		}
 
-		private string Legend(DataGrid grid, string context = null)
+		private string Legend(DataGrid grid, Type type, string context = null)
 		{
 			var legend = new StackPanel();
-			StyleHelper.ApplyStyles(typeof(Order), grid, appResource, legend, context);
+			StyleHelper.ApplyStyles(type, grid, appResource, legend, context);
 			return legend.AsText();
 		}
 
