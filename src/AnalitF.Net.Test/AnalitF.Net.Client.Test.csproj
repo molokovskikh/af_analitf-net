@@ -205,6 +205,7 @@
     <Compile Include="Unit\Models\AttachmentFixture.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\Models\MailFixture.cs" />
+    <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />

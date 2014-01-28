@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reactive.Linq.Observαble;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
+using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
 using log4net.Appender;
@@ -18,35 +20,66 @@ using log4net.Repository.Hierarchy;
 using NHibernate;
 using NHibernate.Linq;
 using log4net.Config;
+using NPOI.SS.Formula.Functions;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
 	public class ResultDir
 	{
-		private static string[] autoopen = {
-			"rejects", "waybills", "attachments"
+		private static string[] autoOpenFiles = {
+			"attachments"
+		};
+
+		private static string[] autoOpenDirs = {
+			"waybills", "rejects", "docs"
 		};
 
 		public ResultDir(string name, Settings settings, Config.Config confg)
 		{
+			var openTypes = autoOpenFiles.ToList();
+			if (settings.OpenRejects) {
+				openTypes.Add("rejects");
+			}
+			if (settings.OpenWaybills) {
+				openTypes.Add("waybills");
+			}
 			Name = name;
 			Src = Path.Combine(confg.UpdateTmpDir, Name);
 			Dst = settings.MapPath(name) ?? Path.Combine(confg.RootDir, name);
 			if (name.Match("waybills")) {
 				GroupBySupplier = settings.GroupWaybillsBySupplier;
 			}
-			if (autoopen.Any(d => d.Match(name))) {
-				Open = settings.OpenRejects;
-			}
+			OpenFiles = openTypes.Any(t => t.Match(name));
+			OpenDir = autoOpenDirs.Any(d => d.Match(name));
 		}
 
-		public string Name { get; set; }
-		public string Src { get; set; }
-		public string Dst { get; set; }
-		public bool Open { get; set; }
+		public string Name;
+		public string Src;
+		public string Dst;
+		public bool OpenFiles;
+		public bool OpenDir;
 		public bool GroupBySupplier;
 		public IList<string> ResultFiles = new List<string>();
+
+		public static IEnumerable<IResult> OpenResultFiles(IEnumerable<ResultDir> dirs)
+		{
+			var disableOpenFiles = dirs.Where(d => d.OpenFiles).Sum(g => g.ResultFiles.Count) > 5;
+			if (disableOpenFiles) {
+				dirs.Each(d => d.OpenFiles = false);
+			}
+
+			foreach (var dir in dirs.Where(d => d.ResultFiles.Count > 0)) {
+				if (dir.OpenFiles) {
+					foreach (var f in dir.ResultFiles.Select(f => new OpenResult(f))) {
+						yield return f;
+					}
+				}
+				else if (dir.OpenDir) {
+					yield return new OpenResult(dir.Dst);
+				}
+			}
+		}
 	}
 
 	public class UpdateCommand : RemoteCommand
@@ -198,7 +231,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				.ToArray();
 
 			resultDirs.Each(Move);
-			OpenResultFiles(resultDirs);
+			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
 
 			Directory.Delete(Config.UpdateTmpDir, true);
@@ -422,23 +455,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 			return result;
-		}
-
-		private void OpenResultFiles(IEnumerable<ResultDir> groups)
-		{
-			var toOpen = groups.Where(g => g.Open);
-			var openDir = toOpen.Sum(g => g.ResultFiles.Count) > 5;
-
-			foreach (var dir in toOpen) {
-				if (dir.ResultFiles.Count > 0) {
-					if (openDir) {
-						Results.Add(new OpenResult(dir.Dst));
-					}
-					else {
-						Results.AddRange(dir.ResultFiles.Select(f => new OpenResult(f)));
-					}
-				}
-			}
 		}
 
 		private List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
