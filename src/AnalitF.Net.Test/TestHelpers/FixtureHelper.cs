@@ -10,6 +10,7 @@ using AnalitF.Net.Service.Config.Environments;
 using AnalitF.Net.Service.Test;
 using AnalitF.Net.Test.Integration;
 using NHibernate;
+using NHibernate.Hql.Ast.ANTLR.Util;
 using NHibernate.Linq;
 using Test.Support;
 
@@ -18,6 +19,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	public class FixtureHelper : IDisposable
 	{
 		private List<Action> rollbacks = new List<Action>();
+		private bool verbose;
+
+		public FixtureHelper(bool verbose = false)
+		{
+			this.verbose = verbose;
+		}
 
 		public T Run<T>()
 		{
@@ -26,9 +33,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public object Run(Type type)
 		{
-			var fixture = Activator.CreateInstance(type);
-			Run(fixture);
-			return fixture;
+			try {
+				var fixture = Activator.CreateInstance(type);
+				Run(fixture);
+				return fixture;
+			}
+			catch(MissingMethodException e) {
+				throw new Exception(String.Format("Не удалось создать объект типа {0}", type), e);
+			}
 		}
 
 		public void Run(dynamic fixture, bool rollback = false)
@@ -49,6 +61,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					AppBootstrapper.NHibernate.UseRelativePath = true;
 					AppBootstrapper.NHibernate.Init();
 					factory = AppBootstrapper.NHibernate.Factory;
+					var config = new Config.Config();
+					config.RootDir = Common.Tools.FileHelper.MakeRooted(config.RootDir);
+					Util.SetValue(fixture, "Config", IntegrationSetup.clientConfig);
 				}
 				else {
 					factory = IntegrationSetup.Factory;
@@ -64,6 +79,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					Setup.SessionFactory = IntegrationSetup.ServerNHConfig("local");
 				}
 				fixture.Config = IntegrationSetup.serviceConfig;
+				fixture.Verbose = verbose;
 				factory = Setup.SessionFactory;
 			}
 

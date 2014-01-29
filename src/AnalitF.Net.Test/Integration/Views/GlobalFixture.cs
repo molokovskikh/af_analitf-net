@@ -12,12 +12,15 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Parts;
+using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -27,6 +30,7 @@ using NHibernate.Linq;
 using NHibernate.Util;
 using NUnit.Framework;
 using ReactiveUI.Testing;
+using Action = System.Action;
 using CheckBox = System.Windows.Controls.CheckBox;
 using DataGrid = System.Windows.Controls.DataGrid;
 using DataGridCell = System.Windows.Controls.DataGridCell;
@@ -34,6 +38,7 @@ using Label = System.Windows.Controls.Label;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
 using WindowState = System.Windows.WindowState;
+using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -440,7 +445,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Fixture<Client.Test.Fixtures.DelayOfPayment>();
 			Start();
 			Click("ShowCatalog");
-			OpenOffers((CatalogNameViewModel)((CatalogViewModel)shell.ActiveItem).ActiveItem);
+			OpenOffers();
 
 			dispatcher.Invoke(() => {
 				var offers = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Offers");
@@ -448,6 +453,35 @@ namespace AnalitF.Net.Test.Integration.Views
 				var supplierCost = GetCell(offers, "Цена поставщика");
 				var cost = GetCell(offers, "Цена");
 				Assert.AreNotEqual(supplierCost.AsText(), cost.AsText());
+			});
+		}
+
+		[Test]
+		public void Promotion()
+		{
+			session.DeleteEach<Promotion>();
+			var fixture = new LocalPromotion("assets/Валемидин.JPG");
+			Fixture(fixture);
+
+			Start();
+			Click("ShowCatalog");
+			OpenOffers(fixture.Promotion.Catalogs[0]);
+			dispatcher.Invoke(() => {
+				var promotions = activeWindow.Descendants<Client.Views.Parts.PromotionPopup>().First();
+				Assert.IsTrue(promotions.IsVisible);
+				Assert.That(promotions.AsText(), Is.StringContaining(fixture.Promotion.Name));
+				var presenter = promotions.Descendants<ContentPresenter>()
+					.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
+				var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
+				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+			});
+
+			WaitWindow(fixture.Promotion.DisplayName);
+			dispatcher.Invoke(() => {
+				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
+				var image = viewer.Document.Descendants<Image>().First();
+				Assert.IsNotNull(image);
+				Assert.That(image.Source.Height, Is.GreaterThan(0));
 			});
 		}
 
@@ -530,14 +564,32 @@ namespace AnalitF.Net.Test.Integration.Views
 			await ViewLoaded<CatalogViewModel>();
 		}
 
-		private async Task<CatalogOfferViewModel> OpenOffers(CatalogNameViewModel viewModel)
+		private CatalogOfferViewModel OpenOffers(Catalog catalog = null)
+		{
+			return OpenOffers((CatalogNameViewModel)((CatalogViewModel)shell.ActiveItem).ActiveItem, catalog).Result;
+		}
+
+		private async Task<CatalogOfferViewModel> OpenOffers(CatalogNameViewModel viewModel, Catalog catalog = null)
 		{
 			var view = (FrameworkElement)viewModel.GetView();
 			if (view == null)
 				throw new Exception(String.Format("Не удалось получить view из {0}", viewModel.GetType()));
+			if (catalog != null) {
+				dispatcher.Invoke(() => {
+					var names = activeWindow.Descendants<DataGrid>().First(g => g.Name == "CatalogNames");
+					names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(c => c.Id == catalog.Name.Id);
+				});
+			}
 			Input(view, "CatalogNames", Key.Enter);
-			if (viewModel.Catalogs.Value.Count > 1)
+			if (viewModel.Catalogs.Value.Count > 1) {
+				if (catalog != null) {
+					dispatcher.Invoke(() => {
+						var catalogs = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Catalogs");
+						catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(c => c.Id == catalog.Id);
+					});
+				}
 				Input(view, "Catalogs", Key.Enter);
+			}
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
 			await ViewLoaded(offers);
 			WaitIdle();

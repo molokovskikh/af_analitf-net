@@ -67,6 +67,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			Id = new OfferComposedId();
 			Id.RegionId = price.Id.RegionId;
+			Id.OfferId = (ulong)base.GetHashCode();
 			PriceId = price.Id.PriceId;
 			Price = price;
 			Cost = cost;

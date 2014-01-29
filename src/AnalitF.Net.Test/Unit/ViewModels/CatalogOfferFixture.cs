@@ -57,10 +57,10 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					}
 				}
 			};
-			model.CurrentOffer = model.Offers.Value[0];
+			model.CurrentOffer.Value = model.Offers.Value[0];
 			Assert.AreEqual(model.RetailMarkup.Value, 20);
 			Assert.AreEqual(model.RetailCost.Value, 120);
-			model.CurrentOffer = model.Offers.Value[1];
+			model.CurrentOffer.Value = model.Offers.Value[1];
 			Assert.AreEqual(model.RetailCost.Value, 180);
 		}
 	}

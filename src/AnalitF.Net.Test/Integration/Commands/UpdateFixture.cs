@@ -308,26 +308,11 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Load_promotions()
 		{
-			var serverUser = ServerUser();
-			var supplier = serverUser.GetActivePrices(session).First().Supplier;
-			var catalog = session.Load<TestCatalogProduct>(localSession.Query<Catalog>().First(c => c.HaveOffers).Id);
-			var testPromotion = new TestPromotion {
-				Name = "Test",
-				Annotation = "Test",
-				Status = true,
-				Supplier = supplier,
-				RegionMask = serverUser.WorkRegionMask,
-				Catalogs = {
-					catalog
-				}
-			};
-			session.Save(testPromotion);
-			testPromotion.Save(serviceConfig.PromotionsPath, "test");
-
+			var fixture = Fixture<CreatePromotion>();
 			Run(new UpdateCommand());
 
 			Assert.That(localSession.Query<Promotion>().Count(), Is.GreaterThan(1));
-			var promotion = localSession.Get<Promotion>(testPromotion.Id);
+			var promotion = localSession.Get<Promotion>(fixture.Promotion.Id);
 			promotion.Init(clientConfig);
 			Assert.IsTrue(File.Exists(promotion.LocalFilename));
 		}

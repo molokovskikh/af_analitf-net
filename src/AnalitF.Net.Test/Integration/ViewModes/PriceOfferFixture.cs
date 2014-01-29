@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_catalog()
 		{
-			var offer = model.CurrentOffer;
+			var offer = model.CurrentOffer.Value;
 			model.ShowCatalog();
 
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(1));
@@ -47,7 +47,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(catalogModel.CurrentCatalogName.Id, Is.EqualTo(catalogModel.CurrentCatalog.Name.Id));
 
 			var offerModel = (CatalogOfferViewModel)shell.ActiveItem;
-			Assert.That(offerModel.CurrentOffer.Id, Is.EqualTo(offer.Id));
+			Assert.That(offerModel.CurrentOffer.Value.Id, Is.EqualTo(offer.Id));
 		}
 
 		[Test]
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.Select(c => c.Id)
 				.Contains(o.CatalogId));
 			price = session.Load<Price>(offer.Price.Id);
-			model.CurrentOffer = model.Offers.Value.First(o => o.Id == offer.Id);
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
 			model.ShowCatalogWithMnnFilter();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
@@ -110,7 +110,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			session.DeleteEach<Order>();
 
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 

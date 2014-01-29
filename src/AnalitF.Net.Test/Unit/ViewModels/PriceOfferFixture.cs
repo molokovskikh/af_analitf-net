@@ -108,8 +108,8 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 
 		private static void OrderByIndex(PriceOfferViewModel model, int index, uint count = 1)
 		{
-			model.CurrentOffer = model.Offers.Value[index];
-			model.CurrentOffer.OrderCount = count;
+			model.CurrentOffer.Value = model.Offers.Value[index];
+			model.CurrentOffer.Value.OrderCount = count;
 			model.OfferUpdated();
 			model.OfferCommitted();
 		}

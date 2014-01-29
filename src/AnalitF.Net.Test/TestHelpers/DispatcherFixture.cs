@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
@@ -79,6 +80,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		public void InternalClick(ButtonBase element)
+		{
+			Contract.Assert(element != null);
+			AssertInputable(element);
+			element.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, element));
+		}
+
+		public void InternalClick(Hyperlink element)
 		{
 			Contract.Assert(element != null);
 			AssertInputable(element);
@@ -173,8 +181,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected static void AssertInputable(UIElement element)
 		{
-			Assert.IsTrue(element.IsVisible);
-			Assert.IsTrue(element.IsEnabled);
+			Assert.IsTrue(element.IsVisible, element.ToString());
+			Assert.IsTrue(element.IsEnabled, element.ToString());
+		}
+		protected static void AssertInputable(ContentElement element)
+		{
+			Assert.IsTrue(element.IsEnabled, element.ToString());
 		}
 
 		protected async void Start()

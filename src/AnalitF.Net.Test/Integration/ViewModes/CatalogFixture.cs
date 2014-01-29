@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -186,15 +187,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_promotion()
 		{
-			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
-			var promotion = new Promotion {
-				Supplier = session.Query<Supplier>().First(),
-				Name = "Тестовая промо-акция",
-				Annotation = "Тестовая промо-акция"
-			};
-			promotion.Catalogs.Add(catalog);
-			session.Save(promotion);
-			session.Flush();
+			var fixture = Fixture<LocalPromotion>();
+			var catalog = fixture.Promotion.Catalogs.First();
 
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Id == catalog.Name.Id);
 			var name = nameViewModel.CurrentCatalogName;

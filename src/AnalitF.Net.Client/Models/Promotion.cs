@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Common.Tools;
 
@@ -62,9 +63,9 @@ namespace AnalitF.Net.Client.Models
 				if (Path.GetExtension(LocalFilename).Match(".jpg")) {
 					var bitmap = new BitmapImage();
 					bitmap.BeginInit();
-					bitmap.UriSource = new Uri(LocalFilename);
+					bitmap.UriSource = new Uri(Path.GetFullPath(LocalFilename));
 					bitmap.EndInit();
-					doc.Blocks.Add(new BlockUIContainer(new Image { Source = bitmap }));
+					doc.Blocks.Add(new BlockUIContainer(new Image { Source = bitmap, Stretch = Stretch.None }));
 				}
 				else if (Path.GetExtension(LocalFilename).Match(".txt")) {
 					doc.Blocks.Add(new Paragraph(new Run(File.ReadAllText(LocalFilename))));

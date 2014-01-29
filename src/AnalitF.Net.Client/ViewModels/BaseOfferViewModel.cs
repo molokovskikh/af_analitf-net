@@ -29,7 +29,6 @@ namespace AnalitF.Net.Client.ViewModels
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		protected Offer lastEditOffer;
-		private Offer currentOffer;
 
 		private string autoCommentText;
 		private bool resetAutoComment;
@@ -46,13 +45,21 @@ namespace AnalitF.Net.Client.ViewModels
 			this.initOfferId = initOfferId;
 
 			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
+			CurrentOffer = new NotifyValue<Offer>();
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
 			Producers = new NotifyValue<List<string>>(new List<string> { Consts.AllProducerLabel });
 
-			this.ObservableForProperty(m => m.CurrentOffer)
+			CurrentOffer.Changed().Subscribe(_ => {
+				if (ResetAutoComment) {
+					AutoCommentText = CurrentOffer.Value != null && CurrentOffer.Value.OrderLine != null
+						? CurrentOffer.Value.OrderLine.Comment
+						: null;
+				}
+			});
+			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Subscribe(_ => InvalidateHistoryOrders());
 
-			this.ObservableForProperty(m => m.CurrentOffer)
+			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
@@ -61,36 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Changed().Subscribe(_ => Calculate());
 		}
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-
-			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
-			this.ObservableForProperty(m => m.CurrentOffer)
-				.Where(o => o != null)
-				.Throttle(Consts.LoadOrderHistoryTimeout, UiScheduler)
-				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
-
-			this.ObservableForProperty(m => m.CurrentOffer)
-#if !DEBUG
-				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-#endif
-				.Subscribe(_ => {
-					if (Session != null) {
-						if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
-							CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
-					}
-				}, CloseCancellation.Token);
-
-			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
-				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
-				.Select(e => new Stat(Address));
-
-			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
-			Bus.Listen<string>("db")
-				.Where(m => m == "Changed")
-				.Subscribe(_ => clearSession = true, CloseCancellation.Token);
-		}
+		public PromotionPopup Promotions { get; set; }
 
 		public InlineEditWarning OrderWarning { get; set; }
 
@@ -122,29 +100,17 @@ namespace AnalitF.Net.Client.ViewModels
 		[Export]
 		public NotifyValue<List<Offer>> Offers { get; set; }
 
-		public Offer CurrentOffer
-		{
-			get { return currentOffer; }
-			set
-			{
-				currentOffer = value;
-				if (ResetAutoComment) {
-					var commentText = currentOffer.OrderLine != null ? currentOffer.OrderLine.Comment : null;
-					AutoCommentText = commentText;
-				}
-				NotifyOfPropertyChange("CurrentOffer");
-			}
-		}
+		public NotifyValue<Offer> CurrentOffer { get; set; }
 
 		public Order CurrentOrder
 		{
 			get
 			{
-				if (CurrentOffer == null)
+				if (CurrentOffer.Value == null)
 					return null;
-				if (CurrentOffer.OrderLine == null)
+				if (CurrentOffer.Value.OrderLine == null)
 					return null;
-				return CurrentOffer.OrderLine.Order;
+				return CurrentOffer.Value.OrderLine.Order;
 			}
 		}
 
@@ -160,6 +126,43 @@ namespace AnalitF.Net.Client.ViewModels
 				return CurrentCatalog != null
 					&& CurrentCatalog.Name.Description != null;
 			}
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			if (StatelessSession != null) {
+				Promotions = new PromotionPopup(StatelessSession, Shell.Config);
+				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false)
+					.Subscribe(c => Promotions.Activate(c.Value == null ? null : c.Value.Name));
+			}
+
+			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
+			this.ObservableForProperty(m => m.CurrentOffer.Value)
+				.Where(o => o != null)
+				.Throttle(Consts.LoadOrderHistoryTimeout, UiScheduler)
+				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
+
+			this.ObservableForProperty(m => m.CurrentOffer.Value)
+#if !DEBUG
+				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+#endif
+				.Subscribe(_ => {
+					if (Session != null) {
+						if (CurrentOffer.Value != null && (currentCatalog == null || CurrentCatalog.Id != CurrentOffer.Value.CatalogId))
+							CurrentCatalog = Session.Load<Catalog>(CurrentOffer.Value.CatalogId);
+					}
+				}, CloseCancellation.Token);
+
+			var observable = this.ObservableForProperty(m => m.CurrentOffer.Value.OrderCount)
+				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
+				.Select(e => new Stat(Address));
+
+			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+			Bus.Listen<string>("db")
+				.Where(m => m == "Changed")
+				.Subscribe(_ => clearSession = true, CloseCancellation.Token);
 		}
 
 		public void ShowDescription()
@@ -182,11 +185,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
-			if (CurrentOffer == null)
+			if (CurrentOffer.Value == null)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog,
-				CurrentOffer == null ? null : CurrentOffer.Id);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog, CurrentOffer.Value.Id);
 
 			if (NavigateOnShowCatalog) {
 				Shell.Navigate(offerViewModel);
@@ -225,12 +227,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public virtual void OfferUpdated()
 		{
-			if (CurrentOffer == null)
+			if (CurrentOffer.Value == null)
 				return;
 
-			lastEditOffer = CurrentOffer;
+			lastEditOffer = CurrentOffer.Value;
 			LoadStat();
-			ShowValidationError(CurrentOffer.UpdateOrderLine(Address, Settings.Value, AutoCommentText));
+			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(Address, Settings.Value, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -249,8 +251,8 @@ namespace AnalitF.Net.Client.ViewModels
 			//мог ввести корректное значение
 			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
-				if (CurrentOffer == null || CurrentOffer.Id != lastEditOffer.Id) {
-					CurrentOffer = lastEditOffer;
+				if (CurrentOffer.Value == null || CurrentOffer.Value.Id != lastEditOffer.Id) {
+					CurrentOffer.Value = lastEditOffer;
 				}
 			}
 		}
@@ -342,17 +344,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			Query();
-			CurrentOffer = CurrentOffer ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
+			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
 			Calculate();
 			LoadOrderItems();
 		}
 
 		protected void LoadStat()
 		{
-			if (Address == null || CurrentOffer == null)
+			if (Address == null || CurrentOffer.Value == null)
 				return;
 
-			if (CurrentOffer.StatLoaded)
+			if (CurrentOffer.Value.StatLoaded)
 				return;
 
 			if (StatelessSession == null)
@@ -364,12 +366,12 @@ from SentOrderLines ol
 join SentOrders o on o.Id = ol.OrderId
 where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
 				.SetParameter("begin", begin)
-				.SetParameter("productId", CurrentOffer.ProductId)
+				.SetParameter("productId", CurrentOffer.Value.ProductId)
 				.SetParameter("addressId", Address.Id)
 				.UniqueResult<object[]>();
-			CurrentOffer.PrevOrderAvgCost = (decimal?)values[0];
-			CurrentOffer.PrevOrderAvgCount = (decimal?)values[1];
-			CurrentOffer.StatLoaded = true;
+			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
+			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
+			CurrentOffer.Value.StatLoaded = true;
 		}
 
 		private void InvalidateHistoryOrders()
@@ -384,7 +386,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			if (!IsActive)
 				return;
 
-			if (CurrentOffer == null || Address == null)
+			if (CurrentOffer.Value == null || Address == null)
 				return;
 
 			var key = HistoryOrdersCacheKey();
@@ -400,12 +402,12 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				//where применяться не будет
 				var addressId = Address.Id;
 				if (Settings.Value.GroupByProduct) {
-					var productId = CurrentOffer.ProductId;
+					var productId = CurrentOffer.Value.ProductId;
 					query = query.Where(o => o.ProductId == productId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
 				else {
-					var catalogId = CurrentOffer.CatalogId;
+					var catalogId = CurrentOffer.Value.CatalogId;
 					query = query.Where(o => o.CatalogId == catalogId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
@@ -423,13 +425,13 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		private object HistoryOrdersCacheKey()
 		{
-			if (CurrentOffer == null || Address == null)
+			if (CurrentOffer.Value == null || Address == null)
 				return 0;
 
 			if (Settings.Value.GroupByProduct)
-				return CurrentOffer.ProductId;
+				return CurrentOffer.Value.ProductId;
 			else
-				return CurrentOffer.CatalogId;
+				return CurrentOffer.Value.CatalogId;
 		}
 	}
 }

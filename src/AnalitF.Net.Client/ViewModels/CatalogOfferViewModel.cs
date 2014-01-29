@@ -36,12 +36,12 @@ namespace AnalitF.Net.Client.ViewModels
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
 			GroupByProduct.Changed().Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
-				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer),
+				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value),
 				Settings);
 			RetailCost = new NotifyValue<decimal?>(() => {
-				if (CurrentOffer == null)
+				if (CurrentOffer.Value == null)
 					return null;
-				return Math.Round(CurrentOffer.ResultCost * (1 + RetailMarkup / 100), 2);
+				return Math.Round(CurrentOffer.Value.ResultCost * (1 + RetailMarkup / 100), 2);
 			}, RetailMarkup);
 
 			CurrentRegion.Changed()
@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
 
-			this.ObservableForProperty(m => m.CurrentOffer)
+			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Subscribe(_ => {
 					RetailCost.Recalculate();
 					RetailMarkup.Recalculate();
@@ -101,7 +101,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 			UpdateMaxProducers();
 
-			CurrentOffer = CurrentOffer
+			CurrentOffer.Value = CurrentOffer.Value
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
 			UpdateFilters();
@@ -214,16 +214,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowPrice()
 		{
-			if (CurrentOffer == null)
+			if (CurrentOffer.Value == null)
 				return;
 
-			var price = CurrentOffer.Price;
+			var price = CurrentOffer.Value.Price;
 			var catalogViewModel = new PriceViewModel {
 				CurrentPrice = {
 					Value = price
 				}
 			};
-			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders, CurrentOffer.Id);
+			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders, CurrentOffer.Value.Id);
 			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 		}
 

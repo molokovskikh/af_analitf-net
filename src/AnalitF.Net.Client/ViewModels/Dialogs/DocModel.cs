@@ -14,10 +14,6 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public DocModel(uint id)
 		{
 			Model = Session.Get<T>(id);
-			if (Model != null) {
-				DisplayName = Model.DisplayName;
-				Document = BuildDocument();
-			}
 		}
 
 		public T Model { get; set; }
@@ -32,6 +28,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public bool CanSave
 		{
 			get { return Document != null; }
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			if (Model != null) {
+				Model.Init(Shell.Config);
+				DisplayName = Model.DisplayName;
+				Document = BuildDocument();
+			}
 		}
 
 		public PrintResult Print()

@@ -16,21 +16,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.DeleteEach<Order>();
 
 			shell.Navigate(model);
-			model.CurrentOffer = model.Offers.Value.First();
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value = model.Offers.Value.First();
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 
 			model.ShowCatalog();
 
 			var catalog = (CatalogOfferViewModel)shell.ActiveItem;
-			catalog.CurrentOffer = catalog.Offers.Value.First(c => c.Id == model.CurrentOffer.Id);
-			catalog.CurrentOffer.OrderCount = 0;
+			catalog.CurrentOffer.Value = catalog.Offers.Value.First(c => c.Id == model.CurrentOffer.Value.Id);
+			catalog.CurrentOffer.Value.OrderCount = 0;
 			catalog.OfferCommitted();
 			catalog.OfferUpdated();
 			catalog.TryClose();
 
-			Assert.IsNull(model.CurrentOffer.OrderCount);
+			Assert.IsNull(model.CurrentOffer.Value.OrderCount);
 		}
 	}
 }

@@ -143,6 +143,7 @@
 		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
+		<ContentControl x:Name="Promotions" Grid.Row="1" />
 
 		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />
 
@@ -244,11 +245,11 @@
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsInvalid}"
+								<DataTrigger Binding="{Binding CurrentOffer.Value.OrderLine.Order.IsInvalid}"
 									Value="false">
 									<Setter Property="Foreground" Value="Green" />
 								</DataTrigger>
-								<DataTrigger Binding="{Binding CurrentOffer.OrderLine.Order.IsInvalid}"
+								<DataTrigger Binding="{Binding CurrentOffer.Value.OrderLine.Order.IsInvalid}"
 									Value="true">
 									<Setter Property="Foreground" Value="Red" />
 								</DataTrigger>

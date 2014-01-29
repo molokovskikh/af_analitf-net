@@ -46,9 +46,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<ContentControl Name="Promotions" Grid.Row="1" Grid.Column="2"
-			HorizontalAlignment="Center" VerticalAlignment="Center"
-			Visibility="{Binding Promotions.Visible.Value, Converter={StaticResource BoolToHidden}}" />
+		<ContentControl Name="Promotions" Grid.Row="1" Grid.Column="2" />
 
 		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2" />
 		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2"

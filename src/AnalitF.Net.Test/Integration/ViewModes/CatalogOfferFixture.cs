@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
@@ -73,18 +74,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));
 
-			model.CurrentOffer = model.Offers.Value[0];
+			model.CurrentOffer.Value = model.Offers.Value[0];
 			Assert.That(model.RetailMarkup.Value, Is.EqualTo(20));
 			var expected = Math.Round(model.Offers.Value[0].Cost * (decimal)1.2, 2);
 			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
-			model.CurrentOffer = model.Offers.Value[1];
-			Assert.That(model.RetailMarkup.Value, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Cost);
+			model.CurrentOffer.Value = model.Offers.Value[1];
+			Assert.That(model.RetailMarkup.Value, Is.EqualTo(30), "цена разделитель {0} текущая {1}", splitCost, model.CurrentOffer.Value.Cost);
 			expected = Math.Round(model.Offers.Value[1].Cost * (decimal)1.3, 2);
 			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 
 			model.RetailMarkup.Value = 23;
-			model.CurrentOffer = model.Offers.Value[0];
+			model.CurrentOffer.Value = model.Offers.Value[0];
 			Assert.That(model.RetailMarkup.Value, Is.EqualTo(23));
 		}
 
@@ -102,7 +103,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeDifferentCategory(catalog);
 
 			var baseOffer = model.Offers.Value.First(o => o.Price.BasePrice);
-			Assert.That(model.CurrentOffer.Id, Is.EqualTo(baseOffer.Id), model.Offers.Value.Implode(o => o.Id));
+			Assert.That(model.CurrentOffer.Value.Id, Is.EqualTo(baseOffer.Id), model.Offers.Value.Implode(o => o.Id));
 		}
 
 		[Test]
@@ -166,17 +167,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 
-			model.CurrentOffer = model.Offers.Value.First(o => o.Id == offer.Id);
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
 			testScheduler.AdvanceToMs(4000);
 
 			Assert.AreEqual(1, model.HistoryOrders.Count, model.HistoryOrders.Implode(l => l.Id));
 			Assert.AreEqual(1, model.HistoryOrders[0].Count);
-			Assert.AreEqual(offer.Cost, model.CurrentOffer.PrevOrderAvgCost);
-			Assert.AreEqual(1, model.CurrentOffer.PrevOrderAvgCount);
+			Assert.AreEqual(offer.Cost, model.CurrentOffer.Value.PrevOrderAvgCost);
+			Assert.AreEqual(1, model.CurrentOffer.Value.PrevOrderAvgCount);
 
-			model.CurrentOffer = null;
+			model.CurrentOffer.Value = null;
 			Assert.IsNull(model.HistoryOrders);
-			model.CurrentOffer = model.Offers.Value.First();
+			model.CurrentOffer.Value = model.Offers.Value.First();
 			Assert.AreEqual(1, model.HistoryOrders.Count);
 		}
 
@@ -230,14 +231,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_order_count()
 		{
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 			Close(model);
 
 			var renewModel = Init(new CatalogOfferViewModel(catalog));
-			Assert.That(renewModel.CurrentOffer.OrderCount, Is.EqualTo(1));
-			Assert.That(renewModel.CurrentOffer.OrderLine, Is.Not.Null);
+			Assert.That(renewModel.CurrentOffer.Value.OrderCount, Is.EqualTo(1));
+			Assert.That(renewModel.CurrentOffer.Value.OrderLine, Is.Not.Null);
 			Assert.That(renewModel.CurrentOrder, Is.Not.Null);
 		}
 
@@ -245,21 +246,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Can_not_make_order_if_current_address_is_null()
 		{
 			shell.CurrentAddress = null;
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 
-			Assert.That(model.CurrentOffer.OrderCount, Is.Null);
-			Assert.That(model.CurrentOffer.OrderLine, Is.Null);
+			Assert.That(model.CurrentOffer.Value.OrderCount, Is.Null);
+			Assert.That(model.CurrentOffer.Value.OrderLine, Is.Null);
 		}
 
 		[Test]
 		public void Create_order_line_with_comment()
 		{
 			model.AutoCommentText = "тестовый комментарий";
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
-			Assert.That(model.CurrentOffer.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
+			Assert.That(model.CurrentOffer.Value.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
 		}
 
 		[Test]
@@ -267,15 +268,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			model.AutoCommentText = "тестовый комментарий";
 			model.ResetAutoComment = true;
-			model.CurrentOffer.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
-			Assert.That(model.CurrentOffer.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
+			Assert.That(model.CurrentOffer.Value.OrderLine.Comment, Is.EqualTo("тестовый комментарий"));
 
-			model.CurrentOffer = model.Offers.Value[1];
+			model.CurrentOffer.Value = model.Offers.Value[1];
 			Assert.That(model.AutoCommentText, Is.Null);
 
-			model.CurrentOffer = model.Offers.Value[0];
+			model.CurrentOffer.Value = model.Offers.Value[0];
 			Assert.That(model.AutoCommentText, Is.EqualTo("тестовый комментарий"));
 		}
 
@@ -297,8 +298,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = model.Offers.Value.First(o => !o.Junk);
 			MakeSentOrder(offer);
 
-			model.CurrentOffer = offer;
-			model.CurrentOffer.OrderCount = 51;
+			model.CurrentOffer.Value = offer;
+			model.CurrentOffer.Value.OrderCount = 51;
 			model.OfferUpdated();
 			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Превышение среднего заказа!"));
 		}
@@ -309,6 +310,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalog = session.Query<Catalog>().First(c => !c.HaveOffers);
 			Assert.That(model.IsSuccessfulActivated, Is.False);
 			Assert.That(manager.MessageBoxes.Implode(), Is.EqualTo("Нет предложений"));
+		}
+
+		[Test]
+		public void Load_promotion()
+		{
+			var fixture = Fixture<LocalPromotion>();
+			catalog = fixture.Promotion.Catalogs.First();
+			Assert.That(model.Promotions.Promotions.Value.Count, Is.GreaterThan(0));
 		}
 	}
 }

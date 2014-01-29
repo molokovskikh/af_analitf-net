@@ -32,8 +32,9 @@ namespace AnalitF.Net.Client.Test.Tasks
 				return;
 			}
 
-			for(var i = 0; i < count; i++)
-				new FixtureHelper().Run(type);
+			for(var i = 0; i < count; i++) {
+				new FixtureHelper(verbose: true).Run(type);
+			}
 		}
 
 		private static IEnumerable<Type> GetTypes()

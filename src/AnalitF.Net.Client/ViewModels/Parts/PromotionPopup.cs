@@ -18,6 +18,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private IStatelessSession session;
 		private Config.Config config;
 
+		public uint? FilterBySupplierId;
+
 		public PromotionPopup(IStatelessSession session, Config.Config config)
 		{
 			Name = new NotifyValue<CatalogName>();
@@ -39,7 +41,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 			Name.Value = name;
 			var nameId = name.Id;
-			Promotions.Value = session.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId))
+			var query = session.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId));
+			if (FilterBySupplierId != null)
+				query = query.Where(p => p.Supplier.Id == FilterBySupplierId);
+			Promotions.Value = query
 				.OrderBy(p => p.Name)
 				.Fetch(p => p.Supplier)
 				.ToList();

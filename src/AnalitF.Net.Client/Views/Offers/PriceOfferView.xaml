@@ -127,6 +127,7 @@
 		</c:DataGrid2>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
+		<ContentControl x:Name="Promotions" Grid.Row="2" />
 
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 		<StackPanel Grid.Row="4" Name="Legend" />

@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		string DisplayName { get; }
 		FlowDocument ToFlowDocument();
+		void Init(Config.Config config);
 	}
 
 	public class ProductDescription : IDocModel
@@ -95,6 +96,10 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			return document;
+		}
+
+		public virtual void Init(Config.Config config)
+		{
 		}
 	}
 }

@@ -80,7 +80,9 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnActivate();
 
 			Update();
-			CurrentOffer = CurrentOffer ?? Offers.Value.FirstOrDefault();
+			if (Promotions != null)
+				Promotions.FilterBySupplierId = Price.Value.SupplierId;
+			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
 
 			if (PriceOffers.Count == 0) {
 				Manager.Warning("Выбранный прайс-лист отсутствует");
@@ -164,7 +166,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return null;
 
 			LoadHistoryOrders();
-			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer, HistoryOrders));
+			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer.Value, HistoryOrders));
 		}
 
 		public IResult EnterOffer()

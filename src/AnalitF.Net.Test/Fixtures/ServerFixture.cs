@@ -9,6 +9,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	public abstract class ServerFixture
 	{
 		public Service.Config.Config Config;
+		public bool Verbose;
 
 		public abstract void Execute(ISession session);
 

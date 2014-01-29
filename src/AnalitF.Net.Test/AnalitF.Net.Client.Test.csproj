@@ -133,8 +133,10 @@
     <Compile Include="Fixtures\DelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
+    <Compile Include="Fixtures\LocalPromotion.cs" />
     <Compile Include="Fixtures\MailWithAttachment.cs" />
     <Compile Include="Fixtures\MakeOrder.cs" />
+    <Compile Include="Fixtures\CreatePromotion.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
     <Compile Include="Fixtures\Reject.cs" />
     <Compile Include="Fixtures\RejectedWaybill.cs" />
