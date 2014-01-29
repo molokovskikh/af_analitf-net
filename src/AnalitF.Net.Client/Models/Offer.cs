@@ -119,9 +119,17 @@ namespace AnalitF.Net.Client.Models
 			get { return orderLine; }
 			set
 			{
+				if (orderLine == value)
+					return;
+
 				orderLine = value;
 				if (OrderLine == null) {
 					OrderCount = null;
+				}
+				else {
+					OrderCount = orderLine.Count;
+					if (Price.Order == null)
+						Price.Order = orderLine.Order;
 				}
 				OnPropertyChanged();
 			}
@@ -201,7 +209,7 @@ namespace AnalitF.Net.Client.Models
 				return result;
 			}
 			var order = Price.Order;
-			if (OrderCount.GetValueOrDefault(0) > 0) {
+			if (OrderCount.GetValueOrDefault() > 0) {
 				if (OrderLine == null) {
 					if (order == null) {
 						order = new Order(Price, address);
@@ -262,13 +270,6 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			return result;
-		}
-
-		public virtual void AttachOrderLine(OrderLine orderLine)
-		{
-			OrderLine = orderLine;
-			Price.Order = orderLine.Order;
-			OrderCount = orderLine.Count;
 		}
 
 		public virtual List<Message> SaveOrderLine(Address address, Settings settings, string comment = null)

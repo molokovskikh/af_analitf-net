@@ -310,13 +310,5 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.IsSuccessfulActivated, Is.False);
 			Assert.That(manager.MessageBoxes.Implode(), Is.EqualTo("Нет предложений"));
 		}
-
-		private void CleanSendOrders(Offer offer)
-		{
-			session.Query<SentOrderLine>()
-				.Where(l => l.CatalogId == offer.CatalogId)
-				.Each(l => session.Delete(l));
-			session.Flush();
-		}
 	}
 }

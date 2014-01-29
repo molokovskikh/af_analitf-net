@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Unit
 {
@@ -224,6 +226,18 @@ namespace AnalitF.Net.Test.Unit
 		{
 			offer.ProducerCost = 0;
 			Assert.IsNull(offer.SupplierMarkup);
+		}
+
+		[Test]
+		public void Attach_order_line()
+		{
+			var order = new Order(address, offer);
+			offer.OrderLine = order.Lines[0];
+			Assert.AreEqual(offer.Price.Order, order);
+			Assert.AreEqual(offer.OrderCount, 1);
+
+			offer.OrderLine = null;
+			Assert.IsNull(offer.OrderCount);
 		}
 
 		private void Validate()

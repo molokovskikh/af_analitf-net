@@ -20,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public abstract class BaseOfferViewModel : BaseScreen
 	{
+		private bool clearSession;
 		private SimpleMRUCache cache = new SimpleMRUCache(10);
 		private Catalog currentCatalog;
 		private List<SentOrderLine> historyOrders;
@@ -87,6 +88,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => new Stat(Address));
 
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+			Bus.Listen<string>("db")
+				.Where(m => m == "Changed")
+				.Subscribe(_ => clearSession = true, CloseCancellation.Token);
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -203,13 +207,15 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.Cost)).ToList();
 
-			var indexes = lookup.OrderBy(k => k.Value)
-				.Select((k, i) => Tuple.Create(k.Key, i))
-				.ToDictionary(t => t.Item1, t => t.Item2);
+			if (setGroupKey) {
+				var indexes = lookup.OrderBy(k => k.Value)
+					.Select((k, i) => Tuple.Create(k.Key, i))
+					.ToDictionary(t => t.Item1, t => t.Item2);
 
-			offers.Each(o => {
-				o.IsGrouped = setGroupKey ? indexes[key(o)] % 2 > 0 : false;
-			});
+				offers.Each(o => {
+					o.IsGrouped = indexes[key(o)] % 2 > 0;
+				});
+			}
 
 			return offers;
 		}
@@ -306,20 +312,36 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void LoadOrderItems()
 		{
+			foreach (var offer in Offers.Value) {
+				offer.Price.Order = null;
+				offer.OrderLine = null;
+			}
+
 			if (Address == null)
 				return;
 
-			var lines = Address.Orders.Where(o => !o.Frozen).SelectMany(o => o.Lines).ToList();
-
+			var lines = Address.Orders.Where(o => !o.Frozen).SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
 			foreach (var offer in Offers.Value) {
-				var line = lines.FirstOrDefault(l => l.OfferId == offer.Id);
-				if (line != null) {
-					offer.AttachOrderLine(line);
-				}
+				offer.OrderLine = lines[offer.Id].FirstOrDefault();
 			}
 		}
 
 		protected abstract void Query();
+
+		protected override void OnActivate()
+		{
+			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
+			if (clearSession) {
+				Session.Clear();
+				if (Address != null)
+					Address = Session.Get<Address>(Address.Id);
+				User = Session.Query<User>().FirstOrDefault();
+				clearSession = false;
+				LoadOrderItems();
+			}
+
+			base.OnActivate();
+		}
 
 		public override void Update()
 		{

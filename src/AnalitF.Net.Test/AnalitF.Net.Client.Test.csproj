@@ -158,6 +158,7 @@
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModes\CorrectionFixture.cs" />
+    <Compile Include="Integration\ViewModes\JunkOfferFixture.cs" />
     <Compile Include="Integration\ViewModes\MailsFixture.cs" />
     <Compile Include="Integration\ViewModes\MnnFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOfferFixture.cs" />
