@@ -37,18 +37,18 @@ namespace AnalitF.Net.Test.Unit
 		public void After_sort_assign_product_index()
 		{
 			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
-			Assert.That(offers[0].IsGrouped, Is.EqualTo(0));
-			Assert.That(offers[1].IsGrouped, Is.EqualTo(1));
-			Assert.That(offers[3].IsGrouped, Is.EqualTo(0));
+			Assert.IsFalse(offers[0].IsGrouped);
+			Assert.IsTrue(offers[1].IsGrouped);
+			Assert.IsFalse(offers[3].IsGrouped);
 		}
 
 		[Test]
 		public void Reset_group_key()
 		{
 			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
-			Assert.That(offers[1].IsGrouped, Is.EqualTo(1));
+			Assert.IsTrue(offers[1].IsGrouped);
 			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.CatalogId, false);
-			Assert.That(offers[1].IsGrouped, Is.EqualTo(0));
+			Assert.IsFalse(offers[1].IsGrouped);
 		}
 	}
 }

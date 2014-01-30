@@ -207,15 +207,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.Cost)).ToList();
 
-			if (setGroupKey) {
-				var indexes = lookup.OrderBy(k => k.Value)
-					.Select((k, i) => Tuple.Create(k.Key, i))
-					.ToDictionary(t => t.Item1, t => t.Item2);
+			var indexes = lookup.OrderBy(k => k.Value)
+				.Select((k, i) => Tuple.Create(k.Key, i))
+				.ToDictionary(t => t.Item1, t => t.Item2);
 
-				offers.Each(o => {
-					o.IsGrouped = indexes[key(o)] % 2 > 0;
-				});
-			}
+			offers.Each(o => {
+				o.IsGrouped = setGroupKey && indexes[key(o)] % 2 > 0;
+			});
 
 			return offers;
 		}

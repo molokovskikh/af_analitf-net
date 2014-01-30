@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var dir = new ResultDir("waybills", settings, config);
 			dir.ResultFiles.Add("waybill.txt");
 			dir.ResultFiles.Add("waybill1.txt");
-			var toOpen = ResultDir.OpenResultFiles(new [] { dir }).ToArray();
+			var toOpen = ResultDir.OpenResultFiles(new[] { dir }).ToArray();
 			Assert.AreEqual(1, toOpen.Length);
 			Assert.AreEqual("Накладные", Path.GetFileName(((OpenResult)toOpen[0]).Filename));
 
@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			dir = new ResultDir("waybills", settings, config);
 			dir.ResultFiles.Add("waybill.txt");
 			dir.ResultFiles.Add("waybill1.txt");
-			toOpen = ResultDir.OpenResultFiles(new [] { dir }).ToArray();
+			toOpen = ResultDir.OpenResultFiles(new[] { dir }).ToArray();
 			Assert.AreEqual(2, toOpen.Length);
 			Assert.AreEqual("waybill.txt", Path.GetFileName(((OpenResult)toOpen[0]).Filename));
 		}
