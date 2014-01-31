@@ -22,11 +22,21 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal ResultCost { get; set; }
 
-		public virtual decimal ResultSum
+		public virtual decimal Sum
 		{
-			get { return Count * ResultCost; }
+			get { return Count * Cost; }
+		}
+
+		public virtual decimal MixedSum
+		{
+			get { return Sum; }
 		}
 
 		public virtual SentOrder Order { get; set; }
+
+		public override decimal GetResultCost()
+		{
+			return ResultCost;
+		}
 	}
 }

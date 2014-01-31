@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -93,6 +94,23 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			lines.Delete();
 			Assert.AreEqual(0, lines.Lines.Value.Count);
 			Assert.IsInstanceOf<OrderDetailsViewModel>(shell.ActiveItem);
+		}
+
+		[Test]
+		public void View_mixed_cost()
+		{
+			restore = true;
+			user.IsDeplayOfPaymentEnabled = true;
+
+			var order = MakeOrder();
+			order.Price.CostFactor = 1.5m;
+			order.Price.VitallyImportantCostFactor = 1.5m;
+			var model = Init(new OrderDetailsViewModel(order));
+
+			var cost = Math.Round(1.5m * order.Lines[0].Cost, 2);
+			var orderLine = model.Lines.Value[0];
+			Assert.AreEqual(cost, orderLine.MixedSum);
+			Assert.AreEqual(cost, orderLine.ResultCost);
 		}
 	}
 }

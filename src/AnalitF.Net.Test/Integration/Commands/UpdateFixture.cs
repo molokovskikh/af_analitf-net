@@ -311,10 +311,24 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var fixture = Fixture<CreatePromotion>();
 			Run(new UpdateCommand());
 
-			Assert.That(localSession.Query<Promotion>().Count(), Is.GreaterThan(1));
+			Assert.That(localSession.Query<Promotion>().Count(), Is.GreaterThan(0));
 			var promotion = localSession.Get<Promotion>(fixture.Promotion.Id);
 			promotion.Init(clientConfig);
 			Assert.IsTrue(File.Exists(promotion.LocalFilename));
+		}
+
+		[Test]
+		public void Load_delay_of_payment()
+		{
+			Fixture<Client.Test.Fixtures.DelayOfPayment>();
+			Run(new UpdateCommand());
+
+			var user = localSession.Query<User>().First();
+			Assert.IsTrue(user.IsDeplayOfPaymentEnabled);
+			Assert.IsTrue(user.ShowSupplierCost);
+			localSession.Refresh(settings);
+			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
+			Assert.That(localSession.Query<Client.Models.DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 	}
 }

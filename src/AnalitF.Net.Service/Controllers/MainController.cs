@@ -198,6 +198,7 @@ where UserId = :userId;")
 							}
 
 							var item = order.AddOrderItem(offer, sourceItem.Count);
+							item.CostWithDelayOfPayment = ((float?)sourceItem.ResultCost).GetValueOrDefault(item.CostWithDelayOfPayment);
 							if (sourceItem.MinCost != null) {
 								item.LeaderInfo = new OrderItemLeadersInfo {
 									OrderItem = item,

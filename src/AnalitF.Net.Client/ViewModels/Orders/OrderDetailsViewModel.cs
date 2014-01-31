@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
+using Common.Tools;
 using NHibernate;
 using NPOI.SS.Formula.Functions;
 using ReactiveUI;
@@ -114,6 +115,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return Source;
 		}
 
+		//todo init orderline
 		public override void Update()
 		{
 			//Update - может быть вызван повторно если
@@ -126,6 +128,8 @@ namespace AnalitF.Net.Client.ViewModels
 				IsSuccessfulActivated = false;
 				return;
 			}
+			Order.Lines.Each(l => l.Configure(User));
+
 			Source = new ObservableCollection<IOrderLine>(Order.Lines);
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)

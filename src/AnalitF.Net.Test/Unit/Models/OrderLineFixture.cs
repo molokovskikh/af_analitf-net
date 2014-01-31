@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.Linq;
+using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit.Models
@@ -63,6 +64,21 @@ namespace AnalitF.Net.Test.Unit.Models
 			Assert.AreEqual("прайс-лист АМП (Основной)\r\n" +
 				"    ЭХИНАЦЕЯ ТРАВА пачка 50г (18%) - Камелия-ЛТ ООО: имеется различие в цене препарата" +
 				" (старая цена: 100,00р.; новая цена: 150,00р.)\r\n", report);
+		}
+
+		[Test]
+		public void Calculate_mixed_cost()
+		{
+			var user = new User();
+			line.Order.Price.CostFactor = 1.5m;
+			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user);
+			Assert.AreEqual(100, line.MixedCost);
+			Assert.AreEqual(100, line.MixedSum);
+
+			user.IsDeplayOfPaymentEnabled = true;
+			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user);
+			Assert.AreEqual(150, line.MixedCost);
+			Assert.AreEqual(150, line.MixedSum);
 		}
 	}
 }

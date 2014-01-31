@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -10,6 +11,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.log4net;
+using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 
 namespace AnalitF.Net.Test.Integration.Commands
 {
@@ -69,6 +71,25 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Run(new UpdateCommand());
 			var reloaded = localSession.Query<Order>().First();
 			Assert.That(reloaded.CreatedOn, Is.EqualTo(order.CreatedOn).Within(1).Seconds);
+		}
+
+		[Test]
+		public void Send_result_cost()
+		{
+			disposable.Add(Disposable.Create(() => Integration.IntegrationSetup.RestoreData(localSession)));
+			localSession.DeleteEach<SentOrder>();
+			var order = MakeOrderClean();
+			order.Price.CostFactor = 1.5m;
+			order.Price.VitallyImportantCostFactor = 1.5m;
+			Assert.AreEqual(UpdateResult.OK, Run(new SendOrders(address)));
+
+			var sentOrder = localSession.Query<SentOrder>().First(o => o.SentOn >= begin);
+			var serverOrder = session.Load<Common.Models.Order>((uint)sentOrder.ServerId);
+
+			var line = order.Lines[0];
+			Assert.IsNotNull(line.ResultCost);
+			Assert.AreNotEqual(line.ResultCost, line.Cost);
+			Assert.AreEqual(line.ResultCost, serverOrder.OrderItems[0].CostWithDelayOfPayment, sentOrder.ServerId.ToString());
 		}
 	}
 }

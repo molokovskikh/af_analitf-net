@@ -129,10 +129,10 @@
 					Binding="{Binding NewQuantity}" />
 				<DataGridTextColumn Width="35*"
 					Header="Старая цена"
-					Binding="{Binding OldCost}" />
+					Binding="{Binding MixedOldCost}" />
 				<DataGridTextColumn Width="35*"
 					Header="Новая цена"
-					Binding="{Binding NewCost}" />
+					Binding="{Binding MixedNewCost}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
@@ -193,7 +193,7 @@
 						TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="55*"
-					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" TextAlignment="Right" />
+					FontWeight="Bold" Header="Цена" Binding="{Binding MixedCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
 						TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"

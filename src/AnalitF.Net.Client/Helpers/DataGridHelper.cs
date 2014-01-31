@@ -106,7 +106,10 @@ namespace AnalitF.Net.Client.Helpers
 			grid.Loaded += (sender, args) => {
 				var dataGrid = (DataGrid)sender;
 				var screen = dataGrid.DataContext as BaseScreen;
-				var removeSupplierCost = screen == null || screen.User == null || !screen.User.ShowSupplierCost;
+				var removeSupplierCost = screen == null
+					|| screen.User == null
+					|| !screen.User.IsDeplayOfPaymentEnabled
+					|| !screen.User.ShowSupplierCost;
 				if (removeSupplierCost) {
 					var column = dataGrid.Columns.FirstOrDefault(c => Equals(c.Header, "Цена поставщика"));
 					if (column != null)

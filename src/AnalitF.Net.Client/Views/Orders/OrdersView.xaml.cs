@@ -15,10 +15,12 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			Loaded += (sender, args) => {
-				var context = "";
-				if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
-					context = "CorrectionEnabled";
-				StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
+				if (Legend.Children.Count == 0) {
+					var context = "";
+					if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+						context = "CorrectionEnabled";
+					StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
+				}
 			};
 
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,

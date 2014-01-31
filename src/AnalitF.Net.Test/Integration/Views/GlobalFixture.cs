@@ -171,7 +171,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public async void Current_address_visivility()
 		{
 			restore = true;
-			new CreateAddress().Execute(session);
+			Fixture<CreateAddress>();
 
 			Start();
 			Click("ShowOrderLines");
@@ -439,10 +439,10 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
-		[Test, NUnit.Framework.Ignore("Не готово")]
+		[Test]
 		public void Delay_of_payment()
 		{
-			Fixture<Client.Test.Fixtures.DelayOfPayment>();
+			Fixture<LocalDelayOfPayment>();
 			Start();
 			Click("ShowCatalog");
 			OpenOffers();

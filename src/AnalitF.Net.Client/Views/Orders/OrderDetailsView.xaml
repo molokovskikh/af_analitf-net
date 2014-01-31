@@ -94,14 +94,14 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
-					Binding="{Binding ResultCost}"
+					Binding="{Binding MixedCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding ResultSum}"
+				<c:DataGridTextColumnEx Width="65*" Header="Сумма" Binding="{Binding MixedSum}"
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
 			</DataGrid.Columns>

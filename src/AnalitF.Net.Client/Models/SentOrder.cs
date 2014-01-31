@@ -36,8 +36,6 @@ namespace AnalitF.Net.Client.Models
 
 		uint Count { get; }
 
-		decimal ResultSum { get; }
-
 		uint? RequestRatio { get; }
 
 		decimal? RegistryCost { get; }
@@ -53,6 +51,12 @@ namespace AnalitF.Net.Client.Models
 		string Quantity { get; }
 
 		string Comment { get; set; }
+
+		decimal Sum { get; }
+
+		decimal MixedSum { get; }
+
+		void Configure(User user);
 	}
 
 	public interface IOrder

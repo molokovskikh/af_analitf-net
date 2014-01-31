@@ -12,6 +12,7 @@ using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
+using Newtonsoft.Json;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -47,7 +48,6 @@ namespace AnalitF.Net.Client.Models.Commands
 					new SyncRequest(clientOrders, Force),
 					Formatter,
 					Token).Result;
-
 			CheckResult(response);
 
 			var results = response.Content.ReadAsAsync<OrderResult[]>().Result

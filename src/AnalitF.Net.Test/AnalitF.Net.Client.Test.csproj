@@ -36,7 +36,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Caliburn.Micro" />
+    <Reference Include="Caliburn.Micro, Version=1.5.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Caliburn.Micro.1.5.2\lib\net45\Caliburn.Micro.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.ActiveRecord" />
     <Reference Include="castle.core" />
     <Reference Include="Devart.Data">
@@ -92,6 +94,7 @@
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.SelfHost.4.0.20918.0\lib\net40\System.Web.Http.SelfHost.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -113,12 +116,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Extended.Wpf.Toolkit.1.9.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
-    <Reference Include="YamlDotNet.Core">
-      <HintPath>..\..\packages\YamlDotNet.Core.2.2.0\lib\net35\YamlDotNet.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="YamlDotNet.RepresentationModel">
-      <HintPath>..\..\packages\YamlDotNet.RepresentationModel.2.2.0\lib\net35\YamlDotNet.RepresentationModel.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acceptance\AccentanceSetup.cs" />
@@ -133,6 +130,7 @@
     <Compile Include="Fixtures\DelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
+    <Compile Include="Fixtures\LocalDelayOfPayment.cs" />
     <Compile Include="Fixtures\LocalPromotion.cs" />
     <Compile Include="Fixtures\MailWithAttachment.cs" />
     <Compile Include="Fixtures\MakeOrder.cs" />
@@ -159,6 +157,7 @@
     <Compile Include="Integration\Commands\UpdateFixture.cs" />
     <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
+    <Compile Include="Integration\RasFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModes\CorrectionFixture.cs" />
@@ -214,6 +213,7 @@
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
+    <Compile Include="Unit\Models\WaybillFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
@@ -229,17 +229,16 @@
     <Compile Include="Unit\PriceResultFixture.cs" />
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
-    <Compile Include="Unit\RasFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\SingleInstanceFixture.cs" />
     <Compile Include="Unit\StyleHelperFixture.cs" />
+    <Compile Include="Unit\TableSettingsFixture.cs" />
     <Compile Include="Unit\UpdateCommandFixture.cs" />
     <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
-    <Compile Include="Unit\WaybillFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var lines = order.Lines;
 			var count = lines.Count();
-			var sum = lines.Sum(l => l.ResultSum);
+			var sum = lines.Sum(l => l.MixedSum);
 			var rows = lines.Select((l, i) => new object[] {
 				i + 1,
 				l.ProductSynonym,
@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Models.Print
 				l.Period,
 				l.ResultCost,
 				l.Count,
-				l.ResultSum
+				l.MixedSum
 			});
 
 			var table = BuildTable(rows, headers);

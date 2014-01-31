@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
@@ -22,10 +23,12 @@ using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Mapping;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 using Main = AnalitF.Net.Client.ViewModels.Main;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
@@ -65,17 +68,26 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			dialogs = new List<Screen>();
 			stub = new StubRemoteCommand(UpdateResult.OK);
-			shell.CommandExecuting += remoteCommand => {
-				command = remoteCommand;
-				if (stub != null) {
-					stub.ErrorMessage = remoteCommand.ErrorMessage;
-					stub.SuccessMessage = remoteCommand.SuccessMessage;
-				}
-				else {
-					command.Credentials = null;
-				}
-				return stub;
-			};
+		}
+
+		protected override ShellViewModel shell
+		{
+			get
+			{
+				var value = base.shell;
+				value.CommandExecuting += remoteCommand => {
+					command = remoteCommand;
+					if (stub != null) {
+						stub.ErrorMessage = remoteCommand.ErrorMessage;
+						stub.SuccessMessage = remoteCommand.SuccessMessage;
+					}
+					else {
+						command.Credentials = null;
+					}
+					return stub;
+				};
+				return value;
+			}
 		}
 
 		[Test]
@@ -343,6 +355,30 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var result = shell.SendOrders().ToArray();
 			Assert.AreEqual(0, result.Length, result.Implode());
+		}
+
+		[Test]
+		public void Recalculate_leaders_on_start()
+		{
+			restore = true;
+			settings.LastUpdate = DateTime.Now;
+			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
+			user.IsDeplayOfPaymentEnabled = true;
+
+			var offer = session.Query<Offer>()
+				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant);
+
+			var delay = session.Query<DelayOfPayment>().FirstOrDefault(d => d.DayOfWeek == DateTime.Today.DayOfWeek && d.Price == offer.Price)
+				?? new DelayOfPayment(-99.999m, offer.Price);
+			delay.OtherDelay = -99.999m;
+			delay.VitallyImportantDelay = -99.999m;
+			session.Save(delay);
+			session.Flush();
+
+			manager.DialogSubject.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
+			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
+			session.Refresh(offer);
+			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 		}
 
 		private void Collect(IEnumerable<IResult> results)

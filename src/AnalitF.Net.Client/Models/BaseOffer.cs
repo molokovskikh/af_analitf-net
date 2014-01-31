@@ -7,12 +7,14 @@ using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class BaseOffer : BaseNotify
+	public abstract class BaseOffer : BaseNotify
 	{
 		private decimal? _retailCost;
+		protected bool HideCost;
 
 		public BaseOffer()
 		{
@@ -129,10 +131,17 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups)
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups, User user)
 		{
-			var markup = MarkupConfig.Calculate(markups, this);
-			RetailCost = Math.Round(Cost * (1 + markup / 100), 2);
+			Configure(user);
+			var cost =  HideCost ? GetResultCost() : Cost;
+			var markup = MarkupConfig.Calculate(markups, this, user);
+			RetailCost = Math.Round(cost * (1 + markup / 100), 2);
+		}
+
+		public virtual void Configure(User user)
+		{
+			HideCost = user.IsDeplayOfPaymentEnabled && !user.ShowSupplierCost;
 		}
 
 		protected virtual decimal GetResultCost(Price price)
@@ -142,5 +151,15 @@ namespace AnalitF.Net.Client.Models
 
 			return Math.Round(VitallyImportant ? Cost * price.VitallyImportantCostFactor : Cost * price.CostFactor, 2);
 		}
+
+		protected virtual decimal GetResultCost(Price price, decimal? cost)
+		{
+			if (price == null || cost == null)
+				return Cost;
+
+			return Math.Round(cost.Value * (VitallyImportant ? price.VitallyImportantCostFactor : price.CostFactor), 2);
+		}
+
+		public abstract decimal GetResultCost();
 	}
 }

@@ -125,7 +125,7 @@ namespace AnalitF.Net.Client.Models
 		[Style("ResultLeaderPrice.RegionName", "ResultLeaderPrice.Name", Description = "Прайс-лист - лидер")]
 		public virtual bool Leader
 		{
-			get { return LeaderCost == Cost; }
+			get { return LeaderCost == ResultCost; }
 		}
 
 		[Ignore]
@@ -238,7 +238,7 @@ namespace AnalitF.Net.Client.Models
 				else {
 					OrderLine.Count = OrderCount.Value;
 					OrderLine.Comment = comment;
-					order.UpdateSum();
+					order.UpdateStat();
 				}
 
 				if (edit) {
@@ -307,6 +307,11 @@ namespace AnalitF.Net.Client.Models
 			get {
 				return GetResultCost(Price);
 			}
+		}
+
+		public override decimal GetResultCost()
+		{
+			return ResultCost;
 		}
 
 		//перегрузка Equals и GetHashCode

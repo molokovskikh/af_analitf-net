@@ -41,11 +41,16 @@ namespace AnalitF.Net.Client.Binders
 		{
 			Dispatcher.CurrentDispatcher.BeginInvoke(
 				DispatcherPriority.ContextIdle,
-				new System.Action(OnViewReady));
+				new System.Action(() => {
+					var results = OnViewReady();
+					if (results != null)
+						Coroutine.BeginExecute(results.GetEnumerator());
+				}));
 		}
 
-		public virtual void OnViewReady()
+		public virtual IEnumerable<IResult> OnViewReady()
 		{
+			return null;
 		}
 
 		public RemoteCommand OnCommandExecuting(RemoteCommand c)

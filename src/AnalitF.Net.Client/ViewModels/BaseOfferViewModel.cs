@@ -222,7 +222,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void CalculateRetailCost()
 		{
 			foreach (var offer in Offers.Value)
-				offer.CalculateRetailCost(Settings.Value.Markups);
+				offer.CalculateRetailCost(Settings.Value.Markups, User);
 		}
 
 		public virtual void OfferUpdated()

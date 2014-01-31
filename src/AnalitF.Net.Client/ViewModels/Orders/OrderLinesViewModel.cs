@@ -41,8 +41,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Sum = new NotifyValue<decimal>(() => {
 				if (IsCurrentSelected)
-					return Lines.Value.Sum(l => l.ResultSum);
-				return SentLines.Value.Sum(l => l.ResultSum);
+					return Lines.Value.Sum(l => l.MixedSum);
+				return SentLines.Value.Sum(l => l.MixedSum);
 			}, SentLines, Lines, IsCurrentSelected);
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
@@ -203,16 +203,18 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
-				SentLines.Value = query.OrderBy(l => l.ProductSynonym)
+				var lines = query.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProductSynonym)
 					.ToList();
+				lines.Each(l => l.Configure(User));
+				SentLines.Value = lines;
 			}
 		}
 
 		protected void Calculate()
 		{
 			foreach (var offer in Lines.Value)
-				offer.CalculateRetailCost(Settings.Value.Markups);
+				offer.CalculateRetailCost(Settings.Value.Markups, User);
 		}
 
 		public void EnterLine()

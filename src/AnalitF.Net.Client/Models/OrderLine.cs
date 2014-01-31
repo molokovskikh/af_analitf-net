@@ -52,9 +52,27 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual decimal MixedCost
+		{
+			get
+			{
+				return HideCost ? ResultCost : Cost;
+			}
+		}
+
 		public virtual decimal? NewCost { get; set; }
 
+		public virtual decimal? MixedNewCost
+		{
+			get { return GetResultCost(Order.Price, NewCost); }
+		}
+
 		public virtual decimal? OldCost { get; set; }
+
+		public virtual decimal? MixedOldCost
+		{
+			get { return GetResultCost(Order.Price, OldCost); }
+		}
 
 		[Ignore]
 		public virtual decimal? MinCost { get; set; }
@@ -138,19 +156,40 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged();
 				OnPropertyChanged("Sum");
 				OnPropertyChanged("ResultSum");
+				OnPropertyChanged("MixedSum");
 			}
 		}
 
 		public virtual OfferComposedId OfferId { get; set; }
 
+		/// <summary>
+		/// сумма по строке без отсрочки платежа, нужно для вычислений
+		/// </summary>
 		public virtual decimal Sum
 		{
 			get { return Count * Cost; }
 		}
 
+		/// <summary>
+		/// сумма по строке с отсрочкой платежа, нужно для отображения в предложениях
+		/// </summary>
 		public virtual decimal ResultSum
 		{
 			get { return Count * ResultCost; }
+		}
+
+		/// <summary>
+		/// сумма по строке с отсрочкой платежа или без в зависимости от настройки Отображать реальную цену поставщика
+		/// нужно для отображения в заказах
+		/// </summary>
+		public virtual decimal MixedSum
+		{
+			get { return Count * MixedCost; }
+		}
+
+		public override decimal GetResultCost()
+		{
+			return ResultCost;
 		}
 
 		public virtual List<Message> EditValidate()
@@ -175,6 +214,7 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
+		//todo - пересчитать
 		public virtual List<Message> SaveValidate()
 		{
 			var result = new List<Message>();
@@ -278,6 +318,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+
 		public virtual void Apply(OrderLineResult result)
 		{
 			if (result == null) {
@@ -354,13 +395,13 @@ namespace AnalitF.Net.Client.Models
 					return "";
 				var datum = new List<string>();
 				if (IsCostChanged)
-					datum.Add(String.Format("старая цена: {0:C}", OldCost));
+					datum.Add(String.Format("старая цена: {0:C}", MixedOldCost));
 				if (IsQuantityChanged)
 					datum.Add(String.Format("старый заказ: {0:C}", OldQuantity));
 				if (IsCostChanged)
-					datum.Add(String.Format("новая цена: {0:C}", NewCost));
+					datum.Add(String.Format("новая цена: {0:C}", MixedNewCost));
 				if (IsQuantityChanged)
-					datum.Add(String.Format("текущий заказ: {0:C}", NewCost));
+					datum.Add(String.Format("текущий заказ: {0:C}", NewQuantity));
 
 				var data = "";
 				if (datum.Count > 0)

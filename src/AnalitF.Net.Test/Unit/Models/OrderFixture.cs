@@ -143,5 +143,15 @@ namespace AnalitF.Net.Test.Unit
 			order.Apply(new OrderResult());
 			Assert.AreEqual(OrderResultStatus.OK, order.SendResult);
 		}
+
+		[Test]
+		public void Remove_line()
+		{
+			var order = new Order(price, address);
+			var line = order.AddLine(offer, 10);
+			Assert.AreEqual(1, order.LinesCount);
+			order.RemoveLine(line);
+			Assert.AreEqual(0, order.LinesCount);
+		}
 	}
 }

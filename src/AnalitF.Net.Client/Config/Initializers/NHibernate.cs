@@ -105,11 +105,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Type(new TimestampType());
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
 				});
-				m.Bag(o => o.DelayOfPayments, c => {
-					c.Inverse(true);
-					c.Key(k => k.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
-				});
 			});
+
+			mapper.Class<DelayOfPayment>(m => {
+				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+			});
+
 			mapper.Class<Order>(m => {
 				m.Property(o => o.Frozen, om => om.Access(Accessor.Field));
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));

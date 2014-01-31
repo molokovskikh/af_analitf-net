@@ -26,7 +26,6 @@ namespace AnalitF.Net.Client.Models
 	public class Order : BaseNotify, IOrder
 	{
 		private decimal sum;
-		private decimal resultSum;
 		private int linesCount;
 		private bool send;
 		private bool frozen;
@@ -80,16 +79,6 @@ namespace AnalitF.Net.Client.Models
 				sum = value;
 				OnPropertyChanged();
 				OnPropertyChanged("IsInvalid");
-			}
-		}
-
-		public virtual decimal ResultSum
-		{
-			get { return sum; }
-			set
-			{
-				sum = value;
-				OnPropertyChanged("ResultSum");
 			}
 		}
 
@@ -180,23 +169,22 @@ namespace AnalitF.Net.Client.Models
 			Lines.Each(l => l.Apply(null));
 		}
 
+		public virtual void UpdateStat()
+		{
+			Sum = Lines.Sum(l => l.Sum);
+			LinesCount = Lines.Count;
+		}
+
 		public virtual void RemoveLine(OrderLine line)
 		{
 			Lines.Remove(line);
-			UpdateSum();
-		}
-
-		public virtual void UpdateSum()
-		{
-			Sum = Lines.Sum(l => l.Sum);
-			ResultSum = Lines.Sum(l => l.ResultSum);
+			UpdateStat();
 		}
 
 		public virtual void AddLine(OrderLine line)
 		{
 			Lines.Add(line);
-			LinesCount = Lines.Count;
-			UpdateSum();
+			UpdateStat();
 		}
 
 		public virtual OrderLine AddLine(Offer offer, uint count)

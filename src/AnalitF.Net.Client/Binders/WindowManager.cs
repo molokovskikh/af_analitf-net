@@ -13,31 +13,40 @@ namespace AnalitF.Net.Client.Extentions
 {
 	public class WindowManager : Caliburn.Micro.WindowManager
 	{
+#if DEBUG
 		public bool UnitTesting;
 		public bool SkipApp;
 		public MessageBoxResult DefaultQuestsionResult = MessageBoxResult.Yes;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
 		public Action<object> ContinueViewDialog = d => {  };
 
+		public Subject<object> DialogSubject = new Subject<object>();
+
 		public Subject<Window> WindowOpened = new Subject<Window>();
 		public Subject<string> MessageOpened = new Subject<string>();
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
+#endif
 
 		public override void ShowWindow(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+#if DEBUG
 			if (UnitTesting)
 				return;
+#endif
 			base.ShowWindow(rootModel, context, settings);
 		}
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+#if DEBUG
 			if (UnitTesting) {
 				ScreenExtensions.TryActivate(rootModel);
+				DialogSubject.OnNext(rootModel);
 				ContinueViewDialog(rootModel);
 				return true;
 			}
+#endif
 			var window = CreateWindow(rootModel, true, context, settings);
 			if (window.Owner != null) {
 				window.SizeToContent = SizeToContent.Manual;
@@ -51,11 +60,14 @@ namespace AnalitF.Net.Client.Extentions
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
+#if DEBUG
 			if (UnitTesting) {
 				ScreenExtensions.TryActivate(rootModel);
+				DialogSubject.OnNext(rootModel);
 				ContinueViewDialog(rootModel);
 				return true;
 			}
+#endif
 			var window = CreateWindow(rootModel, true, context, settings);
 			window.ResizeMode = ResizeMode.NoResize;
 			window.SizeToContent = SizeToContent.WidthAndHeight;
@@ -85,25 +97,31 @@ namespace AnalitF.Net.Client.Extentions
 
 			var window = base.CreateWindow(rootModel, isDialog, context, settings);
 			window.Language = XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag);
+#if DEBUG
 			if (SkipApp)
 				WindowOpened.OnNext(window);
+#endif
 			return window;
 		}
 
 		protected override Window InferOwnerOf(Window window)
 		{
+#if DEBUG
 			if (UnitTesting || SkipApp)
 				return null;
+#endif
 			return base.InferOwnerOf(window);
 		}
 
 		private bool? ShowDialog(Window window)
 		{
+#if DEBUG
 			if (UnitTesting) {
 				window.Closed += (sender, args) => Dialogs.Remove(window);
 				Dialogs.Add(window);
 				return true;
 			}
+#endif
 			window.InputBindings.Add(new KeyBinding(Commands.InvokeViewModel, new KeyGesture(Key.Escape)) {
 				CommandParameter = "TryClose"
 			});
@@ -112,6 +130,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)
 		{
+#if DEBUG
 			if (UnitTesting) {
 				MessageOpened.OnNext(text);
 				MessageBoxes.Add(text);
@@ -119,6 +138,7 @@ namespace AnalitF.Net.Client.Extentions
 			}
 			if (SkipApp)
 				MessageOpened.OnNext(text);
+#endif
 
 			var window = InferOwnerOf(null);
 			if (window == null)

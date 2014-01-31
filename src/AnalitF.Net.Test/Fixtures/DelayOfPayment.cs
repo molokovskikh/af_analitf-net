@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			user.ShowSupplierCost = true;
-			user.Client.Settings.AllowAnalitFSchedule = true;
+			user.Client.Settings.AllowDelayOfPayment = true;
 
 			var ids = session.Query<TestSupplierIntersection>().Where(i => i.Client == user.Client)
 				.SelectMany(i => i.PriceIntersections)
@@ -25,10 +25,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}
 		}
 
-		public void Rollback(ISession session)
+		public override void Rollback(ISession session)
 		{
 			var user = User(session);
-			user.Client.Settings.AllowAnalitFSchedule = false;
+			user.Client.Settings.AllowDelayOfPayment = false;
 		}
 	}
 }

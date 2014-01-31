@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.ViewModels
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
 			GroupByProduct.Changed().Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
-				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value),
+				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User),
 				Settings);
 			RetailCost = new NotifyValue<decimal?>(() => {
 				if (CurrentOffer.Value == null)

@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 
 			if (order != null)
-				order.UpdateSum();
+				order.UpdateStat();
 		}
 
 		public void Delete()

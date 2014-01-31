@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Reactive.Disposables;
-using System.Threading;
-using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
-using Devart.Data.MySql;
 using DotRas;
-using NPOI.HSSF.Record.Chart;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[TestFixture, Explicit("Тестирование предполагает наличие ras соединения")]
 	public class RasFixture

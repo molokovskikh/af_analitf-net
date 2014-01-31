@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -11,7 +12,7 @@ namespace AnalitF.Net.Client.Models
 
 		public ColumnSettings(DataGridColumn dataGridColumn, int index)
 		{
-			Name = dataGridColumn.Header.ToString();
+			Name = (dataGridColumn.Header ?? "").ToString();
 			//видимостью колонки управляет флаг на форме
 			//состояние не нужно сохранять
 			if (Name != "Адрес заказа")
@@ -43,6 +44,11 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return Name;
+		}
+
+		public bool Match(DataGridColumn column)
+		{
+			return String.Equals(Name, (column.Header ?? "").ToString(), StringComparison.CurrentCultureIgnoreCase);
 		}
 	}
 }

@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Mapping;
 
@@ -75,7 +76,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (addressId != null) {
 				query = query.Where(l => l.Order.Address.Id == addressId);
 			}
-			Lines = query.Distinct().ToList();
+			var lines = query.Distinct().ToList();
+			lines.Each(l => l.Configure(User));
+			Lines = lines;
 		}
 
 		protected override void Query()

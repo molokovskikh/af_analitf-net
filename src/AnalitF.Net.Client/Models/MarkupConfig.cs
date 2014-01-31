@@ -119,13 +119,13 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public static decimal Calculate(IEnumerable<MarkupConfig> markups, BaseOffer currentOffer)
+		public static decimal Calculate(IEnumerable<MarkupConfig> markups, BaseOffer offer, User user)
 		{
-			if (currentOffer == null)
+			if (offer == null)
 				return 0;
 
-			var type = currentOffer.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			var cost = currentOffer.Cost;
+			var type = offer.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			var cost = user.IsDeplayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
 			var config = Calculate(markups, type, cost);
 			if (config == null)

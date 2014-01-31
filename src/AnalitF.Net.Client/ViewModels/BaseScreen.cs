@@ -220,6 +220,8 @@ namespace AnalitF.Net.Client.ViewModels
 				TryClose();
 		}
 
+		//todo мы не должны пытаться сериализовать\десериализовать обекты из базы тк это не имеет смысла
+		//их нужно загружать
 		private void Save()
 		{
 			if (Shell == null)
@@ -318,6 +320,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return DisplayName;
 		}
 
+		//todo! если закрыть сессию пока активна транзакция все свалится с ошибкой
 		public void Dispose()
 		{
 			GC.SuppressFinalize(this);
@@ -333,6 +336,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		//todo! обработка ошибко если в дуструкторе возникнет ошибка процесс завершится
 		~BaseScreen()
 		{
 			try {

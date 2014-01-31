@@ -211,6 +211,10 @@ namespace AnalitF.Net.Client.Models.Commands
 			var offersImported = data.Any(t => Path.GetFileNameWithoutExtension(t.Item1).Match("offers"));
 			if (offersImported) {
 				RestoreOrders();
+				var user = Session.Query<User>().First();
+				if (user.IsDeplayOfPaymentEnabled) {
+					DbMaintain.UpdateLeaders(StatelessSession, settings);
+				}
 			}
 
 			foreach (var dir in settings.DocumentDirs)
@@ -352,8 +356,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var loaded = Session.Query<Order>().Where(o => o.LinesCount == 0).ToArray();
 			foreach (var order in loaded) {
-				order.LinesCount = order.Lines.Count;
-				order.UpdateSum();
+				order.UpdateStat();
 			}
 		}
 

@@ -111,7 +111,6 @@ namespace AnalitF.Net.Service.Models
 			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
 
 			string sql;
-
 			sql = @"
 select Id,
 	Product,
@@ -156,7 +155,8 @@ select u.Id,
 	u.InheritPricesFrom is not null as IsPriceEditDisabled,
 	u.UseAdjustmentOrders as IsPreprocessOrders,
 	c.FullName as FullName,
-	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost
+	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost,
+	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
@@ -258,11 +258,13 @@ from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(result, sql, "suppliers");
 
+			//у mysql неделя начинается с понедельника у .net с воскресенья
+			//приводим к виду .net
 			sql = @"
 select
 	p.PriceCode as PriceId,
 	p.RegionCode as RegionId,
-	d.DayOfWeek,
+	if(d.DayOfWeek = 7, 0, d.DayOfWeek + 1) as DayOfWeek,
 	d.VitallyImportantDelay,
 	d.OtherDelay
 from (Usersettings.DelayOfPayments d, UserSettings.Prices p)

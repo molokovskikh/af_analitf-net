@@ -68,6 +68,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool ShowSupplierCost { get; set; }
 
+		public virtual bool IsDeplayOfPaymentEnabled { get; set; }
+
 		public virtual IList<Permission> Permissions { get; set; }
 
 		public virtual bool CanPrint<T>()

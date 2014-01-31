@@ -246,17 +246,8 @@ namespace AnalitF.Net.Test.Unit
 			offer.Cost = 100;
 			Assert.AreEqual(100, offer.ResultCost);
 
-			offer.Price.DelayOfPayments.Add(new DelayOfPayment(50));
+			offer.Price.CostFactor = 1.5m;
 			Assert.AreEqual(offer.ResultCost, 150);
-		}
-
-		[Test]
-		public void Delay_of_payment_per_day()
-		{
-			offer.Price.DelayOfPayments.Add(new DelayOfPayment(DateTime.Today.AddDays(-1).DayOfWeek, 10));
-			offer.Price.DelayOfPayments.Add(new DelayOfPayment(DateTime.Today.DayOfWeek, 20));
-			offer.Cost = 100;
-			Assert.AreEqual(120, offer.ResultCost);
 		}
 
 		[Test]
@@ -265,6 +256,26 @@ namespace AnalitF.Net.Test.Unit
 			offer.LeaderPrice = new Price("Тест1");
 			offer.LeaderCost = offer.Cost;
 			Assert.AreEqual(offer.ResultLeaderPrice, offer.Price);
+		}
+
+		[Test]
+		public void Leader_with_delay_of_payment()
+		{
+			offer.Price.CostFactor = 1.5m;
+			offer.LeaderCost = 79.65m;
+			Assert.IsTrue(offer.Leader);
+		}
+
+		[Test]
+		public void Calculate_retail_cost_based_on_result_cost()
+		{
+			var user = new User();
+			user.IsDeplayOfPaymentEnabled = true;
+
+			offer.Price.CostFactor = 1.2m;
+			settings.Markups.Add(new MarkupConfig(0, 1000, 20));
+			offer.CalculateRetailCost(settings.Markups, user);
+			Assert.AreEqual(76.46, offer.RetailCost);
 		}
 
 		private void Validate()

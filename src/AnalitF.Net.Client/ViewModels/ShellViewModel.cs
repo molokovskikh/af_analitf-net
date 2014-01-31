@@ -23,6 +23,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
+using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -193,18 +194,19 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.Activate();
 		}
 
-		public override void OnViewReady()
+		public override IEnumerable<IResult> OnViewReady()
 		{
 			Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
-				Coroutine.BeginExecute(Import().GetEnumerator());
+				return Import();
 			}
 			if (Config.Cmd.Match("start-check")) {
 				TryClose();
 			}
 			else {
-				StartCheck();
+				return StartCheck();
 			}
+			return Enumerable.Empty<IResult>();
 		}
 
 		public override void CanClose(Action<bool> callback)
@@ -260,19 +262,36 @@ namespace AnalitF.Net.Client.ViewModels
 			Stat.Value = Models.Stat.Update(session, CurrentAddress);
 		}
 
-		public void StartCheck()
+		public IEnumerable<IResult> StartCheck()
 		{
 			if (!Settings.Value.IsValid)
 				CheckSettings();
 
 			if (!Settings.Value.IsValid)
-				return;
+				return Enumerable.Empty<IResult>();
 
 			if (!Config.Quiet) {
 				var request = Settings.Value.CheckUpdateCondition();
 				if (!String.IsNullOrEmpty(request) && Confirm(request))
-					Update();
+					return Update();
 			}
+
+			if (User.Value != null
+				&& User.Value.IsDeplayOfPaymentEnabled
+				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
+				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
+					t => {
+
+						try {
+							DbMaintain.UpdateLeaders(statelessSession, Settings.Value);
+						}
+						catch (Exception e) {
+							Console.WriteLine(e);
+						}
+						return Enumerable.Empty<IResult>();
+					}, r => {  });
+			}
+			return Enumerable.Empty<IResult>();
 		}
 
 		private bool CheckSettings()
@@ -539,7 +558,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-
 		public IEnumerable<IResult> SendOrders(bool force = false)
 		{
 			if (!CanSendOrders)
@@ -617,10 +635,9 @@ namespace AnalitF.Net.Client.ViewModels
 			Reload();
 		}
 
-		private bool Confirm(string text)
+		protected bool Confirm(string text)
 		{
-			var result = windowManager.Question(text);
-			return result == MessageBoxResult.Yes;
+			return windowManager.Question(text) == MessageBoxResult.Yes;
 		}
 
 		private IEnumerable<IResult> Sync(RemoteCommand command)

@@ -20,9 +20,11 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
-		public DelayOfPayment(decimal value)
+		public DelayOfPayment(decimal value, Price price)
 		{
+			DayOfWeek = DateTime.Today.DayOfWeek;
 			OtherDelay = value;
+			Price = price;
 		}
 
 		public DelayOfPayment(DayOfWeek day, decimal value)
@@ -39,7 +41,13 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal VitallyImportantDelay { get; set; }
 
-		//public virtual Price Price { get; set; }
+		//todo! приводит к ошибке сериализации
+		public virtual Price Price { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("{0} - {1} | {2}", DayOfWeek, OtherDelay, VitallyImportantDelay);
+		}
 	}
 
 	[Serializable]
@@ -129,8 +137,6 @@ namespace AnalitF.Net.Client.Models
 	public class Price : BaseNotify
 	{
 		private Order order;
-		private decimal? vitallyImportantCostFactor;
-		private decimal? costFactor;
 
 		public Price(string name) : this()
 		{
@@ -140,7 +146,8 @@ namespace AnalitF.Net.Client.Models
 
 		public Price()
 		{
-			DelayOfPayments = new List<DelayOfPayment>();
+			CostFactor = 1;
+			VitallyImportantCostFactor = 1;
 		}
 
 		public virtual PriceComposedId Id { get; set; }
@@ -188,7 +195,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime? Timestamp { get; set; }
 
-		public virtual IList<DelayOfPayment> DelayOfPayments { get; set; }
+		//корректировка цен применяемая аптекой, обновляеются при запуске программы
+		public virtual decimal CostFactor { get; set; }
+
+		//корректировка цен применяемая аптекой, для жизненно важных препаратов
+		public virtual decimal VitallyImportantCostFactor { get; set; }
 
 		[Style("Name")]
 		public virtual bool NotBase
@@ -245,36 +256,6 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore, JsonIgnore]
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
-
-		public virtual decimal CostFactor
-		{
-			get
-			{
-				if (costFactor == null) {
-					var delayOfPayment = DelayOfPayments.Where(d => d.DayOfWeek == DateTime.Today.DayOfWeek)
-						.Concat(DelayOfPayments)
-						.Select(d => d.OtherDelay)
-						.FirstOrDefault();
-					return (delayOfPayment + 100) / 100;
-				}
-				return costFactor.Value;
-			}
-		}
-
-		public virtual decimal VitallyImportantCostFactor
-		{
-			get
-			{
-				if (vitallyImportantCostFactor == null) {
-					var delayOfPayment = DelayOfPayments.Where(d => d.DayOfWeek == DateTime.Today.DayOfWeek)
-						.Concat(DelayOfPayments)
-						.Select(d => d.VitallyImportantDelay)
-						.FirstOrDefault();
-					vitallyImportantCostFactor = (delayOfPayment + 100) / 100;
-				}
-				return vitallyImportantCostFactor.Value;
-			}
-		}
 
 		private static List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
 			Address address, IStatelessSession session)

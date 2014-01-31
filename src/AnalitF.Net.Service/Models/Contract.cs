@@ -165,6 +165,7 @@ namespace AnalitF.Net.Client.Models
 		public uint Count;
 		public uint? ProducerId;
 		public decimal Cost;
+		public decimal? ResultCost;
 
 		public decimal? LeaderCost;
 		public PriceComposedId LeaderPrice;
