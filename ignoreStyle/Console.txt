@@ -12,3 +12,4 @@
 \src\Common.Tools\Common.Tools\ObjectExtentions.cs
 \src\Test.Support\Test.Support.Web\WatinSetup.cs
 \src\Test.Support\Test.Support\log4net\EventFilter.cs
+\src\AnalitF.Net.Test\Tasks\Log.cs
