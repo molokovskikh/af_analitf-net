@@ -53,7 +53,7 @@ task @DeployApp, [@WebDeploy]
 
 task "deploy:service", [@DeployPipeline]
 
-task @deploy, ["git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update"]
+task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update"]
 
 task "deploy:client", ["deploy:client:package"]
 
