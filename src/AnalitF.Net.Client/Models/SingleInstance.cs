@@ -113,8 +113,15 @@ namespace AnalitF.Net.Client.Models
 		{
 			var currentProcess = Process.GetCurrentProcess();
 			var process = Process.GetProcessesByName(currentProcess.ProcessName)
-				.FirstOrDefault(p => p.Id != currentProcess.Id
-					&& currentProcess.MainModule.FileName == p.MainModule.FileName);
+				.FirstOrDefault(p => {
+					//uac может не дать нам получить информацию о процессе
+					try {
+						return p.Id != currentProcess.Id && currentProcess.MainModule.FileName == p.MainModule.FileName;
+					}
+					catch {
+						return false;
+					}
+				});
 			return process;
 		}
 

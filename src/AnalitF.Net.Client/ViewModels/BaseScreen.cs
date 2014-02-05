@@ -313,6 +313,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Dispose()
 		{
+			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
 			if (StatelessSession != null) {
 				StatelessSession.Dispose();
@@ -327,7 +328,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		~BaseScreen()
 		{
-			Dispose();
+			try {
+				Dispose();
+			}
+			catch(Exception e) {
+				log.Error(String.Format("Ошибка при освобождении объекта {0}", GetType()), e);
+			}
 		}
 	}
 }

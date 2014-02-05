@@ -57,5 +57,13 @@ namespace AnalitF.Net.Test.Integration
 			shell.ShowCatalog();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
 		}
+
+		[Test]
+		public void Dispose_screen()
+		{
+			var screen = new BaseScreen();
+			Activate(screen);
+			screen.Dispose();
+		}
 	}
 }

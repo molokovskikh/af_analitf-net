@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.ScrollLoadTimeout)
 				.ObserveOn(UiScheduler)
 #endif
-				.Subscribe(_ => LoadCatalogs());
+				.Subscribe(_ => LoadCatalogs(), CloseCancellation.Token);
 		}
 
 		public CatalogViewModel ParentModel { get; private set; }

@@ -5,6 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -72,7 +73,7 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentOffer)
 				.Where(o => o != null)
 				.Throttle(Consts.LoadOrderHistoryTimeout, UiScheduler)
-				.Subscribe(_ => LoadHistoryOrders());
+				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
 
 			this.ObservableForProperty(m => m.CurrentOffer)
 #if !DEBUG
@@ -81,7 +82,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => {
 					if (currentOffer != null && (currentCatalog == null || CurrentCatalog.Id != currentOffer.CatalogId))
 						CurrentCatalog = Session.Load<Catalog>(currentOffer.CatalogId);
-				});
+				}, CloseCancellation.Token);
 
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.OrderCount)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
