@@ -55,6 +55,7 @@ namespace AnalitF.Net.Client
 			int result;
 			try {
 				XmlConfigurator.Configure();
+				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 
 				var options = new OptionSet {
@@ -133,7 +134,9 @@ namespace AnalitF.Net.Client
 				bootstapper.Config.Quiet = quiet;
 				bootstapper.Config.DebugPipeName = debugpipe;
 				bootstapper.Config.Cmd = cmds.FirstOrDefault();
+				bootstapper.Start();
 				result = app.Run();
+				log.DebugFormat("Приложение завершено");
 			}
 			catch(EndUserError e) {
 				result = 1;

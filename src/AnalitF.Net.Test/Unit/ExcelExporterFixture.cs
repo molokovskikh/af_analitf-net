@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -23,10 +24,10 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Calculate_can_export()
 		{
-			var exporter = new ExcelExporter(new NonExportableScreen());
+			var exporter = new ExcelExporter(new NonExportableScreen(), Path.GetTempPath());
 			Assert.IsFalse(exporter.CanExport);
 
-			exporter = new ExcelExporter(new ExportableScreen());
+			exporter = new ExcelExporter(new ExportableScreen(), Path.GetTempPath());
 			Assert.IsTrue(exporter.CanExport);
 		}
 	}

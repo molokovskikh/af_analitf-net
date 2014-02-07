@@ -668,7 +668,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			windowManager.Warning("Получена новая версия программы. Сейчас будет выполнено обновление.");
 			var updateExePath = Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe");
-			StartProcess(updateExePath, Process.GetCurrentProcess().Id.ToString());
+			StartProcess(updateExePath, String.Format("{0} \"{1}\"",
+				Process.GetCurrentProcess().Id,
+				GetType().Assembly.Location));
 			//не нужно ничего запрашивать нужно просто выйти
 			Config.Quiet = true;
 			TryClose();

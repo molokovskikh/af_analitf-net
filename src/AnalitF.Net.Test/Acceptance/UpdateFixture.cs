@@ -1,21 +1,35 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Web.Http.SelfHost;
 using System.Windows.Automation;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Test.Integration;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Microsoft.Test.Input;
 using NUnit.Framework;
+using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
 	[TestFixture, Explicit]
 	public class UpdateFixture : BaseFixture
 	{
+		[TearDown]
+		public void TearDown()
+		{
+			var serviceConfig = IntegrationSetup.serviceConfig;
+			Directory.GetFiles(serviceConfig.UpdatePath).Each(File.Delete);
+		}
+
 		[Test]
 		public void Do_not_hold_file_handle()
 		{
@@ -32,16 +46,39 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			AssertUpdate("Обновление завершено успешно.");
 		}
 
-		[Test, Ignore]
+		[Test]
 		public void Check_auto_update()
 		{
+			var serviceConfig = IntegrationSetup.serviceConfig;
+			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
+			DataMother.CopyBin("acceptance", serviceConfig.UpdatePath);
+			DataMother.CopyBin(DataMother.ProjectBin("updater"), serviceConfig.UpdatePath);
+			AccentanceSetup.Configure("acceptance",
+				((HttpSelfHostConfiguration)AccentanceSetup.integrationSetup.server.Configuration).BaseAddress.ToString());
+
+			HandleDialogs();
+			Activate();
 			Click("Update");
-			AssertUpdate("Получена новая версия программы");
+			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
 
-			//AssertWindowTest("Внимание! Происходит обновление программы.");
+			var update = Opened.Timeout(5.Second()).First();
+			AssertText(update, "Внимание! Происходит обновление программы.");
 
-			WaitWindow("АналитФАРМАЦИЯ");
-			WaitForMessage("Обновление завершено успешно.");
+			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(15.Second()).First();
+			AssertText(update, "Производится обмен данными");
+			Process = System.Diagnostics.Process.GetProcessById(update.GetProcessId());
+			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
+				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
+				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ")));
+
+			var message = Opened.Timeout(15.Second()).First();
+			AssertText(message, "Обновление завершено успешно.");
+			ClickByName("ОК", message);
+		}
+
+		private void AssertText(AutomationElement el, string text)
+		{
+			Assert.That(AutomationHelper.ToText(el), Is.StringContaining(text));
 		}
 
 		[Test]
@@ -114,22 +151,16 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Click("ShowPrice");
 			var prices = WaitForElement("Prices");
 			DialogHandle = e => {
-				Dump(e);
+				AutomationHelper.Dump(e);
 			};
 			RightClick(prices);
 			Thread.Sleep(1000);
 		}
 
-		[Test]
-		public void Edit_order_line()
-		{
-			throw new NotImplementedException();
-		}
-
 		private void WaitMessage(string message)
 		{
 			var window = FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();
-			Assert.AreEqual(message, ToText(window));
+			Assert.AreEqual(message, AutomationHelper.ToText(window));
 			ClickByName("ОК", window);
 		}
 
@@ -157,11 +188,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private void AssertUpdate(string result)
 		{
 			Timeout = TimeSpan.FromSeconds(50);
-			var update = FindWindow("Обмен данными") ?? Opened.Timeout(5.Second()).First();
+			var observable = Opened.Timeout(5.Second());
+			var update = FindWindow("Обмен данными") ?? observable.First();
 			Assert.AreEqual("Обмен данными", update.GetName());
 			var dialog = Opened.Timeout(50.Second()).First();
 
-			Assert.AreEqual(result, ToText(dialog));
+			Assert.AreEqual(result, AutomationHelper.ToText(dialog));
 			ClickByName("Закрыть", dialog);
 		}
 
@@ -173,24 +205,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private void WaitForMessage(string message)
 		{
 			var window = WaitWindow();
-			var text = ToText(window);
+			var text = AutomationHelper.ToText(window);
 			Assert.That(text, Is.StringContaining(message));
 			ClickByName("ОК", window);
-		}
-
-		private string ToText(AutomationElement window)
-		{
-			return FindTextElements(window)
-				.Cast<AutomationElement>()
-				.Implode(e => e.GetName(), Environment.NewLine);
-		}
-	}
-
-	public static class AutomationHelper
-	{
-		public static string GetName(this AutomationElement e)
-		{
-			return (string)e.GetCurrentPropertyValue(AutomationElement.NameProperty);
 		}
 	}
 }

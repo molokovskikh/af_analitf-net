@@ -12,6 +12,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Microsoft.Test.Input;
@@ -36,6 +37,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected Action<AutomationElement> WindowHandle = w => {};
 
 		protected Subject<AutomationElement> Opened;
+		private string lastId;
 
 		[SetUp]
 		public void Setup()
@@ -142,6 +144,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
+			var currentId = ((AutomationElement)sender).ToShortText();
+			if (lastId == currentId)
+				return;
+			lastId = currentId;
+
 			Opened.OnNext(sender as AutomationElement);
 
 			var el = sender as AutomationElement;
@@ -157,51 +164,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			}
 		}
 
-		protected static void Dump(AutomationElementCollection elements)
-		{
-			Dump(elements.Cast<AutomationElement>());
-		}
-
-		protected static void Dump(IEnumerable<AutomationElement> elements)
-		{
-			foreach (var element in elements) {
-				Dump(element);
-			}
-		}
-
-		protected static void Dump(AutomationElement element)
-		{
-			if (element == null)
-				return;
-
-			Console.WriteLine("--------");
-			Console.WriteLine("{0} {1}", element, element.GetHashCode());
-			Console.WriteLine("--props--");
-			foreach (var p in element.GetSupportedProperties()) {
-				var value = element.GetCurrentPropertyValue(p);
-				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName, value,
-					value != null ? value.GetType().ToString() : "");
-			}
-
-			Console.WriteLine("--patterns--");
-			foreach (var pattern in element.GetSupportedPatterns()) {
-				Console.WriteLine(pattern.ProgrammaticName);
-			}
-			Console.WriteLine("--------");
-		}
-
 		protected AutomationElementCollection FindTextElements(string text)
 		{
 			return MainWindow.FindAll(TreeScope.Subtree,
 				new AndCondition(
 					new PropertyCondition(AutomationElement.NameProperty, text, PropertyConditionFlags.IgnoreCase),
 					new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text)));
-		}
-
-		protected AutomationElementCollection FindTextElements(AutomationElement element)
-		{
-			return element.FindAll(TreeScope.Subtree,
-				new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text));
 		}
 
 		protected void Wait(Func<bool> func, string message = null)

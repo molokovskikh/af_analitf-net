@@ -68,6 +68,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				}
 				else {
 					factory = IntegrationSetup.Factory;
+					Util.SetValue(fixture, "Config", IntegrationSetup.clientConfig);
 				}
 			}
 			else {

@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -10,6 +11,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Castle.Components.DictionaryAdapter;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration
@@ -22,8 +24,9 @@ namespace AnalitF.Net.Test.Integration
 		[SetUp]
 		public void Setup()
 		{
-			File.Delete("AnalitF.Net.Client.Test.data");
 			app = CreateBootstrapper();
+			FileHelper.InitDir("test");
+			disposable.Add(Disposable.Create(() => Directory.Delete("test", true)));
 			disposable.Add(app);
 		}
 
@@ -60,8 +63,21 @@ namespace AnalitF.Net.Test.Integration
 			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
 		}
 
+		[Test]
+		public void Import_start()
+		{
+			FileHelper2.InitFile("test/temp/update/offers.txt");
+
+			Assert.IsNull(app.Shell);
+
+			app.Config.Cmd = "import";
+			app.InitApp();
+			Assert.IsTrue(File.Exists("test/temp/update/offers.txt"));
+		}
+
 		private void StartShell()
 		{
+			app.InitApp();
 			app.InitShell();
 			Activate(app.Shell);
 		}
@@ -74,7 +90,9 @@ namespace AnalitF.Net.Test.Integration
 		private AppBootstrapper CreateBootstrapper()
 		{
 			//нужно переопределить имя что бы избежать конфликтов с запущеным приложением
-			var app = new AppBootstrapper(false, false, "AnalitF.Net.Client.Test");
+			var app = new AppBootstrapper(false);
+			app.Config.RootDir = "test";
+			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
 			Execute.ResetWithoutDispatcher();
 			return app;
 		}

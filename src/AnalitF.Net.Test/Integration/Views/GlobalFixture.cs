@@ -441,7 +441,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			AsyncClick("Update");
 
-			WaitWindow("АналитФАРМАЦИЯ");
+			WaitWindow("АналитФАРМАЦИЯ: Внимание");
 			dispatcher.Invoke(() => {
 				Assert.That(activeWindow.AsText(),
 					Is.StringContaining("Обнаружены препараты," +

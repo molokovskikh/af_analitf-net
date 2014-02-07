@@ -32,8 +32,9 @@ namespace AnalitF.Net.Client.Models
 	{
 		private PropertyInfo[] properties;
 		private Screen model;
+		public string ExportDir;
 
-		public ExcelExporter(Screen model)
+		public ExcelExporter(Screen model, string dir)
 		{
 			this.model = model;
 			properties = model.GetType().GetProperties()
@@ -80,7 +81,7 @@ namespace AnalitF.Net.Client.Models
 
 		public IResult Export(HSSFWorkbook book)
 		{
-			var filename = Path.ChangeExtension(Path.GetRandomFileName(), "xls");
+			var filename = Path.Combine(ExportDir, Path.ChangeExtension(Path.GetRandomFileName(), "xls"));
 			using (var file = File.OpenWrite(filename)) {
 				book.Write(file);
 			}

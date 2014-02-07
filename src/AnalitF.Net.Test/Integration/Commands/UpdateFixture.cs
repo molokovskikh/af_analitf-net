@@ -109,7 +109,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Send_logs()
 		{
-			File.WriteAllText(@"app\AnalitF.Net.Client.log", "123");
+			File.WriteAllText(Path.Combine(clientConfig.RootDir, "AnalitF.Net.Client.log"), "123");
 
 			Run(new UpdateCommand());
 

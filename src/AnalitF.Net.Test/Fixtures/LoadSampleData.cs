@@ -17,12 +17,14 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Execute(ISession session)
 		{
-			new SanityCheck("").InitDb();
+			new SanityCheck(Config.DbDir).InitDb();
 			var result = Files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
 				.Where(g => g.Count() > 1)
-				.Select(g => Tuple.Create(g.First(f => f.Content == null).LocalFileName,
-					g.First(f => f.Content != null).Content.Split(new[] { "\r\n" },
-						StringSplitOptions.RemoveEmptyEntries)))
+				.Select(g => Tuple.Create(
+					g.First(f => f.ArchiveFileName.IndexOf(".meta.") == -1).LocalFileName,
+					g.First(f => f.ArchiveFileName.IndexOf(".meta.") >= 0)
+						.ReadContent()
+						.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries)))
 				.ToList();
 
 			var importer = new ImportCommand(result);

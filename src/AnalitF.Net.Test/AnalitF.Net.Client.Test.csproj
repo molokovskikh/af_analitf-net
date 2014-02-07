@@ -193,6 +193,7 @@
     <Compile Include="Tasks\Debug.cs" />
     <Compile Include="Tasks\Fixture.cs" />
     <Compile Include="Tasks\Log.cs" />
+    <Compile Include="TestHelpers\AutomationHelper.cs" />
     <Compile Include="TestHelpers\DispatcherFixture.cs" />
     <Compile Include="TestHelpers\BindingChecker.cs" />
     <Compile Include="TestHelpers\MixedFixture.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -41,12 +42,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			clientConfig = Net.Test.Integration.IntegrationSetup.clientConfig;
 			serviceConfig = Net.Test.Integration.IntegrationSetup.serviceConfig;
 
-			var files = Directory.GetFiles(".", "*.txt");
-			foreach (var file in files) {
-				File.Delete(file);
-			}
-
-			FileHelper.InitDir(serviceConfig.UpdatePath, clientConfig.RootDir, clientConfig.TmpDir);
+			FileHelper.InitDir(serviceConfig.UpdatePath,
+				clientConfig.TmpDir,
+				Path.Combine(ConfigurationManager.AppSettings["ClientDocPath"], "АналитФАРМАЦИЯ"));
 
 			localSession = Net.Test.Integration.IntegrationSetup.Factory.OpenSession();
 

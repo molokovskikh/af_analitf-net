@@ -16,7 +16,6 @@ namespace vm
 	{
 		string user = "IEUser";
 		string password = "12345678";
-		//string password = "";
 		string root;
 		string setup;
 		bool forceShutdown = true;
@@ -25,6 +24,9 @@ namespace vm
 		VirtualBoxClass vm;
 		SessionClass session;
 		IMachine machine;
+
+		//string guiType = "gui";
+		string guiType = "headless";
 
 		public VMFixture()
 		{
@@ -43,6 +45,12 @@ namespace vm
 			}
 
 			Init();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			Shutdown();
 		}
 
 		[Test]
@@ -86,6 +94,7 @@ namespace vm
 		{
 			if (forceShutdown) {
 				Shutdown();
+				Restore();
 			}
 
 			if (machine.State != MachineState.MachineState_Running) {
@@ -139,7 +148,7 @@ namespace vm
 		{
 			try
 			{
-				var process = machine.LaunchVMProcess(session, "gui", "");
+				var process = machine.LaunchVMProcess(session, guiType, "");
 				process.WaitForCompletion(-1);
 			}
 			catch(COMException e) {
@@ -148,7 +157,7 @@ namespace vm
 					Process.GetProcessesByName("VirtualBox").Each(p => p.Kill());
 					Thread.Sleep(3000);
 					Init();
-					var process = machine.LaunchVMProcess(session, "gui", "");
+					var process = machine.LaunchVMProcess(session, guiType, "");
 					process.WaitForCompletion(-1);
 				}
 			}
@@ -167,6 +176,13 @@ namespace vm
 		{
 			if (machine.State != MachineState.MachineState_Running)
 				return;
+
+			//если блокировки нет будет исключение
+			try {
+				session.UnlockMachine();
+			}
+			catch (Exception) {}
+
 			machine.LockMachine(session, LockType.LockType_Shared);
 			var guestsession = StartGuest(session.Console);
 			var shutdown = guestsession.ProcessCreate("cmd.exe", new[] {"/C", "shutdown", "/p"}, null, null, 0);
@@ -175,7 +191,6 @@ namespace vm
 			session.UnlockMachine();
 
 			WaitState(machine, MachineState.MachineState_PoweredOff);
-			Restore();
 		}
 
 		private static void WaitState(IMachine machine, MachineState state)

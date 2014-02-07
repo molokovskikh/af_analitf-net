@@ -35,33 +35,25 @@ namespace AnalitF.Net.Client
 	{
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
-		private string name;
 #if DEBUG
 		private DebugPipe debugPipe;
 #endif
 
-		public string SettingsPath;
 		public ShellViewModel Shell;
 
 		public static Config.Initializers.Caliburn Caliburn;
 		public static Config.Initializers.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
-		public string[] Args = new string[0];
 
 		public AppBootstrapper()
 			: this(true)
 		{
 		}
 
-		public AppBootstrapper(bool useApplication = true, bool start = true, string name = null)
+		public AppBootstrapper(bool useApplication = true)
 			: base(useApplication)
 		{
 			FailFast = !useApplication;
-			this.name = name ?? typeof(AppBootstrapper).Assembly.GetName().Name;
-			SettingsPath = this.name + ".data";
-
-			if (start)
-				Start();
 		}
 
 		public bool IsInitialized { get; private set; }
@@ -127,21 +119,15 @@ namespace AnalitF.Net.Client
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
 		{
-			Init();
-		}
 
-		public void Init()
-		{
 			InitLog();
 			InitApp();
-
 			var app = ((App)Application);
 			if (app != null) {
-				app.RegisterResources();
 				if (app.FaultInject)
 					throw new Exception("Ошибка при инициализации");
+				app.RegisterResources();
 			}
-
 			InitUi();
 			InitDb();
 			InitShell();
@@ -166,7 +152,10 @@ namespace AnalitF.Net.Client
 				if (!IsInitialized)
 					return;
 
-				using(var stream = new StreamWriter(SettingsPath)) {
+				if (String.IsNullOrEmpty(Config.SettingsPath))
+					return;
+
+				using(var stream = new StreamWriter(Config.SettingsPath)) {
 					var serializer = new JsonSerializer {
 						ContractResolver = new NHibernateResolver()
 					};
@@ -182,11 +171,11 @@ namespace AnalitF.Net.Client
 		{
 			try
 			{
-				if (!File.Exists(SettingsPath))
+				if (!File.Exists(Config.SettingsPath))
 					return;
 
 				Shell.IsNotifying = false;
-				using(var stream = new StreamReader(SettingsPath)) {
+				using(var stream = new StreamReader(Config.SettingsPath)) {
 					var serializer = new JsonSerializer {
 						ContractResolver = new NHibernateResolver()
 					};
@@ -220,19 +209,18 @@ namespace AnalitF.Net.Client
 			Util.SetValue(instance, "Env", Shell.Env);
 		}
 
-		private void InitApp()
+		public void InitApp()
 		{
-			Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
+			if (ConfigurationManager.AppSettings["Uri"] != null)
+				Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
+
 			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
-			Config.TmpDir = FileHelper.MakeRooted(Config.TmpDir);
-			Config.DbDir = FileHelper.MakeRooted(Config.DbDir);
 #if DEBUG
 			debugPipe = new DebugPipe(Config.DebugPipeName);
 #endif
-			SettingsPath = FileHelper.MakeRooted(SettingsPath);
 
 			if (Directory.Exists(Config.TmpDir)) {
-				if (Config.Cmd.Match("import")) {
+				if (!Config.Cmd.Match("import")) {
 					try {
 						Directory.Delete(Config.TmpDir, true);
 						Directory.CreateDirectory(Config.TmpDir);

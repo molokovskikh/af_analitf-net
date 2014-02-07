@@ -32,19 +32,24 @@ namespace Updater
 
 		public MainWindow()
 		{
-			InitializeComponent();
-
-			int pid;
+			log.DebugFormat("Обновление запущено {0}", typeof(MainWindow).Assembly.Location);
 			var args = Environment.GetCommandLineArgs();
-			if (args.Length < 2 || !int.TryParse(args[1], out pid)) {
-				pid = -1;
-			}
+			var pid = args.Skip(1).Select(v => SafeConvert.ToInt32(v, -1)).FirstOrDefault(-1);
+			var exe = args.Skip(2).FirstOrDefault();
+
+			Closed += (sender, eventArgs) => {
+				log.DebugFormat("Обновление завершено");
+			};
+			InitializeComponent();
 
 			string mainModule = null;
 			var process = GetProcess(pid);
 			if (process != null) {
 				mainModule = process.MainModule.FileName;
 				log.DebugFormat("По завершении будет запущен процесс {0}", mainModule);
+			}
+			else {
+				log.WarnFormat("Процесс {0} не найден", pid);
 			}
 
 			if (process != null && process.MainWindowHandle != IntPtr.Zero) {
@@ -60,12 +65,12 @@ namespace Updater
 			ResizeMode = ResizeMode.NoResize;
 			SizeToContent = SizeToContent.Manual;
 			var task = new Task(() => {
-				Update(pid, mainModule);
+				Update(pid, mainModule ?? exe);
 				Start(mainModule);
 			});
 			task.ContinueWith(t => {
-				log.Error("Процесс обновления завершился ошибкой", t.Exception);
 				if (t.IsFaulted) {
+					log.Error("Процесс обновления завершился ошибкой", t.Exception);
 					App.NotifyAboutException(t.Exception);
 				}
 				Close();

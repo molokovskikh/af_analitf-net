@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Extentions
 		protected override Window CreateWindow(object rootModel, bool isDialog, object context, IDictionary<string, object> settings)
 		{
 			var screen = rootModel as Screen;
-			if (screen != null)
+			if (screen != null && string.IsNullOrEmpty(screen.DisplayName))
 				screen.DisplayName = "АналитФАРМАЦИЯ";
 
 			var window = base.CreateWindow(rootModel, isDialog, context, settings);

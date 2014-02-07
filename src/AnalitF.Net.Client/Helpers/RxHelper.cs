@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static IObservable<T> Dump<T>(this IObservable<T> observable)
 		{
-			return observable.Do(i => Console.WriteLine(i));
+			return observable.Do(i => Console.WriteLine(i), e => Console.WriteLine(e));
 		}
 
 		public static IObservable<EventPattern<PropertyChangedEventArgs>> Changed(this INotifyPropertyChanged self)

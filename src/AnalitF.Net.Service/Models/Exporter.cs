@@ -41,6 +41,18 @@ namespace AnalitF.Net.Service.Models
 				LocalFileName = filename
 			};
 		}
+
+		public override string ToString()
+		{
+			return ArchiveFileName + " - " + LocalFileName;
+		}
+
+		public string ReadContent()
+		{
+			if (Content != null)
+				return Content;
+			return File.ReadAllText(LocalFileName);
+		}
 	}
 
 	public class Exporter : IDisposable

@@ -16,13 +16,13 @@ namespace AnalitF.Net.Test.Integration.Models
 		[TearDown]
 		public void TearDown()
 		{
-			IntegrationSetup.RestoreData(session);
+			restore = true;
 		}
 
 		[Test]
 		public void Make_check()
 		{
-			var check = new SanityCheck("data");
+			var check = new SanityCheck(config.DbDir);
 			check.Check();
 		}
 
@@ -35,7 +35,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			}
 			catch {
 			}
-			var check = new SanityCheck("data");
+			var check = new SanityCheck(config.DbDir);
 			check.Check();
 
 			var settings = session.Query<Settings>().First();
@@ -46,14 +46,13 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Create_local_db()
 		{
 			MySqlConnection.ClearAllPools(true);
-			var dataPath = "data";
-			if (Directory.Exists(dataPath))
-				Directory.GetFiles("data").Each(f => File.Delete(f));
+			if (Directory.Exists(config.DbDir))
+				Directory.GetFiles(config.DbDir).Each(f => File.Delete(f));
 
-			var sanityCheck = new SanityCheck(dataPath);
+			var sanityCheck = new SanityCheck(config.DbDir);
 			sanityCheck.Check();
 
-			Assert.That(Directory.Exists(dataPath));
+			Assert.That(Directory.Exists(config.DbDir));
 		}
 	}
 }

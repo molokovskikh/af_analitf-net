@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Disposables;
 using System.Windows;
+using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -187,7 +188,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var messages = manager.MessageBoxes.Implode();
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
 			Assert.IsFalse(shell.IsActive);
-			Assert.That(ProcessHelper.ExecutedProcesses[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+			var cmd = String.Format(@"{0} {1} ""{2}""",
+				Path.Combine(config.TmpDir, @"update\update\Updater.exe"),
+				Process.GetCurrentProcess().Id,
+				typeof(ShellViewModel).Assembly.Location);
+			Assert.AreEqual(cmd, ProcessHelper.ExecutedProcesses[0]);
 		}
 
 		[Test]
@@ -200,7 +205,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var messages = manager.MessageBoxes.Implode();
 			Assert.AreEqual(messages, "Получена новая версия программы. Сейчас будет выполнено обновление.");
 			Assert.IsFalse(shell.IsActive);
-			Assert.That(ProcessHelper.ExecutedProcesses[0], Is.StringStarting(@"temp\update\update\Updater.exe"));
+			Assert.That(ProcessHelper.ExecutedProcesses[0], Is.StringStarting(Path.Combine(config.TmpDir, @"update\update\Updater.exe")));
 		}
 
 		[Test]

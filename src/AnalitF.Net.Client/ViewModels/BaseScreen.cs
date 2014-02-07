@@ -93,7 +93,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Settings = new NotifyValue<Settings>(new Settings(defaults: true));
 			}
 
-			excelExporter = new ExcelExporter(this);
+			excelExporter = new ExcelExporter(this, Path.GetTempPath());
 		}
 
 		public IScheduler UiScheduler
@@ -133,6 +133,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Shell != null) {
 				tableSettings.Persisted = Shell.ViewSettings;
 				tableSettings.Prefix = GetType().Name + ".";
+				excelExporter.ExportDir = Shell.Config.TmpDir;
 			}
 		}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq.Observαble;
 using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -32,7 +33,7 @@ namespace AnalitF.Net.Test.Integration
 	public class IntegrationSetup
 	{
 		private HttpSelfHostConfiguration cfg;
-		private HttpSelfHostServer server;
+		public HttpSelfHostServer server;
 		private uint serverUserId;
 
 		public static bool isInitialized = false;
@@ -41,26 +42,31 @@ namespace AnalitF.Net.Test.Integration
 		public static Client.Config.Config clientConfig = new Client.Config.Config();
 
 		public static Config serviceConfig;
+		public static string BackupDir = @"var\client\backup";
 
 		[SetUp]
 		public void Setup()
 		{
 			if (isInitialized) {
 				if (server == null) {
-					InitWebServer(cfg);
+					InitWebServer(clientConfig.BaseUrl);
 				}
 				return;
 			}
 
-			clientConfig.BaseUrl = new Uri("http://localhost:7018");
-			clientConfig.RootDir = "app";
-			clientConfig.RequestInterval = 1.Second();
+			if (!Directory.Exists("var"))
+				Directory.CreateDirectory("var");
 
-			FileHelper.InitDir("var");
+			clientConfig.BaseUrl = new Uri("http://localhost:7018");
+			clientConfig.RootDir = @"var\client";
+			clientConfig.RequestInterval = 1.Second();
+			clientConfig.InitDir();
+
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
 			AppBootstrapper.InitUi();
 
 			global::Test.Support.Setup.SessionFactory = ServerNHConfig("server");
+			InitWebServer(clientConfig.BaseUrl);
 
 			var nhibernate = new Client.Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate = nhibernate;
@@ -68,18 +74,13 @@ namespace AnalitF.Net.Test.Integration
 			Factory = nhibernate.Factory;
 			Configuration = nhibernate.Configuration;
 
-			cfg = new HttpSelfHostConfiguration(clientConfig.BaseUrl);
-			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-			serviceConfig = Application.InitApp(cfg);
-
 			if (IsServerStale()) {
-				FileHelper.InitDir("data", "backup");
+				FileHelper.InitDir(clientConfig.DbDir, BackupDir);
 			}
 			if (IsClientStale()) {
 				ImportData();
 				BackupData();
 			}
-			InitWebServer(cfg);
 			isInitialized = true;
 		}
 
@@ -120,18 +121,26 @@ namespace AnalitF.Net.Test.Integration
 			return holder.GetSessionFactory(typeof(ActiveRecordBase));
 		}
 
-		public void InitWebServer(HttpSelfHostConfiguration cfg)
+		public Task InitWebServer(Uri url)
 		{
+			if (server != null)
+				return Task.FromResult(1);
+			if (cfg == null) {
+				cfg = new HttpSelfHostConfiguration(url);
+				cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+				serviceConfig = Application.InitApp(cfg);
+			}
+
 			server = new HttpSelfHostServer(cfg);
-			server.OpenAsync();
+			return server.OpenAsync();
 		}
 
 		private void ImportData()
 		{
-			var sampleData = new SampleData();
-			sampleData.Config = serviceConfig;
 			var helper = new FixtureHelper();
-			helper.Run(sampleData);
+
+			var sampleData = helper.Run<SampleData>();
+			Console.WriteLine(sampleData.Files.Implode());
 			helper.Run(new LoadSampleData {
 				Files = sampleData.Files,
 			});
@@ -142,16 +151,16 @@ namespace AnalitF.Net.Test.Integration
 			using(var session = Factory.OpenSession()) {
 				session.CreateSQLQuery("flush tables").ExecuteUpdate();
 			}
-			FileHelper.InitDir("backup");
-			Directory.GetFiles("data")
-				.Each(f => File.Copy(f, Path.Combine("backup", Path.GetFileName(f)), true));
+			FileHelper.InitDir(BackupDir);
+			Directory.GetFiles(clientConfig.DbDir)
+				.Each(f => File.Copy(f, Path.Combine(BackupDir, Path.GetFileName(f)), true));
 		}
 
 		public static void RestoreData(ISession localSession)
 		{
 			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
-			Directory.GetFiles("backup")
-				.Each(f => File.Copy(f, Path.Combine("data", Path.GetFileName(f)), true));
+			Directory.GetFiles(BackupDir)
+				.Each(f => File.Copy(f, Path.Combine(clientConfig.DbDir, Path.GetFileName(f)), true));
 		}
 	}
 }

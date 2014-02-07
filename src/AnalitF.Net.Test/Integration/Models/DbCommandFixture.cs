@@ -21,16 +21,16 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Repair_data_base()
 		{
-			Directory.GetFiles("data", "mnns.*").Each(File.Delete);
-			File.WriteAllBytes(Path.Combine("data", "markupconfigs.frm"), new byte[0]);
+			Directory.GetFiles(config.DbDir, "mnns.*").Each(File.Delete);
+			File.WriteAllBytes(Path.Combine(config.DbDir, "markupconfigs.frm"), new byte[0]);
 
 			var command = InitCmd(new RepairDb());
 			command.Execute();
 			var result = command.Result;
 
 			Assert.That(result, Is.False);
-			Assert.That(Directory.GetFiles("data", "mnns.*").Length, Is.EqualTo(3));
-			Assert.That(new FileInfo(Path.Combine("data", "markupconfigs.frm")).Length, Is.GreaterThan(0));
+			Assert.That(Directory.GetFiles(config.DbDir, "mnns.*").Length, Is.EqualTo(3));
+			Assert.That(new FileInfo(Path.Combine(config.DbDir, "markupconfigs.frm")).Length, Is.GreaterThan(0));
 		}
 
 		[Test]
