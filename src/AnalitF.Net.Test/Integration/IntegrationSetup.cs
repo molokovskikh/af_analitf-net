@@ -140,7 +140,6 @@ namespace AnalitF.Net.Test.Integration
 			var helper = new FixtureHelper();
 
 			var sampleData = helper.Run<SampleData>();
-			Console.WriteLine(sampleData.Files.Implode());
 			helper.Run(new LoadSampleData {
 				Files = sampleData.Files,
 			});
