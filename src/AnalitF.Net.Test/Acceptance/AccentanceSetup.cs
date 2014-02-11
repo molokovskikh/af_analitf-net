@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[SetUp]
 		public void Setup()
 		{
+			if (!Directory.Exists(IntegrationSetup.BackupDir))
+				return;
 			Prepare(@"..\..\..\AnalitF.Net.Client\bin\Debug", "acceptance");
 
 			var port = Generator.Random(ushort.MaxValue).First();
