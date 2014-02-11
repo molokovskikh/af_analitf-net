@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				.ToList();
 
 			var importer = new ImportCommand(result);
+			importer.Config = Config;
 			importer.Session = session;
 			importer.Execute();
 
