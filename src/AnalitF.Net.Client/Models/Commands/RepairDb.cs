@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 
-			new SanityCheck(Config.DbDir).Check(true);
+			Configure(new SanityCheck()).Check(true);
 
 			Result = results.All(r => r == RepairStatus.Ok);
 		}

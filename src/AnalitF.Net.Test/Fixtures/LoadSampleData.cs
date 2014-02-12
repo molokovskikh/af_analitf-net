@@ -17,7 +17,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Execute(ISession session)
 		{
-			new SanityCheck(Config.DbDir).InitDb();
+			var sanityCheck = new SanityCheck();
+			sanityCheck.Config = Config;
+			sanityCheck.InitDb();
+
 			var result = Files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
 				.Where(g => g.Count() > 1)
 				.Select(g => Tuple.Create(

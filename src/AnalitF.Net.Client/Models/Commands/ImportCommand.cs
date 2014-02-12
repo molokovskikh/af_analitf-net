@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 
-			new SanityCheck(Config.DbDir).Check();
+			Configure(new SanityCheck()).Check();
 
 			var settings = Session.Query<Settings>().First();
 			var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();

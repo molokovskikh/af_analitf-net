@@ -240,7 +240,9 @@ namespace AnalitF.Net.Client
 
 			NHibernate = new Config.Initializers.NHibernate();
 			NHibernate.Init();
-			new SanityCheck(Config.DbDir).Check(Config.Cmd.Match("import"));
+			var sanityCheck = new SanityCheck();
+			sanityCheck.Config = Config;
+			sanityCheck.Check(Config.Cmd.Match("import"));
 		}
 
 		public static void InitUi()

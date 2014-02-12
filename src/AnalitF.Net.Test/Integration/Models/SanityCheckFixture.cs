@@ -13,16 +13,19 @@ namespace AnalitF.Net.Test.Integration.Models
 	[TestFixture]
 	public class SanityCheckFixture : DbFixture
 	{
+		private SanityCheck check;
+
 		[TearDown]
 		public void TearDown()
 		{
 			restore = true;
+			check = new SanityCheck();
+			check.Config = config;
 		}
 
 		[Test]
 		public void Make_check()
 		{
-			var check = new SanityCheck(config.DbDir);
 			check.Check();
 		}
 
@@ -35,7 +38,6 @@ namespace AnalitF.Net.Test.Integration.Models
 			}
 			catch {
 			}
-			var check = new SanityCheck(config.DbDir);
 			check.Check();
 
 			var settings = session.Query<Settings>().First();
@@ -49,8 +51,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			if (Directory.Exists(config.DbDir))
 				Directory.GetFiles(config.DbDir).Each(f => File.Delete(f));
 
-			var sanityCheck = new SanityCheck(config.DbDir);
-			sanityCheck.Check();
+			check.Check();
 
 			Assert.That(Directory.Exists(config.DbDir));
 		}

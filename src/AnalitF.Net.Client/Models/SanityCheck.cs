@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Commands;
 using Common.NHibernate;
 using Common.Tools;
 using Devart.Data.MySql;
@@ -15,26 +16,14 @@ using log4net;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class SanityCheck
+	public class SanityCheck : BaseCommand
 	{
-		private string dataPath;
-		private ILog log = LogManager.GetLogger(typeof(SanityCheck));
-
 		public static bool Debug;
-		private Configuration configuration;
-		private ISessionFactory factory;
-
-		public SanityCheck(string dataPath)
-		{
-			this.dataPath = dataPath;
-			configuration = AppBootstrapper.NHibernate.Configuration;
-			factory = AppBootstrapper.NHibernate.Factory;
-		}
 
 		public void Check(bool updateSchema = false)
 		{
-			if (!Directory.Exists(dataPath)) {
-				Directory.CreateDirectory(dataPath);
+			if (!Directory.Exists(Config.DbDir)) {
+				Directory.CreateDirectory(Config.DbDir);
 				InitDb();
 			}
 			else if (updateSchema) {
@@ -70,7 +59,7 @@ namespace AnalitF.Net.Client.Models
 
 		private bool CheckSettings(bool overrideHash)
 		{
-			using (var session = factory.OpenSession())
+			using (var session = Factory.OpenSession())
 			using (var transaction = session.BeginTransaction()) {
 				var settings = session.Query<Settings>().FirstOrDefault();
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
@@ -121,7 +110,7 @@ namespace AnalitF.Net.Client.Models
 
 		public void UpgradeData()
 		{
-			using (var session = factory.OpenSession())
+			using (var session = Factory.OpenSession())
 			using (var transaction = session.BeginTransaction()) {
 				session.Query<MarkupConfig>()
 					.Where(c => c.MaxMarkup < c.Markup)
@@ -132,13 +121,13 @@ namespace AnalitF.Net.Client.Models
 
 		public void UpgradeSchema()
 		{
-			var export = new SchemaUpdate(configuration);
+			var export = new SchemaUpdate(Configuration);
 			export.Execute(Debug, true);
 		}
 
 		public void InitDb()
 		{
-			var export = new SchemaExport(configuration);
+			var export = new SchemaExport(Configuration);
 			export.Drop(Debug, true);
 			export.Create(Debug, true);
 		}

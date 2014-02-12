@@ -104,7 +104,9 @@ namespace AnalitF.Net.Test.Integration
 
 		private bool IsClientStale()
 		{
-			new SanityCheck(clientConfig.DbDir).Check();
+			var sanityCheck = new SanityCheck();
+			sanityCheck.Config = clientConfig;
+			sanityCheck.Check();
 			using(var session = Factory.OpenSession()) {
 				var user = session.Query<User>().FirstOrDefault();
 				return user == null || serverUserId != user.Id;

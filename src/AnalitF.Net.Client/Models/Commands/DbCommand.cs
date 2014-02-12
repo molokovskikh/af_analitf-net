@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public CancellationToken Token;
 		public ISession Session;
 		public IStatelessSession StatelessSession;
-		public Config.Config Config = new Config.Config();
+		public Config.Config Config;
 		public ProgressReporter Reporter;
 		public BehaviorSubject<Progress> Progress;
 
@@ -35,12 +35,19 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		protected T RunCommand<T>(DbCommand<T> command)
 		{
+			Configure(command);
+			command.Execute();
+			return command.Result;
+		}
+
+		protected T Configure<T>(T command) where T : BaseCommand
+		{
 			command.Session = Session;
 			command.StatelessSession = StatelessSession;
 			command.Token = Token;
 			command.Reporter = Reporter;
-			command.Execute();
-			return command.Result;
+			command.Config = Config;
+			return command;
 		}
 
 		protected IEnumerable<Table> Tables()
