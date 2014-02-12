@@ -15,12 +15,11 @@ namespace AnalitF.Net.Test.Integration.Models
 	{
 		private SanityCheck check;
 
-		[TearDown]
-		public void TearDown()
+		[SetUp]
+		public void Setup()
 		{
 			restore = true;
-			check = new SanityCheck();
-			check.Config = config;
+			check = InitCmd(new SanityCheck());
 		}
 
 		[Test]
