@@ -103,7 +103,6 @@ task "build:client:bin":
 	output = "output/AnalitF.Net.Client"
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
 	Rm(FileSet("$output/*.xml"))
-	print Globals.Environment
 	if Globals.Environment == @Production:
 		Rm(FileSet("$output/*.pdb"))
 
