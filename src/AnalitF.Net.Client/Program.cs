@@ -62,8 +62,8 @@ namespace AnalitF.Net.Client
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
 					{"quiet", "Не выводить предупреждения при запуске", v => quiet = v != null},
-					{"fault-inject", "", v => faultInject = v != null},
 #if DEBUG
+					{"fault-inject", "", v => faultInject = v != null},
 					{"debug-pipe=", "", v => debugpipe = v},
 #endif
 				};

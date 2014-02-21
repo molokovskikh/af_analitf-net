@@ -11,37 +11,18 @@ using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
 {
-	public class PriceOfferFixture
+	public class PriceOfferFixture : BaseUnitFixture
 	{
-		private TestScheduler scheduler;
-		private CompositeDisposable cleanup;
 		private PriceOfferViewModel model;
 		private Price price;
 
 		[SetUp]
 		public void Setup()
 		{
-			BaseScreen.UnitTesting = true;
-
-			cleanup = new CompositeDisposable();
-			RxApp.MessageBus = new MessageBus();
-			scheduler = new TestScheduler();
-			BaseScreen.TestSchuduler = scheduler;
-			cleanup.Add(TestUtils.WithScheduler(scheduler));
-
-			ViewModelFixture.StubWindowManager();
-
 			price = new Price("test1");
 			model = new PriceOfferViewModel(price.Id, false);
 			model.Address = new Address("test addr");
 			model.Price.Value = price;
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			BaseScreen.UnitTesting = false;
-			cleanup.Dispose();
 		}
 
 		[Test]

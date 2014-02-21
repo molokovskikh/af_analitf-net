@@ -15,31 +15,8 @@ using ReactiveUI.Testing;
 namespace AnalitF.Net.Test.Unit.ViewModels
 {
 	[TestFixture]
-	public class CatalogOfferFixture
+	public class CatalogOfferFixture : BaseUnitFixture
 	{
-		private TestScheduler scheduler;
-		private CompositeDisposable cleanup;
-
-		[SetUp]
-		public void Setup()
-		{
-			cleanup = new CompositeDisposable();
-			BaseScreen.UnitTesting = true;
-			RxApp.MessageBus = new MessageBus();
-			scheduler = new TestScheduler();
-			BaseScreen.TestSchuduler = scheduler;
-			cleanup.Add(TestUtils.WithScheduler(scheduler));
-
-			ViewModelFixture.StubWindowManager();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			BaseScreen.UnitTesting = false;
-			cleanup.Dispose();
-		}
-
 		[Test]
 		public void Recalculate_on_offer_changed()
 		{
