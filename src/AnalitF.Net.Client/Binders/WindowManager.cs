@@ -39,14 +39,9 @@ namespace AnalitF.Net.Client.Extentions
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-#if DEBUG
-			if (UnitTesting) {
-				ScreenExtensions.TryActivate(rootModel);
-				DialogSubject.OnNext(rootModel);
-				ContinueViewDialog(rootModel);
+			if (Stub(rootModel))
 				return true;
-			}
-#endif
+
 			var window = CreateWindow(rootModel, true, context, settings);
 			if (window.Owner != null) {
 				window.SizeToContent = SizeToContent.Manual;
@@ -60,20 +55,29 @@ namespace AnalitF.Net.Client.Extentions
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-#if DEBUG
-			if (UnitTesting) {
-				ScreenExtensions.TryActivate(rootModel);
-				DialogSubject.OnNext(rootModel);
-				ContinueViewDialog(rootModel);
+			if (Stub(rootModel))
 				return true;
-			}
-#endif
+
 			var window = CreateWindow(rootModel, true, context, settings);
 			window.ResizeMode = ResizeMode.NoResize;
 			window.SizeToContent = SizeToContent.WidthAndHeight;
 			window.ShowInTaskbar = false;
 
 			return ShowDialog(window);
+		}
+
+		private bool Stub(object rootModel)
+		{
+#if DEBUG
+			if (UnitTesting) {
+				IoC.BuildUp(rootModel);
+				ScreenExtensions.TryActivate(rootModel);
+				DialogSubject.OnNext(rootModel);
+				ContinueViewDialog(rootModel);
+				return true;
+			}
+#endif
+			return false;
 		}
 
 		//скорбная песнь
@@ -91,6 +95,7 @@ namespace AnalitF.Net.Client.Extentions
 		//по этому для каждого вновь создаваемого окна принудительно указываем Language
 		protected override Window CreateWindow(object rootModel, bool isDialog, object context, IDictionary<string, object> settings)
 		{
+			IoC.BuildUp(rootModel);
 			var screen = rootModel as Screen;
 			if (screen != null && string.IsNullOrEmpty(screen.DisplayName))
 				screen.DisplayName = "АналитФАРМАЦИЯ";

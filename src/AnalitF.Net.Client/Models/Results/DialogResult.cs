@@ -11,7 +11,6 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class DialogResult : IResult
 	{
-		public ShellViewModel Shell;
 		public Screen Model;
 		public bool ShowSizeToContent;
 		public bool FullScreen;
@@ -36,7 +35,6 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			Util.SetValue(Model, "Shell", Shell);
 			if (ShowSizeToContent)
 				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else

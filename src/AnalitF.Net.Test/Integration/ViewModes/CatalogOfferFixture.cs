@@ -6,7 +6,9 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.Views;
+using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
@@ -318,6 +320,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var fixture = Fixture<LocalPromotion>();
 			catalog = fixture.Promotion.Catalogs.First();
 			Assert.That(model.Promotions.Promotions.Value.Count, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Show_description()
+		{
+			var dialogs = manager.DialogSubject.Collect();
+			model.ShowDescription();
+			Assert.AreEqual(1, dialogs.Count);
+			var description = (DocModel<ProductDescription>)dialogs[0];
+			Assert.IsNotNull(description.Model);
+			Assert.IsNotNull(description.Document);
 		}
 	}
 }
