@@ -7,7 +7,13 @@
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Offers}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
@@ -83,7 +89,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="56*" MinWidth="5"
+				<c:DataGridTextColumnEx Width="56*"
 					Header="Срок годн."
 					Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"

@@ -3,7 +3,13 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Rejects}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Rejects}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"

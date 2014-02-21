@@ -3,7 +3,13 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Orders}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Orders}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
@@ -79,23 +85,17 @@
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
 							Visibility="Collapsed" />
 						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}"
-							MinWidth="5"
 							TextAlignment="Right" />
 						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}"
 							TextAlignment="Center" />
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
-							MinWidth="5"
 							TextAlignment="Center" />
-						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
-							MinWidth="5" />
-						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
-							MinWidth="5" />
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
+						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}" />
 						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
-							TextAlignment="Right"
-							MinWidth="5" />
+							TextAlignment="Right" />
 						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
-							TextAlignment="Right"
-							MinWidth="5" />
+							TextAlignment="Right" />
 					</DataGrid.Columns>
 				</c:DataGrid2>
 			</TabItem>

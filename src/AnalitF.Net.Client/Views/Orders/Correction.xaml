@@ -4,7 +4,14 @@
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Lines}">
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
 	<UserControl.Resources>
 		<Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
 			<Setter Property="Height" Value="8"/>
@@ -164,7 +171,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 						Binding="{Binding Doc}" />
 				<c:DataGridTextColumnEx Width="69*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="85*" MinWidth="5"
+				<c:DataGridTextColumnEx Width="85*"
 						Header="Срок годн."
 						Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="103*" Header="Прайс-лист"

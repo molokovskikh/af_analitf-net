@@ -5,7 +5,13 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" mc:Ignorable="d"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Prices}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Prices}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"

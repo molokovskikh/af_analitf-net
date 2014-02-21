@@ -8,7 +8,13 @@
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:models="clr-namespace:AnalitF.Net.Client.Models"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Items}">
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.Resources>
 		<Style x:Key="Borderless" TargetType="Control">

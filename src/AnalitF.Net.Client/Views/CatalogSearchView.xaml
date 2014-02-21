@@ -5,7 +5,14 @@
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
-	Binders:FocusBehavior.DefaultFocus="{x:Reference Items}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />

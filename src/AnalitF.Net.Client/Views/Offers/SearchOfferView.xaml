@@ -6,7 +6,13 @@
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Offers}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
@@ -78,11 +84,11 @@
 					Binding="{Binding Price.Name}" />
 				<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
 					Binding="{Binding Price.RegionName}" />
-				<c:DataGridTextColumnEx Width="37*" MinWidth="3" Visibility="Collapsed"
+				<c:DataGridTextColumnEx Width="37*" Visibility="Collapsed"
 					Header="Склад"
 					Binding="{Binding Price.Storage, Converter={StaticResource BoolToMarker}}"
 					TextAlignment="Center" />
-				<c:DataGridTextColumnEx Width="103*" MinWidth="5" Header="Дата прайс-листа"
+				<c:DataGridTextColumnEx Width="103*" Header="Дата прайс-листа"
 					Binding="{Binding Price.PriceDate}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="65*" Header="Реестр.цена"
 					Binding="{Binding RegistryCost}" TextAlignment="Right" />
@@ -101,7 +107,7 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<c:DataGridTextColumnEx Width="55*" MinWidth="5"
+				<c:DataGridTextColumnEx Width="55*"
 					FontWeight="Bold" Header="Цена"
 					Binding="{Binding ResultCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Visibility="Collapsed" Header="Разница, %"

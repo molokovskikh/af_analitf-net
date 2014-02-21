@@ -62,7 +62,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
 				Commands.Bind(viewModel, view, context);
-				FocusBehavior.Bind(viewModel, view, context);
 				var baseScreen = viewModel as BaseScreen;
 				if (baseScreen != null) {
 					var disposable = baseScreen.ResultsSink

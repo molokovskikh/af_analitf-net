@@ -6,7 +6,13 @@
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
-	binders:FocusBehavior.DefaultFocus="{x:Reference Offers}">
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
@@ -79,11 +85,11 @@
 					Header="Кат.производитель" Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="36*" Header="Упаковка" Binding="{Binding Volume}"
 					TextAlignment="Right" />
-				<DataGridTextColumn Width="SizeToHeader" MinWidth="5" Visibility="Collapsed"
+				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed"
 					Header="Документ" Binding="{Binding Doc}" />
-				<DataGridTextColumn Width="56*" MinWidth="5" Header="Примечание"
+				<DataGridTextColumn Width="56*" Header="Примечание"
 					Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="58*" MinWidth="5"
+				<c:DataGridTextColumnEx Width="58*"
 					Header="Срок годн."
 					Binding="{Binding Period}" TextAlignment="Center" />
 				<c:DataGridTextColumnEx Width="31*" Header="Реестр.цена"
@@ -103,10 +109,10 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<c:DataGridTextColumnEx Width="59*" MinWidth="5" FontWeight="Bold"
+				<c:DataGridTextColumnEx Width="59*" FontWeight="Bold"
 					Header="Цена" Binding="{Binding ResultCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="39*" MinWidth="5" Header="Остаток"
+				<c:DataGridTextColumnEx Width="39*" Header="Остаток"
 					Binding="{Binding Quantity}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="51*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
