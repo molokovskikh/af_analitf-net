@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -17,9 +18,11 @@ using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
 using log4net;
+using SmartOrderFactory.Domain;
 using MySqlHelper = AnalitF.Net.Service.Helpers.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
@@ -83,12 +86,27 @@ namespace AnalitF.Net.Service.Models
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
 
-		public Exporter(ISession session, uint userId, Version version, string updateType = null)
+		public List<Order> Orders;
+		public List<OrderBatchItem> BatchItems;
+		public Address BatchAddress;
+
+		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
 			this.session = session;
-			this.version = version;
-			this.UpdateType = updateType;
-			user = session.Load<User>(userId);
+			version = job.Version;
+			UpdateType = job.UpdateType;
+			Prefix = job.Id.ToString();
+
+			ResultPath = config.ResultPath;
+			UpdatePath = config.UpdatePath;
+			AdsPath = config.AdsPath;
+			DocsPath = config.DocsPath;
+			Config = config;
+			MaxProducerCostPriceId = config.MaxProducerCostPriceId;
+			MaxProducerCostCostId = config.MaxProducerCostCostId;
+
+			//job может находиться в другой сессии по этому загрузаем пользователя из текущей сессии
+			user = session.Load<User>(job.User.Id);
 			data = session.Get<AnalitfNetData>(user.Id);
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
@@ -546,6 +564,166 @@ where a.MailId in ({0})", ids.Implode());
 
 		private void ExportOrders(List<UpdateData> result)
 		{
+			if (Orders != null) {
+				Export(result, "Orders",
+					new[] {
+						"ExportId",
+						"CreatedOn",
+						"AddressId",
+						"PriceId",
+						"RegionId",
+						"Comment"
+					},
+					Orders.Select(g => new object[] {
+						g.RowId,
+						g.WriteTime.ToUniversalTime(),
+						g.AddressId,
+						g.PriceList.PriceCode,
+						g.RegionCode,
+						g.ClientAddition
+					}),
+				false);
+
+				var connection = (MySqlConnection)session.Connection;
+				var items = Orders.SelectMany(o => o.OrderItems);
+				var productSynonymLookup = connection
+					.Read(String.Format("select SynonymCode, Synonym from farm.Synonym where SynonymCode in ({0})",
+						items.Select(i => i.SynonymCode.GetValueOrDefault()).DefaultIfEmpty(0u).Implode()))
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["SynonymCode"]), r => r["Synonym"].ToString());
+
+				var producerSynonymLookup = connection
+					.Read(String.Format("select SynonymFirmCrCode, Synonym from farm.SynonymFirmCr where SynonymFirmCrCode in ({0})",
+						items.Select(i => i.SynonymFirmCrCode.GetValueOrDefault()).DefaultIfEmpty(0u).Implode()))
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["SynonymFirmCrCode"]), r => r["Synonym"].ToString());
+
+				var producerIds = items.Select(i => i.CodeFirmCr).Union(BatchItems.Select(i => i.Item.CodeFirmCr))
+					.Where(i => i != null)
+					.Distinct();
+				var producerLookup = connection
+					.Read(String.Format("select Id, Name from Catalogs.Producers where Id in ({0})",
+						producerIds.DefaultIfEmpty((uint?)0).Implode()))
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => r["Name"].ToString());
+
+				var maxProducerCost = connection
+					.Read("select * from Usersettings.MaxProducerCosts")
+					.ToLookup(r => Tuple.Create((uint)r["ProductId"], (uint?)r["ProducerId"]), r => Convert.ToUInt32((decimal?)r["Cost"]));;
+
+				var catalogIdLookup = connection
+					.Read(String.Format("select Id, CatalogId from Catalogs.Products where Id in ({0})",
+						items.Select(i => i.ProductId).DefaultIfEmpty(0u).Implode()))
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Convert.ToUInt32(r["CatalogId"]));
+
+				Export(result, "OrderLines",
+					new [] {
+						"ExportOrderId",
+						"ExportId",
+						"Count",
+						"ProductId",
+						"CatalogId",
+						"ProductSynonymId",
+						"Producer",
+						"ProducerId",
+						"ProducerSynonymId",
+						"Code",
+						"CodeCr",
+						"Unit",
+						"Volume",
+						"Quantity",
+						"Note",
+						"Period",
+						"Doc",
+						"MinBoundCost",
+						"MaxBoundCost",
+						"VitallyImportant",
+						"RegistryCost",
+						"MaxProducerCost",
+						"RequestRatio",
+						"MinOrderSum",
+						"MinOrderCount",
+						"ProducerCost",
+						"NDS",
+						"EAN13",
+						"CodeOKP",
+						"Series",
+						"ProductSynonym",
+						"ProducerSynonym",
+						"Cost",
+						"RegionId",
+						"OfferId",
+					},
+					items
+						.Select(i => new object[] {
+							i.Order.RowId,
+							i.RowId,
+							i.Quantity,
+							i.ProductId,
+							catalogIdLookup[i.ProductId].FirstOrDefault(),//CatalogId
+							i.SynonymCode,
+							producerLookup[i.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),//Producer
+							i.CodeFirmCr,
+							i.SynonymFirmCrCode,
+							i.Code,
+							i.CodeCr,
+							i.OfferInfo.Unit,
+							i.OfferInfo.Volume,
+							i.OfferInfo.Quantity,
+							i.OfferInfo.Note,
+							i.OfferInfo.Period,
+							i.OfferInfo.Doc,
+							i.OfferInfo.MinBoundCost,
+							i.OfferInfo.MaxBoundCost,
+							i.OfferInfo.VitallyImportant,
+							i.OfferInfo.RegistryCost,
+							maxProducerCost[Tuple.Create(i.ProductId, i.CodeFirmCr)].FirstOrDefault(),//MaxProducerCost
+							i.RequestRatio,
+							i.OrderCost,
+							i.MinOrderCount,
+							i.OfferInfo.ProducerCost,
+							i.OfferInfo.NDS,
+							i.EAN13,
+							i.CodeOKP,
+							i.Series,
+							productSynonymLookup[i.SynonymCode.GetValueOrDefault()].FirstOrDefault(),//ProductSynonym
+							producerSynonymLookup[i.SynonymFirmCrCode.GetValueOrDefault()].FirstOrDefault(),//ProducerSynonym
+							i.Cost,
+							i.Order.RegionCode,
+							i.CoreId,
+						}), truncate: false);
+
+				if (BatchItems != null) {
+					Export(result, "BatchLines",
+						new[] {
+							"ExportLineId",
+							"AddressId",
+							"ProductSynonym",
+							"ProductId",
+							"CatalogId",
+							"ProducerSynonym",
+							"ProducerId",
+							"Producer",
+							"Quantity",
+							"Comment",
+							"Status",
+							"ServiceFields"
+						},
+						BatchItems.Select(i => new object[] {
+							i.Item.OrderItem == null ? null : (uint?)i.Item.OrderItem.RowId,
+							i.Item.OrderItem == null ? BatchAddress.Id : i.Item.OrderItem.Order.AddressId,
+							i.ProductName,
+							i.Item.ProductId,
+							i.Item.CatalogId,
+							i.ProducerName,
+							i.Item.CodeFirmCr,
+							producerSynonymLookup[i.Item.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
+							i.Quantity,
+							i.Item.Comments.Implode(Environment.NewLine),
+							(int)i.Item.Status,
+							JsonConvert.SerializeObject(i.ServiceValues)
+						}), truncate: false);
+				}
+
+				return;
+			}
 			if (!userSettings.AllowDownloadUnconfirmedOrders)
 				return;
 

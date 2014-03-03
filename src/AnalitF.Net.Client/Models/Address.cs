@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.Serialization;
+using AnalitF.Net.Client.Config.Initializers;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -19,6 +23,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			Orders = new List<Order>();
 			Rules = new List<MinOrderSumRule>();
+			StatSubject = new Subject<Stat>();
 		}
 
 		public virtual uint Id { get; set; }
@@ -43,9 +48,38 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[IgnoreDataMember, Ignore]
+		public virtual Subject<Stat> StatSubject { get; protected set; }
+
 		public override string ToString()
 		{
 			return string.Format("{0} {1}", Id, Name);
+		}
+
+		public virtual bool RemoveLine(OrderLine line)
+		{
+			var order = line.Order;
+			if (order != null) {
+				order.RemoveLine(line);
+				if (order.IsEmpty)
+					order.Address.Orders.Remove(order);
+				else
+					order.UpdateStat();
+				StatSubject.OnNext(new Stat(this));
+			}
+			return line.Order.IsEmpty;
+		}
+
+		public virtual OrderLine Order(Offer offer, uint count)
+		{
+			var order = new Order(this, offer, count);
+			Orders.Add(order);
+			return order.Lines[0];
+		}
+
+		public virtual IEnumerable<Order> ActiveOrders()
+		{
+			return Orders.Where(o => !o.Frozen);
 		}
 	}
 }

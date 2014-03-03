@@ -15,12 +15,14 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	public class SearchBehavior : BaseNotify
 	{
 		private BaseScreen screen;
+		private bool callUpdate;
 
-		public SearchBehavior(BaseScreen screen)
+		public SearchBehavior(BaseScreen screen, bool callUpdate = true)
 		{
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
 			this.screen = screen;
+			this.callUpdate = callUpdate;
 
 			screen.OnCloseDisposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, screen.Scheduler)
@@ -43,7 +45,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = "";
 			SearchText.Value = "";
-			screen.Update();
+			if (callUpdate)
+				screen.Update();
 			return HandledResult.Handled();
 		}
 
@@ -54,7 +57,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = SearchText.Value;
 			SearchText.Value = "";
-			screen.Update();
+			if (callUpdate)
+				screen.Update();
 			return HandledResult.Handled();
 		}
 	}

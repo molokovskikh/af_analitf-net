@@ -10,18 +10,18 @@ namespace AnalitF.Net.Client.Models.Print
 	public class CatalogOfferDocument : BaseDocument
 	{
 		private List<Offer> offers;
-		private string reportHeader;
+		private string header;
 
-		public CatalogOfferDocument(List<Offer> offers, string header)
+		public CatalogOfferDocument(string header, List<Offer> offers)
 		{
+			this.header = header;
 			this.offers = offers;
-			reportHeader = header;
 		}
 
 		protected override void BuildDoc()
 		{
 			doc.Blocks.Add(new Paragraph());
-			doc.Blocks.Add(new Paragraph(new Run(reportHeader)) {
+			doc.Blocks.Add(new Paragraph(new Run(header)) {
 				FontWeight = FontWeights.Bold,
 				FontSize = 16
 			});

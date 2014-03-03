@@ -13,3 +13,6 @@
 [submodule "src/Common.Web"]
 	path = src/Common.Web
 	url = git@git.analit.net:root/common-web
+[submodule "src/SmartOrderFactory"]
+	path = src/SmartOrderFactory
+	url = git@git.analit.net:root/smartorderfactory.git

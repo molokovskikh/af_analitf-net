@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -35,7 +36,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(correction.IsUpdate);
 			Assert.IsFalse(correction.IsOrderSend);
 			var report = correction.Save().ToArray().OfType<SaveFileResult>().First();
-			var text = File.ReadAllText(report.Dialog.FileName);
+			var text = File.ReadAllText(report.Dialog.FileName, Encoding.Default);
 			Assert.That(text, Is.StringContaining(String.Format("адрес доставки {0}", address.Name)));
 		}
 

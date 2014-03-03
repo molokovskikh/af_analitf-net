@@ -27,24 +27,24 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			using (var scope = new SessionScope()) {
 				var holder = ActiveRecordMediator.GetSessionFactoryHolder();
 				session = holder.CreateSession(typeof(ActiveRecordBase));
-				var supplier = TestSupplier.CreateNaked();
+				var supplier = TestSupplier.CreateNaked(session);
 				supplier.Name += " " + supplier.Id;
 				CreateSampleContactInfo(supplier);
 				CreateSampleCore(supplier);
 
-				var supplier1 = TestSupplier.CreateNaked();
+				var supplier1 = TestSupplier.CreateNaked(session);
 				supplier1.Name += " " + supplier1.Id;
 				CreateSampleContactInfo(supplier1);
 				CreateSampleCore(supplier1);
 
-				var minReqSupplier = TestSupplier.CreateNaked();
+				var minReqSupplier = TestSupplier.CreateNaked(session);
 				minReqSupplier.Name += " минимальный заказ " + minReqSupplier.Id;
 				CreateSampleContactInfo(minReqSupplier);
 				//устанавливаем максимальную цену товара такую что бы при заказе одной позиции
 				//она всегда не добирала до минимального заказа тк тесты ожидают этого
 				CreateSampleCore(minReqSupplier, 1000);
 
-				MaxProducerCosts = CreateMaxProduceCosts(supplier);
+				MaxProducerCosts = CreateMaxProduceCosts(session, supplier);
 				Client = CreateUser(session);
 
 				var user = Client.Users.First();
@@ -66,10 +66,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				holder.ReleaseSession(session);
 			}
 
-			var exporter = new Exporter(origin, Client.Users[0].Id, new Version()) {
+			var requestLog = new RequestLog(origin.Load<Common.Models.User>(Client.Users[0].Id), new Version());
+			var exporter = new Exporter(origin, Config, requestLog) {
+				Prefix = "",
 				MaxProducerCostPriceId = MaxProducerCosts.Id,
 				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id,
-				Config = Config
 			};
 			Files = new List<UpdateData>();
 			exporter.Export(Files);
@@ -122,11 +123,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 МИНИМАЛЬНАЯ СУММА ЗАЯВКИ ДЛЯ ДОСТАВКИ 3000 руб.";
 		}
 
-		private TestPrice CreateMaxProduceCosts(TestSupplier supplier)
+		private TestPrice CreateMaxProduceCosts(ISession session, TestSupplier supplier)
 		{
 			var source = supplier.Prices[0].Core.Where(c => c.Product.CatalogProduct.VitallyImportant);
 
-			var holder = TestSupplier.CreateNaked();
+			var holder = TestSupplier.CreateNaked(session);
 			holder.Name = "Предельные цены производителей";
 			var price = holder.Prices[0];
 			var synonyms = source.GroupBy(c => new { c.Product, c.Producer })

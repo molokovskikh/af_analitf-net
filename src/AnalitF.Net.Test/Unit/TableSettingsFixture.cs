@@ -35,5 +35,25 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(grid.Columns[0].DisplayIndex, 0);
 			Assert.AreEqual(grid.Columns[2].DisplayIndex, 2);
 		}
+
+		[Test]
+		public void Ignore_removed_column()
+		{
+			var settings = new TableSettings();
+			var grid = new DataGrid();
+			Interaction.GetBehaviors(grid).Add(new Persistable());
+			grid.Columns.Add(new DataGridTextColumn { Header = "Название", DisplayIndex = 0 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Производитель", DisplayIndex = 1 });
+			var content = new ContentControl();
+			content.Content = grid;
+			settings.SaveView(content);
+
+			grid = new DataGrid();
+			Interaction.GetBehaviors(grid).Add(new Persistable());
+			grid.Columns.Add(new DataGridTextColumn { Header = "Название" });
+			content.Content = grid;
+			settings.RestoreView(content);
+			Assert.AreEqual(1,grid.Columns.Count);
+		}
 	}
 }

@@ -20,10 +20,10 @@ namespace AnalitF.Net.Client.Extentions
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
 		public Action<object> ContinueViewDialog = d => {  };
 
-		public Subject<object> DialogSubject = new Subject<object>();
-
+		public Subject<object> DialogOpened = new Subject<object>();
 		public Subject<Window> WindowOpened = new Subject<Window>();
 		public Subject<string> MessageOpened = new Subject<string>();
+
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 #endif
@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Extentions
 			if (UnitTesting) {
 				IoC.BuildUp(rootModel);
 				ScreenExtensions.TryActivate(rootModel);
-				DialogSubject.OnNext(rootModel);
+				DialogOpened.OnNext(rootModel);
 				ContinueViewDialog(rootModel);
 				return true;
 			}

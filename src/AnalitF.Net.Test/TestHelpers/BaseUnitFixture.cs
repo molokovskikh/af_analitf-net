@@ -1,5 +1,7 @@
-﻿using System.Reactive.Disposables;
+﻿using System.IO;
+using System.Reactive.Disposables;
 using AnalitF.Net.Client.ViewModels;
+using Common.Tools;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
@@ -9,15 +11,21 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public class BaseUnitFixture
 	{
-		private TestScheduler scheduler;
 		private CompositeDisposable cleanup;
+		private FileCleaner cleaner;
+
+		protected TestScheduler scheduler;
+		protected MessageBus bus;
 
 		[SetUp]
 		public void Setup()
 		{
+			cleaner = new FileCleaner();
 			cleanup = new CompositeDisposable();
+			cleanup.Add(cleaner);
 			BaseScreen.UnitTesting = true;
-			RxApp.MessageBus = new MessageBus();
+			bus = new MessageBus();
+			RxApp.MessageBus = bus;
 			scheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = scheduler;
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
@@ -30,6 +38,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			BaseScreen.UnitTesting = false;
 			cleanup.Dispose();
+		}
+
+		public string RandomFile()
+		{
+			return cleaner.RandomFile();
 		}
 	}
 }

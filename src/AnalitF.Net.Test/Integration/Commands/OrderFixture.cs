@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Forms.VisualStyles;
@@ -11,6 +13,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.log4net;
+using Test.Support.Suppliers;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 
 namespace AnalitF.Net.Test.Integration.Commands
@@ -90,6 +93,74 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.IsNotNull(line.ResultCost);
 			Assert.AreNotEqual(line.ResultCost, line.Cost);
 			Assert.AreEqual(line.ResultCost, serverOrder.OrderItems[0].CostWithDelayOfPayment, sentOrder.ServerId.ToString());
+		}
+
+		[Test]
+		public void Process_batch_request()
+		{
+			var fixture = new SmartOrder {
+				ProductIds = new [] {
+					localSession.Query<Offer>().First().ProductId
+				}
+			};
+			Fixture(fixture);
+			var filename = TempFile("batch.txt", "1|10");
+			localSession.DeleteEach<BatchLine>();
+			localSession.DeleteEach<Order>();
+
+			MakeBatch(filename);
+			var orders = localSession.Query<Order>().ToList();
+			Assert.AreEqual(1, orders.Count);
+			Assert.IsFalse(orders[0].Frozen);
+			var items = localSession.Query<BatchLine>().ToList();
+			Assert.AreEqual(1, items.Count);
+			Assert.IsNotNull(items[0].ExportLineId);
+			Assert.IsTrue(items[0].Status.HasFlag(ItemToOrderStatus.Ordered));
+		}
+
+		[Test]
+		public void Transit_service_fields()
+		{
+			var fixture = new SmartOrder {
+				ProductIds = new [] {
+					localSession.Query<Offer>().First().ProductId
+				}
+			};
+			fixture.Rule.ServiceFields = "2";
+			Fixture(fixture);
+			var filename = TempFile("batch.txt", "1|10|test-payload");
+			localSession.DeleteEach<Order>();
+
+			MakeBatch(filename);
+			var items = localSession.Query<BatchLine>().ToList();
+			Assert.AreEqual(1, items.Count);
+			Assert.That(items[0].ParsedServiceFields, Is.EquivalentTo(new Dictionary<string, string> { { "2", "test-payload" } }));
+		}
+
+		[Test]
+		public void Freeze_orders()
+		{
+			var order = MakeOrderClean();
+
+			var fixture = new SmartOrder {
+				ProductIds = new [] {
+					localSession.Query<Offer>().First().ProductId
+				}
+			};
+			Fixture(fixture);
+			var filename = TempFile("batch.txt", "1|10");
+			MakeBatch(filename);
+
+			localSession.Refresh(order);
+			Assert.IsTrue(order.Frozen);
+		}
+
+		private void MakeBatch(string filename)
+		{
+			Run(new UpdateCommand {
+				BatchFile = filename,
+				AddressId = localSession.Query<Address>().First().Id
+			});
 		}
 	}
 }

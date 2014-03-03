@@ -45,10 +45,10 @@ namespace AnalitF.Net.Client.Models
 			MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
 		}
 
-		public Order(Address address, Offer offer)
+		public Order(Address address, Offer offer, uint count = 1)
 			: this(offer.Price, address)
 		{
-			AddLine(offer, 1);
+			AddLine(offer, count);
 		}
 
 		public virtual uint Id { get; set; }

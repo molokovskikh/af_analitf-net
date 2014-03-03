@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -7,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
@@ -28,9 +31,11 @@ using log4net.Config;
 using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
 using NHibernate.Util;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Action = System.Action;
+using Address = AnalitF.Net.Client.Models.Address;
 using CheckBox = System.Windows.Controls.CheckBox;
 using DataGrid = System.Windows.Controls.DataGrid;
 using DataGridCell = System.Windows.Controls.DataGridCell;
@@ -482,6 +487,34 @@ namespace AnalitF.Net.Test.Integration.Views
 				var image = viewer.Document.Descendants<Image>().First();
 				Assert.IsNotNull(image);
 				Assert.That(image.Source.Height, Is.GreaterThan(0));
+			});
+		}
+
+		[Test]
+		public void Smart_order()
+		{
+			var fixture = new SmartOrder {
+				ProductIds = new [] {
+					session.Query<Offer>().First().ProductId
+				}
+			};
+			Fixture(fixture);
+			var filename = TempFile("batch.txt", "1|10");
+			session.DeleteEach<Order>();
+
+			Start();
+			Click("ShowBatch");
+			AsyncClick("Upload");
+
+			AutomationHelper.HandleOpenFileDialog(Path.GetFullPath(filename));
+
+			WaitWindow("Обмен данными");
+			WaitMessageBox("Обновление завершено успешно.");
+			WaitIdle();
+
+			dispatcher.Invoke(() => {
+				var items = activeWindow.Descendants<DataGrid>().First(g => g.Name == "ReportLines");
+				Assert.That(items.Items.Count, Is.GreaterThan(0));
 			});
 		}
 

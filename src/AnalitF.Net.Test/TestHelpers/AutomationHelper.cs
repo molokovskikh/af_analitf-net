@@ -1,13 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Automation;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public static class AutomationHelper
 	{
+		public  static void Invoke(this AutomationElement el)
+		{
+			var invokePattern = (InvokePattern)el.GetCurrentPattern(InvokePattern.Pattern);
+			invokePattern.Invoke();
+		}
+
+		public static void SetValue(this AutomationElement el, string value)
+		{
+			var invokePattern = (ValuePattern)el.GetCurrentPattern(ValuePattern.Pattern);
+			invokePattern.SetValue(value);
+		}
+
 		public static void TraceWindow(object sender, AutomationEventArgs e)
 		{
 			Console.WriteLine("{0:ss.fff} {1} {2}",
@@ -49,7 +64,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Console.WriteLine("--props--");
 			foreach (var p in element.GetSupportedProperties()) {
 				var value = element.GetCurrentPropertyValue(p);
-				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName, value,
+				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName,
+					value is AutomationIdentifier ? ((AutomationIdentifier)value).ProgrammaticName : value,
 					value != null ? value.GetType().ToString() : "");
 			}
 
@@ -78,6 +94,29 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return FindTextElements(window)
 				.Cast<AutomationElement>()
 				.Implode(e => e.GetName(), Environment.NewLine);
+		}
+
+		public static void HandleOpenFileDialog(string filename)
+		{
+			var pid = Process.GetCurrentProcess().Id;
+			AutomationElement dialog = null;
+			AutomationElement input = null;
+			Util.Wait(() => {
+				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Descendants,
+					new AndCondition(
+						new PropertyCondition(AutomationElement.NameProperty, "Открыть"),
+						new PropertyCondition(AutomationElement.ProcessIdProperty, pid),
+						new PropertyCondition(AutomationElement.ClassNameProperty, "#32770")));
+				if (dialog == null)
+					return false;
+				input = dialog.FindFirst(TreeScope.Children,
+					new AndCondition(new PropertyCondition(AutomationElement.NameProperty, "Имя файла:"),
+						new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox)));
+				return input == null;
+			}, 10.Second(), "Не удалось дождать появления диалога открытия файла");
+			input.SetValue(filename);
+			var button = dialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Открыть"));
+			button.Invoke();
 		}
 	}
 }

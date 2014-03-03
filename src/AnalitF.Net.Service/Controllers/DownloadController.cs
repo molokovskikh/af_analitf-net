@@ -24,9 +24,8 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Post(string[] urns)
 		{
 			//временный файл будет удален после того как будет закрыт указатель на него
-			var result = Path.GetTempFileName();
-			var stream = new FileStream(result, FileMode.Open, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.DeleteOnClose);
-			using(var zip = ZipFile.Create(stream)) {
+			var tmp = FileHelper.DeleteOnCloseTmpFile();
+			using(var zip = ZipFile.Create(tmp)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
 				foreach (var urn in urns) {
@@ -42,9 +41,9 @@ namespace AnalitF.Net.Service.Controllers
 				zip.CommitUpdate();
 			}
 
-			stream.Position = 0;
+			tmp.Position = 0;
 			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(stream)
+				Content = new StreamContent(tmp)
 			};
 		}
 	}

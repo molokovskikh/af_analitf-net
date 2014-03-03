@@ -41,6 +41,7 @@ namespace AnalitF.Net.Service
 			SessionFactory = nhibernate.Factory;
 			var mvc = new Mvc();
 			mvc.Run(httpConfig, nhibernate, config);
+			new Config.Initializers.SmartOrderFactory().Init(nhibernate);
 
 			return config;
 		}

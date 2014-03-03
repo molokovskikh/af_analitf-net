@@ -6,6 +6,26 @@ using System.Windows.Media.Imaging;
 
 namespace AnalitF.Net.Client.Extentions
 {
+	public class LambdaConverter<T> : IValueConverter
+	{
+		private Func<T, object> @select;
+
+		public LambdaConverter(Func<T, object> select)
+		{
+			this.select = select;
+		}
+
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return @select((T)value);
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 	public class UriToBitmapConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

@@ -30,6 +30,8 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual bool IsFaulted { get; set; }
 
+		public virtual bool IsConfirmed { get; set; }
+
 		public virtual string Error { get; set; }
 
 		public virtual Version Version { get; set; }
@@ -53,16 +55,16 @@ namespace AnalitF.Net.Service.Models
 			get { return DateTime.Now > CreatedOn.AddMinutes(30); }
 		}
 
-		public virtual string OutputFile
+		public virtual string OutputFile(Config.Config config)
 		{
-			get { return Id.ToString(); }
+			return Path.Combine(config.ResultPath, Id.ToString());
 		}
 
-		public virtual Stream GetResult(string path)
+		public virtual Stream GetResult(Config.Config config)
 		{
 			if (IsFaulted)
 				throw new Exception("Обработка запроса завершилась ошибкой");
-			return File.OpenRead(Path.Combine(path, OutputFile));
+			return File.OpenRead(OutputFile(config));
 		}
 	}
 }

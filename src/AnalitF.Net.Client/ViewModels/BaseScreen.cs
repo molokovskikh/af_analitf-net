@@ -48,6 +48,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected ISession Session;
 		protected IStatelessSession StatelessSession;
 
+		//адрес доставки который выбран в ui
 		public Address Address;
 		protected IMessageBus Bus = RxApp.MessageBus;
 		//освобождает ресурсы при закрытии формы
@@ -201,7 +202,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Shell == null)
 				return;
 
-			if (Shell.CurrentAddress != null)
+			if (Shell.CurrentAddress != null && Session != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
 		}
 
@@ -320,7 +321,6 @@ namespace AnalitF.Net.Client.ViewModels
 			return DisplayName;
 		}
 
-		//todo! если закрыть сессию пока активна транзакция все свалится с ошибкой
 		public void Dispose()
 		{
 			GC.SuppressFinalize(this);
@@ -336,7 +336,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		//todo! обработка ошибко если в дуструкторе возникнет ошибка процесс завершится
 		~BaseScreen()
 		{
 			try {

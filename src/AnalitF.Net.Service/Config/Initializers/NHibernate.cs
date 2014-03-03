@@ -6,6 +6,7 @@ using Common.Models;
 using Common.NHibernate;
 using NHibernate.Mapping.Attributes;
 using NHibernate.Mapping.ByCode;
+using SmartOrderFactory.Domain;
 
 namespace AnalitF.Net.Service.Config.Initializers
 {
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 			Excludes.Add(typeof(ClientOrder));
 
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
+			Configuration.AddInputStream(HbmSerializer.Default.Serialize(typeof(SmartOrderRule).Assembly));
 
 			Mapper.Class<AnalitfNetData>(m => {
 				m.Schema("Customers");

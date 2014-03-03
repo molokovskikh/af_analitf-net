@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reactive;
@@ -35,7 +36,7 @@ namespace AnalitF.Net.Client.Helpers
 				.Where(e => e.EventArgs.PropertyName == "Value");
 		}
 
-		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> Changed(this INotifyCollectionChanged self)
+		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> Changed<T>(this ObservableCollection<T> self)
 		{
 			return Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
 		}

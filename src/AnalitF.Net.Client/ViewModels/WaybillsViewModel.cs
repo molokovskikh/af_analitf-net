@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.ViewModels
 				w.TaxSum
 			});
 
-			var book = excelExporter.ExportTable(columns, items);
+			var book = ExcelExporter.ExportTable(columns, items);
 			return excelExporter.Export(book);
 		}
 

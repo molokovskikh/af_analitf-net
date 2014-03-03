@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Заказы";
 
-			AddressSelector = new AddressSelector(Session, Scheduler, this);
+			AddressSelector = new AddressSelector(Session, this);
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
 
@@ -85,9 +85,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanUnfreeze");
 				}));
 
-			this.ObservableForProperty(m => m.AddressSelector.All.Value)
-				.Subscribe(_ => Update());
-
+			AddressSelector.FilterChanged.Subscribe(_ => Update(), CloseCancellation.Token);
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
 			var update = ordersChanged
 				.SelectMany(e => e.Value.ItemChanged.Cast<Object>().Merge(e.Value.Changed));
@@ -121,7 +119,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			if (IsSentSelected) {
-				var filterAddresses = AddressFilter().Select(a => a.Id).ToArray();
+				var filterAddresses = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 				var begin = Begin.Value;
 				var end = End.Value.AddDays(1);
 				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
@@ -145,8 +143,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 				//этот вызов должен быть после RebuildSessionIfNeeded
 				//тк он перезагрузить объекты
-				var filterAddresses = AddressFilter();
-				var orders = filterAddresses.SelectMany(a => a.Orders)
+				var orders = AddressSelector.GetActiveFilter()
+					.SelectMany(a => a.Orders)
 					.OrderBy(o => o.CreatedOn)
 					.ToList();
 				Orders = new ReactiveCollection<Order>(orders) {
@@ -154,21 +152,6 @@ namespace AnalitF.Net.Client.ViewModels
 				};
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
-		}
-
-		private Address[] AddressFilter()
-		{
-			var filterAddresses = new Address[0];
-			if (AddressSelector.All.Value) {
-				filterAddresses = AddressSelector.Addresses
-					.Where(a => a.IsSelected)
-					.Select(a => a.Item)
-					.ToArray();
-			}
-			else if (Address != null) {
-				filterAddresses = new[] { Address };
-			}
-			return filterAddresses;
 		}
 
 		private void RebuildSessionIfNeeded()

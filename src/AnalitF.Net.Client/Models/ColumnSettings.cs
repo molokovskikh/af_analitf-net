@@ -28,6 +28,8 @@ namespace AnalitF.Net.Client.Models
 
 		public void Restore(DataGridColumn column)
 		{
+			if (column == null)
+				return;
 			column.Width = Width;
 			if (Name != "Адрес заказа")
 				column.Visibility = Visible;

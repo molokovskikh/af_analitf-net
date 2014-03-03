@@ -39,12 +39,10 @@ namespace AnalitF.Net.Service.Test
 
 			file = "data.zip";
 			File.Delete(file);
-			exporter = new Exporter(session, user.Id, Version.Parse("1.1")) {
+			exporter = new Exporter(session, config, new RequestLog(user, Version.Parse("1.1"))) {
 				Prefix = "1",
 				ResultPath = "data",
 				UpdatePath = "update",
-				DocsPath = FixtureSetup.Config.DocsPath,
-				Config = FixtureSetup.Config
 			};
 		}
 
@@ -110,7 +108,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_all_offers()
 		{
-			var supplier = TestSupplier.CreateNaked();
+			var supplier = TestSupplier.CreateNaked(session);
 			client.MaintainIntersection();
 			var price = supplier.Prices[0];
 			var product = session.Query<TestProduct>().First(p => !p.CatalogProduct.Hidden);

@@ -208,7 +208,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			var doc = new CatalogOfferDocument(Offers.Value, Name);
+			var doc = new CatalogOfferDocument(Name, Offers.Value);
 			return new PrintResult(DisplayName, doc);
 		}
 

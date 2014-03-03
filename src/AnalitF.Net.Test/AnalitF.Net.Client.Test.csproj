@@ -127,6 +127,7 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
+    <Compile Include="Fixtures\CreateServerAddress.cs" />
     <Compile Include="Fixtures\DelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="Fixtures\RejectedWaybill.cs" />
     <Compile Include="Fixtures\SampleData.cs" />
     <Compile Include="Fixtures\ServerFixture.cs" />
+    <Compile Include="Fixtures\SmartOrder.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
     <Compile Include="Fixtures\UnknownWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
@@ -158,6 +160,7 @@
     <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
     <Compile Include="Integration\RasFixture.cs" />
+    <Compile Include="Integration\ViewModes\BatchFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModes\CorrectionFixture.cs" />
@@ -211,6 +214,7 @@
     <Compile Include="TestHelpers\WpfHelper.cs" />
     <Compile Include="Unit\Models\AttachmentFixture.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
+    <Compile Include="Unit\Models\ConfigFixture.cs" />
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
@@ -230,6 +234,7 @@
     <Compile Include="Unit\PriceResultFixture.cs" />
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
+    <Compile Include="Unit\SearchBehaviorFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\SingleInstanceFixture.cs" />
     <Compile Include="Unit\StyleHelperFixture.cs" />
@@ -237,6 +242,7 @@
     <Compile Include="Unit\UpdateCommandFixture.cs" />
     <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
+    <Compile Include="Unit\ViewModels\BatchFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />

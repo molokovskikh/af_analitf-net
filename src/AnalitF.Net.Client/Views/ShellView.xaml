@@ -147,10 +147,10 @@
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"
 						Style="{StaticResource ButtonImage}" />
 				</Button>
-				<!--скрыл кнопку пока не реализовано
-				<Button x:Name="ShowAutoOrder" ToolTip="Авто заказ">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Document_32.ico"></Image>
-				</Button>-->
+				<Button x:Name="ShowBatch" ToolTip="АвтоЗаказ">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Document_32.ico"
+						Style="{StaticResource ButtonImage}" />
+				</Button>
 
 				<Separator />
 

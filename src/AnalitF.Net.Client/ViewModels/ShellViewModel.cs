@@ -21,6 +21,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.Tools;
 using Iesi.Collections;
@@ -67,7 +68,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public CompositeDisposable CloseDisposable = new CompositeDisposable();
 
 		public ShellViewModel()
+			: this(false)
 		{
+
+		}
+
+		public ShellViewModel(bool unitTesting)
+		{
+			UnitTesting = unitTesting;
 			DisplayName = "АналитФАРМАЦИЯ";
 			defaultItem = new Main(Config);
 			Navigator.DefaultScreen = defaultItem;
@@ -87,8 +95,10 @@ namespace AnalitF.Net.Client.ViewModels
 			NewMailsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
 
-			session = Env.Factory.OpenSession();
-			statelessSession = Env.Factory.OpenStatelessSession();
+			if (!UnitTesting) {
+				session = Env.Factory.OpenSession();
+				statelessSession = Env.Factory.OpenStatelessSession();
+			}
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -124,6 +134,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanShowRejects");
 					NotifyOfPropertyChange("CanShowWaybills");
 					NotifyOfPropertyChange("CanMicroUpdate");
+					NotifyOfPropertyChange("CanShowBatch");
 				});
 
 			CloseDisposable.Add(Bus.Listen<Loadable>().ObserveOn(UiScheduler).Subscribe(l => {
@@ -259,6 +270,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void UpdateStat()
 		{
+			if (session == null)
+				return;
+
 			Stat.Value = Models.Stat.Update(session, CurrentAddress);
 		}
 
@@ -306,6 +320,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Reload()
 		{
+			if (session == null)
+				return;
+
 			session.Clear();
 
 			//нужно сохранить идентификатор выбранного адреса доставки тк
@@ -398,6 +415,7 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager.ShowFixedDialog(new About());
 		}
 
+		//отдельные свойства нужны для того что бы к ним могли привязаться пункты меню
 		public bool CanShowCatalog
 		{
 			get { return Settings.Value.LastUpdate != null; }
@@ -493,6 +511,16 @@ namespace AnalitF.Net.Client.ViewModels
 				NavigateRoot(new OrdersViewModel());
 		}
 
+		public bool CanShowBatch
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void ShowBatch()
+		{
+			NavigateRoot(new Batch());
+		}
+
 		public bool CanShowWaybills
 		{
 			get { return Settings.Value.LastUpdate != null; }
@@ -548,6 +576,21 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> Update()
 		{
 			return Sync(new UpdateCommand());
+		}
+
+
+		public IEnumerable<IResult> Batch(string fileName)
+		{
+			if (currentAddress == null)
+				yield break;
+			var results = Sync(new UpdateCommand {
+				BatchFile = fileName,
+				AddressId = currentAddress.Id
+			});
+			foreach (var result in results) {
+				yield return result;
+			}
+			ShowBatch();
 		}
 
 		public bool CanSendOrders

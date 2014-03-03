@@ -40,6 +40,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint? ExportOrderId { get; set; }
 
 		[JsonIgnore]
+		public virtual uint? ExportId { get; set; }
+
+		[JsonIgnore]
 		public virtual Order Order { get; set; }
 
 		public virtual decimal ResultCost

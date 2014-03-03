@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var customBinders = new Action<Type, IEnumerable<FrameworkElement>, List<FrameworkElement>>[] {
 				//сначала должен обрабатываться поиск и только потом переход
 				SearchBinder.Bind,
+				NavBinder.Bind,
 				EnterBinder.Bind,
 			};
 

@@ -146,7 +146,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Quantity,
 				l.RetailSum
 			});
-			var book = excelExporter.ExportTable(columns, items, 8);
+			var book = ExcelExporter.ExportTable(columns, items, 8);
 			var sheet = book.GetSheetAt(0);
 			sheet.CreateRow(1).CreateCell(6).SetCellValue(String.Format("Наименование организации: Сотрудник {0}",
 				Waybill.WaybillSettings.FullName));
@@ -214,7 +214,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Quantity,
 				l.RetailSum
 			});
-			var book = excelExporter.ExportTable(columns, items, 5);
+			var book = ExcelExporter.ExportTable(columns, items, 5);
 			var sheet = book.GetSheetAt(0);
 			sheet.CreateRow(1).CreateCell(6).SetCellValue("Реестр");
 			sheet.CreateRow(2).CreateCell(3)

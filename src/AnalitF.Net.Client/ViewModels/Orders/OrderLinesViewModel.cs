@@ -49,13 +49,13 @@ namespace AnalitF.Net.Client.ViewModels
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
 				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				l => CurrentLine.Value = l);
-			AddressSelector = new AddressSelector(Session, UiScheduler, this);
+			AddressSelector = new AddressSelector(Session, this);
 			editor = new Editor(OrderWarning, Manager);
 
-			AddressSelector.All.Changed()
+			AddressSelector.FilterChanged
 				.Merge(CurrentPrice.Changed())
 				.Merge(OnlyWarning.Changed())
-				.Subscribe(_ => Update());
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 
 			this.ObservableForProperty(m => m.CurrentLine.Value)
 				.Select(e => e.Value)
@@ -168,18 +168,10 @@ namespace AnalitF.Net.Client.ViewModels
 					query = query.Where(l => l.Order.Price.Id == priceId);
 				}
 
-				if (!AddressSelector.All.Value) {
-					if (Address != null) {
-						var addressId = Address.Id;
-						query = query.Where(l => l.Order.Address.Id == addressId);
-					}
-				}
-				else {
-					var addresses = AddressSelector.Addresses.Where(i => i.IsSelected)
-						.Select(i => i.Item.Id)
-						.ToArray();
-					query = query.Where(l => addresses.Contains(l.Order.Address.Id));
-				}
+				var addresses = AddressSelector.GetActiveFilter()
+					.Select(i => i.Id)
+					.ToArray();
+				query = query.Where(l => addresses.Contains(l.Order.Address.Id));
 
 				Lines.Value = new ObservableCollection<OrderLine>(query
 					.OrderBy(l => l.ProductSynonym)

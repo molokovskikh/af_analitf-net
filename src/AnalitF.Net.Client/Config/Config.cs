@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Common.MySql;
 using Iesi.Collections;
 using System.Linq;
@@ -94,6 +96,36 @@ namespace AnalitF.Net.Client.Config
 			catch(DirectoryNotFoundException) {
 				return null;
 			}
+		}
+
+		public Uri WaitUrl(Uri url)
+		{
+			var builder = new UriBuilder(url) {
+				Query = ""
+			};
+			return builder.Uri;
+		}
+
+		public Uri SyncUrl(string key)
+		{
+			var queryString = new List<KeyValuePair<string, string>> {
+				new KeyValuePair<string, string>("reset", "true"),
+				new KeyValuePair<string, string>("data", key)
+			};
+
+			var stringBuilder = new StringBuilder();
+			foreach (var keyValuePair in queryString) {
+				if (stringBuilder.Length > 0)
+					stringBuilder.Append('&');
+				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Key));
+				stringBuilder.Append('=');
+				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
+			}
+			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
+				Query = stringBuilder.ToString(),
+			};
+			var url = builder.Uri;
+			return url;
 		}
 	}
 }

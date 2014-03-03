@@ -83,18 +83,14 @@ namespace AnalitF.Net.Client.Models
 			if (settings == null)
 				return;
 
-			//тк новые колонки не имеют сохраненных настроект
-			//они окажутся в конце таблицы
-			//назначаем им индексы из значений по умолчанию
-			var newColumns = new List<DataGridColumn>();
 			foreach (var setting in settings) {
 				var column = dataGrid.Columns.FirstOrDefault(c => setting.Match(c));
-				if (column == null) {
-					newColumns.Add(column);
-				}
 				setting.Restore(column);
 			}
 
+			//тк новые колонки не имеют сохраненных настроект
+			//они окажутся в конце таблицы
+			//назначаем им индексы из значений по умолчанию
 			foreach (var column in dataGrid.Columns.Where(c => !settings.Any(s => s.Match(c)))) {
 				column.DisplayIndex = dataGrid.Columns.IndexOf(column);
 			}

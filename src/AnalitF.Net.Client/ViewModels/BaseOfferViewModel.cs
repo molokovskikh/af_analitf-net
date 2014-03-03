@@ -22,20 +22,22 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public abstract class BaseOfferViewModel : BaseScreen
 	{
+		private string autoCommentText;
+		private bool resetAutoComment;
 		private bool clearSession;
 		private SimpleMRUCache cache = new SimpleMRUCache(10);
 		private Catalog currentCatalog;
 		private List<SentOrderLine> historyOrders;
+		private OfferComposedId initOfferId;
+
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		protected Offer lastEditOffer;
-
-		private string autoCommentText;
-		private bool resetAutoComment;
-		private OfferComposedId initOfferId;
-
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
+		//адрес доставки для текущего элемента, нужен если мы отображем элементы которые относятся к разным адресам доставки
+		protected Address CurrentElementAddress;
+		public Address[] Addresses = new Address[0];
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -128,6 +130,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		//фактический адрес доставки для которого нужно формировать заявки
+		protected Address ActualAddress
+		{
+			get { return CurrentElementAddress ?? Address; }
+		}
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -136,6 +144,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Promotions = new PromotionPopup(StatelessSession, Shell.Config);
 				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false)
 					.Subscribe(c => Promotions.Activate(c.Value == null ? null : c.Value.Name));
+
+				Addresses = Session.Query<Address>().ToArray();
 			}
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
@@ -185,10 +195,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
-			if (CurrentOffer.Value == null)
+			if (CurrentCatalog == null)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog, CurrentOffer.Value.Id);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog,
+				CurrentOffer.Value != null ? CurrentOffer.Value.Id : null);
 
 			if (NavigateOnShowCatalog) {
 				Shell.Navigate(offerViewModel);
@@ -232,7 +243,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			lastEditOffer = CurrentOffer.Value;
 			LoadStat();
-			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(Address, Settings.Value, AutoCommentText));
+			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -240,7 +251,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(Address, Settings.Value, AutoCommentText));
+			ShowValidationError(lastEditOffer.SaveOrderLine(ActualAddress, Settings.Value, AutoCommentText));
 		}
 
 		protected void ShowValidationError(List<Message> messages)
@@ -315,10 +326,10 @@ namespace AnalitF.Net.Client.ViewModels
 				offer.OrderLine = null;
 			}
 
-			if (Address == null)
+			if (ActualAddress == null)
 				return;
 
-			var lines = Address.Orders.Where(o => !o.Frozen).SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
+			var lines = ActualAddress.ActiveOrders().SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
 			foreach (var offer in Offers.Value) {
 				offer.OrderLine = lines[offer.Id].FirstOrDefault();
 			}
@@ -331,14 +342,22 @@ namespace AnalitF.Net.Client.ViewModels
 			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
 			if (clearSession) {
 				Session.Clear();
-				if (Address != null)
-					Address = Session.Get<Address>(Address.Id);
-				User = Session.Query<User>().FirstOrDefault();
+				RecreateSession();
 				clearSession = false;
-				LoadOrderItems();
 			}
 
 			base.OnActivate();
+		}
+
+		protected virtual void RecreateSession()
+		{
+			Addresses = Session.Query<Address>().ToArray();
+			if (Address != null)
+				Address = Session.Get<Address>(Address.Id);
+			if (CurrentElementAddress != null)
+				CurrentElementAddress = Session.Get<Address>(CurrentElementAddress.Id);
+			User = Session.Query<User>().FirstOrDefault();
+			LoadOrderItems();
 		}
 
 		public override void Update()
@@ -351,13 +370,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void LoadStat()
 		{
-			if (Address == null || CurrentOffer.Value == null)
+			if (ActualAddress == null || CurrentOffer.Value == null || StatelessSession == null)
 				return;
 
 			if (CurrentOffer.Value.StatLoaded)
-				return;
-
-			if (StatelessSession == null)
 				return;
 
 			var begin = DateTime.Now.AddMonths(-1);
@@ -367,7 +383,7 @@ join SentOrders o on o.Id = ol.OrderId
 where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
 				.SetParameter("begin", begin)
 				.SetParameter("productId", CurrentOffer.Value.ProductId)
-				.SetParameter("addressId", Address.Id)
+				.SetParameter("addressId", ActualAddress.Id)
 				.UniqueResult<object[]>();
 			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
 			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
@@ -381,26 +397,17 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		public void LoadHistoryOrders()
 		{
-			//таймер может сработать уже после того как мы ушли с формы
-			//в этом случае не надо ничего делать
-			if (!IsActive)
-				return;
-
-			if (CurrentOffer.Value == null || Address == null)
+			if (ActualAddress == null || CurrentOffer.Value == null || StatelessSession == null)
 				return;
 
 			var key = HistoryOrdersCacheKey();
-			var cached = (List<SentOrderLine>)cache[key];
-			if (cached != null) {
-				HistoryOrders = cached;
-			}
-			else {
+			HistoryOrders = Cache(key, cache, k => {
 				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
 				//переместить в общий блок то первый
 				//where применяться не будет
-				var addressId = Address.Id;
+				var addressId = ActualAddress.Id;
 				if (Settings.Value.GroupByProduct) {
 					var productId = CurrentOffer.Value.ProductId;
 					query = query.Where(o => o.ProductId == productId)
@@ -411,21 +418,30 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 					query = query.Where(o => o.CatalogId == catalogId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
-				cached = query
+				return query
 					.Fetch(l => l.Order)
 					.ThenFetch(o => o.Price)
 					.Take(20)
 					.ToList();
-				cache.Put(key, cached);
-			}
-			HistoryOrders = cached;
+			});
 
 			LoadStat();
 		}
 
+		public T Cache<T, TKey>(TKey key, SimpleMRUCache cache, Func<TKey, T> select)
+		{
+			var cached = (T)cache[key];
+			if (!Equals(cached, default(T))) {
+				return cached;
+			}
+			cached = select(key);
+			cache.Put(key, cached);
+			return cached;
+		}
+
 		private object HistoryOrdersCacheKey()
 		{
-			if (CurrentOffer.Value == null || Address == null)
+			if (CurrentOffer.Value == null || ActualAddress == null)
 				return 0;
 
 			if (Settings.Value.GroupByProduct)

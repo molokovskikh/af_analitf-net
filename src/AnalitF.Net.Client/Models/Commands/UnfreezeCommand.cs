@@ -114,9 +114,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			return destOrder;
 		}
 
-		public void Merge(Order order, IOrder sourceOrder, IOrderLine orderline, Offer[] offers, StringBuilder log)
+		public void Merge(Order order, IOrder sourceOrder, IOrderLine sourceLine, Offer[] offers, StringBuilder log)
 		{
-			var rest = orderline.Count;
+			var rest = sourceLine.Count;
 			foreach (var offer in offers) {
 				if (rest == 0)
 					break;
@@ -126,21 +126,24 @@ namespace AnalitF.Net.Client.Models.Commands
 					var line = new OrderLine(order, offer, rest);
 					line.Count = line.CalculateAvailableQuantity(line.Count);
 					if (ShouldCalculateStatus(line)) {
-						if (line.Cost != orderline.Cost) {
+						if (line.Cost != sourceLine.Cost) {
 							line.SendResult |= LineResultStatus.CostChanged;
 							line.NewCost = line.Cost;
-							line.OldCost = orderline.Cost;
+							line.OldCost = sourceLine.Cost;
 							line.HumanizeSendError();
 						}
-						if (line.Count != orderline.Count) {
+						if (line.Count != sourceLine.Count) {
 							line.SendResult |= LineResultStatus.QuantityChanged;
 							line.NewQuantity = line.Count;
-							line.OldQuantity = orderline.Count;
+							line.OldQuantity = sourceLine.Count;
 							line.HumanizeSendError();
 						}
 					}
-					if (line.Count > 0)
+					if (line.Count > 0) {
+						if (Restore)
+							line.ExportId = ((OrderLine)sourceLine).ExportId;
 						order.AddLine(line);
+					}
 					rest = rest - line.Count;
 				}
 				else {
@@ -151,7 +154,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			if (sourceOrder is Order) {
-				var srcLine = ((OrderLine)orderline);
+				var srcLine = ((OrderLine)sourceLine);
 				if (rest == 0) {
 					((Order)sourceOrder).RemoveLine(srcLine);
 				}
@@ -161,27 +164,27 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			if (rest > 0) {
-				if (rest == orderline.Count) {
-					if (ShouldCalculateStatus(orderline)) {
-						((OrderLine)orderline).SendResult = LineResultStatus.NoOffers;
-						((OrderLine)orderline).HumanizeSendError();
+				if (rest == sourceLine.Count) {
+					if (ShouldCalculateStatus(sourceLine)) {
+						((OrderLine)sourceLine).SendResult = LineResultStatus.NoOffers;
+						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(String.Format("{0} : {1} - {2} ; Предложений не найдено",
 						order.Price.Name,
-						orderline.ProductSynonym,
-						orderline.ProducerSynonym));
+						sourceLine.ProductSynonym,
+						sourceLine.ProducerSynonym));
 				}
 				else {
-					if (ShouldCalculateStatus(orderline)) {
-						((OrderLine)orderline).SendResult = LineResultStatus.CountReduced;
-						((OrderLine)orderline).HumanizeSendError();
+					if (ShouldCalculateStatus(sourceLine)) {
+						((OrderLine)sourceLine).SendResult = LineResultStatus.CountReduced;
+						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказное количество {3} вместо {4}",
 						sourceOrder.Price.Name,
-						orderline.ProductSynonym,
-						orderline.ProducerSynonym,
-						orderline.Count - rest,
-						orderline.Count));
+						sourceLine.ProductSynonym,
+						sourceLine.ProducerSynonym,
+						sourceLine.Count - rest,
+						sourceLine.Count));
 				}
 			}
 		}

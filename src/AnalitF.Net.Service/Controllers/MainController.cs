@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -20,6 +21,7 @@ using NHibernate;
 using NHibernate.Linq;
 using Newtonsoft.Json;
 using log4net;
+using SmartOrderFactory;
 
 namespace AnalitF.Net.Service.Controllers
 {
@@ -57,7 +59,7 @@ namespace AnalitF.Net.Service.Controllers
 				return new HttpResponseMessage(HttpStatusCode.Accepted);
 
 			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(existsJob.GetResult(Config.ResultPath))
+				Content = new StreamContent(existsJob.GetResult(Config))
 			};
 		}
 
@@ -90,6 +92,11 @@ delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();
+			var job = Session.Query<RequestLog>().FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
+			if (job != null) {
+				job.IsConfirmed = true;
+				File.Delete(job.OutputFile(Config));
+			}
 
 			return new HttpResponseMessage();
 		}
@@ -104,18 +111,9 @@ where UserId = :userId;")
 						try {
 							using(var exportSession = sessionFactory.OpenSession())
 							using(var exportTransaction = exportSession.BeginTransaction()) {
-								var exporter = new Exporter(exportSession, job.User.Id, job.Version, job.UpdateType) {
-									Prefix = job.Id.ToString(),
-									ResultPath = config.ResultPath,
-									UpdatePath = config.UpdatePath,
-									AdsPath = config.AdsPath,
-									DocsPath = config.DocsPath,
-									Config = config,
-									MaxProducerCostPriceId = config.MaxProducerCostPriceId,
-									MaxProducerCostCostId = config.MaxProducerCostCostId,
-								};
+								var exporter = new Exporter(exportSession, config, job);
 								using (exporter) {
-									exporter.ExportCompressed(job.OutputFile);
+									exporter.ExportCompressed(job.OutputFile(config));
 								}
 								exportTransaction.Commit();
 							}

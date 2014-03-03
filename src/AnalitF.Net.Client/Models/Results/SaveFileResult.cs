@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Win32;
@@ -15,11 +16,11 @@ namespace AnalitF.Net.Client.Models.Results
 		public SaveFileDialog Dialog = new SaveFileDialog();
 		public Extentions.WindowManager Manager;
 
-		public SaveFileResult(Dictionary<string, string> formats, string filename = null)
+		public SaveFileResult(Tuple<string, string>[] formats, string filename = null)
 		{
 			Dialog.FileName = filename;
-			Dialog.DefaultExt = formats.Values.FirstOrDefault();
-			Dialog.Filter = formats.Implode(k => String.Format("{0}|*{1}", k.Key, k.Value), "|");
+			Dialog.DefaultExt = formats.Select(t => t.Item2).FirstOrDefault();
+			Dialog.Filter = formats.Implode(k => String.Format("{0}|*{1}", k.Item1, k.Item2), "|");
 		}
 
 		public SaveFileResult(string defaultFilename = null)
@@ -44,24 +45,29 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Write(string text)
 		{
-			try
-			{
-				using(var f = File.CreateText(Dialog.FileName)) {
-					f.Write(text);
-				}
-			}
-			catch(UnauthorizedAccessException e) {
-				Report(e);
-			}
-			catch(IOException e) {
-				Report(e);
+			using(var f = Writer()) {
+				f.Write(text);
 			}
 		}
 
 		private void Report(Exception e)
 		{
-			logger.Warn("Ошибка при сохранении файла", e);
 			Manager.Error(e.Message);
+		}
+
+		public StreamWriter Writer()
+		{
+			try {
+				return new StreamWriter(Dialog.FileName, false, Encoding.Default);
+			}
+			catch(UnauthorizedAccessException e) {
+				Report(e);
+				throw;
+			}
+			catch(IOException e) {
+				Report(e);
+				throw;
+			}
 		}
 	}
 }

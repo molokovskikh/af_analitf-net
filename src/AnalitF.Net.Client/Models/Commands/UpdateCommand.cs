@@ -17,6 +17,7 @@ using Common.Tools;
 using Ionic.Zip;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
+using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
 using log4net.Config;
@@ -85,6 +86,10 @@ namespace AnalitF.Net.Client.Models.Commands
 	public class UpdateCommand : RemoteCommand
 	{
 		public bool Clean = true;
+
+		public uint AddressId;
+		public string BatchFile;
+
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
 
@@ -113,34 +118,38 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			Reporter.StageCount(4);
 
-			var queryString = new List<KeyValuePair<string, string>> {
-				new KeyValuePair<string, string>("reset", "true"),
-				new KeyValuePair<string, string>("data", syncData)
-			};
-
-			var stringBuilder = new StringBuilder();
-			foreach (var keyValuePair in queryString) {
-				if (stringBuilder.Length > 0)
-					stringBuilder.Append('&');
-				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Key));
-				stringBuilder.Append('=');
-				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
-			}
-			var builder = new UriBuilder(new Uri(Config.BaseUrl, "Main")) {
-				Query = stringBuilder.ToString(),
-			};
-			var url = builder.Uri;
-
 			var sendLogsTask = SendLogs(Client, Token);
-			SendPrices(Client, Token);
+			HttpResponseMessage response;
+			if (String.IsNullOrEmpty(BatchFile)) {
+				var url = Config.SyncUrl(syncData);
+				SendPrices(Client, Token);
+				var request = Client.GetAsync(url, Token);
+				response = Wait(Config.WaitUrl(url), request);
+			}
+			else {
+				var url = new Uri(Config.BaseUrl, "Batch");
+				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetResust(), Token));
+			}
 
-			var response = Wait(new Uri(Config.BaseUrl, "Main"), Client.GetAsync(url, Token));
+
 			Reporter.Stage("Загрузка данных");
 			Download(response, Config.ArchiveFile, Reporter);
 			var result = ProcessUpdate();
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			return result;
+		}
+
+		private HttpContent GetResust()
+		{
+			var tmp = FileHelper.DeleteOnCloseTmpFile();
+			using (var zip = new ZipFile()) {
+				zip.AddFile(BatchFile).FileName = "payload";
+				zip.AddEntry("meta.json", JsonConvert.SerializeObject(new BatchRequest(AddressId)));
+				zip.Save(tmp);
+			}
+			tmp.Position = 0;
+			return new StreamContent(tmp);
 		}
 
 		private HttpResponseMessage Wait(Uri url, Task<HttpResponseMessage> task)
@@ -190,32 +199,55 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Import()
 		{
-			if (Reporter == null)
-				Reporter = new ProgressReporter(Progress);
-
 			var settings = Session.Query<Settings>().First();
 
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(Config.ArchiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
 
+			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
+
 			RunCommand(new ImportCommand(data));
 
 			SyncOrders();
+
+			var batchAddresses = Session.Query<BatchLine>().Where(l => l.Id > maxBatchLineId).Select(l => l.Address)
+				.Distinct()
+				.ToArray();
+			if (batchAddresses.Any()) {
+				Session.CreateSQLQuery("delete from BatchLines where AddressId in (:addressIds) and id <= :maxId")
+					.SetParameter("maxId", maxBatchLineId)
+					.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
+					.SetFlushMode(FlushMode.Always)
+					.ExecuteUpdate();
+				Session.CreateSQLQuery("update OrderLines ol " +
+					"join Orders o on o.Id = ol.OrderId " +
+					"left join BatchLines b on b.ExportLineId = ol.ExportId " +
+					"set ol.ExportId = null " +
+					"where o.AddressId in (:addressIds) and b.Id is null")
+					.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
+					.SetFlushMode(FlushMode.Always)
+					.ExecuteUpdate();
+			}
+
 			CalculateRejects(settings);
 
 			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
 				SuccessMessage = "Новых файлов документов нет.";
 			}
 
-			var offersImported = data.Any(t => Path.GetFileNameWithoutExtension(t.Item1).Match("offers"));
+			var imports = data.Select(d => Path.GetFileNameWithoutExtension(d.Item1));
+			var offersImported = imports.Contains("offers", StringComparer.OrdinalIgnoreCase);
+			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
 			if (offersImported) {
-				RestoreOrders();
 				var user = Session.Query<User>().First();
 				if (user.IsDeplayOfPaymentEnabled) {
 					DbMaintain.UpdateLeaders(StatelessSession, settings);
 				}
 			}
+
+			if (offersImported || ordersImported)
+				RestoreOrders();
 
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
@@ -367,11 +399,23 @@ namespace AnalitF.Net.Client.Models.Commands
 				.Fetch(o => o.Price)
 				.ToArray();
 
-			var ids = orders.Where(o => !o.Frozen).Select(o => o.Id).ToArray();
+			var ordersToRestore = orders.Where(o => !o.Frozen).ToArray();
+
+			//если это автозаказ то мы не должны восстанавливать заказы
+			//по адресам доставки которые участвовали в автозаказе
+			if (!String.IsNullOrEmpty(BatchFile)) {
+				var autoOrderAddress = ordersToRestore
+					.Where(o => o.Lines.Any(l => l.ExportId != null))
+					.Select(o => o.Address).Distinct().ToArray();
+				ordersToRestore = ordersToRestore
+					.Where(o => !autoOrderAddress.Contains(o.Address) || o.Lines.Any(l => l.ExportId != null))
+					.ToArray();
+			}
+
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете
 			//каждый раз
 			orders.Each(o => o.Frozen = true);
-			var command = new UnfreezeCommand<Order>(ids);
+			var command = new UnfreezeCommand<Order>(ordersToRestore.Select(o => o.Id).ToArray());
 			command.Restore = true;
 			var report = (string)RunCommand(command);
 

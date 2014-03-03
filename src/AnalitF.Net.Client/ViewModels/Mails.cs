@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(CurrentSort.Changed())
 				.Merge(IsAsc.Changed());
 			Items = new NotifyValue<BindingList<Mail>>(Apply, update);
-			var countChanged = ((INotifyCollectionChanged)SelectedItems).Changed();
+			var countChanged = SelectedItems.Changed();
 			CanDelete = new NotifyValue<bool>(() => SelectedItems.Count > 0, countChanged);
 			var updateStat = Items.ObservableForProperty(i => i.Value)
 				.Select(l => l.Value.Changed())

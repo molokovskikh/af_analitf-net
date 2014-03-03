@@ -375,7 +375,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(delay);
 			session.Flush();
 
-			manager.DialogSubject.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
+			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
 			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
 			session.Refresh(offer);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());

@@ -122,7 +122,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Save_price_settings()
 		{
-			var supplier = TestSupplier.CreateNaked();
+			var supplier = TestSupplier.CreateNaked(session);
 			session.Save(supplier);
 			supplier.Maintain();
 
@@ -146,7 +146,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Send_order_for_disabled_price()
 		{
-			var supplier = TestSupplier.CreateNaked();
+			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
@@ -168,7 +168,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Reject_order()
 		{
-			var supplier = TestSupplier.CreateNaked();
+			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);

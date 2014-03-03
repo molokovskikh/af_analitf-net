@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					if (!Directory.Exists(dir))
 						Directory.CreateDirectory(dir);
 				}
-				File.Copy(file, Path.Combine(dir, Promotion.Id + Path.GetExtension(file)));
+				File.Copy(file, Path.Combine(dir, Promotion.Id + Path.GetExtension(file)), true);
 			}
 		}
 

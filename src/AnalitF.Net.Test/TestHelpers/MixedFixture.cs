@@ -28,13 +28,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected CompositeDisposable disposable;
 
 		protected DateTime begin;
+		private FileCleaner cleaner;
 
 		[SetUp]
 		public void Setup()
 		{
 			begin = DateTime.Now;
 
+			cleaner = new FileCleaner();
 			disposable = new CompositeDisposable();
+			disposable.Add(cleaner);
 
 			fixtureHelper = new FixtureHelper();
 			disposable.Add(fixtureHelper);
@@ -107,6 +110,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected TestUser ServerUser()
 		{
 			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+		}
+
+		protected string TempFile(string filename, string content)
+		{
+			cleaner.Watch(filename);
+			File.WriteAllText(filename, content);
+			return filename;
 		}
 	}
 }

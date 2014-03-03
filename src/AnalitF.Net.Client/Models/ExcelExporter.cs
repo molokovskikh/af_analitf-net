@@ -37,6 +37,7 @@ namespace AnalitF.Net.Client.Models
 		public ExcelExporter(Screen model, string dir)
 		{
 			this.model = model;
+			ExportDir = dir;
 			Properties = model.GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
 				.ToArray();
@@ -127,7 +128,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public HSSFWorkbook ExportTable(string[] columns, IEnumerable<object[]> items, int startRow = 0)
+		public static HSSFWorkbook ExportTable(string[] columns, IEnumerable<object[]> items, int startRow = 0)
 		{
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");

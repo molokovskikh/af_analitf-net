@@ -218,7 +218,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual List<Message> UpdateOrderLine(Address address, Settings settings, string comment = null, bool edit = true)
 		{
-			var result = Enumerable.Empty<Message>().ToList();
+			var result = new List<Message>();
 			if (address == null) {
 				OrderCount = null;
 				return result;
@@ -251,13 +251,10 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			if (OrderCount.GetValueOrDefault(0) == 0 && OrderLine != null) {
-				order.RemoveLine(OrderLine);
-				OrderLine = null;
-				OrderCount = null;
-				if (order.IsEmpty) {
-					address.Orders.Remove(order);
+				if (address.RemoveLine(orderLine)) {
 					Price.Order = null;
 				}
+				OrderLine = null;
 			}
 
 			return result;

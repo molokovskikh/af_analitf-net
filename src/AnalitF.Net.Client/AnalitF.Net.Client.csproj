@@ -233,6 +233,7 @@
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\BaseStatelessObject.cs" />
+    <Compile Include="Models\BatchLine.cs" />
     <Compile Include="Models\Catalog.cs" />
     <Compile Include="Models\CatalogName.cs" />
     <Compile Include="Models\ColumnSettings.cs" />
@@ -259,6 +260,7 @@
     <Compile Include="Models\News.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Models\Print\BaseDocument.cs" />
+    <Compile Include="Models\Print\BatchReport.cs" />
     <Compile Include="Models\Print\CatalogOfferDocument.cs" />
     <Compile Include="Models\Print\FixedDocumentHelper.cs" />
     <Compile Include="Models\Print\InvoiceDocument.cs" />
@@ -282,6 +284,7 @@
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
     <Compile Include="Models\Results\MessageResult.cs" />
+    <Compile Include="Models\Results\OpenFileResult.cs" />
     <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
     <Compile Include="Models\Results\SaveFileResult.cs" />
@@ -301,6 +304,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Conventions.cs" />
+    <Compile Include="UI\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
     <Compile Include="ViewModels\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\BaseOrderViewModel.cs" />
@@ -317,6 +321,7 @@
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
     <Compile Include="ViewModels\Journal.cs" />
     <Compile Include="ViewModels\Mails.cs" />
+    <Compile Include="ViewModels\Orders\Batch.cs" />
     <Compile Include="ViewModels\Orders\HistoryOrdersViewModel.cs" />
     <Compile Include="ViewModels\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\Main.cs" />
@@ -375,6 +380,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Orders\Batch.xaml.cs">
+      <DependentUpon>Batch.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\PromotionPopup.xaml.cs">
       <DependentUpon>PromotionPopup.xaml</DependentUpon>
@@ -528,6 +536,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Orders\Batch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

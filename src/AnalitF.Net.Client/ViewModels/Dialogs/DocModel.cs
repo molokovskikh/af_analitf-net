@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Documents;
@@ -50,9 +51,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public IEnumerable<IResult> Save()
 		{
-			var formats = new Dictionary<string, string> {
-				{ "Rich Text Format", ".rtf" },
-				{ "Текстовый документ", ".txt" },
+			var formats = new [] {
+				Tuple.Create("Rich Text Format", ".rtf"),
+				Tuple.Create("Текстовый документ", ".txt"),
 			};
 			var dialog = new SaveFileResult(formats, DisplayName);
 			yield return dialog;

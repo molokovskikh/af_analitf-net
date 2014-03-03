@@ -325,7 +325,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_description()
 		{
-			var dialogs = manager.DialogSubject.Collect();
+			var dialogs = manager.DialogOpened.Collect();
 			model.ShowDescription();
 			Assert.AreEqual(1, dialogs.Count);
 			var description = (DocModel<ProductDescription>)dialogs[0];

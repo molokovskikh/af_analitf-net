@@ -128,8 +128,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			if (launchButton == null)
 				throw new Exception(String.Format("Не могу найти кнопку {0}", name));
 
-			var invokePattern = (InvokePattern)launchButton.GetCurrentPattern(InvokePattern.Pattern);
-			invokePattern.Invoke();
+			launchButton.Invoke();
 		}
 
 		protected void Click(string id, AutomationElement element = null)
@@ -138,8 +137,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			if (launchButton == null)
 				throw new Exception(String.Format("Не могу найти кнопку {0}", id));
 
-			var invokePattern = (InvokePattern)launchButton.GetCurrentPattern(InvokePattern.Pattern);
-			invokePattern.Invoke();
+			launchButton.Invoke();
 		}
 
 		private void OnActivated(object sender, AutomationEventArgs e)
@@ -172,16 +170,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 					new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Text)));
 		}
 
-		protected void Wait(Func<bool> func, string message = null)
+		public void Wait(Func<bool> func, string message = null)
 		{
-			var elapsed = new TimeSpan();
-			var wait = TimeSpan.FromMilliseconds(100);
-			while (func()) {
-				Thread.Sleep(wait);
-				elapsed += wait;
-				if (elapsed > Timeout)
-					throw new Exception(String.Format("Не удалось дождаться за {0} {1}", Timeout, message));
-			}
+			Util.Wait(func, Timeout, message);
 		}
 
 		public void WaitWindow(string caption)

@@ -160,7 +160,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Import_after_update()
 		{
-			File.Copy(Directory.GetFiles(serviceConfig.ResultPath).Last(), clientConfig.ArchiveFile);
+			var src = Directory.GetFiles(serviceConfig.ResultPath)
+				.OrderByDescending(l => new FileInfo(l).LastWriteTime)
+				.Last();
+			File.Copy(src, clientConfig.ArchiveFile);
 			using(var file = new ZipFile(clientConfig.ArchiveFile))
 				file.ExtractAll(clientConfig.UpdateTmpDir);
 

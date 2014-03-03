@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using Common.Tools;
 using NHibernate.Linq;
 
@@ -25,7 +26,7 @@ namespace AnalitF.Net.Client.Helpers
 			return type == typeof(DateTime);
 		}
 
-		public static bool IsNumeric(Type type)
+		public static bool IsNumeric(this Type type)
 		{
 			type = Nullable.GetUnderlyingType(type) ?? type;
 			return type == typeof(short) || type == typeof(ushort)
@@ -89,7 +90,7 @@ namespace AnalitF.Net.Client.Helpers
 				if (property != null) {
 					if (i < parts.Length - 1)
 						current = property.GetValue(current, null);
-					else
+					else if (property.CanWrite)
 						property.SetValue(current, value, null);
 				}
 				else {
@@ -115,6 +116,18 @@ namespace AnalitF.Net.Client.Helpers
 			if (size < 1073741824)
 				return (size / 1048576f).ToString("#.##") + " МБ";
 			return (size / 1073741824f).ToString("#.##") + " ГБ";
+		}
+
+		public static void Wait(Func<bool> func, TimeSpan timeout, string message = null)
+		{
+			var elapsed = new TimeSpan();
+			var wait = TimeSpan.FromMilliseconds(100);
+			while (func()) {
+				Thread.Sleep(wait);
+				elapsed += wait;
+				if (elapsed > timeout)
+					throw new Exception(String.Format("Не удалось дождаться за {0} {1}", timeout, message));
+			}
 		}
 	}
 }

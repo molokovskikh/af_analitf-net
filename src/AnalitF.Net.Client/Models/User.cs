@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using NHibernate.Mapping;
 
@@ -18,6 +19,8 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(OrderDocument).Name + "." + typeof(SentOrder).Name, "PSO" },
 			{ typeof(OrderLinesDocument).Name + "." + typeof(OrderLine).Name, "PCCO" },
 			{ typeof(OrderLinesDocument).Name + "." + typeof(SentOrderLine).Name, "PSCO" },
+			{ typeof(Batch).Name + "." + typeof(Offer).Name, "PCPL" },
+			{ typeof(Batch).Name + "." + typeof(BatchLine).Name, "PCCO" },
 		};
 
 		public static Dictionary<string, string> ShortcutExportMap = new Dictionary<string, string> {
@@ -36,6 +39,8 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(JunkOfferViewModel).Name + "." + "Offers", "EPP" },
 			{ typeof(RejectsViewModel).Name + "." + "Rejects", "BP" },
 			{ typeof(CatalogOfferViewModel).Name + "." + "Offers", "FPCPL" },
+			{ typeof(Batch).Name + "." + typeof(Offer).Name, "FPCPL" },
+			{ typeof(Batch).Name + "." + typeof(BatchLine).Name, "COC" },
 		};
 
 		public Permission()
@@ -74,24 +79,22 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool CanPrint<T>()
 		{
-			return CanPrint(typeof(T));
+			return HasPermission(Permission.ShortcutPrintMap, typeof(T));
 		}
 
 		public virtual bool CanPrint<T, T1>()
 		{
-			return CanPrint(typeof(T), typeof(T1));
+			return HasPermission(Permission.ShortcutPrintMap, typeof(T), typeof(T1));
 		}
 
 		public virtual bool CanPrint<T>(Type context)
 		{
-			return CanPrint(typeof(T), context);
+			return HasPermission(Permission.ShortcutPrintMap, typeof(T), context);
 		}
 
-		public virtual bool CanPrint(params Type[] types)
+		public virtual bool CanExport<T, T1>()
 		{
-			var map = Permission.ShortcutPrintMap;
-			var key = types.Implode(t => t.Name, ".");
-			return Check(map, key);
+			return HasPermission(Permission.ShortcutExportMap, typeof(T), typeof(T1));
 		}
 
 		public virtual bool CanExport(object model, string key)
@@ -102,6 +105,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool CanExport(string key)
 		{
 			return Check(Permission.ShortcutExportMap, key);
+		}
+
+		public virtual bool HasPermission(Dictionary<string, string> map, params Type[] types)
+		{
+			var key = types.Implode(t => t.Name, ".");
+			return Check(map, key);
 		}
 
 		private bool Check(Dictionary<string, string> map, string key)

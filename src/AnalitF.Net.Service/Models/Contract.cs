@@ -173,4 +173,18 @@ namespace AnalitF.Net.Client.Models
 		public PriceComposedId MinPrice;
 	}
 #endif
+
+	public class BatchRequest
+	{
+		public uint AddressId;
+
+		public BatchRequest()
+		{
+		}
+
+		public BatchRequest(uint addressId)
+		{
+			AddressId = addressId;
+		}
+	}
 }

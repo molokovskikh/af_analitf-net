@@ -132,6 +132,9 @@ namespace AnalitF.Net.Client.Helpers
 				.Switch();
 		}
 
+		/// <summary>
+		/// Будь бдителен если внутри NotifyValue лежит список то метод не даст ни какого результата
+		/// </summary>
 		public void Refresh()
 		{
 			OnPropertyChanged("Value");
