@@ -146,6 +146,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				var producerSynonym = price.AddProducerSynonym(producerSynonymValue, data.Item4);
 				var core = new TestCore(productSynonym, producerSynonym) {
 					Price = price,
+					Quantity = "10",
 				};
 				core.SaveAndFlush();
 				core.AddCost((decimal)(random.NextDouble() * 10000));
