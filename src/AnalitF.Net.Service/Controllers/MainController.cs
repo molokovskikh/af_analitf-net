@@ -111,8 +111,7 @@ where UserId = :userId;")
 						try {
 							using(var exportSession = sessionFactory.OpenSession())
 							using(var exportTransaction = exportSession.BeginTransaction()) {
-								var exporter = new Exporter(exportSession, config, job);
-								using (exporter) {
+								using (var exporter = new Exporter(exportSession, config, job)) {
 									exporter.ExportCompressed(job.OutputFile(config));
 								}
 								exportTransaction.Commit();

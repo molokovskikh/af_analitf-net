@@ -83,7 +83,7 @@ namespace AnalitF.Net.Client.Models
 		public IResult Export(HSSFWorkbook book)
 		{
 			var filename = Path.Combine(ExportDir, Path.ChangeExtension(Path.GetRandomFileName(), "xls"));
-			using (var file = File.OpenWrite(filename)) {
+			using (var file = File.Create(filename)) {
 				book.Write(file);
 			}
 

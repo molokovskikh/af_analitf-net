@@ -956,7 +956,7 @@ group by dh.Id")
 			data.Add(BuildMeta(name, truncate, meta));
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
 			cleaner.Watch(filename);
-			using(var file = new StreamWriter(File.OpenWrite(filename), Encoding.GetEncoding(1251))) {
+			using(var file = new StreamWriter(File.Create(filename), Encoding.GetEncoding(1251))) {
 				MySqlHelper.Export(exportData, file);
 			}
 		}

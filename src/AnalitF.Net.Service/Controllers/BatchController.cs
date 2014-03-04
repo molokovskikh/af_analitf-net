@@ -55,14 +55,15 @@ namespace AnalitF.Net.Service.Controllers
 			var job = new RequestLog(CurrentUser, RequestHelper.GetVersion(Request));
 			job.UpdateType = "SmartOrder";
 			Session.Save(job);
-			var exporter = new Exporter(Session, Config, job);
-			exporter.Orders = orders;
-			exporter.BatchItems = batchItems;
-			exporter.BatchAddress = batchAddress;
-			exporter.ExportCompressed(job.OutputFile(Config));
-			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(job.GetResult(Config))
-			};
+			using(var exporter = new Exporter(Session, Config, job)) {
+				exporter.Orders = orders;
+				exporter.BatchItems = batchItems;
+				exporter.BatchAddress = batchAddress;
+				exporter.ExportCompressed(job.OutputFile(Config));
+				return new HttpResponseMessage(HttpStatusCode.OK) {
+					Content = new StreamContent(job.GetResult(Config))
+				};
+			}
 		}
 	}
 }
