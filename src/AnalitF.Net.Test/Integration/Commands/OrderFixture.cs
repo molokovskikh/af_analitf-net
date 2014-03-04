@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.NHibernate;
+using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
@@ -109,11 +110,12 @@ namespace AnalitF.Net.Test.Integration.Commands
 			localSession.DeleteEach<Order>();
 
 			MakeBatch(filename);
-			var orders = localSession.Query<Order>().ToList();
-			Assert.AreEqual(1, orders.Count);
-			Assert.IsFalse(orders[0].Frozen);
+
 			var items = localSession.Query<BatchLine>().ToList();
 			Assert.AreEqual(1, items.Count);
+			var orders = localSession.Query<Order>().ToList();
+			Assert.AreEqual(1, orders.Count, items.Implode(i => i.Comment));
+			Assert.IsFalse(orders[0].Frozen);
 			Assert.IsNotNull(items[0].ExportLineId);
 			Assert.IsTrue(items[0].Status.HasFlag(ItemToOrderStatus.Ordered));
 		}
