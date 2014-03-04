@@ -630,17 +630,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void CheckDb()
 		{
-			RunTask(
-				new WaitViewModel("Производится восстановление базы данных.\r\nПодождите..."),
-				token => {
-					var command = new RepairDb();
-					command.Token = token;
-					command.Config = Config;
-					command.Execute();
-					return command.Result;
-				},
+			RunCmd(new WaitViewModel("Производится восстановление базы данных.\r\nПодождите..."),
+				new RepairDb(),
 				t => {
-					if (t.Result) {
+					if (t) {
 						windowManager.Notify("Проверка базы данных завершена.\r\nОшибок не найдено.");
 					}
 					else {
@@ -659,15 +652,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("При создании базы данных будут потеряны текущие заказы.\r\nПродолжить?"))
 				return;
 
-			RunTask(
+			RunCmd(
 				new WaitViewModel("Производится очистка базы данных.\r\nПодождите..."),
-				token => {
-					var command = new CleanDb();
-					command.Token = token;
-					command.Config = Config;
-					command.Execute();
-					return command.Result;
-				},
+				new CleanDb(),
 				t => Update());
 			Reload();
 		}
@@ -682,6 +669,22 @@ namespace AnalitF.Net.Client.ViewModels
 			return Sync(command, c => c.Run());
 		}
 
+
+		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)
+		{
+			RunTask(model,
+				t => {
+					cmd.Token = t;
+					cmd.Config = Config;
+					cmd.Execute();
+					return cmd.Result;
+				},
+				t => {
+					if (success != null)
+						success(t.Result);
+				});
+		}
+
 		private IEnumerable<IResult> Sync(RemoteCommand command, Func<RemoteCommand, UpdateResult> func)
 		{
 			if (!CheckSettings())
@@ -690,12 +693,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if(UnitTesting)
 				command = OnCommandExecuting(command);
 
-			var progress = new BehaviorSubject<Progress>(new Progress());
-			var wait = new SyncViewModel(progress) {
+			var wait = new SyncViewModel(command.Progress) {
 				GenericErrorMessage = command.ErrorMessage
 			};
 			command.Config = Config;
-			command.Progress = progress;
 
 			var results = new IResult[0];
 			RunTask(wait,

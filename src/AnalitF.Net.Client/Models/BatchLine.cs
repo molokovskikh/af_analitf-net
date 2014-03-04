@@ -166,5 +166,10 @@ namespace AnalitF.Net.Client.Models
 			if (e.PropertyName == "Count")
 				OnPropertyChanged("MixedCount");
 		}
+
+		public override string ToString()
+		{
+			return string.Format("Comment: {0}, ProductId: {1}", Comment, ProductId);
+		}
 	}
 }

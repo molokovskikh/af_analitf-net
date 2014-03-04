@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Linq.Observαble;
 using System.Windows;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
@@ -26,6 +27,7 @@ using NHibernate.Linq;
 using NHibernate.Mapping;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
+using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
@@ -35,24 +37,23 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	public class StubRemoteCommand : RemoteCommand
 	{
+		public Func<StubRemoteCommand, UpdateResult> Do;
 		public UpdateResult result;
-		public Exception Exception;
 
 		public StubRemoteCommand(UpdateResult result)
 		{
 			this.result = result;
+			Do = c => c.result;
 		}
 
 		protected override UpdateResult Execute()
 		{
-			throw new NotImplementedException();
+			return Do(this);
 		}
 
 		public override UpdateResult Run()
 		{
-			if (Exception != null)
-				throw Exception;
-			return result;
+			return Do(this);
 		}
 	}
 
@@ -269,13 +270,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			restore = true;
 			var settings = false;
-			stub.Exception = new RequestException("Unauthorized", HttpStatusCode.Unauthorized);
+			stub.Do = c => { throw new RequestException("Unauthorized", HttpStatusCode.Unauthorized); };
 			manager.ContinueViewDialog = d => {
 				if (d is WaitViewModel)
 					((WaitViewModel)d).Closed.WaitOne();
 				else {
 					settings = true;
-					stub.Exception = null;
+					stub.Do = c => c.result;
 					var model = (SettingsViewModel)d;
 					model.Settings.Password = "aioxct2";
 					model.Save();
@@ -379,6 +380,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
 			session.Refresh(offer);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
+		}
+
+		[Test]
+		public void Attach_progress()
+		{
+			stub.Do = c => {
+				c.Reporter.Stage("1");
+				c.Reporter.Progress();
+				c.Reporter.Stage("2");
+				return c.result;
+			};
+			List<IObservedChange<SyncViewModel, Progress>> events = new List<IObservedChange<SyncViewModel, Progress>>();
+			manager.DialogOpened.OfType<SyncViewModel>().Subscribe(m => events = m.ObservableForProperty(c => c.Progress).Collect());
+			shell.Update();
+
+			Assert.AreEqual(4, events.Count, events.Implode(i => i.Value));
 		}
 
 		private void Collect(IEnumerable<IResult> results)

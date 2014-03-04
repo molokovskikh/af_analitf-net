@@ -112,9 +112,9 @@ namespace AnalitF.Net.Test.Integration.Commands
 			MakeBatch(filename);
 
 			var items = localSession.Query<BatchLine>().ToList();
-			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(1, items.Count, items.Implode());
 			var orders = localSession.Query<Order>().ToList();
-			Assert.AreEqual(1, orders.Count, items.Implode(i => i.Comment));
+			Assert.AreEqual(1, orders.Count, items.Implode());
 			Assert.IsFalse(orders[0].Frozen);
 			Assert.IsNotNull(items[0].ExportLineId);
 			Assert.IsTrue(items[0].Status.HasFlag(ItemToOrderStatus.Ordered));
@@ -135,7 +135,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			MakeBatch(filename);
 			var items = localSession.Query<BatchLine>().ToList();
-			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(1, items.Count, items.Implode());
 			Assert.That(items[0].ParsedServiceFields, Is.EquivalentTo(new Dictionary<string, string> { { "2", "test-payload" } }));
 		}
 
