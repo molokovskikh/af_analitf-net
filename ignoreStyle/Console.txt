@@ -14,3 +14,4 @@
 \src\Test.Support\Test.Support\log4net\EventFilter.cs
 \src\AnalitF.Net.Test\Tasks\Log.cs
 \src\AnalitF.Net.Test\TestHelpers\AutomationHelper.cs
+\src\AnalitF.Net.Test\Fixtures\CreatePromotion.cs

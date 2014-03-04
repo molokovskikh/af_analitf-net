@@ -295,13 +295,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-
-						try {
-							DbMaintain.UpdateLeaders(statelessSession, Settings.Value);
-						}
-						catch (Exception e) {
-							Console.WriteLine(e);
-						}
+						DbMaintain.UpdateLeaders(statelessSession, Settings.Value);
 						return Enumerable.Empty<IResult>();
 					}, r => {  });
 			}
