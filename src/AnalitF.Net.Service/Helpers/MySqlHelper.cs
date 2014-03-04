@@ -16,12 +16,15 @@ namespace AnalitF.Net.Service.Helpers
 				Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 				foreach (var item in exportData) {
 					for (var i = 0; i < item.Length; i++) {
-						if (item[i] == null)
+						var value = item[i];
+						if (value == null)
 							file.Write(@"\N");
-						else if (item[i] is DateTime)
-							file.Write(((DateTime)item[i]).ToString(MySqlConsts.MySQLLongDateTimeFormat));
+						else if (value is DateTime)
+							file.Write(((DateTime)value).ToString(MySqlConsts.MySQLLongDateTimeFormat));
+						else if (value is string)
+							file.Write(MySql.Data.MySqlClient.MySqlHelper.EscapeString((string)value).Replace("\n", "\\\n"));
 						else
-							file.Write(item[i]);
+							file.Write(value);
 						file.Write("\t");
 					}
 					file.WriteLine();
