@@ -117,17 +117,5 @@ namespace AnalitF.Net.Client.Helpers
 				return (size / 1048576f).ToString("#.##") + " МБ";
 			return (size / 1073741824f).ToString("#.##") + " ГБ";
 		}
-
-		public static void Wait(Func<bool> func, TimeSpan timeout, string message = null)
-		{
-			var elapsed = new TimeSpan();
-			var wait = TimeSpan.FromMilliseconds(100);
-			while (func()) {
-				Thread.Sleep(wait);
-				elapsed += wait;
-				if (elapsed > timeout)
-					throw new Exception(String.Format("Не удалось дождаться за {0} {1}", timeout, message));
-			}
-		}
 	}
 }

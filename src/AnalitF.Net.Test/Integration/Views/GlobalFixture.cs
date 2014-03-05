@@ -29,6 +29,7 @@ using Common.Tools;
 using Common.Tools.Calendar;
 using log4net.Config;
 using Microsoft.Reactive.Testing;
+using Microsoft.Win32;
 using NHibernate.Linq;
 using NHibernate.Util;
 using NPOI.SS.Formula.Functions;
@@ -504,9 +505,10 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Start();
 			Click("ShowBatch");
-			AsyncClick("Upload");
 
-			AutomationHelper.HandleOpenFileDialog(Path.GetFullPath(filename));
+			manager.FileDialog.OfType<OpenFileDialog>().Take(1)
+				.Subscribe(d => d.FileName = Path.GetFullPath(filename));
+			AsyncClickNoWait("Upload");
 
 			WaitWindow("Обмен данными");
 			WaitMessageBox("Обновление завершено успешно.");

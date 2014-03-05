@@ -10,6 +10,8 @@ using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
+using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -189,6 +191,23 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(OrderResultStatus.Reject, result[0].Result);
 			Assert.AreEqual("Поставщик отказал в приеме заказа. Сумма заказа меньше минимально допустимой. Минимальный заказ 3 000,00р. заказано 100,00р..",
 				result[0].Error);
+		}
+
+		[Test]
+		public void Error_on_job_fault()
+		{
+			controller.Config = new Config.Config {
+				InjectedFault = "Тестовое исключение"
+			};
+			var response = controller.Get(true);
+			Assert.AreEqual(HttpStatusCode.Accepted, response.StatusCode);
+			var log = session.Query<RequestLog>().First(r => r.User == user);
+			WaitHelper.WaitOrFail(30.Second(), () => {
+				session.Refresh(log);
+				return log.IsFaulted;
+			}, "Сломаный лог");
+			Assert.IsTrue(log.IsCompleted);
+			Assert.IsTrue(log.IsFaulted);
 		}
 
 		private SyncRequest ToClientOrder(TestCore offer)

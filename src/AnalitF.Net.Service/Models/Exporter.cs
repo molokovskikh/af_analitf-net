@@ -546,7 +546,8 @@ where a.MailId in ({0})", ids.Implode());
 				//если другая нитка успела обновить кеш раньше
 				if (IsCacheStale(tag)) {
 					var data = result.First(r => r.ArchiveFileName == tag + ".txt");
-					File.Copy(data.LocalFileName, cacheData, true);
+					//если мы оперируем с удаленной шарой то там файл появится с задержкой
+					FileHelper.Persistent<FileNotFoundException>(() => File.Copy(data.LocalFileName, cacheData, true));
 					var meta = result.First(r => r.ArchiveFileName == tag + ".meta.txt");
 					File.WriteAllText(cacheMeta, meta.Content);
 				}
@@ -596,17 +597,18 @@ where a.MailId in ({0})", ids.Implode());
 						items.Select(i => i.SynonymFirmCrCode.GetValueOrDefault()).DefaultIfEmpty(0u).Implode()))
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["SynonymFirmCrCode"]), r => r["Synonym"].ToString());
 
-				var producerIds = items.Select(i => i.CodeFirmCr).Union(BatchItems.Select(i => i.Item.CodeFirmCr))
+				var producerIds = items.Select(i => i.CodeFirmCr)
+					.Union(BatchItems.Select(b => b.Item).Where(i => i != null).Select(i => i.CodeFirmCr))
 					.Where(i => i != null)
 					.Distinct();
 				var producerLookup = connection
 					.Read(String.Format("select Id, Name from Catalogs.Producers where Id in ({0})",
 						producerIds.DefaultIfEmpty((uint?)0).Implode()))
-					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => r["Name"].ToString());
+					.ToLookup(r => Convert.ToUInt32(r["Id"]), r => r["Name"].ToString());
 
 				var maxProducerCost = connection
 					.Read("select * from Usersettings.MaxProducerCosts")
-					.ToLookup(r => Tuple.Create((uint)r["ProductId"], (uint?)r["ProducerId"]), r => Convert.ToUInt32((decimal?)r["Cost"]));;
+					.ToLookup(r => Tuple.Create((uint)r["ProductId"], r.GetNullableUInt32("ProducerId")), r => r.GetNullableDecimal("Cost"));
 
 				var catalogIdLookup = connection
 					.Read(String.Format("select Id, CatalogId from Catalogs.Products where Id in ({0})",
@@ -707,17 +709,17 @@ where a.MailId in ({0})", ids.Implode());
 							"ServiceFields"
 						},
 						BatchItems.Select(i => new object[] {
-							i.Item.OrderItem == null ? null : (uint?)i.Item.OrderItem.RowId,
-							i.Item.OrderItem == null ? BatchAddress.Id : i.Item.OrderItem.Order.AddressId,
+							i.Item == null || i.Item.OrderItem == null ? null : (uint?)i.Item.OrderItem.RowId,
+							i.Item == null || i.Item.OrderItem == null ? BatchAddress.Id : i.Item.OrderItem.Order.AddressId,
 							i.ProductName,
-							i.Item.ProductId,
-							i.Item.CatalogId,
+							i.Item == null ? null : (uint?)i.Item.ProductId,
+							i.Item == null ? null : (uint?)i.Item.CatalogId,
 							i.ProducerName,
-							i.Item.CodeFirmCr,
-							producerSynonymLookup[i.Item.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
+							i.Item == null ? null : i.Item.CodeFirmCr,
+							i.Item == null ? null : producerLookup[i.Item.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
 							i.Quantity,
-							i.Item.Comments.Implode(Environment.NewLine),
-							(int)i.Item.Status,
+							i.Item == null ? i.Comment : i.Item.Comments.Implode(Environment.NewLine),
+							i.Item == null ? (int)ItemToOrderStatus.NotOrdered : (int)i.Item.Status,
 							JsonConvert.SerializeObject(i.ServiceValues)
 						}), truncate: false);
 				}
@@ -1004,6 +1006,9 @@ group by dh.Id")
 
 		public string ExportCompressed(string file)
 		{
+			if (!String.IsNullOrEmpty(Config.InjectedFault))
+				throw new Exception(Config.InjectedFault);
+
 			var files = new List<UpdateData>();
 			if (UpdateType.Match("waybills")) {
 				ExportDocs(files);
@@ -1117,6 +1122,29 @@ group by dh.Id")
 				return;
 			disposed = true;
 			cleaner.Dispose();
+		}
+	}
+
+	public static class DbRecordHelper
+	{
+		public static uint? GetNullableUInt32(this DbDataRecord record, string column)
+		{
+			var value = record[column];
+			if (value is DBNull)
+				return null;
+			if (value is uint)
+				return (uint)value;
+			return Convert.ToUInt32(value);
+		}
+
+		public static decimal? GetNullableDecimal(this DbDataRecord record, string column)
+		{
+			var value = record[column];
+			if (value is DBNull)
+				return null;
+			if (value is decimal)
+				return (decimal)value;
+			return Convert.ToDecimal(value);
 		}
 	}
 }

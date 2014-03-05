@@ -21,23 +21,23 @@ create temporary table Leaders (
 	PriceId int unsigned,
 	RegionId bigint unsigned,
 	Cost decimal(8,2),
-	index (ProductId, RegionId, PriceId)
-);
+	index (ProductId, RegionId)
+) engine=memory;
 
 insert into Leaders(ProductId, RegionId, Cost)
 select o.ProductId,
 	o.RegionId,
-	min(if(d.Id is null, o.Cost, o.Cost * (1 + if(o.VitallyImportant, d.VitallyImportantDelay, d.OtherDelay) / 100))) as Cost
+	min(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor)) as Cost
 from Offers o
-	left join DelayOfPayments d on d.PriceId = o.PriceId and d.RegionId = o.RegionId and d.DayOfWeek = :dayOfWeek
+	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 where o.Junk = 0
 group by o.ProductId, o.RegionId;
 
 update Leaders l
 	join Offers o on o.RegionId = l.RegionId and o.ProductId = l.ProductId
-	left join DelayOfPayments d on d.PriceId = o.PriceId and d.RegionId = o.RegionId and d.DayOfWeek = :dayOfWeek
+	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 set l.PriceId = o.PriceId
-where l.Cost = round(if(d.Id is null, o.Cost, o.Cost * (1 + if(o.VitallyImportant, d.VitallyImportantDelay, d.OtherDelay) / 100)), 2);
+where l.Cost = round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2);
 
 update Offers o
 	join Leaders l on o.ProductId = l.ProductId and o.RegionId = l.RegionId

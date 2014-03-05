@@ -31,13 +31,13 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
 			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");
 
-			var lastEdit = TimeSpan.Zero;
+			var lastEdit = DateTime.MinValue;
 			var edit = textInput
 				.Where(e => NullableConvert.ToUInt32(e.EventArgs.Text) != null)
 				.Do(e => e.EventArgs.Handled = true)
 				.Select(e => new Func<string, string>(v => {
 					var text = e.EventArgs.Text;
-					var now = TimeSpan.FromMilliseconds(Environment.TickCount);
+					var now = DateTime.Now;
 					if ((now - lastEdit) > inputInterval)
 						return text;
 					else {
@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 			updated.Subscribe(a => {
 				UpdateValue(grid, a);
-				lastEdit = TimeSpan.FromMilliseconds(Environment.TickCount);
+				lastEdit = DateTime.Now;
 			});
 
 			//игнорировать события до тех пор пока не произошло событие редактирования
@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 				.Repeat()
 				.ObserveOn(scheduler)
 				.Subscribe(e => {
-					lastEdit = TimeSpan.Zero;
+					lastEdit = DateTime.MinValue;
 					ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
 				});
 		}

@@ -132,6 +132,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			WaitIdle();
 		}
 
+		protected void AsyncClickNoWait(string name)
+		{
+			dispatcher.BeginInvoke(new Action(() => InternalClick(name)));
+		}
+
 		protected void Input(FrameworkElement view, string name, string text)
 		{
 			view.Dispatcher.Invoke(() => {

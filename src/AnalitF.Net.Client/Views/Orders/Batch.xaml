@@ -70,7 +70,7 @@
 				<c:SearchableDataGridColumn Header="Наименование" Binding="{Binding MixedProduct}" Width="*"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding MixedProducer}" Width="*" />
-				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding Producer}" />
+				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding Producer}" Visibility="Collapsed" />
 				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Line.Order.Price.Name}" Width="*" />
 				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding Line.Cost}" />
 				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding Line.ResultCost}" />
@@ -96,7 +96,7 @@
 				<Label Foreground="Red" Visibility="{Binding Path=CurrentCatalog.MandatoryList, Converter={StaticResource BoolToHidden}, FallbackValue=Hidden}">Обяз. список</Label>
 			</StackPanel>
 			<Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right">Наименование:</Label>
-			<Label Grid.Row="0" Grid.Column="2" x:Name="CurrentReportLine_Value_Product" FontWeight="Bold" />
+			<Label Grid.Row="0" Grid.Column="2" x:Name="CurrentReportLine_Value_MixedProduct" FontWeight="Bold" />
 
 			<Button Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" x:Name="ShowDescription">Описание (F1, Пробел)</Button>
 			<Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Padding="5, 0, 5, 0">МНН:</Label>

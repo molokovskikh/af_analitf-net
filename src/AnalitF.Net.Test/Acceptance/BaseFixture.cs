@@ -15,6 +15,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using Microsoft.Test.Input;
 using NUnit.Framework;
 using Condition = System.Windows.Automation.Condition;
@@ -172,7 +173,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		public void Wait(Func<bool> func, string message = null)
 		{
-			Util.Wait(func, Timeout, message);
+			WaitHelper.WaitOrFail(Timeout, () => !func(), message);
 		}
 
 		public void WaitWindow(string caption)

@@ -253,6 +253,25 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Assert.AreEqual(0, batch.Lines.Count);
 		}
 
+		[Test]
+		public void Filter_lines()
+		{
+			var address = new Address("тест");
+			InitAddress(address);
+
+			var offer = new Offer(new Price("тест"), 50);
+			var line = address.Order(offer, 5);
+			line.ExportId = 562;
+			batch.Lines.Add(new BatchLine(line));
+			batch.Lines.Add(new BatchLine(new Catalog("тест"), address));
+			ScreenExtensions.TryActivate(batch);
+
+			//заказано
+			batch.CurrentFilter.Value = batch.Filter[1];
+			Assert.AreEqual(1, batch.ReportLines.Value.Count);
+			Assert.IsNotNull(batch.ReportLines.Value[0].Line);
+		}
+
 		private void InitAddress(params Address[] addresses)
 		{
 			for(var i = 0; i < addresses.Length; i++) {

@@ -18,5 +18,7 @@
 
 		public uint MaxProducerCostPriceId { get; set; }
 		public uint MaxProducerCostCostId { get; set; }
+
+		public string InjectedFault { get; set; }
 	}
 }

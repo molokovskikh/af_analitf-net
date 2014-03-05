@@ -6,6 +6,8 @@ using System.Windows.Automation;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
+using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -96,12 +98,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				.Implode(e => e.GetName(), Environment.NewLine);
 		}
 
+
+		//это не будет работать на сервере, всего скорее диалоги там даже не отображаются
 		public static void HandleOpenFileDialog(string filename)
 		{
 			var pid = Process.GetCurrentProcess().Id;
 			AutomationElement dialog = null;
 			AutomationElement input = null;
-			Util.Wait(() => {
+			WaitHelper.WaitOrFail(10.Second(), () => {
 				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Descendants,
 					new AndCondition(
 						new PropertyCondition(AutomationElement.NameProperty, "Открыть"),
@@ -112,8 +116,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				input = dialog.FindFirst(TreeScope.Children,
 					new AndCondition(new PropertyCondition(AutomationElement.NameProperty, "Имя файла:"),
 						new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox)));
-				return input == null;
-			}, 10.Second(), "Не удалось дождать появления диалога открытия файла");
+				return input != null;
+			}, "Не удалось дождать появления диалога открытия файла");
 			input.SetValue(filename);
 			var button = dialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Открыть"));
 			button.Invoke();

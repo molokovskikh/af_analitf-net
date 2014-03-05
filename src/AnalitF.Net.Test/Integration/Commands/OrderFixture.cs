@@ -105,14 +105,14 @@ namespace AnalitF.Net.Test.Integration.Commands
 				}
 			};
 			Fixture(fixture);
-			var filename = TempFile("batch.txt", "1|10");
+			var filename = TempFile("batch.txt", "1|10\r\n1-asdasd|10");
 			localSession.DeleteEach<BatchLine>();
 			localSession.DeleteEach<Order>();
 
 			MakeBatch(filename);
 
 			var items = localSession.Query<BatchLine>().ToList();
-			Assert.AreEqual(1, items.Count, items.Implode());
+			Assert.AreEqual(2, items.Count, items.Implode());
 			var orders = localSession.Query<Order>().ToList();
 			Assert.AreEqual(1, orders.Count, items.Implode());
 			Assert.IsFalse(orders[0].Frozen);

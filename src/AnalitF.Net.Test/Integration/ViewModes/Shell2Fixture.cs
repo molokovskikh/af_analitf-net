@@ -8,6 +8,7 @@ using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Linq.Observαble;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
@@ -23,6 +24,7 @@ using Caliburn.Micro;
 using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NHibernate.Mapping;
 using NPOI.SS.Formula.Functions;
@@ -385,16 +387,25 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Attach_progress()
 		{
+			Execute.ResetWithoutDispatcher();
+			var ready = new ManualResetEvent(false);
+			var done = new ManualResetEvent(false);
 			stub.Do = c => {
+				ready.WaitOne();
 				c.Reporter.Stage("1");
 				c.Reporter.Progress();
 				c.Reporter.Stage("2");
+				done.Set();
 				return c.result;
 			};
-			List<IObservedChange<SyncViewModel, Progress>> events = new List<IObservedChange<SyncViewModel, Progress>>();
-			manager.DialogOpened.OfType<SyncViewModel>().Subscribe(m => events = m.ObservableForProperty(c => c.Progress).Collect());
+			var events = new List<IObservedChange<SyncViewModel, Progress>>();
+			manager.DialogOpened.OfType<SyncViewModel>().Subscribe(m => {
+				m.ObservableForProperty(c => c.Progress).Subscribe(events.Add);
+				ready.Set();
+			});
 			shell.Update();
 
+			done.WaitOne(10.Second());
 			Assert.AreEqual(4, events.Count, events.Implode(i => i.Value));
 		}
 

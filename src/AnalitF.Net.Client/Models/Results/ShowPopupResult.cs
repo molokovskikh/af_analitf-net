@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Models.Results
 				menu.Placement = PlacementMode.Bottom;
 				var args = HandledResult.ExtractKeyEventArgs(context);
 				var keyboard = args != null ? args.KeyboardDevice : Keyboard.PrimaryDevice;
-				var timestam = args != null ? args.Timestamp : Environment.TickCount;
+				var timestam = args != null ? args.Timestamp : (int)(DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
 				var inputSource = args != null ? args.InputSource : PresentationSource.FromDependencyObject(context.View);
 				//устанавливаем курсор на первую строку
 				menu.RaiseEvent(new KeyEventArgs(keyboard, inputSource, timestam, Key.Down) {

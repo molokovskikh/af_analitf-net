@@ -113,8 +113,12 @@ namespace AnalitF.Net.Service.Test
 			var price = supplier.Prices[0];
 			var product = session.Query<TestProduct>().First(p => !p.CatalogProduct.Hidden);
 			var synonym = price.AddProductSynonym(product.CatalogProduct.Name, product);
-			var core1 = new TestCore(synonym);
-			var core2 = new TestCore(synonym);
+			var core1 = new TestCore(synonym) {
+				Quantity = "1500"
+			};
+			var core2 = new TestCore(synonym) {
+				Quantity = "200"
+			};
 			session.Save(core1);
 			session.Save(core2);
 			core1.AddCost(100);

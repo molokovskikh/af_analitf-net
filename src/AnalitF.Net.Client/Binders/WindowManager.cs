@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
+using Microsoft.Win32;
+using DialogResult = System.Windows.Forms.DialogResult;
 
 namespace AnalitF.Net.Client.Extentions
 {
@@ -22,6 +26,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public Subject<object> DialogOpened = new Subject<object>();
 		public Subject<Window> WindowOpened = new Subject<Window>();
+		public Subject<FileDialog> FileDialog = new Subject<FileDialog>();
 		public Subject<string> MessageOpened = new Subject<string>();
 
 		public List<Window> Dialogs = new List<Window>();
@@ -53,6 +58,19 @@ namespace AnalitF.Net.Client.Extentions
 			return ShowDialog(window);
 		}
 
+		public bool? ShowDialog(FileDialog dialog)
+		{
+#if DEBUG
+			if (Stub(dialog))
+				return true;
+			if (SkipApp) {
+				FileDialog.OnNext(dialog);
+				return true;
+			}
+#endif
+			return dialog.ShowDialog();
+		}
+
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 			if (Stub(rootModel))
@@ -70,10 +88,15 @@ namespace AnalitF.Net.Client.Extentions
 		{
 #if DEBUG
 			if (UnitTesting) {
-				IoC.BuildUp(rootModel);
-				ScreenExtensions.TryActivate(rootModel);
-				DialogOpened.OnNext(rootModel);
-				ContinueViewDialog(rootModel);
+				if (rootModel is FileDialog) {
+					FileDialog.OnNext((FileDialog)rootModel);
+				}
+				else {
+					IoC.BuildUp(rootModel);
+					ScreenExtensions.TryActivate(rootModel);
+					DialogOpened.OnNext(rootModel);
+					ContinueViewDialog(rootModel);
+				}
 				return true;
 			}
 #endif

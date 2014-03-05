@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Windows.Forms;
 using Caliburn.Micro;
+using Microsoft.Win32;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -8,13 +8,18 @@ namespace AnalitF.Net.Client.Models.Results
 	{
 		public OpenFileDialog Dialog = new OpenFileDialog();
 		public event EventHandler<ResultCompletionEventArgs> Completed;
+		public Extentions.WindowManager Manager;
 
 		public void Execute(ActionExecutionContext context)
 		{
-			var result = Dialog.ShowDialog();
+			bool? result;
+			if (Manager == null)
+				result = Dialog.ShowDialog();
+			else
+				result = Manager.ShowDialog(Dialog);
 			if (Completed != null) {
 				var resultCompletionEventArgs = new ResultCompletionEventArgs {
-					WasCancelled = result != System.Windows.Forms.DialogResult.OK || String.IsNullOrEmpty(Dialog.FileName)
+					WasCancelled = !result.GetValueOrDefault(false) || String.IsNullOrEmpty(Dialog.FileName)
 				};
 				Completed(this, resultCompletionEventArgs);
 			}

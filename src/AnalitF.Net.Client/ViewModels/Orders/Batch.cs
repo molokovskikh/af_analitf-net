@@ -56,31 +56,31 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				var query = Lines.Where(l => l.MixedProduct.CultureContains(SearchBehavior.ActiveSearchTerm.Value)
 					&& (l.Line != null || !l.Status.HasFlag(ItemToOrderStatus.Ordered)));
 				if (CurrentFilter.Value == Filter[1]) {
-					query = query.Where(l => l.IsNotOrdered);
-				}
-				else if (CurrentFilter.Value == Filter[2]) {
-					query = query.Where(l => l.IsNotOrdered && l.IsMinCost);
-				}
-				else if (CurrentFilter.Value == Filter[3]) {
-					query = query.Where(l => l.IsNotOrdered && !l.IsMinCost);
-				}
-				else if (CurrentFilter.Value == Filter[4]) {
-					query = query.Where(l => l.IsNotOrdered && l.ExistsInFreezed);
-				}
-				else if (CurrentFilter.Value == Filter[5]) {
 					query = query.Where(l => !l.IsNotOrdered);
 				}
+				else if (CurrentFilter.Value == Filter[2]) {
+					query = query.Where(l => !l.IsNotOrdered && l.IsMinCost);
+				}
+				else if (CurrentFilter.Value == Filter[3]) {
+					query = query.Where(l => !l.IsNotOrdered && !l.IsMinCost);
+				}
+				else if (CurrentFilter.Value == Filter[4]) {
+					query = query.Where(l => !l.IsNotOrdered && l.ExistsInFreezed);
+				}
+				else if (CurrentFilter.Value == Filter[5]) {
+					query = query.Where(l => l.IsNotOrdered);
+				}
 				else if (CurrentFilter.Value == Filter[6]) {
-					query = query.Where(l => !l.IsNotOrdered && !l.Status.HasFlag(ItemToOrderStatus.OffersExists));
+					query = query.Where(l => l.IsNotOrdered && !l.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
 				else if (CurrentFilter.Value == Filter[7]) {
-					query = query.Where(l => !l.IsNotOrdered && l.Quantity == 0);
+					query = query.Where(l => l.IsNotOrdered && l.Quantity == 0);
 				}
 				else if (CurrentFilter.Value == Filter[8]) {
-					query = query.Where(l => !l.IsNotOrdered && l.Quantity > 0 && l.ProductId != null && l.Status.HasFlag(ItemToOrderStatus.OffersExists));
+					query = query.Where(l => l.IsNotOrdered && l.Quantity > 0 && l.ProductId != null && l.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
 				else if (CurrentFilter.Value == Filter[9]) {
-					query = query.Where(l => !l.IsNotOrdered && l.ProductId == null);
+					query = query.Where(l => l.IsNotOrdered && l.ProductId == null);
 				}
 				return new ObservableCollection<BatchLine>(query.ToList());
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
