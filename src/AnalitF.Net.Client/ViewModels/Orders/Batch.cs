@@ -85,13 +85,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return new ObservableCollection<BatchLine>(query.ToList());
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
 			CurrentReportLine = new NotifyValue<BatchLine>();
-			CurrentReportLine.Changed().Subscribe(_ => {
-				if (CurrentReportLine.Value != null)
-					CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
-				else
-					CurrentElementAddress = null;
-				Update();
-			});
 			CanDelete = new NotifyValue<bool>(() => CurrentReportLine.Value != null, CurrentReportLine);
 			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
 		}
@@ -166,6 +159,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			CurrentReportLine.Changed().Throttle(Consts.ScrollLoadTimeout, UiScheduler).Subscribe(_ => {
+				if (CurrentReportLine.Value != null)
+					CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
+				else
+					CurrentElementAddress = null;
+				Update();
+			});
 
 			AddressSelector.Init();
 			LoadLines();

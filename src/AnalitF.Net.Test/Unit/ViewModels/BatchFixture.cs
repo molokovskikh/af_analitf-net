@@ -197,6 +197,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 				offer
 			};
 			batch.Update();
+			scheduler.AdvanceByMs(1000);
 
 			batch.CurrentOffer.Value = batch.Offers.Value[0];
 			Assert.AreEqual(5, batch.CurrentOffer.Value.OrderCount);

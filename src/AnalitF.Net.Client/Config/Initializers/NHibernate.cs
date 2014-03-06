@@ -185,7 +185,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 					customizer.NotNullable(true);
 				}
 
-				if (indexes.Contains(propertyInfo))
+				if (indexes.Any(m => m.MetadataToken == propertyInfo.MetadataToken && m.Module == propertyInfo.Module))
 					customizer.Index(propertyInfo.Name);
 			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => {
