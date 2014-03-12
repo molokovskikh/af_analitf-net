@@ -187,5 +187,11 @@ namespace AnalitF.Net.Client.Controls
 			var prop = typeof(DataGrid2).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
 			return prop.GetValue(dataGrid, null);
 		}
+
+		public bool CanUserSelectMultipleItems
+		{
+			get { return CanSelectMultipleItems; }
+			set { CanSelectMultipleItems = value; }
+		}
 	}
 }

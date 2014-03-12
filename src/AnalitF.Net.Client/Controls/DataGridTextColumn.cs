@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Controls
@@ -11,6 +12,9 @@ namespace AnalitF.Net.Client.Controls
 
 		protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
 		{
+			if (Binding != null) {
+				BindingOperations.SetBinding(cell, DataGridCell.ToolTipProperty, Binding);
+			}
 			var element = base.GenerateElement(cell, dataItem);
 			SyncProperty(element, TextAlignmentProperty);
 			return element;

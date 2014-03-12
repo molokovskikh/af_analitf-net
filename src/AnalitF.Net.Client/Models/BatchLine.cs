@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string ProductSynonym { get; set; }
 		public virtual uint? ProductId { get; set; }
-		public virtual decimal CatalogId { get; set; }
+		public virtual uint? CatalogId { get; set; }
 
 		public virtual string ProducerSynonym { get; set; }
 		public virtual uint? ProducerId { get; set; }

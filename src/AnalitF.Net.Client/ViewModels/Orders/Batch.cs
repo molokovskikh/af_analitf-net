@@ -185,10 +185,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 							return;
 						}
 						var catalogId = line.CatalogId;
-						CurrentCatalog = StatelessSession.Query<Catalog>()
-							.Fetch(c => c.Name)
-							.ThenFetch(n => n.Mnn)
-							.First(c => c.Id == catalogId);
+						if (catalogId != null) {
+							CurrentCatalog = StatelessSession.Query<Catalog>()
+								.Fetch(c => c.Name)
+								.ThenFetch(n => n.Mnn)
+								.First(c => c.Id == catalogId);
+						}
+						else {
+							CurrentCatalog = null;
+						}
 					}, CloseCancellation.Token);
 
 				ReportLines

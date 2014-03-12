@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.Views.Orders
 		{
 			InitializeComponent();
 
+			ReportLines.CanUserSelectMultipleItems = false;
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Заказано", "Нет");
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Есть производитель", "Нет");
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Цена поставщика", "0000.00");
