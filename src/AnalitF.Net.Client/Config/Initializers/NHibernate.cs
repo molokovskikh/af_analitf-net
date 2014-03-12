@@ -163,7 +163,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
 			});
-
+			mapper.Class<BatchLine>(m => {
+				m.Property(l => l.Comment, c => c.Length(10000));
+				m.Property(l => l.ServiceFields, c => c.Length(10000));
+			});
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
