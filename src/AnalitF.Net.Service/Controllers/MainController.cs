@@ -47,7 +47,7 @@ namespace AnalitF.Net.Service.Controllers
 			}
 
 			if (existsJob == null) {
-				existsJob  = new RequestLog(CurrentUser, RequestHelper.GetVersion(Request));
+				existsJob  = new RequestLog(CurrentUser, Request);
 				existsJob.UpdateType = data;
 				Session.Save(existsJob);
 				Session.Transaction.Commit();

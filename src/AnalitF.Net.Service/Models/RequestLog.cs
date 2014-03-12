@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Web;
+using AnalitF.Net.Service.Helpers;
 using Common.Models;
 using Newtonsoft.Json;
 
@@ -13,9 +16,20 @@ namespace AnalitF.Net.Service.Models
 
 		public RequestLog(User user, Version version)
 		{
+			CreatedOn = DateTime.Now;
+			User = user;
+			Version = version;
+			LocalHost = Environment.MachineName;
+		}
+
+		public RequestLog(User user, HttpRequestMessage request)
+		{
 			User = user;
 			CreatedOn = DateTime.Now;
-			Version = version;
+			Version = RequestHelper.GetVersion(request);
+			LocalHost = Environment.MachineName;
+			if (request.Properties.ContainsKey("MS_HttpContext"))
+				RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 		}
 
 		public virtual uint Id { get; set; }
@@ -37,6 +51,10 @@ namespace AnalitF.Net.Service.Models
 		public virtual Version Version { get; set; }
 
 		public virtual string UpdateType { get; set; }
+
+		public virtual string RemoteHost { get; set; }
+
+		public virtual string LocalHost { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{
