@@ -33,6 +33,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			lazyModel = new Lazy<T>(Init<T>);
 		}
+
+		protected void Reset()
+		{
+			Close(model);
+			lazyModel = new Lazy<T>(Init<T>);
+		}
 	}
 
 	public class ViewModelFixture : DbFixture

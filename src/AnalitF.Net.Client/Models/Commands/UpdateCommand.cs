@@ -474,11 +474,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var waybills = StatelessSession.Query<LoadedDocument>()
 				.Fetch(d => d.Supplier)
-				.Where(d => d.Type == type && d.Supplier != null);
-			//todo review query
+				.Where(d => d.Type == type && d.Supplier.Name != null);
 			var maps = StatelessSession.Query<DirMap>()
 				.Fetch(m => m.Supplier)
-				.Where(m => m.Supplier != null)
+				.Where(m => m.Supplier.Name != null)
 				.ToList();
 			foreach (var doc in waybills) {
 				try {

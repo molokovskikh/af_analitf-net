@@ -271,7 +271,7 @@ from Usersettings.Prices p
 			sql = @"select
 s.Id,
 s.Name,
-s.FullName
+if(length(s.FullName) = 0, s.Name, s.FullName) as FullName
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(result, sql, "suppliers");

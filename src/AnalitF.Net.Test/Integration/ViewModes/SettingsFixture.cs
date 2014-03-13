@@ -12,15 +12,12 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class SettingsFixture : ViewModelFixture
+	public class SettingsFixture : ViewModelFixture<SettingsViewModel>
 	{
-		private SettingsViewModel model;
-
 		[SetUp]
 		public void Setup()
 		{
 			restore = true;
-			model = Init(new SettingsViewModel());
 		}
 
 		[Test]
@@ -38,9 +35,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Markups.Add(new MarkupConfig());
 			model.Save();
 			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
-			Close(model);
 
-			model = Init(new SettingsViewModel());
+			Reset();
 			var all = session.Query<MarkupConfig>().ToList();
 			Assert.AreEqual(origin, model.Markups.Count);
 			//не должно быть потеряных записей
@@ -56,7 +52,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(model);
 
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
-			model = Init(new SettingsViewModel());
+
+			Reset();
 			Assert.That(model.Markups.Count, Is.EqualTo(1));
 		}
 
@@ -78,6 +75,19 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(model);
 			var waybillSettings = session.Load<WaybillSettings>(model.CurrentWaybillSettings.Value.Id);
 			Assert.AreEqual("test", waybillSettings.Name);
+		}
+
+		[Test]
+		public void Filter_not_exists_dir_maps()
+		{
+			var notExistsId = session.Query<Supplier>().ToArray().Max(s => s.Id) + Generator.Random().First();
+			var dirMap = new DirMap();
+			session.Save(dirMap);
+			session.CreateSQLQuery("update DirMaps set SupplierId = :notExistsId where Id = :id")
+				.SetParameter("notExistsId", notExistsId)
+				.SetParameter("id", dirMap.Id)
+				.ExecuteUpdate();
+			Assert.IsEmpty(model.DirMaps.Where(m => m.Id == dirMap.Id).ToArray());
 		}
 	}
 }

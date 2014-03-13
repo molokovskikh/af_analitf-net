@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.ViewModels
 			waybillConfig = Settings.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
-			DirMaps = Session.Query<DirMap>().OrderBy(d => d.Supplier.FullName).ToList();
+			DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
 			CurrentDirMap.Value = DirMaps.FirstOrDefault();
 
 			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
