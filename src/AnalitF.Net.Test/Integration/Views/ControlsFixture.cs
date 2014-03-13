@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq.Observαble;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -16,6 +17,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using Microsoft.Test.Input;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Remotion.Linq.Parsing;
 using Action = System.Action;
@@ -56,6 +58,34 @@ namespace AnalitF.Net.Test.Integration.Views
 					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 				};
 				w.DataContext = new Model();
+				ViewModelBinder.Bind(w.DataContext, w, null);
+			});
+		}
+
+		[Test]
+		public void Popup_scroll()
+		{
+			Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var selector = new PopupSelector();
+				selector.Name = "Items";
+				selector.Member = "Item.Item2";
+				w.Content = new StackPanel {
+					Children = { selector }
+				};
+				selector.Loaded += (sender, args) => {
+					selector.IsOpened = true;
+					w.Dispatcher.InvokeAsync(() => {
+						var scrollViewer = selector.Descendants<ScrollViewer>().First();
+						Assert.AreEqual(Visibility.Visible, scrollViewer.ComputedVerticalScrollBarVisibility);
+						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+					}, DispatcherPriority.ContextIdle);
+				};
+				var model = new Model();
+				model.Items = Enumerable.Range(1, 100)
+					.Select(i => new Selectable<Tuple<string, string>>(Tuple.Create(i.ToString(), i.ToString())))
+					.ToList();
+				w.DataContext = model;
 				ViewModelBinder.Bind(w.DataContext, w, null);
 			});
 		}
