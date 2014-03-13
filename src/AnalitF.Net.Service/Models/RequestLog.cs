@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Web;
 using AnalitF.Net.Service.Helpers;
@@ -22,12 +23,13 @@ namespace AnalitF.Net.Service.Models
 			LocalHost = Environment.MachineName;
 		}
 
-		public RequestLog(User user, HttpRequestMessage request)
+		public RequestLog(User user, HttpRequestMessage request, string updateType)
 		{
 			User = user;
 			CreatedOn = DateTime.Now;
 			Version = RequestHelper.GetVersion(request);
 			LocalHost = Environment.MachineName;
+			UpdateType = updateType;
 			if (request.Properties.ContainsKey("MS_HttpContext"))
 				RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 		}
@@ -83,6 +85,16 @@ namespace AnalitF.Net.Service.Models
 			if (IsFaulted)
 				throw new Exception("Обработка запроса завершилась ошибкой");
 			return File.OpenRead(OutputFile(config));
+		}
+
+		public virtual HttpResponseMessage ToResult(Config.Config config)
+		{
+			if (!IsCompleted)
+				return new HttpResponseMessage(HttpStatusCode.Accepted);
+
+			return new HttpResponseMessage(HttpStatusCode.OK) {
+				Content = new StreamContent(GetResult(config))
+			};
 		}
 	}
 }

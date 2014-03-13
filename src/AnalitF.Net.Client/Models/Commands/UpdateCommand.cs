@@ -142,7 +142,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private HttpContent GetResust()
 		{
-			var tmp = FileHelper.DeleteOnCloseTmpFile();
+			var tmp = FileHelper.SelfDeleteTmpFile();
 			using (var zip = new ZipFile()) {
 				zip.AddFile(BatchFile).FileName = "payload";
 				zip.AddEntry("meta.json", JsonConvert.SerializeObject(new BatchRequest(AddressId)));

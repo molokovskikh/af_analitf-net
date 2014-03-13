@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using DotRas;
@@ -34,13 +35,12 @@ namespace AnalitF.Net.Client.Helpers
 				}
 			}
 
-			if (baseException is HttpRequestException
-				&& baseException.InnerException is WebException
-				&& baseException.InnerException.InnerException is SocketException) {
-				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
-			}
-
-			if (baseException is RasException) {
+			if ((baseException is HttpRequestException
+					&& baseException.InnerException is WebException
+					&& baseException.InnerException.InnerException is SocketException)
+				|| (baseException is TaskCanceledException
+					&& !((TaskCanceledException)baseException).CancellationToken.IsCancellationRequested)
+				|| baseException is RasException) {
 				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
 			}
 
@@ -49,6 +49,13 @@ namespace AnalitF.Net.Client.Helpers
 				return endUserError.Message;
 			}
 			return null;
+		}
+
+		//TaskCanceledException будет если пользователь нажал отмену и если время ожидания истекло
+		public static bool IsCancalled(Exception baseException)
+		{
+			return baseException is TaskCanceledException
+				&& ((TaskCanceledException)baseException).CancellationToken.IsCancellationRequested;
 		}
 	}
 }

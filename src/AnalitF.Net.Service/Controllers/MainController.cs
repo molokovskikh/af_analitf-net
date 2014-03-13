@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using System.Web.Http;
 using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
@@ -17,50 +16,29 @@ using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using MySql.Data.MySqlClient;
-using NHibernate;
 using NHibernate.Linq;
 using Newtonsoft.Json;
-using log4net;
 using SmartOrderFactory;
 
 namespace AnalitF.Net.Service.Controllers
 {
-	public class MainController : ApiController
+	public class MainController : JobController
 	{
-		public static ILog log = LogManager.GetLogger(typeof(MainController));
-
-		public ISession Session { get; set; }
-		public User CurrentUser { get; set; }
-		public Config.Config Config;
-
 		public HttpResponseMessage Get(bool reset = false, string data = null)
 		{
-			var existsJob = Session.Query<RequestLog>()
-				.OrderByDescending(j => j.CreatedOn)
-				.FirstOrDefault(j => j.User == CurrentUser);
-
-			if (existsJob != null) {
-				if (existsJob.IsStale)
-					existsJob = null;
-				else if (reset)
-					existsJob = null;
-			}
+			var existsJob = TryFindJob(reset);
 
 			if (existsJob == null) {
-				existsJob  = new RequestLog(CurrentUser, Request);
-				existsJob.UpdateType = data;
-				Session.Save(existsJob);
-				Session.Transaction.Commit();
-
-				StartJob(existsJob.Id, Config, Session.SessionFactory);
+				existsJob  = new RequestLog(CurrentUser, Request, data);
+				RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
+					(session, config, job) => {
+						using (var exporter = new Exporter(session, config, job)) {
+							exporter.ExportCompressed(job.OutputFile(config));
+						}
+					});
 			}
 
-			if (!existsJob.IsCompleted)
-				return new HttpResponseMessage(HttpStatusCode.Accepted);
-
-			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(existsJob.GetResult(Config))
-			};
+			return existsJob.ToResult(Config);
 		}
 
 		public HttpResponseMessage Delete()
@@ -99,42 +77,6 @@ where UserId = :userId;")
 			}
 
 			return new HttpResponseMessage();
-		}
-
-		public static Task StartJob(uint jobId, Config.Config config, ISessionFactory sessionFactory)
-		{
-			var task = new Task(() => {
-				try {
-					using (var logSession = sessionFactory.OpenSession())
-					using (var logTransaction = logSession.BeginTransaction()) {
-						var job = logSession.Load<RequestLog>(jobId);
-						try {
-							using(var exportSession = sessionFactory.OpenSession())
-							using(var exportTransaction = exportSession.BeginTransaction()) {
-								using (var exporter = new Exporter(exportSession, config, job)) {
-									exporter.ExportCompressed(job.OutputFile(config));
-								}
-								exportTransaction.Commit();
-							}
-						}
-						catch(Exception e) {
-							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
-							job.Faulted(e);
-						}
-						finally {
-							job.Completed();
-							logSession.Save(job);
-							logSession.Flush();
-							logTransaction.Commit();
-						}
-					}
-				}
-				catch(Exception e) {
-					log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
-				}
-			});
-			task.Start();
-			return task;
 		}
 
 		public HttpResponseMessage Post(SyncRequest request)
@@ -214,7 +156,7 @@ where UserId = :userId;")
 						}
 					}
 					catch(OrderException e) {
-						log.Warn(String.Format("Не удалось принять заказ {0}", clientOrder.ClientOrderId), e);
+						Log.Warn(String.Format("Не удалось принять заказ {0}", clientOrder.ClientOrderId), e);
 						errors.Add(new OrderResult(clientOrder.ClientOrderId, "Отправка заказов запрещена"));
 					}
 				}

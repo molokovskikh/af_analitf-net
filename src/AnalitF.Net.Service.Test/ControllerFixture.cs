@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AnalitF.Net.Service.Controllers;
+using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
@@ -27,10 +28,12 @@ namespace AnalitF.Net.Service.Test
 	{
 		private MainController controller;
 		private User user;
+		private Config.Config config;
 
 		[SetUp]
 		public void Setup()
 		{
+			config = FixtureSetup.Config;
 			var client = TestClient.CreateNaked();
 			session.Save(client);
 
@@ -38,7 +41,8 @@ namespace AnalitF.Net.Service.Test
 			controller = new MainController {
 				Request = new HttpRequestMessage(),
 				Session = session,
-				CurrentUser = user
+				CurrentUser = user,
+				Config = config,
 			};
 		}
 
@@ -88,10 +92,8 @@ namespace AnalitF.Net.Service.Test
 		public void Process_request()
 		{
 			var job = new RequestLog(user, new Version());
-			session.Save(job);
-			session.Transaction.Commit();
-
-			var task = MainController.StartJob(job.Id, FixtureSetup.Config, session.SessionFactory);
+			var task = RequestHelper.StartJob(session, job, config, session.SessionFactory,
+				(jobSession, jobConfig, requestJob) => {});
 			task.Wait();
 
 			session.Refresh(job);
@@ -104,16 +106,10 @@ namespace AnalitF.Net.Service.Test
 		public void Log_broken_job()
 		{
 			var job = new RequestLog(user, new Version());
-			session.Save(job);
-
-			var config = new Config.Config();
-			var data = JsonConvert.SerializeObject(FixtureSetup.Config);
-			JsonConvert.PopulateObject(data, config);
-			config.LocalExportPath = "non-exist-path";
-			config.RemoteExportPath = "non-exist-path";
-
-			session.Transaction.Commit();
-			var task = MainController.StartJob(job.Id, config, session.SessionFactory);
+			var task = RequestHelper.StartJob(session, job, config, session.SessionFactory,
+				(jobSession, jobConfig, requestJob) => {
+					throw new Exception("Тестовое исключение");
+				});
 			task.Wait();
 			session.Refresh(job);
 			Assert.That(job.Error, Is.Not.Null);

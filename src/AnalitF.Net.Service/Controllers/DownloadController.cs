@@ -24,7 +24,7 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Post(string[] urns)
 		{
 			//временный файл будет удален после того как будет закрыт указатель на него
-			var tmp = FileHelper.DeleteOnCloseTmpFile();
+			var tmp = FileHelper.SelfDeleteTmpFile();
 			using(var zip = ZipFile.Create(tmp)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();

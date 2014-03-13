@@ -764,8 +764,9 @@ namespace AnalitF.Net.Client.ViewModels
 					success(task);
 				}
 				else if (task.IsFaulted) {
+					log.Debug(String.Format("Ошибка при выполнении задачи {0}", task), task.Exception);
 					var baseException = task.Exception.GetBaseException();
-					if (baseException is TaskCanceledException)
+					if (ErrorHelper.IsCancalled(baseException))
 						return;
 					log.Error(task.Exception);
 
