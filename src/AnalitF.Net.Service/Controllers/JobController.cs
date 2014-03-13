@@ -23,8 +23,11 @@ namespace AnalitF.Net.Service.Controllers
 
 		protected RequestLog TryFindJob(bool reset, string type = null)
 		{
-			var existsJob = Session.Query<RequestLog>()
-				.OrderByDescending(j => j.CreatedOn)
+			var query = Session.Query<RequestLog>();
+			if (type != null)
+				query = query.Where(j => j.UpdateType == type);
+
+			var existsJob = query.OrderByDescending(j => j.CreatedOn)
 				.FirstOrDefault(j => j.User == CurrentUser);
 
 			if (existsJob != null) {

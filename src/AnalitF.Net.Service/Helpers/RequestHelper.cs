@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
@@ -32,12 +33,14 @@ namespace AnalitF.Net.Service.Helpers
 			ISessionFactory sessionFactory,
 			Action<ISession, Config.Config, RequestLog> cmd)
 		{
+			var principal = Thread.CurrentPrincipal;
 			session.Save(existsJob);
 			session.Transaction.Commit();
 			var jobId = existsJob.Id;
 
 			var task = new Task(() => {
 				try {
+					Thread.CurrentPrincipal = principal;
 					using (var logSession = sessionFactory.OpenSession())
 					using (var logTransaction = logSession.BeginTransaction()) {
 						var job = logSession.Load<RequestLog>(jobId);
