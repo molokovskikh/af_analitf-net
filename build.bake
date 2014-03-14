@@ -53,7 +53,7 @@ task @DeployApp, [@WebDeploy]
 
 task "deploy:service", [@DeployPipeline]
 
-task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update"]
+task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "git:push:tags"]
 
 task "deploy:client", ["deploy:client:package"]
 
@@ -135,7 +135,12 @@ task "build:update":
 	if Globals.Environment == @Production:
 		Rm(FileSet("output/Updater/*.pdb"))
 
+task "git:push:tags":
+	return unless Globals.Environment == @Production
+	Bash("git push --tags")
+
 task "git:tag":
 	return unless Globals.Environment == @Production
 	kind = Configuration.Maybe.kind
+	raise "Нужно указать тип релиза patch - исправление ошибок, minor - новый функционал, major - координальные изменения в существующем функционале" unless kind
 	Bash("./scripts/tag-release.sh $kind")
