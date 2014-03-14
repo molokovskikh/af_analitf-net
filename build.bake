@@ -124,6 +124,7 @@ task "setup:preprocess":
 	path = "output/AnalitF.Net.Client/"
 	AddDirectory("INSTALLFOLDER", path, document, manager)
 	document.Save(name)
+	Cp("assets/Демонстрационная дефектура.csv", "output/setup/")
 
 task "build:update":
 	Clean(Globals, "Updater")

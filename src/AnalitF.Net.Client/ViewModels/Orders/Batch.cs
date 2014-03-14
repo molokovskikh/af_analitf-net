@@ -32,6 +32,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	{
 		public List<BatchLine> Lines = new List<BatchLine>();
 		private string activePrint;
+		private string lastUsedDir;
 
 		public Batch()
 		{
@@ -160,6 +161,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
+			lastUsedDir = Settings.Value.GetVarRoot();
 			CurrentReportLine.Changed().Throttle(Consts.ScrollLoadTimeout, UiScheduler).Subscribe(_ => {
 				if (CurrentReportLine.Value != null)
 					CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
@@ -268,7 +270,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				"Продолжить?"))
 				yield break;
 
-			var dialog = new OpenFileResult();
+			var dialog = new OpenFileResult {
+				Dialog = {
+					InitialDirectory = lastUsedDir
+				}
+			};
 			yield return dialog;
 			foreach (var result in Shell.Batch(dialog.Dialog.FileName)) {
 				yield return result;

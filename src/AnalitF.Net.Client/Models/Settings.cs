@@ -333,11 +333,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string MapPath(string name)
 		{
-			var root = ConfigurationManager.AppSettings["ClientDocPath"] ??
-				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-			root = FileHelper.MakeRooted(root);
-			root = Path.Combine(root, "АналитФАРМАЦИЯ");
+			var root = GetVarRoot();
 			if (name.Match("Waybills"))
 				return Path.Combine(root, "Накладные");
 			if (name.Match("Docs"))
@@ -345,6 +341,16 @@ namespace AnalitF.Net.Client.Models
 			if (name.Match("Rejects"))
 				return Path.Combine(root, "Отказы");
 			return null;
+		}
+
+		public string GetVarRoot()
+		{
+			var root = ConfigurationManager.AppSettings["ClientDocPath"] ??
+				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+			root = FileHelper.MakeRooted(root);
+			root = Path.Combine(root, "АналитФАРМАЦИЯ");
+			return root;
 		}
 
 		public virtual void ApplyChanges(ISession session)
