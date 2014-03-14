@@ -65,7 +65,9 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Popup_scroll()
 		{
-			Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
+			//нужны стили
+			if (Application.Current == null)
+				Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
 				var selector = new PopupSelector();
 				selector.Name = "Items";
