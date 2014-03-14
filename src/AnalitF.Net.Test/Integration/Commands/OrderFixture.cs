@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows.Forms.VisualStyles;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -105,11 +106,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 				}
 			};
 			Fixture(fixture);
-			var filename = TempFile("batch.txt", "1|10\r\n1-asdasd|10");
 			localSession.DeleteEach<BatchLine>();
 			localSession.DeleteEach<Order>();
 
-			MakeBatch(filename);
+			MakeBatch("1|10\r\n1-asdasd|10");
 
 			var items = localSession.Query<BatchLine>().ToList();
 			Assert.AreEqual(2, items.Count, items.Implode());
@@ -130,10 +130,9 @@ namespace AnalitF.Net.Test.Integration.Commands
 			};
 			fixture.Rule.ServiceFields = "2";
 			Fixture(fixture);
-			var filename = TempFile("batch.txt", "1|10|test-payload");
 			localSession.DeleteEach<Order>();
 
-			MakeBatch(filename);
+			MakeBatch("1|10|test-payload");
 			var items = localSession.Query<BatchLine>().ToList();
 			Assert.AreEqual(1, items.Count, items.Implode());
 			Assert.That(items[0].ParsedServiceFields, Is.EquivalentTo(new Dictionary<string, string> { { "2", "test-payload" } }));
@@ -150,15 +149,24 @@ namespace AnalitF.Net.Test.Integration.Commands
 				}
 			};
 			Fixture(fixture);
-			var filename = TempFile("batch.txt", "1|10");
-			MakeBatch(filename);
+			MakeBatch("1|10");
 
 			localSession.Refresh(order);
 			Assert.IsTrue(order.Frozen);
 		}
 
-		private void MakeBatch(string filename)
+		[Test]
+		public void Transit_error()
 		{
+			var user = ServerUser();
+			user.Client.Settings.SmartOrderRule = null;
+
+			Assert.Throws<EndUserError>(() => MakeBatch("1|10"), "Услуга 'АвтоЗаказ' не предоставляется");
+		}
+
+		private void MakeBatch(string content)
+		{
+			var filename = TempFile("batch.txt", content);
 			Run(new UpdateCommand {
 				BatchFile = filename,
 				AddressId = localSession.Query<Address>().First().Id

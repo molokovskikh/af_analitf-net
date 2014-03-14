@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Xml;
 using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
@@ -48,22 +50,44 @@ namespace AnalitF.Net.Service.Controllers
 			var existsJob  = new RequestLog(CurrentUser, Request, "SmartOrder");
 			RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
 				(session, config, job) => {
-					List<Order> orders;
-					List<OrderBatchItem> batchItems;
-					var batchAddress = session.Load<Address>(requestMeta.AddressId);
-					using (payloadStream) {
-						var handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
-						orders = handler.ProcessOrderBatch();
-						batchItems = handler.OrderBatchItems;
-						orders.Each(o => o.RowId = (uint)o.GetHashCode());
-						orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
-					}
+					try {
+						List<Order> orders;
+						List<OrderBatchItem> batchItems;
+						var batchAddress = session.Load<Address>(requestMeta.AddressId);
+						using (payloadStream) {
+							var handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
+							orders = handler.ProcessOrderBatch();
+							batchItems = handler.OrderBatchItems;
+							orders.Each(o => o.RowId = (uint)o.GetHashCode());
+							orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
+						}
 
-					using(var exporter = new Exporter(session, config, job)) {
-						exporter.Orders = orders;
-						exporter.BatchItems = batchItems;
-						exporter.BatchAddress = batchAddress;
-						exporter.ExportCompressed(job.OutputFile(Config));
+						using(var exporter = new Exporter(session, config, job)) {
+							exporter.Orders = orders;
+							exporter.BatchItems = batchItems;
+							exporter.BatchAddress = batchAddress;
+							exporter.ExportCompressed(job.OutputFile(Config));
+						}
+					}
+					catch(SmartOrderException e) {
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = e.Message;
+						job.Faulted(e);
+					}
+					catch(XmlException e) {
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+						job.Faulted(e);
+					}
+					catch(DbfException e) {
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+						job.Faulted(e);
+					}
+					catch(DuplicateNameException e) {
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+						job.Faulted(e);
 					}
 				});
 			return existsJob.ToResult(Config);

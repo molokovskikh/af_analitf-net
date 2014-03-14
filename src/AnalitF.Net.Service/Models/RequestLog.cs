@@ -58,6 +58,9 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual string LocalHost { get; set; }
 
+		//описаине ошибки которое возврашается пользователю
+		public virtual string ErrorDescription { get; set; }
+
 		public virtual void Faulted(Exception e)
 		{
 			IsFaulted = true;
@@ -91,6 +94,13 @@ namespace AnalitF.Net.Service.Models
 		{
 			if (!IsCompleted)
 				return new HttpResponseMessage(HttpStatusCode.Accepted);
+			if (IsFaulted) {
+				var message = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+				if (!String.IsNullOrEmpty(ErrorDescription)) {
+					message.Content = new StringContent(ErrorDescription);
+				}
+				return message;
+			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK) {
 				Content = new StreamContent(GetResult(config))

@@ -159,12 +159,19 @@ namespace AnalitF.Net.Client.Models.Commands
 			while (!done) {
 				response = task.Result;
 				if (response.StatusCode != HttpStatusCode.OK
-					&& response.StatusCode != HttpStatusCode.Accepted)
+					&& response.StatusCode != HttpStatusCode.Accepted) {
+
+					if (response.StatusCode == HttpStatusCode.InternalServerError
+						&& response.Content.Headers.ContentType.MediaType == "text/plain") {
+						throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+					}
+
 					throw new RequestException(
 						String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
 							response.StatusCode,
 							response.Content.ReadAsStringAsync().Result),
 						response.StatusCode);
+				}
 
 				done = response.StatusCode == HttpStatusCode.OK;
 				Reporter.Stage("Подготовка данных");
