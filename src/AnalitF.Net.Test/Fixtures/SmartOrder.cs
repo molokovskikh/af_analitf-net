@@ -32,6 +32,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}
 			session.Save(supplier);
 			Rule.AssortmentPriceCode = price.Id;
+			user.Client.Settings.EnableSmartOrder = true;
 			user.Client.Settings.SmartOrderRule = Rule;
 			session.Save(user);
 		}
