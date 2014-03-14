@@ -343,7 +343,7 @@ namespace AnalitF.Net.Client.Models
 			return null;
 		}
 
-		public string GetVarRoot()
+		public virtual string GetVarRoot()
 		{
 			var root = ConfigurationManager.AppSettings["ClientDocPath"] ??
 				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
