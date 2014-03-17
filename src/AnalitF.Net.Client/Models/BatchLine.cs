@@ -74,6 +74,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Comment { get; set;}
 		public virtual ItemToOrderStatus Status { get; set; }
 
+		[Ignore]
 		public virtual OrderLine Line
 		{
 			get

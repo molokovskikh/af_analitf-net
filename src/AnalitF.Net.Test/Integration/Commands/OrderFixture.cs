@@ -109,15 +109,16 @@ namespace AnalitF.Net.Test.Integration.Commands
 			localSession.DeleteEach<BatchLine>();
 			localSession.DeleteEach<Order>();
 
-			MakeBatch("1|10\r\n1-asdasd|10");
+			MakeBatch("1|5\r\n1-asdasd|10");
 
 			var items = localSession.Query<BatchLine>().ToList();
 			Assert.AreEqual(2, items.Count, items.Implode());
 			var orders = localSession.Query<Order>().ToList();
 			Assert.AreEqual(1, orders.Count, items.Implode());
 			Assert.IsFalse(orders[0].Frozen);
-			Assert.IsNotNull(items[0].ExportLineId);
-			Assert.IsTrue(items[0].Status.HasFlag(ItemToOrderStatus.Ordered));
+			var batchLine = items.First(b => b.Quantity == 5);
+			Assert.IsNotNull(batchLine.ExportLineId);
+			Assert.IsTrue(batchLine.Status.HasFlag(ItemToOrderStatus.Ordered));
 		}
 
 		[Test]
