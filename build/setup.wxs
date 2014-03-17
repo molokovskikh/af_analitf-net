@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="782d9cdd-b341-4eff-9540-e54652508c20"
+	<Product Id="*"
 		Language="1049"
 		Codepage="1251"
 		Name="$(var.Setup.Product)"
@@ -13,7 +13,7 @@
 			InstallerVersion="200"
 			Compressed="yes" />
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 		<MediaTemplate />
 
 		<Feature Id="ProductFeature" Title="$(var.Setup.Product)" Level="1">
