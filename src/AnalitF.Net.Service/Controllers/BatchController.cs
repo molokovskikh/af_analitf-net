@@ -74,6 +74,11 @@ namespace AnalitF.Net.Service.Controllers
 						job.ErrorDescription = e.Message;
 						job.Faulted(e);
 					}
+					catch(ExcelException e) {
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+						job.Faulted(e);
+					}
 					catch(XmlException e) {
 						Log.Warn("Ошибка при обработке автозаказа", e);
 						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
