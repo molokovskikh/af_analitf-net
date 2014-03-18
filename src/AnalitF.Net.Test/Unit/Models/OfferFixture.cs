@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using Microsoft.Win32;
+using NHibernate.Hql.Ast.ANTLR;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Address = AnalitF.Net.Client.Models.Address;
@@ -18,10 +20,15 @@ namespace AnalitF.Net.Test.Unit
 		private string error;
 		private string warning;
 		private Settings settings;
+		private List<Message> messages;
+		private bool confirm;
+		private string confirmMessage;
 
 		[SetUp]
 		public void Setup()
 		{
+			confirm = false;
+			confirmMessage = "";
 			settings = new Settings();
 			address = new Address();
 			offer = new Offer {
@@ -278,10 +285,48 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(76.46, offer.RetailCost);
 		}
 
-		private void Validate()
+		[Test]
+		public void Forbid_order()
 		{
-			var message = offer.UpdateOrderLine(address, settings);
-			Read(message);
+			offer.BuyingMatrixType = BuyingMatrixStatus.Denied;
+			offer.OrderCount = 1;
+			Validate(true);
+			Assert.That(warning, Is.EqualTo("Препарат запрещен к заказу."));
+			Assert.IsNull(offer.OrderCount);
+		}
+
+		[Test]
+		public void Warn_on_edit()
+		{
+			offer.BuyingMatrixType = BuyingMatrixStatus.Warning;
+			offer.OrderCount = 1;
+			confirm = true;
+			Validate(true);
+
+			Assert.AreEqual("Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?",
+				confirmMessage);
+			Assert.AreEqual(1, offer.OrderCount);
+		}
+
+		[Test]
+		public void Reject_edit()
+		{
+			offer.BuyingMatrixType = BuyingMatrixStatus.Warning;
+			offer.OrderCount = 1;
+			confirm = false;
+			Validate(true);
+			Assert.IsNull(offer.OrderCount);
+		}
+
+		private void Validate(bool save = false)
+		{
+			messages = offer.UpdateOrderLine(address, settings);
+			Read(messages);
+			if (save)
+				messages = offer.SaveOrderLine(address, settings, m => {
+					confirmMessage = m;
+					return confirm;
+				});
 		}
 
 		private void Read(List<Message> message)

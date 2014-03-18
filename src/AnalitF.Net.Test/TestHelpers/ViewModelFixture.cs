@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			offer = offer ?? session.Query<Offer>().First();
 			var order = new Order(offer.Price, address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 			session.Flush();
@@ -169,7 +169,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			offer = offer ?? session.Query<Offer>().First();
 			var order = new Order(offer.Price, toAddress ?? address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			offer.OrderLine = order.Lines[0];
 			session.Save(order);
 			session.Flush();

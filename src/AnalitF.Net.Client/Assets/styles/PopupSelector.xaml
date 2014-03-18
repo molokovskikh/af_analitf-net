@@ -164,7 +164,7 @@
 													KeyboardNavigation.DirectionalNavigation="Contained"
 													SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
 											</ScrollViewer>
-									</Grid>
+										</Grid>
 									</Grid>
 								</Border>
 							</Themes:SystemDropShadowChrome>

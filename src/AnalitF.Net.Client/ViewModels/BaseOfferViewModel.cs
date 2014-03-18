@@ -243,7 +243,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			lastEditOffer = CurrentOffer.Value;
 			LoadStat();
-			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, AutoCommentText));
+			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
 		public void OfferCommitted()
@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (lastEditOffer == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(ActualAddress, Settings.Value, AutoCommentText));
+			ShowValidationError(lastEditOffer.SaveOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
 		protected void ShowValidationError(List<Message> messages)

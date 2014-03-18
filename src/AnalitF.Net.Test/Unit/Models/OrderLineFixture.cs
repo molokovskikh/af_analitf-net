@@ -19,7 +19,7 @@ namespace AnalitF.Net.Test.Unit.Models
 				ProductSynonym = "ЭХИНАЦЕЯ ТРАВА пачка 50г (18%)",
 				ProducerSynonym = "Камелия-ЛТ ООО",
 			};
-			line = order.AddLine(offer, 1);
+			line = order.TryOrder(offer, 1);
 
 			line.Apply(new OrderLineResult {
 				ServerCost = 150,

@@ -27,7 +27,7 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var order = new Order(price, address);
 			offer.Cost = 10;
-			order.AddLine(offer, 20);
+			order.TryOrder(offer, 20);
 			Assert.That(order.Sum, Is.EqualTo(200));
 			Assert.That(order.LinesCount, Is.EqualTo(1));
 		}
@@ -36,12 +36,12 @@ namespace AnalitF.Net.Test.Unit
 		public void Calculate_is_valid()
 		{
 			var order = new Order(price, address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			Assert.That(order.IsInvalid, Is.True);
 
 			order.Address.Rules.Add(new MinOrderSumRule(order.Address, order.Price, 1000));
 			order = new Order(price, address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			Assert.IsTrue(order.IsInvalid);
 		}
 
@@ -49,13 +49,13 @@ namespace AnalitF.Net.Test.Unit
 		public void Merge_order_line()
 		{
 			var order = new Order(price, address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 
 			var frozen = new Order(price, address) {
 				Frozen = true,
 				Send = false
 			};
-			frozen.AddLine(offer, 1);
+			frozen.TryOrder(offer, 1);
 			frozen.Lines[0].Merge(order, new[] { offer }, new StringBuilder());
 
 			Assert.That(order.Lines[0].Count, Is.EqualTo(2));
@@ -70,7 +70,7 @@ namespace AnalitF.Net.Test.Unit
 				Frozen = true,
 				Send = false
 			};
-			frozen.AddLine(offer, 1);
+			frozen.TryOrder(offer, 1);
 			offer.Note = "test";
 			frozen.Lines[0].Merge(order, new[] { offer }, new StringBuilder());
 			Assert.That(order.Lines[0].Note, Is.EqualTo("test"));
@@ -84,9 +84,9 @@ namespace AnalitF.Net.Test.Unit
 				Frozen = true,
 				Send = false
 			};
-			offer.RequestRatio = 7;
 			offer.Quantity = "5";
-			frozen.AddLine(offer, 1);
+			frozen.TryOrder(offer, 1);
+			offer.RequestRatio = 7;
 			frozen.Lines[0].Merge(order, new[] { offer }, new StringBuilder());
 			Assert.That(frozen.Lines.Count, Is.EqualTo(0));
 			Assert.That(order.Lines.Count, Is.EqualTo(0));
@@ -99,12 +99,11 @@ namespace AnalitF.Net.Test.Unit
 				Frozen = true,
 				Send = false
 			};
-			offer.Quantity = "20";
 			var offer1 = new Offer(offer, 150) {
 				Quantity = "1000"
 			};
-			frozen.AddLine(offer, 100);
-
+			frozen.TryOrder(offer, 100);
+			offer.Quantity = "20";
 			var order = new Order(price, address);
 			frozen.Lines[0].Merge(order, new[] { offer, offer1 }, new StringBuilder());
 			Assert.That(order.Lines.Count, Is.EqualTo(2));
@@ -118,15 +117,15 @@ namespace AnalitF.Net.Test.Unit
 			var price1 = new Price("test2");
 			var price2 = new Price("test3");
 			var order = new Order(price, address);
-			order.AddLine(offer, 10);
+			order.TryOrder(offer, 10);
 			var orders = new[] {
 				new Order(price1, address),
 				new Order(price2, address)
 			};
 			var offer1 = new Offer(price1, 100) { ProductId = 1 };
-			orders[0].AddLine(offer1, 10);
+			orders[0].TryOrder(offer1, 10);
 			var offer2 = new Offer(price2, 150) { ProductId = 1 };
-			orders[1].AddLine(offer2, 1);
+			orders[1].TryOrder(offer2, 1);
 
 			var log = new StringBuilder();
 			ReorderCommand<Order>.Reorder(order, orders, new[] { offer1, offer2 }, log);
@@ -139,7 +138,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Process_server_result()
 		{
 			var order = new Order(price, address);
-			order.AddLine(offer, 10);
+			order.TryOrder(offer, 10);
 			order.Apply(new OrderResult());
 			Assert.AreEqual(OrderResultStatus.OK, order.SendResult);
 		}
@@ -148,7 +147,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Remove_line()
 		{
 			var order = new Order(price, address);
-			var line = order.AddLine(offer, 10);
+			var line = order.TryOrder(offer, 10);
 			Assert.AreEqual(1, order.LinesCount);
 			order.RemoveLine(line);
 			Assert.AreEqual(0, order.LinesCount);

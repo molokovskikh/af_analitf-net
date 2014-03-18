@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.OrderBy(r => r))
 				.ToList();
 
-			Producers.Value = new[] { Consts.AllRegionLabel }
+			Producers.Value = new[] { Consts.AllProducerLabel }
 				.Concat(CatalogOffers.Select(o => o.Producer).Distinct()
 					.OrderBy(p => p))
 				.ToList();

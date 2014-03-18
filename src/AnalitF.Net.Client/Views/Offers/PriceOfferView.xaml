@@ -132,8 +132,14 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
-		<ContentControl x:Name="Promotions" Grid.Row="2" />
+		<Grid Grid.Row="2" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
+			<ContentControl x:Name="Promotions" Grid.Row="1" />
+		</Grid>
 
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 		<StackPanel Grid.Row="4" Name="Legend" />

@@ -25,7 +25,7 @@ namespace AnalitF.Net.Test.Integration.Models
 		{
 			var address = new Address("Тестовый адрес доставки");
 			var order = new Order(new Price(), address);
-			order.AddLine(new Offer(), 1);
+			order.TryOrder(new Offer(), 1);
 			order.Frozen = true;
 			order.Send = false;
 			address.Orders.Add(order);

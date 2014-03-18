@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			var supplier = TestSupplier.CreateNaked(session, 524288);
+			var supplier = TestSupplier.CreateNaked(session, TestRegion.Inforoom);
 			var price = supplier.Prices[0];
 			price.PriceType = PriceType.Assortment;
 			for(var i = 0; i < ProductIds.Length; i++) {

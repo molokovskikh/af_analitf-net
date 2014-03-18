@@ -80,7 +80,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			using (localSession.BeginTransaction()) {
 				offer = offer ?? localSession.Query<Offer>().First();
 				var order = new Order(offer.Price, address);
-				order.AddLine(offer, 1);
+				order.TryOrder(offer, 1);
 				localSession.Save(order);
 				return order;
 			}

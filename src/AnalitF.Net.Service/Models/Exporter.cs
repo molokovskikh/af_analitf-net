@@ -71,6 +71,7 @@ namespace AnalitF.Net.Service.Models
 		private AnalitfNetData data;
 		private UserSettings userSettings;
 		private ClientSettings clientSettings;
+		private OrderRules orderRules;
 		private Version version;
 
 		public string UpdateType;
@@ -110,6 +111,7 @@ namespace AnalitF.Net.Service.Models
 			data = session.Get<AnalitfNetData>(user.Id);
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
+			orderRules = session.Load<OrderRules>(user.Client.Id);
 		}
 
 		//Все даты передаются в UTC!
@@ -263,9 +265,7 @@ from Usersettings.Prices p
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
 	join Farm.Regions r on r.RegionCode = p.RegionCode
-	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
-";
-
+	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode";
 			Export(result, sql, "prices");
 
 			sql = @"select
@@ -292,38 +292,59 @@ where
 	si.ClientId = ?clientId";
 			Export(result, sql, "DelayOfPayments", new { clientId = clientSettings.Id });
 
-			var offerQuery = new OfferQuery();
-			offerQuery.Select("m.MinCost as LeaderCost",
-				"m.PriceCode as LeaderPriceId",
-				"lr.RegionCode as LeaderRegionId",
-				"p.CatalogId",
-				"pr.Name as Producer",
-				"mx.Cost as MaxProducerCost")
-				.Join("join Usersettings.MinCosts m on m.ProductId = c0.ProductId and m.RegionCode = ap.RegionCode")
-				.Join("join Farm.Regions lr on lr.RegionCode = m.RegionCode")
-				.Join("join Catalogs.Products p on p.Id = c0.ProductId")
-				.Join("join Catalogs.Catalog cl on cl.Id = p.CatalogID")
-				.Join("left join Catalogs.Producers pr on pr.Id = c0.CodeFirmCr")
-				.Join("join Farm.Regions r on r.RegionCode = ap.RegionCode")
-				.Join("left join Usersettings.MaxProducerCosts mx on mx.ProductId = c0.ProductId and mx.ProducerId = c0.CodeFirmCr");
-			offerQuery.SelectSynonyms();
-			//в MaxProducerCosts может быть более одной записи
-			offerQuery.GroupBy("c0.Id, ap.RegionCode");
-			sql = offerQuery.ToSql()
-				.Replace("{Offer.", "")
-				.Replace("}", "")
-				.Replace("as Id.CoreId,", "as OfferId,")
-				.Replace("as Id.RegionCode ,", "as RegionId,")
-				.Replace("as CodeFirmCr,", "as ProducerId,")
-				.Replace("as SynonymCode,", "as ProductSynonymId,")
-				.Replace("as SynonymFirmCrCode,", "as ProducerSynonymId,")
-				.Replace("c0.Await as Await,", "")
-				.Replace("c0.UpdateTime as CoreUpdateTime,", "")
-				.Replace("c0.QuantityUpdate as CoreQuantityUpdate,", "")
-				.Replace("as PriceCode,", "as PriceId,")
-				.Replace("as OrderCost,", "as MinOrderSum,")
-				.Replace("c0.VitallyImportant as VitallyImportant", "c0.VitallyImportant or cl.VitallyImportant as VitallyImportant");
-			Export(result, sql, "offers");
+			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
+			sql = @"select
+	core.Id as OfferId,
+	ct.RegionCode as RegionId,
+	ct.PriceCode as PriceId,
+
+	core.ProductId as ProductId,
+	core.CodeFirmCr as ProducerId,
+	core.SynonymCode as ProductSynonymId,
+	core.SynonymFirmCrCode as ProducerSynonymId,
+	core.Quantity,
+	core.Code as Code,
+	core.CodeCr as CodeCr,
+	core.Junk as Junk,
+	core.Await as Await,
+	core.Unit as Unit,
+	core.Volume as Volume,
+	core.Note as Note,
+	core.Period as Period,
+	core.Doc as Doc,
+	core.MinBoundCost as MinBoundCost,
+	core.RegistryCost as RegistryCost,
+	core.MaxBoundCost as MaxBoundCost,
+	core.UpdateTime as CoreUpdateTime,
+	core.QuantityUpdate as CoreQuantityUpdate,
+	core.ProducerCost as ProducerCost,
+	core.EAN13 as EAN13,
+	core.CodeOKP as CodeOKP,
+	core.Series as Series,
+
+	ifnull(cc.RequestRatio, core.RequestRatio) as RequestRatio,
+	ifnull(cc.MinOrderSum, core.OrderCost) as MinOrderSum,
+	ifnull(cc.MinOrderCount, core.MinOrderCount) as MinOrderCount,
+	m.MinCost as LeaderCost,
+	m.PriceCode as LeaderPriceId,
+	m.RegionCode as LeaderRegionId,
+	products.CatalogId,
+	pr.Name as Producer,
+	mx.Cost as MaxProducerCost,
+	core.VitallyImportant or catalog.VitallyImportant as VitallyImportant,
+	s.Synonym as ProductSynonym,
+	sfc.Synonym as ProducerSynonym,
+	if(if(round(cc.Cost * at.UpCost,2)< core.MinBoundCost, core.MinBoundCost, round(cc.Cost*at.UpCost,2)) > core.MaxBoundCost, core.MaxBoundCost, if(round(cc.Cost*at.UpCost,2) < core.MinBoundCost, core.MinBoundCost, round(cc.Cost*at.UpCost,2))) as Cost
+";
+			sql += offersQueryParts.Select + "\r\n";
+			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
+join Usersettings.MinCosts m on m.ProductId = core.ProductId and m.RegionCode = at.RegionCode
+left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
+left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
+join farm.Synonym s on core.synonymcode = s.synonymcode
+left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.synonymfirmcrcode
+");
+			Export(result, sql, "offers", new { ClientCode = user.Client.Id });
 
 			sql = @"
 select

@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models
 		public Order(Address address, Offer offer, uint count = 1)
 			: this(offer.Price, address)
 		{
-			AddLine(offer, count);
+			TryOrder(offer, count);
 		}
 
 		public virtual uint Id { get; set; }
@@ -187,10 +187,37 @@ namespace AnalitF.Net.Client.Models
 			UpdateStat();
 		}
 
-		public virtual OrderLine AddLine(Offer offer, uint count)
+		public virtual OrderLine TryOrder(Offer offer, uint count)
 		{
-			var line = new OrderLine(this, offer, count);
-			AddLine(line);
+			uint ordered;
+			var line = TryOrder(offer, count, out ordered);
+			if (count != ordered)
+				throw new Exception(String.Format("Не удалось заказать позицию {0} заказывалось {1} заказано {2}", offer, count, ordered));
+			return line;
+		}
+
+		public virtual OrderLine TryOrder(Offer offer, uint count, out uint ordered)
+		{
+			ordered = 0;
+			if (offer.BuyingMatrixType == BuyingMatrixStatus.Denied)
+				return null;
+
+			var line = Lines.FirstOrDefault(l => l.OfferId == offer.Id);
+			if (line == null) {
+				line = new OrderLine(this, offer, count);
+				line.Count = line.CalculateAvailableQuantity(line.Count);
+				if (line.Count == 0)
+					return null;
+				ordered = line.Count;
+				AddLine(line);
+			}
+			else {
+				var originCount = line.Count += count;
+				line.Count = line.CalculateAvailableQuantity(line.Count);
+				ordered = count - (originCount - line.Count);
+				if (ordered == 0)
+					line = null;
+			}
 			return line;
 		}
 

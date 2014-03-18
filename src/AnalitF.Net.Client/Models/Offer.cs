@@ -10,6 +10,13 @@ using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
+	public enum BuyingMatrixStatus
+	{
+		Allow = 0,
+		Denied = 1,
+		Warning = 2
+	}
+
 	[Serializable]
 	public class OfferComposedId
 	{
@@ -128,6 +135,12 @@ namespace AnalitF.Net.Client.Models
 			get { return LeaderCost == ResultCost; }
 		}
 
+		[Style(Description = "Препарат запрещен к заказу")]
+		public virtual bool IsForbidden
+		{
+			get { return BuyingMatrixType == BuyingMatrixStatus.Denied; }
+		}
+
 		[Ignore]
 		public virtual OrderLine OrderLine
 		{
@@ -216,7 +229,10 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool StatLoaded { get; set; }
 
-		public virtual List<Message> UpdateOrderLine(Address address, Settings settings, string comment = null, bool edit = true)
+		public virtual List<Message> UpdateOrderLine(Address address, Settings settings,
+			Func<string, bool> confirm = null,
+			string comment = null,
+			bool edit = true)
 		{
 			var result = new List<Message>();
 			if (address == null) {
@@ -245,8 +261,9 @@ namespace AnalitF.Net.Client.Models
 					result.AddRange(OrderLine.EditValidate());
 					result.AddRange(EditValidate(address, settings));
 				}
-				else
-					result = OrderLine.SaveValidate();
+				else {
+					result = OrderLine.SaveValidate(confirm);
+				}
 				OrderCount = OrderLine.Count;
 			}
 
@@ -263,7 +280,7 @@ namespace AnalitF.Net.Client.Models
 		private List<Message> EditValidate(Address address, Settings settings)
 		{
 			var result = new List<Message>();
-			if (OrderCount.GetValueOrDefault(0) == 0)
+			if (OrderCount.GetValueOrDefault(0) == 0 || OrderLine == null)
 				return result;
 
 			if (Junk)
@@ -281,12 +298,18 @@ namespace AnalitF.Net.Client.Models
 				result.Add(Message.Warning("Превышение средней цены!"));
 			}
 
+			if (BuyingMatrixType == BuyingMatrixStatus.Denied) {
+				result.Clear();
+				OrderLine.Count = 0;
+				result.Add(Message.Warning("Препарат запрещен к заказу."));
+			}
+
 			return result;
 		}
 
-		public virtual List<Message> SaveOrderLine(Address address, Settings settings, string comment = null)
+		public virtual List<Message> SaveOrderLine(Address address, Settings settings, Func<string, bool> confirm = null, string comment = null)
 		{
-			return UpdateOrderLine(address, settings, comment, false);
+			return UpdateOrderLine(address, settings, confirm, comment, false);
 		}
 
 		[Ignore]

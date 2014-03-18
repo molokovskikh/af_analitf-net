@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Unit
 				Binding = new Binding("Period")
 			});
 			Build(typeof(Offer));
-			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nУцененные препараты", Legend(grid, typeof(Offer)));
+			Assert.AreEqual("Подсказка\r\nЖизненно важные препараты\r\nПрепарат запрещен к заказу\r\nУцененные препараты", Legend(grid, typeof(Offer)));
 		}
 
 		[Test]

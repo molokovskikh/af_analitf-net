@@ -165,7 +165,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var offer = session.Query<Offer>().First(o => o.CatalogId == catalog.Id);
 			var order = new Order(offer.Price, address);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 

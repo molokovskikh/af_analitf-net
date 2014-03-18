@@ -148,7 +148,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			session.DeleteEach<Order>();
 			var order = MakeOrder(toAddress: session.Query<Address>().OrderBy(a => a.Name).First());
 			var offer = session.Query<Offer>().First(o => o.ProductSynonym != order.Lines[0].ProductSynonym);
-			order.AddLine(offer, 1);
+			order.TryOrder(offer, 1);
 			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
 			var term = source[1].ProductSynonym.ToLower().Except(source[0].ProductSynonym.ToLower()).First().ToString();
 

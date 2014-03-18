@@ -217,12 +217,18 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
-		//todo - пересчитать
-		public virtual List<Message> SaveValidate()
+		public virtual List<Message> SaveValidate(Func<string, bool> confirmCallback = null)
 		{
 			var result = new List<Message>();
 			if (Count == 0)
 				return result;
+
+			if (BuyingMatrixType == BuyingMatrixStatus.Warning
+				&& (confirmCallback == null
+					|| !confirmCallback("Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?"))) {
+				Count = 0;
+				return result;
+			}
 
 			string error = null;
 			if (Count % RequestRatio.GetValueOrDefault(1) != 0) {
@@ -235,7 +241,6 @@ namespace AnalitF.Net.Client.Models
 					Sum,
 					MinOrderSum);
 			}
-
 			else if (MinOrderCount != null && Count < MinOrderCount) {
 				error = String.Format("'Заказанное количество \"{0}\" меньше минимального количества \"{1}\" по данной позиции!'",
 					Count,
@@ -246,11 +251,6 @@ namespace AnalitF.Net.Client.Models
 				Count = CalculateAvailableQuantity(Count);
 				result.Add(Message.Error(error));
 			}
-			//заготовка что бы не забыть
-			//проверка матрицы
-			//if (false) {
-			//	return "Препарат не входит в разрешенную матрицу закупок.\r\nВы действительно хотите заказать его?";
-			//}
 			return result;
 		}
 
@@ -261,6 +261,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CalculateAvailableQuantity(uint quantity)
 		{
+			if (Cost == 0)
+				return quantity;
 			var topBound = SafeConvert.ToUInt32(Quantity);
 			if (topBound == 0)
 				topBound = uint.MaxValue;

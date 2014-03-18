@@ -97,7 +97,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					&& o.Code == line.Code
 					&& o.RequestRatio == line.RequestRatio
 					&& o.MinOrderCount == line.MinOrderCount
-					&& o.MinOrderSum == line.MinOrderSum)
+					&& o.MinOrderSum == line.MinOrderSum
+					&& o.BuyingMatrixType != BuyingMatrixStatus.Denied)
 					.ToArray()
 					.OrderBy(o => o.ResultCost)
 					.ToArray();
@@ -121,11 +122,14 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (rest == 0)
 					break;
 
-				var existLine = order.Lines.FirstOrDefault(l => l.OfferId == offer.Id);
-				if (existLine == null) {
-					var line = new OrderLine(order, offer, rest);
-					line.Count = line.CalculateAvailableQuantity(line.Count);
+				uint ordered;
+				var line = order.TryOrder(offer, rest, out ordered);
+				if (line != null) {
 					if (ShouldCalculateStatus(line)) {
+
+						if (sourceLine.Count == ordered)
+							line.ExportId = ((OrderLine)sourceLine).ExportId;
+
 						if (line.Cost != sourceLine.Cost) {
 							line.SendResult |= LineResultStatus.CostChanged;
 							line.NewCost = line.Cost;
@@ -139,17 +143,7 @@ namespace AnalitF.Net.Client.Models.Commands
 							line.HumanizeSendError();
 						}
 					}
-					if (line.Count > 0) {
-						if (Restore)
-							line.ExportId = ((OrderLine)sourceLine).ExportId;
-						order.AddLine(line);
-					}
-					rest = rest - line.Count;
-				}
-				else {
-					var toOrder = existLine.Count + rest;
-					existLine.Count = existLine.CalculateAvailableQuantity(toOrder);
-					rest = toOrder - existLine.Count;
+					rest = rest - ordered;
 				}
 			}
 

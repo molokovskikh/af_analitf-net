@@ -6,7 +6,6 @@
 \src\AnalitF.Net.Client\Program.cs
 \src\AnalitF.Net.Test\Acceptance\BaseFixture.cs
 \src\AnalitF.Net.Test\TestHelpers\WpfHelper.cs
-\src\AnalitF.Net.Test\Tasks\Fixture.cs
 \src\Common.Tools\Common.Tools.Test\DbfFixture.cs
 \src\Common.Tools\Common.Tools.Test\ReleatableCommandFixture.cs
 \src\Common.Tools\Common.Tools\ObjectExtentions.cs
@@ -15,3 +14,5 @@
 \src\AnalitF.Net.Test\Tasks\Log.cs
 \src\AnalitF.Net.Test\TestHelpers\AutomationHelper.cs
 \src\AnalitF.Net.Test\Fixtures\CreatePromotion.cs
+src/AnalitF.Net.Test/Tasks/*.cs
+src/AnalitF.Net.Test/Fixtures/*.cs

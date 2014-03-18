@@ -57,10 +57,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
-			var command1 = new UpdateCommand();
-			Run(command1);
+			var command = new UpdateCommand();
+			Run(command);
 			var offers = localSession.CreateSQLQuery("select * from offers").List();
-			Assert.AreEqual("Обновление завершено успешно.", command1.SuccessMessage);
+			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(offers.Count, Is.GreaterThan(0));
 		}
 
@@ -224,7 +224,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			newOffer.ProducerSynonymId = (uint?)random.First();
 			localSession.Save(newOffer);
 
-			order.AddLine(newOffer, 1);
+			order.TryOrder(newOffer, 1);
 
 			var command1 = new UpdateCommand();
 			Run(command1);
@@ -323,7 +323,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Load_delay_of_payment()
 		{
-			Fixture<Client.Test.Fixtures.DelayOfPayment>();
+			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
 
 			var user = localSession.Query<User>().First();
@@ -331,7 +331,25 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.IsTrue(user.ShowSupplierCost);
 			localSession.Refresh(settings);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
-			Assert.That(localSession.Query<Client.Models.DelayOfPayment>().Count(), Is.GreaterThan(0));
+			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Calculate_buying_matrix_status()
+		{
+			var offer1 = localSession.Query<Offer>().First();
+			var offer2 = localSession.Query<Offer>().First(o => o.ProductId != offer1.ProductId);
+			var fixture = new CreateMatrix();
+			fixture.Denied = new [] { offer1.ProductId };
+			fixture.Warning = new [] { offer2.ProductId };
+			Fixture(fixture);
+
+			Run(new UpdateCommand());
+
+			localSession.Refresh(offer1);
+			localSession.Refresh(offer2);
+			Assert.AreEqual(BuyingMatrixStatus.Denied, offer1.BuyingMatrixType);
+			Assert.AreEqual(BuyingMatrixStatus.Warning, offer2.BuyingMatrixType);
 		}
 	}
 }

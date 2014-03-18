@@ -131,6 +131,8 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual BuyingMatrixStatus BuyingMatrixType { get; set; }
+
 		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups, User user)
 		{
 			Configure(user);

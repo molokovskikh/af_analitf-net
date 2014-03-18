@@ -162,7 +162,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					&& response.StatusCode != HttpStatusCode.Accepted) {
 
 					if (response.StatusCode == HttpStatusCode.InternalServerError
-						&& response.Content.Headers.ContentType.MediaType == "text/plain") {
+						&& (response.Content.Headers.ContentType != null
+							&& response.Content.Headers.ContentType.MediaType == "text/plain")) {
 						throw new EndUserError(response.Content.ReadAsStringAsync().Result);
 					}
 

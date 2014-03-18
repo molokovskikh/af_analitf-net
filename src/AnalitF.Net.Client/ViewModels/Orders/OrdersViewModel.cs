@@ -348,7 +348,6 @@ namespace AnalitF.Net.Client.ViewModels
 				return null;
 
 			if (IsCurrentSelected) {
-
 				if (SelectedOrders.Count > 1) {
 					Manager.Error("Перемещать в прайс-лист можно только по одной заявке.");
 					return null;
@@ -362,7 +361,6 @@ namespace AnalitF.Net.Client.ViewModels
 				return Run(new ReorderCommand<Order>(CurrentOrder.Id));
 			}
 			else {
-
 				if (SelectedSentOrders.Count > 1) {
 					Manager.Error("Перемещать в прайс-лист можно только по одной заявке.");
 					return null;

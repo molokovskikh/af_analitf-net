@@ -17,8 +17,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var offer = session.Query<Offer>().First();
 			var address = session.Query<Address>().First();
 
-			Order = new Order(offer.Price, address);
-			Order.AddLine(offer, 1);
+			Order = new Order(address, offer);
 			session.Save(Order);
 		}
 	}

@@ -127,8 +127,9 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
+    <Compile Include="Fixtures\CreateMatrix.cs" />
     <Compile Include="Fixtures\CreateServerAddress.cs" />
-    <Compile Include="Fixtures\DelayOfPayment.cs" />
+    <Compile Include="Fixtures\CreateDelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
     <Compile Include="Fixtures\LocalDelayOfPayment.cs" />

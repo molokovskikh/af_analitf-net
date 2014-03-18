@@ -15,10 +15,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var address = session.Query<Address>().First();
 
 			Order = new Order(offer.Price, address);
-			Order.AddLine(offer, 1);
+			Order.TryOrder(offer, 1);
 			var offer1 = session.Query<Offer>().First(o => o.Price == Order.Price
 				&& o.Id.OfferId != Order.Lines[0].OfferId.OfferId);
-			var line = Order.AddLine(offer1, 1);
+			var line = Order.TryOrder(offer1, 1);
 			line.Apply(new OrderLineResult {
 				Result = LineResultStatus.NoOffers
 			});
