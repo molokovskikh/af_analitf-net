@@ -70,7 +70,8 @@ delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();
-			var job = Session.Query<RequestLog>().FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
+			var job = Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
+				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
 			if (job != null) {
 				job.IsConfirmed = true;
 				File.Delete(job.OutputFile(Config));

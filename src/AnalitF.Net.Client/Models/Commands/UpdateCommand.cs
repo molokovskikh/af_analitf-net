@@ -156,34 +156,41 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			var done = false;
 			HttpResponseMessage response = null;
-			while (!done) {
-				response = task.Result;
-				if (response.StatusCode != HttpStatusCode.OK
-					&& response.StatusCode != HttpStatusCode.Accepted) {
+			try {
+				while (!done) {
+					response = task.Result;
+					if (response.StatusCode != HttpStatusCode.OK
+						&& response.StatusCode != HttpStatusCode.Accepted) {
 
-					if (response.StatusCode == HttpStatusCode.InternalServerError
-						&& (response.Content.Headers.ContentType != null
-							&& response.Content.Headers.ContentType.MediaType == "text/plain")) {
-						throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+						if (response.StatusCode == HttpStatusCode.InternalServerError
+							&& (response.Content.Headers.ContentType != null
+								&& response.Content.Headers.ContentType.MediaType == "text/plain")) {
+							throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+						}
+
+						throw new RequestException(
+							String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+								response.StatusCode,
+								response.Content.ReadAsStringAsync().Result),
+							response.StatusCode);
 					}
 
-					throw new RequestException(
-						String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
-							response.StatusCode,
-							response.Content.ReadAsStringAsync().Result),
-						response.StatusCode);
+					done = response.StatusCode == HttpStatusCode.OK;
+					Reporter.Stage("Подготовка данных");
+					if (!done) {
+						response.Dispose();
+						Token.WaitHandle.WaitOne(Config.RequestInterval);
+						Token.ThrowIfCancellationRequested();
+						task = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
+					}
 				}
-
-				done = response.StatusCode == HttpStatusCode.OK;
-				Reporter.Stage("Подготовка данных");
-				if (!done) {
-					Token.WaitHandle.WaitOne(Config.RequestInterval);
-					Token.ThrowIfCancellationRequested();
-				}
-
-				task = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
+				return response;
 			}
-			return response;
+			catch(Exception) {
+				if (response != null)
+					response.Dispose();
+				throw;
+			}
 		}
 
 		public UpdateResult ProcessUpdate()
@@ -525,8 +532,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private static void Download(HttpResponseMessage response, string filename, ProgressReporter reporter)
 		{
-			using (var file = File.Create(filename)) {
-				var stream = response.Content.ReadAsStreamAsync().Result;
+			using (var file = File.Create(filename))
+			using (var stream = response.Content.ReadAsStreamAsync().Result) {
 				reporter.Weight((int)response.Content.Headers.ContentLength.GetValueOrDefault());
 				var buffer = new byte[4*1024];
 				int count;
