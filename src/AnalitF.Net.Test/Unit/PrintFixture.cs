@@ -1,30 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Test.Integration.ViewModes;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
-	public class PrintFixture : ViewModelFixture
+	public class PrintFixture : BaseUnitFixture
 	{
 		[Test]
 		public void Print()

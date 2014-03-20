@@ -27,7 +27,6 @@ namespace AnalitF.Net.Test.Integration
 			app = CreateBootstrapper();
 			FileHelper.InitDir("test");
 			disposable.Add(Disposable.Create(() => Directory.Delete("test", true)));
-			disposable.Add(app);
 		}
 
 		[Test]
@@ -58,6 +57,7 @@ namespace AnalitF.Net.Test.Integration
 			app.Serialize();
 			var savedAddressId = shell.CurrentAddress.Id;
 
+			app = CreateBootstrapper();
 			StartShell();
 			Assert.AreEqual(savedAddressId, shell.CurrentAddress.Id);
 			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
@@ -91,6 +91,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			//нужно переопределить имя что бы избежать конфликтов с запущеным приложением
 			var app = new AppBootstrapper(false);
+			disposable.Add(app);
 			app.Config.RootDir = "test";
 			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
 			Execute.ResetWithoutDispatcher();

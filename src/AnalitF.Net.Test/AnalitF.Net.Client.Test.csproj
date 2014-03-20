@@ -158,7 +158,6 @@
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
     <Compile Include="Integration\Models\StatFixture.cs" />
     <Compile Include="Integration\Commands\UpdateFixture.cs" />
-    <Compile Include="Integration\PrintFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
     <Compile Include="Integration\RasFixture.cs" />
     <Compile Include="Integration\ViewModes\BatchFixture.cs" />
@@ -233,6 +232,7 @@
     <Compile Include="Unit\Models\OrderFixture.cs" />
     <Compile Include="Unit\Models\PriceFixture.cs" />
     <Compile Include="Unit\PriceResultFixture.cs" />
+    <Compile Include="Unit\PrintFixture.cs" />
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
     <Compile Include="Unit\SearchBehaviorFixture.cs" />

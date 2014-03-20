@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -342,7 +343,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Dispose();
 			}
 			catch(Exception e) {
-				log.Error(String.Format("Ошибка при освобождении объекта {0}", GetType()), e);
+				log.Error(String.Format("Ошибка при освобождении объекта {0} {1}", GetType(), GetHashCode()), e);
 			}
 		}
 	}
