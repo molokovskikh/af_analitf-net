@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -116,6 +117,17 @@ namespace AnalitF.Net.Client.Helpers
 			if (size < 1073741824)
 				return (size / 1048576f).ToString("#.##") + " МБ";
 			return (size / 1073741824f).ToString("#.##") + " ГБ";
+		}
+
+		public static T Cache<T, TKey>(SimpleMRUCache cache, TKey key, Func<TKey, T> @select)
+		{
+			var cached = (T)cache[key];
+			if (!Equals(cached, default(T))) {
+				return cached;
+			}
+			cached = @select(key);
+			cache.Put(key, cached);
+			return cached;
 		}
 	}
 }

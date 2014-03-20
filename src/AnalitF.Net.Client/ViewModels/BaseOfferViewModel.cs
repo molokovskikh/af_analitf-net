@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
-		protected Offer lastEditOffer;
+		protected NotifyValue<Offer> LastEditOffer;
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
 		//адрес доставки для текущего элемента, нужен если мы отображем элементы которые относятся к разным адресам доставки
@@ -46,6 +46,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.initOfferId = initOfferId;
 
+			LastEditOffer = new NotifyValue<Offer>();
 			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
 			CurrentOffer = new NotifyValue<Offer>();
 			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
@@ -165,7 +166,10 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 				}, CloseCancellation.Token);
 
+			//изменения в LastEditOffer могут произойти уже после перехода на другое предложение
+			//по этому нужно отслеживать изменения в CurrentOffer и LastEditOffer
 			var observable = this.ObservableForProperty(m => m.CurrentOffer.Value.OrderCount)
+				.Merge(this.ObservableForProperty(m => m.LastEditOffer.Value.OrderCount))
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
 
@@ -241,17 +245,17 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentOffer.Value == null)
 				return;
 
-			lastEditOffer = CurrentOffer.Value;
+			LastEditOffer.Value = CurrentOffer.Value;
 			LoadStat();
 			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
 		public void OfferCommitted()
 		{
-			if (lastEditOffer == null)
+			if (LastEditOffer.Value == null)
 				return;
 
-			ShowValidationError(lastEditOffer.SaveOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
+			ShowValidationError(LastEditOffer.Value.SaveOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
 		protected void ShowValidationError(List<Message> messages)
@@ -262,8 +266,9 @@ namespace AnalitF.Net.Client.ViewModels
 			//мог ввести корректное значение
 			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
-				if (CurrentOffer.Value == null || CurrentOffer.Value.Id != lastEditOffer.Id) {
-					CurrentOffer.Value = lastEditOffer;
+				if (LastEditOffer.Value != null
+					&& (CurrentOffer.Value == null || CurrentOffer.Value.Id != LastEditOffer.Value.Id)) {
+					CurrentOffer.Value = LastEditOffer.Value;
 				}
 			}
 		}
@@ -401,7 +406,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return;
 
 			var key = HistoryOrdersCacheKey();
-			HistoryOrders = Cache(key, cache, k => {
+			HistoryOrders = Util.Cache(cache, key, k => {
 				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
@@ -426,17 +431,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			});
 
 			LoadStat();
-		}
-
-		public T Cache<T, TKey>(TKey key, SimpleMRUCache cache, Func<TKey, T> select)
-		{
-			var cached = (T)cache[key];
-			if (!Equals(cached, default(T))) {
-				return cached;
-			}
-			cached = select(key);
-			cache.Put(key, cached);
-			return cached;
 		}
 
 		private object HistoryOrdersCacheKey()

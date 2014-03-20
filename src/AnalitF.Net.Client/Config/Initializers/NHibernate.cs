@@ -68,6 +68,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Index<Reject>(w => w.Series);
 			Index<Offer>(o => o.ProductId);
 			Index<Offer>(o => o.CatalogId);
+			Index<SentOrder>(o => o.SentOn);
 
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => {

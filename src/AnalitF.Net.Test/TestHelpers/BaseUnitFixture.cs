@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Microsoft.Reactive.Testing;
@@ -16,6 +17,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected TestScheduler scheduler;
 		protected MessageBus bus;
+		protected WindowManager manager;
 
 		[SetUp]
 		public void Setup()
@@ -30,7 +32,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			BaseScreen.TestSchuduler = scheduler;
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
 
-			ViewModelFixture.StubWindowManager();
+			manager = ViewModelFixture.StubWindowManager();
 		}
 
 		[TearDown]

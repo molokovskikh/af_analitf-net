@@ -119,8 +119,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void UpdateMaxProducers()
 		{
-			if (CurrentCatalog == null)
+			if (StatelessSession == null)
 				return;
+
+			if (CurrentCatalog == null) {
+				MaxProducerCosts.Value = new List<MaxProducerCost>();
+				return;
+			}
 
 			var catalogId = CurrentCatalog.Id;
 			MaxProducerCosts.Value = StatelessSession.Query<MaxProducerCost>()
@@ -145,6 +150,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void Query()
 		{
+			if (StatelessSession == null)
+				return;
+
 			if (CatalogOffers.Count == 0) {
 				if (IsFilterByCatalogName) {
 					var catalogs = StatelessSession.Query<Catalog>()

@@ -196,7 +196,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OfferUpdated();
 
-			if (lastEditOffer.OrderLine == null && CurrentFilter.Value == filters[1]) {
+			if (LastEditOffer.Value.OrderLine == null && CurrentFilter.Value == filters[1]) {
 				Filter();
 			}
 		}
