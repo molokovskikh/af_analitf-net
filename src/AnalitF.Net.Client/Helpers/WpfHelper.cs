@@ -163,7 +163,7 @@ namespace AnalitF.Net.Client.Helpers
 			var parent = view.Parent();
 			if (parent == null)
 				return Enumerable.Empty<T>();
-			return parent.Children().Except(new [] { view }).OfType<T>();
+			return parent.Children().Except(new[] { view }).OfType<T>();
 		}
 
 		public static IEnumerable<T> Descendants<T>(this DependencyObject view)

@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.SelfClose"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	behaviors:Focusable.DefaultFocus="{x:Reference TryClose}"
+	Padding="5">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="Auto" />
+		</Grid.ColumnDefinitions>
+		<TextBlock Padding="5" Grid.Row="0" Grid.Column="1" Name="Message" />
+		<TextBlock Padding="5" Grid.Row="1" Grid.Column="1" Name="CountDown" />
+		<Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+			Source="/AnalitF.Net.Client;component/assets/images/Question.ico" />
+		<Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+			HorizontalAlignment="Center"
+			Margin="0, 10, 0, 0"
+			Padding="10, 1, 10, 1"
+			Name="TryClose">OK</Button>
+	</Grid>
+</UserControl>

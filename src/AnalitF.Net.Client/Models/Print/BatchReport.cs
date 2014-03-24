@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Models.Print
 		protected override void BuildDoc()
 		{
 			Header(string.Format("Текущий сводный заказ от {0}", address.Name));
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("Наименование", 232),
 				new PrintColumn("Производитель", 168),
 				new PrintColumn("Прайс-лист", 132),

@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Models.Print
 			doc.Blocks.Add(new Paragraph(new Run(text)));
 			if (price.Order != null)
 				doc.Blocks.Add(new Paragraph(new Run(price.Order.PersonalComment)));
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("№ п/п", 40),
 				new PrintColumn("Наименование", 260),
 				new PrintColumn("Производитель", 196),

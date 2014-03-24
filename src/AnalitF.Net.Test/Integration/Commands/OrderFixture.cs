@@ -101,7 +101,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		public void Process_batch_request()
 		{
 			var fixture = new SmartOrder {
-				ProductIds = new [] {
+				ProductIds = new[] {
 					localSession.Query<Offer>().First().ProductId
 				}
 			};
@@ -125,7 +125,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		public void Transit_service_fields()
 		{
 			var fixture = new SmartOrder {
-				ProductIds = new [] {
+				ProductIds = new[] {
 					localSession.Query<Offer>().First().ProductId
 				}
 			};
@@ -145,7 +145,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var order = MakeOrderClean();
 
 			var fixture = new SmartOrder {
-				ProductIds = new [] {
+				ProductIds = new[] {
 					localSession.Query<Offer>().First().ProductId
 				}
 			};

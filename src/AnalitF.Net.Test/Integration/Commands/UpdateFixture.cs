@@ -340,8 +340,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var offer1 = localSession.Query<Offer>().First();
 			var offer2 = localSession.Query<Offer>().First(o => o.ProductId != offer1.ProductId);
 			var fixture = new CreateMatrix();
-			fixture.Denied = new [] { offer1.ProductId };
-			fixture.Warning = new [] { offer2.ProductId };
+			fixture.Denied = new[] { offer1.ProductId };
+			fixture.Warning = new[] { offer2.ProductId };
 			Fixture(fixture);
 
 			Run(new UpdateCommand());
@@ -350,6 +350,20 @@ namespace AnalitF.Net.Test.Integration.Commands
 			localSession.Refresh(offer2);
 			Assert.AreEqual(BuyingMatrixStatus.Denied, offer1.BuyingMatrixType);
 			Assert.AreEqual(BuyingMatrixStatus.Warning, offer2.BuyingMatrixType);
+		}
+
+		[Test]
+		public void Export_schedule()
+		{
+			var fixture = new CreateSchedule {
+				Schedules = new[] { new TimeSpan(14, 0, 0) }
+			};
+			Fixture(fixture);
+			Run(new UpdateCommand());
+
+			var schedules = localSession.Query<Schedule>().ToArray();
+			Assert.AreEqual(1, schedules.Length);
+			Assert.AreEqual(new TimeSpan(14, 0, 0), schedules[0].UpdateAt);
 		}
 	}
 }

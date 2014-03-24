@@ -53,7 +53,7 @@ namespace AnalitF.Net.Test.Unit
 			grid.Columns.Add(new DataGridTextColumn { Header = "Название" });
 			content.Content = grid;
 			settings.RestoreView(content);
-			Assert.AreEqual(1,grid.Columns.Count);
+			Assert.AreEqual(1, grid.Columns.Count);
 		}
 	}
 }

@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public static class AutomationHelper
 	{
-		public  static void Invoke(this AutomationElement el)
+		public static void Invoke(this AutomationElement el)
 		{
 			var invokePattern = (InvokePattern)el.GetCurrentPattern(InvokePattern.Pattern);
 			invokePattern.Invoke();

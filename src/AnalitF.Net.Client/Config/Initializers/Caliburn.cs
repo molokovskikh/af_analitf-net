@@ -5,6 +5,7 @@ using System.Reactive.Concurrency;
 using System.Windows;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.UI;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -65,9 +66,15 @@ namespace AnalitF.Net.Client.Config.Initializers
 				Commands.Bind(viewModel, view, context);
 				var baseScreen = viewModel as BaseScreen;
 				if (baseScreen != null) {
-					var disposable = baseScreen.ResultsSink
-						.Subscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()));
-					baseScreen.OnCloseDisposable.Add(disposable);
+					baseScreen.ResultsSink
+						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
+							baseScreen.CloseCancellation);
+				}
+				var baseShell = viewModel as BaseShell;
+				if (baseShell != null) {
+					baseShell.ResultsSink
+						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
+							baseShell.CancelDisposable);
 				}
 			};
 

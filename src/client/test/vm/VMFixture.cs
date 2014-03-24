@@ -81,7 +81,7 @@ namespace vm
 			var setupProcess = guestsession.ProcessCreateEx(target, arguments,
 				null, null,
 				0, ProcessPriority.ProcessPriority_Default, null);
-			var cmd = new [] { target }.Concat(arguments).Implode(" ");
+			var cmd = new[] { target }.Concat(arguments).Implode(" ");
 			Assert.AreEqual(setupProcess.Status, ProcessStatus.ProcessStatus_Starting, cmd);
 			while (setupProcess.Status == ProcessStatus.ProcessStatus_Started
 				|| setupProcess.Status == ProcessStatus.ProcessStatus_Starting) {

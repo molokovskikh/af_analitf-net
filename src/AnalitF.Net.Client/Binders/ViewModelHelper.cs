@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.Binders
 				IEnumerator<IResult> actions = null;
 
 				if (result is IResult) {
-					result = new [] { (IResult)result };
+					result = new[] { (IResult)result };
 				}
 
 				if (result is IEnumerable<IResult>) {

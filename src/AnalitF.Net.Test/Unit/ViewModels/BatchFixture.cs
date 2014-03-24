@@ -180,7 +180,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Edit_order_multi_address()
 		{
-			
 			var address1 = new Address("тест1");
 			var address2 = new Address("тест2");
 			InitAddress(address1, address2);

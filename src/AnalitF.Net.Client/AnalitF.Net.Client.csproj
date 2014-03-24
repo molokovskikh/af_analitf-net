@@ -291,6 +291,7 @@
     <Compile Include="Models\Results\SelectDirResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />
+    <Compile Include="Models\Schedule.cs" />
     <Compile Include="Models\SentOrder.cs" />
     <Compile Include="Models\SentOrderLine.cs" />
     <Compile Include="Models\Settings.cs" />
@@ -317,6 +318,7 @@
     <Compile Include="ViewModels\Dialogs\DocModel.cs" />
     <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\PostUpdate.cs" />
+    <Compile Include="ViewModels\Dialogs\SelfClose.cs" />
     <Compile Include="ViewModels\Dialogs\SimpleSettings.cs" />
     <Compile Include="ViewModels\Dialogs\TextViewModel.cs" />
     <Compile Include="ViewModels\Journal.cs" />
@@ -374,6 +376,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PostUpdate.xaml.cs">
       <DependentUpon>PostUpdate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
+      <DependentUpon>SelfClose.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SimpleSettingsView.xaml.cs">
       <DependentUpon>SimpleSettingsView.xaml</DependentUpon>
@@ -528,6 +533,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\SelfClose.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -734,6 +743,7 @@
     <Resource Include="Assets\images\logo.png" />
     <Resource Include="Assets\images\price-tag-log.png" />
     <Resource Include="Assets\images\splash.png" />
+    <Resource Include="Assets\images\Question.ico" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <ItemGroup>

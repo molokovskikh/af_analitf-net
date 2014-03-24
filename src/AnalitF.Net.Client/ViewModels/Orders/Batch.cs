@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			NavigateOnShowCatalog = true;
 			DisplayName = "АвтоЗаказ";
 			AddressSelector = new AddressSelector(Session, this);
-			Filter = new [] {
+			Filter = new[] {
 				"Все",
 				"Заказано",
 				"   Минимальные",
@@ -283,7 +283,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public IEnumerable<IResult> Save()
 		{
-			var dialog = new SaveFileResult(new [] {
+			var dialog = new SaveFileResult(new[] {
 				Tuple.Create("Отчет", ".dbf"),
 				Tuple.Create("Excel", ".xls"),
 				Tuple.Create("Расширенный Excel", ".xls"),

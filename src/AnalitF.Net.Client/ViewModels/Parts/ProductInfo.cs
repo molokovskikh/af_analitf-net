@@ -80,7 +80,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				(sender, args) => {
 					args.CanExecute = CanShowCatalogWithMnnFilter;
 				});
-			Bindings = new [] { binding, binding1, binding2 };
+			Bindings = new[] { binding, binding1, binding2 };
 		}
 
 		public Catalog CurrentCatalog

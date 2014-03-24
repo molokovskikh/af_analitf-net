@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.Models.Print
 					waybill.SupplierName));
 			header.TextAlignment = TextAlignment.Center;
 
-			var columns = new [] {
+			var columns = new[] {
 				new PrintColumn("№ пп", 27),
 				new PrintColumn("Наименование и краткая характеристика товара", 200),
 				new PrintColumn("Серия товара", 84),
@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Кол-во", 36),
 				new PrintColumn("Розн. сумма, руб", 56),
 			};
-			var columnGrops = new [] {
+			var columnGrops = new[] {
 				new ColumnGroup("Предприятие - изготовитель", 4, 6)
 			};
 			var rows = lines.Select((l, i) => new object[] {

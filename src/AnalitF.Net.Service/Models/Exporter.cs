@@ -131,6 +131,29 @@ namespace AnalitF.Net.Service.Models
 			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
 
 			string sql;
+
+			if (clientSettings.AllowAnalitFSchedule) {
+				//клиент хранит время обновления как TimeSpan
+				//в базе это преобразуется в TimeSpan.Ticks
+				//tick - это 100 наносекунд те 10^7
+				sql = @"
+SELECT
+	s.Id,
+	s.Hour * 60 * 60 * 1000 * 1000 * 10 + s.Minute * 60 * 1000 * 1000 * 10 as UpdateAt
+FROM
+	UserSettings.AnalitFSchedules s
+WHERE
+	s.ClientId = ?clientId
+and s.Enable = 1";
+				Export(result, sql, "Schedules", new { clientId = user.Client.Id });
+			}
+			else {
+				//если настройка отключена мы все равно должны экспортировать пустую таблицу
+				//тк у клиента опция сначала опция могла быть включена а затем выключена
+				//что бы отключение сработало нужно очистить таблицу
+				Export(result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
+			}
+
 			sql = @"
 select Id,
 	Product,
@@ -604,7 +627,7 @@ where a.MailId in ({0})", ids.Implode());
 						g.RegionCode,
 						g.ClientAddition
 					}),
-				false);
+					false);
 
 				var connection = (MySqlConnection)session.Connection;
 				var items = Orders.SelectMany(o => o.OrderItems);
@@ -637,7 +660,7 @@ where a.MailId in ({0})", ids.Implode());
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Convert.ToUInt32(r["CatalogId"]));
 
 				Export(result, "OrderLines",
-					new [] {
+					new[] {
 						"ExportOrderId",
 						"ExportId",
 						"Count",
@@ -680,9 +703,9 @@ where a.MailId in ({0})", ids.Implode());
 							i.RowId,
 							i.Quantity,
 							i.ProductId,
-							catalogIdLookup[i.ProductId].FirstOrDefault(),//CatalogId
+							catalogIdLookup[i.ProductId].FirstOrDefault(),
 							i.SynonymCode,
-							producerLookup[i.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),//Producer
+							producerLookup[i.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
 							i.CodeFirmCr,
 							i.SynonymFirmCrCode,
 							i.Code,
@@ -697,7 +720,7 @@ where a.MailId in ({0})", ids.Implode());
 							i.OfferInfo.MaxBoundCost,
 							i.OfferInfo.VitallyImportant,
 							i.OfferInfo.RegistryCost,
-							maxProducerCost[Tuple.Create(i.ProductId, i.CodeFirmCr)].FirstOrDefault(),//MaxProducerCost
+							maxProducerCost[Tuple.Create(i.ProductId, i.CodeFirmCr)].FirstOrDefault(),
 							i.RequestRatio,
 							i.OrderCost,
 							i.MinOrderCount,
@@ -706,8 +729,8 @@ where a.MailId in ({0})", ids.Implode());
 							i.EAN13,
 							i.CodeOKP,
 							i.Series,
-							productSynonymLookup[i.SynonymCode.GetValueOrDefault()].FirstOrDefault(),//ProductSynonym
-							producerSynonymLookup[i.SynonymFirmCrCode.GetValueOrDefault()].FirstOrDefault(),//ProducerSynonym
+							productSynonymLookup[i.SynonymCode.GetValueOrDefault()].FirstOrDefault(),
+							producerSynonymLookup[i.SynonymFirmCrCode.GetValueOrDefault()].FirstOrDefault(),
 							i.Cost,
 							i.Order.RegionCode,
 							i.CoreId,

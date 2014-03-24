@@ -98,7 +98,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			IoC.BuildUp = instance => {
 				Util.SetValue(instance, "Manager", manager);
-				if (shell != null)
+				if (instance != null && shell != null
+					&& (instance.GetType().GetProperty("Shell") != null || instance.GetType().GetField("Shell") != null))
 					Util.SetValue(instance, "Shell", shell.Value);
 			};
 

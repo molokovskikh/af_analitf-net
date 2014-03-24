@@ -383,7 +383,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			switch (format) {
 				case "r":
-					return String.Join(" ", new [] {
+					return String.Join(" ", new[] {
 						ToString() + ":",
 						LongSendError
 					});

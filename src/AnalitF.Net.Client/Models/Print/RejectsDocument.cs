@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Models.Print
 			paginator.PageSize = new Size(size.Height, size.Width);
 
 			Header("Препараты, предписанные к изъятию из аптечной сети");
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("Серия", 96),
 				new PrintColumn("Наименование", 364),
 				new PrintColumn("Фирма-изготовитель", 208),

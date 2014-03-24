@@ -128,6 +128,7 @@
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
+    <Compile Include="Fixtures\CreateSchedule.cs" />
     <Compile Include="Fixtures\CreateServerAddress.cs" />
     <Compile Include="Fixtures\CreateDelayOfPayment.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
@@ -217,6 +218,7 @@
     <Compile Include="Unit\Models\ConfigFixture.cs" />
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
+    <Compile Include="Unit\Models\ScheduleFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
@@ -235,6 +237,7 @@
     <Compile Include="Unit\PrintFixture.cs" />
     <Compile Include="Unit\ProgressReporterFixture.cs" />
     <Compile Include="Unit\QuickSearchFixture.cs" />
+    <Compile Include="Unit\RxHelperFixture.cs" />
     <Compile Include="Unit\SearchBehaviorFixture.cs" />
     <Compile Include="Unit\SettingsFixture.cs" />
     <Compile Include="Unit\SingleInstanceFixture.cs" />
@@ -247,6 +250,8 @@
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
+    <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
+    <Compile Include="Unit\ViewModels\ShellFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AnalitF.Net.Client\AnalitF.Net.Client.csproj">

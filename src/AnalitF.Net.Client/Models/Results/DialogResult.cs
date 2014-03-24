@@ -39,6 +39,11 @@ namespace AnalitF.Net.Client.Models.Results
 				args.WasCancelled = !manager.ShowFixedDialog(Model).GetValueOrDefault(true);
 			else
 				args.WasCancelled = !manager.ShowDialog(Model, null, settings).GetValueOrDefault(true);
+			RaiseCompleted(args);
+		}
+
+		public void RaiseCompleted(ResultCompletionEventArgs args)
+		{
 			if (Completed != null)
 				Completed(this, args);
 		}

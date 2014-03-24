@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ViewOffersByCatalogEnabled = new NotifyValue<bool>(() => Settings.Value.CanViewOffersByCatalogName, Settings);
 
 			DisplayName = "Поиск препаратов в каталоге";
-			Filters = new [] {
+			Filters = new[] {
 				new FilterDeclaration("Все"),
 				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные"),
 				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),

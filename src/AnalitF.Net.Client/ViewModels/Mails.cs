@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public Mails()
 		{
 			DisplayName = "Минипочта";
-			Sort = new [] {
+			Sort = new[] {
 				"Сортировка: Дата",
 				"Сортировка: Тема",
 				"Сортировка: Отправитель",
@@ -206,7 +206,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;
 			var progress = new ProgressMessageHandler();
-			var handlers = Settings.Value.Handlers().Concat(new [] { progress }).ToArray();
+			var handlers = Settings.Value.Handlers().Concat(new[] { progress }).ToArray();
 			var client = HttpClientFactory.Create(handler, handlers);
 			client.DefaultRequestHeaders.Add("version", version.ToString());
 			if (Settings.Value.DebugTimeout > 0)
@@ -215,7 +215,7 @@ namespace AnalitF.Net.Client.ViewModels
 				client.DefaultRequestHeaders.Add("debug-fault", "true");
 			client.BaseAddress = Shell.Config.BaseUrl;
 
-			var data = new [] {
+			var data = new[] {
 				String.Format("urn:data:{0}:{1}", attachment.GetType().Name.ToLower(), attachment.GetId())
 			};
 

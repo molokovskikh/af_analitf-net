@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult ExportWaybill()
 		{
-			var columns = new [] {
+			var columns = new[] {
 				"№ пп",
 				"Наименование и краткая характеристика товара",
 				"Серия товара Сертификат",
@@ -180,7 +180,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult ExportRegistry()
 		{
-			var columns = new [] {
+			var columns = new[] {
 				"№ пп",
 				"Наименование",
 				"Серия товара",

@@ -289,7 +289,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				return new [] {
+				return new[] {
 					MapPath("waybills"),
 					MapPath("rejects"),
 					MapPath("docs"),
@@ -414,7 +414,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DelegatingHandler[] Handlers()
 		{
-			return new [] {
+			return new[] {
 				new RasHandler(RasConnection),
 			};
 		}

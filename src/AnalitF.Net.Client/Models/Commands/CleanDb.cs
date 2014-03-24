@@ -8,7 +8,7 @@ namespace AnalitF.Net.Client.Models.Commands
 	{
 		public override void Execute()
 		{
-			var ignored = new [] {
+			var ignored = new[] {
 				"SentOrders",
 				"SentOrderLines",
 				"Settings",

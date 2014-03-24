@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -10,8 +11,10 @@ using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
-using log4net;
+using Caliburn.Micro;
+using Devart.Common;
 using ReactiveUI;
+using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
@@ -68,13 +71,72 @@ namespace AnalitF.Net.Client.Helpers
 		public static IDisposable CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext)
 		{
 			return observable.Subscribe(e => {
+#if !DEBUG
 				try {
+#endif
 					onNext(e);
+#if !DEBUG
 				}
 				catch(Exception ex) {
 					log.Error("Ошибка при обработке задачи", ex);
 				}
+#endif
 			});
+		}
+
+		public static void CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext, CancellationDisposable cancellation)
+		{
+			observable.Subscribe(e => {
+#if !DEBUG
+				try {
+#endif
+					onNext(e);
+#if !DEBUG
+				}
+				catch(Exception ex) {
+					log.Error("Ошибка при обработке задачи", ex);
+				}
+#endif
+			}, cancellation.Token);
+		}
+
+		//фактический это просто переписаный SequentialResult
+		public static IObservable<IResult> ToObservable(IEnumerable<IResult> results)
+		{
+			if (results == null)
+				return Observable.Empty<IResult>();
+
+			return Observable.Create<IResult>(o => {
+				var cancellation = new CancellationDisposable();
+				try {
+					var enumerator = results.GetEnumerator();
+					CollectResult(enumerator, o, cancellation);
+				}
+				catch(Exception e) {
+					o.OnError(e);
+				}
+				return cancellation;
+			});
+		}
+
+		private static void CollectResult(IEnumerator<IResult> enumerator, IObserver<IResult> observer, CancellationDisposable cancellation)
+		{
+			try {
+				if (cancellation.Token.IsCancellationRequested || !enumerator.MoveNext())
+					observer.OnCompleted();
+				IoC.BuildUp(enumerator.Current);
+			}
+			catch(Exception e) {
+				observer.OnError(e);
+				return;
+			}
+			enumerator.Current.Completed += (sender, args) => {
+				if (args.WasCancelled)
+					observer.OnCompleted();
+				else
+					CollectResult(enumerator, observer, cancellation);
+			};
+			observer.OnNext(enumerator.Current);
 		}
 	}
 }

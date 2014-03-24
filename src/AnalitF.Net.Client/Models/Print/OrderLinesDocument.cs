@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Models.Print
 					model.End.Value.ToShortDateString());
 				Header(text);
 			}
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("Наименование", 232),
 				new PrintColumn("Производитель", 168),
 				new PrintColumn("Прайс-лист", 132),

@@ -24,6 +24,7 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
@@ -31,6 +32,7 @@ using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
+using SelfClose = AnalitF.Net.Client.Views.Dialogs.SelfClose;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -56,7 +58,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private Main defaultItem;
 
 		protected IScheduler Scheduler = BaseScreen.TestSchuduler ?? DefaultScheduler.Instance;
-		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		protected IMessageBus Bus = RxApp.MessageBus;
 
 		[DataMember]
@@ -65,7 +66,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 
 		public Subject<string> Notifications = new Subject<string>();
-		public CompositeDisposable CloseDisposable = new CompositeDisposable();
+		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
+		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 
 		public ShellViewModel()
 			: this(false)
@@ -75,6 +77,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel(bool unitTesting)
 		{
+			CloseDisposable.Add(CancelDisposable);
 			UnitTesting = unitTesting;
 			DisplayName = "АналитФАРМАЦИЯ";
 			defaultItem = new Main(Config);
@@ -147,6 +150,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}));
 			CloseDisposable.Add(Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
 			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session));
+
+			Schedules.Changed().Select(_ =>
+				Schedules.Value.Count == 0
+					? Observable.Empty<bool>()
+					: Observable.Timer(TimeSpan.Zero, 20.Second(), UiScheduler)
+						.Select(__ => Schedule.IsOutdate(Schedules.Value, Settings.Value.LastUpdate.GetValueOrDefault())))
+				.Switch()
+				.Where(k => k)
+				.SelectMany(_ => RxHelper.ToObservable(UpdateBySchedule()))
+				.Subscribe(ResultsSink, CancelDisposable.Token);
 		}
 
 		public Config.Config Config
@@ -331,6 +344,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
+			Schedules.Value = session.Query<Schedule>().ToList();
 			defaultItem.Update();
 		}
 
@@ -572,6 +586,22 @@ namespace AnalitF.Net.Client.ViewModels
 			return Sync(new UpdateCommand());
 		}
 
+		private IEnumerable<IResult> UpdateBySchedule()
+		{
+			if (!Schedule.CanStartUpdate()) {
+				log.WarnFormat("Обновление по расписанию не может быть запущено тк есть открытые диалоговые окна");
+				yield break;
+			}
+			yield return new DialogResult(new Dialogs.SelfClose("Сейчас будет произведено обновление данных\r\nпо установленному расписанию.",
+				"Обновление", 10) {
+					Scheduler = UiScheduler
+				}) {
+					ShowSizeToContent = true,
+				};
+			foreach (var result in Update()) {
+				yield return result;
+			}
+		}
 
 		public IEnumerable<IResult> Batch(string fileName)
 		{
@@ -821,6 +851,13 @@ namespace AnalitF.Net.Client.ViewModels
 			if (screen != null) {
 				screen.PostActivated();
 			}
+		}
+
+		protected override void Configure(IScreen newItem)
+		{
+			Util.SetValue(newItem, "Manager", windowManager);
+			Util.SetValue(newItem, "Shell", this);
+			Util.SetValue(newItem, "Env", Env);
 		}
 
 #if DEBUG

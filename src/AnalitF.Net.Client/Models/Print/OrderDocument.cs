@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(String.Format("Дата прайс-листа от {0}", order.Price.PriceDate));
 			Block(order.Comment);
 
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("№ п/п", 40),
 				new PrintColumn("Наименование", 220),
 				new PrintColumn("Производитель", 165),

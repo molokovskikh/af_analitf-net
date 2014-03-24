@@ -26,7 +26,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			model.User = new User();
 			model.Address = new Address("тест");
-			model.Addresses = new [] { model.Address };
+			model.Addresses = new[] { model.Address };
 			ScreenExtensions.TryActivate(model);
 		}
 

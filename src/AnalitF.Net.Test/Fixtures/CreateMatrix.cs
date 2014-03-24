@@ -27,10 +27,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				var offer2 = price.Price.Core.First(c => c.Product != offer1.Product);
 				Console.WriteLine("Запрет заказа {0}", offer1.Product.FullName);
 				Console.WriteLine("Предупреждение при заказе {0}", offer2.Product.FullName);
-				Denied = new [] {
+				Denied = new[] {
 					offer1.Product.Id
 				};
-				Warning = new [] {
+				Warning = new[] {
 					offer2.Product.Id
 				};
 			}

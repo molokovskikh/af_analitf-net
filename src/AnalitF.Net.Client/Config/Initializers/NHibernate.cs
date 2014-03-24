@@ -13,6 +13,7 @@ using Common.Tools;
 using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
+using NHibernate.Dialect;
 using NHibernate.Mapping.ByCode;
 using NHibernate.Proxy;
 using NHibernate.Type;
@@ -40,6 +41,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
+			var mappingDialect = new MySQL5Dialect();
 			var mapper = new ConventionModelMapper();
 			var baseInspector = new SimpleModelInspector();
 			var simpleModelInspector = ((SimpleModelInspector)mapper.ModelInspector);
@@ -185,7 +187,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				}
 
 				if (propertyType.IsValueType && !propertyType.IsNullable()) {
-					customizer.Column(c => c.Default(GetDefaultValue(propertyInfo)));
+					customizer.Column(c => c.Default(GetDefaultValue(propertyInfo, mappingDialect)));
 					customizer.NotNullable(true);
 				}
 
@@ -259,7 +261,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			}
 		}
 
-		private static object GetDefaultValue(PropertyInfo propertyInfo)
+		private static object GetDefaultValue(PropertyInfo propertyInfo, Dialect dialect)
 		{
 			var instance = Activator.CreateInstance(propertyInfo.ReflectedType);
 			var defaultValue = propertyInfo.GetValue(instance, null);
@@ -269,6 +271,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				return Convert.ToInt32(defaultValue);
 			if (defaultValue is DateTime)
 				return "'" + ((DateTime)defaultValue).ToString(MySqlConsts.MySQLDateFormat) + "'";
+			if (defaultValue is TimeSpan)
+				return new TimeSpanType().ObjectToSQLString(defaultValue, dialect);
 			if (Util.IsNumeric(defaultValue))
 				return ((IFormattable)defaultValue).ToString(null, CultureInfo.InvariantCulture);
 			throw new Exception(propertyInfo.PropertyType.ToString());

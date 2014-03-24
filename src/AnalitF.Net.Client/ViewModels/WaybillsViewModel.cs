@@ -97,7 +97,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult AltExport()
 		{
-			var columns = new [] {"Дата",
+			var columns = new[] {"Дата",
 				"Номер накладной",
 				"Поставщик",
 				"Сумма Опт без НДС",

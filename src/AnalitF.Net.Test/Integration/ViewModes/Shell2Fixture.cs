@@ -69,6 +69,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
+			command = null;
 			dialogs = new List<Screen>();
 			stub = new StubRemoteCommand(UpdateResult.OK);
 		}

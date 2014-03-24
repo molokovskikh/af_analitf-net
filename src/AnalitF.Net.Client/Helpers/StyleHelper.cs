@@ -152,7 +152,7 @@ namespace AnalitF.Net.Client.Helpers
 				localResources.Clear();
 			}
 
-			var ignore = new [] { typeof(BaseOffer) };
+			var ignore = new[] { typeof(BaseOffer) };
 			var types = typeof(StyleHelper).Assembly.GetTypes()
 				.Except(ignore)
 				.Where(t => t.GetProperties().Any(p => p.GetCustomAttributes(typeof(StyleAttribute), true).Length > 0))

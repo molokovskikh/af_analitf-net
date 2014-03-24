@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Models.Print
 				+ String.Format("Через кого   {0}\n", docSettings.OperatedBy)
 				+ "Доверенность № _______от \"______\" ________20__г\n");
 
-			var columns = new [] {
+			var columns = new[] {
 				new PrintColumn("№ пп", 27),
 				new PrintColumn("Наименование и краткая характеристика товара", 200),
 				new PrintColumn("Серия товара", 50),
@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Кол-во", 36),
 				new PrintColumn("Розн. сумма, руб", 56),
 			};
-			var columnGrops = new [] {
+			var columnGrops = new[] {
 				new ColumnGroup("Предприятие - изготовитель", 5, 6)
 			};
 			var rows = lines.Select((l, i) => new object[] {

@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			NeedToCalculateDiff = true;
 			DisplayName = "Сводный прайс-лист";
-			Filters = new [] { "Все", "Основные", "Неосновные" };
+			Filters = new[] { "Все", "Основные", "Неосновные" };
 
 			MaxProducerCosts = new NotifyValue<List<MaxProducerCost>>();
 			CurrentFilter = new NotifyValue<string>(Filters[0]);

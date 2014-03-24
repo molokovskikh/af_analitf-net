@@ -105,7 +105,7 @@ namespace Updater
 			var ignoreReg = new Regex(@"\.txt$");
 			files = files.Where(f => !ignoreReg.IsMatch(f)).ToArray();
 
-			var ignore = new [] {selfExe, selfExe + ".config", "version.txt"};
+			var ignore = new[] {selfExe, selfExe + ".config", "version.txt"};
 
 			files = files.Except(ignore, new FileNameComparer()).ToArray();
 			var exeFiles = files.Where(f => Path.GetExtension(f).Match(".exe")).ToArray();

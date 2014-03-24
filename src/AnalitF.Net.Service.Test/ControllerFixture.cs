@@ -210,7 +210,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			var supplier = offer.Price.Supplier;
 			return new SyncRequest {
-				Orders = new [] {
+				Orders = new[] {
 					new ClientOrder {
 						ClientOrderId = 1,
 						PriceId = offer.Price.Id,

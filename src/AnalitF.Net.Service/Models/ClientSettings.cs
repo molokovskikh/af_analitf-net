@@ -7,5 +7,7 @@
 		public virtual bool ShowAdvertising { get; set; }
 
 		public virtual bool AllowDelayOfPayment { get; set; }
+
+		public virtual bool AllowAnalitFSchedule { get; set; }
 	}
 }

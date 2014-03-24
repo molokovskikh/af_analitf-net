@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
@@ -25,6 +29,9 @@ namespace AnalitF.Net.Client.Binders
 		public bool UnitTesting;
 		public Env Env = new Env();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
+		public Subject<IResult> ResultsSink = new Subject<IResult>();
+		public CompositeDisposable CloseDisposable = new CompositeDisposable();
+		public CancellationDisposable CancelDisposable = new CancellationDisposable();
 
 		public BaseShell()
 		{
@@ -41,11 +48,12 @@ namespace AnalitF.Net.Client.Binders
 		{
 			Dispatcher.CurrentDispatcher.BeginInvoke(
 				DispatcherPriority.ContextIdle,
-				new System.Action(() => {
-					var results = OnViewReady();
-					if (results != null)
-						Coroutine.BeginExecute(results.GetEnumerator());
-				}));
+				new System.Action(() => Execute(OnViewReady())));
+		}
+
+		protected void Execute(IEnumerable<IResult> results)
+		{
+			RxHelper.ToObservable(results).Subscribe(ResultsSink, CancelDisposable.Token);
 		}
 
 		public virtual IEnumerable<IResult> OnViewReady()
@@ -62,11 +70,7 @@ namespace AnalitF.Net.Client.Binders
 
 		protected override void ChangeActiveItem(IScreen newItem, bool closePrevious)
 		{
-			var baseScreen = newItem as BaseScreen;
-			if (baseScreen != null) {
-				baseScreen.Env = Env;
-			}
-
+			Configure(newItem);
 			base.ChangeActiveItem(newItem, closePrevious);
 
 			if (IsActive) {
@@ -75,6 +79,10 @@ namespace AnalitF.Net.Client.Binders
 					this.CloseItem(ActiveItem);
 				}
 			}
+		}
+
+		protected virtual void Configure(IScreen newItem)
+		{
 		}
 
 		protected void StartProcess(string exe, string args = "")

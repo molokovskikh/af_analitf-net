@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Models.Print
 				FontSize = 16
 			});
 
-			var headers = new [] {
+			var headers = new[] {
 				new PrintColumn("Наименование", 216),
 				new PrintColumn("Производитель", 136),
 				new PrintColumn("Прайс-лист", 112),

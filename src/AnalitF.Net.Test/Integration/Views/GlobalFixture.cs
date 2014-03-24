@@ -495,7 +495,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Smart_order()
 		{
 			var fixture = new SmartOrder {
-				ProductIds = new [] {
+				ProductIds = new[] {
 					session.Query<Offer>().First().ProductId
 				}
 			};
