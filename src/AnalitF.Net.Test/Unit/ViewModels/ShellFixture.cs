@@ -16,6 +16,7 @@ using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
+using ReactiveUI;
 using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
@@ -23,6 +24,26 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 	[TestFixture]
 	public class ShellFixture : BaseUnitFixture
 	{
+		public class ExportScreen : Screen, IExportable
+		{
+			private bool canExport;
+
+			public bool CanExport
+			{
+				get { return canExport; }
+				set
+				{
+					canExport = value;
+					NotifyOfPropertyChange("CanExport");
+				}
+			}
+
+			public IResult Export()
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		ShellViewModel shell;
 		Subject<RemoteCommand> cmd;
 
@@ -98,6 +119,33 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			result.Clear();
 			scheduler.AdvanceByMs(30000);
 			Assert.IsInstanceOf<UpdateCommand>(result[0]);
+		}
+
+		[Test]
+		public void Track_can_export_changes()
+		{
+			var canExport = false;
+			shell.CanExport.Changed().Subscribe(_ => canExport = shell.CanExport.Value);
+			var export = new ExportScreen();
+			shell.ActivateItem(export);
+
+			export.CanExport = true;
+
+			Assert.IsTrue(canExport);
+		}
+
+		[Test]
+		public void Do_not_export_unexportable()
+		{
+			var canExport = false;
+			shell.CanExport.Changed().Subscribe(_ => canExport = shell.CanExport.Value);
+			var export = new ExportScreen {
+				CanExport = true
+			};
+			shell.ActivateItem(export);
+			Assert.IsTrue(canExport);
+			shell.ActivateItem(new Screen());
+			Assert.IsFalse(canExport);
 		}
 	}
 }

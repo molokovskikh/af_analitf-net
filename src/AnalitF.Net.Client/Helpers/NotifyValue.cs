@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using log4net;
 using NHibernate;
@@ -64,7 +65,12 @@ namespace AnalitF.Net.Client.Helpers
 
 		public NotifyValue(IObservable<T> observable)
 		{
-			observable.Subscribe(v => Value = v);
+			observable.CatchSubscribe(v => Value = v);
+		}
+
+		public NotifyValue(IObservable<T> observable, CancellationDisposable cancellation = null)
+		{
+			observable.CatchSubscribe(v => Value = v, cancellation);
 		}
 
 		public T Value

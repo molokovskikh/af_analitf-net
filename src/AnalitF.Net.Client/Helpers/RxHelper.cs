@@ -61,6 +61,11 @@ namespace AnalitF.Net.Client.Helpers
 			return new NotifyValue<T>(observable);
 		}
 
+		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable, CancellationDisposable cancellation)
+		{
+			return new NotifyValue<T>(observable, cancellation);
+		}
+
 		public static List<T> Collect<T>(this IObservable<T> source)
 		{
 			var items = new List<T>();

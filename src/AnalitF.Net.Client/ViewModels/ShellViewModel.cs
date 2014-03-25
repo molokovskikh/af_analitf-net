@@ -160,6 +160,22 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(k => k)
 				.SelectMany(_ => RxHelper.ToObservable(UpdateBySchedule()))
 				.Subscribe(ResultsSink, CancelDisposable.Token);
+
+			CanExport = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IExportable
+					? ((IExportable)e.Value).ObservableForProperty(m => m.CanExport, skipInitial: false)
+					: Observable.Return(new ObservedChange<IExportable, bool>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+			CanPrint = this.ObservableForProperty(m => m.ActiveItem)
+				.Select(e => e.Value is IPrintable
+					? ((IPrintable)e.Value).ObservableForProperty(m => m.CanPrint, skipInitial: false)
+					: Observable.Return(new ObservedChange<IPrintable, bool>()))
+				.Switch()
+				.Select(e => e.Value)
+				.ToValue(CancelDisposable);
+			CanPrintPreview = new NotifyValue<bool>(() => CanPrint.Value, CanPrint);
 		}
 
 		public Config.Config Config
@@ -359,17 +375,7 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = value;
 		}
 
-		public bool CanExport
-		{
-			get
-			{
-				var exportable = ActiveItem as IExportable;
-				if (exportable != null) {
-					return exportable.CanExport;
-				}
-				return false;
-			}
-		}
+		public NotifyValue<bool> CanExport { get; set; }
 
 		public IResult Export()
 		{
@@ -379,30 +385,17 @@ namespace AnalitF.Net.Client.ViewModels
 			return ((IExportable)ActiveItem).Export();
 		}
 
-		public bool CanPrint
-		{
-			get
-			{
-				var printable = ActiveItem as IPrintable;
-				if (printable != null) {
-					return printable.CanPrint;
-				}
-				return false;
-			}
-		}
+		public NotifyValue<bool> CanPrint { get; set; }
 
 		public IResult Print()
 		{
-			if (!CanPrint)
+			if (!CanPrint.Value)
 				return null;
 
 			return ((IPrintable)ActiveItem).Print();
 		}
 
-		public bool CanPrintPreview
-		{
-			get { return CanPrint; }
-		}
+		public NotifyValue<bool> CanPrintPreview { get; set; }
 
 		public void PrintPreview()
 		{
