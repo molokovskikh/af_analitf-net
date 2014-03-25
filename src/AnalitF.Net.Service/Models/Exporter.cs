@@ -213,7 +213,7 @@ select up.Id,
 from Usersettings.AssignedPermissions a
 	join Usersettings.UserPermissions up on up.Id = a.PermissionId
 where a.UserId = ?userId
-	and up.Type = 1";
+	and up.Type in (1, 2)";
 			Export(result, sql, "Permissions", new { userId = user.Id });
 
 			sql = @"

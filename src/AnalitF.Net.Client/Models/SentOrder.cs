@@ -52,6 +52,8 @@ namespace AnalitF.Net.Client.Models
 
 		string Comment { get; set; }
 
+		decimal MixedCost { get; }
+
 		decimal Sum { get; }
 
 		decimal MixedSum { get; }

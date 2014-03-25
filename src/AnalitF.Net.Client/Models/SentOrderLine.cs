@@ -1,3 +1,5 @@
+using AnalitF.Net.Client.Config.Initializers;
+
 namespace AnalitF.Net.Client.Models
 {
 	public class SentOrderLine : BaseOffer, IOrderLine
@@ -22,6 +24,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal ResultCost { get; set; }
 
+		public virtual decimal MixedCost
+		{
+			get
+			{
+				return HideCost ? ResultCost : Cost;
+			}
+		}
+
 		public virtual decimal Sum
 		{
 			get { return Count * Cost; }
@@ -33,6 +43,12 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual SentOrder Order { get; set; }
+
+		//заглушка, для поля редактирования на форме детализации заказа
+		//хоть поле которое содержит ошибку скрыто для отправленных заказов
+		//но биндинг все равно будет ругаться если поля не будет
+		[Ignore]
+		public virtual string LongSendError { get; set; }
 
 		public override decimal GetResultCost()
 		{

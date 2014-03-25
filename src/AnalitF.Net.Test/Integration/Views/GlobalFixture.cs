@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.ServiceModel.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,7 +32,6 @@ using Common.Tools;
 using Common.Tools.Calendar;
 using log4net.Config;
 using Microsoft.Reactive.Testing;
-using Microsoft.Win32;
 using NHibernate.Linq;
 using NHibernate.Util;
 using NPOI.SS.Formula.Functions;
@@ -41,6 +43,7 @@ using CheckBox = System.Windows.Controls.CheckBox;
 using DataGrid = System.Windows.Controls.DataGrid;
 using DataGridCell = System.Windows.Controls.DataGridCell;
 using Label = System.Windows.Controls.Label;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
 using WindowState = System.Windows.WindowState;
@@ -312,6 +315,18 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			WaitMessageBox("Обновление завершено успешно.");
 			WaitWindow("Корректировка восстановленных заказов");
+
+			WaitIdle();
+			//на форме корректировки могут возникнуть ошибки биндинга
+			//судю по обсуждению это ошибки wpf и они безобидны
+			//http://wpf.codeplex.com/discussions/47047
+			//игнорирую их
+			var ignored = new[] {
+				"System.Windows.Data Error: 4",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=AreRowDetailsFrozen; DataItem=null; target element is 'DataGridDetailsPresenter' (Name=''); target property is 'SelectiveScrollingOrientation' (type 'SelectiveScrollingOrientation')",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=HeadersVisibility; DataItem=null; target element is 'DataGridRowHeader' (Name=''); target property is 'Visibility' (type 'Visibility')",
+			};
+			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
 		}
 
 		[Test]
@@ -517,6 +532,33 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var items = activeWindow.Descendants<DataGrid>().First(g => g.Name == "ReportLines");
 				Assert.That(items.Items.Count, Is.GreaterThan(0));
+			});
+		}
+
+		[Test]
+		public void Open_sent_orders()
+		{
+			var order = MakeSentOrder();
+			Start();
+			Click("ShowOrders");
+
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var orders = (OrdersViewModel)shell.ActiveItem;
+				orders.IsCurrentSelected.Value = false;
+				orders.IsSentSelected.Value = true;
+			});
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var sentOrder = activeWindow.Descendants<DataGrid>().First(g => g.Name == "SentOrders");
+				sentOrder.SelectedItem = sentOrder.Items.OfType<SentOrder>().First(o => o.Id == order.Id);
+			});
+			Input("SentOrders", Key.Enter);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var lines = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
+				var cell = GetCell(lines, "Цена");
+				Assert.AreEqual(order.Lines[0].Cost.ToString(CultureInfo.InvariantCulture), cell.AsText());
 			});
 		}
 

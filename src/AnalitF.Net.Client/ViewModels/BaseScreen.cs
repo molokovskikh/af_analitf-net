@@ -340,6 +340,7 @@ namespace AnalitF.Net.Client.ViewModels
 		~BaseScreen()
 		{
 			try {
+				log.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
 				Dispose();
 			}
 			catch(Exception e) {

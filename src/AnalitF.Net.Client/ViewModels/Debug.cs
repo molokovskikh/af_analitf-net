@@ -25,9 +25,6 @@ namespace AnalitF.Net.Client.ViewModels
 			ErrorCount = new NotifyValue<int>();
 			HaveErrors = new NotifyValue<bool>(() => ErrorCount.Value > 0, ErrorCount);
 
-			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
-			PresentationTraceSources.Refresh();
-
 			PresentationTraceSources.DataBindingSource.Listeners.Add(new DelegateTraceListner(m => {
 				ErrorCount.Value++;
 				Error += m + "\r\n";
