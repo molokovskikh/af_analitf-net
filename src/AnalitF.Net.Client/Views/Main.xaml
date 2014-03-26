@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls">
 	<Grid>
-		<!--минимальная ширина\высота здается что бы блок рекламы не перекрывал логотип при малом размере формы-->
+		<!--минимальная ширина\высота задается что бы блок рекламы не перекрывал логотип при малом размере формы-->
 		<Grid.RowDefinitions>
 			<RowDefinition Height="1*" MinHeight="{Binding ActualHeight, ElementName=LogoPanel}" />
 			<RowDefinition Height="1*" />

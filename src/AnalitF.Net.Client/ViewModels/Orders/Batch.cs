@@ -443,6 +443,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (Address == null)
 				return;
 
+			Address.ActiveOrders().SelectMany(o => o.Lines).Each(l => l.Configure(User));
 			var activeLines = Addresses.SelectMany(a => a.ActiveOrders()).SelectMany(l => l.Lines)
 				.Where(l => l.ExportId != null)
 				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ExportId.GetValueOrDefault()), l => l.ExportId != null ? l : null);

@@ -263,7 +263,7 @@
 
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
 
-					<Label>Показывать список измений в забраковке за (дни):</Label>
+					<Label>Показывать список изменений в забраковке за (дни):</Label>
 					<TextBox x:Name="Settings_TrackRejectChangedDays"></TextBox>
 				</StackPanel>
 			</TabItem>

@@ -148,7 +148,7 @@ namespace AnalitF.Net.Client.Models
 			get { return Status.HasFlag(ItemToOrderStatus.MinimalCost); }
 		}
 
-		[Style("MixedProduct", Description = "Присутствует в замороженых заказах"), Ignore]
+		[Style("MixedProduct", Description = "Присутствует в замороженных заказах"), Ignore]
 		public virtual bool ExistsInFreezed
 		{
 			get; set;

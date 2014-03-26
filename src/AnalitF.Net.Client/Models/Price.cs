@@ -195,7 +195,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime? Timestamp { get; set; }
 
-		//корректировка цен применяемая аптекой, обновляеются при запуске программы
+		//корректировка цен применяемая аптекой, обновляются при запуске программы
 		public virtual decimal CostFactor { get; set; }
 
 		//корректировка цен применяемая аптекой, для жизненно важных препаратов

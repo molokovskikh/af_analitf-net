@@ -213,7 +213,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DateTime? LastUpdate { get; set; }
 
-		//дата вычисления лидеров если включена опиция отсрочка платежа
+		//дата вычисления лидеров если включена опция отсрочка платежа
 		//нужно что бы определить когда нужно пересчитывать лидеров
 		//тк отсрочки на каждый день могут быть разные
 		public virtual DateTime LastLeaderCalculation { get; set; }

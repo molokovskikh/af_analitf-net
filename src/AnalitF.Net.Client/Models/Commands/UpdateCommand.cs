@@ -312,9 +312,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			//позиции перестают считаться новыми только когда мы получаем новую порцию позиций которые являются забраковкой
 			//.SetFlushMode(FlushMode.Auto)
 			//по умолчанию запросы имеют flush mode Unspecified
-			//это значит что изменения из сесси не будут сохранены в базу перед запросом
+			//это значит что изменения из сессии не будут сохранены в базу перед запросом
 			//а попадут в базу после commit
-			//те изменеия из сесии перетрут состояние флагов
+			//те изменения из сессии перетрут состояние флагов
 			var begin = DateTime.Today.AddDays(-settings.TrackRejectChangedDays);
 			var exists =  Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
 				"	join Waybills w on w.Id = l.WaybillId " +

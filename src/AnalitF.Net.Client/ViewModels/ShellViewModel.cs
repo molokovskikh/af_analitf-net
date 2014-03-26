@@ -724,7 +724,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var results = new IResult[0];
 			RunTask(wait,
 				t => {
-					//настраивать комманду нужно каждый раз тк учетны данные могут быть изменены в RunTask
+					//настраивать команду нужно каждый раз тк учетные данные могут быть изменены в RunTask
 					command.Configure(Settings.Value);
 					command.Token = t;
 					return func(command);

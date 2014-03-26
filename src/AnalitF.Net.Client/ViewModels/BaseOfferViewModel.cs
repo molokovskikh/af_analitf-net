@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected NotifyValue<Offer> LastEditOffer;
 		protected bool NeedToCalculateDiff;
 		protected bool NavigateOnShowCatalog;
-		//адрес доставки для текущего элемента, нужен если мы отображем элементы которые относятся к разным адресам доставки
+		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		public Address[] Addresses = new Address[0];
 

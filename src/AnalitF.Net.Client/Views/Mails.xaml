@@ -101,7 +101,7 @@
 			<Setter Property="ContentTemplate">
 				<Setter.Value>
 					<DataTemplate>
-						<!--Background="Transparent" - нужно для того что бы правилно работал hittest-->
+						<!--Background="Transparent" - нужно для того что бы правильно работал hittest-->
 						<Canvas Height="14" Width="15" Background="Transparent">
 							<Path Stroke="Gray" Height="14" Width="15" Stretch="Fill"
 								StrokeEndLineCap="Round" StrokeStartLineCap="Round"
@@ -171,7 +171,7 @@
 			<Setter Property="ContentTemplate">
 				<Setter.Value>
 					<DataTemplate>
-						<!--Background="Transparent" - нужно для того что бы правилно работал hittest-->
+						<!--Background="Transparent" - нужно для того что бы правильно работал hittest-->
 						<StackPanel Orientation="Horizontal">
 							<Path Stroke="Gray" Height="15" Width="16" Stretch="Uniform"
 								StrokeEndLineCap="Round" StrokeStartLineCap="Round"

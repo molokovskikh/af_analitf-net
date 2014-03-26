@@ -154,7 +154,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 		public virtual string Name { get; set; }
 		public virtual long Size { get; set; }
-		//review - в базе хранятся обсолютные пути что будет если приложение будет перемещено
+		//review - в базе хранятся абсолютные пути что будет если приложение будет перемещено
 		public virtual string LocalFilename { get; set; }
 
 		public virtual string Details

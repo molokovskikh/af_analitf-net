@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual CatalogName Name { get; set; }
 
-		[Style(Description = "Жизнненно важный")]
+		[Style(Description = "Жизненно важный")]
 		public virtual bool VitallyImportant { get; set; }
 
 		public virtual bool MandatoryList { get; set; }

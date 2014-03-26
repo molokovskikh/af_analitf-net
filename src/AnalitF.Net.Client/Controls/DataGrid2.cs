@@ -13,6 +13,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -32,16 +34,56 @@ namespace AnalitF.Net.Client.Controls
 				typeof(DataGrid2),
 				new FrameworkPropertyMetadata(null, CurrentItemStubChanged));
 
-		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		public DataGrid2()
 		{
-			var grid = (DataGrid2)d;
-			grid.CurrentItem = e.NewValue;
+			//раньше для установки восстановления выделения использовалась перегрузка OnItemsChanged но
+			//после обработки OnItemsChanged datagrid обрабатывает событие CollectionChanged
+			//и в нем он сбрасывает выделение из внутреннего хранилища выделенных ячеек _selectedCells
+			//сброс производится по индексу строки те строка удаляется -> выделенные ячейки удаляются из хранилища
+			//после того как я перегрузил OnItemsChanged последовательность событий стала
+			//строка удаляется -> выделение восстанавливается -> выделенные ячейки удаляются из хранилища
+			//тк выделенные ячейки удаляются по индексу только что выделенная строка сама себе считает выделенной
+			//но datagrid считает что у него нет выделенных ячеек
+			//это приводит к тому что при переходе вверх или вниз визуально выделяются две строки
+			((INotifyCollectionChanged)Items).CollectionChanged += CollectionChanged;
 		}
 
 		public object CurrentItemStub
 		{
 			get { return GetValue(CurrentItemStubProperty); }
 			set { SetValue(CurrentItemStubProperty, value); }
+		}
+
+		public bool ShowAddressColumn
+		{
+			get { return (bool)GetValue(ShowAddressColumnProperty); }
+			set { SetValue(ShowAddressColumnProperty, value); }
+		}
+
+		public bool CanUserSelectMultipleItems
+		{
+			get { return CanSelectMultipleItems; }
+			set { CanSelectMultipleItems = value; }
+		}
+
+		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			//если строка удаляет с помощью функции datagrid то после удалении фокус остается в datagrid
+			//если же удаление производится из коллекции ItemsSource то CurrentItem сбрасывается в null
+			//и таблица теряет фокус
+			if (e.Action == NotifyCollectionChangedAction.Remove) {
+				var index = Math.Min(e.OldStartingIndex, Items.Count - 1);
+				if (index >= 0) {
+					CurrentItem = Items[index];
+					SelectedItem = Items[index];
+				}
+			}
+		}
+
+		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			var grid = (DataGrid2)d;
+			grid.CurrentItem = e.NewValue;
 		}
 
 		//это хак, тк дата биндинг не работает для DataGridColumn
@@ -54,12 +96,6 @@ namespace AnalitF.Net.Client.Controls
 				return;
 
 			column.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
-		}
-
-		public bool ShowAddressColumn
-		{
-			get { return (bool)GetValue(ShowAddressColumnProperty); }
-			set { SetValue(ShowAddressColumnProperty, value); }
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -104,22 +140,6 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
-		protected override void OnItemsChanged(NotifyCollectionChangedEventArgs e)
-		{
-			base.OnItemsChanged(e);
-
-			//если строка удаляет с помощью функции datagrid то после удалени фокус остается в datagrid
-			//если же удаление производится из коллекции ItemsSource то CurrentItem сбрасывается в null
-			//и таблица теряет фокус
-			if (e.Action == NotifyCollectionChangedAction.Remove) {
-				var index = Math.Min(e.OldStartingIndex, Items.Count - 1);
-				if (index >= 0) {
-					CurrentItem = Items[index];
-					SelectedItem = Items[index];
-				}
-			}
-		}
-
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
 			base.OnItemsSourceChanged(oldValue, newValue);
@@ -155,12 +175,12 @@ namespace AnalitF.Net.Client.Controls
 			var size = base.MeasureOverride(availableSize);
 
 			//в текущей реализации datagrid вычислении ширины колонок происходит асинхронно
-			//посе того как таблица была нарисована, это приводит к странному эфекту когда таблица рисуется
+			//после того как таблица была нарисована, это приводит к странному эффекту когда таблица рисуется
 			//с одним размером колонок а затем почти мгновенно с другим
 			//зачем так происходит понять невозможно, мне кажется это продолжение безумия
 			//с асинхронной механикой рисования в wpf
 			//ниже я вызываю приватные методы что бы вычислить ширину колонок до этапа рисования
-			//это не решает проблему перерисовки полностью но решает ее значительнуюу часть
+			//это не решает проблему перерисовки полностью но решает ее значительную часть
 			//перерисовка все равно производится но она затрагивает только заголовок таблицы
 			//это неприятно не лучше чем было
 			var value = GetProperty(this, "InternalColumns");
@@ -186,12 +206,6 @@ namespace AnalitF.Net.Client.Controls
 		{
 			var prop = typeof(DataGrid2).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
 			return prop.GetValue(dataGrid, null);
-		}
-
-		public bool CanUserSelectMultipleItems
-		{
-			get { return CanSelectMultipleItems; }
-			set { CanSelectMultipleItems = value; }
 		}
 	}
 }

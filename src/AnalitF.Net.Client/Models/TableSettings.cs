@@ -88,7 +88,7 @@ namespace AnalitF.Net.Client.Models
 				setting.Restore(column);
 			}
 
-			//тк новые колонки не имеют сохраненных настроект
+			//тк новые колонки не имеют сохраненных настроек
 			//они окажутся в конце таблицы
 			//назначаем им индексы из значений по умолчанию
 			foreach (var column in dataGrid.Columns.Where(c => !settings.Any(s => s.Match(c)))) {

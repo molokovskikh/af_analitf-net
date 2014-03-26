@@ -105,7 +105,7 @@ namespace AnalitF.Net.Client.Helpers
 			}, cancellation.Token);
 		}
 
-		//фактический это просто переписаный SequentialResult
+		//фактический это просто переписанный SequentialResult
 		public static IObservable<IResult> ToObservable(IEnumerable<IResult> results)
 		{
 			if (results == null)

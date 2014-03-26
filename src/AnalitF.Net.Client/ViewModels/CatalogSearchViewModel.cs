@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public string Name { get; set; }
 		public string Form { get; set; }
 		public bool HaveOffers { get; set; }
-		[Style(Description = "Жизнненно важный")]
+		[Style(Description = "Жизненно важный")]
 		public bool VitallyImportant { get; set; }
 
 		[Style(Description = "Предложения отсутствуют")]

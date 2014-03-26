@@ -9,7 +9,7 @@ using Action = System.Action;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	//очередное безумее будь бдителен
+	//очередное безумие будь бдителен
 	//BaseNotify не используется но если wpf binding используется для класса без INotifyPropertyChanged
 	//этот объект попадет в глобальную таблицу внутри wpf и это приведет к утечки памяти
 	public class SearchBehavior : BaseNotify
