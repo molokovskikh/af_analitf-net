@@ -94,6 +94,12 @@ namespace AnalitF.Net.Service.Controllers
 						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 						job.Faulted(e);
 					}
+					catch(IndexOutOfRangeException e) {
+						//это исключение возникнет в DefaultSource если на вход сунуть какую нибудь ерунду
+						Log.Warn("Ошибка при обработке автозаказа", e);
+						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+						job.Faulted(e);
+					}
 				});
 			return existsJob.ToResult(Config);
 		}
