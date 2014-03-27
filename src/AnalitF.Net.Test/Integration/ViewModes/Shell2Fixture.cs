@@ -370,7 +370,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			user.IsDeplayOfPaymentEnabled = true;
 
 			var offer = session.Query<Offer>()
-				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant);
+				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant && !o.Junk);
 
 			var delay = session.Query<DelayOfPayment>().FirstOrDefault(d => d.DayOfWeek == DateTime.Today.DayOfWeek && d.Price == offer.Price)
 				?? new DelayOfPayment(-99.999m, offer.Price);
