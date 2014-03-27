@@ -78,7 +78,7 @@
       <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="RotRas">
+    <Reference Include="DotRas">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\DotRas.dll</HintPath>
     </Reference>
