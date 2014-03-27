@@ -5,12 +5,11 @@
 	<Grid>
 		<!--минимальная ширина\высота задается что бы блок рекламы не перекрывал логотип при малом размере формы-->
 		<Grid.RowDefinitions>
-			<RowDefinition Height="1*" MinHeight="{Binding ActualHeight, ElementName=LogoPanel}" />
-			<RowDefinition Height="1*" />
+			<RowDefinition Height="1*" MinHeight="{Binding DesiredSize.Height, ElementName=LogoPanel}" />
 			<RowDefinition Height="3*" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="240" MinWidth="{Binding ActualWidth, ElementName=LogoPanel}" />
+			<ColumnDefinition Width="240" MinWidth="{Binding DesiredSize.Width, ElementName=LogoPanel}" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 
