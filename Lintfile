@@ -1,0 +1,22 @@
+{"Console.WriteLine":
+	[
+	"src/AnalitF.Net.Client/AppBootstrapper.cs",
+	"src/AnalitF.Net.Client/Config/Initializers/NHibernate.cs",
+	"src/AnalitF.Net.Client/Helpers/TimeIt.cs",
+	"src/AnalitF.Net.Client/Helpers/WpfHelper.cs",
+	"src/AnalitF.Net.Client/Helpers/RxHelper.cs",
+	"src/AnalitF.Net.Client/Program.cs",
+	"src/AnalitF.Net.Test/Acceptance/BaseFixture.cs",
+	"src/AnalitF.Net.Test/TestHelpers/WpfHelper.cs",
+	"src/Common.Tools/Common.Tools.Test/DbfFixture.cs",
+	"src/Common.Tools/Common.Tools.Test/ReleatableCommandFixture.cs",
+	"src/Common.Tools/Common.Tools/ObjectExtentions.cs",
+	"src/Test.Support/Test.Support.Web/WatinSetup.cs",
+	"src/Test.Support/Test.Support/log4net/EventFilter.cs",
+	"src/AnalitF.Net.Test/Tasks/Log.cs",
+	"src/AnalitF.Net.Test/TestHelpers/AutomationHelper.cs",
+	"src/AnalitF.Net.Test/Fixtures/CreatePromotion.cs",
+	"src/AnalitF.Net.Test/Tasks/*.cs",
+	"src/AnalitF.Net.Test/Fixtures/*.cs",
+	]
+}
