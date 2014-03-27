@@ -1,3 +1,3 @@
 #!/bin/sh
 
-touch src/AnalitF.Net.Client/bin/debug/*.exe
+touch src/client/app/bin/debug/*.exe

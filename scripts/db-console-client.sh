@@ -1,2 +1,2 @@
 #!/bin/sh
-./scripts/db-console.sh src/AnalitF.Net.Client/bin/run "$@"
+./scripts/db-console.sh src/client/app/bin/run "$@"

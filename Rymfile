@@ -1,3 +1,3 @@
-bin=src/AnalitF.Net.Test/bin/debug/AnalitF.Net.Client.Test.dll
-config=src/AnalitF.Net.Client/bin/run/AnalitF.Net.Client.exe.config
-work-dir=src/AnalitF.Net.Client/bin/run/
+bin=src/client/test/bin/debug/AnalitF.Net.Client.Test.dll
+config=src/client/app/bin/run/AnalitF.Net.Client.exe.config
+work-dir=src/client/app/bin/run/
