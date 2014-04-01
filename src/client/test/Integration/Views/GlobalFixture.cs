@@ -345,6 +345,26 @@ namespace AnalitF.Net.Test.Integration.Views
 		}
 
 		[Test]
+		public void Show_price_offers()
+		{
+			Start();
+			Click("ShowPrice");
+			uint expectedCount = 0;
+			dispatcher.Invoke(() => {
+				var prices = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Prices");
+				var selectedItem = prices.Items.OfType<Price>().First(p => p.PositionCount > 0);
+				expectedCount = selectedItem.PositionCount;
+				prices.SelectedItem = selectedItem;
+			});
+			Input("Prices", Key.Enter);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var count = activeWindow.Descendants<Label>().First(l => l.Name == "Offers_Count");
+				Assert.AreEqual(expectedCount.ToString(), count.AsText());
+			});
+		}
+
+		[Test]
 		public void Offers_search()
 		{
 			//нам нужно лубое наименование где есть хотя бы 3 буквы

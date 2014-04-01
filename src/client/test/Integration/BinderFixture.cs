@@ -9,6 +9,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
@@ -222,6 +223,20 @@ namespace AnalitF.Net.Test.Integration
 			Bind(grid);
 
 			Assert.AreEqual(TextAlignment.Right, ((DataGridTextColumnEx)grid.Columns[0]).TextAlignment);
+		}
+
+		[Test]
+		public void Bind_notify_value_property()
+		{
+			var label1 = new Label { Name = "NotifyItems_Count" };
+			var label2 = new Label { Name = "NotifyItems_Value_Count" };
+			Bind(new StackPanel { Children = { label1, label2 } });
+			var binding1 = BindingOperations.GetBinding(label1, Label.ContentProperty);
+			Assert.IsNotNull(binding1);
+			Assert.AreEqual("NotifyItems.Value.Count", binding1.Path.Path);
+			var binding2 = BindingOperations.GetBinding(label2, Label.ContentProperty);
+			Assert.IsNotNull(binding2);
+			Assert.AreEqual("NotifyItems.Value.Count", binding2.Path.Path);
 		}
 
 		private void Bind(object content)

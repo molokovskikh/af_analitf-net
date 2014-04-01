@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -16,8 +18,11 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class NotifyValueSupport
 	{
+		static readonly ILog Log = LogManager.GetLog(typeof(ViewModelBinder));
+
 		public static void Register()
 		{
+			ViewModelBinder.BindProperties = BindProperties;
 			var defaultSetBinding = ConventionManager.SetBinding;
 
 			//ConventionManager.ApplyItemTemplate - Будет пытаться установить
@@ -126,6 +131,58 @@ namespace AnalitF.Net.Client.Binders
 			};
 		}
 
+		public static IEnumerable<FrameworkElement> BindProperties(IEnumerable<FrameworkElement> namedElements, Type viewModelType)
+		{
+			var unmatchedElements = new List<FrameworkElement>();
+			foreach (var element in namedElements) {
+				var cleanName = element.Name.Trim('_');
+				var parts = cleanName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+				var property = viewModelType.GetPropertyCaseInsensitive(parts[0]);
+				var interpretedViewModelType = viewModelType;
+
+				for (int i = 1; i < parts.Count && property != null; i++) {
+					interpretedViewModelType = property.PropertyType;
+					property = interpretedViewModelType.GetPropertyCaseInsensitive(parts[i]);
+					if (property == null && IsNotifyValue(interpretedViewModelType)) {
+						property = interpretedViewModelType.GetProperty("Value");
+						parts.Insert(i, "Value");
+					}
+				}
+
+				if (property == null) {
+					unmatchedElements.Add(element);
+					Log.Info("Binding Convention Not Applied: Element {0} did not match a property.", element.Name);
+					continue;
+				}
+
+				var convention = ConventionManager.GetElementConvention(element.GetType());
+				if (convention == null) {
+					unmatchedElements.Add(element);
+					Log.Warn("Binding Convention Not Applied: No conventions configured for {0}.", element.GetType());
+					continue;
+				}
+
+				var applied = convention.ApplyBinding(
+					interpretedViewModelType,
+					string.Join(".", parts),
+					property,
+					element,
+					convention
+					);
+
+				if (applied) {
+					Log.Info("Binding Convention Applied: Element {0}.", element.Name);
+				}
+				else {
+					Log.Info("Binding Convention Not Applied: Element {0} has existing binding.", element.Name);
+					unmatchedElements.Add(element);
+				}
+			}
+
+			return unmatchedElements;
+		}
+
 		public static bool IsArrayOfPrimitive(Type posibleArrayOrList)
 		{
 			if (posibleArrayOrList.IsArray) {
@@ -138,8 +195,14 @@ namespace AnalitF.Net.Client.Binders
 
 		public static bool IsNotifyValue(PropertyInfo property)
 		{
-			return property.PropertyType.IsGenericType
-				&& property.PropertyType.GetGenericTypeDefinition() == typeof(NotifyValue<>);
+			var type = property.PropertyType;
+			return IsNotifyValue(type);
+		}
+
+		private static bool IsNotifyValue(Type type)
+		{
+			return type.IsGenericType
+				&& type.GetGenericTypeDefinition() == typeof(NotifyValue<>);
 		}
 
 		public static void Patch(ref string path, ref PropertyInfo property)
