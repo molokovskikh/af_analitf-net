@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Models
 
 			foreach (var setting in settings) {
 				var column = dataGrid.Columns.FirstOrDefault(c => setting.Match(c));
-				setting.Restore(column);
+				setting.Restore(dataGrid.Columns, column);
 			}
 
 			//тк новые колонки не имеют сохраненных настроек

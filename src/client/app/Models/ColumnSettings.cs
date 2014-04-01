@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -26,15 +27,15 @@ namespace AnalitF.Net.Client.Models
 				DisplayIndex = index;
 		}
 
-		public void Restore(DataGridColumn column)
+		public void Restore(ObservableCollection<DataGridColumn> columns, DataGridColumn column)
 		{
 			if (column == null)
 				return;
 			column.Width = Width;
 			if (Name != "Адрес заказа")
 				column.Visibility = Visible;
-			//мы не можем установить неопределенный индекс
-			if (DisplayIndex != -1)
+			//мы не можем установить неопределенный индекс или больше максимально индекса
+			if (DisplayIndex >= 0 && DisplayIndex <= columns.Count - 1)
 				column.DisplayIndex = DisplayIndex;
 		}
 
