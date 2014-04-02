@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -51,25 +52,26 @@ namespace AnalitF.Net.Client.Helpers
 			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(item);
 			var column = grid.CurrentCell.Column
 				?? grid.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible);
-			var cell = GetCell(container, column);
+			var cell = GetCell(container, column, grid.Columns);
 			if (cell != null)
 				return cell.Focus();
 			return false;
 		}
 
-		public static DataGridCell GetCell(DataGridRow rowContainer, DataGridColumn column)
+		public static DataGridCell GetCell(DataGridRow rowContainer, DataGridColumn column, ObservableCollection<DataGridColumn> columns)
 		{
 			if (rowContainer == null)
-				return null;
-			var columnIndex = 0;
-			if (column != null)
-				columnIndex = column.DisplayIndex;
-			if (columnIndex == -1)
 				return null;
 			var presenter = rowContainer.VisualChild<DataGridCellsPresenter>();
 			if (presenter == null)
 				return null;
-			return (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+			for(var i = 0; i < columns.Count; i++) {
+				var cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(i);
+				if (cell != null && (column == null || cell.Column == column)) {
+					return cell;
+				}
+			}
+			return null;
 		}
 
 		public static DataGridCell GetCell(DataGrid grid, DataGridCellInfo info)
@@ -77,7 +79,7 @@ namespace AnalitF.Net.Client.Helpers
 			var container = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(info.Item);
 			if (container == null)
 				return null;
-			var cell = GetCell(container, info.Column);
+			var cell = GetCell(container, info.Column, grid.Columns);
 			return cell;
 		}
 

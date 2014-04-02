@@ -68,7 +68,8 @@ namespace AnalitF.Net.Test.Integration.Views
 					var column = grid.Columns.First(c => c.Header.Equals("Розничная наценка"));
 					var cell = DataGridHelper.GetCell(
 						(DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item),
-						column);
+						column,
+						grid.Columns);
 					isEditing = cell.IsEditing;
 					text = ((TextBox)cell.Content).Text;
 
