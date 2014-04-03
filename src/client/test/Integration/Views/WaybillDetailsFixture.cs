@@ -18,20 +18,11 @@ namespace AnalitF.Net.Test.Integration.Views
 	[TestFixture]
 	public class WaybillDetailsFixture
 	{
-		private WaybillDetailsView view;
-		private DataGrid2 grid;
-
 		[SetUp]
 		public void BaseViewFixtureSetup()
 		{
 			ViewSetup.BindingErrors.Clear();
 			ViewSetup.Setup();
-
-			view = new WaybillDetailsView();
-			grid = (DataGrid2)view.FindName("Lines");
-			var size = new Size(1000, 1000);
-			view.Measure(size);
-			view.Arrange(new Rect(size));
 		}
 
 		[TearDown]
@@ -45,17 +36,23 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Set_cell_style()
 		{
+			var view = new WaybillDetailsView();
+			var grid = (DataGrid2)view.FindName("Lines");
+			var size = new Size(1000, 1000);
+			view.Measure(size);
+			view.Arrange(new Rect(size));
+
 			Assert.IsNotNull(grid.CellStyle);
 		}
 
-		[Test, Explicit]
+		[Test]
 		public void Auto_edit()
 		{
 			var isEditing = false;
 			var text = "";
 			WpfHelper.WithWindow(w => {
-				view = new WaybillDetailsView();
-				grid = (DataGrid2)view.FindName("Lines");
+				var view = new WaybillDetailsView();
+				var grid = (DataGrid2)view.FindName("Lines");
 
 				w.Content = view;
 				var waybill = new Waybill();

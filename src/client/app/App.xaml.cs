@@ -47,8 +47,7 @@ namespace AnalitF.Net.Client
 			style.Setters.Add(new Setter(Control.BackgroundProperty,
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("OrderColumn", style);
-
-			StyleHelper.CollectStyles(Resources);
+			StyleHelper.BuildStyles(Resources);
 		}
 
 		private Style CellStyle(Color active, Color inactive, string name, bool value, Color baseColor)

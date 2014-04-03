@@ -6,15 +6,27 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Microsoft.Win32;
+using CommonDialog = System.Windows.Forms.CommonDialog;
 using DialogResult = System.Windows.Forms.DialogResult;
 
 namespace AnalitF.Net.Client.Extentions
 {
+	public class Win32Stub : System.Windows.Forms.IWin32Window
+	{
+		public Win32Stub(IntPtr handle)
+		{
+			Handle = handle;
+		}
+
+		public IntPtr Handle { get; private set; }
+	}
+
 	public class WindowManager : Caliburn.Micro.WindowManager
 	{
 #if DEBUG
@@ -58,17 +70,27 @@ namespace AnalitF.Net.Client.Extentions
 			return ShowDialog(window);
 		}
 
+		public DialogResult ShowDialog(CommonDialog dialog)
+		{
+#if DEBUG
+			if (Stub(dialog))
+				return DialogResult.OK;
+#endif
+			;
+			var window = InferOwnerOf(null);
+			if (window != null)
+				return dialog.ShowDialog(new Win32Stub(new WindowInteropHelper(window).Handle));
+			else
+				return dialog.ShowDialog();
+		}
+
 		public bool? ShowDialog(FileDialog dialog)
 		{
 #if DEBUG
 			if (Stub(dialog))
 				return true;
-			if (SkipApp) {
-				FileDialog.OnNext(dialog);
-				return true;
-			}
 #endif
-			return dialog.ShowDialog();
+			return dialog.ShowDialog(InferOwnerOf(null));
 		}
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
@@ -99,6 +121,12 @@ namespace AnalitF.Net.Client.Extentions
 				}
 				return true;
 			}
+
+			if (SkipApp && rootModel is FileDialog) {
+				FileDialog.OnNext((FileDialog)rootModel);
+				return true;
+			}
+
 #endif
 			return false;
 		}

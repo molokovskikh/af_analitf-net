@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -88,6 +91,19 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.SetParameter("id", dirMap.Id)
 				.ExecuteUpdate();
 			Assert.IsEmpty(model.DirMaps.Where(m => m.Id == dirMap.Id).ToArray());
+		}
+
+		[Test]
+		public void Edit_color()
+		{
+			var appStyle = model.Styles.First(s => s.Name == "Junk");
+			var results = model.EditColor(appStyle).GetEnumerator();
+			results.MoveNext();
+			var dialog = (NativeDialogResult<ColorDialog>)results.Current;
+			Assert.AreEqual(CustomStyle.ToHexString(dialog.Dialog.Color), appStyle.Background);
+			dialog.Dialog.Color = Color.FromArgb(255, 10, 0);
+			results.MoveNext();
+			Assert.AreEqual("#FFFF0A00", appStyle.Background);
 		}
 	}
 }

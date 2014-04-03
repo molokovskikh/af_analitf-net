@@ -50,7 +50,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Include_in_legend_only_posible_styles()
 		{
 			StyleHelper.Reset();
-			StyleHelper.CollectStyles(appResource);
+			StyleHelper.BuildStyles(appResource);
 			var grid = new DataGrid();
 			grid.Columns.Add(new DataGridTextColumn {
 				Binding = new Binding("Period")
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Check_context_on_build_legend()
 		{
 			StyleHelper.Reset();
-			StyleHelper.CollectStyles(appResource);
+			StyleHelper.BuildStyles(appResource);
 			var grid = new DataGrid();
 			grid.Columns.Add(new DataGridTextColumn {
 				Binding = new Binding("Sum")
@@ -73,6 +73,18 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual("Подсказка\r\n\"Заморожен\"", Legend(grid, typeof(Order)));
 			Assert.AreEqual("Подсказка\r\n\"Заморожен\"" +
 				"\r\nИмеется позиция с корректировкой по цене и/или по количеству", Legend(grid, typeof(Order), "CorrectionEnabled"));
+		}
+
+		[Test]
+		public void Get_default_styles()
+		{
+			var styles = StyleHelper.GetDefaultStyles();
+			Assert.That(styles.Count, Is.GreaterThan(0));
+			var style = styles.First(s => s.Name == "IsSendError");
+			Assert.IsTrue(style.IsBackground);
+			Assert.AreEqual("#FFA0A0A4", style.Background);
+			Assert.AreEqual("Black", style.Foreground);
+			Assert.AreEqual("Корректировка по цене и/или по количеству", style.Description);
 		}
 
 		private string Legend(DataGrid grid, Type type, string context = null)

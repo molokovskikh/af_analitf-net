@@ -267,6 +267,7 @@
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
     <Compile Include="Models\Results\MessageResult.cs" />
+    <Compile Include="Models\Results\NativeDialogResult.cs" />
     <Compile Include="Models\Results\OpenFileResult.cs" />
     <Compile Include="Models\Results\OpenResult.cs" />
     <Compile Include="Models\Results\PrintResult.cs" />
@@ -280,6 +281,7 @@
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\SingleInstance.cs" />
     <Compile Include="Models\Stat.cs" />
+    <Compile Include="Models\CustomStyle.cs" />
     <Compile Include="Models\Supplier.cs" />
     <Compile Include="Models\TableSettings.cs" />
     <Compile Include="Models\User.cs" />

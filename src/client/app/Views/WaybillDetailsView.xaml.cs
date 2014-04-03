@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Views
 						});
 				}
 
-				if (!((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
+				if (DataContext != null && !((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
 					grid.Columns.Remove(grid.Columns.First(g => Equals(g.Header, "ЖНВЛС")));
 				}
 			};

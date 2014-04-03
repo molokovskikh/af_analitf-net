@@ -136,6 +136,21 @@
 					</Grid>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Настройка легенды" Name="ColorsTab">
+				<ListBox Name="Styles"
+					HorizontalContentAlignment="Stretch"
+					cal:Message.Attach="[Event MouseDoubleClick] = [Action EditColor($this.SelectedItem)]">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock
+								FontSize="14"
+								Text="{Binding Description}"
+								Foreground="{Binding Foreground}"
+								Background="{Binding Background}" />
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</TabItem>
 			<TabItem Header="Соединение" Name="ConnectTab">
 				<StackPanel>
 					<Label>Соединение</Label>

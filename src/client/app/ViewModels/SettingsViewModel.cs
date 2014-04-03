@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -13,6 +16,7 @@ using Common.Tools;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
+using Color = System.Drawing.Color;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -38,6 +42,11 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentAddress = Addresses.FirstOrDefault();
 			DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
 			CurrentDirMap.Value = DirMaps.FirstOrDefault();
+
+			var styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+			var newStyles = StyleHelper.GetDefaultStyles().Except(styles);
+			Session.SaveEach(newStyles);
+			Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
 
 			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
@@ -68,6 +77,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public IList<MarkupConfig> VitallyImportantMarkups { get; set; }
 
 		public List<Address> Addresses { get; set; }
+
+		public List<CustomStyle> Styles { get; set; }
 
 		public Address CurrentAddress
 		{
@@ -112,6 +123,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
+			if (App.Current != null)
+				StyleHelper.BuildStyles(App.Current.Resources, Styles);
+
 			IsCredentialsChanged = Session.IsChanged(Settings, s => s.Password)
 				|| Session.IsChanged(Settings, s => s.UserName);
 
@@ -123,6 +137,27 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void Broadcast()
 		{
 			Bus.SendMessage<Settings>(null);
+		}
+
+		public IEnumerable<IResult> EditColor(CustomStyle style)
+		{
+			if (style == null)
+				yield break;
+			var converter = TypeDescriptor.GetConverter(typeof(Color));
+			var dialog = new ColorDialog {
+				Color = style.IsBackground
+					? (Color)converter.ConvertFrom(style.Background)
+					: (Color)converter.ConvertFrom(style.Foreground),
+				FullOpen = true,
+			};
+			yield return new NativeDialogResult<ColorDialog>(dialog);
+			var value = CustomStyle.ToHexString(dialog.Color);
+			if (style.IsBackground) {
+				style.Background = value;
+			}
+			else {
+				style.Foreground = value;
+			}
 		}
 	}
 }

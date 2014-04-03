@@ -24,6 +24,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Newtonsoft.Json;
+using NHibernate.Linq;
 using ReactiveUI;
 using log4net.Config;
 using ILog = log4net.ILog;
@@ -141,6 +142,16 @@ namespace AnalitF.Net.Client
 
 		public void InitShell()
 		{
+			try {
+				if (Application != null) {
+					using(var session = NHibernate.Factory.OpenSession()) {
+						StyleHelper.BuildStyles(Application.Resources, session.Query<CustomStyle>());
+					}
+				}
+			}
+			catch(Exception e) {
+				log.Error("Не удалось инициализировать стили", e);
+			}
 			var windowManager = IoC.Get<IWindowManager>();
 			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
 			Shell.Config = Config;

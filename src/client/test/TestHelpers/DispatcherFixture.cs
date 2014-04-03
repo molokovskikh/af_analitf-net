@@ -31,6 +31,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void Setup()
 		{
+			//wpf обеспечивает синхронизациию объектов ui
+			//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
+			//в других нитках что бы избежать ошибок очищаем статические структуры
+			StyleHelper.Reset();
 			exceptions = new List<Exception>();
 			windows = new List<Window>();
 			activeWindow = null;
