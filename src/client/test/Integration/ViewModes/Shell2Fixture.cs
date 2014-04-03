@@ -381,8 +381,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
 			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
+			Close(shell);
+
 			session.Refresh(offer);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
+			session.Refresh(settings);
+			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 		}
 
 		[Test]

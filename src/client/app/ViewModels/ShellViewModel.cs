@@ -325,8 +325,9 @@ namespace AnalitF.Net.Client.ViewModels
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
 						DbMaintain.UpdateLeaders(statelessSession, Settings.Value);
+						session.Flush();
 						return Enumerable.Empty<IResult>();
-					}, r => {  });
+					}, r => { });
 			}
 			return Enumerable.Empty<IResult>();
 		}
