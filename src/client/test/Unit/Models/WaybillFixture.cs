@@ -240,6 +240,24 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(9.72, line.RetailMarkup);
 		}
 
+		[Test]
+		public void Calculate_fields_for_user_created_waybill()
+		{
+			waybill.Calculate(settings);
+			waybill.IsCreatedByUser = true;
+			var waybillLine = new WaybillLine();
+			waybill.AddLine(waybillLine);
+
+			waybillLine.SupplierCost = 75;
+			waybillLine.Nds = 10;
+			waybillLine.Quantity = 2;
+
+			waybillLine.EndEdit();
+
+			Assert.AreEqual(150, waybillLine.Amount);
+			Assert.AreEqual(150, waybill.Sum);
+		}
+
 		private WaybillLine Line()
 		{
 			settings.Markups[0].Markup = 30;

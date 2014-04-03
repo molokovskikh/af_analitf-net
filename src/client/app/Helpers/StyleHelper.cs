@@ -115,6 +115,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsNotOrdered", Background("#FF8080") },
 				{ "IsMinCost", Background("#ACFF97") },
 				{ "ExistsInFreezed", Background("#C0C0C0") },
+				{ "IsCreatedByUser", Background("#C0DCC0") },
 			};
 
 		private static ResourceDictionary localResources;

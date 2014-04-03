@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class WaybillLine : BaseNotify
+	public class WaybillLine : BaseNotify, IEditableObject
 	{
 		private decimal? _retailCost;
 		private decimal? _realRetailMarkup;
@@ -317,6 +317,27 @@ namespace AnalitF.Net.Client.Models
 			if (Waybill.RoundTo1)
 				return ((int?)(value * 10)) / 10m;
 			return value;
+		}
+
+		public virtual void BeginEdit()
+		{
+		}
+
+		public virtual void EndEdit()
+		{
+			if (Waybill != null && Waybill.IsCreatedByUser) {
+				Amount = Quantity * SupplierCost;
+				NdsAmount = NullableHelper.Round(Nds / 100m * Amount, 2);
+				Calculate(Waybill.Settings, Waybill.Settings.Markups);
+				foreach (var property in typeof(WaybillLine).GetProperties()) {
+					OnPropertyChanged(property.Name);
+				}
+				Waybill.Calculate(Waybill.Settings);
+			}
+		}
+
+		public virtual void CancelEdit()
+		{
 		}
 	}
 }

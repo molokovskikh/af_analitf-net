@@ -298,6 +298,7 @@
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\Consts.cs" />
     <Compile Include="ViewModels\Debug.cs" />
+    <Compile Include="ViewModels\Dialogs\CreateWaybill.cs" />
     <Compile Include="ViewModels\Dialogs\DocModel.cs" />
     <Compile Include="ViewModels\Dialogs\OrderWarning.cs" />
     <Compile Include="ViewModels\Dialogs\PostUpdate.cs" />
@@ -350,6 +351,9 @@
     </Compile>
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
+      <DependentUpon>CreateWaybill.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
@@ -504,6 +508,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Debug.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\CreateWaybill.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -5,16 +5,19 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Common.Tools.Calendar;
+using Devart.Common;
+using NHibernate.Hql.Ast.ANTLR;
 using NHibernate.Mapping;
 using NHibernate.Util;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
-	public class WpfHelper
+	public static class WpfHelper
 	{
 		public static void WithWindow(Action<Window> action)
 		{

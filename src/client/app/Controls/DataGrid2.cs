@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -64,6 +65,15 @@ namespace AnalitF.Net.Client.Controls
 		{
 			get { return CanSelectMultipleItems; }
 			set { CanSelectMultipleItems = value; }
+		}
+
+		public override void OnApplyTemplate()
+		{
+			base.OnApplyTemplate();
+
+			var viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
+			if (viewer != null)
+				viewer.Focusable = true;
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -130,15 +140,15 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
-		public override void OnApplyTemplate()
-		{
-			base.OnApplyTemplate();
 
-			var viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
-			if (viewer != null) {
-				viewer.Focusable = true;
-			}
-		}
+		/*
+		проблемы с фоксом
+		1 - тк ScrollViewer Focusable то он может получить фокус если на него кликнуть
+		это правильно когда грид пуст для того что бы получать ввод с клавиатуры
+		и не правильно когда в гриде есть элементы
+		фокус должен оставаться на элементе
+
+		*/
 
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
@@ -206,6 +216,26 @@ namespace AnalitF.Net.Client.Controls
 		{
 			var prop = typeof(DataGrid2).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
 			return prop.GetValue(dataGrid, null);
+		}
+
+		protected override void OnExecutedCancelEdit(ExecutedRoutedEventArgs e)
+		{
+			base.OnExecutedCancelEdit(e);
+
+			//очередная проблема с datagrid
+			//при выходе из режима редактирования
+			//повторное нажатие escape обрабатывает как завершение редактирование хотя редактирование уже завершено
+			//похоже что проблема состоит в неверном определение типа редактирования
+			//у Items не сбрасывается флаг IsEditingItem и фовторно нажатие escape интерпретируется как завершение
+			//редактирования строки
+			//тк на некоторых формах escape обрабатывается как выход из формы такое поведение неприемлемо
+			var cell = DataGridHelper.GetCell(this, CurrentCell);
+			if (cell == null || !cell.IsEditing) {
+				e.Handled = false;
+				var editable = ((IEditableCollectionView)Items);
+				if (editable.IsEditingItem)
+					editable.CancelEdit();
+			}
 		}
 	}
 }

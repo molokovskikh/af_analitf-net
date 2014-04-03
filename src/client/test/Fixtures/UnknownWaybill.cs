@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate;
@@ -8,11 +9,29 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class UnknownWaybill
 	{
+		public Waybill Waybill;
+
 		public void Execute(ISession session)
 		{
-			var data = new DataMother(session);
-			data.CreateWaybill(session.Query<Address>().First(),
-				session.Query<Settings>().First());
+			var address = session.Query<Address>().First();
+			var settings = session.Query<Settings>().First();
+
+			Waybill = new Waybill {
+				Address = address,
+				WriteTime = DateTime.Now,
+				DocumentDate = DateTime.Now,
+				Supplier = session.Query<Supplier>().First()
+			};
+			Waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(Waybill)).ToList();
+			var line = Waybill.Lines[0];
+			line.Quantity = 10;
+			line.Nds = 10;
+			line.ProducerCost = 15.13m;
+			line.SupplierCostWithoutNds = 18.25m;
+			line.SupplierCost = 20.8m;
+			Waybill.Calculate(settings);
+			session.Save(Waybill);
+			session.Flush();
 		}
 	}
 }

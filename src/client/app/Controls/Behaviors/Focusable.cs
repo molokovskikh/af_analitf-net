@@ -32,20 +32,25 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		private void Unloaded(object sender, RoutedEventArgs e)
 		{
-			if (AssociatedObject.IsKeyboardFocusWithin)
+			if (AssociatedObject.IsKeyboardFocusWithin) {
 				lastFocusedElement = Keyboard.FocusedElement;
+				//если фокус установлен на ячейку то сохранять его нет смысла
+				//тк ячейка может быть разрешена и тогда мы не сможем восстановить фокус
+				//ячейка будет разрушена например если после будет вызвана следующая цепочка событий
+				//форма 1 -> форма 2 (открытие) -> форма 1 (возврат) -> форма 1 (загрузка данных после из-за изменений на форме 2)
+				if (lastFocusedElement is DataGridCell) {
+					lastFocusedElement = ((DataGridCell)lastFocusedElement).VisualParents()
+						.OfType<DataGrid>()
+						.FirstOrDefault();
+				}
+			}
 		}
 
 		private void Loaded(object sender, RoutedEventArgs args)
 		{
 			if (lastFocusedElement != null) {
-				if (lastFocusedElement is DataGridCell) {
-					var grid = ((DataGridCell)lastFocusedElement).VisualParents()
-						.OfType<DataGrid>()
-						.FirstOrDefault();
-					if (grid != null)
-						DataGridHelper.Focus(grid);
-				}
+				if (lastFocusedElement is DataGrid)
+					DataGridHelper.Focus((DataGrid)lastFocusedElement);
 				else
 					Keyboard.Focus(lastFocusedElement);
 			}

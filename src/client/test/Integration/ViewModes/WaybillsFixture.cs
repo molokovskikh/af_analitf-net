@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -19,7 +20,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			waybill = data.CreateWaybill(address, settings);
+			waybill = Fixture<UnknownWaybill>().Waybill;
 		}
 
 		[Test]

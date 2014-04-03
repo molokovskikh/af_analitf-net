@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			if (!Directory.Exists(IntegrationSetup.BackupDir))
 				return;
-			Prepare(@"..\..\..\AnalitF.Net.Client\bin\Debug", "acceptance");
+			Prepare(@"..\..\..\app\bin\Debug", "acceptance");
 
 			var port = Generator.Random(ushort.MaxValue).First();
 			var url = String.Format("http://localhost:{0}/", port);

@@ -9,11 +9,11 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
-using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -163,12 +163,25 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			var ids = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
-			query = query.Where(w => ids.Contains(w.Supplier.Id));
+			if (ids.Length != Suppliers.Count)
+				query = query.Where(w => ids.Contains(w.Supplier.Id));
 
 			Waybills.Value = new ObservableCollection<Waybill>(query
 				.OrderBy(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
 				.ToList());
+		}
+
+		public IEnumerable<IResult> Create()
+		{
+			var waybill = new Waybill {
+				WriteTime = DateTime.Now,
+				DocumentDate = DateTime.Now,
+				IsCreatedByUser = true
+			};
+			yield return new DialogResult(new CreateWaybill(waybill), sizeToContent: true);
+			Session.Save(waybill);
+			Update();
 		}
 	}
 }

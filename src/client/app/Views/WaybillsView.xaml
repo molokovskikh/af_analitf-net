@@ -17,12 +17,12 @@
 
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
+		<WrapPanel Orientation="Horizontal" Margin="4">
 			<StackPanel Orientation="Vertical">
 				<Label>Забраковка</Label>
 				<ComboBox Style="{StaticResource Select}" x:Name="RejectFilter" />
@@ -46,7 +46,8 @@
 			<Button Name="SearchLine" Style="{StaticResource FilterElement}">Поиск товара</Button>
 			<Button Name="OpenFolders" Style="{StaticResource FilterElement}">Открыть папки</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
-		</StackPanel>
+			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
+		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1">
 			<DataGrid.Columns>
@@ -62,7 +63,7 @@
 				<c:DataGridTextColumnEx Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
 				<c:DataGridTextColumnEx Width="64*" Header="Поставщик"
-					Binding="{Binding Supplier.Name}" />
+					Binding="{Binding SupplierName}" />
 				<c:DataGridTextColumnEx Width="64*" Header="Сумма опт"
 					Binding="{Binding Sum}"
 					TextAlignment="Right" />

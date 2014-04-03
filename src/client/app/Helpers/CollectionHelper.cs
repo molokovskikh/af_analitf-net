@@ -37,5 +37,10 @@ namespace AnalitF.Net.Client.Helpers
 			Bind(result, (IList)dst, add, remove);
 			return result;
 		}
+
+		public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
+		{
+			return new ObservableCollection<T>(collection.ToList());
+		}
 	}
 }

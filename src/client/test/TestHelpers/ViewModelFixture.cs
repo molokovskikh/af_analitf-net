@@ -46,7 +46,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected Extentions.WindowManager manager;
 		protected TestScheduler testScheduler;
 		protected Lazy<ShellViewModel> lazyshell;
-		protected DataMother data;
 		protected MessageBus bus;
 		protected Env Env;
 
@@ -75,8 +74,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				return value;
 			});
 			manager = StubWindowManager(lazyshell);
-
-			data = new DataMother(session);
 		}
 
 		protected virtual ShellViewModel shell

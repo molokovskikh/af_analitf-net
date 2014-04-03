@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Navigation;
 using AnalitF.Net.Client.Config.Initializers;
 using Caliburn.Micro;
 using Common.Tools;
+using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -17,12 +19,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Kpp { get; set; }
 	}
 
-	public class Waybill
+	public class Waybill : BaseStatelessObject, IDataErrorInfo
 	{
 		private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Waybill));
 
 		private bool _vitallyImportant;
-		private Settings _settings = new Settings();
 
 		public Waybill()
 		{
@@ -31,7 +32,7 @@ namespace AnalitF.Net.Client.Models
 			RoundTo1 = true;
 		}
 
-		public virtual uint Id { get; set; }
+		public override uint Id { get; set; }
 		public virtual string ProviderDocumentId { get; set; }
 		public virtual DateTime DocumentDate { get; set; }
 		public virtual DateTime WriteTime { get; set; }
@@ -46,6 +47,16 @@ namespace AnalitF.Net.Client.Models
 		public virtual Contractor Buyer { get; set; }
 		public virtual string ShipperNameAndAddress { get; set; }
 		public virtual string ConsigneeNameAndAddress { get; set; }
+		public virtual string UserSupplierName { get; set; }
+
+		//для биндинга
+		public virtual bool IsReadOnly
+		{
+			get { return !IsCreatedByUser; }
+		}
+
+		[Style(Description = "Накладная, созданная пользователем")]
+		public virtual bool IsCreatedByUser { get; set; }
 
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }
@@ -67,7 +78,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				_vitallyImportant = value;
-				Calculate(_settings);
+				Calculate(Settings);
 			}
 		}
 
@@ -102,15 +113,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string SupplierName
 		{
-			get { return Supplier == null ? null : Supplier.FullName; }
+			get { return Supplier == null ? UserSupplierName : Supplier.FullName; }
 		}
 
 		[Ignore]
 		public virtual WaybillSettings WaybillSettings { get; set; }
 
+		[Ignore]
+		public virtual Settings Settings { get; set; }
+
 		public virtual void Calculate(Settings settings)
 		{
-			_settings = settings;
+			Settings = settings;
 			WaybillSettings = settings.Waybills
 				.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null
@@ -118,26 +132,67 @@ namespace AnalitF.Net.Client.Models
 				?? WaybillSettings;
 
 			foreach (var waybillLine in Lines)
-				waybillLine.Calculate(_settings, _settings.Markups);
+				waybillLine.Calculate(Settings, Settings.Markups);
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			if (IsCreatedByUser)
+				TaxSum = Lines.Sum(l => l.NdsAmount).GetValueOrDefault();
+
 			CalculateRetailSum();
 		}
 
 		public virtual void CalculateRetailSum()
 		{
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();
+			if (IsCreatedByUser) {
+				TaxSum = Lines.Sum(l => l.NdsAmount).GetValueOrDefault();
+				Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			}
 		}
 
 		public virtual void DeleteFiles(Settings settings)
 		{
-				var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
-				try {
-					files.Each(f => File.Delete(f));
-				}
-				catch(Exception e) {
-					_log.Warn(String.Format("Ошибка при удалении документа {0}", Id), e);
-				}
+			var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
+			try {
+				files.Each(f => File.Delete(f));
+			}
+			catch(Exception e) {
+				_log.Warn(String.Format("Ошибка при удалении документа {0}", Id), e);
+			}
 		}
+
+		public virtual void RemoveLine(WaybillLine line)
+		{
+			line.Waybill = null;
+			Lines.Remove(line);
+			Calculate(Settings);
+		}
+
+		public virtual void AddLine(WaybillLine line)
+		{
+			line.Waybill = this;
+			Lines.Add(line);
+			Calculate(Settings);
+		}
+
+		public virtual string this[string columnName]
+		{
+			get
+			{
+				if (columnName == "ProviderDocumentId") {
+					if (String.IsNullOrEmpty(ProviderDocumentId)) {
+						return "Не установлен номер накладной.";
+					}
+				}
+				else if (columnName == "UserSupplierName") {
+					if (String.IsNullOrEmpty(UserSupplierName)) {
+						return "Не установлено название поставщика";
+					}
+				}
+				return "";
+			}
+		}
+
+		public virtual string Error { get; protected set; }
 	}
 }

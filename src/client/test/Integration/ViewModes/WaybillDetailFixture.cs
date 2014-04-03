@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -20,11 +21,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class WaybillDetailFixture : ViewModelFixture
 	{
 		private WaybillDetails model;
+		private Waybill waybill;
 
 		[SetUp]
 		public void Setup()
 		{
-			var waybill = data.CreateWaybill(address, settings);
+			waybill = Fixture<UnknownWaybill>().Waybill;
 			model = Init(new WaybillDetails(waybill.Id));
 		}
 
@@ -90,6 +92,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var result = (DialogResult)model.PrintInvoice().First();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview.Document);
+		}
+
+		[Test]
+		public void Create_new_line()
+		{
+			waybill.IsCreatedByUser = true;
+			var waybillLine = new WaybillLine();
+			model.Lines.Value.Add(waybillLine);
+			Assert.AreEqual(11, model.Waybill.Lines.Count);
+			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 	}
 }

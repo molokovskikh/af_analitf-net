@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
@@ -8,6 +12,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Util;
 
@@ -26,23 +31,35 @@ namespace AnalitF.Net.Client.ViewModels
 			RoundToSingleDigit.Changed()
 				.Merge(Settings.Changed())
 				.Subscribe(v => Calculate());
-			Lines = new NotifyValue<IList<WaybillLine>>(() => (Waybill ?? new Waybill())
+			Lines = new NotifyValue<ObservableCollection<WaybillLine>>(() => (Waybill ?? new Waybill())
 				.Lines
 				.Where(l => l.Nds == CurrentTax.Value.Value || CurrentTax.Value.Value == -1)
-				.ToList(), CurrentTax);
+				.ToObservableCollection(), CurrentTax);
+			Lines.Changed().Select(_ => Lines.Value == null
+				? Observable.Empty<EventPattern<NotifyCollectionChangedEventArgs>>()
+				: Lines.Value.Changed())
+			.Switch()
+			.Subscribe(e => {
+				if (e.EventArgs.Action == NotifyCollectionChangedAction.Remove) {
+					e.EventArgs.OldItems.OfType<WaybillLine>().Each(l => Waybill.RemoveLine(l));
+				}
+				else if (e.EventArgs.Action == NotifyCollectionChangedAction.Add) {
+					e.EventArgs.NewItems.OfType<WaybillLine>().Each(l => Waybill.AddLine(l));
+				}
+			});
 		}
+
+		public Waybill Waybill { get; set; }
+		public NotifyValue<ObservableCollection<WaybillLine>> Lines { get; set; }
+		public List<ValueDescription<int?>> Taxes { get; set; }
+		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
+		public NotifyValue<bool> RoundToSingleDigit { get; set; }
 
 		private void Calculate()
 		{
 			Waybill.RoundTo1 = RoundToSingleDigit.Value;
 			Waybill.Calculate(Settings.Value);
 		}
-
-		public Waybill Waybill { get; set; }
-		public NotifyValue<IList<WaybillLine>> Lines { get; set; }
-		public List<ValueDescription<int?>> Taxes { get; set; }
-		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
-		public NotifyValue<bool> RoundToSingleDigit { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -52,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Calculate();
 
-			Lines.Value = Waybill.Lines;
+			Lines.Value = Waybill.Lines.ToObservableCollection();
 			Taxes = new List<ValueDescription<int?>> {
 				new ValueDescription<int?>("Все", -1),
 			};
