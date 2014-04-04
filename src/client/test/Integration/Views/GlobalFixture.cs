@@ -19,10 +19,12 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
+using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -580,6 +582,40 @@ namespace AnalitF.Net.Test.Integration.Views
 				var cell = GetCell(lines, "Цена");
 				Assert.AreEqual(order.Lines[0].Cost.ToString(CultureInfo.InvariantCulture), cell.AsText());
 			});
+		}
+
+		[Test]
+		public void Schedule()
+		{
+			restore = true;
+			var fixture = new CreateSchedule {
+				Schedules = new [] {
+					DateTime.Now.AddMinutes(30).TimeOfDay
+				}
+			};
+			Fixture(fixture);
+
+			Start();
+
+			SystemTime.Now = () => DateTime.Now.AddMinutes(20);
+			testScheduler.AdvanceByMs(30000);
+
+			AsyncClick("Update");
+			WaitMessageBox("Обновление завершено успешно.");
+			WaitIdle();
+
+			dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => {
+				SystemTime.Now = () => DateTime.Now.AddMinutes(40);
+				testScheduler.AdvanceByMs(30000);
+			}));
+
+			WaitWindow("Обновление");
+			dispatcher.Invoke(() => {
+				Assert.That(activeWindow.AsText(),
+					Is.StringContaining("Сейчас будет произведено обновление данных"));
+			});
+			AsyncClick("TryClose");
+			WaitMessageBox("Обновление завершено успешно.");
 		}
 
 		private void WaitWindow(string title)

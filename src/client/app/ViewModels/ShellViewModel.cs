@@ -159,7 +159,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Where(k => k)
 				.SelectMany(_ => RxHelper.ToObservable(UpdateBySchedule()))
-				.Subscribe(ResultsSink, CancelDisposable.Token);
+				.Subscribe(r => ResultsSink.OnNext(r));
 
 			CanExport = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IExportable

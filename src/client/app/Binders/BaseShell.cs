@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Binders
 
 		protected void Execute(IEnumerable<IResult> results)
 		{
-			RxHelper.ToObservable(results).Subscribe(ResultsSink, CancelDisposable.Token);
+			RxHelper.ToObservable(results).Subscribe(v => ResultsSink.OnNext(v));
 		}
 
 		public virtual IEnumerable<IResult> OnViewReady()

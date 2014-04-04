@@ -63,6 +63,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
+			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
 				dispatcher.Invoke(() => {

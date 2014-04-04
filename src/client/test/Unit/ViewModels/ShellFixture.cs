@@ -90,13 +90,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Do_not_update_if_schedule_not_meet()
 		{
+			var result = cmd.Collect();
 			shell.Settings.Value.LastUpdate = new DateTime(2014, 03, 20, 12, 5, 0);
 			shell.Settings.Value.UserName = "test";
 			shell.Settings.Value.Password = "password";
 			shell.Schedules.Value = new List<Schedule> {
 				new Schedule(new TimeSpan(20, 0, 0))
 			};
-			var result = cmd.Collect();
 			SystemTime.Now = () => new DateTime(2014, 03, 20, 19, 5, 0);
 			scheduler.AdvanceByMs(60000);
 			Assert.IsEmpty(result);
@@ -105,18 +105,38 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Periodical_check_schedule()
 		{
+			var result = cmd.Collect();
+
 			shell.Settings.Value.UserName = "test";
 			shell.Settings.Value.Password = "password";
 			shell.Schedules.Value = new List<Schedule> {
 				new Schedule(new TimeSpan(18, 0, 0))
 			};
-			var result = cmd.Collect();
 			SystemTime.Now = () => new DateTime(2014, 03, 20, 19, 5, 0);
 			scheduler.AdvanceByMs(30000);
 			Assert.IsInstanceOf<UpdateCommand>(result[0]);
 
 			//если обновление не удалось мы должны попытаться еще раз
 			result.Clear();
+			scheduler.AdvanceByMs(30000);
+			Assert.IsInstanceOf<UpdateCommand>(result[0]);
+		}
+
+		[Test]
+		public void Do_not_close_subject()
+		{
+			var result = cmd.Collect();
+
+			shell.Settings.Value.UserName = "test";
+			shell.Settings.Value.Password = "password";
+			shell.Schedules.Value = new List<Schedule>();
+			scheduler.AdvanceByMs(30000);
+			Assert.IsEmpty(result);
+
+			shell.Schedules.Value = new List<Schedule> {
+				new Schedule(new TimeSpan(18, 0, 0))
+			};
+			SystemTime.Now = () => new DateTime(2014, 03, 20, 19, 5, 0);
 			scheduler.AdvanceByMs(30000);
 			Assert.IsInstanceOf<UpdateCommand>(result[0]);
 		}

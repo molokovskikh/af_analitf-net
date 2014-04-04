@@ -21,6 +21,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 		public virtual TimeSpan UpdateAt { get; set; }
 
+		public override string ToString()
+		{
+			return UpdateAt.ToString();
+		}
+
 		public static bool IsOutdate(IList<Schedule> shedules, DateTime lastUpdate)
 		{
 			if (shedules.Count == 0)
