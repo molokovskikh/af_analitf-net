@@ -243,7 +243,7 @@
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding ProducerSynonym}" Width="*" />
 				<c:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Period}" Width="*" />
 				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding MixedCost}" FontWeight="Bold" />
-				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding Quantity}" />
+				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding Count}" />
 				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding MixedSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>

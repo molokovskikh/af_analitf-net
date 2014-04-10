@@ -226,6 +226,22 @@ namespace AnalitF.Net.Test.Integration
 		}
 
 		[Test]
+		public void Set_text_alignment_notify_value()
+		{
+			var grid = new DataGrid {
+				Name = "NotifyItemItems",
+				Columns = {
+					new DataGridTextColumnEx {
+						Binding = new Binding("I")
+					}
+				}
+			};
+			Bind(grid);
+
+			Assert.AreEqual(TextAlignment.Right, ((DataGridTextColumnEx)grid.Columns[0]).TextAlignment);
+		}
+
+		[Test]
 		public void Bind_notify_value_property()
 		{
 			var label1 = new Label { Name = "NotifyItems_Count" };
@@ -292,6 +308,7 @@ namespace AnalitF.Net.Test.Integration
 			public NotifyValue<TestEnum> NotifyEnum { get; set; }
 
 			public List<Item> ItemItems { get; set; }
+			public NotifyValue<List<Item>> NotifyItemItems { get; set; }
 
 			public string[] ArrayItems { get; set; }
 

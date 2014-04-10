@@ -96,32 +96,40 @@ namespace AnalitF.Net.Client.UI
 
 					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
-						var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
-						if (result
-							&& property.PropertyType.IsGenericType
-							&& typeof(IList).IsAssignableFrom(property.PropertyType)) {
-							var columns = ((DataGrid)element).Columns.OfType<DataGridTextColumnEx>();
-							foreach (var column in columns) {
-								if (column.Binding is Binding) {
-									var columnPath = ((Binding)column.Binding).Path.Path;
-									var type = property.PropertyType.GetGenericArguments()[0];
-									var columnProperty = Util.GetProperty(type, columnPath);
-									if (columnProperty == null)
-										continue;
-									var columnType = columnProperty.PropertyType;
-									if (Util.IsNumeric(columnType)) {
-										column.TextAlignment = TextAlignment.Right;
-									}
-									if (Util.IsDateTime(columnType)) {
-										column.TextAlignment = TextAlignment.Center;
-									}
-								}
-							}
-						}
-						return result;
+						return GuesAlignment(fallback, viewModelType, path, property, element);
 					}
 					return false;
 				};
+		}
+
+		private static bool GuesAlignment(ElementConvention fallback, Type viewModelType, string path, PropertyInfo property, FrameworkElement element)
+		{
+			var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
+			var dummy = "";
+			NotifyValueSupport.Patch(ref dummy, ref property);
+			var propertyType = property.PropertyType;
+			if (result
+				&& propertyType.IsGenericType
+				&& typeof(IList).IsAssignableFrom(propertyType)) {
+				var columns = ((DataGrid)element).Columns.OfType<DataGridTextColumnEx>();
+				foreach (var column in columns) {
+					if (column.Binding is Binding) {
+						var columnPath = ((Binding)column.Binding).Path.Path;
+						var type = propertyType.GetGenericArguments()[0];
+						var columnProperty = Util.GetProperty(type, columnPath);
+						if (columnProperty == null)
+							continue;
+						var columnType = columnProperty.PropertyType;
+						if (Util.IsNumeric(columnType)) {
+							column.TextAlignment = TextAlignment.Right;
+						}
+						if (Util.IsDateTime(columnType)) {
+							column.TextAlignment = TextAlignment.Center;
+						}
+					}
+				}
+			}
+			return result;
 		}
 
 		private static bool TryBindSelectedItems(Type viewModelType,

@@ -475,7 +475,7 @@ namespace AnalitF.Net.Client.Helpers
 				legend.Children.Add(stack);
 			}
 			else {
-				legend.Children.OfType<StackPanel>().First().Children.AddRange(labels);
+				legend.Children.OfType<Panel>().First().Children.AddRange(labels);
 			}
 		}
 
