@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Linq;
+using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -26,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
+			CurrentLine = new NotifyValue<WaybillLine>();
 			CurrentTax = new NotifyValue<ValueDescription<int?>>();
 			RoundToSingleDigit = new NotifyValue<bool>(true);
 			RoundToSingleDigit.Changed()
@@ -47,13 +49,45 @@ namespace AnalitF.Net.Client.ViewModels
 					e.EventArgs.NewItems.OfType<WaybillLine>().Each(l => Waybill.AddLine(l));
 				}
 			});
+			OrderLines = CurrentLine
+				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+				.Select(v => {
+					if (v == null)
+						return new List<SentOrderLine>();
+					var lineId = v.Id;
+					var orderLineIds = Session.Query<WaybillOrder>().Where(l => l.DocumentLineId == lineId)
+						.Select(l => (uint?)l.OrderLineId)
+						.ToArray();
+					var line = Session.Query<SentOrderLine>().FirstOrDefault(l => orderLineIds.Contains(l.ServerId));
+					if (line != null) {
+						CurrentOrderLine.Value = line;
+						line.Order.Lines.Each(l => l.Configure(User));
+						return line.Order.Lines.OrderBy(l => l.ProductSynonym).ToList();
+					}
+					return new List<SentOrderLine>();
+				})
+				.ToValue(CloseCancellation);
+			CurrentOrderLine = new NotifyValue<SentOrderLine>();
+
+			EmptyLabelVisibility = OrderLines
+				.Select(v => v == null || v.Count == 0 ? Visibility.Visible : Visibility.Collapsed)
+				.ToValue();
+			OrderDetailsVisibility = EmptyLabelVisibility
+				.Select(v => v == Visibility.Collapsed ? Visibility.Visible :  Visibility.Collapsed)
+				.ToValue();
 		}
 
 		public Waybill Waybill { get; set; }
 		public NotifyValue<ObservableCollection<WaybillLine>> Lines { get; set; }
+		public NotifyValue<WaybillLine> CurrentLine { get; set; }
 		public List<ValueDescription<int?>> Taxes { get; set; }
 		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
 		public NotifyValue<bool> RoundToSingleDigit { get; set; }
+
+		public NotifyValue<List<SentOrderLine>> OrderLines { get; set; }
+		public NotifyValue<SentOrderLine> CurrentOrderLine { get; set; }
+		public NotifyValue<Visibility> OrderDetailsVisibility { get; set; }
+		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
 
 		private void Calculate()
 		{

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Common.Tools;
+using System.Linq;
 #if SERVER
 using Common.Models;
 namespace AnalitF.Net.Service.Models
@@ -82,6 +84,7 @@ namespace AnalitF.Net.Client.Models
 	public class OrderLineResult
 	{
 		public uint ClientLineId;
+		public uint? ServerLineId;
 		public uint? ServerQuantity;
 		public decimal? ServerCost;
 		public LineResultStatus Result;
@@ -116,10 +119,11 @@ namespace AnalitF.Net.Client.Models
 		}
 
 #if SERVER
-		public OrderResult(Order order)
+		public OrderResult(Order order, Dictionary<OrderItem, uint> map)
 		{
 			ClientOrderId = order.ClientOrderId.GetValueOrDefault();
 			ServerOrderId = order.RowId;
+			Lines = order.OrderItems.Select(i => new OrderLineResult(map.GetValueOrDefault(i)) { ServerLineId = i.RowId }).ToArray();
 		}
 #endif
 

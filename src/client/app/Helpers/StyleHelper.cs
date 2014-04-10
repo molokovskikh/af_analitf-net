@@ -433,7 +433,7 @@ namespace AnalitF.Net.Client.Helpers
 		}
 
 		public static void ApplyStyles(Type type, DataGrid grid, ResourceDictionary resources,
-			StackPanel legend = null,
+			Panel legend = null,
 			string context = null)
 		{
 			foreach (var dataGridColumn in grid.Columns.OfType<DataGridBoundColumn>()) {
@@ -451,7 +451,7 @@ namespace AnalitF.Net.Client.Helpers
 			BuildLegend(type, grid, resources, legend, context);
 		}
 
-		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, StackPanel legend,
+		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, Panel legend,
 			string context)
 		{
 			if (legend == null)
@@ -469,7 +469,7 @@ namespace AnalitF.Net.Client.Helpers
 
 			if (legend.Children.Count == 0) {
 				legend.Children.Add(new Label { Content = "Подсказка" });
-				var stack = new StackPanel();
+				var stack = new WrapPanel();
 				stack.Orientation = Orientation.Horizontal;
 				stack.Children.AddRange(labels);
 				legend.Children.Add(stack);

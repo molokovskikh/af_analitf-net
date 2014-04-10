@@ -23,6 +23,8 @@
 			<RowDefinition />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="100" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
@@ -187,6 +189,63 @@
 			<Button Style="{StaticResource FilterElement}" CommandTarget="{x:Reference Lines}"
 				Command="ApplicationCommands.Delete">Удалить строку</Button>
 		</StackPanel>
+
 		<StackPanel Grid.Row="4" Name="Legend" />
+
+		<Label Grid.Row="5" Grid.RowSpan="2"
+			VerticalAlignment="Center"
+			HorizontalAlignment="Center"
+			FontSize="16"
+			Visibility="{Binding EmptyLabelVisibility.Value}">
+			Заказов не найдено
+		</Label>
+
+		<StackPanel Grid.Row="5" Style="{StaticResource FilterPanel}"
+			Visibility="{Binding OrderDetailsVisibility.Value}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Заказ №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="CurrentOrderLine_Order_Id" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="CurrentOrderLine_Order_LinesCount" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="CurrentOrderLine_Order_CreatedOn" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">на сумму:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="CurrentOrderLine_Order_Sum" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Прайс-лист:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="CurrentOrderLine_Order_PriceLabel" FontWeight="Bold"></Label>
+
+				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Регион:</Label>
+				<Label Grid.Row="1" Grid.Column="5" Name="CurrentOrderLine_Order_Price_RegionName" FontWeight="Bold"></Label>
+			</Grid>
+		</StackPanel>
+
+		<c:DataGrid2 Grid.Row="6" x:Name="OrderLines"
+			Visibility="{Binding OrderDetailsVisibility.Value}">
+			<DataGrid.Columns>
+				<c:DataGridTextColumnEx Header="Наименование" Binding="{Binding ProductSynonym}" Width="*" />
+				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding ProducerSynonym}" Width="*" />
+				<c:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Period}" Width="*" />
+				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding MixedCost}" FontWeight="Bold" />
+				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding Quantity}" />
+				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding MixedSum}" />
+			</DataGrid.Columns>
+		</c:DataGrid2>
 	</Grid>
 </UserControl>

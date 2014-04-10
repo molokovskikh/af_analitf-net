@@ -39,6 +39,23 @@ namespace AnalitF.Net.Client.Helpers
 				.Where(e => e.EventArgs.PropertyName == "Value");
 		}
 
+		public static IObservable<T> ToObservable<T>(this NotifyValue<T> self)
+		{
+			return Observable.FromEventPattern<PropertyChangedEventArgs>(self, "PropertyChanged")
+				.Where(e => e.EventArgs.PropertyName == "Value")
+				.Select(e => ((NotifyValue<T>)e.Sender).Value);
+		}
+
+		public static IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue<T>(this NotifyValue<T> self)
+		{
+			return self.ObservableForProperty(v => v.Value)
+				.Select(v => v.Value as INotifyPropertyChanged)
+				.Select(v => v == null
+					? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()
+					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))
+				.Switch();
+		}
+
 		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> Changed<T>(this ObservableCollection<T> self)
 		{
 			return Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
@@ -62,6 +79,16 @@ namespace AnalitF.Net.Client.Helpers
 		}
 
 		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable, CancellationDisposable cancellation)
+		{
+			return new NotifyValue<T>(observable, cancellation);
+		}
+
+		public static NotifyValue<TR> ToValue<T, TR>(this IObservable<T> observable, Func<T, TR> func)
+		{
+			return new NotifyValue<TR>(observable.Select(func));
+		}
+
+		public static NotifyValue<T> ToValue<T, TR>(this IObservable<T> observable, Func<T, TR> func, CancellationDisposable cancellation)
 		{
 			return new NotifyValue<T>(observable, cancellation);
 		}

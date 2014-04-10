@@ -38,6 +38,10 @@ namespace AnalitF.Net.Client.ViewModels
 					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
 					editor.CurrentEdit = CurrentLine.Value as OrderLine;
 				});
+			MatchedWaybills = new MatchedWaybills(StatelessSession,
+				CurrentLine.OfType<SentOrderLine>().ToValue(),
+				new NotifyValue<bool>(() => !IsCurrentOrder),
+				UiScheduler);
 		}
 
 		public IList<IOrderLine> Source { get; set; }
@@ -45,6 +49,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool IsCurrentOrder
 		{
 			get { return type == typeof(Order); }
+		}
+
+		public bool IsSentOrder
+		{
+			get { return type == typeof(SentOrder); }
 		}
 
 		public NotifyValue<bool> OnlyWarning { get; set; }
@@ -60,6 +69,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<IList<IOrderLine>> Lines { get; set; }
 
 		public NotifyValue<IOrderLine> CurrentLine { get; set; }
+
+		public MatchedWaybills MatchedWaybills { get; set; }
 
 		public bool CanPrint
 		{

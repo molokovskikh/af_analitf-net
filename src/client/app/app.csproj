@@ -287,6 +287,7 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
+    <Compile Include="Models\WaybillOrder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Conventions.cs" />
@@ -322,6 +323,7 @@
     <Compile Include="ViewModels\Parts\AddressSelector.cs" />
     <Compile Include="ViewModels\Parts\Editor.cs" />
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
+    <Compile Include="ViewModels\Parts\MatchedWaybills.cs" />
     <Compile Include="ViewModels\Parts\Navigator.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
     <Compile Include="ViewModels\Parts\PromotionPopup.cs" />
@@ -377,6 +379,9 @@
     </Compile>
     <Compile Include="Views\Orders\Batch.xaml.cs">
       <DependentUpon>Batch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Parts\MatchedWaybills.xaml.cs">
+      <DependentUpon>MatchedWaybills.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\PromotionPopup.xaml.cs">
       <DependentUpon>PromotionPopup.xaml</DependentUpon>
@@ -542,6 +547,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Orders\Batch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Parts\MatchedWaybills.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

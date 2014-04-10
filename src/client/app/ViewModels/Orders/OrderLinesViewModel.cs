@@ -5,8 +5,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http.Formatting.Parsers;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
+using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -15,6 +17,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -82,6 +85,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
 			CurrentPrice.Mute(Prices.FirstOrDefault());
+
+			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -95,6 +100,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 		public NotifyValue<bool> OnlyWarning { get; set; }
 
+		public NotifyValue<OrderLine> CurrentLine { get; set; }
+
 		[Export]
 		public NotifyValue<ObservableCollection<OrderLine>> Lines { get; set; }
 
@@ -105,9 +112,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<decimal> Sum { get; set; }
 
-		public NotifyValue<OrderLine> CurrentLine { get; set; }
-
 		public NotifyValue<bool> CanDelete { get; set; }
+
+		public MatchedWaybills MatchedWaybills { get; set; }
 
 		public bool CanPrint
 		{

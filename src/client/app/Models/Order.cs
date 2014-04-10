@@ -295,9 +295,7 @@ namespace AnalitF.Net.Client.Models
 				SendError = "Неизвестная ошибка сервера";
 			}
 
-			if (SendResult != OrderResultStatus.OK) {
-				Lines.Each(l => l.Apply(result.Lines.FirstOrDefault(r => r.ClientLineId == l.Id)));
-			}
+			Lines.Each(l => l.Apply(result.Lines.FirstOrDefault(r => r.ClientLineId == l.Id)));
 		}
 	}
 }

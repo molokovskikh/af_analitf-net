@@ -18,13 +18,15 @@
 
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
@@ -184,8 +186,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<StackPanel Grid.Row="2" Name="Legend">
-		</StackPanel>
+		<StackPanel Grid.Row="2" Name="Legend" />
 
 		<ContentControl x:Name="ProductInfo" Grid.Row="3" />
 
@@ -216,5 +217,7 @@
 				Позиций: <Run x:Name="Lines_Value_Count"/> на сумму: <Run x:Name="Sum_Value"/>
 			</TextBlock>
 		</StackPanel>
+
+		<ContentControl Grid.Row="7" Name="MatchedWaybills" />
 	</Grid>
 </UserControl>

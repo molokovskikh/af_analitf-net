@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Parts.MatchedWaybills"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<Label Grid.Row="0" Grid.RowSpan="2"
+			VerticalAlignment="Center"
+			HorizontalAlignment="Center"
+			FontSize="16"
+			Visibility="{Binding EmptyLabelVisibility.Value}">
+			Накладных не найдено
+		</Label>
+
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}"
+			Visibility="{Binding WaybillDetailsVisibility.Value}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Накладная №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="CurrentWaybillLine_Waybill_Id" FontWeight="Bold" />
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">№ поставщика:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="CurrentWaybillLine_Waybill_ProviderDocumentId" FontWeight="Bold" />
+
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="CurrentWaybillLine_Waybill_DocumentDate" FontWeight="Bold" />
+
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="CurrentWaybillLine_Waybill_Lines_Count" FontWeight="Bold" />
+
+				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="CurrentWaybillLine_Waybill_SupplierName" FontWeight="Bold" />
+			</Grid>
+		</StackPanel>
+
+		<controls:DataGrid2 Grid.Row="1" x:Name="WaybillLines" Height="100"
+			Visibility="{Binding WaybillDetailsVisibility.Value}">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Серия товара" Binding="{Binding SerialNumber}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Срок годности" Binding="{Binding Period}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Страна" Binding="{Binding Country}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена производителя без НДС" Binding="{Binding ProducerCost}" />
+				<controls:DataGridTextColumnEx Header="Цена ГР" Binding="{Binding RegistryCost}" />
+				<controls:DataGridTextColumnEx Header="Торговая наценка оптовика" Binding="{Binding SupplierPriceMarkup}" />
+				<controls:DataGridTextColumnEx Header="Цена поставщика без НДС" Binding="{Binding SupplierCostWithoutNds}" />
+				<controls:DataGridTextColumnEx Header="НДС" Binding="{Binding Nds}" />
+				<controls:DataGridTextColumnEx FontWeight="Bold" Header="Цена поставщика с НДС" Binding="{Binding SupplierCost}" />
+				<controls:DataGridTextColumnEx Header="Заказ" Binding="{Binding Quantity}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+	</Grid>
+</UserControl>

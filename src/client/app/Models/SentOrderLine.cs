@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using AnalitF.Net.Client.Config.Initializers;
+using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models
 {
 	public class SentOrderLine : BaseOffer, IOrderLine
 	{
 		public SentOrderLine()
-		{}
+		{
+		}
 
 		public SentOrderLine(SentOrder order, OrderLine orderLine)
 			: base(orderLine)
@@ -14,9 +17,12 @@ namespace AnalitF.Net.Client.Models
 			Count = orderLine.Count;
 			Comment = orderLine.Comment;
 			ResultCost = orderLine.ResultCost;
+			ServerId = orderLine.ExportId;
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual uint? ServerId { get; set; }
 
 		public virtual uint Count { get; set; }
 
@@ -39,7 +45,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal MixedSum
 		{
-			get { return Sum; }
+			get { return Count * MixedCost; }
 		}
 
 		public virtual SentOrder Order { get; set; }

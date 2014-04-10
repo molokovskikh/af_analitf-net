@@ -53,10 +53,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (IsUpdate)
 				CurrentLine.Changed().Subscribe(_ => Update());
 
-			CanSend = new NotifyValue<bool>(
-				() => Address.Orders.Any(o => o.Send)
-					&& Address.Orders.Count(o => o.Send && o.SendResult == OrderResultStatus.Reject) == 0,
-				Address.BindableOrders.Changed());
+			CanSend = Address.BindableOrders.Changed()
+				.ToValue(_ => Address.Orders.Any(o => o.Send)
+					&& Address.Orders.Count(o => o.Send && o.SendResult == OrderResultStatus.Reject) == 0);
+
 			if (addressId != null)
 				DisplayName = string.Format("Журнал отправки заказов для адреса {0}", Address.Name);
 			else

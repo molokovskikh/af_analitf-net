@@ -12,7 +12,7 @@ using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class NotifyValue<T> : BaseNotify
+	public class NotifyValue<T> : BaseNotify, IObservable<T>
 	{
 		private bool respectValue;
 		private Func<T> calc;
@@ -50,12 +50,6 @@ namespace AnalitF.Net.Client.Helpers
 			: this(default(T), calc, props)
 		{
 			Recalculate();
-		}
-
-		public NotifyValue(Func<T> calc, IObservable<object> trigger)
-			: this(calc)
-		{
-			trigger.CatchSubscribe(_ => Recalculate());
 		}
 
 		public NotifyValue(T value)
@@ -121,21 +115,16 @@ namespace AnalitF.Net.Client.Helpers
 			return value.value;
 		}
 
+		public IDisposable Subscribe(IObserver<T> observer)
+		{
+			return this.ToObservable().Merge(Observable.Return(Value)).Subscribe(observer);
+		}
+
 		public override string ToString()
 		{
 			if (Equals(value, null))
 				return String.Empty;
 			return value.ToString();
-		}
-
-		public IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue()
-		{
-			return this.ObservableForProperty(v => v.Value)
-				.Select(v => v.Value as INotifyPropertyChanged)
-				.Select(v => v == null
-					? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()
-					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))
-				.Switch();
 		}
 
 		/// <summary>

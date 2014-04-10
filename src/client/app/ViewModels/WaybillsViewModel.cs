@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.ViewModels
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
 			IsFilterByWriteTime = new NotifyValue<bool>();
 			RejectFilter = new NotifyValue<RejectFilter>();
-			CanDelete = new NotifyValue<bool>(() => CurrentWaybill.Value != null, CurrentWaybill);
+			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
 		}
 
 		public IList<Selectable<Supplier>> Suppliers { get; set; }

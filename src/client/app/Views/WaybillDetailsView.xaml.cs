@@ -73,6 +73,10 @@ namespace AnalitF.Net.Client.Views
 				grid.CurrentCell = new DataGridCellInfo(grid.SelectedItem, column);
 				grid.BeginEdit(args);
 			};
+
+			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
+			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
+			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
 		}
 	}
 }

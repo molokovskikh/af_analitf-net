@@ -161,5 +161,37 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
 			Assert.AreEqual(catalogId, model.ProductInfo.CurrentCatalog.Id);
 		}
+
+		[Test]
+		public void Load_waybill_lines()
+		{
+			session.DeleteEach<SentOrder>();
+			var sendOrder = MakeSentOrder();
+			var orderLine = sendOrder.Lines[0];
+			var waybill = new Waybill {
+				ProviderDocumentId = sendOrder.Id.ToString(),
+				DocumentDate = DateTime.Now,
+				WriteTime = DateTime.Now,
+				Address = sendOrder.Address,
+				Supplier = session.Load<Supplier>(sendOrder.Price.SupplierId),
+			};
+			waybill.Calculate(settings);
+			var line = new WaybillLine {
+				Product = orderLine.ProductSynonym,
+				Producer = orderLine.ProducerSynonym,
+				Quantity = (int?)orderLine.Count,
+				SupplierCost = orderLine.Cost,
+			};
+			waybill.AddLine(line);
+			orderLine.ServerId = orderLine.Id;
+			session.Save(waybill);
+			session.Save(new WaybillOrder(line.Id, orderLine.Id));
+
+			model.IsCurrentSelected.Value = false;
+			model.IsSentSelected.Value = true;
+			model.SelectedSentLine.Value = model.SentLines.Value.First();
+			testScheduler.AdvanceByMs(1000);
+			Assert.AreEqual(1, model.MatchedWaybills.WaybillLines.Value.Count);
+		}
 	}
 }

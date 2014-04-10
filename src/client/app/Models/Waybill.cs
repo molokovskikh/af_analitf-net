@@ -135,9 +135,6 @@ namespace AnalitF.Net.Client.Models
 				waybillLine.Calculate(Settings, Settings.Markups);
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
-			if (IsCreatedByUser)
-				TaxSum = Lines.Sum(l => l.NdsAmount).GetValueOrDefault();
-
 			CalculateRetailSum();
 		}
 
@@ -179,6 +176,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
+				if (!IsCreatedByUser)
+					return "";
 				if (columnName == "ProviderDocumentId") {
 					if (String.IsNullOrEmpty(ProviderDocumentId)) {
 						return "Не установлен номер накладной.";

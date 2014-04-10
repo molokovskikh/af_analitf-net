@@ -339,6 +339,9 @@ namespace AnalitF.Net.Client.Models
 				NewQuantity = result.ServerQuantity;
 				OldQuantity = NullableConvert.ToUInt32(Quantity);
 			}
+			if (result.ServerLineId != null) {
+				ExportId = result.ServerLineId;
+			}
 			HumanizeSendError();
 		}
 

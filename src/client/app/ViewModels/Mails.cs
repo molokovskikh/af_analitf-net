@@ -52,13 +52,12 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentSort = new NotifyValue<string>("Сортировка: Дата");
 			IsAsc = new NotifyValue<bool>(false);
 
-			var update = Term.Changed()
+			Items = Term.Changed()
 				.Throttle(TimeSpan.FromMilliseconds(100), UiScheduler)
 				.Merge(CurrentSort.Changed())
-				.Merge(IsAsc.Changed());
-			Items = new NotifyValue<BindingList<Mail>>(Apply, update);
-			var countChanged = SelectedItems.Changed();
-			CanDelete = new NotifyValue<bool>(() => SelectedItems.Count > 0, countChanged);
+				.Merge(IsAsc.Changed())
+				.ToValue(_ => Apply());
+			CanDelete = SelectedItems.Changed().ToValue(_ => SelectedItems.Count > 0).ToValue();
 			var updateStat = Items.ObservableForProperty(i => i.Value)
 				.Select(l => l.Value.Changed())
 				.Switch();

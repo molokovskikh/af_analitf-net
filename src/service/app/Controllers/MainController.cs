@@ -74,7 +74,7 @@ where UserId = :userId;")
 				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
 			if (job != null) {
 				job.IsConfirmed = true;
-				File.Delete(job.OutputFile(Config));
+				//File.Delete(job.OutputFile(Config));
 			}
 
 			return new HttpResponseMessage();
@@ -169,7 +169,7 @@ where UserId = :userId;")
 				if (!CurrentUser.UseAdjustmentOrders || errors.Count == 0)
 					Session.SaveEach(orders);
 
-				return errors.Concat(orders.Select(o => new OrderResult(o))).ToList();
+				return errors.Concat(orders.Select(o => new OrderResult(o, orderitemMap))).ToList();
 			}
 		}
 

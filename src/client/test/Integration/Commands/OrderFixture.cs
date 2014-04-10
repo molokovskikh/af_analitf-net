@@ -66,6 +66,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
 			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0), "номер строки заказа {0}", item.RowId);
+			Assert.AreEqual(item.RowId, sentOrders[0].Lines[0].ServerId);
 		}
 
 		[Test]
@@ -163,6 +164,22 @@ namespace AnalitF.Net.Test.Integration.Commands
 			user.Client.Settings.SmartOrderRule = null;
 
 			Assert.Throws<EndUserError>(() => MakeBatch("1|10"), "Услуга 'АвтоЗаказ' не предоставляется");
+		}
+
+		[Test]
+		public void Load_waybill_to_order_mapping()
+		{
+			MakeOrderClean();
+
+			Run(new SendOrders(address));
+			var fixture = Fixture<MatchedWaybill>();
+			Run(new UpdateCommand());
+
+			var order = localSession.Query<SentOrder>().First(o => o.SentOn >= begin);
+			var docLines = localSession.CreateSQLQuery("select DocumentLineId from WaybillOrders where OrderLineId = :orderLineId")
+				.SetParameter("orderLineId", order.Lines[0].ServerId)
+				.List();
+			Assert.AreEqual(Convert.ToUInt32(docLines[0]), fixture.Waybill.Lines[0].Id);
 		}
 
 		private void MakeBatch(string content)

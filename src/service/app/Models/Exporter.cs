@@ -970,6 +970,15 @@ where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
 			Export(result, sql, "WaybillLines", new { userId = user.Id }, false);
 
+			sql = String.Format(@"
+select DocumentLineId, OrderLineId
+from Documents.WaybillOrders wo
+	join Documents.DocumentBodies db on db.Id = wo.DocumentLineId
+		join Documents.DocumentHeaders dh on db.DocumentId = dh.Id
+			join Logs.Document_logs d on dh.DownloadId = d.RowId
+where d.RowId in ({0})", ids);
+			Export(result, sql, "WaybillOrders", truncate: false);
+
 			var documentExported = session.CreateSQLQuery(@"
 select d.RowId
 from Logs.Document_logs d

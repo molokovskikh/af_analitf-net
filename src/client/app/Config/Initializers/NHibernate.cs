@@ -90,6 +90,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 				m.Property(p => p.MinOrderSum);
 			});
+			mapper.Class<WaybillOrder>(m => {
+				m.ComposedId(c => {
+					c.Property(p => p.OrderLineId);
+					c.Property(p => p.DocumentLineId);
+				});
+			});
 
 			mapper.Class<Promotion>(m => {
 				m.Bag(o => o.Catalogs, c => {
@@ -170,6 +176,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(l => l.Comment, c => c.Length(10000));
 				m.Property(l => l.ServiceFields, c => c.Length(10000));
 			});
+
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
@@ -203,7 +210,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 			};
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
-				|| t == typeof(MinOrderSumRule));
+				|| t == typeof(MinOrderSumRule)
+				|| t == typeof(WaybillOrder));
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);
