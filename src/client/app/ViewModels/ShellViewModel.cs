@@ -28,6 +28,7 @@ using Common.Tools.Calendar;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
@@ -880,9 +881,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 
-			foreach (var screen in Navigator.NavigationStack.OfType<IDisposable>())
-				screen.Dispose();
-			((Stack<IScreen>)Navigator.NavigationStack).Clear();
+			if (Navigator != null) {
+				Navigator.Dispose();
+				Navigator = null;
+			}
 
 			if (ActiveItem is IDisposable) {
 				var item = ((IDisposable)ActiveItem);

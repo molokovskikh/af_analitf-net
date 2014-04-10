@@ -3,6 +3,7 @@ using System.Linq;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using Castle.Components.DictionaryAdapter;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 
@@ -15,14 +16,20 @@ namespace AnalitF.Net.Test.Unit
 		private DefaultScreen defaultScreen;
 		private Navigator navigator;
 
-		public class TestScreen : Screen
+		public class TestScreen : Screen, IDisposable
 		{
-			public bool IsClosed;
+			public bool IsDisposed;
 
 			protected override void OnDeactivate(bool close)
 			{
-				IsClosed = close;
+				if (close)
+					Dispose();
 				base.OnDeactivate(close);
+			}
+
+			public void Dispose()
+			{
+				IsDisposed = true;
 			}
 		}
 
@@ -180,8 +187,33 @@ namespace AnalitF.Net.Test.Unit
 			navigator.NavigateRoot(s1);
 			navigator.Navigate(s2);
 			navigator.NavigateRoot(s3);
-			Assert.IsTrue(s2.IsClosed);
-			Assert.IsTrue(s1.IsClosed);
+			Assert.IsTrue(s2.IsDisposed);
+			Assert.IsTrue(s1.IsDisposed);
+		}
+
+		[Test]
+		public void Reactivate_item_from_stack()
+		{
+			var s1 = new Screen1();
+			var s2 = new Screen2();
+			var s3 = new Screen2();
+			var s11 = new Screen1();
+			navigator.NavigateRoot(s1);
+			navigator.Navigate(s2);
+			navigator.Navigate(s3);
+			navigator.NavigateRoot(s11);
+
+			//при попытки активировать форму которая уже есть в стеке
+			//возвращаемся к форме из стека
+			Assert.IsTrue(s2.IsDisposed);
+			Assert.IsTrue(s3.IsDisposed);
+
+			Assert.IsFalse(s11.IsActive);
+			Assert.IsTrue(s11.IsDisposed);
+
+			Assert.IsFalse(s1.IsDisposed);
+			Assert.IsTrue(s1.IsActive);
+			Assert.AreEqual(shell.ActiveItem, s1);
 		}
 
 		private void Init()

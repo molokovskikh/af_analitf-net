@@ -5,7 +5,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class Navigator
+	public class Navigator : IDisposable
 	{
 		private ConductorBaseWithActiveItem<IScreen> conductor;
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
@@ -72,16 +72,27 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void NavigateRoot(IScreen screen)
 		{
-			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType())
+			if (screen == null)
 				return;
+
+			if (ReferenceEquals(screen, conductor.ActiveItem))
+				return;
+
+			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType()) {
+				CloseOrDispose(screen);
+				return;
+			}
 
 			HideDefault();
 
 			while (navigationStack.Count > 0) {
-				var closing = navigationStack.Peek();
-				if (closing.GetType() == screen.GetType())
+				var closing = navigationStack.Pop();
+				if (closing.GetType() == screen.GetType()) {
+					if (!ReferenceEquals(screen, closing))
+						CloseOrDispose(screen);
+					screen = closing;
 					break;
-				navigationStack.Pop();
+				}
 				closing.TryClose();
 			}
 
@@ -96,6 +107,17 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.ActivateItem(screen);
 		}
 
+		//если форма не была инициализированна то она и не будет закрыта
+		//надо явно освободить ресурсы
+		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
+		private static void CloseOrDispose(IScreen screen)
+		{
+			screen.TryClose();
+			if (screen is IDisposable) {
+				((IDisposable)screen).Dispose();
+			}
+		}
+
 		private bool IsEmptyOrDefault()
 		{
 			return conductor.ActiveItem == null;
@@ -107,6 +129,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.ActivateItem(navigationStack.Pop());
 			else if (DefaultScreen != null)
 				conductor.ActiveItem = DefaultScreen;
+		}
+
+		public void Dispose()
+		{
+			foreach (var screen in NavigationStack.OfType<IDisposable>())
+				screen.Dispose();
+			navigationStack.Clear();
 		}
 	}
 }
