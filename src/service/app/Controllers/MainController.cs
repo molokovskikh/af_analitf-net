@@ -74,7 +74,7 @@ where UserId = :userId;")
 				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
 			if (job != null) {
 				job.IsConfirmed = true;
-				//File.Delete(job.OutputFile(Config));
+				File.Delete(job.OutputFile(Config));
 			}
 
 			return new HttpResponseMessage();

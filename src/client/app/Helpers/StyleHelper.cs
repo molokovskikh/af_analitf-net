@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Helpers
 	public class StyleHelper
 	{
 		public static Dictionary<string, DataTrigger> DefaultStyles = new Dictionary<string, DataTrigger>();
-		public static Dictionary<string, SolidColorBrush> UserStyles = new Dictionary<string, SolidColorBrush>();
+		public static Dictionary<string, Setter> UserStyles = new Dictionary<string, Setter>();
 
 		private static ResourceDictionary localResources;
 
@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			localResources = null;
 			UserStyles.Clear();
-			DefaultStyles.Clear();
+			DefaultStyles = BuildDefaultStyles();
 		}
 
 		public static void BuildStyles(ResourceDictionary app, IEnumerable<CustomStyle> styles = null)
@@ -153,9 +153,8 @@ namespace AnalitF.Net.Client.Helpers
 				DefaultStyles = BuildDefaultStyles();
 
 			UserStyles = (styles ?? new CustomStyle[0] )
-				.Where(s => s.IsBackground)
 				.GroupBy(g => g.Name)
-				.ToDictionary(s => s.Key, s => new SolidColorBrush((Color)ColorConverter.ConvertFromString(s.First().Background)));
+				.ToDictionary(s => s.Key, s => s.First().ToSetter());
 
 			if (localResources == null) {
 				localResources = new ResourceDictionary();
@@ -208,21 +207,7 @@ namespace AnalitF.Net.Client.Helpers
 			var rowStyles = legends.Where(l => l.d.Columns == null || l.d.Columns.Length == 0);
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
 			foreach (var style in rowStyles) {
-				var property = style.p;
-				var trigger = DefaultStyles.GetValueOrDefault(property.Name);
-				if (trigger != null) {
-					var background = trigger.Setters.OfType<Setter>()
-						.FirstOrDefault(s => s.Property == Control.BackgroundProperty);
-					if (background == null) {
-						rowStyle.Triggers.Add(trigger);
-					}
-					else {
-						AddBackgroundTriggers(rowStyle, property.Name);
-					}
-				}
-				else {
-					AddBackgroundTriggers(rowStyle, property.Name);
-				}
+				PatchBackground(rowStyle, style.p.Name, GetCombinedStyle(style.p.Name));
 			}
 
 			if (rowStyle.Triggers.Count > 0) {
@@ -233,7 +218,6 @@ namespace AnalitF.Net.Client.Helpers
 			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
-
 				GetCombinedStyle(legend.p.Name)
 					.Setters
 					.OfType<Setter>()
@@ -259,25 +243,51 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
+		private static void PatchBackground(Style style, string key, DataTrigger trigger)
+		{
+			var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
+			if (background == null) {
+				style.Triggers.Add(trigger);
+				return;
+			}
+
+			trigger.Setters.Remove(background);
+			AddTriggers(style, key, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
+			if (trigger.Setters.Count > 0) {
+				style.Triggers.Add(trigger);
+			}
+		}
+
 		private static DataTrigger GetCombinedStyle(string key)
 		{
-			var trigger = DefaultStyles.GetValueOrDefault(key)
+			//PatchBackground модифицирует триггер по этому копируем
+			var trigger = Copy(DefaultStyles.GetValueOrDefault(key))
 				?? new DataTrigger {
 					Setters = {
 						new Setter(Control.BackgroundProperty, DefaultColor)
 					}
 				};
-			var userColor = UserStyles.GetValueOrDefault(key);
-			if (userColor != null) {
+			var userStyle = UserStyles.GetValueOrDefault(key);
+			if (userStyle != null) {
 				var copy = new DataTrigger();
-				trigger.Setters.OfType<Setter>().Each(s => copy.Setters.Add(new Setter(s.Property, s.Value)));
+				trigger.Setters.OfType<Setter>()
+					.Where(s => s.Property != userStyle.Property)
+					.Each(s => copy.Setters.Add(new Setter(s.Property, s.Value)));
+				copy.Setters.Add(userStyle);
 				trigger = copy;
-				var setter = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
-				if (setter != null) {
-					setter.Value = userColor;
-				}
 			}
+			trigger.Binding = new Binding(key);
+			trigger.Value = true;
 			return trigger;
+		}
+
+		private static DataTrigger Copy(DataTrigger src)
+		{
+			if (src == null)
+				return null;
+			var copy = new DataTrigger();
+			src.Setters.OfType<Setter>().Each(s => copy.Setters.Add(new Setter(s.Property, s.Value)));
+			return copy;
 		}
 
 		private static SolidColorBrush GetColor(string key)
@@ -291,7 +301,10 @@ namespace AnalitF.Net.Client.Helpers
 					baseColor = ((SolidColorBrush)setter.Value);
 				}
 			}
-			baseColor = UserStyles.GetValueOrDefault(key) ?? baseColor;
+			var userStyle = UserStyles.GetValueOrDefault(key);
+			if (userStyle != null && userStyle.Property == Control.BackgroundProperty) {
+				baseColor = (SolidColorBrush)userStyle.Value;
+			}
 			return baseColor;
 		}
 

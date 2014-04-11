@@ -7,6 +7,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
 using NPOI.HSSF.Record.Chart;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
-			StyleHelper.UserStyles.Clear();
+			StyleHelper.Reset();
 			resource = new ResourceDictionary();
 			appResource = new ResourceDictionary();
 		}
@@ -50,7 +51,6 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Include_in_legend_only_posible_styles()
 		{
-			StyleHelper.Reset();
 			StyleHelper.BuildStyles(appResource);
 			var grid = new DataGrid();
 			grid.Columns.Add(new DataGridTextColumn {
@@ -63,7 +63,6 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Check_context_on_build_legend()
 		{
-			StyleHelper.Reset();
 			StyleHelper.BuildStyles(appResource);
 			var grid = new DataGrid();
 			grid.Columns.Add(new DataGridTextColumn {
@@ -91,11 +90,30 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Build_user_style_for_legend()
 		{
-			StyleHelper.UserStyles.Add("Leader", Brushes.Aqua);
+			StyleHelper.UserStyles.Add("Leader", new Setter(Control.BackgroundProperty, Brushes.Aqua));
 			Build(typeof(Offer));
 			var style = (Style)resource["OfferLeaderLegend"];
 			var background = style.Setters.OfType<Setter>().First(s => s.Property == Control.BackgroundProperty);
 			Assert.AreEqual(Brushes.Aqua.Color, ((SolidColorBrush)background.Value).Color);
+		}
+
+		[Test]
+		public void User_style_foreground()
+		{
+			var userStyles = new[] {
+				new CustomStyle {
+					Foreground = "Red",
+					Name = "VitallyImportant"
+				}
+			};
+			StyleHelper.BuildStyles(appResource, userStyles);
+			var style = (Style)appResource["OfferRow"];
+			var foreground = style.Triggers.OfType<MultiDataTrigger>().SelectMany(t => t.Setters)
+				.Concat(style.Triggers.OfType<DataTrigger>().SelectMany(t => t.Setters))
+				.OfType<Setter>()
+				.First(s => s.Property == Control.ForegroundProperty);
+			Assert.AreEqual(Colors.Red, ((SolidColorBrush)foreground.Value).Color);
+			appResource.Values.OfType<Style>().Each(s => s.Seal());
 		}
 
 		private string Legend(DataGrid grid, Type type, string context = null)

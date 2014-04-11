@@ -31,10 +31,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void Setup()
 		{
-			//wpf обеспечивает синхронизациию объектов ui
-			//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
-			//в других нитках что бы избежать ошибок очищаем статические структуры
-			StyleHelper.Reset();
 			exceptions = new List<Exception>();
 			windows = new List<Window>();
 			activeWindow = null;
@@ -206,6 +202,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfHelper.WithDispatcher(() => {
+				//wpf обеспечивает синхронизациию объектов ui
+				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
+				//в других нитках что бы избежать ошибок очищаем статические структуры
+				StyleHelper.Reset();
 				//DeferredScheduler TaskpoolScheduler thread static тк dispatcher выполняется в своей нитке
 				//здесь будет непойми что
 				var originDeferred = RxApp.DeferredScheduler;

@@ -150,7 +150,8 @@ namespace AnalitF.Net.Service.Test
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file).Implode();
 			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
-				+ " WaybillLines.meta.txt, WaybillLines.txt, LoadedDocuments.meta.txt, LoadedDocuments.txt",
+				+ " WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt,"
+				+ " LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				Path.GetFileName(waybillFile)));
 		}
 

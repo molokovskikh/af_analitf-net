@@ -1,7 +1,10 @@
 ﻿using System;
-using System.Drawing;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using NPOI.SS.Formula.Functions;
+using Color = System.Drawing.Color;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -80,6 +83,18 @@ namespace AnalitF.Net.Client.Models
 		{
 			var value = String.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", color.A, color.R, color.G, color.B);
 			return value;
+		}
+
+		public virtual Setter ToSetter()
+		{
+			if (IsBackground) {
+				var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(Background);
+				return new Setter(Control.BackgroundProperty, new SolidColorBrush(color));
+			}
+			else {
+				var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(Foreground);
+				return new Setter(Control.ForegroundProperty, new SolidColorBrush(color));
+			}
 		}
 	}
 }
