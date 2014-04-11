@@ -21,6 +21,7 @@ namespace AnalitF.Net.Test.Unit
 		[SetUp]
 		public void Setup()
 		{
+			StyleHelper.UserStyles.Clear();
 			resource = new ResourceDictionary();
 			appResource = new ResourceDictionary();
 		}
@@ -85,6 +86,16 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual("#FFA0A0A4", style.Background);
 			Assert.AreEqual("Black", style.Foreground);
 			Assert.AreEqual("Корректировка по цене и/или по количеству", style.Description);
+		}
+
+		[Test]
+		public void Build_user_style_for_legend()
+		{
+			StyleHelper.UserStyles.Add("Leader", Brushes.Aqua);
+			Build(typeof(Offer));
+			var style = (Style)resource["OfferLeaderLegend"];
+			var background = style.Setters.OfType<Setter>().First(s => s.Property == Control.BackgroundProperty);
+			Assert.AreEqual(Brushes.Aqua.Color, ((SolidColorBrush)background.Value).Color);
 		}
 
 		private string Legend(DataGrid grid, Type type, string context = null)

@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
+using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -19,6 +21,7 @@ using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
+using ReactiveUI.Testing;
 using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
@@ -45,7 +48,27 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			var item = view.Descendants<ContentControl>().First(c => c.Name == "OrderWarning");
 			Assert.That(item.Content, Is.InstanceOf<InlineEditWarningView>());
-			Assert.That(WpfHelper.AsText(item), Is.EqualTo("test"));
+			Assert.That(item.AsText(), Is.EqualTo("test"));
+		}
+
+		[Test]
+		public void Rebuild_styles()
+		{
+			StyleHelper.Reset();
+
+			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
+			var model = new CatalogOfferViewModel(catalog);
+			var view = Bind(model);
+
+			StyleHelper.BuildStyles(App.Current.Resources, new[] { new CustomStyle("Junk", "Red") });
+			bus.SendMessage(settings);
+			testScheduler.AdvanceByMs(1000);
+
+			var legend = view.Descendants().OfType<Panel>().First(p => p.Name == "Legend");
+			var label = legend.Descendants<Label>()
+				.First(l => l.Style != null && l.Style.Setters.OfType<Setter>().Any(s => s.Property == ContentControl.ContentProperty && Equals(s.Value, "”цененные препараты")));
+			var setter = label.Style.Setters.OfType<Setter>().First(s => s.Property == Control.BackgroundProperty);
+			Assert.AreEqual(Colors.Red, ((SolidColorBrush)setter.Value).Color);
 		}
 	}
 }

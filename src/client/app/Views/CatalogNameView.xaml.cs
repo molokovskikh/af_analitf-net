@@ -24,6 +24,11 @@ namespace AnalitF.Net.Client.Views
 				}
 			};
 
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
 			StyleHelper.ApplyStyles(typeof(CatalogName), CatalogNames, Application.Current.Resources);
 			StyleHelper.ApplyStyles(typeof(Catalog), Catalogs, Application.Current.Resources);
 		}

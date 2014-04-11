@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using AnalitF.Net.Client.Helpers;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -13,6 +14,15 @@ namespace AnalitF.Net.Client.Models
 		{
 			Background = "White";
 			Foreground = "Black";
+		}
+
+		public CustomStyle(string name, string background)
+			: this()
+		{
+			Name = name;
+			Description = name;
+			Background = background;
+			IsBackground = true;
 		}
 
 		public virtual uint Id { get; set; }

@@ -22,6 +22,11 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
 			StyleHelper.ApplyStyles(typeof(Reject), Rejects, Application.Current.Resources);
 		}
 	}

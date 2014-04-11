@@ -123,6 +123,13 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell = Shell ?? Parent as ShellViewModel;
 
 			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
+			Settings.Subscribe(_ => {
+				foreach (var view in Views.Values) {
+					var method = view.GetType().GetMethod("ApplyStyles");
+					if (method != null)
+						method.Invoke(view, null);
+				}
+			});
 			if (!Readonly) {
 				//для сообщений типа string используется ImmediateScheduler
 				//те вызов произойдет в той же нитке что и SendMessage

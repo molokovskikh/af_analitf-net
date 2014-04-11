@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
@@ -33,9 +34,7 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная сумма");
 
-			var type = typeof(WaybillLine);
-			var resources = Application.Current.Resources;
-			StyleHelper.ApplyStyles(type, grid, resources, Legend);
+			ApplyStyles();
 			//очередная магия wpf
 			//
 			//datagridcolumn живет вне logica|visual tree
@@ -77,6 +76,11 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(WaybillLine), Lines, Application.Current.Resources, Legend);
 		}
 	}
 }

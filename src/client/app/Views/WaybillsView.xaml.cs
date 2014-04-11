@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
@@ -12,15 +13,16 @@ namespace AnalitF.Net.Client.Views
 		public WaybillsView()
 		{
 			InitializeComponent();
-
-
-			var type = typeof(Waybill);
-			var resources = Application.Current.Resources;
-			StyleHelper.ApplyStyles(type, Waybills, resources, Legend);
+			ApplyStyles();
 
 			Waybills.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
 		}
 	}
 }

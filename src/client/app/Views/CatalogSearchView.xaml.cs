@@ -11,6 +11,11 @@ namespace AnalitF.Net.Client.Views
 		public CatalogSearchView()
 		{
 			InitializeComponent();
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
 			StyleHelper.ApplyStyles(typeof(CatalogDisplayItem), Items, Application.Current.Resources);
 		}
 	}

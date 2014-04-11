@@ -12,6 +12,11 @@ namespace AnalitF.Net.Client.Views
 		public PriceView()
 		{
 			InitializeComponent();
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
 			StyleHelper.ApplyStyles(typeof(Price), Prices, Application.Current.Resources);
 		}
 	}

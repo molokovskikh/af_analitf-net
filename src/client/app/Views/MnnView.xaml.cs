@@ -21,6 +21,11 @@ namespace AnalitF.Net.Client.Views
 		public MnnView()
 		{
 			InitializeComponent();
+			ApplyStyles();
+		}
+
+		public void ApplyStyles()
+		{
 			StyleHelper.ApplyStyles(typeof(Mnn), Mnns, Application.Current.Resources);
 		}
 	}

@@ -21,11 +21,10 @@ namespace AnalitF.Net.Client.Views.Orders
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Цена", "0000.00");
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Заказ", "0000.00");
 			DataGridHelper.CalculateColumnWidth(ReportLines, "Сумма", "0000.00");
-			StyleHelper.ApplyStyles(typeof(BatchLine), ReportLines, Application.Current.Resources, Legend);
+			ApplyStyles();
 
 			new Editable().Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
-			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 
 			DataGridHelper.CalculateColumnWidth(HistoryOrders, "00.00.0000", "Срок годн.");
 			DataGridHelper.CalculateColumnWidth(HistoryOrders, "000", "Заказ");
@@ -36,6 +35,12 @@ namespace AnalitF.Net.Client.Views.Orders
 			ReportLines.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(BatchLine), ReportLines, Application.Current.Resources, Legend);
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 		}
 	}
 }

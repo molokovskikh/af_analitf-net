@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using Iesi.Collections;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
@@ -232,14 +233,11 @@ namespace AnalitF.Net.Client.Helpers
 			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
-				var trigger = DefaultStyles.GetValueOrDefault(legend.p.Name);
-				if (trigger == null) {
-					style.Setters.Add(new Setter(Control.BackgroundProperty, DefaultColor));
-				}
-				else {
-					trigger.Setters.OfType<Setter>()
-						.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
-				}
+
+				GetCombinedStyle(legend.p.Name)
+					.Setters
+					.OfType<Setter>()
+					.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
 				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.d.Description));
 				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.d.Description));
 				local.Add(LegendKey(legend.type, legend.p), style);
@@ -259,6 +257,27 @@ namespace AnalitF.Net.Client.Helpers
 				}
 				local.Add(CellKey(type, column.Key, context), style);
 			}
+		}
+
+		private static DataTrigger GetCombinedStyle(string key)
+		{
+			var trigger = DefaultStyles.GetValueOrDefault(key)
+				?? new DataTrigger {
+					Setters = {
+						new Setter(Control.BackgroundProperty, DefaultColor)
+					}
+				};
+			var userColor = UserStyles.GetValueOrDefault(key);
+			if (userColor != null) {
+				var copy = new DataTrigger();
+				trigger.Setters.OfType<Setter>().Each(s => copy.Setters.Add(new Setter(s.Property, s.Value)));
+				trigger = copy;
+				var setter = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
+				if (setter != null) {
+					setter.Value = userColor;
+				}
+			}
+			return trigger;
 		}
 
 		private static SolidColorBrush GetColor(string key)
@@ -465,7 +484,10 @@ namespace AnalitF.Net.Client.Helpers
 				let key = LegendKey(type, p)
 				let style = resources[key] as Style
 				where style != null
-				select new Label { Style = style };
+				select new Label {
+					Style = style,
+					Tag = "generated"
+				};
 
 			if (legend.Children.Count == 0) {
 				legend.Children.Add(new Label { Content = "Подсказка" });
@@ -475,7 +497,12 @@ namespace AnalitF.Net.Client.Helpers
 				legend.Children.Add(stack);
 			}
 			else {
-				legend.Children.OfType<Panel>().First().Children.AddRange(labels);
+				//если пользовательские стили изменились нужно перестроить легенду
+				var panel = legend.Children.OfType<Panel>().First();
+				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated", c.Tag))
+					.ToArray()
+					.Each(c => panel.Children.Remove(c));
+				panel.Children.AddRange(labels);
 			}
 		}
 

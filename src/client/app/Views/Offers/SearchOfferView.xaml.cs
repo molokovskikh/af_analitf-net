@@ -17,15 +17,20 @@ namespace AnalitF.Net.Client.Views
 
 			new Editable().Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
-			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
-
-			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);
+			ApplyStyles();
 
 			BindingOperations.SetBinding(OfferOverlayPanel, Grid.MaxHeightProperty,
 				new Binding("ActualHeight") {
 					Source = Offers,
 					Converter = new LambdaConverter<double>(v => v * 0.7)
 				});
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
+
+			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);
 		}
 	}
 }

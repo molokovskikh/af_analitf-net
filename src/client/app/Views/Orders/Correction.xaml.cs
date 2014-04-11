@@ -37,11 +37,15 @@ namespace AnalitF.Net.Client.Views.Orders
 				return (GroupStyle)Lines.Resources["OrderGroup"];
 			};
 
-			Offers.Items.Clear();
-			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, context: "Correction");
+			ApplyStyles();
 
 			new Editable().Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, context: "Correction");
 			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources);
 		}
 	}

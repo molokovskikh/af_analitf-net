@@ -15,12 +15,7 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			Loaded += (sender, args) => {
-				if (Legend.Children.Count == 0) {
-					var context = "";
-					if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
-						context = "CorrectionEnabled";
-					StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
-				}
+				ApplyStyles();
 			};
 
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
@@ -30,6 +25,14 @@ namespace AnalitF.Net.Client.Views
 			SentOrders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+		}
+
+		public void ApplyStyles()
+		{
+			var context = "";
+			if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+				context = "CorrectionEnabled";
+			StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
 		}
 	}
 }

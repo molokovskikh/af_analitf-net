@@ -16,14 +16,19 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			Loaded += (sender, args) => {
-				var context = "";
-				if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
-					context = "CorrectionEnabled";
-				StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend, context);
+				ApplyStyles();
 			};
 
 			DataGridHelper.CalculateColumnWidths(Lines);
 			new Editable().Attach(Lines);
+		}
+
+		public void ApplyStyles()
+		{
+			var context = "";
+			if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+				context = "CorrectionEnabled";
+			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend, context);
 		}
 	}
 }
