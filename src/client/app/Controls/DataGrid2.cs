@@ -72,8 +72,17 @@ namespace AnalitF.Net.Client.Controls
 			base.OnApplyTemplate();
 
 			var viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
-			if (viewer != null)
+			if (viewer != null) {
+				//тк viewer может получить фокус это будет происходить даже тогда когда не надо
+				//например в случае если пользователь кликнет по пустому полю таблицы
+				//фокус получит viewer и ввод с клавиатуры уйдет к нему не дав ни какого эффекта
+				viewer.GotKeyboardFocus += (s, a) => {
+					if (viewer.IsKeyboardFocused && Items.Count > 0) {
+						DataGridHelper.Focus(this);
+					}
+				};
 				viewer.Focusable = true;
+			}
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
