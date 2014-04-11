@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using log4net;
 using NHibernate;
 using ReactiveUI;
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Client.Helpers
 		private bool respectValue;
 		private Func<T> calc;
 		private T value;
+		private Subject<object> refreshSubject;
 
 		public NotifyValue()
 		{
@@ -57,13 +59,9 @@ namespace AnalitF.Net.Client.Helpers
 			this.value = value;
 		}
 
-		public NotifyValue(IObservable<T> observable)
+		public NotifyValue(IObservable<T> observable, CancellationDisposable cancellation = null, Subject<object> refreshSubject = null)
 		{
-			observable.CatchSubscribe(v => Value = v);
-		}
-
-		public NotifyValue(IObservable<T> observable, CancellationDisposable cancellation = null)
-		{
+			this.refreshSubject = refreshSubject;
 			observable.CatchSubscribe(v => Value = v, cancellation);
 		}
 
@@ -102,6 +100,9 @@ namespace AnalitF.Net.Client.Helpers
 				respectValue = false;
 				Value = calc();
 				respectValue = origin;
+			}
+			if (refreshSubject != null) {
+				refreshSubject.OnNext(null);
 			}
 		}
 

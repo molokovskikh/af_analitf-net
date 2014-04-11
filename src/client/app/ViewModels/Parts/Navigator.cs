@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			while (navigationStack.Count > 0) {
 				var screen = navigationStack.Pop();
-				screen.TryClose();
+				CloseOrDispose(screen);
 			}
 
 			if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
@@ -93,7 +93,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					screen = closing;
 					break;
 				}
-				closing.TryClose();
+				CloseOrDispose(closing);
 			}
 
 			HideDefault();

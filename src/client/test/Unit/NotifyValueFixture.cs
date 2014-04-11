@@ -132,5 +132,15 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual("1", v.Value);
 			Assert.That(changes, Is.EqualTo(new[] { "Value" }));
 		}
+
+		[Test]
+		public void Recalculate_on_observable()
+		{
+			var i = 1;
+			var v = Observable.Empty<int>().ToValue(_ => i++);
+			Assert.AreEqual(0, v.Value);
+			v.Recalculate();
+			Assert.AreEqual(1, v.Value);
+		}
 	}
 }

@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(CurrentSort.Changed())
 				.Merge(IsAsc.Changed())
 				.ToValue(_ => Apply());
-			CanDelete = SelectedItems.Changed().ToValue(_ => SelectedItems.Count > 0).ToValue();
+			CanDelete = SelectedItems.Changed().ToValue(_ => SelectedItems.Count > 0);
 			var updateStat = Items.ObservableForProperty(i => i.Value)
 				.Select(l => l.Value.Changed())
 				.Switch();

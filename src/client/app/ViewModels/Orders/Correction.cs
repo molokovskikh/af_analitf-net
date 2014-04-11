@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -54,6 +55,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				CurrentLine.Changed().Subscribe(_ => Update());
 
 			CanSend = Address.BindableOrders.Changed()
+				.Merge(Observable.Return<object>(null))
 				.ToValue(_ => Address.Orders.Any(o => o.Send)
 					&& Address.Orders.Count(o => o.Send && o.SendResult == OrderResultStatus.Reject) == 0);
 

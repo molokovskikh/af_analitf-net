@@ -216,6 +216,23 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(shell.ActiveItem, s1);
 		}
 
+		[Test]
+		public void Release_resources()
+		{
+			var s1 = new Screen1();
+			var s2 = new Screen2();
+			navigator.NavigateRoot(s1);
+			navigator.Navigate(s2);
+			var s3 = new Screen3();
+			var s21 = new Screen2();
+			navigator.NavigateAndReset(s3, s21);
+			navigator.NavigateRoot(new Screen1());
+			Assert.IsTrue(s1.IsDisposed);
+			Assert.IsTrue(s2.IsDisposed);
+			Assert.IsTrue(s3.IsDisposed);
+			Assert.IsTrue(s21.IsDisposed);
+		}
+
 		private void Init()
 		{
 			shell = new BaseShell();

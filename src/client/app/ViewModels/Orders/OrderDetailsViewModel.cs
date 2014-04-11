@@ -51,11 +51,6 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return type == typeof(Order); }
 		}
 
-		public bool IsSentOrder
-		{
-			get { return type == typeof(SentOrder); }
-		}
-
 		public NotifyValue<bool> OnlyWarning { get; set; }
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 

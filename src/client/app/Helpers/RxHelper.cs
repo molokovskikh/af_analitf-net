@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Models;
@@ -73,24 +75,15 @@ namespace AnalitF.Net.Client.Helpers
 			return Collect(source.Changed().Select(e => e.EventArgs));
 		}
 
-		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable)
-		{
-			return new NotifyValue<T>(observable);
-		}
-
-		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable, CancellationDisposable cancellation)
+		public static NotifyValue<T> ToValue<T>(this IObservable<T> observable, CancellationDisposable cancellation = null)
 		{
 			return new NotifyValue<T>(observable, cancellation);
 		}
 
-		public static NotifyValue<TR> ToValue<T, TR>(this IObservable<T> observable, Func<T, TR> func)
+		public static NotifyValue<TR> ToValue<T, TR>(this IObservable<T> observable, Func<T, TR> func, CancellationDisposable cancellation = null)
 		{
-			return new NotifyValue<TR>(observable.Select(func));
-		}
-
-		public static NotifyValue<T> ToValue<T, TR>(this IObservable<T> observable, Func<T, TR> func, CancellationDisposable cancellation)
-		{
-			return new NotifyValue<T>(observable, cancellation);
+			var refreshSubject = new Subject<object>();
+			return new NotifyValue<TR>(observable.Merge(refreshSubject.Select(v => default(T))).Select(func), cancellation, refreshSubject);
 		}
 
 		public static List<T> Collect<T>(this IObservable<T> source)
@@ -100,23 +93,7 @@ namespace AnalitF.Net.Client.Helpers
 			return items;
 		}
 
-		public static IDisposable CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext)
-		{
-			return observable.Subscribe(e => {
-#if !DEBUG
-				try {
-#endif
-					onNext(e);
-#if !DEBUG
-				}
-				catch(Exception ex) {
-					log.Error("Ошибка при обработке задачи", ex);
-				}
-#endif
-			});
-		}
-
-		public static void CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext, CancellationDisposable cancellation)
+		public static void CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext, CancellationDisposable cancellation = null)
 		{
 			observable.Subscribe(e => {
 #if !DEBUG
@@ -129,7 +106,7 @@ namespace AnalitF.Net.Client.Helpers
 					log.Error("Ошибка при обработке задачи", ex);
 				}
 #endif
-			}, cancellation.Token);
+			}, cancellation != null ? cancellation.Token : CancellationToken.None);
 		}
 
 		//фактический это просто переписанный SequentialResult
