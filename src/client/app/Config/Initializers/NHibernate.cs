@@ -115,6 +115,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
 				});
 			});
+			mapper.Class<Mail>(m => {
+				m.Property(p => p.Subject, c => c.Length(10000));
+				m.Property(p => p.Body, c => c.Length(10000));
+			});
 
 			mapper.Class<DelayOfPayment>(m => {
 				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
