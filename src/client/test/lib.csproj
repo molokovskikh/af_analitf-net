@@ -158,6 +158,7 @@
     <Compile Include="Integration\Models\OrderFixture.cs" />
     <Compile Include="Integration\Models\PriceFixture.cs" />
     <Compile Include="Integration\Models\SanityCheckFixture.cs" />
+    <Compile Include="Integration\Models\SettingsFixture.cs" />
     <Compile Include="Integration\Models\StatFixture.cs" />
     <Compile Include="Integration\Commands\UpdateFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
