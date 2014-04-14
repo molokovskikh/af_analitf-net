@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +15,7 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Controls
 {
-	public interface ISelectable
+	public interface ISelectable : INotifyPropertyChanged
 	{
 		bool IsSelected {get; set; }
 	}
@@ -52,6 +53,24 @@ namespace AnalitF.Net.Client.Controls
 			typeof(PopupSelector),
 			new FrameworkPropertyMetadata(UpdateMember));
 
+		public static DependencyProperty IsOpenProperty
+			= DependencyProperty.RegisterAttached("IsOpen",
+				typeof(bool),
+				typeof(PopupSelector),
+				new PropertyMetadata(false, IsOpenChanged));
+
+		public static DependencyProperty ButtonContentProperty
+			= DependencyProperty.RegisterAttached("ButtonContent",
+				typeof(object),
+				typeof(PopupSelector),
+				new PropertyMetadata());
+
+		public static DependencyProperty IsFiltredProperty
+			= DependencyProperty.RegisterAttached("IsFiltred",
+				typeof(bool),
+				typeof(PopupSelector),
+				new PropertyMetadata(false));
+
 		static PopupSelector()
 		{
 			EventManager.RegisterClassHandler(typeof(PopupSelector),
@@ -73,18 +92,6 @@ namespace AnalitF.Net.Client.Controls
 		{
 			((MultiSelector)sender).ItemsSource.Cast<ISelectable>().Each(s => s.IsSelected = true);
 		}
-
-		public static DependencyProperty IsOpenProperty
-			= DependencyProperty.RegisterAttached("IsOpen",
-				typeof(bool),
-				typeof(PopupSelector),
-				new PropertyMetadata(false, IsOpenChanged));
-
-		public static DependencyProperty ButtonContentProperty
-			= DependencyProperty.RegisterAttached("ButtonContent",
-				typeof(object),
-				typeof(PopupSelector),
-				new PropertyMetadata());
 
 		private static void UpdateMember(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
@@ -125,6 +132,28 @@ namespace AnalitF.Net.Client.Controls
 		{
 			get { return (string)GetValue(ButtonContentProperty); }
 			set { SetValue(ButtonContentProperty, value); }
+		}
+
+		public bool IsFiltred
+		{
+			get { return (bool)GetValue(IsFiltredProperty); }
+			set { SetValue(IsFiltredProperty, value); }
+		}
+
+		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
+		{
+			base.OnItemsSourceChanged(oldValue, newValue);
+
+			if (oldValue != null)
+				oldValue.OfType<ISelectable>().Each(s => s.PropertyChanged -= UpdateIsFiltred);
+			if (newValue != null)
+				newValue.OfType<ISelectable>().Each(s => s.PropertyChanged += UpdateIsFiltred);
+			UpdateIsFiltred(null, null);
+		}
+
+		private void UpdateIsFiltred(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+		{
+			IsFiltred = Items.Cast<ISelectable>().Count(i => i.IsSelected) != Items.Cast<ISelectable>().Count();
 		}
 
 		private static void IsOpenChanged(DependencyObject sender,

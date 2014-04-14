@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq.Observαble;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -43,6 +44,14 @@ namespace AnalitF.Net.Test.Integration.Views
 			public List<Selectable<Tuple<string, string>>> Items { get; set; }
 		}
 
+		[SetUp]
+		public void Setup()
+		{
+			//нужны стили
+			if (Application.Current == null)
+				Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
+		}
+
 		[Test, Explicit("тест конфликтует с пользовательским вводом")]
 		public void Popup_selector()
 		{
@@ -65,16 +74,9 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Popup_scroll()
 		{
-			//нужны стили
-			if (Application.Current == null)
-				Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
-				var selector = new PopupSelector();
-				selector.Name = "Items";
-				selector.Member = "Item.Item2";
-				w.Content = new StackPanel {
-					Children = { selector }
-				};
+				var selector = InitSelector(w);
+
 				selector.Loaded += (sender, args) => {
 					selector.IsOpened = true;
 					w.Dispatcher.InvokeAsync(() => {
@@ -83,13 +85,41 @@ namespace AnalitF.Net.Test.Integration.Views
 						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 					}, DispatcherPriority.ContextIdle);
 				};
-				var model = new Model();
-				model.Items = Enumerable.Range(1, 100)
-					.Select(i => new Selectable<Tuple<string, string>>(Tuple.Create(i.ToString(), i.ToString())))
-					.ToList();
-				w.DataContext = model;
-				ViewModelBinder.Bind(w.DataContext, w, null);
 			});
+		}
+
+		[Test]
+		public void Filter_label()
+		{
+			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+				var selector = InitSelector(w);
+
+				selector.Loaded += (sender, args) => {
+					var stackPanel = selector.Descendants<Grid>().FirstOrDefault(g => g.Name == "MainGrid").Descendants<StackPanel>().First();
+					Assert.That(stackPanel.AsText(), Is.Not.StringContaining(", фильтр применен"));
+					selector.IsOpened = true;
+					((ISelectable)selector.Items[0]).IsSelected = false;
+					Assert.That(stackPanel.AsText(), Is.StringContaining(", фильтр применен"));
+					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+				};
+			});
+		}
+
+		private static PopupSelector InitSelector(Window w)
+		{
+			var selector = new PopupSelector();
+			selector.Name = "Items";
+			selector.Member = "Item.Item2";
+			w.Content = new StackPanel {
+				Children = { selector }
+			};
+			var model = new Model();
+			model.Items = Enumerable.Range(1, 100)
+				.Select(i => new Selectable<Tuple<string, string>>(Tuple.Create(i.ToString(), i.ToString())))
+				.ToList();
+			w.DataContext = model;
+			ViewModelBinder.Bind(w.DataContext, w, null);
+			return selector;
 		}
 
 		[Test]

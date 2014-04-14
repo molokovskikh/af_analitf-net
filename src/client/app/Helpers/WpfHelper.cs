@@ -202,6 +202,7 @@ namespace AnalitF.Net.Client.Helpers
 		public static string AsText(this DependencyObject item)
 		{
 			return item.Descendants()
+				.Where(c => !(c is UIElement) || ((UIElement)c).Visibility == Visibility.Visible)
 				.Select(ToText)
 				.Where(c => c != null)
 				.Implode(Environment.NewLine);

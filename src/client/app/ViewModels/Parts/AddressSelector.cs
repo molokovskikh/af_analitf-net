@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			else
 				Addresses = new List<Selectable<Address>>();
 
-			FilterChanged = Addresses.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
+			FilterChanged = Addresses.Select(a => a.Changed())
 				.Merge()
 				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
 				.Merge(All.Changed());

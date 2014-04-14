@@ -199,10 +199,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					}, CloseCancellation.Token);
 
 				ReportLines
-					.ObservableForProperty(v => v.Value, skipInitial: false)
-					.Select(v => v.Value == null
+					.Select(v => v == null
 						? Observable.Empty<EventPattern<NotifyCollectionChangedEventArgs>>()
-						: v.Value.Changed())
+						: v.Changed())
 					.Switch()
 					.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
 					.Subscribe(e => StatelessSession.DeleteEach(e.EventArgs.OldItems), CloseCancellation.Token);

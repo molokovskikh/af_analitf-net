@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToList();
 
 			var supplierSelectionChanged = Suppliers
-				.Select(a => Observable.FromEventPattern<PropertyChangedEventArgs>(a, "PropertyChanged"))
+				.Select(a => a.Changed())
 				.Merge()
 				.Throttle(Consts.FilterUpdateTimeout, UiScheduler);
 

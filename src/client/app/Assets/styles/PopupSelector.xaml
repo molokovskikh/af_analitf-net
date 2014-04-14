@@ -174,12 +174,20 @@
 							BorderBrush="{TemplateBinding BorderBrush}"
 							Style="{StaticResource ComboBoxReadonlyToggleButton}"
 							IsChecked="{Binding Path=IsOpen, RelativeSource={RelativeSource TemplatedParent}}" />
-						<ContentPresenter IsHitTestVisible="false"
-							Margin="{TemplateBinding Padding}"
-							Content="{Binding Path=ButtonContent, RelativeSource={RelativeSource TemplatedParent}}"
-							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+						<StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}">
+							<ContentPresenter IsHitTestVisible="false"
+								Content="{Binding ButtonContent, RelativeSource={RelativeSource TemplatedParent}}"
+								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+							<TextBlock IsHitTestVisible="false"
+								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+								Visibility="{Binding IsFiltred, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BoolToCollapsed}}">
+								, фильтр применен
+							</TextBlock>
+						</StackPanel>
 					</Grid>
 					<ControlTemplate.Triggers>
 						<Trigger Property="IsEnabled"
