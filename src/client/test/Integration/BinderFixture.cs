@@ -255,6 +255,25 @@ namespace AnalitF.Net.Test.Integration
 			Assert.AreEqual("NotifyItems.Value.Count", binding2.Path.Path);
 		}
 
+		[Test]
+		public void Bind_column_header_tooltip()
+		{
+			var grid = new DataGrid {
+				Name = "ItemItems",
+				Columns = {
+					new DataGridTextColumnEx {
+						Header = "test",
+						Binding = new Binding("I")
+					}
+				}
+			};
+			Bind(grid);
+
+			var header = grid.Columns[0].Header;
+			Assert.IsInstanceOf<TextBlock>(header);
+			Assert.AreEqual("test", ((TextBlock)header).ToolTip);
+		}
+
 		private void Bind(object content)
 		{
 			view.Content = content;

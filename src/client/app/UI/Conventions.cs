@@ -111,20 +111,29 @@ namespace AnalitF.Net.Client.UI
 			if (result
 				&& propertyType.IsGenericType
 				&& typeof(IList).IsAssignableFrom(propertyType)) {
-				var columns = ((DataGrid)element).Columns.OfType<DataGridTextColumnEx>();
+				var dataGrid = ((DataGrid)element);
+				var columns = dataGrid.Columns;
 				foreach (var column in columns) {
-					if (column.Binding is Binding) {
-						var columnPath = ((Binding)column.Binding).Path.Path;
+					if (column.Header is string) {
+						column.Header = new TextBlock {
+							Text = (string)column.Header,
+							ToolTip = column.Header,
+						};
+					}
+
+					if (column is DataGridTextColumnEx && ((DataGridTextColumnEx)column).Binding is Binding) {
+						var exColumn = (DataGridTextColumnEx)column;
+						var columnPath = ((Binding)exColumn.Binding).Path.Path;
 						var type = propertyType.GetGenericArguments()[0];
 						var columnProperty = Util.GetProperty(type, columnPath);
 						if (columnProperty == null)
 							continue;
 						var columnType = columnProperty.PropertyType;
 						if (Util.IsNumeric(columnType)) {
-							column.TextAlignment = TextAlignment.Right;
+							exColumn.TextAlignment = TextAlignment.Right;
 						}
 						if (Util.IsDateTime(columnType)) {
-							column.TextAlignment = TextAlignment.Center;
+							exColumn.TextAlignment = TextAlignment.Center;
 						}
 					}
 				}
