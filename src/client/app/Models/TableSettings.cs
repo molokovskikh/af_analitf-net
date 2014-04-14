@@ -84,14 +84,14 @@ namespace AnalitF.Net.Client.Models
 				return;
 
 			foreach (var setting in settings) {
-				var column = dataGrid.Columns.FirstOrDefault(c => setting.Match(c));
+				var column = DataGridHelper.GetColumn(dataGrid, setting.Name);
 				setting.Restore(dataGrid.Columns, column);
 			}
 
 			//тк новые колонки не имеют сохраненных настроек
 			//они окажутся в конце таблицы
 			//назначаем им индексы из значений по умолчанию
-			foreach (var column in dataGrid.Columns.Where(c => !settings.Any(s => s.Match(c)))) {
+			foreach (var column in dataGrid.Columns.Where(c => !settings.Select(s => s.Name).Contains(DataGridHelper.GetHeader(c)))) {
 				column.DisplayIndex = dataGrid.Columns.IndexOf(column);
 			}
 		}

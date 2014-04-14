@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
 		{
-			var column = dataGrid.Columns.FirstOrDefault(c => c.Header.Equals(header));
+			var column = GetColumn(dataGrid, header);
 			if (column == null)
 				return;
 
@@ -95,7 +95,21 @@ namespace AnalitF.Net.Client.Helpers
 				new Typeface(dataGrid.FontFamily, dataGrid.FontStyle, dataGrid.FontWeight, dataGrid.FontStretch),
 				dataGrid.FontSize,
 				dataGrid.Foreground);
-			column.Width = new DataGridLength(text.Width + 4/*отступы*/, DataGridLengthUnitType.Pixel);
+			column.Width = new DataGridLength(text.Width + 4/*отступы*/ + 2/*окаймление*/, DataGridLengthUnitType.Pixel);
+		}
+
+		public static DataGridColumn GetColumn(DataGrid grid, string name)
+		{
+			return grid.Columns.FirstOrDefault(c => String.Equals(GetHeader(c), name, StringComparison.CurrentCultureIgnoreCase));
+		}
+
+		public static string GetHeader(DataGridColumn column)
+		{
+			if (column.Header is string)
+				return column.Header.ToString();
+			if (column.Header is TextBlock)
+				return ((TextBlock)column.Header).Text;
+			return "";
 		}
 
 		public static void CalculateColumnWidths(DataGrid grid)
@@ -113,7 +127,7 @@ namespace AnalitF.Net.Client.Helpers
 					|| !screen.User.IsDeplayOfPaymentEnabled
 					|| !screen.User.ShowSupplierCost;
 				if (removeSupplierCost) {
-					var column = dataGrid.Columns.FirstOrDefault(c => Equals(c.Header, "Цена поставщика"));
+					var column = GetColumn(dataGrid, "Цена поставщика");
 					if (column != null)
 						dataGrid.Columns.Remove(column);
 				}

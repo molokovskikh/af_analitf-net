@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Models
 			var rowIndex = 0;
 			var row = sheet.CreateRow(rowIndex++);
 			for(var i = 0; i < columns.Length; i++) {
-				row.CreateCell(i).SetCellValue(columns[i].Header.ToString());
+				row.CreateCell(i).SetCellValue(DataGridHelper.GetHeader(columns[i]));
 			}
 			foreach (var item in items) {
 				row = sheet.CreateRow(rowIndex++);

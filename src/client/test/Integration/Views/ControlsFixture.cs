@@ -61,7 +61,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				selector.Member = "Item.Item2";
 				w.Content = selector;
 				selector.Loaded += (sender, args) => {
-					var text = WpfHelper.AsText(selector);
+					var text = selector.AsText();
 					Assert.That(text, Is.StringContaining("test2"));
 
 					Client.Test.TestHelpers.WpfHelper.Shutdown(w);

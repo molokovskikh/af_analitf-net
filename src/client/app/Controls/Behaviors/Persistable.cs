@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			});
 			contextMenu.Items.Add(new Separator());
 			foreach (var column in AssociatedObject.Columns) {
-				var header = GetDescription(column) ?? column.Header;
+				var header = GetDescription(column) ?? Helpers.DataGridHelper.GetHeader(column);
 				var menuItem = new MenuItem {
 					Header = header,
 					IsCheckable = true
