@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.Models.Print
 				valueColumnWidth = new GridLength(117);
 				styles.Add("Номер сертификата", new Style(typeof(TextBlock)) {
 					Setters = {
-						new Setter(TextBlock.FontSizeProperty, 5d)
+						new Setter(TextBlock.FontSizeProperty, 7d)
 					}
 				});
 			}
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var header = new Label {
 				Padding = new Thickness(0),
 				HorizontalContentAlignment = HorizontalAlignment.Center,
-				FontSize = 8,
+				FontSize = 11,
 				Content = "Стеллажная карта",
 				BorderBrush = Brushes.Black,
 				BorderThickness = new Thickness(0, 0, 2.5, 2.5),
@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(0),
 				Padding = new Thickness(2, 0, 2, 0),
 				Content = label,
-				FontSize = 8,
+				FontSize = 10,
 				BorderBrush = Brushes.Black,
 				BorderThickness = new Thickness(0, 0, 2.5, 2.5),
 				FontFamily = new FontFamily("Arial"),
@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var visualValue = new Border {
 				Child = new TextBlock {
 					Text = value,
-					FontSize = 7,
+					FontSize = 9,
 					Style = styles.GetValueOrDefault(label),
 					SnapsToDevicePixels = true,
 					FontFamily = new FontFamily("Arial"),

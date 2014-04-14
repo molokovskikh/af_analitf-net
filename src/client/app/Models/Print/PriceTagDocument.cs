@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Print
 		private Dictionary<string, Style> styles = new Dictionary<string, Style> {
 			{"Product", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 9d),
+					new Setter(TextBlock.FontSizeProperty, 11d),
 					new Setter(TextBlock.FontWeightProperty, FontWeights.Bold),
 					new Setter(FrameworkElement.HeightProperty, 43d),
 					new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Underline),
@@ -31,38 +31,38 @@ namespace AnalitF.Net.Client.Models.Print
 			}},
 			{"Cost", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 16d),
+					new Setter(TextBlock.FontSizeProperty, 18d),
 					new Setter(TextBlock.FontWeightProperty, FontWeights.Bold),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"Country", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 8d),
+					new Setter(TextBlock.FontSizeProperty, 10d),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"Producer", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 8d),
+					new Setter(TextBlock.FontSizeProperty, 10d),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"Period", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 7d),
+					new Setter(TextBlock.FontSizeProperty, 9d),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"SerialNumber", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 7d),
+					new Setter(TextBlock.FontSizeProperty, 9d),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"ProviderDocumentId", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 7d),
+					new Setter(TextBlock.FontSizeProperty, 9d),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 			var product = new TextBlock {
 				Text = line.Product,
-				FontSize = 9,
+				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
@@ -152,7 +152,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var costLabel = new TextBlock {
 				Text = "Цена",
 				Width = 26,
-				FontSize = 7
+				FontSize = 9
 			};
 			costLabel.SetValue(Canvas.LeftProperty, 0d);
 			costLabel.SetValue(Canvas.TopProperty, 38d);
@@ -161,7 +161,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var cost = new TextBlock {
 				Text = FormatCost(line),
 				Width = 133,
-				FontSize = 9,
+				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextAlignment = TextAlignment.Right,
@@ -173,7 +173,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var producerLabel = new TextBlock {
 				Text = "Произв.",
 				Width = 37,
-				FontSize = 7
+				FontSize = 9
 			};
 			producerLabel.SetValue(Canvas.LeftProperty, 0d);
 			producerLabel.SetValue(Canvas.TopProperty, 50d);
@@ -181,7 +181,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var country = new TextBlock {
 				Text = line.Country,
 				Width = 122,
-				FontSize = 7,
+				FontSize = 9,
 				TextAlignment = TextAlignment.Right,
 			};
 			country.SetValue(Canvas.LeftProperty, 39d);
@@ -190,7 +190,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var producer = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 7,
+				FontSize = 9,
 				Text = line.Producer,
 				Width = 160,
 			};
@@ -201,14 +201,14 @@ namespace AnalitF.Net.Client.Models.Print
 			var periodLabel = new TextBlock {
 				Text = "Срок годности",
 				Width = 65,
-				FontSize = 7
+				FontSize = 9
 			};
 			periodLabel.SetValue(Canvas.LeftProperty, 0d);
 			periodLabel.SetValue(Canvas.TopProperty, 73d);
 			canvas.Children.Add(periodLabel);
 			var period = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 7,
+				FontSize = 9,
 				Text = line.Period,
 				Width = 93,
 			};
@@ -219,7 +219,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var singLabel = new TextBlock {
 				Text = "Подпись",
 				Width = 160,
-				FontSize = 6
+				FontSize = 8
 			};
 			singLabel.SetValue(Canvas.LeftProperty, 0d);
 			singLabel.SetValue(Canvas.TopProperty, 84d);
@@ -227,7 +227,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var waybillDate = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 7,
+				FontSize = 9,
 				Text = line.Waybill.DocumentDate.ToShortDateString(),
 				Width = 100,
 			};
@@ -249,7 +249,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var nameAndAddressLabel = new TextBlock {
 				Text = waybillSettings.FullName,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 6,
+				FontSize = 8,
 				Width = 162,
 				Height = 20
 			};
@@ -263,7 +263,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var product = new TextBlock {
 				Text = String.Format("{0}\n{1}", line.Product, line.Producer),
-				FontSize = 9,
+				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
@@ -278,7 +278,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var cost = new TextBlock {
 				Text = FormatCost(line),
 				Width = 112,
-				FontSize = 24,
+				FontSize = 26,
 				FontWeight = FontWeights.Bold,
 				TextAlignment = TextAlignment.Right,
 				VerticalAlignment = VerticalAlignment.Bottom,
@@ -289,7 +289,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var periodLabel = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 6,
+				FontSize = 8,
 				Text = "Годен до",
 				Width = 49,
 			};
@@ -298,7 +298,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(periodLabel);
 			var period = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 7,
+				FontSize = 9,
 				Text = line.Period,
 				Width = 49,
 			};
@@ -307,7 +307,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(period);
 
 			var singLabel = new TextBlock {
-				FontSize = 6,
+				FontSize = 8,
 				Text = "Подпись",
 				Width = 49,
 			};
@@ -330,7 +330,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var nameAndAddressLabel = new TextBlock {
 				Text = waybillSettings.FullName,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 4,
+				FontSize = 6,
 				Width = 162,
 				Height = 10
 			};
@@ -345,7 +345,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var serialNumberLabel = new TextBlock {
 				Text = line.SerialNumber,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 4,
+				FontSize = 6,
 				Width = 81,
 				Height = 10
 			};
@@ -361,7 +361,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var supplierNameLabel = new TextBlock {
 				Text = line.Waybill.SupplierName,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 4,
+				FontSize = 6,
 				Width = 81,
 				Height = 10
 			};
@@ -376,7 +376,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var product = new TextBlock {
 				Text = String.Format("{0}\n{1}", line.Product, line.Producer),
-				FontSize = 9,
+				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
@@ -391,7 +391,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var cost = new TextBlock {
 				Text = FormatCost(line),
 				Width = 112,
-				FontSize = 24,
+				FontSize = 26,
 				FontWeight = FontWeights.Bold,
 				TextAlignment = TextAlignment.Right,
 				VerticalAlignment = VerticalAlignment.Bottom,
@@ -402,7 +402,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var periodLabel = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 6,
+				FontSize = 8,
 				Text = "Годен до",
 				Width = 49,
 			};
@@ -411,7 +411,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(periodLabel);
 			var period = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 7,
+				FontSize = 9,
 				Text = line.Period,
 				Width = 49,
 			};
@@ -420,7 +420,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(period);
 
 			var singLabel = new TextBlock {
-				FontSize = 6,
+				FontSize = 8,
 				Text = "Подпись",
 				Width = 49,
 			};
@@ -451,7 +451,7 @@ namespace AnalitF.Net.Client.Models.Print
 						},
 						new TextBlock {
 							Text = waybillSettings.FullName,
-							FontSize = 6,
+							FontSize = 8,
 							TextAlignment = TextAlignment.Center,
 							VerticalAlignment = VerticalAlignment.Center
 						}
@@ -473,7 +473,7 @@ namespace AnalitF.Net.Client.Models.Print
 					settings.PriceTag.PrintSupplier ? line.Waybill.SupplierName : "");
 
 				var label = new Label {
-					FontSize = 6,
+					FontSize = 8,
 					Content = value,
 					HorizontalContentAlignment = HorizontalAlignment.Right,
 					Margin = new Thickness(0),
@@ -485,7 +485,7 @@ namespace AnalitF.Net.Client.Models.Print
 						new Label {
 							VerticalAlignment = VerticalAlignment.Center,
 							Content = "Подпись",
-							FontSize = 6,
+							FontSize = 8,
 							Margin = new Thickness(0),
 							Padding = new Thickness(0),
 						},
@@ -530,7 +530,7 @@ namespace AnalitF.Net.Client.Models.Print
 						new Label {
 							VerticalAlignment = VerticalAlignment.Center,
 							Content = name,
-							FontSize = 7,
+							FontSize = 9,
 							Margin = new Thickness(0),
 							Padding = new Thickness(0),
 						},

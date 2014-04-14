@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			HeaderStyle = new Style(typeof(Run), HeaderStyle) {
 				Setters = {
-					new Setter(Control.FontSizeProperty, 12d),
+					new Setter(Control.FontSizeProperty, 14d),
 					new Setter(Control.FontWeightProperty, FontWeights.Normal),
 				}
 			};
