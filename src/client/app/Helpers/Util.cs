@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
+using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Util;
@@ -128,6 +132,28 @@ namespace AnalitF.Net.Client.Helpers
 			cached = @select(key);
 			cache.Put(key, cached);
 			return cached;
+		}
+
+		public static IQueryable<T> Filter<T>(IQueryable<T> query,
+			Expression<Func<T, PriceComposedId>> selectFunc,
+			IEnumerable<Selectable<Price>> prices)
+		{
+			var selected = prices.Where(p => p.IsSelected).Select(p => p.Item.Id).ToArray();
+			if (selected.Count() != prices.Count()) {
+				var param = Expression.Parameter(typeof(T), "o");
+				var field = (MemberExpression)selectFunc.Body;
+				Expression result = null;
+				foreach (var id in selected) {
+					if (result == null)
+						result = Expression.Equal(field, Expression.Constant(id));
+					else
+						result = Expression.OrElse(result, Expression.Equal(field, Expression.Constant(id)));
+				}
+
+				result = result ?? Expression.Constant(false);
+				query = query.Where(Expression.Lambda<Func<T, bool>>(result, new[] { param }));
+			}
+			return query;
 		}
 	}
 }

@@ -18,6 +18,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public override void Execute()
 		{
+			//перед импортом нужно очистить сессию, тк в процессе импорта могут быть удалены данные которые содержатся в сесии
+			//например прайс-листы если на каком то этапе эти данные изменятся и сессия попытается сохранить изменения
+			//это приведет к ошибке
+			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
 			foreach (var table in data) {

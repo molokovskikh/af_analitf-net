@@ -37,7 +37,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
 			SelectedSentLine = new NotifyValue<SentOrderLine>();
-			CurrentPrice = new NotifyValue<Price>();
 			CanDelete = new NotifyValue<bool>(
 				() => CurrentLine.Value != null && IsCurrentSelected,
 				CurrentLine, IsCurrentSelected);
@@ -54,11 +53,6 @@ namespace AnalitF.Net.Client.ViewModels
 				l => CurrentLine.Value = l);
 			AddressSelector = new AddressSelector(Session, this);
 			editor = new Editor(OrderWarning, Manager);
-
-			AddressSelector.FilterChanged
-				.Merge(CurrentPrice.Changed())
-				.Merge(OnlyWarning.Changed())
-				.Subscribe(_ => Update(), CloseCancellation.Token);
 
 			this.ObservableForProperty(m => m.CurrentLine.Value)
 				.Select(e => e.Value)
@@ -80,11 +74,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Settings.Changed().Subscribe(_ => Calculate());
 
-			//пока устанавливаем значения не надо оповещать об изменения
-			//все равно будет запрос когда форма активируется
-			var prices = Session.Query<Price>().OrderBy(p => p.Name);
-			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
-			CurrentPrice.Mute(Prices.FirstOrDefault());
+			Prices = Session.Query<Price>().OrderBy(p => p.Name).ToList()
+				.Select(p => new Selectable<Price>(p))
+				.ToList();
+
+			AddressSelector.FilterChanged
+				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
+				.Merge(OnlyWarning.Changed())
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 
 			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
 		}
@@ -94,8 +91,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public AddressSelector AddressSelector { get; set; }
 		public ProductInfo ProductInfo { get; set; }
 
-		public List<Price> Prices { get; set; }
-		public NotifyValue<Price> CurrentPrice { get; set; }
+		public List<Selectable<Price>> Prices { get; set; }
 
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
 		public NotifyValue<bool> OnlyWarning { get; set; }
@@ -170,10 +166,7 @@ namespace AnalitF.Net.Client.ViewModels
 				if (OnlyWarning.Value)
 					query = query.Where(l => l.SendResult != LineResultStatus.OK);
 
-				if (CurrentPrice.Value != null && CurrentPrice.Value.Id != null) {
-					var priceId = CurrentPrice.Value.Id;
-					query = query.Where(l => l.Order.Price.Id == priceId);
-				}
+				query = Util.Filter(query, l => l.Order.Price.Id, Prices);
 
 				var addresses = AddressSelector.GetActiveFilter()
 					.Select(i => i.Id)
@@ -197,10 +190,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.Where(l => l.Order.SentOn > begin && l.Order.SentOn < end)
 					.Where(l => l.Order.Address.Id == addressId);
 
-				if (CurrentPrice.Value != null && CurrentPrice.Value.Id != null) {
-					var priceId = CurrentPrice.Value.Id;
-					query = query.Where(l => l.Order.Price.Id == priceId);
-				}
+				query = Util.Filter(query, l => l.Order.Price.Id, Prices);
 
 				var lines = query.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProductSynonym)

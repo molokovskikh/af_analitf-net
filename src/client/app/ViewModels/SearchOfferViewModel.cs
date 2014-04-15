@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NHibernate.Criterion;
 using NHibernate.Linq;
 using ReactiveUI;
+using Ex=System.Linq.Expressions.Expression;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -31,11 +35,10 @@ namespace AnalitF.Net.Client.ViewModels
 			Producers.Value = producers;
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
-			Prices = new[] { new Price {Name = Consts.AllPricesLabel} }.Concat(prices).ToList();
-			CurrentPrice = new NotifyValue<Price>(Prices.First());
+			Prices = prices.Select(p => new Selectable<Price>(p)).ToList();
 			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
-			CurrentPrice.Changed()
+			Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
@@ -43,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
+		public List<Selectable<Price>> Prices { get; set; }
+		public NotifyValue<bool> OnlyBase { get; set; }
 
 		public IResult Search()
 		{
@@ -55,12 +60,6 @@ namespace AnalitF.Net.Client.ViewModels
 			return SearchBehavior.ClearSearch();
 		}
 
-		public List<Price> Prices { get; set; }
-
-		public NotifyValue<Price> CurrentPrice { get; set; }
-
-		public NotifyValue<bool> OnlyBase { get; set; }
-
 		protected override void Query()
 		{
 			var term = SearchBehavior.ActiveSearchTerm.Value;
@@ -68,11 +67,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(term));
-			var price = CurrentPrice.Value;
-			if (price != null && price.Id != null) {
-				var priceId = price.Id;
-				query = query.Where(o => o.Price.Id == priceId);
-			}
+			query = Util.Filter(query, o => o.Price.Id, Prices);
 
 			var producer = CurrentProducer.Value;
 			if (producer != Consts.AllProducerLabel)

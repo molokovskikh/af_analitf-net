@@ -42,7 +42,7 @@
 				Style="{StaticResource SearchText}"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				binders:SearchBinder.Grid="Offers" />
-			<ComboBox x:Name="Prices" Style="{StaticResource Filter}" DisplayMemberPath="Name" />
+			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
 			<CheckBox x:Name="OnlyBase"
 				Style="{StaticResource FilterElement}">
 				Только основные

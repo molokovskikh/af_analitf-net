@@ -29,7 +29,6 @@ namespace AnalitF.Net.Client.Views
 		public void ApplyStyles()
 		{
 			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
-
 			StyleHelper.ApplyStyles(typeof(SentOrderLine), HistoryOrders, Application.Current.Resources);
 		}
 	}

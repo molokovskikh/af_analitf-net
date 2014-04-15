@@ -355,12 +355,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void ApplyChanges(ISession session)
 		{
-			session
-				.CreateSQLQuery("update prices set BasePrice = Category >= :baseCategory")
-				.SetParameter("baseCategory", BaseFromCategory)
-				.ExecuteUpdate();
-
 			var prices = session.Query<Price>().ToList();
+
+			foreach (var price in prices)
+				price.BasePrice = price.Category >= BaseFromCategory;
 
 			UpdatePriceNames(prices);
 		}

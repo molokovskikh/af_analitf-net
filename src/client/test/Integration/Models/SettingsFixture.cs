@@ -21,6 +21,7 @@ namespace AnalitF.Net.Test.Integration.Models
 			notBase.Category = 0;
 			session.Flush();
 			settings.ApplyChanges(session);
+			session.Flush();
 
 			session.Refresh(basePrice);
 			Assert.IsTrue(basePrice.BasePrice);
