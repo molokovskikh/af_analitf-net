@@ -110,6 +110,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
 				m.Property(p => p.OperativeInfo, c => c.Length(10000));
+				m.Property(p => p.RegionId, c => c.Insert(false));
 				m.Version(p => p.Timestamp, c => {
 					c.Type(new TimestampType());
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));

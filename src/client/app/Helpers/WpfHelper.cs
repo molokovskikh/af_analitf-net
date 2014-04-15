@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Xml;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Helpers
@@ -235,6 +238,13 @@ namespace AnalitF.Net.Client.Helpers
 				BindsDirectlyToSource = true,
 				Mode = BindingMode.OneWayToSource
 			});
+		}
+
+		public static void DumpStyle(Control control)
+		{
+			var settings = new XmlWriterSettings { Indent = true, NewLineOnAttributes = true };
+			XamlWriter.Save(control.Template, XmlWriter.Create(Console.Out, settings));
+			XamlWriter.Save(control.Style, XmlWriter.Create(Console.Out, settings));
 		}
 	}
 }

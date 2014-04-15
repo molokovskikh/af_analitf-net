@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq.Observαble;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -29,9 +30,8 @@ namespace AnalitF.Net.Test.Integration.Models
 			session.Save(offer);
 
 			order.Frozen = true;
-			var restore = new UnfreezeCommand<Order>(order.Id);
+			var restore = InitCmd(new UnfreezeCommand<Order>(order.Id));
 			restore.Restore = true;
-			restore.Session = session;
 			restore.Execute();
 
 			var orders = session.Query<Order>().ToArray();
@@ -42,6 +42,42 @@ namespace AnalitF.Net.Test.Integration.Models
 			var message = String.Format("имеется различие в цене препарата (старая цена: {0:C}; новая цена: {1:C})",
 				oldCost, offer.Cost);
 			Assert.AreEqual(message, line.LongSendError);
+		}
+
+		[Test]
+		public void Message_on_not_found_price()
+		{
+			restore = true;
+			session.DeleteEach<Order>();
+
+			var offer = session.Query<Offer>().First();
+			var maxId = session.Query<Price>().ToArray().Max(p => p.Id.PriceId);
+			var price = new Price("Тест") {
+				RegionName = "Воронеж",
+				Id = {
+					PriceId = maxId + 10,
+					RegionId = offer.Price.Id.RegionId
+				},
+				RegionId = offer.Price.Id.RegionId
+			};
+			session.Save(price);
+			session.Flush();
+			var order = new Order(price, address) {
+				Frozen = true
+			};
+			var orderLine = new OrderLine {
+				Order = order,
+				Count = 1,
+				OfferId = new OfferComposedId()
+			};
+			orderLine.Clone(offer);
+			order.AddLine(orderLine);
+			session.Save(order);
+			var cmd = InitCmd(new UnfreezeCommand<Order>(order.Id));
+			cmd.Execute();
+			var text = (string)cmd.Result;
+			var message = String.Format("Заказ №{0} невозможно \"разморозить\", т.к. прайс-листа Тест - Воронеж нет в обзоре\r\n", order.Id);
+			Assert.AreEqual(message, text);
 		}
 	}
 }

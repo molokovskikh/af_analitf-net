@@ -214,15 +214,15 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Import()
 		{
-			var settings = Session.Query<Settings>().First();
-
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(Config.ArchiveFile))
 				data = GetDbData(zip.Select(z => z.FileName));
 
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
+			//будь бдителен ImportCommand очистит сессию
 			RunCommand(new ImportCommand(data));
+			var settings = Session.Query<Settings>().First();
 
 			SyncOrders();
 

@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Result = log.ToString();
 		}
 
-		public Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
+		public void Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
 			bool addressNotFound;
 			try {
@@ -52,8 +52,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = "Адрес доставки больше не доступен";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. адрес доставки больше не доступен.", sourceOrder.Id));
-				return null;
+				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. адрес доставки больше не доступен.", sourceOrder.Id, GuesAction(sourceOrder)));
+				return;
 			}
 
 			bool priceNotFound;
@@ -70,8 +70,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = "Прайс-листа нет в обзоре";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно восстановить, т.к. прайс-листа нет в обзоре.", sourceOrder.Id));
-				return null;
+				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. прайс-листа нет в обзоре.", sourceOrder.Id, GuesAction(sourceOrder)));
+				return;
 			}
 			var address = addressToOverride ?? sourceOrder.Address;
 
@@ -88,6 +88,16 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (Restore) {
 					destOrder.CreatedOn = sourceOrder.CreatedOn;
 				}
+			}
+
+			var count = session.Query<Offer>().Count(o => o.Price == sourceOrder.Price);
+			if (count == 0) {
+				log.AppendLine(String.Format("Заказ №{0} невозможно {3}, т.к. прайс-листа {1} - {2} нет в обзоре",
+					sourceOrder.Id,
+					sourceOrder.Price.Name,
+					sourceOrder.Price.RegionName,
+					GuesAction(sourceOrder)));
+				return;
 			}
 
 			foreach (var line in sourceOrder.Lines.ToArray()) {
@@ -111,8 +121,17 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			if (!destOrder.IsEmpty)
 				session.Save(destOrder);
+		}
 
-			return destOrder;
+		private string GuesAction(IOrder sourceOrder)
+		{
+			if (Restore)
+				return "восстановить";
+			if (sourceOrder is Order && ((Order)sourceOrder).Frozen)
+				return "\"разморозить\"";
+			if (sourceOrder is SentOrder)
+				return "вернуть в работу";
+			return "объединить";
 		}
 
 		public void Merge(Order order, IOrder sourceOrder, IOrderLine sourceLine, Offer[] offers, StringBuilder log)

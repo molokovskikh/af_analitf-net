@@ -210,8 +210,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Freeze_order_without_offers()
 		{
-			session.DeleteEach<Order>();
-
 			var order = MakeOrderClean();
 
 			var newOffer = new Offer(order.Price, 150);
@@ -226,10 +224,10 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			order.TryOrder(newOffer, 1);
 
-			var command1 = new UpdateCommand();
-			Run(command1);
+			var cmd = new UpdateCommand();
+			Run(cmd);
 
-			var text = command1.Results.OfType<DialogResult>()
+			var text = cmd.Results.OfType<DialogResult>()
 				.Select(r => (TextViewModel)r.Model)
 				.Select(m => m.Text)
 				.First();

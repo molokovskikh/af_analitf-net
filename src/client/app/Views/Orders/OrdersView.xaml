@@ -59,7 +59,24 @@
 								TextAlignment="Right"
 								IsReadOnly="True" />
 							<DataGridCheckBoxColumn Width="56*" Header="Отправить"
-								Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}" />
+								Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}">
+								<DataGridCheckBoxColumn.ElementStyle>
+									<Style TargetType="CheckBox">
+										<Setter Property="IsEnabled" Value="{Binding Frozen, Converter={StaticResource BoolInvert}}" />
+										<Setter Property="HorizontalAlignment" Value="Center" />
+										<Setter Property="VerticalAlignment" Value="Top" />
+										<Setter Property="Focusable" Value="False" />
+										<Setter Property="IsHitTestVisible" Value="False" />
+									</Style>
+								</DataGridCheckBoxColumn.ElementStyle>
+								<DataGridCheckBoxColumn.EditingElementStyle>
+									<Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+										<Setter Property="IsEnabled" Value="{Binding Frozen, Converter={StaticResource BoolInvert}}" />
+										<Setter Property="HorizontalAlignment" Value="Center" />
+										<Setter Property="VerticalAlignment" Value="Top" />
+									</Style>
+								</DataGridCheckBoxColumn.EditingElementStyle>
+							</DataGridCheckBoxColumn>
 							<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
 								TextAlignment="Right"
 								IsReadOnly="True" />

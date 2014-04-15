@@ -9,6 +9,7 @@
 	<Extentions:IntToBoolConverter x:Key="IntToBool" />
 	<Extentions:IntToCollapsedConverter x:Key="IntToCollapsed" />
 	<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
+	<Extentions:InvertConverter x:Key="BoolInvert" />
 
 	<Style TargetType="Image" x:Key="ButtonImage">
 		<Style.Triggers>
