@@ -24,10 +24,17 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Setup()
 		{
 			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
-			model.User = new User();
-			model.Address = new Address("тест");
-			model.Addresses = new[] { model.Address };
-			ScreenExtensions.TryActivate(model);
+			Activate(model);
+		}
+
+		private void Activate(BaseScreen screen)
+		{
+			screen.User = new User();
+			screen.Address = new Address("тест");
+			screen.Parent = shell;
+			if (screen is BaseOfferViewModel)
+				((BaseOfferViewModel)screen).Addresses = new[] { model.Address };
+			ScreenExtensions.TryActivate(screen);
 		}
 
 		[Test]
@@ -85,6 +92,18 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual(0, stat.OrderLinesCount);
 			Assert.IsNull(model.Offers.Value[0].OrderCount);
+		}
+
+		[Test]
+		public void Save_auto_comment_for_session()
+		{
+			model.AutoCommentText = "test";
+			Assert.IsTrue(model.IsActive);
+			ScreenExtensions.TryDeactivate(model, false);
+			Assert.IsFalse(model.IsActive);
+			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
+			Activate(model);
+			Assert.AreEqual("test", model.AutoCommentText);
 		}
 	}
 }

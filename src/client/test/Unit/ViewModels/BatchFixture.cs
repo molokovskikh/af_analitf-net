@@ -27,7 +27,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 	public class BatchFixture : BaseUnitFixture
 	{
 		private Batch batch;
-		private ShellViewModel shell;
 
 		[SetUp]
 		public void Setup()
@@ -38,7 +37,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			};
 
 			batch = new Batch();
-			shell = new ShellViewModel(true);
 			batch.Settings.Value = settings;
 			batch.Shell = shell;
 			batch.Shell.Settings.Value = settings;

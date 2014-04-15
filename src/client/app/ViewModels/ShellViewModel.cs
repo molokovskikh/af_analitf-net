@@ -69,6 +69,9 @@ namespace AnalitF.Net.Client.ViewModels
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
 		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
+		//параметры авто-комментария должны быть одинаковыми на время работы приложения
+		public bool ResetAutoComment;
+		public string AutoCommentText;
 
 		public ShellViewModel()
 			: this(false)

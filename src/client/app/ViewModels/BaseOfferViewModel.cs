@@ -137,6 +137,32 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return CurrentElementAddress ?? Address; }
 		}
 
+		public string AutoCommentText
+		{
+			get
+			{
+				return autoCommentText;
+			}
+			set
+			{
+				autoCommentText = value;
+				NotifyOfPropertyChange("AutoCommentText");
+			}
+		}
+
+		public bool ResetAutoComment
+		{
+			get
+			{
+				return resetAutoComment;
+			}
+			set
+			{
+				resetAutoComment = value;
+				NotifyOfPropertyChange("ResetAutoComment");
+			}
+		}
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -177,6 +203,33 @@ namespace AnalitF.Net.Client.ViewModels
 			Bus.Listen<string>("db")
 				.Where(m => m == "Changed")
 				.Subscribe(_ => clearSession = true, CloseCancellation.Token);
+		}
+
+		protected override void OnActivate()
+		{
+			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
+			if (clearSession) {
+				Session.Clear();
+				RecreateSession();
+				clearSession = false;
+			}
+
+			base.OnActivate();
+
+			if (Shell != null) {
+				ResetAutoComment = Shell.ResetAutoComment;
+				AutoCommentText = Shell.AutoCommentText;
+			}
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			if (Shell != null) {
+				Shell.AutoCommentText = AutoCommentText;
+				Shell.ResetAutoComment = ResetAutoComment;
+			}
+
+			base.OnDeactivate(close);
 		}
 
 		public void ShowDescription()
@@ -298,32 +351,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public string AutoCommentText
-		{
-			get
-			{
-				return autoCommentText;
-			}
-			set
-			{
-				autoCommentText = value;
-				NotifyOfPropertyChange("AutoCommentText");
-			}
-		}
-
-		public bool ResetAutoComment
-		{
-			get
-			{
-				return resetAutoComment;
-			}
-			set
-			{
-				resetAutoComment = value;
-				NotifyOfPropertyChange("ResetAutoComment");
-			}
-		}
-
 		protected void LoadOrderItems()
 		{
 			foreach (var offer in Offers.Value) {
@@ -341,18 +368,6 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		protected abstract void Query();
-
-		protected override void OnActivate()
-		{
-			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
-			if (clearSession) {
-				Session.Clear();
-				RecreateSession();
-				clearSession = false;
-			}
-
-			base.OnActivate();
-		}
 
 		protected virtual void RecreateSession()
 		{

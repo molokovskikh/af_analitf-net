@@ -18,6 +18,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected TestScheduler scheduler;
 		protected MessageBus bus;
 		protected WindowManager manager;
+		protected ShellViewModel shell;
 
 		[SetUp]
 		public void Setup()
@@ -33,6 +34,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
 
 			manager = ViewModelFixture.StubWindowManager();
+			shell = new ShellViewModel(true);
 		}
 
 		[TearDown]
