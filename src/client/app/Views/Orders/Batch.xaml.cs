@@ -1,10 +1,12 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Views.Orders
 {
@@ -40,7 +42,10 @@ namespace AnalitF.Net.Client.Views.Orders
 		public void ApplyStyles()
 		{
 			StyleHelper.ApplyStyles(typeof(BatchLine), ReportLines, Application.Current.Resources, Legend);
+			var elements = Legend.Descendants<FrameworkElement>().Where(e => Equals(e.Tag, "generated")).ToArray();
+			elements.Each(e => e.Tag = "");
 			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
+			elements.Each(e => e.Tag = "generated");
 		}
 	}
 }

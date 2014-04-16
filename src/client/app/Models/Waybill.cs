@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Windows.Navigation;
 using AnalitF.Net.Client.Config.Initializers;
-using Caliburn.Micro;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
-using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -79,6 +77,7 @@ namespace AnalitF.Net.Client.Models
 
 				_vitallyImportant = value;
 				Calculate(Settings);
+				OnPropertyChanged();
 			}
 		}
 
@@ -124,6 +123,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings)
 		{
+			if (settings == null)
+				return;
 			Settings = settings;
 			WaybillSettings = settings.Waybills
 				.FirstOrDefault(s => s.BelongsToAddress != null

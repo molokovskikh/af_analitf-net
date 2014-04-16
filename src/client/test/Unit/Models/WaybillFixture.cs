@@ -176,7 +176,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var line = Line();
 			Calculate(line);
-			var changes = RxHelper.CollectChanges(line);
+			var changes = line.CollectChanges();
 			line.RetailCost = 100;
 			Assert.IsTrue(line.IsMarkupToBig);
 			Assert.That(changes.Implode(e => e.PropertyName), Is.StringContaining("IsMarkupToBig"));
@@ -256,6 +256,29 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 
 			Assert.AreEqual(150, waybillLine.Amount);
 			Assert.AreEqual(150, waybill.Sum);
+		}
+
+		[Test]
+		public void Notify_on_uncalculable_lines()
+		{
+			var waybillLine = new WaybillLine(waybill) {
+				Nds = 18,
+				Quantity = 20,
+				SupplierCost = 9.72m,
+				SupplierCostWithoutNds = 8.84m
+			};
+			waybill.AddLine(waybillLine);
+			waybill.Calculate(settings);
+			Assert.IsTrue(waybill.CanBeVitallyImportant);
+			var changes = waybillLine.CollectChanges();
+			waybill.VitallyImportant = true;
+			Assert.IsTrue(waybillLine.IsNdsInvalid);
+			var props = changes.Select(c => c.PropertyName).ToArray();
+			Assert.IsNull(waybillLine.RetailCost);
+			Assert.Contains("IsNdsInvalid", props);
+			Assert.Contains("IsMarkupToBig", props);
+			Assert.Contains("ActualVitallyImportant", props);
+			Assert.Contains("RetailCost", props);
 		}
 
 		private WaybillLine Line()

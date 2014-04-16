@@ -7,18 +7,6 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class StyleAttribute : Attribute
-	{
-		public string[] Columns;
-		public string Description;
-		public string Context;
-
-		public StyleAttribute(params string[] columns)
-		{
-			Columns = columns;
-		}
-	}
-
 	public class WaybillLine : BaseNotify, IEditableObject
 	{
 		private decimal? _retailCost;
@@ -26,7 +14,8 @@ namespace AnalitF.Net.Client.Models
 		private decimal? _retailMarkup;
 		private decimal? _maxRetailMarkup;
 		private decimal? _maxSupplierMarkup;
-		private bool print;
+		private bool _print;
+		private Waybill _waybill;
 
 		public WaybillLine()
 		{
@@ -40,7 +29,22 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual Waybill Waybill { get; set; }
+
+		public virtual Waybill Waybill
+		{
+			get { return _waybill; }
+			set
+			{
+				if (_waybill == value)
+					return;
+				if (value != null)
+					value.PropertyChanged += WaybillChanged;
+				if (_waybill != null)
+					_waybill.PropertyChanged -= WaybillChanged;
+				_waybill = value;
+			}
+		}
+
 		public virtual uint? ProductId { get; set; }
 		public virtual string Product { get; set; }
 		public virtual uint? ProducerId { get; set; }
@@ -49,10 +53,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Print
 		{
-			get { return print; }
+			get { return _print; }
 			set
 			{
-				print = value;
+				_print = value;
 				OnPropertyChanged();
 			}
 		}
@@ -66,7 +70,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? ExciseTax { get; set; }
 		public virtual string BillOfEntryNumber { get; set; }
 
-		[Style]
 		public virtual bool? VitallyImportant { get; set; }
 
 		public virtual decimal? ProducerCost { get; set; }
@@ -192,7 +195,8 @@ namespace AnalitF.Net.Client.Models
 			get { return Amount - NdsAmount; }
 		}
 
-		private bool ActualVitallyImportant
+		[Style(Name = "VitallyImportant")]
+		public virtual bool ActualVitallyImportant
 		{
 			get { return Waybill != null && Waybill.VitallyImportant || VitallyImportant.GetValueOrDefault(); }
 		}
@@ -200,6 +204,14 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? ProducerCostWithTax
 		{
 			get { return ProducerCost * (1 + (decimal?) Nds / 100); }
+		}
+
+		private void WaybillChanged(object sender, PropertyChangedEventArgs args)
+		{
+			if (args.PropertyName == "VitallyImportant") {
+				OnPropertyChanged("IsNdsInvalid");
+				OnPropertyChanged("ActualVitallyImportant");
+			}
 		}
 
 		private void RecalculateMarkups()
@@ -229,8 +241,21 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups)
 		{
-			if (!IsCalculable())
+			if (!IsCalculable()) {
+				_retailCost = null;
+				_retailMarkup = null;
+				_realRetailMarkup = null;
+				_maxSupplierMarkup = null;
+				MaxRetailMarkup = null;
+				OnPropertyChanged("RetailCost");
+				OnPropertyChanged("RetailSum");
+				OnPropertyChanged("RetailMarkup");
+				OnPropertyChanged("RealRetailMarkup");
+				OnPropertyChanged("IsMarkupInvalid");
+				OnPropertyChanged("IsMarkupToBig");
+				OnPropertyChanged("IsSupplierPriceMarkupInvalid");
 				return;
+			}
 
 			var vitallyImportant = ActualVitallyImportant;
 			var lookByProducerCost = vitallyImportant && settings.LookupMarkByProducerCost;

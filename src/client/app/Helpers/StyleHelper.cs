@@ -13,6 +13,31 @@ using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
+	public class StyleAttribute : Attribute
+	{
+		public string[] Columns;
+		public string Description;
+		public string Context;
+		/// <summary>
+		/// Название стиля который должен применяться, в большенстве случаем null
+		/// нужен в тех ситуация когда название стиля должно отличаться от названия свойства
+		/// например два класса должны использовать один ситль что бы настройки применялись идентичные
+		/// но название свойства не могут быть одинаковыми тк в одном из классов такое свойство уже используется
+		/// а изменение имени существующего свойства друдоемко
+		/// </summary>
+		public string Name;
+
+		public StyleAttribute(params string[] columns)
+		{
+			Columns = columns;
+		}
+
+		public string GetName(PropertyInfo property)
+		{
+			return Name ?? property.Name;
+		}
+	}
+
 	public class StyleHelper
 	{
 		public static Dictionary<string, DataTrigger> DefaultStyles = new Dictionary<string, DataTrigger>();
@@ -207,7 +232,7 @@ namespace AnalitF.Net.Client.Helpers
 			var rowStyles = legends.Where(l => l.d.Columns == null || l.d.Columns.Length == 0);
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
 			foreach (var style in rowStyles) {
-				PatchBackground(rowStyle, style.p.Name, GetCombinedStyle(style.p.Name));
+				PatchBackground(rowStyle, style.p.Name, GetCombinedStyle(style.d.GetName(style.p), style.p.Name));
 			}
 
 			if (rowStyle.Triggers.Count > 0) {
@@ -218,7 +243,7 @@ namespace AnalitF.Net.Client.Helpers
 			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
-				GetCombinedStyle(legend.p.Name)
+				GetCombinedStyle(legend.d.GetName(legend.p), legend.p.Name)
 					.Setters
 					.OfType<Setter>()
 					.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
@@ -231,19 +256,17 @@ namespace AnalitF.Net.Client.Helpers
 				var style = new Style(typeof(DataGridCell), baseStyle);
 				string context = null;
 				foreach (var property in column) {
-					context = property.GetCustomAttributes(typeof(StyleAttribute), true)
-						.Cast<StyleAttribute>()
-						.Select(a => a.Context)
-						.FirstOrDefault();
+					var attr = property.GetCustomAttributes(typeof(StyleAttribute), true).Cast<StyleAttribute>().First();
+					context = attr.Context;
 
-					var color = AddBackgroundTriggers(style, property.Name);
+					var color = AddBackgroundTriggers(style, attr.GetName(property), property.Name);
 					GetValue(style, property.Name, true, color);
 				}
 				local.Add(CellKey(type, column.Key, context), style);
 			}
 		}
 
-		private static void PatchBackground(Style style, string key, DataTrigger trigger)
+		private static void PatchBackground(Style style, string property, DataTrigger trigger)
 		{
 			var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
 			if (background == null) {
@@ -252,13 +275,13 @@ namespace AnalitF.Net.Client.Helpers
 			}
 
 			trigger.Setters.Remove(background);
-			AddTriggers(style, key, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
+			AddTriggers(style, property, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
 			if (trigger.Setters.Count > 0) {
 				style.Triggers.Add(trigger);
 			}
 		}
 
-		private static DataTrigger GetCombinedStyle(string key)
+		private static DataTrigger GetCombinedStyle(string key, string property)
 		{
 			//PatchBackground модифицирует триггер по этому копируем
 			var trigger = Copy(DefaultStyles.GetValueOrDefault(key))
@@ -276,7 +299,7 @@ namespace AnalitF.Net.Client.Helpers
 				copy.Setters.Add(userStyle);
 				trigger = copy;
 			}
-			trigger.Binding = new Binding(key);
+			trigger.Binding = new Binding(property);
 			trigger.Value = true;
 			return trigger;
 		}
@@ -321,10 +344,10 @@ namespace AnalitF.Net.Client.Helpers
 				return context + type.Name + path + "Cell";
 		}
 
-		public static SolidColorBrush AddBackgroundTriggers(Style style, string name)
+		public static SolidColorBrush AddBackgroundTriggers(Style style, string key, string property)
 		{
-			var brush = GetColor(name);
-			AddTriggers(style, name, true, brush.Color, ActiveColor, InactiveColor);
+			var brush = GetColor(key);
+			AddTriggers(style, property, true, brush.Color, ActiveColor, InactiveColor);
 			return brush;
 		}
 

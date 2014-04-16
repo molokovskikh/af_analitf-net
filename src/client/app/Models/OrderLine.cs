@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Controls.Behaviors;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
-using NHibernate.Cfg;
 using Newtonsoft.Json;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {

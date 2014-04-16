@@ -1,4 +1,7 @@
-﻿namespace AnalitF.Net.Client.Models
+﻿using System;
+using AnalitF.Net.Client.Helpers;
+
+namespace AnalitF.Net.Client.Models
 {
 	public class CatalogName : BaseStatelessObject
 	{

@@ -42,9 +42,7 @@ namespace AnalitF.Net.Test.Unit
 			Build(typeof(Mnn));
 			Assert.IsTrue(resource.Contains("MnnRow"));
 			var style = (Style)resource["MnnRow"];
-			var setter = style.Triggers.OfType<MultiDataTrigger>()
-				.SelectMany(t => t.Setters)
-				.OfType<Setter>().First(s => s.Property == Control.BackgroundProperty);
+			var setter = Background(style);
 			Assert.AreEqual(Colors.Silver, ((SolidColorBrush)setter.Value).Color);
 		}
 
@@ -108,12 +106,35 @@ namespace AnalitF.Net.Test.Unit
 			};
 			StyleHelper.BuildStyles(appResource, userStyles);
 			var style = (Style)appResource["OfferRow"];
-			var foreground = style.Triggers.OfType<MultiDataTrigger>().SelectMany(t => t.Setters)
+			var foreground = Foreground(style);
+			Assert.AreEqual(Colors.Red, ((SolidColorBrush)foreground.Value).Color);
+			appResource.Values.OfType<Style>().Each(s => s.Seal());
+		}
+
+		[Test]
+		public void Use_style_name()
+		{
+			Build(typeof(WaybillLine));
+			var style = (Style)resource["WaybillLineRow"];
+			var trigger = style.Triggers.OfType<DataTrigger>().First(t => t.Setters.OfType<Setter>().Any(s => s.Property == Control.ForegroundProperty));
+			Assert.AreEqual(Colors.Green, ((SolidColorBrush)Foreground(style).Value).Color);
+			Assert.AreEqual("ActualVitallyImportant", ((Binding)trigger.Binding).Path.Path);
+		}
+
+		private static Setter Background(Style style)
+		{
+			return style.Triggers.OfType<MultiDataTrigger>()
+				.SelectMany(t => t.Setters)
+				.OfType<Setter>()
+				.First(s => s.Property == Control.BackgroundProperty);
+		}
+
+		private static Setter Foreground(Style style)
+		{
+			return style.Triggers.OfType<MultiDataTrigger>().SelectMany(t => t.Setters)
 				.Concat(style.Triggers.OfType<DataTrigger>().SelectMany(t => t.Setters))
 				.OfType<Setter>()
 				.First(s => s.Property == Control.ForegroundProperty);
-			Assert.AreEqual(Colors.Red, ((SolidColorBrush)foreground.Value).Color);
-			appResource.Values.OfType<Style>().Each(s => s.Seal());
 		}
 
 		private string Legend(DataGrid grid, Type type, string context = null)

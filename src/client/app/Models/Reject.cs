@@ -1,5 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models
 {
