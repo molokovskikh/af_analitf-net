@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -122,6 +123,35 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.IsTrue(sendLog.Committed);
 			Assert.IsTrue(sendLog.FileDelivered);
 			Assert.IsTrue(sendLog.DocumentDelivered);
+		}
+
+		[Test]
+		public void Mark_waybill_with_reject()
+		{
+			var reject = localSession.Query<Client.Models.Reject>().First();
+			var waybill = new Waybill(address, localSession.Query<Supplier>().First());
+			waybill.AddLine(new WaybillLine(waybill) {
+				Product = reject.Product,
+				ProductId = reject.ProductId,
+				SerialNumber = reject.Series,
+				SupplierCost = 42.90m,
+				SupplierCostWithoutNds = 36.36m,
+				Nds = 18,
+				ProducerCost = 28.78m,
+				Quantity = 10
+			});
+			localSession.Save(waybill);
+
+			var cmd = new UpdateCommand();
+			cmd.Session = localSession;
+			cmd.CalculateRejects(settings);
+
+			localSession.Refresh(waybill);
+			Assert.IsTrue(waybill.IsRejectChanged, waybill.Id.ToString());
+			var line = waybill.Lines[0];
+			localSession.Refresh(line);
+			Assert.IsTrue(line.IsRejectNew);
+			Assert.AreEqual(reject.Id, line.RejectId, line.Id.ToString());
 		}
 	}
 }

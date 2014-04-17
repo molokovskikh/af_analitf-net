@@ -315,6 +315,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			//это значит что изменения из сессии не будут сохранены в базу перед запросом
 			//а попадут в базу после commit
 			//те изменения из сессии перетрут состояние флагов
+
+			//сопоставляем с учетом продукта и производителя
 			var begin = DateTime.Today.AddDays(-settings.TrackRejectChangedDays);
 			var exists =  Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
 				"	join Waybills w on w.Id = l.WaybillId " +
@@ -331,33 +333,33 @@ namespace AnalitF.Net.Client.Models.Commands
 				.SetParameter("begin", begin)
 				.SetFlushMode(FlushMode.Always)
 				.ExecuteUpdate() > 0;
-
+			//сопоставляем по продукту
+			//это странно но тем не менее если у строки накладной ИЛИ у отказа производитель неизвестен то сопоставляем
+			//по продукту и серии, так в analitf
 			exists |= Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
 				"	join Waybills w on w.Id = l.WaybillId " +
 				"set l.RejectId = r.Id, l.IsRejectNew = 2, w.IsRejectChanged = 2 " +
 				"where l.RejectId is null " +
 				"	and r.Canceled = 0" +
 				"	and l.ProductId = r.ProductId " +
-				"	and l.ProducerId is null " +
-				"	and r.ProducerId is null " +
+				"	and (l.ProducerId is null or r.ProducerId is null) " +
 				"	and l.SerialNumber = r.Series " +
 				"	and l.ProductId is not null " +
 				"	and l.SerialNumber is not null " +
 				"	and w.WriteTime > :begin ")
 				.SetParameter("begin", begin)
 				.ExecuteUpdate() > 0;
-
+			//сопоставляем по наименованию
 			exists |= Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
 				"	join Waybills w on w.Id = l.WaybillId " +
 				"set l.RejectId = r.Id, l.IsRejectNew = 2, w.IsRejectChanged = 2 " +
 				"where l.RejectId is null " +
 				"	and r.Canceled = 0" +
-				"	and l.ProductId = r.ProductId"  +
-				"	and l.ProducerId is null " +
-				"	and r.ProducerId is null " +
-				"	and l.SerialNumber = r.Series " +
-				"	and l.ProductId is not null " +
+				"	and l.ProductId is null " +
+				"	and l.Product is not null " +
 				"	and l.SerialNumber is not null " +
+				"	and l.Product = r.Product " +
+				"	and l.SerialNumber = r.Series " +
 				"	and w.WriteTime > :begin")
 				.SetParameter("begin", begin)
 				.ExecuteUpdate() > 0;
