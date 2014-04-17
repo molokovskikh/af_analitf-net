@@ -18,6 +18,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
@@ -32,6 +33,7 @@ using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using Address = AnalitF.Net.Client.Models.Address;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 using Main = AnalitF.Net.Client.ViewModels.Main;
 
@@ -412,6 +414,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			done.WaitOne(10.Second());
 			Assert.AreEqual(4, events.Count, events.Implode(i => i.Value));
+		}
+
+		[Test]
+		public void Reload_data_on_reject()
+		{
+			//тест на ошибку, после обновления если мы отображаем PostUpdate
+			//мы должны обновить данные в shell иначе последующие дейсвия приведут к ошибкам
+			stub = null;
+			Fixture<CreateAddress>();
+			Fixture<RejectedWaybill>();
+
+			Collect(shell.Update());
+			Assert.IsInstanceOf<PostUpdate>(dialogs[0]);
+			Assert.AreEqual(1, shell.Addresses.Count);
 		}
 
 		private void Collect(IEnumerable<IResult> results)

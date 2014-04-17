@@ -739,6 +739,9 @@ namespace AnalitF.Net.Client.ViewModels
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
 					}
+					else if (t.Result == UpdateResult.SilentOk) {
+						Reload();
+					}
 					else if (t.Result == UpdateResult.OK) {
 						Reload();
 						windowManager.Notify(command.SuccessMessage);

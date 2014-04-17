@@ -385,7 +385,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					.ExecuteUpdate();
 
 				Results.Add(new DialogResult(new PostUpdate(), sizeToContent: true));
-				result = UpdateResult.Other;
+				result = UpdateResult.SilentOk;
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
 				.ExecuteUpdate();

@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				else {
 					Results.Add(new DialogResult(new Correction(address.Id), fullScreen: true));
 				}
-				updateResult = UpdateResult.Other;
+				updateResult = UpdateResult.NotReload;
 			}
 			if (settings.PrintOrdersAfterSend && sentOrders.Length > 0) {
 				Results.Add(new PrintResult("Отправленные заказы", sentOrders.Select(o => new OrderDocument(o))));
