@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -33,13 +34,18 @@ namespace AnalitF.Net.Client.ViewModels
 			RoundToSingleDigit.Changed()
 				.Merge(Settings.Changed())
 				.Subscribe(v => Calculate());
-			Lines = new NotifyValue<ObservableCollection<WaybillLine>>(() => (Waybill ?? new Waybill())
-				.Lines
-				.Where(l => l.Nds == CurrentTax.Value.Value || CurrentTax.Value.Value == -1)
-				.ToObservableCollection(), CurrentTax);
-			Lines.Changed().Select(_ => Lines.Value == null
+			Lines = new NotifyValue<ListCollectionView>();
+			CurrentTax.Subscribe(v => {
+				if (Lines.Value == null)
+					return;
+				if (v == null || v.Value == -1)
+					Lines.Value.Filter = null;
+				else
+					Lines.Value.Filter = o => ((WaybillLine)o).Nds == v.Value;
+			});
+			Lines.Select(v => v == null
 				? Observable.Empty<EventPattern<NotifyCollectionChangedEventArgs>>()
-				: Lines.Value.Changed())
+				: v.ToCollectionChanged())
 			.Switch()
 			.Subscribe(e => {
 				if (e.EventArgs.Action == NotifyCollectionChangedAction.Remove) {
@@ -78,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public Waybill Waybill { get; set; }
-		public NotifyValue<ObservableCollection<WaybillLine>> Lines { get; set; }
+		public NotifyValue<ListCollectionView> Lines { get; set; }
 		public NotifyValue<WaybillLine> CurrentLine { get; set; }
 		public List<ValueDescription<int?>> Taxes { get; set; }
 		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
@@ -99,18 +105,38 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			if (Session == null)
+				return;
+
 			Waybill = Session.Load<Waybill>(id);
 
 			Calculate();
 
-			Lines.Value = Waybill.Lines.ToObservableCollection();
+			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());
 			Taxes = new List<ValueDescription<int?>> {
 				new ValueDescription<int?>("Все", -1),
 			};
-			Taxes.AddRange(Lines.Value.Select(l => l.Nds).Distinct()
+			Taxes.AddRange(Lines.Value.Cast<WaybillLine>().Select(l => l.Nds).Distinct()
 				.OrderBy(t => t)
 				.Select(t => new ValueDescription<int?>(((object)t ?? "Нет значения").ToString(), t)));
 			CurrentTax.Value = Taxes.FirstOrDefault();
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			if (Shell != null) {
+				RoundToSingleDigit.Value = Shell.RoundToSingleDigit;
+			}
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+			if (Shell != null) {
+				Shell.RoundToSingleDigit = RoundToSingleDigit.Value;
+			}
 		}
 
 		public IResult PrintRackingMap()
@@ -147,7 +173,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private IList<WaybillLine> PrintableLines()
 		{
-			return Lines.Value.Where(l => l.Print).ToList();
+			return Lines.Value.Cast<WaybillLine>().Where(l => l.Print).ToList();
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)

@@ -63,6 +63,13 @@ namespace AnalitF.Net.Client.Helpers
 			return Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
 		}
 
+		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> ToCollectionChanged(this INotifyCollectionChanged self)
+		{
+			return Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+				h => self.CollectionChanged += h,
+				h => self.CollectionChanged -= h);
+		}
+
 		public static IObservable<EventPattern<ListChangedEventArgs>> Changed<T>(this IList<T> value)
 		{
 			if (value == null)

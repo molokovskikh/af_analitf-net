@@ -255,6 +255,7 @@
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />
+    <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\app\app.csproj">

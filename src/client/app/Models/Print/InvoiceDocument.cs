@@ -100,9 +100,9 @@ namespace AnalitF.Net.Client.Models.Print
 
 			dataTable.RowGroups[0].Rows.Add(header);
 
-			var groups = waybill.Lines.GroupBy(l => l.Nds);
+			var groups = waybill.Lines.GroupBy(l => l.Nds).OrderBy(g => g.Key);
 			foreach (var taxGroup in groups) {
-				var rows = taxGroup.Select(l => new object[] {
+				var rows = taxGroup.OrderBy(l => l.Product).Select(l => new object[] {
 					l.Product,
 					l.Unit,
 					l.Quantity,

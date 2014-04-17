@@ -206,6 +206,25 @@ namespace AnalitF.Net.Client.Models
 			get { return ProducerCost * (1 + (decimal?) Nds / 100); }
 		}
 
+		private decimal TaxFactor
+		{
+			get
+			{
+				var nds = Nds.GetValueOrDefault(10);
+				if (Waybill.WaybillSettings.Taxation == Taxation.Envd
+					&& ((ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNdsForVitallyImportant)
+						|| !ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNds)) {
+					nds = 0;
+				}
+				return (1 + nds / 100m);
+			}
+		}
+
+		public virtual decimal? TaxPerUnit
+		{
+			get { return SupplierCost - SupplierCostWithoutNds; }
+		}
+
 		private void WaybillChanged(object sender, PropertyChangedEventArgs args)
 		{
 			if (args.PropertyName == "VitallyImportant") {
@@ -216,7 +235,7 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateMarkups()
 		{
-			UpdateMarkups();
+			UpdateMarkups(RetailCost);
 			OnPropertyChanged("RealRetailMarkup");
 			OnPropertyChanged("RetailMarkup");
 			OnPropertyChanged("IsMarkupInvalid");
@@ -225,7 +244,8 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRetailMarkup()
 		{
-			_retailCost = CalculateRetailCost(RetailMarkup);
+			decimal? stub;
+			_retailCost = CalculateRetailCost(RetailMarkup, out stub);
 			RecalculateMarkups();
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
@@ -273,8 +293,14 @@ namespace AnalitF.Net.Client.Models
 				_retailMarkup = markup.Markup;
 			}
 
-			_retailCost = CalculateRetailCost(RetailMarkup);
-			UpdateMarkups();
+			decimal? rawCost;
+			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
+			//это лишено смысла но тем не менее analitf считает наценку от не округленной цены
+			//что бы получить все выглядело идентично делаем тоже самое
+			//тк RetailCost может быть округлена до большего то и наценка может вырости и привысить значение наценки которое
+			//применялась в расчетах
+			//наверное правильно всегда округлять до меньшего но analitf делает не так, делаем тоже что analitf
+			UpdateMarkups(rawCost);
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
 			OnPropertyChanged("RetailMarkup");
@@ -285,31 +311,18 @@ namespace AnalitF.Net.Client.Models
 			OnPropertyChanged("IsSupplierPriceMarkupInvalid");
 		}
 
-		private void UpdateMarkups()
+		private void UpdateMarkups(decimal? cost)
 		{
 			if (!IsCalculable())
 				return;
 
+			var retailCost = cost;
 			if (ActualVitallyImportant)
-				_retailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
+				_retailMarkup = NullableHelper.Round((retailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
 			else
-				_retailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / SupplierCost * 100, 2);
+				_retailMarkup = NullableHelper.Round((retailCost - SupplierCost) / (SupplierCostWithoutNds * TaxFactor) * 100, 2);
 
-			_realRetailMarkup = NullableHelper.Round((RetailCost - SupplierCost) / SupplierCost * 100, 2);
-		}
-
-		private decimal TaxFactor
-		{
-			get
-			{
-				var nds = Nds.GetValueOrDefault(10);
-				if (Waybill.WaybillSettings.Taxation == Taxation.Envd
-					&& ((ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNdsForVitallyImportant)
-						|| !ActualVitallyImportant && !Waybill.WaybillSettings.IncludeNds)) {
-					nds = 0;
-				}
-				return (1 + nds / 100m);
-			}
+			_realRetailMarkup = NullableHelper.Round((retailCost - SupplierCost) / SupplierCost * 100, 2);
 		}
 
 		private bool IsCalculable()
@@ -326,13 +339,18 @@ namespace AnalitF.Net.Client.Models
 			return RoundCost(realMarkup / 100 * SupplierCost + SupplierCost);
 		}
 
-		private decimal? CalculateRetailCost(decimal? markup)
+		private decimal? CalculateRetailCost(decimal? markup, out decimal? rawCost)
 		{
 			var baseCost = ProducerCost;
 			if (!ActualVitallyImportant)
 				baseCost = SupplierCostWithoutNds;
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
+			rawCost = value;
+			//безумее продолжается если округляем до десятых то тогда считаем от округленного значения
+			if (Waybill.RoundTo1) {
+				rawCost = ((int?)(value * 10)) / 10m;
+			}
 			return RoundCost(value);
 		}
 

@@ -166,10 +166,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (ids.Length != Suppliers.Count)
 				query = query.Where(w => ids.Contains(w.Supplier.Id));
 
-			Waybills.Value = new ObservableCollection<Waybill>(query
+			Waybills.Value = query
 				.OrderBy(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
-				.ToList());
+				.ToObservableCollection();
 		}
 
 		public IEnumerable<IResult> Create()

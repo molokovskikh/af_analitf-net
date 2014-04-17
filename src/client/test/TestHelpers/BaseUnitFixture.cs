@@ -1,12 +1,14 @@
 ﻿using System.IO;
 using System.Reactive.Disposables;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -47,6 +49,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public string RandomFile()
 		{
 			return cleaner.RandomFile();
+		}
+
+		protected void Activate(BaseScreen screen)
+		{
+			screen.User = new User();
+			screen.Address = new Address("тест");
+			screen.Parent = shell;
+			if (screen is BaseOfferViewModel)
+				((BaseOfferViewModel)screen).Addresses = new[] { screen.Address };
+			ScreenExtensions.TryActivate(screen);
 		}
 	}
 }

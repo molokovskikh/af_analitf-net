@@ -173,10 +173,10 @@ namespace AnalitF.Net.Client.ViewModels
 					.ToArray();
 				query = query.Where(l => addresses.Contains(l.Order.Address.Id));
 
-				Lines.Value = new ObservableCollection<OrderLine>(query
+				Lines.Value = query
 					.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProducerSynonym)
-					.ToList());
+					.ToObservableCollection();
 
 				Calculate();
 			}

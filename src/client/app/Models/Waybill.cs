@@ -30,6 +30,15 @@ namespace AnalitF.Net.Client.Models
 			RoundTo1 = true;
 		}
 
+		public Waybill(Address address, Supplier supplier)
+			: this()
+		{
+			Address = address;
+			Supplier = supplier;
+			WriteTime = DateTime.Now;
+			DocumentDate = DateTime.Now;
+		}
+
 		public override uint Id { get; set; }
 		public virtual string ProviderDocumentId { get; set; }
 		public virtual DateTime DocumentDate { get; set; }

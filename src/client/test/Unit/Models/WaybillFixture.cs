@@ -281,6 +281,44 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.Contains("RetailCost", props);
 		}
 
+		[Test]
+		public void Do_not_recalc_markup()
+		{
+			waybill.RoundTo1 = false;
+			var line = new WaybillLine(waybill) {
+				ProducerCost = 30.57m,
+				SupplierCostWithoutNds = 26.80m,
+				Nds = 10,
+				SupplierCost = 29.48m,
+				VitallyImportant = true,
+			};
+			waybill.AddLine(line);
+			waybill.Calculate(settings);
+			Assert.AreEqual(20, line.RetailMarkup);
+			Assert.AreEqual(22.81, line.RealRetailMarkup);
+			Assert.AreEqual(36.21, line.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_markup_not_include_nds()
+		{
+			var markup = settings.Markups.First(m => m.Type == MarkupType.Over);
+			markup.Markup = 60;
+			markup.MaxMarkup = 60;
+			waybill.RoundTo1 = false;
+			waybillSettings.IncludeNds = false;
+			var line = new WaybillLine(waybill) {
+				SupplierCostWithoutNds = 185.50m,
+				Nds = 18,
+				SupplierCost = 218.89m,
+			};
+			Calculate(line);
+			Assert.AreEqual(60, line.MaxRetailMarkup);
+			Assert.AreEqual(60, line.RetailMarkup);
+			Assert.AreEqual(50.85, line.RealRetailMarkup);
+			Assert.AreEqual(330.19, line.RetailCost);
+		}
+
 		private WaybillLine Line()
 		{
 			settings.Markups[0].Markup = 30;

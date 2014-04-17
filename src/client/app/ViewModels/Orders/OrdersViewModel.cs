@@ -122,14 +122,14 @@ namespace AnalitF.Net.Client.ViewModels
 				var filterAddresses = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 				var begin = Begin.Value;
 				var end = End.Value.AddDays(1);
-				SentOrders = new ObservableCollection<SentOrder>(StatelessSession.Query<SentOrder>()
+				SentOrders = StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= begin && o.SentOn < end
 						&& filterAddresses.Contains(o.Address.Id))
 					.OrderBy(o => o.SentOn)
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)
 					.Take(1000)
-					.ToList());
+					.ToObservableCollection();
 			}
 
 			//обновить данные нужно в нескольких ситуациях

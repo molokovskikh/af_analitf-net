@@ -16,12 +16,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var address = session.Query<Address>().First();
 			var settings = session.Query<Settings>().First();
 
-			Waybill = new Waybill {
-				Address = address,
-				WriteTime = DateTime.Now,
-				DocumentDate = DateTime.Now,
-				Supplier = session.Query<Supplier>().First()
-			};
+			Waybill = new Waybill(address, session.Query<Supplier>().First());
 			Waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(Waybill)).ToList();
 			var line = Waybill.Lines[0];
 			line.Quantity = 10;

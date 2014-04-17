@@ -110,7 +110,8 @@
 			CanUserDeleteRows="{Binding Waybill.IsCreatedByUser}">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="180*" Header="Наименование"
-					Binding="{Binding Product}" />
+					Binding="{Binding Product}"
+					SortDirection="Ascending" />
 				<c:DataGridTextColumnEx Width="180*" Header="Производитель"
 					Binding="{Binding Producer}" />
 				<c:DataGridTextColumnEx Width="100*" Header="Страна"

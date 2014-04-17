@@ -72,6 +72,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//параметры авто-комментария должны быть одинаковыми на время работы приложения
 		public bool ResetAutoComment;
 		public string AutoCommentText;
+		public bool RoundToSingleDigit = true;
 
 		public ShellViewModel()
 			: this(false)

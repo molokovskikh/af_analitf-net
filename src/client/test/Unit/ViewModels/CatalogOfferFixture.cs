@@ -27,16 +27,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Activate(model);
 		}
 
-		private void Activate(BaseScreen screen)
-		{
-			screen.User = new User();
-			screen.Address = new Address("тест");
-			screen.Parent = shell;
-			if (screen is BaseOfferViewModel)
-				((BaseOfferViewModel)screen).Addresses = new[] { model.Address };
-			ScreenExtensions.TryActivate(screen);
-		}
-
 		[Test]
 		public void Recalculate_on_offer_changed()
 		{

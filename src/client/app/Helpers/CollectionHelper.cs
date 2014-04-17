@@ -33,14 +33,14 @@ namespace AnalitF.Net.Client.Helpers
 		public static IList<T> LinkTo<T>(this IEnumerable<T> src, IList<T> dst,
 			Action<object> add = null, Action<object> remove = null)
 		{
-			var result = new ObservableCollection<T>(src.ToList());
+			var result = src.ToObservableCollection();
 			Bind(result, (IList)dst, add, remove);
 			return result;
 		}
 
 		public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
 		{
-			return new ObservableCollection<T>(collection.ToList());
+			return new ObservableCollection<T>(collection);
 		}
 	}
 }

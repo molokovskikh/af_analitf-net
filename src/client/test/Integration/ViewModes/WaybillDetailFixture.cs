@@ -42,10 +42,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Recalculate_waybill()
 		{
-			Assert.AreEqual(24.8, model.Lines.Value[0].RetailCost);
+			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
+			Assert.AreEqual(24.8, waybillLine.RetailCost);
 			Assert.IsTrue(model.RoundToSingleDigit);
 			model.RoundToSingleDigit.Value = false;
-			Assert.AreEqual(24.82, model.Lines.Value[0].RetailCost);
+			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
+			Assert.AreEqual(24.82, waybillLine.RetailCost);
 		}
 
 		[Test]
@@ -59,7 +61,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Reload_settings_on_change()
 		{
 			restore = true;
-			Assert.AreEqual(24.8, model.Lines.Value[0].RetailCost);
+			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
+			Assert.AreEqual(24.8, waybillLine.RetailCost);
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
@@ -67,7 +70,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(settings);
 			testScheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
-			Assert.AreEqual(30.8, model.Lines.Value[0].RetailCost);
+			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
+			Assert.AreEqual(30.8, waybillLine.RetailCost);
 		}
 
 		[Test]
@@ -99,7 +103,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
-			model.Lines.Value.Add(waybillLine);
+			model.Lines.Value.AddNewItem(waybillLine);
 			Assert.AreEqual(11, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}

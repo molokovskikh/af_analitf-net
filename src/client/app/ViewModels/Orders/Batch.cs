@@ -83,7 +83,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				else if (CurrentFilter.Value == Filter[9]) {
 					query = query.Where(l => l.IsNotOrdered && l.ProductId == null);
 				}
-				return new ObservableCollection<BatchLine>(query.ToList());
+				return query.ToObservableCollection();
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
 			CurrentReportLine = new NotifyValue<BatchLine>();
 			CanDelete = new NotifyValue<bool>(() => CurrentReportLine.Value != null, CurrentReportLine);

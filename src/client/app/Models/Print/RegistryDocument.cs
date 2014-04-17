@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.Models.Print
 				l.RegistryCost,
 				l.SupplierPriceMarkup,
 				l.SupplierCostWithoutNds,
-				l.NdsAmount,
+				l.TaxPerUnit,
 				l.SupplierCost,
 				l.RetailMarkup,
 				l.RetailCost,
