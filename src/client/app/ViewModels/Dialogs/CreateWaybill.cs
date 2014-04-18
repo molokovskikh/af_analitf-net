@@ -11,12 +11,12 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public CreateWaybill(Waybill waybill)
 		{
 			Waybill = waybill;
-			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name).Select(s => s.Name).ToArray();
+			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name).ToArray();
 		}
 
 		public Waybill Waybill { get; set; }
 
-		public string[] Suppliers { get; set; }
+		public Supplier[] Suppliers { get; set; }
 
 		public void OK()
 		{
