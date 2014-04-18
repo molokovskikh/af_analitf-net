@@ -55,7 +55,7 @@
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="1">
 			<ComboBox x:Name="Producers"
-				Style="{StaticResource Filter}" />
+				Style="{StaticResource Filter}" DisplayMemberPath="Name" />
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
 		</StackPanel>
 

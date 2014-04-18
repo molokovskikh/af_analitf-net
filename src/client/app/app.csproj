@@ -256,6 +256,7 @@
     <Compile Include="Models\Print\RejectsDocument.cs" />
     <Compile Include="Models\Print\WaybillDocument.cs" />
     <Compile Include="Models\Print\WrapDocumentPaginator.cs" />
+    <Compile Include="Models\Producer.cs" />
     <Compile Include="Models\ProductDescription.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\OrderLine.cs" />

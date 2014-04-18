@@ -142,10 +142,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.OrderBy(r => r))
 				.ToList();
 
-			Producers.Value = new[] { Consts.AllProducerLabel }
-				.Concat(CatalogOffers.Select(o => o.Producer).Distinct()
-					.OrderBy(p => p))
-				.ToList();
+			FillProducerFilter(CatalogOffers);
 		}
 
 		protected override void Query()
@@ -187,8 +184,9 @@ namespace AnalitF.Net.Client.ViewModels
 				offers = offers.Where(o => o.Price.RegionName == region);
 			}
 			var producer = CurrentProducer.Value;
-			if (producer != Consts.AllProducerLabel) {
-				offers = offers.Where(o => o.Producer == producer);
+			if (producer != null && producer.Id > 0) {
+				var id = producer.Id;
+				offers = offers.Where(o => o.ProducerId == id);
 			}
 			var filter = CurrentFilter.Value;
 			if (filter == Filters[1]) {

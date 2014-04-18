@@ -438,6 +438,15 @@ where Hidden = 0";
 			Export(result, sql, "catalogs");
 
 			sql = @"
+select p.Id,
+	p.Name
+from Usersettings.Core c
+	join Farm.Core0 c0 on c0.Id = c.Id
+	join Catalogs.Producers p on c0.CodeFirmCr = p.Id
+group by p.Id";
+			Export(result, sql, "producers");
+
+			sql = @"
 select Id, PublicationDate, Header
 from Usersettings.News
 where PublicationDate < curdate() + interval 1 day

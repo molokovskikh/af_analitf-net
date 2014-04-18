@@ -68,7 +68,7 @@
 
 			<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
 				<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
-				<ComboBox x:Name="Producers" Style="{StaticResource Filter}" />
+				<ComboBox x:Name="Producers" Style="{StaticResource Filter}" DisplayMemberPath="Name" />
 			</StackPanel>
 		</DockPanel>
 

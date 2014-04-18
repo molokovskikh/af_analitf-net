@@ -25,14 +25,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			OnlyBase = new NotifyValue<bool>();
 
-			var producers = StatelessSession.Query<Offer>()
-				.Select(o => o.Producer)
-				.Distinct()
-				.ToList()
-				.OrderBy(p => p)
+			Producers.Value = new[] { EmptyProducer }
+				.Concat(StatelessSession.Query<Producer>()
+					.OrderBy(p => p.Name)
+					.ToList())
 				.ToList();
-			producers = new[] { Consts.AllProducerLabel }.Concat(producers).ToList();
-			Producers.Value = producers;
 
 			var prices = Session.Query<Price>().OrderBy(p => p.Name);
 			Prices = prices.Select(p => new Selectable<Price>(p)).ToList();
@@ -70,8 +67,10 @@ namespace AnalitF.Net.Client.ViewModels
 			query = Util.Filter(query, o => o.Price.Id, Prices);
 
 			var producer = CurrentProducer.Value;
-			if (producer != Consts.AllProducerLabel)
-				query = query.Where(o => o.Producer == producer);
+			if (producer != null && producer.Id > 0) {
+				var id = producer.Id;
+				query = query.Where(o => o.ProducerId == id);
+			}
 
 			if (OnlyBase)
 				query = query.Where(o => o.Price.BasePrice);

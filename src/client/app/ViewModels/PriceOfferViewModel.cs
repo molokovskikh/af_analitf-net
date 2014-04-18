@@ -100,8 +100,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (filter == filters[1]) {
 				items = items.Where(o => o.OrderCount > 0);
 			}
-			if (CurrentProducer.Value != Consts.AllProducerLabel) {
-				items = items.Where(o => o.Producer == CurrentProducer.Value);
+			if (CurrentProducer.Value != null && CurrentProducer.Value.Id > 0) {
+				var id = CurrentProducer.Value.Id;
+				items = items.Where(o => o.ProducerId == id);
 			}
 			var term = SearchBehavior.ActiveSearchTerm.Value;
 			if (!String.IsNullOrEmpty(term)) {
@@ -121,11 +122,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
 					?? StatelessSession.Get<Price>(priceId);
 			}
-			if (Producers.Value.Count == 1) {
-				Producers.Value = new[] { Consts.AllProducerLabel }
-					.Concat(PriceOffers.Select(o => o.Producer).Distinct().OrderBy(p => p))
-					.ToList();
-			}
+			if (Producers.Value.Count == 1)
+				FillProducerFilter(PriceOffers);
 			Filter();
 		}
 

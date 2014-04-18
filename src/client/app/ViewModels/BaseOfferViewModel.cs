@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<SentOrderLine> historyOrders;
 		private OfferComposedId initOfferId;
 
+		protected Producer EmptyProducer = new Producer(Consts.AllProducerLabel);
 		//тк уведомление о сохранении изменений приходит после
 		//изменения текущего предложения
 		protected NotifyValue<Offer> LastEditOffer;
@@ -38,6 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		public Address[] Addresses = new Address[0];
+
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -49,8 +51,8 @@ namespace AnalitF.Net.Client.ViewModels
 			LastEditOffer = new NotifyValue<Offer>();
 			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
 			CurrentOffer = new NotifyValue<Offer>();
-			CurrentProducer = new NotifyValue<string>(Consts.AllProducerLabel);
-			Producers = new NotifyValue<List<string>>(new List<string> { Consts.AllProducerLabel });
+			CurrentProducer = new NotifyValue<Producer>(EmptyProducer);
+			Producers = new NotifyValue<List<Producer>>(new List<Producer> { EmptyProducer });
 
 			CurrentOffer.Changed().Subscribe(_ => {
 				if (ResetAutoComment) {
@@ -96,9 +98,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public NotifyValue<List<string>> Producers { get; set; }
+		public NotifyValue<List<Producer>> Producers { get; set; }
 
-		public NotifyValue<string> CurrentProducer { get; set; }
+		public NotifyValue<Producer> CurrentProducer { get; set; }
 
 		[Export]
 		public NotifyValue<List<Offer>> Offers { get; set; }
@@ -457,6 +459,16 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return CurrentOffer.Value.ProductId;
 			else
 				return CurrentOffer.Value.CatalogId;
+		}
+
+		protected void FillProducerFilter(IEnumerable<Offer> offers)
+		{
+			Producers.Value = new[] { EmptyProducer }
+				.Concat(offers.Where(o => o.ProducerId != null)
+					.GroupBy(p => p.ProducerId)
+					.Select(g => new Producer(g.Key.Value, g.First().Producer))
+					.OrderBy(p => p.Name))
+				.ToList();
 		}
 	}
 }

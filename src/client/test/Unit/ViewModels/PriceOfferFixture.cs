@@ -75,12 +75,14 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 				new Offer(price, 100) {
 					ProductSynonym = "Папаверинг",
 					ProducerSynonym = "FARAN",
-					Producer = "FARAN"
+					Producer = "FARAN",
+					ProducerId = 1
 				},
 				new Offer(price, 200) {
 					ProductSynonym = "Аллохол",
 					ProducerSynonym = "ARKRAY",
-					Producer = "ARKRAY"
+					Producer = "ARKRAY",
+					ProducerId = 2
 				},
 			};
 			ScreenExtensions.TryActivate(model);
