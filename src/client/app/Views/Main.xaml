@@ -5,15 +5,15 @@
 	<Grid>
 		<!--минимальная ширина\высота задается что бы блок рекламы не перекрывал логотип при малом размере формы-->
 		<Grid.RowDefinitions>
-			<RowDefinition Height="1*" MinHeight="{Binding DesiredSize.Height, ElementName=LogoPanel}" />
-			<RowDefinition Height="3*" />
+			<RowDefinition Height="240" Name="LogoRow" />
+			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="240" MinWidth="{Binding DesiredSize.Width, ElementName=LogoPanel}" />
+			<ColumnDefinition Width="240" Name="LogoColumn" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.Column="0" Margin="10" Name="LogoPanel">
+		<StackPanel Margin="10" Name="LogoPanel">
 			<Grid Margin="0, 0, 0, 5">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
@@ -28,7 +28,8 @@
 					<TextBlock x:Name="SmallLabel" FontSize="16" Foreground="#336488">компания</TextBlock>
 				</StackPanel>
 			</Grid>
-			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба поддержки пользователей:</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14">поддержки пользователей:</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">
 				тел.:
 				<Span FontWeight="Bold">260-00-00</Span>
