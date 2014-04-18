@@ -154,12 +154,75 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PriceLabel
 		{
+			get { return PriceName; }
+		}
+
+		public virtual string PriceName
+		{
 			get
 			{
-				if (Price == null)
-					return null;
-				return Price.ToString();
+				try
+				{
+					if (Price == null)
+						return "";
+					return Price.Name;
+				}
+				catch(ObjectNotFoundException) {
+					return "";
+				}
 			}
+		}
+
+		public virtual string AddressName
+		{
+			get
+			{
+				try
+				{
+					if (Address == null)
+						return "";
+					return Address.Name;
+				}
+				catch(ObjectNotFoundException) {
+					return "";
+				}
+			}
+		}
+
+		public virtual Price SafePrice
+		{
+			get
+			{
+				if (IsPriceExists())
+					return Price;
+				return new Price {
+					Id = Price.Id
+				};
+			}
+		}
+
+		public virtual bool IsPriceExists()
+		{
+			bool priceNotFound;
+			try {
+				priceNotFound = Price == null || Price.Name == "";
+			}
+			catch (ObjectNotFoundException) {
+				priceNotFound = true;
+			}
+			return !priceNotFound;
+		}
+
+		public virtual bool IsAddressExists()
+		{
+			bool addressNotFound;
+			try {
+				addressNotFound = Address == null || Address.Name == "";
+			}
+			catch (ObjectNotFoundException) {
+				addressNotFound = true;
+			}
+			return !addressNotFound;
 		}
 
 		public virtual void ResetStatus()
@@ -196,6 +259,7 @@ namespace AnalitF.Net.Client.Models
 			return line;
 		}
 
+
 		public virtual OrderLine TryOrder(Offer offer, uint count, out uint ordered)
 		{
 			ordered = 0;
@@ -223,14 +287,20 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ClientOrder ToClientOrder(ISession session)
 		{
+			if (Frozen)
+				return null;
+			if (!Send)
+				return null;
 			try {
 				if (Address == null || Price == null) {
 					Send = false;
+					Frozen = true;
 					return null;
 				}
 			}
 			catch(ObjectNotFoundException) {
 				Send = false;
+				Frozen = true;
 				return null;
 			}
 

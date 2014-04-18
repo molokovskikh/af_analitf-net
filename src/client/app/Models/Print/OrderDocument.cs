@@ -21,10 +21,10 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			var header = String.Format("Заявка № {0} от на {1} от {2}",
 				order.Id,
-				order.Price.Name,
-				order.Address.Name);
-			TwoColumnHeader(header, order.Price.Phone);
-			Block(String.Format("Дата прайс-листа от {0}", order.Price.PriceDate));
+				order.PriceName,
+				order.AddressName);
+			TwoColumnHeader(header, order.SafePrice.Phone);
+			Block(String.Format("Дата прайс-листа от {0}", order.SafePrice.PriceDate));
 			Block(order.Comment);
 
 			var headers = new[] {

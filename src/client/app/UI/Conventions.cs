@@ -110,7 +110,7 @@ namespace AnalitF.Net.Client.UI
 			var propertyType = property.PropertyType;
 			if (result
 				&& propertyType.IsGenericType
-				&& typeof(IList).IsAssignableFrom(propertyType)) {
+				&& typeof(IEnumerable).IsAssignableFrom(propertyType)) {
 				var dataGrid = ((DataGrid)element);
 				var columns = dataGrid.Columns;
 				foreach (var column in columns) {

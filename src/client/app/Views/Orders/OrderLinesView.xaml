@@ -55,7 +55,7 @@
 			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
 			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.Address.Name}"
+				<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.AddressName}"
 					Visibility="Collapsed" />
 				<c:SearchableDataGridColumn Width="225*" Header="Наименование" Binding="{Binding ProductSynonym}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
@@ -72,9 +72,9 @@
 					Binding="{Binding Period}"
 					TextAlignment="Center" />
 
-				<c:DataGridTextColumnEx Width="82*" Header="Прайс-лист" Binding="{Binding Order.Price.Name}" />
+				<c:DataGridTextColumnEx Width="82*" Header="Прайс-лист" Binding="{Binding Order.PriceName}" />
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Регион"
-					Binding="{Binding Order.Price.RegionName}" />
+					Binding="{Binding Order.SafePrice.RegionName}" />
 
 				<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
 					TextAlignment="Right" />
@@ -138,9 +138,9 @@
 					TextAlignment="Center" />
 
 				<DataGridTextColumn Width="82*" Header="Прайс-лист"
-					Binding="{Binding Order.Price.Name}" />
+					Binding="{Binding Order.PriceName}" />
 				<DataGridTextColumn Width="62*" Visibility="Collapsed" Header="Регион"
-					Binding="{Binding Order.Price.RegionName}" />
+					Binding="{Binding Order.SafePrice.RegionName}" />
 
 				<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена"
 					Binding="{Binding RegistryCost}"

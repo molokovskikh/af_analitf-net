@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -80,6 +81,16 @@ namespace AnalitF.Net.Client.Models
 		string PriceLabel { get; }
 
 		IEnumerable<IOrderLine> Lines { get; }
+
+		string PriceName { get; }
+
+		string AddressName { get; }
+
+		Price SafePrice { get; }
+
+		bool IsPriceExists();
+
+		bool IsAddressExists();
 	}
 
 	public class SentOrder : BaseNotify, IOrder
@@ -140,6 +151,33 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<SentOrderLine> Lines { get; set; }
 
+		public virtual string PriceName
+		{
+			get { return SafePrice.Name; }
+		}
+
+		public virtual string AddressName
+		{
+			get
+			{
+				if (IsAddressExists())
+					return Address.Name;
+				return "";
+			}
+		}
+
+		public virtual Price SafePrice
+		{
+			get
+			{
+				if (IsPriceExists())
+					return Price;
+				return new Price {
+					Id = Price.Id
+				};
+			}
+		}
+
 		IEnumerable<IOrderLine> IOrder.Lines
 		{
 			get { return Lines; }
@@ -149,8 +187,32 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				return String.Format("{0} от {1}", Price, PriceDate);
+				return String.Format("{0} от {1}", PriceName, PriceDate);
 			}
+		}
+
+		public virtual bool IsPriceExists()
+		{
+			bool priceNotFound;
+			try {
+				priceNotFound = Price == null || Price.Name == "";
+			}
+			catch (ObjectNotFoundException) {
+				priceNotFound = true;
+			}
+			return !priceNotFound;
+		}
+
+		public virtual bool IsAddressExists()
+		{
+			bool addressNotFound;
+			try {
+				addressNotFound = Address == null || Address.Name == "";
+			}
+			catch (ObjectNotFoundException) {
+				addressNotFound = true;
+			}
+			return !addressNotFound;
 		}
 	}
 }

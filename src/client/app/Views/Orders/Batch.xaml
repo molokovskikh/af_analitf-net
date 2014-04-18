@@ -64,7 +64,7 @@
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
 			ui:NavBinder.Next="{x:Reference Offers}">
 			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding Address.Name}" Width="*" 
+				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding Address.Name}" Width="*"
 					Visibility="Collapsed" />
 				<c:DataGridTextColumnEx Header="Заказано" Binding="{Binding HasOrderLineLabel}" />
 				<c:DataGridTextColumnEx Header="Есть производитель" Binding="{Binding HasProducerLabel}" />
@@ -72,7 +72,7 @@
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding MixedProducer}" Width="*" />
 				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding Producer}" Visibility="Collapsed" />
-				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Line.Order.Price.Name}" Width="*" />
+				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Line.Order.PriceName}" Width="*" />
 				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding Line.Cost}" />
 				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding Line.ResultCost}" />
 				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding MixedCount}" />
@@ -167,7 +167,7 @@
 		<Label Grid.Row="4" Grid.Column="0">Предыдущие заказы</Label>
 		<c:DataGrid2 x:Name="HistoryOrders" Grid.Row="5" Grid.Column="0">
 			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Order.Price.Name}" Width="*" />
+				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Order.PriceName}" Width="*" />
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<c:DataGridTextColumnEx Header="Срок годн." Binding="{Binding Period}"
 					TextAlignment="Center" />

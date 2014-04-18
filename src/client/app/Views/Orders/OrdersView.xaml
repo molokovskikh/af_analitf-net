@@ -45,18 +45,16 @@
 					<c:DataGrid2 x:Name="Orders" Grid.Row="0" IsReadOnly="False" CanUserDeleteRows="True"
 						ShowAddressColumn="{Binding AddressSelector.All.Value}">
 						<DataGrid.Columns>
-							<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
+							<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
 								Visibility="Collapsed"
 								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
-								TextAlignment="Center"
 								IsReadOnly="True" />
-							<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}"
+							<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding PriceName}"
 								IsReadOnly="True" />
-							<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}"
+							<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding SafePrice.RegionName}"
 								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
-								TextAlignment="Right"
 								IsReadOnly="True" />
 							<DataGridCheckBoxColumn Width="56*" Header="Отправить"
 								Binding="{Binding Send, UpdateSourceTrigger=PropertyChanged}">
@@ -78,16 +76,12 @@
 								</DataGridCheckBoxColumn.EditingElementStyle>
 							</DataGridCheckBoxColumn>
 							<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
-								TextAlignment="Right"
 								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
-								TextAlignment="Right"
 								IsReadOnly="True" />
-							<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding Price.MonthlyOrderSum}"
-								TextAlignment="Right"
+							<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding SafePrice.MonthlyOrderSum}"
 								IsReadOnly="True" />
-							<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding Price.WeeklyOrderSum}"
-								TextAlignment="Right"
+							<c:DataGridTextColumnEx Width="40*" Header="Недельный заказ" Binding="{Binding SafePrice.WeeklyOrderSum}"
 								IsReadOnly="True" />
 						</DataGrid.Columns>
 					</c:DataGrid2>
@@ -99,20 +93,15 @@
 				<c:DataGrid2 x:Name="SentOrders" CanUserDeleteRows="True"
 					ShowAddressColumn="{Binding AddressSelector.All.Value}">
 					<DataGrid.Columns>
-						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding Address.Name}"
+						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
 							Visibility="Collapsed" />
-						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}"
-							TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}"
-							TextAlignment="Center" />
-						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}"
-							TextAlignment="Center" />
-						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding Price.Name}" />
-						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding Price.RegionName}" />
-						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}"
-							TextAlignment="Right" />
-						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
-							TextAlignment="Right" />
+						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}" />
+						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}" />
+						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding PriceName}" />
+						<c:DataGridTextColumnEx Width="42*" Header="Регион" Binding="{Binding SafePrice.RegionName}" />
+						<c:DataGridTextColumnEx Width="48*" Header="Позиций" Binding="{Binding LinesCount}" />
+						<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}" />
 					</DataGrid.Columns>
 				</c:DataGrid2>
 			</TabItem>

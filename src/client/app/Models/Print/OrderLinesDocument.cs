@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Models.Print
 				rows = model.Lines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
-					l.Order.Price.Name,
+					l.Order.PriceName,
 					l.ResultCost,
 					l.Count,
 					l.MixedSum
@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Models.Print
 				rows = model.SentLines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
-					l.Order.Price.Name,
+					l.Order.PriceName,
 					l.ResultCost,
 					l.Count,
 					l.MixedSum

@@ -163,17 +163,13 @@
 			<c:DataGrid2 x:Name="HistoryOrders" CanUserSortColumns="False" Height="90">
 				<DataGrid.Columns>
 					<c:DataGridTextColumnEx Width="110*" Header="Прайс-лист"
-						Binding="{Binding Order.Price.Name}" />
+						Binding="{Binding Order.PriceName}" />
 					<c:DataGridTextColumnEx Width="102*" Header="Производитель"
 						Binding="{Binding Producer}" />
-					<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}"
-						TextAlignment="Right" />
-					<c:DataGridTextColumnEx Width="49*" Header="Цена" Binding="{Binding ResultCost}"
-						TextAlignment="Right" />
-					<c:DataGridTextColumnEx Width="68*" Header="Дата" Binding="{Binding Order.SentOn}"
-						TextAlignment="Center" />
-					<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}"
-						TextAlignment="Center" />
+					<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}" />
+					<c:DataGridTextColumnEx Width="49*" Header="Цена" Binding="{Binding ResultCost}" />
+					<c:DataGridTextColumnEx Width="68*" Header="Дата" Binding="{Binding Order.SentOn}" />
+					<c:DataGridTextColumnEx Width="65*" Header="Срок годн." Binding="{Binding Period}" />
 				</DataGrid.Columns>
 			</c:DataGrid2>
 		</DockPanel>

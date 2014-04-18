@@ -38,15 +38,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
-			bool addressNotFound;
-			try {
-				addressNotFound = sourceOrder.Address == null || sourceOrder.Address.Name == "";
-			}
-			catch(ObjectNotFoundException) {
-				addressNotFound = true;
-			}
-
-			if (addressNotFound) {
+			if (!sourceOrder.IsAddressExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = ((Order)sourceOrder);
 					order.SendResult = OrderResultStatus.Reject;
@@ -56,15 +48,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				return;
 			}
 
-			bool priceNotFound;
-			try {
-				priceNotFound = sourceOrder.Price == null || sourceOrder.Price.Name == "";
-			}
-			catch(ObjectNotFoundException) {
-				priceNotFound = true;
-			}
-
-			if (priceNotFound) {
+			if (!sourceOrder.IsPriceExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = ((Order)sourceOrder);
 					order.SendResult = OrderResultStatus.Reject;
