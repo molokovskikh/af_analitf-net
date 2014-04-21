@@ -262,7 +262,7 @@
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>app</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\service\test\lib.csproj">
+    <ProjectReference Include="..\..\service\test\test.csproj">
       <Project>{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}</Project>
       <Name>lib %28service\lib%29</Name>
     </ProjectReference>
