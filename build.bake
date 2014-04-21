@@ -22,7 +22,7 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 		AddDirectory(id, dir, document, manager)
 
 Global(
-	Project: "AnalitF.Net.Service",
+	Project: "src/service/app/app.csproj",
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
