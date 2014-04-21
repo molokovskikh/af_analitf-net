@@ -46,8 +46,8 @@ task @build, ["build:service", "build:client"]
 task @prepare, ["Production", "packages:install", "fix:packages", "generate:assembly:info"]
 
 task "build:service", ["prepare"]:
-	CleanWeb(Globals, "AnalitF.Net.Service")
-	BuildWeb(Globals, "AnalitF.Net.Service")
+	CleanWeb(Globals, "src/service/app/app.csproj")
+	BuildWeb(Globals, "src/service/app/app.csproj")
 
 task @DeployApp, [@WebDeploy]
 
@@ -66,7 +66,10 @@ task "deploy:client:package", ["build:client:package"]:
 		Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
 
 task "build:client:package", ["build:client"]:
-	bin = "output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"
+	proj = "src/client/app/app.csproj"
+	output, _ = GetBuildConfig(Globals, proj)
+	bin = FileSet("*.exe", BaseDirectory: output).First()
+
 	assembly = AssemblyDefinition.ReadAssembly(bin)
 	version = assembly.Name.Version.ToString()
 	build = Configuration.Maybe.buildId
@@ -98,9 +101,10 @@ task "deploy:update", ["build:client"]:
 task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
-	Clean(Globals, "AnalitF.Net.Client")
-	Build(Globals, "AnalitF.Net.Client")
-	output = "output/AnalitF.Net.Client"
+	proj = "src/client/app/app.csproj"
+	output, _ = GetBuildConfig(Globals, proj)
+	Clean(Globals, proj)
+	Build(Globals, proj)
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
 	Rm(FileSet("$output/*.xml"))
 	if Globals.Environment == @Production:
@@ -113,7 +117,10 @@ task "build:setup":
 	Bash("./scripts/wix.sh $arg")
 
 task "setup:preprocess":
-	bin = "output\\AnalitF.Net.Client\\AnalitF.Net.Client.exe"
+	proj = "src/client/app/app.csproj"
+	output, _ = GetBuildConfig(Globals, proj)
+	bin = FileSet("*.exe", BaseDirectory: output).First()
+
 	assembly = AssemblyDefinition.ReadAssembly(bin)
 	File.WriteAllText("output/setup/version.txt", assembly.Name.Version.ToString())
 	name = "output/setup/files.wxs"
@@ -121,8 +128,7 @@ task "setup:preprocess":
 	manager = XmlNamespaceManager(NameTable())
 	manager.AddNamespace("prefix", "http://schemas.microsoft.com/wix/2006/wi")
 
-	path = "output/AnalitF.Net.Client/"
-	AddDirectory("INSTALLFOLDER", path, document, manager)
+	AddDirectory("INSTALLFOLDER", output, document, manager)
 	document.Save(name)
 	Cp("assets/Демонстрационная дефектура.csv", "output/setup/")
 

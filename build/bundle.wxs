@@ -5,7 +5,7 @@
 		Name="$(var.Setup.Product)"
 		Version="$(var.Setup.Version)"
 		Manufacturer="$(var.Setup.Publisher)"
-		IconSourceFile="..\..\src\AnalitF.Net.Client\Assets\images\mainicon_original.ico"
+		IconSourceFile="..\..\src\client\app\Assets\images\mainicon_original.ico"
 		UpgradeCode="22DC7E87-F9E2-463F-9811-E0C53779C644">
 
 		<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense">
