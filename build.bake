@@ -49,7 +49,8 @@ task "build:service", ["prepare"]:
 	CleanWeb(Globals, "src/service/app/app.csproj")
 	BuildWeb(Globals, "src/service/app/app.csproj")
 
-task @DeployApp, [@WebDeploy]
+task @DeployApp:
+	XCopyDeploy(Globals, "src/service/app/app.csproj")
 
 task "deploy:service", [@DeployPipeline]
 
