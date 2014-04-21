@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		private static string InternalProjectBin(string name, [CallerFilePath]string self = "")
 		{
-			return Path.GetFullPath(Path.Combine(self, "..", "..", "..", name, "bin", "debug"));
+			return Path.GetFullPath(Path.Combine(self, "..", "..", "..", "..", name, "bin", "debug"));
 		}
 	}
 }

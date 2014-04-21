@@ -51,6 +51,8 @@ namespace AnalitF.Net.Client.Views
 			Collect.Visibility = Visibility.Collapsed;
 			Debug_ErrorCount.Visibility = Visibility.Collapsed;
 			ShowDebug.Visibility = Visibility.Collapsed;
+			DebugErrorHolder.Content = null;
+			DebugSqlHolder.Content = null;
 #endif
 		}
 

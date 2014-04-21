@@ -229,7 +229,7 @@
 				<Button x:Name="Collect">Collect</Button>
 			</StatusBarItem>
 
-			<StatusBarItem>
+			<StatusBarItem Name="DebugErrorHolder">
 				<Label x:Name="Debug_ErrorCount">
 					<Label.Style>
 						<Style TargetType="Label">
@@ -260,7 +260,7 @@
 				</Label>
 			</StatusBarItem>
 
-			<StatusBarItem>
+			<StatusBarItem Name="DebugSqlHolder">
 				<Button x:Name="ShowDebug" Content="{Binding Debug.SqlCount.Value}">
 				</Button>
 			</StatusBarItem>

@@ -121,7 +121,6 @@
     <Compile Include="Acceptance\AccentanceSetup.cs" />
     <Compile Include="Acceptance\BaseFixture.cs" />
     <Compile Include="Acceptance\MemoryLeakFixture.cs" />
-    <Compile Include="Acceptance\SetupFixture.cs" />
     <Compile Include="Acceptance\StartFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
