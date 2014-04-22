@@ -102,7 +102,6 @@ task "deploy:update", ["build:client"]:
 task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
-	print Globals.Environment
 	proj = "src/client/app/app.csproj"
 	output, _ = GetBuildConfig(Globals, proj)
 	Clean(Globals, proj)
