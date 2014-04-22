@@ -80,7 +80,7 @@ task "build:client:package", ["build:client"]:
 	MkDir("output/package")
 	MkDir("output/package/tools")
 	Cp("output/setup/setup.exe", "output/package/tools/analitf.net.setup.exe", true)
-	Cp(FileSet("**.*", BaseDirectory: "output/analitf.net.client/"), "output/package/tools/", true)
+	Cp(FileSet("**.*", BaseDirectory: "output/client/"), "output/package/tools/", true)
 	spec = "output/package/analitf.net.nuspec"
 	Cp("assets/package.nuspec", spec)
 	specDoc = XDocument.Load(spec)
@@ -102,6 +102,7 @@ task "deploy:update", ["build:client"]:
 task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
+	print Globals.Environment
 	proj = "src/client/app/app.csproj"
 	output, _ = GetBuildConfig(Globals, proj)
 	Clean(Globals, proj)
@@ -137,7 +138,7 @@ task "build:update":
 	Clean(Globals, "Updater")
 	Build(Globals, "Updater")
 	Cp("output/setup/version.txt", "output/Updater/", true)
-	Cp("output/AnalitF.Net.Client/*", "output/Updater/", true)
+	Cp("output/client/*", "output/Updater/", true)
 	Rm(FileSet("output/Updater/*.xml"))
 	if Globals.Environment == @Production:
 		Rm(FileSet("output/Updater/*.pdb"))
