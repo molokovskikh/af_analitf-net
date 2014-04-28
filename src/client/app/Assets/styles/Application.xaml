@@ -69,10 +69,6 @@
 		<Setter Property="Foreground" Value="Green"></Setter>
 	</Style>
 
-	<Style TargetType="Label" x:Key="NotBaseOfferLegend" BasedOn="{StaticResource Legend}">
-		<Setter Property="Background" Value="#F0F0F0"></Setter>
-	</Style>
-
 	<Style TargetType="Label" x:Key="JunkLegend" BasedOn="{StaticResource Legend}">
 		<Setter Property="Background" Value="#f29e66"></Setter>
 	</Style>

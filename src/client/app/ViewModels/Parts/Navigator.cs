@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			while (navigationStack.Count > 0) {
 				var screen = navigationStack.Pop();
-				CloseOrDispose(screen);
+				CloseAndDispose(screen);
 			}
 
 			if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				return;
 
 			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType()) {
-				CloseOrDispose(screen);
+				CloseAndDispose(screen);
 				return;
 			}
 
@@ -89,11 +89,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				var closing = navigationStack.Pop();
 				if (closing.GetType() == screen.GetType()) {
 					if (!ReferenceEquals(screen, closing))
-						CloseOrDispose(screen);
+						CloseAndDispose(screen);
 					screen = closing;
 					break;
 				}
-				CloseOrDispose(closing);
+				CloseAndDispose(closing);
 			}
 
 			HideDefault();
@@ -110,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		//если форма не была инициализированна то она и не будет закрыта
 		//надо явно освободить ресурсы
 		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
-		private static void CloseOrDispose(IScreen screen)
+		private static void CloseAndDispose(IScreen screen)
 		{
 			screen.TryClose();
 			if (screen is IDisposable) {

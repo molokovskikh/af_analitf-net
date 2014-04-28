@@ -113,10 +113,10 @@
 			ui:NavBinder.Prev="{x:Reference ReportLines}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"
-					CellStyle="{StaticResource NotBaseOffer}" Header="Название"
+					Header="Название"
 					Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="89*"
-					CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
+					Header="Производитель"
 					Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Кат.производитель" Binding="{Binding Producer}" />

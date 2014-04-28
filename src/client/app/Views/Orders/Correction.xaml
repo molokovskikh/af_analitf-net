@@ -159,10 +159,10 @@
 			Visibility="{Binding IsUpdate, Converter={StaticResource BoolToCollapsed}}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="196*"
-						CellStyle="{StaticResource NotBaseOffer}" Header="Название"
+						Header="Название"
 						Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="85*"
-						CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
+						Header="Производитель"
 						Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 						Header="Кат.производитель" Binding="{Binding Producer}" />

@@ -4,8 +4,13 @@
 	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700"
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
-	<StackPanel>
-		<TabControl SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<TabControl Grid.Row="0" SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
 			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab">
 				<Grid>
 					<Grid.ColumnDefinitions>
@@ -349,9 +354,9 @@
 				</StackPanel>
 			</TabItem>
 		</TabControl>
-		<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
+		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>
 			<Button x:Name="TryClose" MinWidth="100" IsCancel="True">Отменить</Button>
 		</StackPanel>
-	</StackPanel>
+	</Grid>
 </UserControl>

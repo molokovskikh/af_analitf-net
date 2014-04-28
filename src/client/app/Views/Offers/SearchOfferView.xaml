@@ -64,12 +64,11 @@
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn Width="196*"
-					CellStyle="{StaticResource NotBaseOffer}"
 					Header="Название"
 					Binding="{Binding ProductSynonym}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
 				<c:DataGridTextColumnEx Width="85*"
-					CellStyle="{StaticResource NotBaseOffer}" Header="Производитель"
+					Header="Производитель"
 					Binding="{Binding ProducerSynonym}" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Кат.производитель" Binding="{Binding Producer}" />
@@ -136,12 +135,7 @@
 
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 
-		<StackPanel Grid.Row="4" Name="Legend">
-			<Label>Подсказка</Label>
-			<StackPanel Orientation="Horizontal">
-				<Label Style="{StaticResource NotBaseOfferLegend}">Неосновной поставщик</Label>
-			</StackPanel>
-		</StackPanel>
+		<StackPanel Grid.Row="4" Name="Legend" />
 
 		<DockPanel Grid.Row="5">
 			<Label DockPanel.Dock="Top">Предыдущие заказы</Label>

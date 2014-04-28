@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -226,6 +227,12 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual bool StatLoaded { get; set; }
+
+		[Style("ProductSynonym", "ProducerSynonym", Description = "Неосновной поставщик", Name = "NotBase")]
+		public virtual bool IsNotBase
+		{
+			get { return Price.NotBase; }
+		}
 
 		public virtual List<Message> UpdateOrderLine(Address address, Settings settings,
 			Func<string, bool> confirm = null,
