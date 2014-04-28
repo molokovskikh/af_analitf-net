@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.ViewModels
 			get
 			{
 				return excelExporter.CanExport
-					&& excelExporter.Properties.Any(k => User.CanExport(this, k.Name));
+					&& excelExporter.Properties.Any(k => User.CanExport(GetType(), k.Name));
 			}
 		}
 

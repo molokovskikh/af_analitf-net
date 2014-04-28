@@ -24,8 +24,8 @@ namespace AnalitF.Net.Client.Models
 		};
 
 		public static Dictionary<string, string> ShortcutExportMap = new Dictionary<string, string> {
-			{ typeof(OrderDetailsViewModel).Name + "." + typeof(SentOrder), "ESOO" },
-			{ typeof(OrderDetailsViewModel).Name + "." + typeof(Order), "ECOO" },
+			{ typeof(OrderDetailsViewModel).Name + "." + typeof(SentOrder).Name, "ESOO" },
+			{ typeof(OrderDetailsViewModel).Name + "." + typeof(Order).Name, "ECOO" },
 			{ typeof(CatalogNameViewModel).Name + "." + "CatalogNames", "FPCN" },
 			{ typeof(CatalogNameViewModel).Name + "." + "Catalogs", "FPCF" },
 			{ typeof(CatalogSearchViewModel).Name + "." + "Items", "FPCNF" },

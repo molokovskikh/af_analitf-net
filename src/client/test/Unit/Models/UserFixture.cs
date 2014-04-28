@@ -22,6 +22,13 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		}
 
 		[Test]
+		public void Can_export_order_details()
+		{
+			var user = new User();
+			Assert.IsFalse(user.CanExport<OrderDetailsViewModel, SentOrder>());
+		}
+
+		[Test]
 		public void Can_export()
 		{
 			var user = new User();
