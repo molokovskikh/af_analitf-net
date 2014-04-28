@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 			TableStyle = new Style(typeof(Table)) {
 				Setters = {
-					new Setter(Table.FontSizeProperty, 10d),
+					new Setter(Table.FontSizeProperty, 13d),
 					new Setter(Table.CellSpacingProperty, 0d),
 					new Setter(Table.BorderBrushProperty, Brushes.Black),
 					new Setter(Table.BorderThicknessProperty, new Thickness(1, 1, 0, 0)),
