@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
+using Remotion.Linq.Parsing;
 
 namespace AnalitF.Net.Test.Unit
 {
@@ -40,6 +42,29 @@ namespace AnalitF.Net.Test.Unit
 			Assert.IsFalse(offers[0].IsGrouped);
 			Assert.IsTrue(offers[1].IsGrouped);
 			Assert.IsFalse(offers[3].IsGrouped);
+		}
+
+		[Test]
+		public void Sort_offer_by_min_cost()
+		{
+			offers = new List<Offer> {
+				new Offer {
+					ProductId = 2,
+					Cost = 54.3m,
+				},
+				new Offer {
+					ProductId = 1,
+					Cost = 54.3m
+				},
+				new Offer {
+					ProductId = 2,
+					Cost = 54.3m
+				},
+			};
+			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
+			Assert.AreEqual(1, offers[0].ProductId);
+			Assert.AreEqual(2, offers[1].ProductId);
+			Assert.AreEqual(2, offers[2].ProductId);
 		}
 
 		[Test]

@@ -276,7 +276,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var lookup = offer.GroupBy(key)
 				.ToDictionary(g => g.Key, g => g.Min(o => o.ResultCost));
 
-			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.ResultCost)).ToList();
+			var offers = offer.OrderBy(o => Tuple.Create(lookup[key(o)], o.ResultCost, key(o))).ToList();
 
 			var indexes = lookup.OrderBy(k => k.Value)
 				.Select((k, i) => Tuple.Create(k.Key, i))
