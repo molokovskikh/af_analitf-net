@@ -52,7 +52,7 @@ task "build:service", ["prepare"]:
 task @DeployApp:
 	XCopyDeploy(Globals, "src/service/app/app.csproj")
 
-task "deploy:service", [@DeployPipeline]
+task "deploy:service", ["deploy:pipeline"]
 
 task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "git:push:tags"]
 
@@ -68,7 +68,7 @@ task "deploy:client:package", ["build:client:package"]:
 
 task "build:client:package", ["build:client"]:
 	proj = "src/client/app/app.csproj"
-	output, _ = GetBuildConfig(Globals, proj)
+	name, output, _ = GetBuildConfig(Globals, proj)
 	bin = FileSet("*.exe", BaseDirectory: output).First()
 
 	assembly = AssemblyDefinition.ReadAssembly(bin)
@@ -103,7 +103,7 @@ task "build:client", ["Production", "build:client:bin", "build:setup", "build:up
 
 task "build:client:bin":
 	proj = "src/client/app/app.csproj"
-	output, _ = GetBuildConfig(Globals, proj)
+	name, output, _ = GetBuildConfig(Globals, proj)
 	Clean(Globals, proj)
 	Build(Globals, proj)
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
@@ -119,7 +119,7 @@ task "build:setup":
 
 task "setup:preprocess":
 	proj = "src/client/app/app.csproj"
-	output, _ = GetBuildConfig(Globals, proj)
+	name, output, _ = GetBuildConfig(Globals, proj)
 	bin = FileSet("*.exe", BaseDirectory: output).First()
 
 	assembly = AssemblyDefinition.ReadAssembly(bin)
