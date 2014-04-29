@@ -556,10 +556,10 @@ namespace AnalitF.Net.Client.Helpers
 
 			return styles.Select(t => {
 				var appStyle = new CustomStyle {
-					Name = t.Item1.Name,
+					Name = t.Item2.GetName(t.Item1),
 					Description = t.Item2.Description,
 				};
-				var trigger = DefaultStyles.GetValueOrDefault(t.Item1.Name)
+				var trigger = DefaultStyles.GetValueOrDefault(appStyle.Name)
 					?? Background(DefaultColor.Color.ToString());
 				var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
 				var foreground = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.ForegroundProperty);

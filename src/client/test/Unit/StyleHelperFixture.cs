@@ -121,6 +121,14 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual("ActualVitallyImportant", ((Binding)trigger.Binding).Path.Path);
 		}
 
+		[Test]
+		public void Get_default_style()
+		{
+			var styles = StyleHelper.GetDefaultStyles();
+			var style = styles.First(s => s.Name == "NotBase");
+			Assert.AreEqual("#FFF0F0F0", style.Background);
+		}
+
 		private static Setter Background(Style style)
 		{
 			return style.Triggers.OfType<MultiDataTrigger>()
