@@ -122,5 +122,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var button = dialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Открыть"));
 			button.Invoke();
 		}
+
+		public static AutomationElement FindWindow(string name)
+		{
+			AutomationElement window = null;
+			var handle = WinApi.FindWindow(IntPtr.Zero, name);
+			if (handle != IntPtr.Zero)
+				window = AutomationElement.FromHandle(handle);
+			return window;
+		}
 	}
 }

@@ -1161,6 +1161,8 @@ group by dh.Id")
 
 		private void ExportUpdate(List<UpdateData> zip)
 		{
+			if (data.IsBinaryUpdateDisabled)
+				return;
 			var file = Path.Combine(UpdatePath, "version.txt");
 			if (!File.Exists(file))
 				return;

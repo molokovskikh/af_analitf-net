@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private Process Start()
 		{
-			return StartProcess(exe, root);
+			return StartProcess(Bin);
 		}
 	}
 }

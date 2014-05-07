@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Windows.Media.Media3D;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Models.Catalogs;
 using Common.Tools;
 using NHibernate;
@@ -34,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			if (Verbose && ProductIds.Length == 0) {
 				ProductIds = session.Query<TestCore>().Select(o => o.Product.Id).Distinct().Take(5).ToArray();
-				var root = GetRoot();
+				var root = DataMother.GetRoot();
 				var file = Path.Combine(root, "src", "data", "smart-order.txt");
 				File.WriteAllText(file, ProductIds.Implode(v => String.Format("{0}|1", ProductIds.IndexOf(v) + 1), Environment.NewLine));
 				Console.WriteLine("Соответствие продуктов кодам");
@@ -56,14 +57,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			user.Client.Settings.EnableSmartOrder = true;
 			user.Client.Settings.SmartOrderRule = Rule;
 			session.Save(user);
-		}
-
-		public string GetRoot(string dir = null)
-		{
-			dir = dir ?? Environment.CurrentDirectory;
-			if (Directory.Exists(Path.Combine(dir, "src")))
-				return dir;
-			return GetRoot(Path.Combine(dir, ".."));
 		}
 	}
 }

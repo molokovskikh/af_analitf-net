@@ -76,11 +76,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			ClickByName("ОК", message);
 		}
 
-		private void AssertText(AutomationElement el, string text)
-		{
-			Assert.That(AutomationHelper.ToText(el), Is.StringContaining(text));
-		}
-
 		[Test]
 		public void Mnn_search()
 		{
@@ -142,59 +137,6 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			WaitIdle();
 			Click("Update", MainWindow);
 			AssertUpdate("Обновление завершено успешно.");
-		}
-
-		[Test, Ignore]
-		public void Restore_grid_settings()
-		{
-			Activate();
-			Click("ShowPrice");
-			var prices = WaitForElement("Prices");
-			DialogHandle = e => {
-				AutomationHelper.Dump(e);
-			};
-			RightClick(prices);
-			Thread.Sleep(1000);
-		}
-
-		private void WaitMessage(string message)
-		{
-			var window = FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();
-			Assert.AreEqual(message, AutomationHelper.ToText(window));
-			ClickByName("ОК", window);
-		}
-
-		private static AutomationElement FindWindow(string name)
-		{
-			AutomationElement window = null;
-			var handle = WinApi.FindWindow(IntPtr.Zero, name);
-			if (handle != IntPtr.Zero)
-				window = AutomationElement.FromHandle(handle);
-			return window;
-		}
-
-		private AutomationElement WaitDialog(string name)
-		{
-			return FindWindow(name) ?? Opened.Timeout(Timeout).First();
-		}
-
-		private void Type(string el, string text)
-		{
-			var username = WaitForElement(el);
-			username.SetFocus();
-			Keyboard.Type(text);
-		}
-
-		private void AssertUpdate(string result)
-		{
-			Timeout = TimeSpan.FromSeconds(50);
-			var observable = Opened.Timeout(5.Second());
-			var update = FindWindow("Обмен данными") ?? observable.First();
-			Assert.AreEqual("Обмен данными", update.GetName());
-			var dialog = Opened.Timeout(50.Second()).First();
-
-			Assert.AreEqual(result, AutomationHelper.ToText(dialog));
-			ClickByName("Закрыть", dialog);
 		}
 
 		private AutomationElement WaitWindow()

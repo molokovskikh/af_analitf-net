@@ -19,5 +19,6 @@ namespace AnalitF.Net.Service.Models
 		public virtual User User { get; set; }
 		public virtual DateTime LastUpdateAt { get; set; }
 		public virtual DateTime? LastPendingUpdateAt { get; set; }
+		public virtual bool IsBinaryUpdateDisabled { get; set; }
 	}
 }

@@ -36,5 +36,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			return Path.GetFullPath(Path.Combine(self, "..", "..", "..", "..", name, "bin", "debug"));
 		}
+
+		public static string GetRoot([CallerFilePath] string self = null)
+		{
+			return GetRootDir(Path.GetDirectoryName(self));
+		}
+
+		private static string GetRootDir(string dir)
+		{
+			if (Directory.Exists(Path.Combine(dir, "src")))
+				return dir;
+			return GetRootDir(Path.Combine(dir, ".."));
+		}
 	}
 }

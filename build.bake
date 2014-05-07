@@ -151,3 +151,14 @@ task "git:tag":
 	kind = Configuration.Maybe.kind
 	raise "Нужно указать тип релиза patch - исправление ошибок, minor - новый функционал, major - координальные изменения в существующем функционале" unless kind
 	Bash("./scripts/tag-release.sh $kind")
+
+task "test:binary":
+	try:
+		testId = 26307
+		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 1")
+		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 0 where UserId = $testId")
+		Sh("nunit-console-x86 /nologo ./src/client/test.release/bin/Debug/test.release.dll")
+		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 0")
+	except:
+		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
+		raise

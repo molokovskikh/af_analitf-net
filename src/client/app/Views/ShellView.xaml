@@ -338,7 +338,7 @@
 			</StatusBarItem>
 
 			<StatusBarItem DockPanel.Dock="Right">
-				<TextBlock Margin="5">
+				<TextBlock Margin="5" Name="VersionInfo">
 					<Run>ИД:&#160;</Run><Run Name="User_Value_Id" />
 					<Run> (версия&#160;</Run><Run Name="Version" />
 					<Run>)</Run>

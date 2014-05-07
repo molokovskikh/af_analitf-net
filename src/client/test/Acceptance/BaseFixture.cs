@@ -1,33 +1,29 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
-using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
-using Microsoft.Test.Input;
 using NUnit.Framework;
-using Condition = System.Windows.Automation.Condition;
+using TestStack.White.InputDevices;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
 	public class BaseFixture
 	{
-		protected string root;
-		protected string exe;
+		protected bool IsDebug = true;
+		protected string Bin;
 
 		protected TimeSpan Timeout;
+		protected TimeSpan UpdateTimeout = 50.Second();
 
 		protected Process Process;
 
@@ -49,8 +45,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			DialogHandle = w => {};
 
 			Timeout = TimeSpan.FromSeconds(5);
-			root = @"acceptance";
-			exe = Path.Combine(root, "AnalitF.Net.Client.exe");
+			Bin = Path.Combine("acceptance", "AnalitF.Net.Client.exe");
 
 			Automation.AddAutomationEventHandler(
 				WindowPatternIdentifiers.WindowOpenedEvent,
@@ -113,7 +108,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				.FirstOrDefault();
 		}
 
-		protected Process StartProcess(string fileName, string dir = "", string arguments = "")
+		protected Process StartProcess(string fileName, string arguments = "")
 		{
 			var process = new Process();
 			process.StartInfo.FileName = fileName;
@@ -143,14 +138,17 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
-			var currentId = ((AutomationElement)sender).ToShortText();
+			var el = (AutomationElement)sender;
+			if ((int)el.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) != Process.Id)
+				return;
+
+			var currentId = el.ToShortText();
 			if (lastId == currentId)
 				return;
 			lastId = currentId;
 
-			Opened.OnNext(sender as AutomationElement);
+			Opened.OnNext(el);
 
-			var el = sender as AutomationElement;
 			WindowHandle(el);
 			if (MainWindow == null) {
 				var id = (string)el.GetCurrentPropertyValue(AutomationElement.AutomationIdProperty);
@@ -199,10 +197,15 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
 			Writer = new StreamWriter(pipe);
 
-			Process = StartProcess(exe, root, "--debug-pipe=" + debugPipe);
+			var arguments = "";
+			if (IsDebug)
+				arguments = "--debug-pipe=" + debugPipe;
+			Process = StartProcess(Bin, arguments);
 			WaitMainWindow();
-			pipe.WaitForConnection();
-			Writer.AutoFlush = true;
+			if (IsDebug) {
+				pipe.WaitForConnection();
+				Writer.AutoFlush = true;
+			}
 
 			WaitIdle();
 		}
@@ -211,23 +214,20 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			var cell = ((GridPattern)table.GetCurrentPattern(GridPattern.Pattern)).GetItem(row, column);
 			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
-			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
-			Mouse.DoubleClick(MouseButton.Left);
+			Mouse.Instance.DoubleClick(new Point(rect.X + 3, rect.Y + 3));
 		}
 
 		protected static void ClickCell(AutomationElement table, int row, int column)
 		{
 			var cell = ((GridPattern)table.GetCurrentPattern(GridPattern.Pattern)).GetItem(row, column);
 			var rect = (Rect)cell.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
-			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 3, (int)rect.Y + 3));
-			Mouse.Click(MouseButton.Left);
+			Mouse.Instance.Click(new Point(rect.X + 3, rect.Y + 3));
 		}
 
 		protected static void RightClick(AutomationElement element)
 		{
 			var rect = (Rect)element.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty);
-			Mouse.MoveTo(new System.Drawing.Point((int)rect.X + 10, (int)rect.Y + 10));
-			Mouse.DoubleClick(MouseButton.Right);
+			Mouse.Instance.RightClick(new Point(rect.X + 10, rect.Y + 10));
 		}
 
 		protected void WaitMainWindow()
@@ -248,6 +248,41 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var close = (WindowPattern)MainWindow.GetCurrentPattern(WindowPattern.Pattern);
 			close.WaitForInputIdle((int)10.Second().TotalMilliseconds);
 			return close;
+		}
+
+		protected void Type(string el, string text)
+		{
+			var username = WaitForElement(el);
+			username.SetFocus();
+			Keyboard.Instance.Enter(text);
+		}
+
+		protected void WaitMessage(string message)
+		{
+			var window = AutomationHelper.FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();
+			Assert.AreEqual(message, AutomationHelper.ToText(window));
+			ClickByName("ОК", window);
+		}
+
+		protected void AssertUpdate(string result)
+		{
+			var observable = Opened.Timeout(5.Second());
+			var update = AutomationHelper.FindWindow("Обмен данными") ?? observable.First();
+			Assert.AreEqual("Обмен данными", update.GetName());
+			var dialog = Opened.Timeout(UpdateTimeout).First();
+
+			Assert.AreEqual(result, AutomationHelper.ToText(dialog));
+			ClickByName("Закрыть", dialog);
+		}
+
+		protected AutomationElement WaitDialog(string name)
+		{
+			return AutomationHelper.FindWindow(name) ?? Opened.Timeout(Timeout).First();
+		}
+
+		protected void AssertText(AutomationElement el, string text)
+		{
+			Assert.That(AutomationHelper.ToText(el), Is.StringContaining(text), el.ToShortText());
 		}
 	}
 }
