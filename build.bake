@@ -54,7 +54,7 @@ task @DeployApp:
 
 task "deploy:service", ["deploy:pipeline"]
 
-task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "git:push:tags"]
+task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "test:binary", "git:push:tags"]
 
 task "deploy:client", ["deploy:client:package"]
 
@@ -134,10 +134,11 @@ task "setup:preprocess":
 	Cp("assets/Демонстрационная дефектура.csv", "output/setup/")
 
 task "build:update":
+	_, clientOutput, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
 	Clean(Globals, "Updater")
 	Build(Globals, "Updater")
 	Cp("output/setup/version.txt", "output/Updater/", true)
-	Cp("output/client/*", "output/Updater/", true)
+	Cp("$clientOutput/*", "output/Updater/", true)
 	Rm(FileSet("output/Updater/*.xml"))
 	if Globals.Environment == @Production:
 		Rm(FileSet("output/Updater/*.pdb"))

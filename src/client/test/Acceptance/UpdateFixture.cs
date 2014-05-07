@@ -61,11 +61,13 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Click("Update");
 			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
 
+			FilterByProcess = false;
 			var update = Opened.Timeout(5.Second()).First();
 			AssertText(update, "Внимание! Происходит обновление программы.");
 
 			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(15.Second()).First();
 			AssertText(update, "Производится обмен данными");
+			FilterByProcess = true;
 			Process = System.Diagnostics.Process.GetProcessById(update.GetProcessId());
 			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),

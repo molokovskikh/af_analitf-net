@@ -36,6 +36,14 @@ namespace test.release
 			UpdateTimeout = 5.Minute();
 			var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "АналитФАРМАЦИЯ");
 			Bin = Path.Combine(root, "AnalitF.Net.Client.exe");
+			Close(Process.GetProcesses().FirstOrDefault(p => {
+				try {
+					return p.MainModule.FileName == Path.GetFullPath(Bin);
+				}
+				catch(Exception) {
+					return false;
+				}
+			}));
 			if (Directory.Exists(Path.Combine(root, "data")))
 				Directory.Delete(Path.Combine(root, "data"), true);
 		}
@@ -84,12 +92,14 @@ namespace test.release
 			Click("Update", MainWindow);
 			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
 
-			var update = Opened.Timeout(5.Second()).First();
+			FilterByProcess = false;
+			var update = Opened.Timeout(Timeout).First();
 			AssertText(update, "Внимание! Происходит обновление программы.");
 
 			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(15.Second()).First();
 			AssertText(update, "Производится обмен данными");
 			Process = Process.GetProcessById(update.GetProcessId());
+			FilterByProcess = true;
 			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
 				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ")));

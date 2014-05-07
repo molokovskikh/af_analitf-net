@@ -19,32 +19,39 @@ namespace AnalitF.Net.Client.Test.Acceptance
 {
 	public class BaseFixture
 	{
-		protected bool IsDebug = true;
+		private string lastId;
+		protected bool IsDebug;
 		protected string Bin;
 
 		protected TimeSpan Timeout;
-		protected TimeSpan UpdateTimeout = 50.Second();
+		protected TimeSpan UpdateTimeout;
 
 		protected Process Process;
 
 		protected AutomationElement MainWindow;
 		protected StreamWriter Writer;
 
-		protected Action<AutomationElement> DialogHandle = w => {};
-		protected Action<AutomationElement> WindowHandle = w => {};
+		protected Action<AutomationElement> DialogHandle;
+		protected Action<AutomationElement> WindowHandle;
 
 		protected Subject<AutomationElement> Opened;
-		private string lastId;
+		protected bool FilterByProcess;
 
 		[SetUp]
 		public void Setup()
 		{
+			FilterByProcess = true;
+			Writer = null;
+			lastId = null;
+			IsDebug = true;
+			Process = null;
 			Opened = new Subject<AutomationElement>();
 
 			WindowHandle = w => {};
 			DialogHandle = w => {};
 
-			Timeout = TimeSpan.FromSeconds(5);
+			Timeout = 5.Second();
+			UpdateTimeout = 50.Second();
 			Bin = Path.Combine("acceptance", "AnalitF.Net.Client.exe");
 
 			Automation.AddAutomationEventHandler(
@@ -61,25 +68,30 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Opened.Dispose();
 
 			MainWindow = null;
-			if (Process != null) {
-				if (!Process.HasExited)
-					Process.CloseMainWindow();
-
-				Process.WaitForExit(TimeSpan.FromSeconds(10).Milliseconds);
-				if (!Process.HasExited) {
-					Process.Kill();
-					SpinWait.SpinUntil(() => {
-						try {
-							Process.GetProcessById(Process.Id);
-							return false;
-						}
-						catch(ArgumentException) {
-							return true;
-						}
-					});
-				}
-			}
+			Close(Process);
 			Automation.RemoveAllEventHandlers();
+		}
+
+		protected void Close(Process process)
+		{
+			if (process == null)
+				return;
+			if (process.HasExited)
+				return;
+			process.CloseMainWindow();
+			process.WaitForExit(TimeSpan.FromSeconds(10).Milliseconds);
+			if (!process.HasExited) {
+				process.Kill();
+				WaitHelper.Wait(40.Second(), () => {
+					try {
+						Process.GetProcessById(process.Id);
+						return false;
+					}
+					catch (ArgumentException) {
+						return true;
+					}
+				});
+			}
 		}
 
 		protected AutomationElement FindByName(string name, AutomationElement element = null)
@@ -139,7 +151,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		private void OnActivated(object sender, AutomationEventArgs e)
 		{
 			var el = (AutomationElement)sender;
-			if ((int)el.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) != Process.Id)
+			if (FilterByProcess
+				&& !Process.HasExited
+				&& (int)el.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) != Process.Id)
 				return;
 
 			var currentId = el.ToShortText();
@@ -156,7 +170,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 					MainWindow = el;
 				}
 			}
-			else if (DialogHandle != null && e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
+			else if (DialogHandle != null
+				&& e.EventId.ProgrammaticName == WindowPatternIdentifiers.WindowOpenedEvent.ProgrammaticName) {
 				DialogHandle(el);
 			}
 		}
