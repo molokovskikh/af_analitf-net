@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 							DisplayIndex = 0
 						}
 					},
-					ItemsSource = new [] { 1, 2 }
+					ItemsSource = new[] { 1, 2 }
 				};
 				grid.CurrentItem = grid.Items[0];
 				grid.CurrentCell = new DataGridCellInfo(grid.CurrentItem, grid.Columns[1]);

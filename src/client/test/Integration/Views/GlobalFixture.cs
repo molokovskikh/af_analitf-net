@@ -1,55 +1,34 @@
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.ServiceModel.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
-using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.ViewModels.Parts;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
-using log4net.Config;
-using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
-using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
+using Caliburn.Micro;
+using Microsoft.Win32;
 using Action = System.Action;
-using Address = AnalitF.Net.Client.Models.Address;
-using CheckBox = System.Windows.Controls.CheckBox;
-using DataGrid = System.Windows.Controls.DataGrid;
-using DataGridCell = System.Windows.Controls.DataGridCell;
-using Label = System.Windows.Controls.Label;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using Screen = Caliburn.Micro.Screen;
-using TextBox = System.Windows.Controls.TextBox;
-using WindowState = System.Windows.WindowState;
-using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -589,7 +568,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			restore = true;
 			var fixture = new CreateSchedule {
-				Schedules = new [] {
+				Schedules = new[] {
 					DateTime.Now.AddMinutes(30).TimeOfDay
 				}
 			};
