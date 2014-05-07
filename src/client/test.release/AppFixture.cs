@@ -19,7 +19,7 @@ using TestStack.White.InputDevices;
 
 namespace test.release
 {
-	[TestFixture]
+	[TestFixture, Explicit("Тест должен запускаться после подготовки релиза")]
 	public class AppFixture : BaseFixture
 	{
 		string setupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
