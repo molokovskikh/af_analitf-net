@@ -1,16 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\lib.properties" Condition="Exists('..\..\lib.properties')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}</ProjectGuid>
+    <ProjectGuid>{18676AB8-9F29-41EC-A633-95CF6F8175C6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AnalitF.Net.Service.Test</RootNamespace>
-    <AssemblyName>AnalitF.Net.Service.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>test</RootNamespace>
+    <AssemblyName>test</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -31,71 +30,42 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.ActiveRecord" />
-    <Reference Include="ionic.zip" />
-    <Reference Include="Newtonsoft.Json" />
-    <Reference Include="NHibernate">
-      <HintPath>..\AnalitF.Net\bin\NHibernate.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\AnalitF.Net.Test\bin\Debug\nunit.framework.dll</HintPath>
+      <HintPath>..\..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Http" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ControllerFixture.cs" />
-    <Compile Include="ExporterFixture.cs" />
-    <Compile Include="FixtureSetup.cs" />
-    <Compile Include="TestHelpers\ZipHelper.cs" />
-    <Compile Include="Unit\MySqlHelperFixture.cs" />
+    <Compile Include="UpdateFixture.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\app\app.csproj">
-      <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
-      <Name>app %28service\app%29</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Common.Models\Common.Models\Common.Models.csproj">
-      <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>
-      <Name>Common.Models</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Common.MySql\Common.NHibernate\Common.NHibernate.csproj">
-      <Project>{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}</Project>
-      <Name>Common.NHibernate</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Test.Data\Test.Data.csproj">
-      <Project>{140789c3-8c40-4ab7-a538-ff4141761305}</Project>
-      <Name>Test.Data</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Test.Support\Test.Support\Test.Support.csproj">
-      <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
-      <Name>Test.Support</Name>
+    <ProjectReference Include="..\app\app.csproj">
+      <Project>{677db511-bfb9-4faa-877c-af00a12487cd}</Project>
+      <Name>app %28updater\app%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

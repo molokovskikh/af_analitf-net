@@ -30,6 +30,10 @@ namespace Updater
 	{
 		private ILog log = LogManager.GetLogger(typeof(MainWindow));
 
+		public MainWindow(bool stub)
+		{
+		}
+
 		public MainWindow()
 		{
 			log.DebugFormat("Обновление запущено {0}", typeof(MainWindow).Assembly.Location);
@@ -40,13 +44,24 @@ namespace Updater
 			Closed += (sender, eventArgs) => {
 				log.DebugFormat("Обновление завершено");
 			};
+			var task = Run(pid, exe, FileHelper.MakeRooted("."));
+			task.ContinueWith(t => {
+				if (t.IsFaulted) {
+					log.Error("Процесс обновления завершился ошибкой", t.Exception);
+					App.NotifyAboutException(t.Exception);
+				}
+				Close();
+			}, TaskScheduler.FromCurrentSynchronizationContext());
 			InitializeComponent();
+			ResizeMode = ResizeMode.NoResize;
+			SizeToContent = SizeToContent.Manual;
+		}
 
-			string mainModule = null;
+		public Task<Process> Run(int pid, string exe, string srcRoot)
+		{
 			var process = GetProcess(pid);
 			if (process != null) {
-				mainModule = process.MainModule.FileName;
-				log.DebugFormat("По завершении будет запущен процесс {0}", mainModule);
+				log.DebugFormat("По завершении будет запущен процесс {0}", exe);
 			}
 			else {
 				log.WarnFormat("Процесс {0} не найден", pid);
@@ -62,48 +77,39 @@ namespace Updater
 				WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			}
 
-			ResizeMode = ResizeMode.NoResize;
-			SizeToContent = SizeToContent.Manual;
-			var task = new Task(() => {
-				Update(pid, mainModule ?? exe);
-				Start(mainModule);
+			var task = new Task<Process>(() => {
+				Update(pid, exe, srcRoot);
+				return Start(exe);
 			});
-			task.ContinueWith(t => {
-				if (t.IsFaulted) {
-					log.Error("Процесс обновления завершился ошибкой", t.Exception);
-					App.NotifyAboutException(t.Exception);
-				}
-				Close();
-			}, TaskScheduler.FromCurrentSynchronizationContext());
 			task.Start();
+			return task;
 		}
 
-		private void Start(string exe)
+		private Process Start(string exe)
 		{
-			if (!String.IsNullOrEmpty(exe)) {
-				var arguments = "import";
-				log.DebugFormat("запускаю процесс {0} {1}", exe, arguments);
-				Process.Start(exe, arguments);
+			if (String.IsNullOrEmpty(exe)) {
+				log.Error("Не указан исполняемый файл для запуска");
+				return null;
 			}
+			var arguments = "import";
+			log.DebugFormat("запускаю процесс {0} {1}", exe, arguments);
+			return Process.Start(new ProcessStartInfo(exe, arguments) {
+				WorkingDirectory = Path.GetDirectoryName(exe)
+			});
 		}
 
-		public void Update(int pid, string exe)
+		public void Update(int pid, string exe, string srcRoot)
 		{
 			WaitForPid(pid);
 
-			var sourceRootPath = FileHelper.MakeRooted(".");
 			var destRootPath = Path.GetDirectoryName(exe);
 
 			var selfExe = Path.GetFileName(typeof(MainWindow).Assembly.Location);
-			var version = File.ReadAllText(Path.Combine(sourceRootPath, "version.txt")).Trim();
+			var version = File.ReadAllText(Path.Combine(srcRoot, "version.txt")).Trim();
 			var newBinPath = Path.Combine(destRootPath, version);
 			var oldBinPath = Path.Combine(destRootPath, "bin");
 			var exePath = destRootPath;
-			var files = Directory.GetFiles(sourceRootPath);
-
-			//hack: что бы обойти ошибку в сборке 12
-			var ignoreReg = new Regex(@"\.txt$");
-			files = files.Where(f => !ignoreReg.IsMatch(f)).ToArray();
+			var files = Directory.GetFiles(srcRoot);
 
 			var ignore = new[] {selfExe, selfExe + ".config", "version.txt"};
 

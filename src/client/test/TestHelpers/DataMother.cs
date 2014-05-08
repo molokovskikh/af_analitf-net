@@ -29,12 +29,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static string ProjectBin(string name)
 		{
-			return InternalProjectBin(name);
-		}
-
-		private static string InternalProjectBin(string name, [CallerFilePath]string self = "")
-		{
-			return Path.GetFullPath(Path.Combine(self, "..", "..", "..", "..", name, "bin", "debug"));
+			return Path.Combine(GetRoot(), "src", name, "app", "bin", "debug");
 		}
 
 		public static string GetRoot([CallerFilePath] string self = null)

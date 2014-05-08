@@ -76,6 +76,11 @@ namespace AnalitF.Net.Client.Config
 			get { return Path.Combine(TmpDir, "update");}
 		}
 
+		public string BinUpdateDir
+		{
+			get { return Path.Combine(UpdateTmpDir, "update"); }
+		}
+
 		public void InitDir()
 		{
 			if (!Directory.Exists(RootDir))

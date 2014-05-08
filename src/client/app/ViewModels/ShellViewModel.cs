@@ -754,7 +754,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void RunUpdate()
 		{
 			windowManager.Warning("Получена новая версия программы. Сейчас будет выполнено обновление.");
-			var updateExePath = Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe");
+			var updateExePath = Path.Combine(Config.BinUpdateDir, "Updater.exe");
 			StartProcess(updateExePath, String.Format("{0} \"{1}\"",
 				Process.GetCurrentProcess().Id,
 				GetType().Assembly.Location));

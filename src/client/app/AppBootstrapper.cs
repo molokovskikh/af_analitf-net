@@ -237,6 +237,14 @@ namespace AnalitF.Net.Client
 #endif
 
 			if (Directory.Exists(Config.TmpDir)) {
+				try {
+					//перемещаем лог файл обновления что отправить его на сервер
+					if (Directory.Exists(Config.BinUpdateDir)) {
+						Directory.GetFiles(Config.BinUpdateDir, "*.log")
+							.Each(f => File.Move(f, FileHelper2.Uniq(Path.Combine(Config.RootDir, Path.GetFileName(f)))));
+					}
+				}
+				catch(Exception) {}
 				if (!Config.Cmd.Match("import")) {
 					try {
 						Directory.Delete(Config.TmpDir, true);
@@ -244,6 +252,11 @@ namespace AnalitF.Net.Client
 					}
 					catch(Exception) {}
 				}
+				//в одной из версий временные файлы складывались в корень, чистим мусор
+				try {
+					Directory.GetFiles(Config.RootDir, "*.xls").Each(f => File.Delete(f));
+				}
+				catch (Exception) {}
 			}
 			else {
 				Directory.CreateDirectory(Config.TmpDir);

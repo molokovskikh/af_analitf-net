@@ -95,9 +95,9 @@ task "deploy:update", ["build:client"]:
 	impersonate = Configuration.Maybe.impersonate != null
 	if impersonate:
 		ImpersonateUser("deployer", '$sdfsd887!'):
-			Cp("output/Updater/*", dir, true)
+			Cp("output/updater/*", dir, true)
 	else:
-		Cp("output/Updater/*", dir, true)
+		Cp("output/updater/*", dir, true)
 
 task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
 
@@ -135,13 +135,14 @@ task "setup:preprocess":
 
 task "build:update":
 	_, clientOutput, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
-	Clean(Globals, "Updater")
-	Build(Globals, "Updater")
-	Cp("output/setup/version.txt", "output/Updater/", true)
-	Cp("$clientOutput/*", "output/Updater/", true)
-	Rm(FileSet("output/Updater/*.xml"))
+	_, updaterOutput, _ = GetBuildConfig(Globals, "src/updater/app/app.csproj")
+	Clean(Globals, "src/updater/app/app.csproj")
+	Build(Globals, "src/updater/app/app.csproj")
+	Cp("output/setup/version.txt", updaterOutput, true)
+	Cp("$clientOutput/*", updaterOutput, true)
+	Rm(FileSet("$updaterOutput/*.xml"))
 	if Globals.Environment == @Production:
-		Rm(FileSet("output/Updater/*.pdb"))
+		Rm(FileSet("$updaterOutput/*.pdb"))
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production
