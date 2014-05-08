@@ -273,7 +273,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\service\app\app.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
-      <Name>app</Name>
+      <Name>app %28service\app%29</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common.Models\Common.Models\Common.Models.csproj">
       <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>

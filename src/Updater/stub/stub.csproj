@@ -8,8 +8,8 @@
     <ProjectGuid>{15062012-5439-48BF-8FB8-62DC3C7B76C4}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>test.stub</RootNamespace>
-    <AssemblyName>test.stub</AssemblyName>
+    <RootNamespace>stub</RootNamespace>
+    <AssemblyName>stub</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

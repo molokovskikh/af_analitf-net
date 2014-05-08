@@ -17,10 +17,10 @@ namespace test
 		public void Run_after_update_on_exited_process()
 		{
 			FileHelper.InitDir("test", "test/bin", "test/update");
-			File.Copy("../../../test.stub/bin/debug/test.stub.exe", "test/update/test.stub.exe");
+			File.Copy("../../../stub/bin/debug/stub.exe", "test/update/stub.exe");
 			File.WriteAllText("test/update/version.txt", "1.0");
 
-			var bin = Path.GetFullPath("test/bin/test.stub.exe");
+			var bin = Path.GetFullPath("test/bin/stub.exe");
 			var updateRoot = Path.GetFullPath("test/update");
 			//симулируем запуск если обновляемое приложение уже завергилось
 			var w = new MainWindow(true);

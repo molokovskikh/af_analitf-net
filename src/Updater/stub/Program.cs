@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace test.stub
+namespace stub
 {
 	public class Program
 	{

@@ -49,7 +49,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "updater", "updater", "{5145
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "updater\test\test.csproj", "{18676AB8-9F29-41EC-A633-95CF6F8175C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.stub", "updater\test.stub\test.stub.csproj", "{15062012-5439-48BF-8FB8-62DC3C7B76C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stub", "updater\stub\stub.csproj", "{15062012-5439-48BF-8FB8-62DC3C7B76C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
