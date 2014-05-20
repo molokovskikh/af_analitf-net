@@ -317,6 +317,17 @@ namespace AnalitF.Net.Client.Models
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
 
+		public virtual string Ad
+		{
+			get
+			{
+				var filename = FileHelper.MakeRooted(@"ads\2block.gif");
+				if (File.Exists(filename))
+					return filename;
+				return "";
+			}
+		}
+
 		public virtual IWebProxy GetProxy()
 		{
 			if (ProxyType == ProxyType.None)

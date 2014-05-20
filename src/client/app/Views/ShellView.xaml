@@ -132,10 +132,10 @@
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"
 						Style="{StaticResource ButtonImage}" />
 				</Button>
-				<!--скрыл, пока не реализовано
 				<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"></Image>
-				</Button>-->
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"
+						Style="{StaticResource ButtonImage}" />
+				</Button>
 
 				<Separator />
 

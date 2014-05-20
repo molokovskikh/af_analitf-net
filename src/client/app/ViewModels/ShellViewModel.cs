@@ -21,6 +21,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.Tools;
@@ -33,6 +34,7 @@ using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
+using MinCosts = AnalitF.Net.Client.Views.Offers.MinCosts;
 using SelfClose = AnalitF.Net.Client.Views.Dialogs.SelfClose;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
@@ -134,6 +136,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanSearchOffers");
 					NotifyOfPropertyChange("CanShowMnn");
 					NotifyOfPropertyChange("CanShowPrice");
+					NotifyOfPropertyChange("CanShowMinCosts");
 
 					NotifyOfPropertyChange("CanShowOrders");
 					NotifyOfPropertyChange("CanShowOrderLines");
@@ -444,6 +447,16 @@ namespace AnalitF.Net.Client.ViewModels
 				OpenSinglePrice = true
 			};
 			NavigateRoot(model);
+		}
+
+		public bool CanShowMinCosts
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void ShowMinCosts()
+		{
+			NavigateRoot(new Offers.MinCosts());
 		}
 
 		public bool CanShowMnn

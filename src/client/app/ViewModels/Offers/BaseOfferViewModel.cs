@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
-using Caliburn.Micro;
 using Common.Tools;
-using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Util;
 using ReactiveUI;
 using Message = Common.Tools.Message;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public abstract class BaseOfferViewModel : BaseScreen
 	{

@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;

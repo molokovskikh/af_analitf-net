@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
-using NHibernate.Criterion;
 using NHibernate.Linq;
-using ReactiveUI;
-using Ex=System.Linq.Expressions.Expression;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class SearchOfferViewModel : BaseOfferViewModel
 	{
@@ -31,8 +27,10 @@ namespace AnalitF.Net.Client.ViewModels
 					.ToList())
 				.ToList();
 
-			var prices = Session.Query<Price>().OrderBy(p => p.Name);
-			Prices = prices.Select(p => new Selectable<Price>(p)).ToList();
+			Prices = Session.Query<Price>()
+				.OrderBy(p => p.Name)
+				.Select(p => new Selectable<Price>(p))
+				.ToList();
 			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
 			Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)

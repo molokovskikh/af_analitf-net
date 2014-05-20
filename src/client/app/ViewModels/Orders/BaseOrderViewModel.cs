@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
-using ReactiveUI;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public abstract class BaseOrderViewModel : BaseScreen
 	{

@@ -4,6 +4,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.Views;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;

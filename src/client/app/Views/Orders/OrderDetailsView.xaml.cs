@@ -1,13 +1,11 @@
-﻿using System.Net.Mime;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Views.Orders
 {
 	public partial class OrderDetailsView : UserControl
 	{

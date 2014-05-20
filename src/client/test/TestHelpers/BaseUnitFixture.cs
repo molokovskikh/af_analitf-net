@@ -2,6 +2,7 @@
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Reactive.Testing;

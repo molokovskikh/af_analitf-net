@@ -1,10 +1,9 @@
-﻿using System.Net.Mime;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Views.Orders
 {
 	public partial class HistoryOrdersView : UserControl
 	{

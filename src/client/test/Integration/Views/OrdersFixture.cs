@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using NUnit.Framework;
 using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;

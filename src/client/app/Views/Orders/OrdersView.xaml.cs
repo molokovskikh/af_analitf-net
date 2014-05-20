@@ -6,7 +6,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Views.Orders
 {
 	public partial class OrdersView : UserControl
 	{

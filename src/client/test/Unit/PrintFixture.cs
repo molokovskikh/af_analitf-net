@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit

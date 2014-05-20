@@ -370,6 +370,68 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.synonymfirmcrco
 ");
 			Export(result, sql, "offers", new { ClientCode = user.Client.Id });
 
+			session.CreateSQLQuery(@"
+drop temporary table if exists MinCosts;
+
+CREATE TEMPORARY TABLE MinCosts (
+	Cost DECIMAL(8,2) unsigned,
+	NextCost DECIMAL(8,2) unsigned,
+	ProductId INT unsigned,
+	CatalogId int unsigned,
+	RegionId bigint unsigned,
+	PriceId INT unsigned,
+	UNIQUE MultiK(ProductId, RegionId, Cost)
+) engine = MEMORY;
+
+insert into MinCosts(Cost, ProductId, CatalogId, RegionId)
+select
+	min(c.Cost),
+	c.ProductId,
+	p.CatalogId,
+	c.RegionCode
+from Usersettings.Core c
+	join Farm.Core0 c0 on c0.Id = c.Id
+	join Catalogs.Products p on p.Id = c.ProductId
+where c0.Junk = 0
+group by c.ProductId, c.RegionCode;
+
+UPDATE MinCosts, Usersettings.Core
+SET MinCosts.PriceId = Core.PriceCode
+WHERE Core.ProductId = MinCosts.ProductId
+	and Core.RegionCode = MinCosts.RegionId
+	and Core.Cost = MinCosts.Cost;
+
+drop temporary table if exists NextMinCosts;
+
+CREATE TEMPORARY TABLE NextMinCosts (
+	NextCost DECIMAL(8,2) unsigned,
+	ProductId INT unsigned,
+	RegionId bigint unsigned,
+	UNIQUE MultiK(ProductId, RegionId)
+) engine = MEMORY;
+
+insert into NextMinCosts(NextCost, ProductId, RegionId)
+select min(c.Cost),
+	m.ProductId,
+	m.RegionId
+from Usersettings.Core c
+	join Farm.Core0 c0 on c0.Id = c.Id
+	join MinCosts m on m.ProductId = c.ProductId and m.RegionId = c.RegionCode
+where c.Cost > m.Cost
+	and c0.Junk = 0
+group by m.ProductId, m.RegionId;
+
+update MinCosts m
+join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
+set m.NextCost = n.NextCost;")
+				.ExecuteUpdate();
+			Export(result, "select * from MinCosts", "MinCosts");
+
+			session.CreateSQLQuery(@"
+drop temporary table if exists MinCosts;
+drop temporary table if exists MinCostsNext;")
+				.ExecuteUpdate();
+
 			sql = @"
 select
 	Id,

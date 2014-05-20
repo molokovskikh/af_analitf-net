@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using NUnit.Framework;
 

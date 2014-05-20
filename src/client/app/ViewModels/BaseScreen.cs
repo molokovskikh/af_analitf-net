@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static bool UnitTesting;
 		public static IScheduler TestSchuduler;
 
-		public NotifyValue<Settings> Settings;
+		public NotifyValue<Settings> Settings { get; private set; }
 		public Extentions.WindowManager Manager { get; private set; }
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using NUnit.Framework;

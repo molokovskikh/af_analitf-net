@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -8,11 +9,9 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Common.Tools;
 using NHibernate.Linq;
-using NHibernate.Util;
 using ReactiveUI;
-using System.Reactive.Linq;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class CatalogOfferViewModel : BaseOfferViewModel, IPrintable
 	{

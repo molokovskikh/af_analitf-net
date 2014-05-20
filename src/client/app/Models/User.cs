@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using NHibernate.Mapping;

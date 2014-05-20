@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -20,6 +20,8 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;

@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
-using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -20,12 +14,10 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
-using log4net;
 using Address = AnalitF.Net.Client.Models.Address;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	[DataContract]
 	public class OrdersViewModel : BaseOrderViewModel, IPrintable

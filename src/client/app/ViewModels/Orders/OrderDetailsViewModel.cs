@@ -9,14 +9,13 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
-using Address = AnalitF.Net.Client.Models.Address;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public class OrderDetailsViewModel : BaseScreen, IPrintable
 	{

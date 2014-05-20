@@ -2,7 +2,7 @@
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public class HistoryOrdersViewModel : Screen
 	{

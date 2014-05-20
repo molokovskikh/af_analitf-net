@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using NUnit.Framework;
 using Remotion.Linq.Parsing;
 

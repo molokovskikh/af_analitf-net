@@ -182,6 +182,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(l => l.ServiceFields, c => c.Length(10000));
 			});
 
+			mapper.AfterMapManyToOne += (inspector, member, customizer) => {
+				var propertyInfo = ((PropertyInfo)member.LocalMember);
+				if (propertyInfo.PropertyType == typeof(Price)) {
+					customizer.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
+				}
+			};
 			mapper.AfterMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};

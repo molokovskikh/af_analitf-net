@@ -6,6 +6,8 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;

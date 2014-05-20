@@ -1,4 +1,4 @@
-<UserControl x:Class="AnalitF.Net.Client.Views.CatalogOfferView"
+<UserControl x:Class="AnalitF.Net.Client.Views.Offers.CatalogOfferView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"

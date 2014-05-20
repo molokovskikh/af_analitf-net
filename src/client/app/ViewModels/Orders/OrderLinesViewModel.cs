@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net.Http.Formatting.Parsers;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
-using System.Windows;
-using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -17,11 +11,10 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
-using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	[DataContract]
 	public class OrderLinesViewModel : BaseOrderViewModel, IPrintable

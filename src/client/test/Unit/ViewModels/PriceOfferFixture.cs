@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;

@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Threading;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class WaitViewModel : Screen
 	{

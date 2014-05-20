@@ -36,6 +36,6 @@
 				FontWeight="Bold" />
 		</Grid>
 
-		<Image Height="125" Source="{Binding Ad, Converter={StaticResource UriToBitmap}}" />
+		<Image Height="125" Source="{Binding Settings.Value.Ad, Converter={StaticResource UriToBitmap}}" />
 	</StackPanel>
 </UserControl>

@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.Views;
 using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;

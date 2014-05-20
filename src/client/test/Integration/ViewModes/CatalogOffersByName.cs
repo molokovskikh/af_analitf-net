@@ -3,6 +3,7 @@ using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support.log4net;

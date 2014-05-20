@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 
 namespace AnalitF.Net.Client.Models.Print
 {

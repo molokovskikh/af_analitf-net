@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Windows.Media;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
-using Common.Tools;
 using NHibernate.Linq;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class JunkOfferViewModel : BaseOfferViewModel
 	{

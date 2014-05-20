@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;

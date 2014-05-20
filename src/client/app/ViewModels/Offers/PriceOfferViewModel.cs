@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Documents;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class PriceOfferViewModel : BaseOfferViewModel, IPrintable
 	{

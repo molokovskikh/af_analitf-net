@@ -62,6 +62,12 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var offers = localSession.CreateSQLQuery("select * from offers").List();
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(offers.Count, Is.GreaterThan(0));
+
+			var minCostCount = localSession.Query<MinCost>().Count();
+			Assert.That(minCostCount, Is.GreaterThan(0));
+			var cost = localSession.Query<MinCost>().First();
+			Assert.IsNotNull(cost.Catalog);
+			Assert.IsNotNull(cost.NextCost);
 		}
 
 		[Test]

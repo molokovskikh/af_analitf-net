@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading;
 using AnalitF.Net.Client.Models;
 using ReactiveUI;
 
-namespace AnalitF.Net.Client.ViewModels
+namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class SyncViewModel : WaitViewModel
 	{

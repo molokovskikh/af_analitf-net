@@ -1,6 +1,7 @@
 ﻿using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit.Models

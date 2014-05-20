@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.MySql;
 using Common.NHibernate;
