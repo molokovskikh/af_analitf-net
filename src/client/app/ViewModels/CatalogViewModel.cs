@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
@@ -63,17 +64,32 @@ namespace AnalitF.Net.Client.ViewModels
 				new FilterDeclaration("Все"),
 				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные"),
 				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),
+				new FilterDeclaration("Ожидаемые позиции", "ожидаемым позициям", "только оижадемые позиции"),
 			};
 			CurrentFilter = Filters[0];
 
 			CatalogSearch = false;
+
+			CanAddToAwaited = this
+				.ObservableForProperty(m => (object)m.CurrentCatalog, skipInitial: false)
+				.Merge(this.ObservableForProperty(m => (object)m.CurrentCatalogName))
+				.Select(v => GuessCatalog() != null)
+				.ToValue();
 
 			this.ObservableForProperty(m => m.CurrentCatalogName)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowDescription"));
 
 			this.ObservableForProperty(m => m.CatalogSearch)
 				.Subscribe(_ => NotifyOfPropertyChange("ViewOffersByCatalogVisible"));
+
+			OnCloseDisposable.Add(Disposable.Create(() => {
+				if (ActiveItem is IDisposable) {
+					((IDisposable)ActiveItem).Dispose();
+				}
+			}));
 		}
+
+		public NotifyValue<bool> CanAddToAwaited { get; set; }
 
 		public string SearchText
 		{
@@ -99,6 +115,9 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				ScreenExtensions.TryDeactivate(activeItem, true);
+				if (activeItem is IDisposable) {
+					((IDisposable)activeItem).Dispose();
+				}
 				activeItem = value;
 				if (IsActive) {
 					ScreenExtensions.TryActivate(activeItem);
@@ -362,20 +381,32 @@ namespace AnalitF.Net.Client.ViewModels
 			toRemove.Each(r => Views.Remove(r.Key));
 		}
 
-		public IQueryable<Catalog> ApplyFilter(IQueryable<Catalog> queryable)
+		public void ShowAwaited()
 		{
-			if (!ShowWithoutOffers) {
-				queryable = queryable.Where(c => c.HaveOffers);
-			}
+			Shell.ShowAwaited();
+		}
 
-			if (CurrentFilter == Filters[1]) {
-				queryable = queryable.Where(c => c.VitallyImportant);
-			}
+		public Catalog GuessCatalog()
+		{
+			if (CurrentCatalog != null)
+				return CurrentCatalog;
+			if (CurrentCatalogName != null && ActiveItem is CatalogNameViewModel)
+				return (((CatalogNameViewModel)ActiveItem).Catalogs.Value ?? Enumerable.Empty<Catalog>()).FirstOrDefault();
+			return null;
+		}
 
-			if (CurrentFilter == Filters[2]) {
-				queryable = queryable.Where(c => c.MandatoryList);
+		public IEnumerable<IResult> AddToAwaited()
+		{
+			if (!CanAddToAwaited.Value)
+				yield break;
+			var item = new AwaitedItem(GuessCatalog());
+			string error;
+			if (!item.TrySave(StatelessSession, out error)) {
+				yield return new MessageResult(error, MessageResult.MessageType.Warning);
 			}
-			return queryable;
+			else {
+				yield return new MessageResult("Выбранное наименование добавлено в список ожидаемых позиций.");
+			}
 		}
 	}
 }

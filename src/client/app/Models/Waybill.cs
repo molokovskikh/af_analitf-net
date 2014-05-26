@@ -17,7 +17,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Kpp { get; set; }
 	}
 
-	public class Waybill : BaseStatelessObject, IDataErrorInfo
+	public interface IDataErrorInfo2 : IDataErrorInfo
+	{
+		string[] FieldsForValidate { get; }
+	}
+
+	public class Waybill : BaseStatelessObject, IDataErrorInfo2
 	{
 		private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Waybill));
 
@@ -203,5 +208,13 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual string Error { get; protected set; }
+
+		public virtual string[] FieldsForValidate
+		{
+			get
+			{
+				return new[] { "ProviderDocumentId", "UserSupplierName" };
+			}
+		}
 	}
 }

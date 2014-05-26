@@ -163,6 +163,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (ParentModel.CurrentFilter == ParentModel.Filters[2]) {
 				conditions.Add("c.MandatoryList = 1");
 			}
+			if (ParentModel.CurrentFilter == ParentModel.Filters[3]) {
+				conditions.Add("exists ( select * from AwaitedItems a where a.CatalogId = c.Id )");
+			}
 
 			command.CommandText = "select c.Id, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant"
 				+ " from Catalogs c"

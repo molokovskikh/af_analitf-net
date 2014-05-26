@@ -450,10 +450,10 @@ namespace AnalitF.Net.Test.Integration.Views
 			WaitWindow("АналитФАРМАЦИЯ: Внимание");
 			dispatcher.Invoke(() => {
 				Assert.That(activeWindow.AsText(),
-					Is.StringContaining("Обнаружены препараты," +
-						" предписанные к изъятию, в имеющихся у Вас электронных накладных."));
+					Is.StringContaining("обнаружены препараты," +
+						" предписанные к изъятию, в имеющихся у Вас электронных накладных"));
 			});
-			Click("Show");
+			Click("ShowRejects");
 
 			var model = (WaybillsViewModel)shell.ActiveItem;
 			var view = (FrameworkElement)model.GetView();

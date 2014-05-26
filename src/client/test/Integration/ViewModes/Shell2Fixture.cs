@@ -138,8 +138,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.Reload();
 
 			ContinueWithDialog<SettingsViewModel>(m => {
-				m.Settings.UserName = "test";
-				m.Settings.Password = "123";
+				m.Settings.Value.UserName = "test";
+				m.Settings.Value.Password = "123";
 				m.Save();
 				Deactivate(m);
 			});
@@ -262,12 +262,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			restore = true;
 			var settingsModel = Init<SettingsViewModel>();
-			settingsModel.Settings.OpenRejects = !settingsModel.Settings.OpenRejects;
+			settingsModel.Settings.Value.OpenRejects = !settingsModel.Settings.Value.OpenRejects;
 			settingsModel.Save();
 			Close(settingsModel);
 
 			testScheduler.AdvanceByMs(1000);
-			Assert.AreEqual(settingsModel.Settings.OpenRejects,
+			Assert.AreEqual(settingsModel.Settings.Value.OpenRejects,
 				shell.Settings.Value.OpenRejects);
 		}
 
@@ -284,7 +284,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 					settings = true;
 					stub.Do = c => c.result;
 					var model = (SettingsViewModel)d;
-					model.Settings.Password = "aioxct2";
+					model.Settings.Value.Password = "aioxct2";
 					model.Save();
 					Close(model);
 				}

@@ -7,17 +7,18 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
 using Xceed.Wpf.Toolkit;
 using Action = System.Action;
+using Hyperlink = System.Windows.Documents.Hyperlink;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -110,6 +111,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			var el = activeWindow.FindName(name)
 				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
+			if (el == null)
+				throw new Exception(String.Format("Не могу найти кнопку '{0}'", name));
 			if (el is SplitButton)
 				InternalClick(((SplitButton)el).Descendants<ButtonBase>().First());
 			else

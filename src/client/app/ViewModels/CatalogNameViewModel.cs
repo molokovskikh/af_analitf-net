@@ -119,15 +119,18 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			var queryable = StatelessSession.Query<CatalogName>();
-			if (!ParentModel.ShowWithoutOffers) {
+			if (!ParentModel.ShowWithoutOffers)
 				queryable = queryable.Where(c => c.HaveOffers);
-			}
-			if (ParentModel.CurrentFilter == ParentModel.Filters[1]) {
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 				queryable = queryable.Where(c => c.VitallyImportant);
-			}
-			if (ParentModel.CurrentFilter == ParentModel.Filters[2]) {
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[2])
 				queryable = queryable.Where(c => c.MandatoryList);
-			}
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+				queryable = queryable.Where(n => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog.Name == n));
+
 			if (ParentModel.FiltredMnn != null) {
 				var mnnId = ParentModel.FiltredMnn.Id;
 				queryable = queryable.Where(n => n.Mnn.Id == mnnId);
@@ -155,7 +158,18 @@ namespace AnalitF.Net.Client.ViewModels
 				.Fetch(c => c.Name)
 				.ThenFetch(c => c.Mnn)
 				.Where(c => c.Name.Id == nameId);
-			queryable = ParentModel.ApplyFilter(queryable);
+
+			if (!ParentModel.ShowWithoutOffers)
+				queryable = queryable.Where(c => c.HaveOffers);
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+				queryable = queryable.Where(c => c.VitallyImportant);
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+				queryable = queryable.Where(c => c.MandatoryList);
+
+			if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+				queryable = queryable.Where(c => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog == c));
 
 			Catalogs.Value = queryable
 				.OrderBy(c => c.Form)

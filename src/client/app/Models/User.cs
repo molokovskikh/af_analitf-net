@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq.Observαble;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
@@ -22,6 +23,7 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(OrderLinesDocument).Name + "." + typeof(SentOrderLine).Name, "PSCO" },
 			{ typeof(Batch).Name + "." + typeof(Offer).Name, "PCPL" },
 			{ typeof(Batch).Name + "." + typeof(BatchLine).Name, "PCCO" },
+			{ typeof(Awaited).Name + "." + typeof(Offer).Name, "PCPL" },
 		};
 
 		public static Dictionary<string, string> ShortcutExportMap = new Dictionary<string, string> {
@@ -42,6 +44,9 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(CatalogOfferViewModel).Name + "." + "Offers", "FPCPL" },
 			{ typeof(Batch).Name + "." + typeof(Offer).Name, "FPCPL" },
 			{ typeof(Batch).Name + "." + typeof(BatchLine).Name, "COC" },
+			{ typeof(Awaited).Name + "." + typeof(Offer).Name, "FPCPL" },
+			{ typeof(Awaited).Name + "." + typeof(AwaitedItem).Name, "FPCNF" },
+			{ typeof(MinCosts).Name + "." + "Offers", "FPCPL" },
 		};
 
 		public Permission()

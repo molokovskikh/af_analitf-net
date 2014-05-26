@@ -18,25 +18,37 @@
 			<RowDefinition Height="Auto"></RowDefinition>
 		</Grid.RowDefinitions>
 
-		<StackPanel Style="{StaticResource FilterPanel}"  Grid.Row="0">
-			<ComboBox Style="{StaticResource Filter}" x:Name="Filters" DisplayMemberPath="Name"></ComboBox>
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
 
-			<ToggleButton x:Name="FilterByMnn">
-				<ToggleButton.Style>
-					<Style TargetType="ToggleButton" BasedOn="{StaticResource FilterToggleButton}">
-						<Style.Triggers>
-							<Trigger Property="IsChecked" Value="True">
-								<Setter Property="Content" Value="Убрать синонимы (Esc)"></Setter>
-							</Trigger>
-							<Trigger Property="IsChecked" Value="False">
-								<Setter Property="Content" Value="Показать синонимы (Ctrl+N)"></Setter>
-							</Trigger>
-						</Style.Triggers>
-					</Style>
-				</ToggleButton.Style>
-			</ToggleButton>
-			<Label x:Name="FilterDescription" Foreground="Red"></Label>
-		</StackPanel>
+			<StackPanel Grid.Column="0" Style="{StaticResource FilterPanel}">
+				<ComboBox Style="{StaticResource Filter}" x:Name="Filters" DisplayMemberPath="Name"></ComboBox>
+
+				<ToggleButton x:Name="FilterByMnn">
+					<ToggleButton.Style>
+						<Style TargetType="ToggleButton" BasedOn="{StaticResource FilterToggleButton}">
+							<Style.Triggers>
+								<Trigger Property="IsChecked" Value="True">
+									<Setter Property="Content" Value="Убрать синонимы (Esc)"></Setter>
+								</Trigger>
+								<Trigger Property="IsChecked" Value="False">
+									<Setter Property="Content" Value="Показать синонимы (Ctrl+N)"></Setter>
+								</Trigger>
+							</Style.Triggers>
+						</Style>
+					</ToggleButton.Style>
+				</ToggleButton>
+				<Label x:Name="FilterDescription" Foreground="Red"></Label>
+			</StackPanel>
+
+			<StackPanel HorizontalAlignment="Right" Grid.Column="1" Style="{StaticResource FilterPanel}">
+				<Button Style="{StaticResource FilterElement}" x:Name="AddToAwaited">Добавить в ожидаемые</Button>
+				<Button Style="{StaticResource FilterElement}" x:Name="ShowAwaited">Ожидаемые позиции</Button>
+			</StackPanel>
+		</Grid>
 
 		<ContentControl Grid.Row="1" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
 

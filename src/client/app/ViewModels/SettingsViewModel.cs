@@ -36,8 +36,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
 
-			Settings = Session.Query<Settings>().First();
-			waybillConfig = Settings.Waybills;
+			waybillConfig = Settings.Value.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
 			CurrentAddress = Addresses.FirstOrDefault();
 			DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
@@ -48,18 +47,18 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.SaveEach(newStyles);
 			Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
 
-			Markups = Settings.Markups.Where(t => t.Type == MarkupType.Over)
+			Markups = Settings.Value.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Markups, i => Settings.AddMarkup((MarkupConfig)i));
+				.LinkTo(Settings.Value.Markups, i => Settings.Value.AddMarkup((MarkupConfig)i));
 			MarkupConfig.Validate(Markups);
 
-			VitallyImportantMarkups = Settings.Markups
+			VitallyImportantMarkups = Settings.Value.Markups
 				.Where(t => t.Type == MarkupType.VitallyImportant)
 				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Markups, i => Settings.AddMarkup((MarkupConfig)i));
+				.LinkTo(Settings.Value.Markups, i => Settings.Value.AddMarkup((MarkupConfig)i));
 			MarkupConfig.Validate(VitallyImportantMarkups);
 
-			if (string.IsNullOrEmpty(Settings.UserName))
+			if (string.IsNullOrEmpty(Settings.Value.UserName))
 				SelectedTab.Value = "LoginTab";
 
 			SelectedTab.Changed().Subscribe(_ => lastTab = SelectedTab.Value);
@@ -69,8 +68,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<DirMap> CurrentDirMap { get; set; }
 
 		public NotifyValue<string> SelectedTab { get; set; }
-
-		public new Settings Settings { get; set; }
 
 		public IList<MarkupConfig> Markups { get; set; }
 
@@ -115,7 +112,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Save()
 		{
-			var error = Settings.ValidateMarkups();
+			var error = Settings.Value.ValidateMarkups();
 
 			if (!String.IsNullOrEmpty(error)) {
 				Session.FlushMode = FlushMode.Never;
@@ -126,11 +123,11 @@ namespace AnalitF.Net.Client.ViewModels
 			if (App.Current != null)
 				StyleHelper.BuildStyles(App.Current.Resources, Styles);
 
-			IsCredentialsChanged = Session.IsChanged(Settings, s => s.Password)
-				|| Session.IsChanged(Settings, s => s.UserName);
+			IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
+				|| Session.IsChanged(Settings.Value, s => s.UserName);
 
 			Session.FlushMode = FlushMode.Auto;
-			Settings.ApplyChanges(Session);
+			Settings.Value.ApplyChanges(Session);
 			TryClose();
 		}
 

@@ -20,15 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void OK()
 		{
-			var fields = new [] { "ProviderDocumentId", "UserSupplierName" };
-			foreach (var field in fields) {
-				var error = Waybill[field];
-				if (!string.IsNullOrEmpty(error)) {
-					Manager.Warning(error);
-					return;
-				}
-			}
-			TryClose(true);
+			ValidateAndClose(Waybill);
 		}
 	}
 }

@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Util;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -154,6 +155,12 @@ namespace AnalitF.Net.Client.Helpers
 				query = query.Where(Expression.Lambda<Func<T, bool>>(result, new[] { param }));
 			}
 			return query;
+		}
+
+		public static string DebugDump(object value, Type type, string name)
+		{
+			var p = type.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
+			return String.Format("{0} = {1}", name, p.GetValue(value, null));
 		}
 	}
 }

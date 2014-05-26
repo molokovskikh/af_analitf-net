@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -63,9 +64,14 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(offers.Count, Is.GreaterThan(0));
 
-			var minCostCount = localSession.Query<MinCost>().Count();
+			var catalogId = localSession.Query<Offer>()
+				.Where(o => !o.Junk).GroupBy(o => o.CatalogId)
+				.Where(g => g.Count() > 1)
+				.Select(g => g.Key)
+				.First();
+		var minCostCount = localSession.Query<MinCost>().Count();
 			Assert.That(minCostCount, Is.GreaterThan(0));
-			var cost = localSession.Query<MinCost>().First();
+			var cost = localSession.Query<MinCost>().First(m => m.Catalog.Id == catalogId);
 			Assert.IsNotNull(cost.Catalog);
 			Assert.IsNotNull(cost.NextCost);
 		}
@@ -368,6 +374,24 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var schedules = localSession.Query<Schedule>().ToArray();
 			Assert.AreEqual(1, schedules.Length);
 			Assert.AreEqual(new TimeSpan(14, 0, 0), schedules[0].UpdateAt);
+		}
+
+		[Test]
+		public void Notify_on_awaited()
+		{
+			localSession.DeleteEach<AwaitedItem>();
+
+			var offer = localSession.Query<Offer>().First();
+			var catalog = localSession.Load<Catalog>(offer.CatalogId);
+			var item = new AwaitedItem(catalog);
+			localSession.Save(item);
+
+			var cmd = new UpdateCommand();
+			Run(cmd);
+
+			var model = ((PostUpdate)((DialogResult)cmd.Results[0]).Model);
+			Assert.That(model.Text, Is.StringContaining("появились препараты, которые включены Вами в список ожидаемых позиций"));
+			Assert.IsTrue(model.IsAwaited);
 		}
 	}
 }

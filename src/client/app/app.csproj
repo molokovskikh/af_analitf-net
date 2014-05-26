@@ -189,6 +189,7 @@
     <Compile Include="Controls\SaneCheckboxEditor.cs" />
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
+    <Compile Include="Controls\ComboBox2.cs" />
     <Compile Include="Controls\TransitionContent.cs" />
     <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />
@@ -214,6 +215,7 @@
     <Compile Include="Helpers\WpfHelper.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\Attachment.cs" />
+    <Compile Include="Models\AwaitedItem.cs" />
     <Compile Include="Models\BaseOffer.cs" />
     <Compile Include="Models\BaseStatelessObject.cs" />
     <Compile Include="Models\BatchLine.cs" />
@@ -243,6 +245,7 @@
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\News.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\Print\AwaitedDocument.cs" />
     <Compile Include="Models\Print\BaseDocument.cs" />
     <Compile Include="Models\Print\BatchReport.cs" />
     <Compile Include="Models\Print\CatalogOfferDocument.cs" />
@@ -295,6 +298,8 @@
     <Compile Include="UI\Conventions.cs" />
     <Compile Include="UI\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Offers\AddAwaited.cs" />
+    <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\Offers\MinCosts.cs" />
     <Compile Include="ViewModels\Orders\BaseOrderViewModel.cs" />
@@ -379,6 +384,12 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Offers\AddAwaited.xaml.cs">
+      <DependentUpon>AddAwaited.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Offers\Awaited.xaml.cs">
+      <DependentUpon>Awaited.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\MinCosts.xaml.cs">
       <DependentUpon>MinCosts.xaml</DependentUpon>
@@ -549,6 +560,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Offers\AddAwaited.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Offers\Awaited.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

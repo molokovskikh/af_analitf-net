@@ -245,15 +245,22 @@ namespace AnalitF.Net.Client.Models.Commands
 					.ExecuteUpdate();
 			}
 
-			CalculateRejects(settings);
+			var imports = data.Select(d => Path.GetFileNameWithoutExtension(d.Item1));
+			var offersImported = imports.Contains("offers", StringComparer.OrdinalIgnoreCase);
+			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
+
+			var isRejected = CalculateRejects(settings);
+			var isAwaited = offersImported && CalculateAwaited();
+
+			if (isAwaited || isRejected) {
+				Results.Add(new DialogResult(new PostUpdate(isRejected, isAwaited), sizeToContent: true));
+				result = UpdateResult.SilentOk;
+			}
 
 			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
 				SuccessMessage = "Новых файлов документов нет.";
 			}
 
-			var imports = data.Select(d => Path.GetFileNameWithoutExtension(d.Item1));
-			var offersImported = imports.Contains("offers", StringComparer.OrdinalIgnoreCase);
-			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
 			if (offersImported) {
 				var user = Session.Query<User>().First();
 				if (user.IsDeplayOfPaymentEnabled) {
@@ -290,6 +297,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Confirm(), "Подтверждение обновления");
+		}
+
+		private bool CalculateAwaited()
+		{
+			return Session.CreateSQLQuery(@"
+select count(*)
+from AwaitedItems a
+join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a.ProducerId is null)")
+				.UniqueResult<long?>() > 0;
 		}
 
 		private void ProcessAttachments(ResultDir[] resultDirs)
@@ -383,9 +399,6 @@ namespace AnalitF.Net.Client.Models.Commands
 					.ExecuteUpdate();
 				Session.CreateSQLQuery("update Waybills set IsRejectChanged = 1 where IsRejectChanged = 2")
 					.ExecuteUpdate();
-
-				Results.Add(new DialogResult(new PostUpdate(), sizeToContent: true));
-				result = UpdateResult.SilentOk;
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
 				.ExecuteUpdate();

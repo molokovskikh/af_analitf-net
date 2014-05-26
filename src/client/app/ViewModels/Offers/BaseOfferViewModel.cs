@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Util;
 using ReactiveUI;
@@ -223,6 +224,21 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (Shell != null) {
 				Shell.AutoCommentText = AutoCommentText;
 				Shell.ResetAutoComment = ResetAutoComment;
+			}
+
+			if (Session != null) {
+				var newLines = Addresses.Where(a => NHibernateUtil.IsInitialized(a.Orders))
+					.SelectMany(a => a.Orders)
+					.Where(o => NHibernateUtil.IsInitialized(o.Lines))
+					.SelectMany(o => o.Lines)
+					.Where(l => l.Id == 0)
+					.ToList();
+				if (newLines.Count > 0) {
+					var condition = newLines.Implode(l => String.Format("(a.CatalogId = {0} and (a.ProducerId = {1} or a.Producerid is null))",
+						l.CatalogId, l.ProducerId != null ? l.ProducerId.ToString() : "null"), " or ");
+					Session.CreateSQLQuery(String.Format("delete a from AwaitedItems a where {0}", condition))
+						.ExecuteUpdate();
+				}
 			}
 
 			base.OnDeactivate(close);

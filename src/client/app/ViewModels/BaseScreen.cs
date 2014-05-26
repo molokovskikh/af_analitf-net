@@ -354,5 +354,17 @@ namespace AnalitF.Net.Client.ViewModels
 				log.Error(String.Format("Ошибка при освобождении объекта {0} {1}", GetType(), GetHashCode()), e);
 			}
 		}
+
+		protected void ValidateAndClose(IDataErrorInfo2 item)
+		{
+			foreach (var field in item.FieldsForValidate) {
+				var error = item[field];
+				if (!string.IsNullOrEmpty(error)) {
+					Manager.Warning(error);
+					return;
+				}
+			}
+			TryClose(true);
+		}
 	}
 }

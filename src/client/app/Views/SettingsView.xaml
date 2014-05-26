@@ -125,7 +125,7 @@
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройки поставщиков" Name="DirMapTab"
-				Visibility="{Binding Settings.GroupWaybillsBySupplier,
+				Visibility="{Binding Settings.Value.GroupWaybillsBySupplier,
 					Converter={StaticResource BoolToCollapsed}}">
 				<StackPanel>
 					<Label>Поставщик</Label>
@@ -163,8 +163,8 @@
 						Устанавливать удаленное соединение
 					</CheckBox>
 					<ComboBox Style="{StaticResource Select}"
-						ItemsSource="{Binding Settings.RasConnections}"
-						SelectedItem="{Binding Settings.RasConnection}" />
+						ItemsSource="{Binding Settings.Value.RasConnections}"
+						SelectedItem="{Binding Settings.Value.RasConnection}" />
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">
@@ -174,7 +174,7 @@
 					<TextBox x:Name="Settings_UserName"></TextBox>
 					<Label>Пароль</Label>
 					<PasswordBox x:Name="Settings_Password"
-						Binders:ContentElementBinder.Password="{Binding Path=Settings.Password,
+						Binders:ContentElementBinder.Password="{Binding Settings.Value.Password,
 							Mode=TwoWay,
 							UpdateSourceTrigger=PropertyChanged}" />
 				</StackPanel>
@@ -190,11 +190,11 @@
 						</Grid.ColumnDefinitions>
 						<StackPanel Grid.Column="0">
 							<Label>Адрес</Label>
-							<TextBox IsEnabled="{Binding Settings.CanConfigureProxy}" x:Name="Settings_ProxyHost" />
+							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyHost" />
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Порт</Label>
-							<TextBox IsEnabled="{Binding Settings.CanConfigureProxy}" x:Name="Settings_ProxyPort" />
+							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyPort" />
 						</StackPanel>
 					</Grid>
 					<Grid>
@@ -204,12 +204,12 @@
 						</Grid.ColumnDefinitions>
 						<StackPanel Grid.Column="0">
 							<Label>Имя</Label>
-							<TextBox IsEnabled="{Binding Settings.CanConfigureProxy}" x:Name="Settings_ProxyUserName" />
+							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyUserName" />
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Пароль</Label>
-							<PasswordBox IsEnabled="{Binding Settings.CanConfigureProxy}" x:Name="Settings_ProxyPassword"
-								Binders:ContentElementBinder.Password="{Binding Path=Settings.ProxyPassword,
+							<PasswordBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyPassword"
+								Binders:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
 									Mode=TwoWay,
 									UpdateSourceTrigger=PropertyChanged}" />
 						</StackPanel>
@@ -308,40 +308,40 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_PriceTag_Type" />
 					<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Удалять непечатаемые элементы
 					</CheckBox>
 					<Label>Печатаемые элементы ценника</Label>
 					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Наименование
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintCountry"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Страна
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProducer"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Производитель
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Срок годности
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Номер накладной
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Поставщик
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Серия товара
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
-						IsEnabled="{Binding Settings.PriceTag.IsConfigurable}">
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Дата накладной
 					</CheckBox>
 				</StackPanel>

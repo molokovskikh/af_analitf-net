@@ -26,7 +26,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Calculate_base_category()
 		{
-			model.Settings.GroupByProduct = !model.Settings.GroupByProduct;
+			model.Settings.Value.GroupByProduct = !model.Settings.Value.GroupByProduct;
 			model.Save();
 		}
 
@@ -64,7 +64,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Do_not_flush_changes_by_default()
 		{
 			var value = Generator.Random(10000).First();
-			model.Settings.OverCostWarningPercent = value;
+			model.Settings.Value.OverCostWarningPercent = value;
 			Close(model);
 			session.Refresh(settings);
 			Assert.That(settings.OverCostWarningPercent, Is.Not.EqualTo(value));

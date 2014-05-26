@@ -121,13 +121,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(p => p.Body, c => c.Length(10000));
 			});
 
-			mapper.Class<DelayOfPayment>(m => {
-				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
-			});
-
 			mapper.Class<Order>(m => {
 				m.Property(o => o.Frozen, om => om.Access(Accessor.Field));
-				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				m.ManyToOne(o => o.MinOrderSum, c => {
 					c.Columns(cm => cm.Name("AddressId"), cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
@@ -156,7 +151,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 			}));
 			mapper.Class<Offer>(m => {
 				m.ManyToOne(o => o.Price, c => {
-					c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
 					c.Update(false);
 				});
@@ -165,7 +159,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 					cm => cm.Name("LeaderRegionId")));
 			});
 			mapper.Class<SentOrder>(m => {
-				m.ManyToOne(o => o.Price, c => c.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
 				m.Bag(o => o.Lines, c => {
 					c.Key(k => k.Column("OrderId"));
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
@@ -181,14 +174,12 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(l => l.Comment, c => c.Length(10000));
 				m.Property(l => l.ServiceFields, c => c.Length(10000));
 			});
+			mapper.Class<AwaitedItem>(i => {
+				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
+				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
+			});
 
-			mapper.AfterMapManyToOne += (inspector, member, customizer) => {
-				var propertyInfo = ((PropertyInfo)member.LocalMember);
-				if (propertyInfo.PropertyType == typeof(Price)) {
-					customizer.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
-				}
-			};
-			mapper.AfterMapClass += (inspector, type, customizer) => {
+			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 			};
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
@@ -216,7 +207,13 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
 			};
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => {
-				customizer.Column(member.LocalMember.Name + "Id");
+				var propertyInfo = ((PropertyInfo)member.LocalMember);
+				if (propertyInfo.PropertyType == typeof(Price)) {
+					customizer.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
+				}
+				else {
+					customizer.Column(member.LocalMember.Name + "Id");
+				}
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;

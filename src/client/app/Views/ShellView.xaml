@@ -133,6 +133,10 @@
 						Style="{StaticResource ButtonImage}" />
 				</Button>
 				<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены">
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Yellow_32.ico"
+						Style="{StaticResource ButtonImage}" />
+				</Button>
+				<Button x:Name="ShowAwaited" ToolTip="Ожидаемые позиции">
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"
 						Style="{StaticResource ButtonImage}" />
 				</Button>

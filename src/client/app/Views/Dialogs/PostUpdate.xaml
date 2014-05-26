@@ -18,8 +18,15 @@
 		<Label Name="Header" FontWeight="Bold" />
 		<TextBlock Padding="5" Name="Text" TextWrapping="Wrap" />
 		<StackPanel Orientation="Horizontal">
-			<Button Name="Show" Margin="4">Показать накладные</Button>
-			<Button Name="TryClose" Margin="4">Отмена</Button>
+			<Button Name="TryClose" Margin="4" MinWidth="30">ОК</Button>
+			<Button Name="ShowRejects" Margin="4"
+				Visibility="{Binding IsRejected, Converter={StaticResource BoolToCollapsed}}">
+				Показать забраковку
+			</Button>
+			<Button Name="ShowAwaited" Margin="4"
+				Visibility="{Binding IsAwaited, Converter={StaticResource BoolToCollapsed}}">
+				Показать ожидаемые позиции
+			</Button>
 		</StackPanel>
 	</StackPanel>
 </UserControl>

@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			DisplayName = "Минимальные цены";
 			CurrentCost = new NotifyValue<MinCost>();
 			Diff = new NotifyValue<int>(7);
-			SearchBehavior = new SearchBehavior(this);
+			SearchBehavior = new SearchBehavior(this, callUpdate: false);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

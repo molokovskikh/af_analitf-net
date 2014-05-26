@@ -459,6 +459,16 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Offers.MinCosts());
 		}
 
+		public bool CanShowAwaited
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public void ShowAwaited()
+		{
+			NavigateRoot(new Awaited());
+		}
+
 		public bool CanShowMnn
 		{
 			get { return Settings.Value.LastUpdate != null; }
