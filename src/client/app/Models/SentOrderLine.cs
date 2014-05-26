@@ -14,6 +14,7 @@ namespace AnalitF.Net.Client.Models
 			: base(orderLine)
 		{
 			Order = order;
+			ServerOrderId = order.ServerId;
 			Count = orderLine.Count;
 			Comment = orderLine.Comment;
 			ResultCost = orderLine.ResultCost;
@@ -23,6 +24,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Id { get; set; }
 
 		public virtual uint? ServerId { get; set; }
+
+		public virtual ulong? ServerOrderId { get; set; }
 
 		public virtual uint Count { get; set; }
 

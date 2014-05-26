@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
+using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using log4net;
@@ -8,6 +12,18 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Service.Controllers
 {
+	//нужен тк MainController уже определяет get но с параметрами
+	public class JobController2 : JobController
+	{
+		public HttpResponseMessage Get()
+		{
+			var existsJob = TryFindJob(false, GetType().Name);
+			if (existsJob == null)
+				return new HttpResponseMessage(HttpStatusCode.Accepted);
+			return existsJob.ToResult(Config);
+		}
+	}
+
 	public class JobController : ApiController
 	{
 		protected static ILog Log;
@@ -37,6 +53,13 @@ namespace AnalitF.Net.Service.Controllers
 					existsJob = null;
 			}
 			return existsJob;
+		}
+
+		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)
+		{
+			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
+			RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory, cmd);
+			return existsJob.ToResult(Config);
 		}
 	}
 }

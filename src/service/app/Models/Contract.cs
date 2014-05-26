@@ -27,6 +27,13 @@ namespace AnalitF.Net.Client.Models
 		public OrderLine[] Items;
 	}
 #endif
+
+	public class HistoryRequest
+	{
+		public uint[] WaybillIds;
+		public ulong[] OrderIds;
+	}
+
 	public class SyncRequest
 	{
 		public PriceSettings[] Prices;

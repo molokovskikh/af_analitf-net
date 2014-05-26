@@ -58,6 +58,7 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllText("update\\version.txt", "1.2");
 			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[] { 0x00 });
 
+			exporter.ExportAll();
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
 
@@ -67,6 +68,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_meta()
 		{
+			exporter.ExportAll();
 			ExportCompressed();
 			var zipEntries = ZipHelper.lsZip(file).Implode();
 
@@ -86,6 +88,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			DataMother.News(session);
 
+			exporter.ExportAll();
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
 			Assert.IsTrue(files.Any(f => Regex.IsMatch(f, @"newses/\d+.html")), files.Implode());
@@ -99,6 +102,7 @@ namespace AnalitF.Net.Service.Test
 			exporter.AdsPath = "ads";
 			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 } );
 
+			exporter.ExportAll();
 			ExportCompressed();
 			var zipEntries = ZipHelper.lsZip(file);
 
@@ -146,7 +150,7 @@ namespace AnalitF.Net.Service.Test
 			session.Save(sendLog);
 			var waybillFile = waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
 
-			exporter.UpdateType = "Waybills";
+			exporter.ExportDocs();
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file).Implode();
 			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
@@ -164,7 +168,7 @@ namespace AnalitF.Net.Service.Test
 
 		private void ExportCompressed()
 		{
-			file = exporter.ExportCompressed(file);
+			file = exporter.Compress(file);
 		}
 	}
 }

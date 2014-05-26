@@ -43,12 +43,35 @@ namespace AnalitF.Net.Client.Models.Commands
 			Configure(new SanityCheck()).Check();
 
 			var settings = Session.Query<Settings>().First();
-			var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
-			foreach (var waybill in newWaybills)
-				waybill.Calculate(settings);
+			if (IsImported<SentOrder>()) {
+				Session.CreateSQLQuery(@"
+update SentOrderLines l
+	join SentOrders o on l.ServerOrderId = o.ServerId
+set l.OrderId = o.Id
+where l.OrderId is null;
+
+update SentOrders o
+set Sum = (select sum(round(l.Cost * l.Count, 2)) from SentOrderLines l where l.OrderId = o.Id),
+	LinesCount = (select count(*) from SentOrderLines l where l.OrderId = o.Id)
+where Sum = 0;")
+					.ExecuteUpdate();
+			}
+
+			if (IsImported<Waybill>()) {
+				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
+				foreach (var waybill in newWaybills)
+					waybill.Calculate(settings);
+			}
 
 			settings.LastUpdate = DateTime.Now;
 			settings.ApplyChanges(Session);
+		}
+
+		private bool IsImported<T>()
+		{
+			return data
+				.Select(d => Path.GetFileNameWithoutExtension(d.Item1))
+				.Contains(Inflector.Inflector.Pluralize(typeof(T).Name), StringComparer.CurrentCultureIgnoreCase);
 		}
 
 		private string BuildSql(System.Tuple<string, string[]> table)

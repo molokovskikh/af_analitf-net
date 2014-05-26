@@ -31,7 +31,13 @@ namespace AnalitF.Net.Client.Models
 	{
 		public static bool Debug;
 
-		public void Check(bool updateSchema = false)
+		/// <summary>
+		/// true - если схема была обновлена
+		/// false - если схема не обновлялась
+		/// </summary>
+		/// <param name="updateSchema"></param>
+		/// <returns></returns>
+		public bool Check(bool updateSchema = false)
 		{
 			if (!Directory.Exists(Config.DbDir)) {
 				Directory.CreateDirectory(Config.DbDir);
@@ -65,7 +71,9 @@ namespace AnalitF.Net.Client.Models
 			if (crushOnFirstTry) {
 				UpgradeSchema();
 				CheckSettings(true);
+				return true;
 			}
+			return false;
 		}
 
 		private bool CheckSettings(bool overrideHash)

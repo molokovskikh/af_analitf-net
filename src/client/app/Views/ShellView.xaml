@@ -63,6 +63,7 @@
 			<MenuItem Header="Сервис">
 				<MenuItem Header="Конфигурация" cal:Message.Attach="ShowSettings" />
 				<MenuItem Header="Журнал загрузок" cal:Message.Attach="ShowJournal" />
+				<MenuItem Header="Минипочта" cal:Message.Attach="ShowMails" />
 				<MenuItem Header="Восстановление базы данных" cal:Message.Attach="CheckDb" />
 				<MenuItem Header="Служебные">
 					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4"
@@ -70,6 +71,8 @@
 					<Separator />
 					<MenuItem Header="Создание базы данных с сохранение отправленных заказов"
 						cal:Message.Attach="CleanDb" />
+					<MenuItem Header="Загрузить историю заказов/накладных"
+						cal:Message.Attach="LoadHistory" />
 				</MenuItem>
 			</MenuItem>
 

@@ -393,5 +393,35 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(model.Text, Is.StringContaining("появились препараты, которые включены Вами в список ожидаемых позиций"));
 			Assert.IsTrue(model.IsAwaited);
 		}
+
+		[Test]
+		public void Load_history()
+		{
+			var priceId = localSession.Query<Offer>().First().Price.Id.PriceId;
+			var user = ServerUser();
+			var activePrices = user.GetActivePricesNaked(session);
+			var price = activePrices.Where(p => p.Id.PriceId == priceId)
+				.Concat(activePrices)
+				.First()
+				.Price;
+			var order = new TestOrder(user, price) {
+				Submited = true,
+				Processed = true
+			};
+			var offer = session.Query<TestCore>().First(c => c.Price == price);
+			order.AddItem(offer, 1);
+			session.Save(order);
+			localSession.DeleteEach<SentOrder>();
+
+			var cmd = new UpdateCommand {
+				SyncData = "History"
+			};
+			Run(cmd);
+
+			Assert.That(localSession.Query<SentOrder>().Count(), Is.GreaterThan(0));
+			var localOrder = localSession.Query<SentOrder>().First(o => o.ServerId == order.Id);
+			Assert.AreEqual(1, localOrder.Lines.Count);
+			Assert.AreEqual(1, localOrder.LinesCount);
+		}
 	}
 }

@@ -104,13 +104,15 @@ namespace AnalitF.Net.Test.Integration
 
 		private bool IsClientStale()
 		{
-			var sanityCheck = new SanityCheck();
-			sanityCheck.Config = clientConfig;
-			sanityCheck.Check();
 			using(var session = Factory.OpenSession()) {
 				var user = session.Query<User>().FirstOrDefault();
-				return user == null || serverUserId != user.Id;
+				if (user == null || serverUserId != user.Id)
+					return true;
 			}
+			var sanityCheck = new SanityCheck();
+			sanityCheck.Config = clientConfig;
+			//если схема изменилась нужно обновить эталонную копию, иначе в эталонной копии не будет полей
+			return sanityCheck.Check();
 		}
 
 		public static ISessionFactory ServerNHConfig(string connectionStringName)

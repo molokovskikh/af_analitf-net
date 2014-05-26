@@ -20,16 +20,8 @@ using SmartOrderFactory.Domain;
 
 namespace AnalitF.Net.Service.Controllers
 {
-	public class BatchController : JobController
+	public class BatchController : JobController2
 	{
-		public HttpResponseMessage Get()
-		{
-			var existsJob = TryFindJob(false, "SmartOrder");
-			if (existsJob == null)
-				return new HttpResponseMessage(HttpStatusCode.Accepted);
-			return existsJob.ToResult(Config);
-		}
-
 		public HttpResponseMessage Post(HttpRequestMessage request)
 		{
 			var input = request.Content.ReadAsStreamAsync().Result;
@@ -47,61 +39,59 @@ namespace AnalitF.Net.Service.Controllers
 				payloadStream.Position = 0;
 			}
 
-			var existsJob  = new RequestLog(CurrentUser, Request, "SmartOrder");
-			RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
-				(session, config, job) => {
-					try {
-						List<Order> orders;
-						List<OrderBatchItem> batchItems;
-						var batchAddress = session.Load<Address>(requestMeta.AddressId);
-						using (payloadStream) {
-							var handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
-							orders = handler.ProcessOrderBatch();
-							batchItems = handler.OrderBatchItems;
-							orders.Each(o => o.RowId = (uint)o.GetHashCode());
-							orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
-						}
+			return StartJob((session, config, job) => {
+				try {
+					List<Order> orders;
+					List<OrderBatchItem> batchItems;
+					var batchAddress = session.Load<Address>(requestMeta.AddressId);
+					using (payloadStream) {
+						var handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
+						orders = handler.ProcessOrderBatch();
+						batchItems = handler.OrderBatchItems;
+						orders.Each(o => o.RowId = (uint)o.GetHashCode());
+						orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
+					}
 
-						using(var exporter = new Exporter(session, config, job)) {
-							exporter.Orders = orders;
-							exporter.BatchItems = batchItems;
-							exporter.BatchAddress = batchAddress;
-							exporter.ExportCompressed(job.OutputFile(Config));
-						}
+					using(var exporter = new Exporter(session, config, job)) {
+						exporter.Orders = orders;
+						exporter.BatchItems = batchItems;
+						exporter.BatchAddress = batchAddress;
+						exporter.ExportAll();
+						exporter.Compress(job.OutputFile(Config));
 					}
-					catch(SmartOrderException e) {
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = e.Message;
-						job.Faulted(e);
-					}
-					catch(ExcelException e) {
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
-						job.Faulted(e);
-					}
-					catch(XmlException e) {
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
-						job.Faulted(e);
-					}
-					catch(DbfException e) {
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
-						job.Faulted(e);
-					}
-					catch(DuplicateNameException e) {
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
-						job.Faulted(e);
-					}
-					catch(IndexOutOfRangeException e) {
-						//это исключение возникнет в DefaultSource если на вход сунуть какую нибудь ерунду
-						Log.Warn("Ошибка при обработке автозаказа", e);
-						job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
-						job.Faulted(e);
-					}
-				});
-			return existsJob.ToResult(Config);
+				}
+				catch(SmartOrderException e) {
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = e.Message;
+					job.Faulted(e);
+				}
+				catch(ExcelException e) {
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+					job.Faulted(e);
+				}
+				catch(XmlException e) {
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+					job.Faulted(e);
+				}
+				catch(DbfException e) {
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+					job.Faulted(e);
+				}
+				catch(DuplicateNameException e) {
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+					job.Faulted(e);
+				}
+				catch(IndexOutOfRangeException e) {
+					//это исключение возникнет в DefaultSource если на вход сунуть какую нибудь ерунду
+					Log.Warn("Ошибка при обработке автозаказа", e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
+					job.Faulted(e);
+				}
+			});
 		}
 	}
 }

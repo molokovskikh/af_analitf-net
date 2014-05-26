@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Execute(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = User(session);
 			var client = user.Client;
 			var user2 = client.CreateUser(session);
 			user2.AvaliableAddresses.AddEach(client.Addresses);
@@ -46,9 +46,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				.Concat(activePrices)
 				.First()
 				.Price;
-			var order = new TestOrder(user2, price);
-			order.Submited = false;
-			order.Processed = false;
+			var order = new TestOrder(user2, price) {
+				Submited = false,
+				Processed = false
+			};
 			var offer = session.Query<TestCore>().First(c => c.Price == price);
 			order.AddItem(offer, 1);
 			session.Save(order);

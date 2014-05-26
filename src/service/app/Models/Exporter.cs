@@ -73,8 +73,7 @@ namespace AnalitF.Net.Service.Models
 		private ClientSettings clientSettings;
 		private OrderRules orderRules;
 		private Version version;
-
-		public string UpdateType;
+		private List<UpdateData> result = new List<UpdateData>();
 
 		public Config.Config Config;
 
@@ -95,7 +94,6 @@ namespace AnalitF.Net.Service.Models
 		{
 			this.session = session;
 			version = job.Version;
-			UpdateType = job.UpdateType;
 			Prefix = job.Id.ToString();
 
 			ResultPath = config.ResultPath;
@@ -216,33 +214,7 @@ where a.UserId = ?userId
 	and up.Type in (1, 2)";
 			Export(result, sql, "Permissions", new { userId = user.Id });
 
-			sql = @"
-drop temporary table if exists Usersettings.MaxProducerCosts;
-create temporary table Usersettings.MaxProducerCosts(
-	Id bigint unsigned not null,
-	ProductId int unsigned not null,
-	CatalogId int unsigned not null,
-	ProducerId int unsigned,
-	Producer varchar(255),
-	Product varchar(255),
-	Cost decimal not null,
-	primary key(id),
-	key(ProductId, ProducerId)
-) engine=memory;
-
-insert into Usersettings.MaxProducerCosts(Id, ProductId, CatalogId, ProducerId, Cost, Product, Producer)
-select c0.Id, c0.ProductId, c.Id, c0.CodeFirmCr, cc.Cost, s.Synonym, sfc.Synonym
-from Farm.Core0 c0
-	join Farm.CoreCosts cc on cc.Core_Id = c0.Id
-	join Catalogs.Products p on p.Id = c0.ProductId
-		join Catalogs.Catalog c on c.Id = p.CatalogId
-	join Farm.Synonym s on s.SynonymCode = c0.SynonymCode
-	left join Farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = c0.SynonymFirmCrCode
-where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
-			session.CreateSQLQuery(sql)
-				.SetParameter("priceId", MaxProducerCostPriceId)
-				.SetParameter("costId", MaxProducerCostCostId)
-				.ExecuteUpdate();
+			CreateMaxProducerCosts();
 
 			sql = @"
 select
@@ -540,8 +512,40 @@ where PublicationDate < curdate() + interval 1 day
 
 			ExportPromotions(result);
 			ExportMails(result);
-			ExportDocs(result);
+			ExportDocs();
 			ExportOrders(result);
+		}
+
+		private void CreateMaxProducerCosts()
+		{
+			string sql;
+			sql = @"
+drop temporary table if exists Usersettings.MaxProducerCosts;
+create temporary table Usersettings.MaxProducerCosts(
+	Id bigint unsigned not null,
+	ProductId int unsigned not null,
+	CatalogId int unsigned not null,
+	ProducerId int unsigned,
+	Producer varchar(255),
+	Product varchar(255),
+	Cost decimal not null,
+	primary key(id),
+	key(ProductId, ProducerId)
+) engine=memory;
+
+insert into Usersettings.MaxProducerCosts(Id, ProductId, CatalogId, ProducerId, Cost, Product, Producer)
+select c0.Id, c0.ProductId, c.Id, c0.CodeFirmCr, cc.Cost, s.Synonym, sfc.Synonym
+from Farm.Core0 c0
+	join Farm.CoreCosts cc on cc.Core_Id = c0.Id
+	join Catalogs.Products p on p.Id = c0.ProductId
+		join Catalogs.Catalog c on c.Id = p.CatalogId
+	join Farm.Synonym s on s.SynonymCode = c0.SynonymCode
+	left join Farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = c0.SynonymFirmCrCode
+where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
+			session.CreateSQLQuery(sql)
+				.SetParameter("priceId", MaxProducerCostPriceId)
+				.SetParameter("costId", MaxProducerCostCostId)
+				.ExecuteUpdate();
 		}
 
 		private void ExportPromotions(List<UpdateData> result)
@@ -936,7 +940,86 @@ group by ol.RowId";
 			Export(result, sql, "OrderLines", new { userId = user.Id }, false);
 		}
 
-		private void ExportDocs(List<UpdateData> result)
+		public void ExportSentOrders(ulong[] existOrderIds)
+		{
+			if (user.AvaliableAddresses.Count == 0)
+				return;
+
+			CreateMaxProducerCosts();
+			var condition = new StringBuilder("where oh.UserId = ?userId and oh.Deleted = 0");
+			if (existOrderIds.Length > 0) {
+				condition.Append(" and oh.RowId not in (");
+				condition.Append(String.Join(", ", existOrderIds));
+				condition.Append(") ");
+			}
+			condition.Append(" and oh.AddressId in (");
+			condition.Append(user.AvaliableAddresses.Implode(a => a.Id));
+			condition.Append(") ");
+
+			var sql = String.Format(@"
+select oh.RowId as ServerId,
+	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as CreatedOn,
+	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as SentOn,
+	convert_tz(oh.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
+	oh.AddressId,
+	oh.PriceCode as PriceId,
+	oh.RegionCode as RegionId,
+	oh.ClientAddition as Comment
+from Orders.OrdersHead oh
+{0}", condition);
+			Export(result, sql, "SentOrders", new { userId = user.Id }, false);
+
+			sql = String.Format(@"
+select ol.RowId as ServerId,
+	oh.RowId as ServerOrderId,
+	ol.Quantity as Count,
+	p.Id as ProductId,
+	p.CatalogId as CatalogId,
+	ol.SynonymCode as ProductSynonymId,
+	pr.Name as Producer,
+	ol.CodeFirmCr as ProducerId,
+	ol.SynonymFirmCrCode as ProducerSynonymId,
+	ol.Code,
+	ol.CodeCr,
+	oo.Unit,
+	oo.Volume,
+	oo.Quantity,
+	oo.Note,
+	oo.Period,
+	oo.Doc,
+	ol.Junk,
+	oo.MinBoundCost,
+	oo.MaxBoundCost,
+	oo.VitallyImportant,
+	oo.RegistryCost,
+	mx.Cost as MaxProducerCost,
+	ol.RequestRatio,
+	ol.OrderCost as MinOrderSum,
+	ol.MinOrderCount,
+	oo.ProducerCost,
+	oo.NDS,
+	ol.EAN13,
+	ol.CodeOKP,
+	ol.Series,
+	st.Synonym as ProductSynonym,
+	si.Synonym as ProducerSynonym,
+	ol.Cost,
+	oh.RegionCode as RegionId,
+	ol.CoreId as OfferId
+from Orders.OrdersHead oh
+	join Orders.OrdersList ol on ol.OrderId = oh.RowId
+		join Catalogs.Products p on p.Id = ol.ProductId
+		left join farm.synonymArchive st on st.SynonymCode = ol.SynonymCode
+		left join farm.synonymFirmCr si on si.SynonymFirmCrCode = ol.SynonymFirmCrCode
+		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
+		left join Orders.OrderedOffers oo on oo.Id = ol.RowId
+		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
+{0}
+group by ol.RowId", condition);
+			Export(result, sql, "SentOrderLines", new { userId = user.Id }, false);
+		}
+
+		public void ExportDocs()
 		{
 			string sql;
 
@@ -947,7 +1030,6 @@ group by ol.RowId";
 
 			var logs = session.Query<DocumentSendLog>()
 				.Where(l => !l.Committed && l.User.Id == user.Id)
-				.Take(400)
 				.ToArray();
 
 			if (logs.Length == 0) {
@@ -1129,20 +1211,10 @@ group by dh.Id")
 			return updateData;
 		}
 
-		public string ExportCompressed(string file)
+		public string Compress(string file)
 		{
 			if (!String.IsNullOrEmpty(Config.InjectedFault))
 				throw new Exception(Config.InjectedFault);
-
-			var files = new List<UpdateData>();
-			if (UpdateType.Match("waybills")) {
-				ExportDocs(files);
-			}
-			else {
-				Export(files);
-				ExportUpdate(files);
-				ExportAds(files);
-			}
 
 			var watch = new Stopwatch();
 			watch.Start();
@@ -1150,7 +1222,7 @@ group by dh.Id")
 			using (var zip = ZipFile.Create(file)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
-				foreach (var tuple in files) {
+				foreach (var tuple in result) {
 					var filename = tuple.LocalFileName;
 					//экспоритровать пустые файлы важно тк пустой файл привед к тому что таблица бедет очищена
 					//напимер в случае если последний адрес доставки был отключен
@@ -1172,6 +1244,13 @@ group by dh.Id")
 			log.DebugFormat("Архив создан за {0}, размер {1}", watch.Elapsed, new FileInfo(file).Length);
 
 			return file;
+		}
+
+		public void ExportAll()
+		{
+			Export(result);
+			ExportUpdate(result);
+			ExportAds(result);
 		}
 
 		public class MemoryDataSource : IStaticDataSource
@@ -1233,14 +1312,7 @@ group by dh.Id")
 			if (updateVersion <= version)
 				return;
 
-			//hack: в сборке 12 ошибка, обходим ее
-			if (version.Revision == 12) {
-				AddDir(zip, UpdatePath, "");
-				AddDir(zip, UpdatePath, "update");
-			}
-			else {
-				AddDir(zip, UpdatePath, "update");
-			}
+			AddDir(zip, UpdatePath, "update");
 		}
 
 		public void Dispose()

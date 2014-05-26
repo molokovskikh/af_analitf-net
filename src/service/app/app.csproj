@@ -85,12 +85,15 @@
     <Compile Include="Config\Initializers\SmartOrderFactory.cs" />
     <Compile Include="Controllers\BatchController.cs" />
     <Compile Include="Controllers\DownloadController.cs" />
+    <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\JobController.cs" />
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
-    <Compile Include="Global.asax.cs"></Compile>
-    <Compile Include="Controllers\MainController.cs"></Compile>
+    <Compile Include="Global.asax.cs">
+    </Compile>
+    <Compile Include="Controllers\MainController.cs">
+    </Compile>
     <Compile Include="Helpers\MySqlHelper.cs" />
     <Compile Include="Helpers\RequestHelper.cs" />
     <Compile Include="Models\AnalitfNetData.cs" />

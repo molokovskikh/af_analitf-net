@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Reactive.Linq.Observαble;
 using System.Text;
 using System.Threading;
@@ -120,15 +121,19 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var sendLogsTask = SendLogs(Client, Token);
 			HttpResponseMessage response;
-			if (String.IsNullOrEmpty(BatchFile)) {
+			if (!String.IsNullOrEmpty(BatchFile)) {
+				var url = new Uri(Config.BaseUrl, "Batch");
+				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetBatchRequest(), Token));
+			}
+			else if (SyncData.Match("History")) {
+				var url = new Uri(Config.BaseUrl, SyncData);
+				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetHistoryRequest(), Token));
+			}
+			else {
 				var url = Config.SyncUrl(syncData);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
 				response = Wait(Config.WaitUrl(url), request);
-			}
-			else {
-				var url = new Uri(Config.BaseUrl, "Batch");
-				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetResust(), Token));
 			}
 
 
@@ -140,7 +145,16 @@ namespace AnalitF.Net.Client.Models.Commands
 			return result;
 		}
 
-		private HttpContent GetResust()
+		public ObjectContent<HistoryRequest> GetHistoryRequest()
+		{
+			var data = new HistoryRequest {
+				OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
+				WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray()
+			};
+			return new ObjectContent<HistoryRequest>(data, Formatter);
+		}
+
+		private HttpContent GetBatchRequest()
 		{
 			var tmp = FileHelper.SelfDeleteTmpFile();
 			using (var zip = new ZipFile()) {

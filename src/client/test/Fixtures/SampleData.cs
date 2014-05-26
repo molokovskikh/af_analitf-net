@@ -23,51 +23,43 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Execute(ISession session)
 		{
-			var origin = session;
-			using (var scope = new SessionScope()) {
-				var holder = ActiveRecordMediator.GetSessionFactoryHolder();
-				session = holder.CreateSession(typeof(ActiveRecordBase));
-				var supplier = TestSupplier.CreateNaked(session);
-				supplier.Name += " " + supplier.Id;
-				CreateSampleContactInfo(supplier);
-				CreateSampleCore(supplier);
+			var supplier = TestSupplier.CreateNaked(session);
+			supplier.Name += " " + supplier.Id;
+			CreateSampleContactInfo(supplier);
+			CreateSampleCore(session, supplier);
 
-				var supplier1 = TestSupplier.CreateNaked(session);
-				supplier1.Name += " " + supplier1.Id;
-				CreateSampleContactInfo(supplier1);
-				CreateSampleCore(supplier1);
+			var supplier1 = TestSupplier.CreateNaked(session);
+			supplier1.Name += " " + supplier1.Id;
+			CreateSampleContactInfo(supplier1);
+			CreateSampleCore(session, supplier1);
 
-				var minReqSupplier = TestSupplier.CreateNaked(session);
-				minReqSupplier.Name += " минимальный заказ " + minReqSupplier.Id;
-				CreateSampleContactInfo(minReqSupplier);
-				//устанавливаем максимальную цену товара такую что бы при заказе одной позиции
-				//она всегда не добирала до минимального заказа тк тесты ожидают этого
-				CreateSampleCore(minReqSupplier, 1000);
+			var minReqSupplier = TestSupplier.CreateNaked(session);
+			minReqSupplier.Name += " минимальный заказ " + minReqSupplier.Id;
+			CreateSampleContactInfo(minReqSupplier);
+			//устанавливаем максимальную цену товара такую что бы при заказе одной позиции
+			//она всегда не добирала до минимального заказа тк тесты ожидают этого
+			CreateSampleCore(session, minReqSupplier, 1000);
 
-				MaxProducerCosts = CreateMaxProduceCosts(session, supplier);
-				Client = CreateUser(session);
+			MaxProducerCosts = CreateMaxProduceCosts(session, supplier);
+			Client = CreateUser(session);
 
-				var user = Client.Users.First();
-				var rules = session.Query<TestAddressIntersection>()
-					.Where(i => i.Intersection.Price.Supplier.Id == minReqSupplier.Id
-						&& i.Intersection.Client == user.Client)
-					.ToList();
-				rules.Each(r => {
+			var user = Client.Users.First();
+			session.Query<TestAddressIntersection>()
+				.Where(i => i.Intersection.Price.Supplier.Name.Contains("минимальный заказ")
+					&& i.Intersection.Client == user.Client)
+				.Each(r => {
 					r.MinReq = 1500;
 					r.ControlMinReq = true;
 				});
 
-				new MailWithAttachment {
-					Config = Config
-				}.Execute(session);
+			new MailWithAttachment {
+				Config = Config
+			}.Execute(session);
 
-				DataMother.News(session);
+			DataMother.News(session);
 
-				holder.ReleaseSession(session);
-			}
-
-			var requestLog = new RequestLog(origin.Load<Common.Models.User>(Client.Users[0].Id), new Version());
-			var exporter = new Exporter(origin, Config, requestLog) {
+			var requestLog = new RequestLog(session.Load<Common.Models.User>(Client.Users[0].Id), new Version());
+			var exporter = new Exporter(session, Config, requestLog) {
 				Prefix = "",
 				MaxProducerCostPriceId = MaxProducerCosts.Id,
 				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id,
@@ -148,22 +140,22 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					Price = price,
 					Quantity = "10",
 				};
-				core.SaveAndFlush();
+				session.Save(core);
 				core.AddCost((decimal)(random.NextDouble() * 10000));
 				price.Core.Add(core);
-				core.SaveAndFlush();
+				session.Save(core);
 			}
 
 			price.Costs[0].PriceItem.RowCount = price.Core.Count;
 			return price;
 		}
 
-		public void CreateSampleCore(TestSupplier supplier, double maxCost = 10000)
+		public void CreateSampleCore(ISession session, TestSupplier supplier, double maxCost = 10000)
 		{
 			var price = supplier.Prices[0];
 			var random = new Random();
-			var producers = TestProducer.Queryable.Take(1000).ToList();
-			var products = TestProduct.Queryable.Fetch(p => p.CatalogProduct).Where(p => !p.CatalogProduct.Hidden).Take(1000).ToList();
+			var producers = session.Query<TestProducer>().Take(1000).ToList();
+			var products = session.Query<TestProduct>().Fetch(p => p.CatalogProduct).Where(p => !p.CatalogProduct.Hidden).Take(1000).ToList();
 
 			var maxProducer = producers.Count();
 			var maxProduct = products.Count();
@@ -197,10 +189,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					Quantity = random.Next(1, 10 * 1000).ToString(),
 					Junk = random.Next(100) < 5,
 				};
-				core.SaveAndFlush();
+				session.Save(core);
 				core.AddCost((decimal)(random.NextDouble() * maxCost));
 				price.Core.Add(core);
-				core.SaveAndFlush();
+				session.Save(core);
 			}
 
 			price.Costs[0].PriceItem.RowCount = price.Core.Count;

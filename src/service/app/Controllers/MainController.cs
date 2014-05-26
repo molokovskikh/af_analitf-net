@@ -33,7 +33,11 @@ namespace AnalitF.Net.Service.Controllers
 				RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
 					(session, config, job) => {
 						using (var exporter = new Exporter(session, config, job)) {
-							exporter.ExportCompressed(job.OutputFile(config));
+							if (data.Match("Waybills"))
+								exporter.ExportDocs();
+							else
+								exporter.ExportAll();
+							exporter.Compress(job.OutputFile(config));
 						}
 					});
 			}

@@ -146,6 +146,8 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanShowWaybills");
 					NotifyOfPropertyChange("CanMicroUpdate");
 					NotifyOfPropertyChange("CanShowBatch");
+					NotifyOfPropertyChange("CanShowAwaited");
+					NotifyOfPropertyChange("CanLoadHistory");
 				});
 
 			CloseDisposable.Add(Bus.Listen<Loadable>().ObserveOn(UiScheduler).Subscribe(l => {
@@ -600,6 +602,18 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return Sync(new UpdateCommand {
 				SyncData = "Waybills"
+			});
+		}
+
+		public bool CanLoadHistory
+		{
+			get { return Settings.Value.LastUpdate != null; }
+		}
+
+		public IEnumerable<IResult> LoadHistory()
+		{
+			return Sync(new UpdateCommand {
+				SyncData = "History"
 			});
 		}
 
