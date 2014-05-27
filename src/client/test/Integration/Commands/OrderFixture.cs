@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -13,10 +11,6 @@ using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support;
-using Test.Support.log4net;
-using Test.Support.Suppliers;
-using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 
 namespace AnalitF.Net.Test.Integration.Commands
 {

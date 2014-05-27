@@ -372,10 +372,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
 			user.IsDeplayOfPaymentEnabled = true;
 
+			session.DeleteEach<DelayOfPayment>();
 			var offer = session.Query<Offer>()
 				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant && !o.Junk);
 
-			var delay = session.Query<DelayOfPayment>().FirstOrDefault(d => d.DayOfWeek == DateTime.Today.DayOfWeek && d.Price == offer.Price)
+			var delay = session.Query<DelayOfPayment>()
+				.FirstOrDefault(d => d.DayOfWeek == DateTime.Today.DayOfWeek && d.Price == offer.Price)
 				?? new DelayOfPayment(-99.999m, offer.Price);
 			delay.OtherDelay = -99.999m;
 			delay.VitallyImportantDelay = -99.999m;
@@ -387,9 +389,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(shell);
 
 			session.Refresh(offer);
+			session.Refresh(offer.Price);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
+			var minCost = session.Query<MinCost>().First(m => m.Catalog.Id == offer.CatalogId);
+			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
+			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
 		}
 
 		[Test]

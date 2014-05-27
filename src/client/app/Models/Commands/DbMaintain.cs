@@ -18,16 +18,18 @@ set p.CostFactor = ifnull(1 + d.OtherDelay / 100, 1),
 drop temporary table if exists Leaders;
 create temporary table Leaders (
 	ProductId int unsigned,
+	CatalogId int unsigned,
 	PriceId int unsigned,
 	RegionId bigint unsigned,
 	Cost decimal(8,2),
 	index (ProductId, RegionId)
 ) engine=memory;
 
-insert into Leaders(ProductId, RegionId, Cost)
+insert into Leaders(ProductId, CatalogId, RegionId, Cost)
 select o.ProductId,
+	o.CatalogId,
 	o.RegionId,
-	min(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor)) as Cost
+	min(round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2)) as Cost
 from Offers o
 	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 where o.Junk = 0
@@ -43,6 +45,34 @@ update Offers o
 	join Leaders l on o.ProductId = l.ProductId and o.RegionId = l.RegionId
 set o.LeaderPriceId = l.PriceId, o.LeaderRegionId = l.RegionId, o.LeaderCost = l.Cost;
 
+truncate table MinCosts;
+insert into MinCosts(ProductId, CatalogId, Cost, PriceId, RegionId)
+select l.ProductId, l.CatalogId, l.Cost, l.PriceId, l.RegionId
+from Leaders l;
+
+create temporary table NextMinCosts (
+	NextCost decimal(8,2) unsigned,
+	ProductId int unsigned,
+	RegionId bigint unsigned,
+	unique (ProductId, RegionId)
+) engine = memory;
+
+insert into NextMinCosts(NextCost, ProductId, RegionId)
+select min(round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2)),
+	m.ProductId,
+	m.RegionId
+from Offers o
+	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
+	join MinCosts m on m.ProductId = o.ProductId and m.RegionId = o.RegionId
+where round(o.Cost * if(o.VitallyImportant, p.VitallyImportantCostFactor, p.CostFactor), 2) > m.Cost
+	and o.Junk = 0
+group by m.ProductId, m.RegionId;
+
+update MinCosts m
+	join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
+set m.NextCost = n.NextCost;
+
+drop temporary table NextMinCosts;
 drop temporary table Leaders;")
 				.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
 				.ExecuteUpdate();
