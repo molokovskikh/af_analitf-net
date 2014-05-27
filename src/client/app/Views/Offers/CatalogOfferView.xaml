@@ -36,7 +36,7 @@
 		</Grid.RowDefinitions>
 
 		<DockPanel Grid.Row="0" LastChildFill="False">
-			<Label x:Name="Name" Style="{StaticResource HeaderLabel}" />
+			<Label x:Name="Header" Style="{StaticResource HeaderLabel}" />
 			<Grid DockPanel.Dock="Right">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />

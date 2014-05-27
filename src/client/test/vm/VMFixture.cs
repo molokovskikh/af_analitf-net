@@ -174,7 +174,7 @@ namespace vm
 
 		private void Shutdown()
 		{
-			if (machine.State != MachineState.MachineState_Running)
+			if (machine == null || machine.State != MachineState.MachineState_Running)
 				return;
 
 			//если блокировки нет будет исключение

@@ -377,7 +377,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return IsSentSelected; }
 		}
 
-		public IResult Restore()
+		public IResult RestoreOrder()
 		{
 			if (!CanRestore)
 				return null;

@@ -130,7 +130,7 @@
 						Style="{StaticResource Arrow}" />
 				</StackPanel>
 			</Button>
-			<Button x:Name="Restore" Style="{StaticResource FilterElement}">Вернуть в текущие</Button>
+			<Button x:Name="RestoreOrder" Style="{StaticResource FilterElement}">Вернуть в текущие</Button>
 			<Button x:Name="Reorder" Style="{StaticResource FilterElement}">Перераспределить</Button>
 		</StackPanel>
 	</Grid>
