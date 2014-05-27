@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			: this(initOfferId)
 		{
 			filterCatalog = catalog;
-			Header = catalog.FullName;
+			ViewHeader = catalog.FullName;
 			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
 			CurrentCatalog = catalog;
 		}
@@ -68,10 +68,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			: this()
 		{
 			filterCatalogName = catalogName;
-			Header = filterCatalogName.Name;
+			ViewHeader = filterCatalogName.Name;
 		}
 
-		public string Header { get; private set; }
+		public string ViewHeader { get; private set; }
 
 		public bool IsFilterByCatalogName
 		{
@@ -213,7 +213,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public PrintResult Print()
 		{
-			var doc = new CatalogOfferDocument(Header, Offers.Value);
+			var doc = new CatalogOfferDocument(ViewHeader, Offers.Value);
 			return new PrintResult(DisplayName, doc);
 		}
 
