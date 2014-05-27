@@ -155,6 +155,7 @@ task "git:tag":
 	Bash("./scripts/tag-release.sh $kind")
 
 task "test:binary":
+	return unless Globals.Environment == @Production
 	try:
 		testId = 26307
 		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 1")
