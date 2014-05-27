@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Index<Offer>(o => o.ProductId);
 			Index<Offer>(o => o.CatalogId);
 			Index<SentOrder>(o => o.SentOn);
+			Index<SentOrder>(o => o.ServerId);
 
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => {
@@ -226,8 +227,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			MappingHash = mapping.AsString().GetHashCode();
 
-			if (debug)
+			if (debug) {
+				Console.WriteLine("MappingHash = {0}", MappingHash);
 				Console.WriteLine(mapping.AsString());
+			}
 
 			var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
 			var driver = "NHibernate.Driver.MySqlDataDriver";

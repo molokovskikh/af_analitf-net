@@ -1004,6 +1004,7 @@ select ol.RowId as ServerId,
 	st.Synonym as ProductSynonym,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
+	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
 	oh.RegionCode as RegionId,
 	ol.CoreId as OfferId
 from Orders.OrdersHead oh

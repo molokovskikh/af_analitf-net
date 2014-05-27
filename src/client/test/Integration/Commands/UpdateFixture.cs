@@ -422,6 +422,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var localOrder = localSession.Query<SentOrder>().First(o => o.ServerId == order.Id);
 			Assert.AreEqual(1, localOrder.Lines.Count);
 			Assert.AreEqual(1, localOrder.LinesCount);
+			Assert.That(localOrder.Lines[0].ResultCost, Is.GreaterThan(0));
 		}
 	}
 }

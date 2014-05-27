@@ -114,6 +114,7 @@ namespace AnalitF.Net.Test.Integration
 				if (user == null || serverUserId != user.Id)
 					return true;
 			}
+			return false;
 		}
 
 		public static ISessionFactory ServerNHConfig(string connectionStringName)
