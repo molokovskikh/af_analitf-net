@@ -50,7 +50,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Loaded += (sender, args) => {
 					var tabs = view.Descendants<TabControl>().First();
 					tabs.SelectedItem = tabs.Items[1];
-					var restore = view.Descendants<Button>().First(b => b.Name == "Restore");
+					var restore = view.Descendants<Button>().First(b => b.Name == "RestoreOrder");
 					var reorder = view.Descendants<Button>().First(b => b.Name == "Reorder");
 					var freeze = view.Descendants<Button>().First(b => b.Name == "Freeze");
 					Assert.AreEqual(Visibility.Visible, restore.Visibility);
