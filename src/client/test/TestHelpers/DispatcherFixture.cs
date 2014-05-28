@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -60,6 +62,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
+			if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))) {
+				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
+					var filename = Path.GetFullPath(Guid.NewGuid() + ".jpg");
+					TestStack.White.Desktop.CaptureScreenshot().Save(filename, ImageFormat.Jpeg);
+				}
+			}
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using Caliburn.Micro;
 using Microsoft.Win32;
+using TestStack.White;
 using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.Views
