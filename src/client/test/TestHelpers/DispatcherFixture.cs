@@ -190,8 +190,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected static void AssertInputable(UIElement element)
 		{
-			Assert.IsTrue(element.IsVisible, element.ToString());
-			Assert.IsTrue(element.IsEnabled, element.ToString());
+			Assert.IsTrue(element.IsVisible, "эдемент {0} невидим IsVisible=False", element.ToString());
+			Assert.IsTrue(element.IsEnabled, "элемент {0} недоступен для ввода IsEnabled=False", element);
 		}
 		protected static void AssertInputable(ContentElement element)
 		{
