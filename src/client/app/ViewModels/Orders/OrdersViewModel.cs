@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.IsSentSelected.Value)
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("RestoreVisible");
+					NotifyOfPropertyChange("RestoreOrderVisible");
 					NotifyOfPropertyChange("CanReorder");
 					NotifyOfPropertyChange("EditableOrder");
 				}));
@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
 				.Subscribe(_ => {
 					NotifyOfPropertyChange("CanDelete");
-					NotifyOfPropertyChange("CanRestore");
+					NotifyOfPropertyChange("CanRestoreOrder");
 					NotifyOfPropertyChange("CanReorder");
 				}));
 
