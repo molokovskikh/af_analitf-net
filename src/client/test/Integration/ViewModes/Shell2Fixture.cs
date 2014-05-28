@@ -375,6 +375,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.DeleteEach<DelayOfPayment>();
 			var offer = session.Query<Offer>()
 				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant && !o.Junk);
+			//в прайс-листе может быть несколько предложений нам нужно выбрать самое дешевое
+			offer = session.Query<Offer>()
+				.Where(o => o.Price == offer.Price && o.ProductId == offer.ProductId && !o.VitallyImportant && !o.Junk)
+				.OrderBy(o => o.Cost)
+				.First();
 
 			var delay = session.Query<DelayOfPayment>()
 				.FirstOrDefault(d => d.DayOfWeek == DateTime.Today.DayOfWeek && d.Price == offer.Price)
