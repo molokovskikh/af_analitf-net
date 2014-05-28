@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				return NullableHelper.Round(NextCost / Cost - 1, 2);
+				return NullableHelper.Round(NextCost / Cost - 1 * 100, 2);
 			}
 		}
 	}

@@ -367,19 +367,19 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public bool CanRestore
+		public bool CanRestoreOrder
 		{
 			get { return CurrentSentOrder != null && IsSentSelected; }
 		}
 
-		public bool RestoreVisible
+		public bool RestoreOrderVisible
 		{
 			get { return IsSentSelected; }
 		}
 
 		public IResult RestoreOrder()
 		{
-			if (!CanRestore)
+			if (!CanRestoreOrder)
 				return null;
 
 			if (!Confirm("Вернуть выбранные заявки в работу?"))

@@ -46,11 +46,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalog = session.Load<Catalog>(offer.CatalogId);
 			var seq = model.Add().GetEnumerator();
 			seq.MoveNext();
-			((AddAwaited)((DialogResult)seq.Current).Model).Item.Catalog = catalog;
+			var addAwaited = ((AddAwaited)((DialogResult)seq.Current).Model);
+			addAwaited.Item.Catalog = catalog;
+			addAwaited.OK();
 			seq.MoveNext();
 
-			var item = session.Query<AwaitedItem>().First();
-			Assert.AreEqual(item.Catalog, catalog);
+			var items = session.Query<AwaitedItem>().ToList();
+			Assert.AreEqual(1, items.Count);
+			Assert.AreEqual(items[0].Catalog, catalog);
 		}
 	}
 }

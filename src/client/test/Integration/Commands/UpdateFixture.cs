@@ -418,6 +418,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			};
 			Run(cmd);
 
+			Assert.AreEqual("Загрузка истории заказов и документов завершена успешно.", cmd.SuccessMessage);
 			Assert.That(localSession.Query<SentOrder>().Count(), Is.GreaterThan(0));
 			var localOrder = localSession.Query<SentOrder>().First(o => o.ServerId == order.Id);
 			Assert.AreEqual(1, localOrder.Lines.Count);
