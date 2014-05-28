@@ -63,15 +63,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
-			if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))) {
-				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
-					var filename = Path.GetFullPath(Guid.NewGuid() + ".jpg");
-					PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
-				}
-			}
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
+				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed
+					&& !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))
+					&& activeWindow != null) {
+					var filename = Path.GetFullPath(Guid.NewGuid() + ".png");
+					dispatcher.Invoke(() => {
+						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
+					});
+				}
 				dispatcher.Invoke(() => {
 					foreach (var window in windows.ToArray().Reverse())
 						window.Close();
@@ -232,6 +234,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					RxApp.MessageBus = originbus;
 				}));
 				activeWindow = (Window)ViewLocator.LocateForModel(shell, null, null);
+				//такой размер нужен что бы уместились все кнопки на панели инструментов
+				//тк невидимую кнопку нельзя нажать
+				activeWindow.Width = 1014;
+				activeWindow.Height = 764;
 				windows.Add(activeWindow);
 				activeWindow.Loaded += (sender, args) => loaded.Release();
 				ViewModelBinder.Bind(shell, activeWindow, null);
