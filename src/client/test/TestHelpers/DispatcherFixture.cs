@@ -12,6 +12,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
@@ -65,7 +66,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))) {
 				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
 					var filename = Path.GetFullPath(Guid.NewGuid() + ".jpg");
-					TestStack.White.Desktop.CaptureScreenshot().Save(filename, ImageFormat.Jpeg);
+					PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
 				}
 			}
 			SystemTime.Reset();
