@@ -1,5 +1,7 @@
-﻿using System.Web.Http.Controllers;
+﻿using System.Threading;
+using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using log4net;
 
 namespace AnalitF.Net.Service.Filters
 {
@@ -7,6 +9,7 @@ namespace AnalitF.Net.Service.Filters
 	{
 		public override void OnActionExecuting(HttpActionContext context)
 		{
+			ThreadContext.Properties["username"] = Thread.CurrentPrincipal.Identity.Name;
 			var controllerContext = context.ControllerContext;
 			var config = controllerContext.Configuration.Properties["config"];
 			if (config == null)

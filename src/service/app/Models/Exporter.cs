@@ -1174,8 +1174,8 @@ group by dh.Id")
 		public void Export(List<UpdateData> data, string sql, string file, object parameters = null, bool truncate = true)
 		{
 			var dataAdapter = new MySqlDataAdapter(sql + " limit 0", (MySqlConnection)session.Connection);
-			if (parameters != null)
-				ObjectExtentions.ToDictionary(parameters).Each(k => dataAdapter.SelectCommand.Parameters.AddWithValue(k.Key, k.Value));
+			var dictionary = parameters != null ? ObjectExtentions.ToDictionary(parameters) : new Dictionary<string, object>();
+			dictionary.Each(k => dataAdapter.SelectCommand.Parameters.AddWithValue(k.Key, k.Value));
 
 			var table = new DataTable();
 			dataAdapter.Fill(table);
@@ -1186,10 +1186,10 @@ group by dh.Id")
 			File.Delete(mysqlPath);
 			sql += " INTO OUTFILE '" + mysqlPath + "' ";
 			var command = new MySqlCommand(sql, (MySqlConnection)session.Connection);
-			if (parameters != null)
-				ObjectExtentions.ToDictionary(parameters).Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
+			dictionary.Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
 
-			log.DebugFormat("Запрос {0}", sql);
+			log.DebugFormat("Запрос {0}{1}", sql,
+				dictionary.Count > 0 ? "\r\nпараметры: " + dictionary.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)) : "");
 			var watch = new Stopwatch();
 			watch.Start();
 			command.ExecuteNonQuery();
