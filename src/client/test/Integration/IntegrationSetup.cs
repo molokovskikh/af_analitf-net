@@ -63,7 +63,7 @@ namespace AnalitF.Net.Test.Integration
 			clientConfig.InitDir();
 
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
-			AppBootstrapper.InitUi();
+			AppBootstrapper.InitUi(true);
 
 			global::Test.Support.Setup.SessionFactory = ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);

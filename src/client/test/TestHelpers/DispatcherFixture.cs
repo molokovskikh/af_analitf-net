@@ -212,6 +212,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected async void Start()
 		{
 			session.Flush();
+			//данные могут измениться, нужно перезагрузить данные в shell
+			shell.Reload();
 
 			var loaded = new SemaphoreSlim(0, 1);
 

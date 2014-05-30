@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -17,7 +18,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 {
 	public class Caliburn
 	{
-		public void Init()
+		log4net.ILog log = log4net.LogManager.GetLogger(typeof(Caliburn));
+
+		public void Init(bool failfast)
 		{
 			MessageBus.Current.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 
@@ -41,6 +44,22 @@ namespace AnalitF.Net.Client.Config.Initializers
 				+ @"(?<nsafter>([A-Za-z_]\w*\.)*)(?<basename>[A-Za-z_]\w*)"
 				+ @"(?!<suffix>)$",
 				"${nsbefore}Views.${nsafter}${basename}");
+
+			//безумее сам посебе Caliburn если не найдент view покажет текст Cannot find view for
+			//ни исключения ни ошибки в лог
+			ViewLocator.LocateForModelType = (modelType, displayLocation, context) => {
+				var viewType = ViewLocator.LocateTypeForModelType(modelType, displayLocation, context);
+				if (viewType == null) {
+					if (failfast)
+						throw new Exception(String.Format("Не удалось найти вид для отображения {0}", modelType));
+					else
+						log.ErrorFormat("Не удалось найти вид для отображения {0}", modelType);
+				}
+
+				return viewType == null
+							? new TextBlock()
+							: ViewLocator.GetOrCreateViewType(viewType);
+			};
 
 			Conventions.Register();
 			SaneCheckboxEditor.Register();

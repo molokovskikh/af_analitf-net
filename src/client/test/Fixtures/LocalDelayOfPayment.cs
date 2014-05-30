@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Test.Integration;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -15,10 +16,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			user.IsDeplayOfPaymentEnabled = true;
 			user.ShowSupplierCost = true;
 			var factors = Generator.RandomDouble();
-			foreach (var price in session.Query<Price>()) {
-				price.CostFactor = (decimal)factors.First();
-				price.VitallyImportantCostFactor = (decimal)factors.First();
-			}
+			session.DeleteEach<DelayOfPayment>();
+			session.SaveEach(session.Query<Price>().Select(p => new DelayOfPayment((decimal)factors.First(), p) {
+				VitallyImportantDelay = (decimal)factors.First()
+			}));
 		}
 
 		public void Rollback(ISession session)

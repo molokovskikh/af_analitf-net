@@ -16,6 +16,7 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -135,7 +136,7 @@ namespace AnalitF.Net.Client
 					throw new Exception("Ошибка при инициализации");
 				app.RegisterResources();
 			}
-			InitUi();
+			InitUi(FailFast);
 			InitDb();
 			InitShell();
 		}
@@ -275,7 +276,7 @@ namespace AnalitF.Net.Client
 			sanityCheck.Check(Config.Cmd.Match("import"));
 		}
 
-		public static void InitUi()
+		public static void InitUi(bool failfast)
 		{
 			//в тестах мы можем дважды инициализировать ui
 			//это приведет к тому что делегаты будут вызываться рекурсивно
@@ -283,7 +284,7 @@ namespace AnalitF.Net.Client
 				return;
 
 			Caliburn = new Config.Initializers.Caliburn();
-			Caliburn.Init();
+			Caliburn.Init(failfast);
 		}
 
 		public void Dispose()
