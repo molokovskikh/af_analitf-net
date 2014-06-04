@@ -52,25 +52,30 @@ namespace AnalitF.Net.Client.Binders
 			if (methodInfo != null) {
 				var result = methodInfo.Invoke(viewModel, args);
 
-				IEnumerator<IResult> actions = null;
-
-				if (result is IResult) {
-					result = new[] { (IResult)result };
-				}
-
-				if (result is IEnumerable<IResult>) {
-					result = ((IEnumerable<IResult>)result).GetEnumerator();
-				}
-
-				if (result is IEnumerator<IResult>) {
-					actions = result as IEnumerator<IResult>;
-				}
-
-				if (actions != null)
-					Coroutine.BeginExecute(actions);
-				return result;
+				return ProcessResult(result);
 			}
 			return null;
+		}
+
+		public static object ProcessResult(object result, ActionExecutionContext context = null)
+		{
+			IEnumerator<IResult> actions = null;
+
+			if (result is IResult) {
+				result = new[] { (IResult)result };
+			}
+
+			if (result is IEnumerable<IResult>) {
+				result = ((IEnumerable<IResult>)result).GetEnumerator();
+			}
+
+			if (result is IEnumerator<IResult>) {
+				actions = result as IEnumerator<IResult>;
+			}
+
+			if (actions != null)
+				Coroutine.BeginExecute(actions, context);
+			return result;
 		}
 	}
 }

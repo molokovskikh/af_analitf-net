@@ -4,12 +4,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration;
 using Caliburn.Micro;
+using Common.Tools.Calendar;
 using Microsoft.Reactive.Testing;
 using NHibernate;
 using NHibernate.Linq;
@@ -29,7 +31,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		[SetUp]
-		public void Setup()
+		public void ViewModelFixtureSetup()
 		{
 			lazyModel = new Lazy<T>(Init<T>);
 		}
@@ -187,6 +189,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Activate(object model)
 		{
 			ScreenExtensions.TryActivate(model);
+		}
+
+		protected string WaitNotification()
+		{
+			return shell.Notifications.Timeout(10.Second()).First();
 		}
 	}
 }

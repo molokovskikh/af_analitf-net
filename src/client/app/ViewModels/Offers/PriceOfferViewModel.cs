@@ -140,16 +140,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentFilter.Value = Filters[2];
 		}
 
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			return SearchBehavior.ClearSearch();
-		}
-
 		public PrintResult Print()
 		{
 			var doc = new PriceOfferDocument(Offers.Value, Price, Address);

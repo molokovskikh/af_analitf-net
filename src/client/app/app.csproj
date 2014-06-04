@@ -236,6 +236,7 @@
     <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
     <Compile Include="Models\JournalRecord.cs" />
+    <Compile Include="Models\Loadable.cs" />
     <Compile Include="Models\LoadedDocument.cs" />
     <Compile Include="Models\Mail.cs" />
     <Compile Include="Models\MarkupConfig.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate;
@@ -8,6 +9,7 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
+	[Description("Создает накладную на сервере с файлом")]
 	public class LoadWaybill : ServerFixture
 	{
 		public TestDocumentLog Document;

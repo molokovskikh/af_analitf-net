@@ -236,16 +236,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			return SearchBehavior.ClearSearch();
-		}
-
 		private void LoadLines()
 		{
 			if (StatelessSession != null) {

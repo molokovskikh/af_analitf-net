@@ -23,7 +23,11 @@ namespace AnalitF.Net.Client.Config
 			if (RequestDelay != TimeSpan.Zero)
 				return Tuple.Create(result.Item1, result.Item2.Delay(RequestDelay));
 			if (Barrier != null)
-				return Tuple.Create(result.Item1, result.Item2.Do(_ => Barrier.SignalAndWait(), _ => Barrier.RemoveParticipant()));
+				return Tuple.Create(result.Item1, result.Item2.Do(_ => {
+					Barrier.SignalAndWait();
+				}, _ => {
+					Barrier.RemoveParticipant();
+				}));
 			return result;
 		}
 	}

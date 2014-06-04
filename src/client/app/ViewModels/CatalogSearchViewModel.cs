@@ -116,16 +116,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell = ParentModel.Shell;
 		}
 
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			return SearchBehavior.ClearSearch();
-		}
-
 		public override void Update()
 		{
 			//мы не можем использовать nhibernate для выборки данных тк объем данных слишком велик

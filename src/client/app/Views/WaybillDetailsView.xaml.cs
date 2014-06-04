@@ -20,6 +20,9 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
+			//в xaml назначение имени для колонки не работает
+			CertificateLink.SetValue(NameProperty, "CertificateLink");
+
 			var grid = Lines;
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Цена производителя без НДС");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Цена ГР");

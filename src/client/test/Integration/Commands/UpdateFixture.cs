@@ -69,7 +69,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.Where(g => g.Count() > 1)
 				.Select(g => g.Key)
 				.First();
-		var minCostCount = localSession.Query<MinCost>().Count();
+			var minCostCount = localSession.Query<MinCost>().Count();
 			Assert.That(minCostCount, Is.GreaterThan(0));
 			var cost = localSession.Query<MinCost>().First(m => m.Catalog.Id == catalogId);
 			Assert.IsNotNull(cost.Catalog);

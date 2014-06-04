@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NHibernate;
+using NHibernate.Linq;
 using Test.Support;
 
 namespace Test.Data
@@ -12,8 +13,10 @@ namespace Test.Data
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
 			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
 			var waybill = new TestWaybill(log);
+			var products = session.Query<TestProduct>().Take(32).ToArray();
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
 				Product = "Азарга капли глазные 5мл Фл.-кап. Х1",
+				CatalogProduct = products[0],
 				Certificates = "РОСС BE.ФМ11.Д06711",
 				CertificatesDate = "01.16.2013",
 				Period = "30.09.2014",
@@ -29,6 +32,7 @@ namespace Test.Data
 			});
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
 				Product = "Доксазозин 4мг таб. Х30 (R)",
+				CatalogProduct = products[1],
 				Certificates = "РОСС RU.ФМ08.Д38737",
 				Period = "01.05.2017",
 				Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
@@ -49,6 +53,7 @@ namespace Test.Data
 			for (var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
 					Product = "Доксазозин 4мг таб. Х30 (R)",
+					CatalogProduct = products[i + 1],
 					Certificates = "РОСС RU.ФМ08.Д38737",
 					Period = "01.05.2017",
 					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",

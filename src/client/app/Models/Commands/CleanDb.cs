@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using NHibernate.Linq;
 
@@ -30,6 +31,22 @@ namespace AnalitF.Net.Client.Models.Commands
 					sesssion.CreateSQLQuery(String.Format("TRUNCATE {0}", table))
 						.ExecuteUpdate();
 					Reporter.Progress();
+				}
+			}
+
+			var dirs = new[] {
+				"promotions",
+				"newses",
+				"certificates",
+				"attachments",
+				"ads"
+			};
+			foreach (var dir in dirs.Select(d => Path.Combine(Config.RootDir, d))) {
+				try {
+					Directory.Delete(dir, true);
+					Directory.CreateDirectory(dir);
+				}
+				catch(Exception) {
 				}
 			}
 		}

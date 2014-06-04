@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using NHibernate;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
@@ -14,13 +15,11 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
-		public JournalRecord(Attachment attachment)
+		public JournalRecord(Loadable loadable)
 		{
 			CreateAt = DateTime.Now;
-			Name = attachment.Name;
-			Filename = attachment.LocalFilename;
-			RecordId = attachment.Id;
-			RecordType = "Attachment";
+			RecordId = loadable.GetId();
+			RecordType = NHibernateUtil.GetClass(loadable).Name;
 		}
 
 		public virtual uint Id { get; set; }

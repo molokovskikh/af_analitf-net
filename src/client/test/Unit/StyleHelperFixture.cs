@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
@@ -127,6 +128,18 @@ namespace AnalitF.Net.Test.Unit
 			var styles = StyleHelper.GetDefaultStyles();
 			var style = styles.First(s => s.Name == "NotBase");
 			Assert.AreEqual("#FFF0F0F0", style.Background);
+		}
+
+		[Test]
+		public void Apply_style_to_template_column()
+		{
+			Build(typeof(WaybillLine));
+			var grid = new DataGrid2();
+			var column = new DataGridTemplateColumn();
+			column.SetValue(FrameworkElement.NameProperty, "CertificateLink");
+			grid.Columns.Add(column);
+			StyleHelper.ApplyStyles(typeof(WaybillLine), grid, resource);
+			Assert.IsNotNull(column.CellStyle);
 		}
 
 		private static Setter Background(Style style)

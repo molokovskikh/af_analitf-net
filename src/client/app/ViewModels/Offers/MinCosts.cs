@@ -30,16 +30,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<List<MinCost>> Costs { get; set; }
 		public NotifyValue<MinCost> CurrentCost { get; set; }
 
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			return SearchBehavior.ClearSearch();
-		}
-
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();

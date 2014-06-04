@@ -65,7 +65,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			};
 			ScreenExtensions.TryActivate(model);
 			model.SearchBehavior.SearchText.Value = "Папаверинг";
-			model.Search();
+			model.SearchBehavior.Search();
 			Assert.AreEqual(1, model.Offers.Value.Count);
 		}
 

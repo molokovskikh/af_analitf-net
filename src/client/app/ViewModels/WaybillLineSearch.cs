@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using Common.Tools;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -14,6 +18,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private DateTime begin;
 		private DateTime end;
+		private List<WaybillLine> dirty = new List<WaybillLine>();
 
 		public WaybillLineSearch(DateTime begin, DateTime end)
 		{
@@ -21,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 			this.begin = begin;
 			this.end = end;
 
-			Lines = new NotifyValue<List<WaybillLine>>();
+			Lines = new NotifyValue<List<WaybillLine>>(new List<WaybillLine>());
 			SearchBehavior = new SearchBehavior(this);
 		}
 
@@ -30,6 +35,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			SaveDirty();
 			var query = StatelessSession.Query<WaybillLine>()
 				.Where(l => l.Waybill.WriteTime >= begin && l.Waybill.WriteTime < end);
 
@@ -37,21 +43,70 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!String.IsNullOrEmpty(term))
 				query = query.Where(m => m.SerialNumber.Contains(term) || m.Product.Contains(term));
 
-			Lines.Value = query
+			var lines = query
 				.OrderBy(l => l.Product)
 				.Fetch(l => l.Waybill)
 				.ThenFetch(w => w.Supplier)
+				.FetchMany(l => l.CertificateFiles)
 				.ToList();
+
+			//тк мы загружаем данные из stateless сессии то отслеживать изменения в них
+			//нужно руками, изменения возникнут из-за загрузки сертификатов
+			foreach (var line in Lines.Value)
+				line.PropertyChanged -= Track;
+
+			foreach (var line in lines)
+				line.PropertyChanged += Track;
+
+			var pendings = Shell.PendingDownloads.OfType<WaybillLine>().ToLookup(l => l.Id);
+			if (pendings.Count > 0) {
+				for(var i = 0; i < lines.Count; i ++) {
+					var pending = pendings[lines[i].Id].FirstOrDefault();
+					if (pending != null) {
+						lines[i] = pending;
+					}
+				}
+			}
+
+			Lines.Value = lines;
 		}
 
-		public IResult ClearSearch()
+		private void SaveDirty()
 		{
-			return SearchBehavior.ClearSearch();
+			if (dirty.Count > 0) {
+				dirty.Each(d => StatelessSession.Update(d));
+				dirty.Clear();
+			}
 		}
 
-		public IResult Search()
+		protected override void OnDeactivate(bool close)
 		{
-			return SearchBehavior.Search();
+			SaveDirty();
+			base.OnDeactivate(close);
+		}
+
+		private void Track(object sender, PropertyChangedEventArgs e)
+		{
+			if (Session == null || !Session.IsOpen)
+				return;
+			var props = new[] { "IsError", "IsDownloaded" };
+			if (!props.Contains(e.PropertyName))
+				return;
+
+			if (!dirty.Contains((WaybillLine)sender))
+				dirty.Add((WaybillLine)sender);
+		}
+
+		public override IEnumerable<IResult> Download(Loadable loadable)
+		{
+			var supplier = ((WaybillLine)loadable).Waybill.SafeSupplier;
+			if (supplier == null || !supplier.HaveCertificates) {
+				yield return new MessageResult("Данный поставщик не предоставляет сертификаты в АК Инфорум." +
+					"\r\nОбратитесь к поставщику.",
+					MessageResult.MessageType.Warning);
+				yield break;
+			}
+			base.Download(loadable);
 		}
 	}
 }

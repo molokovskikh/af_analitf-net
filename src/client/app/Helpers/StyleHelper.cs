@@ -153,6 +153,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsMinCost", Background("#ACFF97") },
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
+				{ "IsCertificateNotFound", Background(Colors.Gray.ToString()) },
 			};
 		}
 
@@ -491,19 +492,32 @@ namespace AnalitF.Net.Client.Helpers
 			Panel legend = null,
 			string context = null)
 		{
-			foreach (var dataGridColumn in grid.Columns.OfType<DataGridBoundColumn>()) {
-				var binding = dataGridColumn.Binding as Binding;
-				if (binding == null)
+			foreach (var column in grid.Columns) {
+				var key = GetKey(column);
+				if (String.IsNullOrEmpty(key))
 					continue;
-				var resource = resources[CellKey(type, binding.Path.Path)] as Style
-					?? resources[CellKey(type, binding.Path.Path, context)] as Style;
+				var resource = resources[CellKey(type, key)] as Style
+					?? resources[CellKey(type, key, context)] as Style;
 				if (resource == null)
 					continue;
-				dataGridColumn.CellStyle = resource;
+				column.CellStyle = resource;
 			}
 
 			grid.CellStyle = (Style)resources[type.Name + "Row"];
 			BuildLegend(type, grid, resources, legend, context);
+		}
+
+		private static string GetKey(DataGridColumn column)
+		{
+			var key = column.GetValue(FrameworkElement.NameProperty) as string;
+			var boundColumn = column as DataGridBoundColumn;
+			if (boundColumn != null) {
+				var binding = boundColumn.Binding as Binding;
+				if (binding != null) {
+					key = binding.Path.Path;
+				}
+			}
+			return key;
 		}
 
 		private static void BuildLegend(Type type, DataGrid grid, ResourceDictionary resources, Panel legend,
@@ -514,7 +528,7 @@ namespace AnalitF.Net.Client.Helpers
 
 			var labels = from p in type.GetProperties()
 				from StyleAttribute a in p.GetCustomAttributes(typeof(StyleAttribute), true)
-				where grid.Columns.OfType<DataGridBoundColumn>().Any(c => IsApplicable(c, a))
+				where grid.Columns.Any(c => IsApplicable(c, a))
 					&& (String.IsNullOrEmpty(a.Context) || context == a.Context)
 				orderby a.Description
 				let key = LegendKey(type, p)
@@ -542,9 +556,10 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		private static bool IsApplicable(DataGridBoundColumn col, StyleAttribute attr)
+		private static bool IsApplicable(DataGridColumn col, StyleAttribute attr)
 		{
-			return attr.Columns.Length == 0 || (col.Binding != null &&  attr.Columns.Contains(((Binding)col.Binding).Path.Path));
+			var key = GetKey(col);
+			return attr.Columns.Length == 0 || (!String.IsNullOrEmpty(key) && attr.Columns.Contains(key));
 		}
 
 		public static List<CustomStyle> GetDefaultStyles()

@@ -303,5 +303,17 @@ namespace AnalitF.Net.Client.ViewModels
 				Waybill.DocumentDate.ToShortDateString()));
 			return excelExporter.Export(book);
 		}
+
+		public override IEnumerable<IResult> Download(Loadable loadable)
+		{
+			var supplier = ((WaybillLine)loadable).Waybill.SafeSupplier;
+			if (supplier == null || !supplier.HaveCertificates) {
+				yield return new MessageResult("Данный поставщик не предоставляет сертификаты в АК Инфорум." +
+					"\r\nОбратитесь к поставщику.",
+					MessageResult.MessageType.Warning);
+				yield break;
+			}
+			base.Download(loadable);
+		}
 	}
 }

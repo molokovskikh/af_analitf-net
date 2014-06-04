@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.UI
 						if (NotBindedAndNull(element, ItemsControl.ItemsSourceProperty)
 							&& !ConventionManager.HasBinding(element, Selector.SelectedItemProperty)) {
 
-							var items = DescriptionHelper.GetDescription(property.PropertyType);
+							var items = DescriptionHelper.GetDescriptions(property.PropertyType);
 							element.SetValue(ItemsControl.DisplayMemberPathProperty, "Name");
 							element.SetValue(ItemsControl.ItemsSourceProperty, items);
 

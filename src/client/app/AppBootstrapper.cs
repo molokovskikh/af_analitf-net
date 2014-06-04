@@ -126,7 +126,6 @@ namespace AnalitF.Net.Client
 
 		protected override void OnStartup(object sender, StartupEventArgs e)
 		{
-
 			InitLog();
 			InitApp();
 			var app = ((App)Application);

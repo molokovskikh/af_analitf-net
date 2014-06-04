@@ -19,6 +19,7 @@ using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
+using Microsoft.Runtime.CompilerServices;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -109,72 +110,6 @@ namespace AnalitF.Net.Client.ViewModels
 				return new BindingList<Mail>(items.OrderByDescending(sort).ToList());
 		}
 
-		//todo - если соединение быстрое то загрузка происходит так быстро что элементы управления мигают
-		//черная магия будь бдителен все обработчики живут дольше чем форма и могут быть вызваны после того как форма была закрыта
-		//или с новой копией этой формы если человек ушел а затем вернулся
-		public void Download(Attachment attachment)
-		{
-			attachment.IsDownloading = true;
-			attachment.Session = Session;
-			attachment.Entry = Session.GetSessionImplementation().PersistenceContext.GetEntry(attachment);
-
-			var result = ObservLoad(attachment);
-			var disposable = new CompositeDisposable(3);
-			disposable.Add(Disposable.Create(() => {
-				Bus.SendMessage<Loadable>(attachment, "completed");
-			}));
-			var progress = result.Item1
-				.ObserveOn(UiScheduler)
-				.Subscribe(p => attachment.Progress =  p.EventArgs.ProgressPercentage / 100d);
-			disposable.Add(progress);
-
-			var download = result.Item2
-				.ObserveOn(UiScheduler)
-				.Subscribe(_ => {
-						var notification = "";
-						SessionGaurd(attachment.Session, attachment, (s, a) => {
-							var record = a.UpdateLocalFile(Shell.Config);
-							s.Save(record);
-							Bus.SendMessage(record);
-							notification = String.Format("Файл '{0}' загружен", a.Name);
-							if (IsActive)
-								ResultsSink.OnNext(Open(a));
-						});
-						Shell.Notifications.OnNext(notification);
-					},
-					_ => {
-						attachment.RequstCancellation.Dispose();
-						attachment.IsError = true;
-					},
-					() => {
-						attachment.RequstCancellation.Dispose();
-					});
-			disposable.Add(download);
-			attachment.RequstCancellation = disposable;
-			Bus.SendMessage<Loadable>(attachment);
-		}
-
-		private void SessionGaurd<T>(ISession session, T entity, Action<ISession, T> action)
-		{
-			if (session != null && session.IsOpen) {
-				action(session, entity);
-			}
-			else {
-				using (var s = Env.Factory.OpenSession())
-				using (var t = s.BeginTransaction()) {
-					var e = s.Load<T>(Util.GetValue(entity, "Id"));
-					action(s, e);
-					s.Flush();
-					t.Commit();
-				}
-			}
-		}
-
-		public IResult Open(Attachment attachment)
-		{
-			return new OpenResult(attachment.LocalFilename);
-		}
-
 		public void Delete()
 		{
 			using(var cleaner = new FileCleaner()) {
@@ -186,66 +121,6 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}
 			Items.Refresh();
-		}
-
-		public void Cancel(Attachment attachment)
-		{
-			attachment.IsDownloading = false;
-			attachment.RequstCancellation.Dispose();
-		}
-
-		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<string>> ObservLoad(Loadable attachment)
-		{
-			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
-			var handler = new HttpClientHandler {
-				Credentials = Settings.Value.GetCredential(),
-				PreAuthenticate = true,
-				Proxy = Settings.Value.GetProxy()
-			};
-			if (handler.Credentials == null)
-				handler.UseDefaultCredentials = true;
-			var progress = new ProgressMessageHandler();
-			var handlers = Settings.Value.Handlers().Concat(new[] { progress }).ToArray();
-			var client = HttpClientFactory.Create(handler, handlers);
-			client.DefaultRequestHeaders.Add("version", version.ToString());
-			if (Settings.Value.DebugTimeout > 0)
-				client.DefaultRequestHeaders.Add("debug-timeout", Settings.Value.DebugTimeout.ToString());
-			if (Settings.Value.DebugFault)
-				client.DefaultRequestHeaders.Add("debug-fault", "true");
-			client.BaseAddress = Shell.Config.BaseUrl;
-
-			var data = new[] {
-				String.Format("urn:data:{0}:{1}", attachment.GetType().Name.ToLower(), attachment.GetId())
-			};
-
-			//review - я не понимаю как это может быть но если сделать dispose у observable
-			//то ожидающий запрос тоже будет отменен и cancellationtoke не нужен
-			//очевидного способа как это может работать нет но как то оно работает
-			var result = Tuple.Create(
-				Observable.FromEventPattern<HttpProgressEventArgs>(progress, "HttpReceiveProgress"),
-				Observable
-					.Using(() => client, c => c.PostAsJsonAsync("Download", data).ToObservable())
-					.Do(r => r.EnsureSuccessStatusCode())
-					.Select(r => r.Content.ReadAsStreamAsync())
-					.SubscribeOn(Scheduler)
-					.Select(s => Extract(s, attachment.GetLocalFilename(Shell.Config)))
-			);
-			return Env.WrapRequest(result);
-		}
-
-		private string Extract(Task<Stream> task, string name)
-		{
-			var dir = Path.GetDirectoryName(name);
-			if (!Directory.Exists(dir))
-				FileHelper.CreateDirectoryRecursive(dir);
-
-			using (var zip = ZipFile.Read(task.Result)) {
-				var file = zip.First();
-				using (var target = new FileStream(name, FileMode.Create, FileAccess.Write, FileShare.None)) {
-					file.Extract(target);
-				}
-			}
-			return name;
 		}
 	}
 }

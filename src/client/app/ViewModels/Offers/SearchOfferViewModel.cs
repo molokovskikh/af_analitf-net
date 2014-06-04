@@ -44,22 +44,13 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public List<Selectable<Price>> Prices { get; set; }
 		public NotifyValue<bool> OnlyBase { get; set; }
 
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			Offers.Value = new List<Offer>();
-			return SearchBehavior.ClearSearch();
-		}
-
 		protected override void Query()
 		{
 			var term = SearchBehavior.ActiveSearchTerm.Value;
-			if (String.IsNullOrEmpty(term))
+			if (String.IsNullOrEmpty(term)) {
+				Offers.Value = new List<Offer>();
 				return;
+			}
 
 			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(term));
 			query = Util.Filter(query, o => o.Price.Id, Prices);

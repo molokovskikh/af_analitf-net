@@ -120,7 +120,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<Catalog>());
 			var term = catalog.Name.Name.Slice(3);
 			catalogModel.SearchText = term;
-			searchModel.Search();
+			searchModel.SearchBehavior.Search();
 			Assert.That(searchModel.SearchBehavior.SearchText.Value, Is.Empty);
 			Assert.That(searchModel.SearchBehavior.ActiveSearchTerm.Value, Is.EqualTo(term));
 			Assert.That(searchModel.Items.Value.Count, Is.GreaterThan(0));
@@ -141,8 +141,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var total = searchModel.Items.Value.Count;
 			var term = catalog.Name.Name.Slice(3);
 			catalogModel.SearchText = term;
-			searchModel.Search();
-			searchModel.ClearSearch();
+			searchModel.SearchBehavior.Search();
+			searchModel.SearchBehavior.ClearSearch();
 			Assert.That(searchModel.SearchBehavior.ActiveSearchTerm.Value, Is.Empty);
 			Assert.That(searchModel.Items.Value.Count, Is.EqualTo(total));
 		}

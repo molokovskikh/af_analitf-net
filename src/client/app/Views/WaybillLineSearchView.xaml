@@ -32,6 +32,8 @@
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*" Header="Дата документа"
 					Binding="{Binding Waybill.WriteTime}" />
+				<DataGridTextColumn Width="*" Header="№"
+					Binding="{Binding Waybill.Id}" />
 				<DataGridTextColumn Width="*" Header="Поставщик"
 					Binding="{Binding Waybill.Supplier.FullName}" />
 				<c:SearchableDataGridColumn Width="*" Header="Наименование"
@@ -40,8 +42,13 @@
 				<c:SearchableDataGridColumn Width="*" Header="Серия товара"
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					Binding="{Binding SerialNumber}" />
-				<DataGridTextColumn Width="*" Header="Получить" />
-				<DataGridTextColumn Width="*" Header="Сертификаты" />
+				<DataGridTemplateColumn Header="Сертификаты" Width="SizeToHeader" x:Name="CertificateLink">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<ContentControl Style="{StaticResource DownloadLink}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
 			</DataGrid.Columns>
 		</c:DataGrid2>
 	</Grid>

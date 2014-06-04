@@ -132,13 +132,13 @@
 					Binding="{Binding Period}" />
 				<c:DataGridTextColumnEx Width="160*" Header="Серия товара"
 					Binding="{Binding SerialNumber}" />
-				<!--заготовка-->
-				<!--
-				<c:DataGridTextColumnEx Header="Сертификаты"
-					Width="SizeToHeader" />
-				<c:DataGridTextColumnEx Header="Получить"
-					Width="SizeToHeader" />
-				-->
+				<DataGridTemplateColumn Header="Сертификаты" Width="SizeToHeader" x:Name="CertificateLink">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<ContentControl Style="{StaticResource DownloadLink}" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
 				<DataGridCheckBoxColumn Width="SizeToHeader" Header="ЖНВЛС"
 					Binding="{Binding VitallyImportant, UpdateSourceTrigger=PropertyChanged}" />
 				<c:DataGridTextColumnEx Width="180*" Header="Номер сертификата"

@@ -80,7 +80,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var attachment = new Attachment("test.txt", 1);
 			mail.Attachments.Add(attachment);
 			session.Save(mail);
-			attachment.UpdateLocalFile(attachment.GetLocalFilename(config));
+			attachment.UpdateLocalFile(attachment.Id.ToString());
 			File.WriteAllText(attachment.LocalFilename, "1");
 
 			model.SelectedItems.Add(model.Items.Value.First(m => m.Id == mail.Id));
@@ -130,11 +130,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			WaitNotification();
 			testScheduler.Start();
 			Assert.That(journal.Items.Value.Count, Is.GreaterThan(oldCount));
-		}
-
-		private string WaitNotification()
-		{
-			return shell.Notifications.Timeout(10.Second()).First();
 		}
 
 		private Attachment Download()

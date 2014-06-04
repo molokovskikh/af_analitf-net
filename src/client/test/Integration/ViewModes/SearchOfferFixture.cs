@@ -29,7 +29,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeDifferentCategory(catalog);
 
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			model.Search();
+			model.SearchBehavior.Search();
 
 			var originCount = model.Offers.Value.Count;
 			Assert.That(originCount, Is.GreaterThan(0));
@@ -46,7 +46,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var catalog = FindMultiOfferCatalog();
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			model.Search();
+			model.SearchBehavior.Search();
 
 			var id = model.Offers.Value[0].Price.Id;
 			model.Prices.Each(p => p.IsSelected = false);

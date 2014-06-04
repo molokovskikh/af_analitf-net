@@ -132,6 +132,7 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
+    <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
     <Compile Include="Fixtures\CreateSchedule.cs" />
     <Compile Include="Fixtures\CreateServerAddress.cs" />
@@ -189,6 +190,7 @@
     <Compile Include="Integration\ViewModes\Shell2Fixture.cs" />
     <Compile Include="Integration\ViewModes\ShellFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillDetailFixture.cs" />
+    <Compile Include="Integration\ViewModes\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />

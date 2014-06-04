@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Helpers
 
 	public static class DescriptionHelper
 	{
-		public static List<ValueDescription> GetDescription(Type type)
+		public static List<ValueDescription> GetDescriptions(Type type)
 		{
 			return Enum.GetValues(type)
 				.Cast<object>()
@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Helpers
 				.ToList();
 		}
 
-		public static List<ValueDescription<T>> GetDescription<T>()
+		public static List<ValueDescription<T>> GetDescriptions<T>()
 		{
 			var enumType = typeof(T);
 			return Enum.GetValues(enumType)
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Helpers
 				.ToList();
 		}
 
-		private static string GetDescription(ICustomAttributeProvider provider)
+		public static string GetDescription(ICustomAttributeProvider provider)
 		{
 			var attributes = provider.GetCustomAttributes(typeof(DescriptionAttribute), false);
 			if (attributes.Length == 0)

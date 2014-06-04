@@ -265,9 +265,10 @@ from Usersettings.Prices p
 			Export(result, sql, "prices");
 
 			sql = @"select
-s.Id,
-s.Name,
-if(length(s.FullName) = 0, s.Name, s.FullName) as FullName
+	s.Id,
+	s.Name,
+	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
+	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificateSource
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(result, sql, "suppliers");

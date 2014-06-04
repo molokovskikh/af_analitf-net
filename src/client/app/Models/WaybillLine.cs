@@ -1,13 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class WaybillLine : BaseNotify, IEditableObject
+	public class CertificateFile
+	{
+		public CertificateFile()
+		{
+		}
+
+		public CertificateFile(string localFileName)
+		{
+			LocalFileName = localFileName;
+		}
+
+		public virtual uint Id { get; set; }
+
+		public virtual string LocalFileName { get; set; }
+	}
+
+	public class WaybillLine : Loadable, IEditableObject
 	{
 		private decimal? _retailCost;
 		private decimal? _realRetailMarkup;
@@ -16,10 +35,12 @@ namespace AnalitF.Net.Client.Models
 		private decimal? _maxSupplierMarkup;
 		private bool _print;
 		private Waybill _waybill;
+		private bool isCertificateNotFound;
 
 		public WaybillLine()
 		{
 			Print = true;
+			CertificateFiles = new List<CertificateFile>();
 		}
 
 		public WaybillLine(Waybill waybill)
@@ -88,6 +109,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Edited { get; set; }
 
+		public virtual IList<CertificateFile> CertificateFiles { get; set; }
+
 		public virtual decimal? MaxRetailMarkup
 		{
 			get { return _maxRetailMarkup; }
@@ -146,6 +169,17 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual uint? RejectId { get; set; }
+
+		[Style(Description = "Сертификат не был найден", Columns = new[] { "CertificateLink" })]
+		public virtual bool IsCertificateNotFound
+		{
+			get { return isCertificateNotFound; }
+			set
+			{
+				isCertificateNotFound = value;
+				OnPropertyChanged();
+			}
+		}
 
 		[Style(Description = "Новая разбракованя позиция")]
 		public virtual bool IsRejectCanceled { get; set; }
@@ -223,6 +257,55 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? TaxPerUnit
 		{
 			get { return SupplierCost - SupplierCostWithoutNds; }
+		}
+
+		public virtual string Details
+		{
+			get
+			{
+				if (IsDownloaded)
+					return "Нажмите что бы открыть";
+				if (IsDownloading)
+					return "Нажмите для отмены";
+				if (IsCertificateNotFound)
+					return "Сертификат не найден, нажмите что бы повторить поиск";
+				if (IsError)
+					return ErrorDetails;
+				return "Нажмите для загрузки сертификатов";
+			}
+		}
+
+		public override uint GetId()
+		{
+			return Id;
+		}
+
+		public override string GetLocalFilename(string archEntryName, Config.Config config)
+		{
+			return Path.GetFullPath(Path.Combine(config.RootDir, "certificates", archEntryName));
+		}
+
+		public override JournalRecord UpdateLocalFile(string localFileName)
+		{
+			IsDownloaded = true;
+			CertificateFiles.Add(new CertificateFile(localFileName));
+			return new JournalRecord(this) {
+				Name = String.Format("Сертификаты для {0} серия {1}", Product, SerialNumber),
+				Filename = localFileName,
+			};
+		}
+
+		public override IEnumerable<string> GetFiles()
+		{
+			return CertificateFiles.Select(f => f.LocalFileName);
+		}
+
+		public override void Completed()
+		{
+			base.Completed();
+			if (CertificateFiles.Count == 0) {
+				IsCertificateNotFound = true;
+			}
 		}
 
 		private void WaybillChanged(object sender, PropertyChangedEventArgs args)

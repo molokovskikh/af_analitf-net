@@ -56,15 +56,5 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Mnns.Recalculate();
 		}
-
-		public IResult Search()
-		{
-			return SearchBehavior.Search();
-		}
-
-		public IResult ClearSearch()
-		{
-			return SearchBehavior.ClearSearch();
-		}
 	}
 }

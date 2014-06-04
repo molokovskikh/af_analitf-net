@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config.Environments;
@@ -18,7 +19,13 @@ namespace AnalitF.Net.Client.Test.Tasks
 			types = types.Where(t => String.IsNullOrEmpty(pattern) || t.Name.ToLower().Contains(pattern));
 
 			foreach (var type in types) {
-				Console.WriteLine(type.Name);
+				var desc = DescriptionHelper.GetDescription(type);
+				Console.Write(type.Name);
+				if (!String.IsNullOrEmpty(desc)) {
+					Console.Write(" - ");
+					Console.Write(desc);
+				}
+				Console.WriteLine();
 			}
 		}
 

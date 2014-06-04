@@ -50,7 +50,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			price.PriceType = PriceType.Assortment;
 			for(var i = 0; i < ProductIds.Length; i++) {
 				var product = session.Load<TestProduct>(ProductIds[i]);
-				price.Core.Add(new TestCore { Code = (i + 1).ToString(), Period = "", Quantity = "", Product = product });
+				price.Core.Add(new TestCore(price.AddProductSynonym(product.FullName, product)) {
+					Code = (i + 1).ToString(), Period = "", Quantity = "", Product = product
+				});
 			}
 			session.Save(supplier);
 			Rule.AssortmentPriceCode = price.Id;

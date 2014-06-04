@@ -6,6 +6,8 @@ using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using NHibernate;
+using NHibernate = AnalitF.Net.Client.Config.Initializers.NHibernate;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -126,7 +128,20 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string SupplierName
 		{
-			get { return Supplier == null ? UserSupplierName : Supplier.FullName; }
+			get
+			{
+				return SafeSupplier == null ? UserSupplierName : Supplier.FullName;
+			}
+		}
+
+		public virtual Supplier SafeSupplier
+		{
+			get
+			{
+				if (NHibernateUtil.IsInitialized(Supplier))
+					return Supplier;
+				return null;
+			}
 		}
 
 		[Ignore]

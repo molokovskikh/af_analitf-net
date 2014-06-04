@@ -6,12 +6,17 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Http;
+using System.Net.Http.Handlers;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -20,13 +25,18 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
+using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Util;
 using NPOI.HSSF.UserModel;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
+using Address = AnalitF.Net.Client.Models.Address;
 using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -365,6 +375,142 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}
 			TryClose(true);
+		}
+
+		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObservLoad(Loadable loadable)
+		{
+			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
+			var handler = new HttpClientHandler {
+				Credentials = Settings.Value.GetCredential(),
+				PreAuthenticate = true,
+				Proxy = Settings.Value.GetProxy()
+			};
+			if (handler.Credentials == null)
+				handler.UseDefaultCredentials = true;
+			var progress = new ProgressMessageHandler();
+			var handlers = Settings.Value.Handlers().Concat(new[] { progress }).ToArray();
+			var client = HttpClientFactory.Create(handler, handlers);
+			client.DefaultRequestHeaders.Add("version", version.ToString());
+			if (Settings.Value.DebugTimeout > 0)
+				client.DefaultRequestHeaders.Add("debug-timeout", Settings.Value.DebugTimeout.ToString());
+			if (Settings.Value.DebugFault)
+				client.DefaultRequestHeaders.Add("debug-fault", "true");
+			client.BaseAddress = Shell.Config.BaseUrl;
+
+			var data = new[] {
+				String.Format("urn:data:{0}:{1}", NHibernateUtil.GetClass(loadable).Name.ToLower(), loadable.GetId())
+			};
+
+			//review - я не понимаю как это может быть но если сделать dispose у observable
+			//то ожидающий запрос тоже будет отменен и cancellationtoke не нужен
+			//очевидного способа как это может работать нет но как то оно работает
+			var result = Tuple.Create(
+				Observable.FromEventPattern<HttpProgressEventArgs>(progress, "HttpReceiveProgress"),
+				Observable
+					.Using(() => client, c => c.PostAsJsonAsync("Download", data).ToObservable())
+					.Do(r => r.EnsureSuccessStatusCode())
+					.SelectMany(r => r.Content.ReadAsStreamAsync().ToObservable())
+				);
+			return Env.WrapRequest(result);
+		}
+
+		private IEnumerable<string> Extract(Stream stream, Func<string, string> toName)
+		{
+			using (var zip = ZipFile.Read(stream)) {
+				foreach (var entry in zip) {
+					var name = toName(entry.FileName);
+					var dir = Path.GetDirectoryName(name);
+					if (!Directory.Exists(dir))
+						FileHelper.CreateDirectoryRecursive(dir);
+					if (!String.IsNullOrEmpty(name)) {
+						using (var target = new FileStream(name, FileMode.Create, FileAccess.Write, FileShare.None)) {
+							entry.Extract(target);
+						}
+						yield return name;
+					}
+				}
+			}
+		}
+
+		public void Cancel(Loadable loadable)
+		{
+			loadable.IsDownloading = false;
+			loadable.RequstCancellation.Dispose();
+		}
+
+		public virtual IEnumerable<IResult> Open(Loadable loadable)
+		{
+			return loadable.GetFiles().Select(n => new OpenResult(n));
+		}
+
+		//todo - если соединение быстрое то загрузка происходит так быстро что элементы управления мигают
+		//черная магия будь бдителен все обработчики живут дольше чем форма и могут быть вызваны после того как форма была закрыта
+		//или с новой копией этой формы если человек ушел а затем вернулся
+		public virtual IEnumerable<IResult> Download(Loadable loadable)
+		{
+			loadable.IsDownloading = true;
+			loadable.Session = Session;
+			loadable.Entry = Session.GetSessionImplementation().PersistenceContext.GetEntry(loadable);
+
+			var result = ObservLoad(loadable);
+			var disposable = new CompositeDisposable(3) {
+				Disposable.Create(() => Bus.SendMessage(loadable, "completed"))
+			};
+			var progress = result.Item1
+				.ObserveOn(UiScheduler)
+				.Subscribe(p => loadable.Progress =  p.EventArgs.ProgressPercentage / 100d);
+			disposable.Add(progress);
+
+			var download = result.Item2
+				.ObserveOn(Scheduler)
+				.SelectMany(s => Extract(s, urn => loadable.GetLocalFilename(urn, Shell.Config)).ToObservable())
+				.ObserveOn(UiScheduler)
+				.Subscribe(name => {
+						var notification = "";
+						SessionGaurd(loadable.Session, loadable, (s, a) => {
+							var record = a.UpdateLocalFile(name);
+							s.Save(record);
+							Bus.SendMessage(record);
+							notification = String.Format("Файл '{0}' загружен", record.Name);
+							if (IsActive)
+								Open(a).ToObservable().CatchSubscribe(r => ResultsSink.OnNext(r));
+						});
+						Shell.Notifications.OnNext(notification);
+					},
+					e => {
+						SessionGaurd(loadable.Session, loadable, (s, a) => a.Error());
+					},
+					() => {
+						//если loadable.IsDownloaded = true то значит запрос дал результаты
+						//и состояние сохранено в обработчике он next не нужны обращаться к базе нужно просто освободить ресурсы
+						//если ничего не было найдено то нужно открыть сессию что сохранить состояние объекта
+						if (loadable.IsDownloaded) {
+							loadable.Completed();
+						}
+						else {
+							SessionGaurd(loadable.Session, loadable, (s, a) => a.Completed());
+						}
+					});
+			disposable.Add(download);
+			loadable.RequstCancellation = disposable;
+			Bus.SendMessage(loadable);
+			return Enumerable.Empty<IResult>();
+		}
+
+		protected void SessionGaurd<T>(ISession session, T entity, Action<ISession, T> action)
+		{
+			if (session != null && session.IsOpen) {
+				action(session, entity);
+			}
+			else {
+				using (var s = Env.Factory.OpenSession())
+				using (var t = s.BeginTransaction()) {
+					var e = s.Load(NHibernateUtil.GetClass(entity), Util.GetValue(entity, "Id"));
+					action(s, (T)e);
+					s.Flush();
+					t.Commit();
+				}
+			}
 		}
 	}
 }
