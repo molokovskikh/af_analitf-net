@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -68,9 +69,20 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			var legend = view.Descendants().OfType<Panel>().First(p => p.Name == "Legend");
 			var label = legend.Descendants<Label>()
-				.First(l => l.Style != null && l.Style.Setters.OfType<Setter>().Any(s => s.Property == ContentControl.ContentProperty && Equals(s.Value, "��������� ���������")));
+				.First(l => l.Style != null && l.Style.Setters.OfType<Setter>().Any(s => s.Property == ContentControl.ContentProperty && Equals(s.Value, "Уцененные препараты")));
 			var setter = label.Style.Setters.OfType<Setter>().First(s => s.Property == Control.BackgroundProperty);
 			Assert.AreEqual(Colors.Red, ((SolidColorBrush)setter.Value).Color);
+		}
+
+		[Test(Description = "Часто в результате переименований view теряется, ищем подобные ошибки")]
+		public void Check_view_binding()
+		{
+			var ignore = new [] { typeof(BaseShell), typeof(BaseScreen) };
+			var viewModels = typeof(AppBootstrapper).Assembly.GetTypes()
+				.Where(t => !t.IsAbstract && !t.IsInterface && typeof(IScreen).IsAssignableFrom(t) && !ignore.Contains(t));
+			foreach (var type in viewModels) {
+				Assert.IsNotNull(ViewLocator.LocateTypeForModelType(type, null, null), type.ToString());
+			}
 		}
 	}
 }

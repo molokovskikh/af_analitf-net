@@ -484,7 +484,7 @@
     <Compile Include="Views\Orders\HistoryOrdersView.xaml.cs">
       <DependentUpon>HistoryOrdersView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WaitView.xaml.cs">
+    <Compile Include="Views\Dialogs\WaitView.xaml.cs">
       <DependentUpon>WaitView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WaybillDetailsView.xaml.cs">
@@ -688,7 +688,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\WaitView.xaml">
+    <Page Include="Views\Dialogs\WaitView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

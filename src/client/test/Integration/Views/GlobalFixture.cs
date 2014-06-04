@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,17 +20,20 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Caliburn.Micro;
 using Microsoft.Win32;
+using TestStack.White;
 using Action = System.Action;
 
 namespace AnalitF.Net.Test.Integration.Views
@@ -466,8 +470,18 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Delay_of_payment()
 		{
+			//нужно что бы отработала логика в StartCheck
+			settings.LastLeaderCalculation = DateTime.MinValue;
 			Fixture<LocalDelayOfPayment>();
 			Start();
+
+			var waitWindow = activeWindow;
+			dispatcher.Invoke(() => {
+				Assert.That(activeWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
+			});
+			//ждем пока зкроется
+			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
+
 			Click("ShowCatalog");
 			OpenOffers();
 

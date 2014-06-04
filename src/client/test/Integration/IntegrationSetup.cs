@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.Tasks;
@@ -25,6 +26,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
 using Test.Support;
+using LogManager = Caliburn.Micro.LogManager;
 using User = AnalitF.Net.Client.Models.User;
 
 namespace AnalitF.Net.Test.Integration
@@ -63,7 +65,8 @@ namespace AnalitF.Net.Test.Integration
 			clientConfig.InitDir();
 
 			Consts.ScrollLoadTimeout = TimeSpan.Zero;
-			AppBootstrapper.InitUi();
+			LogManager.GetLog = t => new Log4net(t);
+			AppBootstrapper.InitUi(true);
 
 			global::Test.Support.Setup.SessionFactory = ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);

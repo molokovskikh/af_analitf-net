@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.OrderBy(p => p.Name)
 				.Select(p => new Selectable<Price>(p))
 				.ToList();
-			Costs = Diff.Throttle(Consts.ScrollLoadTimeout, UiScheduler).Select(v => (object)v)
+			Costs = Diff.Throttle(Consts.TextInputLoadTimeout, UiScheduler).Select(v => (object)v)
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(SearchBehavior.ActiveSearchTerm)
 				.Select(_ => Load())

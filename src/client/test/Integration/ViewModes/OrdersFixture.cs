@@ -214,7 +214,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			PrepareSent();
 
-			Assert.That(model.CanRestore, Is.True);
+			Assert.That(model.CanRestoreOrder, Is.True);
 			model.RestoreOrder();
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
 			model.IsCurrentSelected.Value = true;

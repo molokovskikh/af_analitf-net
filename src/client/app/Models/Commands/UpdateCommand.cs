@@ -126,6 +126,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetBatchRequest(), Token));
 			}
 			else if (SyncData.Match("History")) {
+				SuccessMessage = "Загрузка истории заказов и документов завершена успешно.";
 				var url = new Uri(Config.BaseUrl, SyncData);
 				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetHistoryRequest(), Token));
 			}

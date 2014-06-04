@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -10,6 +12,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
@@ -63,6 +66,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
+				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed
+					&& !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))
+					&& activeWindow != null) {
+					var filename = Path.GetFullPath(Guid.NewGuid() + ".png");
+					dispatcher.Invoke(() => {
+						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
+					});
+				}
 				dispatcher.Invoke(() => {
 					foreach (var window in windows.ToArray().Reverse())
 						window.Close();
@@ -190,8 +201,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected static void AssertInputable(UIElement element)
 		{
-			Assert.IsTrue(element.IsVisible, element.ToString());
-			Assert.IsTrue(element.IsEnabled, element.ToString());
+			Assert.IsTrue(element.IsVisible, "эдемент {0} невидим IsVisible=False", element.ToString());
+			Assert.IsTrue(element.IsEnabled, "элемент {0} недоступен для ввода IsEnabled=False", element);
 		}
 		protected static void AssertInputable(ContentElement element)
 		{
@@ -201,6 +212,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected async void Start()
 		{
 			session.Flush();
+			//данные могут измениться, нужно перезагрузить данные в shell
+			shell.Reload();
 
 			var loaded = new SemaphoreSlim(0, 1);
 
@@ -223,6 +236,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					RxApp.MessageBus = originbus;
 				}));
 				activeWindow = (Window)ViewLocator.LocateForModel(shell, null, null);
+				//такой размер нужен что бы уместились все кнопки на панели инструментов
+				//тк невидимую кнопку нельзя нажать
+				activeWindow.Width = 1014;
+				activeWindow.Height = 764;
 				windows.Add(activeWindow);
 				activeWindow.Loaded += (sender, args) => loaded.Release();
 				ViewModelBinder.Bind(shell, activeWindow, null);

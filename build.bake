@@ -80,7 +80,7 @@ task "build:client:package", ["build:client"]:
 	MkDir("output/package")
 	MkDir("output/package/tools")
 	Cp("output/setup/setup.exe", "output/package/tools/analitf.net.setup.exe", true)
-	Cp(FileSet("**.*", BaseDirectory: "output/client/"), "output/package/tools/", true)
+	Cp(FileSet("**.*", BaseDirectory: output), "output/package/tools/", true)
 	spec = "output/package/analitf.net.nuspec"
 	Cp("assets/package.nuspec", spec)
 	specDoc = XDocument.Load(spec)

@@ -3,10 +3,12 @@ using System.Web;
 using System.Web.Http;
 using AnalitF.Net.Service.Config.Environments;
 using AnalitF.Net.Service.Config.Initializers;
+using AnalitF.Net.Service.Controllers;
 using Castle.Components.Binder;
 using NHibernate;
 using log4net;
 using log4net.Config;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Service
 {
@@ -29,6 +31,7 @@ namespace AnalitF.Net.Service
 		public static Config.Config InitApp(HttpConfiguration httpConfig)
 		{
 			XmlConfigurator.Configure();
+			GlobalContext.Properties["Version"] = typeof(MainController).Assembly.GetName().Version;
 
 			var config = ReadConfig();
 			if (config.Environment == "Development")

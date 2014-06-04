@@ -80,7 +80,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			var addAwaited = new AddAwaited();
 			yield return new DialogResult(addAwaited, sizeToContent: true);
-			StatelessSession.Insert(addAwaited.Item);
 			Items.Value.Add(addAwaited.Item);
 			Items.Value = Items.Value.OrderBy(i => i.Catalog.FullName)
 				.ThenBy(i => i.Producer != null ? i.Producer.Name : null)
