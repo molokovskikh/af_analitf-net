@@ -59,6 +59,7 @@
 						Binding="{Binding PublicationDate}" />
 					<DataGridHyperlinkColumn Width="*" Header="Тема"
 						ContentBinding="{Binding Header}"
+						SortMemberPath="Header"
 						Binding="{Binding Url}" />
 				</c:DataGrid2.Columns>
 			</c:DataGrid2>

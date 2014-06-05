@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (Session == null || !Session.IsOpen)
 				return;
-			var props = new[] { "IsError", "IsDownloaded" };
+			var props = new[] { "IsError", "IsDownloaded", "IsCertificateNotFound" };
 			if (!props.Contains(e.PropertyName))
 				return;
 

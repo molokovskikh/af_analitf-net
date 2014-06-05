@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		private FileCleaner cleaner;
 
 		[SetUp]
-		public void Setup()
+		public void MixedFixtureSetup()
 		{
 			begin = DateTime.Now;
 
@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		[TearDown]
-		public void TearDown()
+		public void MixedFixtureTearDown()
 		{
 			if (disposable != null)
 				disposable.Dispose();

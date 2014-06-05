@@ -14,7 +14,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	public class WaybillLineSearchFixture : ViewModelFixture
 	{
 		[Test]
-		public void Save_not_found_sate()
+		public void Save_not_found_state()
 		{
 			Env.Barrier = new Barrier(2);
 			var supplier = session.Query<Supplier>().First();

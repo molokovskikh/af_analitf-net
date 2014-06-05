@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected ShellViewModel shell;
 
 		[SetUp]
-		public void Setup()
+		public void BaseUnitFixtureSetup()
 		{
 			cleaner = new FileCleaner();
 			cleanup = new CompositeDisposable();
@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		[TearDown]
-		public void TearDown()
+		public void BaseUnitFixtureTearDown()
 		{
 			BaseScreen.UnitTesting = false;
 			cleanup.Dispose();

@@ -10,7 +10,6 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 	[TestFixture]
 	public class WaybillFixture
 	{
-		private MarkupConfig[] markups;
 		private Waybill waybill;
 		private Settings settings;
 		private WaybillSettings waybillSettings;

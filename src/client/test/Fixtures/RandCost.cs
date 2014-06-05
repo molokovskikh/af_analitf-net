@@ -1,8 +1,4 @@
 using System;
-using System.Linq;
-using AnalitF.Net.Client.Test.TestHelpers;
-using Devart.Data.MySql;
-using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Exceptions;
 
