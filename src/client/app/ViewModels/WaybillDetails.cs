@@ -24,6 +24,11 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint id;
 
+		public WaybillDetails(long id)
+			: this((uint)id)
+		{
+		}
+
 		public WaybillDetails(uint id)
 		{
 			DisplayName = "Детализация накладной";
@@ -314,6 +319,13 @@ namespace AnalitF.Net.Client.ViewModels
 				yield break;
 			}
 			base.Download(loadable);
+		}
+
+		public override object[] GetRebuildArgs()
+		{
+			return new object[] {
+				id
+			};
 		}
 	}
 }

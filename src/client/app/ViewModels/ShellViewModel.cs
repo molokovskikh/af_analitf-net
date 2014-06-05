@@ -47,6 +47,25 @@ namespace AnalitF.Net.Client.ViewModels
 		PrintResult Print();
 	}
 
+#if DEBUG
+	public class RestoreData
+	{
+		public RestoreData(object[] args, string typeName)
+		{
+			Args = args;
+			TypeName = typeName;
+		}
+
+		public string TypeName;
+		public object[] Args;
+
+		public override string ToString()
+		{
+			return String.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
+		}
+	}
+#endif
+
 	[DataContract]
 	public class ShellViewModel : BaseShell, IDisposable
 	{
@@ -339,6 +358,18 @@ namespace AnalitF.Net.Client.ViewModels
 						return Enumerable.Empty<IResult>();
 					}, r => { });
 			}
+
+#if DEBUG
+			try {
+				NavigateAndReset(PersistentNavigationStack
+					.Select(t => Activator.CreateInstance(Type.GetType(t.TypeName), t.Args))
+					.OfType<IScreen>()
+					.ToArray());
+			}
+			catch(Exception e) {
+				log.Error("Не удалось восстановить состояние", e);
+			}
+#endif
 			return Enumerable.Empty<IResult>();
 		}
 
@@ -901,6 +932,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 #if DEBUG
 		public Debug Debug { get; set; }
+
+		[DataMember]
+		public List<RestoreData> PersistentNavigationStack = new List<RestoreData>();
+
+		protected override void OnDeactivate(bool close)
+		{
+			PersistentNavigationStack = NavigationStack
+				.Concat(new [] { ActiveItem })
+				.Select(s => new RestoreData(((BaseScreen)s).GetRebuildArgs(), s.GetType().FullName))
+				.ToList();
+			base.OnDeactivate(close);
+		}
 
 		public void Collect()
 		{

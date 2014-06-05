@@ -512,5 +512,12 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}
 		}
+
+#if DEBUG
+		public virtual object[] GetRebuildArgs()
+		{
+			return new object[0];
+		}
+#endif
 	}
 }

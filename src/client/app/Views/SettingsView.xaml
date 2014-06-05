@@ -290,17 +290,47 @@
 			<TabItem Header="Настройка стеллажной карты" Name="RackingMapSettings">
 				<StackPanel>
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_RackingMap_Size" />
-					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted">Удалять непечатаемые элементы</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Удалять непечатаемые элементы
+					</CheckBox>
 					<Label>Печатаемые элементы стеллажной карты</Label>
-					<CheckBox x:Name="Settings_RackingMap_PrintProduct">Наименование</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintProducer">Производитель</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintSerialNumber">Серия товара</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintPeriod">Срок годности</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintQuantity">Количество</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintSupplier">Поставщик</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintCertificates">Номер сертификата</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintDocumentDate">Дата поступления</CheckBox>
-					<CheckBox x:Name="Settings_RackingMap_PrintRetailCost">Цена</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintProduct"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Наименование
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintProducer"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Производитель
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintSerialNumber"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Серия товара
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintPeriod"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Срок годности
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintQuantity"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Количество
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintSupplier"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Поставщик
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintCertificates"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Номер сертификата
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintDocumentDate"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Дата поступления
+					</CheckBox>
+					<CheckBox x:Name="Settings_RackingMap_PrintRetailCost"
+						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+						Цена
+					</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройка печати ценников" Name="PriceTagSettings">

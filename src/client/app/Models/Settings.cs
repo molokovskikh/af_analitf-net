@@ -122,11 +122,14 @@ namespace AnalitF.Net.Client.Models
 	public enum RackingMapSize
 	{
 		[Description("Стандартный размер")] Normal,
-		[Description("Большой размер")] Big
+		[Description("Большой размер")] Big,
+		[Description("Стелажная карта №2")] Normal2
 	}
 
-	public class RackingMapSettings
+	public class RackingMapSettings : BaseNotify
 	{
+		private RackingMapSize _size;
+
 		public RackingMapSettings()
 		{
 			PrintProduct = true;
@@ -140,7 +143,15 @@ namespace AnalitF.Net.Client.Models
 			PrintRetailCost = true;
 		}
 
-		public virtual RackingMapSize Size { get; set; }
+		public virtual RackingMapSize Size
+		{
+			get { return _size; }
+			set
+			{
+				_size = value;
+				OnPropertyChanged("IsConfigurable");
+			}
+		}
 		public virtual bool HideNotPrinted { get; set; }
 		public virtual bool PrintProduct { get; set; }
 		public virtual bool PrintProducer { get; set; }
@@ -151,6 +162,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool PrintCertificates { get; set; }
 		public virtual bool PrintDocumentDate { get; set; }
 		public virtual bool PrintRetailCost { get; set; }
+
+		public bool IsConfigurable
+		{
+			get { return Size != RackingMapSize.Normal2; }
+		}
 	}
 
 	public enum ProxyType

@@ -1117,7 +1117,8 @@ select db.Id,
 	db.ExciseTax,
 	db.VitallyImportant,
 	db.Period,
-	db.Certificates
+	db.Certificates,
+	db.EAN13
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id

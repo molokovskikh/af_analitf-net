@@ -107,6 +107,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int? Quantity { get; set; }
 
+		public virtual string EAN13 { get; set; }
+
 		public virtual bool Edited { get; set; }
 
 		public virtual IList<CertificateFile> CertificateFiles { get; set; }

@@ -55,6 +55,9 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void NavigateAndReset(params IScreen[] views)
 		{
+			if (views.Length == 0)
+				return;
+
 			ResetNavigation();
 			HideDefault();
 
