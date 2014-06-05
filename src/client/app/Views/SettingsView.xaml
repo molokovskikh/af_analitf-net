@@ -342,6 +342,10 @@
 						Удалять непечатаемые элементы
 					</CheckBox>
 					<Label>Печатаемые элементы ценника</Label>
+					<CheckBox x:Name="Settings_PriceTag_PrintFullName"
+						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+						Наименование клиента
+					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
 						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Наименование

@@ -434,37 +434,39 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private FrameworkElement Normal(WaybillLine line)
 		{
-			var grid = new StackPanel {
+			var panel = new StackPanel {
 				Width = 162,
 				Margin = new Thickness(2)
 			};
-			grid.Children.Add(new Border {
-				BorderThickness = new Thickness(0, 0, 0, 0.5),
-				BorderBrush = Brushes.Black,
-				Child = new DockPanel {
-					Width = 162,
-					Children = {
-						new Image {
-							Height = 20,
-							Width = 18,
-							Source = new BitmapImage(new Uri(@"pack://application:,,,/AnalitF.Net.Client;component/assets/images/price-tag-log.png"))
-						},
-						new TextBlock {
-							Text = waybillSettings.FullName,
-							FontSize = 8,
-							TextAlignment = TextAlignment.Center,
-							VerticalAlignment = VerticalAlignment.Center
+			if (!settings.PriceTag.HideNotPrinted || settings.PriceTag.PrintFullName) {
+				panel.Children.Add(new Border {
+					BorderThickness = new Thickness(0, 0, 0, 0.5),
+					BorderBrush = Brushes.Black,
+					Child = new DockPanel {
+						Width = 162,
+						Children = {
+							new Image {
+								Height = 20,
+								Width = 18,
+								Source = new BitmapImage(new Uri(@"pack://application:,,,/AnalitF.Net.Client;component/assets/images/price-tag-log.png"))
+							},
+							new TextBlock {
+								Text = settings.PriceTag.PrintFullName ? waybillSettings.FullName : "",
+								FontSize = 8,
+								TextAlignment = TextAlignment.Center,
+								VerticalAlignment = VerticalAlignment.Center
+							}
 						}
 					}
-				}
-			});
-			GetValue(grid, "", line.Product, "Product");
-			GetValue(grid, "Цена", FormatCost(line), "Cost");
-			GetValue(grid, "Произв.", line.Country, "Country");
-			GetValue(grid, "", line.Producer, "Producer");
-			GetValue(grid, "Срок годности", line.Period, "Period");
-			GetValue(grid, "Серия товара", line.SerialNumber, "SerialNumber");
-			GetValue(grid, "№ накладной", line.Waybill.ProviderDocumentId, "ProviderDocumentId");
+				});
+			}
+			GetValue(panel, "", line.Product, "Product");
+			GetValue(panel, "Цена", FormatCost(line), "Cost");
+			GetValue(panel, "Произв.", line.Country, "Country");
+			GetValue(panel, "", line.Producer, "Producer");
+			GetValue(panel, "Срок годности", line.Period, "Period");
+			GetValue(panel, "Серия товара", line.SerialNumber, "SerialNumber");
+			GetValue(panel, "№ накладной", line.Waybill.ProviderDocumentId, "ProviderDocumentId");
 
 			var haveValue = settings.PriceTag.PrintSupplier || settings.PriceTag.PrintDocumentDate;
 			if (haveValue || !settings.PriceTag.HideNotPrinted) {
@@ -493,16 +495,16 @@ namespace AnalitF.Net.Client.Models.Print
 					}
 				};
 				label.SetValue(DockPanel.DockProperty, Dock.Right);
-				grid.Children.Add(new Border {
+				panel.Children.Add(new Border {
 					BorderThickness = new Thickness(0, 0.5, 0, 0),
 					BorderBrush = Brushes.Black,
 					Child = dockPanel
 				});
 			}
 
-			ApplyDefaults(grid);
+			ApplyDefaults(panel);
 
-			return grid;
+			return panel;
 		}
 
 		private void GetValue(StackPanel grid, string name, object value, string key)

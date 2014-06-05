@@ -246,6 +246,7 @@
     <Compile Include="Models\Mnn.cs" />
     <Compile Include="Models\News.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\PriceTagSettings.cs" />
     <Compile Include="Models\Print\AwaitedDocument.cs" />
     <Compile Include="Models\Print\BaseDocument.cs" />
     <Compile Include="Models\Print\BatchReport.cs" />
@@ -268,6 +269,7 @@
     <Compile Include="Models\Price.cs" />
     <Compile Include="Models\ProgressReporter.cs" />
     <Compile Include="Models\Promotion.cs" />
+    <Compile Include="Models\RackingMapSettings.cs" />
     <Compile Include="Models\Reject.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
