@@ -142,6 +142,41 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_waybills()
 		{
+			user.SendWaybills = true;
+			var waybillFile = CreateWaybillWithFile();
+
+			exporter.ExportDocs();
+			var files = ListResult();
+			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
+				+ " WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt,"
+				+ " LoadedDocuments.meta.txt, LoadedDocuments.txt",
+				Path.GetFileName(waybillFile)));
+		}
+
+		[Test]
+		public void Do_not_export_waybill_files()
+		{
+			user.SendWaybills = false;
+			CreateWaybillWithFile();
+			exporter.ExportDocs();
+			var files = ListResult();
+			Assert.AreEqual("Waybills.meta.txt, Waybills.txt," +
+				" WaybillLines.meta.txt, WaybillLines.txt," +
+				" WaybillOrders.meta.txt, WaybillOrders.txt," +
+				" LoadedDocuments.meta.txt, LoadedDocuments.txt",
+				files);
+		}
+
+		private string ListResult()
+		{
+			var memory = new MemoryStream();
+			exporter.Compress(memory);
+			memory.Position = 0;
+			return ZipFile.Read(memory).Implode(l => l.FileName);
+		}
+
+		private string CreateWaybillWithFile()
+		{
 			var testUser = session.Load<TestUser>(user.Id);
 			var waybill = DataMother.CreateWaybill(session, testUser);
 			var log = waybill.Log;
@@ -149,14 +184,7 @@ namespace AnalitF.Net.Service.Test
 			var sendLog = new TestDocumentSendLog(testUser, log);
 			session.Save(sendLog);
 			var waybillFile = waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
-
-			exporter.ExportDocs();
-			ExportCompressed();
-			var files = ZipHelper.lsZip(file).Implode();
-			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
-				+ " WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt,"
-				+ " LoadedDocuments.meta.txt, LoadedDocuments.txt",
-				Path.GetFileName(waybillFile)));
+			return waybillFile;
 		}
 
 		private List<UpdateData> Export()

@@ -27,6 +27,23 @@ using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
+#if DEBUG
+	public class DebugServerError
+	{
+		public string Message;
+		public string ExceptionMessage;
+		public string StackTrace;
+
+		public override string ToString()
+		{
+			return new StringBuilder()
+				.AppendLine(ExceptionMessage)
+				.AppendLine(StackTrace)
+				.ToString();
+		}
+	}
+#endif
+
 	public class ResultDir
 	{
 		private static string[] autoOpenFiles = {
@@ -178,9 +195,13 @@ namespace AnalitF.Net.Client.Models.Commands
 						&& response.StatusCode != HttpStatusCode.Accepted) {
 
 						if (response.StatusCode == HttpStatusCode.InternalServerError
-							&& (response.Content.Headers.ContentType != null
-								&& response.Content.Headers.ContentType.MediaType == "text/plain")) {
-							throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+							&& response.Content.Headers.ContentType != null) {
+							if (response.Content.Headers.ContentType.MediaType == "text/plain") 
+								throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+#if DEBUG
+							if (response.Content.Headers.ContentType.MediaType == "application/json")
+								throw new Exception(response.Content.ReadAsAsync<DebugServerError>().Result.ToString());
+#endif
 						}
 
 						throw new RequestException(

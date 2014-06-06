@@ -1050,6 +1050,10 @@ group by ol.RowId", condition);
 			}
 
 			foreach (var doc in logs) {
+				if (doc.Document.DocumentType == DocType.Waybills && !user.SendWaybills)
+					continue;
+				if (doc.Document.DocumentType == DocType.Rejects && !user.SendRejects)
+					continue;
 				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
@@ -1216,13 +1220,20 @@ group by dh.Id")
 
 		public string Compress(string file)
 		{
+			file = Path.Combine(ResultPath, file);
+			using(var stream = File.Create(file))
+				Compress(stream);
+			return file;
+		}
+
+		public void Compress(Stream stream)
+		{
 			if (!String.IsNullOrEmpty(Config.InjectedFault))
 				throw new Exception(Config.InjectedFault);
 
 			var watch = new Stopwatch();
 			watch.Start();
-			file = Path.Combine(ResultPath, file);
-			using (var zip = ZipFile.Create(file)) {
+			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
 				foreach (var tuple in result) {
@@ -1244,9 +1255,7 @@ group by dh.Id")
 			}
 			watch.Stop();
 
-			log.DebugFormat("Архив создан за {0}, размер {1}", watch.Elapsed, new FileInfo(file).Length);
-
-			return file;
+			log.DebugFormat("Архив создан за {0}, размер {1}", watch.Elapsed, stream.Length);
 		}
 
 		public void ExportAll()

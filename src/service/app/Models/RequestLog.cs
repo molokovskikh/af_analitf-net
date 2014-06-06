@@ -99,6 +99,11 @@ namespace AnalitF.Net.Service.Models
 				if (!String.IsNullOrEmpty(ErrorDescription)) {
 					message.Content = new StringContent(ErrorDescription);
 				}
+#if DEBUG
+				else {
+					throw new Exception(Error);
+				}
+#endif
 				return message;
 			}
 
