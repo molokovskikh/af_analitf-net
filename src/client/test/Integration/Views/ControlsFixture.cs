@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Reactive.Disposables;
 using System.Reactive.Linq.Observαble;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,6 +18,7 @@ using System.Windows.Markup;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
@@ -25,6 +30,7 @@ using Action = System.Action;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;
+using Point = System.Windows.Point;
 using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
@@ -166,17 +172,17 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Focus_on_empty_data_grid()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
 				grid.ItemsSource = Enumerable.Empty<Tuple<string>>().ToList();
-				Idle(w, () => {
-					DataGridHelper.Focus(grid);
-					Assert.IsTrue(grid.IsKeyboardFocusWithin);
-					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-				});
+
+				await w.Dispatcher.WaitIdle();
+				DataGridHelper.Focus(grid);
+				Assert.IsTrue(grid.IsKeyboardFocusWithin);
+				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 			});
 		}
 
@@ -185,29 +191,96 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var items = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
 			var data = new ObservableCollection<Tuple<String>>(items);
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
 				grid.ItemsSource = data;
-				Idle(w, () => {
-					DataGridHelper.Focus(grid);
-					Assert.IsNotNull(grid.CurrentItem);
-					data.Remove((Tuple<string>)grid.SelectedItem);
 
-					Idle(w, () => {
-						Assert.IsTrue(grid.IsKeyboardFocusWithin);
-						Assert.IsNotNull(grid.CurrentItem);
-						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-					});
-				});
+				await w.Dispatcher.WaitIdle();
+				DataGridHelper.Focus(grid);
+				Assert.IsNotNull(grid.CurrentItem);
+				data.Remove((Tuple<string>)grid.SelectedItem);
+
+				await w.Dispatcher.WaitIdle();
+				Assert.IsTrue(grid.IsKeyboardFocusWithin);
+				Assert.IsNotNull(grid.CurrentItem);
+				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+			});
+		}
+
+		[Test]
+		public void Style_fixture()
+		{
+			var offers = new List<Offer>();
+			offers.Add(new Offer(new Price("тест"), 100) {
+				IsGrouped = true,
+				BuyingMatrixType = BuyingMatrixStatus.Denied,
+			});
+
+			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
+				var resources = new ResourceDictionary();
+				StyleHelper.BuildStyles(resources);
+				var grid = new DataGrid2();
+				grid.AutoGenerateColumns = false;
+				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("ProductSynonym") });
+				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("OrderCount") });
+				w.Content = grid;
+				grid.ItemsSource = offers;
+				await w.Dispatcher.WaitIdle();
+				var cells = grid.Children().OfType<DataGridCell>().ToArray();
+				foreach (var cell in cells)
+					Assert.AreEqual("Red", cell.Background.ToString(), cell.ToString());
+				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
 			});
 		}
 
 		private static void Idle(Window w, Action target)
 		{
 			w.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(target));
+		}
+	}
+
+	public class DispatchAwaiter : INotifyCompletion
+	{
+		public Dispatcher dispatcher;
+		private TaskCompletionSource<int> src;
+
+		public DispatchAwaiter(TaskCompletionSource<int> src, Dispatcher dispatcher)
+		{
+			this.src = src;
+			this.dispatcher = dispatcher;
+		}
+
+		public void OnCompleted(Action continuation)
+		{
+			src.Task.ContinueWith(t => dispatcher.BeginInvoke(continuation));
+		}
+
+		public bool IsCompleted
+		{
+			get
+			{
+				return src.Task.IsCompleted;
+			}
+		}
+
+		public void GetResult() { }
+
+		public DispatchAwaiter GetAwaiter()
+		{
+			return this;
+		}
+	}
+
+	public static class DispatcherHelper
+	{
+		public static DispatchAwaiter WaitIdle(this Dispatcher d)
+		{
+			var src = new TaskCompletionSource<int>();
+			d.BeginInvoke(new Action(() => src.SetResult(1)));
+			return new DispatchAwaiter(src, d);
 		}
 	}
 }

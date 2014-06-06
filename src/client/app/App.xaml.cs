@@ -26,20 +26,12 @@ namespace AnalitF.Net.Client
 		public void RegisterResources()
 		{
 			resources = Resources.MergedDictionaries[1];
-
 			baseStyle = (Style)Resources[typeof(DataGridCell)];
-
 			var style = new Style(typeof(DataGridCell), baseStyle);
 			style.Setters.Add(new Setter(Control.BackgroundProperty,
 				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
 			resources.Add("CountColumn", style);
 			resources.Add("VitallyImportant", BaseStyle());
-
-			var offerBaseStyle = (Style)Resources["VitallyImportant"];
-			style = new Style(typeof(DataGridCell), offerBaseStyle);
-			style.Setters.Add(new Setter(Control.BackgroundProperty,
-				new SolidColorBrush(Color.FromRgb(0xEE, 0xF8, 0xFF))));
-			resources.Add("OrderColumn", style);
 			StyleHelper.BuildStyles(Resources);
 		}
 

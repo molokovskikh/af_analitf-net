@@ -206,11 +206,11 @@
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 						Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="47*"
-						CellStyle="{StaticResource OrderColumn}" Header="Заказ"
-						Binding="{Binding OrderCount}" TextAlignment="Right" />
+						Header="Заказ"
+						Binding="{Binding OrderCount}" />
 				<c:DataGridTextColumnEx Width="70*"
-						CellStyle="{StaticResource OrderColumn}" Header="Сумма"
-						Binding="{Binding OrderLine.ResultSum}" TextAlignment="Right" />
+						Header="Сумма"
+						Binding="{Binding OrderLine.ResultSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 

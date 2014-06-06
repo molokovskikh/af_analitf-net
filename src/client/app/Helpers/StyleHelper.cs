@@ -9,6 +9,7 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using Iesi.Collections;
+using Newtonsoft.Json.Utilities;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
@@ -18,6 +19,15 @@ namespace AnalitF.Net.Client.Helpers
 		public string[] Columns;
 		public string Description;
 		public string Context;
+		/// <summary>
+		/// приоритет стиля, для стиля ячейки не делает ничего
+		/// для стиля строки
+		/// если меньше 0 - стиль применяет до стиля ячейки и может быть переписан стилем ячейки
+		/// если больше или равно 0 - стиль применяет после стилей ячейки и может переписать стиль который задает ячейка
+		/// все стили применяются отсортированные от меньшего к большему
+		/// по умолчаию -1
+		/// </summary>
+		public int Priority = -1;
 		/// <summary>
 		/// Название стиля который должен применяться, в большенстве случаем null
 		/// нужен в тех ситуация когда название стиля должно отличаться от названия свойства
@@ -154,6 +164,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
 				{ "IsCertificateNotFound", Background(Colors.Gray.ToString()) },
+				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF).ToString()) }
 			};
 		}
 
@@ -228,43 +239,56 @@ namespace AnalitF.Net.Client.Helpers
 			var legends = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
 				let d = (StyleAttribute)a
-				select new {type, p, d};
+				select Tuple.Create(type, p, d);
 
-			var rowStyles = legends.Where(l => l.d.Columns == null || l.d.Columns.Length == 0);
+			var rowStyles = legends.Where(l => l.Item3.Columns == null || l.Item3.Columns.Length == 0).ToArray();
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
-			foreach (var style in rowStyles) {
-				PatchBackground(rowStyle, style.p.Name, GetCombinedStyle(style.d.GetName(style.p), style.p.Name));
-			}
+			ApplyToStyle(rowStyles.OrderBy(s => s.Item3.Priority), rowStyle);
 
 			if (rowStyle.Triggers.Count > 0) {
 				local.Add(type.Name + "Row", rowStyle);
 				baseStyle = rowStyle;
 			}
 
-			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.d.Description));
+			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.Item3.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
-				GetCombinedStyle(legend.d.GetName(legend.p), legend.p.Name)
+				GetCombinedStyle(legend.Item3.GetName(legend.Item2), legend.Item1.Name)
 					.Setters
 					.OfType<Setter>()
 					.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
-				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.d.Description));
-				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.d.Description));
-				local.Add(LegendKey(legend.type, legend.p), style);
+				style.Setters.Add(new Setter(ContentControl.ContentProperty, legend.Item3.Description));
+				style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, legend.Item3.Description));
+				local.Add(LegendKey(legend.Item1, legend.Item2), style);
 			}
 
 			foreach (var column in map) {
 				var style = new Style(typeof(DataGridCell), baseStyle);
 				string context = null;
+
+				//низкоприоритетные стили строки
+				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority < 0).OrderBy(s => s.Item3.Priority), style);
+
 				foreach (var property in column) {
 					var attr = property.GetCustomAttributes(typeof(StyleAttribute), true).Cast<StyleAttribute>().First();
 					context = attr.Context;
 
-					var color = AddBackgroundTriggers(style, attr.GetName(property), property.Name);
-					GetValue(style, property.Name, true, color);
+					var brush = GetColor(attr.GetName(property));
+					AddMixedBackgroundTriggers(style, property.Name, true, brush.Color, ActiveColor, InactiveColor);
+					AddFocusedTrigger(style, property.Name, true, brush);
 				}
+
+				//высокоприоритетные стили строки
+				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority >= 0).OrderBy(s => s.Item3.Priority), style);
+
 				local.Add(CellKey(type, column.Key, context), style);
 			}
+		}
+
+		private static void ApplyToStyle(IEnumerable<Tuple<Type, PropertyInfo, StyleAttribute>> styles, Style rowStyle)
+		{
+			foreach (var style in styles)
+				PatchBackground(rowStyle, style.Item2.Name, GetCombinedStyle(style.Item3.GetName(style.Item2), style.Item2.Name));
 		}
 
 		private static void PatchBackground(Style style, string property, DataTrigger trigger)
@@ -276,7 +300,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 
 			trigger.Setters.Remove(background);
-			AddTriggers(style, property, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
+			AddMixedBackgroundTriggers(style, property, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
 			if (trigger.Setters.Count > 0) {
 				style.Triggers.Add(trigger);
 			}
@@ -345,14 +369,7 @@ namespace AnalitF.Net.Client.Helpers
 				return context + type.Name + path + "Cell";
 		}
 
-		public static SolidColorBrush AddBackgroundTriggers(Style style, string key, string property)
-		{
-			var brush = GetColor(key);
-			AddTriggers(style, property, true, brush.Color, ActiveColor, InactiveColor);
-			return brush;
-		}
-
-		public static void AddTriggers(Style style, string name, object value,
+		public static void AddMixedBackgroundTriggers(Style style, string name, object value,
 			Color baseColor,
 			Color active,
 			Color inactive)
@@ -461,7 +478,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		//для текущей ячейки когда в ней фокус рисуется прозрачный фон
 		//а для подсвеченных ячеек должен рисоваться не смешанный фон
-		private static void GetValue(Style style,
+		private static void AddFocusedTrigger(Style style,
 			string name,
 			object value,
 			SolidColorBrush normalBrush)

@@ -154,10 +154,10 @@
 				<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
 					Binding="{Binding OrderLine.Comment}" />
 				<c:DataGridTextColumnEx Width="34*"
-					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
+					Header="Заказ"
 					Binding="{Binding OrderCount}" />
 				<c:DataGridTextColumnEx Width="51*"
-					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
+					Header="Сумма"
 					Binding="{Binding OrderLine.ResultSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>

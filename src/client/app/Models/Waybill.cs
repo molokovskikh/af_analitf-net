@@ -151,6 +151,9 @@ namespace AnalitF.Net.Client.Models
 				try {
 					return Address != null ? Address.Name : "";
 				}
+				catch(LazyInitializationException) {
+					return "";
+				}
 				catch(SessionException) {
 					return "";
 				}

@@ -80,11 +80,11 @@
 				<c:DataGridTextColumnEx Width="37*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="46*"
-					CellStyle="{StaticResource OrderColumn}" Header="Заказ"
-					Binding="{Binding OrderCount}" TextAlignment="Right" />
+					Header="Заказ"
+					Binding="{Binding OrderCount}" />
 				<c:DataGridTextColumnEx Width="51*"
-					CellStyle="{StaticResource OrderColumn}" Header="Сумма"
-					Binding="{Binding OrderLine.ResultSum}" TextAlignment="Right" />
+					Header="Сумма"
+					Binding="{Binding OrderLine.ResultSum}" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 

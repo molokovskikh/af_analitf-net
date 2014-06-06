@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.RightsManagement;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
@@ -134,10 +135,20 @@ namespace AnalitF.Net.Client.Models
 			get { return LeaderCost == ResultCost; }
 		}
 
-		[Style(Description = "Препарат запрещен к заказу")]
+		[Style(Description = "Препарат запрещен к заказу", Priority = 1)]
 		public virtual bool IsForbidden
 		{
 			get { return BuyingMatrixType == BuyingMatrixStatus.Denied; }
+		}
+
+		//подсвичиваем колонки, нужно что бы работал функционал приоритета что бы перекрывался цветом IsForbidden
+		[Style("OrderCount", "OrderLine.ResultSum")]
+		public virtual bool OrderMark
+		{
+			get
+			{
+				return true;
+			}
 		}
 
 		[Ignore]
