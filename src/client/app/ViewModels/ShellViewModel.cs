@@ -641,10 +641,17 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return Settings.Value.LastUpdate != null; }
 		}
 
-		public IEnumerable<IResult> LoadHistory()
+		public IEnumerable<IResult> LoadOrderHistory()
 		{
 			return Sync(new UpdateCommand {
-				SyncData = "History"
+				SyncData = "OrderHistory"
+			});
+		}
+
+		public IEnumerable<IResult> LoadWaybillHistory()
+		{
+			return Sync(new UpdateCommand {
+				SyncData = "WaybillHistory"
 			});
 		}
 

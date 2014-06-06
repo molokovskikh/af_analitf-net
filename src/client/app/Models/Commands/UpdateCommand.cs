@@ -142,10 +142,23 @@ namespace AnalitF.Net.Client.Models.Commands
 				var url = new Uri(Config.BaseUrl, "Batch");
 				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetBatchRequest(), Token));
 			}
-			else if (SyncData.Match("History")) {
-				SuccessMessage = "Загрузка истории заказов и документов завершена успешно.";
-				var url = new Uri(Config.BaseUrl, SyncData);
-				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetHistoryRequest(), Token));
+			else if (SyncData.Match("WaybillHistory")) {
+				SuccessMessage = "Загрузка истории документов завершена успешно.";
+				var url = new Uri(Config.BaseUrl, "History");
+				var data = new HistoryRequest {
+					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
+					IgnoreOrders = true,
+				};
+				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync(url.ToString(), data, Token));
+			}
+			else if (SyncData.Match("OrderHistory")) {
+				SuccessMessage = "Загрузка истории заказов завершена успешно.";
+				var url = new Uri(Config.BaseUrl, "History");
+				var data = new HistoryRequest {
+					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
+					IgnoreWaybills = true,
+				};
+				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync(url.ToString(), data, Token));
 			}
 			else {
 				var url = Config.SyncUrl(syncData);
@@ -154,22 +167,12 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait(Config.WaitUrl(url), request);
 			}
 
-
 			Reporter.Stage("Загрузка данных");
 			Download(response, Config.ArchiveFile, Reporter);
 			var result = ProcessUpdate();
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			return result;
-		}
-
-		public ObjectContent<HistoryRequest> GetHistoryRequest()
-		{
-			var data = new HistoryRequest {
-				OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
-				WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray()
-			};
-			return new ObjectContent<HistoryRequest>(data, Formatter);
 		}
 
 		private HttpContent GetBatchRequest()

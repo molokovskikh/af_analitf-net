@@ -71,8 +71,10 @@
 					<Separator />
 					<MenuItem Header="Создание базы данных с сохранение отправленных заказов"
 						cal:Message.Attach="CleanDb" />
-					<MenuItem Header="Загрузить историю заказов/накладных"
-						cal:Message.Attach="LoadHistory" />
+					<MenuItem Header="Загрузить историю заказов"
+						cal:Message.Attach="LoadOrderHistory" />
+					<MenuItem Header="Загрузить историю накладных"
+						cal:Message.Attach="LoadWaybillHistory" />
 				</MenuItem>
 			</MenuItem>
 
