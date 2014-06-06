@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -37,6 +38,9 @@ namespace AnalitF.Net.Client.ViewModels
 			IsFilterByWriteTime = new NotifyValue<bool>();
 			RejectFilter = new NotifyValue<RejectFilter>();
 			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
+			AddressSelector = new AddressSelector(Session, this) {
+				Description = "Все адреса"
+			};
 		}
 
 		public IList<Selectable<Supplier>> Suppliers { get; set; }
@@ -51,11 +55,13 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsFilterByWriteTime { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<RejectFilter> RejectFilter { get; set; }
+		public AddressSelector AddressSelector { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
+			AddressSelector.Init();
 			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name)
 				.ToList()
 				.Select(i => new Selectable<Supplier>(i))
@@ -71,6 +77,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(IsFilterByDocumentDate.Changed())
 				.Merge(RejectFilter.Changed())
 				.Merge(supplierSelectionChanged)
+				.Merge(AddressSelector.FilterChanged)
 				.Subscribe(_ => Update());
 			OnCloseDisposable.Add(subscription);
 		}
@@ -162,13 +169,18 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(w => w.IsRejectChanged);
 			}
 
-			var ids = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
-			if (ids.Length != Suppliers.Count)
-				query = query.Where(w => ids.Contains(w.Supplier.Id));
+			var supplierIds = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
+			if (supplierIds.Length != Suppliers.Count)
+				query = query.Where(w => supplierIds.Contains(w.Supplier.Id));
+
+			var addressIds = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
+			if (addressIds.Length != AddressSelector.Addresses.Count)
+				query = query.Where(w => addressIds.Contains(w.Address.Id));
 
 			Waybills.Value = query
 				.OrderBy(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
+				.Fetch(w => w.Address)
 				.ToObservableCollection();
 		}
 

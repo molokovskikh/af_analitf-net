@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls" mc:Ignorable="d">
 	<StackPanel Orientation="Horizontal">
-		<CheckBox VerticalAlignment="Center" Margin="0, 0, 4, 0" Name="All">Все заказы</CheckBox>
+		<CheckBox VerticalAlignment="Center" Margin="0, 0, 4, 0" Name="All" Content="{Binding Description}" />
 		<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Addresses" ButtonContent="Адреса" />
 	</StackPanel>
 </UserControl>

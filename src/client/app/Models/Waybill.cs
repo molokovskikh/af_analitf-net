@@ -144,6 +144,19 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string AddressName
+		{
+			get
+			{
+				try {
+					return Address != null ? Address.Name : "";
+				}
+				catch(SessionException) {
+					return "";
+				}
+			}
+		}
+
 		[Ignore]
 		public virtual WaybillSettings WaybillSettings { get; set; }
 

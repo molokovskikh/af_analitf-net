@@ -42,6 +42,7 @@
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 2, 4, 0" x:Name="Suppliers"
 				ButtonContent="Поставщики"
 				Member="Item.FullName" />
+			<ContentControl x:Name="AddressSelector" />
 			<Button Name="AltExport" Style="{StaticResource FilterElement}">Список в Excel</Button>
 			<Button Name="SearchLine" Style="{StaticResource FilterElement}">Поиск товара</Button>
 			<Button Name="OpenFolders" Style="{StaticResource FilterElement}">Открыть папки</Button>
@@ -49,8 +50,12 @@
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
 		</WrapPanel>
 
-		<c:DataGrid2 x:Name="Waybills" Grid.Row="1">
+		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
+			ShowAddressColumn="{Binding AddressSelector.All.Value}">
 			<DataGrid.Columns>
+				<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа"
+					Binding="{Binding AddressName}"
+					Visibility="Collapsed" />
 				<c:DataGridTextColumnEx Width="64*" Header="№"
 					Binding="{Binding Id}"
 					TextAlignment="Right" />

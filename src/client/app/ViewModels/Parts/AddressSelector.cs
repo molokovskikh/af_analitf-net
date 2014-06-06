@@ -37,7 +37,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Merge()
 				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
 				.Merge(All.Changed());
+			Description = "Все заказы";
 		}
+
+		public string Description { get; set; }
 
 		public NotifyValue<bool> All { get; set; }
 
