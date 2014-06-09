@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	public class QuickSearch<T> : ViewAware
 	{
 		private string searchText;
-		private bool searchInProgress;
+		public bool searchInProgress;
 		private Action<T> update;
 		private Func<string, T> search;
 		private bool _isEnabled = true;

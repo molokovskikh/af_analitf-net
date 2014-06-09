@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -114,6 +118,23 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Promotions = new PromotionPopup(StatelessSession, Shell.Config);
+		}
+
+		protected override void OnActivate()
+		{
+			base.OnActivate();
+
+			if (!String.IsNullOrEmpty(CatalogNamesSearch.SearchText)) {
+				CatalogNamesSearch.searchInProgress = true;
+				Dispatcher.CurrentDispatcher.BeginInvoke(
+					DispatcherPriority.Loaded,
+					new System.Action(() => {
+						var view = Views.Values.OfType<CatalogNameView>().FirstOrDefault();
+						var el = (DataGrid)view.FindName("CatalogNames");
+						DataGridHelper.Focus(el);
+						CatalogNamesSearch.searchInProgress = false;
+					}));
+			}
 		}
 
 		public override void Update()

@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Xml;
 using Common.Tools;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -215,15 +216,16 @@ namespace AnalitF.Net.Client.Helpers
 		/// предназначен для отладки, протоколирует события
 		/// пример WpfHelper.TraceEvent(typeof(UIElement), UIElement.GotFocusEvent, true);
 		/// </summary>
-		public static void TraceEvent(Type type, RoutedEvent @event, bool trace = false)
+		public static void TraceEvent(Type type, RoutedEvent @event, Func<EventArgs, object> map = null, bool trace = false)
 		{
 			EventManager.RegisterClassHandler(type, @event,
 				new RoutedEventHandler(
 					(sender, args) => {
-						Console.WriteLine("{0} {1}.{2} {3}",
+						Console.WriteLine("{0} {1}.{2} {3} {4}",
 							@event.Name,
 							((FrameworkElement)sender).Name,
 							sender,
+							map != null ? map(args) : args,
 							trace ? new StackTrace() : null);
 					}));
 		}
