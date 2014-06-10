@@ -472,6 +472,9 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 			//если это автозаказ то мы не должны восстанавливать заказы
 			//по адресам доставки которые участвовали в автозаказе
+			//суть в том что после автозаказа по тем адресам по которым автозаказ производился заказы должны быть заморожены
+			//для этого мы исключаем из восстановления заказа у которые не являются результатом автозаказа (ExportId != null) и
+			//и относятся к адресам где автозаказ производился
 			if (!String.IsNullOrEmpty(BatchFile)) {
 				var autoOrderAddress = ordersToRestore
 					.Where(o => o.Lines.Any(l => l.ExportId != null))
@@ -483,7 +486,10 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете
 			//каждый раз
-			orders.Each(o => o.Frozen = true);
+			orders.Each(o => {
+				o.ResetStatus();
+				o.Frozen = true;
+			});
 			var command = new UnfreezeCommand<Order>(ordersToRestore.Select(o => o.Id).ToArray());
 			command.Restore = true;
 			var report = (string)RunCommand(command);

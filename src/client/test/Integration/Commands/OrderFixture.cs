@@ -74,6 +74,42 @@ namespace AnalitF.Net.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Reset_order_status()
+		{
+			localSession.DeleteEach<Order>();
+
+			var prices = localSession.Query<Price>().ToArray();
+			var maxId = prices.Max(p => p.Id.PriceId);
+			var price = new Price("Тест") {
+				RegionName = prices[0].RegionName,
+				Id = {
+					PriceId = maxId + 10,
+					RegionId = prices[0].Id.RegionId
+				},
+				RegionId = prices[0].Id.RegionId
+			};
+			localSession.Save(price);
+			var order = new Order(price, address);
+			var orderLine = new OrderLine {
+				Order = order,
+				Count = 1,
+				OfferId = new OfferComposedId()
+			};
+			order.AddLine(orderLine);
+			localSession.Save(order);
+
+			Run(new UpdateCommand());
+			localSession.Refresh(order);
+			Assert.IsTrue(order.Frozen);
+			Assert.AreEqual(OrderResultStatus.Reject, order.SendResult);
+
+			Run(new UpdateCommand());
+			localSession.Refresh(order);
+			Assert.IsTrue(order.Frozen);
+			Assert.AreEqual(OrderResultStatus.OK, order.SendResult);
+		}
+
+		[Test]
 		public void Send_result_cost()
 		{
 			disposable.Add(Disposable.Create(() => Integration.IntegrationSetup.RestoreData(localSession)));
