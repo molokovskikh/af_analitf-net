@@ -97,7 +97,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var handler = new HttpClientHandler {
 				Credentials = Credentials,
 				PreAuthenticate = true,
-				Proxy = Proxy
+				Proxy = Proxy,
 			};
 			if (handler.Credentials == null)
 				handler.UseDefaultCredentials = true;
@@ -105,6 +105,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			using (var ras = new RasHelper(RasConnection))
 			using (handler)
 			using (var client = new HttpClient(handler)) {
+				client.BaseAddress = Config.BaseUrl;
 				ras.Open();
 				client.DefaultRequestHeaders.Add("Version", version.ToString());
 				return action(client);

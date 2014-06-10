@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
@@ -611,6 +612,45 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 			AsyncClick("TryClose");
 			WaitMessageBox("Обновление завершено успешно.");
+		}
+
+		[Test]
+		public void Send_feedback()
+		{
+			Start();
+			OpenMenu("Сервис");
+			WaitIdle();
+			ClickMenuAsync("Отправить письмо в АК \"Инфорум\"");
+			WaitWindow("Письмо в АК \"Инфорум\"");
+			InputActiveWindow("Subject", "test");
+			Click("Send");
+			WaitMessageBox("Письмо отправлено.");
+		}
+
+		private void OpenMenu(string header)
+		{
+			dispatcher.Invoke(() => {
+				var el = activeWindow.Descendants<Menu>().SelectMany(m => m.Items.OfType<MenuItem>())
+					.Flat(i => i.Items.OfType<MenuItem>())
+					.FirstOrDefault(i => header.Equals(i.Header));
+				if (el == null)
+					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", header, activeWindow));
+				AssertInputable(el);
+				el.IsSubmenuOpen = true;
+			});
+		}
+
+		private void ClickMenuAsync(string header)
+		{
+			dispatcher.BeginInvoke(new Action(() => {
+				var el = activeWindow.Descendants<Menu>().SelectMany(m => m.Items.OfType<MenuItem>())
+					.Flat(i => i.Items.OfType<MenuItem>())
+					.FirstOrDefault(i => header.Equals(i.Header));
+				if (el == null)
+					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", header, activeWindow));
+				AssertInputable(el);
+				el.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, el));
+			}));
 		}
 
 		private void WaitWindow(string title)

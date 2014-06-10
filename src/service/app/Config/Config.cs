@@ -21,5 +21,8 @@
 		public uint MaxProducerCostCostId { get; set; }
 
 		public string InjectedFault { get; set; }
+		public string SupportMail { get; set; }
+		public string OfficeMail { get; set; }
+		public string BillingMail { get; set; }
 	}
 }

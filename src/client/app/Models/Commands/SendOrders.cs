@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var clientOrders = orders.Select(o => o.ToClientOrder(Session)).Where(o => o != null).ToArray();
 
 			var response =
-				Client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),
+				Client.PostAsync("Main",
 					new SyncRequest(clientOrders, Force),
 					Formatter,
 					Token).Result;

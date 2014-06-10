@@ -85,6 +85,7 @@
     <Compile Include="Config\Initializers\SmartOrderFactory.cs" />
     <Compile Include="Controllers\BatchController.cs" />
     <Compile Include="Controllers\DownloadController.cs" />
+    <Compile Include="Controllers\FeedbackController.cs" />
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\JobController.cs" />
     <Compile Include="Controllers\LogsController.cs" />

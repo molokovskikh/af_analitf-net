@@ -166,6 +166,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			element.RaiseEvent(WpfHelper.TextArgs(text));
 		}
 
+		protected void InputActiveWindow(string name, string text)
+		{
+			dispatcher.Invoke(() => {
+				var el = activeWindow.Descendants<FrameworkElement>().FirstOrDefault(e => e.Name == name);
+				if (el == null)
+					throw new Exception(String.Format("Могу найти элемент с именем '{0}' в окне {1}", name, activeWindow));
+				AssertInputable(el);
+				el.RaiseEvent(WpfHelper.TextArgs(text));
+			});
+		}
+
 		protected static void Input(UIElement element, Key key)
 		{
 			Contract.Assert(element != null);

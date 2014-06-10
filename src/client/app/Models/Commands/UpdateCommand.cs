@@ -140,7 +140,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			HttpResponseMessage response;
 			if (!String.IsNullOrEmpty(BatchFile)) {
 				var url = new Uri(Config.BaseUrl, "Batch");
-				response = Wait(Config.WaitUrl(url), Client.PostAsync(url, GetBatchRequest(), Token));
+				response = Wait(Config.WaitUrl(url), Client.PostAsync("Batch", GetBatchRequest(), Token));
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
@@ -149,7 +149,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 					IgnoreOrders = true,
 				};
-				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync(url.ToString(), data, Token));
+				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync("History", data, Token));
 			}
 			else if (SyncData.Match("OrderHistory")) {
 				SuccessMessage = "Загрузка истории заказов завершена успешно.";
@@ -158,7 +158,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
 					IgnoreWaybills = true,
 				};
-				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync(url.ToString(), data, Token));
+				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync("History", data, Token));
 			}
 			else {
 				var url = Config.SyncUrl(syncData);
@@ -199,7 +199,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 						if (response.StatusCode == HttpStatusCode.InternalServerError
 							&& response.Content.Headers.ContentType != null) {
-							if (response.Content.Headers.ContentType.MediaType == "text/plain") 
+							if (response.Content.Headers.ContentType.MediaType == "text/plain")
 								throw new EndUserError(response.Content.ReadAsStringAsync().Result);
 #if DEBUG
 							if (response.Content.Headers.ContentType.MediaType == "application/json")

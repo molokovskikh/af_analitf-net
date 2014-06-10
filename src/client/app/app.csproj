@@ -229,6 +229,7 @@
     <Compile Include="Models\Commands\DbCommand.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
     <Compile Include="Models\Commands\ReorderCommand.cs" />
+    <Compile Include="Models\Commands\SendFeedback.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />
     <Compile Include="Models\Commands\UnfreezeCommand.cs" />
     <Compile Include="Models\Commands\UpdateCommand.cs" />
@@ -282,6 +283,7 @@
     <Compile Include="Models\Results\SaveFileResult.cs" />
     <Compile Include="Models\Results\SelectDirResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
+    <Compile Include="Models\Results\TaskResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />
     <Compile Include="Models\Schedule.cs" />
     <Compile Include="Models\SentOrder.cs" />
@@ -301,6 +303,7 @@
     <Compile Include="UI\Conventions.cs" />
     <Compile Include="UI\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
@@ -387,6 +390,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Feedback.xaml.cs">
+      <DependentUpon>Feedback.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\AddAwaited.xaml.cs">
       <DependentUpon>AddAwaited.xaml</DependentUpon>
@@ -563,6 +569,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Feedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

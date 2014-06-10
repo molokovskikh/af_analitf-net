@@ -36,6 +36,16 @@ namespace AnalitF.Net.Client.Models
 		public bool IgnoreWaybills;
 	}
 
+	public class FeedbackMessage
+	{
+		public bool IsBilling;
+		public bool IsSupport;
+		public bool IsOffice;
+		public string Subject;
+		public string Body;
+		public byte[] Attachments;
+	}
+
 	public class SyncRequest
 	{
 		public PriceSettings[] Prices;

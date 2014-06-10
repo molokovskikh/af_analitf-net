@@ -166,7 +166,8 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanMicroUpdate");
 					NotifyOfPropertyChange("CanShowBatch");
 					NotifyOfPropertyChange("CanShowAwaited");
-					NotifyOfPropertyChange("CanLoadHistory");
+					NotifyOfPropertyChange("CanLoadWaybillHistory");
+					NotifyOfPropertyChange("CanLoadOrderHistory");
 				});
 
 			CloseDisposable.Add(Bus.Listen<Loadable>().ObserveOn(UiScheduler).Subscribe(l => {
@@ -636,7 +637,7 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 		}
 
-		public bool CanLoadHistory
+		public bool CanLoadOrderHistory
 		{
 			get { return Settings.Value.LastUpdate != null; }
 		}
@@ -646,6 +647,11 @@ namespace AnalitF.Net.Client.ViewModels
 			return Sync(new UpdateCommand {
 				SyncData = "OrderHistory"
 			});
+		}
+		public bool CanLoadWaybillHistory
+
+		{
+			get { return Settings.Value.LastUpdate != null; }
 		}
 
 		public IEnumerable<IResult> LoadWaybillHistory()
@@ -763,6 +769,15 @@ namespace AnalitF.Net.Client.ViewModels
 			Reload();
 		}
 
+		public IEnumerable<IResult> Feedback()
+		{
+			using (var feedback = new Feedback()) {
+				yield return new DialogResult(feedback, sizeToContent: true);
+				foreach (var result in Sync(new SendFeedback(feedback)))
+					yield return result;
+			}
+		}
+
 		protected bool Confirm(string text)
 		{
 			return windowManager.Question(text) == MessageBoxResult.Yes;
@@ -772,7 +787,6 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return Sync(command, c => c.Run());
 		}
-
 
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)
 		{

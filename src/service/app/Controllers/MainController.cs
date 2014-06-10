@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
@@ -19,6 +20,7 @@ using MySql.Data.MySqlClient;
 using NHibernate.Linq;
 using Newtonsoft.Json;
 using SmartOrderFactory;
+using Attachment = System.Net.Mail.Attachment;
 
 namespace AnalitF.Net.Service.Controllers
 {
