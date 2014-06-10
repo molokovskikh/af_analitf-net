@@ -221,6 +221,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
 				var resources = new ResourceDictionary();
+				StyleHelper.Reset();
 				StyleHelper.BuildStyles(resources);
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;

@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var exceptions = new List<Exception>();
 			var t = new Thread(() => {
 				var window = new Window();
+				SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
 				try {
 					window.Dispatcher.UnhandledException += (sender, args) => {
 						args.Handled = true;
@@ -45,9 +46,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			t.SetApartmentState(ApartmentState.STA);
 			t.Start();
-			t.Join(20.Second());
+			var stopped = t.Join(20.Second());
+			if (!stopped)
+				t.Abort();
 			if (exceptions.Count > 0 && !(exceptions.FirstOrDefault() is TaskCanceledException))
 				throw new AggregateException(exceptions);
+			if (!stopped)
+				throw new Exception("Тест не завершился добровольно убит по таймауту 20 секунд");
 		}
 
 		public static Dispatcher WithDispatcher(Action action)
