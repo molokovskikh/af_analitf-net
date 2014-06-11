@@ -261,6 +261,7 @@
     <Compile Include="Unit\ViewModels\BatchFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
+    <Compile Include="Unit\ViewModels\OrdersFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />

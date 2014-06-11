@@ -77,7 +77,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					NotifyOfPropertyChange("CanUnfreeze");
 				}));
 
-			AddressSelector.FilterChanged.Subscribe(_ => Update(), CloseCancellation.Token);
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
 			var update = ordersChanged
 				.SelectMany(e => e.Value.ItemChanged.Cast<Object>().Merge(e.Value.Changed));
@@ -101,11 +100,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnInitialize();
 
 			AddressSelector.Init();
+			AddressSelector.FilterChanged.Subscribe(_ => Update(), CloseCancellation.Token);
+
 			var addressId = Address != null ? Address.Id : 0;
-			AddressesToMove = Session.Query<Address>()
-				.Where(a => a.Id != addressId)
-				.OrderBy(a => a.Name)
-				.ToList();
+			if (Session != null) {
+				AddressesToMove = Session.Query<Address>()
+					.Where(a => a.Id != addressId)
+					.OrderBy(a => a.Name)
+					.ToList();
+			}
 		}
 
 		public override void Update()
@@ -148,6 +151,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		private void RebuildSessionIfNeeded()
 		{
+			if (Session == null)
+				return;
 			Session.Flush();
 			Session.Clear();
 			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые

@@ -221,6 +221,9 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public bool ShowAllAddresses { get; set; }
 
+		[DataMember]
+		public uint[] SelectedAddresses { get; set; }
+
 		public ObservableCollection<Loadable> PendingDownloads { get; set; }
 
 		public NotifyValue<Settings> Settings { get; set; }
@@ -400,6 +403,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
+			SelectedAddresses = SelectedAddresses ?? Addresses.Select(a => a.Id).ToArray();
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();

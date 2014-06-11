@@ -273,6 +273,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			if (address == null)
 				return;
+			if (session == null)
+				return;
 
 			var weekBegin = DateTime.Today.FirstDayOfWeek();
 			var monthBegin = DateTime.Today.FirstDayOfMonth();

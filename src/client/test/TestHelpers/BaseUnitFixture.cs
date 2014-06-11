@@ -52,10 +52,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return cleaner.RandomFile();
 		}
 
-		protected void Activate(BaseScreen screen)
+		protected void Activate(BaseScreen screen, Address address = null)
 		{
+			address = address ?? new Address("тест");
 			screen.User = new User();
-			screen.Address = new Address("тест");
+			screen.Address = address;
 			screen.Parent = shell;
 			if (screen is BaseOfferViewModel)
 				((BaseOfferViewModel)screen).Addresses = new[] { screen.Address };

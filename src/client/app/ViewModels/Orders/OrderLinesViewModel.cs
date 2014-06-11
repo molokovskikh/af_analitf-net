@@ -71,11 +71,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(p => new Selectable<Price>(p))
 				.ToList();
 
-			AddressSelector.FilterChanged
-				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
-				.Merge(OnlyWarning.Changed())
-				.Subscribe(_ => Update(), CloseCancellation.Token);
-
 			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
 		}
 
@@ -148,6 +143,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						ProductInfo.CurrentOffer = SelectedSentLine.Value;
 				});
 			AddressSelector.Init();
+			AddressSelector.FilterChanged
+				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
+				.Merge(OnlyWarning.Changed())
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
 		public override void Update()

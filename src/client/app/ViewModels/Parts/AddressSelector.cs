@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -33,10 +34,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			else
 				Addresses = new List<Selectable<Address>>();
 
-			FilterChanged = Addresses.Select(a => a.Changed())
-				.Merge()
-				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
-				.Merge(All.Changed());
 			Description = "Все заказы";
 		}
 
@@ -63,8 +60,17 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			var shell = screen.Shell;
 			if (shell != null) {
 				All.Value = shell.ShowAllAddresses;
+				if (shell.SelectedAddresses != null)
+					Addresses.Each(a => a.IsSelected = shell.SelectedAddresses.Contains(a.Item.Id));
 				All.Changed().Subscribe(_ => shell.ShowAllAddresses = All);
+				Addresses.Select(a => a.Changed()).Merge().Subscribe(_ => {
+					shell.SelectedAddresses = Addresses.Where(a => a.IsSelected).Select(a => a.Item.Id).ToArray();
+				});
 			}
+			FilterChanged = Addresses.Select(a => a.Changed())
+				.Merge()
+				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
+				.Merge(All.Changed());
 		}
 
 		public Address[] GetActiveFilter()

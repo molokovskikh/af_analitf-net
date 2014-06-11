@@ -88,7 +88,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
 			CurrentReportLine = new NotifyValue<BatchLine>();
 			CanDelete = new NotifyValue<bool>(() => CurrentReportLine.Value != null, CurrentReportLine);
-			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
 		}
 
 		public string[] Filter { get; set; }
@@ -172,6 +171,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			});
 
 			AddressSelector.Init();
+			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
 			LoadLines();
 
 			if (Address != null)
