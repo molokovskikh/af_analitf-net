@@ -91,44 +91,52 @@ namespace AnalitF.Net.Client.UI
 				};
 			ConventionManager.AddElementConvention<DataGrid>(ItemsControl.ItemsSourceProperty, "SelectedItem", "SelectionChanged")
 				.ApplyBinding = (viewModelType, path, property, element, convention) => {
-					if (((DataGrid)element).Columns.Count > 1)
+					var dataGrid = (DataGrid)element;
+					if (dataGrid.Columns.Count > 1)
 						Interaction.GetBehaviors(element).Add(new Persistable());
 
 					var fallback = ConventionManager.GetElementConvention(typeof(MultiSelector));
 					if (fallback != null) {
-						return GuesAlignment(fallback, viewModelType, path, property, element);
+						var actualProperty = property;
+						var result = fallback.ApplyBinding(viewModelType, path, actualProperty, element, fallback);
+						var dummy = "";
+						NotifyValueSupport.Patch(ref dummy, ref actualProperty);
+						var propertyType = actualProperty.PropertyType;
+						if (result
+							&& propertyType.IsGenericType
+							&& typeof(IEnumerable).IsAssignableFrom(propertyType)) {
+							ConfigureDataGrid(dataGrid, propertyType.GetGenericArguments()[0]);
+						}
+						return result;
 					}
 					return false;
 				};
 		}
 
-		private static bool GuesAlignment(ElementConvention fallback, Type viewModelType, string path, PropertyInfo property, FrameworkElement element)
+		public static void ConfigureDataGrid(DataGrid dataGrid, Type type)
 		{
-			var result = fallback.ApplyBinding(viewModelType, path, property, element, fallback);
-			var dummy = "";
-			NotifyValueSupport.Patch(ref dummy, ref property);
-			var propertyType = property.PropertyType;
-			if (result
-				&& propertyType.IsGenericType
-				&& typeof(IEnumerable).IsAssignableFrom(propertyType)) {
-				var dataGrid = ((DataGrid)element);
-				var columns = dataGrid.Columns;
-				foreach (var column in columns) {
-					if (column.Header is string) {
-						column.Header = new TextBlock {
-							Text = (string)column.Header,
-							ToolTip = column.Header,
-						};
+			var columns = dataGrid.Columns;
+			foreach (var column in columns) {
+				if (column.Header is string) {
+					column.Header = new TextBlock {
+						Text = (string)column.Header,
+						ToolTip = column.Header,
+					};
+				}
+
+				var boundColumn = column as DataGridBoundColumn;
+				if (boundColumn != null && boundColumn.Binding is Binding) {
+					var columnPath = ((Binding)boundColumn.Binding).Path.Path;
+					var columnProperty = Util.GetProperty(type, columnPath);
+					if (columnProperty == null)
+						continue;
+					var columnType = columnProperty.PropertyType;
+					if (columnType == typeof(decimal) && boundColumn.Binding.StringFormat == null) {
+						boundColumn.Binding.StringFormat = "0.00";
 					}
 
-					if (column is DataGridTextColumnEx && ((DataGridTextColumnEx)column).Binding is Binding) {
-						var exColumn = (DataGridTextColumnEx)column;
-						var columnPath = ((Binding)exColumn.Binding).Path.Path;
-						var type = propertyType.GetGenericArguments()[0];
-						var columnProperty = Util.GetProperty(type, columnPath);
-						if (columnProperty == null)
-							continue;
-						var columnType = columnProperty.PropertyType;
+					var exColumn = column as DataGridTextColumnEx;
+					if (exColumn != null) {
 						if (Util.IsNumeric(columnType)) {
 							exColumn.TextAlignment = TextAlignment.Right;
 						}
@@ -138,7 +146,6 @@ namespace AnalitF.Net.Client.UI
 					}
 				}
 			}
-			return result;
 		}
 
 		private static bool TryBindSelectedItems(Type viewModelType,

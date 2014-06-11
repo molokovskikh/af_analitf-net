@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.UI;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate.Linq;
@@ -79,6 +80,9 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
+			//тк мы не можем получить информацию о типе от view model
+			//задаем ее статично
+			Conventions.ConfigureDataGrid(Lines, typeof(WaybillLine));
 		}
 
 		public void ApplyStyles()
