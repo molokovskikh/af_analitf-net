@@ -100,7 +100,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var results = model.EditColor(appStyle).GetEnumerator();
 			results.MoveNext();
 			var dialog = (NativeDialogResult<ColorDialog>)results.Current;
-			Assert.AreEqual(CustomStyle.ToHexString(dialog.Dialog.Color), appStyle.Background);
+			Assert.AreEqual(ColorHelper.ToHexString(dialog.Dialog.Color), appStyle.Background);
 			dialog.Dialog.Color = Color.FromArgb(255, 10, 0);
 			results.MoveNext();
 			Assert.AreEqual("#FFFF0A00", appStyle.Background);

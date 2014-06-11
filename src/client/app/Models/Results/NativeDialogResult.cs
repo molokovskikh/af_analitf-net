@@ -7,6 +7,7 @@ namespace AnalitF.Net.Client.Models.Results
 	public class NativeDialogResult<T> : IResult where T : CommonDialog
 	{
 		public T Dialog;
+		public Extentions.WindowManager Manager;
 
 		public NativeDialogResult(T dialog)
 		{
@@ -16,7 +17,7 @@ namespace AnalitF.Net.Client.Models.Results
 		public void Execute(ActionExecutionContext context)
 		{
 			var resultCompletionEventArgs = new ResultCompletionEventArgs {
-				WasCancelled = Dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK
+				WasCancelled = Manager.ShowDialog(Dialog) != System.Windows.Forms.DialogResult.OK
 			};
 
 			if (Completed != null)

@@ -84,8 +84,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}
 		}
 
-		public void DoubleClick(FrameworkElement view, UIElement element, object origin = null)
+		public void DoubleClick(UIElement element, object origin = null)
 		{
+			AssertInputable(element);
 			element.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) {
 				RoutedEvent = Control.MouseDoubleClickEvent,
 				Source = origin,

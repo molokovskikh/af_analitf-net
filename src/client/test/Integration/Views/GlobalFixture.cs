@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -32,10 +33,18 @@ using Common.Tools.Helpers;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Caliburn.Micro;
-using Microsoft.Win32;
 using TestStack.White;
 using Action = System.Action;
+using CheckBox = System.Windows.Controls.CheckBox;
+using DataGrid = System.Windows.Controls.DataGrid;
+using DataGridCell = System.Windows.Controls.DataGridCell;
+using Label = System.Windows.Controls.Label;
+using Menu = System.Windows.Controls.Menu;
+using MenuItem = System.Windows.Controls.MenuItem;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Panel = System.Windows.Controls.Panel;
+using Screen = Caliburn.Micro.Screen;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -106,7 +115,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var selectMany = grid.Descendants<DataGridCell>()
 					.SelectMany(c => c.Descendants<Run>())
 					.Where(r => r.Text.ToLower() == term);
-				DoubleClick(view, grid, selectMany.First());
+				DoubleClick(grid, selectMany.First());
 			});
 			var offers = await ViewLoaded<CatalogOfferViewModel>();
 			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
@@ -539,7 +548,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			Click("ShowBatch");
 
-			manager.FileDialog.OfType<OpenFileDialog>().Take(1)
+			manager.OsDialog.OfType<OpenFileDialog>().Take(1)
 				.Subscribe(d => d.FileName = Path.GetFullPath(filename));
 			AsyncClickNoWait("Upload");
 
@@ -625,6 +634,56 @@ namespace AnalitF.Net.Test.Integration.Views
 			InputActiveWindow("Subject", "test");
 			Click("Send");
 			WaitMessageBox("Письмо отправлено.");
+		}
+
+		[Test]
+		public void Edit_style()
+		{
+			session.DeleteEach<Order>();
+			MakeOrder();
+			var junkOrder = MakeOrder(session.Query<Offer>().First(o => o.Junk));
+
+			Start();
+			dispatcher.Invoke(() => {
+				session.DeleteEach<CustomStyle>();
+				session.SaveEach(StyleHelper.GetDefaultStyles());
+			});
+
+			Click("ShowOrderLines");
+			dispatcher.BeginInvoke(new Action(() => {
+				var el = activeWindow.Descendants<Panel>().Where(p => p.Name == "Legend")
+					.SelectMany(p => p.Descendants<Label>())
+					.First(i => i.Name == "Junk");
+				DoubleClick(el);
+			}));
+			var dialog = manager.OsDialog.OfType<ColorDialog>().Timeout(2.Second())
+				.Take(1)
+				.Do(d => {
+					d.Color = System.Drawing.Color.MistyRose;
+				})
+				.First();
+			Assert.IsNotNull(dialog);
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				testScheduler.Start();
+			});
+
+			dispatcher.BeginInvoke(new Action(() => {
+				var el = activeWindow.Descendants<Panel>().Where(p => p.Name == "Legend")
+					.SelectMany(p => p.Descendants<Label>())
+					.First(i => i.Name == "Junk");
+				Assert.AreEqual(System.Drawing.Color.MistyRose.ToHexString(), el.Background.ToString());
+
+				var grid = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
+				//нужно убедиться что строку которую проверяем не выделена иначе цвета не совпадут из-за смешения
+				grid.CurrentItem = grid.ItemsSource.OfType<OrderLine>().First(l => l.Id != junkOrder.Lines[0].Id);
+				var cells = grid.Descendants<DataGridCell>()
+					.Where(c => ((OrderLine)c.DataContext).Id == junkOrder.Lines[0].Id)
+					.Where(c => ((TextBlock)c.Column.Header).Text == "Срок годн.")
+					.ToArray();
+				Assert.AreEqual(1, cells.Length);
+				Assert.AreEqual(System.Drawing.Color.MistyRose.ToHexString(), cells[0].Background.ToString());
+			}));
 		}
 
 		private void OpenMenu(string header)

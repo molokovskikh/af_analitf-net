@@ -6,7 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Iesi.Collections;
 using Newtonsoft.Json.Utilities;
@@ -231,17 +233,11 @@ namespace AnalitF.Net.Client.Helpers
 			Color inactiveColor,
 			Style baseStyle = null)
 		{
-			var map = (from p in type.GetProperties()
-				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
-				from c in ((StyleAttribute)a).Columns
-				group p by c into g
-				select g);
-			var legends = from p in type.GetProperties()
+			var styles = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
 				let d = (StyleAttribute)a
 				select Tuple.Create(type, p, d);
-
-			var rowStyles = legends.Where(l => l.Item3.Columns == null || l.Item3.Columns.Length == 0).ToArray();
+			var rowStyles = styles.Where(l => l.Item3.Columns == null || l.Item3.Columns.Length == 0).ToArray();
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
 			ApplyToStyle(rowStyles.OrderBy(s => s.Item3.Priority), rowStyle);
 
@@ -250,7 +246,7 @@ namespace AnalitF.Net.Client.Helpers
 				baseStyle = rowStyle;
 			}
 
-			var cellStyles = legends.Where(l => !String.IsNullOrEmpty(l.Item3.Description));
+			var cellStyles = styles.Where(l => !String.IsNullOrEmpty(l.Item3.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
 				GetCombinedStyle(legend.Item3.GetName(legend.Item2), legend.Item1.Name)
@@ -262,20 +258,25 @@ namespace AnalitF.Net.Client.Helpers
 				local.Add(LegendKey(legend.Item1, legend.Item2), style);
 			}
 
-			foreach (var column in map) {
+			var columnStyles = (from s in styles
+				from c in s.Item3.Columns
+				group s by c into g
+				select g);
+			foreach (var column in columnStyles) {
 				var style = new Style(typeof(DataGridCell), baseStyle);
 				string context = null;
 
 				//низкоприоритетные стили строки
 				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority < 0).OrderBy(s => s.Item3.Priority), style);
 
-				foreach (var property in column) {
-					var attr = property.GetCustomAttributes(typeof(StyleAttribute), true).Cast<StyleAttribute>().First();
+				foreach (var styleDef in column) {
+					var prop = styleDef.Item2;
+					var attr = styleDef.Item3;
 					context = attr.Context;
 
-					var brush = GetColor(attr.GetName(property));
-					AddMixedBackgroundTriggers(style, property.Name, true, brush.Color, ActiveColor, InactiveColor);
-					AddFocusedTrigger(style, property.Name, true, brush);
+					var brush = GetColor(attr.GetName(prop));
+					AddMixedBackgroundTriggers(style, prop.Name, true, brush.Color, ActiveColor, InactiveColor);
+					AddFocusedTrigger(style, prop.Name, true, brush);
 				}
 
 				//высокоприоритетные стили строки
@@ -551,10 +552,11 @@ namespace AnalitF.Net.Client.Helpers
 				let key = LegendKey(type, p)
 				let style = resources[key] as Style
 				where style != null
-				select new Label {
+				select ConnectEdit(new Label {
 					Style = style,
-					Tag = "generated"
-				};
+					Tag = "generated",
+					Name = a.GetName(p),
+				});
 
 			if (legend.Children.Count == 0) {
 				legend.Children.Add(new Label { Content = "Подсказка" });
@@ -571,6 +573,16 @@ namespace AnalitF.Net.Client.Helpers
 					.Each(c => panel.Children.Remove(c));
 				panel.Children.AddRange(labels);
 			}
+		}
+
+		private static UIElement ConnectEdit(Label label)
+		{
+			label.MouseDoubleClick += (sender, args) => {
+				var screen = label.DataContext as BaseScreen;
+				if (screen != null)
+					ViewModelHelper.ProcessResult(screen.EditLegend(label.Name));
+			};
+			return label;
 		}
 
 		private static bool IsApplicable(DataGridColumn col, StyleAttribute attr)

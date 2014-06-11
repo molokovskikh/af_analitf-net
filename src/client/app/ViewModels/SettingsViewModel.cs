@@ -138,23 +138,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> EditColor(CustomStyle style)
 		{
-			if (style == null)
-				yield break;
-			var converter = TypeDescriptor.GetConverter(typeof(Color));
-			var dialog = new ColorDialog {
-				Color = style.IsBackground
-					? (Color)converter.ConvertFrom(style.Background)
-					: (Color)converter.ConvertFrom(style.Foreground),
-				FullOpen = true,
-			};
-			yield return new NativeDialogResult<ColorDialog>(dialog);
-			var value = CustomStyle.ToHexString(dialog.Color);
-			if (style.IsBackground) {
-				style.Background = value;
-			}
-			else {
-				style.Foreground = value;
-			}
+			return CustomStyle.Edit(style);
 		}
 	}
 }

@@ -11,8 +11,6 @@ using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
-using Microsoft.Win32;
-using CommonDialog = System.Windows.Forms.CommonDialog;
 using DialogResult = System.Windows.Forms.DialogResult;
 
 namespace AnalitF.Net.Client.Extentions
@@ -38,7 +36,7 @@ namespace AnalitF.Net.Client.Extentions
 
 		public Subject<object> DialogOpened = new Subject<object>();
 		public Subject<Window> WindowOpened = new Subject<Window>();
-		public Subject<FileDialog> FileDialog = new Subject<FileDialog>();
+		public Subject<object> OsDialog = new Subject<object>();
 		public Subject<string> MessageOpened = new Subject<string>();
 
 		public List<Window> Dialogs = new List<Window>();
@@ -70,7 +68,7 @@ namespace AnalitF.Net.Client.Extentions
 			return ShowDialog(window);
 		}
 
-		public DialogResult ShowDialog(CommonDialog dialog)
+		public DialogResult ShowDialog(System.Windows.Forms.CommonDialog dialog)
 		{
 #if DEBUG
 			if (Stub(dialog))
@@ -84,7 +82,7 @@ namespace AnalitF.Net.Client.Extentions
 				return dialog.ShowDialog();
 		}
 
-		public bool? ShowDialog(FileDialog dialog)
+		public bool? ShowDialog(Microsoft.Win32.CommonDialog dialog)
 		{
 #if DEBUG
 			if (Stub(dialog))
@@ -109,24 +107,19 @@ namespace AnalitF.Net.Client.Extentions
 		private bool Stub(object rootModel)
 		{
 #if DEBUG
+			if (UnitTesting || SkipApp) {
+				if (rootModel is Microsoft.Win32.CommonDialog || rootModel is System.Windows.Forms.CommonDialog) {
+					OsDialog.OnNext(rootModel);
+					return true;
+				}
+			}
 			if (UnitTesting) {
-				if (rootModel is FileDialog) {
-					FileDialog.OnNext((FileDialog)rootModel);
-				}
-				else {
-					IoC.BuildUp(rootModel);
-					ScreenExtensions.TryActivate(rootModel);
-					DialogOpened.OnNext(rootModel);
-					ContinueViewDialog(rootModel);
-				}
+				IoC.BuildUp(rootModel);
+				ScreenExtensions.TryActivate(rootModel);
+				DialogOpened.OnNext(rootModel);
+				ContinueViewDialog(rootModel);
 				return true;
 			}
-
-			if (SkipApp && rootModel is FileDialog) {
-				FileDialog.OnNext((FileDialog)rootModel);
-				return true;
-			}
-
 #endif
 			return false;
 		}
