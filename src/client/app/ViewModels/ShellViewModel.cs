@@ -132,6 +132,7 @@ namespace AnalitF.Net.Client.ViewModels
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
+				.Merge(User.Cast<object>())
 				.Subscribe(_ => UpdateDisplayName());
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -415,8 +416,12 @@ namespace AnalitF.Net.Client.ViewModels
 		protected void UpdateDisplayName()
 		{
 			var value = "АналитФАРМАЦИЯ";
-			var named =  ActiveItem as IHaveDisplayName;
 
+			if (User.Value != null && !String.IsNullOrEmpty(User.Value.Name)) {
+				value += " - " + User.Value.Name;
+			}
+
+			var named =  ActiveItem as IHaveDisplayName;
 			if (named != null && !String.IsNullOrEmpty(named.DisplayName)) {
 				value += " - " + named.DisplayName;
 			}

@@ -183,18 +183,35 @@ where
 and l.Operation = 2";
 			Export(result, sql, "Rejects", new { lastUpdate = data.LastUpdateAt });
 
-			sql = @"
-select a.Id,
-a.Address as Name
+			var legalEntityCount = session.CreateSQLQuery(@"
+select
+	count(distinct le.Id)
 from Customers.Addresses a
-join Customers.UserAddresses ua on ua.AddressId = a.Id
-where a.Enabled = 1 and ua.UserId = ?userId";
+	join Customers.UserAddresses ua on ua.AddressId = a.Id
+	join Billing.LegalEntities le on le.Id = a.LegalEntityId
+where
+	ua.UserId = :userId
+	and a.Enabled = 1")
+				.SetParameter("userId", user.Id)
+				.UniqueResult<long>();
+			var addressName = "a.Address";
+			if (legalEntityCount > 0)
+				addressName = "concat(le.Name, ', ', a.Address)";
+
+			sql = String.Format(@"
+select a.Id,
+	{0} as Name
+from Customers.Addresses a
+	join Customers.UserAddresses ua on ua.AddressId = a.Id
+	join Billing.LegalEntities le on le.Id = a.LegalEntityId
+where a.Enabled = 1 and ua.UserId = ?userId", addressName);
 			Export(result, sql, "Addresses", new { userId = user.Id });
 
 			sql = @"
 select u.Id,
 	u.InheritPricesFrom is not null as IsPriceEditDisabled,
 	u.UseAdjustmentOrders as IsPreprocessOrders,
+	c.Name,
 	c.FullName as FullName,
 	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost,
 	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled
