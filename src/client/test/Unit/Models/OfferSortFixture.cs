@@ -69,6 +69,34 @@ namespace AnalitF.Net.Test.Unit
 		}
 
 		[Test]
+		public void Sort_by_product()
+		{
+			offers = new List<Offer> {
+				new Offer {
+					ProductId = 1,
+					Cost = 53.38m,
+				},
+				new Offer {
+					ProductId = 2,
+					Cost = 53.38m
+				},
+				new Offer {
+					ProductId = 2,
+					Cost = 54.14m
+				},
+				new Offer {
+					ProductId = 1,
+					Cost = 54.14m
+				},
+			};
+			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
+			Assert.AreEqual(1, offers[0].ProductId);
+			Assert.AreEqual(1, offers[1].ProductId);
+			Assert.AreEqual(2, offers[2].ProductId);
+			Assert.AreEqual(2, offers[3].ProductId);
+		}
+
+		[Test]
 		public void Reset_group_key()
 		{
 			offers = BaseOfferViewModel.SortByMinCostInGroup(offers, o => o.ProductId);
