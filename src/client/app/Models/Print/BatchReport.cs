@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Производитель", 168),
 				new PrintColumn("Прайс-лист", 132),
 				new PrintColumn("Цена", 52),
-				new PrintColumn("Заказ", 40),
+				new PrintColumn("Заказ", 45),
 				new PrintColumn("Сумма", 60)
 			};
 			var table = BuildTableHeader(headers);
@@ -50,22 +50,20 @@ namespace AnalitF.Net.Client.Models.Print
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
 						new TableCell(new Paragraph(new Run("Итого: "))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 1
 						},
 						new TableCell(new Paragraph(new Run("Позиций: " + lines.Count))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 2
 						},
-						new TableCell(new Paragraph(new Run("Сумма: " + lines.Where(l => l.Line != null).Sum(l => l.Line.MixedCost)))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 1, 1),
+						new TableCell(new Paragraph(new Run("Сумма: " + lines.Where(l => l.Line != null).Sum(l => l.Line.MixedSum)))) {
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
-							ColumnSpan = 3
+							ColumnSpan = 3,
+							TextAlignment = TextAlignment.Right
 						}
 					}
 				});

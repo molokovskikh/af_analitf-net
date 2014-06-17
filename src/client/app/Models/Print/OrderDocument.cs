@@ -28,12 +28,12 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(order.Comment);
 
 			var headers = new[] {
-				new PrintColumn("№ п/п", 40),
+				new PrintColumn("№ п/п", 45),
 				new PrintColumn("Наименование", 220),
 				new PrintColumn("Производитель", 165),
 				new PrintColumn("Срок годн.", 73),
 				new PrintColumn("Цена", 66),
-				new PrintColumn("Заказ", 40),
+				new PrintColumn("Заказ", 45),
 				new PrintColumn("Сумма", 80)
 			};
 
@@ -55,22 +55,20 @@ namespace AnalitF.Net.Client.Models.Print
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
 						new TableCell(new Paragraph(new Run("Итого: "))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
-							ColumnSpan = 2
+							ColumnSpan = 2,
 						},
 						new TableCell(new Paragraph(new Run("Позиций: " + count))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
-							ColumnSpan = 2
+							ColumnSpan = 2,
 						},
 						new TableCell(new Paragraph(new Run("Сумма: " + sum))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 1, 1),
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
-							ColumnSpan = 3
+							ColumnSpan = 3,
+							TextAlignment = TextAlignment.Right,
 						}
 					}
 				});

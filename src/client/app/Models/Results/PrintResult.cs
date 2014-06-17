@@ -46,7 +46,6 @@ namespace AnalitF.Net.Client.Models.Results
 		private void Prepare(FlowDocument doc)
 		{
 			if (doc != null) {
-				doc.PagePadding = new Thickness(25);
 				doc.ColumnGap = 0;
 				doc.ColumnWidth = double.PositiveInfinity;
 			}
@@ -60,11 +59,33 @@ namespace AnalitF.Net.Client.Models.Results
 
 			CheckBuffer();
 			foreach (var doc in buffered) {
-				var documentPaginator = GetPaginator(doc.Value.Item1, doc.Value.Item2);
-				var orientation = GetPageOrientation(documentPaginator);
-				if (orientation != PageOrientation.Unknown)
-					dialog.PrintTicket.PageOrientation = orientation;
-				dialog.PrintDocument(documentPaginator, name);
+				var flowDocument = doc.Value.Item1;
+				//очередное безумее - лазерные принтеры не могут печатать на всей поверхности листа и сообщают об этом
+				//через GetPrintCapabilities
+				//wpf будет пытаться печатать на страницы абстрактного размера игнорируя то что говорит ему принтер
+				//задаем реальные размеры области доступной для печати и отступы которые требует принтер
+				//todo - модифицировать flow document не очень хорошо тк мы им не владеем
+				//todo - альбомный формат печати игнорируется
+				var padding = flowDocument.PagePadding;
+				try {
+					var imageableArea = dialog.PrintQueue.GetPrintCapabilities().PageImageableArea;
+					var documentPaginator = GetPaginator(flowDocument, doc.Value.Item2);
+					if (imageableArea != null) {
+						flowDocument.PagePadding = new Thickness(
+							double.IsNaN(padding.Left) ? imageableArea.OriginWidth : padding.Left + imageableArea.OriginWidth,
+							double.IsNaN(padding.Top) ? imageableArea.OriginHeight : padding.Top + imageableArea.OriginHeight,
+							padding.Right,
+							padding.Bottom);
+						documentPaginator.PageSize = new Size(imageableArea.ExtentWidth, imageableArea.ExtentHeight);
+					}
+					var orientation = GetPageOrientation(documentPaginator);
+					if (orientation != PageOrientation.Unknown)
+						dialog.PrintTicket.PageOrientation = orientation;
+					dialog.PrintDocument(documentPaginator, name);
+				}
+				finally {
+					flowDocument.PagePadding = padding;
+				}
 			}
 
 			if (Completed != null)
@@ -78,7 +99,7 @@ namespace AnalitF.Net.Client.Models.Results
 			return PageOrientation.Unknown;
 		}
 
-		public WrapDocumentPaginator Paginator
+		public DocumentPaginator Paginator
 		{
 			get
 			{
@@ -94,7 +115,7 @@ namespace AnalitF.Net.Client.Models.Results
 				buffered = docs.ToArray();
 		}
 
-		private WrapDocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
+		private DocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
 		{
 			Prepare(doc);
 			var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;

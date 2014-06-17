@@ -49,13 +49,15 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public WaybillDocument(Waybill waybill, IList<WaybillLine> lines)
 		{
+			doc.PagePadding = new Thickness(29);
+			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
+
 			this.waybill = waybill;
 			this.settings = waybill.WaybillSettings;
 			this.lines = lines;
 			docSettings = new WaybillDocumentSettings(waybill);
 			Settings = docSettings;
 
-			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {
 				Setters = {
 					new Setter(Control.FontSizeProperty, 10d),
@@ -78,8 +80,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			Landscape();
-
 			Header(String.Format("\n                               Наименование организации: {0}\n", settings.FullName)
 				+ "             Отдел:______________________________________________\n");
 

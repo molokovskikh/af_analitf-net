@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Производитель", 168),
 				new PrintColumn("Прайс-лист", 132),
 				new PrintColumn("Цена", 52),
-				new PrintColumn("Заказ", 40),
+				new PrintColumn("Заказ", 45),
 				new PrintColumn("Сумма", 60)
 			};
 
@@ -78,23 +78,27 @@ namespace AnalitF.Net.Client.Models.Print
 			if (count > 0) {
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
-						new TableCell(new Paragraph(new Run("Итого: "))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+						new TableCell(new Paragraph(new Run("Итого: ")) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 1
 						},
-						new TableCell(new Paragraph(new Run("Позиций: " + count))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 0, 1),
+						new TableCell(new Paragraph(new Run("Позиций: " + count)) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 2
 						},
-						new TableCell(new Paragraph(new Run("Сумма: " + sum))) {
-							BorderBrush = Brushes.Black,
-							BorderThickness = new Thickness(1, 0, 1, 1),
+						new TableCell(new Paragraph(new Run("Сумма: " + sum)) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
-							ColumnSpan = 3
+							ColumnSpan = 3,
+							TextAlignment = TextAlignment.Right
 						}
 					}
 				});

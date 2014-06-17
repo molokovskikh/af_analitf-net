@@ -32,11 +32,11 @@ namespace AnalitF.Net.Client.Models.Print
 			if (price.Order != null)
 				doc.Blocks.Add(new Paragraph(new Run(price.Order.PersonalComment)));
 			var headers = new[] {
-				new PrintColumn("№ п/п", 40),
+				new PrintColumn("№ п/п", 45),
 				new PrintColumn("Наименование", 260),
 				new PrintColumn("Производитель", 196),
 				new PrintColumn("Цена", 68),
-				new PrintColumn("Заказ", 40),
+				new PrintColumn("Заказ", 45),
 				new PrintColumn("Сумма", 80)
 			};
 			var rows = offers.Select((o, i) => new object[]{
@@ -54,26 +54,26 @@ namespace AnalitF.Net.Client.Models.Print
 				sumLabel = sum.ToString();
 			table.RowGroups[0].Rows.Add(new TableRow {
 				Cells = {
-					new TableCell(new Paragraph(new Run("Итого: "))) {
-						BorderBrush = Brushes.Black,
-						BorderThickness = new Thickness(1, 0, 0, 1),
+					new TableCell(new Paragraph(new Run("Итого: ")) {
+						KeepTogether = true
+					}) {
+						Style = CellStyle,
 						FontWeight = FontWeights.Bold,
 						ColumnSpan = 2
 					},
 					new TableCell(new Paragraph(new Run("Позиций: " + offers.Count)) {
 						KeepTogether = true
 					}) {
-						BorderBrush = Brushes.Black,
-						BorderThickness = new Thickness(1, 0, 0, 1),
+						Style = CellStyle,
 						FontWeight = FontWeights.Bold
 					},
 					new TableCell(new Paragraph(new Run("Сумма: " + sumLabel)) {
 						KeepTogether = true
 					}) {
-						BorderBrush = Brushes.Black,
-						BorderThickness = new Thickness(1, 0, 1, 1),
+						Style = CellStyle,
 						FontWeight = FontWeights.Bold,
-						ColumnSpan = 3
+						ColumnSpan = 3,
+						TextAlignment = TextAlignment.Right
 					}
 				}
 			});

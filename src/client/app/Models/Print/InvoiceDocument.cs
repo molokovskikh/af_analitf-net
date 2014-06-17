@@ -16,7 +16,9 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public InvoiceDocument(Waybill waybill)
 		{
-			doc.FontFamily = new FontFamily("Arial");
+			doc.PagePadding = new Thickness(29);
+			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
+
 			this.waybill = waybill;
 			BlockStyle = new Style(typeof(Paragraph)) {
 				Setters = {
@@ -58,8 +60,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			Landscape();
-
 			Header(string.Format("Счет-фактура {0} от {1:d}", waybill.ProviderDocumentId, waybill.DocumentDate));
 			Block(string.Format("Продавец: {0}", waybill.Seller == null ? "" : waybill.Seller.Name));
 			Block(string.Format("Адрес продавца: {0}", waybill.Seller == null ? "" : waybill.Seller.Address));

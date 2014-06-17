@@ -26,10 +26,10 @@ namespace AnalitF.Net.Client.Models.Print
 			Header("Препараты, предписанные к изъятию из аптечной сети");
 			var headers = new[] {
 				new PrintColumn("Серия", 96),
-				new PrintColumn("Наименование", 364),
-				new PrintColumn("Фирма-изготовитель", 208),
+				new PrintColumn("Наименование", 360),
+				new PrintColumn("Фирма-изготовитель", 200),
 				new PrintColumn("Номер письма", 180),
-				new PrintColumn("Дата", 148),
+				new PrintColumn("Дата", 100),
 			};
 			var rows = rejects.Select(r => new object[] {
 				r.Series,
@@ -58,9 +58,8 @@ namespace AnalitF.Net.Client.Models.Print
 				var tableRow = new TableRow();
 				rowGroup.Rows.Add(tableRow);
 				var cell = new TableCell(new Paragraph(new Run(reject.CauseRejects))) {
+					Style = CellStyle,
 					ColumnSpan = headers.Length,
-					BorderBrush = Brushes.Black,
-					BorderThickness = new Thickness(0, 0, 1, 1),
 					FontStyle = FontStyles.Italic
 				};
 				tableRow.Cells.Add(cell);

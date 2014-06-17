@@ -27,11 +27,11 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 
 			var headers = new[] {
-				new PrintColumn("Наименование", 216),
-				new PrintColumn("Производитель", 136),
-				new PrintColumn("Прайс-лист", 112),
-				new PrintColumn("Срок год.", 85),
-				new PrintColumn("Дата пр.", 85),
+				new PrintColumn("Наименование", 210),
+				new PrintColumn("Производитель", 120),
+				new PrintColumn("Прайс-лист", 110),
+				new PrintColumn("Срок год.", 80),
+				new PrintColumn("Дата пр.", 80),
 				new PrintColumn("Разн.", 48),
 				new PrintColumn("Цена", 55)
 			};

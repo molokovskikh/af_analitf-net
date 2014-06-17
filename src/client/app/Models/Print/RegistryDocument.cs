@@ -47,11 +47,15 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			this.waybill = waybill;
 			this.lines = lines;
+			doc.PagePadding = new Thickness(29);
+			//мнения о размере страницы разощлись
+			//придерживаемся мнения delphi тк размеры колонок скопированы от туда
+			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
+
 			settings = waybill.WaybillSettings;
 			docSettings = new RegistryDocumentSettings(waybill);
 			Settings = docSettings;
 
-			doc.FontFamily = new FontFamily("Arial");
 			BlockStyle = new Style(typeof(Paragraph)) {
 				Setters = {
 					new Setter(Control.FontSizeProperty, 10d),
@@ -69,26 +73,33 @@ namespace AnalitF.Net.Client.Models.Print
 					new Setter(Control.FontSizeProperty, 10d),
 				}
 			};
+			TableStyle = new Style(typeof(Table), TableStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+				}
+			};
 		}
 
 		protected override void BuildDoc()
 		{
-			Landscape();
-
 			var block = new Paragraph { Style = BlockStyle };
+			//Figure - игнорирует отступы
 			block.Inlines.Add(new Figure(new Paragraph(new Run(
 				"К положению о порядке формирования цен на лекарственные средства и изделия медицинского назначения\n"
 				+ "Цены реестра соответствуют\n"
 				+ "Гос. реестру 17 изд. 5 доп."))) {
 					Width = new FigureLength(208),
-					HorizontalAnchor = FigureHorizontalAnchor.PageLeft
+					HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
+					Padding = new Thickness(29, 0, 0, 0),
+					TextAlignment = TextAlignment.Left
 				});
 			//WrapDirection = WrapDirection.None нужно что бы блок с "УТВЕРЖДАЮ"
 			//не пытался заполнить пустое пространство между этим блоком и предыдущим
 			block.Inlines.Add(new Figure(new Paragraph(new Run(settings.FullName))) {
 				HorizontalOffset = 713,
 				HorizontalAnchor = FigureHorizontalAnchor.PageLeft,
-				WrapDirection = WrapDirection.None
+				WrapDirection = WrapDirection.None,
+				Padding = new Thickness(0, 0, 29, 0)
 			});
 			doc.Blocks.Add(block);
 
@@ -98,7 +109,8 @@ namespace AnalitF.Net.Client.Models.Print
 			block.Inlines.Add(new Figure(new Paragraph(new Run("УТВЕРЖДАЮ\n"
 				+ String.Format("Зав.аптекой ______________{0}", settings.Director)))) {
 					HorizontalAnchor = FigureHorizontalAnchor.PageRight,
-					WrapDirection = WrapDirection.None
+					WrapDirection = WrapDirection.None,
+					Padding = new Thickness(0, 0, 29, 0)
 				});
 			doc.Blocks.Add(block);
 

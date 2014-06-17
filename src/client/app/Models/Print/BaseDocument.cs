@@ -97,6 +97,8 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public BaseDocument()
 		{
+			doc.FontFamily = new FontFamily("Arial");
+			doc.PagePadding = new Thickness(36, 36, 50, 36);
 			HeaderStyle = new Style(typeof(Run)) {
 				Setters = {
 					new Setter(Control.FontSizeProperty, 16d),
@@ -149,6 +151,8 @@ namespace AnalitF.Net.Client.Models.Print
 			//250 это примерный размер блока с датой, нужно молиться что бы хватило
 			var pageSize = ((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize;
 			var table = new Table {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 10,
 				Columns = {
 					new TableColumn {
 						Width = new GridLength(pageSize.Width - 250)
@@ -164,8 +168,6 @@ namespace AnalitF.Net.Client.Models.Print
 								Cells = {
 									new TableCell(new Paragraph(new Run("Информационная поддержка \"АК \"Инфорум\"\" 473-2606000")) {
 										TextAlignment = TextAlignment.Left,
-										FontWeight = FontWeights.Bold,
-										FontSize = 16
 									}),
 									new TableCell(new Paragraph(new Run(DateTime.Now.ToString()))) {
 										TextAlignment = TextAlignment.Right
@@ -182,7 +184,10 @@ namespace AnalitF.Net.Client.Models.Print
 		public virtual FrameworkContentElement GetFooter(int page, int pageCount)
 		{
 			var footer = "Электронная почта: farm@analit.net, интернет: http://www.analit.net/";
-			return new Paragraph(new Run(footer));
+			return new Paragraph(new Run(footer)) {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 10,
+			};
 		}
 
 		protected void TwoColumnHeader(string leftHeader, string rightHeader)
@@ -271,13 +276,16 @@ namespace AnalitF.Net.Client.Models.Print
 
 			//разделитель страницы может оказаться в середине ячейки
 			var cell = new TableCell(new Paragraph(new Run(text)) {
-				KeepTogether = true
+				KeepTogether = true,
 			});
 			cell.Style = CellStyle;
 			if (colspan > 0)
 				cell.ColumnSpan = colspan;
 			if (Util.IsNumeric(value)) {
 				cell.TextAlignment = TextAlignment.Right;
+			}
+			else {
+				cell.TextAlignment = TextAlignment.Left;
 			}
 			return cell;
 		}

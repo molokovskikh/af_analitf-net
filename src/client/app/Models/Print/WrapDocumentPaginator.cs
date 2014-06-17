@@ -40,7 +40,11 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var header = Header(pageNumber);
 			if (header != null) {
-				visual.Children.Add(header);
+				var headerContainer = new ContainerVisual {
+					Transform = new TranslateTransform(margins.Left, 0)
+				};
+				headerContainer.Children.Add(header);
+				visual.Children.Add(headerContainer);
 			}
 
 			var footer = Footer(pageNumber);
@@ -92,7 +96,7 @@ namespace AnalitF.Net.Client.Models.Print
 				doc.PagePadding = document.PagePadding;
 			}
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			paginator.PageSize = PageSize;
+			paginator.PageSize = ContentSize();
 			var page = paginator.GetPage(0);
 			return page.Visual;
 		}
