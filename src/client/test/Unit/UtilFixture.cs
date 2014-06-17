@@ -1,27 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Dynamic;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Forms.VisualStyles;
-using System.Xaml;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
-using Castle.Components.DictionaryAdapter;
-using Common.Tools;
-using Common.Tools.Calendar;
-using Inflector;
-using Microsoft.Reactive.Testing;
 using NUnit.Framework;
-using ReactiveUI;
-using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Unit
 {

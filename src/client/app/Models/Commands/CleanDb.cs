@@ -17,7 +17,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				"MarkupConfigs",
 				"DirMaps"
 			};
-			var tables = TableNames().Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
 			using(var sesssion = Factory.OpenSession()) {
 				var settings = sesssion.Query<Settings>().FirstOrDefault();
@@ -25,28 +24,26 @@ namespace AnalitF.Net.Client.Models.Commands
 					settings.LastUpdate = null;
 				sesssion.Flush();
 
-				Reporter.Weight(tables.Length);
+				var tables = TableNames().Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
+				var dirs = Config.KnownDirs(settings);
+
+				Reporter.Weight(tables.Length + dirs.Count);
 				foreach (var table in tables) {
 					Token.ThrowIfCancellationRequested();
 					sesssion.CreateSQLQuery(String.Format("TRUNCATE {0}", table))
 						.ExecuteUpdate();
 					Reporter.Progress();
 				}
-			}
 
-			var dirs = new[] {
-				"promotions",
-				"newses",
-				"certificates",
-				"attachments",
-				"ads"
-			};
-			foreach (var dir in dirs.Select(d => Path.Combine(Config.RootDir, d))) {
-				try {
-					Directory.Delete(dir, true);
-					Directory.CreateDirectory(dir);
-				}
-				catch(Exception) {
+				foreach (var dir in dirs) {
+					try {
+						Token.ThrowIfCancellationRequested();
+						Directory.Delete(dir.Dst, true);
+						Directory.CreateDirectory(dir.Dst);
+						Reporter.Progress();
+					}
+					catch(Exception) {
+					}
 				}
 			}
 		}

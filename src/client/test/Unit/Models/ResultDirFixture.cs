@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;

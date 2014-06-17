@@ -97,16 +97,25 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_ads()
 		{
-			FileHelper.InitDir("ads");
-			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
-			exporter.AdsPath = "ads";
-			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 } );
+			InitAd();
 
 			exporter.ExportAll();
-			ExportCompressed();
-			var zipEntries = ZipHelper.lsZip(file);
+			var files = ListResult();
 
-			Assert.That(zipEntries.Implode(), Is.StringContaining("ads/2block.gif"));
+			Assert.That(files, Is.StringContaining("ads/2block.gif"));
+		}
+
+		[Test]
+		public void Export_empty_ad()
+		{
+			InitAd();
+
+			var settings = session.Load<ClientSettings>(client.Id);
+			settings.ShowAdvertising = false;
+			exporter.ExportAds();
+
+			var files = ListResult();
+			Assert.AreEqual("ads/delete.me", files);
 		}
 
 		[Test]
@@ -165,6 +174,14 @@ namespace AnalitF.Net.Service.Test
 				" WaybillOrders.meta.txt, WaybillOrders.txt," +
 				" LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				files);
+		}
+
+		private void InitAd()
+		{
+			FileHelper.InitDir("ads");
+			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
+			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 });
+			exporter.AdsPath = "ads";
 		}
 
 		private string ListResult()

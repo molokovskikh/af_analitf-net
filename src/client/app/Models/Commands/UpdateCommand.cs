@@ -9,6 +9,7 @@ using System.Reactive.Linq.Observαble;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -43,63 +44,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		}
 	}
 #endif
-
-	public class ResultDir
-	{
-		private static string[] autoOpenFiles = {
-			"attachments"
-		};
-
-		private static string[] autoOpenDirs = {
-			"waybills", "rejects", "docs"
-		};
-
-		public ResultDir(string name, Settings settings, Config.Config confg)
-		{
-			var openTypes = autoOpenFiles.ToList();
-			if (settings.OpenRejects) {
-				openTypes.Add("rejects");
-			}
-			if (settings.OpenWaybills) {
-				openTypes.Add("waybills");
-			}
-			Name = name;
-			Src = Path.Combine(confg.UpdateTmpDir, Name);
-			Dst = settings.MapPath(name) ?? Path.Combine(confg.RootDir, name);
-			if (name.Match("waybills")) {
-				GroupBySupplier = settings.GroupWaybillsBySupplier;
-			}
-			OpenFiles = openTypes.Any(t => t.Match(name));
-			OpenDir = autoOpenDirs.Any(d => d.Match(name));
-		}
-
-		public string Name;
-		public string Src;
-		public string Dst;
-		public bool OpenFiles;
-		public bool OpenDir;
-		public bool GroupBySupplier;
-		public IList<string> ResultFiles = new List<string>();
-
-		public static IEnumerable<IResult> OpenResultFiles(IEnumerable<ResultDir> dirs)
-		{
-			var disableOpenFiles = dirs.Where(d => d.OpenFiles).Sum(g => g.ResultFiles.Count) > 5;
-			if (disableOpenFiles) {
-				dirs.Each(d => d.OpenFiles = false);
-			}
-
-			foreach (var dir in dirs.Where(d => d.ResultFiles.Count > 0)) {
-				if (dir.OpenFiles) {
-					foreach (var f in dir.ResultFiles.Select(f => new OpenResult(f))) {
-						yield return f;
-					}
-				}
-				else if (dir.OpenDir) {
-					yield return new OpenResult(dir.Dst);
-				}
-			}
-		}
-	}
 
 	public class UpdateCommand : RemoteCommand
 	{
@@ -313,16 +257,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
 
-			var dirs = new List<ResultDir> {
-				new ResultDir("ads", settings, Config),
-				new ResultDir("newses", settings, Config),
-				new ResultDir("waybills", settings, Config),
-				new ResultDir("docs", settings, Config),
-				new ResultDir("rejects", settings, Config),
-				new ResultDir("attachments", settings, Config),
-				new ResultDir("promotions", settings, Config),
-			};
-
+			var dirs = Config.KnownDirs(settings);
 			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
 				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
 				.Where(d => d != null)
@@ -512,8 +447,15 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 		}
 
-		private void Move(ResultDir source)
+		public void Move(ResultDir source)
 		{
+			if (source.Clean) {
+				if (Directory.Exists(source.Dst)) {
+					Directory.Delete(source.Dst, true);
+					Directory.CreateDirectory(source.Dst);
+				}
+			}
+
 			if (source.GroupBySupplier) {
 				source.ResultFiles = MoveToPerSupplierDir(source.Src, DocumentType.Waybills);
 			}

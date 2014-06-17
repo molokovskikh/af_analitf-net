@@ -1279,7 +1279,7 @@ group by dh.Id")
 		{
 			Export(result);
 			ExportUpdate(result);
-			ExportAds(result);
+			ExportAds();
 		}
 
 		public class MemoryDataSource : IStaticDataSource
@@ -1297,10 +1297,18 @@ group by dh.Id")
 			}
 		}
 
-		public void ExportAds(List<UpdateData> zip)
+		public void ExportAds()
 		{
-			if (!clientSettings.ShowAdvertising)
+			ExportAds(result);
+		}
+
+		private void ExportAds(List<UpdateData> zip)
+		{
+			if (!clientSettings.ShowAdvertising) {
+				//нужно подать сигнал клиенту что он должен очистить папку с рекламой
+				zip.Add(new UpdateData("ads/delete.me") { Content = "" });
 				return;
+			}
 			if (!Directory.Exists(AdsPath))
 				return;
 			var template = String.Format("_{0}", user.Client.RegionCode);
