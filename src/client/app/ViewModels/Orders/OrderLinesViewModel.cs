@@ -147,6 +147,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyWarning.Changed())
 				.Subscribe(_ => Update(), CloseCancellation.Token);
+
+			var isSentSelectedValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".IsSentSelected");
+			if (isSentSelectedValue is bool)
+				IsSentSelected.Mute((bool)isSentSelectedValue);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+
+			Shell.SessionContext[GetType().Name + ".IsSentSelected"] = IsSentSelected.Value;
 		}
 
 		public override void Update()

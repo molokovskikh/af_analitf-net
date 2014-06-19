@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -40,5 +41,25 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<bool> BeginEnabled { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<bool> EndEnabled { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			var beginValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".Begin");
+			if (beginValue is DateTime)
+				Begin.Mute((DateTime)beginValue);
+			var endValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".End");
+			if (endValue is DateTime)
+				End.Mute((DateTime)endValue);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+
+			Shell.SessionContext[GetType().Name + ".Begin"] = Begin.Value;
+			Shell.SessionContext[GetType().Name + ".End"] = End.Value;
+		}
 	}
 }
