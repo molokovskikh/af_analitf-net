@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set errexit
+set -o errexit
 
 git diff --name-only | /bin/grep .cs | xargs toutf-all.sh
 git diff --name-only | xargs clean.sh

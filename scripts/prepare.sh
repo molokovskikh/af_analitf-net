@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set errexit
+set -o errexit
 
 bake prepare
 msbuild.exe /nologo /verbosity:quiet src/*.sln

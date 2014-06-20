@@ -321,11 +321,13 @@ namespace AnalitF.Net.Client.ViewModels
 			base.Download(loadable);
 		}
 
+#if DEBUG
 		public override object[] GetRebuildArgs()
 		{
 			return new object[] {
 				id
 			};
 		}
+#endif
 	}
 }

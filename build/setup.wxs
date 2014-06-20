@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 	<Product Id="*"
 		Language="1049"
 		Codepage="1251"
@@ -16,6 +17,10 @@
 		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 		<MediaTemplate />
 
+		<Property Id="INSTALLFOLDER">
+			<RegistrySearch Key="Software\Microsoft\$(var.Setup.Product)" Root="HKCU" Type="raw" Id="APPLICATIONFOLDER_REGSEARCH" Name="Path" />
+		</Property>
+
 		<Feature Id="ProductFeature" Title="$(var.Setup.Product)" Level="1">
 			<ComponentRef Id="ApplicationFiles" />
 			<ComponentRef Id="ShareFiles" />
@@ -23,13 +28,26 @@
 			<ComponentRef Id="EnglishFiles" />
 			<ComponentRef Id="AppShortcut" />
 			<ComponentRef Id="SampleData" />
+			<ComponentRef Id="Clean" />
 		</Feature>
 		<Property Id="ARPNOREPAIR" Value="no" Secure="yes" />
 		<Property Id="ARPNOMODIFY" Value="no" Secure="yes" />
 		<Property Id="ALLUSERS" Secure="yes" />
+		<CustomAction Id="SetupClean" Property="CleanDir" Value="[INSTALLFOLDER]" Execute="immediate" />
+		<InstallExecuteSequence>
+			<Custom Action="SetupClean" Before="WixRemoveFoldersEx">
+				<![CDATA[ REMOVE = "ALL" AND NOT UPGRADINGPRODUCTCODE ]]>
+			</Custom>
+		</InstallExecuteSequence>
 	</Product>
 
 	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="Clean" Guid="a92aa9da-ae4e-4f65-acb4-f8c1faddb2a8">
+				<RegistryValue Root="HKCU" Key="Software\Microsoft\$(var.Setup.Product)" Name="Path" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+				<util:RemoveFolderEx On="uninstall" Property="CleanDir" />
+			</Component>
+		</DirectoryRef>
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramMenuFolder">
 				<Directory Id="ApplicationProgramsFolder" Name="$(var.Setup.Product)">
