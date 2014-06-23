@@ -82,6 +82,12 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(subscription);
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			AddressSelector.Deinit();
+			base.OnDeactivate(close);
+		}
+
 		public void Delete()
 		{
 			if (!CanDelete)

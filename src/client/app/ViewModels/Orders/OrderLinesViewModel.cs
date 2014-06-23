@@ -157,6 +157,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnDeactivate(close);
 
+			AddressSelector.Deinit();
 			Shell.SessionContext[GetType().Name + ".IsSentSelected"] = IsSentSelected.Value;
 		}
 

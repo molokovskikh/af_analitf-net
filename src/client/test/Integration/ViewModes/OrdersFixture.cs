@@ -293,13 +293,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		}
 
 		[Test]
-		public void Share_all_address_settings()
-		{
-			model.AddressSelector.All.Value = true;
-			Assert.IsTrue(shell.ShowAllAddresses);
-		}
-
-		[Test]
 		public void Update_order()
 		{
 			var order = PrepareCurrent();

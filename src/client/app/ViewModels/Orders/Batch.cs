@@ -209,6 +209,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			AddressSelector.Deinit();
+			base.OnDeactivate(close);
+		}
+
 		protected override void RecreateSession()
 		{
 			base.RecreateSession();

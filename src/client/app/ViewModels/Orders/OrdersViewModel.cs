@@ -111,6 +111,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			AddressSelector.Deinit();
+			base.OnDeactivate(close);
+		}
+
 		public override void Update()
 		{
 			if (IsSentSelected) {

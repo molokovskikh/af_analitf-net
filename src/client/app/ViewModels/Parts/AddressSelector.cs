@@ -59,18 +59,23 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			var shell = screen.Shell;
 			if (shell != null) {
-				All.Value = shell.ShowAllAddresses;
-				if (shell.SelectedAddresses != null)
-					Addresses.Each(a => a.IsSelected = shell.SelectedAddresses.Contains(a.Item.Id));
-				All.Changed().Subscribe(_ => shell.ShowAllAddresses = All);
-				Addresses.Select(a => a.Changed()).Merge().Subscribe(_ => {
-					shell.SelectedAddresses = Addresses.Where(a => a.IsSelected).Select(a => a.Item.Id).ToArray();
-				});
+				All.Value = (bool)shell.SessionContext.GetValueOrDefault("ShowAllAddresses", All.Value);
+				var selectedAddresses = (IDictionary<uint, bool>)shell.SessionContext.GetValueOrDefault("SelectedAddresses", new Dictionary<uint, bool>());
+				Addresses.Each(a => a.IsSelected = selectedAddresses.GetValueOrDefault(a.Item.Id, true));
 			}
 			FilterChanged = Addresses.Select(a => a.Changed())
 				.Merge()
 				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
 				.Merge(All.Changed());
+		}
+
+		public void Deinit()
+		{
+			var shell = screen.Shell;
+			if (shell != null) {
+				shell.SessionContext["ShowAllAddresses"] = All.Value;
+				shell.SessionContext["SelectedAddresses"] = Addresses.ToDictionary(a => a.Item.Id, a => a.IsSelected);
+			}
 		}
 
 		public Address[] GetActiveFilter()

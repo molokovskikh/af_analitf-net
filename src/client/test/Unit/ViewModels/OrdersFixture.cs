@@ -36,5 +36,39 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Assert.IsTrue(model.AddressSelector.All.Value);
 			Assert.IsFalse(model.AddressSelector.Addresses[1].IsSelected);
 		}
+
+		[Test]
+		public void Rebuild_address()
+		{
+			var model = new OrdersViewModel();
+			var addresses = new [] {
+				new Address("Тестовый адрес доставки 1") {
+					Id = 1
+				},
+				new Address("Тестовый адрес доставки ") {
+					Id = 2
+				},
+			};
+			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
+			Activate(model, addresses[0]);
+			model.AddressSelector.All.Value = true;
+			model.AddressSelector.Addresses[1].IsSelected = false;
+			ScreenExtensions.TryDeactivate(model, true);
+
+			model = new OrdersViewModel();
+			addresses = new [] {
+				new Address("Тестовый адрес доставки 1") {
+					Id = 2
+				},
+				new Address("Тестовый адрес доставки 3") {
+					Id = 3
+				},
+			};
+			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
+			Activate(model, addresses[0]);
+			Assert.IsTrue(model.AddressSelector.All.Value);
+			Assert.IsFalse(model.AddressSelector.Addresses[0].IsSelected);
+			Assert.IsTrue(model.AddressSelector.Addresses[1].IsSelected);
+		}
 	}
 }
