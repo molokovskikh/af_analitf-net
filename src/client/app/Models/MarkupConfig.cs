@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal Markup { get; set; }
 		public virtual decimal MaxMarkup { get; set; }
-		public virtual decimal? MaxSupplierMarkup { get; set; }
+		public virtual decimal MaxSupplierMarkup { get; set; }
 		public virtual MarkupType Type { get; set; }
 		public virtual Settings Settings { get; set; }
 
