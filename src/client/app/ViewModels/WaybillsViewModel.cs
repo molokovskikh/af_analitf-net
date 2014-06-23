@@ -186,7 +186,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Create()
 		{
+			if (Address == null)
+				yield break;
 			var waybill = new Waybill {
+				Address = Address,
 				WriteTime = DateTime.Now,
 				DocumentDate = DateTime.Now,
 				IsCreatedByUser = true

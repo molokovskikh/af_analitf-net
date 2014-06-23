@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NUnit.Framework;
 using ReactiveUI.Testing;
@@ -75,6 +76,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Activate(model);
 			var reloaded = model.Waybills.Value.First(w => w.Id == waybill.Id);
 			Assert.That(reloaded.RetailSum, Is.GreaterThan(retailSum));
+		}
+
+		[Test]
+		public void Create()
+		{
+			var result = model.Create().GetEnumerator();
+			Assert.IsTrue(result.MoveNext());
+			var dialog = ((CreateWaybill)((DialogResult)result.Current).Model);
+			dialog.Waybill.ProviderDocumentId = "1";
+			dialog.Waybill.UserSupplierName = "test";
+			result.MoveNext();
+			Assert.IsNotNull(dialog.Waybill.Address);
+			Assert.AreEqual(dialog.Waybill.Address.Id, address.Id);
+			Assert.Contains(dialog.Waybill.Id, model.Waybills.Value.Select(w => w.Id).ToArray());
 		}
 	}
 }
