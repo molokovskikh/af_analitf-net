@@ -26,6 +26,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private IList<WaybillSettings> waybillConfig;
 		private static string lastTab;
 		public bool IsCredentialsChanged;
+		private bool _passwordUpdated;
+		private string _password;
 
 		public SettingsViewModel()
 		{
@@ -35,6 +37,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
+
+			_password = new string(Enumerable.Repeat('*', Settings.Value.Password != null ? Settings.Value.Password.Length : 0).ToArray());
 
 			waybillConfig = Settings.Value.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -62,6 +66,16 @@ namespace AnalitF.Net.Client.ViewModels
 				SelectedTab.Value = "LoginTab";
 
 			SelectedTab.Changed().Subscribe(_ => lastTab = SelectedTab.Value);
+		}
+
+		public string Password
+		{
+			get { return _password; }
+			set
+			{
+				_passwordUpdated = true;
+				_password = value;
+			}
 		}
 
 		public List<DirMap> DirMaps { get; set; }
@@ -118,6 +132,10 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.FlushMode = FlushMode.Never;
 				Manager.Warning(error);
 				return;
+			}
+
+			if (_passwordUpdated) {
+				Settings.Value.Password = _password;
 			}
 
 			if (App.Current != null)

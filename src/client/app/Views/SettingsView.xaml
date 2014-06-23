@@ -171,12 +171,9 @@
 				<StackPanel>
 					<Label>Учетные данные</Label>
 					<Label>Имя</Label>
-					<TextBox x:Name="Settings_UserName"></TextBox>
+					<TextBox x:Name="Settings_UserName" />
 					<Label>Пароль</Label>
-					<PasswordBox x:Name="Settings_Password"
-						Binders:ContentElementBinder.Password="{Binding Settings.Value.Password,
-							Mode=TwoWay,
-							UpdateSourceTrigger=PropertyChanged}" />
+					<TextBox x:Name="Password" />
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Прокси-сервер" Name="ProxyTab">
