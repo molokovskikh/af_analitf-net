@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +18,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client;
@@ -37,6 +40,7 @@ using ReactiveUI.Testing;
 using TestStack.White;
 using Action = System.Action;
 using CheckBox = System.Windows.Controls.CheckBox;
+using Cursors = System.Windows.Input.Cursors;
 using DataGrid = System.Windows.Controls.DataGrid;
 using DataGridCell = System.Windows.Controls.DataGridCell;
 using Label = System.Windows.Controls.Label;
@@ -630,6 +634,16 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			OpenMenu("Сервис");
 			WaitIdle();
+			dispatcher.Invoke(() => {
+				var el = activeWindow.Descendants<Menu>().SelectMany(m => m.Items.OfType<MenuItem>())
+					.Flat(i => i.Items.OfType<MenuItem>())
+					.FirstOrDefault(i => "Сервис".Equals(i.Header));
+				if (el == null)
+					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", "Сервис", activeWindow));
+				AssertInputable(el);
+				Console.WriteLine("el.IsSubmenuOpen = {0}", el.IsSubmenuOpen);
+			});
+
 			ClickMenuAsync("Отправить письмо в АК \"Инфорум\"");
 			WaitWindow("Письмо в АК \"Инфорум\"");
 			InputActiveWindow("Subject", "test");
@@ -697,6 +711,20 @@ namespace AnalitF.Net.Test.Integration.Views
 				if (el == null)
 					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", header, activeWindow));
 				AssertInputable(el);
+
+				//черная магия - когда IsSubmenuOpen = true
+				//пункт меню пытается захватить ввод с мыши и если у него это не молучится закрывает меню
+				//на самом деле ввод захватить получится но не получится получить позицию курсора
+				//из-за ошибки Win32Exception (0x80004005): Эта операция требует интерактивного оконного терминала
+				//WinApi.SendMessage - нужен для того что бы обмануть HwndMouseInputProvider
+				//обработав это сообщение он посчитает что активация произошла и не будет получать позицию курсора
+				//WinApi.SetCapture - нужен для того что бы обмануть код активации, там происходит аналогичное получение позиции курсора
+				//но если захватить ввод мыши получение координат курсора производиться не будет
+				var windowHandle = new WindowInteropHelper(activeWindow).Handle;
+				WinApi.SetCapture(windowHandle);
+				WinApi.SendMessage(windowHandle, /*WM_MOUSEMOVE = */512u, 0, (IntPtr)0);
+				WinApi.ReleaseCapture(windowHandle);
+
 				el.IsSubmenuOpen = true;
 			});
 		}

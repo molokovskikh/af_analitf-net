@@ -160,7 +160,12 @@ namespace AnalitF.Net.Client.Helpers
 		public static string DebugDump(object value, Type type, string name)
 		{
 			var p = type.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
-			return String.Format("{0} = {1}", name, p.GetValue(value, null));
+			if (p != null) {
+				var result = p.GetValue(value, null);
+				return String.Format("{0} = {1}", name, result);
+			}
+			var f = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+			return String.Format("{0} = {1}", name, f.GetValue(value));
 		}
 	}
 }

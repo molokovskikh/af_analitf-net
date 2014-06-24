@@ -21,20 +21,28 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			DependencyProperty Property;
 			DependencyObject O;
+			bool stack;
 
-			public PropertyLogger(DependencyObject o, DependencyProperty property)
+			public PropertyLogger(DependencyObject o, DependencyProperty property, bool stack = false)
 			{
 				O = o;
 				Property = property;
+				this.stack = stack;
 			}
 
 			public object Logger
 			{
 				get { return  null; }
-				set { Console.WriteLine("{1}.{2} = {0}",
-					value,
-					((FrameworkElement)O).Name,
-					Property.Name); }
+				set
+				{
+					Console.WriteLine("{1}.{2} = {0}",
+						value,
+						((FrameworkElement)O).Name,
+						Property.Name);
+					if (stack) {
+						Console.WriteLine(new StackTrace());
+					}
+				}
 			}
 		}
 
@@ -233,10 +241,10 @@ namespace AnalitF.Net.Client.Helpers
 		/// <summary>
 		/// предназначен для отладки, протоколирует изменения свойств
 		/// </summary>
-		public static void TraceProperty(DependencyObject o, DependencyProperty property)
+		public static void TraceProperty(DependencyObject o, DependencyProperty property, bool stack = false)
 		{
 			BindingOperations.SetBinding(o, property, new Binding("Logger") {
-				Source = new PropertyLogger(o, property),
+				Source = new PropertyLogger(o, property, stack),
 				BindsDirectlyToSource = true,
 				Mode = BindingMode.OneWayToSource
 			});

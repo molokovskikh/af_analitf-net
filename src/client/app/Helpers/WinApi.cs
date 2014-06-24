@@ -28,5 +28,14 @@ namespace AnalitF.Net.Client.Helpers
 
 		[DllImport("user32.dll")]
 		public static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr SetCapture(IntPtr hWnd);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern bool ReleaseCapture(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetCapture();
 	}
 }
