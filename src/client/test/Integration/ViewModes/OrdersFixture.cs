@@ -22,30 +22,8 @@ using log4net.Config;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class OrdersFixture : ViewModelFixture
+	public class OrdersFixture : ViewModelFixture<OrdersViewModel>
 	{
-		private Lazy<OrdersViewModel> lazyModel;
-		private OrdersViewModel model
-		{
-			get { return lazyModel.Value; }
-		}
-
-		[SetUp]
-		public void Setup()
-		{
-			lazyModel = new Lazy<OrdersViewModel>(() => {
-				session.Flush();
-				return Init(new OrdersViewModel());
-			});
-		}
-
-		[TearDown]
-		public void Teardown()
-		{
-			if (lazyModel.IsValueCreated && model.IsActive)
-				Close(model);
-		}
-
 		[Test]
 		public void Delete_order()
 		{

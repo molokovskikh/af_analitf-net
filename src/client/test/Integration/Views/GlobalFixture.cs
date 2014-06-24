@@ -18,6 +18,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -585,7 +586,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var lines = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
 				var cell = GetCell(lines, "Цена");
-				Assert.AreEqual(order.Lines[0].Cost.ToString(CultureInfo.InvariantCulture), cell.AsText());
+				Assert.AreEqual(order.Lines[0].Cost.ToString("0.00", CultureInfo.InvariantCulture), cell.AsText());
 			});
 		}
 
@@ -646,7 +647,9 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			dispatcher.Invoke(() => {
 				session.DeleteEach<CustomStyle>();
-				session.SaveEach(StyleHelper.GetDefaultStyles());
+				var styles = StyleHelper.GetDefaultStyles();
+				session.SaveEach(styles);
+				StyleHelper.BuildStyles(App.Current.Resources, styles);
 			});
 
 			Click("ShowOrderLines");
@@ -664,11 +667,10 @@ namespace AnalitF.Net.Test.Integration.Views
 				.First();
 			Assert.IsNotNull(dialog);
 			WaitIdle();
-			dispatcher.Invoke(() => {
-				testScheduler.Start();
-			});
+			dispatcher.Invoke(() => testScheduler.Start());
+			WaitIdle();
 
-			dispatcher.BeginInvoke(new Action(() => {
+			dispatcher.Invoke(() => {
 				var el = activeWindow.Descendants<Panel>().Where(p => p.Name == "Legend")
 					.SelectMany(p => p.Descendants<Label>())
 					.First(i => i.Name == "Junk");
@@ -676,14 +678,14 @@ namespace AnalitF.Net.Test.Integration.Views
 
 				var grid = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
 				//нужно убедиться что строку которую проверяем не выделена иначе цвета не совпадут из-за смешения
-				grid.CurrentItem = grid.ItemsSource.OfType<OrderLine>().First(l => l.Id != junkOrder.Lines[0].Id);
+				grid.SelectedItem = grid.ItemsSource.OfType<OrderLine>().First(l => l.Id != junkOrder.Lines[0].Id);
 				var cells = grid.Descendants<DataGridCell>()
 					.Where(c => ((OrderLine)c.DataContext).Id == junkOrder.Lines[0].Id)
 					.Where(c => ((TextBlock)c.Column.Header).Text == "Срок годн.")
 					.ToArray();
 				Assert.AreEqual(1, cells.Length);
 				Assert.AreEqual(System.Drawing.Color.MistyRose.ToHexString(), cells[0].Background.ToString());
-			}));
+			});
 		}
 
 		private void OpenMenu(string header)

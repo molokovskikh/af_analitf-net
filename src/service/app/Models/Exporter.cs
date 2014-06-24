@@ -195,7 +195,7 @@ where
 				.SetParameter("userId", user.Id)
 				.UniqueResult<long>();
 			var addressName = "a.Address";
-			if (legalEntityCount > 0)
+			if (legalEntityCount > 1)
 				addressName = "concat(le.Name, ', ', a.Address)";
 
 			sql = String.Format(@"
