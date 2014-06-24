@@ -13,10 +13,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	{
 		private FileCleaner cleaner;
 		private CompositeDisposable trash = new CompositeDisposable();
+		private Feedback feedback;
 
 		[SetUp]
 		public void Setup()
 		{
+			feedback = new Feedback(IntegrationSetup.clientConfig);
 			cleaner = new FileCleaner();
 			trash.Add(cleaner);
 		}
@@ -30,7 +32,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Get_message_with_attachments()
 		{
-			var feedback = new Feedback();
 			trash.Add(feedback);
 
 			var result = feedback.AddAttachment().GetEnumerator();
@@ -57,7 +58,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Get_message_without_attachments()
 		{
-			var feedback = new Feedback();
 			trash.Add(feedback);
 			var result = feedback.Send().GetEnumerator();
 			Assert.IsFalse(result.MoveNext());

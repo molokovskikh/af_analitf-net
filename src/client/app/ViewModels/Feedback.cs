@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -10,19 +11,23 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
+using log4net.Config;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Client.ViewModels
 {
 	public class Feedback : Screen, IDisposable
 	{
-		public Feedback()
+		public Feedback(Config.Config config)
 		{
+			this.config = config;
 			DisplayName = "Письмо в АК \"Инфорум\"";
 			SendLog = true;
 			Attachments = new ObservableCollection<string>();
 			IsSupport = true;
 		}
+
+		private Config.Config config;
 
 		public string ArchiveName;
 		public bool IsSupport { get; set; }
@@ -60,9 +65,14 @@ namespace AnalitF.Net.Client.ViewModels
 					File.Delete(ArchiveName);
 
 				ArchiveName = Path.GetTempFileName();
+				var files = Attachments.ToArray();
+				if (SendLog)
+					files = files.Concat(Directory.GetFiles(config.RootDir, "*.log")).ToArray();
+
 				try {
+					log4net.LogManager.ResetConfiguration();
 					using(var zip = new ZipFile()) {
-						foreach (var attachment in Attachments) {
+						foreach (var attachment in files) {
 							zip.AddFile(attachment);
 						}
 						zip.Save(ArchiveName);
@@ -72,12 +82,15 @@ namespace AnalitF.Net.Client.ViewModels
 					File.Delete(ArchiveName);
 					throw;
 				}
+				finally {
+					XmlConfigurator.Configure();
+				}
 				if (new FileInfo(ArchiveName).Length > 4 * 1024 * 1024)
 					throw new Exception("Размер архива с вложенными файлами превышает 4Мб.");
 			});
 			yield return new TaskResult(task, new WaitViewModel("Проверка вложений.\r\nПожалуйста подождите."));
 			if (task.IsFaulted) {
-				var message = ((AggregateException)task.Exception).GetBaseException().Message;
+				var message = task.Exception.GetBaseException().Message;
 				yield return new MessageResult(message, MessageResult.MessageType.Error);
 			}
 			else {
