@@ -634,16 +634,6 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			OpenMenu("Сервис");
 			WaitIdle();
-			dispatcher.Invoke(() => {
-				var el = activeWindow.Descendants<Menu>().SelectMany(m => m.Items.OfType<MenuItem>())
-					.Flat(i => i.Items.OfType<MenuItem>())
-					.FirstOrDefault(i => "Сервис".Equals(i.Header));
-				if (el == null)
-					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", "Сервис", activeWindow));
-				AssertInputable(el);
-				Console.WriteLine("el.IsSubmenuOpen = {0}", el.IsSubmenuOpen);
-			});
-
 			ClickMenuAsync("Отправить письмо в АК \"Инфорум\"");
 			WaitWindow("Письмо в АК \"Инфорум\"");
 			InputActiveWindow("Subject", "test");
