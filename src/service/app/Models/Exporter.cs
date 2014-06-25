@@ -1168,7 +1168,8 @@ select db.Id,
 	db.VitallyImportant,
 	db.Period,
 	db.Certificates,
-	db.EAN13
+	db.EAN13,
+	db.CountryCode
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id

@@ -469,11 +469,66 @@ namespace AnalitF.Net.Client.Models.Print
 
 	public static class GridHelper
 	{
-		public static void Cell(this Grid subBody, int row, int col, UIElement el)
+		public static Grid Cell(this Grid grid, int row, int col, UIElement el)
 		{
-			subBody.Children.Add(el);
+			grid.Children.Add(el);
 			el.SetValue(Grid.RowProperty, row);
 			el.SetValue(Grid.ColumnProperty, col);
+			var diff = Math.Abs(grid.RowDefinitions.Count - 1 - row);
+			if (diff > 0) {
+				grid.RowDefinitions.Add(new RowDefinition {
+					Height = GridLength.Auto
+				});
+			}
+			diff = Math.Abs(grid.ColumnDefinitions.Count - 1 - col);
+			if (diff > 0) {
+				grid.ColumnDefinitions.Add(new ColumnDefinition {
+					Width = GridLength.Auto
+				});
+			}
+			return grid;
+		}
+
+		public static Grid ColSpan(this Grid grid, int row, int col, int span, UIElement el)
+		{
+			grid.Children.Add(el);
+			el.SetValue(Grid.RowProperty, row);
+			el.SetValue(Grid.ColumnProperty, col);
+			el.SetValue(Grid.ColumnSpanProperty, span);
+			var diff = Math.Abs(grid.RowDefinitions.Count - 1 - row);
+			if (diff > 0) {
+				grid.RowDefinitions.Add(new RowDefinition {
+					Height = GridLength.Auto
+				});
+			}
+			diff = Math.Abs(grid.ColumnDefinitions.Count - 1 - col);
+			if (diff > 0) {
+				grid.ColumnDefinitions.Add(new ColumnDefinition {
+					Width = GridLength.Auto
+				});
+			}
+			return grid;
+		}
+
+		public static Grid RowSpan(this Grid grid, int row, int col, int span, UIElement el)
+		{
+			grid.Children.Add(el);
+			el.SetValue(Grid.RowProperty, row);
+			el.SetValue(Grid.ColumnProperty, col);
+			el.SetValue(Grid.RowSpanProperty, span);
+			var diff = Math.Abs(grid.RowDefinitions.Count - 1 - row);
+			if (diff > 0) {
+				grid.RowDefinitions.Add(new RowDefinition {
+					Height = GridLength.Auto
+				});
+			}
+			diff = Math.Abs(grid.ColumnDefinitions.Count - 1 - col);
+			if (diff > 0) {
+				grid.ColumnDefinitions.Add(new ColumnDefinition {
+					Width = GridLength.Auto
+				});
+			}
+			return grid;
 		}
 	}
 }

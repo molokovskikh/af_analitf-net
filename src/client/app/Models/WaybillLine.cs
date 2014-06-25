@@ -70,6 +70,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Product { get; set; }
 		public virtual uint? ProducerId { get; set; }
 		public virtual string Producer { get; set; }
+
+		public virtual string CountryCode { get; set; }
 		public virtual string Country { get; set; }
 
 		public virtual bool Print

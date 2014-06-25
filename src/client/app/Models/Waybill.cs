@@ -57,6 +57,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal TaxSum { get; set; }
 
+		public virtual string InvoiceId { get; set; }
+		public virtual DateTime? InvoiceDate { get; set; }
 		public virtual Contractor Seller { get; set; }
 		public virtual Contractor Buyer { get; set; }
 		public virtual string ShipperNameAndAddress { get; set; }
