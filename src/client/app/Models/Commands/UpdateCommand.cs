@@ -588,7 +588,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			cleaner.Watch(file);
 
 			//TODO: в тестах сброс конфигурации может сильно испортить жизнь
-			//например если нужно подебажить запросы
+			//например если нужно отладить запросы
 			LogManager.ResetConfiguration();
 			try
 			{

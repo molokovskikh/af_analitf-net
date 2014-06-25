@@ -46,6 +46,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return (int)e.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty);
 		}
 
+		public static bool IsEnabled(this AutomationElement e)
+		{
+			return (bool)e.GetCurrentPropertyValue(AutomationElement.IsEnabledProperty);
+		}
+
 		public static void Dump(AutomationElementCollection elements)
 		{
 			Dump((AutomationElementCollection)elements.Cast<AutomationElement>());

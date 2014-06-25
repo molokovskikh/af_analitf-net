@@ -183,13 +183,13 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Style(Description = "Новая разбракованя позиция")]
+		[Style(Description = "Новая разбракованная позиция")]
 		public virtual bool IsRejectCanceled { get; set; }
 
-		[Style(Description = "Новая забракованая позиция")]
+		[Style(Description = "Новая забракованная позиция")]
 		public virtual bool IsRejectNew { get; set; }
 
-		[Style(Description = "Забракованая позиция")]
+		[Style(Description = "Забракованная позиция")]
 		public virtual bool IsReject
 		{
 			get { return !IsRejectNew && RejectId != null; }
@@ -382,7 +382,7 @@ namespace AnalitF.Net.Client.Models
 			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
 			//это лишено смысла но тем не менее analitf считает наценку от не округленной цены
 			//что бы получить все выглядело идентично делаем тоже самое
-			//тк RetailCost может быть округлена до большего то и наценка может вырости и привысить значение наценки которое
+			//тк RetailCost может быть округлена до большего то и наценка может увеличиться и превысить значение наценки которое
 			//применялась в расчетах
 			//наверное правильно всегда округлять до меньшего но analitf делает не так, делаем тоже что analitf
 			UpdateMarkups(rawCost);
@@ -432,7 +432,7 @@ namespace AnalitF.Net.Client.Models
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			rawCost = value;
-			//безумее продолжается если округляем до десятых то тогда считаем от округленного значения
+			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
 			if (Waybill.RoundTo1) {
 				rawCost = ((int?)(value * 10)) / 10m;
 			}

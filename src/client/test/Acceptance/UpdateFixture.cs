@@ -14,6 +14,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Helpers;
 using Microsoft.Test.Input;
 using NUnit.Framework;
 using Test.Support;
@@ -71,7 +72,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Process = System.Diagnostics.Process.GetProcessById(update.GetProcessId());
 			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
-				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ")));
+				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ - тестовый")));
 
 			var message = Opened.Timeout(15.Second()).First();
 			AssertText(message, "Обновление завершено успешно.");
@@ -93,7 +94,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Keyboard.Press(Key.Return);
 
 			//Нужно подождать пока данные обновятся
-			Thread.Sleep(300);
+			WaitIdle();
 			//выбираем ячейку и пытаемся войти
 			ClickCell(mnns, 0, 0);
 			Keyboard.Press(Key.Return);
@@ -117,7 +118,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Keyboard.Press(Key.D1);
 
 			//кнопка активируется с задержкой
-			Thread.Sleep(700);
+			WaitHelper.WaitOrFail(10.Second(),
+				() => FindById("SendOrders").IsEnabled(),
+				"Не удалось дождаться активации кнопки отправки заказов");
 			Click("SendOrders");
 			AssertUpdate("Отправка заказов завершена успешно.");
 		}
@@ -132,7 +135,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 			var dialog = WaitDialog("Настройка");
 			Type("Settings_UserName", "test");
-			Type("Settings_Password", "123");
+			Type("Password", "123");
 
 			Click("Save", dialog);
 

@@ -254,7 +254,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 #if DEBUG
 				{Environment.FormatSql, "true"},
 #endif
-				//раскомментировать если нужно отладить запросы хибера
+				//если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
 			});

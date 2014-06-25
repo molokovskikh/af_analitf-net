@@ -22,9 +22,15 @@ namespace test.release
 	[TestFixture, Explicit("Тест должен запускаться после подготовки релиза")]
 	public class AppFixture : BaseFixture
 	{
+		//для отладки
+		//string testUserName = Environment.UserName;
+		//string testPassword = "123";
+		//string prevSetupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
+
 		string setupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
 		string archiveDir = @"\\offdc\MMedia\packages";
 		string name = "АналитФАРМАЦИЯ";
+		string prevSetupBin = null;
 		string testUserName = "26307";
 		string testPassword = "TkGJEQUX";
 
@@ -59,7 +65,7 @@ namespace test.release
 
 			var dialog = WaitDialog("Настройка");
 			Type("Settings_UserName", testUserName);
-			Type("Settings_Password", testPassword);
+			Type("Password", testPassword);
 
 			Click("Save", dialog);
 
@@ -84,7 +90,7 @@ namespace test.release
 
 			var dialog = WaitDialog("Настройка");
 			Type("Settings_UserName", testUserName);
-			Type("Settings_Password", testPassword);
+			Type("Password", testPassword);
 
 			Click("Save", dialog);
 
@@ -112,6 +118,8 @@ namespace test.release
 
 		private string GetPrevVersion(Version version)
 		{
+			if (!String.IsNullOrEmpty(prevSetupBin))
+				return prevSetupBin;
 			var prevName = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(setupBin)), "prev-setup.exe");
 			if (File.Exists(prevName))
 				File.Delete(prevName);

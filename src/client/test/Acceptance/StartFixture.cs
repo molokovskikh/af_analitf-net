@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Assert.IsFalse(Process.HasExited);
 			Assert.IsTrue(process2.WaitForExit((int)10.Second().TotalMilliseconds));
 			Assert.That(windows.Where(w => w.Item1 == Process.Id).Implode(t => t.Item2),
-				Is.StringContaining("окно(АналитФАРМАЦИЯ)"));
+				Is.StringContaining("окно(АналитФАРМАЦИЯ - тестовый)"));
 			Assert.That(windows.Where(w => w.Item1 == process2.Id).Implode(t => t.Item2), Is.Empty);
 		}
 

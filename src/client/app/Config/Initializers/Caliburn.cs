@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 				+ @"(?!<suffix>)$",
 				"${nsbefore}Views.${nsafter}${basename}");
 
-			//безумее сам посебе Caliburn если не найдент view покажет текст Cannot find view for
+			//безумие - сам по себе Caliburn если не найден view покажет текст Cannot find view for
 			//ни исключения ни ошибки в лог
 			ViewLocator.LocateForModelType = (modelType, displayLocation, context) => {
 				var viewType = ViewLocator.LocateTypeForModelType(modelType, displayLocation, context);

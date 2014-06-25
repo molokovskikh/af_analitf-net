@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.waybill = waybill;
 			this.lines = lines;
 			doc.PagePadding = new Thickness(29);
-			//мнения о размере страницы разощлись
+			//мнения о размере страницы разошлись
 			//придерживаемся мнения delphi тк размеры колонок скопированы от туда
 			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
 

@@ -67,6 +67,13 @@ namespace AnalitF.Net.Client.Controls
 			set { CanSelectMultipleItems = value; }
 		}
 
+		/*
+		проблемы с фоксом
+		1 - тк ScrollViewer Focusable то он может получить фокус если на него кликнуть
+		это правильно когда таблица пуста для того что бы получать ввод с клавиатуры
+		и не правильно когда в таблице есть элементы
+		фокус должен оставаться на элементе
+		*/
 		public override void OnApplyTemplate()
 		{
 			base.OnApplyTemplate();
@@ -150,15 +157,6 @@ namespace AnalitF.Net.Client.Controls
 		}
 
 
-		/*
-		проблемы с фоксом
-		1 - тк ScrollViewer Focusable то он может получить фокус если на него кликнуть
-		это правильно когда грид пуст для того что бы получать ввод с клавиатуры
-		и не правильно когда в гриде есть элементы
-		фокус должен оставаться на элементе
-
-		*/
-
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{
 			base.OnItemsSourceChanged(oldValue, newValue);
@@ -235,7 +233,7 @@ namespace AnalitF.Net.Client.Controls
 			//при выходе из режима редактирования
 			//повторное нажатие escape обрабатывает как завершение редактирование хотя редактирование уже завершено
 			//похоже что проблема состоит в неверном определение типа редактирования
-			//у Items не сбрасывается флаг IsEditingItem и фовторно нажатие escape интерпретируется как завершение
+			//у Items не сбрасывается флаг IsEditingItem и повторно нажатие escape интерпретируется как завершение
 			//редактирования строки
 			//тк на некоторых формах escape обрабатывается как выход из формы такое поведение неприемлемо
 			var cell = DataGridHelper.GetCell(this, CurrentCell);

@@ -141,7 +141,7 @@ namespace AnalitF.Net.Client.Models
 			get { return BuyingMatrixType == BuyingMatrixStatus.Denied; }
 		}
 
-		//подсвичиваем колонки, нужно что бы работал функционал приоритета что бы перекрывался цветом IsForbidden
+		//подсвечиваем колонки, нужно что бы работал функционал приоритета что бы перекрывался цветом IsForbidden
 		[Style("OrderCount", "OrderLine.ResultSum")]
 		public virtual bool OrderMark
 		{
