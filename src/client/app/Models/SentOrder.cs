@@ -153,7 +153,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PriceName
 		{
-			get { return SafePrice.Name; }
+			get { return SafePrice != null ? SafePrice.Name : ""; }
 		}
 
 		public virtual string AddressName
@@ -170,6 +170,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
+				if (Price == null)
+					return null;
 				if (IsPriceExists())
 					return Price;
 				return new Price {

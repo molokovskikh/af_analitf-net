@@ -17,16 +17,28 @@
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate>
-						<TextBlock HorizontalAlignment="Center"
-								cal:Message.Attach="[Event PreviewMouseDown] = [Action Download($dataContext)]"
-								ToolTip="{Binding Details}">
-								<Hyperlink>Загрузить</Hyperlink>
-						</TextBlock>
 					</ControlTemplate>
 				</Setter.Value>
 			</Setter>
 		</Style.Setters>
 		<Style.Triggers>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsNewItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" Value="False" />
+					<Condition Binding="{Binding Waybill.IsCreatedByUser, FallbackValue=True}" Value="False" />
+				</MultiDataTrigger.Conditions>
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate>
+							<TextBlock HorizontalAlignment="Center"
+								cal:Message.Attach="[Event PreviewMouseDown] = [Action Download($dataContext)]"
+								ToolTip="{Binding Details}">
+								<Hyperlink>Загрузить</Hyperlink>
+							</TextBlock>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</MultiDataTrigger>
 			<DataTrigger Binding="{Binding IsDownloading}" Value="True">
 				<Setter Property="Template">
 					<Setter.Value>
