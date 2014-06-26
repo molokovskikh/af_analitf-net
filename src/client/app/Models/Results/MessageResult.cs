@@ -21,6 +21,16 @@ namespace AnalitF.Net.Client.Models.Results
 			Type = type;
 		}
 
+		public static MessageResult Warn(string message)
+		{
+			return new MessageResult(message, MessageType.Warning);
+		}
+
+		public static MessageResult Error(string message)
+		{
+			return new MessageResult(message, MessageType.Error);
+		}
+
 		public void Execute(ActionExecutionContext context)
 		{
 			var manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();

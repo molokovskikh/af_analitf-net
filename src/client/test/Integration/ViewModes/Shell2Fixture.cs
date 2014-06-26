@@ -110,6 +110,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem,
 				prices.CurrentPrice.Value.Id + manager.MessageBoxes.Implode());
 			var offers = (PriceOfferViewModel)shell.ActiveItem;
+			testScheduler.Start();
 			offers.CurrentOffer.Value.OrderCount = 1;
 			offers.OfferUpdated();
 			offers.OfferCommitted();

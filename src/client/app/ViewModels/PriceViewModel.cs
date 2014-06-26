@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
@@ -14,6 +16,7 @@ using Devart.Common;
 using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Linq;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -70,6 +73,11 @@ namespace AnalitF.Net.Client.ViewModels
 				prices.Each(p => p.Order = Address.Orders.Where(o => !o.Frozen).FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));
 			}
+
+			prices.Select(p => p.ObservableForProperty(x => x.Active))
+				.Merge()
+				.Throttle(TimeSpan.FromMilliseconds(1000), UiScheduler)
+				.Subscribe(_ => ResultsSink.OnNext(MessageResult.Warn("Изменение настроек прайс-листов будет применено при следующем обновлении.")), CloseCancellation.Token);
 
 			Prices = prices;
 			if (CurrentPrice.Value != null) {

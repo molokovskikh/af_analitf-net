@@ -9,7 +9,9 @@ using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Test.Integration;
+using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using Microsoft.Reactive.Testing;
@@ -62,6 +64,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			RxApp.MessageBus = bus;
 			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 
+			PriceOfferViewModel.TestQueryScheduler = new CurrentThreadTaskScheduler();
 			testScheduler = new TestScheduler();
 			BaseScreen.TestSchuduler = testScheduler;
 			disposable.Add(TestUtils.WithScheduler(testScheduler));

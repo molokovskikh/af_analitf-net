@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -9,6 +10,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -24,6 +26,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		private PriceComposedId priceId;
 		public List<Offer> PriceOffers = new List<Offer>();
+		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
+		public static TaskScheduler TestQueryScheduler = null;
 
 		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders, OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -42,21 +46,24 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (showLeaders)
 				FilterLeader();
 
-			CurrentProducer.Changed()
-				.Merge(CurrentFilter.Changed())
-				.Subscribe(_ => Filter());
-
 			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
 			//но если не удалить подписку будет утечка памяти
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
 				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
-			SearchBehavior = new SearchBehavior(this);
+			SearchBehavior = new SearchBehavior(this, false);
+			IsLoading = new NotifyValue<bool>(true);
+
+			CurrentProducer.Cast<object>()
+				.Merge(CurrentFilter.Cast<object>())
+				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
+				.Subscribe(_ => Filter());
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<Price> Price { get; set; }
 		public string[] Filters { get; set; }
 		public NotifyValue<string> CurrentFilter { get; set; }
+		public NotifyValue<bool> IsLoading { get; set; }
 
 		public bool CanDeleteOrder
 		{
@@ -77,15 +84,47 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnActivate();
 
-			Update();
+			if (StatelessSession != null)
+				Price.Value = StatelessSession.Get<Price>(priceId);
 			if (Promotions != null)
 				Promotions.FilterBySupplierId = Price.Value.SupplierId;
-			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
 
+			RxQuery(s => {
+					var offers = s.Query<Offer>().Where(o => o.Price.Id == priceId)
+						.Fetch(o => o.Price)
+						.Fetch(o => o.LeaderPrice)
+						.ToList();
+					CalculateRetailCost(offers);
+					LoadOrderItems(offers);
+					return offers;
+				})
+				.ObserveOn(UiScheduler)
+				.CatchSubscribe(BindOffers, CloseCancellation);
+		}
+
+		public void BindOffers(List<Offer> c)
+		{
+			PriceOffers = c;
+			FillProducerFilter(PriceOffers);
+			Filter();
+			SelectOffer();
+			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
+			Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
+				?? Price.Value;
+			IsLoading.Value = false;
 			if (PriceOffers.Count == 0) {
-				Manager.Warning("Выбранный прайс-лист отсутствует");
-				IsSuccessfulActivated = false;
+				ResultsSink.OnNext(MessageResult.Warn("Выбранный прайс-лист отсутствует"));
+				TryClose();
 			}
+		}
+
+		private IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		{
+			if (StatelessSession == null)
+				return Observable.Empty<T>();
+			var task = new Task<T>(() => select(StatelessSession), CloseCancellation.Token);
+			task.Start(QueryScheduler);
+			return Observable.FromAsync(() => task);
 		}
 
 		public void Filter()
@@ -111,18 +150,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		protected override void Query()
 		{
-			if (PriceOffers.Count == 0) {
-				PriceOffers = StatelessSession.Query<Offer>().Where(o => o.Price.Id == priceId)
-					.Fetch(o => o.Price)
-					.Fetch(o => o.LeaderPrice)
-					.ToList();
-
-				Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
-					?? StatelessSession.Get<Price>(priceId);
-			}
-			if (Producers.Value.Count == 1)
-				FillProducerFilter(PriceOffers);
-			Filter();
 		}
 
 		public void CancelFilter()
@@ -185,6 +212,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (LastEditOffer.Value.OrderLine == null && CurrentFilter.Value == filters[1]) {
 				Filter();
 			}
+		}
+
+		protected override void LoadOrderItems()
+		{
+			LoadOrderItems(PriceOffers);
 		}
 	}
 }

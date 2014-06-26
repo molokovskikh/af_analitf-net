@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -34,7 +35,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		public Address[] Addresses = new Address[0];
-
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -299,10 +299,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			return offers;
 		}
 
-		private void CalculateRetailCost()
+		protected void CalculateRetailCost(IEnumerable<Offer> offers)
 		{
-			foreach (var offer in Offers.Value)
-				offer.CalculateRetailCost(Settings.Value.Markups, User);
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User));
 		}
 
 		public virtual void OfferUpdated()
@@ -343,7 +342,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (NeedToCalculateDiff)
 				CalculateDiff();
 
-			CalculateRetailCost();
+			CalculateRetailCost(Offers.Value);
 		}
 
 		private void CalculateDiff()
@@ -363,9 +362,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
-		protected void LoadOrderItems()
+		protected virtual void LoadOrderItems()
 		{
-			foreach (var offer in Offers.Value) {
+			LoadOrderItems(Offers.Value);
+		}
+
+		protected void LoadOrderItems(IEnumerable<Offer> offers)
+		{
+			foreach (var offer in offers) {
 				offer.Price.Order = null;
 				offer.OrderLine = null;
 			}
@@ -375,8 +379,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			var activeOrders = ActualAddress.ActiveOrders();
 			var orders = activeOrders.ToLookup(o => o.Price.Id);
-			var lines = activeOrders.SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
-			foreach (var offer in Offers.Value) {
+			var lines = ActualAddress.ActiveOrders().SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
+			foreach (var offer in offers) {
 				offer.Price.Order = orders[offer.Price.Id].FirstOrDefault();
 				offer.OrderLine = lines[offer.Id].FirstOrDefault();
 			}
@@ -398,9 +402,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public override void Update()
 		{
 			Query();
-			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
+			SelectOffer();
 			Calculate();
 			LoadOrderItems();
+		}
+
+		protected void SelectOffer()
+		{
+			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
 		}
 
 		protected void LoadStat()
@@ -474,7 +483,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return CurrentOffer.Value.CatalogId;
 		}
 
-		protected void FillProducerFilter(IEnumerable<Offer> offers)
+		public void FillProducerFilter(IEnumerable<Offer> offers)
 		{
 			Producers.Value = new[] { EmptyProducer }
 				.Concat(offers.Where(o => o.ProducerId != null)

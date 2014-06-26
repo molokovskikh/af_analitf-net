@@ -29,12 +29,12 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Update_filter_on_order_edit()
 		{
-			model.PriceOffers = new List<Offer> {
+			var offers = new List<Offer> {
 				new Offer(price, 100),
 				new Offer(price, 200),
 				new Offer(price, 15)
 			};
-			ScreenExtensions.TryActivate(model);
+			Activate(offers);
 			OrderByIndex(model, 0);
 			OrderByIndex(model, 2);
 
@@ -51,7 +51,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void SearchOffers()
 		{
-			model.PriceOffers = new List<Offer> {
+			var offers = new List<Offer> {
 				new Offer(price, 100) {
 					ProductSynonym = "Папаверинг",
 					ProducerSynonym = "FARAN",
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					Producer = "ARKRAY"
 				},
 			};
-			ScreenExtensions.TryActivate(model);
+			Activate(offers);
 			model.SearchBehavior.SearchText.Value = "Папаверинг";
 			model.SearchBehavior.Search();
 			Assert.AreEqual(1, model.Offers.Value.Count);
@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Load_producers()
 		{
-			model.PriceOffers = new List<Offer> {
+			var offers = new List<Offer> {
 				new Offer(price, 100) {
 					ProductSynonym = "Папаверинг",
 					ProducerSynonym = "FARAN",
@@ -86,8 +86,15 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					ProducerId = 2
 				},
 			};
-			ScreenExtensions.TryActivate(model);
+			Activate(offers);
+			model.FillProducerFilter(model.PriceOffers);
 			Assert.AreEqual(3, model.Producers.Value.Count);
+		}
+
+		private void Activate(List<Offer> offers)
+		{
+			ScreenExtensions.TryActivate(model);
+			model.BindOffers(offers);
 		}
 
 		private static void OrderByIndex(PriceOfferViewModel model, int index, uint count = 1)

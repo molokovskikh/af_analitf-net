@@ -211,7 +211,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool Active
 		{
 			get { return !DisabledByClient; }
-			set { DisabledByClient = !value; }
+			set
+			{
+				DisabledByClient = !value;
+				OnPropertyChanged();
+			}
 		}
 
 		[Ignore]

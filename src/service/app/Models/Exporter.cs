@@ -1136,7 +1136,9 @@ select d.RowId as Id,
 	i.BuyerInn,
 	i.BuyerKpp,
 	i.ConsigneeInfo as ConsigneeNameAndAddress,
-	i.ShipperInfo as ShipperNameAndAddress
+	i.ShipperInfo as ShipperNameAndAddress,
+	i.InvoiceNumber as InvoiceId,
+	i.InvoiceDate
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id

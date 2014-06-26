@@ -352,6 +352,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 			Input("Prices", Key.Enter);
 			WaitIdle();
+			dispatcher.Invoke(() => testScheduler.Start());
+			WaitIdle();
 			dispatcher.Invoke(() => {
 				var count = activeWindow.Descendants<Label>().First(l => l.Name == "Offers_Count");
 				Assert.AreEqual(expectedCount.ToString(), count.AsText());

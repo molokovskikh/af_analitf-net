@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -18,6 +20,24 @@ using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
+	public class CurrentThreadTaskScheduler : TaskScheduler
+	{
+		protected override void QueueTask(Task task)
+		{
+			TryExecuteTask(task);
+		}
+
+		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+		{
+			return TryExecuteTaskInline(task, taskWasPreviouslyQueued);
+		}
+
+		protected override IEnumerable<Task> GetScheduledTasks()
+		{
+			return Enumerable.Empty<Task>();
+		}
+	}
+
 	[TestFixture]
 	public class PriceOfferFixture : ViewModelFixture
 	{
@@ -34,7 +54,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			price = session.Query<Price>().First(p => p.PositionCount > 0);
 			lazyModel = new Lazy<PriceOfferViewModel>(
-				() => Init(new PriceOfferViewModel(price.Id, false)));
+				() => {
+					var model = new PriceOfferViewModel(price.Id, false);
+					model.QueryScheduler = new CurrentThreadTaskScheduler();
+					Init(model);
+					testScheduler.Start();
+					return model;
+				});
 		}
 
 		[Test]
@@ -82,7 +108,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_history_orders()
 		{
-			MakeSentOrder(model.Offers.Value.First());
+			var offer = session.Query<Offer>().OrderBy(o => o.ProductSynonym).First(o => o.Price == price);
+			MakeSentOrder(offer);
 
 			var history = (DialogResult)model.ShowHistoryOrders();
 			var lines = ((HistoryOrdersViewModel)history.Model).Lines;
