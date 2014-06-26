@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Common.Tools;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -63,7 +64,12 @@ namespace AnalitF.Net.Client
 			var debugpipe = "";
 			int result;
 			try {
-				XmlConfigurator.Configure();
+				var logConfig = new FileInfo(FileHelper.MakeRooted("log4net.config"));
+				if (logConfig.Exists)
+					XmlConfigurator.Configure(logConfig);
+				else
+					XmlConfigurator.Configure();
+
 				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 

@@ -1382,6 +1382,9 @@ group by dh.Id")
 				return;
 
 			AddDir(zip, UpdatePath, "update");
+			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
+			if (File.Exists(perUserUpdate))
+				AddDir(zip, perUserUpdate, "update");
 		}
 
 		public void Dispose()
