@@ -62,11 +62,11 @@ namespace AnalitF.Net.Client.Views
 				}
 
 				if (DataContext != null && !((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
-					grid.Columns.Remove(DataGridHelper.GetColumn(grid, "ЖНВЛС"));
+					grid.Columns.Remove(DataGridHelper.GetColumn(grid.Columns, "ЖНВЛС"));
 				}
 			};
 
-			var column = DataGridHelper.GetColumn(grid, "Розничная наценка");
+			var column = DataGridHelper.GetColumn(grid.Columns, "Розничная наценка");
 			grid.TextInput += (sender, args) => {
 				if (grid.SelectedItem == null)
 					return;

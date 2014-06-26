@@ -187,7 +187,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.IsFalse(box.IsChecked.Value);
 
 				var grid = (DataGrid)view.FindName("Lines");
-				var column = DataGridHelper.GetColumn(grid, "Адрес заказа");
+				var column = DataGridHelper.GetColumn(grid.Columns, "Адрес заказа");
 				Assert.AreEqual(Visibility.Collapsed, column.Visibility);
 			});
 			WaitIdle();

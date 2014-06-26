@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.Controls
 		private static void ShowAddressColumnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var grid = (DataGrid2)d;
-			var column = DataGridHelper.GetColumn(grid, "Адрес заказа");
+			var column = DataGridHelper.GetColumn(grid.Columns, "Адрес заказа");
 			if (column == null)
 				return;
 

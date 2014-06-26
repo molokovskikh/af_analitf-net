@@ -303,6 +303,7 @@
     <Compile Include="UI\Conventions.cs" />
     <Compile Include="UI\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -375,6 +376,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\GridConfig.xaml.cs">
+      <DependentUpon>GridConfig.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\OrderWarning.xaml.cs">
       <DependentUpon>OrderWarning.xaml</DependentUpon>
@@ -549,6 +553,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\DocModel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\GridConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

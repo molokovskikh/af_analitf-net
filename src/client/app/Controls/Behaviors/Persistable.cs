@@ -4,6 +4,7 @@ using System.Windows.Data;
 using System.Windows.Interactivity;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
 {
@@ -16,25 +17,15 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 		protected override void OnAttached()
 		{
 			var contextMenu = new ContextMenu();
-			contextMenu.Items.Add(new MenuItem {
-				Header = "Восстановить значения по умолчанию",
-				Command = Commands.InvokeViewModel,
-				CommandParameter = new { Method = "ResetView", grid = AssociatedObject },
-			});
-			contextMenu.Items.Add(new Separator());
-			foreach (var column in AssociatedObject.Columns) {
-				var header = GetDescription(column) ?? Helpers.DataGridHelper.GetHeader(column);
-				var menuItem = new MenuItem {
-					Header = header,
-					IsCheckable = true
-				};
-				var binding = new Binding("Visibility") {
-					Converter = new BoolToCollapsedConverter(),
-					Source = column
-				};
-				menuItem.SetBinding(MenuItem.IsCheckedProperty, binding);
-				contextMenu.Items.Add(menuItem);
-			}
+			var item = new MenuItem {
+				Header = "Столбцы...",
+			};
+			item.Click += (sender, args) => {
+				var screen = AssociatedObject.DataContext as BaseScreen;
+				if (screen != null)
+					ViewModelHelper.ProcessResult(screen.ConfigureGrid(AssociatedObject));
+			};
+			contextMenu.Items.Add(item);
 			AssociatedObject.ContextMenu = contextMenu;
 		}
 

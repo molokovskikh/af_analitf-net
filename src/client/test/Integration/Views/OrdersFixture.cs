@@ -30,7 +30,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			var all = view.Descendants<CheckBox>().First(c => c.Name == "All");
 			Assert.That(all.Visibility, Is.EqualTo(Visibility.Visible));
 			var grid = view.Descendants<DataGrid>().First(c => c.Name == "Orders");
-			var column = DataGridHelper.GetColumn(grid, "Адрес заказа");
+			var column = DataGridHelper.GetColumn(grid.Columns, "Адрес заказа");
 
 			Assert.That(column.Visibility, Is.EqualTo(Visibility.Collapsed));
 			model.AddressSelector.All.Value = true;

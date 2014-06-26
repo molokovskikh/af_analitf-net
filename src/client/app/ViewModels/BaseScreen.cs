@@ -23,9 +23,11 @@ using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
@@ -547,5 +549,10 @@ namespace AnalitF.Net.Client.ViewModels
 			return new object[0];
 		}
 #endif
+
+		public IResult ConfigureGrid(DataGrid grid)
+		{
+			return new DialogResult(new GridConfig(grid), sizeToContent: true);
+		}
 	}
 }

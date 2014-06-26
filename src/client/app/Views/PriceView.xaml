@@ -7,6 +7,7 @@
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:cal="http://www.caliburnproject.org"
 	behaviors:Focusable.DefaultFocus="{x:Reference Prices}">
 
 	<i:Interaction.Behaviors>
@@ -53,17 +54,17 @@
 				<DataGridCheckBoxColumn Width="65*" Header="В работе"
 					Binding="{Binding Active, UpdateSourceTrigger=PropertyChanged}" />
 				<c:DataGridTextColumnEx Width="50*" Header="Позиций"
-					Binding="{Binding PositionCount}" IsReadOnly="True" TextAlignment="Right" />
+					Binding="{Binding PositionCount}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="45*" Header="Заказ"
-					Binding="{Binding Order.LinesCount}" IsReadOnly="True" TextAlignment="Right" />
+					Binding="{Binding Order.LinesCount}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="51*" Header="Сумма" Binding="{Binding Order.Sum}"
-					IsReadOnly="True" TextAlignment="Right" />
+					IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа"
-					Binding="{Binding PriceDate}" IsReadOnly="True" TextAlignment="Center" />
+					Binding="{Binding PriceDate}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="60*" Header="Месячный заказ"
-					Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
+					Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ"
-					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" TextAlignment="Right" />
+					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 

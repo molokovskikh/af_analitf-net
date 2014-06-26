@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using AnalitF.Net.Client.ViewModels;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -85,7 +86,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
 		{
-			var column = GetColumn(dataGrid, header);
+			var column = GetColumn(dataGrid.Columns, header);
 			if (column == null)
 				return;
 
@@ -100,7 +101,12 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static DataGridColumn GetColumn(DataGrid grid, string name)
 		{
-			return grid.Columns.FirstOrDefault(c => String.Equals(GetHeader(c), name, StringComparison.CurrentCultureIgnoreCase));
+			return GetColumn(grid.Columns, name);
+		}
+
+		public static DataGridColumn GetColumn(ObservableCollection<DataGridColumn> columns, string name)
+		{
+			return columns.FirstOrDefault(c => String.Equals(GetHeader(c), name, StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		public static string GetHeader(DataGridColumn column)
@@ -127,7 +133,7 @@ namespace AnalitF.Net.Client.Helpers
 					|| !screen.User.IsDeplayOfPaymentEnabled
 					|| !screen.User.ShowSupplierCost;
 				if (removeSupplierCost) {
-					var column = GetColumn(dataGrid, "Цена поставщика");
+					var column = GetColumn(dataGrid.Columns, "Цена поставщика");
 					if (column != null)
 						dataGrid.Columns.Remove(column);
 				}

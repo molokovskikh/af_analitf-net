@@ -84,8 +84,7 @@ namespace AnalitF.Net.Client.Models
 				return;
 
 			foreach (var setting in settings) {
-				var column = DataGridHelper.GetColumn(dataGrid, setting.Name);
-				setting.Restore(dataGrid.Columns, column);
+				setting.Restore(dataGrid.Columns);
 			}
 
 			//тк новые колонки не имеют сохраненных настроек
