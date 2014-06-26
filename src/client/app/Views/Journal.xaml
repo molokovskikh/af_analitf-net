@@ -9,7 +9,8 @@
 					<Grid Margin="0, 0, 0, 4"
 						cal:Message.Attach="[Event MouseDown] = [Action Open($dataContext)]"
 						Cursor="Hand"
-						ToolTip="Нажмите что бы открыть">
+						ToolTip="Нажмите что бы открыть"
+						HorizontalAlignment="Left">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="*" />
