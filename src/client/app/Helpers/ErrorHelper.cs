@@ -36,8 +36,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 
 			if ((baseException is HttpRequestException
-					&& baseException.InnerException is WebException
-					&& baseException.InnerException.InnerException is SocketException)
+					&& baseException.InnerException is WebException)
 				|| (baseException is TaskCanceledException
 					&& !((TaskCanceledException)baseException).CancellationToken.IsCancellationRequested)
 				|| baseException is RasException) {

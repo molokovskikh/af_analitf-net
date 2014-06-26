@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Models
 	public class Settings : BaseNotify
 	{
 		private bool groupWaybillBySupplier;
-		private ProxyType proxyType;
+		private bool _useProxy;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -170,29 +170,23 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual bool UseProxy
+		{
+			get { return _useProxy; }
+			set
+			{
+				_useProxy = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public virtual string ProxyHost { get; set; }
 
 		public virtual int ProxyPort { get; set; }
 
-		public virtual ProxyType ProxyType
-		{
-			get { return proxyType; }
-			set
-			{
-				proxyType = value;
-				OnPropertyChanged();
-				OnPropertyChanged("CanConfigureProxy");
-			}
-		}
-
 		public virtual string ProxyUserName { get; set; }
 
 		public virtual string ProxyPassword { get; set; }
-
-		public virtual bool CanConfigureProxy
-		{
-			get { return ProxyType == ProxyType.User; }
-		}
 
 		public virtual bool IsValid
 		{
@@ -244,10 +238,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IWebProxy GetProxy()
 		{
-			if (ProxyType == ProxyType.None)
+			if (!UseProxy)
 				return null;
-			if (ProxyType == ProxyType.System)
-				return WebRequest.DefaultWebProxy;
 			if (ProxyHost == null)
 				return null;
 			var proxy = new WebProxy(ProxyHost, ProxyPort);

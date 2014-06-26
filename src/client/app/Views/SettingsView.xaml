@@ -179,7 +179,7 @@
 			<TabItem Header="Прокси-сервер" Name="ProxyTab">
 				<StackPanel>
 					<Label>Прокси-сервер</Label>
-					<ComboBox Style="{StaticResource Select}" x:Name="Settings_ProxyType" />
+					<CheckBox Name="Settings_UseProxy">Соединяться через прокси-сервер</CheckBox>
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -187,11 +187,11 @@
 						</Grid.ColumnDefinitions>
 						<StackPanel Grid.Column="0">
 							<Label>Адрес</Label>
-							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyHost" />
+							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyHost" />
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Порт</Label>
-							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyPort" />
+							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyPort" />
 						</StackPanel>
 					</Grid>
 					<Grid>
@@ -201,11 +201,11 @@
 						</Grid.ColumnDefinitions>
 						<StackPanel Grid.Column="0">
 							<Label>Имя</Label>
-							<TextBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyUserName" />
+							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyUserName" />
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Пароль</Label>
-							<PasswordBox IsEnabled="{Binding Settings.Value.CanConfigureProxy}" x:Name="Settings_ProxyPassword"
+							<PasswordBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyPassword"
 								Binders:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
 									Mode=TwoWay,
 									UpdateSourceTrigger=PropertyChanged}" />
