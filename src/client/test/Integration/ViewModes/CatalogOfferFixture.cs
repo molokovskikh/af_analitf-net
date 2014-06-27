@@ -326,6 +326,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_description()
 		{
+			catalog = session.Query<Catalog>()
+				.First(c => c.HaveOffers && c.Name.Description != null);
 			var dialogs = manager.DialogOpened.Collect();
 			model.ShowDescription();
 			Assert.AreEqual(1, dialogs.Count);
