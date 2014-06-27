@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.MySql;
@@ -26,11 +27,34 @@ using Settings = AnalitF.Net.Client.Models.Settings;
 
 namespace AnalitF.Net.Client.Config.Initializers
 {
+	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+	public class MEMORYSTATUSEX
+	{
+		public uint dwLength;
+		public uint dwMemoryLoad;
+		public ulong ullTotalPhys;
+		public ulong ullAvailPhys;
+		public ulong ullTotalPageFile;
+		public ulong ullAvailPageFile;
+		public ulong ullTotalVirtual;
+		public ulong ullAvailVirtual;
+		public ulong ullAvailExtendedVirtual;
+
+		public MEMORYSTATUSEX()
+		{
+			this.dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+		}
+	}
+
 	public class IgnoreAttribute : Attribute
 	{}
 
 	public class NHibernate
 	{
+		[return: MarshalAs(UnmanagedType.Bool)]
+		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
 		private static ILog log = LogManager.GetLogger(typeof(NHibernate));
 		private List<PropertyInfo> indexes = new List<PropertyInfo>();
 
@@ -321,6 +345,17 @@ namespace AnalitF.Net.Client.Config.Initializers
 				else
 					path = Path.GetFullPath(FileHelper.MakeRooted(value));
 				dictionary[key] = path.Replace("\\", "/");
+			}
+
+			var status = new MEMORYSTATUSEX();
+			if (GlobalMemoryStatusEx(status)) {
+				ulong min = 32*1024*1024;
+				//нет смысла просить больше тк в 32 битном процессе всего скорее не сможем выделить блок больше из-за
+				//фрагментации
+				ulong max = 500*1024*1024;
+				var size = Math.Min(Math.Max(min, status.ullAvailVirtual / 3), max);
+				dictionary.Add("--max_heap_table_size", size.ToString());
+				dictionary.Add("--tmp_table_size", size.ToString());
 			}
 
 			builder.ServerParameters = dictionary.Select(k => k.Key + "=" + k.Value).Implode(";");
