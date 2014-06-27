@@ -246,6 +246,7 @@
     <Compile Include="Unit\Models\OfferSortFixture.cs" />
     <Compile Include="Unit\Models\OrderFixture.cs" />
     <Compile Include="Unit\Models\PriceFixture.cs" />
+    <Compile Include="Unit\PersistableFixture.cs" />
     <Compile Include="Unit\PriceResultFixture.cs" />
     <Compile Include="Unit\PrintFixture.cs" />
     <Compile Include="Unit\ProgressReporterFixture.cs" />

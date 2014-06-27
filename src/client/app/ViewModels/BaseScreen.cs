@@ -288,6 +288,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnViewLoaded(object view)
 		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject != null) {
+				dependencyObject.Descendants<DataGrid>().Each(g => {
+					if (!User.CanExport(this, g.Name)) {
+						g.ClipboardCopyMode = DataGridClipboardCopyMode.None;
+					}
+				});
+			}
 			tableSettings.RestoreView(view);
 		}
 

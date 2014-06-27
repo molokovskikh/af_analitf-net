@@ -18,6 +18,7 @@ using AnalitF.Net.Client.Views;
 using AnalitF.Net.Client.Views.Offers;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
+using Common.Tools;
 using Common.Tools.Calendar;
 using Devart.Common;
 using NHibernate.Linq;
@@ -83,6 +84,18 @@ namespace AnalitF.Net.Test.Integration.Views
 			foreach (var type in viewModels) {
 				Assert.IsNotNull(ViewLocator.LocateTypeForModelType(type, null, null), type.ToString());
 			}
+		}
+
+		[Test]
+		public void Disable_clipboard()
+		{
+			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
+			var model = new CatalogOfferViewModel(catalog);
+			model.User.Permissions.Remove(model.User.Permissions.FirstOrDefault(p => p.Name.Match("FPCPL")));
+			var view = Bind(model);
+			view.RaiseEvent(new RoutedEventArgs(FrameworkElement.LoadedEvent));
+			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Offers");
+			Assert.AreEqual(DataGridClipboardCopyMode.None, grid.ClipboardCopyMode);
 		}
 	}
 }

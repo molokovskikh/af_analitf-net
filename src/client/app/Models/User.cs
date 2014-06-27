@@ -8,6 +8,7 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.Tools;
 using NHibernate.Mapping;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -60,6 +61,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 		public virtual string Name { get; set; }
+
+		public override string ToString()
+		{
+			return Name;
+		}
 	}
 
 	public class User
