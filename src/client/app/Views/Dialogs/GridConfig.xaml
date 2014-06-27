@@ -42,7 +42,6 @@
 			<TextBlock Margin="5">Ширина выделенного столбца:</TextBlock>
 			<TextBox Margin="5" Width="40" Name="CurrentColumn_PixelWidth" />
 			<TextBlock Margin="5">пикс.</TextBlock>
-			<Label Name="CurrentColumn_DisplayIndex"></Label>
 		</StackPanel>
 
 		<StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
