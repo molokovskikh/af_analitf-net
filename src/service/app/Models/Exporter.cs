@@ -285,7 +285,7 @@ from Usersettings.Prices p
 	s.Id,
 	s.Name,
 	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
-	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificateSource
+	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(result, sql, "suppliers");

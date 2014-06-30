@@ -40,5 +40,10 @@ namespace AnalitF.Net.Client.Models.Results
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
+
+		public override string ToString()
+		{
+			return Message;
+		}
 	}
 }

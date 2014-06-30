@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
@@ -106,6 +108,25 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Lines.Value.AddNewItem(waybillLine);
 			Assert.AreEqual(11, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
+		}
+
+		[Test]
+		public void Load_certificate()
+		{
+			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
+
+			Fixture<LoadWaybill>();
+			var fixture = Fixture<CreateCertificate>();
+
+			var updateResults = shell.Update().ToArray();
+			Assert.AreEqual(1, updateResults.Length,
+				"должны были получить только результат открытия файла накладной {0}", updateResults.Implode());
+			var waybillId = fixture.Line.Waybill.Log.Id;
+			var lineId = fixture.Line.Id;
+			model = Init(new WaybillDetails(waybillId));
+			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == lineId)).ToArray();
+			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
+			Assert.AreEqual("Файл 'Сертификаты для Азарга капли глазные 5мл Фл.-кап. Х1 серия A 565' загружен", WaitNotification());
 		}
 	}
 }
