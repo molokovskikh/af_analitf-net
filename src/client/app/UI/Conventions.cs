@@ -131,7 +131,8 @@ namespace AnalitF.Net.Client.UI
 					if (columnProperty == null)
 						continue;
 					var columnType = columnProperty.PropertyType;
-					if (columnType == typeof(decimal) && boundColumn.Binding.StringFormat == null) {
+					if (boundColumn.Binding.StringFormat == null)
+					if (columnType == typeof(decimal) || columnType == typeof(decimal?)) {
 						boundColumn.Binding.StringFormat = "0.00";
 					}
 
