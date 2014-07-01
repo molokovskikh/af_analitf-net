@@ -53,6 +53,8 @@ namespace AnalitF.Net.Client.Models
 		[Display(Name = "Срок годности:", Order = 8)]
 		public virtual string Expiration { get; set; }
 
+		public virtual bool Hidden { get; set; }
+
 		public virtual string FullName
 		{
 			get { return String.Format("{0} ({1})", Name, EnglishName); }

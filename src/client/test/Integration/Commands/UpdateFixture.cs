@@ -94,6 +94,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			SampleData.CreateUser(session);
 
+			Run(new UpdateCommand());
+
 			var price = localSession.Query<Price>().First(p => p.PositionCount > 0);
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));

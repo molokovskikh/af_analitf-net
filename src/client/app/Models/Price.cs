@@ -201,6 +201,9 @@ namespace AnalitF.Net.Client.Models
 		//корректировка цен применяемая аптекой, для жизненно важных препаратов
 		public virtual decimal VitallyImportantCostFactor { get; set; }
 
+		//экспортировался ли прайс-лист при последнем обновлении
+		public virtual bool Fresh { get; set; }
+
 		[Style("Name")]
 		public virtual bool NotBase
 		{

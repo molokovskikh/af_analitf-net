@@ -13,6 +13,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Header { get; set; }
 
+		public virtual bool Hidden { get; set; }
+
 		public virtual Uri Url
 		{
 			get

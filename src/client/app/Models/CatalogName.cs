@@ -20,6 +20,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ProductDescription Description { get; set; }
 
+		public virtual bool Hidden { get; set; }
+
 		[Style(Description = "Предложения отсутствуют")]
 		public virtual bool DoNotHaveOffers
 		{

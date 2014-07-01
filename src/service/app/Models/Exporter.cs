@@ -90,6 +90,7 @@ namespace AnalitF.Net.Service.Models
 		public List<Order> Orders;
 		public List<OrderBatchItem> BatchItems;
 		public Address BatchAddress;
+		public bool ResetLastUpdate;
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
@@ -118,14 +119,38 @@ namespace AnalitF.Net.Service.Models
 		{
 			data = data ?? new AnalitfNetData(user);
 			data.LastPendingUpdateAt = DateTime.Now;
+			if (ResetLastUpdate)
+				data.LastUpdateAt = DateTime.MinValue;
 			session.Save(data);
 
+			//по умолчанию fresh = 1
 			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
 				"drop temporary table if exists usersettings.activeprices;" +
 				"call Customers.GetOffers(:userId);" +
-				"call Customers.GetPrices(:userId);")
+				"call Customers.GetPrices(:userId); " +
+				"insert into Customers.AnalitFNetPriceReplications (PriceId, UserId, UpdateTime) " +
+				"select i.PriceId, :userId, :replicationDate from (" +
+				"select PriceCode as PriceId from UserSettings.Prices p " +
+				"left join Customers.AnalitFNetPriceReplications r on r.PriceId = p.PriceCode and r.UserId = :userId " +
+				"where r.Id is null) as i;" +
+				"update Usersettings.ActivePrices ap " +
+				"join Customers.AnalitFNetPriceReplications r on r.PriceId = ap.PriceCode " +
+				"set ap.Fresh = 0 " +
+				"where r.UserId = :userId and r.UpdateTime < :lastSync")
 				.SetParameter("userId", user.Id)
+				.SetParameter("lastSync", data.LastUpdateAt)
+				//для тех записей которые мы создали время репликации должно быть меньше текущего что бы не реплицировать
+				//данные еще раз
+				.SetParameter("replicationDate", data.LastPendingUpdateAt.Value.AddSeconds(-1))
 				.ExecuteUpdate();
+			var maxProducerCostDate = session.CreateSQLQuery(@"
+select pi.PriceDate
+from Usersettings.PriceItems pi
+join Usersettings.PricesCosts pc on pc.PriceItemId = pi.Id
+where pc.CostCode = :costId")
+				.SetParameter("costId", MaxProducerCostCostId)
+				.List<DateTime?>()
+				.FirstOrDefault();
 
 			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
 
@@ -266,9 +291,10 @@ where u.Id = ?UserId
 	and a.Enabled = 1
 ";
 			Export(result, sql, "MinOrderSumRules", new { userId = user.Id });
-
-			sql = @"select * from Usersettings.MaxProducerCosts";
-			Export(result, sql, "MaxProducerCosts");
+			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt) {
+				sql = @"select * from Usersettings.MaxProducerCosts";
+				Export(result, sql, "MaxProducerCosts");
+			}
 
 			sql = @"select
 p.PriceCode as PriceId,
@@ -365,16 +391,21 @@ where
 	ct.Cost
 ";
 			sql += offersQueryParts.Select + "\r\n";
-			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
+			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, true), @"
 join Usersettings.MinCosts m on m.ProductId = core.ProductId and m.RegionCode = at.RegionCode
 left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(result, sql, "offers", new { ClientCode = user.Client.Id });
+			Export(result, sql, "offers", new { userId = user.Id, lastSync = data.LastUpdateAt, cumulative = false });
 
-			session.CreateSQLQuery(@"
+			var freshCount = Convert.ToUInt32(session
+				.CreateSQLQuery("select count(*) from Usersettings.ActivePrices ap where ap.Fresh = 1")
+				.UniqueResult());
+
+			if (freshCount > 0) {
+				session.CreateSQLQuery(@"
 drop temporary table if exists MinCosts;
 
 CREATE TEMPORARY TABLE MinCosts (
@@ -428,8 +459,9 @@ group by m.ProductId, m.RegionId;
 update MinCosts m
 join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
 set m.NextCost = n.NextCost;")
-				.ExecuteUpdate();
-			Export(result, "select * from MinCosts", "MinCosts");
+					.ExecuteUpdate();
+				Export(result, "select * from MinCosts", "MinCosts");
+			}
 
 			session.CreateSQLQuery(@"
 drop temporary table if exists MinCosts;
@@ -451,43 +483,56 @@ select
 	PharmacologicalAction,
 	Storage,
 	Expiration,
-	Composition
+	Composition,
+	NeedCorrect as Hidden
 from Catalogs.Descriptions
-where NeedCorrect = 0";
-			CachedExport(result, sql, "ProductDescriptions");
+where UpdateTime > ?lastSync
+union
+select
+	l.DescriptionId,
+	null as Name,
+	null as EnglishName,
+	null as Description,
+	null as Interaction,
+	null as SideEffect,
+	null as IndicationsForUse,
+	null as Dosing,
+	null as Warnings,
+	null as ProductForm,
+	null as PharmacologicalAction,
+	null as Storage,
+	null as Expiration,
+	null as Composition,
+	1 as Hidden
+from logs.DescriptionLogs l
+where l.LogTime >= ?lastSync and l.Operation = 2";
+			Export(result, sql, "ProductDescriptions", new { lastSync = data.LastUpdateAt }, false);
 
 			sql = @"
-select Id,
-	Mnn as Name,
-	exists(select *
-		from usersettings.Core cr
-			join Catalogs.Products p on p.Id = cr.ProductId
-				join Catalogs.Catalog c on c.Id = p.CatalogId
-					join Catalogs.CatalogNames cn on cn.Id = c.NameId
-		where m.Id = cn.MnnId) as HaveOffers
-from Catalogs.Mnn m";
+select l.MnnId as Id, l.Mnn as Name, 1 as Hidden
+from logs.MnnLogs l
+where l.LogTime >= ?lastSync and l.Operation = 2
+union
+select Id, Mnn as Name, 0 as Hidden
+from Catalogs.Mnn m
+where m.UpdateTime > ?lastSync";
+			Export(result, sql, "mnns", new { lastSync = data.LastUpdateAt }, false);
 
-			Export(result, sql, "mnns");
-
-			//todo: когда будет накопительное обновление
-			//нужно обработать обновление descriptionid когда станет NeedCorrect = 0
 			sql = @"
 select cn.Id,
 	cn.Name,
 	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
 	cn.MnnId,
-	exists(select *
-		from usersettings.Core cr
-			join Catalogs.Products p on p.Id = cr.ProductId
-				join Catalogs.Catalog c on c.Id = p.CatalogId
-		where c.NameId = cn.Id) as HaveOffers,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
+	sum(if(c.Hidden, 1, 0)) = count(*) as Hidden
 from Catalogs.CatalogNames cn
+	join Catalogs.Catalog c on c.NameId = cn.Id
 	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
+	and (cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync)
 group by cn.Id";
-			Export(result, sql, "catalognames");
+			Export(result, sql, "catalognames", new { lastSync = data.LastUpdateAt }, false);
 
 			sql = @"
 select
@@ -495,36 +540,39 @@ select
 	c.NameId,
 	c.VitallyImportant,
 	c.MandatoryList,
-	exists(select * from usersettings.Core cr join Catalogs.Products p on p.Id = cr.ProductId where p.CatalogId = c.Id) as HaveOffers,
 	cf.Id as FormId,
-	cf.Form as Form
+	cf.Form as Form,
+	c.Hidden
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
-where Hidden = 0";
-			Export(result, sql, "catalogs");
+where c.UpdateTime > ?lastSync";
+			Export(result, sql, "catalogs", new { lastSync = data.LastUpdateAt }, false);
 
 			sql = @"
-select p.Id,
-	p.Name
-from Usersettings.Core c
-	join Farm.Core0 c0 on c0.Id = c.Id
-	join Catalogs.Producers p on c0.CodeFirmCr = p.Id
-group by p.Id";
-			Export(result, sql, "producers");
+select l.ProducerId as Id, l.Name, 1 as Hidden
+from logs.ProducerLogs l
+where l.LogTime >= ?lastSync and l.Operation = 2
+union
+select p.Id, p.Name, 0 as Hidden
+from Catalogs.Producers p
+where p.UpdateTime > ?lastSync";
+			Export(result, sql, "producers", new { lastSync = data.LastUpdateAt }, false);
 
 			sql = @"
-select Id, PublicationDate, Header
+select Id, PublicationDate, Header, Deleted as Hidden
 from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
-	and Deleted = 0
-	and DestinationType in (1, 2)";
-			Export(result, sql, "News");
+	and DestinationType in (1, 2)
+	and UpdateTime > ?lastSync";
+			Export(result, sql, "News", new { lastSync = data.LastUpdateAt }, false);
 
 			var newses = session.CreateSQLQuery(@"select Id, Body
 from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
 	and Deleted = 0
-	and DestinationType in (1, 2)")
+	and DestinationType in (1, 2)
+	and UpdateTime > :lastSync")
+				.SetParameter("lastSync", data.LastUpdateAt)
 				.List<object[]>();
 
 			var template = "<html>"
@@ -542,10 +590,10 @@ where PublicationDate < curdate() + interval 1 day
 				});
 			}
 
-			ExportPromotions(result);
-			ExportMails(result);
+			ExportPromotions();
+			ExportMails();
 			ExportDocs();
-			ExportOrders(result);
+			ExportOrders();
 		}
 
 		private string HtmlToText(string value)
@@ -595,10 +643,13 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 				.ExecuteUpdate();
 		}
 
-		private void ExportPromotions(List<UpdateData> result)
+		private void ExportPromotions()
 		{
-			if (!clientSettings.ShowAdvertising)
+			if (!clientSettings.ShowAdvertising) {
+				Export(result, "PromotionCatalogs", new [] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
+				Export(result, "Promotions", new [] { "Id" }, Enumerable.Empty<object[]>());
 				return;
+			}
 
 			var ids = session.CreateSQLQuery(@"
 select Id
@@ -637,7 +688,7 @@ where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
 			}
 		}
 
-		private void ExportMails(List<UpdateData> result)
+		private void ExportMails()
 		{
 			session.CreateSQLQuery("delete from Logs.PendingMailLogs where UserId = :userId")
 				.SetParameter("userId", user.Id)
@@ -730,7 +781,7 @@ where a.MailId in ({0})", ids.Implode());
 			return new FileInfo(filename).LastWriteTime.Date != DateTime.Today;
 		}
 
-		private void ExportOrders(List<UpdateData> result)
+		private void ExportOrders()
 		{
 			if (Orders != null) {
 				Export(result, "Orders",

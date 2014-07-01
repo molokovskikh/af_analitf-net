@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Models;
@@ -26,6 +27,7 @@ namespace AnalitF.Net.Service.Test
 		private Exporter exporter;
 		private string file;
 		private TestClient client;
+		private Config.Config config;
 
 		[SetUp]
 		public void Setup()
@@ -33,7 +35,7 @@ namespace AnalitF.Net.Service.Test
 			client = TestClient.CreateNaked();
 			session.Save(client);
 
-			var config = FixtureSetup.Config;
+			config = FixtureSetup.Config;
 			user = session.Load<User>(client.Users[0].Id);
 			FileHelper.InitDir("data", "update");
 			if (!Directory.Exists(config.LocalExportPath))
@@ -43,11 +45,7 @@ namespace AnalitF.Net.Service.Test
 
 			file = "data.zip";
 			File.Delete(file);
-			exporter = new Exporter(session, config, new RequestLog(user, Version.Parse("1.1"))) {
-				Prefix = "1",
-				ResultPath = "data",
-				UpdatePath = "update",
-			};
+			Init();
 		}
 
 		[TearDown]
@@ -180,12 +178,59 @@ namespace AnalitF.Net.Service.Test
 				files);
 		}
 
+		[Test]
+		public void Sync_only_changed()
+		{
+			exporter.ExportAll();
+			var result = ReadResult();
+			Assert.That(result.First(r => r.FileName == "catalogs.txt").UncompressedSize, Is.GreaterThan(0));
+			Assert.That(result.First(r => r.FileName == "catalognames.txt").UncompressedSize, Is.GreaterThan(0));
+			Assert.That(result.First(r => r.FileName == "offers.txt").UncompressedSize, Is.GreaterThan(0));
+			var resultFiles = result.Implode(r => r.FileName);
+			Assert.That(resultFiles, Is.StringContaining("MinCosts"));
+			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
+
+			var controller = new MainController {
+				CurrentUser = user,
+				Session = session
+			};
+			controller.Delete();
+			Init();
+
+			exporter.ExportAll();
+			result = ReadResult();
+			Assert.AreEqual(0, result.First(r => r.FileName == "catalogs.txt").UncompressedSize);
+			Assert.AreEqual(0, result.First(r => r.FileName == "catalognames.txt").UncompressedSize);
+			Assert.AreEqual(0, result.First(r => r.FileName == "offers.txt").UncompressedSize,
+				"пользователь {0}", user.Id);
+			resultFiles = result.Implode(r => r.FileName);
+			Assert.That(resultFiles, Is.Not.StringContaining("MinCosts"));
+			Assert.That(resultFiles, Is.Not.StringContaining("MaxProducerCosts"));
+		}
+
+		private void Init()
+		{
+			exporter = new Exporter(session, config, new RequestLog(user, Version.Parse("1.1"))) {
+				Prefix = "1",
+				ResultPath = "data",
+				UpdatePath = "update",
+			};
+		}
+
 		private void InitAd()
 		{
 			FileHelper.InitDir("ads");
 			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
 			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 });
 			exporter.AdsPath = "ads";
+		}
+
+		private ZipFile ReadResult()
+		{
+			var memory = new MemoryStream();
+			exporter.Compress(memory);
+			memory.Position = 0;
+			return ZipFile.Read(memory);
 		}
 
 		private string ListResult()
