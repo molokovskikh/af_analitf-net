@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 using Test.Support;
@@ -11,11 +12,15 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	public class CreateCertificate : ServerFixture
 	{
 		public TestWaybillLine Line;
+		public TestWaybill Waybill;
 
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			Line = session.Query<TestWaybillLine>().FirstOrDefault(l => l.Waybill.Client == user.Client && l.CatalogProduct != null && l.SerialNumber != null);
+			var lines = session.Query<TestWaybillLine>();
+			if (Waybill != null)
+				lines = session.Query<TestWaybillLine>().Where(l => l.Waybill.Id == Waybill.Id);
+			Line = lines.FirstOrDefault(l => l.Waybill.Client == user.Client && l.CatalogProduct != null && l.SerialNumber != null);
 			if (Line == null)
 				throw new Exception("Нет ни одной подходящей накладной для создания сертификата");
 			var source = session.Query<TestCertificateSource>().FirstOrDefault(s => s.Suppliers.Contains(Line.Waybill.Supplier));
@@ -28,6 +33,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var existsCert = session.Query<TestCertificate>()
 				.FirstOrDefault(c => c.CatalogProduct == Line.CatalogProduct.CatalogProduct && c.SerialNumber == Line.SerialNumber);
 			if (existsCert != null) {
+				session.Query<TestWaybillLine>().Where(c => c.Certificate == existsCert).Each(l => l.Certificate = null);
 				session.Delete(existsCert);
 				session.Flush();
 			}

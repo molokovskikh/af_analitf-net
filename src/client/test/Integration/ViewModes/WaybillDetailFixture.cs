@@ -115,18 +115,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
 
-			Fixture<LoadWaybill>();
-			var fixture = Fixture<CreateCertificate>();
+			var waybillFixture = Fixture<LoadWaybill>();
+			var fixture = new CreateCertificate {
+				Waybill = waybillFixture.Waybill
+			};
+			Fixture(fixture);
+			var line = fixture.Line;
+			var waybillId = line.Waybill.Log.Id;
 
 			var updateResults = shell.Update().ToArray();
+			model = Init(new WaybillDetails(waybillId));
 			Assert.AreEqual(1, updateResults.Length,
 				"должны были получить только результат открытия файла накладной {0}", updateResults.Implode());
-			var waybillId = fixture.Line.Waybill.Log.Id;
-			var lineId = fixture.Line.Id;
-			model = Init(new WaybillDetails(waybillId));
-			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == lineId)).ToArray();
+
+			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == line.Id)).ToArray();
 			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
-			Assert.AreEqual("Файл 'Сертификаты для Азарга капли глазные 5мл Фл.-кап. Х1 серия A 565' загружен", WaitNotification());
+			Assert.AreEqual(String.Format("Файл 'Сертификаты для {0} серия {1}' загружен", line.Product, line.SerialNumber), WaitNotification());
 		}
 	}
 }
