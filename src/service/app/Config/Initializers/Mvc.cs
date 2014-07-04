@@ -23,6 +23,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 			config.Filters.Add(new SessionFilter());
 			config.Filters.Add(new UserFilter());
 			config.Filters.Add(new ConfigFilter());
+			config.Filters.Add(new LogAccess());
 		}
 	}
 }
