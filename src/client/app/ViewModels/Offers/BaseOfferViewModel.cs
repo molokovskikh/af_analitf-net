@@ -373,8 +373,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (ActualAddress == null)
 				return;
 
-			var lines = ActualAddress.ActiveOrders().SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
+			var activeOrders = ActualAddress.ActiveOrders();
+			var orders = activeOrders.ToLookup(o => o.Price.Id);
+			var lines = activeOrders.SelectMany(o => o.Lines).ToLookup(l => l.OfferId);
 			foreach (var offer in Offers.Value) {
+				offer.Price.Order = orders[offer.Price.Id].FirstOrDefault();
 				offer.OrderLine = lines[offer.Id].FirstOrDefault();
 			}
 		}

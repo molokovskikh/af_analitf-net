@@ -333,5 +333,24 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNotNull(description.Model);
 			Assert.IsNotNull(description.Document);
 		}
+
+		[Test]
+		public void Load_order_for_price()
+		{
+			session.DeleteEach<Order>();
+			var offer = session.Query<Offer>().First();
+			MakeOrder(offer);
+
+			var catalogId = session.Query<Offer>()
+				.First(o => o.Price == offer.Price && o.CatalogId != offer.CatalogId).CatalogId;
+			catalog = session.Load<Catalog>(catalogId);
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			Close(model);
+			session.Clear();
+			var orders = session.Query<Order>().ToArray();
+			Assert.AreEqual(1, orders.Count());
+			Assert.AreEqual(2, orders[0].Lines.Count);
+		}
 	}
 }
