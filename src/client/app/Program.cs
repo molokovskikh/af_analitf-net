@@ -15,6 +15,7 @@ using log4net.Config;
 using log4net.Layout;
 using log4net.ObjectRenderer;
 using log4net.Repository.Hierarchy;
+using Microsoft.Win32.SafeHandles;
 using NDesk.Options;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
@@ -39,13 +40,21 @@ namespace AnalitF.Net.Client
 		private static ILog log = LogManager.GetLogger(typeof(Program));
 
 		public const uint ATTACH_PARENT_PROCESS = 0x0ffffffff;
+		public const int ERROR_ACCESS_DENIED = 5;
 
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern bool AttachConsole(uint dwProcessId);
 
+		[DllImport("kernel32",SetLastError=true)]
+		public static extern bool AllocConsole();
+
 		[STAThread]
 		public static int Main(string[] args)
 		{
+			//по умолчанию у gui приложения нет консоли, но если кто то запустил из консоли
+			//то нужно с ним говорить
+			//если делать это позже то вызов не дает результата
+			AttachConsole(ATTACH_PARENT_PROCESS);
 			SingleInstance instance = null;
 			var help = false;
 			var version  = false;
@@ -68,11 +77,6 @@ namespace AnalitF.Net.Client
 #endif
 				};
 				var cmds = options.Parse(args);
-
-				//по умолчанию у gui приложения нет консоли, но если кто то запустил из консоли
-				//то нужно с ним говорить
-				AttachConsole(ATTACH_PARENT_PROCESS);
-
 				if (help) {
 					options.WriteOptionDescriptions(Console.Out);
 					return 0;
@@ -138,20 +142,18 @@ namespace AnalitF.Net.Client
 				result = app.Run();
 				log.DebugFormat("Приложение завершено");
 			}
-			catch(EndUserError e) {
+			catch(Exception e) {
+				var message = e is EndUserError ? e.Message : e.ToString();
 				result = 1;
+				Console.WriteLine(message);
 				log.Error("Ошибка при запуске приложения", e);
 				if (!quiet) {
 					MessageBox.Show(
-						e.Message,
+						message,
 						"АналитФАРМАЦИЯ: Внимание",
 						MessageBoxButton.OK,
-						MessageBoxImage.Warning);
+						MessageBoxImage.Error);
 				}
-			}
-			catch(Exception e) {
-				log.Error("Ошибка при запуске приложения", e);
-				result = 1;
 			}
 			finally {
 				if (instance != null)
