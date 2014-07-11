@@ -6,6 +6,7 @@ import System.Xml
 import System.Xml.Linq
 import System.Linq.Enumerable
 import System.Xml.XPath.Extensions
+import System.Net
 import Mono.Cecil
 
 def FileElement(file as string, id as string, element as XElement):
@@ -165,3 +166,15 @@ task "test:binary":
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
+
+task "deploy:setup":
+	url = "http://redmine.analit.net/projects/afn/versions.json?key=778ed542c36c919a58c9fa62615e3096b0761a42"
+	version = File.ReadAllText("output/setup/version.txt")
+	client = WebClient()
+	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
+	try:
+		client.UploadString(url, "{ \"version\": {\"name\": \"$version\" } }")
+	except e:
+		print e
+	Cp("output/setup/setup.exe", "//adc.analit.net/Inforoom/FTP/anonymous/AnalitFNET_0_9_0_28.exe", true)
+	Cp("output/setup/setup.exe", "//adc.analit.net/Inforoom/FTP/anonymous/AnalitFNET.exe", true)
