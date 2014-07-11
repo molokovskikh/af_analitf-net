@@ -176,5 +176,5 @@ task "deploy:setup":
 		client.UploadString(url, "{ \"version\": {\"name\": \"$version\" } }")
 	except e:
 		print e
-	Cp("output/setup/setup.exe", "//adc.analit.net/Inforoom/FTP/anonymous/AnalitFNET_0_9_0_28.exe", true)
-	Cp("output/setup/setup.exe", "//adc.analit.net/Inforoom/FTP/anonymous/AnalitFNET.exe", true)
+	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
+	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
