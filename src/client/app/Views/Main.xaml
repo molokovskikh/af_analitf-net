@@ -32,7 +32,7 @@
 			<TextBlock TextWrapping="Wrap" FontSize="14">поддержки пользователей:</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">
 				тел.:
-				<Span FontWeight="Bold">260-00-00</Span>
+				<Span FontWeight="Bold">260-60-00</Span>
 			</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">Режим работы:</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">будни: с 07:00 до 19:00</TextBlock>
