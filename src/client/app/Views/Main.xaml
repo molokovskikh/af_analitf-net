@@ -5,7 +5,7 @@
 	<Grid>
 		<!--минимальная ширина\высота задается что бы блок рекламы не перекрывал логотип при малом размере формы-->
 		<Grid.RowDefinitions>
-			<RowDefinition Height="240" Name="LogoRow" />
+			<RowDefinition Height="Auto" Name="LogoRow" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
@@ -47,7 +47,7 @@
 		<Grid Grid.Row="0" Grid.Column="1">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
-				<RowDefinition Height="*" />
+				<RowDefinition Height="240" />
 			</Grid.RowDefinitions>
 			<Label Grid.Row="0">Новости</Label>
 			<c:DataGrid2 Grid.Row="1" x:Name="Newses" BorderThickness="0">

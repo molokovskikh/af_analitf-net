@@ -7,6 +7,7 @@ import System.Xml.Linq
 import System.Linq.Enumerable
 import System.Xml.XPath.Extensions
 import System.Net
+import System.Text
 import Mono.Cecil
 
 def FileElement(file as string, id as string, element as XElement):
@@ -168,10 +169,11 @@ task "test:binary":
 		raise
 
 task "deploy:setup":
-	url = "http://redmine.analit.net/projects/afn/versions.json?key=778ed542c36c919a58c9fa62615e3096b0761a42"
+	url = "http://redmine.analit.net/projects/afn/versions.json"
 	version = File.ReadAllText("output/setup/version.txt")
 	client = WebClient()
 	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
+	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	try:
 		client.UploadString(url, "{ \"version\": {\"name\": \"$version\" } }")
 	except e:

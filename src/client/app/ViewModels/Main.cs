@@ -31,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			Session.Evict(User);
 			User = Session.Query<User>().FirstOrDefault()
 				?? new User {
 					SupportHours = "будни: с 07:00 до 19:00",
