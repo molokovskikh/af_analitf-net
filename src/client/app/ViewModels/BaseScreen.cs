@@ -100,7 +100,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 				Settings = new NotifyValue<Settings>(Session.Query<Settings>().First());
 				User = Session.Query<User>().FirstOrDefault()
-					?? new User();
+					?? new User {
+						SupportHours = "будни: с 07:00 до 19:00",
+						SupportPhone = "тел.: 473-260-60-00",
+					};
 			}
 			else {
 				Settings = new NotifyValue<Settings>(new Settings(defaults: true));

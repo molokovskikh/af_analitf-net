@@ -8,12 +8,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
 using Common.Models.Repositories;
 using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
+using HtmlAgilityPack;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Zip.Compression;
@@ -207,6 +209,13 @@ from Customers.Addresses a
 where a.Enabled = 1 and ua.UserId = ?userId", addressName);
 			Export(result, sql, "Addresses", new { userId = user.Id });
 
+
+			var contacts = session.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
+				.SetParameter("id", user.Client.RegionCode)
+				.List<object[]>();
+			var rawPhone = contacts.Select(d => d[0]).Cast<string>().FirstOrDefault();
+			var rawHours =  contacts.Select(d => d[1]).Cast<string>().FirstOrDefault();
+
 			sql = @"
 select u.Id,
 	u.InheritPricesFrom is not null as IsPriceEditDisabled,
@@ -214,12 +223,18 @@ select u.Id,
 	c.Name,
 	c.FullName as FullName,
 	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost,
-	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled
+	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled,
+	?supportPhone as SupportPhone,
+	?supportHours as SupportHours
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
 where u.Id = ?userId";
-			Export(result, sql, "Users", new { userId = user.Id });
+			Export(result, sql, "Users", new {
+				userId = user.Id,
+				supportPhone = HtmlToText(rawPhone),
+				supportHours = HtmlToText(rawHours)
+			});
 
 			sql = @"
 select up.Id,
@@ -532,6 +547,19 @@ where PublicationDate < curdate() + interval 1 day
 			ExportMails(result);
 			ExportDocs();
 			ExportOrders(result);
+		}
+
+		private string HtmlToText(string value)
+		{
+			try {
+				var doc = new HtmlDocument();
+				doc.LoadHtml(value);
+				return HtmlEntity.DeEntitize(doc.DocumentNode.InnerText);
+			}
+			catch(Exception e) {
+				log.Error(String.Format("Ошибка при преобразовании значения {0}", value), e);
+				return "";
+			}
 		}
 
 		private void CreateMaxProducerCosts()

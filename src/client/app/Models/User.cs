@@ -83,6 +83,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsDeplayOfPaymentEnabled { get; set; }
 
+		public virtual string SupportPhone { get; set; }
+
+		public virtual string SupportHours { get; set; }
+
 		public virtual IList<Permission> Permissions { get; set; }
 
 		public virtual bool CanPrint<T>()

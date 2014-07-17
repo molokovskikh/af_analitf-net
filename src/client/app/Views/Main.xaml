@@ -30,12 +30,9 @@
 			</Grid>
 			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">поддержки пользователей:</TextBlock>
-			<TextBlock TextWrapping="Wrap" FontSize="14">
-				тел.:
-				<Span FontWeight="Bold">260-60-00</Span>
-			</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding SupportPhone.Value}" />
 			<TextBlock TextWrapping="Wrap" FontSize="14">Режим работы:</TextBlock>
-			<TextBlock TextWrapping="Wrap" FontSize="14">будни: с 07:00 до 19:00</TextBlock>
+			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding SupportHours.Value}" />
 			<TextBlock TextWrapping="Wrap" FontSize="14">
 				E-mail:
 				<Hyperlink NavigateUri="mailto:tech@analit.net">

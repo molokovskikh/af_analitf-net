@@ -43,6 +43,9 @@
     </Reference>
     <Reference Include="Castle.Core" />
     <Reference Include="Castle.Windsor" />
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\..\..\packages\HtmlAgilityPack.1.4.6\lib\Net40\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
