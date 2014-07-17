@@ -261,11 +261,14 @@ namespace AnalitF.Net.Client.Models
 			Address address, IStatelessSession session)
 		{
 			var addressId = address.Id;
-
+			//g.Key != null ? g.Key.Id : null - на первый взгляд это выражение не имеет смысла
+			//но в этом методе происходит ошибка NRE единственное что подходит под это g.Key.Id
 			return session.Query<SentOrder>()
 				.Where(o => o.Address.Id == addressId && o.SentOn >= @from)
 				.GroupBy(o => o.Price)
-				.Select(g => Tuple.Create(g.Key.Id, g.Sum(o => o.Sum)))
+				.Select(g => Tuple.Create(g.Key != null ? g.Key.Id : null, g.Sum(o => o.Sum)))
+				.ToList()
+				.Where(t => t.Item1 != null)
 				.ToList();
 		}
 
