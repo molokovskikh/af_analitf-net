@@ -392,6 +392,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[JsonIgnore]
 		public virtual string LongSendError
 		{
 			get
