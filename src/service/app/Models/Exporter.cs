@@ -363,7 +363,7 @@ where
 	core.VitallyImportant or catalog.VitallyImportant as VitallyImportant,
 	s.Synonym as ProductSynonym,
 	sfc.Synonym as ProducerSynonym,
-	if(if(round(cc.Cost * at.UpCost,2)< core.MinBoundCost, core.MinBoundCost, round(cc.Cost*at.UpCost,2)) > core.MaxBoundCost, core.MaxBoundCost, if(round(cc.Cost*at.UpCost,2) < core.MinBoundCost, core.MinBoundCost, round(cc.Cost*at.UpCost,2))) as Cost
+	ct.Cost
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
@@ -371,7 +371,7 @@ join Usersettings.MinCosts m on m.ProductId = core.ProductId and m.RegionCode = 
 left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
-left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.synonymfirmcrcode
+left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
 			Export(result, sql, "offers", new { ClientCode = user.Client.Id });
 
