@@ -551,6 +551,8 @@ where PublicationDate < curdate() + interval 1 day
 
 		private string HtmlToText(string value)
 		{
+			if (String.IsNullOrEmpty(value))
+				return "";
 			try {
 				var doc = new HtmlDocument();
 				doc.LoadHtml(value);
