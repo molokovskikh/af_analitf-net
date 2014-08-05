@@ -40,7 +40,7 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual DateTime CreatedOn { get; set; }
 
-		public virtual DateTime CompletedOn { get; set; }
+		public virtual DateTime? CompletedOn { get; set; }
 
 		public virtual int ExecuteInSeconds { get; set; }
 
@@ -67,12 +67,14 @@ namespace AnalitF.Net.Service.Models
 		{
 			IsFaulted = true;
 			Error = e.ToString();
+			CompletedOn = DateTime.Now;
 		}
 
 		public virtual void Completed()
 		{
 			IsCompleted = true;
 			ExecuteInSeconds = (int)(DateTime.Now - CreatedOn).TotalSeconds;
+			CompletedOn = DateTime.Now;
 		}
 
 		public virtual bool IsStale
