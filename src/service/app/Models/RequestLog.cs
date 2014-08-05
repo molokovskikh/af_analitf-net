@@ -40,6 +40,8 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual DateTime CreatedOn { get; set; }
 
+		public virtual DateTime CompletedOn { get; set; }
+
 		public virtual int ExecuteInSeconds { get; set; }
 
 		public virtual bool IsCompleted { get; set; }
@@ -105,6 +107,12 @@ namespace AnalitF.Net.Service.Models
 				}
 #endif
 				return message;
+			}
+
+			//файл результата выкладывается на dfs репликация может занять до нескольких минут
+			if (config.ResultTimeout > TimeSpan.Zero) {
+				if (!File.Exists(OutputFile(config)) && DateTime.Now < (CompletedOn + config.ResultTimeout))
+					return new HttpResponseMessage(HttpStatusCode.Accepted);
 			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK) {

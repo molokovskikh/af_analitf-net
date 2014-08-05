@@ -1,4 +1,6 @@
-﻿namespace AnalitF.Net.Service.Config
+﻿using System;
+
+namespace AnalitF.Net.Service.Config
 {
 	public class Config
 	{
@@ -24,5 +26,6 @@
 		public string SupportMail { get; set; }
 		public string OfficeMail { get; set; }
 		public string BillingMail { get; set; }
+		public TimeSpan ResultTimeout { get; set; }
 	}
 }
