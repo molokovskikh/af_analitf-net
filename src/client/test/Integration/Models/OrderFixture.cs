@@ -15,7 +15,7 @@ namespace AnalitF.Net.Test.Integration.Models
 	public class OrderFixture : DbFixture
 	{
 		//тест для ситуации когда для загруженных объектов не работает биндинг
-		//измещение о новыйх данных ui не обрабатывает
+		//извещение о новых данных ui не обрабатывает
 		//проблема в том что ui биндится к прокси а объект посылает извещения от себя
 		[Test]
 		public void Send_order_notification()

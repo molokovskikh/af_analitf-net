@@ -213,7 +213,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected static void AssertInputable(UIElement element)
 		{
-			Assert.IsTrue(element.IsVisible, "эдемент {0} невидим IsVisible=False", element.ToString());
+			Assert.IsTrue(element.IsVisible, "элемент {0} невидим IsVisible=False", element.ToString());
 			Assert.IsTrue(element.IsEnabled, "элемент {0} недоступен для ввода IsEnabled=False", element);
 		}
 		protected static void AssertInputable(ContentElement element)
@@ -230,7 +230,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfHelper.WithDispatcher(() => {
-				//wpf обеспечивает синхронизациию объектов ui
+				//wpf обеспечивает синхронизацию объектов ui
 				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
 				//в других нитках что бы избежать ошибок очищаем статические структуры
 				StyleHelper.Reset();

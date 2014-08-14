@@ -89,7 +89,7 @@ namespace AnalitF.Net.Test.Integration
 
 		private AppBootstrapper CreateBootstrapper()
 		{
-			//нужно переопределить имя что бы избежать конфликтов с запущеным приложением
+			//нужно переопределить имя что бы избежать конфликтов с запущенным приложением
 			var app = new AppBootstrapper(false);
 			disposable.Add(app);
 			app.Config.RootDir = "test";

@@ -19,7 +19,7 @@ using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
-	[TestFixture, Ignore("Тесты сломаны, из-за обработки даилога я не знаю как их чинить")]
+	[TestFixture, Ignore("Тесты сломаны, из-за обработки диалога я не знаю как их чинить")]
 	public class ShellFixture : ViewModelFixture
 	{
 		[Test]

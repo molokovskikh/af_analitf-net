@@ -110,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.ActivateItem(screen);
 		}
 
-		//если форма не была инициализированна то она и не будет закрыта
+		//если форма не была инициализирована то она и не будет закрыта
 		//надо явно освободить ресурсы
 		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
 		public static void CloseAndDispose(IScreen screen)

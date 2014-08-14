@@ -316,7 +316,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offers = correction.Offers.Value;
 			Assert.IsFalse(correction.IsOrderSend);
 			order = session.Query<Order>().First();
-			//тк мы оперируем случайными данными то мы можем изменить OfferId заказнной позиции если
+			//тк мы оперируем случайными данными то мы можем изменить OfferId заказанной позиции если
 			//все остальные атрибуты совпали а цена у нее ниже
 			Assert.That(offers.Count, Is.GreaterThan(0));
 			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
@@ -432,7 +432,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Reload_data_on_reject()
 		{
 			//тест на ошибку, после обновления если мы отображаем PostUpdate
-			//мы должны обновить данные в shell иначе последующие дейсвия приведут к ошибкам
+			//мы должны обновить данные в shell иначе последующие действия приведут к ошибкам
 			stub = null;
 			Fixture<CreateAddress>();
 			Fixture<RejectedWaybill>();

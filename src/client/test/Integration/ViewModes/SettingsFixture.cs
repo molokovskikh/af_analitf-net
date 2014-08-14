@@ -42,7 +42,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Reset();
 			var all = session.Query<MarkupConfig>().ToList();
 			Assert.AreEqual(origin, model.Markups.Count);
-			//не должно быть потеряных записей
+			//не должно быть потерянных записей
 			Assert.AreEqual(model.Markups.Count + model.VitallyImportantMarkups.Count, all.Count);
 		}
 

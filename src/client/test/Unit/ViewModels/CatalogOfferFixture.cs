@@ -74,7 +74,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			//симулируем переход на другую строку и подтверждение редактирования
-			//нам нужно подождать во время отображения диалога тк результат редактирования еще не отменем
+			//нам нужно подождать во время отображения диалога тк результат редактирования еще не отменен
 			manager.MessageOpened.Subscribe(s => {
 				scheduler.AdvanceByMs(1000);
 			});

@@ -16,17 +16,24 @@ namespace AnalitF.Net.Client.Controls
 		public static DependencyProperty HighlightStyleProperty
 			= DependencyProperty.RegisterAttached("HighlightStyle", typeof(Style), typeof(SearchableDataGridColumn));
 
+		/// <summary>
+		/// Графические элементы из которых строится таблица используются повторно
+		/// когда мы манипулируем Inlines мы сбрасываем биндинг и текст элемента не изменится когда изменится DataContext
+		/// по этому при изменении DataContext восстанавливаем биндинг и обновляем выделение
+		/// </summary>
 		protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
 		{
 			var element = (TextBlock) base.GenerateElement(cell, dataItem);
-			element.Loaded += MarkText;
+			element.DataContextChanged += (s, a) => {
+				var textBlock = ((TextBlock)s);
+				BindingOperations.SetBinding(textBlock, TextBlock.TextProperty, Binding);
+				MarkText(textBlock);
+			};
 			return element;
 		}
 
-		private void MarkText(object sender, RoutedEventArgs e)
+		private void MarkText(TextBlock element)
 		{
-			var element = ((TextBlock)sender);
-			element.Loaded -= MarkText;
 			var term = GetSearchTerm(DataGridOwner);
 			if (String.IsNullOrEmpty(term))
 				return;

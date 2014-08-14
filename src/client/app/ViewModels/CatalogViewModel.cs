@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.ViewModels
 				new FilterDeclaration("Все"),
 				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные"),
 				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),
-				new FilterDeclaration("Ожидаемые позиции", "ожидаемым позициям", "только оижадемые позиции"),
+				new FilterDeclaration("Ожидаемые позиции", "ожидаемым позициям", "только ожидаемые позиции"),
 			};
 			CurrentFilter = Filters[0];
 

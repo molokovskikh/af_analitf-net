@@ -57,16 +57,16 @@ namespace AnalitF.Net.Test.Integration.Views
 	public class GlobalFixture : DispatcherFixture
 	{
 		//тестирует очень специфичную ошибку
-		//проблема повторяется если открыть каталок -> войти в пребложения
+		//проблема повторяется если открыть каталог -> войти в предложения
 		//вернуться в каталог "нажав букву" и если это повторная попытка поиска
-		//и в предыдущую попытку был выбран элементы который отображается на одном экраные с выбранные
-		//в текущую попытку элементом то это приведет к эффекту похожому на "съедание" ввыденной буквы
+		//и в предыдущую попытку был выбран элементы который отображается на одном экране с выбранным
+		//в текущую попытку элементом то это приведет к эффекту похожему на "съедание" введенной буквы
 		[Test]
 		public async void Open_catalog_on_quick_search()
 		{
 			Start();
 
-			//открытие окна на весь экран нужно что бы отображалось максимальное колиечство элементов
+			//открытие окна на весь экран нужно что бы отображалось максимальное количество элементов
 			activeWindow.Dispatcher.Invoke(() => {
 				activeWindow.WindowState = WindowState.Maximized;
 			});
@@ -320,7 +320,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			WaitIdle();
 			//на форме корректировки могут возникнуть ошибки биндинга
-			//судю по обсуждению это ошибки wpf и они безобидны
+			//судя по обсуждению это ошибки wpf и они безобидны
 			//http://wpf.codeplex.com/discussions/47047
 			//игнорирую их
 			var ignored = new[] {
@@ -369,7 +369,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Offers_search()
 		{
-			//нам нужно лубое наименование где есть хотя бы 3 буквы
+			//нам нужно любое наименование где есть хотя бы 3 буквы
 			//тк цифры будут считаться вводом для редактирования
 			var term = session.Query<Offer>().Take(100).ToArray().Select(o => Regex.Match(o.ProductSynonym, "[a-zA-Zа-яА-Я]{3}"))
 				.Where(m => m.Success)
@@ -494,7 +494,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				Assert.That(activeWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
 			});
-			//ждем пока зкроется
+			//ждем пока закроется
 			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
 
 			Click("ShowCatalog");
@@ -703,7 +703,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				AssertInputable(el);
 
 				//черная магия - когда IsSubmenuOpen = true
-				//пункт меню пытается захватить ввод с мыши и если у него это не молучится закрывает меню
+				//пункт меню пытается захватить ввод с мыши и если у него это не получится закрывает меню
 				//на самом деле ввод захватить получится но не получится получить позицию курсора
 				//из-за ошибки Win32Exception (0x80004005): Эта операция требует интерактивного оконного терминала
 				//WinApi.SendMessage - нужен для того что бы обмануть HwndMouseInputProvider

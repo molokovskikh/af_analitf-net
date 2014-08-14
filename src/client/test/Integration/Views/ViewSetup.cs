@@ -17,7 +17,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public static List<string> BindingErrors = new List<string>();
 
 		//nunit не умеет вызывать инициализатор в sta
-		//и игнорируте атрибут RequiresSTA по этому надо вызывать руками
+		//и игнорирует атрибут RequiresSTA по этому надо вызывать руками
 		public static void Setup()
 		{
 			if (init)
@@ -34,7 +34,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			System.Windows.Application.LoadComponent(app, new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
 			app.RegisterResources();
 			//при инициализации caliburn будет думать что у нас есть dispatcher
-			//и пытатся выболнять все уведомления в ui thread
+			//и пытаться выполнять все уведомления в ui thread
 			//на самом деле у нас dispatcher`а нет
 			Execute.ResetWithoutDispatcher();
 		}

@@ -122,7 +122,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					new AndCondition(new PropertyCondition(AutomationElement.NameProperty, "Имя файла:"),
 						new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ComboBox)));
 				return input != null;
-			}, "Не удалось дождать появления диалога открытия файла");
+			}, "Не удалось дождаться появления диалога открытия файла");
 			input.SetValue(filename);
 			var button = dialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Открыть"));
 			button.Invoke();

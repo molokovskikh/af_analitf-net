@@ -37,7 +37,7 @@ namespace vm
 		[SetUp]
 		public void Setup()
 		{
-			//кэщируем файл что бы каждый раз не собирать
+			//кэшируем файл что бы каждый раз не собирать
 			if (!File.Exists("setup.exe")) {
 				var cmd = String.Format("bash.exe -l -c \"cd `cygpath '{0}'`;{1}\"", root, "bake build:client env=test");
 				ProcessHelper.CmdDir(cmd, root);
