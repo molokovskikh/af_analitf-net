@@ -163,6 +163,12 @@
 		<Setter Property="VerticalAlignment" Value="Center"></Setter>
 	</Style>
 
+	<Style TargetType="ComboBox" x:Key="AutoWidthFilter" BasedOn="{StaticResource Select}">
+		<Setter Property="MinWidth" Value="150" />
+		<Setter Property="Margin" Value="0, 0, 4, 0" />
+		<Setter Property="VerticalAlignment" Value="Center"></Setter>
+	</Style>
+
 	<Style TargetType="CheckBox" x:Key="FilterCheckBox">
 		<Setter Property="Margin" Value="0, 0, 4, 0" />
 		<Setter Property="FontWeight" Value="Bold" />

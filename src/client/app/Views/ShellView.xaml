@@ -216,7 +216,7 @@
 
 				<StackPanel>
 					<Label>Адрес заказа:</Label>
-					<ComboBox Style="{StaticResource Filter}" x:Name="Addresses"
+					<ComboBox Style="{StaticResource AutoWidthFilter}" x:Name="Addresses"
 						DisplayMemberPath="Name" />
 				</StackPanel>
 			</ToolBar>
