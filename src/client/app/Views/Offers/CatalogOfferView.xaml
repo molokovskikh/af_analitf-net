@@ -245,7 +245,7 @@
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left" />
 				<Label Name="RetailCost" />
 				<Label>Сумма</Label>
-				<Label Name="CurrentOffer_OrderLine_Order_Sum">
+				<Label Name="CurrentOffer_Price_Order_Sum">
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
