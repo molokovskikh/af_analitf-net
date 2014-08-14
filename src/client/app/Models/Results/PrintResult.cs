@@ -71,11 +71,12 @@ namespace AnalitF.Net.Client.Models.Results
 					var imageableArea = dialog.PrintQueue.GetPrintCapabilities().PageImageableArea;
 					var documentPaginator = GetPaginator(flowDocument, doc.Value.Item2);
 					if (imageableArea != null) {
-						flowDocument.PagePadding = new Thickness(
-							double.IsNaN(padding.Left) ? imageableArea.OriginWidth : padding.Left + imageableArea.OriginWidth,
-							double.IsNaN(padding.Top) ? imageableArea.OriginHeight : padding.Top + imageableArea.OriginHeight,
-							padding.Right,
-							padding.Bottom);
+						if (imageableArea.OriginWidth > 0 || imageableArea.OriginHeight > 0)
+							flowDocument.PagePadding = new Thickness(
+								imageableArea.OriginWidth,
+								imageableArea.OriginHeight,
+								0,
+								0);
 						documentPaginator.PageSize = new Size(imageableArea.ExtentWidth, imageableArea.ExtentHeight);
 					}
 					var orientation = GetPageOrientation(documentPaginator);
