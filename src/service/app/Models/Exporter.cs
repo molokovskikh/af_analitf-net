@@ -25,7 +25,6 @@ using NHibernate;
 using NHibernate.Linq;
 using log4net;
 using SmartOrderFactory.Domain;
-using MySqlHelper = AnalitF.Net.Service.Helpers.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
 {
