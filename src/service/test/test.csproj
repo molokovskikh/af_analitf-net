@@ -46,6 +46,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,6 +62,10 @@
     <Compile Include="Unit\MySqlHelperFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common.MySql\Common.MySql\Common.MySql.csproj">
+      <Project>{8a680813-c83b-497a-85e6-e8f07b7d7650}</Project>
+      <Name>Common.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
       <Name>app %28service\app%29</Name>
