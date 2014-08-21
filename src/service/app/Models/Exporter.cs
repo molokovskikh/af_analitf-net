@@ -1220,7 +1220,7 @@ group by dh.Id")
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
 			cleaner.Watch(filename);
 			using(var file = new StreamWriter(File.Create(filename), Encoding.GetEncoding(1251))) {
-				MySqlHelper.Export(exportData, file);
+				Common.MySql.MySqlHelper.Export(exportData, file);
 			}
 		}
 

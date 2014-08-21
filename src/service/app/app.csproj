@@ -99,7 +99,6 @@
     </Compile>
     <Compile Include="Controllers\MainController.cs">
     </Compile>
-    <Compile Include="Helpers\MySqlHelper.cs" />
     <Compile Include="Helpers\RequestHelper.cs" />
     <Compile Include="Models\AnalitfNetData.cs" />
     <Compile Include="Models\Attachment.cs" />
