@@ -483,5 +483,11 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 					.OrderBy(p => p.Name))
 				.ToList();
 		}
+
+		public override void TryClose()
+		{
+			OfferCommitted();
+			base.TryClose();
+		}
 	}
 }
