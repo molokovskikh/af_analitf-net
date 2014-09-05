@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class OrderDocument : BaseDocument
 	{
-		private IOrder order;
+		public IOrder order;
 
 		public OrderDocument(IOrder order)
 		{

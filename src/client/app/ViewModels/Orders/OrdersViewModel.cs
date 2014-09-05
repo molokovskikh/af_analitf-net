@@ -459,9 +459,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public PrintResult Print()
 		{
-			IEnumerable<FlowDocument> docs;
+			IEnumerable<BaseDocument> docs;
 			if (!IsSentSelected) {
-				docs = Orders.Select(o => new OrderDocument(o).Build());
+				docs = Orders.Select(o => new OrderDocument(o));
 			}
 			else {
 				docs = SentOrders.Select(BuildPrintOrderDocument);
@@ -469,7 +469,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			return new PrintResult(DisplayName, docs);
 		}
 
-		private FlowDocument BuildPrintOrderDocument(SentOrder order)
+		private BaseDocument BuildPrintOrderDocument(SentOrder order)
 		{
 			var id = order.Id;
 			var result = StatelessSession.Query<SentOrder>()
@@ -477,8 +477,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Fetch(o => o.Price)
 				.Fetch(o => o.Address)
 				.Fetch(o => o.Lines)
+				.ToList()
 				.First();
-			return new OrderDocument(result).Build();
+			return new OrderDocument(result);
 		}
 
 		public IResult Run(DbCommand command)

@@ -154,11 +154,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 						.Count() > 1);
 		}
 
-		protected SentOrder MakeSentOrder(Offer offer = null)
+		protected SentOrder MakeSentOrder(params Offer[] offers)
 		{
-			offer = offer ?? session.Query<Offer>().First();
+			var offer = offers.FirstOrDefault() ?? session.Query<Offer>().First();
 			var order = new Order(offer.Price, address);
-			order.TryOrder(offer, 1);
+			foreach (var offerToOrder in offers) {
+				order.TryOrder(offerToOrder, 1);
+			}
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 			session.Flush();

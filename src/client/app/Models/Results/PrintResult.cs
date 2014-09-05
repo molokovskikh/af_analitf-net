@@ -57,8 +57,7 @@ namespace AnalitF.Net.Client.Models.Results
 			if (dialog.ShowDialog() != true)
 				return;
 
-			CheckBuffer();
-			foreach (var doc in buffered) {
+			foreach (var doc in Docs) {
 				var flowDocument = doc.Value.Item1;
 				//очередное безумие - лазерные принтеры не могут печатать на всей поверхности листа и сообщают об этом
 				//через GetPrintCapabilities
@@ -104,16 +103,9 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			get
 			{
-				CheckBuffer();
-				var doc = buffered.First();
+				var doc = Docs.First();
 				return GetPaginator(doc.Value.Item1, doc.Value.Item2);
 			}
-		}
-
-		private void CheckBuffer()
-		{
-			if (buffered == null)
-				buffered = docs.ToArray();
 		}
 
 		private DocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
@@ -124,5 +116,13 @@ namespace AnalitF.Net.Client.Models.Results
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
+
+		public Lazy<Tuple<FlowDocument, BaseDocument>>[] Docs
+		{
+			get
+			{
+				return buffered = buffered ?? docs.ToArray();
+			}
+		}
 	}
 }

@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
@@ -66,12 +67,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Print_sent_order()
 		{
-			MakeSentOrder();
+			var offer = session.Query<Offer>().First();
+			var offers = session.Query<Offer>().Where(o => o.Price == offer.Price).Take(2).ToArray();
+			MakeSentOrder(offers);
 			model.IsSentSelected.Value = true;
 			model.IsCurrentSelected.Value = false;
 			Assert.That(model.CanPrint, Is.True);
-			var doc = model.Print().Paginator;
-			Assert.That(doc, Is.Not.Null);
+			var result = model.Print();
+
+			var paginator = result.Paginator;
+			Assert.That(paginator, Is.Not.Null);
+			var doc = (OrderDocument)result.Docs[0].Value.Item2;
+			Assert.AreEqual(2, doc.order.Lines.Count());
 		}
 
 		[Test]
