@@ -156,7 +156,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected SentOrder MakeSentOrder(params Offer[] offers)
 		{
-			var offer = offers.FirstOrDefault() ?? session.Query<Offer>().First();
+			offers = offers.DefaultIfEmpty(session.Query<Offer>().First()).ToArray();
+			var offer = offers.First();
 			var order = new Order(offer.Price, address);
 			foreach (var offerToOrder in offers) {
 				order.TryOrder(offerToOrder, 1);
