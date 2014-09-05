@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using ReactiveUI;
@@ -98,7 +99,9 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				if (box == null)
 					return;
 
-				var grid = d.Parent().Parent().Children().OfType<DataGrid>().FirstOrDefault();
+				var contentControl = d.Parent();
+				var grid = contentControl.GetValue(QuickSearchBehavior.GridRef) as DataGrid
+					?? contentControl.Parent().Children().OfType<DataGrid>().FirstOrDefault();
 				if (grid == null)
 					return;
 

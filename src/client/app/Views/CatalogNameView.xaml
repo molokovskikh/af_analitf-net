@@ -6,6 +6,7 @@
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	behaviors:Focusable.DefaultFocus="{x:Reference CatalogNames}">
 
 	<i:Interaction.Behaviors>
@@ -54,7 +55,8 @@
 
 		<ContentControl Name="Promotions" Grid.Row="1" Grid.Column="2" />
 
-		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2" />
+		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2"
+			binders:QuickSearchBehavior.GridRef="{x:Reference Catalogs}" />
 		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2"
 			cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}" />
 	</Grid>

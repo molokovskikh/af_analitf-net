@@ -17,6 +17,21 @@ namespace AnalitF.Net.Client.Binders
 {
 	public class QuickSearchBehavior
 	{
+		public static DependencyProperty GridRef
+			= DependencyProperty.RegisterAttached("GridRef",
+				typeof(Control),
+				typeof(QuickSearchBehavior));
+
+		public static void SetGridRef(DependencyObject d, Control source)
+		{
+			d.SetValue(GridRef, source);
+		}
+
+		public static DataGrid GetGridRef(DependencyObject d)
+		{
+			return d.GetValue(GridRef) as DataGrid;
+		}
+
 		//основная идея:
 		//видимость поля ввода привязана к поисковому запросу
 		//если запрос есть то поле видимо
