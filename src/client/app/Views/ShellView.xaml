@@ -85,7 +85,7 @@
 		</Menu>
 
 		<ToolBarTray Grid.Row="1">
-			<ToolBar Band="1" BandIndex="1">
+			<ToolBar Band="1" BandIndex="1" Name="ToolBar">
 
 				<!--todo что бы выглядело как следует нужно для кнопки которая внутри применить ToolBar.ButtonStyleKey -->
 				<xctk:SplitButton x:Name="Update" ToolTip="Получить данные" Background="Transparent">
@@ -212,12 +212,12 @@
 						Style="{StaticResource ButtonImage}" />
 				</Button>
 
-				<Separator />
+				<Separator ToolBar.OverflowMode="Never" />
 
-				<StackPanel>
+				<StackPanel ToolBar.OverflowMode="Never">
 					<Label>Адрес заказа:</Label>
 					<ComboBox Style="{StaticResource AutoWidthFilter}" x:Name="Addresses"
-						DisplayMemberPath="Name" />
+						DisplayMemberPath="Name" MaxWidth="500" />
 				</StackPanel>
 			</ToolBar>
 		</ToolBarTray>

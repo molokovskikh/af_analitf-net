@@ -16,7 +16,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -35,21 +34,14 @@ using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using TestStack.White;
-using Action = System.Action;
-using CheckBox = System.Windows.Controls.CheckBox;
-using Cursors = System.Windows.Input.Cursors;
-using DataGrid = System.Windows.Controls.DataGrid;
-using DataGridCell = System.Windows.Controls.DataGridCell;
-using Label = System.Windows.Controls.Label;
-using Menu = System.Windows.Controls.Menu;
-using MenuItem = System.Windows.Controls.MenuItem;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using Panel = System.Windows.Controls.Panel;
+using Microsoft.Win32;
 using Screen = Caliburn.Micro.Screen;
-using TextBox = System.Windows.Controls.TextBox;
+using Action = System.Action;
+using Address = AnalitF.Net.Client.Models.Address;
+using Hyperlink = System.Windows.Documents.Hyperlink;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -424,6 +416,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Dynamic_recalculate_markup_validation()
 		{
 			Start();
+			OpenToolbarOverflowIfNeeded("ShowSettings");
 			AsyncClick("ShowSettings");
 			dispatcher.Invoke(() => {
 				var content = (FrameworkElement)activeWindow.Content;
@@ -436,6 +429,21 @@ namespace AnalitF.Net.Test.Integration.Views
 				var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
 				EditCell(grid, 0, 1, "30");
 				Assert.AreEqual(Color.FromRgb(0x80, 0x80, 0).ToString(), GetCell(grid, 0, 1).Background.ToString());
+			});
+		}
+
+		/// <summary>
+		/// Кнопка в панели инструментов может быть скрыта на панели переполнения если она не помещается
+		/// проверяем что кнопка скрыта и открываем панель переполнения
+		/// </summary>
+		private void OpenToolbarOverflowIfNeeded(string name)
+		{
+			dispatcher.Invoke(() => {
+				var toolbar = activeWindow.Descendants<ToolBar>().First(t => t.Name.Match("ToolBar"));
+				var button = toolbar.Items.OfType<ButtonBase>().First(b => b.Name.Match(name));
+				if (button.IsVisible)
+					return;
+				toolbar.IsOverflowOpen = true;
 			});
 		}
 
@@ -663,7 +671,7 @@ namespace AnalitF.Net.Test.Integration.Views
 					.First(i => i.Name == "Junk");
 				DoubleClick(el);
 			}));
-			var dialog = manager.OsDialog.OfType<ColorDialog>().Timeout(2.Second())
+			var dialog = manager.OsDialog.OfType<System.Windows.Forms.ColorDialog>().Timeout(2.Second())
 				.Take(1)
 				.Do(d => {
 					d.Color = System.Drawing.Color.MistyRose;

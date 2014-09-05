@@ -344,6 +344,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalogId = session.Query<Offer>()
 				.First(o => o.Price == offer.Price && o.CatalogId != offer.CatalogId).CatalogId;
 			catalog = session.Load<Catalog>(catalogId);
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Price.Id == offer.Price.Id);
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			Close(model);

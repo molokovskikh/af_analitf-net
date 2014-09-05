@@ -35,7 +35,11 @@ namespace AnalitF.Net.Service.Test
 
 			var config = FixtureSetup.Config;
 			user = session.Load<User>(client.Users[0].Id);
-			FileHelper.InitDir(config.LocalExportPath, "data", "update");
+			FileHelper.InitDir("data", "update");
+			if (!Directory.Exists(config.LocalExportPath))
+				Directory.CreateDirectory(config.LocalExportPath);
+			else
+				Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
 
 			file = "data.zip";
 			File.Delete(file);

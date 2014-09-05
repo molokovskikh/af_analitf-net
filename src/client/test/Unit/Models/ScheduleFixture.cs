@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		}
 
 		[Test]
-		public void IsOutdate()
+		public void Is_outdate()
 		{
 			SystemTime.Now = () => new DateTime(2013, 3, 20, 13, 0, 0);
 			Assert.IsFalse(Schedule.IsOutdate(new Schedule[0], DateTime.MinValue));

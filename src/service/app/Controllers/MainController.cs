@@ -186,10 +186,7 @@ where UserId = :userId;")
 			if (addressId == null)
 				return errors;
 			try {
-				var address = Session.Load<Address>(addressId.Value);
-				var cheker = new PreorderChecker((MySqlConnection)Session.Connection,
-					CurrentUser.Client,
-					address);
+				var cheker = new PreorderChecker((MySqlConnection)Session.Connection, CurrentUser.Client);
 				cheker.Check();
 			}
 			catch(OrderException e) {
@@ -199,9 +196,9 @@ where UserId = :userId;")
 
 			if (!CurrentUser.IgnoreCheckMinOrder) {
 				foreach (var order in orders.ToArray()) {
-					var context = new MinOrderContext((MySqlConnection)Session.Connection, Session, order);
+					var context = new MinOrderContext(Session, order);
 					var controller = new MinReqController(context);
-					var result = controller.ProcessOrder(order);
+					var result = controller.ProcessOrder();
 					if (result != null) {
 						var message = result.Type == MinReqStatus.ErrorType.MinReq
 							? String.Format("Поставщик отказал в приеме заказа." +
