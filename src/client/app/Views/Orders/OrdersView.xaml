@@ -95,7 +95,7 @@
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
 							Visibility="Collapsed" />
-						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding Id}" />
+						<c:DataGridTextColumnEx Width="65*" Header="Заказ №" Binding="{Binding ServerId}" />
 						<c:DataGridTextColumnEx Width="66*" Header="Отправлено" Binding="{Binding SentOn}" />
 						<c:DataGridTextColumnEx Width="48*" Header="Создано" Binding="{Binding CreatedOn}" />
 						<c:DataGridTextColumnEx Width="65*" Header="Прайс-лист" Binding="{Binding PriceName}" />
