@@ -55,10 +55,12 @@ namespace AnalitF.Net.Client.Views
 			//и будет ошибка по этому ждем как все загрузится будет установлен правильный контекст и после этого создаем биндинг
 			Loaded += (sender, args) => {
 				foreach (var gridColumn in Lines.Columns.OfType<DataGridTextColumn>().Where(c => !c.IsReadOnly)) {
-					BindingOperations.SetBinding(gridColumn, DataGridColumn.IsReadOnlyProperty,
-						new Binding("DataContext.Waybill.IsReadOnly") {
-							Source = grid
-						});
+					if (gridColumn.ReadLocalValue(DataGridColumn.IsReadOnlyProperty) == DependencyProperty.UnsetValue) {
+						BindingOperations.SetBinding(gridColumn, DataGridColumn.IsReadOnlyProperty,
+							new Binding("DataContext.Waybill.IsReadOnly") {
+								Source = grid
+							});
+					}
 				}
 
 				if (DataContext != null && !((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
