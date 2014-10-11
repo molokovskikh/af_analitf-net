@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
@@ -14,16 +15,17 @@ namespace AnalitF.Net.Client.Models.Print
 	[Description("Настройка печати накладной")]
 	public class WaybillDocumentSettings
 	{
-		public WaybillDocumentSettings(Waybill waybill)
+		public WaybillDocumentSettings Setup(Waybill waybill)
 		{
 			ProviderDocumentId = waybill.ProviderDocumentId;
 			DocumentDate = waybill.DocumentDate;
+			return this;
 		}
 
-		[Display(Name = "Накладная №", Order = 0)]
+		[Display(Name = "Накладная №", Order = 0), Ignore]
 		public string ProviderDocumentId { get; set; }
 
-		[Display(Name = "Дата", Order = 1)]
+		[Display(Name = "Дата", Order = 1), Ignore]
 		public DateTime DocumentDate { get; set; }
 
 		[Display(Name = "Через кого", Order = 2)]
@@ -55,7 +57,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.waybill = waybill;
 			this.settings = waybill.WaybillSettings;
 			this.lines = lines;
-			docSettings = new WaybillDocumentSettings(waybill);
+			docSettings = waybill.GetWaybillDocSettings();
 			Settings = docSettings;
 
 			BlockStyle = new Style(typeof(Paragraph)) {
