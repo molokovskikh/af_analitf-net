@@ -1077,7 +1077,7 @@ group by ol.RowId", condition);
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.User.Id == user.Id)
+				.Where(l => !l.Committed && l.User.Id == user.Id && !l.Document.IsFake)
 				.ToArray();
 
 			if (logs.Length == 0) {
@@ -1123,7 +1123,7 @@ group by ol.RowId", condition);
 			sql = String.Format(@"
 select d.RowId as Id,
 	dh.ProviderDocumentId,
-	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
+	convert_tz(now(), @@session.time_zone,'+00:00') as WriteTime,
 	convert_tz(dh.DocumentDate, @@session.time_zone,'+00:00') as DocumentDate,
 	dh.AddressId,
 	dh.FirmCode as SupplierId,

@@ -16,6 +16,7 @@ namespace AnalitF.Net.Service.Models
 		public virtual DocType DocumentType { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual string Filename { get; set; }
+		public virtual bool IsFake { get; set; }
 	}
 
 	public class DocumentSendLog
