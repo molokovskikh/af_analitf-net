@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Models.Print
 				Setters = {
 					new Setter(TextBlock.FontSizeProperty, 11d),
 					new Setter(TextBlock.FontWeightProperty, FontWeights.Bold),
-					new Setter(FrameworkElement.HeightProperty, 43d),
+					new Setter(FrameworkElement.HeightProperty, 41d),
 					new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Underline),
 					new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap),
 					new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center),
@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Models.Print
 			{"Producer", new Style(typeof(TextBlock)) {
 				Setters = {
 					new Setter(TextBlock.FontSizeProperty, 10d),
-					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
+					new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Right),
 				}
 			}},
 			{"Period", new Style(typeof(TextBlock)) {
@@ -249,6 +249,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var nameAndAddressLabel = new TextBlock {
 				Text = waybillSettings.FullName,
 				TextAlignment = TextAlignment.Center,
+				TextWrapping = TextWrapping.Wrap,
 				FontSize = 8,
 				Width = 162,
 				Height = 20
@@ -451,10 +452,12 @@ namespace AnalitF.Net.Client.Models.Print
 								Source = new BitmapImage(new Uri(@"pack://application:,,,/AnalitF.Net.Client;component/assets/images/price-tag-log.png"))
 							},
 							new TextBlock {
+								Height = 20,
 								Text = settings.PriceTag.PrintFullName ? waybillSettings.FullName : "",
 								FontSize = 8,
 								TextAlignment = TextAlignment.Center,
-								VerticalAlignment = VerticalAlignment.Center
+								VerticalAlignment = VerticalAlignment.Center,
+								TextWrapping = TextWrapping.Wrap
 							}
 						}
 					}
