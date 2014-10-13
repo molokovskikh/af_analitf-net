@@ -29,7 +29,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			waybill = Fixture<UnknownWaybill>().Waybill;
+			waybill = Fixture<LocalWaybill>().Waybill;
 			model = Init(new WaybillDetails(waybill.Id));
 		}
 

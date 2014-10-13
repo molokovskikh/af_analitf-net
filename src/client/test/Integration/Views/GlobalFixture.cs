@@ -221,7 +221,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Select_printing_by_header()
 		{
-			Fixture(new UnknownWaybill());
+			Fixture(new LocalWaybill());
 
 			Start();
 			Click("ShowWaybills");

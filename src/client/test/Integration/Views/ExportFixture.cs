@@ -48,8 +48,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void CheckExport(BaseScreen model)
 		{
-			Init(model);
-			InitView(model);
+			Bind(model);
 
 			Assert.That(model.CanExport, Is.True);
 			result = (OpenResult)model.Export();

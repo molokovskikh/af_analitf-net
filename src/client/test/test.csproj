@@ -152,7 +152,7 @@
     <Compile Include="Fixtures\ServerFixture.cs" />
     <Compile Include="Fixtures\SmartOrder.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
-    <Compile Include="Fixtures\UnknownWaybill.cs" />
+    <Compile Include="Fixtures\LocalWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />

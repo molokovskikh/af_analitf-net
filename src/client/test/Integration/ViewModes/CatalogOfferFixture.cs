@@ -326,6 +326,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_description()
 		{
+			//todo - мы должны выбирать позицию с описанием
 			var dialogs = manager.DialogOpened.Collect();
 			model.ShowDescription();
 			Assert.AreEqual(1, dialogs.Count);
