@@ -57,6 +57,19 @@ namespace AnalitF.Net.Test.Integration.Views
 					WpfHelper.Shutdown(w);
 				};
 			});
+
+			//на форме корректировки могут возникнуть ошибки биндинга
+			//судя по обсуждению это ошибки wpf и они безобидны
+			//http://wpf.codeplex.com/discussions/47047
+			//игнорирую их
+			var ignored = new[] {
+				"System.Windows.Data Error: 4",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=AreRowDetailsFrozen; DataItem=null; target element is 'DataGridDetailsPresenter' (Name=''); target property is 'SelectiveScrollingOrientation' (type 'SelectiveScrollingOrientation')",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=HeadersVisibility; DataItem=null; target element is 'DataGridRowHeader' (Name=''); target property is 'Visibility' (type 'Visibility')",
+				//todo - разобрать причину ошибки
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=NewItemMargin; DataItem=null; target element is 'DataGridRow' (Name=''); target property is 'Margin' (type 'Thickness')"
+			};
+			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
 		}
 	}
 }
