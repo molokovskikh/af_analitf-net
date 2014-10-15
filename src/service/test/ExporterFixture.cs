@@ -156,7 +156,7 @@ namespace AnalitF.Net.Service.Test
 		public void Export_waybills()
 		{
 			user.SendWaybills = true;
-			var waybillFile = CreateWaybillWithFile();
+			var waybillFile = CreateWaybillWithFile().Log.LocalFile;
 
 			exporter.ExportDocs();
 			var files = ListResult();
@@ -180,6 +180,21 @@ namespace AnalitF.Net.Service.Test
 				files);
 		}
 
+		[Test]
+		public void Export_converted_waybill()
+		{
+			user.SendWaybills = true;
+			var waybill = CreateWaybillWithFile();
+			waybill.Log.IsFake = true;
+			session.Flush();
+
+			exporter.ExportDocs();
+			var files = ListResult();
+			Assert.That(files, Is.Not.StringContaining("Waybills/" + Path.GetFileName(waybill.Log.LocalFile)));
+			var result = exporter.Result.First(r => r.ArchiveFileName == "Waybills.txt");
+			Assert.That(new FileInfo(result.LocalFileName).Length, Is.GreaterThan(10), File.ReadAllText(result.LocalFileName));
+		}
+
 		private void InitAd()
 		{
 			FileHelper.InitDir("ads");
@@ -196,7 +211,7 @@ namespace AnalitF.Net.Service.Test
 			return ZipFile.Read(memory).Implode(l => l.FileName);
 		}
 
-		private string CreateWaybillWithFile()
+		private TestWaybill CreateWaybillWithFile()
 		{
 			var testUser = session.Load<TestUser>(user.Id);
 			var waybill = DataMother.CreateWaybill(session, testUser);
@@ -204,8 +219,8 @@ namespace AnalitF.Net.Service.Test
 			session.Save(waybill);
 			var sendLog = new TestDocumentSendLog(testUser, log);
 			session.Save(sendLog);
-			var waybillFile = waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
-			return waybillFile;
+			waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
+			return waybill;
 		}
 
 		private List<UpdateData> Export()

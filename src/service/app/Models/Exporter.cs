@@ -74,7 +74,6 @@ namespace AnalitF.Net.Service.Models
 		private ClientSettings clientSettings;
 		private OrderRules orderRules;
 		private Version version;
-		private List<UpdateData> result = new List<UpdateData>();
 
 		public Config.Config Config;
 
@@ -90,6 +89,7 @@ namespace AnalitF.Net.Service.Models
 		public List<Order> Orders;
 		public List<OrderBatchItem> BatchItems;
 		public Address BatchAddress;
+		public List<UpdateData> Result = new List<UpdateData>();
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
@@ -1014,7 +1014,7 @@ select oh.RowId as ServerId,
 	oh.ClientAddition as Comment
 from Orders.OrdersHead oh
 {0}", condition);
-			Export(result, sql, "SentOrders", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrders", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select ol.RowId as ServerId,
@@ -1064,7 +1064,7 @@ from Orders.OrdersHead oh
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
 {0}
 group by ol.RowId", condition);
-			Export(result, sql, "SentOrderLines", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrderLines", new { userId = user.Id }, false);
 		}
 
 		public void ExportDocs()
@@ -1077,12 +1077,12 @@ group by ol.RowId", condition);
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.User.Id == user.Id && !l.Document.IsFake)
+				.Where(l => !l.Committed && l.User.Id == user.Id)
 				.ToArray();
 
 			if (logs.Length == 0) {
 				//мы должны передать LoadedDocuments что бы клиент очистил таблицу
-				Export(result,
+				Export(Result,
 					"LoadedDocuments",
 					new[] { "Id", "Type", "SupplierId", "OriginFilename" },
 					new object[0][]);
@@ -1100,6 +1100,10 @@ group by ol.RowId", condition);
 					continue;
 				if (doc.Document.DocumentType == DocType.Rejects && !user.SendRejects)
 					continue;
+				//если это конвертированный документ мы не должны доставлять файл но должны доставить разобранную
+				//накладную
+				if (doc.Document.IsFake)
+					continue;
 				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
@@ -1108,7 +1112,7 @@ group by ol.RowId", condition);
 					if (!Directory.Exists(path))
 						continue;
 					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
-					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
+					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
@@ -1142,7 +1146,7 @@ from Logs.Document_logs d
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id", ids);
-			Export(result, sql, "Waybills", new { userId = user.Id }, false);
+			Export(Result, sql, "Waybills", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select db.Id,
@@ -1174,7 +1178,7 @@ from Logs.Document_logs d
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
-			Export(result, sql, "WaybillLines", new { userId = user.Id }, false);
+			Export(Result, sql, "WaybillLines", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select DocumentLineId, OrderLineId
@@ -1183,7 +1187,7 @@ from Documents.WaybillOrders wo
 		join Documents.DocumentHeaders dh on db.DocumentId = dh.Id
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
-			Export(result, sql, "WaybillOrders", truncate: false);
+			Export(Result, sql, "WaybillOrders", truncate: false);
 
 			var documentExported = session.CreateSQLQuery(@"
 select d.RowId
@@ -1198,7 +1202,7 @@ group by dh.Id")
 				.Each(l => l.DocumentDelivered = true);
 
 			var delivered = logs.Where(l => l.DocumentDelivered || l.FileDelivered).ToArray();
-			Export(result,
+			Export(Result,
 				"LoadedDocuments",
 				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
 				delivered.Select(l => new object[] {
@@ -1282,7 +1286,7 @@ group by dh.Id")
 			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
-				foreach (var tuple in result) {
+				foreach (var tuple in Result) {
 					var filename = tuple.LocalFileName;
 					//экспоритровать пустые файлы важно тк пустой файл привед к тому что таблица бедет очищена
 					//напимер в случае если последний адрес доставки был отключен
@@ -1306,8 +1310,8 @@ group by dh.Id")
 
 		public void ExportAll()
 		{
-			Export(result);
-			ExportUpdate(result);
+			Export(Result);
+			ExportUpdate(Result);
 			ExportAds();
 		}
 
@@ -1328,7 +1332,7 @@ group by dh.Id")
 
 		public void ExportAds()
 		{
-			ExportAds(result);
+			ExportAds(Result);
 		}
 
 		private void ExportAds(List<UpdateData> zip)
