@@ -56,7 +56,7 @@
 				</Grid.RowDefinitions>
 
 				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Заказ №:</Label>
-				<Label Grid.Row="0" Grid.Column="1" Name="Order_Id" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Order_DisplayId" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
 				<Label Grid.Row="1" Grid.Column="1" Name="Source_Count" FontWeight="Bold"></Label>

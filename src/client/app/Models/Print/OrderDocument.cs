@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Print
 		protected override void BuildDoc()
 		{
 			var header = String.Format("Заявка № {0} от на {1} от {2}",
-				order.Id,
+				order.DisplayId,
 				order.PriceName,
 				order.AddressName);
 			TwoColumnHeader(header, order.SafePrice.Phone);
