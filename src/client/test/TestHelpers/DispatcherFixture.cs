@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static bool IsCI()
 		{
-			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER");
+			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"));
 		}
 
 		public void DoubleClick(UIElement element, object origin = null)
