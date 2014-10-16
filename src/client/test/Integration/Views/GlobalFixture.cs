@@ -750,7 +750,11 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void WaitMessageBox(string message)
 		{
-			var opened = manager.MessageOpened.Timeout(15.Second()).First();
+			var timeout = 15.Second();
+			if (IsCI())
+				timeout = 60.Second();
+
+			var opened = manager.MessageOpened.Timeout(timeout).First();
 			Assert.AreEqual(opened, message);
 			var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
 			for(var i = 0; window == IntPtr.Zero && i < 100; i++) {

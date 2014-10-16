@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups.Clear();
 			var markupType = catalog.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
 			settings.AddMarkup(new MarkupConfig(0, splitCost, 20, markupType));
-			settings.AddMarkup(new MarkupConfig(splitCost, 100 * splitCost, 30, markupType));
+			settings.AddMarkup(new MarkupConfig(splitCost, decimal.MaxValue, 30, markupType));
 			session.Save(settings);
 
 			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));

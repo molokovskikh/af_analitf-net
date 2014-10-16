@@ -66,10 +66,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
-				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed
-					&& !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))
+				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && IsCI()
 					&& activeWindow != null) {
-					var filename = Path.GetFullPath(Guid.NewGuid() + ".png");
+					var filename = Path.GetFullPath(FileHelper.StringToFileName(TestContext.CurrentContext.Test.FullName) + ".png");
 					dispatcher.Invoke(() => {
 						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
 					});
@@ -82,6 +81,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				dispatcher.Invoke(() => shell.Dispose());
 				dispatcher.InvokeShutdown();
 			}
+		}
+
+		public static bool IsCI()
+		{
+			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER");
 		}
 
 		public void DoubleClick(UIElement element, object origin = null)
