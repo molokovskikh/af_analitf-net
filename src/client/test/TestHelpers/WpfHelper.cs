@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Common.Tools.Calendar;
-using Devart.Common;
-using NHibernate.Hql.Ast.ANTLR;
-using NHibernate.Mapping;
-using NHibernate.Util;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -101,6 +97,55 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				window.Close();
 				window.Dispatcher.InvokeShutdown();
 			}));
+		}
+
+		public static DispatchAwaiter WaitIdle(this Dispatcher d)
+		{
+			var src = new TaskCompletionSource<int>();
+				d.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => src.SetResult(1)));
+			return new DispatchAwaiter(src, d);
+		}
+
+		public static DispatchAwaiter WaitLoaded(this FrameworkElement element)
+		{
+			var src = new TaskCompletionSource<int>();
+			if (element.IsLoaded)
+				src.SetResult(1);
+			else
+				element.Loaded += (sender, args) => src.SetResult(1);
+			return new DispatchAwaiter(src, element.Dispatcher);
+		}
+	}
+
+	public class DispatchAwaiter : INotifyCompletion
+	{
+		public Dispatcher dispatcher;
+		private TaskCompletionSource<int> src;
+
+		public DispatchAwaiter(TaskCompletionSource<int> src, Dispatcher dispatcher)
+		{
+			this.src = src;
+			this.dispatcher = dispatcher;
+		}
+
+		public void OnCompleted(Action continuation)
+		{
+			src.Task.ContinueWith(t => dispatcher.BeginInvoke(continuation));
+		}
+
+		public bool IsCompleted
+		{
+			get
+			{
+				return src.Task.IsCompleted;
+			}
+		}
+
+		public void GetResult() { }
+
+		public DispatchAwaiter GetAwaiter()
+		{
+			return this;
 		}
 	}
 }

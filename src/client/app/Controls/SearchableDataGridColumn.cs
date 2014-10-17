@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Controls
@@ -27,7 +28,13 @@ namespace AnalitF.Net.Client.Controls
 			element.DataContextChanged += (s, a) => {
 				var textBlock = ((TextBlock)s);
 				BindingOperations.SetBinding(textBlock, TextBlock.TextProperty, Binding);
-				MarkText(textBlock);
+				//очередная необъяснимая ошибка
+				//если вызвать метод напрямую то для первого захода будет складываться впечатление что
+				//он не дал результата хотя метод вызывается и раскраска происходит
+				//подозреваю что биндинг применяется еще раз и сбрасывает всю работу сделанную в MarkText
+				//по этому планируем работу после биндинга
+				//то что описано выше теория, воспроизвести ситуацию изолировано мне не удалось
+				Dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(() => MarkText(textBlock)));
 			};
 			return element;
 		}

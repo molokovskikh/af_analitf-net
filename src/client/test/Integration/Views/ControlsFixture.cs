@@ -1,37 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Linq;
-using System.Net.Http;
-using System.Reactive.Disposables;
-using System.Reactive.Linq.Observαble;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Markup;
-using System.Windows.Threading;
+using System.Windows.Documents;
+using System.Windows.Media;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
-using Common.Tools.Calendar;
-using Microsoft.Test.Input;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Remotion.Linq.Parsing;
-using Action = System.Action;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;
 using Point = System.Windows.Point;
-using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
+using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -61,7 +49,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test, Explicit("тест конфликтует с пользовательским вводом")]
 		public void Popup_selector()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			WpfHelper.WithWindow(w => {
 				var selector = new PopupSelector();
 				selector.Name = "Items";
 				selector.Member = "Item.Item2";
@@ -70,7 +58,7 @@ namespace AnalitF.Net.Test.Integration.Views
 					var text = selector.AsText();
 					Assert.That(text, Is.StringContaining("test2"));
 
-					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+					WpfHelper.Shutdown(w);
 				};
 				w.DataContext = new Model();
 				ViewModelBinder.Bind(w.DataContext, w, null);
@@ -80,34 +68,30 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Popup_scroll()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			WpfHelper.WithWindow(async w => {
 				var selector = InitSelector(w);
-
-				selector.Loaded += (sender, args) => {
-					selector.IsOpened = true;
-					w.Dispatcher.InvokeAsync(() => {
-						var scrollViewer = selector.Descendants<ScrollViewer>().First();
-						Assert.AreEqual(Visibility.Visible, scrollViewer.ComputedVerticalScrollBarVisibility);
-						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-					}, DispatcherPriority.ContextIdle);
-				};
+				await selector.WaitLoaded();
+				selector.IsOpened = true;
+				await w.Dispatcher.WaitIdle();
+				var scrollViewer = selector.Descendants<ScrollViewer>().First();
+				Assert.AreEqual(Visibility.Visible, scrollViewer.ComputedVerticalScrollBarVisibility);
+				WpfHelper.Shutdown(w);
 			});
 		}
 
 		[Test]
 		public void Filter_label()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			WpfHelper.WithWindow(async w => {
 				var selector = InitSelector(w);
+				await selector.WaitLoaded();
 
-				selector.Loaded += (sender, args) => {
-					var stackPanel = selector.Descendants<Grid>().FirstOrDefault(g => g.Name == "MainGrid").Descendants<StackPanel>().First();
-					Assert.That(stackPanel.AsText(), Is.Not.StringContaining(", фильтр применен"));
-					selector.IsOpened = true;
-					((ISelectable)selector.Items[0]).IsSelected = false;
-					Assert.That(stackPanel.AsText(), Is.StringContaining(", фильтр применен"));
-					Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-				};
+				var stackPanel = selector.Descendants<Grid>().FirstOrDefault(g => g.Name == "MainGrid").Descendants<StackPanel>().First();
+				Assert.That(stackPanel.AsText(), Is.Not.StringContaining(", фильтр применен"));
+				selector.IsOpened = true;
+				((ISelectable)selector.Items[0]).IsSelected = false;
+				Assert.That(stackPanel.AsText(), Is.StringContaining(", фильтр применен"));
+				WpfHelper.Shutdown(w);
 			});
 		}
 
@@ -131,48 +115,45 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Do_not_reset_data_grid_focus()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
 				w.Content = grid;
 				grid.ItemsSource = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
-				grid.Loaded += (sender, args) => {
-					DataGridHelper.Focus(grid);
-					grid.ItemsSource = Enumerable.Range(500, 100).Select(i => Tuple.Create(i.ToString())).ToList();
-					w.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => {
-						Assert.IsTrue(grid.IsKeyboardFocusWithin);
-						Assert.IsInstanceOf<DataGridCell>(Keyboard.FocusedElement);
+				await grid.WaitLoaded();
+				DataGridHelper.Focus(grid);
+				grid.ItemsSource = Enumerable.Range(500, 100).Select(i => Tuple.Create(i.ToString())).ToList();
+				await w.Dispatcher.WaitIdle();
+				Assert.IsTrue(grid.IsKeyboardFocusWithin);
+				Assert.IsInstanceOf<DataGridCell>(Keyboard.FocusedElement);
 
-						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-					}));
-				};
+				WpfHelper.Shutdown(w);
 			});
 		}
 
 		[Test, Explicit("тест управляет мышкой и движения пользователя могут его сломать")]
 		public void Set_focus_on_empty_grid()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(w => {
+			WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				w.Content = grid;
-				grid.Loaded += (sender, args) => {
-					Assert.IsFalse(grid.IsKeyboardFocusWithin);
-					var point = grid.PointToScreen(new Point(3, 3));
-					Mouse.MoveTo(new System.Drawing.Point((int)point.X, (int)point.Y));
-					Mouse.Click(MouseButton.Left);
-					Idle(w, () => {
-						Assert.IsTrue(grid.IsKeyboardFocusWithin);
-						Client.Test.TestHelpers.WpfHelper.Shutdown(w);
-					});
-				};
+				await grid.WaitLoaded();
+
+				Assert.IsFalse(grid.IsKeyboardFocusWithin);
+				var point = grid.PointToScreen(new Point(3, 3));
+				Mouse.MoveTo(new System.Drawing.Point((int)point.X, (int)point.Y));
+				Mouse.Click(MouseButton.Left);
+				await w.Dispatcher.WaitIdle();
+				Assert.IsTrue(grid.IsKeyboardFocusWithin);
+				WpfHelper.Shutdown(w);
 			});
 		}
 
 		[Test]
 		public void Focus_on_empty_data_grid()
 		{
-			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
+			WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
@@ -182,7 +163,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				await w.Dispatcher.WaitIdle();
 				DataGridHelper.Focus(grid);
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
-				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+				WpfHelper.Shutdown(w);
 			});
 		}
 
@@ -191,7 +172,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var items = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
 			var data = new ObservableCollection<Tuple<String>>(items);
-			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
+			WpfHelper.WithWindow(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
@@ -206,7 +187,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				await w.Dispatcher.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 				Assert.IsNotNull(grid.CurrentItem);
-				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+				WpfHelper.Shutdown(w);
 			});
 		}
 
@@ -219,7 +200,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				BuyingMatrixType = BuyingMatrixStatus.Denied,
 			});
 
-			Client.Test.TestHelpers.WpfHelper.WithWindow(async w => {
+			WpfHelper.WithWindow(async w => {
 				var resources = new ResourceDictionary();
 				StyleHelper.Reset();
 				StyleHelper.BuildStyles(resources);
@@ -233,55 +214,60 @@ namespace AnalitF.Net.Test.Integration.Views
 				var cells = grid.Children().OfType<DataGridCell>().ToArray();
 				foreach (var cell in cells)
 					Assert.AreEqual("Red", cell.Background.ToString(), cell.ToString());
-				Client.Test.TestHelpers.WpfHelper.Shutdown(w);
+				WpfHelper.Shutdown(w);
 			});
 		}
 
-		private static void Idle(Window w, Action target)
+		public class SearchableModel
 		{
-			w.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(target));
-		}
-	}
-
-	public class DispatchAwaiter : INotifyCompletion
-	{
-		public Dispatcher dispatcher;
-		private TaskCompletionSource<int> src;
-
-		public DispatchAwaiter(TaskCompletionSource<int> src, Dispatcher dispatcher)
-		{
-			this.src = src;
-			this.dispatcher = dispatcher;
-		}
-
-		public void OnCompleted(Action continuation)
-		{
-			src.Task.ContinueWith(t => dispatcher.BeginInvoke(continuation));
-		}
-
-		public bool IsCompleted
-		{
-			get
+			public SearchableModel()
 			{
-				return src.Task.IsCompleted;
+				Term = new NotifyValue<string>();
+				Items = new NotifyValue<List<Tuple<string>>>();
 			}
+
+			public NotifyValue<List<Tuple<string>>> Items { get; set; }
+
+			public NotifyValue<string> Term { get; set; }
 		}
 
-		public void GetResult() { }
-
-		public DispatchAwaiter GetAwaiter()
+		[Test]
+		public void Searchable_column()
 		{
-			return this;
-		}
-	}
+			WpfHelper.WithWindow(async w => {
+				var model = new SearchableModel();
+				var grid = new DataGrid2();
+				grid.DataContext = model;
+				BindingOperations.SetBinding(grid, DataGrid.ItemsSourceProperty, new Binding("Items.Value"));
+				BindingOperations.SetBinding(grid, SearchableDataGridColumn.SearchTermProperty, new Binding("Term.Value"));
+				grid.AutoGenerateColumns = false;
+				grid.Columns.Add(new SearchableDataGridColumn {
+					Binding = new Binding("Item1"),
+					HighlightStyle = new Style {
+						Setters = {
+							new Setter(TextElement.BackgroundProperty, Brushes.Red)
+						}
+					}
+				});
+				w.Content = grid;
+				await grid.WaitLoaded();
+				await w.Dispatcher.WaitIdle();
 
-	public static class DispatcherHelper
-	{
-		public static DispatchAwaiter WaitIdle(this Dispatcher d)
-		{
-			var src = new TaskCompletionSource<int>();
-			d.BeginInvoke(new Action(() => src.SetResult(1)));
-			return new DispatchAwaiter(src, d);
+				model.Items.Value = Enumerable.Range(0, 49).Select(i => Tuple.Create(i.ToString())).ToList();
+				await w.Dispatcher.WaitIdle();
+
+				model.Term.Value = "5";
+				model.Items.Value = Enumerable.Range(50, 100).Select(i => Tuple.Create(i.ToString())).ToList();
+				await w.Dispatcher.WaitIdle();
+
+				var row = grid.Descendants<DataGridRow>().First(r => ((Tuple<String>)r.DataContext).Item1 == "50");
+				var text = row.Descendants<TextBlock>().First();
+				Assert.AreEqual("50", text.Text);
+				var inlines = text.Inlines.OfType<Run>().ToArray();
+				Assert.AreEqual("5", inlines[0].Text);
+				Assert.AreEqual("0", inlines[1].Text);
+				WpfHelper.Shutdown(w);
+			});
 		}
 	}
 }
