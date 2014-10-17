@@ -15,7 +15,6 @@ using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
-using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -119,7 +118,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			//	return UpdateResult.OK;
 			//};
 
-			var dispatcher = WpfHelper.WithDispatcher(() => {
+			var dispatcher = WpfTestHelper.WithDispatcher(() => {
 				taskCompleted.Set();
 				shell.Update();
 				Assert.That(manager.Dialogs.Count, Is.EqualTo(1));

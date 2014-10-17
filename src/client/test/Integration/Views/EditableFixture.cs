@@ -51,7 +51,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			grid.ItemsSource = items;
 			grid.SelectedItem = items[0];
 			new Editable(scheduler).Attach(grid);
-			grid.RaiseEvent(WpfHelper.TextArgs("1"));
+			grid.RaiseEvent(WpfTestHelper.TextArgs("1"));
 
 			Assert.IsTrue(viewModel.updated);
 			Assert.IsFalse(viewModel.commited);

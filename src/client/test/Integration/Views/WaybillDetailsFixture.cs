@@ -13,7 +13,6 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
 using NUnit.Framework;
-using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -36,26 +35,24 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Auto_edit()
 		{
 			var waybill = Fixture<LocalWaybill>().Waybill;
-			WpfHelper.WithWindow(w => {
+			WpfTestHelper.WithWindow(async w => {
 				var model = new WaybillDetails(waybill.Id);
 				var view = (WaybillDetailsView)Bind(model);
 				w.Content = view;
 
 				var grid = (DataGrid2)view.FindName("Lines");
-				grid.Loaded += (sender, args) => {
-					grid.SelectedItem = waybill.Lines[0];
-					grid.RaiseEvent(WpfHelper.TextArgs("1"));
-					var column = grid.Columns.First(c => c.Header is TextBlock && ((TextBlock)c.Header).Text.Equals("Розничная наценка"));
-					Console.WriteLine();
-					var cell = DataGridHelper.GetCell(
-						(DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item),
-						column,
-						grid.Columns);
-					Assert.IsTrue(cell.IsEditing);
-					Assert.AreEqual("1", ((TextBox)cell.Content).Text);
+				await grid.WaitLoaded();
+				grid.SelectedItem = waybill.Lines[0];
+				grid.RaiseEvent(WpfTestHelper.TextArgs("1"));
+				var column = grid.Columns.First(c => c.Header is TextBlock && ((TextBlock)c.Header).Text.Equals("Розничная наценка"));
+				var cell = DataGridHelper.GetCell(
+					(DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(grid.CurrentCell.Item),
+					column,
+					grid.Columns);
+				Assert.IsTrue(cell.IsEditing);
+				Assert.AreEqual("1", ((TextBox)cell.Content).Text);
 
-					WpfHelper.Shutdown(w);
-				};
+				WpfTestHelper.Shutdown(w);
 			});
 
 			//на форме корректировки могут возникнуть ошибки биндинга

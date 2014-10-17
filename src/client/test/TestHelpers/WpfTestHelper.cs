@@ -13,7 +13,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
-	public static class WpfHelper
+	public static class WpfTestHelper
 	{
 		public static void WithWindow(Action<Window> action)
 		{
@@ -97,6 +97,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				window.Close();
 				window.Dispatcher.InvokeShutdown();
 			}));
+		}
+
+		public static void SendKey(this FrameworkElement d, Key key)
+		{
+			d.RaiseEvent(KeyEventArgs(d, key));
+		}
+
+		public static DispatchAwaiter WaitIdle(this FrameworkElement d)
+		{
+			return d.Dispatcher.WaitIdle();
 		}
 
 		public static DispatchAwaiter WaitIdle(this Dispatcher d)
