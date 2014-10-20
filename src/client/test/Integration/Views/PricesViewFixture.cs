@@ -27,12 +27,12 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Enter_price()
 		{
-			WpfTestHelper.WithWindow(w => {
+			WpfTestHelper.WithWindow(async w => {
 				var view = Bind(new PriceViewModel());
 				var grid = (DataGrid)view.FindName("Prices");
 				w.Content = view;
 
-				w.WaitLoaded();
+				await w.WaitLoaded();
 				var keyEventArgs = WpfTestHelper.KeyEventArgs(grid, Key.Enter);
 				keyEventArgs.RoutedEvent = DataGrid.KeyDownEvent;
 				grid.RaiseEvent(keyEventArgs);

@@ -34,6 +34,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var grid = view.Descendants<DataGrid>().First(g => g.Name == "Items");
 				grid.SendKey(Key.Return);
 				await view.WaitIdle();
+				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}
