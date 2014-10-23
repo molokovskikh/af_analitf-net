@@ -7,7 +7,7 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class UnknownWaybill
+	public class LocalWaybill
 	{
 		public Waybill Waybill;
 

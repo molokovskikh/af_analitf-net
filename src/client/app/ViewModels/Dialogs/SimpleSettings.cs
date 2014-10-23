@@ -13,13 +13,12 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class SimpleSettings : Screen
 	{
-		private object settings;
-
+		public object Target;
 		public Tuple<PropertyInfo, object[]>[] Properties;
 
 		public SimpleSettings(object settings)
 		{
-			this.settings = settings;
+			this.Target = settings;
 			DisplayName = "АналитФАРМАЦИЯ";
 			var attributes = settings.GetType().GetCustomAttributes(typeof(DescriptionAttribute), true);
 			if (attributes.Length > 0) {
@@ -43,7 +42,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			base.OnViewAttached(view, context);
 
 			var grid = (Grid)((FrameworkElement)view).FindName("Data");
-			grid.DataContext = settings;
+			grid.DataContext = Target;
 			for(var i = 0; i < Properties.Length; i ++) {
 				grid.RowDefinitions.Add(new RowDefinition());
 				var property = Properties[i];

@@ -11,6 +11,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -192,6 +193,10 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return !String.IsNullOrEmpty(Password) && !String.IsNullOrEmpty(UserName); }
 		}
+
+		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
+		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
+
 
 		public virtual IEnumerable<string> DocumentDirs
 		{

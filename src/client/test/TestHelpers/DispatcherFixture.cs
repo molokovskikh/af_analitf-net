@@ -66,10 +66,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
-				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed
-					&& !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"))
+				if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && IsCI()
 					&& activeWindow != null) {
-					var filename = Path.GetFullPath(Guid.NewGuid() + ".png");
+					var filename = Path.GetFullPath(FileHelper.StringToFileName(TestContext.CurrentContext.Test.FullName) + ".png");
 					dispatcher.Invoke(() => {
 						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
 					});
@@ -82,6 +81,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				dispatcher.Invoke(() => shell.Dispose());
 				dispatcher.InvokeShutdown();
 			}
+		}
+
+		public static bool IsCI()
+		{
+			return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_NUMBER"));
 		}
 
 		public void DoubleClick(UIElement element, object origin = null)
@@ -164,7 +168,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			Contract.Assert(element != null);
 			AssertInputable(element);
-			element.RaiseEvent(WpfHelper.TextArgs(text));
+			element.RaiseEvent(WpfTestHelper.TextArgs(text));
 		}
 
 		protected void InputActiveWindow(string name, string text)
@@ -174,7 +178,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				if (el == null)
 					throw new Exception(String.Format("Могу найти элемент с именем '{0}' в окне {1}", name, activeWindow));
 				AssertInputable(el);
-				el.RaiseEvent(WpfHelper.TextArgs(text));
+				el.RaiseEvent(WpfTestHelper.TextArgs(text));
 			});
 		}
 
@@ -182,7 +186,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			Contract.Assert(element != null);
 			AssertInputable(element);
-			element.RaiseEvent(WpfHelper.KeyEventArgs(element, key));
+			element.RaiseEvent(WpfTestHelper.KeyEventArgs(element, key));
 		}
 
 		protected void Input(string name, Key key)
@@ -229,7 +233,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			var loaded = new SemaphoreSlim(0, 1);
 
-			dispatcher = WpfHelper.WithDispatcher(() => {
+			dispatcher = WpfTestHelper.WithDispatcher(() => {
 				//wpf обеспечивает синхронизацию объектов ui
 				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
 				//в других нитках что бы избежать ошибок очищаем статические структуры

@@ -89,7 +89,7 @@ task "build:client:package", ["build:client"]:
 	versionNode = specDoc.Descendants().First({n| n.Name.LocalName == "version"})
 	versionNode.Value = version
 	specDoc.Save(spec)
-	Exec("cmd.exe", "/C chocolatey.bat pack", BaseDirectory: "output/package").Execute()
+	Exec("cmd.exe", "/C choco pack", BaseDirectory: "output/package").Execute()
 
 task "deploy:update", ["build:client"]:
 	dir = Globals.UpdateDeployRoot
@@ -153,7 +153,7 @@ task "git:push:tags":
 task "git:tag":
 	return unless Globals.Environment == @Production
 	kind = Configuration.Maybe.kind
-	raise "Нужно указать тип релиза patch - исправление ошибок, minor - новый функционал, major - координальные изменения в существующем функционале" unless kind
+	raise "Нужно указать тип релиза kind=patch - исправление ошибок, kind=minor - новый функционал, kind=major - координальные изменения в существующем функционале" unless kind
 	Bash("./scripts/tag-release.sh $kind")
 
 task "test:binary":

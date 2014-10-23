@@ -70,7 +70,7 @@
 					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4"
 						cal:Message.Attach="ResetNavigation" />
 					<Separator />
-					<MenuItem Header="Создание базы данных с сохранение отправленных заказов"
+					<MenuItem Header="Создание базы данных с сохранением отправленных заказов"
 						cal:Message.Attach="CleanDb" />
 					<MenuItem Header="Загрузить историю заказов"
 						cal:Message.Attach="LoadOrderHistory" />

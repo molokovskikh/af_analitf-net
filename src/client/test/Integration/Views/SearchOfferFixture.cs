@@ -20,8 +20,8 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Check_view()
 		{
-			var model = Init(new SearchOfferViewModel());
-			var view = InitView<SearchOfferView>(model);
+			var model = new SearchOfferViewModel();
+			var view = (SearchOfferView)Bind(model);
 
 			var offer = session.Query<Offer>().First();
 			model.SearchBehavior.SearchText.Value = offer.ProductSynonym.Slice(3);

@@ -152,7 +152,7 @@
     <Compile Include="Fixtures\ServerFixture.cs" />
     <Compile Include="Fixtures\SmartOrder.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
-    <Compile Include="Fixtures\UnknownWaybill.cs" />
+    <Compile Include="Fixtures\LocalWaybill.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
@@ -193,7 +193,8 @@
     <Compile Include="Integration\ViewModes\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
-    <Compile Include="Integration\Views\CatalogOfferViewFixture.cs" />
+    <Compile Include="Integration\Views\CatalogOfferFixture.cs" />
+    <Compile Include="Integration\Views\CatalogSearchFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />
     <Compile Include="Integration\Views\DataGridHelperFixture.cs" />
     <Compile Include="Integration\Views\EditableFixture.cs" />
@@ -224,7 +225,7 @@
     <Compile Include="TestHelpers\DbFixture.cs" />
     <Compile Include="TestHelpers\FixtureHelper.cs" />
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />
-    <Compile Include="TestHelpers\WpfHelper.cs" />
+    <Compile Include="TestHelpers\WpfTestHelper.cs" />
     <Compile Include="Unit\Models\AttachmentFixture.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\Models\ConfigFixture.cs" />

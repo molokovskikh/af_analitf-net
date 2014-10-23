@@ -179,7 +179,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			nameViewModel.EnterCatalog();
 
 			var offer = (CatalogOfferViewModel)shell.ActiveItem;
-			offer.SearchInCatalog(null, WpfHelper.TextArgs("а"));
+			offer.SearchInCatalog(null, WpfTestHelper.TextArgs("а"));
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogViewModel>());
 			Assert.That(catalogModel.SearchText, Is.EqualTo("а"));
 			Assert.That(catalogModel.CurrentCatalogName.Name.ToLower(), Is.StringStarting("а"));

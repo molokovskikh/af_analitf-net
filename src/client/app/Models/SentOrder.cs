@@ -66,6 +66,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		uint Id { get; }
 
+		uint DisplayId { get; }
+
 		DateTime CreatedOn { get; }
 
 		Price Price { get; }
@@ -120,6 +122,11 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual uint Id { get; set; }
+
+		public virtual uint DisplayId
+		{
+			get { return (uint)ServerId; }
+		}
 
 		public virtual Price Price { get; set; }
 

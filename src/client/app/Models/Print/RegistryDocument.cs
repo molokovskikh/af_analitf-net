@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Config.Initializers;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
@@ -14,16 +15,17 @@ namespace AnalitF.Net.Client.Models.Print
 	[Description("Настройка печати реестра")]
 	public class RegistryDocumentSettings
 	{
-		public RegistryDocumentSettings(Waybill waybill)
+		public RegistryDocumentSettings Setup(Waybill waybill)
 		{
 			RegistryId = waybill.ProviderDocumentId;
 			Date = waybill.DocumentDate;
+			return this;
 		}
 
-		[Display(Name = "Реестр №", Order = 0)]
+		[Display(Name = "Реестр №", Order = 0), Ignore]
 		public string RegistryId { get; set; }
 
-		[Display(Name = "Дата", Order = 1)]
+		[Display(Name = "Дата", Order = 1), Ignore]
 		public DateTime Date { get; set; }
 
 		[Display(Name = "Члены комиссии", Order = 2)]
@@ -53,7 +55,7 @@ namespace AnalitF.Net.Client.Models.Print
 			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
 
 			settings = waybill.WaybillSettings;
-			docSettings = new RegistryDocumentSettings(waybill);
+			docSettings = waybill.GetRegistryDocSettings();
 			Settings = docSettings;
 
 			BlockStyle = new Style(typeof(Paragraph)) {

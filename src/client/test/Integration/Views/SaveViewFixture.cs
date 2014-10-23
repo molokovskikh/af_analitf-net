@@ -38,8 +38,8 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void InitView()
 		{
-			model = Init(new CatalogOfferViewModel(catalog));
-			view = InitView<CatalogOfferView>(model);
+			model = new CatalogOfferViewModel(catalog);
+			view = (CatalogOfferView)Bind(model);
 			model.SaveDefaults(view);
 		}
 

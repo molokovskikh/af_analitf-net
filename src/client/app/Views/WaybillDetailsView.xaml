@@ -169,13 +169,16 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="*" Header="Розничная наценка"
 					Binding="{Binding RetailMarkup}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="False" />
 				<c:DataGridTextColumnEx Width="*" Header="Реальная наценка"
 					Binding="{Binding RealRetailMarkup}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="False" />
 				<c:DataGridTextColumnEx Width="*" Header="Розничная цена"
 					Binding="{Binding RetailCost}"
-					TextAlignment="Right" />
+					TextAlignment="Right"
+					IsReadOnly="False" />
 				<c:DataGridTextColumnEx Width="*" Header="Заказ"
 					Binding="{Binding Quantity}"
 					TextAlignment="Right" />
@@ -218,7 +221,7 @@
 				</Grid.RowDefinitions>
 
 				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Заказ №:</Label>
-				<Label Grid.Row="0" Grid.Column="1" Name="CurrentOrderLine_Order_Id" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="CurrentOrderLine_Order_DisplayId" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
 				<Label Grid.Row="1" Grid.Column="1" Name="CurrentOrderLine_Order_LinesCount" FontWeight="Bold"></Label>

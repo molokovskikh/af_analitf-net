@@ -74,7 +74,6 @@ namespace AnalitF.Net.Service.Models
 		private ClientSettings clientSettings;
 		private OrderRules orderRules;
 		private Version version;
-		private List<UpdateData> result = new List<UpdateData>();
 
 		public Config.Config Config;
 
@@ -91,6 +90,7 @@ namespace AnalitF.Net.Service.Models
 		public List<OrderBatchItem> BatchItems;
 		public Address BatchAddress;
 		public bool ResetLastUpdate;
+		public List<UpdateData> Result = new List<UpdateData>();
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
@@ -646,8 +646,8 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 		private void ExportPromotions()
 		{
 			if (!clientSettings.ShowAdvertising) {
-				Export(result, "PromotionCatalogs", new [] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
-				Export(result, "Promotions", new [] { "Id" }, Enumerable.Empty<object[]>());
+				Export(Result, "PromotionCatalogs", new [] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
+				Export(Result, "Promotions", new [] { "Id" }, Enumerable.Empty<object[]>());
 				return;
 			}
 
@@ -667,7 +667,7 @@ select
 	sp.Annotation
 from usersettings.SupplierPromotions sp
 where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(result, sql, "Promotions", new { regionMask = userSettings.WorkRegionMask });
+			Export(Result, sql, "Promotions", new { regionMask = userSettings.WorkRegionMask });
 			sql = @"
 select
 	pc.CatalogId,
@@ -675,7 +675,7 @@ select
 from usersettings.PromotionCatalogs pc
 	join usersettings.SupplierPromotions sp on pc.PromotionId = sp.Id
 where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(result, sql, "PromotionCatalogs", new { regionMask = userSettings.WorkRegionMask });
+			Export(Result, sql, "PromotionCatalogs", new { regionMask = userSettings.WorkRegionMask });
 
 			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
 			if (Directory.Exists(Config.PromotionsPath)) {
@@ -683,7 +683,7 @@ where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
 					var local = promotion.GetFilename(Config);
 					if (String.IsNullOrEmpty(local))
 						continue;
-					result.Add(UpdateData.FromFile(promotion.GetArchiveName(local), local));
+					Result.Add(UpdateData.FromFile(promotion.GetArchiveName(local), local));
 				}
 			}
 		}
@@ -730,7 +730,7 @@ from Documents.Mails m
 	join customers.Suppliers s on s.Id = m.SupplierId
 where m.Id in ({0})", ids.Implode());
 
-			Export(result, sql, "mails", truncate: false);
+			Export(Result, sql, "mails", truncate: false);
 
 			sql = String.Format(@"
 select a.Id,
@@ -741,12 +741,12 @@ from Documents.Attachments a
 	join Documents.Mails m on m.Id = a.MailId
 where a.MailId in ({0})", ids.Implode());
 
-			Export(result, sql, "attachments", truncate: false);
+			Export(Result, sql, "attachments", truncate: false);
 
 			IEnumerable<Attachment> loadable = session.Query<Attachment>()
 				.Where(a => loadMaiIds.Contains(a.MailId))
 				.ToArray();
-			result.AddRange(loadable.Select(attachment => UpdateData.FromFile(attachment.GetArchiveName(), attachment.GetFilename(Config))));
+			Result.AddRange(loadable.Select(attachment => UpdateData.FromFile(attachment.GetArchiveName(), attachment.GetFilename(Config))));
 			session.SaveEach(pendingMails);
 		}
 
@@ -784,7 +784,7 @@ where a.MailId in ({0})", ids.Implode());
 		private void ExportOrders()
 		{
 			if (Orders != null) {
-				Export(result, "Orders",
+				Export(Result, "Orders",
 					new[] {
 						"ExportId",
 						"CreatedOn",
@@ -833,7 +833,7 @@ where a.MailId in ({0})", ids.Implode());
 						items.Select(i => i.ProductId).DefaultIfEmpty(0u).Implode()))
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Convert.ToUInt32(r["CatalogId"]));
 
-				Export(result, "OrderLines",
+				Export(Result, "OrderLines",
 					new[] {
 						"ExportOrderId",
 						"ExportId",
@@ -911,7 +911,7 @@ where a.MailId in ({0})", ids.Implode());
 						}), truncate: false);
 
 				if (BatchItems != null) {
-					Export(result, "BatchLines",
+					Export(Result, "BatchLines",
 						new[] {
 							"ExportLineId",
 							"AddressId",
@@ -969,7 +969,7 @@ where a.MailId in ({0})", ids.Implode());
 				}
 			}
 
-			Export(result, "Orders",
+			Export(Result, "Orders",
 				new[] {
 					"ExportId",
 					"CreatedOn",
@@ -1035,7 +1035,7 @@ from Logs.PendingOrderLogs l
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
 where l.UserId = ?userId
 group by ol.RowId";
-			Export(result, sql, "OrderLines", new { userId = user.Id }, false);
+			Export(Result, sql, "OrderLines", new { userId = user.Id }, false);
 		}
 
 		public void ExportSentOrders(ulong[] existOrderIds)
@@ -1065,7 +1065,7 @@ select oh.RowId as ServerId,
 	oh.ClientAddition as Comment
 from Orders.OrdersHead oh
 {0}", condition);
-			Export(result, sql, "SentOrders", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrders", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select ol.RowId as ServerId,
@@ -1115,7 +1115,7 @@ from Orders.OrdersHead oh
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
 {0}
 group by ol.RowId", condition);
-			Export(result, sql, "SentOrderLines", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrderLines", new { userId = user.Id }, false);
 		}
 
 		public void ExportDocs()
@@ -1133,7 +1133,7 @@ group by ol.RowId", condition);
 
 			if (logs.Length == 0) {
 				//мы должны передать LoadedDocuments что бы клиент очистил таблицу
-				Export(result,
+				Export(Result,
 					"LoadedDocuments",
 					new[] { "Id", "Type", "SupplierId", "OriginFilename" },
 					new object[0][]);
@@ -1151,6 +1151,10 @@ group by ol.RowId", condition);
 					continue;
 				if (doc.Document.DocumentType == DocType.Rejects && !user.SendRejects)
 					continue;
+				//если это конвертированный документ мы не должны доставлять файл но должны доставить разобранную
+				//накладную
+				if (doc.Document.IsFake)
+					continue;
 				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
@@ -1159,7 +1163,7 @@ group by ol.RowId", condition);
 					if (!Directory.Exists(path))
 						continue;
 					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
-					result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
+					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
@@ -1174,7 +1178,7 @@ group by ol.RowId", condition);
 			sql = String.Format(@"
 select d.RowId as Id,
 	dh.ProviderDocumentId,
-	convert_tz(dh.WriteTime, @@session.time_zone,'+00:00') as WriteTime,
+	convert_tz(now(), @@session.time_zone,'+00:00') as WriteTime,
 	convert_tz(dh.DocumentDate, @@session.time_zone,'+00:00') as DocumentDate,
 	dh.AddressId,
 	dh.FirmCode as SupplierId,
@@ -1195,7 +1199,7 @@ from Logs.Document_logs d
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id", ids);
-			Export(result, sql, "Waybills", new { userId = user.Id }, false);
+			Export(Result, sql, "Waybills", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select db.Id,
@@ -1228,7 +1232,7 @@ from Logs.Document_logs d
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
-			Export(result, sql, "WaybillLines", new { userId = user.Id }, false);
+			Export(Result, sql, "WaybillLines", new { userId = user.Id }, false);
 
 			sql = String.Format(@"
 select DocumentLineId, OrderLineId
@@ -1237,7 +1241,7 @@ from Documents.WaybillOrders wo
 		join Documents.DocumentHeaders dh on db.DocumentId = dh.Id
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
-			Export(result, sql, "WaybillOrders", truncate: false);
+			Export(Result, sql, "WaybillOrders", truncate: false);
 
 			var documentExported = session.CreateSQLQuery(@"
 select d.RowId
@@ -1252,7 +1256,7 @@ group by dh.Id")
 				.Each(l => l.DocumentDelivered = true);
 
 			var delivered = logs.Where(l => l.DocumentDelivered || l.FileDelivered).ToArray();
-			Export(result,
+			Export(Result,
 				"LoadedDocuments",
 				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
 				delivered.Select(l => new object[] {
@@ -1336,7 +1340,7 @@ group by dh.Id")
 			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
-				foreach (var tuple in result) {
+				foreach (var tuple in Result) {
 					var filename = tuple.LocalFileName;
 					//экспоритровать пустые файлы важно тк пустой файл привед к тому что таблица бедет очищена
 					//напимер в случае если последний адрес доставки был отключен
@@ -1360,8 +1364,8 @@ group by dh.Id")
 
 		public void ExportAll()
 		{
-			Export(result);
-			ExportUpdate(result);
+			Export(Result);
+			ExportUpdate(Result);
 			ExportAds();
 		}
 
@@ -1382,7 +1386,7 @@ group by dh.Id")
 
 		public void ExportAds()
 		{
-			ExportAds(result);
+			ExportAds(Result);
 		}
 
 		private void ExportAds(List<UpdateData> zip)

@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = "Адрес доставки больше не доступен";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. адрес доставки больше не доступен.", sourceOrder.Id, GuesAction(sourceOrder)));
+				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. адрес доставки больше не доступен.", sourceOrder.DisplayId, GuesAction(sourceOrder)));
 				return;
 			}
 
@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = "Прайс-листа нет в обзоре";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. прайс-листа нет в обзоре.", sourceOrder.Id, GuesAction(sourceOrder)));
+				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. прайс-листа нет в обзоре.", sourceOrder.DisplayId, GuesAction(sourceOrder)));
 				return;
 			}
 			var address = addressToOverride ?? sourceOrder.Address;
@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var count = session.Query<Offer>().Count(o => o.Price == sourceOrder.Price);
 			if (count == 0) {
 				log.AppendLine(String.Format("Заказ №{0} невозможно {3}, т.к. прайс-листа {1} - {2} нет в обзоре",
-					sourceOrder.Id,
+					sourceOrder.DisplayId,
 					sourceOrder.Price.Name,
 					sourceOrder.Price.RegionName,
 					GuesAction(sourceOrder)));

@@ -1,12 +1,8 @@
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
@@ -19,19 +15,14 @@ using AnalitF.Net.Client.Views.Offers;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
 using Common.Tools;
-using Common.Tools.Calendar;
-using Devart.Common;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
-using WpfHelper = AnalitF.Net.Client.Helpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
 	[TestFixture]
-	public class CatalogOfferViewFixture : BaseViewFixture
+	public class CatalogOfferFixture : BaseViewFixture
 	{
 		[Test]
 		public void Open_shell()

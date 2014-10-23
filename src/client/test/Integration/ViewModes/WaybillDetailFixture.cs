@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -28,7 +29,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[SetUp]
 		public void Setup()
 		{
-			waybill = Fixture<UnknownWaybill>().Waybill;
+			waybill = Fixture<LocalWaybill>().Waybill;
 			model = Init(new WaybillDetails(waybill.Id));
 		}
 
@@ -131,6 +132,24 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == line.Id)).ToArray();
 			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
 			Assert.AreEqual(String.Format("Файл 'Сертификаты для {0} серия {1}' загружен", line.Product, line.SerialNumber), WaitNotification());
+		}
+
+		[Test]
+		public void Persis_registry_config()
+		{
+			var results = model.PrintRegistry().GetEnumerator();
+			Assert.IsTrue(results.MoveNext());
+			var target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
+			target.CommitteeMember1 = "Член комитета №1";
+			Assert.IsTrue(results.MoveNext());
+			Assert.IsNotNull(results.Current);
+			Close(model);
+
+			model = Init(new WaybillDetails(waybill.Id));
+			results = model.PrintRegistry().GetEnumerator();
+			Assert.IsTrue(results.MoveNext());
+			target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
+			Assert.AreEqual("Член комитета №1", target.CommitteeMember1);
 		}
 	}
 }

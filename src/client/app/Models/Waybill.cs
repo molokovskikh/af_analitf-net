@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Print;
 using Common.Tools;
 using NHibernate;
 using NHibernate = AnalitF.Net.Client.Config.Initializers.NHibernate;
@@ -248,6 +249,20 @@ namespace AnalitF.Net.Client.Models
 			{
 				return new[] { "ProviderDocumentId", "UserSupplierName" };
 			}
+		}
+
+		public virtual WaybillDocumentSettings GetWaybillDocSettings()
+		{
+			if (Settings.WaybillDoc == null)
+				Settings.WaybillDoc = new WaybillDocumentSettings();
+			return Settings.WaybillDoc.Setup(this);
+		}
+
+		public virtual RegistryDocumentSettings GetRegistryDocSettings()
+		{
+			if (Settings.RegistryDoc == null)
+				Settings.RegistryDoc = new RegistryDocumentSettings();
+			return Settings.RegistryDoc.Setup(this);
 		}
 	}
 }

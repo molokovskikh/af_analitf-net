@@ -19,20 +19,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ViewSetup.Setup();
 		}
 
-		protected T InitView<T>(BaseScreen model) where T : DependencyObject, new()
-		{
-			var view = ViewLocator.LocateForModel(model, null, null);
-			ViewModelBinder.Bind(model, view, null);
-			return view as T;
-		}
-
-		protected UIElement InitView(object model)
-		{
-			var view = ViewLocator.LocateForModel(model, null, null);
-			ViewModelBinder.Bind(model, view, null);
-			return view;
-		}
-
 		public static void ForceBinding(UIElement view)
 		{
 			var size = new Size(1000, 1000);
@@ -43,7 +29,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected UserControl Bind(BaseScreen priceViewModel)
 		{
 			var model = Init(priceViewModel);
-			var view = InitView(model);
+			var view1 = ViewLocator.LocateForModel(model, null, null);
+			ViewModelBinder.Bind(model, view1, null);
+			var view = view1;
 			ForceBinding(view);
 			return (UserControl)view;
 		}

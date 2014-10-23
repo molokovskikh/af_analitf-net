@@ -10,7 +10,6 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using NUnit.Framework;
-using WpfHelper = AnalitF.Net.Client.Test.TestHelpers.WpfHelper;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -42,22 +41,21 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Show_action_buttons()
 		{
-			WpfHelper.WithWindow(w => {
+			WpfTestHelper.WithWindow(async w => {
 				var model = new OrdersViewModel();
 				var view = Bind(model);
 				w.Content = view;
 
-				w.Loaded += (sender, args) => {
-					var tabs = view.Descendants<TabControl>().First();
-					tabs.SelectedItem = tabs.Items[1];
-					var restore = view.Descendants<Button>().First(b => b.Name == "RestoreOrder");
-					var reorder = view.Descendants<Button>().First(b => b.Name == "Reorder");
-					var freeze = view.Descendants<Button>().First(b => b.Name == "Freeze");
-					Assert.AreEqual(Visibility.Visible, restore.Visibility);
-					Assert.AreEqual(Visibility.Visible, reorder.Visibility);
-					Assert.AreEqual(Visibility.Collapsed, freeze.Visibility);
-					WpfHelper.Shutdown(w);
-				};
+				await w.WaitLoaded();
+				var tabs = view.Descendants<TabControl>().First();
+				tabs.SelectedItem = tabs.Items[1];
+				var restore = view.Descendants<Button>().First(b => b.Name == "RestoreOrder");
+				var reorder = view.Descendants<Button>().First(b => b.Name == "Reorder");
+				var freeze = view.Descendants<Button>().First(b => b.Name == "Freeze");
+				Assert.AreEqual(Visibility.Visible, restore.Visibility);
+				Assert.AreEqual(Visibility.Visible, reorder.Visibility);
+				Assert.AreEqual(Visibility.Collapsed, freeze.Visibility);
+				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}

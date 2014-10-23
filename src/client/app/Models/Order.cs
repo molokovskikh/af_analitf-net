@@ -53,6 +53,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
+		public virtual uint DisplayId
+		{
+			get { return Id; }
+		}
+
 		public virtual uint? ExportId { get; set; }
 
 		public virtual DateTime CreatedOn { get; set; }
