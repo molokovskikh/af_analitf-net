@@ -8,9 +8,6 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	//todo - перед экспортом предложений очищать предложения по прай-листам которые синхронизируются
-	//todo - вычислять наличие предложений для каталога и мнн
-	//todo - очистка скрытых для каталога и производителей
 	public class ImportCommand : DbCommand
 	{
 		private List<System.Tuple<string, string[]>> data;
@@ -142,7 +139,11 @@ drop temporary table ExistsCatalogs;")
 				sql += String.Format("TRUNCATE {0}; ", tableName);
 			}
 			else if (tableName.Match("offers")) {
-
+				sql += @"
+delete o from Offers o
+join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
+where p.IsSynced = 1;
+";
 			}
 
 			var columns = meta;

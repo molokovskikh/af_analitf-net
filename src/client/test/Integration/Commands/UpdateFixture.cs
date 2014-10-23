@@ -18,6 +18,8 @@ using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
+using Test.Support.Suppliers;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Commands
@@ -426,6 +428,40 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.AreEqual(1, localOrder.Lines.Count);
 			Assert.AreEqual(1, localOrder.LinesCount);
 			Assert.That(localOrder.Lines[0].ResultCost, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Clean_offers()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			supplier.CreateSampleCore(session);
+			var serverUser = ServerUser();
+			serverUser.Client.MaintainIntersection(session);
+
+			Run(new UpdateCommand());
+			var price = localSession.Query<Price>().First(p => p.SupplierId == supplier.Id);
+			var oldOffer = localSession.Query<Offer>().First(o => o.Price == price);
+
+			session.BeginTransaction();
+			var testPrice = supplier.Prices[0];
+			session.CreateSQLQuery("delete from Farm.Core0 where PriceCode = :priceId")
+				.SetParameter("priceId", testPrice.Id)
+				.ExecuteUpdate();
+			session.Clear();
+			supplier = session.Load<TestSupplier>(supplier.Id);
+			supplier.CreateSampleCore(session);
+			session.CreateSQLQuery("update Customers.AnalitFNetPriceReplications set UpdateTime = now() where UserId = :userId and priceId = :priceId")
+				.SetParameter("priceId", testPrice.Id)
+				.SetParameter("userId", serverUser.Id)
+				.ExecuteUpdate();
+
+			Run(new UpdateCommand());
+
+			localSession.Clear();
+			var newOffer = localSession.Query<Offer>().FirstOrDefault(o => o.Price == price);
+			oldOffer = localSession.Get<Offer>(oldOffer.Id);
+			Assert.IsNull(oldOffer);
+			Assert.IsNotNull(newOffer);
 		}
 	}
 }

@@ -28,6 +28,7 @@ namespace AnalitF.Net.Service.Test
 		private string file;
 		private TestClient client;
 		private Config.Config config;
+		private RequestLog requestLog;
 
 		[SetUp]
 		public void Setup()
@@ -181,11 +182,17 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Sync_only_changed()
 		{
+			InitAd();
 			exporter.ExportAll();
 			var result = ReadResult();
-			Assert.That(result.First(r => r.FileName == "catalogs.txt").UncompressedSize, Is.GreaterThan(0));
-			Assert.That(result.First(r => r.FileName == "catalognames.txt").UncompressedSize, Is.GreaterThan(0));
-			Assert.That(result.First(r => r.FileName == "offers.txt").UncompressedSize, Is.GreaterThan(0));
+			var zeros = new [] {
+				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt"
+			};
+			foreach (var zero in zeros) {
+				Assert.That(result.First(r => r.FileName.Match(zero)).UncompressedSize, Is.GreaterThan(0),
+					"пользователь {0} файл {1}", user.Id, zero);
+			}
+
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MinCosts"));
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
@@ -195,17 +202,20 @@ namespace AnalitF.Net.Service.Test
 				Session = session
 			};
 			controller.Delete();
-			Init();
 
+			Init();
+			requestLog.LastSync = session.Load<AnalitfNetData>(user.Id).LastUpdateAt;
+			exporter.AdsPath = "ads";
 			exporter.ExportAll();
 			result = ReadResult();
-			Assert.AreEqual(0, result.First(r => r.FileName == "catalogs.txt").UncompressedSize);
-			Assert.AreEqual(0, result.First(r => r.FileName == "catalognames.txt").UncompressedSize);
-			Assert.AreEqual(0, result.First(r => r.FileName == "offers.txt").UncompressedSize,
-				"пользователь {0}", user.Id);
+			foreach (var zero in zeros) {
+				Assert.AreEqual(0, result.First(r => r.FileName.Match(zero)).UncompressedSize,
+					"пользователь {0} файл {1}", user.Id, zero);
+			}
 			resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.Not.StringContaining("MinCosts"));
 			Assert.That(resultFiles, Is.Not.StringContaining("MaxProducerCosts"));
+			Assert.That(resultFiles, Is.Not.StringContaining("ads"));
 		}
 
 		[Test]
@@ -225,7 +235,8 @@ namespace AnalitF.Net.Service.Test
 
 		private void Init()
 		{
-			exporter = new Exporter(session, config, new RequestLog(user, Version.Parse("1.1"))) {
+			requestLog = new RequestLog(user, Version.Parse("1.1"));
+			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
 				UpdatePath = "update",

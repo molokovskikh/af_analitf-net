@@ -202,7 +202,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal VitallyImportantCostFactor { get; set; }
 
 		//экспортировался ли прайс-лист при последнем обновлении
-		public virtual bool Fresh { get; set; }
+		public virtual bool IsSynced { get; set; }
 
 		[Style("Name")]
 		public virtual bool NotBase

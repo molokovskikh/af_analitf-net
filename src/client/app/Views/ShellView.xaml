@@ -99,6 +99,9 @@
 								cal:Message.Attach="SendOrders" />
 							<MenuItem Header="Загрузить и получить накладные, сертификаты"
 								cal:Message.Attach="MicroUpdate" />
+							<Separator />
+							<MenuItem Header="Кумулятивное обновление"
+								cal:Message.Attach="CleanSync" />
 						</ItemsControl>
 					</xctk:SplitButton.DropDownContent>
 				</xctk:SplitButton>

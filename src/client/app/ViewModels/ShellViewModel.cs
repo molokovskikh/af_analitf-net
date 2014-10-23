@@ -640,6 +640,13 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 		}
 
+		public IEnumerable<IResult> CleanSync()
+		{
+			User.Value.LastSync = null;
+			session.Flush();
+			return Sync(new UpdateCommand());
+		}
+
 		public bool CanLoadOrderHistory
 		{
 			get { return Settings.Value.LastUpdate != null; }
@@ -651,8 +658,8 @@ namespace AnalitF.Net.Client.ViewModels
 				SyncData = "OrderHistory"
 			});
 		}
-		public bool CanLoadWaybillHistory
 
+		public bool CanLoadWaybillHistory
 		{
 			get { return Settings.Value.LastUpdate != null; }
 		}

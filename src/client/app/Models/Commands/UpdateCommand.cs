@@ -105,7 +105,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync("History", data, Token));
 			}
 			else {
-				var url = Config.SyncUrl(syncData);
+				var user = Session.Query<User>().FirstOrDefault();
+				var url = Config.SyncUrl(syncData, user == null ? null : user.LastSync);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
 				response = Wait(Config.WaitUrl(url), request);

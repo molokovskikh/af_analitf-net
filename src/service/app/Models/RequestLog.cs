@@ -23,13 +23,14 @@ namespace AnalitF.Net.Service.Models
 			LocalHost = Environment.MachineName;
 		}
 
-		public RequestLog(User user, HttpRequestMessage request, string updateType)
+		public RequestLog(User user, HttpRequestMessage request, string updateType, DateTime? lastSync = null)
 		{
 			User = user;
 			CreatedOn = DateTime.Now;
 			Version = RequestHelper.GetVersion(request);
 			LocalHost = Environment.MachineName;
 			UpdateType = updateType;
+			LastSync = lastSync;
 			if (request.Properties.ContainsKey("MS_HttpContext"))
 				RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 		}
@@ -60,8 +61,10 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual string LocalHost { get; set; }
 
-		//описаине ошибки которое возврашается пользователю
+		//описание ошибки которое возвращается пользователю
 		public virtual string ErrorDescription { get; set; }
+
+		public virtual DateTime? LastSync { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

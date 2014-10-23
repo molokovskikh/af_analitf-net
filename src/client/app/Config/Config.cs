@@ -180,12 +180,15 @@ namespace AnalitF.Net.Client.Config
 			return builder.Uri;
 		}
 
-		public Uri SyncUrl(string key)
+		public Uri SyncUrl(string key, DateTime? lastSync)
 		{
 			var queryString = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("reset", "true"),
 				new KeyValuePair<string, string>("data", key)
 			};
+
+			if (lastSync != null)
+				queryString.Add(new KeyValuePair<string, string>("lastSync", lastSync.Value.ToString("O")));
 
 			var stringBuilder = new StringBuilder();
 			foreach (var keyValuePair in queryString) {
@@ -198,8 +201,8 @@ namespace AnalitF.Net.Client.Config
 			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
 				Query = stringBuilder.ToString(),
 			};
-			var url = builder.Uri;
-			return url;
+			Console.WriteLine(builder.Uri);
+			return builder.Uri;
 		}
 
 		public List<ResultDir> KnownDirs(Settings settings)

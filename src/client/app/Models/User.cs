@@ -93,6 +93,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string SupportHours { get; set; }
 
+		public virtual DateTime? LastSync { get; set; }
+
 		public virtual IList<Permission> Permissions { get; set; }
 
 		public virtual bool CanPrint<T>()

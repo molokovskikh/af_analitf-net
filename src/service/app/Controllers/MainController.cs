@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Mail;
-using System.Threading.Tasks;
 using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
@@ -18,20 +15,17 @@ using Common.NHibernate;
 using Common.Tools;
 using MySql.Data.MySqlClient;
 using NHibernate.Linq;
-using Newtonsoft.Json;
-using SmartOrderFactory;
-using Attachment = System.Net.Mail.Attachment;
 
 namespace AnalitF.Net.Service.Controllers
 {
 	public class MainController : JobController
 	{
-		public HttpResponseMessage Get(bool reset = false, string data = null)
+		public HttpResponseMessage Get(bool reset = false, string data = null, DateTime? lastSync = null)
 		{
 			var existsJob = TryFindJob(reset);
 
 			if (existsJob == null) {
-				existsJob  = new RequestLog(CurrentUser, Request, data);
+				existsJob  = new RequestLog(CurrentUser, Request, data, lastSync);
 				RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
 					(session, config, job) => {
 						using (var exporter = new Exporter(session, config, job)) {
@@ -80,7 +74,8 @@ where UserId = :userId;")
 				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
 			if (job != null) {
 				job.IsConfirmed = true;
-				File.Delete(job.OutputFile(Config));
+				if (!Config.DebugExport)
+					File.Delete(job.OutputFile(Config));
 			}
 
 			return new HttpResponseMessage();

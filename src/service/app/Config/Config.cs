@@ -28,5 +28,7 @@ namespace AnalitF.Net.Service.Config
 		public string OfficeMail { get; set; }
 		public string BillingMail { get; set; }
 		public TimeSpan ResultTimeout { get; set; }
+		public bool DebugExport { get; set; }
+		public long MaxReclameFileSize { get; set; }
 	}
 }

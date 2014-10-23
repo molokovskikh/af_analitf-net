@@ -59,6 +59,12 @@ namespace AnalitF.Net.Service.Models
 		}
 	}
 
+	//накопительное, промоакции - в prgdata промоакции экспортируются всегда хотя нет причин почему так происходит
+	//накопительное, минипочта - в prgdata при кумулятивном обновлении минипочта не сбрасывается, сбрасывается только если происходит
+	//ограниченное кумулятивное обновление
+	//todo - накопительное, накладные в prgdata отправленные накладные сбрасываются на основании даты полученной с клиента
+	//накопительное, заказы - сбрасывается только в случае ограниченного кумулятивного
+	//накопительное, новости - экспортируются всегда, хотя можно синхронизировать
 	public class Exporter : IDisposable
 	{
 		private ILog log = LogManager.GetLogger(typeof(Exporter));
@@ -73,7 +79,7 @@ namespace AnalitF.Net.Service.Models
 		private UserSettings userSettings;
 		private ClientSettings clientSettings;
 		private OrderRules orderRules;
-		private Version version;
+		private RequestLog job;
 
 		public Config.Config Config;
 
@@ -89,13 +95,12 @@ namespace AnalitF.Net.Service.Models
 		public List<Order> Orders;
 		public List<OrderBatchItem> BatchItems;
 		public Address BatchAddress;
-		public bool ResetLastUpdate;
 		public List<UpdateData> Result = new List<UpdateData>();
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
 			this.session = session;
-			version = job.Version;
+			this.job = job;
 			Prefix = job.Id.ToString();
 
 			ResultPath = config.ResultPath;
@@ -106,8 +111,7 @@ namespace AnalitF.Net.Service.Models
 			MaxProducerCostPriceId = config.MaxProducerCostPriceId;
 			MaxProducerCostCostId = config.MaxProducerCostCostId;
 
-			//job может находиться в другой сессии по этому загрузаем пользователя из текущей сессии
-			user = session.Load<User>(job.User.Id);
+			user = job.User;
 			data = session.Get<AnalitfNetData>(user.Id);
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
@@ -119,8 +123,13 @@ namespace AnalitF.Net.Service.Models
 		{
 			data = data ?? new AnalitfNetData(user);
 			data.LastPendingUpdateAt = DateTime.Now;
-			if (ResetLastUpdate)
+			if (job.LastSync != data.LastUpdateAt) {
+				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
+					" последние обновление на клиента {0}" +
+					" последнее обновление на сервере {1}" +
+					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
 				data.LastUpdateAt = DateTime.MinValue;
+			}
 			session.Save(data);
 
 			//по умолчанию fresh = 1
@@ -169,7 +178,7 @@ FROM
 WHERE
 	s.ClientId = ?clientId
 and s.Enable = 1";
-				Export(result, sql, "Schedules", new { clientId = user.Client.Id });
+				Export(result, sql, "Schedules", truncate: true, parameters: new { clientId = user.Client.Id });
 			}
 			else {
 				//если настройка отключена мы все равно должны экспортировать пустую таблицу
@@ -190,6 +199,7 @@ select Id,
 	CauseRejects,
 	CancelDate is not null as Canceled
 from Farm.Rejects
+where UpdateTime >= ?lastUpdate
 union
 select
 	l.RejectId,
@@ -202,12 +212,10 @@ select
 	convert_tz(LetterDate, @@session.time_zone,'+00:00') as LetterDate,
 	l.CauseRejects,
 	1 as Canceled
-from
-	Logs.RejectLogs l
-where
-	l.LogTime >= ?lastUpdate
+from Logs.RejectLogs l
+where l.LogTime >= ?lastUpdate
 and l.Operation = 2";
-			Export(result, sql, "Rejects", new { lastUpdate = data.LastUpdateAt });
+			Export(result, sql, "Rejects", truncate: false, parameters: new { lastUpdate = data.LastUpdateAt });
 
 			var legalEntityCount = session.CreateSQLQuery(@"
 select
@@ -231,7 +239,7 @@ from Customers.Addresses a
 	join Customers.UserAddresses ua on ua.AddressId = a.Id
 	join Billing.LegalEntities le on le.Id = a.LegalEntityId
 where a.Enabled = 1 and ua.UserId = ?userId", addressName);
-			Export(result, sql, "Addresses", new { userId = user.Id });
+			Export(result, sql, "Addresses", truncate: true, parameters: new { userId = user.Id });
 
 
 			var contacts = session.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
@@ -249,15 +257,17 @@ select u.Id,
 	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost,
 	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
-	?supportHours as SupportHours
+	?supportHours as SupportHours,
+	?lastSync as LastSync
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
 where u.Id = ?userId";
-			Export(result, sql, "Users", new {
+			Export(result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
 				supportPhone = HtmlToText(rawPhone),
-				supportHours = HtmlToText(rawHours)
+				supportHours = HtmlToText(rawHours),
+				lastSync = data.LastPendingUpdateAt
 			});
 
 			sql = @"
@@ -268,7 +278,7 @@ from Usersettings.AssignedPermissions a
 	join Usersettings.UserPermissions up on up.Id = a.PermissionId
 where a.UserId = ?userId
 	and up.Type in (1, 2)";
-			Export(result, sql, "Permissions", new { userId = user.Id });
+			Export(result, sql, "Permissions", truncate: true, parameters: new { userId = user.Id });
 
 			CreateMaxProducerCosts();
 
@@ -290,36 +300,38 @@ from
 where u.Id = ?UserId
 	and a.Enabled = 1
 ";
-			Export(result, sql, "MinOrderSumRules", new { userId = user.Id });
+			Export(result, sql, "MinOrderSumRules", truncate: true, parameters: new { userId = user.Id });
 			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt) {
 				sql = @"select * from Usersettings.MaxProducerCosts";
-				Export(result, sql, "MaxProducerCosts");
+				Export(result, sql, "MaxProducerCosts", truncate: true);
 			}
 
 			sql = @"select
-p.PriceCode as PriceId,
-p.PriceName as PriceName,
-s.Name as Name,
-r.RegionCode as RegionId,
-r.Region as RegionName,
-s.Id as SupplierId,
-s.Name as SupplierName,
-s.FullName as SupplierFullName,
-rd.Storage,
-if(p.DisabledByClient or not p.Actual, 0, p.PositionCount) as PositionCount,
-convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
-rd.OperativeInfo,
-rd.ContactInfo,
-rd.SupportPhone as Phone,
-rd.AdminMail as Email,
-p.FirmCategory as Category,
-p.DisabledByClient
+	p.PriceCode as PriceId,
+	p.PriceName as PriceName,
+	s.Name as Name,
+	r.RegionCode as RegionId,
+	r.Region as RegionName,
+	s.Id as SupplierId,
+	s.Name as SupplierName,
+	s.FullName as SupplierFullName,
+	rd.Storage,
+	if(p.DisabledByClient or not p.Actual, 0, p.PositionCount) as PositionCount,
+	convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
+	rd.OperativeInfo,
+	rd.ContactInfo,
+	rd.SupportPhone as Phone,
+	rd.AdminMail as Email,
+	p.FirmCategory as Category,
+	p.DisabledByClient,
+	ifnull(ap.Fresh, 1) IsSynced
 from Usersettings.Prices p
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
 	join Farm.Regions r on r.RegionCode = p.RegionCode
-	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode";
-			Export(result, sql, "prices");
+	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
+	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode";
+			Export(result, sql, "prices", truncate: true);
 
 			sql = @"select
 	s.Id,
@@ -328,7 +340,7 @@ from Usersettings.Prices p
 	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
-			Export(result, sql, "suppliers");
+			Export(result, sql, "suppliers", truncate: true);
 
 			//у mysql неделя начинается с понедельника у .net с воскресенья
 			//приводим к виду .net
@@ -344,7 +356,7 @@ from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
 	join UserSettings.SupplierIntersection si on si.Id = pi.SupplierIntersectionId and si.SupplierID = p.FirmCode
 where
 	si.ClientId = ?clientId";
-			Export(result, sql, "DelayOfPayments", new { clientId = clientSettings.Id });
+			Export(result, sql, "DelayOfPayments", truncate: true, parameters: new { clientId = clientSettings.Id });
 
 			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
 			sql = @"select
@@ -398,13 +410,13 @@ left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and 
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(result, sql, "offers", new { userId = user.Id, lastSync = data.LastUpdateAt, cumulative = false });
+			Export(result, sql, "offers", truncate: false, parameters: new { userId = user.Id, cumulative = false });
 
-			var freshCount = Convert.ToUInt32(session
+			var syncPricesCount = Convert.ToUInt32(session
 				.CreateSQLQuery("select count(*) from Usersettings.ActivePrices ap where ap.Fresh = 1")
 				.UniqueResult());
 
-			if (freshCount > 0) {
+			if (syncPricesCount > 0) {
 				session.CreateSQLQuery(@"
 drop temporary table if exists MinCosts;
 
@@ -460,7 +472,7 @@ update MinCosts m
 join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
 set m.NextCost = n.NextCost;")
 					.ExecuteUpdate();
-				Export(result, "select * from MinCosts", "MinCosts");
+				Export(result, "select * from MinCosts", "MinCosts", true);
 			}
 
 			session.CreateSQLQuery(@"
@@ -506,7 +518,7 @@ select
 	1 as Hidden
 from logs.DescriptionLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2";
-			Export(result, sql, "ProductDescriptions", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select l.MnnId as Id, l.Mnn as Name, 1 as Hidden
@@ -516,7 +528,7 @@ union
 select Id, Mnn as Name, 0 as Hidden
 from Catalogs.Mnn m
 where m.UpdateTime > ?lastSync";
-			Export(result, sql, "mnns", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select cn.Id,
@@ -532,7 +544,7 @@ from Catalogs.CatalogNames cn
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 	and (cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync)
 group by cn.Id";
-			Export(result, sql, "catalognames", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select
@@ -546,7 +558,7 @@ select
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
-			Export(result, sql, "catalogs", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select l.ProducerId as Id, l.Name, 1 as Hidden
@@ -556,7 +568,7 @@ union
 select p.Id, p.Name, 0 as Hidden
 from Catalogs.Producers p
 where p.UpdateTime > ?lastSync";
-			Export(result, sql, "producers", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select Id, PublicationDate, Header, Deleted as Hidden
@@ -564,7 +576,7 @@ from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
 	and DestinationType in (1, 2)
 	and UpdateTime > ?lastSync";
-			Export(result, sql, "News", new { lastSync = data.LastUpdateAt }, false);
+			Export(result, sql, "News", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			var newses = session.CreateSQLQuery(@"select Id, Body
 from Usersettings.News
@@ -667,7 +679,7 @@ select
 	sp.Annotation
 from usersettings.SupplierPromotions sp
 where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "Promotions", new { regionMask = userSettings.WorkRegionMask });
+			Export(Result, sql, "Promotions", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
 			sql = @"
 select
 	pc.CatalogId,
@@ -675,7 +687,7 @@ select
 from usersettings.PromotionCatalogs pc
 	join usersettings.SupplierPromotions sp on pc.PromotionId = sp.Id
 where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "PromotionCatalogs", new { regionMask = userSettings.WorkRegionMask });
+			Export(Result, sql, "PromotionCatalogs", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
 
 			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
 			if (Directory.Exists(Config.PromotionsPath)) {
@@ -753,14 +765,14 @@ where a.MailId in ({0})", ids.Implode());
 		private void CachedExport(List<UpdateData> result, string sql, string tag)
 		{
 			if (Config == null) {
-				Export(result, sql, tag);
+				Export(result, sql, tag, truncate: true);
 				return;
 			}
 
 			var cacheData = Path.Combine(Config.CachePath, tag + ".txt");
 			var cacheMeta = Path.Combine(Config.CachePath, tag + ".meta.txt");
 			if (IsCacheStale(cacheData)) {
-				Export(result, sql, tag);
+				Export(result, sql, tag, truncate: true);
 				//если другая нитка успела обновить кеш раньше
 				if (IsCacheStale(tag)) {
 					var data = result.First(r => r.ArchiveFileName == tag + ".txt");
@@ -1035,7 +1047,7 @@ from Logs.PendingOrderLogs l
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
 where l.UserId = ?userId
 group by ol.RowId";
-			Export(Result, sql, "OrderLines", new { userId = user.Id }, false);
+			Export(Result, sql, "OrderLines", truncate: false, parameters: new { userId = user.Id });
 		}
 
 		public void ExportSentOrders(ulong[] existOrderIds)
@@ -1065,7 +1077,7 @@ select oh.RowId as ServerId,
 	oh.ClientAddition as Comment
 from Orders.OrdersHead oh
 {0}", condition);
-			Export(Result, sql, "SentOrders", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrders", truncate: false, parameters: new { userId = user.Id });
 
 			sql = String.Format(@"
 select ol.RowId as ServerId,
@@ -1115,7 +1127,7 @@ from Orders.OrdersHead oh
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
 {0}
 group by ol.RowId", condition);
-			Export(Result, sql, "SentOrderLines", new { userId = user.Id }, false);
+			Export(Result, sql, "SentOrderLines", truncate: false, parameters: new { userId = user.Id });
 		}
 
 		public void ExportDocs()
@@ -1199,7 +1211,7 @@ from Logs.Document_logs d
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id", ids);
-			Export(Result, sql, "Waybills", new { userId = user.Id }, false);
+			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 
 			sql = String.Format(@"
 select db.Id,
@@ -1232,7 +1244,7 @@ from Logs.Document_logs d
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 where d.RowId in ({0})
 group by dh.Id, db.Id", ids);
-			Export(Result, sql, "WaybillLines", new { userId = user.Id }, false);
+			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });
 
 			sql = String.Format(@"
 select DocumentLineId, OrderLineId
@@ -1281,7 +1293,7 @@ group by dh.Id")
 			}
 		}
 
-		public void Export(List<UpdateData> data, string sql, string file, object parameters = null, bool truncate = true)
+		public void Export(List<UpdateData> data, string sql, string file, bool truncate, object parameters = null)
 		{
 			var dataAdapter = new MySqlDataAdapter(sql + " limit 0", (MySqlConnection)session.Connection);
 			var dictionary = parameters != null ? ObjectExtentions.ToDictionary(parameters) : new Dictionary<string, object>();
@@ -1324,9 +1336,14 @@ group by dh.Id")
 
 		public string Compress(string file)
 		{
-			file = Path.Combine(ResultPath, file);
-			using(var stream = File.Create(file))
+			file = Path.GetFullPath(Path.Combine(ResultPath, file));
+			using(var stream = File.Create(file)) {
+				var watch = new Stopwatch();
+				watch.Start();
 				Compress(stream);
+				watch.Stop();
+				log.DebugFormat("Архив {2} создан за {0}, размер {1}", watch.Elapsed, stream.Length, file);
+			}
 			return file;
 		}
 
@@ -1335,15 +1352,13 @@ group by dh.Id")
 			if (!String.IsNullOrEmpty(Config.InjectedFault))
 				throw new Exception(Config.InjectedFault);
 
-			var watch = new Stopwatch();
-			watch.Start();
 			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 				zip.BeginUpdate();
 				foreach (var tuple in Result) {
 					var filename = tuple.LocalFileName;
-					//экспоритровать пустые файлы важно тк пустой файл привед к тому что таблица бедет очищена
-					//напимер в случае если последний адрес доставки был отключен
+					//экспортировать пустые файлы важно тк пустой файл приведет к тому что таблица будет очищена
+					//например в случае если последний адрес доставки был отключен
 					if (String.IsNullOrEmpty(filename)) {
 						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
 						zip.Add(content, tuple.ArchiveFileName);
@@ -1357,9 +1372,6 @@ group by dh.Id")
 				}
 				zip.CommitUpdate();
 			}
-			watch.Stop();
-
-			log.DebugFormat("Архив создан за {0}, размер {1}", watch.Elapsed, stream.Length);
 		}
 
 		public void ExportAll()
@@ -1403,7 +1415,12 @@ group by dh.Id")
 			if (String.IsNullOrEmpty(dir))
 				return;
 
-			AddDir(zip, dir, "ads");
+			var files = new DirectoryInfo(dir).EnumerateFiles()
+				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
+					&& f.LastWriteTime > data.LastUpdateAt
+					&& f.Length < Config.MaxReclameFileSize)
+				.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName });
+			zip.AddRange(files);
 		}
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
@@ -1433,7 +1450,7 @@ group by dh.Id")
 				return;
 
 			var updateVersion = Version.Parse(File.ReadAllText(file));
-			if (updateVersion <= version)
+			if (updateVersion <= job.Version)
 				return;
 
 			AddDir(zip, UpdatePath, "update");
