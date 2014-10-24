@@ -51,6 +51,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "updater\test\test.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stub", "updater\stub\stub.csproj", "{15062012-5439-48BF-8FB8-62DC3C7B76C4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proxy", "proxy", "{EAE5A359-D061-478B-B381-29FDA921C068}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "proxy\app\app.csproj", "{BB0320E9-5844-4AD0-A17D-355CF556B15C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		ChildrenFolder|Any CPU = ChildrenFolder|Any CPU
@@ -253,6 +257,15 @@ Global
 		{15062012-5439-48BF-8FB8-62DC3C7B76C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15062012-5439-48BF-8FB8-62DC3C7B76C4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{15062012-5439-48BF-8FB8-62DC3C7B76C4}.Release|x86.ActiveCfg = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.ChildrenFolder|Any CPU.ActiveCfg = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.ChildrenFolder|Any CPU.Build.0 = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.ChildrenFolder|x86.ActiveCfg = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -278,5 +291,6 @@ Global
 		{677DB511-BFB9-4FAA-877C-AF00A12487CD} = {514554E3-AC66-4F5C-86D3-0FB479EACD0F}
 		{18676AB8-9F29-41EC-A633-95CF6F8175C6} = {514554E3-AC66-4F5C-86D3-0FB479EACD0F}
 		{15062012-5439-48BF-8FB8-62DC3C7B76C4} = {514554E3-AC66-4F5C-86D3-0FB479EACD0F}
+		{BB0320E9-5844-4AD0-A17D-355CF556B15C} = {EAE5A359-D061-478B-B381-29FDA921C068}
 	EndGlobalSection
 EndGlobal

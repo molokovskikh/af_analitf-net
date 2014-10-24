@@ -9,6 +9,7 @@ import System.Xml.XPath.Extensions
 import System.Net
 import System.Text
 import Mono.Cecil
+import Microsoft.Web.Administration from "Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
@@ -23,8 +24,24 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 		id = Path.GetFileName(dir)
 		AddDirectory(id, dir, document, manager)
 
+def RegisterApp(sitename as string, path as string, fspath as string):
+	manager = ServerManager.OpenRemote("localhost")
+	site = manager.Sites[sitename]
+	raise "Не могу найте сайт $sitename" unless site
+	app = site.Applications.FirstOrDefault({a| a.Path == "/" + path})
+	return if app
+	app = site.Applications.Add("/" + path, fspath)
+	config = manager.GetApplicationHostConfiguration()
+	section = config.GetSection("system.webServer/security/authentication/anonymousAuthentication", "$sitename/$path")
+	section[@enabled] = false
+	section = config.GetSection("system.webServer/security/authentication/basicAuthentication", "$sitename/$path")
+	section[@enabled] = true
+	section[@realm] = "adc.analit.net"
+	section[@defaultLogonDomain] = "adc.analit.net"
+	manager.CommitChanges()
+
 Global(
-	Project: "src/service/app/app.csproj",
+#	Project: "src/service/app/app.csproj",
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
@@ -51,10 +68,41 @@ task "build:service", ["prepare"]:
 	CleanWeb(Globals, "src/service/app/app.csproj")
 	BuildWeb(Globals, "src/service/app/app.csproj")
 
-task @DeployApp:
-	XCopyDeploy(Globals, "src/service/app/app.csproj")
+task "deploy:service", ["build:service"]:
+	sitename = "local"
+	proj = "src/service/app/app.csproj"
+	name, output, _ = GetBuildConfig(Globals, proj)
 
-task "deploy:service", ["deploy:pipeline"]
+	bin = FileSet("**/$name.dll", BaseDirectory: output).First()
+	assembly = AssemblyDefinition.ReadAssembly(bin)
+	version = assembly.Name.Version.ToString()
+
+	deployTo = GetDeploy(Globals, proj)
+	deployTo += "-$version"
+	MkDir(deployTo) unless Exist(deployTo)
+	deployToBin = Path.Combine(deployTo, "bin")
+	deployToVar = Path.Combine(deployTo, "var")
+	MkDir(deployToBin) unless Exist(deployToBin)
+	MkDir(deployToVar) unless Exist(deployToVar)
+	XCopyDeploy(Globals, "src/service/app/app.csproj", deployToBin)
+	RegisterApp(sitename, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+
+#task @DeployApp, ["deploy:service"]
+
+task "build:proxy", ["prepare"]:
+	CleanWeb(Globals, "src/proxy/app/app.csproj")
+	BuildWeb(Globals, "src/proxy/app/app.csproj")
+
+task "deploy:proxy", ["build:proxy"]:
+	sitename = "local"
+	proj = "src/proxy/app/app.csproj"
+	name, output, _ = GetBuildConfig(Globals, proj)
+	deployTo = GetDeploy(Globals, proj)
+	deployToBin = Path.Combine(deployTo, "bin")
+	XCopyDeploy(Globals, proj, deployToBin)
+	RegisterApp(sitename, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+
+#task "deploy:service", ["deploy:pipeline"]
 
 task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "test:binary", "git:push:tags"]
 
@@ -108,7 +156,7 @@ task "build:client:bin":
 	name, output, _ = GetBuildConfig(Globals, proj)
 	Clean(Globals, proj)
 	Build(Globals, proj)
-	Cp(FileSet("**", BaseDirectory: "lib/libmysqld"), output)
+	Cp(FileSet("**", BaseDirectory: "lib/libmysqld", Excludes: ["build.sh", ".gitignore"]), output)
 	Rm(FileSet("$output/*.xml"))
 	if Globals.Environment == @Production:
 		Rm(FileSet("$output/*.pdb"))
