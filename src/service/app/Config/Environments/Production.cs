@@ -13,6 +13,7 @@ namespace AnalitF.Net.Service.Config.Environments
 				config.RemoteExportPath = @"\\" + Environment.MachineName + @"\" + config.RemoteExportPath;
 
 			var properties = config.GetType().GetProperties()
+				.Where(p => p.CanWrite)
 				.Where(p => p.Name.EndsWith("Path") && p.PropertyType == typeof(string));
 
 			foreach (var property in properties) {

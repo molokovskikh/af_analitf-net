@@ -92,6 +92,7 @@
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\JobController.cs" />
     <Compile Include="Controllers\LogsController.cs" />
+    <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Filters\LogAccess.cs" />

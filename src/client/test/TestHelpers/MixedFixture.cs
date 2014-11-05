@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			clientConfig = Net.Test.Integration.IntegrationSetup.clientConfig;
 			serviceConfig = Net.Test.Integration.IntegrationSetup.serviceConfig;
 
-			FileHelper.InitDir(serviceConfig.UpdatePath,
+			FileHelper.InitDir(serviceConfig.RtmUpdatePath,
 				clientConfig.TmpDir,
 				Path.Combine(ConfigurationManager.AppSettings["ClientDocPath"], "АналитФАРМАЦИЯ"));
 
@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			address = address ?? this.address;
 			using (localSession.BeginTransaction()) {
-				offer = offer ?? localSession.Query<Offer>().First();
+				offer = offer ?? localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ"));
 				var order = new Order(offer.Price, address);
 				order.TryOrder(offer, 1);
 				localSession.Save(order);

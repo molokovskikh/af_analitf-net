@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Test.TestHelpers;
 using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
@@ -20,6 +21,8 @@ using NUnit.Framework;
 using Test.Support;
 using Test.Support.log4net;
 using Test.Support.Suppliers;
+using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
+using Promotion = AnalitF.Net.Client.Models.Promotion;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
 namespace AnalitF.Net.Test.Integration.Commands
@@ -81,8 +84,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Import_version_update()
 		{
-			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
-			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
+			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
+			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
 
 			var result = Run(new UpdateCommand());
 
@@ -196,14 +199,14 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Clean_after_import()
 		{
-			File.WriteAllBytes(Path.Combine(serviceConfig.UpdatePath, "updater.exe"), new byte[] { 0x00 });
-			File.WriteAllText(Path.Combine(serviceConfig.UpdatePath, "version.txt"), "99.99.99.99");
+			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
+			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
 
 			var result1 = Run(new UpdateCommand());
 			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
-			File.Delete(Path.Combine(serviceConfig.UpdatePath, "updater.exe"));
-			File.Delete(Path.Combine(serviceConfig.UpdatePath, "version.txt"));
+			File.Delete(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"));
+			File.Delete(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"));
 
 			var result2 = Run(new UpdateCommand());
 			Assert.That(result2, Is.EqualTo(UpdateResult.OK));
@@ -356,6 +359,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var fixture = new CreateMatrix();
 			fixture.Denied = new[] { offer1.ProductId };
 			fixture.Warning = new[] { offer2.ProductId };
+			var data = session.Load<AnalitfNetData>(ServerUser().Id);
+			data.LastUpdateAt = DateTime.MinValue;
 			Fixture(fixture);
 
 			Run(new UpdateCommand());

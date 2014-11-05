@@ -13,6 +13,10 @@ namespace AnalitF.Net.Service.Filters
 		{
 			if (context.Exception != null)
 				return;
+			var controller = context.ActionContext.ControllerContext.Controller;
+			if (controller == null || controller.GetType().GetProperty("Session") == null)
+				return;
+
 			var session = (ISession)((dynamic)context.ActionContext.ControllerContext.Controller).Session;
 			if (session == null)
 				return;

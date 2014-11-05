@@ -1,4 +1,5 @@
 import System
+import System.Collections
 import System.Reflection
 import System.IO
 import System.Net.Mail
@@ -8,6 +9,7 @@ import System.Linq.Enumerable
 import System.Xml.XPath.Extensions
 import System.Net
 import System.Text
+import System.Threading
 import Mono.Cecil
 import Microsoft.Web.Administration from "Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
 
@@ -24,34 +26,48 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 		id = Path.GetFileName(dir)
 		AddDirectory(id, dir, document, manager)
 
-def RegisterApp(sitename as string, path as string, fspath as string):
-	manager = ServerManager.OpenRemote("localhost")
-	site = manager.Sites[sitename]
-	raise "Не могу найте сайт $sitename" unless site
-	app = site.Applications.FirstOrDefault({a| a.Path == "/" + path})
-	return if app
-	app = site.Applications.Add("/" + path, fspath)
-	config = manager.GetApplicationHostConfiguration()
-	section = config.GetSection("system.webServer/security/authentication/anonymousAuthentication", "$sitename/$path")
-	section[@enabled] = false
-	section = config.GetSection("system.webServer/security/authentication/basicAuthentication", "$sitename/$path")
-	section[@enabled] = true
-	section[@realm] = "adc.analit.net"
-	section[@defaultLogonDomain] = "adc.analit.net"
-	manager.CommitChanges()
+def RegisterApp(iishost as object, sitename as string, path as string, fspath as string):
+	hosts = iishost as ICollection or (iishost, )
+	for host in hosts:
+		manager = ServerManager.OpenRemote(host)
+		site = manager.Sites[sitename]
+		raise "Не могу найте сайт $sitename" unless site
+		app = site.Applications.FirstOrDefault({a| a.Path == "/" + path})
+		return if app
+		app = site.Applications.Add("/" + path, fspath)
+		config = manager.GetApplicationHostConfiguration()
+		section = config.GetSection("system.webServer/security/authentication/anonymousAuthentication", "$sitename/$path")
+		section[@enabled] = false
+		section = config.GetSection("system.webServer/security/authentication/basicAuthentication", "$sitename/$path")
+		section[@enabled] = true
+		section[@realm] = "adc.analit.net"
+		section[@defaultLogonDomain] = "adc.analit.net"
+		manager.CommitChanges()
 
 Global(
 #	Project: "src/service/app/app.csproj",
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
+		@Local: {
+			@UpdateDeployRoot: """C:\inetpub\wwwroot\AnalitF.Net.Service-0.9.7.35\var\update\rtm""",
+			@CheckUrlRoot: "http://localhost/AnalitF.Net.Service",
+			@IISSiteName: "local",
+			@IISHost: "localhost"
+		},
 		@Production : {
-			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update"""
+			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\alpha""",
+			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
+			@IISSiteName: "IOS",
+			@IISHost: ("acdcserv", "solo", "frontrmt")
 		},
 		@Test : {
 			@DeployRoot: """\\acdcserv\TEST""",
 			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update"""
+			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update\rtm""",
+			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
+			@IISSiteName: "TEST",
+			@IISHost: "acdcserv"
 		}
 	},
 	JenkinsProject: "AnalitF.Net",
@@ -62,14 +78,13 @@ task @default, [@build]
 
 task @build, ["build:service", "build:client"]
 
-task @prepare, ["Production", "packages:install", "fix:packages", "generate:assembly:info"]
+task @prepare, ["env", "packages:install", "packages:fix", "generate:assembly:info"]
 
 task "build:service", ["prepare"]:
 	CleanWeb(Globals, "src/service/app/app.csproj")
 	BuildWeb(Globals, "src/service/app/app.csproj")
 
 task "deploy:service", ["build:service"]:
-	sitename = "local"
 	proj = "src/service/app/app.csproj"
 	name, output, _ = GetBuildConfig(Globals, proj)
 
@@ -79,32 +94,39 @@ task "deploy:service", ["build:service"]:
 
 	deployTo = GetDeploy(Globals, proj)
 	deployTo += "-$version"
+	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Main/Version"
 	MkDir(deployTo) unless Exist(deployTo)
 	deployToBin = Path.Combine(deployTo, "bin")
 	deployToVar = Path.Combine(deployTo, "var")
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, "src/service/app/app.csproj", deployToBin)
-	RegisterApp(sitename, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
 
-#task @DeployApp, ["deploy:service"]
+	#создаем маршрут в прокси
+	proj = "src/proxy/app/app.csproj"
+	deployTo = Path.Combine(GetDeploy(Globals, proj), "bin")
+	proxyConfig = Path.Combine(deployTo, @config)
+	webConfigInfo = FileInfo(Path.Combine(deployTo, "Web.Config"))
+	unless webConfigInfo.Exists:
+		raise "Не удалось найти конфигурационный файл прокси ${webConfigInfo.FullName}, прокси должен быть развернут первым вызови bake deploy:proxy"
+	webConfigInfo.LastWriteTime = DateTime.Now
+	using writer = StreamWriter(proxyConfig, true):
+		writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
 	BuildWeb(Globals, "src/proxy/app/app.csproj")
 
 task "deploy:proxy", ["build:proxy"]:
-	sitename = "local"
 	proj = "src/proxy/app/app.csproj"
 	name, output, _ = GetBuildConfig(Globals, proj)
 	deployTo = GetDeploy(Globals, proj)
 	deployToBin = Path.Combine(deployTo, "bin")
 	XCopyDeploy(Globals, proj, deployToBin)
-	RegisterApp(sitename, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
 
-#task "deploy:service", ["deploy:pipeline"]
-
-task @deploy, ["Production", "git:tag", "prepare", "deploy:service", "deploy:client", "deploy:update", "test:binary", "git:push:tags"]
+task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "git:push:tags"]
 
 task "deploy:client", ["deploy:client:package"]
 
@@ -141,7 +163,10 @@ task "build:client:package", ["build:client"]:
 
 task "deploy:update", ["build:client"]:
 	dir = Globals.UpdateDeployRoot
-	Rm("$dir/*")
+	if Exist(dir):
+		Rm("$dir/*")
+	else:
+		MkDir(dir)
 	impersonate = Configuration.Maybe.impersonate != null
 	if impersonate:
 		ImpersonateUser("deployer", '$sdfsd887!'):
@@ -149,7 +174,7 @@ task "deploy:update", ["build:client"]:
 	else:
 		Cp("output/updater/*", dir, true)
 
-task "build:client", ["Production", "build:client:bin", "build:setup", "build:update"]
+task "build:client", ["env", "build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
 	proj = "src/client/app/app.csproj"
@@ -207,11 +232,40 @@ task "git:tag":
 task "test:binary":
 	return unless Globals.Environment == @Production
 	try:
+		if Globals.CheckUrl:
+			proj = "src/service/app/app.csproj"
+			name, output, _ = GetBuildConfig(Globals, proj)
+
+			bin = FileSet("**/$name.dll", BaseDirectory: output).First()
+			assembly = AssemblyDefinition.ReadAssembly(bin)
+			version = assembly.Name.Version.ToString()
+			done = false
+			while not done:
+				try:
+					serviceVersion = WebClient.DownloadString(Globals.CheckUrl)
+					done = serviceVersion == version
+					unless done:
+						print "Версия сервиса $serviceVersion жду $version"
+						print "Жду обновления"
+						Thread.Sleep(1000)
+				except e:
+					print e.Message
+					print "Жду обновления"
+					Thread.Sleep(1000)
 		testId = 26307
-		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 1")
-		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 0 where UserId = $testId")
+		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
-		Db.Execute("update Customers.AnalitFNetDatas set IsBinaryUpdateDisabled = 0")
+		dir = Path.Combine(Path.GetDirectoryName(Globals.UpdateDeployRoot), "beta")
+		if Exist(dir):
+			Rm("$dir/*")
+		else:
+			MkDir(dir)
+		impersonate = Configuration.Maybe.impersonate != null
+		if impersonate:
+			ImpersonateUser("deployer", '$sdfsd887!'):
+				Cp("output/updater/*", dir, true)
+		else:
+			Cp("output/updater/*", dir, true)
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise

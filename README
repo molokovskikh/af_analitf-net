@@ -1,9 +1,11 @@
 Зависимости
 
 cygwin - скрипты, cinst cygwin
-wix - установщик, cinst wix, должен быть в PATH
-virtualbox - тесты, cinst virtualbox, должен быть в PATH
+wix - установщик, должен быть в PATH
+virtualbox - тесты, должен быть в PATH
 lib/dcmysql72std.exe - драйвер mysql
+для удобства есть конфигурационный файл зависимостей - choco.config
+для установки choco install choco.config
 
 Сборка
 

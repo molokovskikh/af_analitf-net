@@ -17,6 +17,7 @@ namespace AnalitF.Net.Service.Config.Environments
 		public void Run(Config config)
 		{
 			var properties = config.GetType().GetProperties()
+				.Where(p => p.CanWrite)
 				.Where(p => p.Name.EndsWith("Path") && p.PropertyType == typeof(string))
 				.Where(p => p.Name != "RemoteExportPath");
 

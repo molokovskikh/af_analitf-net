@@ -55,7 +55,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			orders.Each(o => o.Apply(results.FirstOrDefault(r => r.ClientOrderId == o.Id)));
 			var acceptedOrders = orders.Where(o => o.IsAccepted).ToArray();
 			var rejectedOrders = orders.Where(o => !o.IsAccepted).ToArray();
-
 			var sentOrders = acceptedOrders.Select(o => new SentOrder(o)).ToArray();
 
 			Session.SaveEach(sentOrders);

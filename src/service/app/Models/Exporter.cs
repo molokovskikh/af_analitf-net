@@ -104,7 +104,6 @@ namespace AnalitF.Net.Service.Models
 			Prefix = job.Id.ToString();
 
 			ResultPath = config.ResultPath;
-			UpdatePath = config.UpdatePath;
 			AdsPath = config.AdsPath;
 			DocsPath = config.DocsPath;
 			Config = config;
@@ -116,6 +115,9 @@ namespace AnalitF.Net.Service.Models
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
+
+			UpdatePath = Path.Combine(config.UpdatePath,
+				data == null || String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
 		}
 
 		//Все даты передаются в UTC!
@@ -410,7 +412,12 @@ left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and 
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(result, sql, "offers", truncate: false, parameters: new { userId = user.Id, cumulative = false });
+			Export(result, sql, "offers", truncate: false, parameters: new {
+				userId = user.Id,
+				cumulative = false,
+				//нужен если включена оптимизация цен
+				clientCode = user.Client.Id
+			});
 
 			var syncPricesCount = Convert.ToUInt32(session
 				.CreateSQLQuery("select count(*) from Usersettings.ActivePrices ap where ap.Fresh = 1")
@@ -1443,11 +1450,11 @@ group by dh.Id")
 
 		private void ExportUpdate(List<UpdateData> zip)
 		{
-			if (data.IsBinaryUpdateDisabled)
-				return;
 			var file = Path.Combine(UpdatePath, "version.txt");
-			if (!File.Exists(file))
+			if (!File.Exists(file)) {
+				log.DebugFormat("Не найден файл версии {0}", Path.GetFullPath(file));
 				return;
+			}
 
 			var updateVersion = Version.Parse(File.ReadAllText(file));
 			if (updateVersion <= job.Version)

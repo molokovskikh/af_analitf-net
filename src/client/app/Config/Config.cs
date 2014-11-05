@@ -201,7 +201,6 @@ namespace AnalitF.Net.Client.Config
 			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
 				Query = stringBuilder.ToString(),
 			};
-			Console.WriteLine(builder.Uri);
 			return builder.Uri;
 		}
 

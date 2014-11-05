@@ -105,7 +105,6 @@ namespace AnalitF.Net.Client.Models
 		public SentOrder(Order order)
 		{
 			SentOn = DateTime.Now;
-
 			Address = order.Address;
 			Price = order.Price;
 			PriceDate = Price.PriceDate;

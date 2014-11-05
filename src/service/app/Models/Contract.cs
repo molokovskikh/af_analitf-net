@@ -153,6 +153,11 @@ namespace AnalitF.Net.Client.Models
 			Result = OrderResultStatus.Warning;
 			Lines = lines.ToArray();
 		}
+
+		public override string ToString()
+		{
+			return Error;
+		}
 	}
 #if SERVER
 

@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Helpers
 			rasHelper = new RasHelper(connectionname);
 		}
 
-		public async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+		protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
 			var task = new Task(() => rasHelper.Open());
 			task.Start();

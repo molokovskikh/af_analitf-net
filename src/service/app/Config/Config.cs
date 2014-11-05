@@ -1,9 +1,16 @@
 ﻿using System;
+using System.IO;
 
 namespace AnalitF.Net.Service.Config
 {
 	public class Config
 	{
+		public Config()
+		{
+			//если настройка не задана отдаем файлы любого размера
+			MaxReclameFileSize = long.MaxValue;
+		}
+
 		public string Environment { get; set; }
 		//для тестирования
 		public string RootPath { get; set; }
@@ -30,5 +37,10 @@ namespace AnalitF.Net.Service.Config
 		public TimeSpan ResultTimeout { get; set; }
 		public bool DebugExport { get; set; }
 		public long MaxReclameFileSize { get; set; }
+
+		public string RtmUpdatePath
+		{
+			get { return Path.Combine(UpdatePath, "rtm"); }
+		}
 	}
 }
