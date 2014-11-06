@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -8,9 +8,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
-using Castle.Components.DictionaryAdapter;
 using Common.Tools;
 using NUnit.Framework;
 
@@ -33,9 +31,7 @@ namespace AnalitF.Net.Test.Integration
 		public void Persist_shell()
 		{
 			StartShell();
-			shell.ViewSettings.Add("test", new List<ColumnSettings> {
-				new ColumnSettings()
-			});
+			shell.ViewSettings.Add("test", new List<ColumnSettings> { new ColumnSettings() });
 			app.Serialize();
 
 			StartShell();

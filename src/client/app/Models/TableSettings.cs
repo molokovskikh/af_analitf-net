@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interactivity;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.Tools;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
+	//todo после изменений таблицы начали терять фокус
 	public class TableSettings
 	{
 		private Dictionary<string, List<ColumnSettings>> defaults
@@ -70,22 +74,16 @@ namespace AnalitF.Net.Client.Models
 			if (storage.ContainsKey(key)) {
 				storage.Remove(key);
 			}
-			storage.Add(key, grid.Columns.Select((c, i) => new ColumnSettings(c, i)).ToList());
+			storage.Add(key, grid.Columns.Select((c, i) => new ColumnSettings(grid, c, i)).ToList());
 		}
 
 		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
 		{
-			var key = GetViewKey(dataGrid);
-			if (!storage.ContainsKey(key))
-				return;
-
-			var settings = storage[key];
+			var settings = storage.GetValueOrDefault(GetViewKey(dataGrid));
 			if (settings == null)
 				return;
-
-			foreach (var setting in settings) {
-				setting.Restore(dataGrid.Columns);
-			}
+			foreach (var column in settings)
+				column.Restore(dataGrid, dataGrid.Columns);
 
 			//тк новые колонки не имеют сохраненных настроек
 			//они окажутся в конце таблицы

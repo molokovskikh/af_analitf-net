@@ -104,6 +104,16 @@ namespace AnalitF.Net.Client.Controls
 					SelectedItem = Items[index];
 				}
 			}
+
+			//если data grid получит событие Reset он убьет все ячейки и построит их заново
+			//вместе с ячейками он убьет и фокус
+			//Reset произойдет во множестве случаев в том числе если к данным применить сортировку Items.SortDescriptions.Add
+			//что бы не терять фокус ловим событие и если владем фоксом восстанавливаем его после того как данные обновились
+			if (e.Action == NotifyCollectionChangedAction.Reset && IsKeyboardFocusWithin) {
+				Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() => {
+					DataGridHelper.Focus(this);
+				}));
+			}
 		}
 
 		protected static void CurrentItemStubChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
