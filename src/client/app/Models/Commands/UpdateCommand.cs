@@ -553,6 +553,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			var lastUpdate = settings.LastUpdate;
 			var prices = Session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
 			var clientPrices = prices.Select(p => new PriceSettings(p.Id.PriceId, p.Id.RegionId, p.Active)).ToArray();
+			if (clientPrices.Length == 0)
+				return;
 
 			var response = client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),
 				new SyncRequest(clientPrices),

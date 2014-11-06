@@ -105,16 +105,20 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
+			//данные хранятся с точностью до секунды, в тестах операзия может быть выполнена за одну секунду тогда
+			//комманда будет думать что синхронизировать нечего
+			localSession.Refresh(settings);
+			settings.LastUpdate = settings.LastUpdate.Value.AddSeconds(-1);
 
 			Run(new UpdateCommand());
 
 			localSession.Refresh(price);
-			Assert.That(price.Active, Is.False, price.Id.ToString());
+			var user = ServerUser();
+			Assert.That(price.Active, Is.False, "прайс {0}, пользователь {1}", price.Id, user.Id);
 			Assert.That(price.PositionCount, Is.EqualTo(0));
 			var offersCount = localSession.Query<Offer>().Count(o => o.Price == price);
 			Assert.That(offersCount, Is.EqualTo(0));
 
-			var user = ServerUser();
 			var priceSettings = session
 				.CreateSQLQuery("select * from Customers.UserPrices" +
 					" where UserId = :userId and PriceId = :priceId and RegionId = :regionId")

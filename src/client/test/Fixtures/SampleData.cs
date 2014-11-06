@@ -64,8 +64,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				MaxProducerCostPriceId = MaxProducerCosts.Id,
 				MaxProducerCostCostId = MaxProducerCosts.Costs[0].Id,
 			};
-			Files = new List<UpdateData>();
-			exporter.Export(Files);
+			exporter.Export();
+			Files = exporter.Result;
 		}
 
 		public static TestClient CreateUser(ISession session)

@@ -67,6 +67,11 @@ namespace AnalitF.Net.Client.Models
 		{
 			Prices = prices;
 		}
+
+		public override string ToString()
+		{
+			return string.Format("Prices: ({0})", Prices == null ? "null" : Prices.Implode());
+		}
 	}
 
 	public class PriceSettings
@@ -80,6 +85,11 @@ namespace AnalitF.Net.Client.Models
 			PriceId = priceId;
 			RegionId = regionId;
 			Active = active;
+		}
+
+		public override string ToString()
+		{
+			return string.Format("PriceId: {0}, RegionId: {1}, Active: {2}", PriceId, RegionId, Active);
 		}
 	}
 

@@ -143,9 +143,9 @@ namespace AnalitF.Net.Service.Test
 			session.Save(core1);
 			session.Save(core2);
 
-			var files = Export();
+			exporter.Export();
 
-			var offers = files.First(t => t.ArchiveFileName.EndsWith("offers.txt"));
+			var offers = exporter.Result.First(t => t.ArchiveFileName.EndsWith("offers.txt"));
 			var text = File.ReadAllText(offers.LocalFileName);
 			Assert.That(text, Is.StringContaining(core1.Id.ToString()));
 			Assert.That(text, Is.StringContaining(core2.Id.ToString()));
@@ -277,13 +277,6 @@ namespace AnalitF.Net.Service.Test
 			session.Save(sendLog);
 			waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
 			return waybill;
-		}
-
-		private List<UpdateData> Export()
-		{
-			var files = new List<UpdateData>();
-			exporter.Export(files);
-			return files;
 		}
 
 		private void ExportCompressed()

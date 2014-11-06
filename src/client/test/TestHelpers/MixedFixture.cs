@@ -78,12 +78,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			address = address ?? this.address;
 			using (localSession.BeginTransaction()) {
-				offer = offer ?? localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ"));
+				offer = offer ?? SafeOffer();
 				var order = new Order(offer.Price, address);
 				order.TryOrder(offer, 1);
 				localSession.Save(order);
 				return order;
 			}
+		}
+
+		protected Offer SafeOffer()
+		{
+			return localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ"));
 		}
 
 		protected Order MakeOrderClean(Address address = null, Offer offer = null)

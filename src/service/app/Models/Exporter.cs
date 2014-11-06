@@ -48,7 +48,10 @@ namespace AnalitF.Net.Service.Models
 
 		public override string ToString()
 		{
-			return ArchiveFileName + " - " + LocalFileName;
+			if (!String.IsNullOrEmpty(LocalFileName))
+				return ArchiveFileName + " - " + LocalFileName + " - " + new FileInfo(LocalFileName).Length;
+			else
+				return ArchiveFileName;
 		}
 
 		public string ReadContent()
@@ -121,7 +124,7 @@ namespace AnalitF.Net.Service.Models
 		}
 
 		//Все даты передаются в UTC!
-		public void Export(List<UpdateData> result)
+		public void Export()
 		{
 			data = data ?? new AnalitfNetData(user);
 			data.LastPendingUpdateAt = DateTime.Now;
@@ -180,13 +183,13 @@ FROM
 WHERE
 	s.ClientId = ?clientId
 and s.Enable = 1";
-				Export(result, sql, "Schedules", truncate: true, parameters: new { clientId = user.Client.Id });
+				Export(Result, sql, "Schedules", truncate: true, parameters: new { clientId = user.Client.Id });
 			}
 			else {
 				//если настройка отключена мы все равно должны экспортировать пустую таблицу
 				//тк у клиента опция сначала опция могла быть включена а затем выключена
 				//что бы отключение сработало нужно очистить таблицу
-				Export(result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
+				Export(Result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
 			}
 
 			sql = @"
@@ -217,7 +220,7 @@ select
 from Logs.RejectLogs l
 where l.LogTime >= ?lastUpdate
 and l.Operation = 2";
-			Export(result, sql, "Rejects", truncate: false, parameters: new { lastUpdate = data.LastUpdateAt });
+			Export(Result, sql, "Rejects", truncate: false, parameters: new { lastUpdate = data.LastUpdateAt });
 
 			var legalEntityCount = session.CreateSQLQuery(@"
 select
@@ -241,7 +244,7 @@ from Customers.Addresses a
 	join Customers.UserAddresses ua on ua.AddressId = a.Id
 	join Billing.LegalEntities le on le.Id = a.LegalEntityId
 where a.Enabled = 1 and ua.UserId = ?userId", addressName);
-			Export(result, sql, "Addresses", truncate: true, parameters: new { userId = user.Id });
+			Export(Result, sql, "Addresses", truncate: true, parameters: new { userId = user.Id });
 
 
 			var contacts = session.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
@@ -265,7 +268,7 @@ from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
 where u.Id = ?userId";
-			Export(result, sql, "Users", truncate: true, parameters: new {
+			Export(Result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
 				supportPhone = HtmlToText(rawPhone),
 				supportHours = HtmlToText(rawHours),
@@ -280,7 +283,7 @@ from Usersettings.AssignedPermissions a
 	join Usersettings.UserPermissions up on up.Id = a.PermissionId
 where a.UserId = ?userId
 	and up.Type in (1, 2)";
-			Export(result, sql, "Permissions", truncate: true, parameters: new { userId = user.Id });
+			Export(Result, sql, "Permissions", truncate: true, parameters: new { userId = user.Id });
 
 			CreateMaxProducerCosts();
 
@@ -302,10 +305,10 @@ from
 where u.Id = ?UserId
 	and a.Enabled = 1
 ";
-			Export(result, sql, "MinOrderSumRules", truncate: true, parameters: new { userId = user.Id });
+			Export(Result, sql, "MinOrderSumRules", truncate: true, parameters: new { userId = user.Id });
 			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt) {
 				sql = @"select * from Usersettings.MaxProducerCosts";
-				Export(result, sql, "MaxProducerCosts", truncate: true);
+				Export(Result, sql, "MaxProducerCosts", truncate: true);
 			}
 
 			sql = @"select
@@ -333,7 +336,7 @@ from Usersettings.Prices p
 	join Farm.Regions r on r.RegionCode = p.RegionCode
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
 	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode";
-			Export(result, sql, "prices", truncate: true);
+			Export(Result, sql, "prices", truncate: true);
 
 			sql = @"select
 	s.Id,
@@ -342,7 +345,7 @@ from Usersettings.Prices p
 	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
-			Export(result, sql, "suppliers", truncate: true);
+			Export(Result, sql, "suppliers", truncate: true);
 
 			//у mysql неделя начинается с понедельника у .net с воскресенья
 			//приводим к виду .net
@@ -358,7 +361,7 @@ from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
 	join UserSettings.SupplierIntersection si on si.Id = pi.SupplierIntersectionId and si.SupplierID = p.FirmCode
 where
 	si.ClientId = ?clientId";
-			Export(result, sql, "DelayOfPayments", truncate: true, parameters: new { clientId = clientSettings.Id });
+			Export(Result, sql, "DelayOfPayments", truncate: true, parameters: new { clientId = clientSettings.Id });
 
 			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
 			sql = @"select
@@ -412,7 +415,7 @@ left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and 
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(result, sql, "offers", truncate: false, parameters: new {
+			Export(Result, sql, "offers", truncate: false, parameters: new {
 				userId = user.Id,
 				cumulative = false,
 				//нужен если включена оптимизация цен
@@ -479,7 +482,7 @@ update MinCosts m
 join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
 set m.NextCost = n.NextCost;")
 					.ExecuteUpdate();
-				Export(result, "select * from MinCosts", "MinCosts", true);
+				Export(Result, "select * from MinCosts", "MinCosts", true);
 			}
 
 			session.CreateSQLQuery(@"
@@ -525,7 +528,7 @@ select
 	1 as Hidden
 from logs.DescriptionLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2";
-			Export(result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select l.MnnId as Id, l.Mnn as Name, 1 as Hidden
@@ -535,7 +538,7 @@ union
 select Id, Mnn as Name, 0 as Hidden
 from Catalogs.Mnn m
 where m.UpdateTime > ?lastSync";
-			Export(result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select cn.Id,
@@ -551,7 +554,7 @@ from Catalogs.CatalogNames cn
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 	and (cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync)
 group by cn.Id";
-			Export(result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select
@@ -565,7 +568,7 @@ select
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
-			Export(result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select l.ProducerId as Id, l.Name, 1 as Hidden
@@ -575,7 +578,7 @@ union
 select p.Id, p.Name, 0 as Hidden
 from Catalogs.Producers p
 where p.UpdateTime > ?lastSync";
-			Export(result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			sql = @"
 select Id, PublicationDate, Header, Deleted as Hidden
@@ -583,7 +586,7 @@ from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
 	and DestinationType in (1, 2)
 	and UpdateTime > ?lastSync";
-			Export(result, sql, "News", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			Export(Result, sql, "News", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
 			var newses = session.CreateSQLQuery(@"select Id, Body
 from Usersettings.News
@@ -604,7 +607,7 @@ where PublicationDate < curdate() + interval 1 day
 				+ "</html>";
 			foreach (var news in newses) {
 				var name = news[0] + ".html";
-				result.Add(new UpdateData("newses/" + name) {
+				Result.Add(new UpdateData("newses/" + name) {
 					Content = String.Format(template, news[1])
 				});
 			}
@@ -1383,8 +1386,8 @@ group by dh.Id")
 
 		public void ExportAll()
 		{
-			Export(Result);
-			ExportUpdate(Result);
+			Export();
+			ExportUpdate();
 			ExportAds();
 		}
 
@@ -1448,7 +1451,7 @@ group by dh.Id")
 			scanned.Scan(dir, true);
 		}
 
-		private void ExportUpdate(List<UpdateData> zip)
+		private void ExportUpdate()
 		{
 			var file = Path.Combine(UpdatePath, "version.txt");
 			if (!File.Exists(file)) {
@@ -1460,10 +1463,10 @@ group by dh.Id")
 			if (updateVersion <= job.Version)
 				return;
 
-			AddDir(zip, UpdatePath, "update");
+			AddDir(Result, UpdatePath, "update");
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
-				AddDir(zip, perUserUpdate, "update");
+				AddDir(Result, perUserUpdate, "update");
 		}
 
 		public void Dispose()

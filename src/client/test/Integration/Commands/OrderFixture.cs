@@ -11,6 +11,7 @@ using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.Commands
 {
@@ -133,7 +134,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			var fixture = new SmartOrder {
 				ProductIds = new[] {
-					localSession.Query<Offer>().First().ProductId
+					SafeSmartOrderProductId()
 				}
 			};
 			Fixture(fixture);
@@ -157,7 +158,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			var fixture = new SmartOrder {
 				ProductIds = new[] {
-					localSession.Query<Offer>().First().ProductId
+					SafeSmartOrderProductId()
 				}
 			};
 			fixture.Rule.ServiceFields = "2";
@@ -177,7 +178,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			var fixture = new SmartOrder {
 				ProductIds = new[] {
-					localSession.Query<Offer>().First().ProductId
+					SafeSmartOrderProductId()
 				}
 			};
 			Fixture(fixture);
@@ -210,6 +211,18 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.SetParameter("orderLineId", order.Lines[0].ServerId)
 				.List();
 			Assert.AreEqual(Convert.ToUInt32(docLines[0]), fixture.Waybill.Lines[0].Id);
+		}
+
+		//для автозаказа нам нужна такая позиция которой нет в прайсе с минимальной ценой заказа
+		//если позиция с минимальной суммой окажется самой дешевой то автозаказ не сможет сформировать заявку
+		public uint SafeSmartOrderProductId()
+		{
+			var productIds = localSession.Query<Offer>()
+				.Where(o => o.Price.Name.Contains("минимальный заказ"))
+				.Select(o => o.ProductId)
+				.Distinct()
+				.ToArray();
+			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId)).ProductId;
 		}
 
 		private void MakeBatch(string content)
