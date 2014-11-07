@@ -23,6 +23,7 @@ using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
 using Test.Support;
@@ -107,6 +108,12 @@ namespace AnalitF.Net.Test.Integration
 
 		private bool IsClientStale()
 		{
+			var directoryInfo = new DirectoryInfo(clientConfig.DbDir);
+			if (directoryInfo.Exists) {
+				var pid = directoryInfo.Parent.GetFiles("*.pid");
+				if (pid.Length > 0)
+					throw new Exception(String.Format("Существует pid файл {0}, забыл закрыть консоль?", pid[0].FullName));
+			}
 			var sanityCheck = new SanityCheck();
 			sanityCheck.Config = clientConfig;
 			//если схема изменилась нужно обновить эталонную копию, иначе в эталонной копии не будет полей

@@ -157,14 +157,6 @@ namespace AnalitF.Net.Service.Models
 				//данные еще раз
 				.SetParameter("replicationDate", data.LastPendingUpdateAt.Value.AddSeconds(-1))
 				.ExecuteUpdate();
-			var maxProducerCostDate = session.CreateSQLQuery(@"
-select pi.PriceDate
-from Usersettings.PriceItems pi
-join Usersettings.PricesCosts pc on pc.PriceItemId = pi.Id
-where pc.CostCode = :costId")
-				.SetParameter("costId", MaxProducerCostCostId)
-				.List<DateTime?>()
-				.FirstOrDefault();
 
 			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
 
@@ -189,10 +181,26 @@ and s.Enable = 1";
 				//если настройка отключена мы все равно должны экспортировать пустую таблицу
 				//тк у клиента опция сначала опция могла быть включена а затем выключена
 				//что бы отключение сработало нужно очистить таблицу
-				Export(Result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
+				Export(Result, "Schedules", new[] { "Id" }, Enumerable.Empty<object[]>());
 			}
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select Id,
+	Product,
+	ProductId,
+	Producer,
+	ProducerId,
+	Series,
+	LetterNo,
+	convert_tz(LetterDate, @@session.time_zone,'+00:00') as LetterDate,
+	CauseRejects,
+	CancelDate is not null as Canceled
+from Farm.Rejects";
+				CachedExport(Result, sql, "Rejects");
+			}
+			else {
+				sql = @"
 select Id,
 	Product,
 	ProductId,
@@ -220,7 +228,8 @@ select
 from Logs.RejectLogs l
 where l.LogTime >= ?lastUpdate
 and l.Operation = 2";
-			Export(Result, sql, "Rejects", truncate: false, parameters: new { lastUpdate = data.LastUpdateAt });
+				Export(Result, sql, "Rejects", truncate: false, parameters: new { lastUpdate = data.LastUpdateAt });
+			}
 
 			var legalEntityCount = session.CreateSQLQuery(@"
 select
@@ -285,8 +294,6 @@ where a.UserId = ?userId
 	and up.Type in (1, 2)";
 			Export(Result, sql, "Permissions", truncate: true, parameters: new { userId = user.Id });
 
-			CreateMaxProducerCosts();
-
 			sql = @"
 select
 	a.Id as AddressId,
@@ -303,9 +310,18 @@ from
   join Customers.AddressIntersection ai on ai.IntersectionId = i.Id and ai.AddressId = a.Id
   join Usersettings.ActivePrices p on p.PriceCode = i.PriceId and p.RegionCode = i.RegionId
 where u.Id = ?UserId
-	and a.Enabled = 1
-";
+	and a.Enabled = 1";
 			Export(Result, sql, "MinOrderSumRules", truncate: true, parameters: new { userId = user.Id });
+
+			CreateMaxProducerCosts();
+			var maxProducerCostDate = session.CreateSQLQuery(@"
+select pi.PriceDate
+from Usersettings.PriceItems pi
+join Usersettings.PricesCosts pc on pc.PriceItemId = pi.Id
+where pc.CostCode = :costId")
+				.SetParameter("costId", MaxProducerCostCostId)
+				.List<DateTime?>()
+				.FirstOrDefault();
 			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt) {
 				sql = @"select * from Usersettings.MaxProducerCosts";
 				Export(Result, sql, "MaxProducerCosts", truncate: true);
@@ -415,7 +431,7 @@ left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and 
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(Result, sql, "offers", truncate: false, parameters: new {
+			Export(Result, sql, "offers", truncate: data.LastUpdateAt == DateTime.MinValue, parameters: new {
 				userId = user.Id,
 				cumulative = false,
 				//нужен если включена оптимизация цен
@@ -482,7 +498,7 @@ update MinCosts m
 join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
 set m.NextCost = n.NextCost;")
 					.ExecuteUpdate();
-				Export(Result, "select * from MinCosts", "MinCosts", true);
+				Export(Result, "select * from MinCosts", "MinCosts", truncate: true);
 			}
 
 			session.CreateSQLQuery(@"
@@ -490,7 +506,29 @@ drop temporary table if exists MinCosts;
 drop temporary table if exists MinCostsNext;")
 				.ExecuteUpdate();
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select
+	Id,
+	Name,
+	EnglishName,
+	Description,
+	Interaction,
+	SideEffect,
+	IndicationsForUse,
+	Dosing,
+	Warnings,
+	ProductForm,
+	PharmacologicalAction,
+	Storage,
+	Expiration,
+	Composition
+from Catalogs.Descriptions
+where NeedCorrect = 0";
+				CachedExport(Result, sql, "ProductDescriptions");
+			}
+			else {
+				sql = @"
 select
 	Id,
 	Name,
@@ -528,9 +566,17 @@ select
 	1 as Hidden
 from logs.DescriptionLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2";
-			Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select Id, Mnn as Name
+from Catalogs.Mnn m";
+				CachedExport(Result, sql, "mnns");
+			}
+			else {
+				sql = @"
 select l.MnnId as Id, l.Mnn as Name, 1 as Hidden
 from logs.MnnLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2
@@ -538,9 +584,27 @@ union
 select Id, Mnn as Name, 0 as Hidden
 from Catalogs.Mnn m
 where m.UpdateTime > ?lastSync";
-			Export(Result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select cn.Id,
+	cn.Name,
+	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
+	cn.MnnId,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
+from Catalogs.CatalogNames cn
+	join Catalogs.Catalog c on c.NameId = cn.Id
+	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
+where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
+group by cn.Id
+having sum(if(c.Hidden, 1, 0)) <> count(*)";
+				CachedExport(Result, sql, "catalognames");
+			}
+			else {
+				sql = @"
 select cn.Id,
 	cn.Name,
 	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
@@ -554,9 +618,25 @@ from Catalogs.CatalogNames cn
 where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 	and (cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync)
 group by cn.Id";
-			Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select
+	c.Id,
+	c.NameId,
+	c.VitallyImportant,
+	c.MandatoryList,
+	cf.Id as FormId,
+	cf.Form as Form
+from Catalogs.Catalog c
+	join Catalogs.CatalogForms cf on cf.Id = c.FormId
+where c.Hidden = 0";
+				CachedExport(Result, sql, "catalogs");
+			}
+			else {
+				sql = @"
 select
 	c.Id,
 	c.NameId,
@@ -568,9 +648,17 @@ select
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
-			Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
 
-			sql = @"
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select p.Id, p.Name
+from Catalogs.Producers p";
+				CachedExport(Result, sql, "producers");
+			}
+			else {
+				sql = @"
 select l.ProducerId as Id, l.Name, 1 as Hidden
 from logs.ProducerLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2
@@ -578,24 +666,44 @@ union
 select p.Id, p.Name, 0 as Hidden
 from Catalogs.Producers p
 where p.UpdateTime > ?lastSync";
-			Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
 
-			sql = @"
+			IList<object[]> newses = new List<object[]>();
+			if (data.LastUpdateAt == DateTime.MinValue) {
+				sql = @"
+select Id, PublicationDate, Header
+from Usersettings.News
+where PublicationDate < curdate() + interval 1 day
+	and DestinationType in (1, 2)
+	and Deleted = 0";
+				CachedExport(Result, sql, "News");
+
+				newses = session.CreateSQLQuery(@"select Id, Body
+from Usersettings.News
+where PublicationDate < curdate() + interval 1 day
+	and Deleted = 0
+	and DestinationType in (1, 2)")
+					.List<object[]>();
+			}
+			else {
+				sql = @"
 select Id, PublicationDate, Header, Deleted as Hidden
 from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
 	and DestinationType in (1, 2)
 	and UpdateTime > ?lastSync";
-			Export(Result, sql, "News", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+				Export(Result, sql, "News", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 
-			var newses = session.CreateSQLQuery(@"select Id, Body
+				newses = session.CreateSQLQuery(@"select Id, Body
 from Usersettings.News
 where PublicationDate < curdate() + interval 1 day
 	and Deleted = 0
 	and DestinationType in (1, 2)
 	and UpdateTime > :lastSync")
-				.SetParameter("lastSync", data.LastUpdateAt)
-				.List<object[]>();
+					.SetParameter("lastSync", data.LastUpdateAt)
+					.List<object[]>();
+			}
 
 			var template = "<html>"
 				+ "<head>"

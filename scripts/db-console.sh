@@ -1,4 +1,5 @@
 #!/bin/sh
+
 path=$1
 path=$(cygpath -aw $path)
 defaults=$(cygpath -aw ./scripts/my.ini)
