@@ -143,6 +143,18 @@ namespace AnalitF.Net.Client.ViewModels
 
 			IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
 				|| Session.IsChanged(Settings.Value, s => s.UserName);
+			if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
+				&& Settings.Value.GroupWaybillsBySupplier) {
+				foreach (var dirMap in DirMaps) {
+					try {
+						if (!Directory.Exists(dirMap.Dir))
+							FileHelper.CreateDirectoryRecursive(dirMap.Dir);
+					}
+					catch(Exception e) {
+						log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+					}
+				}
+			}
 
 			Session.FlushMode = FlushMode.Auto;
 			Settings.Value.ApplyChanges(Session);
