@@ -26,8 +26,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		private PriceComposedId priceId;
 		public List<Offer> PriceOffers = new List<Offer>();
-		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
-		public static TaskScheduler TestQueryScheduler = null;
 
 		public PriceOfferViewModel(PriceComposedId priceId, bool showLeaders, OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -116,15 +114,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				ResultsSink.OnNext(MessageResult.Warn("Выбранный прайс-лист отсутствует"));
 				TryClose();
 			}
-		}
-
-		private IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
-		{
-			if (StatelessSession == null)
-				return Observable.Empty<T>();
-			var task = new Task<T>(() => select(StatelessSession), CloseCancellation.Token);
-			task.Start(QueryScheduler);
-			return Observable.FromAsync(() => task);
 		}
 
 		public void Filter()
