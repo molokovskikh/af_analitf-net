@@ -11,7 +11,6 @@ import System.Net
 import System.Text
 import System.Threading
 import Mono.Cecil
-import Microsoft.Web.Administration from "Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
@@ -28,21 +27,13 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 
 def RegisterApp(iishost as object, sitename as string, path as string, fspath as string):
 	hosts = iishost as ICollection or (iishost, )
-	for host in hosts:
-		manager = ServerManager.OpenRemote(host)
-		site = manager.Sites[sitename]
-		raise "Не могу найте сайт $sitename" unless site
-		app = site.Applications.FirstOrDefault({a| a.Path == "/" + path})
-		return if app
-		app = site.Applications.Add("/" + path, fspath)
-		config = manager.GetApplicationHostConfiguration()
-		section = config.GetSection("system.webServer/security/authentication/anonymousAuthentication", "$sitename/$path")
-		section[@enabled] = false
-		section = config.GetSection("system.webServer/security/authentication/basicAuthentication", "$sitename/$path")
-		section[@enabled] = true
-		section[@realm] = "adc.analit.net"
-		section[@defaultLogonDomain] = "adc.analit.net"
-		manager.CommitChanges()
+	script = Path.GetFullPath("scripts/iis.ps1")
+	hostsArg = join(hosts, ",")
+	psArgs = ""
+	if Globals.Environment == @Production:
+		user, password = AskCredentials("user for $hostsArg:")
+		psArgs = "-Credential (New-Object PsCredential(\"$user\", (convertto-securestring \"$password\" -asplaintext -force))"
+	Sh("powershell Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath $psArgs")
 
 Global(
 #	Project: "src/service/app/app.csproj",
