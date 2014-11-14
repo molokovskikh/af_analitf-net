@@ -102,13 +102,8 @@ task "deploy:service", ["build:service"]:
 	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
 	#создаем маршрут в прокси
-	proj = "src/proxy/app/app.csproj"
-	deployTo = Path.Combine(GetDeploy(Globals, proj), "bin")
+	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
 	proxyConfig = Path.Combine(deployTo, @config)
-	webConfigInfo = FileInfo(Path.Combine(deployTo, "Web.Config"))
-	unless webConfigInfo.Exists:
-		raise "Не удалось найти конфигурационный файл прокси ${webConfigInfo.FullName}, прокси должен быть развернут первым вызови bake deploy:proxy"
-	webConfigInfo.LastWriteTime = DateTime.Now
 	using writer = StreamWriter(proxyConfig, true):
 		writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
 
@@ -121,6 +116,9 @@ task "deploy:proxy", ["build:proxy"]:
 	name, output, _ = GetBuildConfig(Globals, proj)
 	deployTo = GetDeploy(Globals, proj)
 	deployToBin = Path.Combine(deployTo, "bin")
+	deployToVar = Path.Combine(deployTo, "var")
+	MkDir(deployToBin) unless Exist(deployToBin)
+	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
 	fsPath = Path.GetFullPath(deployToBin)
 	if Globals.Maybe.IISPathRoot:
@@ -233,27 +231,40 @@ task "git:tag":
 task "test:binary":
 	return unless Globals.Environment == @Production
 	try:
-		if Globals.CheckUrl:
+		testId = "26307"
+		testPassword = "TkGJEQUX"
+		unless Globals.Maybe.CheckUrl:
 			proj = "src/service/app/app.csproj"
 			name, output, _ = GetBuildConfig(Globals, proj)
-
 			bin = FileSet("**/$name.dll", BaseDirectory: output).First()
 			assembly = AssemblyDefinition.ReadAssembly(bin)
 			version = assembly.Name.Version.ToString()
-			done = false
-			while not done:
-				try:
-					serviceVersion = WebClient.DownloadString(Globals.CheckUrl)
-					done = serviceVersion == version
-					unless done:
-						print "Версия сервиса $serviceVersion жду $version"
-						print "Жду обновления"
-						Thread.Sleep(1000)
-				except e:
-					print e.Message
+			Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
+		proj = "src/service/app/app.csproj"
+		name, output, _ = GetBuildConfig(Globals, proj)
+
+		bin = FileSet("**/$name.dll", BaseDirectory: output).First()
+		assembly = AssemblyDefinition.ReadAssembly(bin)
+		version = assembly.Name.Version.ToString()
+		done = false
+		count = 0
+		while not done:
+			try:
+				count++
+				client = WebClient()
+				client.Credentials = NetworkCredential(testId, testPassword)
+				serviceVersion = client.DownloadString(Globals.CheckUrl)
+				done = serviceVersion == version
+				unless done:
+					print "Версия сервиса $serviceVersion жду $version"
 					print "Жду обновления"
 					Thread.Sleep(1000)
-		testId = 26307
+			except e:
+				if count > 20:
+					raise
+				print e.Message
+				print "Жду обновления"
+				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		dir = Path.Combine(Path.GetDirectoryName(Globals.UpdateDeployRoot), "beta")

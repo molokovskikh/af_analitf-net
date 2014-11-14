@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -21,29 +22,41 @@ namespace AnalitF.Net.Proxy
 		{
 			try {
 				XmlConfigurator.Configure();
-				var configfile = FileHelper.MakeRooted("config");
-				if (File.Exists(configfile)) {
-					var lines = File.ReadAllLines(configfile);
-					var route = lines.FirstOrDefault();
-					if (route != null)
-						Proxy.DefaultRoute = route;
-
-					Proxy.Map = lines.Skip(1)
-						.Select(l => l.Split(' '))
-						.Where(l => l.Length == 2)
-						.Select(l => Tuple.Create(new Version(l[0]), l[1]))
-						.GroupBy(t => t.Item1)
-						.ToDictionary(g => g.Key, g => g.Select(t => t.Item2).First());
-					log.Debug(Proxy.DefaultRoute);
-					log.Debug(Proxy.Map.Implode(Environment.NewLine));
-				}
-				else {
-					log.DebugFormat("config {0} not found", configfile);
-				}
+				var configfile = Path.GetFullPath(FileHelper.MakeRooted(ConfigurationManager.AppSettings["config"] ?? "config"));
+				LoadConfig(configfile);
+				var watched = new FileSystemWatcher(Path.GetDirectoryName(configfile), Path.GetFileName(configfile));
+				watched.Changed += (sender, args) => LoadConfig(configfile);
+				watched.Deleted += (sender, args) => LoadConfig(configfile);
+				watched.Created += (sender, args) => LoadConfig(configfile);
+				watched.Renamed += (sender, args) => LoadConfig(configfile);
+				watched.Error += (sender, args) => log.Error("watch error", args.GetException());
+				watched.EnableRaisingEvents = true;
 				app.Use(new Func<object, Func<IDictionary<string, object>, Task>>(_ => Proxy.Invoke));
 			}
 			catch(Exception e) {
 				log.Error(e);
+			}
+		}
+
+		private static void LoadConfig(string configfile)
+		{
+			if (File.Exists(configfile)) {
+				var lines = File.ReadAllLines(configfile);
+				var route = lines.FirstOrDefault();
+				if (route != null)
+					Proxy.DefaultRoute = route;
+
+				Proxy.Map = lines.Skip(1)
+					.Select(l => l.Split(' '))
+					.Where(l => l.Length == 2)
+					.Select(l => Tuple.Create(new Version(l[0]), l[1]))
+					.GroupBy(t => t.Item1)
+					.ToDictionary(g => g.Key, g => g.Select(t => t.Item2).First());
+				log.Debug(Proxy.DefaultRoute);
+				log.Debug(Proxy.Map.Implode(Environment.NewLine));
+			}
+			else {
+				log.DebugFormat("config {0} not found", configfile);
 			}
 		}
 	}
@@ -88,7 +101,7 @@ namespace AnalitF.Net.Proxy
 					contentHeaders.Add("Last-Modified");
 
 
-					var uri = context.Request.Scheme + "://" + route + context.Request.Path;
+					var uri = route + context.Request.Path;
 					var querystring = (string)environment["owin.RequestQueryString"];
 					if (querystring != "")
 						uri += "?" + querystring;
@@ -96,10 +109,6 @@ namespace AnalitF.Net.Proxy
 					var client = new HttpClient();
 					var proxyRequest = new HttpRequestMessage(new HttpMethod(context.Request.Method), uri);
 					log.DebugFormat("request = {0}", proxyRequest);
-					//foreach (var header in context.Request.Headers) {
-					//	proxyRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-					//}
-					//context.Request.Headers.Clear();
 					proxyRequest.Headers.Clear();
 					foreach (var header in context.Request.Headers.Where(h => !contentHeaders.Contains(h.Key))) {
 						proxyRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
@@ -123,8 +132,6 @@ namespace AnalitF.Net.Proxy
 					foreach (var header in proxyResponse.Headers) {
 						if (header.Key == "Transfer-Encoding")
 							continue;
-						//if (context.Response.Headers.ContainsKey(header.Key))
-						//	context.Response.Headers.Remove(header.Key);
 						context.Response.Headers.Add(header.Key, header.Value.ToArray());
 					}
 					if (proxyResponse.Content != null) {
