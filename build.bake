@@ -25,15 +25,15 @@ def AddDirectory(id as string, path as string, document as XDocument, manager as
 		id = Path.GetFileName(dir)
 		AddDirectory(id, dir, document, manager)
 
-def RegisterApp(iishost as object, sitename as string, path as string, fspath as string):
+def RegisterApp(iishost as object, sitename as string, path as string, fspath as string, pool as string):
 	hosts = iishost as ICollection or (iishost, )
 	script = Path.GetFullPath("scripts/iis.ps1")
 	hostsArg = join(hosts, ",")
 	psArgs = ""
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
-		psArgs = "-Credential (New-Object PsCredential(\"$user\", (convertto-securestring \"$password\" -asplaintext -force))"
-	Sh("powershell Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath $psArgs")
+		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
+	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 Global(
 #	Project: "src/service/app/app.csproj",
@@ -44,13 +44,16 @@ Global(
 			@UpdateDeployRoot: """C:\inetpub\wwwroot\AnalitF.Net.Service-0.9.7.35\var\update\rtm""",
 			@CheckUrlRoot: "http://localhost/AnalitF.Net.Service",
 			@IISSiteName: "local",
-			@IISHost: "localhost"
+			@IISHost: "localhost",
+			@IISAppPool: "DefaultAppPool"
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\alpha""",
-			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
+			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
 			@IISSiteName: "IOS",
-			@IISHost: ("acdcserv", "solo", "frontrmt")
+			@IISHost: ("solo", "frontrmt"),
+			@IISPathRoot: "U:\\WebApps",
+			@IISAppPool: "Runner"
 		},
 		@Test : {
 			@DeployRoot: """\\acdcserv\TEST""",
@@ -85,14 +88,18 @@ task "deploy:service", ["build:service"]:
 
 	deployTo = GetDeploy(Globals, proj)
 	deployTo += "-$version"
+	name += "-$version"
 	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Main/Version"
 	MkDir(deployTo) unless Exist(deployTo)
 	deployToBin = Path.Combine(deployTo, "bin")
 	deployToVar = Path.Combine(deployTo, "var")
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
-	XCopyDeploy(Globals, "src/service/app/app.csproj", deployToBin)
-	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+	XCopyDeploy(Globals, proj, deployToBin)
+	fsPath = Path.GetFullPath(deployToBin)
+	if Globals.Maybe.IISPathRoot:
+		fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
 	#создаем маршрут в прокси
 	proj = "src/proxy/app/app.csproj"
@@ -115,7 +122,10 @@ task "deploy:proxy", ["build:proxy"]:
 	deployTo = GetDeploy(Globals, proj)
 	deployToBin = Path.Combine(deployTo, "bin")
 	XCopyDeploy(Globals, proj, deployToBin)
-	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), Path.GetFullPath(deployToBin))
+	fsPath = Path.GetFullPath(deployToBin)
+	if Globals.Maybe.IISPathRoot:
+		fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
 task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "git:push:tags"]
 
@@ -273,3 +283,15 @@ task "deploy:setup":
 		print e
 	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
 	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
+
+task "iis:clean":
+	iishost = Globals.IISHost
+	hosts = iishost as ICollection or (iishost, )
+	sitename = Globals.IISSiteName
+	hostsArg = join(hosts, ",")
+	psArgs = ""
+	if Globals.Environment == @Production:
+		user, password = AskCredentials("user for $hostsArg:")
+		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
+	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
+	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()

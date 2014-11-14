@@ -58,6 +58,7 @@
     <None Include="config" />
     <None Include="packages.config" />
     <None Include="Web.config" />
+    <None Include="Web.release.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
