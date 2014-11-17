@@ -306,3 +306,6 @@ task "iis:clean":
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
+
+task "db:local:seed":
+	Bash("rym -f Rymfile.service fixture execute SampleData")

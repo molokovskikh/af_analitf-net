@@ -82,12 +82,15 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var sendLogsTask = SendLogs(Client, Token);
 			HttpResponseMessage response;
+			var updateType = "накопительное";
 			if (!String.IsNullOrEmpty(BatchFile)) {
+				updateType = "автозаказ";
 				var url = new Uri(Config.BaseUrl, "Batch");
 				response = Wait(Config.WaitUrl(url), Client.PostAsync("Batch", GetBatchRequest(), Token));
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
+				updateType = "загрузка истории заказов";
 				var url = new Uri(Config.BaseUrl, "History");
 				var data = new HistoryRequest {
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
@@ -97,6 +100,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			else if (SyncData.Match("OrderHistory")) {
 				SuccessMessage = "Загрузка истории заказов завершена успешно.";
+				updateType = "загрузка истории заказов";
 				var url = new Uri(Config.BaseUrl, "History");
 				var data = new HistoryRequest {
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
@@ -106,15 +110,25 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			else {
 				var user = Session.Query<User>().FirstOrDefault();
-				var url = Config.SyncUrl(syncData, user == null ? null : user.LastSync);
+				var lastSync = user == null ? null : user.LastSync;
+				if (lastSync == null) {
+					updateType = "куммулятивное";
+				}
+				if (syncData.Match("Waybills")) {
+					updateType = "загрузка накладных";
+				}
+				var url = Config.SyncUrl(syncData, lastSync);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
 				response = Wait(Config.WaitUrl(url), request);
 			}
 
 			Reporter.Stage("Загрузка данных");
+			log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
+			log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
 			var result = ProcessUpdate();
+			log.InfoFormat("Обновление завершено успешно");
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			return result;
@@ -189,8 +203,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
 			}
 
-			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe")))
+			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe"))) {
+				log.InfoFormat("Получено обновление приложения");
 				return UpdateResult.UpdatePending;
+			}
 
 			Import();
 			return result;

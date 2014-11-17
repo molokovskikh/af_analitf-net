@@ -42,6 +42,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				throw new EndUserError("Не заказов для отправки");
 
 			var clientOrders = orders.Select(o => o.ToClientOrder(Session)).Where(o => o != null).ToArray();
+			log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", clientOrders.Length);
 
 			var response =
 				Client.PostAsync("Main",
@@ -49,6 +50,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Formatter,
 					Token).Result;
 			CheckResult(response);
+			log.InfoFormat("Заказы отправлены успешно");
 
 			var results = response.Content.ReadAsAsync<OrderResult[]>().Result
 				?? new OrderResult[0];
