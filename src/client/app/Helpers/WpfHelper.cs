@@ -222,7 +222,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		/// <summary>
 		/// предназначен для отладки, протоколирует события
-		/// пример WpfHelper.TraceEvent(typeof(UIElement), UIElement.GotFocusEvent, true);
+		/// пример WpfHelper.TraceEvent(typeof(UIElement), UIElement.GotFocusEvent, trace: true);
 		/// </summary>
 		public static void TraceEvent(Type type, RoutedEvent @event, Func<EventArgs, object> map = null, bool trace = false)
 		{

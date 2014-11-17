@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reactive.Linq.Observαble;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,24 +24,28 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
-		public ColumnSettings(DataGridColumn dataGridColumn, int index)
+		public ColumnSettings(DataGrid grid, DataGridColumn column, int index)
 		{
-			_pixelWidth = (int)dataGridColumn.ActualWidth;
-			Name = DataGridHelper.GetHeader(dataGridColumn);
+			_pixelWidth = (int)column.ActualWidth;
+			Name = DataGridHelper.GetHeader(column);
 			//видимостью колонки управляет флаг на форме
 			//состояние не нужно сохранять
 			if (Name != "Адрес заказа")
-				Visible = dataGridColumn.Visibility;
-			Width = dataGridColumn.Width;
+				Visible = column.Visibility;
+			Width = column.Width;
 			//-1 будет в том случае если таблица еще не отображалась
 			//в этом случае надо использовать индекс колонки
-			if (dataGridColumn.DisplayIndex != -1)
-				DisplayIndex = dataGridColumn.DisplayIndex;
+			if (column.DisplayIndex != -1)
+				DisplayIndex = column.DisplayIndex;
 			else
 				DisplayIndex = index;
+			if (grid.CanUserSortColumns && column.CanUserSort) {
+				SortDirection = column.SortDirection;
+				SortMemberPath = column.SortMemberPath;
+			}
 		}
 
-		public void Restore(ObservableCollection<DataGridColumn> columns)
+		public void Restore(DataGrid grid, ObservableCollection<DataGridColumn> columns)
 		{
 			var column = DataGridHelper.GetColumn(columns, Name);
 			if (column == null)
@@ -51,10 +56,23 @@ namespace AnalitF.Net.Client.Models
 			//мы не можем установить неопределенный индекс или больше максимально индекса
 			if (DisplayIndex >= 0 && DisplayIndex <= columns.Count - 1)
 				column.DisplayIndex = DisplayIndex;
+			if (grid.CanUserSortColumns && column.CanUserSort) {
+				if (SortDirection != null)
+					column.SortDirection = SortDirection;
+				if (!String.IsNullOrEmpty(SortMemberPath))
+					column.SortMemberPath = SortMemberPath;
+
+				if (column.SortDirection != null && !String.IsNullOrEmpty(column.SortMemberPath)) {
+					grid.Items.SortDescriptions.Clear();
+					grid.Items.SortDescriptions.Add(new SortDescription(column.SortMemberPath, column.SortDirection.Value));
+				}
+			}
 		}
 
 		public string Name { get; set; }
 		public Visibility Visible { get; set; }
+		public ListSortDirection? SortDirection;
+		public string SortMemberPath;
 
 		[JsonIgnore]
 		public bool IsVisible

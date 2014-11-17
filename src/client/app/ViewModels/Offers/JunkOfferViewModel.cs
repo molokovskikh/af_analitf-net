@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
 using NHibernate.Linq;
@@ -16,24 +18,37 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
 				t => Offers.Value.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				o => CurrentOffer.Value = o);
+			IsLoading = new NotifyValue<bool>(true);
 		}
 
 		public QuickSearch<Offer> QuickSearch { get; private set; }
+		public NotifyValue<bool> IsLoading { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			Update();
+			RxQuery(s => {
+					var offers = StatelessSession.Query<Offer>()
+						.Where(o => o.Junk)
+						.OrderBy(o => o.ProductSynonym)
+						.Fetch(o => o.Price)
+						.ToList();
+					CalculateRetailCost(offers);
+					LoadOrderItems(offers);
+					return offers;
+				})
+				.ObserveOn(UiScheduler)
+				.CatchSubscribe(o => {
+					Offers.Value = o;
+					SelectOffer();
+					CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
+					IsLoading.Value = false;
+				}, CloseCancellation);
 		}
 
 		protected override void Query()
 		{
-			Offers.Value = StatelessSession.Query<Offer>()
-				.Where(o => o.Junk)
-				.OrderBy(o => o.ProductSynonym)
-				.Fetch(o => o.Price)
-				.ToList();
 		}
 	}
 }

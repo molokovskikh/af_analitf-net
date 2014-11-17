@@ -99,6 +99,11 @@
 
 		<Parts:ProductInfoView Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}" />
 
+		<ProgressBar Grid.Row="0" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="2">
 			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">Показать синонимы (Ctrl+N)</Button>

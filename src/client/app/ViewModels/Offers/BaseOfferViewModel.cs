@@ -35,6 +35,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		public Address[] Addresses = new Address[0];
+		public static TaskScheduler TestQueryScheduler = null;
+		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -497,6 +499,15 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		{
 			OfferCommitted();
 			base.TryClose();
+		}
+
+		protected IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		{
+			if (StatelessSession == null)
+				return Observable.Empty<T>();
+			var task = new Task<T>(() => @select(StatelessSession), CloseCancellation.Token);
+			task.Start(QueryScheduler);
+			return Observable.FromAsync(() => task);
 		}
 	}
 }

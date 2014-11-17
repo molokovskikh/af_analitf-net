@@ -1114,7 +1114,8 @@ where a.MailId in ({0})", ids.Implode());
 					g.Key.AddressId,
 					g.Key.PriceList.PriceCode,
 					g.Key.RegionCode,
-					g.Implode(o => o.ClientAddition)
+					g.Where(o => !String.IsNullOrWhiteSpace(o.ClientAddition))
+						.Implode(o => String.Format("{0}: {1}", o.UserId, o.ClientAddition), " | ")
 				}),
 				false);
 
