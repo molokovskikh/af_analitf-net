@@ -143,7 +143,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			var launchButton = FindById(id, element);
 			if (launchButton == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}", id));
+				throw new Exception(String.Format("Не могу найти кнопку {0}, форма {1}", id, AutomationHelper.ToText(element)));
 
 			launchButton.Invoke();
 		}
