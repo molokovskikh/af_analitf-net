@@ -138,26 +138,36 @@ namespace AnalitF.Net.Service.Models
 			session.Save(data);
 
 			//по умолчанию fresh = 1
-			session.CreateSQLQuery("drop temporary table if exists usersettings.prices;" +
-				"drop temporary table if exists usersettings.activeprices;" +
-				"call Customers.GetOffers(:userId);" +
-				"call Customers.GetPrices(:userId); " +
-				"insert into Customers.AnalitFNetPriceReplications (PriceId, UserId, UpdateTime) " +
-				"select i.PriceId, :userId, :replicationDate from (" +
-				"select PriceCode as PriceId from UserSettings.Prices p " +
-				"left join Customers.AnalitFNetPriceReplications r on r.PriceId = p.PriceCode and r.UserId = :userId " +
-				"where r.Id is null) as i;" +
-				"update Usersettings.ActivePrices ap " +
-				"join Customers.AnalitFNetPriceReplications r on r.PriceId = ap.PriceCode " +
-				"set ap.Fresh = 0 " +
-				"where r.UserId = :userId and r.UpdateTime < :lastSync")
+			session.CreateSQLQuery(@"
+drop temporary table if exists usersettings.prices;
+drop temporary table if exists usersettings.activeprices;
+call Customers.GetOffers(:userId);
+call Customers.GetPrices(:userId);
+
+insert into Usersettings.AnalitFReplicationInfo (FirmCode, UserId, ForceReplication)
+select i.FirmCode, :userId, 1
+from (
+	select p.FirmCode
+	from UserSettings.Prices p
+	left join Usersettings.AnalitFReplicationInfo r on r.FirmCode = p.FirmCode and r.UserId = :userId
+	where r.UserId is null
+	group by p.FirmCode
+) as i;
+
+update Usersettings.ActivePrices ap
+	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
+set ap.Fresh = (r.ForceReplication = 1 or :cumulative)
+where r.UserId = :userId;
+
+update Usersettings.ActivePrices ap
+	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
+set r.ForceReplication = 0
+where r.UserId = :userId and ap.Fresh = 1;")
 				.SetParameter("userId", user.Id)
-				.SetParameter("lastSync", data.LastUpdateAt)
+				.SetParameter("cumulative", data.LastUpdateAt == DateTime.MinValue)
 				//для тех записей которые мы создали время репликации должно быть меньше текущего что бы не реплицировать
 				//данные еще раз
-				.SetParameter("replicationDate", data.LastPendingUpdateAt.Value.AddSeconds(-1))
 				.ExecuteUpdate();
-
 			CostOptimizer.OptimizeCostIfNeeded((MySqlConnection)session.Connection, user.Client.Id, user.Id);
 
 			string sql;
