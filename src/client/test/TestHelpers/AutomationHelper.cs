@@ -98,6 +98,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static string ToText(AutomationElement window)
 		{
+			if (window == null)
+				return null;
 			return FindTextElements(window)
 				.Cast<AutomationElement>()
 				.Implode(e => e.GetName(), Environment.NewLine);

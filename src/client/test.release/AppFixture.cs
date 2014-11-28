@@ -128,8 +128,8 @@ namespace test.release
 				.Where(f => pattern.IsMatch(Path.GetFileName(f)))
 				.Select(f => Tuple.Create(f, Version.Parse(pattern.Match(Path.GetFileName(f)).Groups[1].Value)))
 				.Where(t => t.Item2 < version)
+				.OrderByDescending(f => f.Item2)
 				.Select(t => t.Item1)
-				.OrderByDescending(f => f)
 				.First();
 			using(var zipfile = new ZipFile(pkg)) {
 				var entry = zipfile.GetEntry("tools/analitf.net.setup.exe");

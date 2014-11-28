@@ -1,3 +1,4 @@
+import Boo.Lang.PatternMatching
 import System
 import System.Collections
 import System.Reflection
@@ -35,6 +36,19 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
+def CopyUpdateBin(channel as string):
+	dir = Path.Combine(Path.GetDirectoryName(Globals.UpdateDeployRoot), channel)
+	if Exist(dir):
+		Rm("$dir/*")
+	else:
+		MkDir(dir)
+	impersonate = Configuration.Maybe.impersonate != null
+	if impersonate:
+		ImpersonateUser("deployer", '$sdfsd887!'):
+			Cp("output/updater/*", dir, true)
+	else:
+		Cp("output/updater/*", dir, true)
+
 Global(
 #	Project: "src/service/app/app.csproj",
 	HumanReadableName: "AnalitF.Net",
@@ -53,7 +67,7 @@ Global(
 			@IISSiteName: "IOS",
 			@IISHost: ("solo", "frontrmt"),
 			@IISPathRoot: "U:\\WebApps",
-			@IISAppPool: "Runner"
+			@IISAppPool: "Runer"
 		},
 		@Test : {
 			@DeployRoot: """\\acdcserv\TEST""",
@@ -224,9 +238,35 @@ task "git:push:tags":
 
 task "git:tag":
 	return unless Globals.Environment == @Production
+
 	kind = Configuration.Maybe.kind
-	raise "Нужно указать тип релиза kind=patch - исправление ошибок, kind=minor - новый функционал, kind=major - координальные изменения в существующем функционале" unless kind
-	Bash("./scripts/tag-release.sh $kind")
+	unless kind:
+		raise "Нужно указать тип релиза kind=patch - исправление ошибок, kind=minor - новый функционал, kind=major - координальные изменения в существующем функционале, подробней о версионности http://semver.org"
+
+	output = ExecuteProcess("git", "log -1 --decorate --pretty=oneline")
+	if output.Contains("tag: v"):
+		print "Последний коммит был релизом, не буду обновлять номер версии тк похоже что это на повторный деплой"
+		return
+
+	currentVersion = GetVersionTags().LastOrDefault() or Version(GetVersion())
+	revision = currentVersion.Revision
+	if revision == -1:
+		revision = 0
+	revision++
+	major = currentVersion.Major
+	minor = currentVersion.Minor
+	build = currentVersion.Build
+	match kind:
+		case "patch":
+			build++
+		case "minor":
+			minor++
+		case "major":
+			major++
+		otherwise:
+			raise "Не знаю что за релиз $kind"
+	newVersion = Version(major, minor, build, revision)
+	Bash("git tag v$newVersion")
 
 task "test:binary":
 	return unless Globals.Environment == @Production
@@ -267,17 +307,7 @@ task "test:binary":
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
-		dir = Path.Combine(Path.GetDirectoryName(Globals.UpdateDeployRoot), "beta")
-		if Exist(dir):
-			Rm("$dir/*")
-		else:
-			MkDir(dir)
-		impersonate = Configuration.Maybe.impersonate != null
-		if impersonate:
-			ImpersonateUser("deployer", '$sdfsd887!'):
-				Cp("output/updater/*", dir, true)
-		else:
-			Cp("output/updater/*", dir, true)
+		CopyUpdateBin("beta")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
@@ -294,6 +324,7 @@ task "deploy:setup":
 		print e
 	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
 	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
+	CopyUpdateBin("rtm")
 
 task "iis:clean":
 	iishost = Globals.IISHost

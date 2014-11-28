@@ -459,8 +459,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			session.Clear();
 			supplier = session.Load<TestSupplier>(supplier.Id);
 			supplier.CreateSampleCore(session);
-			session.CreateSQLQuery("update Customers.AnalitFNetPriceReplications set UpdateTime = now() where UserId = :userId and priceId = :priceId")
-				.SetParameter("priceId", testPrice.Id)
+			session.CreateSQLQuery("update Usersettings.AnalitFReplicationInfo set ForceReplication = 1 where UserId = :userId and FirmCode = :supplierId")
+				.SetParameter("supplierId", testPrice.Supplier.Id)
 				.SetParameter("userId", serverUser.Id)
 				.ExecuteUpdate();
 
