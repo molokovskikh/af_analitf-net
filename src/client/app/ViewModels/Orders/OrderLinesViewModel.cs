@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 			OnCloseDisposable.Add(observable.Subscribe(_ => Sum.Recalculate()));
 
-			Settings.Changed().Subscribe(_ => Calculate());
+			Settings.Subscribe(_ => Calculate());
 
 			Prices = Session.Query<Price>().OrderBy(p => p.Name).ToList()
 				.Select(p => new Selectable<Price>(p))
@@ -131,11 +131,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			OnlyWarningVisible = new NotifyValue<bool>(() => IsCurrentSelected && User.IsPreprocessOrders, IsCurrentSelected);
+			OnlyWarningVisible = IsCurrentSelected.Select(v => v && User.IsPreprocessOrders).ToValue();
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
-			CurrentLine.Changed()
-				.Merge(SelectedSentLine.Changed())
-				.Merge(IsCurrentSelected.Changed())
+			CurrentLine.Cast<object>()
+				.Merge(SelectedSentLine)
+				.Merge(IsCurrentSelected.Select(v => (object)v))
 				.Subscribe(_ => {
 					if (IsCurrentSelected)
 						ProductInfo.CurrentOffer = CurrentLine.Value;
@@ -145,7 +145,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.Init();
 			AddressSelector.FilterChanged
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
-				.Merge(OnlyWarning.Changed())
+				.Merge(OnlyWarning.Select(v => (object)v))
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 
 			var isSentSelectedValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".IsSentSelected");

@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnInitialize();
 
 			if (IsUpdate)
-				CurrentLine.Changed().Subscribe(_ => Update());
+				CurrentLine.Subscribe(_ => Update());
 
 			CanSend = Address.BindableOrders.Changed()
 				.Merge(Observable.Return<object>(null))
@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		protected override void Query()
 		{
-			if (CurrentLine == null) {
+			if (CurrentLine.Value == null) {
 				Offers.Value = new List<Offer>();
 				return;
 			}

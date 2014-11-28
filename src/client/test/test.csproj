@@ -230,7 +230,6 @@
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\Models\ConfigFixture.cs" />
     <Compile Include="Unit\Models\MailFixture.cs" />
-    <Compile Include="Unit\Models\MinCostFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />

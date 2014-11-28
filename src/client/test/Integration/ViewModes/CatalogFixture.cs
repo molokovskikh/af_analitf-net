@@ -26,6 +26,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			catalogModel = Init(new CatalogViewModel());
 			nameViewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
+			testScheduler.Start();
 		}
 
 		[Test, Ignore]
@@ -53,6 +54,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(nameViewModel.CatalogNames.Value.Select(c => c.Name).ToList(),
 				Is.EquivalentTo(expectedNames.Select(n => n.Name).ToArray()));
 			catalogModel.FilterByMnn = false;
+			testScheduler.Start();
 			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(1));
 		}
 
@@ -111,11 +113,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Activete_search()
 		{
-			catalogModel.CatalogSearch = true;
+			catalogModel.CatalogSearch.Value = true;
+			testScheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
-
 			Assert.That(catalogModel.ActiveItem, Is.InstanceOf<CatalogSearchViewModel>());
 			Assert.That(catalogModel.CurrentItem, Is.InstanceOf<Catalog>());
 			var term = catalog.Name.Name.Slice(3);
@@ -134,7 +136,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Clear_search_term()
 		{
-			catalogModel.CatalogSearch = true;
+			catalogModel.CatalogSearch.Value = true;
+			testScheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -150,13 +153,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Filter_by_mnn_in_search()
 		{
-			catalogModel.CatalogSearch = true;
+			catalogModel.CatalogSearch.Value = true;
+			testScheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers && c.Name.Mnn != null);
 			var total = searchModel.Items.Value.Count;
 			searchModel.CurrentCatalog.Value = catalog;
 			catalogModel.FilterByMnn = true;
+			testScheduler.Start();
 			Assert.That(searchModel.Items.Value.Count, Is.LessThan(total));
 		}
 
@@ -206,6 +211,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);
 			catalogModel.FilterByMnn = true;
+			testScheduler.Start();
 		}
 	}
 }

@@ -97,7 +97,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			var catalog = await ViewLoaded<CatalogViewModel>();
 			dispatcher.Invoke(() => {
-				catalog.CatalogSearch = true;
+				catalog.CatalogSearch.Value = true;
 			});
 
 			await ViewLoaded(catalog.ActiveItem);

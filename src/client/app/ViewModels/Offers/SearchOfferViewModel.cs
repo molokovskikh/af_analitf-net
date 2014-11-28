@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.OrderBy(p => p.Name)
 				.Select(p => new Selectable<Price>(p))
 				.ToList();
-			Settings.Changed().Subscribe(_ => SortOffers(Offers));
+			Settings.Subscribe(_ => SortOffers(Offers));
 
 			Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
 				.Merge(OnlyBase.Changed())

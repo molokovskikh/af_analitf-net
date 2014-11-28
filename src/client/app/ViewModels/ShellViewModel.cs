@@ -118,9 +118,9 @@ namespace AnalitF.Net.Client.ViewModels
 			Stat = new NotifyValue<Stat>(new Stat());
 			User = new NotifyValue<User>();
 			Settings = new NotifyValue<Settings>();
-			IsDataLoaded = new NotifyValue<bool>(
-				() => Settings.Value != null && Settings.Value.LastUpdate != null,
-				Settings);
+			IsDataLoaded = Settings
+				.Select(v => v != null && v.LastUpdate != null)
+				.ToValue();
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			NewMailsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
@@ -183,7 +183,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CloseDisposable.Add(Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
 			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session));
 
-			Schedules.Changed().Select(_ =>
+			Schedules.Select(_ =>
 				Schedules.Value.Count == 0
 					? Observable.Empty<bool>()
 					: Observable.Timer(TimeSpan.Zero, 20.Second(), UiScheduler)
@@ -207,7 +207,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
-			CanPrintPreview = new NotifyValue<bool>(() => CanPrint.Value, CanPrint);
+			CanPrintPreview = CanPrint.ToValue();
 		}
 
 		public Config.Config Config

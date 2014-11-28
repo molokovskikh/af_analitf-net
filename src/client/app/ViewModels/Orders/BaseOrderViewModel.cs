@@ -15,24 +15,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			IsSentSelected = new NotifyValue<bool>();
 			Begin = new NotifyValue<DateTime>(DateTime.Today);
 			End = new NotifyValue<DateTime>(DateTime.Today);
-			BeginEnabled = new NotifyValue<bool>(() => IsSentSelected, IsSentSelected);
-			EndEnabled = new NotifyValue<bool>(() => IsSentSelected, IsSentSelected);
-			Begin.Changed().Merge(End.Changed())
-				.Subscribe(_ => Update());
+			BeginEnabled = IsSentSelected.ToValue();
+			EndEnabled = IsSentSelected.ToValue();
+			Begin.Merge(End).Subscribe(_ => Update());
 
-			IsSentSelected.Changed()
-				.Merge(IsCurrentSelected.Changed())
+			IsSentSelected
+				.Merge(IsCurrentSelected)
 				.Skip(1)
-				.Take(1)
-				.Repeat()
 				.Subscribe(n => {
 					if (IsSentSelected && !isSendInit) {
 						isSendInit = true;
 						Update();
 					}
 				});
-			IsCurrentSelected.Changed().Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
-			IsCurrentSelected.Changed().Subscribe(_ => NotifyOfPropertyChange("CanExport"));
+			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
+			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanExport"));
 		}
 
 		public NotifyValue<bool> IsCurrentSelected { get; set ;}

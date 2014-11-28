@@ -46,6 +46,11 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
+		<ProgressBar Grid.Row="1" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
 		<Parts:CatalogPanel Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}"
 			DataContext="{Binding ParentModel}" />

@@ -16,12 +16,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Price Price { get; set; }
 
-		public virtual decimal? Diff
-		{
-			get
-			{
-				return NullableHelper.Round((NextCost / Cost - 1) * 100, 2);
-			}
-		}
+		public virtual decimal? Diff { get; set; }
 	}
 }

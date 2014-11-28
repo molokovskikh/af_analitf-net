@@ -453,6 +453,7 @@ CREATE TEMPORARY TABLE MinCosts (
 	CatalogId int unsigned,
 	RegionId bigint unsigned,
 	PriceId INT unsigned,
+	Diff Decimal(8, 2),
 	UNIQUE MultiK(ProductId, RegionId, Cost)
 ) engine = MEMORY;
 
@@ -496,7 +497,8 @@ group by m.ProductId, m.RegionId;
 
 update MinCosts m
 join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
-set m.NextCost = n.NextCost;")
+set m.NextCost = n.NextCost,
+	m.Diff = round((n.NextCost / m.Cost - 1) * 100, 2);")
 					.ExecuteUpdate();
 				Export(Result, "select * from MinCosts", "MinCosts", truncate: true);
 			}

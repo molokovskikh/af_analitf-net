@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
 				SelectedTab.Value = "LoginTab";
 
-			SelectedTab.Changed().Subscribe(_ => lastTab = SelectedTab.Value);
+			SelectedTab.Subscribe(_ => lastTab = SelectedTab.Value);
 		}
 
 		public string Password

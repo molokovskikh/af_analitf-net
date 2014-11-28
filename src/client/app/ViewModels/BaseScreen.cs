@@ -28,6 +28,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
@@ -83,6 +84,10 @@ namespace AnalitF.Net.Client.ViewModels
 		//в приложении его обрабатывает Coroutine см Config/Initializers/Caliburn
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
 		public Env Env = new Env();
+		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
+		public static TaskScheduler TestQueryScheduler = null;
+		public ManualResetEventSlim drained = new ManualResetEventSlim(true);
+		public int backgrountQueryCount = 0;
 
 		public BaseScreen()
 		{
@@ -118,6 +123,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public IScheduler UiScheduler
 		{
 			get { return uiSheduler.Value; }
+		}
+
+		public TaskScheduler TplUiScheduler
+		{
+			get
+			{
+				return TestQueryScheduler ?? TaskScheduler.FromCurrentSynchronizationContext();
+			}
 		}
 
 		public bool IsSuccessfulActivated { get; protected set; }
@@ -354,8 +367,12 @@ namespace AnalitF.Net.Client.ViewModels
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
 			if (StatelessSession != null) {
-				StatelessSession.Dispose();
-				StatelessSession = null;
+				//методы RxQuery обращается к StatelessSession в другой нитке
+				//вроде бы это безопасно но для освобождения нужно установить блокировку
+				lock (StatelessSession) {
+					StatelessSession.Dispose();
+					StatelessSession = null;
+				}
 			}
 
 			if (Session != null) {
@@ -561,6 +578,37 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult ConfigureGrid(DataGrid grid)
 		{
 			return new DialogResult(new GridConfig(grid), sizeToContent: true);
+		}
+
+		protected IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		{
+			if (StatelessSession == null)
+				return Observable.Empty<T>();
+			var task = new Task<T>(() => {
+				Interlocked.Increment(ref backgrountQueryCount);
+				try{
+					drained.Reset();
+					if (StatelessSession == null)
+						return default(T);
+					lock (StatelessSession) {
+						return @select(StatelessSession);
+					}
+				}
+				finally {
+					var val = Interlocked.Decrement(ref backgrountQueryCount);
+					if (val == 0)
+						drained.Set();
+				}
+			}, CloseCancellation.Token);
+			task.Start(QueryScheduler);
+			return Observable.FromAsync(() => task);
+		}
+
+		public Task WaitQueryDrain()
+		{
+			var t = new Task(() => drained.Wait());
+			t.Start(QueryScheduler);
+			return t;
 		}
 	}
 }

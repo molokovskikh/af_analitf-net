@@ -35,8 +35,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		public Address[] Addresses = new Address[0];
-		public static TaskScheduler TestQueryScheduler = null;
-		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -51,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentProducer = new NotifyValue<Producer>(EmptyProducer);
 			Producers = new NotifyValue<List<Producer>>(new List<Producer> { EmptyProducer });
 
-			CurrentOffer.Changed().Subscribe(_ => {
+			CurrentOffer.Subscribe(_ => {
 				if (ResetAutoComment) {
 					AutoCommentText = CurrentOffer.Value != null && CurrentOffer.Value.OrderLine != null
 						? CurrentOffer.Value.OrderLine.Comment
@@ -67,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowCatalogWithMnnFilter"));
 
-			Settings.Changed().Subscribe(_ => Calculate());
+			Settings.Subscribe(_ => Calculate());
 		}
 
 		public PromotionPopup Promotions { get; set; }
@@ -499,15 +497,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		{
 			OfferCommitted();
 			base.TryClose();
-		}
-
-		protected IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
-		{
-			if (StatelessSession == null)
-				return Observable.Empty<T>();
-			var task = new Task<T>(() => @select(StatelessSession), CloseCancellation.Token);
-			task.Start(QueryScheduler);
-			return Observable.FromAsync(() => task);
 		}
 	}
 }

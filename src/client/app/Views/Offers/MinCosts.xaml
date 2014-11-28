@@ -68,6 +68,11 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 
+		<ProgressBar Grid.Row="1" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
 		<controls:DataGrid2 x:Name="Offers" Grid.Row="2"
 			CanUserSortColumns="False"
 			ui:NavBinder.Prev="{x:Reference Costs}">

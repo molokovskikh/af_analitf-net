@@ -55,6 +55,11 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
+		<ProgressBar Grid.Row="1" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
 		<Grid Grid.Row="2">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />

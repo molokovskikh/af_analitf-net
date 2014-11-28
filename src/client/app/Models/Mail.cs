@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.Models
 
 		public static void TrackIsNew(IScheduler scheduler, NotifyValue<Mail> current)
 		{
-			current.Changed()
+			current
 				.Do(_ => {
 					if (current.Value != null)
 						current.Value.IsEdited = false;

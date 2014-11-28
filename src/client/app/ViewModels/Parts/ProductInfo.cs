@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			Shell = shell;
 
 			if (value != null)
-				value.Changed().Subscribe(_ => CurrentOffer = value.Value);
+				value.Subscribe(_ => CurrentOffer = value.Value);
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => {

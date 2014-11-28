@@ -13,6 +13,7 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -26,10 +27,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogNameViewModel(CatalogViewModel catalog)
 		{
-			Readonly = true;
 			Shell = catalog.Shell;
 			ParentModel = catalog;
-			CatalogNames = new NotifyValue<List<CatalogName>>();
 			Catalogs = new NotifyValue<List<Catalog>>(new List<Catalog>());
 			CurrentItem = new NotifyValue<object>();
 			CurrentCatalogName = new NotifyValue<CatalogName>();
@@ -42,18 +41,13 @@ namespace AnalitF.Net.Client.ViewModels
 				v => Catalogs.Value.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalog = c);
 
-			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
-				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
-				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
-				.Subscribe(_ => Update()));
-
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogs()));
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)
 				.Subscribe(_ => NotifyOfPropertyChange("CatalogsEnabled")));
 
-			CurrentCatalogName.Changed()
+			CurrentCatalogName
 				.Subscribe(_ => {
 					if (activeItemType == typeof(CatalogName))
 						CurrentItem.Value = CurrentCatalogName.Value;
@@ -62,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//в жизни нет смысла грузить формы выпуска при каждом изменении наименования
 			//это приведет к визуальным тормозам при скролинге
 			//но в тестах это приведет к геморою
-			CurrentCatalogName.Changed()
+			CurrentCatalogName
 #if !DEBUG
 				.Throttle(Consts.ScrollLoadTimeout)
 				.ObserveOn(UiScheduler)
@@ -118,6 +112,17 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Promotions = new PromotionPopup(StatelessSession, Shell.Config);
+			CatalogNames = ParentModel.ObservableForProperty(m => (object)m.FilterByMnn, skipInitial: false)
+				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
+				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
+				.Select(_ => RxQuery(LoadCatalogNames))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.ToValue(CloseCancellation);
+			CatalogNames.Subscribe(_ => {
+				CurrentCatalogName.Value = CurrentCatalogName.Value
+					?? (CatalogNames.Value ?? Enumerable.Empty<CatalogName>()).FirstOrDefault();
+			});
 		}
 
 		protected override void OnActivate()
@@ -137,9 +142,9 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public override void Update()
+		private List<CatalogName> LoadCatalogNames(IStatelessSession session)
 		{
-			var queryable = StatelessSession.Query<CatalogName>();
+			var queryable = session.Query<CatalogName>();
 			if (!ParentModel.ShowWithoutOffers)
 				queryable = queryable.Where(c => c.HaveOffers);
 
@@ -150,18 +155,15 @@ namespace AnalitF.Net.Client.ViewModels
 				queryable = queryable.Where(c => c.MandatoryList);
 
 			if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-				queryable = queryable.Where(n => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog.Name == n));
+				queryable = queryable.Where(n => session.Query<AwaitedItem>().Any(i => i.Catalog.Name == n));
 
 			if (ParentModel.FiltredMnn != null) {
 				var mnnId = ParentModel.FiltredMnn.Id;
 				queryable = queryable.Where(n => n.Mnn.Id == mnnId);
 			}
-			CatalogNames.Value = queryable.OrderBy(c => c.Name)
+			return queryable.OrderBy(c => c.Name)
 				.Fetch(c => c.Mnn)
 				.ToList();
-
-			if (CurrentCatalogName.Value == null)
-				CurrentCatalogName.Value = CatalogNames.Value.FirstOrDefault();
 		}
 
 		private void LoadCatalogs()

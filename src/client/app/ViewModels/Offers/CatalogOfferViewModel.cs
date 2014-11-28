@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentRegion = new NotifyValue<string>(Consts.AllRegionLabel);
 
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
-			GroupByProduct.Changed().Subscribe(_ => Offers.Value = Sort(Offers.Value));
+			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User),
 				Settings);
@@ -43,9 +43,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return Math.Round(CurrentOffer.Value.ResultCost * (1 + RetailMarkup / 100), 2);
 			}, RetailMarkup);
 
-			CurrentRegion.Changed()
-				.Merge(CurrentFilter.Changed())
-				.Merge(CurrentProducer.Changed())
+			CurrentRegion.Cast<Object>()
+				.Merge(CurrentFilter)
+				.Merge(CurrentProducer)
+				//пропускаем начальные значения
+				.Skip(3)
 				.Subscribe(_ => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer.Value)

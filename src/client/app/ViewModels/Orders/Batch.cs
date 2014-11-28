@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return query.ToObservableCollection();
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
 			CurrentReportLine = new NotifyValue<BatchLine>();
-			CanDelete = new NotifyValue<bool>(() => CurrentReportLine.Value != null, CurrentReportLine);
+			CanDelete = CurrentReportLine.Select(l => l != null).ToValue();
 		}
 
 		public string[] Filter { get; set; }
@@ -162,13 +162,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnInitialize();
 
 			lastUsedDir = Settings.Value.GetVarRoot();
-			CurrentReportLine.Changed().Throttle(Consts.ScrollLoadTimeout, UiScheduler).Subscribe(_ => {
-				if (CurrentReportLine.Value != null)
-					CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
-				else
-					CurrentElementAddress = null;
-				Update();
-			});
+			CurrentReportLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+				.Subscribe(_ => {
+					if (CurrentReportLine.Value != null)
+						CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
+					else
+						CurrentElementAddress = null;
+					Update();
+				});
 
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
@@ -179,7 +180,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			if (StatelessSession != null) {
 				CurrentReportLine
-					.Changed()
 					.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 					.Subscribe(_ => {
 						var line = CurrentReportLine.Value;

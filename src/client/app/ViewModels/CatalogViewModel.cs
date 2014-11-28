@@ -6,6 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -51,13 +52,13 @@ namespace AnalitF.Net.Client.ViewModels
 		private FilterDeclaration currentFilter;
 		private Mnn filtredMnn;
 		private bool viewOffersByCatalog;
-		private Screen activeItem;
+		private BaseScreen activeItem;
 		private IDisposable observable = Disposable.Empty;
 
 		public CatalogViewModel()
 		{
 			ViewOffersByCatalog = true;
-			ViewOffersByCatalogEnabled = new NotifyValue<bool>(() => Settings.Value.CanViewOffersByCatalogName, Settings);
+			ViewOffersByCatalogEnabled = Settings.Select(s => s.CanViewOffersByCatalogName).ToValue();
 
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new[] {
@@ -68,7 +69,8 @@ namespace AnalitF.Net.Client.ViewModels
 			};
 			CurrentFilter = Filters[0];
 
-			CatalogSearch = false;
+			CatalogSearch = new NotifyValue<bool>();
+			CatalogSearch.CatchSubscribe(_ => UpdateActiveItem(), CloseCancellation);
 
 			CanAddToAwaited = this
 				.ObservableForProperty(m => (object)m.CurrentCatalog, skipInitial: false)
@@ -79,17 +81,22 @@ namespace AnalitF.Net.Client.ViewModels
 			this.ObservableForProperty(m => m.CurrentCatalogName)
 				.Subscribe(_ => NotifyOfPropertyChange("CanShowDescription"));
 
-			this.ObservableForProperty(m => m.CatalogSearch)
-				.Subscribe(_ => NotifyOfPropertyChange("ViewOffersByCatalogVisible"));
+			ViewOffersByCatalogVisible = CatalogSearch.Select(v => !v)
+				.ToValue();
 
 			OnCloseDisposable.Add(Disposable.Create(() => {
 				if (ActiveItem is IDisposable) {
 					((IDisposable)ActiveItem).Dispose();
 				}
 			}));
+			IsEnabled = new NotifyValue<bool>(true);
 		}
 
+		public NotifyValue<bool> ViewOffersByCatalogVisible { get; private set; }
+		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 		public NotifyValue<bool> CanAddToAwaited { get; set; }
+		public NotifyValue<bool> IsEnabled { get; set; }
+		public NotifyValue<bool> CatalogSearch { get; set; }
 
 		public string SearchText
 		{
@@ -109,20 +116,44 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public Screen ActiveItem
+		public BaseScreen ActiveItem
 		{
 			get { return activeItem; }
 			set
 			{
-				ScreenExtensions.TryDeactivate(activeItem, true);
-				if (activeItem is IDisposable) {
-					((IDisposable)activeItem).Dispose();
+				if (activeItem != null) {
+					//деактивация открытого элемента будет ждать завершения фоновой загрузки данных
+					//что заблокирует ui нитку, что бы избежат этого
+					//1. отключаем ui - что бы не получать больше запросов
+					//2. ждем пока все фоновые запросы не завершатся
+					//3. освобождаем старую форму и конструируем новую форму
+					//4. включаем ui
+					IsEnabled.Value = false;
+					activeItem.WaitQueryDrain()
+						.ContinueWith(t => {
+							ScreenExtensions.TryDeactivate(activeItem, true);
+							if (activeItem is IDisposable) {
+								((IDisposable)activeItem).Dispose();
+							}
+							activeItem = value;
+							if (IsActive) {
+								ScreenExtensions.TryActivate(activeItem);
+							}
+							NotifyOfPropertyChange("ActiveItem");
+							IsEnabled.Value = true;
+						}, TplUiScheduler);
 				}
-				activeItem = value;
-				if (IsActive) {
-					ScreenExtensions.TryActivate(activeItem);
+				else {
+					ScreenExtensions.TryDeactivate(activeItem, true);
+					if (activeItem is IDisposable) {
+						((IDisposable)activeItem).Dispose();
+					}
+					activeItem = value;
+					if (IsActive) {
+						ScreenExtensions.TryActivate(activeItem);
+					}
+					NotifyOfPropertyChange("ActiveItem");
 				}
-				NotifyOfPropertyChange("ActiveItem");
 			}
 		}
 
@@ -167,6 +198,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			get
 			{
+				if (activeItem == null)
+					return null;
 				if (activeItem is CatalogSearchViewModel) {
 					return ((CatalogSearchViewModel)activeItem).CurrentCatalog.Value;
 				}
@@ -174,6 +207,8 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			set
 			{
+				if (activeItem == null)
+					return;
 				if (activeItem is CatalogSearchViewModel) {
 					((CatalogSearchViewModel)activeItem).CurrentCatalog.Value = value;
 				}
@@ -299,20 +334,13 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool ViewOffersByCatalogVisible
-		{
-			get { return !CatalogSearch; }
-		}
-
-		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			var baseScreen = ActiveItem as BaseScreen;
-			if (baseScreen != null)
-				baseScreen.Shell = Shell;
+			if (ActiveItem != null)
+				ActiveItem.Shell = Shell;
 		}
 
 		protected override void OnActivate()
@@ -327,46 +355,40 @@ namespace AnalitF.Net.Client.ViewModels
 			ScreenExtensions.TryDeactivate(ActiveItem, close);
 		}
 
-		[DataMember]
-		public bool CatalogSearch
+		public void UpdateActiveItem()
 		{
-			get { return ActiveItem is CatalogSearchViewModel; }
-			set
-			{
-				if (value && !(ActiveItem is CatalogSearchViewModel)) {
-					observable.Dispose();
-					CleanCache();
+			if (CatalogSearch && !(ActiveItem is CatalogSearchViewModel)) {
+				observable.Dispose();
+				CleanCache();
 
-					var model = new CatalogSearchViewModel(this);
-					observable = model.ObservableForProperty(m => m.CurrentCatalog.Value)
-						.Subscribe(_ => {
-							NotifyOfPropertyChange("CurrentItem");
-							NotifyOfPropertyChange("CurrentCatalog");
-							NotifyOfPropertyChange("CurrentCatalogName");
-						});
-					CleanCache();
-					ActiveItem = model;
-				}
-				else if (!(ActiveItem is CatalogNameViewModel)) {
-					observable.Dispose();
-					CleanCache();
+				var model = new CatalogSearchViewModel(this);
+				observable = model.ObservableForProperty(m => m.CurrentCatalog.Value)
+					.Subscribe(_ => {
+						NotifyOfPropertyChange("CurrentItem");
+						NotifyOfPropertyChange("CurrentCatalog");
+						NotifyOfPropertyChange("CurrentCatalogName");
+					});
+				CleanCache();
+				ActiveItem = model;
+			}
+			else if (!(ActiveItem is CatalogNameViewModel)) {
+				observable.Dispose();
+				CleanCache();
 
-					var model = new CatalogNameViewModel(this);
-					var composite = new CompositeDisposable {
-						model
-							.ObservableForProperty(m => m.CurrentItem.Value)
-							.Subscribe(_ => NotifyOfPropertyChange("CurrentItem")),
-						model
-							.ObservableForProperty(m => m.CurrentCatalog)
-							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalog")),
-						model
-							.ObservableForProperty(m => m.CurrentCatalogName.Value)
-							.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalogName"))
-					};
-					observable = composite;
-					ActiveItem = model;
-				}
-				NotifyOfPropertyChange("CatalogSearch");
+				var model = new CatalogNameViewModel(this);
+				var composite = new CompositeDisposable {
+					model
+						.ObservableForProperty(m => m.CurrentItem.Value)
+						.Subscribe(_ => NotifyOfPropertyChange("CurrentItem")),
+					model
+						.ObservableForProperty(m => m.CurrentCatalog)
+						.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalog")),
+					model
+						.ObservableForProperty(m => m.CurrentCatalogName.Value)
+						.Subscribe(_ => NotifyOfPropertyChange("CurrentCatalogName"))
+				};
+				observable = composite;
+				ActiveItem = model;
 			}
 		}
 

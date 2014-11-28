@@ -32,14 +32,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnlyWarning = new NotifyValue<bool>();
 			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
 			CurrentLine = new NotifyValue<IOrderLine>();
-			CurrentLine.Changed()
+			CurrentLine
 				.Subscribe(_ => {
 					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
 					editor.CurrentEdit = CurrentLine.Value as OrderLine;
 				});
 			MatchedWaybills = new MatchedWaybills(StatelessSession,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
-				new NotifyValue<bool>(() => !IsCurrentOrder),
+				new NotifyValue<bool>(!IsCurrentOrder),
 				UiScheduler);
 		}
 
@@ -93,14 +93,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			editor = new Editor(OrderWarning, Manager);
-			OnlyWarningVisible = new NotifyValue<bool>(() => User.IsPreprocessOrders && IsCurrentOrder);
+			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
 
 			editor.ObservableForProperty(e => e.CurrentEdit)
 				.Select(e => e.Value)
 				.BindTo(this, m => m.CurrentLine.Value);
 
-			Lines.Changed()
-				.Subscribe(_ => editor.Lines = Lines.Value as IList);
+			Lines.Subscribe(_ => editor.Lines = Lines.Value as IList);
 		}
 
 		protected override void OnViewAttached(object view, object context)

@@ -53,10 +53,10 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentSort = new NotifyValue<string>("Сортировка: Дата");
 			IsAsc = new NotifyValue<bool>(false);
 
-			Items = Term.Changed()
+			Items = Term.Cast<object>()
 				.Throttle(TimeSpan.FromMilliseconds(100), UiScheduler)
-				.Merge(CurrentSort.Changed())
-				.Merge(IsAsc.Changed())
+				.Merge(CurrentSort)
+				.Merge(IsAsc.Select(v => (object)v))
 				.ToValue(_ => Apply());
 			CanDelete = SelectedItems.Changed().ToValue(_ => SelectedItems.Count > 0);
 			var updateStat = Items.ObservableForProperty(i => i.Value)

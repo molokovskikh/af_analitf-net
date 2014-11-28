@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Mapping;
 using ReactiveUI;
@@ -22,6 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentCost = new NotifyValue<MinCost>();
 			Diff = new NotifyValue<int>(7);
 			SearchBehavior = new SearchBehavior(this, callUpdate: false);
+			IsLoading = new NotifyValue<bool>(true);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -29,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<int> Diff { get; set; }
 		public NotifyValue<List<MinCost>> Costs { get; set; }
 		public NotifyValue<MinCost> CurrentCost { get; set; }
+		public NotifyValue<bool> IsLoading { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -41,31 +44,36 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Costs = Diff.Throttle(Consts.TextInputLoadTimeout, UiScheduler).Select(v => (object)v)
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(SearchBehavior.ActiveSearchTerm)
-				.Select(_ => Load())
-				.ToValue(_ => Load(), CloseCancellation);
+				.Select(_ => RxQuery(Load))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.ToValue(CloseCancellation);
 
 			CurrentCost
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 				.Subscribe(_ => Query(), CloseCancellation.Token);
-
-			Costs.Value = Load();
 		}
 
-		private List<MinCost> Load()
+		private List<MinCost> Load(IStatelessSession session)
 		{
-			var factor = 1 + Diff.Value / 100m;
-			var query = Session.Query<MinCost>()
+			IsLoading.Value = true;
+			var factor = Diff.Value;
+			var query = session.Query<MinCost>()
 				.Fetch(c => c.Catalog)
 				.ThenFetch(c => c.Name)
-				.Where(c => c.NextCost / c.Cost > factor);
+				.Where(c => c.Diff > factor);
 			query = Util.Filter(query, c => c.Price.Id, Prices);
 			var term = SearchBehavior.ActiveSearchTerm.Value;
 			if (!String.IsNullOrEmpty(term)) {
 				query = query.Where(c => c.Catalog.Name.Name.Contains(term) || c.Catalog.Form.Contains(term));
 			}
-			return query.OrderBy(c => c.Catalog.Name.Name)
+			var result = query.OrderBy(c => c.Catalog.Name.Name)
 				.ThenBy(c => c.Catalog.Form)
+				.Fetch(c => c.Catalog)
+				.ThenFetch(c => c.Name)
 				.ToList();
+			IsLoading.Value = false;
+			return result;
 		}
 
 		protected override void Query()
