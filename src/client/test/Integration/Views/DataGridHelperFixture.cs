@@ -11,7 +11,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Get_cell()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var grid = new DataGrid {
 					Columns = {
 						new DataGridTextColumn {
@@ -30,7 +30,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var cell = DataGridHelper.GetCell(grid, grid.CurrentCell);
 				Assert.AreEqual(grid.CurrentItem, cell.DataContext);
 				Assert.AreEqual(grid.Columns[1], cell.Column);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}

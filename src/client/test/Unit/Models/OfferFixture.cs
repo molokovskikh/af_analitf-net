@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using NHibernate.Hql.Ast.ANTLR;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
+using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Unit
@@ -271,6 +272,15 @@ namespace AnalitF.Net.Test.Unit
 			offer.Price.CostFactor = 1.5m;
 			offer.LeaderCost = 79.65m;
 			Assert.IsTrue(offer.Leader);
+		}
+
+		[Test]
+		public void Leader_if_cost_not_minimal()
+		{
+			offer.LeaderPrice = offer.Price;
+			offer.LeaderCost = offer.Cost - 20;
+			Assert.IsTrue(offer.Leader);
+			Assert.AreEqual(offer.ResultLeaderPrice, offer.Price);
 		}
 
 		[Test]

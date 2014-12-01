@@ -27,7 +27,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Enter_price()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var view = Bind(new PriceViewModel());
 				var grid = (DataGrid)view.FindName("Prices");
 				w.Content = view;
@@ -36,8 +36,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				var keyEventArgs = WpfTestHelper.KeyEventArgs(grid, Key.Enter);
 				keyEventArgs.RoutedEvent = DataGrid.KeyDownEvent;
 				grid.RaiseEvent(keyEventArgs);
-
-				WpfTestHelper.Shutdown(w);
 			});
 			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem);
 		}

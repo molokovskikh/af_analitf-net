@@ -41,7 +41,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Show_action_buttons()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var model = new OrdersViewModel();
 				var view = Bind(model);
 				w.Content = view;
@@ -55,7 +55,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.AreEqual(Visibility.Visible, restore.Visibility);
 				Assert.AreEqual(Visibility.Visible, reorder.Visibility);
 				Assert.AreEqual(Visibility.Collapsed, freeze.Visibility);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}

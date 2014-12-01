@@ -67,21 +67,20 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Popup_scroll()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var selector = InitSelector(w);
 				await selector.WaitLoaded();
 				selector.IsOpened = true;
 				await w.Dispatcher.WaitIdle();
 				var scrollViewer = selector.Descendants<ScrollViewer>().First();
 				Assert.AreEqual(Visibility.Visible, scrollViewer.ComputedVerticalScrollBarVisibility);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
 		[Test]
 		public void Filter_label()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var selector = InitSelector(w);
 				await selector.WaitLoaded();
 
@@ -90,7 +89,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				selector.IsOpened = true;
 				((ISelectable)selector.Items[0]).IsSelected = false;
 				Assert.That(stackPanel.AsText(), Is.StringContaining(", фильтр применен"));
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
@@ -114,7 +112,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Do_not_reset_data_grid_focus()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
@@ -126,15 +124,13 @@ namespace AnalitF.Net.Test.Integration.Views
 				await w.Dispatcher.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 				Assert.IsInstanceOf<DataGridCell>(Keyboard.FocusedElement);
-
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
 		[Test, Explicit("тест управляет мышкой и движения пользователя могут его сломать")]
 		public void Set_focus_on_empty_grid()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var grid = new DataGrid2();
 				w.Content = grid;
 				await grid.WaitLoaded();
@@ -145,14 +141,13 @@ namespace AnalitF.Net.Test.Integration.Views
 				Mouse.Click(MouseButton.Left);
 				await w.Dispatcher.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
 		[Test]
 		public void Focus_on_empty_data_grid()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
@@ -162,7 +157,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				await w.Dispatcher.WaitIdle();
 				DataGridHelper.Focus(grid);
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
@@ -171,7 +165,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var items = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
 			var data = new ObservableCollection<Tuple<String>>(items);
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var grid = new DataGrid2();
 				grid.AutoGenerateColumns = false;
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Items") });
@@ -186,7 +180,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				await w.Dispatcher.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 				Assert.IsNotNull(grid.CurrentItem);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
@@ -199,7 +192,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				BuyingMatrixType = BuyingMatrixStatus.Denied,
 			});
 
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var resources = new ResourceDictionary();
 				StyleHelper.Reset();
 				StyleHelper.BuildStyles(resources);
@@ -213,7 +206,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				var cells = grid.Children().OfType<DataGridCell>().ToArray();
 				foreach (var cell in cells)
 					Assert.AreEqual("Red", cell.Background.ToString(), cell.ToString());
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 
@@ -233,7 +225,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Searchable_column()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var model = new SearchableModel();
 				var grid = new DataGrid2();
 				grid.DataContext = model;
@@ -265,7 +257,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				var inlines = text.Inlines.OfType<Run>().ToArray();
 				Assert.AreEqual("5", inlines[0].Text);
 				Assert.AreEqual("0", inlines[1].Text);
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}

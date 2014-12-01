@@ -35,7 +35,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Auto_edit()
 		{
 			var waybill = Fixture<LocalWaybill>().Waybill;
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var model = new WaybillDetails(waybill.Id);
 				var view = (WaybillDetailsView)Bind(model);
 				w.Content = view;
@@ -51,8 +51,6 @@ namespace AnalitF.Net.Test.Integration.Views
 					grid.Columns);
 				Assert.IsTrue(cell.IsEditing);
 				Assert.AreEqual("1", ((TextBox)cell.Content).Text);
-
-				WpfTestHelper.Shutdown(w);
 			});
 
 			//на форме корректировки могут возникнуть ошибки биндинга

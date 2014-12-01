@@ -14,7 +14,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Mark_search_results()
 		{
-			WpfTestHelper.WithWindow(async w => {
+			WpfTestHelper.WithWindow2(async w => {
 				var model = new CatalogViewModel();
 				var view = Bind(model);
 				w.Content = view;
@@ -34,7 +34,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				var grid = view.Descendants<DataGrid>().First(g => g.Name == "Items");
 				grid.SendKey(Key.Return);
 				await view.WaitIdle();
-				WpfTestHelper.Shutdown(w);
 			});
 		}
 	}

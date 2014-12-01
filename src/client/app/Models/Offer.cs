@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Models
 		[Style("ResultLeaderPrice.RegionName", "ResultLeaderPrice.Name", Description = "Прайс-лист - лидер")]
 		public virtual bool Leader
 		{
-			get { return LeaderCost == ResultCost; }
+			get { return LeaderCost == ResultCost || LeaderPrice == Price; }
 		}
 
 		[Style(Description = "Препарат запрещен к заказу", Priority = 1)]
