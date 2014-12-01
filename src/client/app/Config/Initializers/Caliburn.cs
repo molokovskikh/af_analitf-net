@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Binders;
@@ -84,13 +85,15 @@ namespace AnalitF.Net.Client.Config.Initializers
 				ContentElementBinder.Bind(viewModel, view, context);
 				Commands.Bind(viewModel, view, context);
 				var baseScreen = viewModel as BaseScreen;
-				if (baseScreen != null) {
+				//этот метод будет вызваться каждый раз при активации\деактивации формы
+				//что бы избежать множественных подписок
+				if (baseScreen != null && !baseScreen.ResultsSink.HasObservers) {
 					baseScreen.ResultsSink
 						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
 							baseScreen.CloseCancellation);
 				}
 				var baseShell = viewModel as BaseShell;
-				if (baseShell != null) {
+				if (baseShell != null && !baseShell.ResultsSink.HasObservers) {
 					baseShell.ResultsSink
 						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
 							baseShell.CancelDisposable);

@@ -1,4 +1,5 @@
-﻿#if DEBUG
+﻿using System.Reactive.Linq;
+#if DEBUG
 using System;
 using System.Diagnostics;
 using AnalitF.Net.Client.Helpers;
@@ -23,7 +24,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Sql = "";
 			SqlCount = new NotifyValue<int>();
 			ErrorCount = new NotifyValue<int>();
-			HaveErrors = new NotifyValue<bool>(() => ErrorCount.Value > 0, ErrorCount);
+			HaveErrors = ErrorCount.Select(c => c > 0).ToValue();
 
 			PresentationTraceSources.DataBindingSource.Listeners.Add(new DelegateTraceListner(m => {
 				ErrorCount.Value++;

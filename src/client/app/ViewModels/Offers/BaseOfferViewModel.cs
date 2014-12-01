@@ -175,7 +175,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Where(o => o != null)
-				.Throttle(Consts.LoadOrderHistoryTimeout, TestSchuduler)
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
 

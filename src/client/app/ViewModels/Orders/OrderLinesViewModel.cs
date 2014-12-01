@@ -30,9 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
 			SelectedSentLine = new NotifyValue<SentOrderLine>();
-			CanDelete = new NotifyValue<bool>(
-				() => CurrentLine.Value != null && IsCurrentSelected,
-				CurrentLine, IsCurrentSelected);
+			CanDelete = CurrentLine.CombineLatest(IsCurrentSelected, (l, s) => l != null && s).ToValue();
 
 			Sum = new NotifyValue<decimal>(() => {
 				if (IsCurrentSelected)
@@ -47,13 +45,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector = new AddressSelector(Session, this);
 			editor = new Editor(OrderWarning, Manager);
 
-			this.ObservableForProperty(m => m.CurrentLine.Value)
-				.Select(e => e.Value)
-				.BindTo(editor, e => e.CurrentEdit);
-
-			this.ObservableForProperty(m => m.Lines.Value)
-				.Select(e => e.Value)
-				.BindTo(editor, e => e.Lines);
+			CurrentLine.CatchSubscribe(v => editor.CurrentEdit = v);
+			Lines.CatchSubscribe(v => editor.Lines = v);
 
 			editor.ObservableForProperty(e => e.CurrentEdit)
 				.Select(e => e.Value)

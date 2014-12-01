@@ -29,9 +29,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected UserControl Bind(BaseScreen priceViewModel)
 		{
 			var model = Init(priceViewModel);
-			var view1 = ViewLocator.LocateForModel(model, null, null);
-			ViewModelBinder.Bind(model, view1, null);
-			var view = view1;
+			var view = ViewLocator.LocateForModel(model, null, null);
+			ViewModelBinder.Bind(model, view, null);
 			ForceBinding(view);
 			return (UserControl)view;
 		}

@@ -37,11 +37,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			RetailMarkup = new NotifyValue<decimal>(true,
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User),
 				Settings);
-			RetailCost = new NotifyValue<decimal?>(() => {
-				if (CurrentOffer.Value == null)
-					return null;
-				return Math.Round(CurrentOffer.Value.ResultCost * (1 + RetailMarkup / 100), 2);
-			}, RetailMarkup);
+			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
+				(o, m) => o == null ? null : (decimal?)Math.Round(o.ResultCost * (1 + m / 100), 2))
+				.ToValue();
 
 			CurrentRegion.Cast<Object>()
 				.Merge(CurrentFilter)

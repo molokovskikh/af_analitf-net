@@ -193,6 +193,7 @@
     <Compile Include="Integration\ViewModes\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
+    <Compile Include="Integration\Views\BaseScreenFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferFixture.cs" />
     <Compile Include="Integration\Views\CatalogSearchFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />
