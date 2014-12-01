@@ -38,6 +38,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			lazyModel = new Lazy<T>(Init<T>);
 		}
 
+		protected void ForceInit()
+		{
+			Assert.IsNotNull(lazyModel.Value);
+			testScheduler.Start();
+		}
+
 		protected void Reset()
 		{
 			Close(model);

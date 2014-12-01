@@ -32,11 +32,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnlyWarning = new NotifyValue<bool>();
 			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
 			CurrentLine = new NotifyValue<IOrderLine>();
-			CurrentLine
-				.Subscribe(_ => {
-					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
-					editor.CurrentEdit = CurrentLine.Value as OrderLine;
-				});
 			MatchedWaybills = new MatchedWaybills(StatelessSession,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder),
@@ -93,6 +88,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			editor = new Editor(OrderWarning, Manager);
+			CurrentLine
+				.Subscribe(_ => {
+					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
+					editor.CurrentEdit = CurrentLine.Value as OrderLine;
+				});
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
 
 			editor.ObservableForProperty(e => e.CurrentEdit)

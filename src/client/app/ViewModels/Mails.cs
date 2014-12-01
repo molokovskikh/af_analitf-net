@@ -54,9 +54,10 @@ namespace AnalitF.Net.Client.ViewModels
 			IsAsc = new NotifyValue<bool>(false);
 
 			Items = Term.Cast<object>()
-				.Throttle(TimeSpan.FromMilliseconds(100), UiScheduler)
+				.Throttle(TimeSpan.FromMilliseconds(100), Scheduler)
 				.Merge(CurrentSort)
 				.Merge(IsAsc.Select(v => (object)v))
+				.ObserveOn(UiScheduler)
 				.ToValue(_ => Apply());
 			CanDelete = SelectedItems.Changed().ToValue(_ => SelectedItems.Count > 0);
 			var updateStat = Items.ObservableForProperty(i => i.Value)

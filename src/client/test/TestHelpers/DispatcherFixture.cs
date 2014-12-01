@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Windows;
@@ -16,6 +17,7 @@ using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
+using Microsoft.Reactive.Testing;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
@@ -63,6 +65,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
+			BaseScreen.TestUiSchuduler = null;
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
@@ -261,6 +264,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				ViewModelBinder.Bind(shell, activeWindow, null);
 				activeWindow.Show();
 			});
+			BaseScreen.TestUiSchuduler = new DispatcherScheduler(dispatcher);
+
 			dispatcher.UnhandledException += (sender, args) => {
 				args.Handled = true;
 				exceptions.Add(args.Exception);

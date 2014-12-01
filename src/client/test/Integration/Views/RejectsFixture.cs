@@ -14,6 +14,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var model = new RejectsViewModel();
 			Bind(model);
+			testScheduler.Start();
 
 			Assert.IsTrue(model.CanExport);
 			var result = (OpenResult)model.Export();

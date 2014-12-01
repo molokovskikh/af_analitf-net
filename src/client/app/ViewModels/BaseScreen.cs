@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private TableSettings tableSettings = new TableSettings();
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
-		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestSchuduler ?? DispatcherScheduler.Current);
+		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestUiSchuduler ?? TestSchuduler ?? DispatcherScheduler.Current);
 
 		protected bool updateOnActivate = true;
 
@@ -73,6 +73,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public static bool UnitTesting;
 		public static IScheduler TestSchuduler;
+		public static IScheduler TestUiSchuduler;
 
 		public NotifyValue<Settings> Settings { get; private set; }
 		public Extentions.WindowManager Manager { get; private set; }

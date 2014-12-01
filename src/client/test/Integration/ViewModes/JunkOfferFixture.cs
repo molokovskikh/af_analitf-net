@@ -17,6 +17,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.DeleteEach<Order>();
 
 			shell.Navigate(model);
+			testScheduler.Start();
 			model.CurrentOffer.Value = model.Offers.Value.First();
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();

@@ -23,6 +23,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.ShowWithoutOffers.Value = true;
 			model.CurrentMnn = model.Mnns.Value.First(m => m.Id == catalogName.Mnn.Id);
 			model.EnterMnn();
+			testScheduler.Start();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			var names = (CatalogNameViewModel)catalog.ActiveItem;

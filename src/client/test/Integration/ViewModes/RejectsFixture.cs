@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -15,6 +17,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Mark()
 		{
+			ForceInit();
+
 			model.CurrentReject.Value = model.Rejects.Value.First();
 			model.CurrentReject.Value.Marked = false;
 			model.Mark();
@@ -25,6 +29,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Remove_all_marks()
 		{
+			ForceInit();
+
 			var reject = model.Rejects.Value.First();
 			model.CurrentReject.Value = reject;
 			model.CurrentReject.Value.Marked = false;
@@ -39,6 +45,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Print()
 		{
+			ForceInit();
+
 			Assert.IsTrue(model.CanPrint);
 			var doc = model.Print().Paginator;
 			Assert.That(doc, Is.Not.Null);
