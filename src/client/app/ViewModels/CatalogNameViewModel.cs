@@ -36,10 +36,12 @@ namespace AnalitF.Net.Client.ViewModels
 			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
 				v => CatalogNames.Value.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalogName.Value = c);
+			CatalogNamesSearch.RemapChars = true;
 
 			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,
 				v => Catalogs.Value.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalog = c);
+			CatalogsSearch.RemapChars = true;
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter)
 				.Subscribe(_ => LoadCatalogs()));

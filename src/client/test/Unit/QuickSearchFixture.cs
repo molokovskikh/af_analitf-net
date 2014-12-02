@@ -44,5 +44,15 @@ namespace AnalitF.Net.Test.Unit
 			search.IsEnabled = false;
 			Assert.That(search.SearchText, Is.Null);
 		}
+
+		[Test]
+		public void Remap_keyboard_layout()
+		{
+			search.RemapChars = true;
+			items.Add("папаверин");
+			search.SearchText = "gfgf";
+			Assert.AreEqual("папа", search.SearchText);
+			Assert.AreEqual("папаверин", result);
+		}
 	}
 }

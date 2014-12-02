@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -10,16 +11,30 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using ReactiveUI;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class QuickSearch<T> : ViewAware
 	{
+		public const string RusKeys = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+		public const string EngKeys = "f,dult`;pbqrkvyjghcnea[wxio]sm.zF<DULT~:PBQRKVYJGHCNEA{WXIO}SM\">Z";
+		public static Dictionary<char, char> CharMap = new Dictionary<char, char>();
+
 		private string searchText;
 		public bool searchInProgress;
 		private Action<T> update;
 		private Func<string, T> search;
 		private bool _isEnabled = true;
+
+		public bool RemapChars;
+
+		static QuickSearch()
+		{
+			for(var i = 0; i < EngKeys.Length; i++) {
+				CharMap.Add(EngKeys[i], RusKeys[i]);
+			}
+		}
 
 		public QuickSearch(IScheduler scheduler, Func<string, T> search, Action<T> update)
 		{
@@ -57,24 +72,27 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				if (searchInProgress)
 					return;
 
-				if (String.Equals(searchText, value, StringComparison.CurrentCultureIgnoreCase))
+				var text = value;
+				if (!String.IsNullOrEmpty(text))
+					text = new string(text.Select(c => CharMap.GetValueOrDefault(c, c)).ToArray());
+				if (String.Equals(searchText, text, StringComparison.CurrentCultureIgnoreCase))
 					return;
 
 				searchInProgress = true;
 				var notify = false;
 				try
 				{
-					if (!String.IsNullOrEmpty(value)) {
-						var result = search(value);
+					if (!String.IsNullOrEmpty(text)) {
+						var result = search(text);
 						if (result != null) {
 							notify = true;
-							searchText = value;
+							searchText = text;
 							update(result);
 						}
 					}
 					else {
 						notify = true;
-						searchText = value;
+						searchText = text;
 					}
 				}
 				finally {

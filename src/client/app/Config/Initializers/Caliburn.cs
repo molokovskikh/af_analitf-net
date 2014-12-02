@@ -81,6 +81,10 @@ namespace AnalitF.Net.Client.Config.Initializers
 			var defaultBindActions = ViewModelBinder.BindActions;
 			var defaultBind = ViewModelBinder.Bind;
 			ViewModelBinder.Bind = (viewModel, view, context) => {
+				if ((bool)view.GetValue(ViewModelBinder.ConventionsAppliedProperty)) {
+					return;
+				}
+
 				defaultBind(viewModel, view, context);
 				ContentElementBinder.Bind(viewModel, view, context);
 				Commands.Bind(viewModel, view, context);
