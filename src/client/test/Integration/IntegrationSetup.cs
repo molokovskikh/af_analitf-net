@@ -60,7 +60,7 @@ namespace AnalitF.Net.Test.Integration
 			if (!Directory.Exists("var"))
 				Directory.CreateDirectory("var");
 
-			clientConfig.BaseUrl = new Uri("http://localhost:7018");
+			clientConfig.BaseUrl = new Uri(String.Format("http://localhost:{0}", new Random().Next(10000, 20000)));
 			clientConfig.RootDir = @"var\client";
 			clientConfig.RequestInterval = 1.Second();
 			clientConfig.InitDir();

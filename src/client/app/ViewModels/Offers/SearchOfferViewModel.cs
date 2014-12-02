@@ -33,7 +33,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.ToList();
 			Settings.Changed().Subscribe(_ => SortOffers(Offers));
 
-			Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+			Prices.Select(p => p.Changed()).Merge()
+				.Throttle(Consts.FilterUpdateTimeout, UiScheduler)
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
 				.Subscribe(_ => Update());
@@ -52,7 +53,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return;
 			}
 
-			var query = StatelessSession.Query<Offer>().Where(o => o.ProductSynonym.Contains(term));
+			var query = StatelessSession.Query<Offer>();
+			//.Where(o => o.ProductSynonym.Contains(term));
+			query = Util.ContainsAny(query, o => o.ProductSynonym,
+				term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 			query = Util.Filter(query, o => o.Price.Id, Prices);
 
 			var producer = CurrentProducer.Value;

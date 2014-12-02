@@ -88,7 +88,7 @@ update Mnns set HaveOffers = 0;
 update ExistsCatalogs e
 join Catalogs c on c.Id = e.CatalogId
 	join CatalogNames cn on cn.Id = c.NameId
-		join Mnns m on m.Id = cn.MnnId
+		left join Mnns m on m.Id = cn.MnnId
 set m.HaveOffers = 1,
 	cn.HaveOffers = 1,
 	c.HaveOffers = 1;
