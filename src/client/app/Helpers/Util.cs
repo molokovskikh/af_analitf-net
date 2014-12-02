@@ -157,6 +157,27 @@ namespace AnalitF.Net.Client.Helpers
 			return query;
 		}
 
+		public static IQueryable<T> ContainsAny<T>(IQueryable<T> query,
+			Expression<Func<T, string>> select,
+			IEnumerable<string> values)
+		{
+			if (!values.Any())
+				return query;
+
+			var field = (MemberExpression)select.Body;
+			Expression result = null;
+			foreach (var value in values) {
+				var exp = Expression.Call(field, typeof(String).GetMethod("Contains"), Expression.Constant(value));
+				if (result == null)
+					result = exp;
+				else
+					result = Expression.OrElse(result, exp);
+			}
+
+			return query.Where(Expression.Lambda<Func<T, bool>>(result,
+				new[] { Expression.Parameter(typeof(T), "o") }));
+		}
+
 		public static string DebugDump(object value, Type type, string name)
 		{
 			var p = type.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);

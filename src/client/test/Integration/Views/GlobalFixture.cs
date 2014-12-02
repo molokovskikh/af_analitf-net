@@ -388,6 +388,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var order = MakeSentOrder();
 			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+			DebugContext.Add("CatalogId", catalog.Id);
 
 			Start();
 			Click("ShowCatalog");

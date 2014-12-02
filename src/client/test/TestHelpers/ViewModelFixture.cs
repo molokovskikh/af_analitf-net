@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -13,6 +14,8 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Test.Integration;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
+using Castle.ActiveRecord.Framework;
+using Common.Tools;
 using Common.Tools.Calendar;
 using Microsoft.Reactive.Testing;
 using NHibernate;
@@ -58,10 +61,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected Lazy<ShellViewModel> lazyshell;
 		protected MessageBus bus;
 		protected Env Env;
+		protected IDictionary<string, object> DebugContext;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
+			DebugContext= new Dictionary<string, object>();
 			Env = new Env();
 			ProcessHelper.UnitTesting = true;
 			ProcessHelper.ExecutedProcesses.Clear();
@@ -85,6 +90,15 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				return value;
 			});
 			manager = StubWindowManager(lazyshell);
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
+				if (DebugContext.Count > 0)
+					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
+			}
 		}
 
 		protected virtual ShellViewModel shell
