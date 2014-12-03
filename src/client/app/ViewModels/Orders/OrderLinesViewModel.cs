@@ -60,9 +60,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			Settings.Subscribe(_ => Calculate());
 
-			Prices = Session.Query<Price>().OrderBy(p => p.Name).ToList()
-				.Select(p => new Selectable<Price>(p))
-				.ToList();
+			if (Session != null)
+				Prices = Session.Query<Price>().OrderBy(p => p.Name).ToList()
+					.Select(p => new Selectable<Price>(p))
+					.ToList();
+			else
+				Prices = new List<Selectable<Price>>();
 
 			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
 		}
@@ -124,6 +127,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
+			var isSentSelectedValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".IsSentSelected");
+			if (isSentSelectedValue is bool)
+				IsSentSelected.Value = (bool)isSentSelectedValue;
+
 			OnlyWarningVisible = IsCurrentSelected.Select(v => v && User.IsPreprocessOrders).ToValue();
 			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
 			CurrentLine.Cast<object>()
@@ -139,11 +146,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.FilterChanged
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyWarning.Select(v => (object)v))
-				.Subscribe(_ => Update(), CloseCancellation.Token);
-
-			var isSentSelectedValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".IsSentSelected");
-			if (isSentSelectedValue is bool)
-				IsSentSelected.Mute((bool)isSentSelectedValue);
+				.CatchSubscribe(_ => Update(), CloseCancellation);
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -156,6 +159,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public override void Update()
 		{
+			if (!IsSuccessfulActivated)
+				return;
+			if (Session == null)
+				return;
 			if (IsCurrentSelected) {
 				var query = Session.Query<OrderLine>()
 					.Where(l => !l.Order.Frozen);
@@ -192,7 +199,19 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				var lines = query.OrderBy(l => l.ProductSynonym)
 					.ThenBy(l => l.ProductSynonym)
 					.ToList();
-				lines.Each(l => l.Configure(User));
+				if (Settings.Value.HighlightUnmatchedOrderLines) {
+					var ids = lines.Where(l => l.ServerId != null).Select(l => l.ServerId.Value).ToArray();
+					var waybillOrders = StatelessSession.Query<WaybillOrder>().Where(o => ids.Contains(o.OrderLineId)).ToArray();
+					ids = waybillOrders.Select(o => o.DocumentLineId).ToArray();
+					var waybillLines = StatelessSession.Query<WaybillLine>().Where(o => ids.Contains(o.Id)).ToArray();
+					var lookup = waybillOrders
+						.GroupBy(g => g.OrderLineId, m => m.DocumentLineId)
+						.ToDictionary(g => g.Key, g => waybillLines.Where(l => g.Contains(l.Id)).ToArray());
+					lines.Each(l => l.Configure(User, lookup));
+				}
+				else {
+					lines.Each(l => l.Configure(User));
+				}
 				SentLines.Value = lines;
 			}
 		}

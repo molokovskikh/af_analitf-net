@@ -1,5 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Shapes;
 using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models
@@ -58,6 +63,24 @@ namespace AnalitF.Net.Client.Models
 		//но биндинг все равно будет ругаться если поля не будет
 		[Ignore]
 		public virtual string LongSendError { get; set; }
+
+		[Ignore, Style(Description = "Несоответствие в накладной")]
+		public virtual bool IsUnmatchedByWaybill { get; set; }
+
+		public virtual void Configure(User user, Dictionary<uint, WaybillLine[]> matchedWaybillLines)
+		{
+			Configure(user);
+
+			if (ServerId == null)
+				return;
+			var lines = matchedWaybillLines.GetValueOrDefault(ServerId.Value);
+			if (lines == null || lines.Length == 0) {
+				IsUnmatchedByWaybill = true;
+				return;
+			}
+			IsUnmatchedByWaybill = lines[0].Quantity < Count
+				|| Math.Abs((double)(Cost - lines[0].SupplierCost.GetValueOrDefault())) > 0.02;
+		}
 
 		public override decimal GetResultCost()
 		{

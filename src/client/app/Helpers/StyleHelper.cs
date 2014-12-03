@@ -166,7 +166,8 @@ namespace AnalitF.Net.Client.Helpers
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
 				{ "IsCertificateNotFound", Background(Colors.Gray.ToString()) },
-				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF).ToString()) }
+				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF).ToString()) },
+				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141).ToString()) },
 			};
 		}
 

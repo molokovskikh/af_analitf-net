@@ -25,9 +25,13 @@ namespace AnalitF.Net.Client.Views.Orders
 		public void ApplyStyles()
 		{
 			var context = "";
-			if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
+			var baseScreen = ((BaseScreen)DataContext);
+			if (baseScreen.User != null && baseScreen.User.IsPreprocessOrders)
 				context = "CorrectionEnabled";
 			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend, context);
+
+			if (baseScreen.Settings.Value != null && baseScreen.Settings.Value.HighlightUnmatchedOrderLines)
+				StyleHelper.ApplyStyles(typeof(SentOrderLine), SentLines, Application.Current.Resources, Legend);
 		}
 	}
 }

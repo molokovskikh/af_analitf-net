@@ -279,6 +279,7 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_DiffCalcMode" />
 
 					<CheckBox x:Name="Settings_ShowPriceName">Всегда показывать названия прайс-листов</CheckBox>
+					<CheckBox x:Name="Settings_HighlightUnmatchedOrderLines">Выделять цветом недопоставленные позиции заказов</CheckBox>
 
 					<Label>Показывать список изменений в забраковке за (дни):</Label>
 					<TextBox x:Name="Settings_TrackRejectChangedDays"></TextBox>

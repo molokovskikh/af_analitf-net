@@ -100,6 +100,7 @@ namespace AnalitF.Net.Client.Models
 			DeleteWaybillsOlderThan = 150;
 			TrackRejectChangedDays = 90;
 			OpenRejects = true;
+			HighlightUnmatchedOrderLines = true;
 			RackingMap = new RackingMapSettings();
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
@@ -160,6 +161,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool ConfirmSendOrders { get; set; }
 
 		public virtual bool PrintOrdersAfterSend { get; set; }
+
+		public virtual bool HighlightUnmatchedOrderLines { get; set; }
 
 		public virtual bool GroupWaybillsBySupplier
 		{

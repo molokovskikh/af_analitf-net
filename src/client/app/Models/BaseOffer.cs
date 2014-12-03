@@ -64,7 +64,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Doc { get; set; }
 
-		[Style("Period", "ResultCost", Description = "Уцененные препараты")]
+		//в предложениях мы отображаем ResultCost в заказах MixedCost
+		[Style("Period", "ResultCost", "MixedCost", Description = "Уцененные препараты")]
 		public virtual bool Junk { get; set; }
 
 

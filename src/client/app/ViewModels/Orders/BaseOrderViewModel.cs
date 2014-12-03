@@ -7,8 +7,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public abstract class BaseOrderViewModel : BaseScreen
 	{
-		private bool isSendInit;
-
 		public BaseOrderViewModel()
 		{
 			IsCurrentSelected = new NotifyValue<bool>(true);
@@ -17,17 +15,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			BeginEnabled = IsSentSelected.ToValue();
 			EndEnabled = IsSentSelected.ToValue();
-			Begin.Merge(End).Subscribe(_ => Update());
 
-			IsSentSelected
-				.Merge(IsCurrentSelected)
-				.Skip(1)
-				.Subscribe(n => {
-					if (IsSentSelected && !isSendInit) {
-						isSendInit = true;
-						Update();
-					}
-				});
 			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
 			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanExport"));
 		}
@@ -45,10 +33,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			var beginValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".Begin");
 			if (beginValue is DateTime)
-				Begin.Mute((DateTime)beginValue);
+				Begin.Value = (DateTime)beginValue;
 			var endValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".End");
 			if (endValue is DateTime)
-				End.Mute((DateTime)endValue);
+				End.Value = (DateTime)endValue;
+			Begin.Merge(End).Skip(2).CatchSubscribe(_ => Update(), CloseCancellation);
+			IsSentSelected.Merge(IsCurrentSelected).Skip(2)
+				.Where(_ => !(IsSentSelected.Value && IsCurrentSelected.Value))
+				.CatchSubscribe(_ => Update(), CloseCancellation);
 		}
 
 		protected override void OnDeactivate(bool close)

@@ -1,24 +1,18 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Test.Integration;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
-using Castle.ActiveRecord.Framework;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Microsoft.Reactive.Testing;
-using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
@@ -188,6 +182,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);
 			session.Flush();
+			sentOrder.Lines.Each(l => l.ServerId = 1000 * l.Id);
 			return sentOrder;
 		}
 
