@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	{
 		public List<BatchLine> Lines = new List<BatchLine>();
 		private string activePrint;
-		private string lastUsedDir;
+		private static string lastUsedDir;
 
 		public Batch()
 		{
@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				else if (CurrentFilter.Value == Filter[9]) {
 					query = query.Where(l => l.IsNotOrdered && l.ProductId == null);
 				}
-				return query.ToObservableCollection();
+				return query.OrderBy(l => l.ProductSynonym).ToObservableCollection();
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
 			CurrentReportLine = new NotifyValue<BatchLine>();
 			CanDelete = CurrentReportLine.Select(l => l != null).ToValue();
@@ -161,7 +161,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			lastUsedDir = Settings.Value.GetVarRoot();
+			lastUsedDir = lastUsedDir ?? Settings.Value.GetVarRoot();
 			CurrentReportLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 				.Subscribe(_ => {
 					if (CurrentReportLine.Value != null)
@@ -272,6 +272,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				}
 			};
 			yield return dialog;
+			lastUsedDir = Path.GetDirectoryName(dialog.Dialog.FileName) ?? lastUsedDir;
 			foreach (var result in Shell.Batch(dialog.Dialog.FileName)) {
 				yield return result;
 			}
