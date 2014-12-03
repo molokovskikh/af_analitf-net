@@ -36,8 +36,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var updateResult = UpdateResult.OK;
 			Progress.OnNext(new Progress("Соединение", 100, 0));
 			Progress.OnNext(new Progress("Отправка заказов", 0, 50));
-			var orders =
-				Session.Query<Order>().Where(o => o.Address == address && !o.Frozen && o.Send).ToList();
+			var orders = Session.Query<Order>().ReadyToSend(address).ToList();
 			if (orders.Count == 0)
 				throw new EndUserError("Не заказов для отправки");
 

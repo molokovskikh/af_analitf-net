@@ -311,6 +311,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(modelOrder.Price.WeeklyOrderSum, Is.GreaterThan(0));
 		}
 
+		[Test]
+		public void Try_send_not_active_order_from_orders_view()
+		{
+			PrepareCurrent();
+			shell.NavigateAndReset(model);
+			model.CurrentOrder.Send = false;
+			var e = Assert.Throws<AggregateException>(() => shell.SendOrders().ToArray());
+			Assert.AreEqual("Не заказов для отправки", ErrorHelper.TranslateException(e), e.ToString());
+		}
+
 		private Offer MakeReordarable(Offer offer)
 		{
 			var price = session.Query<Price>().First(p => p.Id.PriceId != offer.Price.Id.PriceId);

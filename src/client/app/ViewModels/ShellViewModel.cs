@@ -723,6 +723,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
 
+			//перед проверкой нам нужно закрыть все формы что бы сохранить изменения
+			ResetNavigation();
 			var warningOrders = statelessSession.Query<Order>()
 				.Fetch(o => o.Price)
 				.Fetch(o => o.MinOrderSum)
