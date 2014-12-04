@@ -277,7 +277,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				{Environment.ConnectionString, connectionString},
 				{Environment.Hbm2ddlKeyWords, "none"},
 #if DEBUG
-				{Environment.FormatSql, "true"},
+				//для запросов в AddAwaited падает
+				//{Environment.FormatSql, "true"},
 #endif
 				//если нужно отладить запросы хибера
 				//{Environment.ShowSql, "true"},

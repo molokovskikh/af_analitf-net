@@ -641,7 +641,8 @@ select
 	c.VitallyImportant,
 	c.MandatoryList,
 	cf.Id as FormId,
-	cf.Form as Form
+	cf.Form as Form,
+	c.Name as Fullname
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.Hidden = 0";
@@ -656,7 +657,8 @@ select
 	c.MandatoryList,
 	cf.Id as FormId,
 	cf.Form as Form,
-	c.Hidden
+	c.Hidden,
+	c.Name as Fullname
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
@@ -1572,6 +1574,10 @@ group by dh.Id")
 			scanned.Scan(dir, true);
 		}
 
+		//todo текущая логика обновления ошибочна, если мы знаем что нужно сформировать обновление
+		//то данные должен готовить сервис той же версии что и бинарники которые передаются
+		//иначе может получиться ситуация когда приложение ожидает что в обновлении будут поля а по факту их не буде
+		//тк обновление приготовлено старой версией сервиса
 		private void ExportUpdate()
 		{
 			var file = Path.Combine(UpdatePath, "version.txt");

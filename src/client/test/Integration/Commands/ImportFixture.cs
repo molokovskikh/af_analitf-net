@@ -14,6 +14,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Import_future_data()
 		{
+			restore = true;
 			var data = new List<Tuple<string, string[]>> {
 				Tuple.Create(TempFile("Users.txt", "5\ttest\t"), new[] { "Id", "NonExistsColumn" })
 			};

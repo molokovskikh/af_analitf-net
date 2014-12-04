@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.NHibernate;
 using Common.Tools;
+using log4net.Config;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support.log4net;
@@ -175,7 +176,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 		public void Freeze_orders()
 		{
 			var order = MakeOrderClean();
-
 			var fixture = new SmartOrder {
 				ProductIds = new[] {
 					SafeSmartOrderProductId()
@@ -184,6 +184,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Fixture(fixture);
 			MakeBatch("1|10");
 
+			//здесь может возникнуть NHibernate.UnresolvableObjectException : No row with the given identifier exists
+			//это значить что данные в backup не соответсвуют данным в data нужно перезалить данные
 			localSession.Refresh(order);
 			Assert.IsTrue(order.Frozen);
 		}

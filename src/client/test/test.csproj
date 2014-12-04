@@ -169,6 +169,7 @@
     <Compile Include="Integration\Commands\UpdateFixture.cs" />
     <Compile Include="Integration\IntegrationSetup.cs" />
     <Compile Include="Integration\RasFixture.cs" />
+    <Compile Include="Integration\ViewModes\AddWaitedFixture.cs" />
     <Compile Include="Integration\ViewModes\AwaitedFixture.cs" />
     <Compile Include="Integration\ViewModes\BatchFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />

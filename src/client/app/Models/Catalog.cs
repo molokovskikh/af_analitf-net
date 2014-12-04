@@ -1,5 +1,6 @@
 ﻿using System;
 using AnalitF.Net.Client.Helpers;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -12,6 +13,7 @@ namespace AnalitF.Net.Client.Models
 		public Catalog(string name)
 		{
 			Name = new CatalogName { Name = name };
+			FullName = name;
 		}
 
 		public override uint Id { get; set; }
@@ -31,15 +33,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool Hidden { get; set; }
 
+		public virtual string FullName { get; set; }
+
 		[Style(Description = "Предложения отсутствуют")]
 		public virtual bool DoNotHaveOffers
 		{
 			get { return !HaveOffers; }
-		}
-
-		public virtual string FullName
-		{
-			get { return Name.Name + " " + Form; }
 		}
 
 		public override string ToString()

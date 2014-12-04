@@ -48,19 +48,27 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			//однако я могу и ошибаться
 			//в любом случае функция не критическая
 			Catalogs = CatalogTerm
-				.ObserveOn(Scheduler)
-				.Throttle(Consts.TextInputLoadTimeout)
+				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
 				.Select(t => {
 					if (String.IsNullOrEmpty(t))
 						return Observable.Return(new List<Catalog>());
 					if (CurrentCatalog.Value != null && CurrentCatalog.Value.FullName == t) {
 						return Observable.Return(Catalogs.Value);
 					}
-					var items = StatelessSession.Query<Catalog>()
-						.Fetch(c => c.Name)
-						.Where(c => c.Form.Contains(t) || c.Name.Name.Contains(t))
-						.OrderBy(c => c.Name.Name).ThenBy(c => c.Form)
-						.Take(100)
+
+					var items = StatelessSession.CreateSQLQuery(@"
+(select {c.*}, 0 as Score
+from Catalogs c
+where c.Fullname like :term)
+union distinct
+(select {c.*}, 1 as Score
+from Catalogs c
+where c.Fullname like :fullterm)
+order by Score, {c.FullName}")
+						.AddEntity("c", typeof(Catalog))
+						.SetParameter("term", t + "%")
+						.SetParameter("fullterm", "%" + t + "%")
+						.List<Catalog>()
 						.ToList();
 					return Observable.Return(items);
 				})
@@ -71,8 +79,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentCatalog.Subscribe(v => Item.Catalog = v);
 
 			Producers = ProducerTerm
-				.ObserveOn(Scheduler)
-				.Throttle(Consts.TextInputLoadTimeout)
+				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
 				.Select(t => {
 					if (String.IsNullOrEmpty(t))
 						return Observable.Return(new List<Producer> { emptyProducer });
@@ -80,11 +87,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						return Observable.Return(Producers.Value);
 
 					CurrentProducer.Value = null;
-					var items = StatelessSession.Query<Producer>()
-						.Where(c => c.Name.Contains(t))
-						.OrderBy(c => c.Name)
-						.Take(100)
-						.ToList();
+					var items = StatelessSession.CreateSQLQuery(@"
+(select {p.*}, 0 as Score
+from Producers p
+where p.Name like :term)
+union distinct
+(select {p.*}, 1 as Score
+from Producers p
+where p.Name like :fullterm)
+order by Score, {p.Name}")
+						.AddEntity("p", typeof(Producer))
+						.SetParameter("term", t + "%")
+						.SetParameter("fullterm", "%" + t + "%")
+						.List<Producer>();
 					return Observable.Return(new[] { emptyProducer }.Concat(items).ToList());
 				})
 				.Switch()
