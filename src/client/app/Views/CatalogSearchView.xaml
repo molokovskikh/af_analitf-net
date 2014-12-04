@@ -31,7 +31,8 @@
 		</StackPanel>
 
 		<c:DataGrid2 Grid.Row="1" x:Name="Items"
-			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
+			SelectionMode="Single">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
 					Width="*"

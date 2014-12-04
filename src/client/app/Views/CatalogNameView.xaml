@@ -27,7 +27,8 @@
 		</Grid.RowDefinitions>
 
 		<c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
-			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]">
+			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
+			SelectionMode="Single">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 					Header="Наименование"
@@ -45,7 +46,8 @@
 			Width="5" />
 
 		<c:DataGrid2 Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
-			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]">
+			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]"
+			SelectionMode="Single">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 					Header="Форма выпуска"
