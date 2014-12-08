@@ -402,6 +402,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var minCost = session.Query<MinCost>().First(m => m.Catalog.Id == offer.CatalogId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
+			Assert.That(minCost.Diff, Is.GreaterThan(0));
 		}
 
 		[Test]

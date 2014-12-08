@@ -113,7 +113,7 @@ order by Score, {p.Name}")
 		{
 			var message = "";
 			if (Item.TrySave(StatelessSession, out message)) {
-				TryClose(true);
+				TryClose();
 			}
 			else {
 				Manager.Warning(message);

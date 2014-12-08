@@ -22,14 +22,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				Environment.NewLine);
 		}
 
-		public void Send()
+		public void Cancel()
 		{
 			TryClose(true);
-		}
-
-		public override void TryClose()
-		{
-			TryClose(false);
 		}
 	}
 }

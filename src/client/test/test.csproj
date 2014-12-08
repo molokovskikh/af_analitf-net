@@ -150,6 +150,7 @@
     <Compile Include="Fixtures\RejectedWaybill.cs" />
     <Compile Include="Fixtures\SampleData.cs" />
     <Compile Include="Fixtures\ServerFixture.cs" />
+    <Compile Include="Fixtures\SimpleFixture.cs" />
     <Compile Include="Fixtures\SmartOrder.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
     <Compile Include="Fixtures\LocalWaybill.cs" />

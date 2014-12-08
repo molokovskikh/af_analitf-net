@@ -422,9 +422,6 @@ where
 	ifnull(cc.RequestRatio, core.RequestRatio) as RequestRatio,
 	ifnull(cc.MinOrderSum, core.OrderCost) as MinOrderSum,
 	ifnull(cc.MinOrderCount, core.MinOrderCount) as MinOrderCount,
-	m.MinCost as LeaderCost,
-	m.PriceCode as LeaderPriceId,
-	m.RegionCode as LeaderRegionId,
 	products.CatalogId,
 	pr.Name as Producer,
 	mx.Cost as MaxProducerCost,
@@ -435,7 +432,6 @@ where
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, true), @"
-join Usersettings.MinCosts m on m.ProductId = core.ProductId and m.RegionCode = at.RegionCode
 left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
@@ -447,76 +443,6 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 				//нужен если включена оптимизация цен
 				clientCode = user.Client.Id
 			});
-
-			var syncPricesCount = Convert.ToUInt32(session
-				.CreateSQLQuery("select count(*) from Usersettings.ActivePrices ap where ap.Fresh = 1")
-				.UniqueResult());
-
-			if (syncPricesCount > 0) {
-				session.CreateSQLQuery(@"
-drop temporary table if exists MinCosts;
-
-CREATE TEMPORARY TABLE MinCosts (
-	Cost DECIMAL(8,2) unsigned,
-	NextCost DECIMAL(8,2) unsigned,
-	ProductId INT unsigned,
-	CatalogId int unsigned,
-	RegionId bigint unsigned,
-	PriceId INT unsigned,
-	Diff Decimal(8, 2),
-	UNIQUE MultiK(ProductId, RegionId, Cost)
-) engine = MEMORY;
-
-insert into MinCosts(Cost, ProductId, CatalogId, RegionId)
-select
-	min(c.Cost),
-	c.ProductId,
-	p.CatalogId,
-	c.RegionCode
-from Usersettings.Core c
-	join Farm.Core0 c0 on c0.Id = c.Id
-	join Catalogs.Products p on p.Id = c.ProductId
-where c0.Junk = 0
-group by c.ProductId, c.RegionCode;
-
-UPDATE MinCosts, Usersettings.Core
-SET MinCosts.PriceId = Core.PriceCode
-WHERE Core.ProductId = MinCosts.ProductId
-	and Core.RegionCode = MinCosts.RegionId
-	and Core.Cost = MinCosts.Cost;
-
-drop temporary table if exists NextMinCosts;
-
-CREATE TEMPORARY TABLE NextMinCosts (
-	NextCost DECIMAL(8,2) unsigned,
-	ProductId INT unsigned,
-	RegionId bigint unsigned,
-	UNIQUE MultiK(ProductId, RegionId)
-) engine = MEMORY;
-
-insert into NextMinCosts(NextCost, ProductId, RegionId)
-select min(c.Cost),
-	m.ProductId,
-	m.RegionId
-from Usersettings.Core c
-	join Farm.Core0 c0 on c0.Id = c.Id
-	join MinCosts m on m.ProductId = c.ProductId and m.RegionId = c.RegionCode
-where c.Cost > m.Cost
-	and c0.Junk = 0
-group by m.ProductId, m.RegionId;
-
-update MinCosts m
-join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
-set m.NextCost = n.NextCost,
-	m.Diff = round((n.NextCost / m.Cost - 1) * 100, 2);")
-					.ExecuteUpdate();
-				Export(Result, "select * from MinCosts", "MinCosts", truncate: true);
-			}
-
-			session.CreateSQLQuery(@"
-drop temporary table if exists MinCosts;
-drop temporary table if exists MinCostsNext;")
-				.ExecuteUpdate();
 
 			if (data.LastUpdateAt == DateTime.MinValue) {
 				sql = @"

@@ -11,6 +11,9 @@ namespace AnalitF.Net.Client.Config
 		public TimeSpan RequestDelay = TimeSpan.Zero;
 		//механизм синхронизации для тестов
 		public Barrier Barrier;
+#if DEBUG
+		public bool IsUnitTesting;
+#endif
 
 		public ISessionFactory Factory
 		{

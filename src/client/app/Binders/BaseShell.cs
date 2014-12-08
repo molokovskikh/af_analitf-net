@@ -26,7 +26,6 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public Navigator Navigator;
 
-		public bool UnitTesting;
 		public Env Env = new Env();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
@@ -92,13 +91,17 @@ namespace AnalitF.Net.Client.Binders
 
 		public override void TryClose(bool? dialogResult)
 		{
+#if DEBUG
 			UnitTestClose();
+#endif
 			base.TryClose(dialogResult);
 		}
 
 		public override void TryClose()
 		{
+#if DEBUG
 			UnitTestClose();
+#endif
 			base.TryClose();
 		}
 
@@ -114,9 +117,10 @@ namespace AnalitF.Net.Client.Binders
 			}
 		}
 
+#if DEBUG
 		private void UnitTestClose()
 		{
-			if (UnitTesting) {
+			if (Env.IsUnitTesting) {
 				if (Parent == null && Views.Count == 0)
 					CanClose(r => {
 						if (r)
@@ -124,6 +128,7 @@ namespace AnalitF.Net.Client.Binders
 					});
 			}
 		}
+#endif
 
 		public override void DeactivateItem(IScreen item, bool close)
 		{

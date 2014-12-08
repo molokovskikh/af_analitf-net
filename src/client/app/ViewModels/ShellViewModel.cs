@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -15,7 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -26,16 +24,12 @@ using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
-using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
-using MinCosts = AnalitF.Net.Client.Views.Offers.MinCosts;
-using SelfClose = AnalitF.Net.Client.Views.Dialogs.SelfClose;
 using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -70,7 +64,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class ShellViewModel : BaseShell, IDisposable
 	{
 		private WindowManager windowManager;
-		private Config.Config config = new Config.Config();
+		private Config.Config config;
 		private ISession session;
 		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
@@ -96,22 +90,25 @@ namespace AnalitF.Net.Client.ViewModels
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
 
+		//не верь решарперу
 		public ShellViewModel()
-			: this(false)
+			: this(null)
 		{
-
 		}
 
-		public ShellViewModel(bool unitTesting)
+		public ShellViewModel(Config.Config config = null)
 		{
+			this.config = config = config ?? new Config.Config();
+#if DEBUG
+			Env.IsUnitTesting = config.IsUnitTesting;
+#endif
 			CloseDisposable.Add(CancelDisposable);
-			UnitTesting = unitTesting;
 			DisplayName = "АналитФАРМАЦИЯ";
 			defaultItem = new Main(Config);
 			Navigator.DefaultScreen = defaultItem;
 
 #if DEBUG
-			if (!UnitTesting)
+			if (!config.IsUnitTesting)
 				Debug = new Debug();
 #endif
 
@@ -125,10 +122,15 @@ namespace AnalitF.Net.Client.ViewModels
 			NewMailsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
 
-			if (!UnitTesting) {
+#if DEBUG
+			if (!config.SkipOpenSession) {
 				session = Env.Factory.OpenSession();
 				statelessSession = Env.Factory.OpenStatelessSession();
 			}
+#else
+			session = Env.Factory.OpenSession();
+			statelessSession = Env.Factory.OpenStatelessSession();
+#endif
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -353,7 +355,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-						DbMaintain.UpdateLeaders(statelessSession, Settings.Value);
+						DbMaintain.UpdateLeaders(session, Settings.Value);
 						session.Flush();
 						return Enumerable.Empty<IResult>();
 					}, r => { });
@@ -820,8 +822,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CheckSettings())
 				return Enumerable.Empty<IResult>();
 
-			if(UnitTesting)
+#if DEBUG
+			if(config.IsUnitTesting)
 				command = OnCommandExecuting(command);
+#endif
 
 			var wait = new SyncViewModel(command.Progress) {
 				GenericErrorMessage = command.ErrorMessage

@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		private string file;
 		public Promotion Promotion;
 		public Config.Config Config;
+		public bool Verbose;
 
 		public LocalPromotion()
 		{
@@ -31,6 +32,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Name = "Тестовая промо-акция",
 				Annotation = "Тестовая промо-акция"
 			};
+			if (Verbose)
+				Console.WriteLine("Создана промоакция для товара {0}", catalog.FullName);
 			Promotion.Catalogs.Add(catalog);
 			session.Save(Promotion);
 			if (!String.IsNullOrEmpty(file)) {

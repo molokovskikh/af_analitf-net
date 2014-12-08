@@ -101,6 +101,10 @@ namespace AnalitF.Net.Client.Config
 		public Uri BaseUrl;
 		public TimeSpan RequestInterval = TimeSpan.FromSeconds(15);
 		public string RootDir;
+#if DEBUG
+		public bool IsUnitTesting;
+		public bool SkipOpenSession;
+#endif
 
 		public string TmpDir
 		{

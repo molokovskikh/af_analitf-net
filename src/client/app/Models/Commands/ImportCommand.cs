@@ -94,6 +94,7 @@ set m.HaveOffers = 1,
 	c.HaveOffers = 1;
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
+				DbMaintain.UpdateLeaders(Session, settings);
 			}
 
 			//вычисляю таблицы в которых нужно производить чистку

@@ -84,6 +84,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			finally {
 				Session = null;
+				StatelessSession = null;
 				Client = null;
 			}
 		}

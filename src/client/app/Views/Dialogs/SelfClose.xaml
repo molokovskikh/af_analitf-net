@@ -24,7 +24,7 @@
 		<TextBlock Padding="5" Grid.Row="1" Grid.Column="1" Name="CountDown" />
 		<Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
 			Source="/AnalitF.Net.Client;component/assets/images/Question.ico" />
-		<Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+		<Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
 			HorizontalAlignment="Center"
 			Margin="0, 10, 0, 0"
 			Padding="10, 1, 10, 1"

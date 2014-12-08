@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -11,15 +9,12 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Service.Models;
-using AnalitF.Net.Service.Test.TestHelpers;
-using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
-using Test.Support.log4net;
 using Test.Support.Suppliers;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
@@ -392,12 +387,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Notify_on_awaited()
 		{
-			localSession.DeleteEach<AwaitedItem>();
-
-			var offer = localSession.Query<Offer>().First();
-			var catalog = localSession.Load<Catalog>(offer.CatalogId);
-			var item = new AwaitedItem(catalog);
-			localSession.Save(item);
+			SimpleFixture.CreateCleanAwaited(localSession);
 
 			var cmd = new UpdateCommand();
 			Run(cmd);

@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> Send()
 		{
 			if (Attachments.Count == 0) {
-				TryClose(true);
+				TryClose();
 				yield break;
 			}
 
@@ -94,8 +94,13 @@ namespace AnalitF.Net.Client.ViewModels
 				yield return new MessageResult(message, MessageResult.MessageType.Error);
 			}
 			else {
-				TryClose(true);
+				TryClose();
 			}
+		}
+
+		public void Cancel()
+		{
+			TryClose(true);
 		}
 
 		public FeedbackMessage GetMessage()

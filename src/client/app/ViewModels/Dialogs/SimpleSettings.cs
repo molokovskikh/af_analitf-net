@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				.ToArray();
 		}
 
-		public void OK()
+		public void Cancel()
 		{
 			TryClose(true);
 		}

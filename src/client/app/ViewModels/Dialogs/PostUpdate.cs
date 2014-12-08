@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs

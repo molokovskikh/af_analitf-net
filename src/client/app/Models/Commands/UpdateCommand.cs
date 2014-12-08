@@ -261,13 +261,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				SuccessMessage = "Новых файлов документов нет.";
 			}
 
-			if (offersImported) {
-				var user = Session.Query<User>().First();
-				if (user.IsDeplayOfPaymentEnabled) {
-					DbMaintain.UpdateLeaders(StatelessSession, settings);
-				}
-			}
-
 			if (offersImported || ordersImported)
 				RestoreOrders();
 

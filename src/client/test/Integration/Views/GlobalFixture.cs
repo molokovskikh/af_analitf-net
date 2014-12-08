@@ -311,16 +311,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			WaitWindow("Корректировка восстановленных заказов");
 
 			WaitIdle();
-			//на форме корректировки могут возникнуть ошибки биндинга
-			//судя по обсуждению это ошибки wpf и они безобидны
-			//http://wpf.codeplex.com/discussions/47047
-			//игнорирую их
-			var ignored = new[] {
-				"System.Windows.Data Error: 4",
-				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=AreRowDetailsFrozen; DataItem=null; target element is 'DataGridDetailsPresenter' (Name=''); target property is 'SelectiveScrollingOrientation' (type 'SelectiveScrollingOrientation')",
-				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=HeadersVisibility; DataItem=null; target element is 'DataGridRowHeader' (Name=''); target property is 'Visibility' (type 'Visibility')",
-			};
-			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
+			ShallowBindingErrors();
 		}
 
 		[Test]
@@ -560,6 +551,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			Fixture(fixture);
 			var filename = TempFile("batch.txt", "1|10");
 			session.DeleteEach<Order>();
+			//что бы избежать сообщения о ожидаемых позициях
+			session.DeleteEach<AwaitedItem>();
 
 			Start();
 			Click("ShowBatch");
@@ -703,6 +696,38 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
+		[Test]
+		public void Show_order_restore_result_after_update_notification()
+		{
+			SimpleFixture.CreateCleanAwaited(session);
+			MakeOrder();
+			Fixture<RandCost>();
+
+			Start();
+			AsyncClick("Update");
+
+			WaitWindow("АналитФАРМАЦИЯ: Внимание", "появились препараты, которые включены Вами в список ожидаемых позиций");
+			AsyncClickNoWait("TryClose");
+			WaitWindow("Корректировка восстановленных заказов");
+
+			WaitIdle();
+			ShallowBindingErrors();
+		}
+
+		private static void ShallowBindingErrors()
+		{
+			//на форме корректировки могут возникнуть ошибки биндинга
+			//судя по обсуждению это ошибки wpf и они безобидны
+			//http://wpf.codeplex.com/discussions/47047
+			//игнорирую их
+			var ignored = new[] {
+				"System.Windows.Data Error: 4",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=AreRowDetailsFrozen; DataItem=null; target element is 'DataGridDetailsPresenter' (Name=''); target property is 'SelectiveScrollingOrientation' (type 'SelectiveScrollingOrientation')",
+				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=HeadersVisibility; DataItem=null; target element is 'DataGridRowHeader' (Name=''); target property is 'Visibility' (type 'Visibility')",
+			};
+			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
+		}
+
 		private void OpenMenu(string header)
 		{
 			dispatcher.Invoke(() => {
@@ -743,11 +768,14 @@ namespace AnalitF.Net.Test.Integration.Views
 			}));
 		}
 
-		private void WaitWindow(string title)
+		private void WaitWindow(string title, string body = null)
 		{
 			var opened = manager.WindowOpened.Timeout(30.Second()).First();
 			opened.Dispatcher.Invoke(() => {
-				Assert.AreEqual(title, opened.Title, opened.AsText());
+				var text = opened.AsText();
+				Assert.AreEqual(title, opened.Title, text);
+				if (!String.IsNullOrEmpty(body))
+					Assert.That(text, Is.StringContaining(body), text);
 			});
 		}
 

@@ -22,8 +22,8 @@
 			TextWrapping="Wrap">
 		</TextBox>
 		<StackPanel Orientation="Horizontal">
-			<Button Name="Send" Margin="4">Отправить заказы</Button>
-			<Button Name="TryClose" Margin="4">Отменить отправку</Button>
+			<Button Name="TryClose" Margin="4">Отправить заказы</Button>
+			<Button Name="Cancel" Margin="4">Отменить отправку</Button>
 			<Button Name="Save" Margin="4">Сохранить в файл</Button>
 		</StackPanel>
 	</StackPanel>

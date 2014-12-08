@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reactive.Disposables;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
@@ -37,7 +38,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			cleanup.Add(TestUtils.WithScheduler(scheduler));
 
 			manager = ViewModelFixture.StubWindowManager();
-			shell = new ShellViewModel(true);
+			var config = new Config.Config {
+				IsUnitTesting = true,
+				SkipOpenSession = true,
+			};
+			shell = new ShellViewModel(config);
+			shell.Env = new Env {
+				IsUnitTesting = true
+			};
 		}
 
 		[TearDown]

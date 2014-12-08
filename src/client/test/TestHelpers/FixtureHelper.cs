@@ -64,6 +64,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					var config = new Config.Config();
 					config.RootDir = Common.Tools.FileHelper.MakeRooted(config.RootDir);
 					Util.SetValue(fixture, "Config", IntegrationSetup.clientConfig);
+					Util.SetValue(fixture, "Verbose", true);
 				}
 				else {
 					factory = IntegrationSetup.Factory;

@@ -61,7 +61,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public void BaseFixtureSetup()
 		{
 			DebugContext= new Dictionary<string, object>();
-			Env = new Env();
+			Env = new Env {
+				IsUnitTesting = true
+			};
 			ProcessHelper.UnitTesting = true;
 			ProcessHelper.ExecutedProcesses.Clear();
 
@@ -76,7 +78,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
 				var value = new ShellViewModel();
-				value.UnitTesting = true;
 				value.Config = config;
 				value.Env = Env;
 				disposable.Add(value);

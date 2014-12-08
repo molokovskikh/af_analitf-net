@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Markup;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using DialogResult = System.Windows.Forms.DialogResult;
 
@@ -54,8 +55,11 @@ namespace AnalitF.Net.Client.Extentions
 
 		public override bool? ShowDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-			if (Stub(rootModel))
-				return true;
+#if DEBUG
+			bool? dialogResult;
+			if (Stub(rootModel, out dialogResult))
+				return dialogResult;
+#endif
 
 			var window = CreateWindow(rootModel, true, context, settings);
 			if (window.Owner != null) {
@@ -71,10 +75,11 @@ namespace AnalitF.Net.Client.Extentions
 		public DialogResult ShowDialog(System.Windows.Forms.CommonDialog dialog)
 		{
 #if DEBUG
-			if (Stub(dialog))
+			bool? dialogResult;
+			if (Stub(dialog, out dialogResult))
 				return DialogResult.OK;
 #endif
-			;
+
 			var window = InferOwnerOf(null);
 			if (window != null)
 				return dialog.ShowDialog(new Win32Stub(new WindowInteropHelper(window).Handle));
@@ -85,16 +90,21 @@ namespace AnalitF.Net.Client.Extentions
 		public bool? ShowDialog(Microsoft.Win32.CommonDialog dialog)
 		{
 #if DEBUG
-			if (Stub(dialog))
-				return true;
+			bool? dialogResult;
+			if (Stub(dialog, out dialogResult))
+				return dialogResult;
 #endif
 			return dialog.ShowDialog(InferOwnerOf(null));
 		}
 
 		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
-			if (Stub(rootModel))
-				return true;
+#if DEBUG
+			bool? dialogResult;
+			if (Stub(rootModel, out dialogResult)) {
+				return dialogResult;
+			}
+#endif
 
 			var window = CreateWindow(rootModel, true, context, settings);
 			window.ResizeMode = ResizeMode.NoResize;
@@ -104,11 +114,14 @@ namespace AnalitF.Net.Client.Extentions
 			return ShowDialog(window);
 		}
 
-		private bool Stub(object rootModel)
-		{
 #if DEBUG
+		private bool Stub(object rootModel, out bool? dialogResult)
+		{
+			dialogResult = false;
 			if (UnitTesting || SkipApp) {
 				if (rootModel is Microsoft.Win32.CommonDialog || rootModel is System.Windows.Forms.CommonDialog) {
+					//по умолчанию для системных диалогов мы должны возвращать true для всех остальных false
+					dialogResult = true;
 					OsDialog.OnNext(rootModel);
 					return true;
 				}
@@ -120,9 +133,9 @@ namespace AnalitF.Net.Client.Extentions
 				ContinueViewDialog(rootModel);
 				return true;
 			}
-#endif
 			return false;
 		}
+#endif
 
 		//скорбная песнь
 		//для того что значения форматировались в соответствии с правилами русского языка

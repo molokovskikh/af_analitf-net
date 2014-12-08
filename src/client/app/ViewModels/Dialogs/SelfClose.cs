@@ -42,10 +42,5 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			if (close)
 				closeDisposable.Dispose();
 		}
-
-		public override void TryClose()
-		{
-			base.TryClose(true);
-		}
 	}
 }

@@ -7,7 +7,7 @@ namespace AnalitF.Net.Client.Models.Commands
 {
 	public class DbMaintain
 	{
-		public static void UpdateLeaders(IStatelessSession statelessSession, Settings settings)
+		public static void UpdateLeaders(ISession statelessSession, Settings settings)
 		{
 			statelessSession.CreateSQLQuery(@"
 update Prices p
@@ -70,7 +70,8 @@ group by m.ProductId, m.RegionId;
 
 update MinCosts m
 	join NextMinCosts n on n.ProductId = m.ProductId and n.RegionId = m.RegionId
-set m.NextCost = n.NextCost;
+set m.NextCost = n.NextCost,
+	m.Diff = round((n.NextCost / m.Cost - 1) * 100, 2);
 
 drop temporary table NextMinCosts;
 drop temporary table Leaders;")

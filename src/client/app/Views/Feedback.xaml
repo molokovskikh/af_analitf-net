@@ -34,7 +34,7 @@
 		</StackPanel>
 		<StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal">
 			<Button Margin="5" Name="Send">Отправить</Button>
-			<Button Margin="5" Name="TryClose">Отменить</Button>
+			<Button Margin="5" Name="Cancel">Отменить</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>

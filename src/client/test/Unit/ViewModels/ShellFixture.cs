@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Linq.Observαble;
 using System.Reactive.Subjects;
-using System.Text;
-using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Unit.ViewModels
@@ -44,14 +37,12 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			}
 		}
 
-		ShellViewModel shell;
 		Subject<RemoteCommand> cmd;
 
 		[SetUp]
 		public void Setup()
 		{
 			cmd = new Subject<RemoteCommand>();
-			shell = new ShellViewModel(true);
 			shell.Settings.Value = new Settings();
 			shell.CommandExecuting += command => {
 				cmd.OnNext(command);

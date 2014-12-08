@@ -402,7 +402,7 @@ namespace AnalitF.Net.Client.ViewModels
 					return;
 				}
 			}
-			TryClose(true);
+			TryClose();
 		}
 
 		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObservLoad(Loadable loadable)

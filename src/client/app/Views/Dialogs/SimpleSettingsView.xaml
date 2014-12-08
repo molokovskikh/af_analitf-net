@@ -22,8 +22,8 @@
 			</Grid.ColumnDefinitions>
 		</Grid>
 		<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
-			<Button x:Name="OK" MinWidth="100" IsDefault="True">ОК</Button>
-			<Button x:Name="TryClose" MinWidth="100" IsCancel="True">Отменить</Button>
+			<Button x:Name="TryClose" MinWidth="100" IsDefault="True">ОК</Button>
+			<Button x:Name="Cancel" MinWidth="100" IsCancel="True">Отменить</Button>
 		</StackPanel>
 	</StackPanel>
 </UserControl>

@@ -183,6 +183,7 @@ where UserId = :userId;")
 			try {
 				var cheker = new PreorderChecker((MySqlConnection)Session.Connection, CurrentUser.Client);
 				cheker.Check();
+				PreorderChecker.CheckDailyOrdersSum(Session, Session.Load<Address>(addressId), orders);
 			}
 			catch(OrderException e) {
 				errors.AddRange(orders.Select(o => new OrderResult(o.ClientOrderId, e.Message)));
@@ -191,8 +192,7 @@ where UserId = :userId;")
 
 			if (!CurrentUser.IgnoreCheckMinOrder) {
 				foreach (var order in orders.ToArray()) {
-					var context = new MinOrderContext(Session, order);
-					var controller = new MinReqController(context);
+					var controller = new MinReqController(Session, order);
 					var result = controller.ProcessOrder();
 					if (result != null) {
 						var message = result.Type == MinReqStatus.ErrorType.MinReq
