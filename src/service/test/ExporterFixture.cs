@@ -194,7 +194,6 @@ namespace AnalitF.Net.Service.Test
 			}
 
 			var resultFiles = result.Implode(r => r.FileName);
-			Assert.That(resultFiles, Is.StringContaining("MinCosts"));
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
 			var controller = new MainController {
@@ -213,7 +212,6 @@ namespace AnalitF.Net.Service.Test
 					"пользователь {0} файл {1}", user.Id, zero);
 			}
 			resultFiles = result.Implode(r => r.FileName);
-			Assert.That(resultFiles, Is.Not.StringContaining("MinCosts"));
 			Assert.That(resultFiles, Is.Not.StringContaining("MaxProducerCosts"));
 			Assert.That(resultFiles, Is.Not.StringContaining("ads"));
 		}

@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
+using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
@@ -199,7 +200,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return null;
 
 			if (!CurrentCatalog.Value.HaveOffers)
-				return new ShowPopupResult();
+				return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
 
 			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
 			return null;

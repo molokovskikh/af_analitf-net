@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views.Parts;
 using Caliburn.Micro;
 using Common.Tools;
@@ -429,6 +430,27 @@ namespace AnalitF.Net.Client.ViewModels
 			else {
 				yield return new MessageResult("Выбранное наименование добавлено в список ожидаемых позиций.");
 			}
+		}
+
+		public IEnumerable<IResult> ShowOrderHistory()
+		{
+			if (CurrentCatalog == null || Address == null)
+				yield break;
+
+			var addressId = Address.Id;
+			var catalogId = CurrentCatalog.Id;
+			var lines = StatelessSession.Query<SentOrderLine>()
+				.Where(o => o.CatalogId == catalogId)
+				.Where(o => o.Order.Address.Id == addressId)
+				.OrderByDescending(o => o.Order.SentOn)
+				.Fetch(l => l.Order)
+				.ThenFetch(o => o.Price)
+				.Take(20)
+				.ToList();
+			if (lines.Count > 0)
+				Shell.Navigate(new HistoryOrdersViewModel(CurrentCatalog, null, lines));
+			else
+				yield return MessageResult.Warn("Нет истории заказов");
 		}
 	}
 }

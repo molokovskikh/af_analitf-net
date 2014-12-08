@@ -5,7 +5,7 @@
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-	behaviors:Focusable.DefaultFocus="{x:Reference TryClose}">
+	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
 
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
@@ -40,7 +40,6 @@
 		</c:DataGrid2>
 
 		<StackPanel Grid.Row="2" Orientation="Horizontal">
-			<Button Name="TryClose">Закрыть</Button>
 			<Label FontWeight="Bold">
 				<TextBlock>
 					Средняя цена по предыдущим заказам: <Run Name="Offer_PrevOrderAvgCost"></Run>

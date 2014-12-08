@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
@@ -205,6 +207,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(promotions.Visible.Value);
 			Assert.AreEqual(name.Value.Name, promotions.Name.Value.Name);
 			Assert.That(promotions.Promotions.Value.Count, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Show_order_history()
+		{
+			var catalog = nameViewModel.Catalogs.Value.First();
+			session.DeleteEach<SentOrder>();
+			nameViewModel.CurrentCatalog = catalog;
+			var results = catalogModel.ShowOrderHistory().ToArray();
+			Assert.AreEqual(1, results.Length);
+			Assert.AreEqual("Нет истории заказов", ((MessageResult)results[0]).Message);
 		}
 
 		private void ApplyMnnFilter()

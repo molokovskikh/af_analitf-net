@@ -1,22 +1,33 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Caliburn.Micro;
+using Action = System.Action;
 
 namespace AnalitF.Net.Client.Models.Results
 {
 	public class ShowPopupResult : IResult
 	{
+		private Func<IEnumerable<IResult>> showHistory;
+
+		public ShowPopupResult(Func<IEnumerable<IResult>> showHistory)
+		{
+			this.showHistory = showHistory;
+		}
+
 		public void Execute(ActionExecutionContext context)
 		{
 			var cell = Keyboard.FocusedElement as DataGridCell;
 			if (cell != null) {
+				var menuItem = new MenuItem { Header = "Показать историю заказов"};
+				menuItem.Click += (sender, eventArgs) => Coroutine.BeginExecute(showHistory().GetEnumerator());
 				var menu = new ContextMenu {
 					Items = {
 						new MenuItem { FontWeight = FontWeights.Bold, Header = "Нет предложений" },
-						new MenuItem { Header = "Показать историю заказов"}
+						menuItem
 					}
 				};
 				menu.IsOpen = true;

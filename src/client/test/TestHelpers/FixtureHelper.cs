@@ -57,10 +57,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ISessionFactory factory;
 			if (local) {
 				if (IntegrationSetup.Factory == null) {
-					AppBootstrapper.NHibernate = new Config.Initializers.NHibernate();
-					AppBootstrapper.NHibernate.UseRelativePath = true;
-					AppBootstrapper.NHibernate.Init();
-					factory = AppBootstrapper.NHibernate.Factory;
+					factory = GetFactory();
 					var config = new Config.Config();
 					config.RootDir = Common.Tools.FileHelper.MakeRooted(config.RootDir);
 					Util.SetValue(fixture, "Config", IntegrationSetup.clientConfig);
@@ -93,6 +90,18 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					transaction.Commit();
 				}
 			}
+		}
+
+
+		public static ISessionFactory GetFactory()
+		{
+			if (IntegrationSetup.Factory != null)
+				return IntegrationSetup.Factory;
+			AppBootstrapper.NHibernate = new Config.Initializers.NHibernate();
+			AppBootstrapper.NHibernate.UseRelativePath = true;
+			AppBootstrapper.NHibernate.Init();
+			var factory = AppBootstrapper.NHibernate.Factory;
+			return factory;
 		}
 
 		public void Dispose()
