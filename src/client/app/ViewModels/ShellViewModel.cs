@@ -644,9 +644,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> CleanSync()
 		{
+			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
+				yield break;
 			User.Value.LastSync = null;
 			session.Flush();
-			return Sync(new UpdateCommand());
+			foreach (var result in Sync(new UpdateCommand())) {
+					yield return result;
+			}
 		}
 
 		public bool CanLoadOrderHistory
