@@ -4,7 +4,7 @@
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-	behaviors:Focusable.DefaultFocus="{x:Reference OK}">
+	behaviors:Focusable.DefaultFocus="{x:Reference TryClose}">
 
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
