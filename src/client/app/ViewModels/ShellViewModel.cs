@@ -899,7 +899,7 @@ namespace AnalitF.Net.Client.ViewModels
 					var baseException = task.Exception.GetBaseException();
 					if (ErrorHelper.IsCancalled(baseException))
 						return;
-					log.Error(task.Exception);
+					log.Error("Ошибка при выполнении фоновой задачи", task.Exception);
 
 					var error = ErrorHelper.TranslateException(task.Exception)
 						?? viewModel.GenericErrorMessage;
