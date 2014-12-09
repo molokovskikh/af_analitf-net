@@ -899,10 +899,11 @@ namespace AnalitF.Net.Client.ViewModels
 					var baseException = task.Exception.GetBaseException();
 					if (ErrorHelper.IsCancalled(baseException))
 						return;
-					log.Error("Ошибка при выполнении фоновой задачи", task.Exception);
 
 					var error = ErrorHelper.TranslateException(task.Exception)
 						?? viewModel.GenericErrorMessage;
+
+					log.Error(error, task.Exception);
 					windowManager.Error(error);
 
 					//показывать форму с настройками нужно только один раз
