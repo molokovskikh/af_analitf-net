@@ -19,13 +19,14 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var header = String.Format("Заявка № {0} от на {1} от {2}",
+			var header = String.Format("Заявка № {0} от {1} на {2} от {3}",
 				order.DisplayId,
+				order.CreatedOn,
 				order.PriceName,
 				order.AddressName);
 			TwoColumnHeader(header, order.SafePrice.Phone);
 			Block(String.Format("Дата прайс-листа от {0}", order.SafePrice.PriceDate));
-			Block(order.Comment);
+			Block(order.PersonalComment);
 
 			var headers = new[] {
 				new PrintColumn("№ п/п", 45),
