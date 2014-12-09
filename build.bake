@@ -19,6 +19,8 @@ def FileElement(file as string, id as string, element as XElement):
 def AddDirectory(id as string, path as string, document as XDocument, manager as XmlNamespaceManager):
 	element = document.XPathSelectElement("/prefix:Wix/prefix:Fragment/prefix:DirectoryRef[@Id='$id']/prefix:Component", manager)
 	for file in Directory.GetFiles(path):
+		if String.Equals(Path.GetExtension(file), ".pdb", StringComparison.OrdinalIgnoreCase):
+			continue
 		fileId = Path.GetFileName(file) + "_" + id
 		element.Add(FileElement(file, fileId, element))
 
@@ -197,8 +199,6 @@ task "build:client:bin":
 	Build(Globals, proj)
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld", Excludes: ["build.sh", ".gitignore"]), output)
 	Rm(FileSet("$output/*.xml"))
-	if Globals.Environment == @Production:
-		Rm(FileSet("$output/*.pdb"))
 
 task "build:setup":
 	arg = ""
@@ -228,7 +228,7 @@ task "build:update":
 	Clean(Globals, "src/updater/app/app.csproj")
 	Build(Globals, "src/updater/app/app.csproj")
 	Cp("output/setup/version.txt", updaterOutput, true)
-	Cp("$clientOutput/*", updaterOutput, true)
+	Cp(FileSet("*", BaseDirectory: clientOutput, Excludes: ["*.pdb", ]), updaterOutput, true)
 	Rm(FileSet("$updaterOutput/*.xml"))
 	if Globals.Environment == @Production:
 		Rm(FileSet("$updaterOutput/*.pdb"))
