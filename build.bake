@@ -65,6 +65,7 @@ Global(
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\alpha""",
+			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
 			@IISSiteName: "IOS",
 			@IISHost: ("solo", "frontrmt"),
@@ -311,6 +312,9 @@ task "test:binary":
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta")
+		if Globals.Maybe.SetupDeployRoot:
+			dst = Path.Combine(Globals.Maybe.SetupDeployRoot, "AnalitF.Net-$version.exe")
+			Cp("output/setup/setup.exe", dst)
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
