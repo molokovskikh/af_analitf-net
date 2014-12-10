@@ -19,6 +19,8 @@ def FileElement(file as string, id as string, element as XElement):
 def AddDirectory(id as string, path as string, document as XDocument, manager as XmlNamespaceManager):
 	element = document.XPathSelectElement("/prefix:Wix/prefix:Fragment/prefix:DirectoryRef[@Id='$id']/prefix:Component", manager)
 	for file in Directory.GetFiles(path):
+		if String.Equals(Path.GetExtension(file), ".pdb", StringComparison.OrdinalIgnoreCase):
+			continue
 		fileId = Path.GetFileName(file) + "_" + id
 		element.Add(FileElement(file, fileId, element))
 
@@ -63,6 +65,7 @@ Global(
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\alpha""",
+			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
 			@IISSiteName: "IOS",
 			@IISHost: ("solo", "frontrmt"),
@@ -103,7 +106,7 @@ task "deploy:service", ["build:service"]:
 	deployTo = GetDeploy(Globals, proj)
 	deployTo += "-$version"
 	name += "-$version"
-	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Main/Version"
+	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
 	MkDir(deployTo) unless Exist(deployTo)
 	deployToBin = Path.Combine(deployTo, "bin")
 	deployToVar = Path.Combine(deployTo, "var")
@@ -135,9 +138,10 @@ task "deploy:proxy", ["build:proxy"]:
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
 	fsPath = Path.GetFullPath(deployToBin)
-	if Globals.Maybe.IISPathRoot:
-		fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
-	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
+	unless Configuration.Maybe.skipRegister:
+		if Globals.Maybe.IISPathRoot:
+			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
+		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
 task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "git:push:tags"]
 
@@ -196,8 +200,6 @@ task "build:client:bin":
 	Build(Globals, proj)
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld", Excludes: ["build.sh", ".gitignore"]), output)
 	Rm(FileSet("$output/*.xml"))
-	if Globals.Environment == @Production:
-		Rm(FileSet("$output/*.pdb"))
 
 task "build:setup":
 	arg = ""
@@ -227,7 +229,7 @@ task "build:update":
 	Clean(Globals, "src/updater/app/app.csproj")
 	Build(Globals, "src/updater/app/app.csproj")
 	Cp("output/setup/version.txt", updaterOutput, true)
-	Cp("$clientOutput/*", updaterOutput, true)
+	Cp(FileSet("*", BaseDirectory: clientOutput, Excludes: ["*.pdb", ]), updaterOutput, true)
 	Rm(FileSet("$updaterOutput/*.xml"))
 	if Globals.Environment == @Production:
 		Rm(FileSet("$updaterOutput/*.pdb"))
@@ -291,12 +293,14 @@ task "test:binary":
 		while not done:
 			try:
 				count++
-				client = WebClient()
-				client.Credentials = NetworkCredential(testId, testPassword)
-				serviceVersion = client.DownloadString(Globals.CheckUrl)
-				done = serviceVersion == version
+				if count > 20:
+					raise "Не удалось дождаться версии $version"
+				using client = WebClient():
+					client.Credentials = NetworkCredential(testId, testPassword)
+					serviceVersion = client.DownloadString(Globals.CheckUrl)
+					done = serviceVersion == version
 				unless done:
-					print "Версия сервиса $serviceVersion жду $version"
+					print "Для сервиса ${Global.CheckUrl} ожидаю версию $version получил $serviceVersion"
 					print "Жду обновления"
 					Thread.Sleep(1000)
 			except e:
@@ -308,6 +312,9 @@ task "test:binary":
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta")
+		if Globals.Maybe.SetupDeployRoot:
+			dst = Path.Combine(Globals.Maybe.SetupDeployRoot, "AnalitF.Net-$version.exe")
+			Cp("output/setup/setup.exe", dst)
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise

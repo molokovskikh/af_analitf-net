@@ -140,11 +140,11 @@ drop temporary table ExistsCatalogs;")
 				sql += String.Format("TRUNCATE {0}; ", tableName);
 			}
 			else if (tableName.Match("offers")) {
+				//мы должны удалить все предложения по загруженным прайс-листам и предложения по отсутствующим прайс-листам
 				sql += @"
 delete o from Offers o
-join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
-where p.IsSynced = 1;
-";
+	left join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
+where p.IsSynced = 1 or p.PriceId is null;";
 			}
 
 			var columns = meta;
