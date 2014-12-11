@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Сумма", 80)
 			};
 
-			var lines = order.Lines;
+			var lines = order.Lines.ToArray();
 			var count = lines.Count();
 			var sum = lines.Sum(l => l.MixedSum);
 			var rows = lines.Select((l, i) => new object[] {
@@ -51,7 +51,28 @@ namespace AnalitF.Net.Client.Models.Print
 				l.MixedSum
 			});
 
-			var table = BuildTable(rows, headers);
+			var table = BuildTableHeader(headers);
+			var rowGroup = table.RowGroups[0];
+			var index = 0;
+			foreach (var row in rows) {
+				BuildRow(headers, rowGroup, row);
+
+				var line = lines[index];
+				if (!String.IsNullOrEmpty(line.Comment)) {
+					var tableRow = new TableRow();
+					rowGroup.Rows.Add(tableRow);
+					var cell = new TableCell(new Paragraph(new Run(line.Comment))) {
+						Style = CellStyle,
+						ColumnSpan = headers.Length,
+						FontStyle = FontStyles.Italic
+					};
+					tableRow.Cells.Add(cell);
+				}
+
+				index++;
+			}
+
+			doc.Blocks.Add(table);
 			if (count > 0) {
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
