@@ -54,7 +54,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 
 			var query = StatelessSession.Query<Offer>();
-			//.Where(o => o.ProductSynonym.Contains(term));
 			query = Util.ContainsAny(query, o => o.ProductSynonym,
 				term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 			query = Util.Filter(query, o => o.Price.Id, Prices);

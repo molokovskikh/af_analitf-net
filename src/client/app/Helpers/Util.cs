@@ -171,7 +171,7 @@ namespace AnalitF.Net.Client.Helpers
 				if (result == null)
 					result = exp;
 				else
-					result = Expression.OrElse(result, exp);
+					result = Expression.AndAlso(result, exp);
 			}
 
 			return query.Where(Expression.Lambda<Func<T, bool>>(result,
