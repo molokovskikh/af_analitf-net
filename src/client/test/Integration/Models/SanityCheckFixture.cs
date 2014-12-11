@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
@@ -26,6 +27,17 @@ namespace AnalitF.Net.Test.Integration.Models
 		public void Make_check()
 		{
 			check.Check();
+		}
+
+		[Test]
+		public void Update_column_types()
+		{
+			session.CreateSQLQuery("alter table Settings change column ProxyPort ProxyPort int NOT NULL DEFAULT '0';")
+				.ExecuteUpdate();
+			check.Check(true);
+			var result = session.CreateSQLQuery("show create table Settings")
+				.UniqueResult<object[]>();
+			Assert.That(result[1].ToString(), Is.StringContaining("`ProxyPort` int(11) DEFAULT NULL,"));
 		}
 
 		[Test]

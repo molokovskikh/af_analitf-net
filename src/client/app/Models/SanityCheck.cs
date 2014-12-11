@@ -171,10 +171,6 @@ namespace AnalitF.Net.Client.Models
 							continue;
 						}
 
-						//если тип задан явно то сравнить его не получится
-						if (!String.IsNullOrEmpty(column.SqlType))
-							continue;
-
 						var diff = !CompareType(columnInfo, dialect, column, mapping);
 						if (diff) {
 							var sql = new StringBuilder()
@@ -214,6 +210,8 @@ namespace AnalitF.Net.Client.Models
 					if (alters.Count > 0) {
 						foreach (var alter in alters) {
 							try {
+								if (log.IsDebugEnabled)
+									log.Debug(alter);
 								cmd.CommandText = alter;
 								cmd.ExecuteNonQuery();
 							}
@@ -228,6 +226,8 @@ namespace AnalitF.Net.Client.Models
 
 		private static bool CompareType(IColumnMetadata columnInfo, Dialect dialect, Column column, IMapping mapping)
 		{
+			if (Convert.ToBoolean(columnInfo.Nullable) != column.IsNullable)
+				return false;
 			var typeName = dialect.GetTypeName(column.GetSqlTypeCode(mapping));
 			typeName = typeName.Replace(" UNSIGNED", "");
 			if (typeName.Match("INTEGER")) {

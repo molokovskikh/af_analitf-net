@@ -229,6 +229,7 @@
     <Compile Include="TestHelpers\FixtureHelper.cs" />
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />
     <Compile Include="TestHelpers\WpfTestHelper.cs" />
+    <Compile Include="Unit\Converters.cs" />
     <Compile Include="Unit\Models\AttachmentFixture.cs" />
     <Compile Include="Unit\BaseConductorFixture.cs" />
     <Compile Include="Unit\Models\ConfigFixture.cs" />

@@ -11,6 +11,8 @@
 	<Extentions:IntToCollapsedConverter x:Key="IntToCollapsed" />
 	<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
 	<Extentions:InvertConverter x:Key="BoolInvert" />
+	<Extentions:NullableConverter x:Key="NullableConverter" />
+
 
 	<Style x:Key="DownloadLink" TargetType="ContentControl">
 		<Style.Setters>

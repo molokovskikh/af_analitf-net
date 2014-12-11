@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
+using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Extentions
 {
@@ -122,6 +124,22 @@ namespace AnalitF.Net.Client.Extentions
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			return !(bool)value;
+		}
+	}
+
+	public class NullableConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			var forward = TypeDescriptor.GetConverter(targetType);
+			if (value == null || forward.CanConvertFrom(value.GetType()))
+				return forward.ConvertFrom(value);
+			return TypeDescriptor.GetConverter(value.GetType()).ConvertTo(value, targetType);
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return TypeDescriptor.GetConverter(targetType).ConvertFrom(value);
 		}
 	}
 }

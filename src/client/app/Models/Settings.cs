@@ -186,7 +186,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string ProxyHost { get; set; }
 
-		public virtual int ProxyPort { get; set; }
+		public virtual int? ProxyPort { get; set; }
 
 		public virtual string ProxyUserName { get; set; }
 
@@ -248,9 +248,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			if (!UseProxy)
 				return null;
-			if (ProxyHost == null)
+			if (String.IsNullOrEmpty(ProxyHost) || ProxyPort.GetValueOrDefault() <= 0)
 				return null;
-			var proxy = new WebProxy(ProxyHost, ProxyPort);
+			var proxy = new WebProxy(ProxyHost, ProxyPort.Value);
 			if (!String.IsNullOrEmpty(ProxyUserName))
 				proxy.Credentials = new NetworkCredential(ProxyUserName, ProxyPassword);
 			return proxy;

@@ -191,7 +191,7 @@
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Порт</Label>
-							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyPort" />
+							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" Text="{Binding Path=Settings.Value.ProxyPort, Converter={StaticResource NullableConverter}}"  />
 						</StackPanel>
 					</Grid>
 					<Grid>
