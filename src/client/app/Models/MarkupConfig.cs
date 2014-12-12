@@ -174,6 +174,8 @@ namespace AnalitF.Net.Client.Models
 					errors.Add("Некорректно введены границы цен.");
 				}
 			}
+			if (!source.Any(m => m.Type == MarkupType.VitallyImportant))
+				errors.Add("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].");
 			return errors.FirstOrDefault();
 		}
 

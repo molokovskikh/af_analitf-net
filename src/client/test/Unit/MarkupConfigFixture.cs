@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
@@ -69,6 +70,14 @@ namespace AnalitF.Net.Test.Unit
 			var settings = new Settings(defaults: true);
 			settings.Markups[2].End = 100;
 			Assert.AreEqual("Некорректно введены границы цен.", settings.ValidateMarkups());
+		}
+
+		[Test]
+		public void Reject_withou_vitally_important_markups()
+		{
+			var settings = new Settings(defaults: true);
+			settings.Markups.RemoveEach(settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant));
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.ValidateMarkups());
 		}
 	}
 }
