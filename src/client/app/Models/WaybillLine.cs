@@ -165,7 +165,7 @@ namespace AnalitF.Net.Client.Models
 
 				Edited = true;
 				_retailCost = value;
-				RecalculateMarkups();
+				RecalculateMarkups(RetailCost);
 				Waybill.CalculateRetailSum();
 				OnPropertyChanged("RetailSum");
 				OnPropertyChanged();
@@ -320,9 +320,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		private void RecalculateMarkups()
+		private void RecalculateMarkups(decimal? rawRetailCost)
 		{
-			UpdateMarkups(RetailCost);
+			UpdateMarkups(rawRetailCost);
 			OnPropertyChanged("RealRetailMarkup");
 			OnPropertyChanged("RetailMarkup");
 			OnPropertyChanged("IsMarkupInvalid");
@@ -331,9 +331,9 @@ namespace AnalitF.Net.Client.Models
 
 		private void RecalculateFromRetailMarkup()
 		{
-			decimal? stub;
-			_retailCost = CalculateRetailCost(RetailMarkup, out stub);
-			RecalculateMarkups();
+			decimal? rawCost;
+			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
+			RecalculateMarkups(rawCost);
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
 		}
@@ -341,12 +341,12 @@ namespace AnalitF.Net.Client.Models
 		private void RecalculateFromRealRetailMarkup()
 		{
 			_retailCost = CalculateFromRealMarkup(RealRetailMarkup);
-			RecalculateMarkups();
+			RecalculateMarkups(RetailCost);
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
 		}
 
-		public virtual void Calculate(Settings settings, IEnumerable<MarkupConfig> markups)
+		public virtual void Calculate(Settings settings)
 		{
 			if (!IsCalculable()) {
 				_retailCost = null;
@@ -370,16 +370,19 @@ namespace AnalitF.Net.Client.Models
 			if (sourceCost == 0)
 				return;
 			var markupType = vitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			var markup = MarkupConfig.Calculate(markups, markupType, sourceCost);
+			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost);
 			if (markup == null)
 				return;
 
 			MaxRetailMarkup = markup.MaxMarkup;
 			_maxSupplierMarkup = markup.MaxSupplierMarkup;
-			if (!Edited) {
-				_retailMarkup = markup.Markup;
-			}
+			//пересчет производится при каждом входе в накладную что бы отобразить актуальные данные если наценки были изменены
+			//для позиций которые редактировал пользователь пересчитывать ничего не нужно иначе данные могут измениться
+			//в результате ошибок округления
+			if (Edited)
+				return;
 
+			_retailMarkup = markup.Markup;
 			decimal? rawCost;
 			_retailCost = CalculateRetailCost(RetailMarkup, out rawCost);
 			//это лишено смысла но тем не менее analitf считает наценку от не округленной цены
@@ -458,7 +461,7 @@ namespace AnalitF.Net.Client.Models
 			if (Waybill != null && Waybill.IsCreatedByUser) {
 				Amount = Quantity * SupplierCost;
 				NdsAmount = NullableHelper.Round(Nds / 100m * Amount, 2);
-				Calculate(Waybill.Settings, Waybill.Settings.Markups);
+				Calculate(Waybill.Settings);
 				foreach (var property in typeof(WaybillLine).GetProperties()) {
 					OnPropertyChanged(property.Name);
 				}

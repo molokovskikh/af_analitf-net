@@ -181,7 +181,7 @@ namespace AnalitF.Net.Client.Models
 				?? WaybillSettings;
 
 			foreach (var waybillLine in Lines)
-				waybillLine.Calculate(Settings, Settings.Markups);
+				waybillLine.Calculate(Settings);
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
 			CalculateRetailSum();

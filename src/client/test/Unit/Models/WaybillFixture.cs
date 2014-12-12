@@ -224,18 +224,19 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		}
 
 		[Test]
-		public void Do_not_change_markup_on_tax_factor_Change()
+		public void Do_not_change_markup_on_tax_factor_change()
 		{
 			var line = Line();
 			line.VitallyImportant = true;
 			Calculate(line);
-			line.RetailMarkup = 10;
+
 			waybillSettings.IncludeNdsForVitallyImportant = false;
-			Calculate(line);
+			line.RetailMarkup = 10;
 			Assert.AreEqual(9.73, line.RetailMarkup);
 
+			line.Edited = false;
 			waybillSettings.IncludeNdsForVitallyImportant = true;
-			Calculate(line);
+			line.RetailMarkup = 10;
 			Assert.AreEqual(9.72, line.RetailMarkup);
 		}
 
@@ -316,6 +317,26 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(60, line.RetailMarkup);
 			Assert.AreEqual(50.85, line.RealRetailMarkup);
 			Assert.AreEqual(330.19, line.RetailCost);
+		}
+
+		[Test]
+		public void Do_not_recalculate_edited_lines()
+		{
+			var line = new WaybillLine(waybill) {
+				Product = "ТЕСТ-ПОЛОСКИ",
+				SupplierCostWithoutNds = 1298.18m,
+				Nds = 10,
+				SupplierCost = 1428,
+			};
+			Calculate(line);
+			Assert.AreEqual(1713.6, line.RetailCost);
+
+			line.RetailCost = 5000;
+			Assert.AreEqual(5000, line.RetailCost);
+			Assert.AreEqual(250.14, line.RetailMarkup);
+
+			waybill.Calculate(settings);
+			Assert.AreEqual(5000, line.RetailCost);
 		}
 
 		private WaybillLine Line()
