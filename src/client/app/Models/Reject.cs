@@ -40,5 +40,13 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual bool Canceled { get; set; }
+
+		public virtual string From
+		{
+			get
+			{
+				return String.Format("{0} от {1:d}", LetterNo, LetterDate);
+			}
+		}
 	}
 }

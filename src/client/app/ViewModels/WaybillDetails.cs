@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -17,6 +18,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Util;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -99,6 +101,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<SentOrderLine> CurrentOrderLine { get; set; }
 		public NotifyValue<Visibility> OrderDetailsVisibility { get; set; }
 		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
+		public NotifyValue<bool> IsRejectVisible { get; set; }
+		public NotifyValue<Reject> Reject { get; set; }
 
 		private void Calculate()
 		{
@@ -125,6 +129,17 @@ namespace AnalitF.Net.Client.ViewModels
 				.OrderBy(t => t)
 				.Select(t => new ValueDescription<int?>(((object)t ?? "Нет значения").ToString(), t)));
 			CurrentTax.Value = Taxes.FirstOrDefault();
+			Reject = CurrentLine
+				.Throttle(Consts.ScrollLoadTimeout, Scheduler)
+				.Select(v => RxQuery(s => {
+					if (v.RejectId == null)
+						return null;
+					return s.Get<Reject>(v.RejectId.Value);
+				}))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.ToValue(CloseCancellation);
+			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 		}
 
 		protected override void OnActivate()
@@ -319,6 +334,11 @@ namespace AnalitF.Net.Client.ViewModels
 				yield break;
 			}
 			base.Download(loadable);
+		}
+
+		public void HideReject()
+		{
+			IsRejectVisible.Value = false;
 		}
 
 #if DEBUG

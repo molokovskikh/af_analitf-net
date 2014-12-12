@@ -194,6 +194,42 @@
 				Command="ApplicationCommands.Delete">Удалить строку</Button>
 		</StackPanel>
 
+		<Border Grid.Row="2" BorderThickness="1" BorderBrush="Black" HorizontalAlignment="Center" VerticalAlignment="Center"
+			SnapsToDevicePixels="True"
+			Visibility="{Binding IsRejectVisible.Value, Converter={StaticResource BoolToHidden}}"
+			Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+			<Grid
+				Height="150"
+				Width="575">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<!--при нажатии таблица не должна терять фокус-->
+				<Button Focusable="False" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Name="HideReject">Свернуть</Button>
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right">Серия:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Reject_Series" />
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right">Товар:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Reject_Product" />
+
+				<Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">Изготовитель:</Label>
+				<Label Grid.Row="2" Grid.Column="1" Name="Reject_Producer" />
+
+				<Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right">Номер письма:</Label>
+				<Label Grid.Row="3" Grid.Column="1" Name="Reject_From" />
+				<TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Name="Reject_CauseRejects" Style="{StaticResource ReadOnlyText}" />
+			</Grid>
+		</Border>
+
 		<StackPanel Grid.Row="4" Name="Legend" />
 
 		<Label Grid.Row="5" Grid.RowSpan="2"
