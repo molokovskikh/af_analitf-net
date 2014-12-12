@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Controls;
@@ -12,6 +13,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Common.Tools;
+using NHibernate.Linq;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Integration.Views
@@ -53,6 +55,11 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.AreEqual("1", ((TextBox)cell.Content).Text);
 			});
 
+			CleanSafeError();
+		}
+
+		private static void CleanSafeError()
+		{
 			//на форме корректировки могут возникнуть ошибки биндинга
 			//судя по обсуждению это ошибки wpf и они безобидны
 			//http://wpf.codeplex.com/discussions/47047
@@ -65,6 +72,25 @@ namespace AnalitF.Net.Test.Integration.Views
 				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=NewItemMargin; DataItem=null; target element is 'DataGridRow' (Name=''); target property is 'Margin' (type 'Thickness')"
 			};
 			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
+		}
+
+		[Test]
+		public void Show_print_for_created_waybill()
+		{
+			var waybill = new Waybill(session.Query<Address>().First(), session.Query<Supplier>().First());
+			waybill.IsCreatedByUser = true;
+			session.Save(waybill);
+
+			WpfTestHelper.WithWindow2(async w => {
+				var model = new WaybillDetails(waybill.Id);
+				var view = (WaybillDetailsView)Bind(model);
+				w.Content = view;
+
+				await view.WaitLoaded();
+				view.Descendants<Button>().First(b => b.Name == "PrintWaybill")
+					.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+			});
+			CleanSafeError();
 		}
 	}
 }

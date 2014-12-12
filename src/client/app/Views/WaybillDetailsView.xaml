@@ -76,32 +76,32 @@
 		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
 			<Grid>
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
-					<ColumnDefinition Width="Auto"></ColumnDefinition>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto"></RowDefinition>
-					<RowDefinition Height="Auto"></RowDefinition>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
 				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Накладная №:</Label>
-				<Label Grid.Row="0" Grid.Column="1" Name="Waybill_Id" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Waybill_Id" FontWeight="Bold" />
 
 				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">№ поставщика:</Label>
-				<Label Grid.Row="1" Grid.Column="1" Name="Waybill_ProviderDocumentId" FontWeight="Bold"></Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Waybill_ProviderDocumentId" FontWeight="Bold" />
 
 				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
-				<Label Grid.Row="0" Grid.Column="3" Name="Waybill_DocumentDate" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="Waybill_DocumentDate" FontWeight="Bold" />
 
 				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
-				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold"></Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold" />
 
 				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_SupplierName" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_SupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 

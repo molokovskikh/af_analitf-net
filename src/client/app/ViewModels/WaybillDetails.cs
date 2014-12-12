@@ -35,7 +35,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
-			CurrentLine = new NotifyValue<WaybillLine>();
+			CurrentLine = new NotifyValue<object>();
+			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
+
 			CurrentTax = new NotifyValue<ValueDescription<int?>>();
 			RoundToSingleDigit = new NotifyValue<bool>(true);
 			RoundToSingleDigit.Changed()
@@ -62,7 +64,7 @@ namespace AnalitF.Net.Client.ViewModels
 					e.EventArgs.NewItems.OfType<WaybillLine>().Each(l => Waybill.AddLine(l));
 				}
 			});
-			OrderLines = CurrentLine
+			OrderLines = CurrentWaybillLine
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 				.Select(v => {
 					if (v == null)
@@ -91,8 +93,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public Waybill Waybill { get; set; }
+		//datagrid для обозначения новой строки использует специальный внутренний объект
+		//что бы избежать ошибок в тестах
+		public NotifyValue<object> CurrentLine { get; set; }
 		public NotifyValue<ListCollectionView> Lines { get; set; }
-		public NotifyValue<WaybillLine> CurrentLine { get; set; }
+		public NotifyValue<WaybillLine> CurrentWaybillLine { get; set; }
 		public List<ValueDescription<int?>> Taxes { get; set; }
 		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
 		public NotifyValue<bool> RoundToSingleDigit { get; set; }
@@ -129,7 +134,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.OrderBy(t => t)
 				.Select(t => new ValueDescription<int?>(((object)t ?? "Нет значения").ToString(), t)));
 			CurrentTax.Value = Taxes.FirstOrDefault();
-			Reject = CurrentLine
+			Reject = CurrentWaybillLine
 				.Throttle(Consts.ScrollLoadTimeout, Scheduler)
 				.Select(v => RxQuery(s => {
 					if (v.RejectId == null)
@@ -193,7 +198,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private IList<WaybillLine> PrintableLines()
 		{
-			return Lines.Value.Cast<WaybillLine>().Where(l => l.Print).ToList();
+			//в случае редактирование пользовательской накладной в коллекции будет NamedObject
+			return Lines.Value.OfType<WaybillLine>().Where(l => l.Print).ToList();
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
