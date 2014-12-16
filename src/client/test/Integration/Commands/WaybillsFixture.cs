@@ -102,6 +102,30 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Run(command);
 
 			Assert.AreEqual("Получение документов завершено успешно.", command.SuccessMessage);
+			//если была загружена хотя бы разобранная накладная то нужно открыть форму накладных а не папку с накладными
+			Assert.AreEqual(1, command.Results.Count, command.Results.Implode());
+			Assert.IsInstanceOf<ShellResult>(command.Results[0]);
+		}
+
+		[Test]
+		public void Open_waybill_view_after_import()
+		{
+			session.CreateSQLQuery(@"delete from Logs.DocumentSendLogs"
+				+ " where UserId = :userId;")
+				.SetParameter("userId", ServerUser().Id)
+				.ExecuteUpdate();
+			session.Transaction.Commit();
+			Fixture(new LoadWaybill());
+
+			var command = new UpdateCommand {
+				SyncData = "Waybills"
+			};
+
+			Assert.AreEqual(UpdateResult.OK, Run(command));
+			Assert.AreEqual("Получение документов завершено успешно.", command.SuccessMessage);
+			//если была загружена хотя бы разобранная накладная то нужно открыть форму накладных а не папку с накладными
+			Assert.AreEqual(1, command.Results.Count, command.Results.Implode());
+			Assert.IsInstanceOf<ShellResult>(command.Results[0]);
 		}
 
 		[Test]

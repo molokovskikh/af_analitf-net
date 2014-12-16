@@ -13,5 +13,6 @@
 		public virtual Supplier Supplier { get; set; }
 		public virtual DocumentType Type { get; set; }
 		public virtual string OriginFilename { get; set; }
+		public virtual bool IsDocDelivered { get; set; }
 	}
 }

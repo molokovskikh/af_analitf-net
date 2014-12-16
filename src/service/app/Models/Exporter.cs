@@ -1329,12 +1329,13 @@ group by dh.Id")
 			var delivered = logs.Where(l => l.DocumentDelivered || l.FileDelivered).ToArray();
 			Export(Result,
 				"LoadedDocuments",
-				new[] { "Id", "Type", "SupplierId", "OriginFilename", },
+				new[] { "Id", "Type", "SupplierId", "OriginFilename", "IsDocDelivered" },
 				delivered.Select(l => new object[] {
 					l.Document.Id,
 					(int)l.Document.DocumentType,
 					l.Document.Supplier.Id,
 					l.FileDelivered ? l.Document.Filename : null,
+					l.DocumentDelivered
 				}));
 
 			var pending = delivered.Select(l => new PendingDocLog(l));

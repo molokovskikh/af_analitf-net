@@ -286,6 +286,7 @@
     <Compile Include="Models\Results\PrintResult.cs" />
     <Compile Include="Models\Results\SaveFileResult.cs" />
     <Compile Include="Models\Results\SelectDirResult.cs" />
+    <Compile Include="Models\Results\ShellResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\Results\TaskResult.cs" />
     <Compile Include="Models\SanityCheck.cs" />

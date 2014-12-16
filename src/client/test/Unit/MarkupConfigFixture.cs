@@ -28,7 +28,8 @@ namespace AnalitF.Net.Test.Unit
 			var markups = new[] {
 				new MarkupConfig(0, 100, 20),
 				new MarkupConfig(100, 200, 20),
-				new MarkupConfig(200, 1000, 20)
+				new MarkupConfig(200, 1000, 20),
+				new MarkupConfig(0, 100000, 20, MarkupType.VitallyImportant),
 			};
 			Assert.IsNull(MarkupConfig.Validate(markups));
 		}
@@ -38,7 +39,8 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var markups = new[] {
 				new MarkupConfig(0, 100, 20),
-				new MarkupConfig(80, 200, 20)
+				new MarkupConfig(80, 200, 20),
+				new MarkupConfig(0, 100000, 20, MarkupType.VitallyImportant),
 			};
 			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups));
 

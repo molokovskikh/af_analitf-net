@@ -257,8 +257,24 @@ namespace AnalitF.Net.Client.Models.Commands
 				result = UpdateResult.SilentOk;
 			}
 
-			if (syncData.Match("Waybills") && !StatelessSession.Query<LoadedDocument>().Any()) {
-				SuccessMessage = "Новых файлов документов нет.";
+			var dirs = Config.KnownDirs(settings);
+			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
+				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
+				.Where(d => d != null)
+				.ToArray();
+
+			if (syncData.Match("Waybills")) {
+				if (!StatelessSession.Query<LoadedDocument>().Any()) {
+					SuccessMessage = "Новых файлов документов нет.";
+				}
+				else if (StatelessSession.Query<LoadedDocument>().Any(d => d.IsDocDelivered)) {
+					//если получили разобранные накладные мы не должны открывать ни файлы ни папки накладных даже
+					//если установлена опция
+					Results.Add(new ShellResult(s => s.ShowWaybills()));
+					var dir = dirs.First(d => d.Name.Match("waybills"));
+					dir.OpenDir = false;
+					dir.OpenFiles = false;
+				}
 			}
 
 			if (offersImported || ordersImported)
@@ -266,12 +282,6 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			foreach (var dir in settings.DocumentDirs)
 				FileHelper.CreateDirectoryRecursive(dir);
-
-			var dirs = Config.KnownDirs(settings);
-			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
-				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
-				.Where(d => d != null)
-				.ToArray();
 
 			resultDirs.Each(Move);
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));

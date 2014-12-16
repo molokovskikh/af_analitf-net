@@ -137,7 +137,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Reject = CurrentWaybillLine
 				.Throttle(Consts.ScrollLoadTimeout, Scheduler)
 				.Select(v => RxQuery(s => {
-					if (v.RejectId == null)
+					if (v == null || v.RejectId == null)
 						return null;
 					return s.Get<Reject>(v.RejectId.Value);
 				}))
