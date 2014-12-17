@@ -473,6 +473,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowCatalog()
 		{
+			var catalog = ActiveItem as CatalogViewModel;
+			if (catalog != null && catalog.CatalogSearch.Value) {
+				catalog.CatalogSearch.Value = false;
+			}
 			NavigateRoot(new CatalogViewModel());
 		}
 
