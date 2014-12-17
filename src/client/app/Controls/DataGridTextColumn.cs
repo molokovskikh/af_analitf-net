@@ -35,5 +35,16 @@ namespace AnalitF.Net.Client.Controls
 			get { return (TextAlignment)GetValue(TextAlignmentProperty); }
 			set { SetValue(TextAlignmentProperty, value); }
 		}
+
+		protected override bool CommitCellEdit(FrameworkElement editingElement)
+		{
+			var result = base.CommitCellEdit(editingElement);
+			if (result) {
+				var exp = BindingOperations.GetBindingExpression(editingElement, TextBox.TextProperty);
+				if (exp != null)
+					exp.UpdateSource();
+			}
+			return result;
+		}
 	}
 }
