@@ -204,6 +204,9 @@ namespace AnalitF.Net.Client.Models
 		//экспортировался ли прайс-лист при последнем обновлении
 		public virtual bool IsSynced { get; set; }
 
+		//формирование заявок запрещено
+		public virtual bool IsOrderDisabled { get; set; }
+
 		[Style("Name")]
 		public virtual bool NotBase
 		{

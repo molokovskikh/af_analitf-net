@@ -355,14 +355,18 @@ where pc.CostCode = :costId")
 	rd.AdminMail as Email,
 	p.FirmCategory as Category,
 	p.DisabledByClient,
-	ifnull(ap.Fresh, 1) IsSynced
-from Usersettings.Prices p
+	ifnull(ap.Fresh, 1) IsSynced,
+	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled
+from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
 	join Farm.Regions r on r.RegionCode = p.RegionCode
 	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
-	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode";
-			Export(Result, sql, "prices", truncate: true);
+	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
+	join Customers.Clients c on c.Id = u.ClientId
+	join Usersettings.RetClientsSet r on r.ClientCode = c.Id
+where u.Id = ?userId";
+			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
 
 			sql = @"select
 	s.Id,

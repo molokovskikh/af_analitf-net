@@ -27,11 +27,10 @@ namespace AnalitF.Net.Client.Models.Commands
 			var priceIds = prices.Select(o => o.Id.PriceId).ToArray();
 			var regionIds = prices.Select(o => o.Id.RegionId).ToArray();
 			var productIds = order.Lines.Select(l => l.ProductId).ToArray();
-			var offers = Session.Query<Offer>()
+			var offers = Offer.Orderable(Session.Query<Offer>())
 				.Where(o => priceIds.Contains(o.Price.Id.PriceId)
 					&& regionIds.Contains(o.Price.Id.RegionId)
-					&& productIds.Contains(o.ProductId)
-					&& o.BuyingMatrixType != BuyingMatrixStatus.Denied)
+					&& productIds.Contains(o.ProductId))
 				.ToArray();
 			var log = new StringBuilder();
 			Reorder(order, orders, offers, log);

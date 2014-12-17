@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -53,8 +54,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Recalculate_stat_on_edit_reject()
 		{
-			Stat stat = null;
-			bus.Listen<Stat>().Subscribe(s => stat = s);
+			var stat = bus.Listen<Stat>().ToValue();
 			model.Offers.Value = new List<Offer> {
 				new Offer(new Price("test1"), 100) {
 					Id = {
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.CurrentOffer.Value = model.Offers.Value[1];
 			model.OfferCommitted();
 			scheduler.AdvanceByMs(1000);
-			Assert.AreEqual(0, stat.OrderLinesCount);
+			Assert.AreEqual(0, stat.Value.OrderLinesCount);
 			Assert.IsNull(model.Offers.Value[0].OrderCount);
 		}
 
@@ -95,6 +95,25 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			Activate(model);
 			Assert.AreEqual("test", model.AutoCommentText);
+		}
+
+		[Test]
+		public void Do_not_order_from_forbidden_prices()
+		{
+			var price = new Price("test1");
+			model.Offers.Value = new List<Offer> {
+				new Offer(price, 100) {
+					Id = {
+						OfferId = 1
+					},
+				},
+			};
+			price.IsOrderDisabled = true;
+			model.CurrentOffer.Value = model.Offers.Value.First();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			Assert.IsNull(model.CurrentOffer.Value.OrderCount);
+			Assert.IsNull(model.CurrentOffer.Value.OrderLine);
 		}
 	}
 }

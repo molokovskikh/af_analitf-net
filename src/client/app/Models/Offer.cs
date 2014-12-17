@@ -365,5 +365,10 @@ namespace AnalitF.Net.Client.Models
 		{
 			return Id.GetHashCode();
 		}
+
+		public static IQueryable<Offer> Orderable(IQueryable<Offer> query)
+		{
+			return query.Where(o => o.BuyingMatrixType != BuyingMatrixStatus.Denied && !o.Price.IsOrderDisabled);
+		}
 	}
 }

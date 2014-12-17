@@ -364,6 +364,7 @@ namespace AnalitF.Net.Client.ViewModels
 #if DEBUG
 			try {
 				NavigateAndReset(PersistentNavigationStack
+					.Where(t => t.TypeName != typeof(Main).FullName)
 					.Select(t => Activator.CreateInstance(Type.GetType(t.TypeName), t.Args))
 					.OfType<IScreen>()
 					.ToArray());

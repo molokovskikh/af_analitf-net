@@ -310,6 +310,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (CurrentOffer.Value == null)
 				return;
 
+			if (CurrentOffer.Value.Price.IsOrderDisabled) {
+				CurrentOffer.Value.OrderCount = null;
+				return;
+			}
+
 			LastEditOffer.Value = CurrentOffer.Value;
 			LoadStat();
 			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));

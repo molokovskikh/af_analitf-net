@@ -198,6 +198,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OfferUpdated();
 
+			if (LastEditOffer.Value == null)
+				return;
 			if (LastEditOffer.Value.OrderLine == null && CurrentFilter.Value == filters[1]) {
 				Filter();
 			}

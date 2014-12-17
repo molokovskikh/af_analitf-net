@@ -85,14 +85,14 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			foreach (var line in sourceOrder.Lines.ToArray()) {
-				var offers = session.Query<Offer>().Where(o => o.ProductSynonymId == line.ProductSynonymId
-					&& o.ProducerSynonymId == line.ProducerSynonymId
-					&& o.Price == sourceOrder.Price
-					&& o.Code == line.Code
-					&& o.RequestRatio == line.RequestRatio
-					&& o.MinOrderCount == line.MinOrderCount
-					&& o.MinOrderSum == line.MinOrderSum
-					&& o.BuyingMatrixType != BuyingMatrixStatus.Denied)
+				var offers = Offer.Orderable(session.Query<Offer>())
+					.Where(o => o.ProductSynonymId == line.ProductSynonymId
+						&& o.ProducerSynonymId == line.ProducerSynonymId
+						&& o.Price == sourceOrder.Price
+						&& o.Code == line.Code
+						&& o.RequestRatio == line.RequestRatio
+						&& o.MinOrderCount == line.MinOrderCount
+						&& o.MinOrderSum == line.MinOrderSum)
 					.ToArray()
 					.OrderBy(o => o.ResultCost)
 					.ToArray();

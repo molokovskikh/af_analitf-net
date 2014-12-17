@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -89,6 +90,25 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Activate(offers);
 			model.FillProducerFilter(model.PriceOffers);
 			Assert.AreEqual(3, model.Producers.Value.Count);
+		}
+
+		[Test]
+		public void Do_not_order_from_forbidden_prices()
+		{
+			var price = new Price("test1");
+			model.Offers.Value = new List<Offer> {
+				new Offer(price, 100) {
+					Id = {
+						OfferId = 1
+					},
+				},
+			};
+			price.IsOrderDisabled = true;
+			model.CurrentOffer.Value = model.Offers.Value.First();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			Assert.IsNull(model.CurrentOffer.Value.OrderCount);
+			Assert.IsNull(model.CurrentOffer.Value.OrderLine);
 		}
 
 		private void Activate(List<Offer> offers)
