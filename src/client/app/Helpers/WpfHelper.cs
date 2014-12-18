@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -255,6 +258,11 @@ namespace AnalitF.Net.Client.Helpers
 			var settings = new XmlWriterSettings { Indent = true, NewLineOnAttributes = true };
 			XamlWriter.Save(control.Template, XmlWriter.Create(Console.Out, settings));
 			XamlWriter.Save(control.Style, XmlWriter.Create(Console.Out, settings));
+		}
+
+		public static IObservable<EventPattern<TextCompositionEventArgs>> ObservableTextInput(this UIElement el)
+		{
+			return Observable.FromEventPattern<TextCompositionEventArgs>(el, "TextInput");
 		}
 	}
 }

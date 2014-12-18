@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
@@ -43,7 +44,9 @@ namespace AnalitF.Net.Client.Binders
 		//если поле стало скрытым все подписки надо освободить
 		public static void AttachSearch(DataGrid grid, TextBox searchText)
 		{
-			AttachInput(grid, searchText);
+			grid.ObservableTextInput()
+				.CatchSubscribe(e => RedirectInput(e, searchText));
+
 			var binding = BindingOperations.GetBinding(grid, Selector.SelectedItemProperty);
 			//если биндинга нет это странно
 			//магия что бы обойти ошибку в .net 4.0 см комментарий к CurrentItemStubProperty
@@ -89,23 +92,21 @@ namespace AnalitF.Net.Client.Binders
 			};
 		}
 
-		public static void AttachInput(DataGrid grid, TextBox searchText)
+		public static void RedirectInput(EventPattern<TextCompositionEventArgs> message, TextBox searchText)
 		{
-			grid.TextInput += (sender, args) => {
-				if (!searchText.IsEnabled)
-					return;
+			if (!searchText.IsEnabled)
+				return;
 
-				if (!Char.IsControl(args.Text[0])) {
-					args.Handled = true;
-					searchText.Text += args.Text;
-					DataGridHelper.Centrify(grid);
-				}
-				else if (args.Text[0] == '\b') {
-					args.Handled = true;
-					searchText.Text = searchText.Text.Slice(0, -2);
-					DataGridHelper.Centrify(grid);
-				}
-			};
+			if (!Char.IsControl(message.EventArgs.Text[0])) {
+				message.EventArgs.Handled = true;
+				searchText.Text += message.EventArgs.Text;
+				DataGridHelper.Centrify(message.Sender as DataGrid);
+			}
+			else if (message.EventArgs.Text[0] == '\b') {
+				message.EventArgs.Handled = true;
+				searchText.Text = searchText.Text.Slice(0, -2);
+				DataGridHelper.Centrify(message.Sender as DataGrid);
+			}
 		}
 
 		private static void AttachToCurrentCell(DataGrid grid, CompositeDisposable disposible, TextBox text)

@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public CatalogSearchViewModel(CatalogViewModel catalog)
 		{
 			Shell = catalog.Shell;
-			Items = new NotifyValue<List<CatalogDisplayItem>>();
+			Items = new NotifyValue<List<CatalogDisplayItem>>(new List<CatalogDisplayItem>());
 			CurrentItem = new NotifyValue<CatalogDisplayItem>();
 			CurrentCatalog = CurrentItem
 #if !DEBUG
@@ -98,8 +98,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			SearchBehavior = new SearchBehavior(this, callUpdate: false);
 			IsLoading = new NotifyValue<bool>(true);
+			IsQuickSearchEnabled = new NotifyValue<bool>();
+			IsQuickSearchEnabled.Subscribe(v => {
+				QuickSearch.IsEnabled = v;
+				SearchBehavior.HandleGridKeyboardInput = !v;
+			});
 		}
 
+		public NotifyValue<bool> IsQuickSearchEnabled { get; set; }
 		public CatalogViewModel ParentModel { get; set; }
 		public SearchBehavior SearchBehavior { get; set; }
 		public QuickSearch<CatalogDisplayItem> QuickSearch { get; set; }

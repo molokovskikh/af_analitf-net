@@ -25,7 +25,7 @@
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				Style="{StaticResource SearchText}"
 				Binders:SearchBinder.Grid="Items" />
-			<CheckBox x:Name="QuickSearch_IsEnabled" Style="{StaticResource FilterCheckBoxSmall}">
+			<CheckBox x:Name="IsQuickSearchEnabled" Style="{StaticResource FilterCheckBoxSmall}">
 				Искать в начале слова
 			</CheckBox>
 		</StackPanel>

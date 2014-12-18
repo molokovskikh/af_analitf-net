@@ -33,7 +33,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = view;
 
 				await w.WaitLoaded();
-				var keyEventArgs = WpfTestHelper.KeyEventArgs(grid, Key.Enter);
+				var keyEventArgs = WpfTestHelper.KeyArgs(grid, Key.Enter);
 				keyEventArgs.RoutedEvent = DataGrid.KeyDownEvent;
 				grid.RaiseEvent(keyEventArgs);
 			});

@@ -16,6 +16,8 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public static void Centrify(DataGrid grid)
 		{
+			if (grid == null)
+				return;
 			var scrollViewer = grid.Descendants<ScrollViewer>().FirstOrDefault();
 			if (scrollViewer == null)
 				return;

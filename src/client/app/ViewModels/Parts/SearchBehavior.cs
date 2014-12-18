@@ -1,11 +1,8 @@
 using System;
-using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
-using Action = System.Action;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
@@ -16,6 +13,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	{
 		private BaseScreen screen;
 		private bool callUpdate;
+
+		//блокирует обработку ввода с клавиатуры в таблице что была возможность у дрогого обработчика
+		//например у быстрого поиска
+		public bool HandleGridKeyboardInput = true;
 
 		public SearchBehavior(BaseScreen screen, bool callUpdate = true)
 		{

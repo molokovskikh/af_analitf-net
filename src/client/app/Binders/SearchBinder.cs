@@ -32,7 +32,13 @@ namespace AnalitF.Net.Client.Binders
 			if (grid == null)
 				return;
 
-			QuickSearchBehavior.AttachInput(grid, textBox);
+			grid.ObservableTextInput()
+				.Where(e => {
+					var model = GetModel(grid);
+					return model != null && model.HandleGridKeyboardInput;
+				})
+				.CatchSubscribe(e => QuickSearchBehavior.RedirectInput(e, textBox));
+
 			AttachKeyDown(grid);
 			AttachKeyDown(textBox);
 		}
@@ -43,16 +49,10 @@ namespace AnalitF.Net.Client.Binders
 			observable
 				.Where(a => a.EventArgs.Key == Key.Return)
 				.CatchSubscribe(e => {
-					var dc = element.DataContext;
-					if (dc == null)
+					var model = GetModel(element);
+					if (model == null)
 						return;
-					var propertyInfo = dc.GetType().GetProperty("SearchBehavior");
-					if (propertyInfo == null)
-						return;
-					var behavior = propertyInfo.GetValue(dc, null) as SearchBehavior;
-					if (behavior == null)
-						return;
-					ViewModelHelper.ProcessResult(behavior.Search(), new ActionExecutionContext {
+					ViewModelHelper.ProcessResult(model.Search(), new ActionExecutionContext {
 						Source = e.Sender as FrameworkElement,
 						EventArgs = e.EventArgs
 					});
@@ -60,20 +60,26 @@ namespace AnalitF.Net.Client.Binders
 			observable
 				.Where(a => a.EventArgs.Key == Key.Escape)
 				.CatchSubscribe(e => {
-					var dc = element.DataContext;
-					if (dc == null)
+					var model = GetModel(element);
+					if (model == null)
 						return;
-					var propertyInfo = dc.GetType().GetProperty("SearchBehavior");
-					if (propertyInfo == null)
-						return;
-					var behavior = propertyInfo.GetValue(dc, null) as SearchBehavior;
-					if (behavior == null)
-						return;
-					ViewModelHelper.ProcessResult(behavior.ClearSearch(), new ActionExecutionContext {
+					ViewModelHelper.ProcessResult(model.ClearSearch(), new ActionExecutionContext {
 						Source = e.Sender as FrameworkElement,
 						EventArgs = e.EventArgs
 					});
 				});
+		}
+
+		private static SearchBehavior GetModel(FrameworkElement element)
+		{
+			var dc = element.DataContext;
+			if (dc == null)
+				return null;
+			var propertyInfo = dc.GetType().GetProperty("SearchBehavior");
+			if (propertyInfo == null)
+				return null;
+			var behavior = propertyInfo.GetValue(dc, null) as SearchBehavior;
+			return behavior;
 		}
 
 		public static string GetGrid(DependencyObject d)

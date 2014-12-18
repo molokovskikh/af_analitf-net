@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -22,16 +24,24 @@ namespace AnalitF.Net.Test.Unit
 			items = new List<string>();
 			result = null;
 			search = new QuickSearch<string>(scheduler,
-				v => items.FirstOrDefault(i => i.Contains(v)),
+				v => items.FirstOrDefault(i => i.IndexOf(v, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				s => result = s);
-			items.Add("123");
+			items.Add("Microsoft");
+		}
+
+		[Test]
+		public void Search()
+		{
+			search.SearchText = "m";
+			Assert.AreEqual("Microsoft", result);
+			Assert.AreEqual("m", search.SearchText);
 		}
 
 		[Test]
 		public void Disable_search()
 		{
 			search.IsEnabled = false;
-			search.SearchText = "1";
+			search.SearchText = "m";
 			Assert.That(result, Is.Null);
 			Assert.That(search.SearchText, Is.Null);
 		}
@@ -39,7 +49,7 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Disable_on_search()
 		{
-			search.SearchText = "1";
+			search.SearchText = "m";
 			Assert.That(result, Is.Not.Null);
 			search.IsEnabled = false;
 			Assert.That(search.SearchText, Is.Null);

@@ -118,7 +118,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			};
 		}
 
-		public static KeyEventArgs KeyEventArgs(DependencyObject o, Key key)
+		public static KeyEventArgs KeyArgs(DependencyObject o, Key key)
 		{
 			var keyEventArgs = new KeyEventArgs(Keyboard.PrimaryDevice,
 				PresentationSource.CurrentSources.OfType<PresentationSource>().First(),
@@ -141,7 +141,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static void SendKey(this FrameworkElement d, Key key)
 		{
-			d.RaiseEvent(KeyEventArgs(d, key));
+			d.RaiseEvent(KeyArgs(d, key));
+		}
+
+		public static void SendText(this FrameworkElement d, string text)
+		{
+			d.RaiseEvent(TextArgs(text));
 		}
 
 		public static DispatchAwaiter WaitIdle(this FrameworkElement d)

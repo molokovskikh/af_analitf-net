@@ -189,7 +189,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			Contract.Assert(element != null);
 			AssertInputable(element);
-			element.RaiseEvent(WpfTestHelper.KeyEventArgs(element, key));
+			element.RaiseEvent(WpfTestHelper.KeyArgs(element, key));
 		}
 
 		protected void Input(string name, Key key)

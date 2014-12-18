@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					return;
 
 				var text = value;
-				if (!String.IsNullOrEmpty(text))
+				if (!String.IsNullOrEmpty(text) && RemapChars)
 					text = new string(text.Select(c => CharMap.GetValueOrDefault(c, c)).ToArray());
 				if (String.Equals(searchText, text, StringComparison.CurrentCultureIgnoreCase))
 					return;
