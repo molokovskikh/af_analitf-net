@@ -287,39 +287,41 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			var orderDays = -Settings.Value.DeleteOrdersOlderThan;
-			var orderQuery = statelessSession.Query<SentOrder>()
-				.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
-			if (orderQuery.Any()) {
-				var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
-					Confirm(String.Format("В архиве заказов обнаружены заказы," +
-						" сделанные более {0} дней назад. Удалить их?", Settings.Value.DeleteOrdersOlderThan));
-				if (deleteOldOrders) {
-					var orders = orderQuery.ToArray();
-					foreach (var order in orders) {
-						statelessSession.Delete(order);
+			if (statelessSession != null) {
+				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
+				var orderQuery = statelessSession.Query<SentOrder>()
+					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
+				if (orderQuery.Any()) {
+					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
+						Confirm(String.Format("В архиве заказов обнаружены заказы," +
+							" сделанные более {0} дней назад. Удалить их?", Settings.Value.DeleteOrdersOlderThan));
+					if (deleteOldOrders) {
+						var orders = orderQuery.ToArray();
+						foreach (var order in orders) {
+							statelessSession.Delete(order);
+						}
+					}
+				}
+
+				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
+				var query = statelessSession.Query<Waybill>()
+					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
+				if (query.Any()) {
+					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
+						Confirm(String.Format("В архиве заказов обнаружены документы (накладные, отказы)," +
+							" сделанные более {0} дней назад. Удалить их?",
+								Settings.Value.DeleteWaybillsOlderThan));
+					if (deleteOldWaybills) {
+						var waybills = query.ToArray();
+						foreach (var waybill in waybills) {
+							waybill.DeleteFiles(Settings);
+							statelessSession.Delete(waybill);
+						}
 					}
 				}
 			}
 
-			var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
-			var query = statelessSession.Query<Waybill>()
-				.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
-			if (query.Any()) {
-				var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
-					Confirm(String.Format("В архиве заказов обнаружены документы (накладные, отказы)," +
-						" сделанные более {0} дней назад. Удалить их?",
-							Settings.Value.DeleteWaybillsOlderThan));
-				if (deleteOldWaybills) {
-					var waybills = query.ToArray();
-					foreach (var waybill in waybills) {
-						waybill.DeleteFiles(Settings);
-						statelessSession.Delete(waybill);
-					}
-				}
-			}
-
-			if (Stat.Value.OrdersCount > 0
+			if (Stat.Value.ReadyForSendOrdersCount > 0
 				&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
 				Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
 			}

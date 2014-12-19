@@ -158,5 +158,17 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			shell.ActivateItem(new Screen());
 			Assert.IsFalse(canExport);
 		}
+
+		[Test]
+		public void Do_not_warn_on_not_send_orders()
+		{
+			shell.CurrentAddress = new Address("тест");
+			var line = shell.CurrentAddress.Order(new Offer(new Price("тест"), 50), 1);
+			line.Order.Send = false;
+			bus.SendMessage(new Stat(shell.CurrentAddress));
+			scheduler.Start();
+			shell.TryClose();
+			Assert.AreEqual("", manager.MessageBoxes.Implode());
+		}
 	}
 }
