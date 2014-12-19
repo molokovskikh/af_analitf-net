@@ -1,13 +1,10 @@
-﻿using System.Linq;
-using AnalitF.Net.Client.Test.TestHelpers;
-using Common.MySql;
-using Common.NHibernate;
+﻿using System;
+using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
 using Test.Support;
 using Test.Support.Catalog;
 using Test.Support.Documents;
-using Test.Support.log4net;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -19,7 +16,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var reject = session.Query<TestReject>().First(r => r.Product != null && r.Producer != null
 				&& r.CancelDate == null);
-			Doc = DataMother.CreateWaybill(session, User(session));
+			Doc = Service.Test.TestHelpers.DataMother.CreateWaybill(session, User(session));
 			Doc.ProviderDocumentId = "reject";
 			Doc.Lines.Add(new TestWaybillLine(Doc) {
 				Product = reject.Product.CatalogProduct.Name,

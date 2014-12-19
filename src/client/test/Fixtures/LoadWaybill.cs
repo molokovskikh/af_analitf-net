@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			Waybill = DataMother.CreateWaybill(session, user);
+			Waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
 			var log = Waybill.Log;
 			session.Save(Waybill);
 			SendLog = new TestDocumentSendLog(user, log);

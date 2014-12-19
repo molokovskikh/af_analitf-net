@@ -1115,18 +1115,19 @@ group by ol.RowId";
 
 		public void ExportSentOrders(ulong[] existOrderIds)
 		{
-			if (user.AvaliableAddresses.Count == 0)
+			var addresses = user.AvaliableAddresses.Where(a => a.Enabled).ToArray();
+			if (addresses.Length == 0)
 				return;
 
 			CreateMaxProducerCosts();
-			var condition = new StringBuilder("where oh.UserId = ?userId and oh.Deleted = 0");
+			var condition = new StringBuilder("where oh.Deleted = 0");
 			if (existOrderIds.Length > 0) {
 				condition.Append(" and oh.RowId not in (");
 				condition.Append(String.Join(", ", existOrderIds));
 				condition.Append(") ");
 			}
 			condition.Append(" and oh.AddressId in (");
-			condition.Append(user.AvaliableAddresses.Implode(a => a.Id));
+			condition.Append(addresses.Implode(a => a.Id));
 			condition.Append(") ");
 
 			var sql = String.Format(@"

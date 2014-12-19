@@ -4,18 +4,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Common.Tools;
-using NHibernate;
-using Test.Support;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
 	public class DataMother
 	{
-		public static TestWaybill CreateWaybill(ISession session, TestUser user)
-		{
-			return Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
-		}
-
 		public static void CopyBin(string src, string dst)
 		{
 			var regex = new Regex(@"(\.dll|\.exe|\.config|\.pdb)$", RegexOptions.IgnoreCase);
