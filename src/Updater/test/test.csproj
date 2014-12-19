@@ -56,7 +56,7 @@
     </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{677db511-bfb9-4faa-877c-af00a12487cd}</Project>
-      <Name>app %28updater\app%29</Name>
+      <Name>app</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

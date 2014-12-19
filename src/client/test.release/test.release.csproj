@@ -84,7 +84,7 @@
     </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{5878740b-360a-4942-8902-926907209616}</Project>
-      <Name>app %28client\app%29</Name>
+      <Name>app</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

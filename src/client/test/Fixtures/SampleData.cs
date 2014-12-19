@@ -11,7 +11,7 @@ using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using Test.Support;
 using Test.Support.Suppliers;
-using DataMother = Test.Data.DataMother;
+using DataMother = AnalitF.Net.Service.Test.TestHelpers.DataMother;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {

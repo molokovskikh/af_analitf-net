@@ -3,13 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NHibernate;
-using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using Test.Support;
-using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -17,7 +13,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		public static TestWaybill CreateWaybill(ISession session, TestUser user)
 		{
-			return global::Test.Data.DataMother.CreateWaybill(session, user);
+			return Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
 		}
 
 		public static void CopyBin(string src, string dst)

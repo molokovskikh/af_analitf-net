@@ -58,6 +58,7 @@
     <Compile Include="ControllerFixture.cs" />
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />
+    <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\ZipHelper.cs" />
     <Compile Include="Unit\MySqlHelperFixture.cs" />
   </ItemGroup>
@@ -68,7 +69,7 @@
     </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
-      <Name>app %28service\app%29</Name>
+      <Name>app</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common.Models\Common.Models\Common.Models.csproj">
       <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>
@@ -81,10 +82,6 @@
     <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
       <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
       <Name>Common.Tools</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Test.Data\Test.Data.csproj">
-      <Project>{140789c3-8c40-4ab7-a538-ff4141761305}</Project>
-      <Name>Test.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Test.Support\Test.Support\Test.Support.csproj">
       <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
