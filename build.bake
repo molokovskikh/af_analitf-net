@@ -12,6 +12,7 @@ import System.Net
 import System.Text
 import System.Threading
 import Mono.Cecil
+import Newtonsoft.Json
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
@@ -250,7 +251,7 @@ task "git:tag":
 		print "Последний коммит был релизом, не буду обновлять номер версии тк похоже что это на повторный деплой"
 		return
 
-	currentVersion = GetVersionTags().LastOrDefault() or Version(GetVersion())
+	currentVersion = GetVersion()
 	revision = currentVersion.Revision
 	if revision == -1:
 		revision = 0
@@ -320,17 +321,32 @@ task "test:binary":
 		raise
 
 task "deploy:setup":
-	url = "http://redmine.analit.net/projects/afn/versions.json"
+	url = "http://redmine.analit.net/projects/afn"
 	version = File.ReadAllText("output/setup/version.txt")
+	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	client = WebClient()
+	client.Encoding = Encoding.UTF8
 	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	try:
-		client.UploadString(url, "{ \"version\": {\"name\": \"$version\" } }")
+		redmineVersion = JsonConvert.DeserializeObject(client.UploadString("$url/versions.json", "{ \"version\": {\"name\": \"$version\" } }"))
+		redmineVersionId = redmineVersion[@version][@id].ToString()
+
+		subject = "Версия $version"
+		description = """"Установщик":file://offdc.adc.analit.net/MMedia/AnalitF.Net/AnalitF.Net-$version.exe
+"Список изменений":http://redmine.analit.net/versions/${redmineVersionId}
+"""
+		content = JsonConvert.SerializeXNode(XElement("issue", XElement("subject", subject), XElement("description", description)))
+		client = WebClient()
+		client.Encoding = Encoding.UTF8
+		client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
+		client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
+		client.UploadString("$url/issues.json", content)
 	except e:
+		print "Не удалось создать требование в redmine"
 		print e
-	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
-	Cp("output/setup/setup.exe", """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
+	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
+	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
 	CopyUpdateBin("rtm")
 
 task "iis:clean":
