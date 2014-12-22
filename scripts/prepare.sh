@@ -4,7 +4,6 @@ set -o errexit
 
 bake prepare
 msbuild.exe /nologo /verbosity:quiet src/*.sln
-bake generate:binding:redirection
 mkdir src/data || :
 mkdir src/data/update || :
 mkdir src/data/result || :

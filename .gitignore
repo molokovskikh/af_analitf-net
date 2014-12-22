@@ -10,3 +10,4 @@ src/data
 AssemblyInfo.cs
 TestResult.xml
 *.gen.*
+scripts/guard/
