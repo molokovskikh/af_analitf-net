@@ -194,6 +194,7 @@
     <Compile Include="Controls\SearchableDataGridColumn.cs" />
     <Compile Include="Controls\PopupSelector.cs" />
     <Compile Include="Controls\ComboBox2.cs" />
+    <Compile Include="Controls\ToolbarPanel.cs" />
     <Compile Include="Controls\TransitionContent.cs" />
     <Compile Include="Helpers\BaseNotify.cs" />
     <Compile Include="Helpers\CollectionHelper.cs" />

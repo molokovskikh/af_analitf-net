@@ -84,6 +84,8 @@
 	</Style>
 
 	<Style TargetType="Image" x:Key="ButtonImage">
+		<!--иначе кнопка попытается занять все доступное пространство-->
+		<Setter Property="Stretch" Value="None" />
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=Button}}" Value="False">
 				<Setter Property="Effect">

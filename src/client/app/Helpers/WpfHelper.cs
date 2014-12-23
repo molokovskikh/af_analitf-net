@@ -22,9 +22,9 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		private class PropertyLogger
 		{
-			DependencyProperty Property;
-			DependencyObject O;
-			bool stack;
+			private DependencyProperty Property;
+			private DependencyObject O;
+			private bool stack;
 
 			public PropertyLogger(DependencyObject o, DependencyProperty property, bool stack = false)
 			{
@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Helpers
 
 			public object Logger
 			{
-				get { return  null; }
+				get { return null; }
 				set
 				{
 					Console.WriteLine("{1}.{2} = {0}",
@@ -69,16 +69,13 @@ namespace AnalitF.Net.Client.Helpers
 			var child = default(T);
 
 			var numVisuals = VisualTreeHelper.GetChildrenCount(parent);
-			for (int i = 0; i < numVisuals; i++)
-			{
+			for (int i = 0; i < numVisuals; i++) {
 				var v = (Visual)VisualTreeHelper.GetChild(parent, i);
 				child = v as T;
-				if (child == null)
-				{
+				if (child == null) {
 					child = VisualChild<T>(v);
 				}
-				if (child != null)
-				{
+				if (child != null) {
 					break;
 				}
 			}
@@ -188,7 +185,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void PrintVisualTree(Visual visual, int offset = 0)
 		{
-			for(var i = 0; i < offset; i++)
+			for (var i = 0; i < offset; i++)
 				Console.Write("  ");
 			if (visual is TextBlock)
 				Console.WriteLine("{0} {1}", visual, ((TextBlock)visual).Text);
@@ -197,7 +194,7 @@ namespace AnalitF.Net.Client.Helpers
 			else
 				Console.WriteLine(visual);
 			var count = VisualTreeHelper.GetChildrenCount(visual);
-			for(var i = 0; i < count; i++) {
+			for (var i = 0; i < count; i++) {
 				PrintVisualTree((Visual)VisualTreeHelper.GetChild(visual, i), offset + 1);
 			}
 		}

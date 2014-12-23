@@ -6,6 +6,7 @@
 	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:views="clr-namespace:AnalitF.Net.Client.Views"
 	MinHeight="600" MinWidth="800" Name="Shell">
 	<Window.InputBindings>
 		<KeyBinding Gesture="CTRL+S" Command="binders:Commands.InvokeViewModel"
@@ -84,117 +85,114 @@
 			</MenuItem>
 		</Menu>
 
-		<ToolBarTray Grid.Row="1">
-			<ToolBar Band="1" BandIndex="1" Name="ToolBar">
-
-				<!--todo что бы выглядело как следует нужно для кнопки которая внутри применить ToolBar.ButtonStyleKey -->
-				<xctk:SplitButton x:Name="Update" ToolTip="Получить данные" Background="Transparent">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico"
+		<controls:ToolbarPanel Grid.Row="1" x:Name="ToolBarPanel" HorizontalAlignment="Left">
+			<xctk:SplitButton x:Name="Update" ToolTip="Получить данные" Background="Transparent">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico"
 						Style="{StaticResource ButtonImage}" />
-					<xctk:SplitButton.DropDownContent>
-						<ItemsControl>
-							<MenuItem Header="Получить данные" InputGestureText="Ctrl+R"
+				<xctk:SplitButton.DropDownContent>
+					<ItemsControl>
+						<MenuItem Header="Получить данные" InputGestureText="Ctrl+R"
 								cal:Message.Attach="Update" />
-							<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
+						<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
 								cal:Message.Attach="SendOrders" />
-							<MenuItem Header="Загрузить и получить накладные, сертификаты"
+						<MenuItem Header="Загрузить и получить накладные, сертификаты"
 								cal:Message.Attach="MicroUpdate" />
-							<Separator />
-							<MenuItem Header="Кумулятивное обновление"
+						<Separator />
+						<MenuItem Header="Кумулятивное обновление"
 								cal:Message.Attach="CleanSync" />
-						</ItemsControl>
-					</xctk:SplitButton.DropDownContent>
-				</xctk:SplitButton>
+					</ItemsControl>
+				</xctk:SplitButton.DropDownContent>
+			</xctk:SplitButton>
 
-				<Button x:Name="SendOrders" ToolTip="Отправить заказы">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico"
+			<Button x:Name="SendOrders" ToolTip="Отправить заказы" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="Export" ToolTip="Сохранить текущую таблицу">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico"
+			<Button x:Name="Export" ToolTip="Сохранить текущую таблицу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Button x:Name="Print" ToolTip="Печать">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico"
+			<Button x:Name="Print" ToolTip="Печать" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico"
+			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico"
+			</Button>
+			<Button x:Name="SearchOffers" ToolTip="Поиск в прайс-листах" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowMnn" ToolTip="Поиск по МНН">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico"
+			</Button>
+			<Button x:Name="ShowMnn" ToolTip="Поиск по МНН" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"
+			</Button>
+			<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Yellow_32.ico"
+			</Button>
+			<Button x:Name="ShowMinCosts" ToolTip="Минимальные цены" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Yellow_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowAwaited" ToolTip="Ожидаемые позиции">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"
+			</Button>
+			<Button x:Name="ShowAwaited" ToolTip="Ожидаемые позиции" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Favourites_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico"
+			<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowOrders" ToolTip="Заказы">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"
+			</Button>
+			<Button x:Name="ShowOrders" ToolTip="Заказы" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowBatch" ToolTip="АвтоЗаказ">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Document_32.ico"
+			</Button>
+			<Button x:Name="ShowBatch" ToolTip="АвтоЗаказ" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Document_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="ShowJunkOffers" ToolTip="Уцененные препараты">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad_32.ico"
+			<Button x:Name="ShowJunkOffers" ToolTip="Уцененные препараты" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
-				<Button x:Name="ShowRejects" ToolTip="Забракованные препараты">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad2_32.ico"
+			</Button>
+			<Button x:Name="ShowRejects" ToolTip="Забракованные препараты" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Notepad2_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="MicroUpdate" ToolTip="Загрузить и получить накладные, сертификаты">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/WayBill_32.ico"
+			<Button x:Name="MicroUpdate" ToolTip="Загрузить и получить накладные, сертификаты" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/WayBill_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Button x:Name="ShowWaybills" ToolTip="Накладные">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"
+			<Button x:Name="ShowWaybills" ToolTip="Накладные" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<Button x:Name="ShowMails" ToolTip="Мини-почта" IsEnabled="{Binding IsDataLoaded.Value}">
-					<Grid>
-						<Image Source="/AnalitF.Net.Client;component/assets/images/Compose Email_32.ico"
+			<Button x:Name="ShowMails" ToolTip="Мини-почта" IsEnabled="{Binding IsDataLoaded.Value}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Grid>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/Compose Email_32.ico"
 							Style="{StaticResource ButtonImage}" />
-						<TextBlock Padding="2, 0, 2, 2"
+					<TextBlock Padding="2, 0, 2, 2"
 							Background="Green"
 							Foreground="White"
 							VerticalAlignment="Top"
@@ -202,28 +200,26 @@
 							FontSize="10"
 							Name="NewMailsCount"
 							Visibility="{Binding NewMailsCount.Value, Converter={StaticResource IntToCollapsed}}" />
-					</Grid>
-				</Button>
+				</Grid>
+			</Button>
 
-				<Button x:Name="ShowMain" ToolTip="На главную страницу">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Home 2_32.ico"
+			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Home 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Button x:Name="ShowSettings" ToolTip="Конфигурация">
-					<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"
+			<Button x:Name="ShowSettings" ToolTip="Конфигурация" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/AnalitF.Net.Client;component/assets/images/Control Panel 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
-				</Button>
+			</Button>
 
-				<Separator ToolBar.OverflowMode="Never" />
+			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-				<StackPanel ToolBar.OverflowMode="Never">
-					<Label>Адрес заказа:</Label>
-					<ComboBox Style="{StaticResource AutoWidthFilter}" x:Name="Addresses"
-						DisplayMemberPath="Name" MaxWidth="500" />
-				</StackPanel>
-			</ToolBar>
-		</ToolBarTray>
+			<StackPanel>
+				<TextBlock>Адрес заказа:</TextBlock>
+				<ComboBox x:Name="Addresses" DisplayMemberPath="Name" />
+			</StackPanel>
+		</controls:ToolbarPanel>
 
 		<ContentControl Grid.Row="2" x:Name="ActiveItem" />
 

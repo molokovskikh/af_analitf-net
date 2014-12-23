@@ -10,7 +10,9 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
@@ -50,26 +52,6 @@ namespace AnalitF.Net.Client.Views
 						new OpenResult(url).Execute(new ActionExecutionContext());
 					}));
 
-			//проблема
-			//в адресе доставки может быть много символов в этом случае он съест все кнопки тк для него установлена
-			//опция которая запрещает панели инструментов скрывать его
-			//опция запрещающая скрытие установлена что бы избежать ситуации когда список адресов доставки исчезает после выбора длинного адреса
-			//это происходит потому что длинному адресу не хватает места и он уходит на панель переполнения
-			//у вычисления максимальной ширины есть два защитных механизма которые предотвращают зацикливание алгоритма
-			//вычисления местоположения элементов
-			//первый - Math.Abs(ToolBar.ActualWidth - lastwidth) > 50
-			//второй - ispatcher.BeginInvoke(DispatcherPriority.ContextIdle
-			//если убрать хотя бы один вычисление будет производиться бесконечно
-			ToolBar.SizeChanged += (sender, args) => {
-				if (Math.Abs(ToolBar.ActualWidth - lastwidth) > 50)
-					Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new System.Action(() => {
-						lastwidth = ToolBar.ActualWidth;
-						var result = ToolBar.ActualWidth / 2;
-						if (!double.IsNaN(result)) {
-							Addresses.MaxWidth = result;
-						}
-					}));
-			};
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
 			Collect.Visibility = Visibility.Collapsed;
