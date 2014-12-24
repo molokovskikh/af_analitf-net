@@ -347,7 +347,7 @@ where pc.CostCode = :costId")
 	s.Name as SupplierName,
 	s.FullName as SupplierFullName,
 	rd.Storage,
-	if(p.DisabledByClient or not p.Actual, 0, p.PositionCount) as PositionCount,
+	if(p.DisabledByClient or not p.Actual, 0, (select count(*) from UserSettings.Core c where c.PriceCode = p.PriceCode and c.RegionCode = p.RegionCode)) as PositionCount,
 	convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
 	rd.OperativeInfo,
 	rd.ContactInfo,
