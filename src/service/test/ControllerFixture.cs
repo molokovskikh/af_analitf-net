@@ -144,6 +144,12 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Send_order_for_disabled_price()
 		{
+			var ordersController = new OrdersController {
+				Request = new HttpRequestMessage(),
+				Session = session,
+				CurrentUser = user,
+				Config = config,
+			};
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
@@ -152,7 +158,8 @@ namespace AnalitF.Net.Service.Test
 			supplier.Maintain();
 
 			var offer = price.Core[0];
-			controller.Post(ToClientOrder(offer));
+			ordersController.Post(ToClientOrder(offer));
+			ordersController.Task.Wait();
 
 			var orders = session.Query<Order>()
 				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
@@ -166,6 +173,13 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Reject_order()
 		{
+			var ordersController = new OrdersController {
+				Request = new HttpRequestMessage(),
+				Session = session,
+				CurrentUser = user,
+				Config = config,
+			};
+
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
@@ -183,7 +197,15 @@ namespace AnalitF.Net.Service.Test
 			user.UseAdjustmentOrders = true;
 			session.Flush();
 			var offer = price.Core.First();
-			var result = (List<OrderResult>)((ObjectContent)controller.Post(ToClientOrder(offer)).Content).Value;
+			var postResult = ((ObjectContent)ordersController.Post(ToClientOrder(offer)).Content).Value;
+			Assert.That(postResult.GetType().GetProperty("RequestId").GetValue(postResult), Is.GreaterThan(0));
+
+			ordersController.Task.Wait();
+			ordersController.Session.Clear();
+
+			var response = ordersController.Get();
+			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+			var result = JsonConvert.DeserializeObject<List<OrderResult>>(response.Content.ReadAsStringAsync().Result);
 			Assert.AreEqual(OrderResultStatus.Reject, result[0].Result);
 			Assert.AreEqual("Поставщик отказал в приеме заказа. Сумма заказа меньше минимально допустимой. Минимальный заказ 3 000,00р. заказано 100,00р..",
 				result[0].Error);

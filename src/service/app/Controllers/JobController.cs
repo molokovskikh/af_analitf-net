@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
@@ -31,6 +32,8 @@ namespace AnalitF.Net.Service.Controllers
 		public Config.Config Config;
 		public ISession Session { get; set; }
 		public User CurrentUser { get; set; }
+		//для тестирования
+		public Task Task;
 
 		public JobController()
 		{
@@ -58,7 +61,7 @@ namespace AnalitF.Net.Service.Controllers
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)
 		{
 			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
-			RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory, cmd);
+			Task = RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory, cmd);
 			return existsJob.ToResult(Config);
 		}
 	}
