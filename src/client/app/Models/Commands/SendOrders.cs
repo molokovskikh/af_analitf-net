@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Print;
@@ -43,12 +44,14 @@ namespace AnalitF.Net.Client.Models.Commands
 			var clientOrders = orders.Select(o => o.ToClientOrder(Session)).Where(o => o != null).ToArray();
 			log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", clientOrders.Length);
 
-			var response =
-				Client.PostAsync("Main",
+			uint requestId = 0;
+			var response = Wait("Orders",
+				Client.PostAsync("Orders",
 					new SyncRequest(clientOrders, Force),
 					Formatter,
-					Token).Result;
-			CheckResult(response);
+					Token), ref requestId);
+			CheckResult(Client.PutAsJsonAsync("Orders", new ConfirmRequest(requestId), Token).Result);
+
 			log.InfoFormat("Заказы отправлены успешно");
 
 			var results = response.Content.ReadAsAsync<OrderResult[]>().Result

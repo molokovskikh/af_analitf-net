@@ -53,6 +53,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			var orders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
 			Assert.That(orders.Count, Is.EqualTo(1));
+			Assert.IsFalse(orders[0].Deleted);
 			var resultOrder = orders[0];
 			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
 			var item = resultOrder.OrderItems[0];

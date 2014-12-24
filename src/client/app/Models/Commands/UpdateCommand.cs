@@ -85,28 +85,25 @@ namespace AnalitF.Net.Client.Models.Commands
 			var updateType = "накопительное";
 			if (!String.IsNullOrEmpty(BatchFile)) {
 				updateType = "автозаказ";
-				var url = new Uri(Config.BaseUrl, "Batch");
-				response = Wait(Config.WaitUrl(url), Client.PostAsync("Batch", GetBatchRequest(), Token));
+				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(), Token));
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
 				updateType = "загрузка истории заказов";
-				var url = new Uri(Config.BaseUrl, "History");
 				var data = new HistoryRequest {
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 					IgnoreOrders = true,
 				};
-				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync("History", data, Token));
+				response = Wait("History", Client.PostAsJsonAsync("History", data, Token));
 			}
 			else if (SyncData.Match("OrderHistory")) {
 				SuccessMessage = "Загрузка истории заказов завершена успешно.";
 				updateType = "загрузка истории заказов";
-				var url = new Uri(Config.BaseUrl, "History");
 				var data = new HistoryRequest {
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
 					IgnoreWaybills = true,
 				};
-				response = Wait(Config.WaitUrl(url), Client.PostAsJsonAsync("History", data, Token));
+				response = Wait("History", Client.PostAsJsonAsync("History", data, Token));
 			}
 			else {
 				var user = Session.Query<User>().FirstOrDefault();
@@ -120,7 +117,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var url = Config.SyncUrl(syncData, lastSync);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
-				response = Wait(Config.WaitUrl(url), request);
+				response = Wait(Config.WaitUrl(url).ToString(), request);
 			}
 
 			Reporter.Stage("Загрузка данных");
@@ -144,51 +141,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			tmp.Position = 0;
 			return new StreamContent(tmp);
-		}
-
-		private HttpResponseMessage Wait(Uri url, Task<HttpResponseMessage> task)
-		{
-			var done = false;
-			HttpResponseMessage response = null;
-			try {
-				while (!done) {
-					response = task.Result;
-					if (response.StatusCode != HttpStatusCode.OK
-						&& response.StatusCode != HttpStatusCode.Accepted) {
-
-						if (response.StatusCode == HttpStatusCode.InternalServerError
-							&& response.Content.Headers.ContentType != null) {
-							if (response.Content.Headers.ContentType.MediaType == "text/plain")
-								throw new EndUserError(response.Content.ReadAsStringAsync().Result);
-#if DEBUG
-							if (response.Content.Headers.ContentType.MediaType == "application/json")
-								throw new Exception(response.Content.ReadAsAsync<DebugServerError>().Result.ToString());
-#endif
-						}
-
-						throw new RequestException(
-							String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
-								response.StatusCode,
-								response.Content.ReadAsStringAsync().Result),
-							response.StatusCode);
-					}
-
-					done = response.StatusCode == HttpStatusCode.OK;
-					Reporter.Stage("Подготовка данных");
-					if (!done) {
-						response.Dispose();
-						Token.WaitHandle.WaitOne(Config.RequestInterval);
-						Token.ThrowIfCancellationRequested();
-						task = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
-					}
-				}
-				return response;
-			}
-			catch(Exception) {
-				if (response != null)
-					response.Dispose();
-				throw;
-			}
 		}
 
 		public UpdateResult ProcessUpdate()

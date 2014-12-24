@@ -2,9 +2,11 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Web;
 using AnalitF.Net.Service.Helpers;
 using Common.Models;
+using Common.Tools;
 using Newtonsoft.Json;
 
 namespace AnalitF.Net.Service.Models
@@ -99,8 +101,11 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual HttpResponseMessage ToResult(Config.Config config)
 		{
-			if (!IsCompleted)
-				return new HttpResponseMessage(HttpStatusCode.Accepted);
+			if (!IsCompleted) {
+				return new HttpResponseMessage(HttpStatusCode.Accepted) {
+					Content = new ObjectContent<object>(new { RequestId = Id }, new JsonMediaTypeFormatter())
+				};
+			}
 			if (IsFaulted) {
 				var message = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 				if (!String.IsNullOrEmpty(ErrorDescription)) {
@@ -117,12 +122,24 @@ namespace AnalitF.Net.Service.Models
 			//файл результата выкладывается на dfs репликация может занять до нескольких минут
 			if (config.ResultTimeout > TimeSpan.Zero) {
 				if (!File.Exists(OutputFile(config)) && DateTime.Now < (CompletedOn + config.ResultTimeout))
-					return new HttpResponseMessage(HttpStatusCode.Accepted);
+					return new HttpResponseMessage(HttpStatusCode.Accepted) {
+						Content = new ObjectContent<object>(new { RequestId = Id }, new JsonMediaTypeFormatter())
+					};
 			}
 
+			var streamContent = new StreamContent(GetResult(config));
+			if (UpdateType.Match("OrdersController"))
+				streamContent.Headers.Add("Content-Type", "application/json");
 			return new HttpResponseMessage(HttpStatusCode.OK) {
-				Content = new StreamContent(GetResult(config))
+				Content = streamContent
 			};
+		}
+
+		public virtual void Confirm(Config.Config config)
+		{
+			IsConfirmed = true;
+			if (!config.DebugExport)
+				File.Delete(OutputFile(config));
 		}
 	}
 }

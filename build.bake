@@ -53,7 +53,6 @@ def CopyUpdateBin(channel as string):
 		Cp("output/updater/*", dir, true)
 
 Global(
-#	Project: "src/service/app/app.csproj",
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
@@ -83,7 +82,8 @@ Global(
 		}
 	},
 	JenkinsProject: "AnalitF.Net",
-	Retarget: true
+	Retarget: true,
+	AdditionalAssemblies: ("src/service/app/bin/AnalitF.Net.Service.dll", )
 )
 
 task @default, [@build]

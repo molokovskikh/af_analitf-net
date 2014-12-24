@@ -92,6 +92,7 @@
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\JobController.cs" />
     <Compile Include="Controllers\LogsController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Controllers\MainController.cs">
     </Compile>
     <Compile Include="Helpers\RequestHelper.cs" />
+    <Compile Include="Models\AcceptOrderLog.cs" />
     <Compile Include="Models\AnalitfNetData.cs" />
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\ClientAppLog.cs" />

@@ -5,12 +5,14 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using DotRas;
 using Iesi.Collections;
 using NHibernate;
+using Remotion.Linq;
 using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
 
@@ -146,6 +148,60 @@ namespace AnalitF.Net.Client.Models.Commands
 			Proxy = value.GetProxy();
 			if (value.UseRas) {
 				RasConnection = value.RasConnection;
+			}
+		}
+
+		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task)
+		{
+			uint id = 0;
+			return Wait(statusCheckUrl, task, ref id);
+		}
+
+		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task, ref uint requestId)
+		{
+			HttpResponseMessage response = null;
+			try {
+				while (true) {
+					if (response != null)
+						response.Dispose();
+
+					response = task.Result;
+					if (response.StatusCode == HttpStatusCode.OK)
+						return response;
+
+					if (response.StatusCode == HttpStatusCode.Accepted) {
+						Reporter.Stage("Подготовка данных");
+						if (requestId == 0
+							&& response.Content.Headers.ContentType != null
+							&& response.Content.Headers.ContentType.MediaType == "application/json") {
+							requestId = ((dynamic)response.Content.ReadAsAsync<object>().Result).RequestId;
+						}
+						Token.WaitHandle.WaitOne(Config.RequestInterval);
+						Token.ThrowIfCancellationRequested();
+						task = Client.GetAsync(statusCheckUrl, HttpCompletionOption.ResponseHeadersRead, Token);
+						continue;
+					}
+
+					if (response.StatusCode == HttpStatusCode.InternalServerError
+						&& response.Content.Headers.ContentType != null) {
+						if (response.Content.Headers.ContentType.MediaType == "text/plain")
+							throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+#if DEBUG
+						if (response.Content.Headers.ContentType.MediaType == "application/json")
+							throw new Exception(response.Content.ReadAsAsync<DebugServerError>().Result.ToString());
+#endif
+					}
+					throw new RequestException(
+						String.Format("Произошла ошибка при обработке запроса, код ошибки {0} {1}",
+							response.StatusCode,
+							response.Content.ReadAsStringAsync().Result),
+						response.StatusCode);
+				}
+			}
+			catch(Exception) {
+				if (response != null)
+					response.Dispose();
+				throw;
 			}
 		}
 	}

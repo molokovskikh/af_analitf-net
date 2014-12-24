@@ -410,7 +410,6 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Dynamic_recalculate_markup_validation()
 		{
 			Start();
-			OpenToolbarOverflowIfNeeded("ShowSettings");
 			AsyncClick("ShowSettings");
 			dispatcher.Invoke(() => {
 				var content = (FrameworkElement)activeWindow.Content;
@@ -423,21 +422,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				var grid = (DataGrid)content.FindName("VitallyImportantMarkups");
 				EditCell(grid, 0, 1, "30");
 				Assert.AreEqual(Color.FromRgb(0x80, 0x80, 0).ToString(), GetCell(grid, 0, 1).Background.ToString());
-			});
-		}
-
-		/// <summary>
-		/// Кнопка в панели инструментов может быть скрыта на панели переполнения если она не помещается
-		/// проверяем что кнопка скрыта и открываем панель переполнения
-		/// </summary>
-		private void OpenToolbarOverflowIfNeeded(string name)
-		{
-			dispatcher.Invoke(() => {
-				var toolbar = activeWindow.Descendants<ToolBar>().First(t => t.Name.Match("ToolBar"));
-				var button = toolbar.Items.OfType<ButtonBase>().First(b => b.Name.Match(name));
-				if (button.IsVisible)
-					return;
-				toolbar.IsOverflowOpen = true;
 			});
 		}
 

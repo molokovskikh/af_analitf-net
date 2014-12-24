@@ -128,6 +128,16 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
+	public class ConfirmRequest
+	{
+		public uint RequestId;
+
+		public ConfirmRequest(uint requestId)
+		{
+			RequestId = requestId;
+		}
+	}
+
 	public class OrderResult
 	{
 		public uint ClientOrderId;
