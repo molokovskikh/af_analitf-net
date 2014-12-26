@@ -23,6 +23,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Loader.Custom;
 using ReactiveUI;
 using Remotion.Linq.Parsing;
 using Order = NHibernate.Criterion.Order;
@@ -291,34 +292,38 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				using(var writer = dialog.Writer()) {
 					var table = new DataTable();
 					var column = table.Columns.Add("KOD");
-					column.MaxLength = 9;
+					column.ExtendedProperties.Add("scale", (byte)9);
 
 					column = table.Columns.Add("NAME");
-					column.MaxLength = 100;
+					column.ExtendedProperties.Add("scale", (byte)100);
 
 					column = table.Columns.Add("KOL", typeof(double));
 					column.ExtendedProperties.Add("presision", 17);
 					column.ExtendedProperties.Add("scale", 3);
+
 					column = table.Columns.Add("PRICE", typeof(double));
 					column.ExtendedProperties.Add("presision", 17);
 					column.ExtendedProperties.Add("scale", 3);
 
 					column = table.Columns.Add("NOM_ZAK");
-					column.MaxLength = 10;
+					column.ExtendedProperties.Add("scale", (byte)10);
 
 					column = table.Columns.Add("NOM_AU");
-					column.MaxLength = 6;
+					column.ExtendedProperties.Add("scale", (byte)6);
 
-					foreach (var line in Lines.Where(l => l.Line != null)) {
+					var goodLines = Lines.Where(l => l.Line != null);
+					foreach (var line in goodLines)
+					{
+						var parsedServiceFields = line.ParsedServiceFields.Select(f => f.Value).FirstOrDefault();
 						table.Rows.Add(
 							line.Line.Code,
 							line.Line.ProducerSynonym,
 							line.Line.Count,
 							line.Line.ResultCost,
 							line.Line.Id,
-							line.ParsedServiceFields.Select(f => f.Value).FirstOrDefault());
+							parsedServiceFields
+							);
 					}
-
 					Dbf2.Save(table, writer);
 				}
 			}
