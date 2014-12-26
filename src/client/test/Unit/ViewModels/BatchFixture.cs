@@ -94,7 +94,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			save.Dialog.FileName = file;
 			Next(results);
 
-			var dbf = Dbf.Load(File.Open(file, FileMode.Open));
+			var dbf = Dbf.Load(file);
 			Assert.That(dbf.Rows.Count, Is.EqualTo(2));
 		}
 
