@@ -282,11 +282,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public IEnumerable<IResult> Save()
 		{
 			var dialog = new SaveFileResult(new[] {
-				Tuple.Create("Отчет", ".dbf"),
-				Tuple.Create("Excel", ".xls"),
-				Tuple.Create("Расширенный Excel", ".xls"),
-				Tuple.Create("Excel", ".csv"),
+				Tuple.Create("Отчет (*.dbf)", ".dbf"),
+				Tuple.Create("Excel (*.xls)", ".xls"),
+				Tuple.Create("Расширенный Excel (*.xls)", ".xls"),
+				Tuple.Create("Excel (*.scv)", ".csv"),
 			});
+
 			yield return dialog;
 			if (dialog.Dialog.FilterIndex == 1) {
 				using(var writer = dialog.Writer()) {
