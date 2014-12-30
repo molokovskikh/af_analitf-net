@@ -28,7 +28,7 @@ namespace Updater
 
 	public partial class MainWindow
 	{
-		private ILog log = LogManager.GetLogger(typeof(MainWindow));
+		private static ILog log = LogManager.GetLogger(typeof(MainWindow));
 
 		public MainWindow(bool stub)
 		{
@@ -98,46 +98,30 @@ namespace Updater
 			});
 		}
 
-		public void Update(int pid, string exe, string srcRoot)
+		public static void Update(int pid, string exe, string srcRoot)
 		{
 			WaitForPid(pid);
 
-			var destRootPath = Path.GetDirectoryName(exe);
-
+			var dstRoot = Path.GetDirectoryName(exe);
 			var selfExe = Path.GetFileName(typeof(MainWindow).Assembly.Location);
-			var version = File.ReadAllText(Path.Combine(srcRoot, "version.txt")).Trim();
-			var newBinPath = Path.Combine(destRootPath, version);
-			var oldBinPath = Path.Combine(destRootPath, "bin");
-			var exePath = destRootPath;
 			var files = Directory.GetFiles(srcRoot);
-
-			var ignore = new[] {selfExe, selfExe + ".config", "version.txt"};
-
+			var ignore = new[] {selfExe, selfExe + ".config", "version.txt", "delete.me"};
 			files = files.Except(ignore, new FileNameComparer()).ToArray();
-			var exeFiles = files.Where(f => Path.GetExtension(f).Match(".exe")).ToArray();
-			exeFiles = exeFiles.Concat(files.Where(f => Path.GetExtension(f).Match(".config")
-				&& exeFiles.Any(e => Path.GetFileNameWithoutExtension(e).Match(Path.GetFileNameWithoutExtension(f)))))
-				.ToArray();
-			var binFiles = files.Except(exeFiles).ToArray();
 
-			if (Directory.Exists(oldBinPath)) {
-				if (Directory.Exists(newBinPath))
-					Directory.Delete(newBinPath, true);
-				Directory.CreateDirectory(newBinPath);
-			}
-			else {
-				newBinPath = exePath;
+			//убираем мусор
+			//защита от дурака мусор будем убирать только если есть исполняемый файл
+			//иначе нечего будем запускать
+			var forDelete = Path.Combine(srcRoot, "delete.me");
+			if (File.Exists(forDelete)
+				&& File.Exists(Path.Combine(srcRoot, Path.GetFileName(exe)))) {
+				var fordelete = File.ReadAllLines(forDelete).SelectMany(l => Directory.GetFiles(dstRoot, l)).ToArray();
+				fordelete.Each(File.Delete);
 			}
 
-			CopyFiles(binFiles, newBinPath);
-			if (Directory.Exists(oldBinPath)) {
-				Directory.Delete(oldBinPath, true);
-				Directory.Move(newBinPath, oldBinPath);
-			}
-			CopyFiles(exeFiles, exePath);
+			CopyFiles(files, dstRoot);
 		}
 
-		private void WaitForPid(int pid)
+		private static void WaitForPid(int pid)
 		{
 			var process = GetProcess(pid);
 			if (process == null)
@@ -170,7 +154,7 @@ namespace Updater
 			return null;
 		}
 
-		private void CopyFiles(IEnumerable<string> sources, string path)
+		private static void CopyFiles(IEnumerable<string> sources, string path)
 		{
 			foreach (var source in sources) {
 				var dest = Path.Combine(path, Path.GetFileName(source));

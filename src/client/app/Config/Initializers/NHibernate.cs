@@ -246,9 +246,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
 			var assembly = typeof(Offer).Assembly;
-			var types = assembly.GetTypes().Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
-				|| t == typeof(MinOrderSumRule)
-				|| t == typeof(WaybillOrder));
+			var types = assembly.GetTypes()
+				.Where(t => t.Namespace != null && t.Namespace.StartsWith("AnalitF.Net.Client.Models"))
+				.Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
+					|| t == typeof(MinOrderSumRule)
+					|| t == typeof(WaybillOrder));
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);

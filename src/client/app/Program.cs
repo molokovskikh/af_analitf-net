@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.PlatformServices;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
@@ -19,7 +20,10 @@ using log4net.Repository.Hierarchy;
 using Microsoft.Win32.SafeHandles;
 using NDesk.Options;
 using ReactiveUI;
+using ReactiveUI.Routing;
 using LogManager = log4net.LogManager;
+//для ilmerge, что бы найти ресурсы Xceed.Wpf.Toolkit
+[assembly: ThemeInfo(ResourceDictionaryLocation.SourceAssembly, ResourceDictionaryLocation.SourceAssembly)]
 
 namespace AnalitF.Net.Client
 {
@@ -64,6 +68,17 @@ namespace AnalitF.Net.Client
 			var debugpipe = "";
 			int result;
 			try {
+				//проверка для ilmerge
+				var merged = new [] {
+					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net"
+				};
+				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
+					Console.WriteLine(eventArgs.Name);
+					if (merged.Any(n => eventArgs.Name.StartsWith(n)))
+						return typeof(Program).Assembly;
+					return null;
+				};
+
 				var logConfig = new FileInfo(FileHelper.MakeRooted("log4net.config"));
 				if (logConfig.Exists)
 					XmlConfigurator.Configure(logConfig);
@@ -90,7 +105,6 @@ namespace AnalitF.Net.Client
 
 				if (version) {
 					var assembly = typeof(Program).Assembly;
-					Console.WriteLine(assembly.GetName().Version.ToString());
 					var hash = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)
 						.OfType<AssemblyCopyrightAttribute>()
 						.Select(a => a.Copyright)
@@ -114,6 +128,12 @@ namespace AnalitF.Net.Client
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
 					return 0;
+
+				PlatformEnlightenmentProvider.Current = new CurrentPlatformEnlightenmentProvider();
+				//регистрация объектов reactiveui в нормальной жизни это должно произойти автоматический
+				//но после ilmerge логика регистрации будет сломана
+				new ReactiveUI.Routing.ServiceLocationRegistration().Register();
+				new ReactiveUI.Xaml.ServiceLocationRegistration().Register();
 
 				RxApp.MessageBus.Listen<string>()
 					.Where(m => m == "Startup")
@@ -140,6 +160,7 @@ namespace AnalitF.Net.Client
 					FaultInject = faultInject
 				};
 				app.InitializeComponent();
+
 				var bootstapper = new AppBootstrapper();
 				bootstapper.Config.Quiet = quiet;
 				bootstapper.Config.DebugPipeName = debugpipe;

@@ -16,6 +16,17 @@ namespace Updater
 
 		public App()
 		{
+			//проверка для ilmerge
+			var merged = new [] {
+				"log4net"
+			};
+			AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
+				Console.WriteLine(eventArgs.Name);
+				if (merged.Any(n => eventArgs.Name.StartsWith(n)))
+					return typeof(App).Assembly;
+				return null;
+			};
+
 			XmlConfigurator.Configure();
 
 			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
