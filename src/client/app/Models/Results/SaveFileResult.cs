@@ -21,13 +21,15 @@ namespace AnalitF.Net.Client.Models.Results
 			Dialog.FileName = filename;
 			Dialog.DefaultExt = formats.Select(t => t.Item2).FirstOrDefault();
 			Dialog.Filter = formats.Implode(k => String.Format("{0}|*{1}", k.Item1, k.Item2), "|");
+			Dialog.AddExtension = false;
 		}
 
 		public SaveFileResult(string defaultFilename = null)
 		{
 			Dialog.FileName = String.Format("{0} от {1:d}.txt", defaultFilename, DateTime.Now);
 			Dialog.DefaultExt = ".txt";
-			Dialog.Filter = "Текстовые файлы|*.txt";
+			Dialog.Filter = "Текстовые файлы (*.txt)|*.txt";
+			Dialog.AddExtension = false;
 		}
 
 		public void Execute(ActionExecutionContext context)

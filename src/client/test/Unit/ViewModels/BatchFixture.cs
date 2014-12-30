@@ -13,6 +13,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
+using Common.Tools;
 using Microsoft.Win32;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula.Functions;
@@ -65,6 +66,36 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Assert.AreEqual("data.txt", cmd.BatchFile);
 			Assert.AreEqual(100, cmd.AddressId);
 			Assert.IsInstanceOf<Batch>(shell.ActiveItem);
+		}
+
+		/// <summary>
+		/// К задаче
+		/// http://redmine.analit.net/issues/30315
+		/// </summary>
+		[Test(Description = "Проверка сохранения в DBF файлов, где значения не влезают в строки. Не должно быть исключений.")]
+		public void DBFSaveTest()
+		{
+			batch.Lines = new List<BatchLine> {
+				new BatchLine {
+					Line = new OrderLine() { Code = "normal" }
+				},
+				new BatchLine {
+					Line = new OrderLine() { Code = "SuperLongCodeIsMoreThan9Symbols" 
+						+ "BetterToAddMoreSymbolsForClearTest" 
+						+ "MaybeItsStillNotLongEnought"
+						+ "SomeMoreText" }
+				}
+			};
+
+			var results = batch.Save().GetEnumerator();
+			var save = Next<SaveFileResult>(results);
+			save.Dialog.FilterIndex = 1;
+			var file = RandomFile();
+			save.Dialog.FileName = file;
+			Next(results);
+
+			var dbf = Dbf.Load(file);
+			Assert.That(dbf.Rows.Count, Is.EqualTo(2));
 		}
 
 		[Test]

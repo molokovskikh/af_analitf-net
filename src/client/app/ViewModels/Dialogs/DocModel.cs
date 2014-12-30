@@ -52,8 +52,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public IEnumerable<IResult> Save()
 		{
 			var formats = new[] {
-				Tuple.Create("Rich Text Format", ".rtf"),
-				Tuple.Create("Текстовый документ", ".txt"),
+				Tuple.Create("Rich Text Format (*.rtf)", ".rtf"),
+				Tuple.Create("Текстовый документ (*.txt)", ".txt"),
 			};
 			var dialog = new SaveFileResult(formats, DisplayName);
 			yield return dialog;
