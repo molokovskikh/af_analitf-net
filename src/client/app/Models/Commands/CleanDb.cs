@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.Models.Commands
 		public override void Execute()
 		{
 			var ignored = new[] {
+				"Orders",
+				"OrderLines",
 				"SentOrders",
 				"SentOrderLines",
 				"Settings",

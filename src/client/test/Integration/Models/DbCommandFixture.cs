@@ -36,11 +36,18 @@ namespace AnalitF.Net.Test.Integration.Models
 		[Test]
 		public void Clean_db()
 		{
+			//Текущие заказы не должны удаляются из базы
+			var order = new Order();
+			session.Save(order);
+			session.Flush();
+			session.Clear();
+
 			var command = InitCmd(new CleanDb());
 			command.Execute();
 
 			Assert.That(session.Query<Offer>().Count(), Is.EqualTo(0));
 			Assert.That(session.Query<Settings>().Count(), Is.EqualTo(1));
+			Assert.That(session.Query<Order>().Count(), Is.EqualTo(1));
 		}
 	}
 }
