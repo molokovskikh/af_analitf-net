@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -68,7 +69,7 @@ namespace AnalitF.Net.Client.Models
 					doc.Blocks.Add(new BlockUIContainer(new Image { Source = bitmap, Stretch = Stretch.None }));
 				}
 				else if (Path.GetExtension(LocalFilename).Match(".txt")) {
-					doc.Blocks.Add(new Paragraph(new Run(File.ReadAllText(LocalFilename))));
+					doc.Blocks.Add(new Paragraph(new Run(File.ReadAllText(LocalFilename, Encoding.GetEncoding(1251)))));
 				}
 			}
 

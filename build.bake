@@ -164,7 +164,8 @@ task "deploy:client:package", ["build:client:package"]:
 
 task "build:client:package", ["build:client"]:
 	proj = "src/client/app/app.csproj"
-	name, output, _ = GetBuildConfig(Globals, proj)
+	name, _, _ = GetBuildConfig(Globals, proj)
+	output = "output/merged"
 	bin = FileSet("*.exe", BaseDirectory: output).First()
 
 	assembly = AssemblyDefinition.ReadAssembly(bin)

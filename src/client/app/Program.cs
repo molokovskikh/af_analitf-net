@@ -73,7 +73,6 @@ namespace AnalitF.Net.Client
 					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net"
 				};
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
-					Console.WriteLine(eventArgs.Name);
 					if (merged.Any(n => eventArgs.Name.StartsWith(n)))
 						return typeof(Program).Assembly;
 					return null;
