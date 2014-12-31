@@ -3,6 +3,7 @@
 	"src/client/test/Acceptance/BaseFixture.cs",
 	"src/client/test/Fixtures/*.cs",
 	"src/client/test/Fixtures/CreatePromotion.cs",
+	"src/client/test/TestHelpers/ViewModelFixture.cs",
 	"src/client/test/Tasks/*.cs",
 	"src/client/test/Tasks/Log.cs",
 	"src/client/test/TestHelpers/AutomationHelper.cs",

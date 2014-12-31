@@ -21,7 +21,6 @@ namespace Updater
 				"log4net"
 			};
 			AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
-				Console.WriteLine(eventArgs.Name);
 				if (merged.Any(n => eventArgs.Name.StartsWith(n)))
 					return typeof(App).Assembly;
 				return null;
