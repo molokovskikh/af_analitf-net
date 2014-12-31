@@ -41,31 +41,44 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string):
-	dir = Path.Combine(Path.GetDirectoryName(Globals.UpdateDeployRoot), channel)
+	dir = Globals.UpdateDeployRoot
+	MkDir(dir) unless Exist(dir)
+	dir = Path.Combine(dir, channel)
 	if Exist(dir):
 		Rm("$dir/*")
 	else:
 		MkDir(dir)
 	impersonate = Configuration.Maybe.impersonate != null
+	files = FileSet("*", BaseDirectory: "output/updater/", Excludes: ["*.pdb", ])
 	if impersonate:
 		ImpersonateUser("deployer", '$sdfsd887!'):
-			Cp("output/updater/*", dir, true)
+			Cp(files, dir, true)
 	else:
-		Cp("output/updater/*", dir, true)
+		Cp(files, dir, true)
 
 Global(
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
 		@Local: {
-			@UpdateDeployRoot: """C:\inetpub\wwwroot\data\update\rtm""",
+			@UpdateDeployRoot: """C:\inetpub\wwwroot\data\update\""",
+			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://localhost/AnalitF.Net.Service",
 			@IISSiteName: "local",
 			@IISHost: "localhost",
 			@IISAppPool: "DefaultAppPool"
 		},
+		@Test : {
+			@DeployAlias: "AnalitF.Net.Service.Test",
+			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update\""",
+			@DefaultUpdateChannel: "rtm",
+			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
+			@IISSiteName: "TEST",
+			@IISHost: "acdcserv"
+		},
 		@Production : {
-			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\alpha""",
+			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\""",
+			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
 			@IISSiteName: "IOS",
@@ -73,14 +86,6 @@ Global(
 			@IISPathRoot: "U:\\WebApps",
 			@IISAppPool: "Runer"
 		},
-		@Test : {
-			@DeployRoot: """\\acdcserv\TEST""",
-			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update\rtm""",
-			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
-			@IISSiteName: "TEST",
-			@IISHost: "acdcserv"
-		}
 	},
 	JenkinsProject: "AnalitF.Net",
 	Retarget: true,
@@ -145,7 +150,7 @@ task "deploy:proxy", ["build:proxy"]:
 			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
 		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
-task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "git:push:tags"]
+task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
 task "deploy:client", ["deploy:client:package"]
 
@@ -181,18 +186,7 @@ task "build:client:package", ["build:client"]:
 	Exec("cmd.exe", "/C choco pack", BaseDirectory: "output/package").Execute()
 
 task "deploy:update", ["build:update"]:
-	dir = Globals.UpdateDeployRoot
-	if Exist(dir):
-		Rm("$dir/*")
-	else:
-		MkDir(dir)
-	impersonate = Configuration.Maybe.impersonate != null
-	files = FileSet("*", BaseDirectory: "output/updater/", Excludes: ["*.pdb", ])
-	if impersonate:
-		ImpersonateUser("deployer", '$sdfsd887!'):
-			Cp(files, dir, true)
-	else:
-		Cp(files, dir, true)
+	CopyUpdateBin(Globals.DefaultUpdateChannel)
 
 task "build:client", ["env", "build:client:bin", "build:setup", "build:update"]
 
@@ -371,7 +365,9 @@ task "test:binary":
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
 
-task "deploy:setup":
+task "deploy:announce":
+	unless Globals.Environment == @Production:
+		raise "Задача может быть выполнена только в среде Production задай env=Production"
 	url = "http://redmine.analit.net/projects/afn"
 	version = File.ReadAllText("output/setup/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
@@ -379,23 +375,25 @@ task "deploy:setup":
 	client.Encoding = Encoding.UTF8
 	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
-	try:
-		redmineVersion = JsonConvert.DeserializeObject(client.UploadString("$url/versions.json", "{ \"version\": {\"name\": \"$version\" } }"))
-		redmineVersionId = redmineVersion[@version][@id].ToString()
+	redmineVersion = JsonConvert.DeserializeObject(client.UploadString("$url/versions.json", "{ \"version\": {\"name\": \"$version\" } }"))
+	redmineVersionId = redmineVersion[@version][@id].ToString()
 
-		subject = "Версия $version"
-		description = """"Установщик":file://offdc.adc.analit.net/MMedia/AnalitF.Net/AnalitF.Net-$version.exe
+	subject = "Версия $version"
+	description = """"Установщик":file://offdc.adc.analit.net/MMedia/AnalitF.Net/AnalitF.Net-$version.exe
 "Список изменений":http://redmine.analit.net/versions/${redmineVersionId}
 """
-		content = JsonConvert.SerializeXNode(XElement("issue", XElement("subject", subject), XElement("description", description)))
-		client = WebClient()
-		client.Encoding = Encoding.UTF8
-		client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
-		client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
-		client.UploadString("$url/issues.json", content)
-	except e:
-		print "Не удалось создать требование в redmine"
-		print e
+	content = JsonConvert.SerializeXNode(XElement("issue", XElement("subject", subject), XElement("description", description)))
+	client = WebClient()
+	client.Encoding = Encoding.UTF8
+	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
+	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
+	client.UploadString("$url/issues.json", content)
+
+task "deploy:setup":
+	unless Globals.Environment == @Production:
+		raise "Задача может быть выполнена только в среде Production задай env=Production"
+	version = File.ReadAllText("output/setup/version.txt")
+	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
 	CopyUpdateBin("rtm")
