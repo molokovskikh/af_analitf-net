@@ -311,8 +311,11 @@ task "git:tag":
 		case "patch":
 			build++
 		case "minor":
+			build = 0
 			minor++
 		case "major":
+			build = 0
+			minor = 0
 			major++
 		otherwise:
 			raise "Не знаю что за релиз $kind"
