@@ -380,7 +380,7 @@ task "deploy:announce":
 	redmineVersionId = redmineVersion[@version][@id].ToString()
 
 	subject = "Версия $version"
-	description = """"Установщик":file://offdc.adc.analit.net/MMedia/AnalitF.Net/AnalitF.Net-$version.exe
+	description = """"Установщик":http://ios.analit.net/Files/AnalitF.Net-$version.exe
 "Список изменений":http://redmine.analit.net/versions/${redmineVersionId}
 """
 	content = JsonConvert.SerializeXNode(XElement("issue", XElement("subject", subject), XElement("description", description)))
@@ -389,6 +389,8 @@ task "deploy:announce":
 	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
 	client.Headers.Add("X-Redmine-API-Key", "778ed542c36c919a58c9fa62615e3096b0761a42")
 	client.UploadString("$url/issues.json", content)
+	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
+	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
 
 task "deploy:setup":
 	unless Globals.Environment == @Production:
