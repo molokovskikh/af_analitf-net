@@ -109,11 +109,16 @@ order by Score, {p.Name}")
 			CurrentProducer.Subscribe(v => Item.Producer = (v != null && v.Id > 0) ? v : null);
 		}
 
+		public override void TryClose()
+		{
+			TryClose(true);
+		}
+
 		public void OK()
 		{
 			var message = "";
 			if (Item.TrySave(StatelessSession, out message)) {
-				TryClose();
+				TryClose(false);
 			}
 			else {
 				Manager.Warning(message);

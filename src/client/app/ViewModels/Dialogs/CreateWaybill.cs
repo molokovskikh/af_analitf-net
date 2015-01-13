@@ -18,6 +18,11 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public Supplier[] Suppliers { get; set; }
 
+		public override void TryClose()
+		{
+			TryClose(true);
+		}
+
 		public void OK()
 		{
 			ValidateAndClose(Waybill);

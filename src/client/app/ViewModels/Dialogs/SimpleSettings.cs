@@ -32,9 +32,14 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				.ToArray();
 		}
 
-		public void Cancel()
+		public override void TryClose()
 		{
-			TryClose(true);
+			base.TryClose(true);
+		}
+
+		public void Ok()
+		{
+			TryClose(false);
 		}
 
 		protected override void OnViewAttached(object view, object context)
