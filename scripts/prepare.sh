@@ -5,6 +5,7 @@ set -o errexit
 bake prepare
 msbuild.exe /nologo /verbosity:quiet src/*.sln
 mkdir src/data || :
+chmod -R o+w src/data
 mkdir src/data/update || :
 mkdir src/data/result || :
 mkdir src/data/export || :

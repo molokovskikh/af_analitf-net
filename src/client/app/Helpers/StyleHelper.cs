@@ -556,7 +556,7 @@ namespace AnalitF.Net.Client.Helpers
 				select ConnectEdit(new Label {
 					Style = style,
 					Tag = "generated",
-					Name = a.GetName(p),
+					Name = a.GetName(p) + "LegendItem",
 				});
 
 			if (legend.Children.Count == 0) {
@@ -581,7 +581,7 @@ namespace AnalitF.Net.Client.Helpers
 			label.MouseDoubleClick += (sender, args) => {
 				var screen = label.DataContext as BaseScreen;
 				if (screen != null)
-					ViewModelHelper.ProcessResult(screen.EditLegend(label.Name));
+					ViewModelHelper.ProcessResult(screen.EditLegend(label.Name.Replace("LegendItem", "")));
 			};
 			return label;
 		}
