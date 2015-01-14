@@ -365,8 +365,13 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			var vitallyImportant = ActualVitallyImportant;
+			//LookupMarkByProducerCost - странный флаг, который нигде не проставляется и неизвестно зачем он нужен. Возможно это пережиток и его следует удалить.
 			var lookByProducerCost = vitallyImportant && settings.LookupMarkByProducerCost;
 			var sourceCost = (lookByProducerCost ? ProducerCost : SupplierCostWithoutNds).GetValueOrDefault();
+
+			//флаг в настройках накладных ЖНВЛС заставляет использовать для определения диапозона наценки цену производителя с ндс
+			sourceCost = settings.UseSupplierPriceWithNdsForMarkup && ProducerCostWithTax != null ? (decimal)ProducerCostWithTax : sourceCost;
+
 			if (sourceCost == 0)
 				return;
 			var markupType = vitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;

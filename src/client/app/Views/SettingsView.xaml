@@ -60,7 +60,7 @@
 					</Grid.ColumnDefinitions>
 
 					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0"
-						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
+						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]" Margin="0,0,0,75">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
 								Header="Левая граница"
@@ -76,7 +76,10 @@
 								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
-
+					<StackPanel Grid.Column="0"  Margin="10,350,0,0" >
+						<CheckBox  x:Name="Settings_UseSupplierPriceWithNdsForMarkup" Content="Использовать цену завода с НДС при определении ценового диапозона"/>
+						<CheckBox  x:Name="Settings_ApplyToAllAdresses" Content="Применить ко всем адресам(точкам) доставки"/>
+					</StackPanel>
 					<StackPanel Grid.Column="1">
 						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}"
 							Command="ApplicationCommands.Delete">
