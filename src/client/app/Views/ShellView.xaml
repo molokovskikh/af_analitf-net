@@ -41,6 +41,10 @@
 					cal:Message.Attach="Update" />
 				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
 					cal:Message.Attach="SendOrders" />
+				<MenuItem Header="Загрузить и получить накладные, сертификаты"
+					cal:Message.Attach="MicroUpdate" />
+				<MenuItem Header="Кумулятивное обновление"
+					cal:Message.Attach="CleanSync" />
 				<Separator />
 				<MenuItem Header="Сохранить" InputGestureText="Ctrl+T" cal:Message.Attach="Export" />
 				<MenuItem Header="Предварительный просмотр..." cal:Message.Attach="PrintPreview" />
