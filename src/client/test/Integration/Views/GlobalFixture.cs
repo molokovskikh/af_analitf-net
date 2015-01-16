@@ -648,7 +648,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.BeginInvoke(new Action(() => {
 				var el = activeWindow.Descendants<Panel>().Where(p => p.Name == "Legend")
 					.SelectMany(p => p.Descendants<Label>())
-					.First(i => i.Name == "Junk");
+					.First(i => i.Name == "JunkLegendItem");
 				DoubleClick(el);
 			}));
 			var dialog = manager.OsDialog.OfType<System.Windows.Forms.ColorDialog>().Timeout(2.Second())
@@ -665,7 +665,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var el = activeWindow.Descendants<Panel>().Where(p => p.Name == "Legend")
 					.SelectMany(p => p.Descendants<Label>())
-					.First(i => i.Name == "Junk");
+					.First(i => i.Name == "JunkLegendItem");
 				Assert.AreEqual(System.Drawing.Color.MistyRose.ToHexString(), el.Background.ToString());
 
 				var grid = activeWindow.Descendants<DataGrid>().First(g => g.Name == "Lines");
