@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Win32;
@@ -52,10 +53,6 @@ namespace AnalitF.Net.Client.Models.Results
 			}
 		}
 
-		private void Report(Exception e)
-		{
-			Manager.Error(e.Message);
-		}
 
 		public StreamWriter Writer()
 		{
@@ -63,11 +60,11 @@ namespace AnalitF.Net.Client.Models.Results
 				return new StreamWriter(Dialog.FileName, false, Encoding.Default);
 			}
 			catch(UnauthorizedAccessException e) {
-				Report(e);
+				Manager.Error(e.Message);
 				throw;
 			}
 			catch(IOException e) {
-				Report(e);
+				Manager.Error(ErrorHelper.TranslateIO(e));
 				throw;
 			}
 		}

@@ -133,14 +133,23 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private HttpContent GetBatchRequest()
 		{
-			var tmp = FileHelper.SelfDeleteTmpFile();
-			using (var zip = new ZipFile()) {
-				zip.AddFile(BatchFile).FileName = "payload";
-				zip.AddEntry("meta.json", JsonConvert.SerializeObject(new BatchRequest(AddressId)));
-				zip.Save(tmp);
+			try {
+				var tmp = FileHelper.SelfDeleteTmpFile();
+				using (var zip = new ZipFile()) {
+					zip.AddFile(BatchFile).FileName = "payload";
+					zip.AddEntry("meta.json", JsonConvert.SerializeObject(new BatchRequest(AddressId)));
+					zip.Save(tmp);
+				}
+				tmp.Position = 0;
+				return new StreamContent(tmp);
 			}
-			tmp.Position = 0;
-			return new StreamContent(tmp);
+			//транслируем сообщения об ошибках, если кто то зажал или удалил файл автозаказа
+			catch(IOException e) {
+				throw new EndUserError(ErrorHelper.TranslateIO(e));
+			}
+			catch(UnauthorizedAccessException e) {
+				throw new EndUserError(e.Message);
+			}
 		}
 
 		public UpdateResult ProcessUpdate()

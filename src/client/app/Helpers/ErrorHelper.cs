@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -55,6 +56,14 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			return baseException is TaskCanceledException
 				&& ((TaskCanceledException)baseException).CancellationToken.IsCancellationRequested;
+		}
+
+		public static string TranslateIO(IOException exception)
+		{
+			if (exception is FileNotFoundException) {
+				return String.Format("Файл {0} не найден", exception.Message);
+			}
+			return exception.Message;
 		}
 	}
 }

@@ -208,6 +208,7 @@
     <Compile Include="Helpers\FailFastLog.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\JsonHelper.cs" />
+    <Compile Include="Helpers\LazyEnumerable.cs" />
     <Compile Include="Helpers\Log4net.cs" />
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\NHHelper.cs" />

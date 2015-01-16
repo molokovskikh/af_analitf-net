@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Subjects;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -169,6 +170,23 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			scheduler.Start();
 			shell.TryClose();
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
+		}
+
+		[Test]
+		public void Run_batch()
+		{
+			var cmds = cmd.Collect();
+
+			shell.CurrentAddress = new Address("тест");
+			shell.Addresses.Add(shell.CurrentAddress);
+			shell.Settings.Value.LastUpdate = DateTime.Now;
+			shell.Settings.Value.UserName = "test";
+			shell.Settings.Value.Password = "password";
+			shell.Config.Cmd = "batch=1.txt";
+
+			var results = shell.OnViewReady().ToArray();
+			Assert.AreEqual(1, cmds.Count);
+			Assert.AreEqual("1.txt", ((UpdateCommand)cmds[0]).BatchFile);
 		}
 	}
 }

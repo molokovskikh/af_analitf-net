@@ -273,11 +273,17 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			if (Config.Cmd.Match("start-check")) {
 				TryClose();
+				return Enumerable.Empty<IResult>();
 			}
 			else {
-				return StartCheck();
+				var results = StartCheck();
+				if ((Config.Cmd ?? "").StartsWith("batch=")) {
+					//вызов Batch должен происходить только после операций в startcheck
+					//тк startcheck мжет изменить данные а batch эти изменения не увидит
+					results = results.Concat(LazyHelper.Create(() => Batch(config.Cmd.Remove(0, 6))));
+				}
+				return results;
 			}
-			return Enumerable.Empty<IResult>();
 		}
 
 		public override void CanClose(Action<bool> callback)
@@ -364,15 +370,17 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 #if DEBUG
-			try {
-				NavigateAndReset(PersistentNavigationStack
-					.Where(t => t.TypeName != typeof(Main).FullName)
-					.Select(t => Activator.CreateInstance(Type.GetType(t.TypeName), t.Args))
-					.OfType<IScreen>()
-					.ToArray());
-			}
-			catch(Exception e) {
-				log.Error("Не удалось восстановить состояние", e);
+			if (!Config.IsUnitTesting) {
+				try {
+					NavigateAndReset(PersistentNavigationStack
+						.Where(t => t.TypeName != typeof(Main).FullName)
+						.Select(t => Activator.CreateInstance(Type.GetType(t.TypeName), t.Args))
+						.OfType<IScreen>()
+						.ToArray());
+				}
+				catch(Exception e) {
+					log.Error("Не удалось восстановить состояние", e);
+				}
 			}
 #endif
 			return Enumerable.Empty<IResult>();

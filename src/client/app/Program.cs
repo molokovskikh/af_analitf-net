@@ -8,6 +8,7 @@ using System.Resources;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
@@ -22,6 +23,8 @@ using NDesk.Options;
 using ReactiveUI;
 using ReactiveUI.Routing;
 using LogManager = log4net.LogManager;
+using MessageBox = System.Windows.MessageBox;
+
 //для ilmerge, что бы найти ресурсы Xceed.Wpf.Toolkit
 [assembly: ThemeInfo(ResourceDictionaryLocation.SourceAssembly, ResourceDictionaryLocation.SourceAssembly)]
 
@@ -50,8 +53,11 @@ namespace AnalitF.Net.Client
 		[DllImport("kernel32", SetLastError = true)]
 		public static extern bool AttachConsole(uint dwProcessId);
 
-		[DllImport("kernel32",SetLastError=true)]
+		[DllImport("kernel32", SetLastError=true)]
 		public static extern bool AllocConsole();
+
+		[DllImport("kernel32", SetLastError=true)]
+		public static extern bool FreeConsole();
 
 		[STAThread]
 		public static int Main(string[] args)
@@ -87,10 +93,12 @@ namespace AnalitF.Net.Client
 				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 
+				string batchFile = null;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
 					{"quiet", "Не выводить предупреждения при запуске", v => quiet = v != null},
+					{"batch=", "Запустить приложение и вызвать автозаказ с указанным файлом", v => batchFile = v},
 #if DEBUG
 					{"fault-inject", "", v => faultInject = v != null},
 					{"debug-pipe=", "", v => debugpipe = v},
@@ -108,6 +116,7 @@ namespace AnalitF.Net.Client
 						.OfType<AssemblyCopyrightAttribute>()
 						.Select(a => a.Copyright)
 						.FirstOrDefault();
+					Console.WriteLine(assembly.GetName().Version);
 					Console.WriteLine(hash);
 					return 0;
 				}
@@ -164,9 +173,15 @@ namespace AnalitF.Net.Client
 				bootstapper.Config.Quiet = quiet;
 				bootstapper.Config.DebugPipeName = debugpipe;
 				bootstapper.Config.Cmd = cmds.FirstOrDefault();
+				if (!String.IsNullOrEmpty(batchFile))
+					bootstapper.Config.Cmd = "batch=" + batchFile;
 				bootstapper.Start();
 				result = app.Run();
 				log.DebugFormat("Приложение завершено");
+			}
+			catch(OptionException e) {
+				result = 1;
+				Console.WriteLine(e.Message);
 			}
 			catch(Exception e) {
 				var message = e is EndUserError ? e.Message : e.ToString();
