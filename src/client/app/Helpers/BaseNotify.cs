@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AnalitF.Net.Client.Config.Initializers;
+using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -13,7 +14,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public virtual event PropertyChangedEventHandler PropertyChanged;
 
-		[Ignore]
+		[Ignore, JsonIgnore]
 		public virtual bool IsNotifying { get; set; }
 
 		protected virtual void OnPropertyChanged([CallerMemberName]string propertyName = "")

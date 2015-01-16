@@ -97,6 +97,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> ViewOffersByCatalogEnabled { get; private set; }
 		public NotifyValue<bool> CanAddToAwaited { get; set; }
 		public NotifyValue<bool> IsEnabled { get; set; }
+		[DataMember]
 		public NotifyValue<bool> CatalogSearch { get; set; }
 
 		public string SearchText
