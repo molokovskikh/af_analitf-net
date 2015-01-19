@@ -92,6 +92,7 @@ namespace AnalitF.Net.Client.Models
 
 		public Settings()
 		{
+			UseSupplierPriceWithNdsForMarkup = false;
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
 			ConfirmDeleteOldOrders = true;
@@ -109,6 +110,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int Id { get; set; }
 
+		public virtual bool UseSupplierPriceWithNdsForMarkup { get; set; }
 		public virtual bool CanViewOffersByCatalogName { get; set; }
 		public virtual bool GroupByProduct { get; set; }
 		public virtual bool ShowPriceName { get; set; }

@@ -24,6 +24,39 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			waybill = new Waybill();
 		}
 
+		[Test(Description = "Проверка работы флага из настроек накладных ЖНВЛС - 'Использовать цену завода с НДС при определении ценового диапозона'")]
+		public void Calculate_markup_with_supplierPriceWithNDS_flag()
+		{
+			//Подстраиваем диапозоны наценок под товар в накладной
+			var markups = settings.Markups;
+			var minorMarkup = markups[1];
+			minorMarkup.End = 78;
+			var majorMarkup = markups[2];
+			majorMarkup.Begin = minorMarkup.End;
+			majorMarkup.Markup = 40;
+			majorMarkup.MaxMarkup = 40;
+
+			var line = new WaybillLine(waybill)
+			{
+				Nds = 10,
+				SupplierCost = 82.63m,
+				SupplierCostWithoutNds = 75.12m,
+				ProducerCost = 72.89m,
+				Quantity = 10,
+				VitallyImportant = true
+			};
+			//Стандартный расклад
+			Calculate(line);
+			Assert.AreEqual(19.92, line.RetailMarkup);
+
+			//Проверяем расчет с флагом
+			settings.UseSupplierPriceWithNdsForMarkup = true;
+			Calculate(line);
+
+			Assert.That(line.ProducerCostWithTax,Is.GreaterThan(majorMarkup.Begin));
+			Assert.AreEqual(40, line.RetailMarkup);
+		}
+
 		[Test]
 		public void Calculate_max_markup()
 		{
