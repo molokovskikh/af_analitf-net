@@ -214,7 +214,7 @@ task "build:client:merged", ["build:client:bin"]:
 	files = String.Join(" ", FileSet(["*.dll", "*.exe"], BaseDirectory: source, Excludes: ["libmysqld.dll", ]))
 	exe = FileSet("*.exe", BaseDirectory: source).First()
 	name = Path.Combine(output, Path.GetFileName(exe))
-	Sh("ilmerge $files /allowdup /out:$name")
+	Sh("ilmerge /targetplatform:v4,\"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\" $files /allowdup /out:$name")
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld", Excludes: ["src", "build.sh", ".gitignore"]), output)
 	Cp(FileSet("*.config", BaseDirectory: source), output)
 	#тк мы обединили сборки библиотки содержащие wpf контролы не найдут свои ресурсы правим это
@@ -266,7 +266,7 @@ task "build:update", ["build:client:merged"]:
 	exe = merged.First({f| Path.GetExtension(f) == ".exe"})
 	MkDir("output/updater/merged") unless Exist("output/updater/merged")
 	name = Path.Combine(Path.GetDirectoryName(exe), "merged", Path.GetFileName(exe))
-	Sh("ilmerge $files /allowdup /out:$name")
+	Sh("ilmerge /targetplatform:v4,\"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\" $files /allowdup /out:$name")
 	for f in merged.Concat(merged.Select({f| Path.ChangeExtension(f, ".pdb")})):
 		Rm(f)
 	Mv(name, exe)
