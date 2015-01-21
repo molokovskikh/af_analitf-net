@@ -546,7 +546,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			AsyncClickNoWait("Upload");
 
 			WaitWindow("Обмен данными");
-			WaitMessageBox("Обновление завершено успешно.");
+			WaitMessageBox("Автоматическая обработка дефектуры завершена.");
 			WaitIdle();
 
 			dispatcher.Invoke(() => {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows;
@@ -86,6 +87,21 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			var viewModel = dataGrid.DataContext;
 			if (viewModel != null)
 				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
+		}
+
+		public static void AutoEditOnDigit(DataGrid2 grid, string name)
+		{
+			var column = DataGridHelper.GetColumn(grid.Columns, name);
+			grid.TextInput += (sender, args) => {
+				if (grid.SelectedItem == null)
+					return;
+				var isDigit = args.Text.All(Char.IsDigit);
+				if (!isDigit)
+					return;
+				args.Handled = true;
+				grid.CurrentCell = new DataGridCellInfo(grid.SelectedItem, column);
+				grid.BeginEdit(args);
+			};
 		}
 	}
 }

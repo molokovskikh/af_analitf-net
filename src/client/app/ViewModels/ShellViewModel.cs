@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -21,6 +22,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -602,7 +604,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowBatch()
 		{
-			NavigateRoot(new Batch());
+			if (User.Value == null)
+				return;
+			if (User.Value.UseBatch2)
+				NavigateRoot(new Batch2());
+			else
+				NavigateRoot(new Batch());
 		}
 
 		public bool CanShowWaybills
@@ -714,11 +721,12 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> Batch(string fileName)
+		public IEnumerable<IResult> Batch(string fileName = null)
 		{
 			if (currentAddress == null)
 				yield break;
 			var results = Sync(new UpdateCommand {
+				SyncData = "Batch",
 				BatchFile = fileName,
 				AddressId = currentAddress.Id
 			});
@@ -860,6 +868,13 @@ namespace AnalitF.Net.Client.ViewModels
 					return func(command);
 				},
 				t => {
+					var view = ((ShellView)GetView());
+					if (view != null) {
+						if (view.WindowState == WindowState.Minimized) {
+							view.WindowState = WindowState.Maximized;
+						}
+						WinApi.SetForegroundWindow(new WindowInteropHelper(view).Handle);
+					}
 					if (t.Result == UpdateResult.UpdatePending) {
 						RunUpdate();
 					}

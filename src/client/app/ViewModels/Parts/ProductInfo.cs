@@ -49,15 +49,14 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public CommandBinding[] Bindings;
 
-		public ProductInfo(IStatelessSession session, WindowManager manager, ShellViewModel shell,
-			NotifyValue<OrderLine> value = null)
+		public ProductInfo(BaseScreen screen, IObservable<BaseOffer> value = null)
 		{
-			StatelessSession = session;
-			Manager = manager;
-			Shell = shell;
+			StatelessSession = screen.StatelessSession;
+			Manager = screen.Manager;
+			Shell = screen.Shell;
 
 			if (value != null)
-				value.Subscribe(_ => CurrentOffer = value.Value);
+				value.Subscribe(v => CurrentOffer = v);
 
 			this.ObservableForProperty(m => m.CurrentCatalog)
 				.Subscribe(_ => {

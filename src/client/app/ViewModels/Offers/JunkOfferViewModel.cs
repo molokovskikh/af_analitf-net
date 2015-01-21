@@ -46,9 +46,5 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					IsLoading.Value = false;
 				}, CloseCancellation);
 		}
-
-		protected override void Query()
-		{
-		}
 	}
 }

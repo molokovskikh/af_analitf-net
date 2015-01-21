@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.UI;
@@ -68,16 +69,7 @@ namespace AnalitF.Net.Client.Views
 				}
 			};
 
-			var column = DataGridHelper.GetColumn(grid.Columns, "Розничная наценка");
-			grid.TextInput += (sender, args) => {
-				if (grid.SelectedItem == null)
-					return;
-				var isDigit = args.Text.All(char.IsDigit);
-				if (!isDigit)
-					return;
-				grid.CurrentCell = new DataGridCellInfo(grid.SelectedItem, column);
-				grid.BeginEdit(args);
-			};
+			Editable.AutoEditOnDigit(grid, "Розничная наценка");
 
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");

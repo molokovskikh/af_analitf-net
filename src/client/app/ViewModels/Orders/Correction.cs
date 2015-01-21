@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				DisplayName = string.Format("Журнал отправки заказов для адреса {0}", Address.Name);
 			else
 				DisplayName = string.Format("Корректировка восстановленных заказов");
-			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell, CurrentLine);
+			ProductInfo = new ProductInfo(this, CurrentLine);
 			var view = GetView();
 			if (view != null)
 				Attach(view, ProductInfo.Bindings);

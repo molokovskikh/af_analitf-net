@@ -15,6 +15,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using log4net.Appender;
@@ -85,7 +86,23 @@ namespace AnalitF.Net.Client.Models.Commands
 			var updateType = "накопительное";
 			if (!String.IsNullOrEmpty(BatchFile)) {
 				updateType = "автозаказ";
+				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
 				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(), Token));
+			}
+			else if (SyncData.Match("Batch")) {
+				updateType = "автозаказ";
+				SuccessMessage = "Автоматическая обработка дефектуры завершина.";
+				var items = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
+					Code = l.Code,
+					CodeCr = l.CodeCr,
+					ProductName = l.ProductSynonym,
+					ProducerName = l.ProducerSynonym,
+					Quantity = l.Quantity,
+					SupplierDeliveryId = l.SupplierDeliveryId,
+					ServiceValues = l.ParsedServiceFields
+				}).ToList();
+				var batchRequest = new BatchRequest(AddressId, items);
+				response = Wait("Batch", Client.PostAsJsonAsync("Batch", batchRequest, Token));
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
@@ -198,7 +215,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					.ExecuteUpdate();
 				Session.CreateSQLQuery("update OrderLines ol " +
 					"join Orders o on o.Id = ol.OrderId " +
-					"left join BatchLines b on b.ExportLineId = ol.ExportId " +
+					"left join BatchLines b on b.ExportId = ol.ExportBatchLineId " +
 					"set ol.ExportId = null " +
 					"where o.AddressId in (:addressIds) and b.Id is null")
 					.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
@@ -391,13 +408,20 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			//суть в том что после автозаказа по тем адресам по которым автозаказ производился заказы должны быть заморожены
 			//для этого мы исключаем из восстановления заказа у которые не являются результатом автозаказа (ExportId != null) и
 			//и относятся к адресам где автозаказ производился
-			if (!String.IsNullOrEmpty(BatchFile)) {
+			if (SyncData.Match("Batch")) {
 				var autoOrderAddress = ordersToRestore
 					.Where(o => o.Lines.Any(l => l.ExportId != null))
 					.Select(o => o.Address).Distinct().ToArray();
 				ordersToRestore = ordersToRestore
 					.Where(o => !autoOrderAddress.Contains(o.Address) || o.Lines.Any(l => l.ExportId != null))
 					.ToArray();
+
+				//если это повторная обработка, удаляем старые заказы
+				if (BatchFile == null) {
+					var todelete = orders.Where(o => autoOrderAddress.Contains(o.Address)).Except(ordersToRestore).ToArray();
+					orders = orders.Except(todelete).ToArray();
+					Session.DeleteEach(todelete);
+				}
 			}
 
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете

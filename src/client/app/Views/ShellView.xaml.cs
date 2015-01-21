@@ -31,7 +31,6 @@ namespace AnalitF.Net.Client.Views
 		private bool isNotifing;
 		private Queue<string> pending = new Queue<string>();
 		private DispatcherTimer notificationTimer = new DispatcherTimer();
-		private double lastwidth;
 
 		public ShellView()
 		{

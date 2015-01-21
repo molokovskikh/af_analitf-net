@@ -7,8 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Linq.Observαble;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -23,16 +21,12 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
-using NHibernate.Loader.Custom;
-using ReactiveUI;
-using Remotion.Linq.Parsing;
-using Order = NHibernate.Criterion.Order;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
-		public List<BatchLine> Lines = new List<BatchLine>();
+		public List<BatchLineView> Lines = new List<BatchLineView>();
 		private string activePrint;
 		private static string lastUsedDir;
 
@@ -55,9 +49,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			};
 			CurrentFilter = new NotifyValue<string>("Все");
 			SearchBehavior = new SearchBehavior(this, callUpdate: false);
-			ReportLines = new NotifyValue<ObservableCollection<BatchLine>>(() => {
-				var query = Lines.Where(l => l.MixedProduct.CultureContains(SearchBehavior.ActiveSearchTerm.Value)
-					&& (l.Line != null || !l.Status.HasFlag(ItemToOrderStatus.Ordered)));
+			ReportLines = new NotifyValue<ObservableCollection<BatchLineView>>(() => {
+				var query = Lines.Where(l => l.Product.CultureContains(SearchBehavior.ActiveSearchTerm.Value)
+					&& (l.OrderLine != null || !l.BatchLine.Status.HasFlag(ItemToOrderStatus.Ordered)));
 				if (CurrentFilter.Value == Filter[1]) {
 					query = query.Where(l => !l.IsNotOrdered);
 				}
@@ -74,20 +68,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					query = query.Where(l => l.IsNotOrdered);
 				}
 				else if (CurrentFilter.Value == Filter[6]) {
-					query = query.Where(l => l.IsNotOrdered && !l.Status.HasFlag(ItemToOrderStatus.OffersExists));
+					query = query.Where(l => l.IsNotOrdered && !l.BatchLine.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
 				else if (CurrentFilter.Value == Filter[7]) {
-					query = query.Where(l => l.IsNotOrdered && l.Quantity == 0);
+					query = query.Where(l => l.IsNotOrdered && l.BatchLine.Quantity == 0);
 				}
 				else if (CurrentFilter.Value == Filter[8]) {
-					query = query.Where(l => l.IsNotOrdered && l.Quantity > 0 && l.ProductId != null && l.Status.HasFlag(ItemToOrderStatus.OffersExists));
+					query = query.Where(l => l.IsNotOrdered && l.BatchLine.Quantity > 0
+						&& l.BatchLine.ProductId != null
+						&& l.BatchLine.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
 				else if (CurrentFilter.Value == Filter[9]) {
-					query = query.Where(l => l.IsNotOrdered && l.ProductId == null);
+					query = query.Where(l => l.IsNotOrdered && l.BatchLine.ProductId == null);
 				}
-				return query.OrderBy(l => l.ProductSynonym).ToObservableCollection();
+				return query.OrderBy(l => l.Product).ToObservableCollection();
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
-			CurrentReportLine = new NotifyValue<BatchLine>();
+			CurrentReportLine = new NotifyValue<BatchLineView>();
 			CanDelete = CurrentReportLine.Select(l => l != null).ToValue();
 		}
 
@@ -96,9 +92,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<string> CurrentFilter { get; set; }
 
 		[Export]
-		public NotifyValue<ObservableCollection<BatchLine>> ReportLines { get; set; }
+		public NotifyValue<ObservableCollection<BatchLineView>> ReportLines { get; set; }
 
-		public NotifyValue<BatchLine> CurrentReportLine { get; set; }
+		public NotifyValue<BatchLineView> CurrentReportLine { get; set; }
 
 		public AddressSelector AddressSelector { get; set; }
 
@@ -141,7 +137,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			var line = Lines.FirstOrDefault();
 			if (line == null)
 				return;
-			foreach (var pair in line.ParsedServiceFields) {
+			foreach (var pair in line.BatchLine.ParsedServiceFields) {
 				var key = pair.Key;
 				//todo - хорошо бы вычислять ширину колонок, но непонятно как
 				//если задать с помощью звезды колонка будет зажата в минимальный размер
@@ -166,7 +162,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			CurrentReportLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 				.Subscribe(_ => {
 					if (CurrentReportLine.Value != null)
-						CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.Address.Id);
+						CurrentElementAddress = Addresses.FirstOrDefault(a => a.Id == CurrentReportLine.Value.BatchLine.Address.Id);
 					else
 						CurrentElementAddress = null;
 					Update();
@@ -188,7 +184,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 							CurrentCatalog = null;
 							return;
 						}
-						var catalogId = line.CatalogId;
+						var catalogId = line.BatchLine.CatalogId;
 						if (catalogId != null) {
 							CurrentCatalog = StatelessSession.Query<Catalog>()
 								.Fetch(c => c.Name)
@@ -206,7 +202,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						: v.Changed())
 					.Switch()
 					.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
-					.Subscribe(e => StatelessSession.DeleteEach(e.EventArgs.OldItems), CloseCancellation.Token);
+					.Subscribe(e => StatelessSession.DeleteEach(e.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine)),
+						CloseCancellation.Token);
 			}
 		}
 
@@ -220,11 +217,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.RecreateSession();
 
-			foreach (var item in AddressSelector.Addresses)
-				item.Item = Session.Load<Address>(item.Item.Id);
-
-			CalculateStatus();
-			ReportLines.Recalculate();
+			LoadLines();
 		}
 
 		public void Delete()
@@ -238,23 +231,37 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			var line = CurrentReportLine.Value;
 			Lines.Remove(line);
 			ReportLines.Value.Remove(line);
-			if (line.Line != null) {
-				Address.RemoveLine(line.Line);
+			if (line.OrderLine != null) {
+				Address.RemoveLine(line.OrderLine);
 			}
 		}
 
 		private void LoadLines()
 		{
-			if (StatelessSession != null) {
-				var ids = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
-				Lines = StatelessSession.Query<BatchLine>()
-					.Fetch(l => l.Address)
-					.Where(l => ids.Contains(l.Address.Id))
-					.OrderBy(l => l.ProductSynonym)
-					.ToList();
-			}
-			CalculateStatus();
+			if (StatelessSession == null)
+				return;
+
+			var ids = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
+			var batchLines = StatelessSession.Query<BatchLine>()
+				.Fetch(l => l.Address)
+				.Where(l => ids.Contains(l.Address.Id))
+				.ToList();
+			BuildLineViews(batchLines);
+		}
+
+		public void BuildLineViews(List<BatchLine> batchLines)
+		{
+			var lookup = Addresses.SelectMany(a => a.ActiveOrders()).SelectMany(o => o.Lines)
+				.ToLookup(l => l.ExportBatchLineId);
+			Lines = batchLines.Select(l => new BatchLineView(l, lookup[l.ExportId].FirstOrDefault())).ToList();
+			BatchLine.CalculateStyle(Addresses, batchLines);
+			Lines.Where(l => l.OrderLine != null).Each(l => l.OrderLine.Configure(User));
 			ReportLines.Recalculate();
+		}
+
+		public IEnumerable<IResult> Reload()
+		{
+			return Shell.Batch();
 		}
 
 		public IEnumerable<IResult> Upload()
@@ -312,18 +319,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					column = table.Columns.Add("NOM_AU");
 					column.ExtendedProperties.Add("scale", (byte)6);
 
-					var goodLines = Lines.Where(l => l.Line != null);
+					var goodLines = Lines.Where(l => l.OrderLine != null);
 					foreach (var line in goodLines)
 					{
-						var parsedServiceFields = line.ParsedServiceFields.Select(f => f.Value).FirstOrDefault();
+						var parsedServiceFields = line.BatchLine.ParsedServiceFields.Select(f => f.Value).FirstOrDefault();
 						table.Rows.Add(
-							line.Line.Code,
-							line.Line.ProducerSynonym,
-							line.Line.Count,
-							line.Line.ResultCost,
-							line.Line.Id,
-							parsedServiceFields
-							);
+							line.OrderLine.Code,
+							line.OrderLine.ProducerSynonym,
+							line.OrderLine.Count,
+							line.OrderLine.ResultCost,
+							line.OrderLine.Id,
+							parsedServiceFields);
 					}
 					Dbf2.Save(table, writer);
 				}
@@ -349,7 +355,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			writer.Write("Наименование;Производитель;Прайс-лист;Цена;Заказ;Сумма;Комментарий");
 			var firstLine = Lines.FirstOrDefault();
 			if (firstLine != null) {
-				foreach (var field in firstLine.ParsedServiceFields) {
+				foreach (var field in firstLine.BatchLine.ParsedServiceFields) {
 					writer.Write(";");
 					writer.Write(field.Key);
 				}
@@ -357,33 +363,33 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			writer.WriteLine();
 			foreach (var line in Lines) {
 				writer.Write(quote);
-				writer.Write(line.MixedProduct);
+				writer.Write(line.Product);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.MixedProducer);
+				writer.Write(line.Producer);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.PriceName);
+				writer.Write(line.OrderLine != null ? line.OrderLine.Order.PriceName : null);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.Line != null ? (decimal?)line.Line.MixedCost : null);
+				writer.Write(line.OrderLine != null ? (decimal?)line.OrderLine.MixedCost : null);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.MixedCount);
+				writer.Write(line.Count);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.Line != null ? (decimal?)line.Line.MixedSum : null);
+				writer.Write(line.OrderLine != null ? (decimal?)line.OrderLine.MixedSum : null);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.Comment);
+				writer.Write(line.BatchLine.Comment);
 				writer.Write(quote);
-				foreach (var field in line.ParsedServiceFields) {
+				foreach (var field in line.BatchLine.ParsedServiceFields) {
 					writer.Write(";\"");
 					writer.Write(field.Value);
 					writer.Write(quote);
@@ -393,7 +399,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public void ExportExcel(Stream stream, List<BatchLine> lines, bool exportServiceFields)
+		public void ExportExcel(Stream stream, List<BatchLineView> lines, bool exportServiceFields)
 		{
 			var columns = new[] {
 				"Наименование",
@@ -407,17 +413,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (exportServiceFields) {
 				var firstLine = lines.FirstOrDefault();
 				if (firstLine != null)
-					columns = columns.Concat(firstLine.ParsedServiceFields.Select(f => f.Key)).ToArray();
+					columns = columns.Concat(firstLine.BatchLine.ParsedServiceFields.Select(f => f.Key)).ToArray();
 			}
 			var rows = lines.Select(l => new object[] {
-				l.MixedProducer,
-				l.MixedProduct,
-				l.PriceName,
-				l.Line != null ? (decimal?)l.Line.MixedCost : null,
-				l.MixedCount,
-				l.Line != null ? (decimal?)l.Line.MixedSum : null,
-				l.Comment
-			}.Concat(exportServiceFields ? l.ParsedServiceFields.Select(f => f.Value) : Enumerable.Empty<object>()).ToArray());
+				l.Producer,
+				l.Product,
+				l.OrderLine != null ? l.OrderLine.Order.PriceName : null,
+				l.OrderLine != null ? (decimal?)l.OrderLine.MixedCost : null,
+				l.Count,
+				l.OrderLine != null ? (decimal?)l.OrderLine.MixedSum : null,
+				l.BatchLine.Comment
+			}.Concat(exportServiceFields ? l.BatchLine.ParsedServiceFields.Select(f => f.Value) : Enumerable.Empty<object>()).ToArray());
 			var book = ExcelExporter.ExportTable(columns, rows);
 			book.Write(stream);
 		}
@@ -427,36 +433,18 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (StatelessSession == null)
 				return;
 			if (CurrentReportLine.Value == null
-				|| CurrentReportLine.Value.ProductId == null) {
+				|| CurrentReportLine.Value.BatchLine.ProductId == null) {
 				Offers.Value = new List<Offer>();
 				return;
 			}
 
-			var productId = CurrentReportLine.Value.ProductId;
+			var productId = CurrentReportLine.Value.BatchLine.ProductId;
 			var offers = StatelessSession.Query<Offer>()
 				.Fetch(o => o.Price)
 				.Where(o => o.ProductId == productId)
 				.OrderBy(o => o.Cost)
 				.ToList();
 			Offers.Value = offers.OrderBy(o => o.ResultCost).ToList();
-		}
-
-		public void CalculateStatus()
-		{
-			if (Address == null)
-				return;
-
-			Address.ActiveOrders().SelectMany(o => o.Lines).Each(l => l.Configure(User));
-			var activeLines = Addresses.SelectMany(a => a.ActiveOrders()).SelectMany(l => l.Lines)
-				.Where(l => l.ExportId != null)
-				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ExportId.GetValueOrDefault()), l => l.ExportId != null ? l : null);
-			var productids = Addresses.SelectMany(a => a.Orders).Where(o => o.Frozen)
-				.SelectMany(o => o.Lines)
-				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ProductId));
-			foreach (var line in Lines) {
-				line.ExistsInFreezed = productids[Tuple.Create(line.Address.Id, line.ProductId.GetValueOrDefault())].FirstOrDefault() != null;
-				line.Line = activeLines[Tuple.Create(line.Address.Id, line.ExportLineId.GetValueOrDefault())].FirstOrDefault();
-			}
 		}
 
 		public PrintResult Print()
@@ -488,16 +476,16 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OfferUpdated();
 
-			var batchLine = CurrentReportLine.Value;
-			if (batchLine == null)
+			var reportLine = CurrentReportLine.Value;
+			if (reportLine == null)
 				return;
 
-			var orderLine = batchLine.Line;
+			var orderLine = reportLine.OrderLine;
 			if (orderLine != null
 				&& !orderLine.Order.Lines.Contains(orderLine)) {
-				Lines.Remove(batchLine);
-				ReportLines.Value.Remove(batchLine);
-				batchLine.Line = null;
+				Lines.Remove(reportLine);
+				ReportLines.Value.Remove(reportLine);
+				reportLine.OrderLine = null;
 			}
 		}
 	}

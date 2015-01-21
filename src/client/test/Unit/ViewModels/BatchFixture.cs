@@ -50,6 +50,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 				Id = 100,
 			};
 			batch.Address = address;
+			shell.User.Value = new User();
 			shell.CurrentAddress = address;
 			shell.ActiveItem = batch;
 			var stub = new StubRemoteCommand(UpdateResult.OK);
@@ -75,16 +76,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test(Description = "Проверка сохранения в DBF файлов, где значения не влезают в строки. Не должно быть исключений.")]
 		public void DBFSaveTest()
 		{
-			batch.Lines = new List<BatchLine> {
-				new BatchLine {
-					Line = new OrderLine() { Code = "normal" }
-				},
-				new BatchLine {
-					Line = new OrderLine() { Code = "SuperLongCodeIsMoreThan9Symbols" 
-						+ "BetterToAddMoreSymbolsForClearTest" 
+			batch.Lines = new List<BatchLineView> {
+				new BatchLineView(new BatchLine(), new OrderLine { Code = "normal" }),
+				new BatchLineView(new BatchLine(), new OrderLine {
+					Code = "SuperLongCodeIsMoreThan9Symbols"
+						+ "BetterToAddMoreSymbolsForClearTest"
 						+ "MaybeItsStillNotLongEnought"
-						+ "SomeMoreText" }
-				}
+						+ "SomeMoreText" })
 			};
 
 			var results = batch.Save().GetEnumerator();
@@ -102,11 +100,9 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Save()
 		{
 			var order = new Order(new Address("тест"), new Offer(new Price("тест"), 100));
-			batch.Lines = new List<BatchLine> {
-				new BatchLine(),
-				new BatchLine {
-					Line = order.Lines[0]
-				}
+			batch.Lines = new List<BatchLineView> {
+				new BatchLineView(new BatchLine(), null),
+				new BatchLineView(new BatchLine(), order.Lines[0])
 			};
 
 			var results = batch.Save().GetEnumerator();
@@ -123,11 +119,9 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Export_excel()
 		{
 			var order = new Order(new Address("тест"), new Offer(new Price("тест"), 100));
-			batch.Lines = new List<BatchLine> {
-				new BatchLine(),
-				new BatchLine {
-					Line = order.Lines[0]
-				}
+			batch.Lines = new List<BatchLineView> {
+				new BatchLineView(new BatchLine(), null),
+				new BatchLineView(new BatchLine(), order.Lines[0])
 			};
 			var results = batch.Save().GetEnumerator();
 			var save = Next<SaveFileResult>(results);
@@ -145,10 +139,10 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Export_service_fields()
 		{
-			batch.Lines = new List<BatchLine> {
-				new BatchLine {
+			batch.Lines = new List<BatchLineView> {
+				new BatchLineView(new BatchLine {
 					ServiceFields = @"{""f1"":""f1-value""}"
-				}
+				}, null)
 			};
 			var writer = new StringWriter();
 			batch.ExportCsv(writer);
@@ -161,13 +155,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		{
 			var order = MakeOrderLine().Order;
 			order.Frozen = true;
-			batch.Lines = new List<BatchLine> {
-				new BatchLine {
+			batch.Lines = new List<BatchLineView> {
+				new BatchLineView(new BatchLine {
 					ProductId = 105,
 					Address = batch.Address
-				},
+				}, null),
 			};
-			batch.CalculateStatus();
+			BatchLine.CalculateStyle(batch.Addresses, batch.Lines.Select(l => l.BatchLine));
 			Assert.IsTrue(batch.Lines[0].ExistsInFreezed);
 		}
 
@@ -177,9 +171,9 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var line = MakeOrderLine();
 			line.ExportId = 45;
 
-			batch.Lines.Add(new BatchLine(line));
 			ScreenExtensions.TryActivate(batch);
-			Assert.AreEqual(line, batch.ReportLines.Value[0].Line);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
+			Assert.AreEqual(line, batch.ReportLines.Value[0].OrderLine);
 		}
 
 		[Test]
@@ -194,10 +188,8 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			batch.Address = address;
 			Stat lastStat = null;
 			bus.Listen<Stat>().Subscribe(s => lastStat = s);
-			batch.Lines = new List<BatchLine> {
-				new BatchLine(order.Lines[0])
-			};
 			ScreenExtensions.TryActivate(batch);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(order.Lines[0]) });
 
 			batch.CurrentReportLine.Value = batch.Lines[0];
 			batch.Delete();
@@ -214,11 +206,11 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			InitAddress(address1, address2);
 			ScreenExtensions.TryActivate(batch);
 
-			batch.Lines.Add(new BatchLine { Address = address1 });
+			batch.Lines.Add(new BatchLineView(new BatchLine { Address = address1 }, null));
 
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address2.Order(offer, 5);
-			batch.Lines.Add(new BatchLine(line));
+			batch.Lines.Add(new BatchLineView(new BatchLine(line), null));
 
 			batch.CurrentReportLine.Value = batch.Lines[1];
 			batch.Offers.Value = new List<Offer> {
@@ -251,10 +243,10 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address2.Order(offer, 5);
 			line.ExportId = 562;
-			batch.Lines.Add(new BatchLine(line));
 			ScreenExtensions.TryActivate(batch);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
-			Assert.AreEqual(line, batch.ReportLines.Value[0].Line);
+			Assert.AreEqual(line, batch.ReportLines.Value[0].OrderLine);
 		}
 
 		[Test]
@@ -265,8 +257,8 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address.Order(offer, 5);
 			line.ExportId = 562;
-			batch.Lines.Add(new BatchLine(line));
 			ScreenExtensions.TryActivate(batch);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
 			batch.CurrentReportLine.Value = batch.Lines[0];
 			batch.Offers.Value = new List<Offer> {
@@ -291,14 +283,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address.Order(offer, 5);
 			line.ExportId = 562;
-			batch.Lines.Add(new BatchLine(line));
-			batch.Lines.Add(new BatchLine(new Catalog("тест"), address));
 			ScreenExtensions.TryActivate(batch);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line), new BatchLine(new Catalog("тест"), address) });
 
 			//заказано
 			batch.CurrentFilter.Value = batch.Filter[1];
 			Assert.AreEqual(1, batch.ReportLines.Value.Count);
-			Assert.IsNotNull(batch.ReportLines.Value[0].Line);
+			Assert.IsNotNull(batch.ReportLines.Value[0].OrderLine);
 		}
 
 		private void InitAddress(params Address[] addresses)
