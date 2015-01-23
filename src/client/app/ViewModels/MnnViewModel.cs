@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -14,13 +15,22 @@ namespace AnalitF.Net.Client.ViewModels
 		public MnnViewModel()
 		{
 			DisplayName = "Поиск по МНН";
-			Readonly = true;
-
 			ShowWithoutOffers = new NotifyValue<bool>();
-			Mnns = new NotifyValue<List<Mnn>>(
-				new List<Mnn>(),
-				() => {
-					var query = StatelessSession.Query<Mnn>();
+			SearchBehavior = new SearchBehavior(this);
+		}
+
+		public SearchBehavior SearchBehavior { get; set; }
+		public NotifyValue<List<Mnn>> Mnns { get; set; }
+		public Mnn CurrentMnn { get; set; }
+		public NotifyValue<bool> ShowWithoutOffers { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			Mnns = ShowWithoutOffers
+				.Select(v => RxQuery(s => {
+					var query = s.Query<Mnn>();
 					if (!ShowWithoutOffers) {
 						query = query.Where(m => m.HaveOffers);
 					}
@@ -31,16 +41,11 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 
 					return query.OrderBy(m => m.Name).ToList();
-				},
-				ShowWithoutOffers);
-
-			SearchBehavior = new SearchBehavior(this);
+				}))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.ToValue();
 		}
-
-		public SearchBehavior SearchBehavior { get; set; }
-		public NotifyValue<List<Mnn>> Mnns { get; set; }
-		public Mnn CurrentMnn { get; set; }
-		public NotifyValue<bool> ShowWithoutOffers { get; set; }
 
 		public void EnterMnn()
 		{
@@ -50,11 +55,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Shell.Navigate(new CatalogViewModel {
 				FiltredMnn = CurrentMnn
 			});
-		}
-
-		public override void Update()
-		{
-			Mnns.Recalculate();
 		}
 	}
 }

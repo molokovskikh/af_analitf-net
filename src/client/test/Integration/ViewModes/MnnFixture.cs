@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
-	public class MnnFixture : ViewModelFixture
+	public class MnnFixture : ViewModelFixture<MnnViewModel>
 	{
 		[Test]
 		public void On_open_catalog_update_have_offers_flag()
@@ -18,13 +18,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.First(n => !n.HaveOffers
 					&& n.Mnn != null
 					&& !n.Mnn.HaveOffers);
-			var model = Init(new MnnViewModel());
-			Assert.That(model.Mnns.Value.Count, Is.GreaterThan(0));
+			var items = model.Mnns;
+			testScheduler.Start();
+			Assert.That(items.Value.Count, Is.GreaterThan(0));
 			model.ShowWithoutOffers.Value = true;
-			model.CurrentMnn = model.Mnns.Value.First(m => m.Id == catalogName.Mnn.Id);
+			testScheduler.Start();
+			model.CurrentMnn = items.Value.First(m => m.Id == catalogName.Mnn.Id);
 			model.EnterMnn();
 			testScheduler.Start();
-
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
 			Assert.IsTrue(catalog.FilterByMnn, model.CurrentMnn.ToString());

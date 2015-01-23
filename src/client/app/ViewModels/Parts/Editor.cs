@@ -15,25 +15,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private OrderLine lastEdit;
 		private InlineEditWarning warning;
 		private WindowManager manager;
-		private OrderLine currentLine;
+		private NotifyValue<OrderLine> current;
 
-		public Editor(InlineEditWarning warning, WindowManager manager)
+		public Editor(InlineEditWarning warning, WindowManager manager, NotifyValue<OrderLine> current)
 		{
 			this.warning = warning;
 			this.manager = manager;
-		}
-
-		public OrderLine CurrentEdit
-		{
-			get { return currentLine; }
-			set
-			{
-				if (currentLine == value)
-					return;
-
-				currentLine = value;
-				OnPropertyChanged("CurrentLine");
-			}
+			this.current = current;
 		}
 
 		public IList Lines { get; set; }
@@ -54,18 +42,18 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			//мог ввести корректное значение
 			var errors = messages.Where(m => m.IsError);
 			if (errors.Any()) {
-				if (CurrentEdit == null || CurrentEdit.Id != lastEdit.Id) {
-					CurrentEdit = lastEdit;
+				if (current.Value == null || current.Value.Id != lastEdit.Id) {
+					current.Value = lastEdit;
 				}
 			}
 		}
 
 		public void Updated()
 		{
-			if (CurrentEdit == null)
+			if (current.Value == null)
 				return;
 
-			lastEdit = CurrentEdit;
+			lastEdit = current.Value;
 			ShowValidationError(lastEdit.EditValidate());
 			CheckForDelete(lastEdit);
 		}
@@ -94,14 +82,14 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Delete()
 		{
-			if (CurrentEdit == null)
+			if (current.Value == null)
 				return;
 
 			if (manager.Question("Удалить позицию?") != MessageBoxResult.Yes)
 				return;
 
-			CurrentEdit.Count = 0;
-			CheckForDelete(CurrentEdit);
+			current.Value.Count = 0;
+			CheckForDelete(current.Value);
 		}
 	}
 }

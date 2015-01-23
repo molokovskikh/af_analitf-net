@@ -43,15 +43,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				l => CurrentLine.Value = l);
 			AddressSelector = new AddressSelector(Session, this);
-			editor = new Editor(OrderWarning, Manager);
+			editor = new Editor(OrderWarning, Manager, CurrentLine);
 
-			CurrentLine.CatchSubscribe(v => editor.CurrentEdit = v);
 			Lines.CatchSubscribe(v => editor.Lines = v);
-
-			editor.ObservableForProperty(e => e.CurrentEdit)
-				.Select(e => e.Value)
-				.BindTo(this, m => m.CurrentLine.Value);
-
 			var observable = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
@@ -132,7 +126,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				IsSentSelected.Value = (bool)isSentSelectedValue;
 
 			OnlyWarningVisible = IsCurrentSelected.Select(v => v && User.IsPreprocessOrders).ToValue();
-			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+			ProductInfo = new ProductInfo(this);
 			CurrentLine.Cast<object>()
 				.Merge(SelectedSentLine)
 				.Merge(IsCurrentSelected.Select(v => (object)v))

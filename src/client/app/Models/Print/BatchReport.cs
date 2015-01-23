@@ -9,10 +9,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class BatchReport : BaseDocument
 	{
-		private IList<BatchLine> lines;
+		private IList<BatchLineView> lines;
 		private Address address;
 
-		public BatchReport(IList<BatchLine> lines, Address address)
+		public BatchReport(IList<BatchLineView> lines, Address address)
 		{
 			this.lines = lines;
 			this.address = address;
@@ -34,15 +34,15 @@ namespace AnalitF.Net.Client.Models.Print
 			var rowGroup = table.RowGroups[0];
 			foreach (var line in lines) {
 				BuildRow(headers, rowGroup, new object[] {
-					line.MixedProduct,
-					line.MixedProducer,
-					line.PriceName,
-					line.Line != null ? (decimal?)line.Line.MixedCost : null,
-					line.Quantity,
-					line.Line != null ? (decimal?)line.Line.MixedSum : null
+					line.Product,
+					line.Producer,
+					line.OrderLine != null ? line.OrderLine.Order.PriceName : null,
+					line.OrderLine != null ? (decimal?)line.OrderLine.MixedCost : null,
+					line.Count,
+					line.OrderLine != null ? (decimal?)line.OrderLine.MixedSum : null
 				});
 				var tableRow = new TableRow();
-				tableRow.Cells.Add(Cell(line.Comment, 6));
+				tableRow.Cells.Add(Cell(line.BatchLine.Comment, 6));
 				rowGroup.Rows.Add(tableRow);
 			}
 
@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Print
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 2
 						},
-						new TableCell(new Paragraph(new Run("Сумма: " + lines.Where(l => l.Line != null).Sum(l => l.Line.MixedSum)))) {
+						new TableCell(new Paragraph(new Run("Сумма: " + lines.Where(l => l.OrderLine != null).Sum(l => l.OrderLine.MixedSum)))) {
 							Style = CellStyle,
 							FontWeight = FontWeights.Bold,
 							ColumnSpan = 3,

@@ -11,8 +11,10 @@ using Common.NHibernate;
 using Common.Tools;
 using log4net.Config;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Test.Support.log4net;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Integration.Commands
 {
@@ -151,8 +153,43 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.AreEqual(1, orders.Count, items.Implode());
 			Assert.IsFalse(orders[0].Frozen);
 			var batchLine = items.First(b => b.Quantity == 5);
-			Assert.IsNotNull(batchLine.ExportLineId);
+			Assert.IsNotNull(batchLine.ExportId);
 			Assert.IsTrue(batchLine.Status.HasFlag(ItemToOrderStatus.Ordered));
+			var orderline = orders.SelectMany(o => o.Lines).FirstOrDefault(l => l.ExportBatchLineId == batchLine.ExportId);
+			Assert.IsNotNull(orderline);
+		}
+
+		[Test]
+		public void Reprocess_batch()
+		{
+			var fixture = new SmartOrder {
+				ProductIds = new[] {
+					SafeSmartOrderProductId()
+				}
+			};
+			Fixture(fixture);
+			localSession.DeleteEach<BatchLine>();
+			localSession.DeleteEach<Order>();
+
+			MakeBatch("1|5");
+
+			var items = localSession.Query<BatchLine>().ToList();
+			var batchLine = items[0];
+			Assert.IsTrue(batchLine.Status.HasFlag(ItemToOrderStatus.Ordered));
+
+			batchLine.Quantity = 3;
+			Run(new UpdateCommand {
+				SyncData = "Batch",
+				AddressId = localSession.Query<Address>().First().Id
+			});
+			items = localSession.Query<BatchLine>().ToList();
+			batchLine = items[0];
+			Assert.IsTrue(batchLine.Status.HasFlag(ItemToOrderStatus.Ordered), batchLine.ToString());
+			Assert.AreEqual(3, batchLine.Quantity);
+			var lines = localSession.Query<OrderLine>().ToArray();
+			var orderLine = lines[0];
+			Assert.AreEqual(1, lines.Length);
+			Assert.AreEqual(3, orderLine.Count);
 		}
 
 		[Test]
@@ -232,6 +269,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			var filename = TempFile("batch.txt", content);
 			Run(new UpdateCommand {
+				SyncData = "Batch",
 				BatchFile = filename,
 				AddressId = localSession.Query<Address>().First().Id
 			});

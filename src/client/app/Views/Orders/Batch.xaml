@@ -41,6 +41,7 @@
 			<ColumnDefinition />
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
+
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<TextBox x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
@@ -50,6 +51,7 @@
 			<Button Name="ShowCatalog" Style="{StaticResource FilterElement}">В каталог (F2)</Button>
 			<Button Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterElement}">Синонимы (Ctrl+N)</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="Upload">Загрузить</Button>
+			<Button Style="{StaticResource FilterElement}" x:Name="Reload">Повторить</Button>
 			<TextBlock Style="{StaticResource FilterElement}">
 				<Hyperlink NavigateUri="http://stat.analit.net/CI/SmartOrderRule/show">Настройка</Hyperlink>
 			</TextBlock>
@@ -60,24 +62,27 @@
 		<c:DataGrid2 x:Name="ReportLines" Grid.Row="1" Grid.ColumnSpan="2"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
 			CanUserDeleteRows="True"
+			CanUserSelectMultipleItems="False"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('ReportLines')]"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
-			ui:NavBinder.Next="{x:Reference Offers}">
+			ui:NavBinder.Next="{x:Reference Offers}"
+			IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding Address.Name}" Width="*"
-					Visibility="Collapsed" />
-				<c:DataGridTextColumnEx Header="Заказано" Binding="{Binding HasOrderLineLabel}" />
-				<c:DataGridTextColumnEx Header="Есть производитель" Binding="{Binding HasProducerLabel}" />
-				<c:SearchableDataGridColumn Header="Наименование" Binding="{Binding MixedProduct}" Width="*"
-					HighlightStyle="{StaticResource DataGridHighlight}" />
-				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding MixedProducer}" Width="*" />
-				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding Producer}" Visibility="Collapsed" />
-				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Line.Order.PriceName}" Width="*" />
-				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding Line.Cost}" />
-				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding Line.ResultCost}" />
-				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding MixedCount}" />
-				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding Line.MixedSum}" />
-				<c:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" />
+					Visibility="Collapsed" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Заказано" Binding="{Binding BatchLine.HasOrderLineLabel}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Есть производитель" Binding="{Binding BatchLine.HasProducerLabel}" IsReadOnly="True" />
+				<c:SearchableDataGridColumn Header="Наименование" Binding="{Binding Product}" Width="*"
+					HighlightStyle="{StaticResource DataGridHighlight}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding BatchLine.Producer}" Visibility="Collapsed" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Количество" Binding="{Binding BatchLine.Quantity}" />
+				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding OrderLine.Order.PriceName}" Width="*" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding OrderLine.Cost}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding OrderLine.ResultCost}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding OrderLine.Count}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding OrderLine.MixedSum}" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Комментарий" Binding="{Binding BatchLine.Comment}" Width="*" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
@@ -108,9 +113,11 @@
 			</Button>
 		</Grid>
 
-		<c:DataGrid2 x:Name="Offers" Grid.Row="3" Grid.ColumnSpan="2" CanUserSortColumns="False"
+		<c:DataGrid2 x:Name="Offers" Grid.Row="3" Grid.ColumnSpan="2"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('Offers')]"
-			ui:NavBinder.Prev="{x:Reference ReportLines}">
+			ui:NavBinder.Prev="{x:Reference ReportLines}"
+			CanUserSelectMultipleItems="False"
+			CanUserSortColumns="False">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"
 					Header="Название"
@@ -165,7 +172,7 @@
 		<ContentControl x:Name="OrderWarning" Grid.Row="3" Grid.ColumnSpan="2"/>
 
 		<Label Grid.Row="4" Grid.Column="0">Предыдущие заказы</Label>
-		<c:DataGrid2 x:Name="HistoryOrders" Grid.Row="5" Grid.Column="0">
+		<c:DataGrid2 x:Name="HistoryOrders" Grid.Row="5" Grid.Column="0" CanUserSortColumns="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding Order.PriceName}" Width="*" />
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />

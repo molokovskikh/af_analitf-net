@@ -85,20 +85,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			ProductInfo = new ProductInfo(StatelessSession, Manager, Shell);
+			ProductInfo = new ProductInfo(this);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
-			editor = new Editor(OrderWarning, Manager);
+
+			//если это отправленный заказ редактор не должен работать
+			var currentOrderLine = new NotifyValue<OrderLine>();
+			if (IsCurrentOrder) {
+				currentOrderLine = CurrentLine.Select(v => (OrderLine)v).ToValue();
+				currentOrderLine.Subscribe(v => CurrentLine.Value = v);
+			}
+			editor = new Editor(OrderWarning, Manager, currentOrderLine);
 			CurrentLine
 				.Subscribe(_ => {
 					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
-					editor.CurrentEdit = CurrentLine.Value as OrderLine;
 				});
+
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
-
-			editor.ObservableForProperty(e => e.CurrentEdit)
-				.Select(e => e.Value)
-				.BindTo(this, m => m.CurrentLine.Value);
-
 			Lines.Subscribe(_ => editor.Lines = Lines.Value as IList);
 		}
 

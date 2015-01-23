@@ -130,8 +130,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (line != null) {
 					if (ShouldCalculateStatus(line)) {
 
-						if (sourceLine.Count == ordered)
+						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;
+							line.ExportBatchLineId = ((OrderLine)sourceLine).ExportBatchLineId;
+						}
 
 						if (line.Cost != sourceLine.Cost) {
 							line.SendResult |= LineResultStatus.CostChanged;

@@ -46,6 +46,7 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
+		private bool clearSession;
 		private TableSettings tableSettings = new TableSettings();
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
@@ -59,12 +60,12 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool Readonly;
 		protected ILog log;
 		protected ExcelExporter excelExporter;
+		protected IMessageBus Bus = RxApp.MessageBus;
 		protected ISession Session;
-		protected IStatelessSession StatelessSession;
+		public IStatelessSession StatelessSession;
 
 		//адрес доставки который выбран в ui
 		public Address Address;
-		protected IMessageBus Bus = RxApp.MessageBus;
 		//освобождает ресурсы при закрытии формы
 		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();
 		//сигнал который подается при закрытии формы, может быть использован для отмены операций который выполняются в фоне
@@ -87,8 +88,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public Env Env = new Env();
 		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
 		public static TaskScheduler TestQueryScheduler = null;
-		public ManualResetEventSlim drained = new ManualResetEventSlim(true);
-		public int backgrountQueryCount = 0;
+		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
+		public int BackgrountQueryCount = 0;
+		public Address[] Addresses = new Address[0];
+
+		protected SimpleMRUCache cache = new SimpleMRUCache(10);
 
 		public BaseScreen()
 		{
@@ -119,6 +123,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			excelExporter = new ExcelExporter(this, Path.GetTempPath());
+
 		}
 
 		public IScheduler UiScheduler
@@ -163,10 +168,17 @@ namespace AnalitF.Net.Client.ViewModels
 				//то вызов произойдет после того как Dispatcher поделает все дела
 				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
 				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
-				OnCloseDisposable.Add(Bus.Listen<string>("db")
+				Bus.Listen<string>("db")
 					.Where(m => m == "Changed")
-					.Subscribe(_ => updateOnActivate = true));
+					.Subscribe(_ => {
+						updateOnActivate = true;
+					}, CloseCancellation.Token);
 			}
+			Bus.Listen<string>("db")
+				.Where(m => m == "Changed")
+				.Subscribe(_ => {
+					clearSession = true;
+				}, CloseCancellation.Token);
 
 			Load();
 			Restore();
@@ -185,8 +197,26 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 		}
 
+		protected virtual void RecreateSession()
+		{
+			Session.Clear();
+			Addresses = Session.Query<Address>().ToArray();
+			if (Address != null)
+				Address = Session.Get<Address>(Address.Id);
+			User = Session.Query<User>().FirstOrDefault();
+			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
+			//что бы избежать ошибок ленивой загрузки
+			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings(true)));
+		}
+
 		protected override void OnActivate()
 		{
+			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
+			if (clearSession) {
+				RecreateSession();
+				clearSession = false;
+			}
+
 			IsSuccessfulActivated = true;
 
 			if (updateOnActivate) {
@@ -352,7 +382,7 @@ namespace AnalitF.Net.Client.ViewModels
 			StatelessSession.Update(sender);
 		}
 
-		protected void WatchForUpdate(NotifyValue<Reject> currentReject)
+		protected void WatchForUpdate<T>(NotifyValue<T> currentReject)
 		{
 			currentReject.ChangedValue()
 				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
@@ -586,9 +616,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (StatelessSession == null)
 				return Observable.Empty<T>();
 			var task = new Task<T>(() => {
-				Interlocked.Increment(ref backgrountQueryCount);
+				Interlocked.Increment(ref BackgrountQueryCount);
 				try{
-					drained.Reset();
+					Drained.Reset();
 					if (StatelessSession == null)
 						return default(T);
 					lock (StatelessSession) {
@@ -596,9 +626,9 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 				}
 				finally {
-					var val = Interlocked.Decrement(ref backgrountQueryCount);
+					var val = Interlocked.Decrement(ref BackgrountQueryCount);
 					if (val == 0)
-						drained.Set();
+						Drained.Set();
 				}
 			}, CloseCancellation.Token);
 			task.Start(QueryScheduler);
@@ -607,7 +637,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Task WaitQueryDrain()
 		{
-			var t = new Task(() => drained.Wait());
+			var t = new Task(() => Drained.Wait());
 			t.Start(QueryScheduler);
 			return t;
 		}

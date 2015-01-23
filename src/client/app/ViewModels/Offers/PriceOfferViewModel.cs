@@ -137,10 +137,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Offers.Value = items.OrderBy(o => o.ProductSynonym).ToList();
 		}
 
-		protected override void Query()
-		{
-		}
-
 		public void CancelFilter()
 		{
 			CurrentFilter.Value = Filters[0];

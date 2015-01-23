@@ -20,8 +20,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 	{
 		private string autoCommentText;
 		private bool resetAutoComment;
-		private bool clearSession;
-		private SimpleMRUCache cache = new SimpleMRUCache(10);
 		private Catalog currentCatalog;
 		private List<SentOrderLine> historyOrders;
 		private OfferComposedId initOfferId;
@@ -34,7 +32,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected bool NavigateOnShowCatalog;
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
-		public Address[] Addresses = new Address[0];
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -198,20 +195,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Select(e => new Stat(Address));
 
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
-			Bus.Listen<string>("db")
-				.Where(m => m == "Changed")
-				.Subscribe(_ => clearSession = true, CloseCancellation.Token);
 		}
 
 		protected override void OnActivate()
 		{
-			//если это не первичная активация и данные в базе были изменены то нужно перезагрузить сессию
-			if (clearSession) {
-				Session.Clear();
-				RecreateSession();
-				clearSession = false;
-			}
-
 			base.OnActivate();
 
 			if (Shell != null) {
@@ -392,16 +379,16 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			}
 		}
 
-		protected abstract void Query();
-
-		protected virtual void RecreateSession()
+		protected virtual void Query()
 		{
-			Addresses = Session.Query<Address>().ToArray();
-			if (Address != null)
-				Address = Session.Get<Address>(Address.Id);
+		}
+
+		protected override void RecreateSession()
+		{
+			base.RecreateSession();
+
 			if (CurrentElementAddress != null)
 				CurrentElementAddress = Session.Get<Address>(CurrentElementAddress.Id);
-			User = Session.Query<User>().FirstOrDefault();
 			LoadOrderItems();
 		}
 

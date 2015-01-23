@@ -222,17 +222,42 @@ namespace AnalitF.Net.Client.Models
 	}
 #endif
 
+	public class BatchItem
+	{
+		public string Code;
+
+		public string CodeCr;
+
+		public string ProductName;
+
+		public string ProducerName;
+
+		public uint Quantity;
+
+		public string SupplierDeliveryId;
+
+		public Dictionary<string, string> ServiceValues;
+	}
+
 	public class BatchRequest
 	{
 		public uint AddressId;
+		public List<BatchItem> BatchItems;
 
 		public BatchRequest()
 		{
+			BatchItems = new List<BatchItem>();
 		}
 
 		public BatchRequest(uint addressId)
 		{
 			AddressId = addressId;
+			BatchItems = new List<BatchItem>();
+		}
+		public BatchRequest(uint addressId, List<BatchItem> items)
+		{
+			AddressId = addressId;
+			BatchItems = items;
 		}
 	}
 }

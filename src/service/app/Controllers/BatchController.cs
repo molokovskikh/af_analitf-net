@@ -24,33 +24,49 @@ namespace AnalitF.Net.Service.Controllers
 	{
 		public HttpResponseMessage Post(HttpRequestMessage request)
 		{
-			var input = request.Content.ReadAsStreamAsync().Result;
 			BatchRequest requestMeta;
-			Stream payloadStream;
-			using(var zip = ZipFile.Read(input)) {
-				var meta = zip.Entries.First(e => e.FileName.Match("meta.json"));
-				var serializer = new JsonSerializer();
-				using(var streamReader = new StreamReader(meta.OpenReader())) {
-					requestMeta = (BatchRequest)serializer.Deserialize(streamReader, typeof(BatchRequest));
+			Stream payloadStream = null;
+			if (request.Content.Headers.ContentType != null
+				&& request.Content.Headers.ContentType.MediaType.Match("application/json")) {
+				requestMeta = request.Content.ReadAsAsync<BatchRequest>().Result;
+			}
+			else {
+				var input = request.Content.ReadAsStreamAsync().Result;
+				using(var zip = ZipFile.Read(input)) {
+					var meta = zip.Entries.First(e => e.FileName.Match("meta.json"));
+					var serializer = new JsonSerializer();
+					using(var streamReader = new StreamReader(meta.OpenReader())) {
+						requestMeta = (BatchRequest)serializer.Deserialize(streamReader, typeof(BatchRequest));
+					}
+					var payload = zip.Entries.First(e => e.FileName.Match("payload"));
+					payloadStream = FileHelper.SelfDeleteTmpFile();
+					payload.Extract(payloadStream);
+					payloadStream.Position = 0;
 				}
-				var payload = zip.Entries.First(e => e.FileName.Match("payload"));
-				payloadStream = FileHelper.SelfDeleteTmpFile();
-				payload.Extract(payloadStream);
-				payloadStream.Position = 0;
 			}
 
 			return StartJob((session, config, job) => {
 				try {
-					List<Order> orders;
-					List<OrderBatchItem> batchItems;
 					var batchAddress = session.Load<Address>(requestMeta.AddressId);
-					using (payloadStream) {
-						var handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
-						orders = handler.ProcessOrderBatch();
-						batchItems = handler.OrderBatchItems;
-						orders.Each(o => o.RowId = (uint)o.GetHashCode());
-						orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
+					SmartOrderBatchHandler handler;
+					if (payloadStream == null) {
+						var items = requestMeta.BatchItems.Select(i => new OrderBatchItem(i.ProductName, i.ProducerName, i.Quantity) {
+							Code = i.Code,
+							CodeCr = i.CodeCr,
+							SupplierDeliveryId = i.SupplierDeliveryId,
+							ServiceValues = i.ServiceValues,
+						}).ToList();
+						handler = new SmartOrderBatchHandler(session, job.User, batchAddress, items);
 					}
+					else {
+						using (payloadStream) {
+							handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
+						}
+					}
+					var orders = handler.ProcessOrderBatch();
+					var batchItems = handler.OrderBatchItems;
+					orders.Each(o => o.RowId = (uint)o.GetHashCode());
+					orders.SelectMany(o => o.OrderItems).Each(o => o.RowId = (uint)o.GetHashCode());
 
 					using(var exporter = new Exporter(session, config, job)) {
 						exporter.Orders = orders;

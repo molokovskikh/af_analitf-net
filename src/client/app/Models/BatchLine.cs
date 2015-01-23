@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Newtonsoft.Json;
@@ -17,10 +18,74 @@ namespace AnalitF.Net.Client.Models
 		OffersExists = 0x10, // Предложения для данной позиции имелись
 	}
 
+	public class BatchLineView : BaseNotify
+	{
+		public BatchLineView(BatchLine batchline, OrderLine orderline)
+		{
+			BatchLine = batchline;
+			OrderLine = orderline;
+			BatchLine.PropertyChanged += (sender, args) => {
+				if (args.PropertyName == "Quantity")
+					OnPropertyChanged("Count");
+			};
+			if (OrderLine != null) {
+				OrderLine.PropertyChanged += (sender, args) => {
+					if (args.PropertyName == "Count")
+						OnPropertyChanged("Count");
+				};
+			}
+		}
+
+		public BatchLine BatchLine { get; private set; }
+		public OrderLine OrderLine { get; set; }
+
+		public virtual string Product
+		{
+			get
+			{
+				return OrderLine == null ? BatchLine.ProductSynonym : OrderLine.ProductSynonym;
+			}
+		}
+
+		public virtual string Producer
+		{
+			get
+			{
+				return OrderLine == null ? BatchLine.ProducerSynonym : OrderLine.ProducerSynonym;
+			}
+		}
+
+		public virtual uint Count
+		{
+			get
+			{
+				return OrderLine == null ? BatchLine.Quantity : OrderLine.Count;
+			}
+		}
+
+		[Style(Description = "Не заказанные")]
+		public virtual bool IsNotOrdered
+		{
+			get { return BatchLine.Status.HasFlag(ItemToOrderStatus.NotOrdered); }
+		}
+
+		[Style(Description = "Минимальная цена")]
+		public virtual bool IsMinCost
+		{
+			get { return BatchLine.Status.HasFlag(ItemToOrderStatus.MinimalCost); }
+		}
+
+		[Style("Product", Description = "Присутствует в замороженных заказах"), Ignore]
+		public virtual bool ExistsInFreezed
+		{
+			get { return BatchLine.ExistsInFreezed; }
+		}
+	}
+
 	public class BatchLine : BaseStatelessObject
 	{
 		private Lazy<Dictionary<string, string>> lazyFields;
-		private OrderLine line;
+		private uint _quantity;
 
 		public BatchLine()
 		{
@@ -40,7 +105,8 @@ namespace AnalitF.Net.Client.Models
 			: this()
 		{
 			Address = orderLine.Order.Address;
-			ExportLineId = orderLine.ExportId;
+			ExportId = (uint)GetHashCode();
+			orderLine.ExportBatchLineId = ExportId;
 			ProductId = orderLine.ProductId;
 			CatalogId = orderLine.CatalogId;
 			ProductSynonym = orderLine.ProductSynonym;
@@ -58,12 +124,16 @@ namespace AnalitF.Net.Client.Models
 			ProductSynonym = catalog.FullName;
 			ProductId = catalog.Id;
 			CatalogId = catalog.Id;
+			Status = ItemToOrderStatus.NotOrdered;
 		}
 
 		public override uint Id { get; set; }
 
 		public virtual Address Address { get; set; }
 
+		public virtual string Code { get; set; }
+		public virtual string CodeCr { get; set; }
+		public virtual string SupplierDeliveryId { get; set; }
 		public virtual string ProductSynonym { get; set; }
 		public virtual uint? ProductId { get; set; }
 		public virtual uint? CatalogId { get; set; }
@@ -71,61 +141,21 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ProducerSynonym { get; set; }
 		public virtual uint? ProducerId { get; set; }
 		public virtual string Producer { get; set; }
-		public virtual uint Quantity { get; set; }
-		public virtual string Comment { get; set;}
-		public virtual ItemToOrderStatus Status { get; set; }
 
-		[Ignore]
-		public virtual OrderLine Line
+		public virtual uint Quantity
 		{
-			get
-			{
-				return line;
-			}
+			get { return _quantity; }
 			set
 			{
-				if (line == value)
-					return;
-				if (value == null)
-					line.PropertyChanged -= TrackLine;
-				else
-					value.PropertyChanged += TrackLine;
-					
-				line = value;
+				_quantity = value;
+				OnPropertyChanged();
 			}
 		}
 
+		public virtual string Comment { get; set;}
+		public virtual ItemToOrderStatus Status { get; set; }
 		public virtual string ServiceFields { get; set; }
-		public virtual uint? ExportLineId { get; set; }
-
-		public virtual string MixedProduct
-		{
-			get
-			{
-				return Line == null ? ProductSynonym : Line.ProductSynonym;
-			}
-		}
-
-		public virtual string MixedProducer
-		{
-			get
-			{
-				return Line == null ? ProducerSynonym : Line.ProducerSynonym;
-			}
-		}
-
-		public virtual string PriceName
-		{
-			get { return Line == null ? "" : Line.Order.Price.Name; }
-		}
-
-		public virtual uint MixedCount
-		{
-			get
-			{
-				return Line == null ? Quantity : Line.Count;
-			}
-		}
+		public virtual uint? ExportId { get; set; }
 
 		public virtual string HasProducerLabel
 		{
@@ -134,13 +164,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string HasOrderLineLabel
 		{
-			get { return  Line == null ? "Нет" : "Да"; }
+			get { return  IsNotOrdered ? "Нет" : "Да"; }
+		}
+
+		public virtual Dictionary<string, string> ParsedServiceFields
+		{
+			get { return lazyFields.Value; }
 		}
 
 		[Style(Description = "Не заказанные")]
 		public virtual bool IsNotOrdered
 		{
-			get { return Line == null; }
+			get { return Status.HasFlag(ItemToOrderStatus.NotOrdered); }
 		}
 
 		[Style(Description = "Минимальная цена")]
@@ -149,29 +184,24 @@ namespace AnalitF.Net.Client.Models
 			get { return Status.HasFlag(ItemToOrderStatus.MinimalCost); }
 		}
 
-		[Style("MixedProduct", Description = "Присутствует в замороженных заказах"), Ignore]
-		public virtual bool ExistsInFreezed
-		{
-			get; set;
-		}
-
-		public virtual Dictionary<string, string> ParsedServiceFields
-		{
-			get
-			{
-				return lazyFields.Value;
-			}
-		}
-
-		private void TrackLine(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == "Count")
-				OnPropertyChanged("MixedCount");
-		}
+		[Style("ProductSynonym", Description = "Присутствует в замороженных заказах"), Ignore]
+		public virtual bool ExistsInFreezed { get; set; }
 
 		public override string ToString()
 		{
-			return string.Format("Comment: {0}, ProductId: {1}", Comment, ProductId);
+			return String.Format("Comment: {0}, Status: {2}, ProductId: {1}, ProductSynonym: {3}",
+				Comment, ProductId, Status, ProductSynonym);
+		}
+
+		public static void CalculateStyle(Address[] addresses, IEnumerable<BatchLine> lines)
+		{
+			var productids = addresses.SelectMany(a => a.Orders).Where(o => o.Frozen)
+				.SelectMany(o => o.Lines)
+				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ProductId));
+			foreach (var line in lines) {
+				var key = Tuple.Create(line.Address.Id, line.ProductId.GetValueOrDefault());
+				line.ExistsInFreezed = productids[key].FirstOrDefault() != null;
+			}
 		}
 	}
 }

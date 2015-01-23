@@ -282,7 +282,8 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync
+	?lastSync as LastSync,
+	u.UseBatch2
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
@@ -907,6 +908,11 @@ where a.MailId in ({0})", ids.Implode());
 						items.Select(i => i.ProductId).DefaultIfEmpty(0u).Implode()))
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Convert.ToUInt32(r["CatalogId"]));
 
+				var orderbatchLookup = (from batch in (BatchItems ?? new List<OrderBatchItem>())
+					where batch.Item != null
+					from line in batch.Item.OrderItems
+					select Tuple.Create(batch, line))
+					.ToLookup(t => t.Item2, t => t.Item1);
 				Export(Result, "OrderLines",
 					new[] {
 						"ExportOrderId",
@@ -944,6 +950,7 @@ where a.MailId in ({0})", ids.Implode());
 						"Cost",
 						"RegionId",
 						"OfferId",
+						"ExportBatchLineId"
 					},
 					items
 						.Select(i => new object[] {
@@ -982,12 +989,16 @@ where a.MailId in ({0})", ids.Implode());
 							i.Cost,
 							i.Order.RegionCode,
 							i.CoreId,
+							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault()
 						}), truncate: false);
 
 				if (BatchItems != null) {
 					Export(Result, "BatchLines",
 						new[] {
-							"ExportLineId",
+							"ExportId",
+							"Code",
+							"CodeCr",
+							"SupplierDeliveryId",
 							"AddressId",
 							"ProductSynonym",
 							"ProductId",
@@ -1001,8 +1012,11 @@ where a.MailId in ({0})", ids.Implode());
 							"ServiceFields"
 						},
 						BatchItems.Select(i => new object[] {
-							i.Item == null || i.Item.OrderItem == null ? null : (uint?)i.Item.OrderItem.RowId,
-							i.Item == null || i.Item.OrderItem == null ? BatchAddress.Id : i.Item.OrderItem.Order.AddressId,
+							i.GetHashCode(),
+							i.Code,
+							i.CodeCr,
+							i.SupplierDeliveryId,
+							GetAddressId(BatchAddress, i),
 							i.ProductName,
 							i.Item == null ? null : (uint?)i.Item.ProductId,
 							i.Item == null ? null : (uint?)i.Item.CatalogId,
@@ -1111,6 +1125,19 @@ from Logs.PendingOrderLogs l
 where l.UserId = ?userId
 group by ol.RowId";
 			Export(Result, sql, "OrderLines", truncate: false, parameters: new { userId = user.Id });
+		}
+
+		private object GetAddressId(Address address, OrderBatchItem item)
+		{
+			var id = address.Id;
+			if (item.Item == null)
+				return id;
+			if (item.Item.Address != null)
+				id = item.Item.Address.Id;
+			var orderItem = item.Item.OrderItems.FirstOrDefault();
+			if (orderItem != null)
+				id = orderItem.Order.AddressId.Value;
+			return id;
 		}
 
 		public void ExportSentOrders(ulong[] existOrderIds)
