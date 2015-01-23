@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -33,8 +34,14 @@ namespace AnalitF.Net.Service.Models
 			LocalHost = Environment.MachineName;
 			UpdateType = updateType;
 			LastSync = lastSync;
-			if (request.Properties.ContainsKey("MS_HttpContext"))
-				RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+			IEnumerable<string> values;
+			if (request.Headers.TryGetValues("X-Forwarded-For", out values)) {
+				RemoteHost = values.Implode();
+			}
+			if (String.IsNullOrEmpty(RemoteHost)) {
+				if (request.Properties.ContainsKey("MS_HttpContext"))
+					RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+			}
 		}
 
 		public virtual uint Id { get; set; }

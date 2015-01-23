@@ -100,7 +100,6 @@ namespace AnalitF.Net.Proxy
 					contentHeaders.Add("Expires");
 					contentHeaders.Add("Last-Modified");
 
-
 					var uri = route + context.Request.Path;
 					var querystring = (string)environment["owin.RequestQueryString"];
 					if (querystring != "")
@@ -110,6 +109,7 @@ namespace AnalitF.Net.Proxy
 					var proxyRequest = new HttpRequestMessage(new HttpMethod(context.Request.Method), uri);
 					log.DebugFormat("request = {0}", proxyRequest);
 					proxyRequest.Headers.Clear();
+					proxyRequest.Headers.Add("X-Forwarded-For", context.Request.RemoteIpAddress);
 					foreach (var header in context.Request.Headers.Where(h => !contentHeaders.Contains(h.Key))) {
 						proxyRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
 					}

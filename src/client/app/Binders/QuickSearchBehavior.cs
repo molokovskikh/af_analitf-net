@@ -96,6 +96,8 @@ namespace AnalitF.Net.Client.Binders
 		{
 			if (!searchText.IsEnabled)
 				return;
+			if (String.IsNullOrEmpty(message.EventArgs.Text))
+				return;
 
 			if (!Char.IsControl(message.EventArgs.Text[0])) {
 				message.EventArgs.Handled = true;
