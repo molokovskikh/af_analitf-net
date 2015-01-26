@@ -169,7 +169,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
 				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}, fullScreen :true);
+			}, fullScreen: true);
 		}
 
 		public IResult PrintPriceTags()

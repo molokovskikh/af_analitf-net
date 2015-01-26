@@ -127,7 +127,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				SentOrders = StatelessSession.Query<SentOrder>()
 					.Where(o => o.SentOn >= begin && o.SentOn < end
 						&& filterAddresses.Contains(o.Address.Id))
-					.OrderBy(o => o.SentOn)
+					.OrderByDescending(o => o.SentOn)
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)
 					.Take(1000)
@@ -147,7 +147,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				//тк он перезагрузить объекты
 				var orders = AddressSelector.GetActiveFilter()
 					.SelectMany(a => a.Orders)
-					.OrderBy(o => o.CreatedOn)
+					.OrderBy(o => o.PriceName)
 					.ToList();
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true

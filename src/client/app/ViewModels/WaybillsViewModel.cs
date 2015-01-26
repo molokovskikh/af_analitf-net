@@ -184,7 +184,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(w => addressIds.Contains(w.Address.Id));
 
 			Waybills.Value = query
-				.OrderBy(w => w.WriteTime)
+				.OrderByDescending(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
 				.Fetch(w => w.Address)
 				.ToObservableCollection();
