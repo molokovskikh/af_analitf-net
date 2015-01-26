@@ -47,6 +47,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Close(model);
 			lazyModel = new Lazy<T>(Init<T>);
 		}
+
+		protected T Next<T>(IEnumerator<IResult> results)
+		{
+			Assert.IsTrue(results.MoveNext());
+			Assert.IsInstanceOf<T>(results.Current);
+			return (T)results.Current;
+		}
 	}
 
 	public class ViewModelFixture : DbFixture

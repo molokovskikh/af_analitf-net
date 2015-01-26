@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
@@ -10,6 +11,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;
 using Common.MySql;
 using Common.NHibernate;
@@ -19,6 +21,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 using log4net.Config;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -121,7 +124,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.CanFreeze, Is.True);
 			model.Freeze();
 			Assert.That(model.CanUnfreeze);
-			model.Unfreeze();
+			ProcessTask(model.Unfreeze());
 			Assert.That(model.Orders.Select(o => o.Id).ToArray(), Is.Not.Contains(order.Id));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
@@ -138,7 +141,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.CurrentOrder = model.Orders.First(o => o.Id == order.Id);
 			Assert.That(model.CanReorder, Is.True);
-			model.Reorder();
+			var result = model.Reorder();
+			ProcessTask(result);
+
 			Assert.That(model.Orders.Select(o => o.Id).ToArray(), Is.Not.Contains(order.Id));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines[0].Count, Is.EqualTo(2));
@@ -158,7 +163,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			SelectSent();
 
 			Assert.That(model.CanReorder, Is.True);
-			model.Reorder();
+			ProcessTask(model.Reorder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines.Count, Is.EqualTo(2));
@@ -173,8 +178,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder();
 			SelectSent();
 
-			var result = model.Reorder();
-			var text = ((TextViewModel)((DialogResult)result).Model).Text;
+			var result = model.Reorder().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+
+			var text = ((TextViewModel)Next<DialogResult>(result).Model).Text;
 			Assert.That(text, Is.StringContaining("предложение отсутствует"));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines.Count, Is.EqualTo(1));
@@ -200,7 +209,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			PrepareSent();
 
 			Assert.That(model.CanRestoreOrder, Is.True);
-			model.RestoreOrder();
+			ProcessTask(model.RestoreOrder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
 			model.IsCurrentSelected.Value = true;
 			model.IsSentSelected.Value = false;
@@ -247,7 +256,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.AddressToMove = model.AddressesToMove.Find(a => a.Id == newAddress.Id);
 			Assert.True(model.CanMove);
 			Assert.That(model.MoveVisible);
-			model.Move();
+			ProcessTask(model.Move());
 			Assert.That(model.Orders[0].Address.Id, Is.EqualTo(newAddress.Id));
 		}
 
@@ -358,6 +367,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.IsSentSelected.Value = true;
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
+		}
+
+		private void ProcessTask(IEnumerable<IResult> result)
+		{
+			var enumerator = result.GetEnumerator();
+			var task = Next<TaskResult>(enumerator).Task;
+			task.Start();
+			task.Wait();
+			enumerator.MoveNext();
 		}
 	}
 }

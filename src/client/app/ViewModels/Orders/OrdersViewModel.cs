@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -320,7 +322,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return CurrentOrder != null && CurrentOrder.Frozen && !IsSentSelected; }
 		}
 
-		public IResult Unfreeze()
+		public IEnumerable<IResult> Unfreeze()
 		{
 			if (!CanUnfreeze)
 				return null;
@@ -341,7 +343,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
-		public IResult Reorder()
+		public IEnumerable<IResult> Reorder()
 		{
 			if (!CanReorder)
 				return null;
@@ -387,7 +389,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return IsSentSelected; }
 		}
 
-		public IResult RestoreOrder()
+		public IEnumerable<IResult> RestoreOrder()
 		{
 			if (!CanRestoreOrder)
 				return null;
@@ -409,7 +411,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return IsCurrentSelected; }
 		}
 
-		public IResult Move()
+		public IEnumerable<IResult> Move()
 		{
 			if (!CanMove)
 				return null;
@@ -481,28 +483,29 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			return new OrderDocument(result);
 		}
 
-		public IResult Run(DbCommand command)
+		public IEnumerable<IResult> Run(DbCommand command)
 		{
 			Session.Flush();
-			using(var session = Session.SessionFactory.OpenSession())
-			using(var transaction = session.BeginTransaction()) {
-				command.Session = session;
-				command.Execute();
-				updateOnActivate = session.IsDirty();
-				transaction.Commit();
-			}
+			var task = new Task(() => {
+				using(var session = Session.SessionFactory.OpenSession())
+				using(var transaction = session.BeginTransaction()) {
+					command.Session = session;
+					command.Execute();
+					updateOnActivate = session.IsDirty();
+					transaction.Commit();
+				}
+			});
+
+			yield return new Models.Results.TaskResult(task, new WaitViewModel("Выполнение операции, подождите."));
+
+			if (task.IsFaulted)
+				log.Error(String.Format("Ошибка при выполнение команды {0}", command), task.Exception);
+
 			Update();
 
-			return ProcessCommandResult(command);
-		}
-
-		private static IResult ProcessCommandResult(DbCommand command)
-		{
 			var text = command.Result as string;
 			if (!String.IsNullOrEmpty(text))
-				return new DialogResult(new TextViewModel(text), sizeToContent: true);
-
-			return null;
+				yield return new DialogResult(new TextViewModel(text), sizeToContent: true);
 		}
 	}
 }
