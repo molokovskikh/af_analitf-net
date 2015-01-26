@@ -258,6 +258,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
+			if (statelessSession != null) {
+				statelessSession
+					.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0")
+					.ExecuteUpdate();
+			}
 			Reload();
 		}
 

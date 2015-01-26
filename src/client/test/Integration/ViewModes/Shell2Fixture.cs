@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Linq.Observαble;
 using System.Threading;
-using System.Windows;
-using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -21,20 +16,14 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
-using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
-using NHibernate.Mapping;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
-using Address = AnalitF.Net.Client.Models.Address;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 using Main = AnalitF.Net.Client.ViewModels.Main;
 
@@ -138,11 +127,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Flush();
 			shell.Reload();
 
-			ContinueWithDialog<SettingsViewModel>(m => {
+			manager.DialogOpened.OfType<SettingsViewModel>().Subscribe(m => {
+				ScreenExtensions.TryActivate(m);
 				m.Settings.Value.UserName = "test";
 				m.Settings.Value.Password = "123";
 				m.Save();
 				Deactivate(m);
+				Close(m);
 			});
 
 			shell.StartCheck();
@@ -197,7 +188,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_about()
 		{
+			var about = manager.DialogOpened.OfType<About>().ToValue();
 			shell.ShowAbout();
+			Assert.IsNotNull(about.Value);
 		}
 
 		[Test]
@@ -278,7 +271,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			restore = true;
 			var settings = false;
 			stub.Do = c => { throw new RequestException("Unauthorized", HttpStatusCode.Unauthorized); };
-			manager.ContinueViewDialog = d => {
+			manager.DialogOpened.Subscribe(d => {
 				if (d is WaitViewModel)
 					((WaitViewModel)d).Closed.WaitOne();
 				else {
@@ -289,7 +282,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 					model.Save();
 					Close(model);
 				}
-			};
+			});
 			shell.Update();
 
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
@@ -444,23 +437,24 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.AreEqual(1, shell.Addresses.Count);
 		}
 
+		[Test]
+		public void Mark_for_send_on_init()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			order.Send = false;
+
+			Assert.AreEqual(1, shell.Stat.Value.ReadyForSendOrdersCount);
+			session.Refresh(order);
+			Assert.IsTrue(order.Send);
+		}
+
 		private void Collect(IEnumerable<IResult> results)
 		{
 			dialogs.AddRange(results.OfType<DialogResult>().Select(d => d.Model));
 			foreach (var dialog in dialogs.OfType<BaseScreen>()) {
 				dialog.Shell = shell;
 			}
-		}
-
-		private void ContinueWithDialog<T>(Action<T> action)
-		{
-			manager.ContinueViewDialog = m => {
-				if (m is T) {
-					ScreenExtensions.TryActivate(m);
-					action((T)m);
-					Close(m);
-				}
-			};
 		}
 	}
 }

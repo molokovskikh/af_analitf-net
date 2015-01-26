@@ -33,7 +33,6 @@ namespace AnalitF.Net.Client.Extentions
 		public bool SkipApp;
 		public MessageBoxResult DefaultQuestsionResult = MessageBoxResult.Yes;
 		public MessageBoxResult DefaultResult = MessageBoxResult.OK;
-		public Action<object> ContinueViewDialog = d => {  };
 
 		public Subject<object> DialogOpened = new Subject<object>();
 		public Subject<Window> WindowOpened = new Subject<Window>();
@@ -130,7 +129,6 @@ namespace AnalitF.Net.Client.Extentions
 				IoC.BuildUp(rootModel);
 				ScreenExtensions.TryActivate(rootModel);
 				DialogOpened.OnNext(rootModel);
-				ContinueViewDialog(rootModel);
 				return true;
 			}
 			return false;
