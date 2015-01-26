@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			settings.UseSupplierPriceWithNdsForMarkup = true;
 			Calculate(line);
 
-			Assert.That(line.ProducerCostWithTax,Is.GreaterThan(majorMarkup.Begin));
+			Assert.That(line.ProducerCostWithTax, Is.GreaterThan(majorMarkup.Begin));
 			Assert.AreEqual(40, line.RetailMarkup);
 		}
 

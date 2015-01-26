@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
-			DebugContext= new Dictionary<string, object>();
+			DebugContext = new Dictionary<string, object>();
 			Env = new Env {
 				IsUnitTesting = true
 			};

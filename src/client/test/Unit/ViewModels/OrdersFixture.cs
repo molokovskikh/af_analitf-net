@@ -16,7 +16,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Save_address_filter()
 		{
 			var model = new OrdersViewModel();
-			var addresses = new [] {
+			var addresses = new[] {
 				new Address("тест") {
 					Id = 1
 				},
@@ -41,7 +41,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Rebuild_address()
 		{
 			var model = new OrdersViewModel();
-			var addresses = new [] {
+			var addresses = new[] {
 				new Address("Тестовый адрес доставки 1") {
 					Id = 1
 				},
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			ScreenExtensions.TryDeactivate(model, true);
 
 			model = new OrdersViewModel();
-			addresses = new [] {
+			addresses = new[] {
 				new Address("Тестовый адрес доставки 1") {
 					Id = 2
 				},

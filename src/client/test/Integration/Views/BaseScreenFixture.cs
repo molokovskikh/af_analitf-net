@@ -20,7 +20,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[SetUp]
 		public void Setup()
 		{
-			origin =  ViewLocator.LocateForModel;
+			origin = ViewLocator.LocateForModel;
 			ViewLocator.LocateForModel = (model, displayLocation, context) => {
 				if (model is TestScreen) {
 					var view = new UserControl();

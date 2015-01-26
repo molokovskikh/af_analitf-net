@@ -270,7 +270,7 @@ where a.Enabled = 1 and ua.UserId = ?userId", addressName);
 				.SetParameter("id", user.Client.RegionCode)
 				.List<object[]>();
 			var rawPhone = contacts.Select(d => d[0]).Cast<string>().FirstOrDefault();
-			var rawHours =  contacts.Select(d => d[1]).Cast<string>().FirstOrDefault();
+			var rawHours = contacts.Select(d => d[1]).Cast<string>().FirstOrDefault();
 
 			sql = @"
 select u.Id,
@@ -721,8 +721,8 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 		private void ExportPromotions()
 		{
 			if (!clientSettings.ShowAdvertising) {
-				Export(Result, "PromotionCatalogs", new [] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
-				Export(Result, "Promotions", new [] { "Id" }, Enumerable.Empty<object[]>());
+				Export(Result, "PromotionCatalogs", new[] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
+				Export(Result, "Promotions", new[] { "Id" }, Enumerable.Empty<object[]>());
 				return;
 			}
 

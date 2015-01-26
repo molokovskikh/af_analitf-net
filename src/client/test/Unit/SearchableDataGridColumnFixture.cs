@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		[Test]
 		public void Split()
 		{
-			var result = SearchableDataGridColumn.Split("АТЕНОЛОЛ табл. 50 мг N100", new [] { "бальзам" });
+			var result = SearchableDataGridColumn.Split("АТЕНОЛОЛ табл. 50 мг N100", new[] { "бальзам" });
 			Assert.IsEmpty(result);
 
 			var value = "АСКОРБИНОВАЯ КИСЛОТА табл. с сахаром 25 мг N10";
