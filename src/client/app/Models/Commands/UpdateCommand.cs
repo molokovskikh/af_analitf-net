@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			else if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
-				SuccessMessage = "Автоматическая обработка дефектуры завершина.";
+				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
 				var items = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
 					Code = l.Code,
 					CodeCr = l.CodeCr,
