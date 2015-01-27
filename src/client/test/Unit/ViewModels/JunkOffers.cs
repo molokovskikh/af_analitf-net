@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Test.Unit.ViewModels
 {
 	[TestFixture]
-	public class JunkOffersFixture :  BaseUnitFixture
+	public class JunkOffersFixture : BaseUnitFixture
 	{
 		[Test]
 		public void Disabled_export()

@@ -5,6 +5,7 @@ using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -34,6 +35,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(names.CatalogNames.Value.All(n => n.Mnn.Id == model.CurrentMnn.Id),
 				names.CatalogNames.Value.Implode());
 			Assert.That(catalog.ShowWithoutOffers, Is.True);
+		}
+
+		[Test]
+		public void Search()
+		{
+			var items = model.Mnns;
+			testScheduler.Start();
+			var count = items.Value.Count;
+			Assert.That(count, Is.GreaterThan(0));
+			model.SearchBehavior.SearchText.Value = items.Value[0].Name;
+			testScheduler.AdvanceByMs(5000);
+			testScheduler.Start();
+			Assert.That(model.Mnns.Value.Count, Is.LessThan(count));
+			Assert.That(model.Mnns.Value.Count, Is.GreaterThan(0));
 		}
 	}
 }

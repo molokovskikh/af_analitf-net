@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Поиск по МНН";
 			ShowWithoutOffers = new NotifyValue<bool>();
-			SearchBehavior = new SearchBehavior(this);
+			SearchBehavior = new SearchBehavior(this, callUpdate: false);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -28,8 +28,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Mnns = ShowWithoutOffers
-				.Select(v => RxQuery(s => {
+			Mnns = SearchBehavior.ActiveSearchTerm.Select(v => (object)v)
+				.Merge(ShowWithoutOffers.Select(v => (object)v))
+				.Select(_ => RxQuery(s => {
 					var query = s.Query<Mnn>();
 					if (!ShowWithoutOffers) {
 						query = query.Where(m => m.HaveOffers);
