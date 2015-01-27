@@ -352,7 +352,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = session.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
 			var order1 = MakeOrder(offer);
 			order1.Send = false;
-			MakeOrder();
+			MakeOrder(session.Query<Offer>().First(o => !o.Price.SupplierName.Contains("минимальный заказ")));
 
 			var result = shell.SendOrders().ToArray();
 			Assert.AreEqual(0, result.Length, result.Implode());
@@ -414,7 +414,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			};
 			var events = new List<Progress>();
 			manager.DialogOpened.OfType<SyncViewModel>().Subscribe(m => {
-				m.Progress.Collect(events);
+				m.Progress.Skip(1).Collect(events);
 				ready.Set();
 			});
 			shell.Update();

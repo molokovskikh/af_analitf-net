@@ -1,12 +1,8 @@
-﻿using System.Linq;
-using System.Reactive.Linq;
-using AnalitF.Net.Client.Models;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Common.Tools;
-using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
@@ -29,12 +25,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeDifferentCategory(catalog);
 
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			model.SearchBehavior.Search();
+			testScheduler.Start();
 
 			var originCount = model.Offers.Value.Count;
 			Assert.That(originCount, Is.GreaterThan(0));
 
 			model.OnlyBase.Value = true;
+			testScheduler.Start();
 			Assert.That(model.Offers.Value.Count, Is.LessThan(originCount));
 			foreach (var offer in model.Offers.Value) {
 				Assert.That(offer.Price.BasePrice, Is.True);
@@ -46,7 +43,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var catalog = FindMultiOfferCatalog();
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			model.SearchBehavior.Search();
+			testScheduler.Start();
 
 			var id = model.Offers.Value[0].Price.Id;
 			model.Prices.Each(p => p.IsSelected = false);

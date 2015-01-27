@@ -368,6 +368,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Input(view, "Offers", term);
 			Input(view, "Offers", Key.Enter);
+			WaitIdle();
 			dispatcher.Invoke(() => {
 				var offers = (DataGrid)view.FindName("Offers");
 				Assert.That(offers.Items.Count, Is.GreaterThan(0), "Поисковый запрос '{0}'", term);
