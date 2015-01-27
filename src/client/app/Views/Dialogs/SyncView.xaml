@@ -17,7 +17,7 @@
 		<GroupBox Header="Общий ход выполнения">
 			<StackPanel>
 				<Label>
-					<TextBlock>Прошло времени: <Run Name="Time"></Run></TextBlock>
+					<TextBlock>Прошло времени: <Run Name="Time_Value"></Run></TextBlock>
 				</Label>
 				<ProgressBar Height="20" Name="Progress_Total" />
 			</StackPanel>

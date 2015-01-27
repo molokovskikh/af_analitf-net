@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Views.Dialogs;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	public class OrderWarning : TextViewModel
+	public interface ICancelable
+	{
+		bool WasCancelled { get; }
+	}
+
+	public class OrderWarning : TextViewModel, ICancelable
 	{
 		public OrderWarning(List<Order> orders)
 		{
@@ -20,16 +24,15 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 					o.MinOrderSum.MinOrderSum,
 					o.Sum),
 				Environment.NewLine);
+			WasCancelled = true;
 		}
 
-		public override void TryClose()
-		{
-			TryClose(true);
-		}
+		public bool WasCancelled { get; private set; }
 
 		public void OK()
 		{
-			TryClose(false);
+			WasCancelled = false;
+			TryClose();
 		}
 	}
 }

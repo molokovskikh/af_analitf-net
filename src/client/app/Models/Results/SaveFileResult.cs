@@ -53,7 +53,6 @@ namespace AnalitF.Net.Client.Models.Results
 			}
 		}
 
-
 		public StreamWriter Writer()
 		{
 			try {

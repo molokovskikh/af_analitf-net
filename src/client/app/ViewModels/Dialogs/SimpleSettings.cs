@@ -11,7 +11,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	public class SimpleSettings : Screen
+	public class SimpleSettings : Screen, ICancelable
 	{
 		public object Target;
 		public Tuple<PropertyInfo, object[]>[] Properties;
@@ -30,12 +30,10 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				.Where(t => t.Item2.Length > 0)
 				.OrderBy(t => ((DisplayAttribute)t.Item2[0]).Order)
 				.ToArray();
+			WasCancelled = true;
 		}
 
-		public override void TryClose()
-		{
-			base.TryClose(true);
-		}
+		public bool WasCancelled { get; private set; }
 
 		public void Ok()
 		{

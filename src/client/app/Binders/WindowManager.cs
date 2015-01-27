@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Extentions
 #if DEBUG
 			bool? dialogResult;
 			if (Stub(rootModel, out dialogResult))
-				return dialogResult;
+				return null;
 #endif
 
 			var window = CreateWindow(rootModel, true, context, settings);
@@ -68,7 +68,8 @@ namespace AnalitF.Net.Client.Extentions
 				window.ShowInTaskbar = false;
 			}
 
-			return ShowDialog(window);
+			ShowDialog(window);
+			return null;
 		}
 
 		public DialogResult ShowDialog(System.Windows.Forms.CommonDialog dialog)
@@ -96,12 +97,12 @@ namespace AnalitF.Net.Client.Extentions
 			return dialog.ShowDialog(InferOwnerOf(null));
 		}
 
-		public bool? ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
+		public void ShowFixedDialog(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 #if DEBUG
 			bool? dialogResult;
 			if (Stub(rootModel, out dialogResult)) {
-				return dialogResult;
+				return;
 			}
 #endif
 
@@ -110,7 +111,7 @@ namespace AnalitF.Net.Client.Extentions
 			window.SizeToContent = SizeToContent.WidthAndHeight;
 			window.ShowInTaskbar = false;
 
-			return ShowDialog(window);
+			ShowDialog(window);
 		}
 
 #if DEBUG
@@ -173,19 +174,18 @@ namespace AnalitF.Net.Client.Extentions
 			return base.InferOwnerOf(window);
 		}
 
-		private bool? ShowDialog(Window window)
+		private void ShowDialog(Window window)
 		{
 #if DEBUG
 			if (UnitTesting) {
 				window.Closed += (sender, args) => Dialogs.Remove(window);
 				Dialogs.Add(window);
-				return true;
 			}
 #endif
 			window.InputBindings.Add(new KeyBinding(Commands.InvokeViewModel, new KeyGesture(Key.Escape)) {
 				CommandParameter = "TryClose"
 			});
-			return window.ShowDialog();
+			window.ShowDialog();
 		}
 
 		public MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButton buttons, MessageBoxImage icon)

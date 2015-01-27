@@ -412,15 +412,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				done.Set();
 				return c.result;
 			};
-			var events = new List<IObservedChange<SyncViewModel, Progress>>();
+			var events = new List<Progress>();
 			manager.DialogOpened.OfType<SyncViewModel>().Subscribe(m => {
-				m.ObservableForProperty(c => c.Progress).Subscribe(events.Add);
+				m.Progress.Collect(events);
 				ready.Set();
 			});
 			shell.Update();
 
 			done.WaitOne(10.Second());
-			Assert.AreEqual(4, events.Count, events.Implode(i => i.Value));
+			Assert.AreEqual(4, events.Count, events.Implode());
 		}
 
 		[Test]

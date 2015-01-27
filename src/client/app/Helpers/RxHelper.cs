@@ -100,6 +100,11 @@ namespace AnalitF.Net.Client.Helpers
 			return items;
 		}
 
+		public static void Collect<T>(this IObservable<T> source, IList<T> collection)
+		{
+			source.Subscribe(collection.Add);
+		}
+
 		public static void CatchSubscribe<T>(this IObservable<T> observable, Action<T> onNext, CancellationDisposable cancellation = null)
 		{
 			observable.Subscribe(e => {

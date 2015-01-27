@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Results
@@ -34,9 +35,13 @@ namespace AnalitF.Net.Client.Models.Results
 			//по умолчанию ShowDialog вернет false те по умолчанию мы продолжаем выполение
 			//что бы отменить выполение цепочки нужно явно сказать TryClose(true)
 			if (ShowSizeToContent)
-				args.WasCancelled = manager.ShowFixedDialog(Model).GetValueOrDefault();
+				manager.ShowFixedDialog(Model);
 			else
-				args.WasCancelled = manager.ShowDialog(Model, null, settings).GetValueOrDefault();
+				manager.ShowDialog(Model, null, settings);
+
+			var cancellable = Model as ICancelable;
+			if (cancellable != null)
+				args.WasCancelled = cancellable.WasCancelled;
 			RaiseCompleted(args);
 		}
 

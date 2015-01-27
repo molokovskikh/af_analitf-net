@@ -6,12 +6,13 @@ using System.Reactive.Linq;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Newtonsoft.Json.Utilities;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
-	public class AddAwaited : BaseScreen
+	public class AddAwaited : BaseScreen, ICancelable
 	{
 		private Producer emptyProducer = new Producer(Consts.AllProducerLabel);
 
@@ -25,8 +26,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			ProducerTerm = new NotifyValue<string>();
 			CurrentProducer = new NotifyValue<Producer>(emptyProducer);
+			WasCancelled = true;
 		}
 
+		public bool WasCancelled { get; private set; }
 		public AwaitedItem Item { get; set; }
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 		public NotifyValue<Catalog> CurrentCatalog { get; set; }
@@ -109,16 +112,12 @@ order by Score, {p.Name}")
 			CurrentProducer.Subscribe(v => Item.Producer = (v != null && v.Id > 0) ? v : null);
 		}
 
-		public override void TryClose()
-		{
-			TryClose(true);
-		}
-
 		public void OK()
 		{
 			var message = "";
 			if (Item.TrySave(StatelessSession, out message)) {
-				TryClose(false);
+				WasCancelled = false;
+				TryClose();
 			}
 			else {
 				Manager.Warning(message);

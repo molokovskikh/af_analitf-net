@@ -423,18 +423,6 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		protected void ValidateAndClose(IDataErrorInfo2 item)
-		{
-			foreach (var field in item.FieldsForValidate) {
-				var error = item[field];
-				if (!string.IsNullOrEmpty(error)) {
-					Manager.Warning(error);
-					return;
-				}
-			}
-			TryClose(false);
-		}
-
 		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObservLoad(Loadable loadable)
 		{
 			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
