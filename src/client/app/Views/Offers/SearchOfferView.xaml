@@ -133,6 +133,11 @@
 			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
 
+		<ProgressBar Grid.Row="2" IsIndeterminate="True"
+			Width="200"
+			Height="20"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
 		<Parts:ProductInfoView Grid.Row="3" cal:Bind.ModelWithoutContext="{Binding}" />
 
 		<StackPanel Grid.Row="4" Name="Legend" />

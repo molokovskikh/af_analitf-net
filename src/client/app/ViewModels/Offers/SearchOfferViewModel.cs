@@ -31,52 +31,66 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.OrderBy(p => p.Name)
 				.Select(p => new Selectable<Price>(p))
 				.ToList();
-			Settings.Subscribe(_ => SortOffers(Offers));
-
-			Prices.Select(p => p.Changed()).Merge()
-				.Throttle(Consts.FilterUpdateTimeout, UiScheduler)
-				.Merge(OnlyBase.Changed())
-				.Merge(CurrentProducer.Changed())
-				.Subscribe(_ => Update());
+			Settings.Subscribe(_ => {
+				Offers.Value = SortOffers(Offers);
+			});
 			SearchBehavior = new SearchBehavior(this);
+			IsLoading = new NotifyValue<bool>();
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
 		public List<Selectable<Price>> Prices { get; set; }
 		public NotifyValue<bool> OnlyBase { get; set; }
+		public NotifyValue<bool> IsLoading { get; set; }
 
-		protected override void Query()
+		protected override void OnInitialize()
 		{
-			var term = SearchBehavior.ActiveSearchTerm.Value;
-			if (String.IsNullOrEmpty(term)) {
-				Offers.Value = new List<Offer>();
-				return;
-			}
+			base.OnInitialize();
 
-			var query = StatelessSession.Query<Offer>();
-			query = Util.ContainsAny(query, o => o.ProductSynonym,
-				term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
-			query = Util.Filter(query, o => o.Price.Id, Prices);
+			SearchBehavior.ActiveSearchTerm.Cast<object>()
+				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
+				.Merge(OnlyBase.Changed())
+				.Merge(CurrentProducer.Changed())
+				.Select(v => {
+					var term = SearchBehavior.ActiveSearchTerm.Value;
+					if (String.IsNullOrEmpty(term))
+						return Observable.Return(new List<Offer>());
 
-			var producer = CurrentProducer.Value;
-			if (producer != null && producer.Id > 0) {
-				var id = producer.Id;
-				query = query.Where(o => o.ProducerId == id);
-			}
+					return RxQuery(s => {
+						IsLoading.Value = true;
+						var query = StatelessSession.Query<Offer>();
+						query = Util.ContainsAny(query, o => o.ProductSynonym,
+							term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+						query = Util.Filter(query, o => o.Price.Id, Prices);
 
-			if (OnlyBase)
-				query = query.Where(o => o.Price.BasePrice);
+						var producer = CurrentProducer.Value;
+						if (producer != null && producer.Id > 0) {
+							var id = producer.Id;
+							query = query.Where(o => o.ProducerId == id);
+						}
 
-			SortOffers(query.Fetch(o => o.Price).ToList());
+						if (OnlyBase)
+							query = query.Where(o => o.Price.BasePrice);
+
+						var result = SortOffers(query.Fetch(o => o.Price).ToList());
+						IsLoading.Value = false;
+						return result;
+					});
+				})
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.CatchSubscribe(v => {
+					Offers.Value = v;
+				}, CloseCancellation);
 		}
 
-		private void SortOffers(List<Offer> result)
+		private List<Offer> SortOffers(List<Offer> offers)
 		{
 			if (Settings.Value.GroupByProduct) {
-				Offers.Value = SortByMinCostInGroup(result, o => o.ProductId);
+				return SortByMinCostInGroup(offers, o => o.ProductId);
 			}
 			else {
-				Offers.Value = SortByMinCostInGroup(result, o => o.CatalogId);
+				return SortByMinCostInGroup(offers, o => o.CatalogId);
 			}
 		}
 	}
