@@ -97,6 +97,15 @@ drop temporary table ExistsCatalogs;")
 				DbMaintain.UpdateLeaders(Session, settings);
 			}
 
+			//очистка результатов автозаказа
+			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
+			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
+			Session.CreateSQLQuery(@"delete b
+from BatchLines b
+left join Addresses a on a.Id = b.AddressId
+where a.Id is null")
+				.ExecuteUpdate();
+
 			//вычисляю таблицы в которых нужно производить чистку
 			//Hidden = 1 экспортируется в том случае если позиция была удалена
 			//или скрыта и не должна больше быть доступна клиенту
