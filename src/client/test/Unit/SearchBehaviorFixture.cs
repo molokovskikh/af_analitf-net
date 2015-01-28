@@ -10,22 +10,15 @@ namespace AnalitF.Net.Test.Unit
 	{
 		public class TestScreen : BaseScreen
 		{
-			public int Updated;
-
-			public override void Update()
-			{
-				Updated++;
-			}
 		}
 
 		[Test]
 		public void Do_not_update()
 		{
 			var screen = new TestScreen();
-			var behavior = new SearchBehavior(screen, callUpdate: false);
+			var behavior = new SearchBehavior(screen);
 			behavior.SearchText.Value = "test";
 			behavior.Search();
-			Assert.AreEqual(0, screen.Updated);
 			Assert.AreEqual("", behavior.SearchText.Value);
 			Assert.AreEqual("test", behavior.ActiveSearchTerm.Value);
 		}

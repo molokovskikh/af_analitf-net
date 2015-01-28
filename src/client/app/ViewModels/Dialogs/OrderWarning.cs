@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
-	public interface ICancelable
-	{
-		bool WasCancelled { get; }
-	}
-
 	public class OrderWarning : TextViewModel, ICancelable
 	{
 		public OrderWarning(List<Order> orders)

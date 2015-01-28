@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			CurrentFilter = new NotifyValue<string>("Все");
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			AddressSelector = new AddressSelector(Session, this);
-			SearchBehavior = new SearchBehavior(this, callUpdate: false);
+			SearchBehavior = new SearchBehavior(this);
 
 			OrderLines = new NotifyValue<ObservableCollection<OrderLine>>();
 			CurrentOrderLine = new NotifyValue<OrderLine>();

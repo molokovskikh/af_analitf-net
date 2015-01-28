@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -33,42 +34,56 @@ namespace AnalitF.Net.Client.ViewModels
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<List<WaybillLine>> Lines { get; set; }
 
-		public override void Update()
+		protected override void OnInitialize()
 		{
-			SaveDirty();
-			var query = StatelessSession.Query<WaybillLine>()
-				.Where(l => l.Waybill.WriteTime >= begin && l.Waybill.WriteTime < end);
+			base.OnInitialize();
 
-			var term = SearchBehavior.ActiveSearchTerm.Value;
-			if (!String.IsNullOrEmpty(term))
-				query = query.Where(m => m.SerialNumber.Contains(term) || m.Product.Contains(term));
+			Lines = SearchBehavior.ActiveSearchTerm
+				.Select(v =>{
+					//это событие произойдет в ui нитке здесь нужно скопировать данные что сохранить их ниже
+					//копируем тк обновление произойдет в другой нитке
+					var toUpdate = dirty.ToArray();
+					dirty.Clear();
+					return RxQuery(s => {
+						toUpdate.Each(s.Update);
+						var query = s.Query<WaybillLine>()
+							.Where(l => l.Waybill.WriteTime >= begin && l.Waybill.WriteTime < end);
 
-			var lines = query
-				.OrderBy(l => l.Product)
-				.Fetch(l => l.Waybill)
-				.ThenFetch(w => w.Supplier)
-				.FetchMany(l => l.CertificateFiles)
-				.ToList();
+						var term = SearchBehavior.ActiveSearchTerm.Value;
+						if (!String.IsNullOrEmpty(term))
+							query = query.Where(m => m.SerialNumber.Contains(term) || m.Product.Contains(term));
 
-			//тк мы загружаем данные из stateless сессии то отслеживать изменения в них
-			//нужно руками, изменения возникнут из-за загрузки сертификатов
-			foreach (var line in Lines.Value)
-				line.PropertyChanged -= Track;
+						var lines = query
+							.OrderBy(l => l.Product)
+							.Fetch(l => l.Waybill)
+							.ThenFetch(w => w.Supplier)
+							.FetchMany(l => l.CertificateFiles)
+							.ToList();
+						return lines;
+					});
+			})
+			.Switch()
+			.ObserveOn(UiScheduler)
+			.ToValue(lines => {
+					//тк мы загружаем данные из stateless сессии то отслеживать изменения в них
+					//нужно руками, изменения возникнут из-за загрузки сертификатов
+					foreach (var line in Lines.Value ?? Enumerable.Empty<WaybillLine>())
+						line.PropertyChanged -= Track;
 
-			foreach (var line in lines)
-				line.PropertyChanged += Track;
+					foreach (var line in lines)
+						line.PropertyChanged += Track;
 
-			var pendings = Shell.PendingDownloads.OfType<WaybillLine>().ToLookup(l => l.Id);
-			if (pendings.Count > 0) {
-				for(var i = 0; i < lines.Count; i ++) {
-					var pending = pendings[lines[i].Id].FirstOrDefault();
-					if (pending != null) {
-						lines[i] = pending;
+					var pendings = Shell.PendingDownloads.OfType<WaybillLine>().ToLookup(l => l.Id);
+					if (pendings.Count > 0) {
+						for(var i = 0; i < lines.Count; i ++) {
+							var pending = pendings[lines[i].Id].FirstOrDefault();
+							if (pending != null) {
+								lines[i] = pending;
+							}
+						}
 					}
-				}
-			}
-
-			Lines.Value = lines;
+				return lines;
+			});
 		}
 
 		private void SaveDirty()

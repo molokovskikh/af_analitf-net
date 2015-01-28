@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Поиск по МНН";
 			ShowWithoutOffers = new NotifyValue<bool>();
-			SearchBehavior = new SearchBehavior(this, callUpdate: false);
+			SearchBehavior = new SearchBehavior(this);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

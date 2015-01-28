@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			//но если не удалить подписку будет утечка памяти
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
 				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
-			SearchBehavior = new SearchBehavior(this, false);
+			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
 
 			CurrentProducer.Cast<object>()

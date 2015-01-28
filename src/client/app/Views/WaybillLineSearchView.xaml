@@ -36,7 +36,7 @@
 				<DataGridTextColumn Width="*" Header="№"
 					Binding="{Binding Waybill.Id}" />
 				<DataGridTextColumn Width="*" Header="Поставщик"
-					Binding="{Binding Waybill.Supplier.FullName}" />
+					Binding="{Binding Waybill.SafeSupplier.FullName}" />
 				<c:SearchableDataGridColumn Width="*" Header="Наименование"
 					HighlightStyle="{StaticResource DataGridHighlight}"
 					Binding="{Binding Product}" />

@@ -11,19 +11,14 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 	//этот объект попадет в глобальную таблицу внутри wpf и это приведет к утечки памяти
 	public class SearchBehavior : BaseNotify
 	{
-		private BaseScreen screen;
-		private bool callUpdate;
-
 		//блокирует обработку ввода с клавиатуры в таблице что была возможность у дрогого обработчика
 		//например у быстрого поиска
 		public bool HandleGridKeyboardInput = true;
 
-		public SearchBehavior(BaseScreen screen, bool callUpdate = true)
+		public SearchBehavior(BaseScreen screen)
 		{
 			SearchText = new NotifyValue<string>();
 			ActiveSearchTerm = new NotifyValue<string>();
-			this.screen = screen;
-			this.callUpdate = callUpdate;
 
 			screen.OnCloseDisposable.Add(SearchText.Changed()
 				.Throttle(Consts.SearchTimeout, screen.Scheduler)
@@ -46,8 +41,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = "";
 			SearchText.Value = "";
-			if (callUpdate)
-				screen.Update();
 			return HandledResult.Handled();
 		}
 
@@ -58,8 +51,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 			ActiveSearchTerm.Value = SearchText.Value;
 			SearchText.Value = "";
-			if (callUpdate)
-				screen.Update();
 			return HandledResult.Handled();
 		}
 	}

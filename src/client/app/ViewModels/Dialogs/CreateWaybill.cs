@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using NHibernate.Linq;
 

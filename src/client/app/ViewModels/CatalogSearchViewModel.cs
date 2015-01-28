@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.ViewModels
 				v => CurrentItem.Value = v);
 			QuickSearch.IsEnabled = false;
 
-			SearchBehavior = new SearchBehavior(this, callUpdate: false);
+			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
 			IsQuickSearchEnabled = new NotifyValue<bool>();
 			IsQuickSearchEnabled.Subscribe(v => {

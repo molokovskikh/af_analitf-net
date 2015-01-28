@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				"   Не сопоставлено"
 			};
 			CurrentFilter = new NotifyValue<string>("Все");
-			SearchBehavior = new SearchBehavior(this, callUpdate: false);
+			SearchBehavior = new SearchBehavior(this);
 			ReportLines = new NotifyValue<ObservableCollection<BatchLineView>>(() => {
 				var query = Lines.Where(l => l.Product.CultureContains(SearchBehavior.ActiveSearchTerm.Value)
 					&& (l.OrderLine != null || !l.BatchLine.Status.HasFlag(ItemToOrderStatus.Ordered)));

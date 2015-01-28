@@ -6,6 +6,11 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Results
 {
+	public interface ICancelable
+	{
+		bool WasCancelled { get; }
+	}
+
 	public class DialogResult : IResult
 	{
 		public Screen Model;
