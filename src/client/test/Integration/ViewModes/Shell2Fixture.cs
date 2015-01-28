@@ -349,6 +349,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Do_not_warn_on_not_send_orders()
 		{
 			session.DeleteEach<Order>();
+			//форма инициализируется лениво и при инициализации все заказы отмечаются для отправки
+			Assert.IsNotNull(shell.Addresses);
+
 			var offer = session.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
 			var order1 = MakeOrder(offer);
 			order1.Send = false;
