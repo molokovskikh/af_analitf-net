@@ -28,6 +28,16 @@ using SmartOrderFactory.Domain;
 
 namespace AnalitF.Net.Service.Models
 {
+	public class Offer3 : Offer2
+	{
+		public ulong OfferId;
+		public uint CatalogId;
+		public string Producer;
+		public decimal? MaxProducerCost;
+		public string ProductSynonym;
+		public string ProducerSynonym;
+	}
+
 	public class UpdateData
 	{
 		public string LocalFileName { get; set; }
@@ -58,7 +68,7 @@ namespace AnalitF.Net.Service.Models
 		{
 			if (Content != null)
 				return Content;
-			return File.ReadAllText(LocalFileName);
+			return File.ReadAllText(LocalFileName, Encoding.GetEncoding(1251));
 		}
 	}
 
@@ -138,6 +148,7 @@ namespace AnalitF.Net.Service.Models
 			session.Save(data);
 
 			//по умолчанию fresh = 1
+			var cumulative = data.LastUpdateAt == DateTime.MinValue;
 			session.CreateSQLQuery(@"
 drop temporary table if exists usersettings.prices;
 drop temporary table if exists usersettings.activeprices;
@@ -164,7 +175,7 @@ update Usersettings.ActivePrices ap
 set r.ForceReplication = 0
 where r.UserId = :userId and ap.Fresh = 1;")
 				.SetParameter("userId", user.Id)
-				.SetParameter("cumulative", data.LastUpdateAt == DateTime.MinValue)
+				.SetParameter("cumulative", cumulative)
 				//для тех записей которые мы создали время репликации должно быть меньше текущего что бы не реплицировать
 				//данные еще раз
 				.ExecuteUpdate();
@@ -194,7 +205,7 @@ and s.Enable = 1";
 				Export(Result, "Schedules", new[] { "Id" }, Enumerable.Empty<object[]>());
 			}
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select Id,
 	Product,
@@ -339,37 +350,6 @@ where pc.CostCode = :costId")
 			}
 
 			sql = @"select
-	p.PriceCode as PriceId,
-	p.PriceName as PriceName,
-	s.Name as Name,
-	r.RegionCode as RegionId,
-	r.Region as RegionName,
-	s.Id as SupplierId,
-	s.Name as SupplierName,
-	s.FullName as SupplierFullName,
-	rd.Storage,
-	if(p.DisabledByClient or not p.Actual, 0, (select count(*) from UserSettings.Core c where c.PriceCode = p.PriceCode and c.RegionCode = p.RegionCode)) as PositionCount,
-	convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
-	rd.OperativeInfo,
-	rd.ContactInfo,
-	rd.SupportPhone as Phone,
-	rd.AdminMail as Email,
-	p.FirmCategory as Category,
-	p.DisabledByClient,
-	ifnull(ap.Fresh, 1) IsSynced,
-	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled
-from (Usersettings.Prices p, Customers.Users u)
-	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
-		join Customers.Suppliers s on s.Id = pd.FirmCode
-	join Farm.Regions r on r.RegionCode = p.RegionCode
-	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
-	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
-	join Customers.Clients c on c.Id = u.ClientId
-	join Usersettings.RetClientsSet r on r.ClientCode = c.Id
-where u.Id = ?userId";
-			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
-
-			sql = @"select
 	s.Id,
 	s.Name,
 	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
@@ -414,11 +394,7 @@ where
 	core.Note as Note,
 	core.Period as Period,
 	core.Doc as Doc,
-	core.MinBoundCost as MinBoundCost,
 	core.RegistryCost as RegistryCost,
-	core.MaxBoundCost as MaxBoundCost,
-	core.UpdateTime as CoreUpdateTime,
-	core.QuantityUpdate as CoreQuantityUpdate,
 	core.ProducerCost as ProducerCost,
 	core.EAN13 as EAN13,
 	core.CodeOKP as CodeOKP,
@@ -433,23 +409,182 @@ where
 	core.VitallyImportant or catalog.VitallyImportant as VitallyImportant,
 	s.Synonym as ProductSynonym,
 	sfc.Synonym as ProducerSynonym,
-	ct.Cost
+	ct.Cost,
+
+	at.FirmCode as SupplierId,
+	core.MaxBoundCost,
+	core.OptimizationSkip
 ";
 			sql += offersQueryParts.Select + "\r\n";
-			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, true), @"
+			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
 left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 ");
-			Export(Result, sql, "offers", truncate: data.LastUpdateAt == DateTime.MinValue, parameters: new {
-				userId = user.Id,
-				cumulative = false,
-				//нужен если включена оптимизация цен
-				clientCode = user.Client.Id
-			});
+			var offers = new List<Offer3>();
+			var cmd = new MySqlCommand(sql, (MySqlConnection)session.Connection);
+			cmd.Parameters.AddWithValue("userId", user.Id);
+			cmd.Parameters.AddWithValue("clientCode", user.Client.Id);
+			using(var reader = cmd.ExecuteReader()) {
+				while (reader.Read()) {
+					offers.Add(new Offer3 {
+						OfferId = reader.GetUInt64(0),
+						RegionId = reader.GetUInt64(1),
+						PriceId = reader.GetUInt32(2),
+						ProductId = reader.GetUInt32(3),
+						ProducerId = reader.GetNullableUInt32(4),
+						SynonymCode = reader.GetUInt32(5),
+						SynonymFirmCrCode = reader.GetNullableUInt32(6),
+						RawQuantity = reader.SafeGetString(7),
+						Code = reader.SafeGetString(8),
+						CodeCr = reader.SafeGetString(9),
+						Junk = reader.GetBoolean(10),
+						Await = reader.GetBoolean(11),
+						Unit = reader.SafeGetString(12),
+						Volume = reader.SafeGetString(13),
+						Note = reader.SafeGetString(14),
+						Period = reader.SafeGetString(15),
+						Doc = reader.SafeGetString(16),
+						RegistryCost = reader.GetNullableFloat(17),
+						ProducerCost = reader.GetNullableFloat(18),
+						EAN13 = reader.SafeGetString(19),
+						CodeOKP = reader.SafeGetString(20),
+						Series = reader.SafeGetString(21),
+						RequestRatio = reader.GetNullableUInt32(22),
+						OrderCost = reader.GetNullableUInt32(23),
+						MinOrderCount = reader.GetNullableUInt32(24),
+						CatalogId = reader.GetUInt32(25),
+						Producer = reader.SafeGetString(26),
+						MaxProducerCost = reader.GetNullableDecimal(27),
+						VitallyImportant = reader.GetBoolean(28),
+						ProductSynonym = reader.SafeGetString(29),
+						ProducerSynonym = reader.SafeGetString(30),
+						Cost = reader.GetDecimal(31),
+						//поля для оптимизации цен
+						SupplierId = reader.GetUInt32(32),
+						MaxBoundCost = reader.GetNullableFloat(33),
+						OptimizationSkip = reader.GetBoolean(34),
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+						BuyingMatrixType = reader.GetUInt32(35),
+					});
+				}
+			}
+
+			var prices = session.Query<ActivePrice>().ToArray();
+			var supplierIds = prices.Select(p => p.Id.Price.Supplier.Id).Distinct().ToArray();
+			var optimizer = MonopolisticsOptimizer.Load(session, user, supplierIds);
+			optimizer.PatchFresh(prices);
+			session.Flush();
+			var logs = optimizer.Optimize(offers);
+			CostOptimizer.SaveLogs((MySqlConnection)session.Connection, logs, user);
+			var freshPrices = prices.Where(p => p.Fresh).Select(p => p.Id.Price.PriceCode).OrderBy(i => i).ToArray();
+			IEnumerable<Offer3> toExport = offers;
+			if (!cumulative)
+				toExport = offers.Where(o => Array.BinarySearch(freshPrices, o.PriceId) >= 0);
+			Export(Result, "offers", new[] {
+				"OfferId",
+				"RegionId",
+				"PriceId",
+				"ProductId",
+				"ProducerId",
+				"ProductSynonymId",
+				"ProducerSynonymId",
+				"Quantity",
+				"Code",
+				"CodeCr",
+				"Junk",
+				"Await",
+				"Unit",
+				"Volume",
+				"Note",
+				"Period",
+				"Doc",
+				"RegistryCost",
+				"ProducerCost",
+				"EAN13",
+				"CodeOKP",
+				"Series",
+				"RequestRatio",
+				"MinOrderSum",
+				"MinOrderCount",
+				"CatalogId",
+				"Producer",
+				"MaxProducerCost",
+				"VitallyImportant",
+				"ProductSynonym",
+				"ProducerSynonym",
+				"Cost",
+				"BuyingMatrixType"
+			}, toExport.Select(o => new object[] {
+				o.OfferId,
+				o.RegionId,
+				o.PriceId,
+				o.ProductId,
+				o.ProducerId,
+				o.SynonymCode,
+				o.SynonymFirmCrCode,
+				o.RawQuantity,
+				o.Code,
+				o.CodeCr,
+				o.Junk,
+				o.Await,
+				o.Unit,
+				o.Volume,
+				o.Note,
+				o.Period,
+				o.Doc,
+				o.RegistryCost,
+				o.ProducerCost,
+				o.EAN13,
+				o.CodeOKP,
+				o.Series,
+				o.RequestRatio,
+				o.OrderCost,
+				o.MinOrderCount,
+				o.CatalogId,
+				o.Producer,
+				o.MaxProducerCost,
+				o.VitallyImportant,
+				o.ProductSynonym,
+				o.ProducerSynonym,
+				o.Cost,
+				o.BuyingMatrixType
+			}), truncate: cumulative);
+
+			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
+			sql = @"select
+	p.PriceCode as PriceId,
+	p.PriceName as PriceName,
+	s.Name as Name,
+	r.RegionCode as RegionId,
+	r.Region as RegionName,
+	s.Id as SupplierId,
+	s.Name as SupplierName,
+	s.FullName as SupplierFullName,
+	rd.Storage,
+	if(p.DisabledByClient or not p.Actual, 0, (select count(*) from UserSettings.Core c where c.PriceCode = p.PriceCode and c.RegionCode = p.RegionCode)) as PositionCount,
+	convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
+	rd.OperativeInfo,
+	rd.ContactInfo,
+	rd.SupportPhone as Phone,
+	rd.AdminMail as Email,
+	p.FirmCategory as Category,
+	p.DisabledByClient,
+	ifnull(ap.Fresh, 1) IsSynced,
+	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled
+from (Usersettings.Prices p, Customers.Users u)
+	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
+		join Customers.Suppliers s on s.Id = pd.FirmCode
+	join Farm.Regions r on r.RegionCode = p.RegionCode
+	join Usersettings.RegionalData rd on rd.FirmCode = s.Id and rd.RegionCode = r.RegionCode
+	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
+	join Customers.Clients c on c.Id = u.ClientId
+	join Usersettings.RetClientsSet r on r.ClientCode = c.Id
+where u.Id = ?userId";
+			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
+
+			if (cumulative) {
 				sql = @"
 select
 	Id,
@@ -512,7 +647,7 @@ where l.LogTime >= ?lastSync and l.Operation = 2";
 				Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select Id, Mnn as Name
 from Catalogs.Mnn m";
@@ -530,7 +665,7 @@ where m.UpdateTime > ?lastSync";
 				Export(Result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select cn.Id,
 	cn.Name,
@@ -564,7 +699,7 @@ group by cn.Id";
 				Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select
 	c.Id,
@@ -596,7 +731,7 @@ where c.UpdateTime > ?lastSync";
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select p.Id, p.Name
 from Catalogs.Producers p";
@@ -615,7 +750,7 @@ where p.UpdateTime > ?lastSync";
 			}
 
 			IList<object[]> newses = new List<object[]>();
-			if (data.LastUpdateAt == DateTime.MinValue) {
+			if (cumulative) {
 				sql = @"
 select Id, PublicationDate, Header
 from Usersettings.News

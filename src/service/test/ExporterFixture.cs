@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Mapping;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Documents;
@@ -201,8 +203,9 @@ namespace AnalitF.Net.Service.Test
 			};
 			controller.Delete();
 
-			Init();
-			requestLog.LastSync = session.Load<AnalitfNetData>(user.Id).LastUpdateAt;
+			session.Flush();
+			session.Clear();
+			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
 			exporter.AdsPath = "ads";
 			exporter.ExportAll();
 			result = ReadResult();
@@ -230,9 +233,86 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(new FileInfo(result.LocalFileName).Length, Is.GreaterThan(10), File.ReadAllText(result.LocalFileName));
 		}
 
-		private void Init()
+		[Test]
+		public void Cost_optimization()
 		{
-			requestLog = new RequestLog(user, Version.Parse("1.1"));
+			var supplier = TestSupplier.CreateNaked(session);
+			supplier.CreateSampleCore(session);
+			var rule = new CostOptimizationRule(session.Load<Supplier>(supplier.Id), RuleType.MaxCost) {
+				Diapasons = { new CostOptimizationDiapason(0, decimal.MaxValue, 20) },
+				Clients = { session.Load<Client>(client.Id) }
+			};
+			session.Save(rule);
+			client.MaintainIntersection(session);
+			session.CreateSQLQuery("delete from Customers.UserPrices where userid = :userId and priceId <> :priceId")
+				.SetParameter("userId", user.Id)
+				.SetParameter("priceId", supplier.Prices[0].Id)
+				.ExecuteUpdate();
+			session.Flush();
+			exporter.ExportAll();
+			var offers = ParseData("offers");
+			var offerData = offers.First();
+			var id = Convert.ToUInt64(offerData[0]);
+			var offer = supplier.Prices[0].Core.First(c => c.Id == id);
+			Assert.AreEqual(offer.Costs[0].Cost * 1.2m, Convert.ToDecimal(offerData[31], CultureInfo.InvariantCulture));
+		}
+
+		[Test]
+		public void Cost_optimization_reset_fresh()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			supplier.CreateSampleCore(session);
+			var supplier2 = TestSupplier.CreateNaked(session);
+			supplier2.CreateSampleCore(session);
+			var rule = new CostOptimizationRule(session.Load<Supplier>(supplier.Id), RuleType.MaxCost) {
+				Diapasons = { new CostOptimizationDiapason(0, decimal.MaxValue, 20) },
+				Clients = { session.Load<Client>(client.Id) },
+				Concurrents = { session.Load<Supplier>(supplier2.Id) }
+			};
+			session.Save(rule);
+			client.MaintainIntersection(session);
+			session.CreateSQLQuery("delete from Customers.UserPrices where userid = :userId and priceId not in (:ids)")
+				.SetParameter("userId", user.Id)
+				.SetParameterList("ids", new[] { supplier.Prices[0].Id, supplier2.Prices[0].Id })
+				.ExecuteUpdate();
+			session.Flush();
+			exporter.ExportAll();
+			var controller = new MainController {
+				CurrentUser = user,
+				Session = session
+			};
+			controller.Delete();
+			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId and FirmCode = :supplierId")
+				.SetParameter("supplierId", supplier2.Id)
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
+
+			session.Flush();
+			session.Clear();
+			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
+			exporter.ExportAll();
+			var ids = ParseData("offers").Select(l => Convert.ToUInt64(l[0])).ToArray();
+			Assert.IsTrue(ids.Contains(supplier.Prices[0].Core[0].Id), ids.Implode());
+			var priceData = ParseData("prices").First(d => Convert.ToUInt32(d[0]) == supplier.Prices[0].Id);
+			Assert.AreEqual(1, Convert.ToUInt32(priceData[17]));
+		}
+
+		private IEnumerable<string[]> ParseData(string name)
+		{
+			return exporter.Result
+				.First(r => Path.GetFileNameWithoutExtension(r.ArchiveFileName).Match(name))
+				.ReadContent()
+				.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(l => l.Split('\t'));
+		}
+
+		private void Init(DateTime? lastSync = null)
+		{
+			requestLog = new RequestLog(user, Version.Parse("1.1")) {
+				LastSync = lastSync
+			};
 			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
@@ -245,6 +325,8 @@ namespace AnalitF.Net.Service.Test
 			FileHelper.InitDir("ads");
 			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
 			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 });
+			var file = new FileInfo(@"ads\Воронеж_1\2block.gif");
+			file.LastWriteTime = DateTime.Now.AddSeconds(-1);
 			exporter.AdsPath = "ads";
 		}
 
