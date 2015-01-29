@@ -35,6 +35,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var batchLine = new BatchLine(catalog, address);
 			session.Save(batchLine);
 
+			model.SelectedReportLines.Add(model.Lines.Value.First());
 			model.CurrentReportLine.Value = model.Lines.Value.First();
 			Assert.IsTrue(model.CanDelete);
 			model.Delete();

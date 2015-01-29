@@ -192,6 +192,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			ScreenExtensions.TryActivate(batch);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(order.Lines[0]) });
 
+			batch.SelectedReportLines.Add(batch.Lines.Value[0]);
 			batch.CurrentReportLine.Value = batch.Lines.Value[0];
 			batch.Delete();
 			scheduler.AdvanceByMs(1000);

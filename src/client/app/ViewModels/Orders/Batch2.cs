@@ -81,13 +81,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.ToValue();
 			CurrentBatchLine = new NotifyValue<BatchLine>();
 
+			Lines = new NotifyValue<ObservableCollection<BatchLine>>(new ObservableCollection<BatchLine>());
 			CanReload = Lines.CollectionChanged()
 				.Select(e => e.Sender as ObservableCollection<BatchLine>)
 				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
 			CanDelete = CurrentBatchLine.Select(v => v != null).ToValue();
 			WatchForUpdate(CurrentBatchLine);
 			SelectedBatchLines = new List<BatchLine>();
-			Lines = new NotifyValue<ObservableCollection<BatchLine>>(new ObservableCollection<BatchLine>());
 			CanClear = Lines.CollectionChanged()
 				.Select(e => e.Sender as ObservableCollection<BatchLine>)
 				.Select(v => v != null && v.Count > 0).ToValue();
