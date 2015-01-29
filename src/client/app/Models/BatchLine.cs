@@ -18,8 +18,10 @@ namespace AnalitF.Net.Client.Models
 		OffersExists = 0x10, // Предложения для данной позиции имелись
 	}
 
-	public class BatchLineView : BaseNotify
+	public class BatchLineView : BaseNotify, IEditableObject
 	{
+		private OrderLine orderLine;
+
 		public BatchLineView(BatchLine batchline, OrderLine orderline)
 		{
 			BatchLine = batchline;
@@ -37,7 +39,21 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public BatchLine BatchLine { get; private set; }
-		public OrderLine OrderLine { get; set; }
+
+		public OrderLine OrderLine
+		{
+			get
+			{
+				return orderLine;
+			}
+			set
+			{
+				if (orderLine == value)
+					return;
+				orderLine = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public virtual string Product
 		{
@@ -55,6 +71,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		//для экспорта
 		public virtual uint Count
 		{
 			get
@@ -80,9 +97,21 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return BatchLine.ExistsInFreezed; }
 		}
+
+		public void BeginEdit()
+		{
+		}
+
+		public void EndEdit()
+		{
+		}
+
+		public void CancelEdit()
+		{
+		}
 	}
 
-	public class BatchLine : BaseStatelessObject
+	public class BatchLine : BaseStatelessObject, IEditableObject
 	{
 		private Lazy<Dictionary<string, string>> lazyFields;
 		private uint _quantity;
@@ -202,6 +231,18 @@ namespace AnalitF.Net.Client.Models
 				var key = Tuple.Create(line.Address.Id, line.ProductId.GetValueOrDefault());
 				line.ExistsInFreezed = productids[key].FirstOrDefault() != null;
 			}
+		}
+
+		public virtual void BeginEdit()
+		{
+		}
+
+		public virtual void EndEdit()
+		{
+		}
+
+		public virtual void CancelEdit()
+		{
 		}
 	}
 }

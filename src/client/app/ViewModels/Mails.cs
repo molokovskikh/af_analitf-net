@@ -1,26 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Handlers;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
-using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Models.Results;
-using Caliburn.Micro;
 using Common.Tools;
-using Ionic.Zip;
-using Microsoft.Runtime.CompilerServices;
-using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 

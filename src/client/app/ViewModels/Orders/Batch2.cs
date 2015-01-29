@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -19,7 +21,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	{
 		private static string lastUsedDir;
 		private Editor editor;
-		private List<BatchLine> lines = new List<BatchLine>();
 
 		public Batch2()
 		{
@@ -47,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OrderLines.Subscribe(v => editor.Lines = v);
 			BatchLines = CurrentFilter.Merge(SearchBehavior.ActiveSearchTerm)
 				.Select(_ => {
-					var query = lines.Where(l => l.ProductSynonym.CultureContains(SearchBehavior.ActiveSearchTerm.Value));
+					var query = Lines.Value.Where(l => l.ProductSynonym.CultureContains(SearchBehavior.ActiveSearchTerm.Value));
 					if (CurrentFilter.Value == Filter[1]) {
 						query = query.Where(l => l.Status.HasFlag(ItemToOrderStatus.Ordered));
 					}
@@ -80,12 +81,20 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.ToValue();
 			CurrentBatchLine = new NotifyValue<BatchLine>();
 
-			CanReload = BatchLines.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
-			CanDeleteBatchLine = CurrentBatchLine.Select(v => v != null).ToValue();
-			CanDeleteOrderLine = CurrentOrderLine.Select(v => v != null).ToValue();
+			CanReload = Lines.CollectionChanged()
+				.Select(e => e.Sender as ObservableCollection<BatchLine>)
+				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
+			CanDelete = CurrentBatchLine.Select(v => v != null).ToValue();
 			WatchForUpdate(CurrentBatchLine);
+			SelectedBatchLines = new List<BatchLine>();
+			Lines = new NotifyValue<ObservableCollection<BatchLine>>(new ObservableCollection<BatchLine>());
+			CanClear = Lines.CollectionChanged()
+				.Select(e => e.Sender as ObservableCollection<BatchLine>)
+				.Select(v => v != null && v.Count > 0).ToValue();
 		}
 
+		public NotifyValue<bool> CanClear { get; set; }
+		public NotifyValue<ObservableCollection<BatchLine>> Lines { get; set; }
 		public SearchBehavior SearchBehavior { get; set; }
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -97,11 +106,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<ObservableCollection<OrderLine>> OrderLines { get; set; }
 		public NotifyValue<OrderLine> CurrentOrderLine { get; set; }
 
+		public List<BatchLine> SelectedBatchLines { get; set; }
 		public NotifyValue<ObservableCollection<BatchLine>> BatchLines { get; set; }
 		public NotifyValue<BatchLine> CurrentBatchLine { get; set; }
 
-		public NotifyValue<bool> CanDeleteOrderLine { get; set; }
-		public NotifyValue<bool> CanDeleteBatchLine { get; set; }
+		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<bool> CanReload { get; set; }
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 		public ProductInfo ProductInfo { get; set; }
@@ -121,27 +130,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(Observable.Return<object>(null))
 				.Select(_ => RxQuery(s => {
 					var ids = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
-					return StatelessSession.Query<BatchLine>().Where(l => ids.Contains(l.Address.Id)).ToList();
+					return StatelessSession.Query<BatchLine>()
+						.Fetch(b => b.Address)
+						.Where(l => ids.Contains(l.Address.Id)).ToList();
 				}))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(o => {
 					BatchLine.CalculateStyle(Addresses, o);
-					lines = o;
+					Lines.Value = new ObservableCollection<BatchLine>(o);
 					BatchLines.Value = new ObservableCollection<BatchLine>(o);
 					CurrentBatchLine.Value = o.FirstOrDefault();
 				}, CloseCancellation);
 
 			CurrentBatchLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Select(b => {
-					return b != null
-						? Address.Orders
-							.SelectMany(a => a.Lines)
-							.Where(l => l.ExportBatchLineId == b.ExportId)
-							.OrderBy(l => l.ProductSynonym)
-							.ToObservableCollection()
-						: new ObservableCollection<OrderLine>();
-				})
+				.Select(GetOrderLines)
 				.CatchSubscribe(v => {
 					OrderLines.Value = v;
 					CurrentOrderLine.Value = v.FirstOrDefault();
@@ -175,6 +178,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnViewAttached(view, context);
 			Attach(view, ProductInfo.Bindings);
+
+			var grid = (DataGrid)((FrameworkElement)view).FindName("BatchLines");
+			if (grid == null)
+				return;
+			Batch.BuildServiceColumns(Lines.Value.FirstOrDefault(), grid);
+		}
+
+		private ObservableCollection<OrderLine> GetOrderLines(BatchLine b)
+		{
+			return b != null
+				? Address.Orders
+					.SelectMany(a => a.Lines)
+					.Where(l => l.ExportBatchLineId == b.ExportId)
+					.OrderBy(l => l.ProductSynonym)
+					.ToObservableCollection()
+				: new ObservableCollection<OrderLine>();
 		}
 
 		public IEnumerable<IResult> Reload()
@@ -204,6 +223,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 		}
 
+		public void Clear()
+		{
+			if (!CanClear)
+				return;
+			if (!Confirm("Удалить результат автозаказа?"))
+				return;
+
+			foreach (var line in Lines.Value.ToArray())
+				DeleteBatchLine(line);
+		}
+
 		public void OfferUpdated()
 		{
 			editor.Updated();
@@ -216,16 +246,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public void Delete()
 		{
-			if (!CanDeleteBatchLine)
+			if (!CanDelete)
 				return;
 			if (!Confirm("Удалить позицию?"))
 				return;
 
-			BatchLines.Value.Remove(CurrentBatchLine.Value);
-			StatelessSession.Delete(CurrentBatchLine.Value);
-			foreach (var orderLine in OrderLines.Value) {
-				orderLine.Order.Address.RemoveLine(orderLine);
-			}
+			foreach (var line in SelectedBatchLines.ToArray())
+				DeleteBatchLine(line);
+		}
+
+		private void DeleteBatchLine(BatchLine line)
+		{
+			BatchLines.Value.Remove(line);
+			Lines.Value.Remove(line);
+			StatelessSession.Delete(line);
+			GetOrderLines(line).Each(l => l.Order.Address.RemoveLine(l));
 		}
 	}
 }

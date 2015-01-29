@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -76,7 +77,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test(Description = "Проверка сохранения в DBF файлов, где значения не влезают в строки. Не должно быть исключений.")]
 		public void DBFSaveTest()
 		{
-			batch.Lines = new List<BatchLineView> {
+			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine(), new OrderLine { Code = "normal" }),
 				new BatchLineView(new BatchLine(), new OrderLine {
 					Code = "SuperLongCodeIsMoreThan9Symbols"
@@ -100,7 +101,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Save()
 		{
 			var order = new Order(new Address("тест"), new Offer(new Price("тест"), 100));
-			batch.Lines = new List<BatchLineView> {
+			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine(), null),
 				new BatchLineView(new BatchLine(), order.Lines[0])
 			};
@@ -119,7 +120,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Export_excel()
 		{
 			var order = new Order(new Address("тест"), new Offer(new Price("тест"), 100));
-			batch.Lines = new List<BatchLineView> {
+			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine(), null),
 				new BatchLineView(new BatchLine(), order.Lines[0])
 			};
@@ -139,7 +140,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Export_service_fields()
 		{
-			batch.Lines = new List<BatchLineView> {
+			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine {
 					ServiceFields = @"{""f1"":""f1-value""}"
 				}, null)
@@ -155,14 +156,14 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		{
 			var order = MakeOrderLine().Order;
 			order.Frozen = true;
-			batch.Lines = new List<BatchLineView> {
+			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine {
 					ProductId = 105,
 					Address = batch.Address
 				}, null),
 			};
-			BatchLine.CalculateStyle(batch.Addresses, batch.Lines.Select(l => l.BatchLine));
-			Assert.IsTrue(batch.Lines[0].ExistsInFreezed);
+			BatchLine.CalculateStyle(batch.Addresses, batch.Lines.Value.Select(l => l.BatchLine));
+			Assert.IsTrue(batch.Lines.Value[0].ExistsInFreezed);
 		}
 
 		[Test]
@@ -191,7 +192,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			ScreenExtensions.TryActivate(batch);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(order.Lines[0]) });
 
-			batch.CurrentReportLine.Value = batch.Lines[0];
+			batch.CurrentReportLine.Value = batch.Lines.Value[0];
 			batch.Delete();
 			scheduler.AdvanceByMs(1000);
 			Assert.IsNotNull(lastStat);
@@ -206,13 +207,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			InitAddress(address1, address2);
 			ScreenExtensions.TryActivate(batch);
 
-			batch.Lines.Add(new BatchLineView(new BatchLine { Address = address1 }, null));
+			batch.Lines.Value.Add(new BatchLineView(new BatchLine { Address = address1 }, null));
 
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address2.Order(offer, 5);
-			batch.Lines.Add(new BatchLineView(new BatchLine(line), null));
+			batch.Lines.Value.Add(new BatchLineView(new BatchLine(line), null));
 
-			batch.CurrentReportLine.Value = batch.Lines[1];
+			batch.CurrentReportLine.Value = batch.Lines.Value[1];
 			batch.Offers.Value = new List<Offer> {
 				offer
 			};
@@ -260,7 +261,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			ScreenExtensions.TryActivate(batch);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
-			batch.CurrentReportLine.Value = batch.Lines[0];
+			batch.CurrentReportLine.Value = batch.Lines.Value[0];
 			batch.Offers.Value = new List<Offer> {
 				offer,
 			};
@@ -271,7 +272,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			batch.OfferUpdated();
 			batch.OfferCommitted();
 			Assert.AreEqual(0, batch.ReportLines.Value.Count);
-			Assert.AreEqual(0, batch.Lines.Count);
+			Assert.AreEqual(0, batch.Lines.Value.Count);
 		}
 
 		[Test]

@@ -60,7 +60,17 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> Changed<T>(this ObservableCollection<T> self)
 		{
-			return Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
+			return self == null
+				? Observable.Empty<EventPattern<NotifyCollectionChangedEventArgs>>()
+				: Observable.FromEventPattern<NotifyCollectionChangedEventArgs>(self, "CollectionChanged");
+		}
+
+		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> CollectionChanged<T>(this IObservable<ObservableCollection<T>> self)
+		{
+			return self.Select(v => Observable
+					.Return(new EventPattern<NotifyCollectionChangedEventArgs>(v, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)))
+					.Merge(v.Changed()))
+				.Switch();
 		}
 
 		public static IObservable<EventPattern<NotifyCollectionChangedEventArgs>> ToCollectionChanged(this INotifyCollectionChanged self)

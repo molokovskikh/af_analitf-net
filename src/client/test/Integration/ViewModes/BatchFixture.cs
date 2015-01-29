@@ -20,7 +20,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalog = session.Query<Catalog>().First(c => !c.HaveOffers);
 			session.Save(new BatchLine(catalog, address));
 
-			model.CurrentReportLine.Value = model.Lines.First();
+			model.CurrentReportLine.Value = model.Lines.Value.First();
 			testScheduler.AdvanceByMs(2000);
 			Assert.IsNotNull(model.CurrentCatalog);
 			Assert.AreEqual(catalog.Id, model.CurrentCatalog.Id);
@@ -35,7 +35,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var batchLine = new BatchLine(catalog, address);
 			session.Save(batchLine);
 
-			model.CurrentReportLine.Value = model.Lines.First();
+			model.CurrentReportLine.Value = model.Lines.Value.First();
 			Assert.IsTrue(model.CanDelete);
 			model.Delete();
 			Close(model);

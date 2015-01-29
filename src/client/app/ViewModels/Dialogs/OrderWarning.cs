@@ -30,5 +30,10 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			WasCancelled = false;
 			TryClose();
 		}
+
+		public override string ToString()
+		{
+			return Text;
+		}
 	}
 }

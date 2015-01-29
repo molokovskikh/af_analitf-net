@@ -386,6 +386,7 @@
 					<Label>Задержка в обработке запросов (секунд)</Label>
 					<TextBox Name="Settings_DebugTimeout" />
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
+					<CheckBox Name="User_UseBatch2">Показывать форму редактирования автозаказа</CheckBox>
 				</StackPanel>
 			</TabItem>
 		</TabControl>

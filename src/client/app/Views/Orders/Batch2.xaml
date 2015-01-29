@@ -49,14 +49,16 @@
 			</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="Upload">Загрузить</Button>
 			<Button Style="{StaticResource FilterElement}" x:Name="Reload">Повторить</Button>
+			<Button Style="{StaticResource FilterElement}" x:Name="Clear">Удалить результат автозаказа</Button>
 			<TextBlock Style="{StaticResource FilterElement}">
 				<Hyperlink NavigateUri="http://stat.analit.net/CI/SmartOrderRule/show">Настройка</Hyperlink>
 			</TextBlock>
 			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 
-		<c:DataGrid2 x:Name="BatchLines" Grid.Row="1" Grid.ColumnSpan="2" CanUserSelectMultipleItems="False" IsReadOnly="False"
-			ui:NavBinder.Next="{x:Reference OrderLines}">
+		<c:DataGrid2 x:Name="BatchLines" Grid.Row="1" Grid.ColumnSpan="2" IsReadOnly="False"
+			ui:NavBinder.Next="{x:Reference OrderLines}"
+			ShowAddressColumn="{Binding AddressSelector.All.Value}">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding Address.Name}" Width="*"
 					Visibility="Collapsed" IsReadOnly="True" />
