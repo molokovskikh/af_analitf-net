@@ -34,6 +34,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(waybill);
 
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			testScheduler.Start();
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
 			Assert.AreEqual(0, results.Length);
@@ -67,6 +68,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(waybill);
 
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			testScheduler.Start();
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
 			Assert.AreEqual(0, results.Length);
@@ -75,6 +77,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Close(model);
 
 			model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			testScheduler.Start();
 			waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			Assert.IsTrue(waybillLine.IsDownloading);
 		}
