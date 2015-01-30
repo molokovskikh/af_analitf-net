@@ -285,6 +285,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var update = AutomationHelper.FindWindow("Обмен данными") ?? observable.First();
 			Assert.AreEqual("Обмен данными", update.GetName());
 			var dialog = Opened.Timeout(UpdateTimeout).First();
+			if (dialog.GetName() == "Обмен данными") {
+				dialog = Opened.Timeout(UpdateTimeout).First();
+			}
 
 			Assert.AreEqual(result, AutomationHelper.ToText(dialog));
 			ClickByName("Закрыть", dialog);

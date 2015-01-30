@@ -357,7 +357,7 @@ task "test:binary":
 				print "Жду обновления"
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
-		Sh("nunit-console-x86 /nologo /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
+		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta")
 		if Globals.Maybe.SetupDeployRoot:
 			dst = Path.Combine(Globals.Maybe.SetupDeployRoot, "AnalitF.Net-$version.exe")
