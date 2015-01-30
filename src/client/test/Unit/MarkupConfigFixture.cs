@@ -29,7 +29,9 @@ namespace AnalitF.Net.Test.Unit
 				new MarkupConfig(0, 100, 20),
 				new MarkupConfig(100, 200, 20),
 				new MarkupConfig(200, 1000, 20),
-				new MarkupConfig(0, 100000, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(0, 50, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(50, 500, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(500, 1000000, 20, MarkupType.VitallyImportant),
 			};
 			Assert.IsNull(MarkupConfig.Validate(markups));
 		}
@@ -40,7 +42,9 @@ namespace AnalitF.Net.Test.Unit
 			var markups = new[] {
 				new MarkupConfig(0, 100, 20),
 				new MarkupConfig(80, 200, 20),
-				new MarkupConfig(0, 100000, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(0, 50, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(50, 500, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(500, 1000000, 20, MarkupType.VitallyImportant),
 			};
 			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups));
 
@@ -79,6 +83,16 @@ namespace AnalitF.Net.Test.Unit
 		{
 			var settings = new Settings(defaults: true);
 			settings.Markups.RemoveEach(settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant));
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.ValidateMarkups());
+		}
+
+		[Test]
+		public void Check_mandatory_ranges()
+		{
+			var settings = new Settings(defaults: true);
+			var markups = settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant).OrderBy(m => m.Begin).ToArray();
+			markups[0].End = 40;
+			markups[1].Begin = 40;
 			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.ValidateMarkups());
 		}
 	}
