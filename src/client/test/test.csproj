@@ -197,6 +197,7 @@
     <Compile Include="Integration\ViewModes\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\BaseScreenFixture.cs" />
+    <Compile Include="Integration\Views\BatchFixture.cs" />
     <Compile Include="Integration\Views\Batch2Fixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferFixture.cs" />
     <Compile Include="Integration\Views\CatalogSearchFixture.cs" />

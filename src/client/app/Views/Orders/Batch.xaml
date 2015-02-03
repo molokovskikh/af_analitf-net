@@ -184,7 +184,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<TextBox x:Name="CurrentReportLine_Value_Comment" Grid.Row="4" Grid.Column="1" Grid.RowSpan="2"
+		<TextBox x:Name="CurrentReportLine_Value_BatchLine_Comment" Grid.Row="4" Grid.Column="1" Grid.RowSpan="2"
 			Style="{StaticResource ReadOnlyText}" />
 
 		<StackPanel Grid.Row="6" Name="Legend" Grid.ColumnSpan="2" />

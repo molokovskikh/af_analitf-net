@@ -244,10 +244,7 @@ namespace AnalitF.Net.Service.Test
 			};
 			session.Save(rule);
 			client.MaintainIntersection(session);
-			session.CreateSQLQuery("delete from Customers.UserPrices where userid = :userId and priceId <> :priceId")
-				.SetParameter("userId", user.Id)
-				.SetParameter("priceId", supplier.Prices[0].Id)
-				.ExecuteUpdate();
+			client.Users[0].CleanPrices(session, supplier);
 			session.Flush();
 			exporter.ExportAll();
 			var offers = ParseData("offers");
@@ -271,10 +268,7 @@ namespace AnalitF.Net.Service.Test
 			};
 			session.Save(rule);
 			client.MaintainIntersection(session);
-			session.CreateSQLQuery("delete from Customers.UserPrices where userid = :userId and priceId not in (:ids)")
-				.SetParameter("userId", user.Id)
-				.SetParameterList("ids", new[] { supplier.Prices[0].Id, supplier2.Prices[0].Id })
-				.ExecuteUpdate();
+			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
 			var controller = new MainController {
