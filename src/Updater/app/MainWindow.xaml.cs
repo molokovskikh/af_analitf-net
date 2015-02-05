@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -115,10 +116,30 @@ namespace Updater
 			if (File.Exists(forDelete)
 				&& File.Exists(Path.Combine(srcRoot, Path.GetFileName(exe)))) {
 				var fordelete = File.ReadAllLines(forDelete).SelectMany(l => Directory.GetFiles(dstRoot, l)).ToArray();
-				fordelete.Each(File.Delete);
+				fordelete.Each(f => SafeFromAv(() => File.Delete(f)));
 			}
 
 			CopyFiles(files, dstRoot);
+		}
+
+		//на xp если выключить касперский endpoint security
+		//при обращении к файлам будет ошибка доступ запрещен но если попробовать несколько раз то жизнь наладится
+		private static void SafeFromAv(Action action)
+		{
+			var index = 0;
+			while (true) {
+				try {
+					index++;
+					action();
+					break;
+				}
+				catch (Exception) {
+					if (index > 3)
+						throw;
+					else
+						Thread.Sleep(50);
+				}
+			}
 		}
 
 		private static void WaitForPid(int pid)
@@ -159,7 +180,7 @@ namespace Updater
 			foreach (var source in sources) {
 				var dest = Path.Combine(path, Path.GetFileName(source));
 				log.DebugFormat("Копирую {0} > {1}", source, dest);
-				File.Copy(source, dest, true);
+				SafeFromAv(() => File.Copy(source, dest, true));
 			}
 		}
 	}
