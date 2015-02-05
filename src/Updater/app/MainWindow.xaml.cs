@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -115,7 +116,22 @@ namespace Updater
 			if (File.Exists(forDelete)
 				&& File.Exists(Path.Combine(srcRoot, Path.GetFileName(exe)))) {
 				var fordelete = File.ReadAllLines(forDelete).SelectMany(l => Directory.GetFiles(dstRoot, l)).ToArray();
-				fordelete.Each(File.Delete);
+				fordelete.Each(f => {
+					var index = 0;
+					while (true) {
+						try {
+							index++;
+							File.Delete(f);
+							break;
+						}
+						catch(Exception) {
+							if (index > 3)
+								throw;
+							else
+								Thread.Sleep(50);
+						}
+					}
+				});
 			}
 
 			CopyFiles(files, dstRoot);
