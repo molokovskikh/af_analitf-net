@@ -21,7 +21,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			factor = column.ActualWidth / column.Width.Value;
 			this.grid = grid;
 			DisplayName = "Столбцы";
-			Columns = new NotifyValue<List<ColumnSettings>>(grid.Columns.Select((c, i) => new ColumnSettings(grid, c, i)).OrderBy(c => c.DisplayIndex).ToList());
+			Columns = new NotifyValue<List<ColumnSettings>>(grid.Columns.Select((c, i) => new ColumnSettings(grid, c, i))
+				.OrderBy(c => c.DisplayIndex).ToList());
 			CurrentColumn = new NotifyValue<ColumnSettings>();
 			CanHide = this.ObservableForProperty(c => c.CurrentColumn.Value.IsVisible)
 				.Select(v => v.Value)
