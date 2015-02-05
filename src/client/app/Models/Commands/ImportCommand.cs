@@ -103,7 +103,7 @@ drop temporary table ExistsCatalogs;")
 			Session.CreateSQLQuery(@"delete b
 from BatchLines b
 left join Addresses a on a.Id = b.AddressId
-where a.Id is null")
+where a.Id is null;")
 				.ExecuteUpdate();
 
 			//вычисляю таблицы в которых нужно производить чистку

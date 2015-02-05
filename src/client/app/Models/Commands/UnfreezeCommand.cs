@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NHibernate;
 using NHibernate.Linq;
+using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -28,34 +30,53 @@ namespace AnalitF.Net.Client.Models.Commands
 		public override void Execute()
 		{
 			var log = new StringBuilder();
+			if (ids.Length == 0)
+				return;
+
+			var orders = new List<Order>();
 			foreach (var id in ids) {
 				var order = Session.Load<T>(id);
 				var address = Session.Get<Address>(addressId);
-				Unfreeze(order, address, Session, log);
+				var resultOrder = Unfreeze(order, address, Session, log);
+				if (resultOrder != null) {
+					orders.Add(resultOrder);
+					Session.Save(resultOrder);
+				}
+				if (ShouldCalculateStatus(order)) {
+					var currentOrder = order as Order;
+					if (!currentOrder.IsEmpty) {
+						orders.Add(currentOrder);
+					}
+				}
 			}
-			Result = log.ToString();
+			if (Restore)
+				Result = OrderLine.RestoreReport(orders);
+			else
+				Result = log.ToString();
 		}
 
-		public void Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
+		public Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
 			if (!sourceOrder.IsAddressExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = ((Order)sourceOrder);
 					order.SendResult = OrderResultStatus.Reject;
-					order.SendError = "Адрес доставки больше не доступен";
+					order.SendError = Restore
+						? "Заказ был заморожен, т.к. адрес доставки больше не доступен"
+						: "Адрес доставки больше не доступен";
 				}
 				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. адрес доставки больше не доступен.", sourceOrder.DisplayId, GuesAction(sourceOrder)));
-				return;
+				return null;
 			}
 
 			if (!sourceOrder.IsPriceExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = ((Order)sourceOrder);
 					order.SendResult = OrderResultStatus.Reject;
-					order.SendError = "Прайс-листа нет в обзоре";
+					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
 				}
 				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. прайс-листа нет в обзоре.", sourceOrder.DisplayId, GuesAction(sourceOrder)));
-				return;
+				return null;
 			}
 			var address = addressToOverride ?? sourceOrder.Address;
 
@@ -76,12 +97,17 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			var count = session.Query<Offer>().Count(o => o.Price == sourceOrder.Price);
 			if (count == 0) {
+				if (ShouldCalculateStatus(sourceOrder)) {
+					var order = ((Order)sourceOrder);
+					order.SendResult = OrderResultStatus.Reject;
+					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
+				}
 				log.AppendLine(String.Format("Заказ №{0} невозможно {3}, т.к. прайс-листа {1} - {2} нет в обзоре",
 					sourceOrder.DisplayId,
 					sourceOrder.Price.Name,
 					sourceOrder.Price.RegionName,
 					GuesAction(sourceOrder)));
-				return;
+				return null;
 			}
 
 			foreach (var line in sourceOrder.Lines.ToArray()) {
@@ -103,8 +129,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (currentOrder != null && currentOrder.IsEmpty)
 				session.Delete(sourceOrder);
 
-			if (!destOrder.IsEmpty)
-				session.Save(destOrder);
+			if (destOrder.IsEmpty)
+				return null;
+			return destOrder;
 		}
 
 		private string GuesAction(IOrder sourceOrder)
@@ -129,12 +156,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
 					if (ShouldCalculateStatus(line)) {
-
 						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;
 							line.ExportBatchLineId = ((OrderLine)sourceLine).ExportBatchLineId;
 						}
-
 						if (line.Cost != sourceLine.Cost) {
 							line.SendResult |= LineResultStatus.CostChanged;
 							line.NewCost = line.Cost;

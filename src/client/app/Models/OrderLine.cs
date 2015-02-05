@@ -7,6 +7,8 @@ using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
+using NHibernate;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -434,12 +436,46 @@ namespace AnalitF.Net.Client.Models
 						currentOffset = offset;
 					builder
 						.AppendFormat(currentOffset)
-						.AppendFormat("прайс-лист {0}", group.Key.Price.Name);
+						.AppendFormat("прайс-лист {0}", group.Key.PriceName);
 					if (group.Key.SendResult == OrderResultStatus.Reject)
 						builder.AppendFormat(" - {0}", group.Key.SendError);
 					builder.AppendLine();
 					currentOffset += offset;
 					foreach (var orderLine in group) {
+						builder
+							.Append(currentOffset)
+							.AppendLine(String.Format("{0:r}", orderLine));
+					}
+				}
+			}
+			return builder.ToString();
+		}
+
+		public static string RestoreReport(IEnumerable<Order> orders)
+		{
+			var offset = "    ";
+			var currentOffset = "";
+			var builder = new StringBuilder();
+			var addressGroups = orders
+				.Where(o => o.SendResult != OrderResultStatus.OK || o.Lines.Any(l => l.SendResult != LineResultStatus.OK))
+				.GroupBy(l => l.Address);
+			foreach (var addressGroup in addressGroups) {
+				try {
+					builder.AppendFormat("адрес доставки {0}", addressGroup.Key.Name).AppendLine();
+				}
+				catch(ObjectNotFoundException) {
+					builder.AppendFormat("адрес доставки <адрес доставки удален>").AppendLine();
+				}
+				foreach (var order in addressGroup) {
+					currentOffset = offset;
+					builder
+						.AppendFormat(currentOffset)
+						.AppendFormat("прайс-лист {0}", order.PriceName);
+					if (order.SendResult != OrderResultStatus.OK)
+						builder.AppendFormat(" - {0}", order.SendError);
+					builder.AppendLine();
+					currentOffset += offset;
+					foreach (var orderLine in order.Lines.Where(l => l.SendResult != LineResultStatus.OK)) {
 						builder
 							.Append(currentOffset)
 							.AppendLine(String.Format("{0:r}", orderLine));
