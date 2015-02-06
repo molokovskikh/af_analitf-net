@@ -194,14 +194,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.ThenBy(l => l.ProductSynonym)
 					.ToList();
 				if (Settings.Value.HighlightUnmatchedOrderLines) {
-					var ids = lines.Where(l => l.ServerId != null).Select(l => l.ServerId.Value).ToArray();
-					var waybillOrders = StatelessSession.Query<WaybillOrder>().Where(o => ids.Contains(o.OrderLineId)).ToArray();
-					ids = waybillOrders.Select(o => o.DocumentLineId).ToArray();
-					var waybillLines = StatelessSession.Query<WaybillLine>().Where(o => ids.Contains(o.Id)).ToArray();
-					var lookup = waybillOrders
-						.GroupBy(g => g.OrderLineId, m => m.DocumentLineId)
-						.ToDictionary(g => g.Key, g => waybillLines.Where(l => g.Contains(l.Id)).ToArray());
-					lines.Each(l => l.Configure(User, lookup));
+					lines.Each(l => {
+						var lookup = MatchedWaybills.GetLookUp(StatelessSession, lines);
+						l.Configure(User, lookup);
+					});
 				}
 				else {
 					lines.Each(l => l.Configure(User));

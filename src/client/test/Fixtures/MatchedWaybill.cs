@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -7,6 +8,7 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
+	[Description("Создает накладную связанную с заказом проверка функционала - сопоставления накладных, должен быть отправленный заказ")]
 	public class MatchedWaybill : ServerFixture
 	{
 		public TestWaybill Waybill;

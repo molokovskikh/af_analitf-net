@@ -134,7 +134,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				IsSuccessfulActivated = false;
 				return;
 			}
-			Order.Lines.Each(l => l.Configure(User));
+			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
+				var sentLines =  (IList<SentOrderLine>)Order.Lines;
+				var lookup = MatchedWaybills.GetLookUp(StatelessSession, sentLines);
+				sentLines.Each(l => l.Configure(User, lookup));
+			}
+			else {
+				Order.Lines.Each(l => l.Configure(User));
+			}
+
 
 			Source = new ObservableCollection<IOrderLine>(Order.Lines);
 			Source.ObservableForProperty(c => c.Count)

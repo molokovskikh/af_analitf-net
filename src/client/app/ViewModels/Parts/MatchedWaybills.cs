@@ -68,10 +68,24 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.ThenFetchMany(w => w.Lines)
 				.ToList();
 			if (lines.Count > 0) {
-				CurrentWaybillLine.Value = lines[0];
-				return lines[0].Waybill.Lines.OrderBy(l => l.Product).ToList();
+				var result = lines[0].Waybill.Lines.OrderBy(l => l.Product).ToList();
+				//будь бдителен - хотя с точки зрения бд lines[0] и result.First(l => l.Id == lines[0].Id) один и тот же объект
+				//nhibernate интерпретирует их как два разных объекта и выделение строки в ui не будет работать
+				CurrentWaybillLine.Value = result.First(l => l.Id == lines[0].Id);
+				return result;
 			}
 			return lines;
+		}
+
+		public static Dictionary<uint, WaybillLine[]> GetLookUp(IStatelessSession session, IEnumerable<SentOrderLine> lines)
+		{
+				var ids = lines.Where(l => l.ServerId != null).Select(l => l.ServerId.Value).ToArray();
+				var waybillOrders = session.Query<WaybillOrder>().Where(o => ids.Contains(o.OrderLineId)).ToArray();
+				ids = waybillOrders.Select(o => o.DocumentLineId).ToArray();
+				var waybillLines = session.Query<WaybillLine>().Where(o => ids.Contains(o.Id)).ToArray();
+				return waybillOrders
+					.GroupBy(g => g.OrderLineId, m => m.DocumentLineId)
+					.ToDictionary(g => g.Key, g => waybillLines.Where(l => g.Contains(l.Id)).ToArray());
 		}
 	}
 }
