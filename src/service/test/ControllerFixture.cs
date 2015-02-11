@@ -207,7 +207,7 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 			var result = JsonConvert.DeserializeObject<List<OrderResult>>(response.Content.ReadAsStringAsync().Result);
 			Assert.AreEqual(OrderResultStatus.Reject, result[0].Result);
-			Assert.AreEqual("Поставщик отказал в приеме заказа. Сумма заказа меньше минимально допустимой. Минимальный заказ 3 000,00р. заказано 100,00р..",
+			Assert.AreEqual("Поставщик отказал в приеме заказа. Сумма заказа меньше минимально допустимой. Минимальный заказ 3000,00 заказано 100,00.",
 				result[0].Error);
 		}
 

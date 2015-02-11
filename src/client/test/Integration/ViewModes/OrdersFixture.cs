@@ -247,7 +247,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			restore = true;
 
-			var newAddress = new Address("Тестовый адрес доставки");
+			var newAddress = new Address("Я - Тестовый адрес доставки");
 			session.Save(newAddress);
 			PrepareCurrent();
 
