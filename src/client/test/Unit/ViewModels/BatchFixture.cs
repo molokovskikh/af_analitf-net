@@ -52,6 +52,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			};
 			batch.Address = address;
 			shell.User.Value = new User();
+			shell.Settings.Value.LastUpdate = DateTime.Now;
 			shell.CurrentAddress = address;
 			shell.ActiveItem = batch;
 			var stub = new StubRemoteCommand(UpdateResult.OK);

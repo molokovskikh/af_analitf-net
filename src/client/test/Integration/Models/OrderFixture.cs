@@ -33,11 +33,13 @@ namespace AnalitF.Net.Test.Integration.Models
 				events.Add(Tuple.Create(sender, args));
 			};
 			order.Sum = 100;
-			Assert.That(events.Count, Is.EqualTo(2));
+			Assert.That(events.Count, Is.EqualTo(3));
 			Assert.That(events[0].Item2.PropertyName, Is.EqualTo("Sum"));
 			Assert.That(events[0].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
 			Assert.That(events[1].Item2.PropertyName, Is.EqualTo("IsInvalid"));
 			Assert.That(events[1].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
+			Assert.That(events[2].Item2.PropertyName, Is.EqualTo("IsOverLimit"));
+			Assert.That(events[2].Item1.GetHashCode(), Is.EqualTo(order.GetHashCode()));
 		}
 	}
 }

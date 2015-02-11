@@ -157,7 +157,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.FirstOrDefault();
 			var expected = String.Format("прайс-лист {0} - Поставщик отказал в приеме заказа." +
 				" Сумма заказа меньше минимально допустимой." +
-				" Минимальный заказ {1:C} заказано {2:C}.", order.Price.Name, 1500, order.Sum);
+				" Минимальный заказ {1:0.00} заказано {2:0.00}.", order.Price.Name, 1500, order.Sum);
 			Assert.AreEqual(expected, text);
 		}
 
@@ -252,7 +252,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			localSession.Clear();
 
-			Assert.That(text, Is.StringContaining("Предложений не найдено"));
+			Assert.That(text, Is.StringContaining("предложение отсутствует"));
 			order = localSession.Load<Order>(order.Id);
 			Assert.IsTrue(order.Frozen);
 			Assert.AreEqual(1, order.Lines.Count);
