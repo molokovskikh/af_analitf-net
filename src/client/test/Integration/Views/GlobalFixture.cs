@@ -586,6 +586,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		[Test]
 		public void Schedule()
 		{
+			session.DeleteEach<Order>();
 			restore = true;
 			var fixture = new CreateSchedule {
 				Schedules = new[] {
