@@ -77,7 +77,7 @@ Global(
 			@IISHost: "acdcserv"
 		},
 		@Production : {
-			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var""",
+			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
