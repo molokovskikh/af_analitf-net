@@ -77,7 +77,7 @@ Global(
 			@IISHost: "acdcserv"
 		},
 		@Production : {
-			@UpdateDeployRoot: """\\acdcserv\WebApps\var\update\""",
+			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var""",
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
@@ -150,7 +150,9 @@ task "deploy:proxy", ["build:proxy"]:
 			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
 		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
-task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
+task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "post:deploy"]
+
+task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
 task "deploy:client", ["deploy:client:package"]
 
