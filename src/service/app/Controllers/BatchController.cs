@@ -57,6 +57,7 @@ namespace AnalitF.Net.Service.Controllers
 							ServiceValues = i.ServiceValues,
 						}).ToList();
 						handler = new SmartOrderBatchHandler(session, job.User, batchAddress, items);
+						handler.RespectLimits = true;
 					}
 					else {
 						using (payloadStream) {

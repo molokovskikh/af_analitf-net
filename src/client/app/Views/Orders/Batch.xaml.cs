@@ -40,6 +40,7 @@ namespace AnalitF.Net.Client.Views.Orders
 			ReportLines.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
+			Editable.AutoEditOnDigit(ReportLines, "Количество");
 		}
 
 		public void ApplyStyles()

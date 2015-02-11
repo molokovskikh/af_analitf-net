@@ -604,17 +604,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanShowBatch
 		{
-			get { return Settings.Value.LastUpdate != null; }
+			get { return User.Value != null && Settings.Value.LastUpdate != null; }
 		}
 
 		public void ShowBatch()
 		{
-			if (User.Value == null)
+			if (!CanShowBatch)
 				return;
-			if (User.Value.UseBatch2)
-				NavigateRoot(new Batch2());
-			else
-				NavigateRoot(new Batch());
+			NavigateRoot(new Batch());
 		}
 
 		public bool CanShowWaybills

@@ -248,6 +248,8 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			ScreenExtensions.TryActivate(batch);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
+			Assert.IsTrue(batch.CanReload);
+			Assert.IsTrue(batch.CanClear);
 			Assert.AreEqual(line, batch.ReportLines.Value[0].OrderLine);
 		}
 

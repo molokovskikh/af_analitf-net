@@ -269,13 +269,26 @@ where
 
 			sql = String.Format(@"
 select a.Id,
-	{0} as Name
+	{0} as Name,
+	exists(select * from OrderSendRules.SmartOrderLimits l where l.AddressId = a.Id) as HaveLimits
 from Customers.Addresses a
 	join Customers.UserAddresses ua on ua.AddressId = a.Id
 	join Billing.LegalEntities le on le.Id = a.LegalEntityId
 where a.Enabled = 1 and ua.UserId = ?userId", addressName);
+
 			Export(Result, sql, "Addresses", truncate: true, parameters: new { userId = user.Id });
 
+			sql = @"
+select l.AddressId,
+	p.PriceCode as PriceId,
+	p.RegionCode as RegionId,
+	l.Value
+from Customers.Addresses a
+	join Customers.UserAddresses ua on ua.AddressId = a.Id
+	join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
+	join Usersettings.Prices p on p.FirmCode = l.SupplierId
+where a.Enabled = 1 and ua.UserId = ?userId";
+			Export(Result, sql, "Limits", truncate: true, parameters: new { userId = user.Id });
 
 			var contacts = session.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
 				.SetParameter("id", user.Client.RegionCode)
@@ -293,8 +306,7 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync,
-	u.UseBatch2
+	?lastSync as LastSync
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id

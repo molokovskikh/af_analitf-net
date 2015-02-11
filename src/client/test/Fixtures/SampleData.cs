@@ -73,6 +73,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			//очищаем предудыщие попытки
 			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
 			var client = TestClient.CreateNaked(session);
+			client.Addresses[0].Value += " " + client.Addresses[0].Id;
 			var user = client.Users[0];
 			user.SendRejects = true;
 			user.SendWaybills = true;

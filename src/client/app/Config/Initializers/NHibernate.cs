@@ -116,6 +116,13 @@ namespace AnalitF.Net.Client.Config.Initializers
 				});
 				m.Property(p => p.MinOrderSum);
 			});
+			mapper.Class<Limit>(m => {
+				m.ComposedId(c => {
+					c.ManyToOne(p => p.Address);
+					c.ManyToOne(p => p.Price, t => t.Columns(cm => cm.Name("PriceId"), cm => cm.Name("RegionId")));
+				});
+				m.Property(p => p.Value);
+			});
 			mapper.Class<WaybillOrder>(m => {
 				m.ComposedId(c => {
 					c.Property(p => p.OrderLineId);
@@ -150,6 +157,11 @@ namespace AnalitF.Net.Client.Config.Initializers
 			mapper.Class<Order>(m => {
 				m.Property(o => o.Frozen, om => om.Access(Accessor.Field));
 				m.ManyToOne(o => o.MinOrderSum, c => {
+					c.Columns(cm => cm.Name("AddressId"), cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
+					c.Insert(false);
+					c.Update(false);
+				});
+				m.ManyToOne(o => o.Limit, c => {
 					c.Columns(cm => cm.Name("AddressId"), cm => cm.Name("PriceId"), cm => cm.Name("RegionId"));
 					c.Insert(false);
 					c.Update(false);
@@ -250,7 +262,8 @@ namespace AnalitF.Net.Client.Config.Initializers
 				.Where(t => t.Namespace != null && t.Namespace.StartsWith("AnalitF.Net.Client.Models"))
 				.Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
 					|| t == typeof(MinOrderSumRule)
-					|| t == typeof(WaybillOrder));
+					|| t == typeof(WaybillOrder)
+					|| t == typeof(Limit));
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);

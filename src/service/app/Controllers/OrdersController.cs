@@ -125,6 +125,20 @@ where l.RequestId = :id;")
 				//мы не должны сохранять валидные заказы если корректировка заказов
 				//включена
 				if (!user.UseAdjustmentOrders || errors.Count == 0) {
+					var addressIds = orders.Select(o => o.AddressId).Distinct().ToArray();
+					if (addressIds.Length > 0) {
+						var addresses = session.Query<Address>()
+							.Where(a => addressIds.Contains(a.Id) && a.SmartOrderLimits.Count > 0)
+							.ToArray();
+						foreach (var order in orders) {
+							var limit = addresses.Where(a => a.Id == order.AddressId)
+								.SelectMany(a => a.SmartOrderLimits)
+								.FirstOrDefault(l => l.Supplier.Id == order.PriceList.Supplier.Id);
+							if (limit != null) {
+								limit.Value -= (decimal)order.CalculateSum();
+							}
+						}
+					}
 					orders.Each(o => o.Deleted = true);
 					session.SaveEach(orders);
 					session.SaveEach(orders.Select(o => new AcceptedOrderLog(log, o)));
@@ -159,11 +173,11 @@ where l.RequestId = :id;")
 						var message = result.Type == MinReqStatus.ErrorType.MinReq
 							? String.Format("Поставщик отказал в приеме заказа." +
 								" Сумма заказа меньше минимально допустимой." +
-								" Минимальный заказ {0:C} заказано {1:C}.",
+								" Минимальный заказ {0:0.00} заказано {1:0.00}.",
 								result.MinReq, order.CalculateSum())
 							: String.Format("Поставщик отказал в приеме дозаказа." +
 								" Сумма дозаказа меньше минимально допустимой." +
-								" Минимальный дозаказ {0:C} заказано {1:C}.",
+								" Минимальный дозаказ {0:0.00} заказано {1:0.00}.",
 								result.MinReordering, order.CalculateSum());
 						errors.Add(new OrderResult(order.ClientOrderId, message));
 						orders.Remove(order);
@@ -177,7 +191,16 @@ where l.RequestId = :id;")
 			errors = errors.Concat(rejectedOrders.Keys
 				.Select(o => new OrderResult(o.ClientOrderId, String.Format("Сумма заказов в этом" +
 					" месяце по Вашему предприятию превысила установленный лимит." +
-					" Лимит заказа на поставщика {0} - {1:C}", o.PriceList.Supplier.Name, rejectedOrders[o]))))
+					" Лимит заказа на поставщика {0} - {1:0.00}", o.PriceList.Supplier.Name, rejectedOrders[o]))))
+				.ToList();
+
+
+			var rejectedByLimit = Address.CheckLimits(session, orders);
+			orders.RemoveEach(rejectedByLimit.Select(r => r.Item1));
+			errors = errors.Concat(rejectedByLimit
+				.Select(r => new OrderResult(r.Item1.ClientOrderId, String.Format("Сумма заказов " +
+					"по Вашему предприятию превысила установленный лимит." +
+					" Лимит заказа на поставщика {0} - {1:0.00}", r.Item1.PriceList.Supplier.Name, r.Item2))))
 				.ToList();
 
 			if (user.UseAdjustmentOrders && !force) {

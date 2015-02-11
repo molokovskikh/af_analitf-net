@@ -77,6 +77,8 @@
 							</DataGridCheckBoxColumn>
 							<c:DataGridTextColumnEx Width="65*" Header="Мин.сумма" Binding="{Binding MinOrderSum.MinOrderSum}"
 								IsReadOnly="True" />
+							<c:DataGridTextColumnEx Width="65*" Header="Лимит" Binding="{Binding Limit.Value}"
+								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="38*" Header="Сумма" Binding="{Binding Sum}"
 								IsReadOnly="True" />
 							<c:DataGridTextColumnEx Width="40*" Header="Месячный заказ" Binding="{Binding SafePrice.MonthlyOrderSum}"

@@ -87,11 +87,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			CanDelete = CurrentReportLine.Select(l => l != null).ToValue();
 			SelectedReportLines = new List<BatchLineView>();
 			CanClear = Lines.CollectionChanged()
-				.Select(e => e.Sender as ObservableCollection<BatchLine>)
+				.Select(e => e.Sender as ObservableCollection<BatchLineView>)
 				.Select(v => v != null && v.Count > 0).ToValue();
 			CanReload = Lines.CollectionChanged()
-				.Select(e => e.Sender as ObservableCollection<BatchLine>)
+				.Select(e => e.Sender as ObservableCollection<BatchLineView>)
 				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
+			WatchForUpdate(CurrentReportLine.Select(l => l == null ? null : l.BatchLine).ToValue());
 		}
 
 		public NotifyValue<bool> CanReload { get; set; }

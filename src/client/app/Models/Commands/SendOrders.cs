@@ -60,6 +60,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var acceptedOrders = orders.Where(o => o.IsAccepted).ToArray();
 			var rejectedOrders = orders.Where(o => !o.IsAccepted).ToArray();
 			var sentOrders = acceptedOrders.Select(o => new SentOrder(o)).ToArray();
+			acceptedOrders.Where(o => o.Limit != null).Each(o => o.Limit.Value -= o.Sum);
 
 			Session.SaveEach(sentOrders);
 			Session.DeleteEach(acceptedOrders);

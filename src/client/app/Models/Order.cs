@@ -14,6 +14,35 @@ using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
+	public class Limit
+	{
+		public virtual Address Address { get; set; }
+		public virtual Price Price { get; set; }
+		public virtual decimal Value { get; set; }
+
+		public virtual bool Equals(Limit other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return Equals(Price, other.Price) && Equals(Address, other.Address);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != this.GetType()) return false;
+			return Equals(obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				return ((Price != null ? Price.Id.GetHashCode() : 0) * 397) ^ (Address != null ? Address.Id.GetHashCode() : 0);
+			}
+		}
+	}
+
 	public static class OrderQuery
 	{
 		public static IQueryable<Order> ReadyToSend(this IQueryable<Order> query, Address address)
@@ -84,6 +113,7 @@ namespace AnalitF.Net.Client.Models
 				sum = value;
 				OnPropertyChanged();
 				OnPropertyChanged("IsInvalid");
+				OnPropertyChanged("IsOverLimit");
 			}
 		}
 
@@ -132,6 +162,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
+		public virtual Limit Limit { get; set; }
+
 		[Ignore]
 		public virtual ulong ServerId { get; set; }
 
@@ -143,6 +175,17 @@ namespace AnalitF.Net.Client.Models
 				if (MinOrderSum == null)
 					return true;
 				return Sum < MinOrderSum.MinOrderSum;
+			}
+		}
+
+		[Style("Limit.Value", Description = "Превышение лимита")]
+		public virtual bool IsOverLimit
+		{
+			get
+			{
+				if (Limit == null)
+					return false;
+				return Sum > Limit.Value;
 			}
 		}
 

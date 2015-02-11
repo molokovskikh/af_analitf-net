@@ -30,6 +30,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Name { get; set; }
 
+		public virtual bool HaveLimits { get; set; }
+
 		[IgnoreDataMember]
 		public virtual IList<MinOrderSumRule> Rules { get; set; }
 
