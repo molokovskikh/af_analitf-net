@@ -262,6 +262,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				windows.Add(activeWindow);
 				activeWindow.Loaded += (sender, args) => loaded.Release();
 				ViewModelBinder.Bind(shell, activeWindow, null);
+				//что бы тесты не лезли на первый план
+				activeWindow.ShowActivated = false;
+				activeWindow.ShowInTaskbar = false;
 				activeWindow.Show();
 			});
 			BaseScreen.TestUiSchuduler = new DispatcherScheduler(dispatcher);
