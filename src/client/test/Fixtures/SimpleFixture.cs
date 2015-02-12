@@ -1,10 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using Common.Models;
 using Common.NHibernate;
 using NHibernate;
 using NHibernate.Linq;
+using Address = AnalitF.Net.Client.Models.Address;
+using Offer = AnalitF.Net.Client.Models.Offer;
+using Order = AnalitF.Net.Client.Models.Order;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -32,6 +37,24 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(sent);
 			if (verbose)
 				Console.WriteLine("Создан отправленный заказ для товара {0}", catalog.FullName);
+		}
+
+		public static void SmartOrderSetLimit(ISession session)
+		{
+			Debugger.Break();
+			Console.Write("Поставщик:");
+			var supplierId = Convert.ToUInt32(Console.ReadLine());
+			Console.Write("Лимит:");
+			var value = Convert.ToDecimal(Console.ReadLine());
+			var user = ServerFixture.User(session);
+			var address = session.Load<Common.Models.Address>(user.AvaliableAddresses[0].Id);
+			var limit = address.SmartOrderLimits.FirstOrDefault(l => l.Supplier.Id == supplierId);
+			if (limit == null) {
+				limit = new SmartOrderLimit(session.Load<Common.Models.Supplier>(supplierId), value);
+				address.SmartOrderLimits.Add(limit);
+			}
+			limit.Value = value;
+			session.Save(address);
 		}
 	}
 }

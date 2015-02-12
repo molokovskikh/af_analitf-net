@@ -181,6 +181,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string Priority { get; set; }
+		public virtual float? BaseCost { get; set; }
+
 		public virtual string Comment { get; set;}
 		public virtual ItemToOrderStatus Status { get; set; }
 		public virtual string ServiceFields { get; set; }

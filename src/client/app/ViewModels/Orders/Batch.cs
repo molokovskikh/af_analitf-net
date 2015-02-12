@@ -157,7 +157,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			if (line == null)
 				return;
-			foreach (var pair in line.ParsedServiceFields) {
+			foreach (var pair in line.ParsedServiceFields.Where(k => k.Key != "ReportData")) {
 				var key = pair.Key;
 				//todo - хорошо бы вычислять ширину колонок, но непонятно как
 				//если задать с помощью звезды колонка будет зажата в минимальный размер
@@ -321,16 +321,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public IEnumerable<IResult> Save()
 		{
-			var dialog = new SaveFileResult(new[] {
+			var result = new SaveFileResult(new[] {
 				Tuple.Create("Отчет (*.dbf)", ".dbf"),
 				Tuple.Create("Excel (*.xls)", ".xls"),
 				Tuple.Create("Расширенный Excel (*.xls)", ".xls"),
 				Tuple.Create("Excel (*.scv)", ".csv"),
+				Tuple.Create("Здоровые люди (*.scv)", ".csv"),
 			});
 
-			yield return dialog;
-			if (dialog.Dialog.FilterIndex == 1) {
-				using(var writer = dialog.Writer()) {
+			yield return result;
+			if (result.Dialog.FilterIndex == 1) {
+				using(var writer = result.Writer()) {
 					var table = new DataTable();
 					var column = table.Columns.Add("KOD");
 					column.ExtendedProperties.Add("scale", (byte)9);
@@ -367,15 +368,27 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					Dbf2.Save(table, writer);
 				}
 			}
-			else if (dialog.Dialog.FilterIndex == 2 || dialog.Dialog.FilterIndex == 3) {
-				var exportServiceFields = dialog.Dialog.FilterIndex == 3;
-				using(var writer = dialog.Writer()) {
+			else if (result.Dialog.FilterIndex == 2 || result.Dialog.FilterIndex == 3) {
+				var exportServiceFields = result.Dialog.FilterIndex == 3;
+				using(var writer = result.Writer()) {
 					ExportExcel(writer.BaseStream, Lines.Value, exportServiceFields);
 				}
 			}
-			else {
-				using(var writer = dialog.Writer()) {
+
+			else if (result.Dialog.FilterIndex == 4) {
+				using(var writer = result.Writer()) {
 					ExportCsv(writer);
+				}
+			}
+			else {
+				using(var writer = result.Writer()) {
+					writer.WriteLine("Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество");
+					foreach (var line in ReportLines.Value) {
+						var reportLine = line.BatchLine.ParsedServiceFields.Where(f => f.Key == "ReportData")
+							.Select(f => f.Value)
+							.FirstOrDefault();
+						writer.WriteLine(reportLine);
+					}
 				}
 			}
 		}

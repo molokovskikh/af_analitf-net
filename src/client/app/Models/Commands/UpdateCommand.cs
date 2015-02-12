@@ -99,7 +99,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					ProducerName = l.ProducerSynonym,
 					Quantity = l.Quantity,
 					SupplierDeliveryId = l.SupplierDeliveryId,
-					ServiceValues = l.ParsedServiceFields
+					ServiceValues = l.ParsedServiceFields,
+					Priority = l.Priority,
+					BaseCost = l.BaseCost
 				}).ToList();
 				var batchRequest = new BatchRequest(AddressId, items);
 				response = Wait("Batch", Client.PostAsJsonAsync("Batch", batchRequest, Token));

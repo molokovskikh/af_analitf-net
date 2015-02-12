@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config.Environments;
+using AnalitF.Net.Test.Integration;
 using Common.Tools;
 using NPOI.SS.Formula.Functions;
 
@@ -63,11 +64,18 @@ namespace AnalitF.Net.Client.Test.Tasks
 					new FixtureHelper(verbose: true).Run(type);
 				}
 				else {
-					using (var session = FixtureHelper.GetFactory().OpenSession()) {
+					var factory = FixtureHelper.GetFactory();
+					if (method.Name == "SmartOrderSetLimit") {
+						factory = IntegrationSetup.ServerNHConfig("local");
+					}
+
+					using (var session = factory.OpenSession())
+					using (session.BeginTransaction()) {
 						if (method.GetParameters().Length == 1)
 							method.Invoke(null, new object[] { session });
 						else
 							method.Invoke(null, new object[] { session, true });
+						session.Transaction.Commit();
 					}
 				}
 			}

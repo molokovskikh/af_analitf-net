@@ -55,6 +55,8 @@ namespace AnalitF.Net.Service.Controllers
 							CodeCr = i.CodeCr,
 							SupplierDeliveryId = i.SupplierDeliveryId,
 							ServiceValues = i.ServiceValues,
+							Priority = i.Priority,
+							BaseCost = i.BaseCost
 						}).ToList();
 						handler = new SmartOrderBatchHandler(session, job.User, batchAddress, items);
 						handler.RespectLimits = true;
