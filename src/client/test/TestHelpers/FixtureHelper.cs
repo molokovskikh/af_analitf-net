@@ -100,8 +100,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			AppBootstrapper.NHibernate = new Config.Initializers.NHibernate();
 			AppBootstrapper.NHibernate.UseRelativePath = true;
 			AppBootstrapper.NHibernate.Init();
-			var factory = AppBootstrapper.NHibernate.Factory;
-			return factory;
+			return AppBootstrapper.NHibernate.Factory;
 		}
 
 		public void Dispose()

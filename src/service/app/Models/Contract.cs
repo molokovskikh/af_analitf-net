@@ -237,6 +237,10 @@ namespace AnalitF.Net.Client.Models
 		public string SupplierDeliveryId;
 
 		public Dictionary<string, string> ServiceValues;
+
+		public string Priority;
+
+		public float? BaseCost;
 	}
 
 	public class BatchRequest

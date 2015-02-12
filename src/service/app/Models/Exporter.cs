@@ -1038,7 +1038,7 @@ where a.MailId in ({0})", ids.Implode());
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["SynonymFirmCrCode"]), r => r["Synonym"].ToString());
 
 				var producerIds = items.Select(i => i.CodeFirmCr)
-					.Union(BatchItems.Select(b => b.Item).Where(i => i != null).Select(i => i.CodeFirmCr))
+					.Union(BatchItems.Select(b => b.Item).Where(i => i != null).Select(i => i.ProducerId))
 					.Where(i => i != null)
 					.Distinct();
 				var producerLookup = connection
@@ -1156,7 +1156,9 @@ where a.MailId in ({0})", ids.Implode());
 							"Quantity",
 							"Comment",
 							"Status",
-							"ServiceFields"
+							"Priority",
+							"BaseCost",
+							"ServiceFields",
 						},
 						BatchItems.Select(i => new object[] {
 							i.GetHashCode(),
@@ -1168,11 +1170,13 @@ where a.MailId in ({0})", ids.Implode());
 							i.Item == null ? null : (uint?)i.Item.ProductId,
 							i.Item == null ? null : (uint?)i.Item.CatalogId,
 							i.ProducerName,
-							i.Item == null ? null : i.Item.CodeFirmCr,
-							i.Item == null ? null : producerLookup[i.Item.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
+							i.Item == null ? null : i.Item.ProducerId,
+							i.Item == null ? null : producerLookup[i.Item.ProducerId.GetValueOrDefault()].FirstOrDefault(),
 							i.Quantity,
 							i.Item == null ? i.Comment : i.Item.Comments.Implode(Environment.NewLine),
 							i.Item == null ? (int)ItemToOrderStatus.NotOrdered : (int)i.Item.Status,
+							i.Priority,
+							i.BaseCost,
 							JsonConvert.SerializeObject(i.ServiceValues)
 						}), truncate: false);
 				}

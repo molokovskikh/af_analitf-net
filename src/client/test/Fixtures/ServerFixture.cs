@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 		}
 
-		protected static TestUser User(ISession session)
+		public static TestUser User(ISession session)
 		{
 			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
 		}
