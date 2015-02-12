@@ -36,9 +36,10 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public bool WasCancelled { get; private set; }
 
-		public void Ok()
+		public void OK()
 		{
-			TryClose(false);
+			WasCancelled = false;
+			TryClose();
 		}
 
 		protected override void OnViewAttached(object view, object context)

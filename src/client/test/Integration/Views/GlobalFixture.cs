@@ -624,7 +624,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 			OpenMenu("Сервис");
 			WaitIdle();
-			ClickMenuAsync("Отправить письмо в АК \"Инфорум\"");
+			AsyncClickMenu("Отправить письмо в АК \"Инфорум\"");
 			WaitWindow("Письмо в АК \"Инфорум\"");
 			InputActiveWindow("Subject", "test");
 			Click("Send");
@@ -700,6 +700,22 @@ namespace AnalitF.Net.Test.Integration.Views
 			ShallowBindingErrors();
 		}
 
+		[Test]
+		public void Print_waybill()
+		{
+			Fixture<LocalWaybill>();
+			Start();
+			Click("ShowWaybills");
+
+			Input("Waybills", Key.Return);
+			WaitIdle();
+
+			AsyncClickNoWait("PrintWaybill");
+			WaitWindow("Настройка печати накладной");
+			AsyncClickNoWait("OK");
+			WaitWindow("Предварительный просмотр");
+		}
+
 		private static void ShallowBindingErrors()
 		{
 			//на форме корректировки могут возникнуть ошибки биндинга
@@ -741,7 +757,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 		}
 
-		private void ClickMenuAsync(string header)
+		private void AsyncClickMenu(string header)
 		{
 			dispatcher.BeginInvoke(new Action(() => {
 				var el = activeWindow.Descendants<Menu>().SelectMany(m => m.Items.OfType<MenuItem>())
@@ -756,7 +772,13 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private void WaitWindow(string title, string body = null)
 		{
-			var opened = manager.WindowOpened.Timeout(30.Second()).First();
+			var found = false;
+			dispatcher.Invoke(() => {
+				found = activeWindow.Title == "Настройка печати накладной";
+			});
+			if (found)
+				return;
+			var opened = manager.WindowOpened.Timeout(5.Second()).First();
 			opened.Dispatcher.Invoke(() => {
 				var text = opened.AsText();
 				Assert.AreEqual(title, opened.Title, text);
