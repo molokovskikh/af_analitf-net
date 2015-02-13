@@ -88,6 +88,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(e => new Stat(Address));
 
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+			IsCurrentSelected
+				.Select(v => v ? "Orders" : "SentOrders")
+				.Subscribe(excelExporter.ActiveProperty);
 		}
 
 		public AddressSelector AddressSelector { get; set; }
@@ -446,15 +449,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				if (IsCurrentSelected)
 					return User.CanPrint<OrderDocument, Order>();
 				return User.CanPrint<OrderDocument, SentOrder>();
-			}
-		}
-
-		public override bool CanExport
-		{
-			get
-			{
-				var property = IsCurrentSelected ? "Orders" : "SentOrders";
-				return excelExporter.CanExport && User.CanExport(this, property);
 			}
 		}
 

@@ -23,10 +23,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected MessageBus bus;
 		protected WindowManager manager;
 		protected ShellViewModel shell;
+		protected User user;
 
 		[SetUp]
 		public void BaseUnitFixtureSetup()
 		{
+			user = new User();
 			cleaner = new FileCleaner();
 			cleanup = new CompositeDisposable();
 			cleanup.Add(cleaner);
@@ -46,12 +48,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			shell.Env = new Env {
 				IsUnitTesting = true
 			};
+			BaseScreen.TestContext = new AppTestContext(user);
 		}
 
 		[TearDown]
 		public void BaseUnitFixtureTearDown()
 		{
 			BaseScreen.UnitTesting = false;
+			BaseScreen.TestContext = null;
 			cleanup.Dispose();
 		}
 
@@ -63,11 +67,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Activate(BaseScreen screen, Address address = null)
 		{
 			address = address ?? new Address("тест");
-			screen.User = new User();
+			screen.User = user;
 			screen.Address = address;
 			screen.Parent = shell;
-			if (screen is BaseOfferViewModel)
-				((BaseOfferViewModel)screen).Addresses = new[] { screen.Address };
+			screen.Addresses = new[] { screen.Address };
 			ScreenExtensions.TryActivate(screen);
 		}
 	}

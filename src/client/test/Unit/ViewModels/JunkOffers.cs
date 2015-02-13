@@ -11,10 +11,14 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Disabled_export()
 		{
+			user.Permissions.Clear();
 			var model = new JunkOfferViewModel();
 			Activate(model);
 			Assert.IsFalse(model.CanExport);
+
 			model.User.Permissions.Add(new Permission("EPP"));
+			model = new JunkOfferViewModel();
+			Activate(model);
 			Assert.IsTrue(model.CanExport);
 		}
 	}

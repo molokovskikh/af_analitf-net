@@ -270,9 +270,11 @@
     <Compile Include="Unit\UtilFixture.cs" />
     <Compile Include="Unit\ViewModelHelperFixture.cs" />
     <Compile Include="Unit\ViewModels\BatchFixture.cs" />
+    <Compile Include="Unit\ViewModels\CatalogFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogNameFixture.cs" />
     <Compile Include="Unit\ViewModels\CatalogOfferFixture.cs" />
     <Compile Include="Unit\ViewModels\JunkOffers.cs" />
+    <Compile Include="Unit\ViewModels\OrderDetailsFixture.cs" />
     <Compile Include="Unit\ViewModels\OrderLines.cs" />
     <Compile Include="Unit\ViewModels\OrdersFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />

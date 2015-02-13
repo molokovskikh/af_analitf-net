@@ -62,6 +62,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				Prices = new List<Selectable<Price>>();
 
 			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
+			IsCurrentSelected
+				.Select(v => v ? "Lines" : "SentLines")
+				.Subscribe(excelExporter.ActiveProperty);
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -97,15 +100,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				if (IsCurrentSelected)
 					return User.CanPrint<OrderLinesDocument, OrderLine>();
 				return User.CanPrint<OrderLinesDocument, SentOrderLine>();
-			}
-		}
-
-		public override bool CanExport
-		{
-			get
-			{
-				var property = IsCurrentSelected ? "Lines" : "SentLines";
-				return excelExporter.CanExport && User.CanExport(this, property);
 			}
 		}
 

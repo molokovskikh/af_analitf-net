@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Can_export_order_details()
 		{
 			var user = new User();
-			Assert.IsFalse(user.CanExport<OrderDetailsViewModel, SentOrder>());
+			Assert.IsFalse(user.CanExport(typeof(OrderDetailsViewModel).Name + "." + typeof(SentOrder).Name));
 		}
 
 		[Test]

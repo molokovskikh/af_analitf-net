@@ -139,15 +139,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(User.Cast<object>())
 				.Subscribe(_ => UpdateDisplayName());
 
-			this.ObservableForProperty(m => m.ActiveItem)
-				.Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
-
-			this.ObservableForProperty(m => m.ActiveItem)
-				.Subscribe(_ => NotifyOfPropertyChange("CanExport"));
-
-			this.ObservableForProperty(m => m.CanPrint)
-				.Subscribe(_ => NotifyOfPropertyChange("CanPrintPreview"));
-
 			this.ObservableForProperty(m => (object)m.Stat.Value)
 				.Merge(this.ObservableForProperty(m => (object)m.CurrentAddress))
 				.Subscribe(_ => NotifyOfPropertyChange("CanSendOrders"));
@@ -199,10 +190,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			CanExport = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IExportable
-					? ((IExportable)e.Value).ObservableForProperty(m => m.CanExport, skipInitial: false)
-					: Observable.Return(new ObservedChange<IExportable, bool>()))
+					? ((IExportable)e.Value).CanExport
+					: Observable.Return(false))
 				.Switch()
-				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 			CanPrint = this.ObservableForProperty(m => m.ActiveItem)
 				.Select(e => e.Value is IPrintable
@@ -604,7 +594,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanShowBatch
 		{
-			get { return User.Value != null && Settings.Value.LastUpdate != null; }
+			get { return Settings.Value.LastUpdate != null; }
 		}
 
 		public void ShowBatch()

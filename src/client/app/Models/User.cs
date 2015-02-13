@@ -43,10 +43,10 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(JunkOfferViewModel).Name + "." + "Offers", "EPP" },
 			{ typeof(RejectsViewModel).Name + "." + "Rejects", "BP" },
 			{ typeof(CatalogOfferViewModel).Name + "." + "Offers", "FPCPL" },
-			{ typeof(Batch).Name + "." + typeof(Offer).Name, "FPCPL" },
-			{ typeof(Batch).Name + "." + typeof(BatchLine).Name, "COC" },
-			{ typeof(Awaited).Name + "." + typeof(Offer).Name, "FPCPL" },
-			{ typeof(Awaited).Name + "." + typeof(AwaitedItem).Name, "FPCNF" },
+			{ typeof(Batch).Name + "." + "Offers", "FPCPL" },
+			{ typeof(Batch).Name + "." + "ReportLines", "COC" },
+			{ typeof(Awaited).Name + "." + "Offers", "FPCPL" },
+			{ typeof(Awaited).Name + "." + "Items", "FPCNF" },
 			{ typeof(MinCosts).Name + "." + "Offers", "FPCPL" },
 		};
 
@@ -110,11 +110,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool CanPrint<T>(Type context)
 		{
 			return HasPermission(Permission.ShortcutPrintMap, typeof(T), context);
-		}
-
-		public virtual bool CanExport<T, T1>()
-		{
-			return HasPermission(Permission.ShortcutExportMap, typeof(T), typeof(T1));
 		}
 
 		public virtual bool CanExport(object model, string key)

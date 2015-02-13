@@ -26,7 +26,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 {
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
-		private string activePrint;
 		private static string lastUsedDir;
 
 		public Batch()
@@ -93,7 +92,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(e => e.Sender as ObservableCollection<BatchLineView>)
 				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
 			WatchForUpdate(CurrentReportLine.Select(l => l == null ? null : l.BatchLine).ToValue());
+			ActivePrint = new NotifyValue<string>();
+			ActivePrint.Subscribe(excelExporter.ActiveProperty);
 		}
+
+		public NotifyValue<string> ActivePrint { get; set; }
 
 		public NotifyValue<bool> CanReload { get; set; }
 
@@ -127,19 +130,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			get
 			{
-				return activePrint.Match("Offers")
+				return ActivePrint.Value.Match("Offers")
 					? User.CanPrint<Batch, Offer>()
 					: User.CanPrint<Batch, BatchLine>();
-			}
-		}
-
-		public override bool CanExport
-		{
-			get
-			{
-				return activePrint.Match("Offers")
-					? User.CanExport<Batch, Offer>()
-					: User.CanExport<Batch, BatchLine>();
 			}
 		}
 
@@ -495,7 +488,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public PrintResult Print()
 		{
-			if (activePrint.Match("Offers")) {
+			if (ActivePrint.Value.Match("Offers")) {
 				if (CurrentCatalog == null)
 					return null;
 				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, Offers.Value));
@@ -508,8 +501,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public void ActivatePrint(string name)
 		{
-			activePrint = name;
-			NotifyOfPropertyChange("CanExport");
+			ActivePrint.Value = name;
 			NotifyOfPropertyChange("CanPrint");
 		}
 

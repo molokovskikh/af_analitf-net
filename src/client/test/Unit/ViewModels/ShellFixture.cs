@@ -20,17 +20,12 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 	{
 		public class ExportScreen : Screen, IExportable
 		{
-			private bool canExport;
-
-			public bool CanExport
+			public ExportScreen()
 			{
-				get { return canExport; }
-				set
-				{
-					canExport = value;
-					NotifyOfPropertyChange("CanExport");
-				}
+				CanExport = new NotifyValue<bool>();
 			}
+
+			public NotifyValue<bool> CanExport { get; set; }
 
 			public IResult Export()
 			{
@@ -141,7 +136,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			var export = new ExportScreen();
 			shell.ActivateItem(export);
 
-			export.CanExport = true;
+			export.CanExport.Value = true;
 
 			Assert.IsTrue(canExport);
 		}
@@ -151,9 +146,8 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		{
 			var canExport = false;
 			shell.CanExport.Changed().Subscribe(_ => canExport = shell.CanExport.Value);
-			var export = new ExportScreen {
-				CanExport = true
-			};
+			var export = new ExportScreen();
+			export.CanExport.Value = true;
 			shell.ActivateItem(export);
 			Assert.IsTrue(canExport);
 			shell.ActivateItem(new Screen());
