@@ -39,7 +39,7 @@ namespace AnalitF.Net.Test.Integration
 		public HttpSelfHostServer server;
 		private uint serverUserId;
 
-		public static bool isInitialized = false;
+		public static bool isInitialized;
 		public static ISessionFactory Factory;
 		public static Configuration Configuration;
 		public static Client.Config.Config clientConfig = new Client.Config.Config();
@@ -70,7 +70,7 @@ namespace AnalitF.Net.Test.Integration
 			LogManager.GetLog = t => new Log4net(t);
 			AppBootstrapper.InitUi(true);
 
-			global::Test.Support.Setup.SessionFactory = ServerNHConfig("server");
+			global::Test.Support.Setup.SessionFactory = DataHelper.ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);
 
 			var nhibernate = new Client.Config.Initializers.NHibernate();
@@ -86,6 +86,7 @@ namespace AnalitF.Net.Test.Integration
 				ImportData();
 				BackupData();
 			}
+			DataHelper.SeedDb();
 			isInitialized = true;
 		}
 
@@ -100,7 +101,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			//если пользователя нет, значит база была перезалита и локальная база не актуальна
 			using(var session = IntegrationFixture.Factory.OpenSession()) {
-				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == System.Environment.UserName);
+				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == ServerFixture.DebugLogin());
 				if (user != null)
 					serverUserId = user.Id;
 				return user == null;
@@ -126,16 +127,6 @@ namespace AnalitF.Net.Test.Integration
 					return true;
 			}
 			return false;
-		}
-
-		public static ISessionFactory ServerNHConfig(string connectionStringName)
-		{
-			global::Test.Support.Setup.BuildConfiguration(connectionStringName);
-			var server = new Service.Config.Initializers.NHibernate();
-			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
-			server.Configuration = holder.GetConfiguration(typeof(ActiveRecordBase));
-			server.Init();
-			return holder.GetSessionFactory(typeof(ActiveRecordBase));
 		}
 
 		public Task InitWebServer(Uri url)
@@ -170,13 +161,6 @@ namespace AnalitF.Net.Test.Integration
 			FileHelper.InitDir(BackupDir);
 			Directory.GetFiles(clientConfig.DbDir)
 				.Each(f => File.Copy(f, Path.Combine(BackupDir, Path.GetFileName(f)), true));
-		}
-
-		public static void RestoreData(ISession localSession)
-		{
-			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
-			Directory.GetFiles(BackupDir)
-				.Each(f => File.Copy(f, Path.Combine(clientConfig.DbDir, Path.GetFileName(f)), true));
 		}
 	}
 }

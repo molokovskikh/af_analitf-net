@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Execute(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			var user = User(session);
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
 			Document = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
 			Document.DocumentType = DocumentType.Reject;

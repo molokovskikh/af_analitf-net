@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Service.Test;
 using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
@@ -114,7 +115,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected TestUser ServerUser()
 		{
-			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			return ServerFixture.User(session);
 		}
 
 		protected string TempFile(string filename, string content)

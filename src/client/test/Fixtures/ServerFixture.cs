@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -19,7 +20,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static TestUser User(ISession session)
 		{
-			return session.Query<TestUser>().First(u => u.Login == Environment.UserName);
+			return session.Query<TestUser>().First(u => u.Login == DebugLogin());
+		}
+
+		public static string DebugLogin()
+		{
+			return ConfigurationManager.AppSettings["DebugUser"] ?? Environment.UserName;
 		}
 	}
 }

@@ -57,8 +57,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Rollback(ISession session)
 		{
-			var user = session.Query<TestUser>().First(u => u.Login == Environment.UserName);
-			user.AllowDownloadUnconfirmedOrders = false;
+			User(session).AllowDownloadUnconfirmedOrders = false;
 		}
 	}
 }

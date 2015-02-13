@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					session.Transaction.Commit();
 			}
 			if (restore)
-				IntegrationSetup.RestoreData(session);
+				DataHelper.RestoreData(session);
 			if (disposable != null)
 				disposable.Dispose();
 		}

@@ -1,6 +1,6 @@
-﻿using System.Reactive.Linq;
-#if DEBUG
+﻿#if DEBUG
 using System;
+using System.Reactive.Linq;
 using System.Diagnostics;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;

@@ -117,7 +117,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Send_result_cost()
 		{
-			disposable.Add(Disposable.Create(() => Integration.IntegrationSetup.RestoreData(localSession)));
+			disposable.Add(Disposable.Create(() => DataHelper.RestoreData(localSession)));
 			localSession.DeleteEach<SentOrder>();
 			var order = MakeOrderClean();
 			order.Price.CostFactor = 1.5m;

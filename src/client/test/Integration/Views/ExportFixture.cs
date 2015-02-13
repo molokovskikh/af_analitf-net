@@ -50,7 +50,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			Bind(model);
 
-			Assert.That(model.CanExport, Is.True);
+			Assert.IsTrue(model.CanExport.Value);
 			result = (OpenResult)model.Export();
 			Assert.That(File.Exists(result.Filename), result.Filename);
 		}

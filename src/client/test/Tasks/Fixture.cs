@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 				else {
 					var factory = FixtureHelper.GetFactory();
 					if (method.Name == "SmartOrderSetLimit") {
-						factory = IntegrationSetup.ServerNHConfig("local");
+						factory = DataHelper.ServerNHConfig("local");
 					}
 
 					using (var session = factory.OpenSession())

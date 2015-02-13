@@ -37,13 +37,13 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[TearDown]
 		public void Teardown()
 		{
-			Integration.IntegrationSetup.RestoreData(localSession);
+			DataHelper.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();
 				session.CreateSQLQuery("update Customers.Users set Login = Id;" +
 					"update Customers.Users set Login = :login where Id = :id")
-					.SetParameter("login", Environment.UserName)
+					.SetParameter("login", ServerFixture.DebugLogin())
 					.SetParameter("id", user.Id)
 					.ExecuteUpdate();
 			}
@@ -92,7 +92,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		{
 			restoreUser = true;
 
-			SampleData.CreateUser(session);
+			SampleData.CreateUser(session, ServerFixture.DebugLogin());
 
 			Run(new UpdateCommand());
 

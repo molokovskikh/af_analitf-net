@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			CreateSampleCore(session, minReqSupplier, 1000);
 
 			MaxProducerCosts = CreateMaxProduceCosts(session, supplier);
-			Client = CreateUser(session);
+			Client = CreateUser(session, DebugLogin());
 
 			var user = Client.Users.First();
 			session.Query<TestAddressIntersection>()
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			Files = exporter.Result;
 		}
 
-		public static TestClient CreateUser(ISession session)
+		public static TestClient CreateUser(ISession session, string login)
 		{
 			//очищаем предудыщие попытки
 			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			user.SendRejects = true;
 			user.SendWaybills = true;
 			//что бы можно было руками обновить клиент
-			user.Login = Environment.UserName;
+			user.Login = login;
 			return client;
 		}
 

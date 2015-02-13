@@ -709,7 +709,6 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Input("Waybills", Key.Return);
 			WaitIdle();
-
 			AsyncClickNoWait("PrintWaybill");
 			WaitWindow("Настройка печати накладной");
 			AsyncClickNoWait("OK");
@@ -774,7 +773,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var found = false;
 			dispatcher.Invoke(() => {
-				found = activeWindow.Title == "Настройка печати накладной";
+				found = activeWindow.Title == title;
 			});
 			if (found)
 				return;

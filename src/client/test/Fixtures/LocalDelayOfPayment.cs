@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
@@ -24,7 +25,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Rollback(ISession session)
 		{
-			IntegrationSetup.RestoreData(session);
+			DataHelper.RestoreData(session);
 		}
 	}
 }

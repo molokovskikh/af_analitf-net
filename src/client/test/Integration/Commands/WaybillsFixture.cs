@@ -31,7 +31,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		public void TearDown()
 		{
 			if (restore)
-				Integration.IntegrationSetup.RestoreData(localSession);
+				DataHelper.RestoreData(localSession);
 		}
 
 		[Test]
