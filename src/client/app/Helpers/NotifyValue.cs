@@ -8,13 +8,16 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using log4net;
 using NHibernate;
+using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class NotifyValue<T> : BaseNotify, IObservable<T>
+	public class NotifyValue<T> : BaseNotify, IObservable<T>, IObserver<T>
 	{
+		private static ILog log = LogManager.GetLogger(typeof(NotifyValue<>));
+
 		private bool respectValue;
 		private Func<T> calc;
 		private T value;
@@ -134,6 +137,24 @@ namespace AnalitF.Net.Client.Helpers
 		public void Refresh()
 		{
 			OnPropertyChanged("Value");
+		}
+
+		public void OnNext(T value)
+		{
+			Value = value;
+		}
+
+		public void OnError(Exception error)
+		{
+#if DEBUG
+			throw new Exception(String.Format("Ошибка при получениии значениея для свойства {0} = {1}", GetType(), this), error);
+#else
+			log.Error(String.Format("Ошибка при получениии значениея для свойства {0} = {1}", GetType(), this), error);
+#endif
+		}
+
+		public void OnCompleted()
+		{
 		}
 	}
 

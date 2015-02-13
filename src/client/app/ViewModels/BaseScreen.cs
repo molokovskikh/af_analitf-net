@@ -44,6 +44,16 @@ using ILog = log4net.ILog;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class AppTestContext
+	{
+		public AppTestContext(User user)
+		{
+			User = user;
+		}
+
+		public User User;
+	}
+
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
 		private bool clearSession;
@@ -94,6 +104,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected SimpleMRUCache cache = new SimpleMRUCache(10);
 
+		public static AppTestContext TestContext;
+
 		public BaseScreen()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
@@ -119,11 +131,16 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			else {
 				Settings = new NotifyValue<Settings>(new Settings(defaults: true));
-				User = new User();
+				User = TestContext != null ? TestContext.User : new User();
 			}
 
-			excelExporter = new ExcelExporter(this, Path.GetTempPath());
-
+			var properties = GetType().GetProperties()
+				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
+				.Select(p => p.Name)
+				.Where(p => User.CanExport(this, p))
+				.ToArray();
+			excelExporter = new ExcelExporter(this, properties, Path.GetTempPath());
+			CanExport = excelExporter.CanExport.ToValue();
 		}
 
 		public IScheduler UiScheduler
@@ -143,14 +160,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public User User { get; set; }
 
-		public virtual bool CanExport
-		{
-			get
-			{
-				return excelExporter.CanExport
-					&& excelExporter.Properties.Any(k => User.CanExport(this, k.Name));
-			}
-		}
+		public NotifyValue<bool> CanExport { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -349,7 +359,7 @@ namespace AnalitF.Net.Client.ViewModels
 			tableSettings.RestoreView(view);
 		}
 
-		public IResult Export()
+		public virtual IResult Export()
 		{
 			return excelExporter.Export();
 		}

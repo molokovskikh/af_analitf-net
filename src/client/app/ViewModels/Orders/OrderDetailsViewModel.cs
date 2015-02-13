@@ -36,6 +36,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder),
 				UiScheduler);
+			if (User.CanExport(this, type.Name))
+				excelExporter.Properties = new []{ "Lines" };
+			else
+				excelExporter.Properties = new string[0];
+			excelExporter.ActiveProperty.Refresh();
 		}
 
 		public IList<IOrderLine> Source { get; set; }
@@ -64,11 +69,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public bool CanPrint
 		{
 			get { return User.CanPrint<OrderDocument>(type); }
-		}
-
-		public override bool CanExport
-		{
-			get { return User.CanExport(this, type.Name); }
 		}
 
 		public bool ShowPriceVisible

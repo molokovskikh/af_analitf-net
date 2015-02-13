@@ -65,6 +65,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 #endif
 				.Subscribe(_ => LoadCatalogs(), CloseCancellation.Token);
+			excelExporter.ActiveProperty.Value = "CatalogNames";
 		}
 
 		public CatalogViewModel ParentModel { get; private set; }
@@ -74,6 +75,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public QuickSearch<CatalogName> CatalogNamesSearch { get; private set; }
 		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
 
+		[Export]
 		public NotifyValue<List<CatalogName>> CatalogNames { get; set; }
 		public NotifyValue<CatalogName> CurrentCatalogName { get; set; }
 
@@ -106,6 +108,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		[Export]
 		public NotifyValue<List<Catalog>> Catalogs { get; set; }
 
 		public NotifyValue<object> CurrentItem { get; set; }
@@ -241,6 +244,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ActivateCatalog()
 		{
 			if (activeItemType != typeof(Catalog)) {
+				excelExporter.ActiveProperty.Value = "Catalogs";
 				activeItemType = typeof(Catalog);
 				CurrentItem.Value = CurrentCatalog;
 				Promotions.Activate(CurrentCatalogName);
@@ -249,9 +253,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ActivateCatalogName()
 		{
-			activeItemType = typeof(CatalogName);
-			CurrentItem.Value = CurrentCatalogName.Value;
-			Promotions.Deactivate();
+			if (activeItemType != typeof(CatalogName)) {
+				excelExporter.ActiveProperty.Value = "CatalogNames";
+				activeItemType = typeof(CatalogName);
+				CurrentItem.Value = CurrentCatalogName.Value;
+				Promotions.Deactivate();
+			}
 		}
 	}
 }

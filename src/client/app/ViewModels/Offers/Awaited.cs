@@ -20,20 +20,21 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class Awaited : BaseOfferViewModel, IPrintable
 	{
-		private string activePrint;
-
 		public Awaited()
 		{
 			DisplayName = "Ожидаемые позиции";
 			Items = new NotifyValue<ObservableCollection<AwaitedItem>>();
 			CurrentItem = new NotifyValue<AwaitedItem>();
 			CanDelete = CurrentItem.Select(i => i != null).ToValue();
+			ActivePrint = new NotifyValue<string>();
+			ActivePrint.Subscribe(excelExporter.ActiveProperty);
 		}
 
 		public NotifyValue<bool> CanDelete { get; set; }
 		[Export]
 		public NotifyValue<ObservableCollection<AwaitedItem>> Items { get; set; }
 		public NotifyValue<AwaitedItem> CurrentItem { get; set; }
+		public NotifyValue<string> ActivePrint { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -96,21 +97,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Items.Value.Remove(CurrentItem.Value);
 		}
 
-		public override bool CanExport
-		{
-			get
-			{
-				return activePrint.Match("Offers")
-					? User.CanExport<Awaited, Offer>()
-					: User.CanExport<Awaited, AwaitedItem>();
-			}
-		}
-
 		public bool CanPrint
 		{
 			get
 			{
-				return activePrint.Match("Offers")
+				return ActivePrint.Value.Match("Offers")
 					? User.CanPrint<Awaited, Offer>()
 					: User.CanPrint<Awaited, AwaitedItem>();
 			}
@@ -118,7 +109,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public PrintResult Print()
 		{
-			if (activePrint.Match("Offers")) {
+			if (ActivePrint.Value.Match("Offers")) {
 				if (CurrentCatalog == null)
 					return null;
 				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, Offers.Value));
@@ -131,8 +122,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public void ActivatePrint(string name)
 		{
-			activePrint = name;
-			NotifyOfPropertyChange("CanExport");
+			ActivePrint.Value = name;
 			NotifyOfPropertyChange("CanPrint");
 		}
 	}

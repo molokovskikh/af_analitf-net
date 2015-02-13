@@ -30,12 +30,12 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			var copy = new MenuItem {
 				Header = "Копировать"
 			};
-			if (AssociatedObject.ClipboardCopyMode == DataGridClipboardCopyMode.None) {
-				copy.IsEnabled = false;
-			}
-			else {
-				copy.Click += (sender, args) => CopyToClipboard(AssociatedObject);
-			}
+			BindingOperations.SetBinding(copy, MenuItem.IsEnabledProperty, new Binding("ClipboardCopyMode") {
+				Source = AssociatedObject,
+				BindsDirectlyToSource = true,
+				Converter = new LambdaConverter<DataGridClipboardCopyMode>(m => m != DataGridClipboardCopyMode.None)
+			});
+			copy.Click += (sender, args) => CopyToClipboard(AssociatedObject);
 			contextMenu.Items.Add(item);
 			contextMenu.Items.Add(copy);
 			AssociatedObject.ContextMenu = contextMenu;

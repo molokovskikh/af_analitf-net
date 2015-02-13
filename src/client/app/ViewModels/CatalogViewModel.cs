@@ -71,6 +71,10 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentFilter = Filters[0];
 
 			CatalogSearch = new NotifyValue<bool>();
+			this.ObservableForProperty(m => m.ActiveItem)
+				.Select(i => i.Value != null ? i.Value.CanExport : Observable.Return(false))
+				.Switch()
+				.Subscribe(CanExport);
 			CatalogSearch.CatchSubscribe(_ => UpdateActiveItem(), CloseCancellation);
 
 			CanAddToAwaited = this
@@ -99,6 +103,13 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsEnabled { get; set; }
 		[DataMember]
 		public NotifyValue<bool> CatalogSearch { get; set; }
+
+		public override IResult Export()
+		{
+			if (!CanExport)
+				return null;
+			return ActiveItem.Export();
+		}
 
 		public string SearchText
 		{

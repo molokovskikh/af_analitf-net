@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,7 +20,7 @@ namespace AnalitF.Net.Client.Models
 {
 	public interface IExportable
 	{
-		bool CanExport { get; }
+		NotifyValue<bool> CanExport { get; }
 
 		IResult Export();
 	}
@@ -30,23 +31,23 @@ namespace AnalitF.Net.Client.Models
 
 	public class ExcelExporter
 	{
-		public PropertyInfo[] Properties;
 		private Screen model;
-		public string ExportDir;
 
-		public ExcelExporter(Screen model, string dir)
+		public string ExportDir;
+		public string[] Properties;
+
+		public ExcelExporter(Screen model, string[] properties, string dir)
 		{
 			this.model = model;
+			this.Properties = properties;
 			ExportDir = dir;
-			Properties = model.GetType().GetProperties()
-				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
-				.ToArray();
+			ActiveProperty = new NotifyValue<string>();
+			CanExport = new NotifyValue<bool>();
+			ActiveProperty.Select(p => Properties.Length > 0 && (p == null || Properties.Contains(p))).Subscribe(CanExport);
 		}
 
-		public bool CanExport
-		{
-			get { return Properties.Length > 0; }
-		}
+		public NotifyValue<bool> CanExport { get; set; }
+		public NotifyValue<string> ActiveProperty { get; set; }
 
 		public IResult Export()
 		{
@@ -92,12 +93,14 @@ namespace AnalitF.Net.Client.Models
 
 		private DataGrid FindGrid()
 		{
-			var names = Properties.Select(p => p.Name).ToArray();
 			var view = (UserControl) model.GetView();
 			if (view == null)
 				return null;
-			return view.Descendants<DataGrid>().Where(g => names.Contains(g.Name))
-				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 100 + Convert.ToUInt32(g.IsVisible) * 10)
+			return view.Descendants<DataGrid>()
+				.Where(g => Properties.Contains(g.Name))
+				.OrderByDescending(g => Convert.ToUInt32(g.IsKeyboardFocusWithin) * 1000
+					+ Convert.ToUInt32(ActiveProperty.Value == g.Name) * 1000
+					+ Convert.ToUInt32(g.IsVisible) * 10)
 				.FirstOrDefault();
 		}
 

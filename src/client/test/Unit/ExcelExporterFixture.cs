@@ -24,10 +24,10 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Calculate_can_export()
 		{
-			var exporter = new ExcelExporter(new NonExportableScreen(), Path.GetTempPath());
+			var exporter = new ExcelExporter(new NonExportableScreen(), new string[0], Path.GetTempPath());
 			Assert.IsFalse(exporter.CanExport);
 
-			exporter = new ExcelExporter(new ExportableScreen(), Path.GetTempPath());
+			exporter = new ExcelExporter(new ExportableScreen(), new[] { "Items" }, Path.GetTempPath());
 			Assert.IsTrue(exporter.CanExport);
 		}
 	}

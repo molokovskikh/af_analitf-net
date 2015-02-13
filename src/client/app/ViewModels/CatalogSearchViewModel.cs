@@ -110,6 +110,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public SearchBehavior SearchBehavior { get; set; }
 		public QuickSearch<CatalogDisplayItem> QuickSearch { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
+		[Export]
+		public NotifyValue<List<CatalogDisplayItem>> Items { get; set;}
+		public NotifyValue<CatalogDisplayItem> CurrentItem { get; set; }
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -196,9 +200,6 @@ namespace AnalitF.Net.Client.ViewModels
 			return items;
 		}
 
-		public NotifyValue<List<CatalogDisplayItem>> Items { get; set;}
-		public NotifyValue<CatalogDisplayItem> CurrentItem { get; set; }
-		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		public IResult EnterItem()
 		{
