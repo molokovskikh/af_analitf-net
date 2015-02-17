@@ -71,7 +71,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public static TestClient CreateUser(ISession session, string login)
 		{
 			//очищаем предудыщие попытки
-			session.CreateSQLQuery("update Customers.Users set Login = Id").ExecuteUpdate();
+			session.CreateSQLQuery("update Customers.Users set Login = Id where login = :login")
+				.SetParameter("login", login)
+				.ExecuteUpdate();
 			var client = TestClient.CreateNaked(session);
 			client.Addresses[0].Value += " " + client.Addresses[0].Id;
 			var user = client.Users[0];

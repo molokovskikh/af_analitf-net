@@ -169,7 +169,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected void Input(UIElement element, string text)
 		{
-			Contract.Assert(element != null);
+			Assert.IsNotNull(element);
 			AssertInputable(element);
 			element.RaiseEvent(WpfTestHelper.TextArgs(text));
 		}

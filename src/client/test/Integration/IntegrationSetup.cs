@@ -148,9 +148,7 @@ namespace AnalitF.Net.Test.Integration
 			var helper = new FixtureHelper();
 
 			var sampleData = helper.Run<SampleData>();
-			helper.Run(new LoadSampleData {
-				Files = sampleData.Files,
-			});
+			helper.Run(new LoadSampleData(sampleData.Files));
 		}
 
 		private void BackupData()

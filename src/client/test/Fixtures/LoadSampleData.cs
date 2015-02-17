@@ -15,6 +15,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public List<UpdateData> Files;
 		public Config.Config Config;
 
+		public LoadSampleData(List<UpdateData> files)
+		{
+			Files = files;
+		}
+
 		public void Execute(ISession session)
 		{
 			var sanityCheck = new SanityCheck();

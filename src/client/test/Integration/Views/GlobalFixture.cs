@@ -777,7 +777,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 			if (found)
 				return;
-			var opened = manager.WindowOpened.Timeout(5.Second()).First();
+			var opened = manager.WindowOpened.Timeout(30.Second()).First();
 			opened.Dispatcher.Invoke(() => {
 				var text = opened.AsText();
 				Assert.AreEqual(title, opened.Title, text);

@@ -1,6 +1,7 @@
 using System;
 using NHibernate;
 using NHibernate.Exceptions;
+using AnalitF.Net.Service.Models;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -10,6 +11,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			user.UseAdjustmentOrders = true;
+			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
 			try {
 				session.CreateSQLQuery("create table Farm.CoreCosts_Backup select * from Farm.CoreCosts")
 					.ExecuteUpdate();
