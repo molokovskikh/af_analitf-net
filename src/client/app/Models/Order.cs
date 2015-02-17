@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Models
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			if (obj.GetType() != this.GetType()) return false;
-			return Equals(obj);
+			return Equals((Limit)obj);
 		}
 
 		public override int GetHashCode()
