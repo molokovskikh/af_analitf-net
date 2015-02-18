@@ -144,12 +144,6 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Send_order_for_disabled_price()
 		{
-			var ordersController = new OrdersController {
-				Request = new HttpRequestMessage(),
-				Session = session,
-				CurrentUser = user,
-				Config = config,
-			};
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
 			supplier.CreateSampleCore();
@@ -158,8 +152,7 @@ namespace AnalitF.Net.Service.Test
 			supplier.Maintain();
 
 			var offer = price.Core[0];
-			ordersController.Post(ToClientOrder(offer));
-			ordersController.Task.Wait();
+			PostOrder(ToClientOrder(offer));
 
 			var orders = session.Query<Order>()
 				.Where(o => o.UserId == user.Id && o.PriceList.PriceCode == price.Id)
@@ -168,6 +161,33 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(orders.Count, Is.EqualTo(1));
 			//todo: этой проверки здесь не место
 			Assert.IsFalse(orders[0].CalculateLeader);
+		}
+
+		[Test]
+		public void Lower_limit_by_delay_of_payment_sum()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			var price = supplier.Prices[0];
+			supplier.CreateSampleCore();
+			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
+			session.Save(supplier);
+			supplier.Maintain();
+
+			var address = session.Load<Address>(user.AvaliableAddresses[0].Id);
+			var limit = new SmartOrderLimit(session.Load<Supplier>(supplier.Id), 1000);
+			address.SmartOrderLimits.Add(limit);
+
+			var settings = session.Load<ClientSettings>(user.Client.Id);
+			settings.AllowDelayOfPayment = true;
+
+			var offer = price.Core[0];
+			var clientOrder = ToClientOrder(offer);
+			clientOrder.Orders[0].Items[0].ResultCost = 150;
+			session.Flush();
+			PostOrder(clientOrder);
+
+			session.Refresh(limit);
+			Assert.AreEqual(850, limit.Value);
 		}
 
 		[Test]
@@ -226,6 +246,18 @@ namespace AnalitF.Net.Service.Test
 			}, "Сломаный лог");
 			Assert.IsTrue(log.IsCompleted);
 			Assert.IsTrue(log.IsFaulted);
+		}
+
+		private void PostOrder(SyncRequest syncRequest)
+		{
+			var ordersController = new OrdersController {
+				Request = new HttpRequestMessage(),
+				Session = session,
+				CurrentUser = user,
+				Config = config,
+			};
+			ordersController.Post(syncRequest);
+			ordersController.Task.Wait();
 		}
 
 		private SyncRequest ToClientOrder(TestCore offer)

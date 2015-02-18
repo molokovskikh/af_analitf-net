@@ -51,6 +51,7 @@ where l.RequestId = :id;")
 		private static List<OrderResult> SaveOrders(ISession session, RequestLog log, ClientOrder[] clientOrders, bool force)
 		{
 			var user = log.User;
+			var rules = session.Load<OrderRules>(user.Client.Id);
 			var errors = new List<OrderResult>();
 			if (clientOrders == null)
 				return errors;
@@ -58,7 +59,6 @@ where l.RequestId = :id;")
 			using(StorageProcedures.GetActivePrices((MySqlConnection)session.Connection, user.Id)) {
 				var orderitemMap = new Dictionary<OrderItem, uint>();
 				var orders = new List<Order>();
-				var rules = session.Load<OrderRules>(user.Client.Id);
 				foreach (var clientOrder in clientOrders) {
 					var address = session.Load<Address>(clientOrder.AddressId);
 					var price = session.Load<PriceList>(clientOrder.PriceId);
@@ -135,7 +135,7 @@ where l.RequestId = :id;")
 								.SelectMany(a => a.SmartOrderLimits)
 								.FirstOrDefault(l => l.Supplier.Id == order.PriceList.Supplier.Id);
 							if (limit != null) {
-								limit.Value -= (decimal)order.CalculateSum();
+								limit.Value -= Address.CalculateSum(session, order);
 							}
 						}
 					}
