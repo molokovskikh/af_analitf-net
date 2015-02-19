@@ -11,6 +11,11 @@ namespace AnalitF.Net.Client.Views
 		public CatalogSearchView()
 		{
 			InitializeComponent();
+			SearchText.KeyDown += (sender, args) => {
+				if (args.Key == Key.Return) {
+					DataGridHelper.Focus(Items);
+				}
+			};
 			ApplyStyles();
 		}
 
