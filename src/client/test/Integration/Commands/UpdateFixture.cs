@@ -74,6 +74,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var cost = localSession.Query<MinCost>().First(m => m.Catalog.Id == catalogId);
 			Assert.IsNotNull(cost.Catalog);
 			Assert.IsNotNull(cost.NextCost);
+			Assert.That(session.Query<Offer>().Count(o => o.Exp != null), Is.GreaterThan(0));
 		}
 
 		[Test]

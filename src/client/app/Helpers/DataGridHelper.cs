@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using AnalitF.Net.Client.ViewModels;
+using NHibernate.Engine;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
@@ -122,6 +123,10 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidths(DataGrid grid)
 		{
+			var col = GetColumn(grid, "Срок годн.");
+			if (col != null) {
+				col.SortMemberPath = "Exp";
+			}
 			CalculateColumnWidth(grid, "00.00", "Наценка поставщика");
 			CalculateColumnWidth(grid, "000.00", "Цена производителя");
 			CalculateColumnWidth(grid, "000.00", "Пред.зарег.цена");

@@ -41,7 +41,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static void SmartOrderSetLimit(ISession session)
 		{
-			Debugger.Break();
 			Console.Write("Поставщик:");
 			var supplierId = Convert.ToUInt32(Console.ReadLine());
 			Console.Write("Лимит:");

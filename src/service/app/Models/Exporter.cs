@@ -425,7 +425,8 @@ where
 
 	at.FirmCode as SupplierId,
 	core.MaxBoundCost,
-	core.OptimizationSkip
+	core.OptimizationSkip,
+	core.Exp
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
@@ -477,8 +478,9 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 						SupplierId = reader.GetUInt32(32),
 						MaxBoundCost = reader.GetNullableFloat(33),
 						OptimizationSkip = reader.GetBoolean(34),
+						Exp = reader.GetNullableDateTime(35),
 
-						BuyingMatrixType = reader.GetUInt32(35),
+						BuyingMatrixType = reader.GetUInt32(36),
 					});
 				}
 			}
@@ -527,7 +529,8 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 				"ProductSynonym",
 				"ProducerSynonym",
 				"Cost",
-				"BuyingMatrixType"
+				"BuyingMatrixType",
+				"Exp"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -561,7 +564,8 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 				o.ProductSynonym,
 				o.ProducerSynonym,
 				o.Cost,
-				o.BuyingMatrixType
+				o.BuyingMatrixType,
+				o.Exp
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -1478,6 +1482,7 @@ select db.Id,
 	db.ExciseTax,
 	db.VitallyImportant,
 	db.Period,
+	str_to_date(db.Period, '%d.%m.%Y') as Exp,
 	db.Certificates,
 	db.EAN13,
 	db.CountryCode

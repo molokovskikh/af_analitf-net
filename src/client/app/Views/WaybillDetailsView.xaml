@@ -129,7 +129,7 @@
 					</DataGridCheckBoxColumn.Header>
 				</DataGridCheckBoxColumn>
 				<c:DataGridTextColumnEx Width="160*" Header="Срок годности"
-					Binding="{Binding Period}" />
+					Binding="{Binding Period}" SortMemberPath="Exp" />
 				<c:DataGridTextColumnEx Width="160*" Header="Серия товара"
 					Binding="{Binding SerialNumber}" />
 				<DataGridTemplateColumn Header="Сертификаты" Width="SizeToHeader" x:Name="CertificateLink">

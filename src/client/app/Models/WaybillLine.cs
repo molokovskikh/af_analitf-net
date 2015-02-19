@@ -85,6 +85,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual string Period { get; set; }
+		public virtual DateTime? Exp { get; set; }
 		public virtual string SerialNumber { get; set; }
 		public virtual string Certificates { get; set; }
 		public virtual bool LoadCertificate { get; set; }

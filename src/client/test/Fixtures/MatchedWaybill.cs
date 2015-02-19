@@ -15,6 +15,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public override void Execute(ISession session)
 		{
+			var random = new Random();
 			var user = User(session);
 			var order = session.Query<TestOrder>().Where(o => o.User == user)
 				.OrderByDescending(o => o.WriteTime)
@@ -31,6 +32,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				line.Product = orderline.Product.FullName;
 				line.Quantity = orderline.Quantity;
 				line.SupplierCost = (decimal?)orderline.Cost;
+				line.Period = DateTime.Today.AddDays(random.Next(5 * 365)).ToShortDateString();
 				Waybill.Lines.Add(line);
 				session.Save(line);
 				session.CreateSQLQuery("insert into Documents.WaybillOrders(DocumentLineId, OrderLineId) values (:documentLineId, :orderLineId)")

@@ -62,6 +62,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Period { get; set; }
 
+		public virtual DateTime? Exp { get; set; }
+
 		public virtual string Doc { get; set; }
 
 		//в предложениях мы отображаем ResultCost в заказах MixedCost

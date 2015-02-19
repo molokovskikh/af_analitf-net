@@ -41,7 +41,6 @@ namespace AnalitF.Net.Client.Models
 				DisplayIndex = index;
 			if (grid.CanUserSortColumns && column.CanUserSort) {
 				SortDirection = column.SortDirection;
-				SortMemberPath = column.SortMemberPath;
 			}
 		}
 
@@ -59,8 +58,6 @@ namespace AnalitF.Net.Client.Models
 			if (grid.CanUserSortColumns && column.CanUserSort) {
 				if (SortDirection != null)
 					column.SortDirection = SortDirection;
-				if (!String.IsNullOrEmpty(SortMemberPath))
-					column.SortMemberPath = SortMemberPath;
 
 				if (column.SortDirection != null && !String.IsNullOrEmpty(column.SortMemberPath)) {
 					grid.Items.SortDescriptions.Clear();
