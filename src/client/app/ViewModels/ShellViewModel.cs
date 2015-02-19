@@ -736,7 +736,13 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> SendOrders(bool force = false)
+		//для "горячей" клавишы
+		public IEnumerable<IResult> SendOrders()
+		{
+			return SendOrders(false);
+		}
+
+		public IEnumerable<IResult> SendOrders(bool force)
 		{
 			if (!CanSendOrders)
 				yield break;

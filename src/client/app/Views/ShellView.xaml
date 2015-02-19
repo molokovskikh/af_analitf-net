@@ -25,6 +25,8 @@
 			CommandParameter="ShowOrderLines" />
 		<KeyBinding Gesture="F12" Command="binders:Commands.InvokeViewModel"
 			CommandParameter="ShowOrders" />
+		<KeyBinding Gesture="CTRL+M" Command="binders:Commands.InvokeViewModel"
+			CommandParameter="ShowMnn" />
 	</Window.InputBindings>
 
 	<Grid>
@@ -90,7 +92,7 @@
 		</Menu>
 
 		<controls:ToolbarPanel Grid.Row="1" x:Name="ToolBarPanel" HorizontalAlignment="Left">
-			<xctk:SplitButton x:Name="Update" ToolTip="Получить данные" Background="Transparent">
+			<xctk:SplitButton x:Name="Update" ToolTip="Получить данные (Ctrl+R)" Background="Transparent">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Download_32.ico"
 						Style="{StaticResource ButtonImage}" />
 				<xctk:SplitButton.DropDownContent>
@@ -108,26 +110,26 @@
 				</xctk:SplitButton.DropDownContent>
 			</xctk:SplitButton>
 
-			<Button x:Name="SendOrders" ToolTip="Отправить заказы" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="SendOrders" ToolTip="Отправить заказы (Ctrl+S)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Email 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-			<Button x:Name="Export" ToolTip="Сохранить текущую таблицу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="Export" ToolTip="Сохранить текущую таблицу (Ctrl+T)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Floppy Disk Green_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Button x:Name="Print" ToolTip="Печать" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="Print" ToolTip="Печать (Ctrl+P)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Printer 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="ShowCatalog" ToolTip="Поиск препаратов в каталоге (F8)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Folder Green_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
@@ -135,11 +137,11 @@
 				<Image Source="/AnalitF.Net.Client;component/assets/images/View Doc_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowMnn" ToolTip="Поиск по МНН" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="ShowMnn" ToolTip="Поиск по МНН (Ctrl+M)"  Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Address Book_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="ShowPrice" ToolTip="Прайс-листы фирм (F9)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Document Blank_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
@@ -154,11 +156,11 @@
 
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
-			<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="ShowOrderLines" ToolTip="Сводный заказ (F10)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Clipboard_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
-			<Button x:Name="ShowOrders" ToolTip="Заказы" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+			<Button x:Name="ShowOrders" ToolTip="Заказы (F12)" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/AnalitF.Net.Client;component/assets/images/Work_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
