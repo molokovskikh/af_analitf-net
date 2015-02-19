@@ -168,6 +168,8 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsCertificateNotFound", Background(Colors.Gray.ToString()) },
 				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF).ToString()) },
 				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141).ToString()) },
+				{ "IsLimited", Background(Color.FromRgb(255, 96, 0).ToString()) },
+				{ "IsSplitByLimit", Background(Color.FromRgb(255, 191, 0).ToString()) },
 			};
 		}
 

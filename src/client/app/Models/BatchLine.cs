@@ -16,6 +16,8 @@ namespace AnalitF.Net.Client.Models
 		MinimalCost = 0x04, // Заказан по минимальной цене
 		NotEnoughQuantity = 0x08, // Не заказан по причине нехватки количества
 		OffersExists = 0x10, // Предложения для данной позиции имелись
+		NotEnoughLimit = 0x20, //Лимит исчерпан
+		SplitByLimit = 0x40, //Разбито из-за лимита
 	}
 
 	public class BatchLineView : BaseNotify, IEditableObject
@@ -96,6 +98,18 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool ExistsInFreezed
 		{
 			get { return BatchLine.ExistsInFreezed; }
+		}
+
+		[Style(Description = "Лимит исчерпан")]
+		public virtual bool IsLimited
+		{
+			get { return IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.NotEnoughLimit); }
+		}
+
+		[Style(Description = "Ограничен лимитом")]
+		public virtual bool IsSplitByLimit
+		{
+			get { return !IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.SplitByLimit); }
 		}
 
 		public void BeginEdit()
@@ -214,6 +228,18 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsMinCost
 		{
 			get { return Status.HasFlag(ItemToOrderStatus.MinimalCost); }
+		}
+
+		[Style(Description = "Лимит исчерпан")]
+		public virtual bool IsLimited
+		{
+			get { return Status.HasFlag(ItemToOrderStatus.NotEnoughLimit); }
+		}
+
+		[Style(Description = "Ограничен лимитом")]
+		public virtual bool IsSplitByLimit
+		{
+			get { return Status.HasFlag(ItemToOrderStatus.SplitByLimit); }
 		}
 
 		[Style("ProductSynonym", Description = "Присутствует в замороженных заказах"), Ignore]

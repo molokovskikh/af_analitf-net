@@ -39,11 +39,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				"   Минимальные",
 				"   Не минимальные",
 				"   Присутствующие в замороженных заказах",
+				"   Ограничен лимитом",
 				"Не заказано",
 				"   Нет предложений",
 				"   Нулевое количество",
 				"   Прочее",
-				"   Не сопоставлено"
+				"   Не сопоставлено",
+				"   Лимит исчерпан"
 			};
 			CurrentFilter = new NotifyValue<string>("Все");
 			SearchBehavior = new SearchBehavior(this);
@@ -64,21 +66,27 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					query = query.Where(l => !l.IsNotOrdered && l.ExistsInFreezed);
 				}
 				else if (CurrentFilter.Value == Filter[5]) {
-					query = query.Where(l => l.IsNotOrdered);
+					query = query.Where(l => l.IsSplitByLimit);
 				}
 				else if (CurrentFilter.Value == Filter[6]) {
-					query = query.Where(l => l.IsNotOrdered && !l.BatchLine.Status.HasFlag(ItemToOrderStatus.OffersExists));
+					query = query.Where(l => l.IsNotOrdered);
 				}
 				else if (CurrentFilter.Value == Filter[7]) {
-					query = query.Where(l => l.IsNotOrdered && l.BatchLine.Quantity == 0);
+					query = query.Where(l => l.IsNotOrdered && !l.BatchLine.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
 				else if (CurrentFilter.Value == Filter[8]) {
+					query = query.Where(l => l.IsNotOrdered && l.BatchLine.Quantity == 0);
+				}
+				else if (CurrentFilter.Value == Filter[9]) {
 					query = query.Where(l => l.IsNotOrdered && l.BatchLine.Quantity > 0
 						&& l.BatchLine.ProductId != null
 						&& l.BatchLine.Status.HasFlag(ItemToOrderStatus.OffersExists));
 				}
-				else if (CurrentFilter.Value == Filter[9]) {
+				else if (CurrentFilter.Value == Filter[10]) {
 					query = query.Where(l => l.IsNotOrdered && l.BatchLine.ProductId == null);
+				}
+				else if (CurrentFilter.Value == Filter[11]) {
+					query = query.Where(l => l.IsLimited);
 				}
 				return query.OrderBy(l => l.Product).ToObservableCollection();
 			}, CurrentFilter, SearchBehavior.ActiveSearchTerm);
