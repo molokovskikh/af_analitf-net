@@ -21,16 +21,15 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			OnlyBase = new NotifyValue<bool>();
 
-			Producers.Value = new[] { EmptyProducer }
-				.Concat(StatelessSession.Query<Producer>()
+			if (Session != null) {
+				Prices = Session.Query<Price>()
 					.OrderBy(p => p.Name)
-					.ToList())
-				.ToList();
-
-			Prices = Session.Query<Price>()
-				.OrderBy(p => p.Name)
-				.Select(p => new Selectable<Price>(p))
-				.ToList();
+					.Select(p => new Selectable<Price>(p))
+					.ToList();
+			}
+			else {
+				Prices = new List<Selectable<Price>>();
+			}
 			Settings.Subscribe(_ => {
 				Offers.Value = SortOffers(Offers);
 			});
@@ -46,6 +45,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			RxQuery(s => s.Query<Producer>()
+					.OrderBy(p => p.Name)
+					.ToList())
+				.ObserveOn(UiScheduler)
+				.Subscribe(Producers);
 
 			SearchBehavior.ActiveSearchTerm.Cast<object>()
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
@@ -79,9 +84,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
-				.CatchSubscribe(v => {
-					Offers.Value = v;
-				}, CloseCancellation);
+				.Subscribe(Offers, CloseCancellation.Token);
 		}
 
 		private List<Offer> SortOffers(List<Offer> offers)

@@ -279,6 +279,7 @@
     <Compile Include="Unit\ViewModels\OrderLines.cs" />
     <Compile Include="Unit\ViewModels\OrdersFixture.cs" />
     <Compile Include="Unit\ViewModels\PriceOfferFixture.cs" />
+    <Compile Include="Unit\ViewModels\OffersSearchFixture.cs" />
     <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />

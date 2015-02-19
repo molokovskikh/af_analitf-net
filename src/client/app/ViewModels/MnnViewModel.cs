@@ -20,6 +20,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
+		[Export]
 		public NotifyValue<List<Mnn>> Mnns { get; set; }
 		public Mnn CurrentMnn { get; set; }
 		public NotifyValue<bool> ShowWithoutOffers { get; set; }

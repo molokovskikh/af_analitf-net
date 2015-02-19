@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(CatalogNameViewModel).Name + "." + "CatalogNames", "FPCN" },
 			{ typeof(CatalogNameViewModel).Name + "." + "Catalogs", "FPCF" },
 			{ typeof(CatalogSearchViewModel).Name + "." + "Items", "FPCNF" },
-			{ typeof(SearchOfferViewModel) + ".Offers", "FPL" },
+			{ typeof(SearchOfferViewModel).Name + ".Offers", "FPL" },
 			{ typeof(PriceViewModel).Name + "." + "Prices", "PLSL" },
 			{ typeof(PriceOfferViewModel).Name + "." + "Offers", "PLSOS" },
 			{ typeof(OrderLinesViewModel).Name + "." + "Lines", "COC" },
