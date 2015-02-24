@@ -81,7 +81,10 @@ namespace AnalitF.Net.Test.Unit
 			settings.SaveView(content);
 
 			InitGrid();
-			grid.Columns.Add(new DataGridTextColumn { Header = "Наименование" });
+			grid.Columns.Add(new DataGridTextColumn {
+				Header = "Наименование",
+				SortMemberPath = "Name"
+			});
 			settings.RestoreView(content);
 			var sortDescription = grid.Items.SortDescriptions[0];
 			Assert.AreEqual("Name", sortDescription.PropertyName);

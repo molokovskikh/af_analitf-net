@@ -15,6 +15,7 @@ using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
 using Test.Support.Suppliers;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
@@ -57,6 +58,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 		public void Import()
 		{
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
+			var user = localSession.Query<User>().First();
+			user.LastSync = null;
 
 			var command = new UpdateCommand();
 			Run(command);
@@ -74,7 +77,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var cost = localSession.Query<MinCost>().First(m => m.Catalog.Id == catalogId);
 			Assert.IsNotNull(cost.Catalog);
 			Assert.IsNotNull(cost.NextCost);
-			Assert.That(session.Query<Offer>().Count(o => o.Exp != null), Is.GreaterThan(0));
+			Assert.That(localSession.Query<Offer>().Count(o => o.Exp != null), Is.GreaterThan(0));
 		}
 
 		[Test]
