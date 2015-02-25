@@ -32,6 +32,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[SetUp]
 		public void Setup()
 		{
+			revertToDefaults = false;
 			restoreUser = false;
 		}
 
@@ -142,27 +143,6 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.SetParameter("date", begin)
 				.UniqueResult<string>();
 			Assert.That(text, Is.EqualTo("123"));
-		}
-
-		[Test]
-		public void Reject_order_by_min_req()
-		{
-			var offer = localSession.Query<Offer>().First(o => o.Price.SupplierName.Contains("минимальный заказ"));
-			var order = MakeOrderClean(address, offer);
-
-			var command = new SendOrders(address);
-			Run(command);
-
-			var text = command.Results
-				.OfType<DialogResult>()
-				.Select(d => d.Model)
-				.OfType<TextViewModel>()
-				.Select(t => t.Text)
-				.FirstOrDefault();
-			var expected = String.Format("прайс-лист {0} - Поставщик отказал в приеме заказа." +
-				" Сумма заказа меньше минимально допустимой." +
-				" Минимальный заказ {1:0.00} заказано {2:0.00}.", order.Price.Name, 1500, order.Sum);
-			Assert.AreEqual(expected, text);
 		}
 
 		[Test]

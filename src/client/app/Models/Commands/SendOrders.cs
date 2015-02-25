@@ -46,10 +46,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			uint requestId = 0;
 			var response = Wait("Orders",
-				Client.PostAsync("Orders",
-					new SyncRequest(clientOrders, Force),
-					Formatter,
-					Token), ref requestId);
+				Client.PostAsync("Orders", new SyncRequest(clientOrders, Force), Formatter, Token),
+				ref requestId);
 			CheckResult(Client.PutAsJsonAsync("Orders", new ConfirmRequest(requestId), Token).Result);
 
 			log.InfoFormat("Заказы отправлены успешно");

@@ -79,6 +79,7 @@ namespace AnalitF.Net.Client.Models
 			get { return GetResultCost(Order.Price, OldCost); }
 		}
 
+		[JsonIgnore]
 		public virtual decimal? OptimalFactor
 		{
 			get
@@ -89,6 +90,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[JsonIgnore]
 		public virtual MinCost MinCostItem { get; set; }
 
 		[Ignore]
