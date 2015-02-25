@@ -99,6 +99,7 @@
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="*" Header="Эффективность" Binding="{Binding OptimalFactor}" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="65" Header="Цена"
 					Binding="{Binding MixedCost}"

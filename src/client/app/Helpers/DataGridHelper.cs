@@ -131,6 +131,7 @@ namespace AnalitF.Net.Client.Helpers
 			CalculateColumnWidth(grid, "000.00", "Цена производителя");
 			CalculateColumnWidth(grid, "000.00", "Пред.зарег.цена");
 			CalculateColumnWidth(grid, "0000.00", "Цена поставщика");
+			CalculateColumnWidth(grid, "0000.00", "Эффективность");
 
 			grid.Loaded += (sender, args) => {
 				var dataGrid = (DataGrid)sender;
