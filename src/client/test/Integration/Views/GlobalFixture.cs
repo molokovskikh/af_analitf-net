@@ -187,7 +187,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.IsFalse(box.IsChecked.Value);
 
 				var grid = (DataGrid)view.FindName("Lines");
-				var column = DataGridHelper.GetColumn(grid.Columns, "Адрес заказа");
+				var column = DataGridHelper.FindColumn(grid.Columns, "Адрес заказа");
 				Assert.AreEqual(Visibility.Collapsed, column.Visibility);
 			});
 			WaitIdle();
@@ -197,7 +197,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				box.IsChecked = true;
 
 				var grid = (DataGrid)view.FindName("Lines");
-				var column = DataGridHelper.GetColumn(grid, "Адрес заказа");
+				var column = DataGridHelper.FindColumn(grid, "Адрес заказа");
 				Assert.IsTrue(box.IsChecked.Value);
 				Assert.IsTrue(lines.AddressSelector.All.Value);
 				Assert.AreEqual(Visibility.Visible, column.Visibility);
@@ -213,7 +213,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.IsFalse(box.IsChecked.Value);
 
 				var grid = (DataGrid)view.FindName("Lines");
-				var column = DataGridHelper.GetColumn(grid, "Адрес заказа");
+				var column = DataGridHelper.FindColumn(grid, "Адрес заказа");
 				Assert.AreEqual(Visibility.Collapsed, column.Visibility);
 			});
 		}
@@ -816,7 +816,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 		private DataGridCell GetCell(DataGrid grid, string name, int row = 0)
 		{
-			var column = DataGridHelper.GetColumn(grid, name);
+			var column = DataGridHelper.FindColumn(grid, name);
 			return GetCell(grid, column.DisplayIndex, row);
 		}
 

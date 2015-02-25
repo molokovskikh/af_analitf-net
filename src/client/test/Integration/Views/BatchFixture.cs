@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				searchCheck.IsChecked = true;
 
 				var grid = view.Descendants<DataGrid>().First(c => c.Name == "ReportLines");
-				var col = DataGridHelper.GetColumn(grid, "Адрес заказа");
+				var col = DataGridHelper.FindColumn(grid, "Адрес заказа");
 				Assert.AreEqual(col.Visibility, Visibility.Visible);
 				grid.CurrentItem = grid.Items[0];
 				await view.WaitIdle();

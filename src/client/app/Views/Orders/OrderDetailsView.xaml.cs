@@ -18,6 +18,14 @@ namespace AnalitF.Net.Client.Views.Orders
 				ApplyStyles();
 			};
 
+			DataContextChanged += (sender, args) => {
+				var model = DataContext as OrderDetailsViewModel;
+				if (model != null) {
+					if (!model.IsCurrentOrder)
+						Lines.Columns.Remove(DataGridHelper.FindColumn(Lines, "Эффективность"));
+				}
+			};
+
 			DataGridHelper.CalculateColumnWidths(Lines);
 			new Editable().Attach(Lines);
 		}

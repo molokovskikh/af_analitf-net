@@ -46,7 +46,7 @@ namespace AnalitF.Net.Client.Models
 
 		public void Restore(DataGrid grid, ObservableCollection<DataGridColumn> columns)
 		{
-			var column = DataGridHelper.GetColumn(columns, Name);
+			var column = DataGridHelper.FindColumn(columns, Name);
 			if (column == null)
 				return;
 			column.Width = Width;

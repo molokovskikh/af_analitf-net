@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
 		{
-			var column = GetColumn(dataGrid.Columns, header);
+			var column = FindColumn(dataGrid.Columns, header);
 			if (column == null)
 				return;
 
@@ -102,12 +102,12 @@ namespace AnalitF.Net.Client.Helpers
 			column.Width = new DataGridLength(text.Width + 4/*отступы*/ + 2/*окаймление*/, DataGridLengthUnitType.Pixel);
 		}
 
-		public static DataGridColumn GetColumn(DataGrid grid, string name)
+		public static DataGridColumn FindColumn(DataGrid grid, string name)
 		{
-			return GetColumn(grid.Columns, name);
+			return FindColumn(grid.Columns, name);
 		}
 
-		public static DataGridColumn GetColumn(ObservableCollection<DataGridColumn> columns, string name)
+		public static DataGridColumn FindColumn(ObservableCollection<DataGridColumn> columns, string name)
 		{
 			return columns.FirstOrDefault(c => String.Equals(GetHeader(c), name, StringComparison.CurrentCultureIgnoreCase));
 		}
@@ -123,7 +123,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidths(DataGrid grid)
 		{
-			var col = GetColumn(grid, "Срок годн.");
+			var col = FindColumn(grid, "Срок годн.");
 			if (col != null) {
 				col.SortMemberPath = "Exp";
 			}
@@ -141,7 +141,7 @@ namespace AnalitF.Net.Client.Helpers
 					|| !screen.User.IsDeplayOfPaymentEnabled
 					|| !screen.User.ShowSupplierCost;
 				if (removeSupplierCost) {
-					var column = GetColumn(dataGrid.Columns, "Цена поставщика");
+					var column = FindColumn(dataGrid.Columns, "Цена поставщика");
 					if (column != null)
 						dataGrid.Columns.Remove(column);
 				}

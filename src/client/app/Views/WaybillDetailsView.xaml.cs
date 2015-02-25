@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Views
 				}
 
 				if (DataContext != null && !((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
-					grid.Columns.Remove(DataGridHelper.GetColumn(grid.Columns, "ЖНВЛС"));
+					grid.Columns.Remove(DataGridHelper.FindColumn(grid.Columns, "ЖНВЛС"));
 				}
 			};
 

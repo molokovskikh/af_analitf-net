@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		public static void AutoEditOnDigit(DataGrid2 grid, string name)
 		{
-			var column = DataGridHelper.GetColumn(grid.Columns, name);
+			var column = DataGridHelper.FindColumn(grid.Columns, name);
 			grid.TextInput += (sender, args) => {
 				if (grid.SelectedItem == null)
 					return;
