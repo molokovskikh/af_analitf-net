@@ -120,16 +120,17 @@ task "deploy:service", ["build:service"]:
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
-	fsPath = Path.GetFullPath(deployToBin)
-	if Globals.Maybe.IISPathRoot:
-		fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
-	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
+	if Globals.Maybe.skipRegisterApp:
+		fsPath = Path.GetFullPath(deployToBin)
+		if Globals.Maybe.IISPathRoot:
+			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
+		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
-	#создаем маршрут в прокси
-	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
-	proxyConfig = Path.Combine(deployTo, @config)
-	using writer = StreamWriter(proxyConfig, true):
-		writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
+		#создаем маршрут в прокси
+		deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
+		proxyConfig = Path.Combine(deployTo, @config)
+		using writer = StreamWriter(proxyConfig, true):
+			writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
