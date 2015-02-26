@@ -154,14 +154,6 @@ namespace AnalitF.Net.Client.Config.Initializers
 				m.Property(p => p.Body, c => c.Length(10000));
 			});
 
-			mapper.Class<OrderLine>(m => {
-				m.ManyToOne(o => o.MinCostItem, c => {
-					c.Columns(cm => cm.Name("ProductId"));
-					c.PropertyRef("ProductId");
-					c.Insert(false);
-					c.Update(false);
-				});
-			});
 			mapper.Class<Order>(m => {
 				m.Property(o => o.Frozen, om => om.Access(Accessor.Field));
 				m.ManyToOne(o => o.MinOrderSum, c => {

@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.Models
 			Order = order;
 			OfferId = offer.Id;
 			Count = count;
+			OptimalFactor = offer.ResultCost - offer.LeaderCost;
 		}
 
 		public virtual uint Id { get; set; }
@@ -80,18 +81,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[JsonIgnore]
-		public virtual decimal? OptimalFactor
-		{
-			get
-			{
-				if (MinCostItem == null)
-					return null;
-				return ResultCost - MinCostItem.Cost;
-			}
-		}
-
-		[JsonIgnore]
-		public virtual MinCost MinCostItem { get; set; }
+		public virtual decimal? OptimalFactor { get; set; }
 
 		[Ignore]
 		public virtual decimal? MinCost { get; set; }
