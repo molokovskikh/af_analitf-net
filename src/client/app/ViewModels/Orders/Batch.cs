@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,6 +25,7 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
+	[DataContract]
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
 		private static string lastUsedDir;
@@ -103,6 +105,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			ActivePrint = new NotifyValue<string>();
 			ActivePrint.Subscribe(excelExporter.ActiveProperty);
 		}
+
+		[DataMember]
+		public uint LastSelectedLine { get; set; }
 
 		public NotifyValue<string> ActivePrint { get; set; }
 
@@ -192,6 +197,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Subscribe(_ => LoadLines(), CloseCancellation.Token);
 			LoadLines();
+			if (LastSelectedLine > 0)
+				CurrentReportLine.Value = CurrentReportLine.Value
+					?? ReportLines.Value.FirstOrDefault(v => v.BatchLine.Id == LastSelectedLine);
 
 			if (Address != null)
 				Bus.RegisterMessageSource(Address.StatSubject);
@@ -221,14 +229,17 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.Select(v => v.Changed())
 					.Switch()
 					.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
-					.Subscribe(e => StatelessSession.DeleteEach(e.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine)),
-						CloseCancellation.Token);
+					.CatchSubscribe(e => StatelessSession.DeleteEach(e.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine)),
+						CloseCancellation);
 			}
 		}
 
 		protected override void OnDeactivate(bool close)
 		{
 			AddressSelector.Deinit();
+			if (close) {
+				LastSelectedLine = CurrentReportLine.Value != null ? CurrentReportLine.Value.BatchLine.Id : 0;
+			}
 			base.OnDeactivate(close);
 		}
 

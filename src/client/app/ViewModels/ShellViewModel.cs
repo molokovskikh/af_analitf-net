@@ -1029,9 +1029,9 @@ namespace AnalitF.Net.Client.ViewModels
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
 
-		public void ShowDebug()
+		public IResult ShowDebug()
 		{
-			windowManager.ShowWindow(Debug);
+			return new WindowResult(Debug);
 		}
 #endif
 		public void Dispose()

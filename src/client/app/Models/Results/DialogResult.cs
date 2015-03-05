@@ -3,12 +3,33 @@ using System.Collections.Generic;
 using System.Windows;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models.Results
 {
 	public interface ICancelable
 	{
 		bool WasCancelled { get; }
+	}
+
+	public class WindowResult : IResult
+	{
+		private Screen model;
+		public IWindowManager Manager;
+
+		public WindowResult(Screen model)
+		{
+			this.model = model;
+		}
+
+		public void Execute(ActionExecutionContext context)
+		{
+			Manager.ShowWindow(model);
+			if (Completed != null)
+				Completed(this, new ResultCompletionEventArgs());
+		}
+
+		public event EventHandler<ResultCompletionEventArgs> Completed;
 	}
 
 	public class DialogResult : IResult

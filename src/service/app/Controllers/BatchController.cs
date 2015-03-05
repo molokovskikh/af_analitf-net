@@ -46,6 +46,7 @@ namespace AnalitF.Net.Service.Controllers
 			}
 
 			return StartJob((session, config, job) => {
+				job.LastSync = requestMeta.LastSync;
 				try {
 					var batchAddress = session.Load<Address>(requestMeta.AddressId);
 					SmartOrderBatchHandler handler;

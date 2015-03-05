@@ -245,6 +245,7 @@ namespace AnalitF.Net.Client.Models
 
 	public class BatchRequest
 	{
+		public DateTime? LastSync;
 		public uint AddressId;
 		public List<BatchItem> BatchItems;
 
@@ -253,15 +254,11 @@ namespace AnalitF.Net.Client.Models
 			BatchItems = new List<BatchItem>();
 		}
 
-		public BatchRequest(uint addressId)
+		public BatchRequest(uint addressId, DateTime? lastSync)
+			: this()
 		{
 			AddressId = addressId;
-			BatchItems = new List<BatchItem>();
-		}
-		public BatchRequest(uint addressId, List<BatchItem> items)
-		{
-			AddressId = addressId;
-			BatchItems = items;
+			LastSync = lastSync;
 		}
 	}
 }

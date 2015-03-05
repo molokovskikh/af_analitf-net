@@ -1592,6 +1592,7 @@ group by dh.Id")
 				watch.Stop();
 				log.DebugFormat("Архив {2} создан за {0}, размер {1}", watch.Elapsed, stream.Length, file);
 			}
+			job.Size = new FileInfo(file).Length;
 			return file;
 		}
 

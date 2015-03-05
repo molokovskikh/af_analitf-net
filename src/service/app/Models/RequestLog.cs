@@ -75,6 +75,8 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual DateTime? LastSync { get; set; }
 
+		public virtual long? Size { get; set; }
+
 		public virtual void Faulted(Exception e)
 		{
 			IsFaulted = true;

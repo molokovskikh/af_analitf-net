@@ -21,7 +21,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			layout.ActivateOptions();
 			Error = "";
-			Sql = "";
+			Stack = new NotifyValue<bool>();
+			Sql = new NotifyValue<string>("");
 			SqlCount = new NotifyValue<int>();
 			ErrorCount = new NotifyValue<int>();
 			HaveErrors = ErrorCount.Select(c => c > 0).ToValue();
@@ -51,11 +52,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public string Name { get; set; }
 
 		public string Error { get; set; }
-		public string Sql { get; set; }
+		public NotifyValue<string> Sql { get; set; }
 
 		public NotifyValue<int> ErrorCount { get; set; }
 		public NotifyValue<bool> HaveErrors { get; set; }
 		public NotifyValue<int> SqlCount { get; set; }
+		public NotifyValue<bool> Stack { get; set; }
+
+		public void Clear()
+		{
+			Sql.Value = "";
+		}
 
 		public void Close()
 		{
@@ -66,15 +73,17 @@ namespace AnalitF.Net.Client.ViewModels
 			if (loggingEvent.LoggerName == "NHibernate.SQL") {
 				SqlCount.Value++;
 				var sql = (string)loggingEvent.MessageObject;
-				if (Sql.Length > limit)
-					Sql = "";
-				Sql += new BasicFormatter().Format(SqlProcessor.ExtractArguments(sql)) + "\r\n";
+				if (Sql.Value.Length > limit)
+					Sql.Value = "";
+				Sql.Value += new BasicFormatter().Format(SqlProcessor.ExtractArguments(sql)) + Environment.NewLine;
+				if (Stack)
+					Sql.Value += new StackTrace() + Environment.NewLine;
 			}
 			else {
 				ErrorCount.Value++;
 				if (Error.Length > limit)
 					Error = "";
-				Error += layout.Format(loggingEvent) + "\r\n";
+				Error += layout.Format(loggingEvent) + Environment.NewLine;
 			}
 		}
 	}
