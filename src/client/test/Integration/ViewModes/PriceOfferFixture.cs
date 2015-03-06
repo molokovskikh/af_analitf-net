@@ -111,6 +111,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var offer = session.Query<Offer>().OrderBy(o => o.ProductSynonym).First(o => o.Price == price);
 			MakeSentOrder(offer);
 
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
 			var history = (DialogResult)model.ShowHistoryOrders();
 			var lines = ((HistoryOrdersViewModel)history.Model).Lines;
 			Assert.That(lines.Count, Is.GreaterThan(0));
