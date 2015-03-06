@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -213,11 +214,22 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static string AsText(this DependencyObject item)
 		{
-			return item.Descendants()
+			Func<string> getter = () => item.Descendants()
 				.Where(c => !(c is UIElement) || ((UIElement)c).Visibility == Visibility.Visible)
 				.Select(ToText)
 				.Where(c => c != null)
 				.Implode(Environment.NewLine);
+			if (item.Dispatcher.Thread.ManagedThreadId != Thread.CurrentThread.ManagedThreadId) {
+				var inner = getter;
+				getter = () => {
+					var result = "";
+					item.Dispatcher.Invoke(new Action(() => {
+						result = inner();
+					}));
+					return result;
+				};
+			}
+			return getter();
 		}
 
 		/// <summary>
