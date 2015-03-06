@@ -64,7 +64,7 @@ namespace AnalitF.Net.Service.Controllers
 					}
 					else {
 						using (payloadStream) {
-							handler = new SmartOrderBatchHandler(job.User, batchAddress, payloadStream);
+							handler = new SmartOrderBatchHandler(session, job.User, batchAddress, payloadStream);
 						}
 					}
 					var orders = handler.ProcessOrderBatch();

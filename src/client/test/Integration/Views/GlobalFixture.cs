@@ -792,16 +792,21 @@ namespace AnalitF.Net.Test.Integration.Views
 			if (IsCI())
 				timeout = 60.Second();
 
-			var opened = manager.MessageOpened.Timeout(timeout).First();
-			Assert.AreEqual(opened, message);
-			var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
-			for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
-				Thread.Sleep(20);
-				window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+			try {
+				var opened = manager.MessageOpened.Timeout(timeout).First();
+				Assert.AreEqual(opened, message);
+				var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+				for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
+					Thread.Sleep(20);
+					window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+				}
+				if (window == IntPtr.Zero)
+					throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
+				WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
 			}
-			if (window == IntPtr.Zero)
-				throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
-			WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
+			catch(TimeoutException e) {
+				throw new Exception(String.Format("Не удалось дождаться {0}, окно {1}", message, activeWindow.AsText()), e);
+			}
 		}
 
 		private void EditCell(DataGrid grid, int column, int row, string text)
