@@ -356,7 +356,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (User.Value != null
-				&& User.Value.IsDeplayOfPaymentEnabled
+				&& User.Value.IsDelayOfPaymentEnabled
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {

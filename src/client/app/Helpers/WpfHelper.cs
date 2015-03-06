@@ -205,7 +205,9 @@ namespace AnalitF.Net.Client.Helpers
 			if (item is TextBlock) {
 				return ((TextBlock)item).Text;
 			}
-
+			if (item is TextBox) {
+				return ((TextBox)item).Text;
+			}
 			if (item is ContentControl && ((ContentControl)item).Content is string) {
 				return (string)((ContentControl)item).Content;
 			}

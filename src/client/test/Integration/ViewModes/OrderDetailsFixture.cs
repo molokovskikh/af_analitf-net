@@ -102,7 +102,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void View_mixed_cost()
 		{
 			restore = true;
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 
 			var order = MakeOrder();
 			order.Price.CostFactor = 1.5m;

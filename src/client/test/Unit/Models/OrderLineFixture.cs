@@ -75,7 +75,7 @@ namespace AnalitF.Net.Test.Unit.Models
 			Assert.AreEqual(100, line.MixedCost);
 			Assert.AreEqual(100, line.MixedSum);
 
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user);
 			Assert.AreEqual(150, line.MixedCost);
 			Assert.AreEqual(150, line.MixedSum);

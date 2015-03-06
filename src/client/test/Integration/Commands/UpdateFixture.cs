@@ -327,7 +327,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Run(new UpdateCommand());
 
 			var user = localSession.Query<User>().First();
-			Assert.IsTrue(user.IsDeplayOfPaymentEnabled);
+			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
 			localSession.Refresh(settings);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);

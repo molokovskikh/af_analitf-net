@@ -138,7 +138,7 @@ namespace AnalitF.Net.Client.Helpers
 				var screen = dataGrid.DataContext as BaseScreen;
 				var removeSupplierCost = screen == null
 					|| screen.User == null
-					|| !screen.User.IsDeplayOfPaymentEnabled
+					|| !screen.User.IsDelayOfPaymentEnabled
 					|| !screen.User.ShowSupplierCost;
 				if (removeSupplierCost) {
 					var column = FindColumn(dataGrid.Columns, "Цена поставщика");

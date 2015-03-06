@@ -367,7 +367,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			restore = true;
 			settings.LastUpdate = DateTime.Now;
 			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 
 			session.DeleteEach<DelayOfPayment>();
 			var offer = session.Query<Offer>()

@@ -11,19 +11,16 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			user.UseAdjustmentOrders = true;
-			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
-set ForceReplication = 1
-where userId = :userId")
-				.SetParameter("userId", user.Id)
-				.ExecuteUpdate();
-			try {
-				session.CreateSQLQuery("create table Farm.CoreCosts_Backup select * from Farm.CoreCosts")
-					.ExecuteUpdate();
-			}
-			catch(GenericADOException) {
-			}
 
-			session.CreateSQLQuery(@"update Farm.CoreCosts set cost = round(rand() * 10000, 2)")
+			session.CreateSQLQuery(@"
+update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId;
+
+drop table if exists Farm.CoreCosts_Backup;
+create table Farm.CoreCosts_Backup select * from Farm.CoreCosts;
+update Farm.CoreCosts set cost = round(rand() * 10000, 2);")
+				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
 		}
 
@@ -31,8 +28,14 @@ where userId = :userId")
 		{
 			var user = User(session);
 			user.UseAdjustmentOrders = false;
-			session.CreateSQLQuery("delete from Farm.CoreCosts;" +
-				"insert into Farm.CoreCosts select * from Farm.CoreCosts_Backup;")
+			session.CreateSQLQuery(@"
+delete from Farm.CoreCosts;
+insert into Farm.CoreCosts select * from Farm.CoreCosts_Backup;
+drop table Farm.CoreCosts_Backup;
+update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId;")
+				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
 		}
 	}

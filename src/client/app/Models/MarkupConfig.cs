@@ -125,7 +125,7 @@ namespace AnalitF.Net.Client.Models
 				return 0;
 
 			var type = offer.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			var cost = user.IsDeplayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
+			var cost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
 			var config = Calculate(markups, type, cost);
 			if (config == null)

@@ -15,6 +15,7 @@ using Common.Models.Repositories;
 using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Helpers;
 using HtmlAgilityPack;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
@@ -303,7 +304,7 @@ select u.Id,
 	c.Name,
 	c.FullName as FullName,
 	rcs.AllowDelayOfPayment and u.ShowSupplierCost as ShowSupplierCost,
-	rcs.AllowDelayOfPayment as IsDeplayOfPaymentEnabled,
+	rcs.AllowDelayOfPayment as IsDelayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
 	?lastSync as LastSync
@@ -377,14 +378,17 @@ select
 	p.PriceCode as PriceId,
 	p.RegionCode as RegionId,
 	if(d.DayOfWeek = 7, 0, d.DayOfWeek + 1) as DayOfWeek,
-	d.VitallyImportantDelay,
-	d.OtherDelay
+	if(?delayOfPaymentEnabled, d.VitallyImportantDelay, 0) as VitallyImportantDelay,
+	if(?delayOfPaymentEnabled, d.OtherDelay, 0) as OtherDelay
 from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
 	join UserSettings.PriceIntersections pi on pi.Id = d.PriceIntersectionId and pi.PriceId = p.PriceCode
 	join UserSettings.SupplierIntersection si on si.Id = pi.SupplierIntersectionId and si.SupplierID = p.FirmCode
 where
 	si.ClientId = ?clientId";
-			Export(Result, sql, "DelayOfPayments", truncate: true, parameters: new { clientId = clientSettings.Id });
+			Export(Result, sql, "DelayOfPayments", truncate: true, parameters: new {
+				clientId = clientSettings.Id,
+				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
+			});
 
 			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
 			sql = @"select
@@ -1612,11 +1616,22 @@ group by dh.Id")
 						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
 						zip.Add(content, tuple.ArchiveFileName);
 					}
-					else if (File.Exists(filename)) {
-						zip.Add(filename, tuple.ArchiveFileName);
-					}
 					else {
-						log.WarnFormat("Не найден файл для экспорта {0}", filename);
+						if (Config.ExportTimeout != TimeSpan.Zero)
+							WaitHelper.WaitOrFail(Config.ExportTimeout,
+								() => File.Exists(filename),
+								String.Format("Не найден файл для экспорта {0}", filename));
+
+						if (File.Exists(filename)) {
+							zip.Add(filename, tuple.ArchiveFileName);
+						}
+						else {
+#if DEBUG
+							throw new Exception(String.Format("Не найден файл для экспорта {0}", filename));
+#else
+							log.WarnFormat("Не найден файл для экспорта {0}", filename);
+#endif
+						}
 					}
 				}
 				zip.CommitUpdate();
