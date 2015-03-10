@@ -59,6 +59,8 @@ namespace AnalitF.Net.Client.Models
 
 		decimal MixedSum { get; }
 
+		bool Junk { get; }
+
 		void Configure(User user);
 	}
 
