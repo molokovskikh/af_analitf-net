@@ -295,6 +295,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_correction()
 		{
+			restore = true;
 			stub = null;
 			var order = Fixture<MakeOrder>().Order;
 			Fixture<RandCost>();

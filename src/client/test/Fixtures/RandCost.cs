@@ -28,10 +28,12 @@ update Farm.CoreCosts set cost = round(rand() * 10000, 2);")
 		{
 			var user = User(session);
 			user.UseAdjustmentOrders = false;
+
 			session.CreateSQLQuery(@"
 delete from Farm.CoreCosts;
 insert into Farm.CoreCosts select * from Farm.CoreCosts_Backup;
 drop table Farm.CoreCosts_Backup;
+
 update Usersettings.AnalitFReplicationInfo
 set ForceReplication = 1
 where userId = :userId;")

@@ -475,12 +475,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			//нужно что бы отработала логика в StartCheck
 			settings.LastLeaderCalculation = DateTime.MinValue;
 			Fixture<LocalDelayOfPayment>();
+			var waitWindowAsync = manager.WindowOpened.Where(w => w.AsText().Contains("Пересчет отсрочки платежа")).Replay();
+			disposable.Add(waitWindowAsync.Connect());
 			Start();
 
-			var waitWindow = activeWindow;
-			dispatcher.Invoke(() => {
-				Assert.That(activeWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
-			});
+			var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
+			Assert.That(activeWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
 			//ждем пока закроется
 			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
 

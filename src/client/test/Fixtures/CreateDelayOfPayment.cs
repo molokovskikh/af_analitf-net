@@ -29,6 +29,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			user.Client.Settings.AllowDelayOfPayment = false;
+			session.CreateSQLQuery(@"
+update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId;")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
 		}
 	}
 }
