@@ -42,5 +42,7 @@ namespace AnalitF.Net.Service.Config
 		{
 			get { return Path.Combine(UpdatePath, "rtm"); }
 		}
+
+		public TimeSpan ExportTimeout { get; set; }
 	}
 }

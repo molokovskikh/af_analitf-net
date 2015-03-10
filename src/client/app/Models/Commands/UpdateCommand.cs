@@ -84,27 +84,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			var sendLogsTask = SendLogs(Client, Token);
 			HttpResponseMessage response;
 			var updateType = "накопительное";
-			if (!String.IsNullOrEmpty(BatchFile)) {
+			var user = Session.Query<User>().FirstOrDefault();
+			if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
 				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
-				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(), Token));
-			}
-			else if (SyncData.Match("Batch")) {
-				updateType = "автозаказ";
-				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
-				var items = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
-					Code = l.Code,
-					CodeCr = l.CodeCr,
-					ProductName = l.ProductSynonym,
-					ProducerName = l.ProducerSynonym,
-					Quantity = l.Quantity,
-					SupplierDeliveryId = l.SupplierDeliveryId,
-					ServiceValues = l.ParsedServiceFields,
-					Priority = l.Priority,
-					BaseCost = l.BaseCost
-				}).ToList();
-				var batchRequest = new BatchRequest(AddressId, items);
-				response = Wait("Batch", Client.PostAsJsonAsync("Batch", batchRequest, Token));
+				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user), Token));
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
@@ -125,7 +109,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token));
 			}
 			else {
-				var user = Session.Query<User>().FirstOrDefault();
 				var lastSync = user == null ? null : user.LastSync;
 				if (lastSync == null) {
 					updateType = "куммулятивное";
@@ -150,24 +133,41 @@ namespace AnalitF.Net.Client.Models.Commands
 			return result;
 		}
 
-		private HttpContent GetBatchRequest()
+		private HttpContent GetBatchRequest(User user)
 		{
-			try {
-				var tmp = FileHelper.SelfDeleteTmpFile();
-				using (var zip = new ZipFile()) {
-					zip.AddFile(BatchFile).FileName = "payload";
-					zip.AddEntry("meta.json", JsonConvert.SerializeObject(new BatchRequest(AddressId)));
-					zip.Save(tmp);
+			var request = new BatchRequest(AddressId, user == null ? null : user.LastSync);
+			if (String.IsNullOrEmpty(BatchFile)) {
+				request.BatchItems = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
+					Code = l.Code,
+					CodeCr = l.CodeCr,
+					ProductName = l.ProductSynonym,
+					ProducerName = l.ProducerSynonym,
+					Quantity = l.Quantity,
+					SupplierDeliveryId = l.SupplierDeliveryId,
+					ServiceValues = l.ParsedServiceFields,
+					Priority = l.Priority,
+					BaseCost = l.BaseCost
+				}).ToList();
+				return new ObjectContent<BatchRequest>(request, Formatter);
+			}
+			else {
+				try {
+					var tmp = FileHelper.SelfDeleteTmpFile();
+					using (var zip = new ZipFile()) {
+						zip.AddFile(BatchFile).FileName = "payload";
+						zip.AddEntry("meta.json", JsonConvert.SerializeObject(request));
+						zip.Save(tmp);
+					}
+					tmp.Position = 0;
+					return new StreamContent(tmp);
 				}
-				tmp.Position = 0;
-				return new StreamContent(tmp);
-			}
-			//транслируем сообщения об ошибках, если кто то зажал или удалил файл автозаказа
-			catch(IOException e) {
-				throw new EndUserError(ErrorHelper.TranslateIO(e));
-			}
-			catch(UnauthorizedAccessException e) {
-				throw new EndUserError(e.Message);
+				//транслируем сообщения об ошибках, если кто то зажал или удалил файл автозаказа
+				catch(IOException e) {
+					throw new EndUserError(ErrorHelper.TranslateIO(e));
+				}
+				catch(UnauthorizedAccessException e) {
+					throw new EndUserError(e.Message);
+				}
 			}
 		}
 

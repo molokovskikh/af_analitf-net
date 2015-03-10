@@ -146,7 +146,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Configure(User user)
 		{
-			HideCost = user.IsDeplayOfPaymentEnabled && !user.ShowSupplierCost;
+			HideCost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost;
 		}
 
 		protected virtual decimal GetResultCost(Price price)

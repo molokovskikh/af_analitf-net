@@ -88,21 +88,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Promotions.FilterBySupplierId = Price.Value.SupplierId;
 
 			RxQuery(s => {
-					var offers = s.Query<Offer>().Where(o => o.Price.Id == priceId)
+					return s.Query<Offer>().Where(o => o.Price.Id == priceId)
 						.Fetch(o => o.Price)
 						.Fetch(o => o.LeaderPrice)
 						.ToList();
-					CalculateRetailCost(offers);
-					LoadOrderItems(offers);
-					return offers;
 				})
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(BindOffers, CloseCancellation);
 		}
 
-		public void BindOffers(List<Offer> c)
+		public void BindOffers(List<Offer> offers)
 		{
-			PriceOffers = c;
+			CalculateRetailCost(offers);
+			LoadOrderItems(offers);
+			PriceOffers = offers;
 			FillProducerFilter(PriceOffers);
 			Filter();
 			SelectOffer();

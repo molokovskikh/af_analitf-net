@@ -295,6 +295,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Show_correction()
 		{
+			restore = true;
 			stub = null;
 			var order = Fixture<MakeOrder>().Order;
 			Fixture<RandCost>();
@@ -367,7 +368,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			restore = true;
 			settings.LastUpdate = DateTime.Now;
 			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 
 			session.DeleteEach<DelayOfPayment>();
 			var offer = session.Query<Offer>()
@@ -398,7 +399,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
-			Assert.That(minCost.Diff, Is.GreaterThan(0));
+			Assert.That(minCost.Diff, Is.GreaterThan(0), minCost.ToString());
 		}
 
 		[Test]

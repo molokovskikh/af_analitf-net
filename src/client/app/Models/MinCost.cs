@@ -17,5 +17,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual Price Price { get; set; }
 
 		public virtual decimal? Diff { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("Cost: {0}, NextCost: {1}, ProductId: {2}, Diff: {3}", Cost, NextCost, ProductId, Diff);
+		}
 	}
 }

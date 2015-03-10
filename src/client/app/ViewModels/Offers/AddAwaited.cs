@@ -41,21 +41,16 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			//вообще то это грабли тк StatelessSession формально не производит внутренней синхронизации
-			//но судя по реализации в данном случает все будет хорошо
-			//тк для каждого вызова создается свое соединение и свой контекст
-			//однако я могу и ошибаться
-			//в любом случае функция не критическая
 			Catalogs = CatalogTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => {
+				.Select(t => RxQuery(s => {
 					if (String.IsNullOrEmpty(t))
-						return Observable.Return(new List<Catalog>());
+						return new List<Catalog>();
 					if (CurrentCatalog.Value != null && CurrentCatalog.Value.FullName == t) {
-						return Observable.Return(Catalogs.Value);
+						return Catalogs.Value;
 					}
 
-					var items = StatelessSession.CreateSQLQuery(@"
+					return s.CreateSQLQuery(@"
 (select {c.*}, 0 as Score
 from Catalogs c
 where c.Fullname like :term)
@@ -69,8 +64,7 @@ order by Score, {c.FullName}")
 						.SetParameter("fullterm", "%" + t + "%")
 						.List<Catalog>()
 						.ToList();
-					return Observable.Return(items);
-				})
+				}))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
@@ -79,11 +73,11 @@ order by Score, {c.FullName}")
 
 			Producers = ProducerTerm
 				.Throttle(Consts.TextInputLoadTimeout, Scheduler)
-				.Select(t => {
+				.Select(t => RxQuery(s => {
 					if (String.IsNullOrEmpty(t))
-						return Observable.Return(new List<Producer> { emptyProducer });
+						return new List<Producer> { emptyProducer };
 					if (CurrentProducer.Value != null && CurrentProducer.Value.Name == t)
-						return Observable.Return(Producers.Value);
+						return Producers.Value;
 
 					CurrentProducer.Value = null;
 					var items = StatelessSession.CreateSQLQuery(@"
@@ -99,8 +93,8 @@ order by Score, {p.Name}")
 						.SetParameter("term", t + "%")
 						.SetParameter("fullterm", "%" + t + "%")
 						.List<Producer>();
-					return Observable.Return(new[] { emptyProducer }.Concat(items).ToList());
-				})
+					return new[] { emptyProducer }.Concat(items).ToList();
+				}))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);

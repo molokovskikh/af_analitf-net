@@ -3,11 +3,27 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	Height="600"
 	Width="800">
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+	</UserControl.InputBindings>
+
 	<TabControl>
 		<TabItem Header="Sql">
-			<TextBox Name="Sql" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				<StackPanel Grid.Row="0" Orientation="Horizontal">
+					<CheckBox Name="Stack" VerticalAlignment="Center" Padding="3">Stack</CheckBox>
+					<Button Name="Clear" VerticalAlignment="Center" Padding="3">Clear</Button>
+				</StackPanel>
+				<TextBox Grid.Row="1" Name="Sql" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+			</Grid>
+
 		</TabItem>
 		<TabItem Header="Error">
 			<TextBox Name="Error" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />

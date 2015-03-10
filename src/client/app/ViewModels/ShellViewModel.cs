@@ -356,7 +356,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (User.Value != null
-				&& User.Value.IsDeplayOfPaymentEnabled
+				&& User.Value.IsDelayOfPaymentEnabled
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
@@ -1029,9 +1029,9 @@ namespace AnalitF.Net.Client.ViewModels
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
 
-		public void ShowDebug()
+		public IResult ShowDebug()
 		{
-			windowManager.ShowWindow(Debug);
+			return new WindowResult(Debug);
 		}
 #endif
 		public void Dispose()

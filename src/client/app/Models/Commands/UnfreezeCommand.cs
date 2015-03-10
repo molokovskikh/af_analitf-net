@@ -118,7 +118,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						&& o.Code == line.Code
 						&& o.RequestRatio == line.RequestRatio
 						&& o.MinOrderCount == line.MinOrderCount
-						&& o.MinOrderSum == line.MinOrderSum)
+						&& o.MinOrderSum == line.MinOrderSum
+						&& o.Junk == line.Junk)
 					.ToArray()
 					.OrderBy(o => o.ResultCost)
 					.ToArray();

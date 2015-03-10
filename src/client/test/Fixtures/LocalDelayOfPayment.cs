@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public void Execute(ISession session)
 		{
 			var user = session.Query<User>().First();
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 			user.ShowSupplierCost = true;
 			var factors = Generator.RandomDouble();
 			session.DeleteEach<DelayOfPayment>();

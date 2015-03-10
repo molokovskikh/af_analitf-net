@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool ShowSupplierCost { get; set; }
 
-		public virtual bool IsDeplayOfPaymentEnabled { get; set; }
+		public virtual bool IsDelayOfPaymentEnabled { get; set; }
 
 		public virtual string SupportPhone { get; set; }
 

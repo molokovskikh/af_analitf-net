@@ -28,7 +28,13 @@
 			IsEditable="True"
 			x:Name="CatalogProducts"
 			Width="300"
-			DisplayMemberPath="FullName" />
+			DisplayMemberPath="FullName">
+			<ComboBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<VirtualizingStackPanel />
+				</ItemsPanelTemplate>
+			</ComboBox.ItemsPanel>
+		</c:ComboBox2>
 		<Label Grid.Row="2">Производитель</Label>
 		<c:ComboBox2 Grid.Row="3"
 			Text="{Binding ProducerTerm.Value, UpdateSourceTrigger=PropertyChanged}"
@@ -39,7 +45,13 @@
 			StaysOpenOnEdit="True"
 			IsEditable="True"
 			Width="300"
-			DisplayMemberPath="Name" />
+			DisplayMemberPath="Name">
+			<ComboBox.ItemsPanel>
+				<ItemsPanelTemplate>
+					<VirtualizingStackPanel />
+				</ItemsPanelTemplate>
+			</ComboBox.ItemsPanel>
+		</c:ComboBox2>
 		<StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0, 10, 0, 10">
 			<Button Name="OK" Margin="0, 0, 5, 0">ОК</Button>
 			<Button Name="TryClose">Отмена</Button>

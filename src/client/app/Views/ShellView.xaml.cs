@@ -50,7 +50,11 @@ namespace AnalitF.Net.Client.Views
 						var url = ((RequestNavigateEventArgs)args).Uri.ToString();
 						new OpenResult(url).Execute(new ActionExecutionContext());
 					}));
-
+#if DEBUG
+			InputBindings.Add(new KeyBinding(Commands.InvokeViewModel, new KeyGesture(Key.D, ModifierKeys.Control)) {
+				CommandParameter = "ShowDebug"
+			});
+#endif
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
 			Collect.Visibility = Visibility.Collapsed;

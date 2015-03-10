@@ -22,6 +22,9 @@ namespace AnalitF.Net.Client.Views
 		public Debug()
 		{
 			InitializeComponent();
+			Loaded += (sender, args) => {
+				Sql.Focus();
+			};
 		}
 	}
 }

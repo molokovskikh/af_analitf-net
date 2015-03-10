@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Offers;
+using Common.NHibernate;
 using Common.Tools;
+using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
@@ -54,6 +59,22 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.Prices.First(p => p.Item.Id != id).IsSelected = true;
 			testScheduler.AdvanceByMs(10000);
 			Assert.That(model.Offers.Value.Count(), Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Build_order()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+
+			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
+			model.SearchBehavior.Search();
+			testScheduler.Start();
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+
+			var offer = model.Offers.Value.First(o => o.Id == order.Lines[0].OfferId);
+			Assert.AreEqual(1, offer.OrderCount);
 		}
 	}
 }

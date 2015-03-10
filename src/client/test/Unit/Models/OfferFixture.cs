@@ -287,7 +287,7 @@ namespace AnalitF.Net.Test.Unit
 		public void Calculate_retail_cost_based_on_result_cost()
 		{
 			var user = new User();
-			user.IsDeplayOfPaymentEnabled = true;
+			user.IsDelayOfPaymentEnabled = true;
 
 			offer.Price.CostFactor = 1.2m;
 			settings.Markups.Add(new MarkupConfig(0, 1000, 20));
