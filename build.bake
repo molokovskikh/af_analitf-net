@@ -109,27 +109,31 @@ task "deploy:service", ["build:service"]:
 	version = assembly.Name.Version.ToString()
 
 	deployTo = GetDeploy(Globals, proj)
-	deployTo += "-$version"
-	name += "-$version"
-	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
+	#В тестовой среде всегда одно приложение
+	if Globals.Maybe.IISHost:
+		deployTo += "-$version"
+		Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
+	else:
+		Globals.CheckUrl = Globals.CheckUrlRoot + "/Status/"
 	MkDir(deployTo) unless Exist(deployTo)
 	deployToBin = Path.Combine(deployTo, "bin")
 	deployToVar = Path.Combine(deployTo, "var")
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
+
 	return unless Globals.Maybe.IISHost
 	if Globals.Maybe.skipRegisterApp:
 		fsPath = Path.GetFullPath(deployToBin)
 		if Globals.Maybe.IISPathRoot:
-			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
-		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
+			fsPath = Path.Combine(Globals.IISPathRoot, Path.GetFileName(deployTo), "bin")
+		RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), fsPath, Globals.Maybe.IISAppPool)
 
 		#создаем маршрут в прокси
 		deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
 		proxyConfig = Path.Combine(deployTo, @config)
 		using writer = StreamWriter(proxyConfig, true):
-			writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
+			writer.WriteLine("$version " + Globals.CheckUrl)
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
@@ -369,8 +373,8 @@ task "test:binary":
 		raise
 
 task "deploy:announce":
-	unless Globals.Environment == @Production:
-		raise "Задача может быть выполнена только в среде Production задай env=Production"
+	return unless Globals.Environment == @Production
+
 	url = "http://redmine.analit.net/projects/afn"
 	version = File.ReadAllText("output/setup/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
@@ -395,8 +399,8 @@ task "deploy:announce":
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
 
 task "deploy:setup":
-	unless Globals.Environment == @Production:
-		raise "Задача может быть выполнена только в среде Production задай env=Production"
+	return unless Globals.Environment == @Production
+
 	version = File.ReadAllText("output/setup/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
