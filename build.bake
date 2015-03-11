@@ -87,7 +87,13 @@ Global(
 	},
 	JenkinsProject: "AnalitF.Net",
 	Retarget: true,
-	AdditionalAssemblies: ("src/service/app/bin/AnalitF.Net.Service.dll", )
+	AdditionalAssemblies: ("src/service/app/bin/AnalitF.Net.Service.dll", ),
+	Config: {
+		"assembly:info:generate": {
+			@Title: "АналитФАРМАЦИЯ",
+			@Product: "АналитФАРМАЦИЯ",
+		}
+	}
 )
 
 task @default, [@build]
