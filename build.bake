@@ -123,17 +123,18 @@ task "deploy:service", ["build:service"]:
 	XCopyDeploy(Globals, proj, deployToBin)
 
 	return unless Globals.Maybe.IISHost
-	if Globals.Maybe.skipRegisterApp:
-		fsPath = Path.GetFullPath(deployToBin)
-		if Globals.Maybe.IISPathRoot:
-			fsPath = Path.Combine(Globals.IISPathRoot, Path.GetFileName(deployTo), "bin")
-		RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), fsPath, Globals.Maybe.IISAppPool)
+	return if Globals.Maybe.skipRegisterApp
 
-		#создаем маршрут в прокси
-		deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
-		proxyConfig = Path.Combine(deployTo, @config)
-		using writer = StreamWriter(proxyConfig, true):
-			writer.WriteLine("$version " + Globals.CheckUrl)
+	fsPath = Path.GetFullPath(deployToBin)
+	if Globals.Maybe.IISPathRoot:
+		fsPath = Path.Combine(Globals.IISPathRoot, Path.GetFileName(deployTo), "bin")
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), fsPath, Globals.Maybe.IISAppPool)
+
+	#создаем маршрут в прокси
+	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
+	proxyConfig = Path.Combine(deployTo, @config)
+	using writer = StreamWriter(proxyConfig, true):
+		writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
@@ -359,8 +360,8 @@ task "test:binary":
 			except e:
 				if count > 20:
 					raise
+				print "Жду обновления ${Globals.CheckUrl}"
 				print e.Message
-				print "Жду обновления"
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
