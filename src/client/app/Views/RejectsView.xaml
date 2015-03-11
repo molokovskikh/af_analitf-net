@@ -60,6 +60,8 @@
 			Height="20"
 			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
 
+		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
+
 		<Grid Grid.Row="2">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />

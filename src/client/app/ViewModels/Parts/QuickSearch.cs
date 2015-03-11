@@ -6,6 +6,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -46,6 +47,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Throttle(TimeSpan.FromMilliseconds(5000), scheduler)
 				.Where(o => !String.IsNullOrEmpty(o.Value))
 				.Subscribe(_ => SearchText = null);
+		}
+		public QuickSearch(IScheduler scheduler, Func<string, T> search, IObserver<T> update)
+			: this(scheduler, search, update.OnNext)
+		{
 		}
 
 		public bool IsEnabled

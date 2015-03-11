@@ -17,7 +17,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
 				t => Offers.Value.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
-				o => CurrentOffer.Value = o);
+				CurrentOffer);
+			QuickSearch.RemapChars = true;
 			IsLoading = new NotifyValue<bool>(true);
 		}
 
@@ -42,7 +43,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.CatchSubscribe(o => {
 					Offers.Value = o;
 					SelectOffer();
-					CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
 					IsLoading.Value = false;
 				}, CloseCancellation);
 		}

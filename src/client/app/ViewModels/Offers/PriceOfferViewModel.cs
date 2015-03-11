@@ -105,7 +105,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			FillProducerFilter(PriceOffers);
 			Filter();
 			SelectOffer();
-			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault();
 			Price.Value = PriceOffers.Select(o => o.Price).FirstOrDefault()
 				?? Price.Value;
 			IsLoading.Value = false;

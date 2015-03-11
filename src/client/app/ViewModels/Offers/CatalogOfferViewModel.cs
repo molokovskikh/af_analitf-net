@@ -99,11 +99,15 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			Update();
 			UpdateMaxProducers();
+			UpdateFilters();
+		}
 
+		protected override void SelectOffer()
+		{
 			CurrentOffer.Value = CurrentOffer.Value
+				?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId)
 				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
 				?? Offers.Value.FirstOrDefault();
-			UpdateFilters();
 		}
 
 		protected override void OnActivate()

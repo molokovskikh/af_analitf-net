@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate.Linq;
 
@@ -23,6 +24,10 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentReject = new NotifyValue<Reject>();
 			CanMark = CurrentReject.Select(r => r != null).ToValue();
 			IsLoading = new NotifyValue<bool>(true);
+			QuickSearch = new QuickSearch<Reject>(UiScheduler,
+				t => Rejects.Value.FirstOrDefault(o => o.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
+				CurrentReject);
+			QuickSearch.RemapChars = true;
 
 			WatchForUpdate(CurrentReject);
 		}
@@ -41,6 +46,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> CanMark { get; set; }
 
 		public NotifyValue<bool> IsLoading { get; set; }
+
+		public QuickSearch<Reject> QuickSearch { get; set; }
 
 		protected override void OnInitialize()
 		{

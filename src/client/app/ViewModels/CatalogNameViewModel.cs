@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
 				v => CatalogNames.Value.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
-				c => CurrentCatalogName.Value = c);
+				CurrentCatalogName);
 			CatalogNamesSearch.RemapChars = true;
 
 			CatalogsSearch = new QuickSearch<Catalog>(UiScheduler,

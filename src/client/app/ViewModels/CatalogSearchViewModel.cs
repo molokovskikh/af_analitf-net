@@ -93,7 +93,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,
 				v => Items.Value.FirstOrDefault(c => c.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
-				v => CurrentItem.Value = v);
+				CurrentItem);
 			QuickSearch.IsEnabled = false;
 
 			SearchBehavior = new SearchBehavior(this);

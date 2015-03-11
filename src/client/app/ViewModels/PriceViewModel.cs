@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowLeaders = new NotifyValue<bool>();
 			QuickSearch = new QuickSearch<Price>(UiScheduler,
 				t => Prices.FirstOrDefault(p => p.Name.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
-				p => CurrentPrice.Value = p);
+				CurrentPrice);
 		}
 
 		public QuickSearch<Price> QuickSearch { get; set; }

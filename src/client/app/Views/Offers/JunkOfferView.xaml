@@ -96,6 +96,7 @@
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
 			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
+		<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 
 		<Parts:ProductInfoView Grid.Row="1" cal:Bind.ModelWithoutContext="{Binding}" />
 

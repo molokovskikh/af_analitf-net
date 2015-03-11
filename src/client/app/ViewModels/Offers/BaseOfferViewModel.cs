@@ -22,7 +22,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private bool resetAutoComment;
 		private Catalog currentCatalog;
 		private List<SentOrderLine> historyOrders;
-		private OfferComposedId initOfferId;
 
 		protected Producer EmptyProducer = new Producer(Consts.AllProducerLabel);
 		//тк уведомление о сохранении изменений приходит после
@@ -32,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected bool NavigateOnShowCatalog;
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
+		protected OfferComposedId initOfferId;
 
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
@@ -400,9 +400,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			LoadOrderItems();
 		}
 
-		protected void SelectOffer()
+		protected virtual void SelectOffer()
 		{
-			CurrentOffer.Value = CurrentOffer.Value ?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId);
+			CurrentOffer.Value = CurrentOffer.Value
+				?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId)
+				?? Offers.Value.FirstOrDefault();
 		}
 
 		protected void LoadStat()
