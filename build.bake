@@ -70,11 +70,9 @@ Global(
 		},
 		@Test : {
 			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update\""",
+			@UpdateDeployRoot: """\\solo\TEST\var-test\update\""",
 			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
-			@IISSiteName: "TEST",
-			@IISHost: "acdcserv"
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
@@ -111,19 +109,26 @@ task "deploy:service", ["build:service"]:
 	version = assembly.Name.Version.ToString()
 
 	deployTo = GetDeploy(Globals, proj)
-	deployTo += "-$version"
-	name += "-$version"
-	Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
+	#В тестовой среде всегда одно приложение
+	if Globals.Maybe.IISHost:
+		deployTo += "-$version"
+		Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
+	else:
+		Globals.CheckUrl = Globals.CheckUrlRoot + "/Status/"
 	MkDir(deployTo) unless Exist(deployTo)
 	deployToBin = Path.Combine(deployTo, "bin")
 	deployToVar = Path.Combine(deployTo, "var")
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
+
+	return unless Globals.Maybe.IISHost
+	return if Globals.Maybe.skipRegisterApp
+
 	fsPath = Path.GetFullPath(deployToBin)
 	if Globals.Maybe.IISPathRoot:
-		fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
-	RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
+		fsPath = Path.Combine(Globals.IISPathRoot, Path.GetFileName(deployTo), "bin")
+	RegisterApp(Globals.IISHost, Globals.IISSiteName, Path.GetFileName(deployTo), fsPath, Globals.Maybe.IISAppPool)
 
 	#создаем маршрут в прокси
 	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
@@ -355,8 +360,8 @@ task "test:binary":
 			except e:
 				if count > 20:
 					raise
+				print "Жду обновления ${Globals.CheckUrl}"
 				print e.Message
-				print "Жду обновления"
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
@@ -369,8 +374,8 @@ task "test:binary":
 		raise
 
 task "deploy:announce":
-	unless Globals.Environment == @Production:
-		raise "Задача может быть выполнена только в среде Production задай env=Production"
+	return unless Globals.Environment == @Production
+
 	url = "http://redmine.analit.net/projects/afn"
 	version = File.ReadAllText("output/setup/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
@@ -395,8 +400,8 @@ task "deploy:announce":
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
 
 task "deploy:setup":
-	unless Globals.Environment == @Production:
-		raise "Задача может быть выполнена только в среде Production задай env=Production"
+	return unless Globals.Environment == @Production
+
 	version = File.ReadAllText("output/setup/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
