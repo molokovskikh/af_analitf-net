@@ -70,11 +70,9 @@ Global(
 		},
 		@Test : {
 			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\acdcserv\TEST\var-test\update\""",
+			@UpdateDeployRoot: """\\solo\TEST\var-test\update\""",
 			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
-			@IISSiteName: "TEST",
-			@IISHost: "acdcserv"
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
@@ -120,6 +118,7 @@ task "deploy:service", ["build:service"]:
 	MkDir(deployToBin) unless Exist(deployToBin)
 	MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
+	return unless Globals.Maybe.IISHost
 	if Globals.Maybe.skipRegisterApp:
 		fsPath = Path.GetFullPath(deployToBin)
 		if Globals.Maybe.IISPathRoot:
