@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			DisplayName = "Сводный заказ";
 
+			LinesCount = new NotifyValue<int>();
 			OnlyWarning = new NotifyValue<bool>();
 			CurrentLine = new NotifyValue<OrderLine>();
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
@@ -46,11 +47,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			editor = new Editor(OrderWarning, Manager, CurrentLine);
 
 			Lines.CatchSubscribe(v => editor.Lines = v);
-			var observable = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
+			var currentLinesChanged = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
-			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
-			OnCloseDisposable.Add(observable.Subscribe(_ => Sum.Recalculate()));
+			OnCloseDisposable.Add(Bus.RegisterMessageSource(currentLinesChanged));
+			OnCloseDisposable.Add(currentLinesChanged.Subscribe(_ => Sum.Recalculate()));
 
 			Settings.Subscribe(_ => Calculate());
 
@@ -65,6 +66,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			IsCurrentSelected
 				.Select(v => v ? "Lines" : "SentLines")
 				.Subscribe(excelExporter.ActiveProperty);
+
+			Observable.Merge(IsCurrentSelected.Select(x => (object)x), Lines, SentLines, currentLinesChanged)
+				.Select(_ => {
+					if (IsCurrentSelected)
+						return Lines.Value != null ? Lines.Value.Count : 0;
+					return SentLines.Value != null ? SentLines.Value.Count : 0;
+				})
+				.Subscribe(LinesCount);
 		}
 
 		public InlineEditWarning OrderWarning { get; set; }
@@ -86,6 +95,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<List<SentOrderLine>> SentLines { get; set; }
 
 		public NotifyValue<SentOrderLine> SelectedSentLine { get; set; }
+
+		public NotifyValue<int> LinesCount { get; set; }
 
 		public NotifyValue<decimal> Sum { get; set; }
 
