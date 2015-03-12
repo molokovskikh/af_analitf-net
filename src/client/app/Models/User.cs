@@ -48,6 +48,7 @@ namespace AnalitF.Net.Client.Models
 			{ typeof(Awaited).Name + "." + "Offers", "FPCPL" },
 			{ typeof(Awaited).Name + "." + "Items", "FPCNF" },
 			{ typeof(MinCosts).Name + "." + "Offers", "FPCPL" },
+			{ typeof(MnnViewModel).Name + "." + "Mnns", "FPCNF" },
 		};
 
 		public Permission()
