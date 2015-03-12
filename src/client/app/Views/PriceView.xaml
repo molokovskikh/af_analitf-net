@@ -61,9 +61,9 @@
 					IsReadOnly="True" />
 				<c:DataGridTextColumnEx Width="95*" Header="Дата прайс-листа"
 					Binding="{Binding PriceDate}" IsReadOnly="True" />
-				<c:DataGridTextColumnEx Width="60*" Header="Месячный заказ"
+				<c:DataGridTextColumnEx Width="60*" Header="Недельный заказ"
 					Binding="{Binding WeeklyOrderSum}" IsReadOnly="True" />
-				<c:DataGridTextColumnEx Width="65*" Header="Недельный заказ"
+				<c:DataGridTextColumnEx Width="65*" Header="Месячный заказ"
 					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>

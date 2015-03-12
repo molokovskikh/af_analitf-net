@@ -224,5 +224,10 @@ namespace AnalitF.Net.Client.Models
 			}
 			return !addressNotFound;
 		}
+
+		public override string ToString()
+		{
+			return String.Format("Заявка поставщика {0} на сумму {1}", Price, Sum);
+		}
 	}
 }

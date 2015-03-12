@@ -69,7 +69,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Send_orders()
 		{
-			session.DeleteEach<SentOrder>();
+			localSession.DeleteEach<SentOrder>();
 			var order = MakeOrderClean();
 			var line = order.Lines[0];
 
@@ -77,7 +77,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
 			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
-			Assert.That(sentOrders.Count, Is.EqualTo(1));
+			Assert.That(sentOrders.Count, Is.EqualTo(1), sentOrders.Implode());
 			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
 
 			var orders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
