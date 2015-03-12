@@ -69,6 +69,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Send_orders()
 		{
+			session.DeleteEach<SentOrder>();
 			var order = MakeOrderClean();
 			var line = order.Lines[0];
 
