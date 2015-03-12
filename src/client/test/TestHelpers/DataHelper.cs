@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Test.Integration;
 using Castle.ActiveRecord;
@@ -8,6 +10,7 @@ using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
 using Test.Support;
+using Environment = System.Environment;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -18,6 +21,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			localSession.CreateSQLQuery("flush tables").ExecuteUpdate();
 			Directory.GetFiles(IntegrationSetup.BackupDir)
 				.Each(f => File.Copy(f, Path.Combine(IntegrationSetup.clientConfig.DbDir, Path.GetFileName(f)), true));
+		}
+
+		public static void CopyDb(string dir)
+		{
+			using(var session = IntegrationFixture.Factory.OpenSession()) {
+				session.CreateSQLQuery("flush tables").ExecuteUpdate();
+			}
+			FileHelper.InitDir(dir);
+			Directory.GetFiles(IntegrationSetup.clientConfig.DbDir)
+				.Each(f => File.Copy(f, Path.Combine(dir, Path.GetFileName(f)), true));
 		}
 
 		public static ISessionFactory ServerNHConfig(string connectionStringName)
@@ -35,12 +48,36 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			using (var session = Setup.SessionFactory.OpenSession())
 			using (session.BeginTransaction()) {
-				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == System.Environment.UserName);
+				var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == Environment.UserName);
 				if (user != null)
 					return;
-				SampleData.CreateUser(session, System.Environment.UserName);
+				SampleData.CreateUser(session, Environment.UserName);
 				session.Transaction.Commit();
 			}
+		}
+
+		public static void CopyBin(string src, string dst)
+		{
+			var regex = new Regex(@"(\.dll|\.exe|\.config|\.pdb)$", RegexOptions.IgnoreCase);
+			Directory.GetFiles(src).Where(f => regex.IsMatch(f))
+				.Each(f => File.Copy(f, Path.Combine(dst, Path.GetFileName(f)), true));
+		}
+
+		public static string ProjectBin(string name)
+		{
+			return Path.Combine(GetRoot(), "src", name, "app", "bin", "debug");
+		}
+
+		public static string GetRoot([CallerFilePath] string self = null)
+		{
+			return GetRootDir(Path.GetDirectoryName(self));
+		}
+
+		private static string GetRootDir(string dir)
+		{
+			if (Directory.Exists(Path.Combine(dir, "src")))
+				return dir;
+			return GetRootDir(Path.Combine(dir, ".."));
 		}
 	}
 }

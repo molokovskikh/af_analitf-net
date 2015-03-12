@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			if (Verbose && ProductIds.Length == 0) {
 				ProductIds = session.Query<TestCore>().Select(o => o.Product.Id).Distinct().Take(5).ToArray();
-				var root = DataMother.GetRoot();
+				var root = DataHelper.GetRoot();
 				var file = Path.Combine(root, "src", "data", "smart-order.txt");
 				File.WriteAllText(file, ProductIds.Implode(v => String.Format("{0}|1", ProductIds.IndexOf(v) + 1), Environment.NewLine));
 				Console.WriteLine("Соответствие продуктов кодам");

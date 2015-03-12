@@ -60,7 +60,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			if (!Directory.Exists(dst))
 				Directory.CreateDirectory(dst);
 
-			DataMother.CopyBin(src, dst);
+			DataHelper.CopyBin(src, dst);
 			FileHelper2.CopyDir("share", Path.Combine(dst, "share"));
 			FileHelper2.CopyDir(IntegrationSetup.BackupDir, Path.Combine(dst, "data"));
 		}

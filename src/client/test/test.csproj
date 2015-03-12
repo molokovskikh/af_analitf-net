@@ -229,7 +229,6 @@
     <Compile Include="TestHelpers\MixedScheduler.cs" />
     <Compile Include="TestHelpers\ViewModelFixture.cs" />
     <Compile Include="TestHelpers\BaseViewFixture.cs" />
-    <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\DbFixture.cs" />
     <Compile Include="TestHelpers\FixtureHelper.cs" />
     <Compile Include="TestHelpers\MemoryTraceListner.cs" />

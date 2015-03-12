@@ -153,12 +153,7 @@ namespace AnalitF.Net.Test.Integration
 
 		private void BackupData()
 		{
-			using(var session = Factory.OpenSession()) {
-				session.CreateSQLQuery("flush tables").ExecuteUpdate();
-			}
-			FileHelper.InitDir(BackupDir);
-			Directory.GetFiles(clientConfig.DbDir)
-				.Each(f => File.Copy(f, Path.Combine(BackupDir, Path.GetFileName(f)), true));
+			DataHelper.CopyDb(BackupDir);
 		}
 	}
 }

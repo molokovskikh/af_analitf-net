@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
@@ -46,7 +47,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(cert);
 			Line.Certificate = cert;
 			//если тесты запускать несколько раз с перезаливкой базы то id будет одинаковый
-			File.Copy(Path.Combine(TestHelpers.DataMother.GetRoot(), "assets", "certificate.gif"),
+			File.Copy(Path.Combine(DataHelper.GetRoot(), "assets", "certificate.gif"),
 				Path.Combine(Config.CertificatesPath, file.Id + ".gif"), true);
 			if (Verbose)
 				Console.WriteLine("Для строки {0} накладной {1} создан сертификат", Line.Product, Line.Waybill.Log.Id);
