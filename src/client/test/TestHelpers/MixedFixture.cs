@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -121,7 +122,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected string TempFile(string filename, string content)
 		{
 			cleaner.Watch(filename);
-			File.WriteAllText(filename, content);
+			File.WriteAllText(filename, content, Encoding.Default);
 			return filename;
 		}
 	}

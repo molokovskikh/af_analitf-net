@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
@@ -16,6 +17,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class SmartOrder : ServerFixture
 	{
+		public List<Tuple<string, uint>> AddressMap = new List<Tuple<string, uint>>();
+		public List<Tuple<string, uint>> SynonymMap = new List<Tuple<string, uint>>();
 		public uint[] ProductIds = new uint[0];
 		public TestSmartOrderRule Rule;
 
@@ -53,6 +56,27 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				price.Core.Add(new TestCore(price.AddProductSynonym(product.FullName, product)) {
 					Code = (i + 1).ToString(), Period = "", Quantity = "", Product = product
 				});
+			}
+			foreach (var tuple in SynonymMap) {
+				price.AddProductSynonym(tuple.Item1, session.Load<TestProduct>(tuple.Item2));
+			}
+			foreach (var tuple in AddressMap) {
+				var cmd = session.Connection.CreateCommand();
+				cmd.CommandText = "set @Skip = 1";
+				cmd.ExecuteNonQuery();
+				var address = session.Load<TestAddress>(tuple.Item2);
+				var addressIntersection = session.Query<TestAddressIntersection>()
+					.FirstOrDefault(i => i.Intersection.Price == supplier.Prices[0] && i.Address == address);
+				if (addressIntersection == null) {
+					var intersection = new TestIntersection(supplier.Prices[0], address.Client);
+					session.Save(intersection);
+					addressIntersection = new TestAddressIntersection(address, intersection);
+					session.Save(addressIntersection);
+				}
+				addressIntersection.SupplierDeliveryId = tuple.Item1;
+				cmd = session.Connection.CreateCommand();
+				cmd.CommandText = "set @Skip = null";
+				cmd.ExecuteNonQuery();
 			}
 			session.Save(supplier);
 			Rule.AssortmentPriceCode = price.Id;

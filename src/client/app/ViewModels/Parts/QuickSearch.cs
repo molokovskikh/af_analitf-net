@@ -48,6 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Where(o => !String.IsNullOrEmpty(o.Value))
 				.Subscribe(_ => SearchText = null);
 		}
+
 		public QuickSearch(IScheduler scheduler, Func<string, T> search, IObserver<T> update)
 			: this(scheduler, search, update.OnNext)
 		{

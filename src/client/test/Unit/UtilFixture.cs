@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 

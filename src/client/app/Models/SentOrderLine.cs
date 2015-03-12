@@ -5,6 +5,7 @@ using System.Windows.Shapes;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Newtonsoft.Json;
 using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models

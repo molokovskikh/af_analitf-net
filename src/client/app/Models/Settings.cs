@@ -267,6 +267,8 @@ namespace AnalitF.Net.Client.Models
 				return Path.Combine(root, "Документы");
 			if (name.Match("Rejects"))
 				return Path.Combine(root, "Отказы");
+			if (name.Match("Orders"))
+				return Path.Combine(root, "Заявки");
 			return null;
 		}
 

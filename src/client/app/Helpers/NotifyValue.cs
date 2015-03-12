@@ -8,12 +8,22 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using log4net;
 using NHibernate;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Helpers
 {
+	/// <summary>
+	/// правильный вариант использования
+	/// объявить поле
+	/// public NotifyValue<int> F { get; set; }
+	///
+	/// инициализировать в конструкторе
+	/// F = new NotifyValie<int>();
+	///
+	/// добавить подписку для вычисления
+	/// F1.CombineLatest(F2, (x, y) => x + y).Subscribe(F);
+	/// </summary>
 	public class NotifyValue<T> : BaseNotify, IObservable<T>, IObserver<T>
 	{
 		private static ILog log = LogManager.GetLogger(typeof(NotifyValue<>));

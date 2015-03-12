@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -277,22 +279,73 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.AreEqual(Convert.ToUInt32(docLines[0]), fixture.Waybill.Lines[0].Id);
 		}
 
+		[Test]
+		public void Save_orders()
+		{
+			var ordersPath = settings.MapPath("Orders");
+			if (Directory.Exists(ordersPath))
+				Directory.GetFiles(ordersPath).Each(File.Delete);
+
+			localSession.DeleteEach<Order>();
+			localSession.DeleteEach<SentOrder>();
+			var offer = SafeSmartOrderOffer();
+
+			var externalLineId = Guid.NewGuid().ToString();
+			var externalProductId = Guid.NewGuid().ToString();
+			var externalAddressId = Guid.NewGuid().ToString();
+			var fixture = new SmartOrder {
+				SynonymMap = {
+					Tuple.Create(offer.ProductSynonym, offer.ProductId)
+				},
+				AddressMap = {
+					Tuple.Create(externalAddressId, address.Id)
+				}
+			};
+			fixture.Rule.ParseAlgorithm = "HealthyPeopleSource";
+			session.CreateSQLQuery("update usersettings.RetClientsSet set SaveOrders = 1 where ClientCode = :clientId")
+				.SetParameter("clientId", ServerUser().Client.Id)
+				.ExecuteUpdate();
+
+			session.Transaction.Commit();
+			Fixture(fixture);
+
+			var batch = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
+{0};{1};{2};{3};{4};;;1;;", externalLineId, externalAddressId, DateTime.Now, externalProductId, offer.ProductSynonym);
+
+			Assert.AreEqual(UpdateResult.OK, MakeBatch(batch));
+			Assert.AreEqual(1, localSession.Query<Order>().Count(), localSession.Query<BatchLine>().Implode());
+
+			Assert.AreEqual(UpdateResult.OK, Run(new SendOrders(address)));
+			var files = Directory.GetFiles(ordersPath);
+			Assert.AreEqual(1, files.Length);
+			var order = localSession.Query<SentOrder>().First();
+			var expected = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
+{0};{1};{2};{3};{4};;;1;;", externalLineId, externalAddressId, order.SentOn, externalProductId, offer.ProductSynonym);
+			var lines = File.ReadAllText(files[0], Encoding.Default).TrimEnd();
+			Assert.AreEqual(expected, lines);
+		}
+
 		//для автозаказа нам нужна такая позиция которой нет в прайсе с минимальной ценой заказа
 		//если позиция с минимальной суммой окажется самой дешевой то автозаказ не сможет сформировать заявку
 		public uint SafeSmartOrderProductId()
+		{
+			return SafeSmartOrderOffer().ProductId;
+		}
+
+		private Offer SafeSmartOrderOffer()
 		{
 			var productIds = localSession.Query<Offer>()
 				.Where(o => o.Price.Name.Contains("минимальный заказ"))
 				.Select(o => o.ProductId)
 				.Distinct()
 				.ToArray();
-			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId)).ProductId;
+			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId));
 		}
 
-		private void MakeBatch(string content)
+		private UpdateResult MakeBatch(string content)
 		{
 			var filename = TempFile("batch.txt", content);
-			Run(new UpdateCommand {
+			return Run(new UpdateCommand {
 				SyncData = "Batch",
 				BatchFile = filename,
 				AddressId = localSession.Query<Address>().First().Id

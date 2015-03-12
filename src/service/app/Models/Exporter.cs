@@ -307,7 +307,8 @@ select u.Id,
 	rcs.AllowDelayOfPayment as IsDelayOfPaymentEnabled,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
-	?lastSync as LastSync
+	?lastSync as LastSync,
+	rcs.SaveOrders
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
