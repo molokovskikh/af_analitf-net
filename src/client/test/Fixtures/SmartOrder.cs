@@ -61,22 +61,16 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				price.AddProductSynonym(tuple.Item1, session.Load<TestProduct>(tuple.Item2));
 			}
 			foreach (var tuple in AddressMap) {
-				var cmd = session.Connection.CreateCommand();
-				cmd.CommandText = "set @Skip = 1";
-				cmd.ExecuteNonQuery();
 				var address = session.Load<TestAddress>(tuple.Item2);
 				var addressIntersection = session.Query<TestAddressIntersection>()
 					.FirstOrDefault(i => i.Intersection.Price == supplier.Prices[0] && i.Address == address);
 				if (addressIntersection == null) {
 					var intersection = new TestIntersection(supplier.Prices[0], address.Client);
 					session.Save(intersection);
-					addressIntersection = new TestAddressIntersection(address, intersection);
-					session.Save(addressIntersection);
+					session.Refresh(intersection);
+					addressIntersection = intersection.AddressIntersections.First(i => i.Address == address);
 				}
 				addressIntersection.SupplierDeliveryId = tuple.Item1;
-				cmd = session.Connection.CreateCommand();
-				cmd.CommandText = "set @Skip = null";
-				cmd.ExecuteNonQuery();
 			}
 			session.Save(supplier);
 			Rule.AssortmentPriceCode = price.Id;
