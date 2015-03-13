@@ -44,16 +44,12 @@ def CopyUpdateBin(channel as string):
 	dir = Globals.UpdateDeployRoot
 	MkDir(dir) unless Exist(dir)
 	dir = Path.Combine(dir, channel)
-	if Exist(dir):
-		Rm("$dir/*")
-	else:
-		MkDir(dir)
-	impersonate = Configuration.Maybe.impersonate != null
 	files = FileSet("*", BaseDirectory: "output/updater/", Excludes: ["*.pdb", ])
-	if impersonate:
-		ImpersonateUser("deployer", '$sdfsd887!'):
-			Cp(files, dir, true)
-	else:
+	ImpersonateIfNeeded(Globals):
+		if Exist(dir):
+			Rm("$dir/*")
+		else:
+			MkDir(dir)
 		Cp(files, dir, true)
 
 Global(
@@ -169,11 +165,7 @@ task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:pus
 task "deploy:client", ["deploy:client:package"]
 
 task "deploy:client:package", ["build:client:package"]:
-	impersonate = Configuration.Maybe.impersonate != null
-	if impersonate:
-		ImpersonateUser("deployer", '$sdfsd887!'):
-			Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
-	else:
+	ImpersonateIfNeeded(Globals):
 		Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
 
 task "build:client:package", ["build:client"]:
