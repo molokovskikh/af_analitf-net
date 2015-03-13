@@ -121,10 +121,10 @@ task "deploy:service", ["build:service"]:
 		Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
 	else:
 		Globals.CheckUrl = Globals.CheckUrlRoot + "/Status/"
+	deployToBin = Path.Combine(deployTo, "bin")
+	deployToVar = Path.Combine(deployTo, "var")
 	ImpersonateIfNeeded(Globals):
 		MkDir(deployTo) unless Exist(deployTo)
-		deployToBin = Path.Combine(deployTo, "bin")
-		deployToVar = Path.Combine(deployTo, "var")
 		MkDir(deployToBin) unless Exist(deployToBin)
 		MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
