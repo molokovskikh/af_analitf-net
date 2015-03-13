@@ -41,11 +41,11 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string):
-	dir = Globals.UpdateDeployRoot
-	MkDir(dir) unless Exist(dir)
-	dir = Path.Combine(dir, channel)
+	root = Globals.UpdateDeployRoot
+	dir = Path.Combine(root, channel)
 	files = FileSet("*", BaseDirectory: "output/updater/", Excludes: ["*.pdb", ])
 	ImpersonateIfNeeded(Globals):
+		MkDir(root) unless Exist(root)
 		if Exist(dir):
 			Rm("$dir/*")
 		else:
