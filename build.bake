@@ -70,9 +70,9 @@ Global(
 		},
 		@Test : {
 			@DeployAlias: "AnalitF.Net.Service.Test",
-			@UpdateDeployRoot: """\\solo\TEST\var-test\update\""",
+			@UpdateDeployRoot: """\\solo\TEST\AnalitF.Net.Service.Test\var\update\""",
 			@DefaultUpdateChannel: "rtm",
-			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
+			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
 		},
 		@Production : {
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
@@ -121,11 +121,12 @@ task "deploy:service", ["build:service"]:
 		Globals.CheckUrl = Globals.CheckUrlRoot + "-$version/Status/"
 	else:
 		Globals.CheckUrl = Globals.CheckUrlRoot + "/Status/"
-	MkDir(deployTo) unless Exist(deployTo)
-	deployToBin = Path.Combine(deployTo, "bin")
-	deployToVar = Path.Combine(deployTo, "var")
-	MkDir(deployToBin) unless Exist(deployToBin)
-	MkDir(deployToVar) unless Exist(deployToVar)
+	ImpersonateIfNeeded(Globals):
+		MkDir(deployTo) unless Exist(deployTo)
+		deployToBin = Path.Combine(deployTo, "bin")
+		deployToVar = Path.Combine(deployTo, "var")
+		MkDir(deployToBin) unless Exist(deployToBin)
+		MkDir(deployToVar) unless Exist(deployToVar)
 	XCopyDeploy(Globals, proj, deployToBin)
 
 	return unless Globals.Maybe.IISHost
