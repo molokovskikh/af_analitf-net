@@ -322,8 +322,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var order = localSession.Query<SentOrder>().First();
 			var expected = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
 {0};{1};{2};{3};{4};;{5};1;;", externalLineId, externalAddressId, order.SentOn, externalProductId,
-				offer.ProductSynonym,
-				offer.ProducerSynonym);
+				order.Lines[0].ProductSynonym,
+				order.Lines[0].ProducerSynonym);
 			var lines = File.ReadAllText(files[0], Encoding.Default).TrimEnd();
 			Assert.AreEqual(expected, lines);
 		}
