@@ -398,7 +398,11 @@ task "deploy:announce":
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\""", true)
 
-task "deploy:setup":
+desc """
+делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента
+устанавливает ссылку на него с ftp
+"""
+task "promote:to:rtm":
 	return unless Globals.Environment == @Production
 
 	version = File.ReadAllText("output/setup/version.txt")
