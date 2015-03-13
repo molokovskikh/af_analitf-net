@@ -48,6 +48,11 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 
 		private void Loaded(object sender, RoutedEventArgs args)
 		{
+			//если внутри элемента управления есть своя логика восстановления фокуса
+			//мы не должны перетирать ее
+			//пример возврат из CatalogOfferViewModel при вводе с клавиатуры
+			if (AssociatedObject.IsKeyboardFocusWithin)
+				return;
 			if (lastFocusedElement != null) {
 				if (lastFocusedElement is DataGrid)
 					DataGridHelper.Focus((DataGrid)lastFocusedElement);
