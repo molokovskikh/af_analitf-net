@@ -135,7 +135,7 @@ where l.RequestId = :id;")
 								.SelectMany(a => a.SmartOrderLimits)
 								.FirstOrDefault(l => l.Supplier.Id == order.PriceList.Supplier.Id);
 							if (limit != null) {
-								limit.Value -= Address.CalculateSum(session, order);
+								limit.ConsumeLimit(Address.CalculateSum(session, order));
 							}
 						}
 					}

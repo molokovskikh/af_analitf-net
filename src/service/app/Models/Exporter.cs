@@ -283,7 +283,7 @@ where a.Enabled = 1 and ua.UserId = ?userId", addressName);
 select l.AddressId,
 	p.PriceCode as PriceId,
 	p.RegionCode as RegionId,
-	l.Value
+	l.Value + ifnull(l.Today, 0) as Value
 from Customers.Addresses a
 	join Customers.UserAddresses ua on ua.AddressId = a.Id
 	join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
