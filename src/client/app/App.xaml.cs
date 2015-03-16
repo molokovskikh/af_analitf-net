@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 
@@ -23,6 +24,16 @@ namespace AnalitF.Net.Client
 					FrameworkPropertyMetadataOptions.AffectsMeasure
 						| FrameworkPropertyMetadataOptions.AffectsRender
 						| FrameworkPropertyMetadataOptions.Inherits));
+
+			//по умолчанию на windows xp шрифт tahoma 11
+			//на vista и выше segoe 12
+			//что бы выглядело одинаково везде делаем 12
+			if (SystemFonts.MessageFontSize < 12) {
+				Control.FontSizeProperty.OverrideMetadata(typeof(TextBlock),
+					new FrameworkPropertyMetadata(12d, FrameworkPropertyMetadataOptions.Inherits));
+				Control.FontSizeProperty.OverrideMetadata(typeof(TextElement),
+					new FrameworkPropertyMetadata(12d, FrameworkPropertyMetadataOptions.Inherits));
+			}
 		}
 
 		public void RegisterResources()

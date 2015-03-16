@@ -9,6 +9,7 @@ using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
+using NUnit.Framework;
 using Test.Support;
 using Environment = System.Environment;
 
@@ -78,6 +79,21 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (Directory.Exists(Path.Combine(dir, "src")))
 				return dir;
 			return GetRootDir(Path.Combine(dir, ".."));
+		}
+
+		public static void SaveFailData()
+		{
+			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && DispatcherFixture.IsCI()) {
+				var root = "fail-test-data";
+				if (!Directory.Exists(root)) {
+					Directory.CreateDirectory(root);
+				}
+				if (Directory.GetDirectories(root).Length > 10) {
+					return;
+				}
+
+				CopyDb(Path.Combine(root, FileHelper.StringToPath(TestContext.CurrentContext.Test.FullName)));
+			}
 		}
 	}
 }

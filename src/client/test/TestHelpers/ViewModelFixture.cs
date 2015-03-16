@@ -102,6 +102,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				if (DebugContext.Count > 0)
 					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
 			}
+			DataHelper.SaveFailData();
 		}
 
 		protected virtual ShellViewModel shell

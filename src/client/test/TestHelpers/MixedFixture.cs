@@ -64,22 +64,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			if (disposable != null)
 				disposable.Dispose();
-			SaveFailData();
-		}
-
-		private static void SaveFailData()
-		{
-			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && DispatcherFixture.IsCI()) {
-				var root = "fail-test-data";
-				if (!Directory.Exists(root)) {
-					Directory.CreateDirectory(root);
-				}
-				if (Directory.GetDirectories(root).Length > 10) {
-					return;
-				}
-
-				DataHelper.CopyDb(Path.Combine(root, FileHelper.StringToPath(TestContext.CurrentContext.Test.FullName)));
-			}
+			DataHelper.SaveFailData();
 		}
 
 		protected T Fixture<T>()
