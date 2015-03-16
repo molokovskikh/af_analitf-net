@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.ViewModels;
-using Caliburn.Micro;
-using NHibernate.Hql.Ast.ANTLR;
 
 namespace AnalitF.Net.Client
 {
@@ -22,6 +14,16 @@ namespace AnalitF.Net.Client
 
 		public SplashScreen Splash;
 		public bool FaultInject;
+
+		public App()
+		{
+			//клиенты жалуются что при настройках по умолчанию текст "размыт"
+			TextOptions.TextFormattingModeProperty.OverrideMetadata(typeof(Window),
+				new FrameworkPropertyMetadata(TextFormattingMode.Display,
+					FrameworkPropertyMetadataOptions.AffectsMeasure
+						| FrameworkPropertyMetadataOptions.AffectsRender
+						| FrameworkPropertyMetadataOptions.Inherits));
+		}
 
 		public void RegisterResources()
 		{

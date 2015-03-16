@@ -1024,7 +1024,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Snoop()
 		{
-			var assembly = Assembly.LoadFrom(@"C:\Chocolatey\lib\snoop.2.7.1\tools\snoop.exe");
+			var assembly = Assembly.LoadFrom(@"C:\ProgramData\chocolatey\lib\snoop.2.8.0\tools\snoop.exe");
 			var type = assembly.GetType("Snoop.SnoopUI");
 			type.GetMethod("GoBabyGo", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
 		}
