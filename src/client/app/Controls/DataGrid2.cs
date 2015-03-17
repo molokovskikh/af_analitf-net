@@ -15,7 +15,9 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using Caliburn.Micro;
 using Common.Tools;
+using Action = System.Action;
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -34,6 +36,8 @@ namespace AnalitF.Net.Client.Controls
 				typeof(object),
 				typeof(DataGrid2),
 				new FrameworkPropertyMetadata(null, CurrentItemStubChanged));
+
+		private ScrollViewer viewer;
 
 		public DataGrid2()
 		{
@@ -78,7 +82,7 @@ namespace AnalitF.Net.Client.Controls
 		{
 			base.OnApplyTemplate();
 
-			var viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
+			viewer = this.Descendants<ScrollViewer>().FirstOrDefault(s => s.Name == "DG_ScrollViewer");
 			if (viewer != null) {
 				//тк viewer может получить фокус это будет происходить даже тогда когда не надо
 				//например в случае если пользователь кликнет по пустому полю таблицы
@@ -144,6 +148,22 @@ namespace AnalitF.Net.Client.Controls
 					return;
 				if (!cell.IsEditing)
 					return;
+			}
+			else if (e.Key == Key.Home) {
+				if (viewer != null) {
+					viewer.ScrollToHome();
+					SelectedItem = Items.Cast<object>().FirstOrDefault();
+					e.Handled = true;
+					return;
+				}
+			}
+			else if (e.Key == Key.End) {
+				if (viewer != null) {
+					viewer.ScrollToEnd();
+					SelectedItem = Items.Cast<object>().LastOrDefault();
+					e.Handled = true;
+					return;
+				}
 			}
 
 			base.OnKeyDown(e);
