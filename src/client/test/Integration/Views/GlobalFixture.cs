@@ -480,7 +480,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 
 			var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
-			Assert.That(activeWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
+			Assert.That(waitWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
 			//ждем пока закроется
 			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
 

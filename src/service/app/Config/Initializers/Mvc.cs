@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System.Security.AccessControl;
+using System.Web.Http;
 using AnalitF.Net.Service.Filters;
 using Common.Web.Service.Filters;
 using NHibernate;
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 			config.Filters.Add(new UserFilter());
 			config.Filters.Add(new ConfigFilter());
 			config.Filters.Add(new LogAccess());
+			config.Filters.Add(new Common.Web.Service.Filters.DebugFilter());
 		}
 	}
 }
