@@ -178,8 +178,6 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				if (Price == null)
-					return null;
 				if (IsPriceExists())
 					return Price;
 				return new Price {

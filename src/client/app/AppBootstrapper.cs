@@ -25,6 +25,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Newtonsoft.Json;
+using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using log4net.Config;
@@ -268,6 +269,9 @@ namespace AnalitF.Net.Client
 			if (NHibernate != null)
 				return;
 
+			//если сборки обединены то логика определения системы протоколирование не работает
+			//нужно вручную настроить ее
+			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
 			NHibernate = new Config.Initializers.NHibernate();
 			NHibernate.Init();
 			var sanityCheck = new SanityCheck();

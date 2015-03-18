@@ -30,6 +30,9 @@ namespace AnalitF.Net.Client
 				new FrameworkPropertyMetadata(14d, FrameworkPropertyMetadataOptions.Inherits));
 			Control.FontSizeProperty.OverrideMetadata(typeof(TextElement),
 				new FrameworkPropertyMetadata(14d, FrameworkPropertyMetadataOptions.Inherits));
+			//используется для вычисления ширины колонок
+			Control.FontSizeProperty.OverrideMetadata(typeof(DataGrid),
+				new FrameworkPropertyMetadata(14d, FrameworkPropertyMetadataOptions.Inherits));
 		}
 
 		public void RegisterResources()

@@ -710,12 +710,11 @@ select cn.Id,
 	cn.MnnId,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
-	sum(if(c.Hidden, 1, 0)) = count(*) as Hidden
+	not exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0) as Hidden
 from Catalogs.CatalogNames cn
 	join Catalogs.Catalog c on c.NameId = cn.Id
 	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
-where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
-	and (cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync)
+where cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync
 group by cn.Id";
 				Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
