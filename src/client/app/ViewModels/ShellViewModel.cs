@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -368,14 +369,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 #if DEBUG
 			if (!Config.IsUnitTesting) {
+				var disposable = new CompositeDisposable();
 				try {
 					NavigateAndReset(PersistentNavigationStack
 						.Where(t => t.TypeName != typeof(Main).FullName)
-						.Select(t => Activator.CreateInstance(Type.GetType(t.TypeName), t.Args))
+						.Select(t => {
+							var v = Activator.CreateInstance(Type.GetType(t.TypeName), t.Args);
+							if (v is IDisposable) {
+								disposable.Add((IDisposable)v);
+							}
+							return v;
+						})
 						.OfType<IScreen>()
 						.ToArray());
 				}
 				catch(Exception e) {
+					disposable.Dispose();
 					log.Error("Не удалось восстановить состояние", e);
 				}
 			}
