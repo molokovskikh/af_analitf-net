@@ -518,7 +518,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 					var files = Directory.GetFiles(srcDir, String.Format("{0}_*", doc.Id));
 					foreach (var src in files) {
-						dst = FileHelper2.Uniq(Path.Combine(dst, doc.OriginFilename));
+						dst = FileHelper.Uniq(Path.Combine(dst, doc.OriginFilename));
 						File.Move(src, dst);
 						result.Add(dst);
 					}

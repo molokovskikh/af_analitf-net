@@ -242,7 +242,7 @@ namespace AnalitF.Net.Client
 					//перемещаем лог файл обновления что отправить его на сервер
 					if (Directory.Exists(Config.BinUpdateDir)) {
 						Directory.GetFiles(Config.BinUpdateDir, "*.log")
-							.Each(f => File.Move(f, FileHelper2.Uniq(Path.Combine(Config.RootDir, Path.GetFileName(f)))));
+							.Each(f => File.Move(f, FileHelper.Uniq(Path.Combine(Config.RootDir, Path.GetFileName(f)))));
 					}
 				}
 				catch(Exception) {}
