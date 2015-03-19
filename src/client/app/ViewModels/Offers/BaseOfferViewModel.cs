@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
+using Dapper;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Util;
@@ -182,8 +183,22 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 #endif
 				.Subscribe(_ => {
 					if (Session != null) {
-						if (CurrentOffer.Value != null && (currentCatalog == null || CurrentCatalog.Id != CurrentOffer.Value.CatalogId))
-							CurrentCatalog = Session.Load<Catalog>(CurrentOffer.Value.CatalogId);
+						if (CurrentOffer.Value != null && (currentCatalog == null || CurrentCatalog.Id != CurrentOffer.Value.CatalogId)) {
+							var sql = @"select c.*, cn.*, m.*, cn.DescriptionId as Id
+from Catalogs c
+join CatalogNames cn on cn.Id = c.NameId
+left join Mnns m on m.Id = cn.MnnId
+where c.Id = ?";
+							CurrentCatalog = Session
+								.Connection.Query<Catalog, CatalogName, Mnn, ProductDescription, Catalog>(sql, (c, cn, m, d) => {
+									c.Name = cn;
+									if (cn != null) {
+										cn.Mnn = m;
+										cn.Description = d;
+									}
+									return c;
+								}, new { catalogId = CurrentOffer.Value.CatalogId }).FirstOrDefault();
+						}
 					}
 				}, CloseCancellation.Token);
 
