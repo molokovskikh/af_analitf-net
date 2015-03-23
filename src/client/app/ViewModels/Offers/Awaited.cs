@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Linq.Observαble;
+using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -52,7 +53,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			CurrentItem
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Query(), CloseCancellation.Token);
+				.Subscribe(_ => {
+					Update();
+				}, CloseCancellation.Token);
 		}
 
 		protected override void Query()

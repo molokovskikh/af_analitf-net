@@ -39,6 +39,12 @@ namespace AnalitF.Net.Client.Controls
 
 		private ScrollViewer viewer;
 
+		static DataGrid2()
+		{
+			//DataGrid сбрасывает сортировку зачем непонятно
+			ItemsSourceProperty.OverrideMetadata(typeof(DataGrid2), new FrameworkPropertyMetadata(null, OnCoerceItemsSourceProperty));
+		}
+
 		public DataGrid2()
 		{
 			//раньше для установки восстановления выделения использовалась перегрузка OnItemsChanged но
@@ -51,6 +57,11 @@ namespace AnalitF.Net.Client.Controls
 			//но datagrid считает что у него нет выделенных ячеек
 			//это приводит к тому что при переходе вверх или вниз визуально выделяются две строки
 			((INotifyCollectionChanged)Items).CollectionChanged += CollectionChanged;
+		}
+
+		private static object OnCoerceItemsSourceProperty(DependencyObject d, object basevalue)
+		{
+			return basevalue;
 		}
 
 		public object CurrentItemStub
@@ -185,7 +196,6 @@ namespace AnalitF.Net.Client.Controls
 				e.ContinueRouting = true;
 			}
 		}
-
 
 		protected override void OnItemsSourceChanged(IEnumerable oldValue, IEnumerable newValue)
 		{

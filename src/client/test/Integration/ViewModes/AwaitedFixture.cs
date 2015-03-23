@@ -55,5 +55,20 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.AreEqual(1, items.Count);
 			Assert.AreEqual(items[0].Catalog, catalog);
 		}
+
+		[Test]
+		public void Build_order()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+			session.Save(new AwaitedItem(catalog));
+
+			model.CurrentItem.Value = model.Items.Value.First();
+			testScheduler.AdvanceByMs(500);
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			var offer = model.Offers.Value.First(o => o.Id == order.Lines[0].OfferId);
+			Assert.AreEqual(1, offer.OrderCount);
+		}
 	}
 }
