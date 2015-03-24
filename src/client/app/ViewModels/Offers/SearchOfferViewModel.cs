@@ -46,8 +46,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			RxQuery(s => s.Query<Producer>()
-					.OrderBy(p => p.Name)
+			RxQuery(s => new [] { EmptyProducer }
+					.Concat(s.Query<Producer>()
+						.OrderBy(p => p.Name)
+						.ToList())
 					.ToList())
 				.ObserveOn(UiScheduler)
 				.Subscribe(Producers);

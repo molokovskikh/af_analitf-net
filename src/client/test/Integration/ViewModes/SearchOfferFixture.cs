@@ -19,6 +19,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Full_filter_values()
 		{
+			Assert.AreEqual("Все производители", model.Producers.Value[0].Name);
 			Assert.That(model.Producers.Value.Count, Is.GreaterThan(0));
 			Assert.That(model.Prices.Count, Is.GreaterThan(0));
 		}
