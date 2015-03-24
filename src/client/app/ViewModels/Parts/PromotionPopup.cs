@@ -41,13 +41,16 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 			Name.Value = name;
 			var nameId = name.Id;
-			var query = session.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId));
-			if (FilterBySupplierId != null)
-				query = query.Where(p => p.Supplier.Id == FilterBySupplierId);
-			Promotions.Value = query
-				.OrderBy(p => p.Name)
-				.Fetch(p => p.Supplier)
-				.ToList();
+			//сессия может использоваться для асинхронной загрузки данных выполняем синхронизацию
+			lock (session) {
+				var query = session.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId));
+				if (FilterBySupplierId != null)
+					query = query.Where(p => p.Supplier.Id == FilterBySupplierId);
+				Promotions.Value = query
+					.OrderBy(p => p.Name)
+					.Fetch(p => p.Supplier)
+					.ToList();
+			}
 			Promotions.Value.Each(p => p.Init(config));
 			Visible.Value = Promotions.Value.Count > 0;
 		}
