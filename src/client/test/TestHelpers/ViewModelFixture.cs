@@ -18,6 +18,7 @@ using log4net.Config;
 using log4net.Core;
 using log4net.Repository.Hierarchy;
 using Microsoft.Reactive.Testing;
+using NHibernate.AdoNet.Util;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
@@ -114,7 +115,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			if (catcher != null) {
 				var events = ((MemoryAppender)catcher.Appender).GetEvents();
-				events.Each(e => Console.WriteLine(e.MessageObject));
+				events.Each(e => Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(e.MessageObject.ToString()))));
 				catcher = null;
 				var repository = (Hierarchy)LogManager.GetRepository();
 				repository.ResetConfiguration();

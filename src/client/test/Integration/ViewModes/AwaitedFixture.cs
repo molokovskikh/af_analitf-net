@@ -19,6 +19,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Delete_awaited_on_order()
 		{
 			session.DeleteEach<AwaitedItem>();
+			session.DeleteEach<Order>();
 
 			var offer = session.Query<Offer>().First();
 			session.Save(new AwaitedItem(session.Load<Catalog>(offer.CatalogId)));
