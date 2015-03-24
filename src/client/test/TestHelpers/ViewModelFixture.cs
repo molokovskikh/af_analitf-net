@@ -13,11 +13,17 @@ using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using log4net.Appender;
+using log4net.Config;
+using log4net.Core;
+using log4net.Repository.Hierarchy;
 using Microsoft.Reactive.Testing;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
+using Test.Support.log4net;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -64,10 +70,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected MessageBus bus;
 		protected Env Env;
 		protected IDictionary<string, object> DebugContext;
+		private QueryCatcher catcher;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
+			catcher = null;
 			DebugContext = new Dictionary<string, object>();
 			Env = new Env {
 				IsUnitTesting = true
@@ -93,11 +101,26 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				return value;
 			});
 			manager = StubWindowManager(lazyshell);
+			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
+			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
+				catcher = new QueryCatcher();
+				catcher.Appender = new MemoryAppender();
+				catcher.Start();
+			}
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
+			if (catcher != null) {
+				var events = ((MemoryAppender)catcher.Appender).GetEvents();
+				events.Each(e => Console.WriteLine(e.MessageObject));
+				catcher = null;
+				var repository = (Hierarchy)LogManager.GetRepository();
+				repository.ResetConfiguration();
+				XmlConfigurator.Configure();
+			}
+
 			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
 				if (DebugContext.Count > 0)
 					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));

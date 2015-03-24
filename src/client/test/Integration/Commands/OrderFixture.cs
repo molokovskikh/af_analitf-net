@@ -320,10 +320,11 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var files = Directory.GetFiles(ordersPath);
 			Assert.AreEqual(1, files.Length);
 			var order = localSession.Query<SentOrder>().First();
-			var expected = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
-{0};{1};{2};{3};{4};;{5};1;;", externalLineId, externalAddressId, order.SentOn, externalProductId,
+			var expected = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена;Поставщик
+{0};{1};{2};{3};{4};;{5};1;;;{6}", externalLineId, externalAddressId, order.SentOn, externalProductId,
 				order.Lines[0].ProductSynonym,
-				order.Lines[0].ProducerSynonym);
+				order.Lines[0].ProducerSynonym,
+				order.Price.Name);
 			var lines = File.ReadAllText(files[0], Encoding.Default).TrimEnd();
 			Assert.AreEqual(expected, lines);
 		}

@@ -108,7 +108,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						foreach (var sentOrder in sentOrders) {
 							var name = Path.Combine(dir, sentOrder.ServerId + ".txt");
 							using(var writer = new StreamWriter(name, false, Encoding.Default)) {
-								writer.WriteLine("Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена");
+								writer.WriteLine("Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена;Поставщик");
 								foreach (var line in sentOrder.Lines) {
 									var payload = new string[0];
 									var orderLine = orders.SelectMany(o => o.Lines).FirstOrDefault(l => l.ExportId == line.ServerId);
@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.Models.Commands
 											payload = (batchline.ParsedServiceFields.GetValueOrDefault("ReportData") ?? "").Split(';');
 									}
 
-									writer.WriteLine("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9}",
+									writer.WriteLine("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10}",
 										GetIndexOrDefault(payload, 0),
 										GetIndexOrDefault(payload, 1),
 										sentOrder.SentOn,
@@ -129,7 +129,8 @@ namespace AnalitF.Net.Client.Models.Commands
 										line.ProducerSynonym,
 										line.Count,
 										GetIndexOrDefault(payload, 9),
-										GetIndexOrDefault(payload, 10));
+										GetIndexOrDefault(payload, 10),
+										line.Order.Price.Name);
 								}
 							}
 						}
