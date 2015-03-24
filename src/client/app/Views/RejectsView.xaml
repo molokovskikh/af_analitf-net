@@ -34,7 +34,7 @@
 				Style="{StaticResource FilterElement}">
 				Выводить причину забраковки
 			</CheckBox>
-			<Button Name="Mark" Style="{StaticResource FilterElement}">Пометить</Button>
+			<Button Name="Mark" Style="{StaticResource FilterElement}">Пометить (F2)</Button>
 			<Button Name="ClearMarks" Style="{StaticResource FilterElement}">Снять все пометки</Button>
 		</StackPanel>
 
