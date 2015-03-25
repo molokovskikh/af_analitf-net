@@ -102,8 +102,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (user.SaveOrders) {
 					try {
 						var dir = settings.MapPath("Orders");
-						if (!Directory.Exists(dir))
-							Directory.CreateDirectory(dir);
+						Directory.CreateDirectory(dir);
 
 						foreach (var sentOrder in sentOrders) {
 							var name = Path.Combine(dir, sentOrder.ServerId + ".txt");
