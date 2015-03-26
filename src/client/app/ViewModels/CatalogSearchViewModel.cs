@@ -85,10 +85,12 @@ namespace AnalitF.Net.Client.ViewModels
 					if (CurrentItem.Value == null)
 						return null;
 					var catalogId = CurrentItem.Value.CatalogId;
-					return StatelessSession.Query<Catalog>()
-						.Fetch(c => c.Name)
-						.ThenFetch(n => n.Mnn)
-						.FirstOrDefault(c => c.Id == catalogId);
+					lock (StatelessSession) {
+						return StatelessSession.Query<Catalog>()
+							.Fetch(c => c.Name)
+							.ThenFetch(n => n.Mnn)
+							.FirstOrDefault(c => c.Id == catalogId);
+					}
 				});
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,
