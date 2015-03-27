@@ -97,6 +97,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 			Index<SentOrder>(o => o.SentOn);
 			Index<SentOrder>(o => o.ServerId);
 			Index<MinCost>(r => r.Diff);
+			Index<Catalog>(r => r.Name);
 
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => {
@@ -254,6 +255,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 				}
 				else {
 					customizer.Column(member.LocalMember.Name + "Id");
+					if (indexes.Contains(propertyInfo)){
+						customizer.Column(m => m.Index(member.LocalMember.Name + "Id"));
+					}
 				}
 				customizer.NotFound(NotFoundMode.Ignore);
 			};
@@ -294,7 +298,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 #if DEBUG
 				//если нужно отладить запросы хибера
 				//для запросов в AddAwaited падает
-				//{Environment.FormatSql, "true"},
+				{Environment.FormatSql, "true"},
 #endif
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
 			});
