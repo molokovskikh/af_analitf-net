@@ -94,8 +94,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			disposable.Add(TestUtils.WithScheduler(testScheduler));
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
-				var value = new ShellViewModel();
-				value.Config = config;
+				var value = new ShellViewModel(config);
 				value.Env = Env;
 				disposable.Add(value);
 				ScreenExtensions.TryActivate(value);
