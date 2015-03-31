@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System.Collections.Specialized;
+using System.Configuration;
 using System.Web;
 using System.Web.Http;
 using AnalitF.Net.Service.Config.Environments;
@@ -42,11 +43,28 @@ namespace AnalitF.Net.Service
 			var nhibernate = new Config.Initializers.NHibernate();
 			nhibernate.Init();
 			SessionFactory = nhibernate.Factory;
+			ReadDbConfig(config);
 			var mvc = new Mvc();
 			mvc.Run(httpConfig, nhibernate, config);
 			new Config.Initializers.SmartOrderFactory().Init(nhibernate);
 
 			return config;
+		}
+
+		public static void ReadDbConfig(Config.Config config)
+		{
+			using (var session = SessionFactory.OpenSession()) {
+				var collection = new NameValueCollection();
+				var rows = session.CreateSQLQuery("select `key`, `value` from Customers.AppConfig")
+					.List<object[]>();
+				foreach (var row in rows) {
+					collection.Add(row[0].ToString(), row[1].ToString());
+				}
+				var builder = new TreeBuilder();
+				var tree = builder.BuildSourceNode(collection);
+				var binder = new DataBinder();
+				binder.BindObjectInstance(config, "", tree);
+			}
 		}
 
 		public static Config.Config ReadConfig()

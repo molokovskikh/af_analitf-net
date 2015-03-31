@@ -769,6 +769,23 @@ where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
+			sql = @"
+select c.Id,
+	c.Code as DrugID,
+	c.Note as InnR,
+	c.Doc as TradeNmR,
+	c.Series as DrugFmNmRS,
+	c.Unit as Pack,
+	c.Volume as DosageR,
+	s.Synonym as ClNm,
+	c.CodeCr as Segment,
+	c.ProductId,
+	c.CodeFirmCr as ProducerId
+from Farm.Core0 c
+	join Farm.SynonymFirmCr s on s.SynonymFirmCrCode = c.SynonymFirmCrCode
+where c.PriceCode = ?priceId";
+			Export(Result, sql, "RegulatorRegistry", truncate: true, parameters: new { priceId = Config.RegulatorRegistryPriceId });
+
 			IList<object[]> newses = new List<object[]>();
 			if (cumulative) {
 				sql = @"

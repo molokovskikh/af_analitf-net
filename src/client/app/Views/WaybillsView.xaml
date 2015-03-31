@@ -48,6 +48,7 @@
 			<Button Name="OpenFolders" Style="{StaticResource FilterElement}">Открыть папки</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
+			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">Отчет для Росздравнадзора</Button>
 		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"

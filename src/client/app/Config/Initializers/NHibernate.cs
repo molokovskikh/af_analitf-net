@@ -223,6 +223,9 @@ namespace AnalitF.Net.Client.Config.Initializers
 
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
+				if (type == typeof(RegulatorRegistry)) {
+					customizer.Table("RegulatorRegistry");
+				}
 			};
 			mapper.BeforeMapProperty += (inspector, member, customizer) => {
 				var propertyInfo = ((PropertyInfo)member.LocalMember);

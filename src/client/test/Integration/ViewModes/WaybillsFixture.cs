@@ -7,9 +7,11 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -90,6 +92,18 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsNotNull(dialog.Waybill.Address);
 			Assert.AreEqual(dialog.Waybill.Address.Id, address.Id);
 			Assert.Contains(dialog.Waybill.Id, model.Waybills.Value.Select(w => w.Id).ToArray());
+		}
+
+		[Test]
+		public void Waybill_report()
+		{
+			FileHelper.InitDir(settings.MapPath("Reports"));
+			var result = model.RegulatorReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+			Assert.That(Directory.GetFiles(open.Filename)[0], Is.StringContaining("Росздравнадзор"));
 		}
 	}
 }
