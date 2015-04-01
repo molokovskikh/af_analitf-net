@@ -122,7 +122,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			var supplier = TestSupplier.CreateNaked(session);
 			session.Save(supplier);
-			supplier.Maintain();
+			supplier.Maintain(session);
 
 			var price = supplier.Prices[0];
 
@@ -146,10 +146,10 @@ namespace AnalitF.Net.Service.Test
 		{
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
-			supplier.CreateSampleCore();
+			supplier.CreateSampleCore(session);
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
 			session.Save(supplier);
-			supplier.Maintain();
+			supplier.Maintain(session);
 
 			var offer = price.Core[0];
 			PostOrder(ToClientOrder(offer));
@@ -159,19 +159,18 @@ namespace AnalitF.Net.Service.Test
 				.ToList();
 
 			Assert.That(orders.Count, Is.EqualTo(1));
-			//todo: этой проверки здесь не место
 			Assert.IsFalse(orders[0].CalculateLeader);
 		}
 
 		[Test]
-		public void Lower_limit_by_delay_of_payment_sum()
+		public void Lower_limit_by_actual_sum()
 		{
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
-			supplier.CreateSampleCore();
+			supplier.CreateSampleCore(session);
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
 			session.Save(supplier);
-			supplier.Maintain();
+			supplier.Maintain(session);
 
 			var address = session.Load<Address>(user.AvaliableAddresses[0].Id);
 			var limit = new SmartOrderLimit(session.Load<Supplier>(supplier.Id), 1000);
@@ -187,7 +186,7 @@ namespace AnalitF.Net.Service.Test
 			PostOrder(clientOrder);
 
 			session.Refresh(limit);
-			Assert.AreEqual(850, limit.Value);
+			Assert.AreEqual(900, limit.Value);
 		}
 
 		[Test]
@@ -202,10 +201,10 @@ namespace AnalitF.Net.Service.Test
 
 			var supplier = TestSupplier.CreateNaked(session);
 			var price = supplier.Prices[0];
-			supplier.CreateSampleCore();
+			supplier.CreateSampleCore(session);
 			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
 			session.Save(supplier);
-			supplier.Maintain();
+			supplier.Maintain(session);
 
 			var testUser = session.Load<TestUser>(user.Id);
 			var intersection = session
