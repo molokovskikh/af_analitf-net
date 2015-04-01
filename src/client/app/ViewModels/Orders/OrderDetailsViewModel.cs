@@ -32,10 +32,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnlyWarning = new NotifyValue<bool>();
 			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
 			CurrentLine = new NotifyValue<IOrderLine>();
-			MatchedWaybills = new MatchedWaybills(StatelessSession,
+			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
-				new NotifyValue<bool>(!IsCurrentOrder),
-				UiScheduler);
+				new NotifyValue<bool>(!IsCurrentOrder));
 			if (User.CanExport(this, type.Name))
 				excelExporter.Properties = new []{ "Lines" };
 			else

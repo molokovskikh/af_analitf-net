@@ -14,15 +14,12 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class MatchedWaybills : ViewAware
 	{
-		public MatchedWaybills(IStatelessSession session,
+		public MatchedWaybills(BaseScreen screen,
 			NotifyValue<SentOrderLine> line,
-			NotifyValue<bool> isSentSelected,
-			IScheduler uiScheduler)
+			NotifyValue<bool> isSentSelected)
 		{
 			CurrentWaybillLine = new NotifyValue<WaybillLine>();
-			WaybillLines = line.Throttle(Consts.ScrollLoadTimeout, uiScheduler)
-				.Select(v => LoadMatchedWaybill(v, session))
-				.ToValue();
+			WaybillLines = new NotifyValue<List<WaybillLine>>();
 			WaybillDetailsVisibility = new NotifyValue<Visibility>(() => {
 				if (!isSentSelected)
 					return Visibility.Collapsed;
@@ -37,6 +34,12 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					return Visibility.Hidden;
 				return Visibility.Visible;
 			}, isSentSelected, WaybillLines);
+
+			line.Throttle(Consts.ScrollLoadTimeout, screen.UiScheduler)
+				.Select(v => screen.RxQuery(s => LoadMatchedWaybill(v, s)))
+				.Switch()
+				.ObserveOn(screen.UiScheduler)
+				.Subscribe(WaybillLines, screen.CloseCancellation.Token);
 		}
 
 		public NotifyValue<Visibility> WaybillDetailsVisibility { get; set; }

@@ -609,7 +609,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new GridConfig(grid), sizeToContent: true);
 		}
 
-		protected IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
 			if (StatelessSession == null)
 				return Observable.Empty<T>();

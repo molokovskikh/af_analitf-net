@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 				Prices = new List<Selectable<Price>>();
 
-			MatchedWaybills = new MatchedWaybills(StatelessSession, SelectedSentLine, IsSentSelected, UiScheduler);
+			MatchedWaybills = new MatchedWaybills(this, SelectedSentLine, IsSentSelected);
 			IsCurrentSelected
 				.Select(v => v ? "Lines" : "SentLines")
 				.Subscribe(excelExporter.ActiveProperty);
@@ -146,6 +146,41 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyWarning.Select(v => (object)v))
 				.CatchSubscribe(_ => Update(), CloseCancellation);
+
+			IsSentSelected.Where(v => v)
+				.Select(v => (object)v)
+				.Merge(Begin.Select(d => (object)d))
+				.Merge(End.Select(d => (object)d))
+				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
+				.Select(_ => RxQuery(s => {
+					var addressId = Address.Id;
+					var begin = Begin.Value;
+					var end = End.Value.AddDays(1);
+					var query = s.Query<SentOrderLine>()
+						.Fetch(l => l.Order)
+						.ThenFetch(o => o.Price)
+						.Where(l => l.Order.SentOn > begin && l.Order.SentOn < end)
+						.Where(l => l.Order.Address.Id == addressId);
+
+					query = Util.Filter(query, l => l.Order.Price.Id, Prices);
+
+					var lines = query.OrderBy(l => l.ProductSynonym)
+						.ThenBy(l => l.ProductSynonym)
+						.ToList();
+					if (Settings.Value.HighlightUnmatchedOrderLines) {
+						lines.Each(l => {
+							var lookup = MatchedWaybills.GetLookUp(s, lines);
+							l.Configure(User, lookup);
+						});
+					}
+					else {
+						lines.Each(l => l.Configure(User));
+					}
+					return lines;
+				}))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(SentLines, CloseCancellation.Token);
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -182,32 +217,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.ToObservableCollection();
 
 				Calculate();
-			}
-			else {
-				var addressId = Address.Id;
-				var begin = Begin.Value;
-				var end = End.Value.AddDays(1);
-				var query = StatelessSession.Query<SentOrderLine>()
-					.Fetch(l => l.Order)
-					.ThenFetch(o => o.Price)
-					.Where(l => l.Order.SentOn > begin && l.Order.SentOn < end)
-					.Where(l => l.Order.Address.Id == addressId);
-
-				query = Util.Filter(query, l => l.Order.Price.Id, Prices);
-
-				var lines = query.OrderBy(l => l.ProductSynonym)
-					.ThenBy(l => l.ProductSynonym)
-					.ToList();
-				if (Settings.Value.HighlightUnmatchedOrderLines) {
-					lines.Each(l => {
-						var lookup = MatchedWaybills.GetLookUp(StatelessSession, lines);
-						l.Configure(User, lookup);
-					});
-				}
-				else {
-					lines.Each(l => l.Configure(User));
-				}
-				SentLines.Value = lines;
 			}
 		}
 

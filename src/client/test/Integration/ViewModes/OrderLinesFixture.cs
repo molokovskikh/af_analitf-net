@@ -161,6 +161,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;
+			testScheduler.Start();
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
 			Assert.AreEqual(catalogId, model.ProductInfo.CurrentCatalog.Id);
 		}
@@ -177,6 +178,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;
+			testScheduler.Start();
 
 			var matchedLine = model.SentLines.Value.First(l => l.Id == sendOrder.Lines[0].Id);
 			Assert.IsFalse(matchedLine.IsUnmatchedByWaybill);
