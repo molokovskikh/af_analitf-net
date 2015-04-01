@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Product = reject.Product.CatalogProduct.Name,
 				CatalogProduct = reject.Product,
 				Producer = reject.Producer.Name,
-				ProducerId = (int?)reject.Producer.Id,
+				ProducerId = reject.Producer.Id,
 				Quantity = 10,
 				SupplierCost = 100,
 				SupplierCostWithoutNDS = 90,

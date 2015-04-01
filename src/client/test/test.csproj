@@ -146,6 +146,7 @@
     <Compile Include="Fixtures\CreatePromotion.cs" />
     <Compile Include="Fixtures\MatchedWaybill.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
+    <Compile Include="Fixtures\RegulatorRegistry.cs" />
     <Compile Include="Fixtures\Reject.cs" />
     <Compile Include="Fixtures\RejectedWaybill.cs" />
     <Compile Include="Fixtures\SampleData.cs" />

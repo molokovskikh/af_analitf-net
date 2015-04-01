@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -203,6 +204,13 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new CreateWaybill(waybill), sizeToContent: true);
 			Session.Save(waybill);
 			Update();
+		}
+
+		public IEnumerable<IResult> RegulatorReport()
+		{
+			var commnand = new WaybillsReport();
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config), new WaitViewModel("Выполнение операции, подождите."));
+			yield return new OpenResult(Settings.Value.MapPath("Reports"));
 		}
 	}
 }

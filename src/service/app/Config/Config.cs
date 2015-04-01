@@ -30,6 +30,8 @@ namespace AnalitF.Net.Service.Config
 		public uint MaxProducerCostPriceId { get; set; }
 		public uint MaxProducerCostCostId { get; set; }
 
+		public uint RegulatorRegistryPriceId { get; set; }
+
 		public string InjectedFault { get; set; }
 		public string SupportMail { get; set; }
 		public string OfficeMail { get; set; }

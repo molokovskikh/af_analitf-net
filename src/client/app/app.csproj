@@ -282,6 +282,7 @@
     <Compile Include="Models\ProgressReporter.cs" />
     <Compile Include="Models\Promotion.cs" />
     <Compile Include="Models\RackingMapSettings.cs" />
+    <Compile Include="Models\RegulatorRegistry.cs" />
     <Compile Include="Models\Reject.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
@@ -310,6 +311,7 @@
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
     <Compile Include="Models\WaybillOrder.cs" />
+    <Compile Include="Models\WaybillsReport.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Conventions.cs" />
