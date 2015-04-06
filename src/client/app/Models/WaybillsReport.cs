@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			var end = DateTime.Today.FirstDayOfWeek();
 			var begin = end.AddDays(-7);
-			var period = begin.ToShortDateString();
+			var period = end.ToShortDateString();
 			var rows = StatelessSession.CreateSQLQuery(@"
 select r.DrugID, r.InnR, r.TradeNmR, r.DrugFmNmRS, r.Pack, r.DosageR, r.ClNm, r.Segment,
 	:period as RptPeriod,
