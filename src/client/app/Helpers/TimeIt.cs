@@ -8,9 +8,9 @@ namespace AnalitF.Net.Client.Helpers
 		private string text;
 		private Stopwatch watch = new Stopwatch();
 
-		public TimeIt(string text)
+		public TimeIt(string text, params object[] args)
 		{
-			this.text = text;
+			this.text = String.Format(text, args);
 			watch.Start();
 		}
 

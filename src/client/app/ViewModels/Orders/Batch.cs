@@ -104,6 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			WatchForUpdate(CurrentReportLine.Select(l => l == null ? null : l.BatchLine).ToValue());
 			ActivePrint = new NotifyValue<string>();
 			ActivePrint.Subscribe(excelExporter.ActiveProperty);
+			CurrentFilter.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
 		}
 
 		[DataMember]

@@ -297,6 +297,16 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Assert.IsNotNull(batch.ReportLines.Value[0].OrderLine);
 		}
 
+		[Test]
+		public void Reset_search_term_on_filter()
+		{
+			batch.SearchBehavior.SearchText.Value = "тест";
+			batch.SearchBehavior.Search();
+			Assert.AreEqual("тест", batch.SearchBehavior.ActiveSearchTerm.Value);
+			batch.CurrentFilter.Value = "Не заказано";
+			Assert.AreEqual("", batch.SearchBehavior.ActiveSearchTerm.Value);
+		}
+
 		private void InitAddress(params Address[] addresses)
 		{
 			for(var i = 0; i < addresses.Length; i++) {
