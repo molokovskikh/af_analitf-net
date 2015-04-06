@@ -137,6 +137,10 @@ namespace AnalitF.Net.Service.Models
 		//Все даты передаются в UTC!
 		public void Export()
 		{
+#if DEBUG
+			//на случай если были созданы тестовые данные нужно перечитать конфиг
+			Application.ReadDbConfig(Config);
+#endif
 			data = data ?? new AnalitfNetData(user);
 			data.LastPendingUpdateAt = DateTime.Now;
 			if (job.LastSync != data.LastUpdateAt) {
