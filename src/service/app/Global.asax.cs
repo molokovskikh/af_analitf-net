@@ -53,6 +53,8 @@ namespace AnalitF.Net.Service
 
 		public static void ReadDbConfig(Config.Config config)
 		{
+			if (SessionFactory == null)
+				return;
 			using (var session = SessionFactory.OpenSession()) {
 				var collection = new NameValueCollection();
 				var rows = session.CreateSQLQuery("select `key`, `value` from Customers.AppConfig")

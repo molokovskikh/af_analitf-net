@@ -152,15 +152,18 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(Begin.Select(d => (object)d))
 				.Merge(End.Select(d => (object)d))
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
+				.Merge(AddressSelector.FilterChanged)
 				.Select(_ => RxQuery(s => {
-					var addressId = Address.Id;
 					var begin = Begin.Value;
 					var end = End.Value.AddDays(1);
+					var addressIds = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 					var query = s.Query<SentOrderLine>()
 						.Fetch(l => l.Order)
+						.ThenFetch(o => o.Address)
+						.Fetch(o => o.Order)
 						.ThenFetch(o => o.Price)
 						.Where(l => l.Order.SentOn > begin && l.Order.SentOn < end)
-						.Where(l => l.Order.Address.Id == addressId);
+						.Where(l => addressIds.Contains(l.Order.Address.Id));
 
 					query = Util.Filter(query, l => l.Order.Price.Id, Prices);
 
