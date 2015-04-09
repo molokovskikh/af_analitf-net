@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Binders
 	{
 		public ObservableTrigger(IObservable<object> observable)
 		{
-			observable.Subscribe(InvokeActions);
+			observable.CatchSubscribe(InvokeActions);
 		}
 	}
 

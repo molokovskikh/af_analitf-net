@@ -25,7 +25,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		public void Set_cell_style()
 		{
 			var view = new WaybillDetailsView();
-			var grid = (DataGrid2)view.FindName("Lines");
+			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
 			var size = new Size(1000, 1000);
 			view.Measure(size);
 			view.Arrange(new Rect(size));
@@ -42,7 +42,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var view = (WaybillDetailsView)Bind(model);
 				w.Content = view;
 
-				var grid = (DataGrid2)view.FindName("Lines");
+				var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
 				await grid.WaitLoaded();
 				grid.SelectedItem = waybill.Lines[0];
 				grid.RaiseEvent(WpfTestHelper.TextArgs("1"));

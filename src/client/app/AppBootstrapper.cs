@@ -21,6 +21,7 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
@@ -36,6 +37,8 @@ namespace AnalitF.Net.Client
 {
 	public class AppBootstrapper : BootstrapperBase, IDisposable
 	{
+		public static Func<object, DependencyObject, object, UIElement> DefaultLocateForModel = ViewLocator.LocateForModel;
+
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
 #if DEBUG
@@ -57,6 +60,7 @@ namespace AnalitF.Net.Client
 			: base(useApplication)
 		{
 			FailFast = !useApplication;
+			ViewLocator.LocateForModel = LocateForModel;
 		}
 
 		public bool IsInitialized { get; private set; }
@@ -288,6 +292,16 @@ namespace AnalitF.Net.Client
 
 			Caliburn = new Config.Initializers.Caliburn();
 			Caliburn.Init(failfast);
+		}
+
+		public static UIElement LocateForModel(object model, DependencyObject displayLocation, object context)
+		{
+			if (model is WaybillDetails) {
+				var waybills = (WaybillDetails)model;
+				waybills.SkipRestoreTable = true;
+				return new WaybillDetailsView(waybills);
+			}
+			return DefaultLocateForModel(model, displayLocation, context);
 		}
 
 		public void Dispose()

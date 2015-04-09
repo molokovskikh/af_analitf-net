@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
 		private bool clearSession;
-		private TableSettings tableSettings = new TableSettings();
+		public TableSettings tableSettings = new TableSettings();
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
 		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestUiSchuduler ?? TestSchuduler ?? DispatcherScheduler.Current);
@@ -105,6 +105,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected SimpleMRUCache cache = new SimpleMRUCache(10);
 
 		public static AppTestContext TestContext;
+		public bool SkipRestoreTable;
 
 		public BaseScreen()
 		{
@@ -350,7 +351,9 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 				});
 			}
-			tableSettings.RestoreView(view);
+
+			if (!SkipRestoreTable)
+				tableSettings.RestoreView(view);
 		}
 
 		//для тестов

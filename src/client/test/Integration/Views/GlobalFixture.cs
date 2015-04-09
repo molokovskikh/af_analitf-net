@@ -229,7 +229,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			WaitIdle();
 			dispatcher.Invoke(() => {
 				var view = (FrameworkElement)((WaybillDetails)shell.ActiveItem).GetView();
-				var datagrid = (DataGrid)view.FindName("Lines");
+				var datagrid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
 				var printColumn = datagrid.Columns.First(c => !(c.Header is TextBlock));
 				var all = datagrid.Descendants<CheckBox>().First(c => "Печатать".Equals(c.Content));
 				Assert.IsTrue(all.IsChecked.Value);

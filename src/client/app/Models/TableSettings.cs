@@ -54,6 +54,14 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public void Restore(params DataGrid[] grids)
+		{
+			foreach (var grid in grids) {
+				SaveView(grid, defaults);
+				RestoreView(grid, Persisted);
+			}
+		}
+
 		private IEnumerable<DataGrid> GetControls(object view)
 		{
 			var dependencyObject = view as DependencyObject;

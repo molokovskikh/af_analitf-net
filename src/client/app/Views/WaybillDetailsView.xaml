@@ -5,8 +5,7 @@
 	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
-	xmlns:cal="http://www.caliburnproject.org"
-	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+	xmlns:cal="http://www.caliburnproject.org">
 
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
@@ -16,7 +15,7 @@
 		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
-	<Grid>
+	<Grid Name="MainGrid">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -105,92 +104,9 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid2 Grid.Row="2" x:Name="Lines" IsReadOnly="False"
-			CanUserAddRows="{Binding Waybill.IsCreatedByUser}"
-			CanUserDeleteRows="{Binding Waybill.IsCreatedByUser}">
-			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="180*" Header="Наименование"
-					Binding="{Binding Product}"
-					SortDirection="Ascending" />
-				<c:DataGridTextColumnEx Width="180*" Header="Производитель"
-					Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="100*" Header="Страна"
-					Binding="{Binding Country}" />
-				<DataGridCheckBoxColumn Width="SizeToHeader"
-					Binding="{Binding Print, UpdateSourceTrigger=PropertyChanged}"
-					behaviors:Persistable.Description="Печатать">
-					<DataGridCheckBoxColumn.Header>
-						<CheckBox IsChecked="True">
-							<i:Interaction.Behaviors>
-								<behaviors:Selectable />
-							</i:Interaction.Behaviors>
-							Печатать
-						</CheckBox>
-					</DataGridCheckBoxColumn.Header>
-				</DataGridCheckBoxColumn>
-				<c:DataGridTextColumnEx Width="160*" Header="Срок годности"
-					Binding="{Binding Period}" SortMemberPath="Exp" />
-				<c:DataGridTextColumnEx Width="160*" Header="Серия товара"
-					Binding="{Binding SerialNumber}" />
-				<DataGridTemplateColumn Header="Сертификаты" Width="SizeToHeader" x:Name="CertificateLink">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<ContentControl Style="{StaticResource DownloadLink}" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridCheckBoxColumn Width="SizeToHeader" Header="ЖНВЛС"
-					Binding="{Binding VitallyImportant, UpdateSourceTrigger=PropertyChanged}" />
-				<c:DataGridTextColumnEx Width="180*" Header="Номер сертификата"
-					Binding="{Binding Certificates}"
-					Visibility="Collapsed" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена производителя без НДС"
-					Binding="{Binding ProducerCost}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена ГР"
-					Binding="{Binding RegistryCost}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Торговая наценка оптовика"
-					Binding="{Binding SupplierPriceMarkup}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика без НДС"
-					Binding="{Binding SupplierCostWithoutNds}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Header="НДС"
-					Binding="{Binding Nds}"
-					Width="SizeToHeader"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика с НДС"
-					Binding="{Binding SupplierCost}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Макс. розничная наценка"
-					Binding="{Binding MaxRetailMarkup}"
-					IsReadOnly="True"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Розничная наценка"
-					Binding="{Binding RetailMarkup}"
-					TextAlignment="Right"
-					IsReadOnly="False" />
-				<c:DataGridTextColumnEx Width="*" Header="Реальная наценка"
-					Binding="{Binding RealRetailMarkup}"
-					TextAlignment="Right"
-					IsReadOnly="False" />
-				<c:DataGridTextColumnEx Width="*" Header="Розничная цена"
-					Binding="{Binding RetailCost}"
-					TextAlignment="Right"
-					IsReadOnly="False" />
-				<c:DataGridTextColumnEx Width="*" Header="Заказ"
-					Binding="{Binding Quantity}"
-					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Розничная сумма"
-					Binding="{Binding RetailSum}"
-					IsReadOnly="True"
-					TextAlignment="Right" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
 		<StackPanel Grid.Row="3" Style="{StaticResource FilterPanel}"
 			Visibility="{Binding Waybill.IsCreatedByUser, Converter={StaticResource BoolToCollapsed}}">
-			<Button Style="{StaticResource FilterElement}" CommandTarget="{x:Reference Lines}"
+			<Button Style="{StaticResource FilterElement}"
 				Command="ApplicationCommands.Delete">Удалить строку</Button>
 		</StackPanel>
 

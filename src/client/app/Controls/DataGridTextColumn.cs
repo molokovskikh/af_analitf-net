@@ -46,5 +46,11 @@ namespace AnalitF.Net.Client.Controls
 			}
 			return result;
 		}
+
+		public string Name
+		{
+			get { return (string)GetValue(FrameworkElement.NameProperty); }
+			set { SetValue(FrameworkElement.NameProperty, value); }
+		}
 	}
 }

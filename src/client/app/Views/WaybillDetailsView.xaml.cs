@@ -1,9 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interactivity;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -16,16 +19,215 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Views
 {
+	public class CustomDataGridColumn : DataGridColumn
+	{
+		public Func<DataGridCell, object, FrameworkElement> Generator;
+
+		public CustomDataGridColumn()
+		{
+		}
+
+		public CustomDataGridColumn(Func<DataGridCell, object, FrameworkElement> generator)
+		{
+			this.Generator = generator;
+		}
+
+		protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
+		{
+			return Generator(cell, dataItem);
+		}
+
+		protected override FrameworkElement GenerateEditingElement(DataGridCell cell, object dataItem)
+		{
+			return Generator(cell, dataItem);
+		}
+
+		public string Name
+		{
+			get { return (string)GetValue(FrameworkElement.NameProperty); }
+			set { SetValue(FrameworkElement.NameProperty, value); }
+		}
+	}
+
 	public partial class WaybillDetailsView : UserControl
 	{
+		private DataGrid2 lines;
+		private WaybillDetails model;
+
+		public WaybillDetailsView(WaybillDetails model)
+		{
+			this.model = model;
+			Init();
+		}
+
 		public WaybillDetailsView()
+		{
+			Init();
+		}
+
+		private void Init()
 		{
 			InitializeComponent();
 
-			//в xaml назначение имени для колонки не работает
-			CertificateLink.SetValue(NameProperty, "CertificateLink");
+			//борьба за производительность
+			//операции установки стиля приводят к перестроению дерева элементов wpf
+			//что негативно отражается на производительности
+			//что бы избежать ненужных перестроений дерева
+			//сначала конструируем таблицу и настраиваем ее а затем добавляем в дерево элементов
+			lines = new DataGrid2();
+			lines.Loaded += (sender, args) => {
+				DataGridHelper.Focus(lines);
+			};
+			lines.IsReadOnly = false;
+			lines.Name = "Lines";
+			var header = new CheckBox {
+				Content = "Печатать",
+				IsChecked = true,
+			};
+			header.Checked += (sender, args) => {
+				lines.Items.OfType<WaybillLine>().Each(l => l.Print = header.IsChecked.GetValueOrDefault());
+			};
+			header.Unchecked += (sender, args) => {
+				lines.Items.OfType<WaybillLine>().Each(l => l.Print = header.IsChecked.GetValueOrDefault());
+			};
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Наименование",
+				Binding = new Binding("Product"),
+				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
+				SortDirection = ListSortDirection.Ascending
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Производитель",
+				Binding = new Binding("Producer"),
+				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Страна",
+				Binding = new Binding("Country"),
+				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new CustomDataGridColumn {
+				Header = header,
+				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+				Generator = (c, i) => {
+					var el = new CheckBox {
+						VerticalAlignment = VerticalAlignment.Center,
+						HorizontalAlignment = HorizontalAlignment.Center
+					};
+					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding("Print") {
+						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+					});
+					return el;
+				}
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Срок годности",
+				Binding = new Binding("Period"),
+				SortMemberPath = "Exp",
+				Width = new DataGridLength(160, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Серия товара",
+				Binding = new Binding("SerialNumber"),
+				Width = new DataGridLength(160, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new CustomDataGridColumn((c, i) => null) {
+				Header = "Сертификаты",
+				Name = "CertificateLink",
+				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+				Generator = (c, i) => {
+					return new ContentControl { Style = (Style)FindResource("DownloadLink")};
+				}
+			});
+			if (model != null && model.Waybill.IsCreatedByUser) {
+				lines.Columns.Add(new CustomDataGridColumn {
+					Header = "ЖНВЛС",
+					Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+					Generator = (c, i) => {
+						var el = new CheckBox {
+							VerticalAlignment = VerticalAlignment.Center,
+							HorizontalAlignment = HorizontalAlignment.Center
+						};
+						BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding("VitallyImportant") {
+							UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+						});
+						return el;
+					}
+				});
+			}
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Номер сертификата",
+				Binding = new Binding("Certificates"),
+				Width = new DataGridLength(180, DataGridLengthUnitType.Star),
+				Visibility = Visibility.Collapsed
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Цена производителя без НДС",
+				Binding = new Binding("ProducerCost"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Цена ГР",
+				Binding = new Binding("RegistryCost"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Торговая наценка оптовика",
+				Binding = new Binding("SupplierPriceMarkup"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Цена поставщика без НДС",
+				Binding = new Binding("SupplierCostWithoutNds"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "НДС",
+				Binding = new Binding("Nds"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Цена поставщика с НДС",
+				Binding = new Binding("SupplierCost"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Макс. розничная наценка",
+				Binding = new Binding("MaxRetailMarkup"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = true,
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Розничная наценка",
+				Binding = new Binding("RetailMarkup"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false,
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Реальная наценка",
+				Binding = new Binding("RealRetailMarkup"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false,
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Розничная цена",
+				Binding = new Binding("RetailCost"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false,
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Заказ",
+				Binding = new Binding("Quantity"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Розничная сумма",
+				Binding = new Binding("RetailSum"),
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+				IsReadOnly = false,
+			});
 
-			var grid = Lines;
+			var grid = lines;
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Цена производителя без НДС");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Цена ГР");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Торговая наценка оптовика");
@@ -39,49 +241,33 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная сумма");
 
-			ApplyStyles();
-			//очередная магия wpf
-			//
-			//datagridcolumn живет вне logica|visual tree
-			//и по этому стандартный биндинг не работает
-			//внутри биндинга есть проверки которые пытаются найти родителя
-			//для колонки родитель null и биндинг отказывается работать
-			//самое смешное что при поиске родителя даже есть специальный финт для таких элементов которые находятся вне дерева
-			//но перегрузка internal свойства который возвращает контекст в DataGridColumn не реализована
-			//проверка родителя не работает в двух случаях если source задан явно и если он задан через relative source
-			//relative source работать не будет тк колонка вне дерева
-			//source нельзя задать в xaml тк он обнаруживает какую то рекурсию, с этим говном я уже не стал разбираться
-			//
-			//Loaded используется тк при конструировании он получит родительский datacontext а он будет shellviewmodel
-			//и будет ошибка по этому ждем как все загрузится будет установлен правильный контекст и после этого создаем биндинг
-			Loaded += (sender, args) => {
-				foreach (var gridColumn in Lines.Columns.OfType<DataGridTextColumn>().Where(c => !c.IsReadOnly)) {
+			StyleHelper.ApplyStyles(typeof(WaybillLine), lines, Application.Current.Resources, Legend);
+			Conventions.ConfigureDataGrid(lines, typeof(WaybillLine));
+
+			Grid.SetRow(lines, 2);
+			Grid.SetColumn(lines, 1);
+			Editable.AutoEditOnDigit(grid, "Розничная наценка");
+			if (model != null) {
+				model.tableSettings.Restore(lines);
+				model.tableSettings.Restore(OrderLines);
+
+				foreach (var gridColumn in lines.Columns.OfType<DataGridTextColumn>().Where(c => !c.IsReadOnly)) {
 					if (gridColumn.ReadLocalValue(DataGridColumn.IsReadOnlyProperty) == DependencyProperty.UnsetValue) {
-						BindingOperations.SetBinding(gridColumn, DataGridColumn.IsReadOnlyProperty,
-							new Binding("DataContext.Waybill.IsReadOnly") {
-								Source = grid
-							});
+						gridColumn.IsReadOnly = model.Waybill.IsReadOnly;
 					}
 				}
+			}
 
-				if (DataContext != null && !((WaybillDetails)DataContext).Waybill.IsCreatedByUser) {
-					grid.Columns.Remove(DataGridHelper.FindColumn(grid.Columns, "ЖНВЛС"));
-				}
-			};
-
-			Editable.AutoEditOnDigit(grid, "Розничная наценка");
+			MainGrid.Children.Add(lines);
 
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
-			//тк мы не можем получить информацию о типе от view model
-			//задаем ее статично
-			Conventions.ConfigureDataGrid(Lines, typeof(WaybillLine));
 		}
 
 		public void ApplyStyles()
 		{
-			StyleHelper.ApplyStyles(typeof(WaybillLine), Lines, Application.Current.Resources, Legend);
+			StyleHelper.ApplyStyles(typeof(WaybillLine), lines, Application.Current.Resources, Legend);
 		}
 	}
 }
