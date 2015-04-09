@@ -58,7 +58,7 @@
 				Style="{StaticResource Filter}" DisplayMemberPath="Name">
 				<ComboBox.ItemsPanel>
 					<ItemsPanelTemplate>
-						<VirtualizingStackPanel />
+						<VirtualizingStackPanel Width="300" />
 					</ItemsPanelTemplate>
 				</ComboBox.ItemsPanel>
 			</ComboBox>
