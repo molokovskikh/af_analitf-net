@@ -44,7 +44,8 @@ namespace AnalitF.Net.Client.ViewModels
 				c => CurrentCatalog = c);
 			CatalogsSearch.RemapChars = true;
 
-			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter)
+			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter).Cast<object>()
+				.Merge(ParentModel.ObservableForProperty(m => m.ShowWithoutOffers))
 				.Subscribe(_ => LoadCatalogs()));
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)

@@ -54,9 +54,9 @@
 		<ContentControl Grid.Row="1" Width="Auto" Height="Auto" x:Name="ActiveItem"></ContentControl>
 
 		<StackPanel Grid.Row="2" Style="{StaticResource FilterPanel}">
-			<CheckBox Name="CatalogSearch" Style="{StaticResource FilterCheckBox}">Поиск по части наименования</CheckBox>
-			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource FilterCheckBox}">Отображать весь каталог</CheckBox>
-			<CheckBox Name="ViewOffersByCatalog"
+			<CheckBox Name="CatalogSearch" Style="{StaticResource FilterCheckBox}" Focusable="False">Поиск по части наименования</CheckBox>
+			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource FilterCheckBox}" Focusable="False">Отображать весь каталог</CheckBox>
+			<CheckBox Name="ViewOffersByCatalog" Focusable="False"
 				Style="{StaticResource FilterCheckBox}">Поиск по форме выпуска (F4)</CheckBox>
 		</StackPanel>
 	</Grid>

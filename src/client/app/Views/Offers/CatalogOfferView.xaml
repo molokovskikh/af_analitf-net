@@ -66,7 +66,13 @@
 				<ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Filter}"
 					x:Name="Filters" />
 				<ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Filter}"
-					x:Name="Producers" DisplayMemberPath="Name"/>
+					x:Name="Producers" DisplayMemberPath="Name">
+					<ComboBox.ItemsPanel>
+						<ItemsPanelTemplate>
+							<VirtualizingStackPanel />
+						</ItemsPanelTemplate>
+					</ComboBox.ItemsPanel>
+				</ComboBox>
 				<ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource Filter}"
 					x:Name="Regions" />
 			</Grid>
