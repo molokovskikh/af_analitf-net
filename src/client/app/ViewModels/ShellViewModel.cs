@@ -84,6 +84,8 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, string> ViewModelSettings = new Dictionary<string, string>();
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
+		[DataMember]
+		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());

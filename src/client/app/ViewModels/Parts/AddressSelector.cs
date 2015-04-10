@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
+using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -59,8 +60,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			var shell = screen.Shell;
 			if (shell != null) {
-				All.Value = (bool)shell.SessionContext.GetValueOrDefault("ShowAllAddresses", All.Value);
-				var selectedAddresses = (IDictionary<uint, bool>)shell.SessionContext.GetValueOrDefault("SelectedAddresses", new Dictionary<uint, bool>());
+				All.Value = (bool)shell.PersistentContext.GetValueOrDefault("ShowAllAddresses", All.Value);
+				var selectedAddresses = GetValueOrDefault(shell, "SelectedAddresses", new Dictionary<uint, bool>());
 				Addresses.Each(a => a.IsSelected = selectedAddresses.GetValueOrDefault(a.Item.Id, true));
 			}
 			FilterChanged = Addresses.Select(a => a.Changed())
@@ -69,12 +70,24 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Merge(All.Changed());
 		}
 
+		private static T GetValueOrDefault<T>(ShellViewModel shell, string key, T defaultValue)
+		{
+			var result = shell.PersistentContext.GetValueOrDefault(key, defaultValue);
+			if (result is T) {
+				return (T)result;
+			}
+			if (result is JObject) {
+				return ((JObject)result).ToObject<T>();
+			}
+			return defaultValue;
+		}
+
 		public void Deinit()
 		{
 			var shell = screen.Shell;
 			if (shell != null) {
-				shell.SessionContext["ShowAllAddresses"] = All.Value;
-				shell.SessionContext["SelectedAddresses"] = Addresses.ToDictionary(a => a.Item.Id, a => a.IsSelected);
+				shell.PersistentContext["ShowAllAddresses"] = All.Value;
+				shell.PersistentContext["SelectedAddresses"] = Addresses.ToDictionary(a => a.Item.Id, a => a.IsSelected);
 			}
 		}
 
