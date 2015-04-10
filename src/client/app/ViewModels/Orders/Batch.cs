@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 	[DataContract]
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
-		private static string lastUsedDir;
+		private string lastUsedDir;
 
 		public Batch()
 		{
@@ -185,7 +185,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			lastUsedDir = lastUsedDir ?? Settings.Value.GetVarRoot();
+			lastUsedDir = (string)Shell.PersistentContext.GetValueOrDefault("BatchDir", Settings.Value.GetVarRoot());
 			CurrentReportLine.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 				.Subscribe(_ => {
 					if (CurrentReportLine.Value != null)
@@ -240,6 +240,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.Deinit();
 			if (close) {
 				LastSelectedLine = CurrentReportLine.Value != null ? CurrentReportLine.Value.BatchLine.Id : 0;
+				if (Settings.Value.GetVarRoot() != lastUsedDir)
+					Shell.PersistentContext["BatchDir"] = lastUsedDir;
 			}
 			base.OnDeactivate(close);
 		}
