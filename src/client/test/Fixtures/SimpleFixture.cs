@@ -3,10 +3,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Tasks;
 using Common.Models;
 using Common.NHibernate;
 using NHibernate;
 using NHibernate.Linq;
+using Test.Support;
 using Address = AnalitF.Net.Client.Models.Address;
 using Offer = AnalitF.Net.Client.Models.Offer;
 using Order = AnalitF.Net.Client.Models.Order;
@@ -39,6 +41,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Console.WriteLine("Создан отправленный заказ для товара {0}", catalog.FullName);
 		}
 
+		[Service]
 		public static void SmartOrderSetLimit(ISession session)
 		{
 			Console.Write("Поставщик:");
@@ -54,6 +57,16 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}
 			limit.Value = value;
 			session.Save(address);
+		}
+
+		[Description("Создает адрес доставки, на сервере"), Service]
+		public static void ServiceAddress(ISession session)
+		{
+			var user = ServerFixture.User(session);
+			var address = user.Client.CreateAddress();
+			session.Save(address);
+			address.Value += " " + address.Id;
+			user.AvaliableAddresses.Add(address);
 		}
 	}
 }

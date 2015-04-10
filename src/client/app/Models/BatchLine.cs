@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Models
 			get { return BatchLine.Status.HasFlag(ItemToOrderStatus.MinimalCost); }
 		}
 
-		[Style("Product", Description = "Присутствует в замороженных заказах"), Ignore]
+		[Style("Product", Description = "Присутствует в замороженных заказах")]
 		public virtual bool ExistsInFreezed
 		{
 			get { return BatchLine.ExistsInFreezed; }
@@ -111,6 +111,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return !IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.SplitByLimit); }
 		}
+
+		[Style("BatchLine.Address.Name")]
+		public virtual bool IsCurrentAddress { get; set; }
 
 		public void BeginEdit()
 		{
@@ -251,14 +254,15 @@ namespace AnalitF.Net.Client.Models
 				Comment, ProductId, Status, ProductSynonym);
 		}
 
-		public static void CalculateStyle(Address[] addresses, IEnumerable<BatchLine> lines)
+		public static void CalculateStyle(Address selectedAddress, Address[] addresses, IEnumerable<BatchLineView> lines)
 		{
 			var productids = addresses.SelectMany(a => a.Orders).Where(o => o.Frozen)
 				.SelectMany(o => o.Lines)
 				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ProductId));
 			foreach (var line in lines) {
-				var key = Tuple.Create(line.Address.Id, line.ProductId.GetValueOrDefault());
-				line.ExistsInFreezed = productids[key].FirstOrDefault() != null;
+				var key = Tuple.Create(line.BatchLine.Address.Id, line.BatchLine.ProductId.GetValueOrDefault());
+				line.BatchLine.ExistsInFreezed = productids[key].FirstOrDefault() != null;
+				line.IsCurrentAddress = line.BatchLine.Address != null && selectedAddress.Id == line.BatchLine.Address.Id;
 			}
 		}
 

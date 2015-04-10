@@ -45,7 +45,7 @@ namespace AnalitF.Net.Client.Views.Orders
 
 		public void ApplyStyles()
 		{
-			StyleHelper.ApplyStyles(typeof(BatchLine), ReportLines, Application.Current.Resources, Legend);
+			StyleHelper.ApplyStyles(typeof(BatchLineView), ReportLines, Application.Current.Resources, Legend);
 			var elements = Legend.Descendants<FrameworkElement>().Where(e => Equals(e.Tag, "generated")).ToArray();
 			elements.Each(e => e.Tag = "");
 			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);

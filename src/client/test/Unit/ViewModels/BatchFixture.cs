@@ -163,8 +163,9 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					Address = batch.Address
 				}, null),
 			};
-			BatchLine.CalculateStyle(batch.Addresses, batch.Lines.Value.Select(l => l.BatchLine));
+			BatchLine.CalculateStyle(batch.Address, batch.Addresses, batch.Lines.Value);
 			Assert.IsTrue(batch.Lines.Value[0].ExistsInFreezed);
+			Assert.IsTrue(batch.Lines.Value[0].IsCurrentAddress);
 		}
 
 		[Test]

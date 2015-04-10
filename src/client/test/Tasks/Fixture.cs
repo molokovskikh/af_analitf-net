@@ -14,6 +14,9 @@ using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Test.Tasks
 {
+	public class ServiceAttribute : Attribute
+	{ }
+
 	public class Fixture
 	{
 		[Description("Выводит список всех наборов тестовых данных")]
@@ -65,7 +68,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 				}
 				else {
 					var factory = FixtureHelper.GetFactory();
-					if (method.Name == "SmartOrderSetLimit") {
+					if (method.GetCustomAttributes(typeof(ServiceAttribute)).Any()) {
 						factory = DataHelper.ServerNHConfig("local");
 					}
 

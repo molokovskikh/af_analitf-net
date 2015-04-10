@@ -3,11 +3,14 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Markup;
 using System.Windows.Media;
+using System.Xml;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using NPOI.HSSF.Record.Chart;
 using NUnit.Framework;
@@ -26,6 +29,17 @@ namespace AnalitF.Net.Test.Unit
 			StyleHelper.Reset();
 			resource = new ResourceDictionary();
 			appResource = new ResourceDictionary();
+		}
+
+		[Test]
+		public void b()
+		{
+			Build(typeof(BatchLineView));
+			var style = (Style)resource["BatchLineViewBatchLine.Address.NameCell"];
+			Assert.IsNotNull(style);
+			var trigger = style.Triggers.OfType<DataTrigger>()
+				.FirstOrDefault(t => t.Setters.OfType<Setter>().Any(s => s.Property == Control.FontWeightProperty));
+			Assert.IsNotNull(trigger, "текущий адрес доставки выделяется жирным");
 		}
 
 		[Test]

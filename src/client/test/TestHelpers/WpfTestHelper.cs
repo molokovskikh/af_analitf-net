@@ -7,7 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Threading;
+using System.Xml;
 using Common.Tools.Calendar;
 using ReactiveUI;
 
@@ -169,6 +171,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			else
 				element.Loaded += (sender, args) => src.SetResult(1);
 			return new DispatchAwaiter(src, element.Dispatcher);
+		}
+
+		public static void DumpXamlObj(ResourceDictionary obj)
+		{
+			var settings = new XmlWriterSettings { Indent = true };
+			var writer = XmlWriter.Create(Console.Out, settings);
+			XamlWriter.Save(obj, writer);
 		}
 	}
 

@@ -74,8 +74,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected ISession Session;
 		public IStatelessSession StatelessSession;
 
-		//адрес доставки который выбран в ui
-		public Address Address;
 		//освобождает ресурсы при закрытии формы
 		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();
 		//сигнал который подается при закрытии формы, может быть использован для отмены операций который выполняются в фоне
@@ -100,11 +98,15 @@ namespace AnalitF.Net.Client.ViewModels
 		public static TaskScheduler TestQueryScheduler = null;
 		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
 		public int BackgrountQueryCount = 0;
+
+		//адрес доставки который выбран в ui
+		public Address Address;
 		public Address[] Addresses = new Address[0];
 
 		protected SimpleMRUCache cache = new SimpleMRUCache(10);
 
 		public static AppTestContext TestContext;
+		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
 
 		public BaseScreen()

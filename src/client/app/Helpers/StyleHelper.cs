@@ -165,21 +165,35 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsMinCost", Background("#ACFF97") },
 				{ "ExistsInFreezed", Background("#C0C0C0") },
 				{ "IsCreatedByUser", Background("#C0DCC0") },
-				{ "IsCertificateNotFound", Background(Colors.Gray.ToString()) },
-				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF).ToString()) },
-				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141).ToString()) },
-				{ "IsLimited", Background(Color.FromRgb(255, 96, 0).ToString()) },
-				{ "IsSplitByLimit", Background(Color.FromRgb(255, 191, 0).ToString()) },
+				{ "IsCertificateNotFound", Background(Colors.Gray) },
+				{ "OrderMark", Background(Color.FromRgb(0xEE, 0xF8, 0xFF)) },
+				{ "IsUnmatchedByWaybill", Background(Color.FromRgb(248, 238, 141)) },
+				{ "IsLimited", Background(Color.FromRgb(255, 96, 0)) },
+				{ "IsSplitByLimit", Background(Color.FromRgb(255, 191, 0)) },
+				{ "IsCurrentAddress",
+					new DataTrigger {
+						Binding = new Binding("IsCurrentAddress"),
+						Value = true,
+						Setters = {
+							new Setter(Control.FontWeightProperty, FontWeights.Bold)
+						}
+					}
+				},
+			};
+		}
+
+		private static DataTrigger Background(Color color)
+		{
+			return new DataTrigger {
+				Setters = {
+					new Setter(Control.BackgroundProperty, new SolidColorBrush(color))
+				}
 			};
 		}
 
 		private static DataTrigger Background(string color)
 		{
-			return new DataTrigger {
-				Setters = {
-					new Setter(Control.BackgroundProperty, new SolidColorBrush((Color)ColorConverter.ConvertFromString(color)))
-				}
-			};
+			return Background((Color)ColorConverter.ConvertFromString(color));
 		}
 
 		public static void Reset()
@@ -277,14 +291,21 @@ namespace AnalitF.Net.Client.Helpers
 					var attr = styleDef.Item3;
 					context = attr.Context;
 
-					var brush = GetColor(attr.GetName(prop));
-					AddMixedBackgroundTriggers(style, prop.Name, true, brush.Color, ActiveColor, InactiveColor);
-					AddFocusedTrigger(style, prop.Name, true, brush);
+					var key = attr.GetName(prop);
+					var brush = GetColor(key);
+					if (brush != null) {
+						AddMixedBackgroundTriggers(style, prop.Name, true, brush.Color, ActiveColor, InactiveColor);
+						AddFocusedTrigger(style, prop.Name, true, brush);
+					}
+					else {
+						style.Triggers.Add(DefaultStyles.GetValueOrDefault(key));
+					}
 				}
 
 				//высоко-приоритетные стили строки
 				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority >= 0).OrderBy(s => s.Item3.Priority), style);
 
+				style.Seal();
 				local.Add(CellKey(type, column.Key, context), style);
 			}
 		}
@@ -349,9 +370,10 @@ namespace AnalitF.Net.Client.Helpers
 			if (trigger != null) {
 				var setter = trigger.Setters.OfType<Setter>()
 					.FirstOrDefault(s => s.Property == Control.BackgroundProperty);
-				if (setter != null) {
-					baseColor = ((SolidColorBrush)setter.Value);
-				}
+				//если стиль определен но он не затрагивает цвет фона
+				if (setter == null)
+					return null;
+				baseColor = ((SolidColorBrush)setter.Value);
 			}
 			var userStyle = UserStyles.GetValueOrDefault(key);
 			if (userStyle != null && userStyle.Property == Control.BackgroundProperty) {
@@ -607,7 +629,7 @@ namespace AnalitF.Net.Client.Helpers
 					Description = t.Item2.Description,
 				};
 				var trigger = DefaultStyles.GetValueOrDefault(appStyle.Name)
-					?? Background(DefaultColor.Color.ToString());
+					?? Background(DefaultColor.Color);
 				var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
 				var foreground = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.ForegroundProperty);
 				if (background != null && background.Value is SolidColorBrush) {

@@ -300,7 +300,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			var lookup = Addresses.SelectMany(a => a.ActiveOrders()).SelectMany(o => o.Lines)
 				.ToLookup(l => l.ExportBatchLineId);
 			Lines.Value = batchLines.Select(l => new BatchLineView(l, lookup[l.ExportId].FirstOrDefault())).ToObservableCollection();
-			BatchLine.CalculateStyle(Addresses, batchLines);
+			BatchLine.CalculateStyle(Address, Addresses, Lines.Value);
 			Lines.Value.Where(l => l.OrderLine != null).Each(l => l.OrderLine.Configure(User));
 			ReportLines.Recalculate();
 		}
