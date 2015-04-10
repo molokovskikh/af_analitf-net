@@ -50,7 +50,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Submited = false,
 				Processed = false
 			};
-			var offer = session.Query<TestCore>().First(c => c.Price == price);
+			//уцененные препараты не восстанавливаются
+			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
 			order.AddItem(offer, 1);
 			session.Save(order);
 		}
