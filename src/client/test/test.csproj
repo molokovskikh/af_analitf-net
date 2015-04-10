@@ -174,7 +174,6 @@
     <Compile Include="Integration\RasFixture.cs" />
     <Compile Include="Integration\ViewModes\AddWaitedFixture.cs" />
     <Compile Include="Integration\ViewModes\AwaitedFixture.cs" />
-    <Compile Include="Integration\ViewModes\Batch2Fixture.cs" />
     <Compile Include="Integration\ViewModes\BatchFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModes\CatalogOffersByName.cs" />
@@ -200,7 +199,6 @@
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\BaseScreenFixture.cs" />
     <Compile Include="Integration\Views\BatchFixture.cs" />
-    <Compile Include="Integration\Views\Batch2Fixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferFixture.cs" />
     <Compile Include="Integration\Views\CatalogSearchFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />

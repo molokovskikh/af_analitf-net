@@ -340,7 +340,6 @@
     <Compile Include="ViewModels\Journal.cs" />
     <Compile Include="ViewModels\Mails.cs" />
     <Compile Include="ViewModels\Orders\Batch.cs" />
-    <Compile Include="ViewModels\Orders\Batch2.cs" />
     <Compile Include="ViewModels\Orders\HistoryOrdersViewModel.cs" />
     <Compile Include="ViewModels\Offers\JunkOfferViewModel.cs" />
     <Compile Include="ViewModels\Main.cs" />
@@ -424,9 +423,6 @@
     </Compile>
     <Compile Include="Views\Orders\Batch.xaml.cs">
       <DependentUpon>Batch.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Orders\Batch2.xaml.cs">
-      <DependentUpon>Batch2.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\MatchedWaybills.xaml.cs">
       <DependentUpon>MatchedWaybills.xaml</DependentUpon>
@@ -615,10 +611,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Orders\Batch.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Orders\Batch2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
