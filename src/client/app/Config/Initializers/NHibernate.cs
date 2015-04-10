@@ -301,7 +301,7 @@ namespace AnalitF.Net.Client.Config.Initializers
 #if DEBUG
 				//если нужно отладить запросы хибера
 				//для запросов в AddAwaited падает
-				{Environment.FormatSql, "true"},
+				//{Environment.FormatSql, "true"},
 #endif
 				{Environment.ProxyFactoryFactoryClass, typeof(ProxyFactoryFactory).AssemblyQualifiedName},
 			});

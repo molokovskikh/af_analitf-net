@@ -17,7 +17,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				"Settings",
 				"WaybillSettings",
 				"MarkupConfigs",
-				"DirMaps"
+				"DirMaps",
+				"AwaitedItems"
 			};
 
 			using(var sesssion = Factory.OpenSession()) {

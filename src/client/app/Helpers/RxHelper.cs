@@ -128,6 +128,12 @@ namespace AnalitF.Net.Client.Helpers
 					log.Error("Ошибка при обработке задачи", ex);
 				}
 #endif
+			}, e => {
+#if DEBUG
+				throw new Exception("Произошла ошибка", e);
+#else
+				log.Error("Ошибка при обработке задачи", e);
+#endif
 			}, cancellation != null ? cancellation.Token : CancellationToken.None);
 		}
 
