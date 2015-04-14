@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client
 {
 	public class AppBootstrapper : BootstrapperBase, IDisposable
 	{
-		public static Func<object, DependencyObject, object, UIElement> DefaultLocateForModel = ViewLocator.LocateForModel;
+		public Func<object, DependencyObject, object, UIElement> DefaultLocateForModel;
 
 		private ILog log = log4net.LogManager.GetLogger(typeof(AppBootstrapper));
 		private bool FailFast;
@@ -60,6 +60,7 @@ namespace AnalitF.Net.Client
 			: base(useApplication)
 		{
 			FailFast = !useApplication;
+			DefaultLocateForModel = ViewLocator.LocateForModel;
 			ViewLocator.LocateForModel = LocateForModel;
 		}
 
@@ -294,7 +295,7 @@ namespace AnalitF.Net.Client
 			Caliburn.Init(failfast);
 		}
 
-		public static UIElement LocateForModel(object model, DependencyObject displayLocation, object context)
+		public UIElement LocateForModel(object model, DependencyObject displayLocation, object context)
 		{
 			if (model is WaybillDetails) {
 				var waybills = (WaybillDetails)model;
