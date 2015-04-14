@@ -84,9 +84,11 @@ namespace AnalitF.Net.Client.Models
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
 					settings = new Settings(defaults: true, token: mappingToken);
+					settings.GetClientToken();
 					session.Save(settings);
 				}
 				else {
+					settings.GetClientToken();
 					if (overrideHash)
 						settings.MappingToken = mappingToken;
 

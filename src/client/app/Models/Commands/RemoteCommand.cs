@@ -45,6 +45,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected HttpClient Client;
 		protected JsonMediaTypeFormatter Formatter;
 
+		public string ClientToke;
 		public ICredentials Credentials;
 		public IWebProxy Proxy;
 		public string RasConnection;
@@ -111,6 +112,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				client.BaseAddress = Config.BaseUrl;
 				ras.Open();
 				client.DefaultRequestHeaders.Add("Version", version.ToString());
+				client.DefaultRequestHeaders.Add("Client-Token", ClientToke);
 				return action(client);
 			}
 		}
@@ -146,6 +148,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			Credentials = value.GetCredential();
 			Proxy = value.GetProxy();
+			ClientToke = value.GetClientToken();
 			if (value.UseRas) {
 				RasConnection = value.RasConnection;
 			}

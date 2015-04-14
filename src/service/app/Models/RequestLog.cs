@@ -38,6 +38,9 @@ namespace AnalitF.Net.Service.Models
 			if (request.Headers.TryGetValues("X-Forwarded-For", out values)) {
 				RemoteHost = values.Implode();
 			}
+			if (request.Headers.TryGetValues("Client-Token", out values)) {
+				ClientToken = values.Implode();
+			}
 			if (String.IsNullOrEmpty(RemoteHost)) {
 				if (request.Properties.ContainsKey("MS_HttpContext"))
 					RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -76,6 +79,8 @@ namespace AnalitF.Net.Service.Models
 		public virtual DateTime? LastSync { get; set; }
 
 		public virtual long? Size { get; set; }
+
+		public virtual string ClientToken { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

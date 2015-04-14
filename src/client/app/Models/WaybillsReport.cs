@@ -30,7 +30,7 @@ from WaybillLines l
 	join RegulatorRegistry r on r.ProductId = l.ProductId and r.ProducerId = l.ProducerId
 	join Waybills w on w.Id = l.WaybillId
 where w.DocumentDate >= :begin and w.DocumentDate < :end and l.RetailCost is not null
-group by l.ProductId, r.ProducerId, l.SupplierCost")
+group by r.DrugID")
 				.SetParameter("begin", begin)
 				.SetParameter("end", end)
 				.SetParameter("period", period)

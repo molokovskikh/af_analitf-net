@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Print;
@@ -16,6 +18,7 @@ using AnalitF.Net.Client.Views;
 using Common.Tools;
 using Common.Tools.Calendar;
 using DotRas;
+using log4net;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -201,7 +204,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
-
+		public virtual string ClientToken { get; set; }
 
 		public virtual IEnumerable<string> DocumentDirs
 		{
@@ -346,6 +349,21 @@ namespace AnalitF.Net.Client.Models
 			return new[] {
 				new RasHandler(RasConnection),
 			};
+		}
+
+		public virtual string GetClientToken()
+		{
+			var log = LogManager.GetLogger(typeof(Settings));
+			try {
+				if (String.IsNullOrEmpty(ClientToken)) {
+					ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
+				}
+				return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(ClientToken), null, DataProtectionScope.CurrentUser));
+			}
+			catch(Exception e) {
+				log.Error("Ошибка при получение токена приложения", e);
+				return null;
+			}
 		}
 	}
 }
