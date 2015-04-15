@@ -247,11 +247,11 @@
 			</TabControl>
 
 			<StackPanel Grid.Column="2">
-				<Label>Наценка</Label>
+				<Label Padding="5, 2, 5, 2">Наценка</Label>
 				<xctk:IntegerUpDown Name="RetailMarkup" TextAlignment="Left" />
-				<Label Name="RetailCost" />
-				<Label>Сумма</Label>
-				<Label Name="CurrentOffer_Price_Order_Sum">
+				<Label Padding="5, 2, 5, 2" Name="RetailCost" />
+				<Label Padding="5, 2, 5, 2">Сумма</Label>
+				<Label Padding="5, 2, 5, 2" Name="CurrentOffer_Price_Order_Sum">
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
