@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,23 +17,18 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private InlineEditWarning warning;
 		private WindowManager manager;
 		private NotifyValue<OrderLine> current;
+		private uint lastEditCountCandidate;
+		private uint lastValidCount;
 
 		public Editor(InlineEditWarning warning, WindowManager manager, NotifyValue<OrderLine> current)
 		{
 			this.warning = warning;
 			this.manager = manager;
 			this.current = current;
+			current.Subscribe(x => lastEditCountCandidate = x != null ?  x.Count : 0);
 		}
 
 		public IList Lines { get; set; }
-
-		public void ShowValidationError()
-		{
-			if (lastEdit == null)
-				return;
-
-			ShowValidationError(lastEdit.SaveValidate());
-		}
 
 		private void ShowValidationError(List<Message> messages)
 		{
@@ -50,6 +46,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Updated()
 		{
+			lastValidCount = lastEditCountCandidate;
 			if (current.Value == null)
 				return;
 
@@ -60,7 +57,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Committed()
 		{
-			ShowValidationError();
+			if (lastEdit == null)
+				return;
+
+			ShowValidationError(lastEdit.SaveValidate(lastValidCount));
 		}
 
 		private void CheckForDelete(OrderLine orderLine)

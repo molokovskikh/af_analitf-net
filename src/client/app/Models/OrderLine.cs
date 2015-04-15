@@ -223,7 +223,7 @@ namespace AnalitF.Net.Client.Models
 			return result;
 		}
 
-		public virtual List<Message> SaveValidate(Func<string, bool> confirmCallback = null)
+		public virtual List<Message> SaveValidate(uint lastValidCount = 0, Func<string, bool> confirmCallback = null)
 		{
 			var result = new List<Message>();
 			if (Count == 0)
@@ -255,6 +255,9 @@ namespace AnalitF.Net.Client.Models
 
 			if (!String.IsNullOrEmpty(error)) {
 				Count = CalculateAvailableQuantity(Count);
+				if (Count == 0) {
+					Count = lastValidCount;
+				}
 				result.Add(Message.Error(error));
 			}
 			return result;
@@ -392,10 +395,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			switch (format) {
 				case "r":
-					return String.Join(" ", new[] {
-						ToString() + ":",
-						LongSendError
-					});
+					return String.Join(" ", ToString() + ":", LongSendError);
 				default:
 					return ToString();
 			}

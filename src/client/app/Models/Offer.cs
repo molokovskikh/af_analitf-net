@@ -278,7 +278,7 @@ namespace AnalitF.Net.Client.Models
 					result.AddRange(EditValidate(address, settings));
 				}
 				else {
-					result = OrderLine.SaveValidate(confirm);
+					result = OrderLine.SaveValidate(confirmCallback: confirm);
 				}
 				OrderCount = OrderLine.Count;
 			}

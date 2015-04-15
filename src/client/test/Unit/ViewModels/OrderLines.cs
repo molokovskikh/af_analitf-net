@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Linq;
+using System.Collections.ObjectModel;
+using System.IO;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -26,7 +29,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Activate(model);
 			model.IsSentSelected.Value = true;
 			model.IsCurrentSelected.Value = false;
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 			model = new OrderLinesViewModel();
 			Activate(model);
 			Assert.IsTrue(model.IsSentSelected.Value);
@@ -42,7 +45,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Activate(model);
 			model.AddressSelector.All.Value = true;
 			model.AddressSelector.Addresses[0].IsSelected = false;
-			ScreenExtensions.TryDeactivate(model, true);
+			Close(model);
 
 			var memory = new MemoryStream();
 			var writer = new StreamWriter(memory);
@@ -63,6 +66,50 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			Assert.IsTrue(model.AddressSelector.All.Value);
 			Assert.IsFalse(model.AddressSelector.Addresses[0].IsSelected);
 			Assert.IsTrue(model.AddressSelector.Addresses[1].IsSelected);
+		}
+
+		[Test]
+		public void Rollback_invalid_edit_values()
+		{
+			var price = new Price("тестовый");
+			var order = new Order(new Address("тестовый"), new Offer(price, 150) {
+				RequestRatio = 15
+			}, 15);
+			order.TryOrder(new Offer(price, 180) { RequestRatio = 7}, 7);
+			Activate(model);
+			model.Lines.Value = new ObservableCollection<OrderLine>(order.Lines);
+			model.CurrentLine.Value = model.Lines.Value[0];
+			model.CurrentLine.Value.Count = 9;
+			model.OfferUpdated();
+			//симулируем переход на другую строку
+			model.CurrentLine.Value = model.Lines.Value[1];
+			model.OfferCommitted();
+
+			Assert.AreEqual(15, model.Lines.Value[0].Count);
+		}
+
+		[Test]
+		public void Reset_edit_on_close()
+		{
+			var price = new Price("тестовый");
+			var order = new Order(new Address("тестовый"), new Offer(price, 150) {
+				RequestRatio = 15
+			}, 15);
+			order.TryOrder(new Offer(price, 180) { RequestRatio = 7}, 7);
+			Activate(model);
+			model.Lines.Value = new ObservableCollection<OrderLine>(order.Lines);
+			model.CurrentLine.Value = model.Lines.Value[0];
+			model.CurrentLine.Value.Count = 9;
+			model.OfferUpdated();
+			Close(model);
+			model.TryClose();
+
+			Assert.AreEqual(15, model.Lines.Value[0].Count);
+		}
+
+		private void Close(Screen model)
+		{
+			ScreenExtensions.TryDeactivate(model, true);
 		}
 	}
 }

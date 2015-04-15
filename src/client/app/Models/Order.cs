@@ -307,7 +307,6 @@ namespace AnalitF.Net.Client.Models
 			return line;
 		}
 
-
 		public virtual OrderLine TryOrder(Offer offer, uint count, out uint ordered)
 		{
 			ordered = 0;

@@ -103,6 +103,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				}
 				else if (currentCatalog == null || currentCatalog.Id != currentOffer.CatalogId) {
 					var catalogId = CurrentOffer.CatalogId;
+					if (StatelessSession == null)
+						return;
 					currentCatalog = StatelessSession.Query<Catalog>()
 						.Fetch(c => c.Name)
 						.ThenFetch(n => n.Mnn)

@@ -95,20 +95,27 @@ where l.RequestId = :id;")
 								property.SetValue(offer, value, null);
 							}
 
-							var item = order.AddOrderItem(offer, sourceItem.Count);
-							item.CostWithDelayOfPayment = ((float?)sourceItem.ResultCost).GetValueOrDefault(item.CostWithDelayOfPayment);
-							if (sourceItem.MinCost != null) {
-								item.LeaderInfo = new OrderItemLeadersInfo {
-									OrderItem = item,
-									MinCost = (float?)sourceItem.MinCost,
-									PriceCode = sourceItem.MinPrice != null
-										? (uint?)sourceItem.MinPrice.PriceId : null,
-									LeaderMinCost = (float?)sourceItem.LeaderCost,
-									LeaderPriceCode = sourceItem.LeaderPrice != null
-										? (uint?)sourceItem.LeaderPrice.PriceId : null,
-								};
+							try {
+								var item = order.AddOrderItem(offer, sourceItem.Count);
+								item.CostWithDelayOfPayment = ((float?)sourceItem.ResultCost).GetValueOrDefault(item.CostWithDelayOfPayment);
+								if (sourceItem.MinCost != null) {
+									item.LeaderInfo = new OrderItemLeadersInfo {
+										OrderItem = item,
+										MinCost = (float?)sourceItem.MinCost,
+										PriceCode = sourceItem.MinPrice != null
+											? (uint?)sourceItem.MinPrice.PriceId : null,
+										LeaderMinCost = (float?)sourceItem.LeaderCost,
+										LeaderPriceCode = sourceItem.LeaderPrice != null
+											? (uint?)sourceItem.LeaderPrice.PriceId : null,
+									};
+								}
+								orderitemMap.Add(item, sourceItem.Id);
 							}
-							orderitemMap.Add(item, sourceItem.Id);
+							catch(OrderException e) {
+								//если здесь произошла ошибка значит есть проблема в клиентском приложении и нужно узнать об этом
+								Log.Error(String.Format("Не удалось сформировать заявку по позиции {0}", offer.Id), e);
+								throw new OrderException(String.Format("Не удалось сформировать заявку по позиции {0}", offer.Id), e);
+							}
 						}
 						if (order.OrderItems.Count > 0) {
 							orders.Add(order);

@@ -252,6 +252,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			editor.Committed();
 		}
 
+		public override void TryClose()
+		{
+			OfferCommitted();
+			base.TryClose();
+		}
+
 		public PrintResult Print()
 		{
 			var doc = new OrderLinesDocument(this).Build();
