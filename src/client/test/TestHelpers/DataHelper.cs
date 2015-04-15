@@ -85,10 +85,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && DispatcherFixture.IsCI()) {
 				var root = "fail-test-data";
-				if (!Directory.Exists(root)) {
-					Directory.CreateDirectory(root);
-				}
-				if (Directory.GetDirectories(root).Length > 10) {
+				var dir = Directory.CreateDirectory(root);
+				if (dir.GetDirectories().Length > 10) {
 					return;
 				}
 

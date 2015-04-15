@@ -57,9 +57,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected static void Prepare(string src, string dst)
 		{
-			if (!Directory.Exists(dst))
-				Directory.CreateDirectory(dst);
-
+			Directory.CreateDirectory(dst);
 			DataHelper.CopyBin(src, dst);
 			FileHelper2.CopyDir("share", Path.Combine(dst, "share"));
 			FileHelper2.CopyDir(IntegrationSetup.BackupDir, Path.Combine(dst, "data"));

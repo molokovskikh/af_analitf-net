@@ -24,10 +24,8 @@ namespace AnalitF.Net.Service.Config.Environments
 				property.SetValue(config, value, null);
 			}
 
-			if (!Directory.Exists(config.CachePath))
-				Directory.CreateDirectory(config.CachePath);
-			if (!Directory.Exists(config.ResultPath))
-				Directory.CreateDirectory(config.ResultPath);
+			Directory.CreateDirectory(config.CachePath);
+			Directory.CreateDirectory(config.ResultPath);
 		}
 	}
 }

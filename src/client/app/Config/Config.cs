@@ -156,10 +156,8 @@ namespace AnalitF.Net.Client.Config
 
 		public void InitDir()
 		{
-			if (!Directory.Exists(RootDir))
-				Directory.CreateDirectory(RootDir);
-			if (!Directory.Exists(TmpDir))
-				Directory.CreateDirectory(TmpDir);
+			Directory.CreateDirectory(RootDir);
+			Directory.CreateDirectory(TmpDir);
 		}
 
 		public string MapToFile(object entity)

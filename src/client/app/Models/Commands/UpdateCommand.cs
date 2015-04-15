@@ -176,8 +176,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (Directory.Exists(Config.UpdateTmpDir))
 				Directory.Delete(Config.UpdateTmpDir, true);
 
-			if (!Directory.Exists(Config.UpdateTmpDir))
-				Directory.CreateDirectory(Config.UpdateTmpDir);
+			Directory.CreateDirectory(Config.UpdateTmpDir);
 
 			using (var zip = new ZipFile(Config.ArchiveFile)) {
 				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
@@ -478,9 +477,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		{
 			var files = new List<string>();
 			if (Directory.Exists(source)) {
-				if (!Directory.Exists(destination)) {
-					Directory.CreateDirectory(destination);
-				}
+				Directory.CreateDirectory(destination);
 
 				foreach (var file in Directory.GetFiles(source)) {
 					var dst = Path.Combine(destination, Path.GetFileName(file));

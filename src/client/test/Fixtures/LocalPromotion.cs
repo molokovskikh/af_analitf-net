@@ -42,8 +42,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				}
 				var dir = Path.Combine(Config.RootDir, "promotions");
 				if (!string.IsNullOrEmpty(file)) {
-					if (!Directory.Exists(dir))
-						Directory.CreateDirectory(dir);
+					Directory.CreateDirectory(dir);
 				}
 				File.Copy(file, Path.Combine(dir, Promotion.Id + Path.GetExtension(file)), true);
 			}

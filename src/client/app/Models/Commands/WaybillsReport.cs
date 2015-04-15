@@ -32,11 +32,10 @@ group by r.DrugID")
 				.List();
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.MapPath("Reports");
-			if (!Directory.Exists(dir))
-				Directory.CreateDirectory(dir);
-			var filename = Path.Combine(dir, FileHelper.StringToFileName(String.Format("Росздравнадзор-{0}.xls", period)));
+			Directory.CreateDirectory(dir);
+			var filename = Path.Combine(dir, FileHelper.StringToFileName(String.Format("Р РѕСЃР·РґСЂР°РІРЅР°РґР·РѕСЂ-{0}.xls", period)));
 			var book = new HSSFWorkbook();
-			var sheet = book.CreateSheet("Отчет");
+			var sheet = book.CreateSheet("РћС‚С‡РµС‚");
 			var reportRow = sheet.CreateRow(0);
 			reportRow.CreateCell(0).SetCellValue("DrugID");
 			reportRow.CreateCell(1).SetCellValue("InnR");
