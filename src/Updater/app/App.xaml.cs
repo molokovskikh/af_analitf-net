@@ -4,6 +4,9 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 using System.Windows.Threading;
 using log4net;
 using log4net.Config;
@@ -16,6 +19,19 @@ namespace Updater
 
 		public App()
 		{
+			//клиенты жалуются что при настройках по умолчанию текст "размыт"
+			TextOptions.TextFormattingModeProperty.OverrideMetadata(typeof(Window),
+				new FrameworkPropertyMetadata(TextFormattingMode.Display,
+					FrameworkPropertyMetadataOptions.AffectsMeasure
+						| FrameworkPropertyMetadataOptions.AffectsRender
+						| FrameworkPropertyMetadataOptions.Inherits));
+
+			//клиенты жалуются что шрифт слишком мелкий
+			Control.FontSizeProperty.OverrideMetadata(typeof(TextBlock),
+				new FrameworkPropertyMetadata(14d, FrameworkPropertyMetadataOptions.Inherits));
+			Control.FontSizeProperty.OverrideMetadata(typeof(TextElement),
+				new FrameworkPropertyMetadata(14d, FrameworkPropertyMetadataOptions.Inherits));
+
 			//проверка для ilmerge
 			var merged = new [] {
 				"log4net"
