@@ -1,18 +1,13 @@
-Ôªøusing System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AnalitF.Net.Client.Config;
-using AnalitF.Net.Client.Models.Commands;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
-using NHibernate.Util;
-using NPOI.HSSF.Record.Aggregates;
 using NPOI.HSSF.UserModel;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Commands
 {
 	public class WaybillsReport : DbCommand
 	{
@@ -39,9 +34,9 @@ group by r.DrugID")
 			var dir = settings.MapPath("Reports");
 			if (!Directory.Exists(dir))
 				Directory.CreateDirectory(dir);
-			var filename = Path.Combine(dir, FileHelper.StringToFileName(String.Format("–†–æ—Å–∑–¥—Ä–∞–≤–Ω–∞–¥–∑–æ—Ä-{0}.xls", period)));
+			var filename = Path.Combine(dir, FileHelper.StringToFileName(String.Format("–ÓÒÁ‰‡‚Ì‡‰ÁÓ-{0}.xls", period)));
 			var book = new HSSFWorkbook();
-			var sheet = book.CreateSheet("–û—Ç—á–µ—Ç");
+			var sheet = book.CreateSheet("ŒÚ˜ÂÚ");
 			var reportRow = sheet.CreateRow(0);
 			reportRow.CreateCell(0).SetCellValue("DrugID");
 			reportRow.CreateCell(1).SetCellValue("InnR");
