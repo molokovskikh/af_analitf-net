@@ -74,8 +74,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					return SentLines.Value != null ? SentLines.Value.Count : 0;
 				})
 				.Subscribe(LinesCount);
+			IsLoading = new NotifyValue<bool>();
+			IsCurrentSelected.Where(v => v)
+				.Select(_ => false)
+				.Subscribe(IsLoading);
 		}
 
+		public NotifyValue<bool> IsLoading { get; set; }
 		public InlineEditWarning OrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
 		public AddressSelector AddressSelector { get; set; }
@@ -153,6 +158,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(End.Select(d => (object)d))
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(AddressSelector.FilterChanged)
+				.Do(_ => { IsLoading.Value = true; })
 				.Select(_ => RxQuery(s => {
 					var begin = Begin.Value;
 					var end = End.Value.AddDays(1);
@@ -169,12 +175,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 					var lines = query.OrderBy(l => l.ProductSynonym)
 						.ThenBy(l => l.ProductSynonym)
+						.Take(1000)
 						.ToList();
 					if (Settings.Value.HighlightUnmatchedOrderLines) {
-						lines.Each(l => {
-							var lookup = MatchedWaybills.GetLookUp(s, lines);
-							l.Configure(User, lookup);
-						});
+						var lookup = MatchedWaybills.GetLookUp(s, lines);
+						lines.Each(l => l.Configure(User, lookup));
 					}
 					else {
 						lines.Each(l => l.Configure(User));
@@ -183,6 +188,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				}))
 				.Switch()
 				.ObserveOn(UiScheduler)
+				.Do(_ => { IsLoading.Value = false; })
 				.Subscribe(SentLines, CloseCancellation.Token);
 		}
 
