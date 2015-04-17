@@ -8,7 +8,7 @@ if [ "$env" == "test" ]; then
 	url="http://test.analit.net/AnalitF.Net.Service.Test/"
 fi
 if [ "$env" == "production" ]; then
-	url="http://ios.analit.net/AnalitF.Net.Service/"
+	url="http://ios.analit.net/AnalitF.Net.Proxy/"
 fi
 
 if [ -z $url ]; then
