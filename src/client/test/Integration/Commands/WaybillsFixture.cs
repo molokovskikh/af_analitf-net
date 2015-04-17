@@ -135,7 +135,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var sendLog = fixture.SendLog;
 			Run(new UpdateCommand());
 
-			var waybills = localSession.Query<Waybill>().ToList();
+			var waybills = localSession.Query<Waybill>().Where(w => w.DocType == DocType.Waybill).ToList();
 			Assert.That(waybills.Count(), Is.GreaterThanOrEqualTo(1));
 			Assert.That(waybills[0].Sum, Is.GreaterThan(0));
 			Assert.That(waybills[0].RetailSum, Is.GreaterThan(0));
