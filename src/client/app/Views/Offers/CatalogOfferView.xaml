@@ -167,7 +167,7 @@
 
 		<StackPanel Grid.Row="3" Name="Legend" />
 
-		<Grid Grid.Row="4" Height="120">
+		<Grid Grid.Row="4" Height="130">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition />
@@ -175,8 +175,8 @@
 			</Grid.ColumnDefinitions>
 
 			<DockPanel Grid.Column="0">
-				<Label DockPanel.Dock="Top">Предыдущие заказы</Label>
-				<Label DockPanel.Dock="Bottom" FontWeight="Bold">
+				<Label DockPanel.Dock="Top" Padding="5, 0, 5, 0">Предыдущие заказы</Label>
+				<Label DockPanel.Dock="Bottom" FontWeight="Bold" Padding="5, 0, 5, 0">
 					<TextBlock>
 						Средняя цена/заказ по предыдущим заказам:
 						<Run Name="CurrentOffer_PrevOrderAvgCost" />

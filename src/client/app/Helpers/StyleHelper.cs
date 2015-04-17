@@ -584,7 +584,7 @@ namespace AnalitF.Net.Client.Helpers
 				});
 
 			if (legend.Children.Count == 0) {
-				legend.Children.Add(new Label { Content = "Подсказка" });
+				legend.Children.Add(new Label { Content = "Подсказка", Padding = new Thickness(5, 0, 5, 0) });
 				var stack = new WrapPanel();
 				stack.Orientation = Orientation.Horizontal;
 				stack.Children.AddRange(labels);
