@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.OrderRejectDetails"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+
+	<UserControl.InputBindings>
+		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+	</UserControl.InputBindings>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Отказ №:</Label>
+				<Label Grid.Row="0" Grid.Column="1" Name="Doc_DownloadId" FontWeight="Bold" />
+
+				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="3" Name="Doc_WriteTime" FontWeight="Bold" />
+
+				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Value_Count" FontWeight="Bold" />
+
+				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
+				<Label Grid.Row="1" Grid.Column="3" Name="Doc_Supplier_Name" FontWeight="Bold" />
+			</Grid>
+		</StackPanel>
+
+		<controls:DataGrid2 Grid.Row="1" x:Name="Lines">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Width="*" Header="Наименование" Binding="{Binding Product}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Производитель" Binding="{Binding Producer}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Количество" Binding="{Binding Count}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+	</Grid>
+</UserControl>

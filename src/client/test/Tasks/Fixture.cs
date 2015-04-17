@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 			var method = GetMethods().FirstOrDefault(m => m.Name.Match(name));
 			if (type == null && method == null) {
 				Console.WriteLine("Не удалось найти набор тестовых данных '{0}'," +
-					" использую list что просмотреть доступные наборы", name);
+					" используй list что просмотреть доступные наборы", name);
 				return;
 			}
 

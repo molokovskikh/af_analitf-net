@@ -9,6 +9,7 @@ using Common.NHibernate;
 using NHibernate;
 using NHibernate.Linq;
 using Test.Support;
+using Test.Support.Documents;
 using Address = AnalitF.Net.Client.Models.Address;
 using Offer = AnalitF.Net.Client.Models.Offer;
 using Order = AnalitF.Net.Client.Models.Order;
@@ -67,6 +68,23 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(address);
 			address.Value += " " + address.Id;
 			user.AvaliableAddresses.Add(address);
+		}
+
+		[Description("Создает отказ, на сервере"), Service]
+		public static void CreateOrderReject(ISession session, uint productId = 0)
+		{
+			var user = ServerFixture.User(session);
+			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
+			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
+			log.DocumentType = global::Test.Support.DocumentType.Reject;
+			session.Save(log);
+			session.Save(new TestDocumentSendLog(user, log));
+			var orderReject = new TestOrderReject(log);
+			var product = session.Query<TestProduct>().First(p => !p.Hidden);
+			if (productId > 0)
+				product = session.Load<TestProduct>(productId);
+			orderReject.CreateLine(product, 1);
+			session.Save(orderReject);
 		}
 	}
 }

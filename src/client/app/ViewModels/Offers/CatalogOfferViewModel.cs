@@ -202,7 +202,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Offers.Value = Sort(offers.ToList());
 		}
 
-		private List<Offer> Sort(List<Offer> offers)
+		private List<Offer> Sort(IList<Offer> offers)
 		{
 			if (offers == null)
 				return null;

@@ -25,6 +25,15 @@ namespace AnalitF.Net.Client.Models
 		string[] FieldsForValidate { get; }
 	}
 
+	public enum DocType
+	{
+		Waybill = 1,
+		Reject = 2
+	}
+
+	//на текущий момент эта модель может представлять как заголовок накладной так и заголовок отказа
+	//однако существует отдельная модель для заголовка отказа
+	//что бы можно было создать отдельную модель для общего отображения а модели развести по своим углам
 	public class Waybill : BaseStatelessObject, IDataErrorInfo2
 	{
 		private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Waybill));
@@ -53,6 +62,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual DateTime WriteTime { get; set; }
 		public virtual Address Address { get; set; }
 		public virtual Supplier Supplier { get; set; }
+		public virtual DocType? DocType { get; set; }
 
 		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
@@ -126,7 +136,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Type
 		{
-			get { return "Накладная"; }
+			get
+			{
+				if (DocType.GetValueOrDefault(Models.DocType.Waybill) == Models.DocType.Reject)
+					return "Отказ";
+				return "Накладная";
+			}
 		}
 
 		public virtual string SupplierName

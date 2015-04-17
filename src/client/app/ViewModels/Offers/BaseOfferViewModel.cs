@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			this.initOfferId = initOfferId;
 
 			LastEditOffer = new NotifyValue<Offer>();
-			Offers = new NotifyValue<List<Offer>>(new List<Offer>());
+			Offers = new NotifyValue<IList<Offer>>(new List<Offer>());
 			CurrentOffer = new NotifyValue<Offer>();
 			CurrentProducer = new NotifyValue<Producer>(EmptyProducer);
 			Producers = new NotifyValue<List<Producer>>(new List<Producer> { EmptyProducer });
@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<Producer> CurrentProducer { get; set; }
 
 		[Export]
-		public NotifyValue<List<Offer>> Offers { get; set; }
+		public NotifyValue<IList<Offer>> Offers { get; set; }
 
 		public NotifyValue<Offer> CurrentOffer { get; set; }
 
@@ -284,7 +284,7 @@ where c.Id = ?";
 			}
 		}
 
-		public static List<Offer> SortByMinCostInGroup<T>(List<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)
+		public static List<Offer> SortByMinCostInGroup<T>(IList<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)
 		{
 			var lookup = offer.GroupBy(key)
 				.ToDictionary(g => g.Key, g => g.Min(o => o.ResultCost));

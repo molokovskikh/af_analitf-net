@@ -9,11 +9,11 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class PriceOfferDocument : BaseDocument
 	{
-		private List<Offer> offers;
+		private IList<Offer> offers;
 		private Price price;
 		private Address address;
 
-		public PriceOfferDocument(List<Offer> offers, Price price, Address address)
+		public PriceOfferDocument(IList<Offer> offers, Price price, Address address)
 		{
 			this.offers = offers;
 			this.price = price;
