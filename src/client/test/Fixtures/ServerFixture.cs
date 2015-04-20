@@ -27,5 +27,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			return ConfigurationManager.AppSettings["DebugUser"] ?? Environment.UserName;
 		}
+
+		protected void ExecuteFixture(ServerFixture fixture, ISession session)
+		{
+			fixture.Config = Config;
+			fixture.Verbose = Verbose;
+			fixture.Execute(session);
+		}
 	}
 }

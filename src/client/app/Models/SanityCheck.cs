@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace AnalitF.Net.Client.Models
 {
 	public class SanityCheck : BaseCommand
 	{
-		public static bool Debug;
+		public bool Debug;
 
 		/// <summary>
 		/// true - если схема была обновлена
@@ -209,6 +210,13 @@ namespace AnalitF.Net.Client.Models
 						}
 					}
 
+					if (table.Name.Match("Offers")){
+						var col = table.ColumnIterator.First(c => c.Name.Match("ProductSynonym"));
+						if (!table.IndexIterator.Any(i => i.ContainsColumn(col))) {
+							alters.Add("alter table Offers add fulltext (ProductSynonym);");
+						}
+					}
+
 					if (alters.Count > 0) {
 						foreach (var alter in alters) {
 							try {
@@ -244,6 +252,24 @@ namespace AnalitF.Net.Client.Models
 			var export = new SchemaExport(Configuration);
 			export.Drop(Debug, true);
 			export.Create(Debug, true);
+			using (var connectionProvider = ConnectionProviderFactory.NewConnectionProvider(Configuration.Properties))
+			using (var connection = (DbConnection) connectionProvider.GetConnection()) {
+				var cmd = connection.CreateCommand();
+				var alters = new List<string> {
+					"alter table Offers add fulltext (ProductSynonym);"
+				};
+				foreach (var alter in alters) {
+					try {
+						if (log.IsDebugEnabled)
+							log.Debug(alter);
+						cmd.CommandText = alter;
+						cmd.ExecuteNonQuery();
+					}
+					catch(Exception e) {
+						log.Warn("Ошибка при обновлении схемы", e);
+					}
+				}
+			}
 		}
 	}
 }

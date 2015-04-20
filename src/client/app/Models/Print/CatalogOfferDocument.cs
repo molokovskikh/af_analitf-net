@@ -9,10 +9,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class CatalogOfferDocument : BaseDocument
 	{
-		private List<Offer> offers;
+		private IList<Offer> offers;
 		private string header;
 
-		public CatalogOfferDocument(string header, List<Offer> offers)
+		public CatalogOfferDocument(string header, IList<Offer> offers)
 		{
 			this.header = header;
 			this.offers = offers;

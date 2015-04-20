@@ -63,7 +63,8 @@ namespace AnalitF.Net.Test.Integration.Models
 				Directory.GetFiles(config.DbDir).Each(f => File.Delete(f));
 
 			check.Check();
-
+			var result = session.CreateSQLQuery("show create table Offers").UniqueResult<object[]>();
+			Assert.That(result[1].ToString(), Is.StringContaining("FULLTEXT KEY"));
 			Assert.That(Directory.Exists(config.DbDir));
 		}
 	}

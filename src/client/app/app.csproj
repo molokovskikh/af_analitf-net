@@ -286,6 +286,7 @@
     <Compile Include="Models\RackingMapSettings.cs" />
     <Compile Include="Models\RegulatorRegistry.cs" />
     <Compile Include="Models\Reject.cs" />
+    <Compile Include="Models\RejectOrderLine.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
@@ -324,6 +325,7 @@
     <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
     <Compile Include="ViewModels\Offers\MinCosts.cs" />
+    <Compile Include="ViewModels\OrderRejectDetails.cs" />
     <Compile Include="ViewModels\Orders\BaseOrderViewModel.cs" />
     <Compile Include="ViewModels\BaseScreen.cs" />
     <Compile Include="ViewModels\CatalogNameViewModel.cs" />
@@ -421,6 +423,9 @@
     </Compile>
     <Compile Include="Views\Offers\MinCosts.xaml.cs">
       <DependentUpon>MinCosts.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OrderRejectDetails.xaml.cs">
+      <DependentUpon>OrderRejectDetails.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Orders\Batch.xaml.cs">
       <DependentUpon>Batch.xaml</DependentUpon>
@@ -608,6 +613,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Offers\MinCosts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OrderRejectDetails.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

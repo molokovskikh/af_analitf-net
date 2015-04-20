@@ -143,7 +143,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (CurrentWaybill.Value == null)
 				return;
 
-			Shell.Navigate(new WaybillDetails(CurrentWaybill.Value.Id));
+			if (CurrentWaybill.Value.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
+				Shell.Navigate(new OrderRejectDetails(CurrentWaybill.Value.Id));
+			else
+				Shell.Navigate(new WaybillDetails(CurrentWaybill.Value.Id));
 		}
 
 		public void SearchLine()

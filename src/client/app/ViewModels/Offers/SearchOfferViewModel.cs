@@ -13,6 +13,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 {
 	public class SearchOfferViewModel : BaseOfferViewModel
 	{
+		private string initTerm;
+
+		public SearchOfferViewModel(string term)
+			: this()
+		{
+			initTerm = term;
+		}
+
 		public SearchOfferViewModel()
 		{
 			DisplayName = "Поиск в прайс-листах";
@@ -31,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Prices = new List<Selectable<Price>>();
 			}
 			Settings.Subscribe(_ => {
-				Offers.Value = SortOffers(Offers);
+				Offers.Value = SortOffers(Offers.Value);
 			});
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>();
@@ -53,7 +61,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					.ToList())
 				.ObserveOn(UiScheduler)
 				.Subscribe(Producers);
-
 			SearchBehavior.ActiveSearchTerm.Cast<object>()
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyBase.Changed())
@@ -62,9 +69,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					var term = SearchBehavior.ActiveSearchTerm.Value;
 					if (String.IsNullOrEmpty(term))
 						return Observable.Return(new List<Offer>());
-
+					IsLoading.Value = true;
 					return RxQuery(s => {
-						IsLoading.Value = true;
 						var query = StatelessSession.Query<Offer>();
 						query = Util.ContainsAny(query, o => o.ProductSynonym,
 							term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
@@ -80,7 +86,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 							query = query.Where(o => o.Price.BasePrice);
 
 						var result = SortOffers(query.Fetch(o => o.Price).ToList());
-						IsLoading.Value = false;
 						return result;
 					});
 				})
@@ -91,11 +96,36 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Do(v => {
 					LoadOrderItems(v);
 					CalculateRetailCost(v);
+					IsLoading.Value = false;
 				})
 				.Subscribe(Offers, CloseCancellation.Token);
+
+			if (!String.IsNullOrEmpty(initTerm)) {
+				IsLoading.Value = true;
+				RxQuery(s => {
+					var offers = StatelessSession
+						.CreateSQLQuery(@"
+select {o.*}, {p.*}, match (productsynonym) against (:term in natural language mode)
+from Offers o
+	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
+where match (ProductSynonym) against (:term in natural language mode)")
+						.AddEntity("o", typeof(Offer))
+						.AddJoin("p", "o.Price")
+						.SetParameter("term", initTerm)
+						.List<Offer>();
+					return offers;
+				})
+				.ObserveOn(UiScheduler)
+				.Do(v => {
+					LoadOrderItems(v);
+					CalculateRetailCost(v);
+					IsLoading.Value = false;
+				})
+				.Subscribe(Offers, CloseCancellation.Token);
+			}
 		}
 
-		private List<Offer> SortOffers(List<Offer> offers)
+		private IList<Offer> SortOffers(IList<Offer> offers)
 		{
 			if (Settings.Value.GroupByProduct) {
 				return SortByMinCostInGroup(offers, o => o.ProductId);

@@ -52,11 +52,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					r.ControlMinReq = true;
 				});
 
-			new MailWithAttachment {
-				Config = Config
-			}.Execute(session);
+			ExecuteFixture(new MailWithAttachment(), session);
 
 			DataMother.News(session);
+			SimpleFixture.CreateOrderReject(session, supplier.Prices[0].Core[0].Product.Id);
 
 			var requestLog = new RequestLog(session.Load<Common.Models.User>(Client.Users[0].Id), new Version());
 			var exporter = new Exporter(session, Config, requestLog) {
