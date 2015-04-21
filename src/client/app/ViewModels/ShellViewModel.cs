@@ -944,10 +944,12 @@ namespace AnalitF.Net.Client.ViewModels
 					success(task);
 				}
 				else if (task.IsFaulted) {
-					log.Debug(String.Format("Ошибка при выполнении задачи {0}", task), task.Exception);
+					log.Debug(String.Format("Ошибка при выполнении задачи {0}", viewModel.Text), task.Exception);
 					var baseException = task.Exception.GetBaseException();
-					if (ErrorHelper.IsCancalled(baseException))
+					if (ErrorHelper.IsCancalled(baseException)) {
+						log.Warn(String.Format("Отменена задача {0}", viewModel.Text));
 						return;
+					}
 
 					var error = ErrorHelper.TranslateException(task.Exception)
 						?? viewModel.GenericErrorMessage;
