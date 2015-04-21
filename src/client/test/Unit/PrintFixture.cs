@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -57,6 +58,26 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var doc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false).Build();
 			Assert.IsNotNull(doc);
+		}
+
+		[Test]
+		public void Build_selected_pages()
+		{
+			var baseDoc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false);
+			var flowDoc = baseDoc.Build();
+			var paginator = new WrapDocumentPaginator(flowDoc, baseDoc, PageRangeSelection.UserPages, new PageRange(1, 1));
+			paginator.GetPage(0);
+			Assert.AreEqual(paginator.PageCount, 1);
+		}
+
+		[Test]
+		public void Validate_range()
+		{
+			var baseDoc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false);
+			var flowDoc = baseDoc.Build();
+			var paginator = new WrapDocumentPaginator(flowDoc, baseDoc, PageRangeSelection.UserPages, new PageRange(1, 100));
+			paginator.GetPage(0);
+			Assert.AreEqual(2, paginator.PageCount);
 		}
 
 		private static string FlowDocumentToText(FlowDocument doc)

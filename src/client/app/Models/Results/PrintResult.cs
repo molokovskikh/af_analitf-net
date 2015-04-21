@@ -54,6 +54,7 @@ namespace AnalitF.Net.Client.Models.Results
 		public void Execute(ActionExecutionContext context)
 		{
 			var dialog = new PrintDialog();
+			dialog.UserPageRangeEnabled = true;
 			if (dialog.ShowDialog() != true)
 				return;
 
@@ -68,7 +69,8 @@ namespace AnalitF.Net.Client.Models.Results
 				var padding = flowDocument.PagePadding;
 				try {
 					var imageableArea = dialog.PrintQueue.GetPrintCapabilities().PageImageableArea;
-					var documentPaginator = GetPaginator(flowDocument, doc.Value.Item2);
+					var documentPaginator = GetPaginator(flowDocument, doc.Value.Item2, dialog.PageRangeSelection, dialog.PageRange);
+					var orientation = GetPageOrientation(documentPaginator);
 					if (imageableArea != null) {
 						if (imageableArea.OriginWidth > 0 || imageableArea.OriginHeight > 0)
 							flowDocument.PagePadding = new Thickness(
@@ -76,9 +78,12 @@ namespace AnalitF.Net.Client.Models.Results
 								imageableArea.OriginHeight,
 								0,
 								0);
-						documentPaginator.PageSize = new Size(imageableArea.ExtentWidth, imageableArea.ExtentHeight);
+						if (orientation == PageOrientation.Landscape)
+							documentPaginator.PageSize = new Size(imageableArea.ExtentHeight, imageableArea.ExtentWidth);
+						else
+							documentPaginator.PageSize = new Size(imageableArea.ExtentWidth, imageableArea.ExtentHeight);
 					}
-					var orientation = GetPageOrientation(documentPaginator);
+
 					if (orientation != PageOrientation.Unknown)
 						dialog.PrintTicket.PageOrientation = orientation;
 					dialog.PrintDocument(documentPaginator, name);
@@ -103,16 +108,21 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			get
 			{
-				var doc = Docs.First();
-				return GetPaginator(doc.Value.Item1, doc.Value.Item2);
+				return GetPaginator(PageRangeSelection.AllPages, new PageRange());
 			}
 		}
 
-		private DocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc)
+		public DocumentPaginator GetPaginator(PageRangeSelection selection, PageRange range)
+		{
+			var doc = Docs.First();
+			return GetPaginator(doc.Value.Item1, doc.Value.Item2, selection, range);
+		}
+
+		private DocumentPaginator GetPaginator(FlowDocument doc, BaseDocument baseDoc,
+			PageRangeSelection selection, PageRange range)
 		{
 			Prepare(doc);
-			var documentPaginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			return new WrapDocumentPaginator(documentPaginator, baseDoc);
+			return new WrapDocumentPaginator(doc, baseDoc, selection, range);
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;

@@ -1,3 +1,4 @@
+using System;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,11 +7,24 @@ using System.Windows.Documents;
 using System.Windows.Documents.Serialization;
 using System.Windows.Input;
 using System.Windows.Xps;
+using AnalitF.Net.Client.Models.Results;
+using log4net;
 
 namespace AnalitF.Net.Client.Controls
 {
 	public class DocumentViewer2 : DocumentViewer
 	{
+		private ILog log = LogManager.GetLogger(typeof(DocumentViewer2));
+		/// <summary>
+		/// проблема - что бы отображать только страницы выбранные в диалоге
+		/// нужно обернуть Paginator в другой Paginator который реализует логику выборки страниц
+		/// однако если получить Paginator из FixedDocument и передать на печать это приведет к ошибке
+		/// System.Windows.Xps.XpsSerializationException: FixedPage не может содержать другую FixedPage.
+		/// что бы избежать этого получает оригинальный flowdocument из которого был создан fixeddocument
+		/// и отправляем на печать его
+		/// </summary>
+		public PrintResult PrintResult;
+
 		public static DependencyProperty OrientationProperty
 			= DependencyProperty.RegisterAttached("Orientation",
 				typeof(PageOrientation),
@@ -63,6 +77,7 @@ namespace AnalitF.Net.Client.Controls
 				return;
 
 			var dialog = new PrintDialog();
+			dialog.UserPageRangeEnabled = true;
 			if (dialog.ShowDialog() != true)
 				return;
 
@@ -76,7 +91,9 @@ namespace AnalitF.Net.Client.Controls
 			_writer.WritingCompleted += Completed;
 			_writer.WritingCancelled += Cancelled;
 			CommandManager.InvalidateRequerySuggested();
-			if (Document is FixedDocumentSequence)
+			if (PrintResult != null)
+				_writer.WriteAsync(PrintResult.GetPaginator(dialog.PageRangeSelection, dialog.PageRange));
+			else if (Document is FixedDocumentSequence)
 				_writer.WriteAsync(Document as FixedDocumentSequence);
 			else if (Document is FixedDocument)
 				_writer.WriteAsync(Document as FixedDocument);
@@ -86,16 +103,26 @@ namespace AnalitF.Net.Client.Controls
 
 		private void Cancelled(object sender, WritingCancelledEventArgs e)
 		{
-			CleanUpWriter();
+			CleanUpWriter(e.Error);
 		}
 
 		private void Completed(object sender, WritingCompletedEventArgs e)
 		{
-			CleanUpWriter();
+			CleanUpWriter(e.Error);
 		}
 
-		private void CleanUpWriter()
+		private void CleanUpWriter(Exception e)
 		{
+			//кидать здесь исключение не кажется хорошей идей
+			//поэтому делаем это только в дебаге что бы было понятно почему
+			//ничего не печатает
+			if (e != null) {
+#if DEBUG
+				throw new Exception("Ошибка при печати документа", e);
+#else
+				log.Error("Ошибка при печати документа", e);
+#endif
+			}
 			if (_writer == null)
 				return;
 

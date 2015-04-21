@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -11,6 +12,17 @@ namespace AnalitF.Net.Client.Models.Print
 		private DocumentPaginator paginator;
 		private Size pageSize;
 		private Thickness margins;
+		private PageRangeSelection selection;
+		private PageRange range;
+
+		public WrapDocumentPaginator(FlowDocument flowDoc, BaseDocument baseDoc,
+			PageRangeSelection selection = PageRangeSelection.AllPages,
+			PageRange range = default(PageRange))
+			: this(((IDocumentPaginatorSource)flowDoc).DocumentPaginator, baseDoc)
+		{
+			this.selection = selection;
+			this.range = range;
+		}
 
 		public WrapDocumentPaginator(DocumentPaginator paginator, BaseDocument document)
 		{
@@ -24,8 +36,13 @@ namespace AnalitF.Net.Client.Models.Print
 		public override DocumentPage GetPage(int pageNumber)
 		{
 			//что бы paginator.PageCount вернул корректное значение нужно сформировать все страницы
-			var totalPages = 0;
-			while (paginator.GetPage(totalPages++) != DocumentPage.Missing) {}
+			if (!paginator.IsPageCountValid) {
+				var totalPages = 0;
+				while (paginator.GetPage(totalPages++) != DocumentPage.Missing) {}
+			}
+			if (selection == PageRangeSelection.UserPages){
+				pageNumber = pageNumber + Math.Min(range.PageFrom, paginator.PageCount) - 1;
+			}
 
 			var originalVisual = paginator.GetPage(pageNumber).Visual;
 
@@ -108,7 +125,16 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override int PageCount
 		{
-			get { return paginator.PageCount; }
+			get
+			{
+				if (selection == PageRangeSelection.UserPages) {
+					var max = paginator.PageCount;
+					if (max == 0)
+						return 0;
+					return Math.Min(range.PageTo, max) - Math.Min(max, range.PageFrom) + 1;
+				}
+				return paginator.PageCount;
+			}
 		}
 
 		public override Size PageSize
