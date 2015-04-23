@@ -81,7 +81,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var paginator = result.Paginator;
 			Assert.That(paginator, Is.Not.Null);
 			var doc = (OrderDocument)result.Docs[0].Value.Item2;
-			Assert.AreEqual(2, doc.order.Lines.Count());
+			Assert.AreEqual(2, doc.Lines.Count());
 		}
 
 		[Test]

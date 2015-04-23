@@ -10,23 +10,31 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class OrderDocument : BaseDocument
 	{
-		public IOrder order;
+		public IOrder Order;
+		public IOrderLine[] Lines;
+
+		public OrderDocument(IOrder order, IOrderLine[] lines)
+		{
+			Order = order;
+			Lines = lines;
+		}
 
 		public OrderDocument(IOrder order)
 		{
-			this.order = order;
+			Order = order;
+			Lines = order.Lines.ToArray();
 		}
 
 		protected override void BuildDoc()
 		{
 			var header = String.Format("Заявка № {0} от {1} на {2} от {3}",
-				order.DisplayId,
-				order.CreatedOn,
-				order.PriceName,
-				order.AddressName);
-			TwoColumnHeader(header, order.SafePrice.Phone);
-			Block(String.Format("Дата прайс-листа от {0}", order.SafePrice.PriceDate));
-			Block(order.PersonalComment);
+				Order.DisplayId,
+				Order.CreatedOn,
+				Order.PriceName,
+				Order.AddressName);
+			TwoColumnHeader(header, Order.SafePrice.Phone);
+			Block(String.Format("Дата прайс-листа от {0}", Order.SafePrice.PriceDate));
+			Block(Order.PersonalComment);
 
 			var headers = new[] {
 				new PrintColumn("№ п/п", 45),
@@ -38,10 +46,9 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Сумма", 80)
 			};
 
-			var lines = order.Lines.ToArray();
-			var count = lines.Count();
-			var sum = lines.Sum(l => l.MixedSum);
-			var rows = lines.Select((l, i) => new object[] {
+			var count = Lines.Count();
+			var sum = Lines.Sum(l => l.MixedSum);
+			var rows = Lines.Select((l, i) => new object[] {
 				i + 1,
 				l.ProductSynonym,
 				l.ProducerSynonym,
@@ -57,7 +64,7 @@ namespace AnalitF.Net.Client.Models.Print
 			foreach (var row in rows) {
 				BuildRow(headers, rowGroup, row);
 
-				var line = lines[index];
+				var line = Lines[index];
 				if (!String.IsNullOrEmpty(line.Comment)) {
 					var tableRow = new TableRow();
 					rowGroup.Rows.Add(tableRow);

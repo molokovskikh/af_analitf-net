@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -155,7 +157,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public PrintResult Print()
 		{
-			return new PrintResult(DisplayName, new OrderDocument(Order).Build());
+			//порядок сортировки должен быть такой же как в таблице
+			var lines = ((FrameworkElement)GetView()).Descendants<DataGrid>()
+				.First(g => g.Name == "Lines").Items.OfType<IOrderLine>().ToArray();
+			return new PrintResult(DisplayName, new OrderDocument(Order, lines).Build());
 		}
 
 		public void EnterLine()
