@@ -46,10 +46,15 @@
 					<ColumnDefinition />
 					<ColumnDefinition />
 					<ColumnDefinition />
+					<ColumnDefinition />
 				</Grid.ColumnDefinitions>
-				<Parts:AutoComment Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+				<CheckBox x:Name="HideJunk" Grid.Row="0" Grid.Column="0"
+					Style="{StaticResource FilterElement}" Focusable="False">
+					Скрыть уцененные
+				</CheckBox>
+				<Parts:AutoComment Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
 					cal:Bind.ModelWithoutContext="{Binding}" />
-				<ToggleButton Grid.Row="0" Grid.Column="1" Name="GroupByProduct">
+				<ToggleButton Grid.Row="0" Grid.Column="2" Name="GroupByProduct">
 					<FrameworkElement.Style>
 						<Style TargetType="ToggleButton" BasedOn="{StaticResource FilterToggleButton}">
 							<Style.Triggers>
@@ -63,9 +68,9 @@
 						</Style>
 					</FrameworkElement.Style>
 				</ToggleButton>
-				<ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource Filter}"
+				<ComboBox Grid.Row="0" Grid.Column="3" Style="{StaticResource Filter}"
 					x:Name="Filters" />
-				<ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Filter}"
+				<ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource Filter}"
 					x:Name="Producers" DisplayMemberPath="Name">
 					<ComboBox.ItemsPanel>
 						<ItemsPanelTemplate>
@@ -73,7 +78,7 @@
 						</ItemsPanelTemplate>
 					</ComboBox.ItemsPanel>
 				</ComboBox>
-				<ComboBox Grid.Row="1" Grid.Column="2" Style="{StaticResource Filter}"
+				<ComboBox Grid.Row="1" Grid.Column="3" Style="{StaticResource Filter}"
 					x:Name="Regions" />
 			</Grid>
 		</DockPanel>
@@ -81,8 +86,8 @@
 		<c:DataGrid2 x:Name="Offers" Grid.Row="1"
 			CanUserSortColumns="False"
 			cal:Message.Attach="[Event TextInput] = [Action SearchInCatalog($sender, $eventargs)]">
-			<DataGrid.Columns>
-				<DataGridTextColumn Width="177*"
+			<c:DataGrid2.Columns>
+				<c:DataGridTextColumnEx Width="177*"
 					Header="Название"
 					Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="89*"
@@ -137,7 +142,7 @@
 				<c:DataGridTextColumnEx Width="51*"
 					Header="Сумма"
 					Binding="{Binding OrderLine.ResultSum}" />
-			</DataGrid.Columns>
+			</c:DataGrid2.Columns>
 			<ItemsControl.GroupStyle>
 				<GroupStyle>
 					<GroupStyle.HeaderTemplate>

@@ -26,6 +26,7 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint id;
 
+		//для восстановления состояния
 		public WaybillDetails(long id)
 			: this((uint)id)
 		{

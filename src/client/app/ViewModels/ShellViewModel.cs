@@ -27,6 +27,7 @@ using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -1077,6 +1078,18 @@ namespace AnalitF.Net.Client.ViewModels
 				defaultItem = null;
 			}
 			CloseDisposable.Dispose();
+		}
+
+		public T GetPersistedValue<T>(string key, T defaultValue)
+		{
+			var result = PersistentContext.GetValueOrDefault(key, defaultValue);
+			if (result is T) {
+				return (T)result;
+			}
+			if (result is JObject) {
+				return ((JObject)result).ToObject<T>();
+			}
+			return defaultValue;
 		}
 	}
 }

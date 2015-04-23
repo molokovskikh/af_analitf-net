@@ -61,25 +61,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			var shell = screen.Shell;
 			if (shell != null) {
 				All.Value = (bool)shell.PersistentContext.GetValueOrDefault("ShowAllAddresses", All.Value);
-				var selectedAddresses = GetValueOrDefault(shell, "SelectedAddresses", new Dictionary<uint, bool>());
+				var selectedAddresses = shell.GetPersistedValue("SelectedAddresses", new Dictionary<uint, bool>());
 				Addresses.Each(a => a.IsSelected = selectedAddresses.GetValueOrDefault(a.Item.Id, true));
 			}
 			FilterChanged = Addresses.Select(a => a.Changed())
 				.Merge()
 				.Throttle(Consts.FilterUpdateTimeout, screen.UiScheduler)
 				.Merge(All.Changed());
-		}
-
-		private static T GetValueOrDefault<T>(ShellViewModel shell, string key, T defaultValue)
-		{
-			var result = shell.PersistentContext.GetValueOrDefault(key, defaultValue);
-			if (result is T) {
-				return (T)result;
-			}
-			if (result is JObject) {
-				return ((JObject)result).ToObject<T>();
-			}
-			return defaultValue;
 		}
 
 		public void Deinit()

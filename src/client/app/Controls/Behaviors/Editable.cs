@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			this.scheduler = scheduler ?? DispatcherScheduler.Current;
 		}
 
-		public void Attach(DataGrid2 grid)
+		public void Attach(DataGrid grid)
 		{
 			var keydown = Observable.FromEventPattern<KeyEventArgs>(grid, "KeyDown");
 			var textInput = Observable.FromEventPattern<TextCompositionEventArgs>(grid, "TextInput");

@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			NeedToCalculateDiff = true;
 			NavigateOnShowCatalog = true;
 
+			HideJunk = new NotifyValue<bool>();
 			OnlyBase = new NotifyValue<bool>();
 
 			if (Session != null) {
@@ -48,11 +49,21 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public SearchBehavior SearchBehavior { get; set; }
 		public List<Selectable<Price>> Prices { get; set; }
 		public NotifyValue<bool> OnlyBase { get; set; }
+		public NotifyValue<bool> HideJunk { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
+
+		protected override void OnDeactivate(bool close)
+		{
+			if (HideJunk.Value) {
+				Shell.PersistentContext["HideJunk"] = HideJunk.Value;
+			}
+			base.OnDeactivate(close);
+		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			HideJunk.Value = Shell.GetPersistedValue("HideJunk", HideJunk.Value);
 
 			RxQuery(s => new [] { EmptyProducer }
 					.Concat(s.Query<Producer>()
@@ -65,6 +76,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
+				.Merge(HideJunk.Changed())
 				.Select(v => {
 					var term = SearchBehavior.ActiveSearchTerm.Value;
 					if (String.IsNullOrEmpty(term))
@@ -84,6 +96,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 						if (OnlyBase)
 							query = query.Where(o => o.Price.BasePrice);
+						if (HideJunk)
+							query = query.Where(o => !o.Junk);
 
 						var result = SortOffers(query.Fetch(o => o.Price).ToList());
 						return result;
@@ -100,6 +114,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				})
 				.Subscribe(Offers, CloseCancellation.Token);
 
+			//используется в случае если нужно найти предложения по позиции отказа
 			if (!String.IsNullOrEmpty(initTerm)) {
 				IsLoading.Value = true;
 				RxQuery(s => {

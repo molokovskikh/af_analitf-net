@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Models
 				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
 		}
 
-		private string GetViewKey(DataGrid grid)
+		private string GetViewKey(FrameworkElement grid)
 		{
 			return Prefix + grid.Name;
 		}

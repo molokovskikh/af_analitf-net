@@ -47,6 +47,10 @@
 				Style="{StaticResource FilterElement}">
 				Только основные
 			</CheckBox>
+			<CheckBox x:Name="HideJunk"
+				Style="{StaticResource FilterElement}">
+				Скрыть уцененные
+			</CheckBox>
 			<Button x:Name="ShowCatalog" Style="{StaticResource FilterButton}">В каталог (F2)</Button>
 			<Button x:Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterButton}">
 				Показать синонимы (Ctrl+N)

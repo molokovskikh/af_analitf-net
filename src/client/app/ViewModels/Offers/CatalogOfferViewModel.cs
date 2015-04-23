@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			DisplayName = "Сводный прайс-лист";
 			Filters = new[] { "Все", "Основные", "Неосновные" };
 
+			HideJunk = new NotifyValue<bool>();
 			MaxProducerCosts = new NotifyValue<List<MaxProducerCost>>();
 			CurrentFilter = new NotifyValue<string>(Filters[0]);
 			Regions = new NotifyValue<List<string>>();
@@ -41,11 +42,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				(o, m) => o == null ? null : (decimal?)Math.Round(o.ResultCost * (1 + m / 100), 2))
 				.ToValue();
 
-			CurrentRegion.Cast<Object>()
-				.Merge(CurrentFilter)
-				.Merge(CurrentProducer)
-				//пропускаем начальные значения
-				.Skip(3)
+			//.Skip(1) - пропускаем начальные значения
+			CurrentRegion.Cast<Object>().Skip(1)
+				.Merge(CurrentFilter.Skip(1))
+				.Merge(CurrentProducer.Skip(1))
+				.Merge(HideJunk.Select(v => (object)v).Skip(1))
 				.Subscribe(_ => Update());
 
 			this.ObservableForProperty(m => m.CurrentOffer.Value)
@@ -53,6 +54,16 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					RetailCost.Recalculate();
 					RetailMarkup.Recalculate();
 				});
+		}
+
+		//для восстановления состояния
+		public CatalogOfferViewModel(long id)
+			: this()
+		{
+			filterCatalog = Session.Load<Catalog>((uint)id);
+			ViewHeader = filterCatalog.FullName;
+			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
+			CurrentCatalog = filterCatalog;
 		}
 
 		public CatalogOfferViewModel(Catalog catalog, OfferComposedId initOfferId = null)
@@ -80,6 +91,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public string[] Filters { get; set; }
 
+		public NotifyValue<bool> HideJunk { get; set; }
 		public NotifyValue<string> CurrentFilter { get; set; }
 		public NotifyValue<List<MaxProducerCost>> MaxProducerCosts { get; set; }
 		public NotifyValue<List<string>> Regions { get; set; }
@@ -93,21 +105,22 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			get { return User.CanPrint<CatalogOfferDocument>(); }
 		}
 
+		protected override void OnDeactivate(bool close)
+		{
+			if (HideJunk.Value) {
+				Shell.PersistentContext["HideJunk"] = HideJunk.Value;
+			}
+			base.OnDeactivate(close);
+		}
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			HideJunk.Value = Shell.GetPersistedValue("HideJunk", HideJunk.Value);
 
 			Update();
 			UpdateMaxProducers();
 			UpdateFilters();
-		}
-
-		protected override void SelectOffer()
-		{
-			CurrentOffer.Value = CurrentOffer.Value
-				?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId)
-				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
-				?? Offers.Value.FirstOrDefault();
 		}
 
 		protected override void OnActivate()
@@ -118,6 +131,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Manager.Warning("Нет предложений");
 				IsSuccessfulActivated = false;
 			}
+		}
+
+		protected override void SelectOffer()
+		{
+			CurrentOffer.Value = CurrentOffer.Value
+				?? Offers.Value.FirstOrDefault(o => o.Id == initOfferId)
+				?? Offers.Value.FirstOrDefault(o => o.Price.BasePrice)
+				?? Offers.Value.FirstOrDefault();
 		}
 
 		private void UpdateMaxProducers()
@@ -198,6 +219,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (filter == Filters[2]) {
 				offers = offers.Where(o => !o.Price.BasePrice);
 			}
+			if (HideJunk) {
+				offers = offers.Where(o => !o.Junk);
+			}
 
 			Offers.Value = Sort(offers.ToList());
 		}
@@ -251,5 +275,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			catalog.SearchText = text;
 			TryClose();
 		}
+
+#if DEBUG
+		public override object[] GetRebuildArgs()
+		{
+			return new object[] {
+				filterCatalog.Id
+			};
+		}
+#endif
 	}
 }

@@ -105,6 +105,16 @@ namespace AnalitF.Net.Client.Controls
 				};
 				viewer.Focusable = true;
 			}
+			//ошибка в datagrid
+			//при вычислении фактической ширины колонок datagrid пытается обределить ширину доступного поля
+			//для этого используется scollviewer но если нет ни одной строки scrollviewer будет null
+			//правим это
+			if (viewer != null) {
+				var host = GetProperty(this, "InternalScrollHost");
+				if (host == null) {
+					SetField(this, "_internalScrollHost", viewer);
+				}
+			}
 		}
 
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -246,23 +256,28 @@ namespace AnalitF.Net.Client.Controls
 			return size;
 		}
 
-		private void SetField(object target, string name, bool value)
+		private void SetField(object target, string name, object value)
 		{
-			var f = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+			FieldInfo f = null;
+			var type = target.GetType();
+			while (type != null && f == null) {
+				f = type.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+				type = type.BaseType;
+			}
 			f.SetValue(target, value);
 		}
 
-		private void Invoke(object value, string name)
+		private void Invoke(object target, string name)
 		{
-			var m = value.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic, null,
+			var m = target.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic, null,
 				new[] { typeof(object) }, null);
-			m.Invoke(value, new object[] { null });
+			m.Invoke(target, new object[] { null });
 		}
 
-		private object GetProperty(DataGrid2 dataGrid, string name)
+		private object GetProperty(object target, string name)
 		{
-			var prop = typeof(DataGrid2).GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
-			return prop.GetValue(dataGrid, null);
+			var prop = target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic);
+			return prop.GetValue(target, null);
 		}
 
 		protected override void OnExecutedCancelEdit(ExecutedRoutedEventArgs e)
