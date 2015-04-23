@@ -4,10 +4,9 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:cal="http://www.caliburnproject.org"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-	xmlns:ui="clr-namespace:AnalitF.Net.Client.UI"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference ReportLines}">
 
 	<i:Interaction.Behaviors>
@@ -15,15 +14,15 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalog" />
-		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalogWithMnnFilter" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
@@ -46,7 +45,7 @@
 			<TextBox x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				Style="{StaticResource SearchText}"
-				binders:SearchBinder.Grid="ReportLines" />
+				caliburn:SearchBinder.Grid="ReportLines" />
 			<ComboBox Style="{StaticResource FilterElement}" x:Name="Filter" />
 			<Button Name="ShowCatalog" Style="{StaticResource FilterElement}">В каталог (F2)</Button>
 			<Button Name="ShowCatalogWithMnnFilter" Style="{StaticResource FilterElement}">Синонимы (Ctrl+N)</Button>
@@ -64,7 +63,7 @@
 			CanUserDeleteRows="True"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('ReportLines')]"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
-			ui:NavBinder.Next="{x:Reference Offers}"
+			caliburn:NavBinder.Next="{x:Reference Offers}"
 			IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding BatchLine.Address.Name}" Width="*"
@@ -114,7 +113,7 @@
 
 		<c:DataGrid2 x:Name="Offers" Grid.Row="3" Grid.ColumnSpan="2"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('Offers')]"
-			ui:NavBinder.Prev="{x:Reference ReportLines}"
+			caliburn:NavBinder.Prev="{x:Reference ReportLines}"
 			CanUserSelectMultipleItems="False"
 			CanUserSortColumns="False">
 			<DataGrid.Columns>

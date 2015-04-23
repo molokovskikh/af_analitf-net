@@ -3,11 +3,11 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	Height="600"
 	Width="800">
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="TryClose" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="TryClose" />
 	</UserControl.InputBindings>
 
 	<TabControl>

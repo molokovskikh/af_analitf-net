@@ -1,7 +1,6 @@
 <UserControl x:Class="AnalitF.Net.Client.Views.Orders.Correction"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"

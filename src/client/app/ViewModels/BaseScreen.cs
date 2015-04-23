@@ -21,8 +21,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config;
+using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -41,6 +41,7 @@ using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using ILog = log4net.ILog;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -85,7 +86,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static IScheduler TestUiSchuduler;
 
 		public NotifyValue<Settings> Settings { get; private set; }
-		public Extentions.WindowManager Manager { get; private set; }
+		public WindowManager Manager { get; private set; }
 		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
 
 		public ShellViewModel Shell;
@@ -113,7 +114,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
 			log = log4net.LogManager.GetLogger(GetType());
-			Manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			Manager = (WindowManager)IoC.Get<IWindowManager>();
 			OnCloseDisposable.Add(CloseCancellation);
 			OnCloseDisposable.Add(ResultsSink);
 

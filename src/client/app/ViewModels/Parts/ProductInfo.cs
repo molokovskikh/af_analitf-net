@@ -10,7 +10,7 @@ using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {

@@ -11,7 +11,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
@@ -108,7 +107,7 @@ namespace AnalitF.Net.Test.Integration
 			ViewModelBinder.Bind(model, view, null);
 
 			Assert.That(view.CommandBindings.Count, Is.EqualTo(2));
-			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Client.Binders.Commands.InvokeViewModel));
+			Assert.That(view.CommandBindings[0].Command, Is.EqualTo(Client.Config.Caliburn.Commands.InvokeViewModel));
 		}
 
 		[Test]

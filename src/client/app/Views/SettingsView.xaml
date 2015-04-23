@@ -1,9 +1,9 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.SettingsView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:Binders="clr-namespace:AnalitF.Net.Client.Binders"
-	xmlns:cal="http://www.caliburnproject.org" Height="500" Width="700"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders">
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	Height="500" Width="700">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />
@@ -209,7 +209,7 @@
 						<StackPanel Grid.Column="1">
 							<Label>Пароль</Label>
 							<PasswordBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyPassword"
-								Binders:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
+								caliburn:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
 									Mode=TwoWay,
 									UpdateSourceTrigger=PropertyChanged}" />
 						</StackPanel>
@@ -255,7 +255,7 @@
 						Группировать файлы накладных по поставщику
 					</CheckBox>
 					<TextBlock>
-						<Hyperlink Command="binders:Commands.NavigateUri" NavigateUri="http://stat.analit.net/ci/">
+						<Hyperlink Command="caliburn:Commands.NavigateUri" NavigateUri="http://stat.analit.net/ci/">
 							Сервер управления
 						</Hyperlink>
 					</TextBlock>

@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Common.Tools;
 using Microsoft.Win32;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -15,7 +16,7 @@ namespace AnalitF.Net.Client.Models.Results
 		private log4net.ILog logger = log4net.LogManager.GetLogger(typeof(SaveFileResult));
 
 		public SaveFileDialog Dialog = new SaveFileDialog();
-		public Extentions.WindowManager Manager;
+		public WindowManager Manager;
 
 		public SaveFileResult(Tuple<string, string>[] formats, string filename = null)
 		{

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config.Caliburn;
 using Caliburn.Micro;
 using Ionic.Zip;
 using NUnit.Framework;

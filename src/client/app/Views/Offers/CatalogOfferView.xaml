@@ -6,9 +6,9 @@
 	xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
 
 	<i:Interaction.Behaviors>
@@ -16,13 +16,13 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowPrice" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 

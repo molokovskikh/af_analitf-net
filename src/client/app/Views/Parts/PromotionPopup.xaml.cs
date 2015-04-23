@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config.Caliburn;
 
 namespace AnalitF.Net.Client.Views.Parts
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Castle.Components.DictionaryAdapter;

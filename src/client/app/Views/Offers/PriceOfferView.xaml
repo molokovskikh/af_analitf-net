@@ -5,9 +5,9 @@
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
 
 	<i:Interaction.Behaviors>
@@ -15,21 +15,21 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalog" />
-		<KeyBinding Gesture="F4" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F4" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="CancelFilter" />
-		<KeyBinding Gesture="F5" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F5" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="FilterOrdered" />
-		<KeyBinding Gesture="F6" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F6" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="FilterLeader" />
-		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalogWithMnnFilter" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
@@ -64,7 +64,7 @@
 			<TextBox x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				Style="{StaticResource SearchText}"
-				binders:SearchBinder.Grid="Offers" />
+				caliburn:SearchBinder.Grid="Offers" />
 
 			<StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
 				<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />

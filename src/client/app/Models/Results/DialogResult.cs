@@ -4,6 +4,7 @@ using System.Windows;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NPOI.SS.Formula.Functions;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -49,7 +50,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Execute(ActionExecutionContext context)
 		{
-			var manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			var manager = (WindowManager)IoC.Get<IWindowManager>();
 			var args = new ResultCompletionEventArgs();
 			IDictionary<string, object> settings = null;
 			if (FullScreen) {

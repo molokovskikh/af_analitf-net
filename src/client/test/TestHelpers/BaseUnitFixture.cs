@@ -10,7 +10,7 @@ using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {

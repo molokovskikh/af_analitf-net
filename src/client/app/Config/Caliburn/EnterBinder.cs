@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interactivity;
-using System.Windows.Media;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Inflector;
-using ReactiveUI.Blend;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class ObservableTrigger : TriggerBase<FrameworkElement>
 	{

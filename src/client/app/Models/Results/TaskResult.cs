@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -35,6 +36,6 @@ namespace AnalitF.Net.Client.Models.Results
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
-		public Extentions.WindowManager Manager;
+		public WindowManager Manager;
 	}
 }

@@ -7,7 +7,7 @@ using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class ContentElementBinder
 	{

@@ -5,9 +5,9 @@
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:Views="clr-namespace:AnalitF.Net.Client.Views"
 	xmlns:Parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
 
 	<i:Interaction.Behaviors>
@@ -15,15 +15,15 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F2" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalog" />
-		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowCatalogWithMnnFilter" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
@@ -41,7 +41,7 @@
 			<TextBox x:Name="SearchText"
 				Style="{StaticResource SearchText}"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
-				binders:SearchBinder.Grid="Offers" />
+				caliburn:SearchBinder.Grid="Offers" />
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
 			<CheckBox x:Name="OnlyBase"
 				Style="{StaticResource FilterElement}">

@@ -4,7 +4,7 @@ using System.Windows.Input;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public static class Commands
 	{

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Windows.Forms;
 using Caliburn.Micro;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
 	public class NativeDialogResult<T> : IResult where T : CommonDialog
 	{
 		public T Dialog;
-		public Extentions.WindowManager Manager;
+		public WindowManager Manager;
 
 		public NativeDialogResult(T dialog)
 		{

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,7 +8,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class SearchBinder
 	{

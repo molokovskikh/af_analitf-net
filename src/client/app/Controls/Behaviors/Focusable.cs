@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interactivity;
 using System.Windows.Threading;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 using Action = System.Action;

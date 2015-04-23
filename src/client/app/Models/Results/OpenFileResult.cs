@@ -1,6 +1,7 @@
 ﻿using System;
 using Caliburn.Micro;
 using Microsoft.Win32;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -8,7 +9,7 @@ namespace AnalitF.Net.Client.Models.Results
 	{
 		public OpenFileDialog Dialog = new OpenFileDialog();
 		public event EventHandler<ResultCompletionEventArgs> Completed;
-		public Extentions.WindowManager Manager;
+		public WindowManager Manager;
 
 		public void Execute(ActionExecutionContext context)
 		{

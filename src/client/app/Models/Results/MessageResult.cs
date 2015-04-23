@@ -1,5 +1,6 @@
 ﻿using System;
 using Caliburn.Micro;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Models.Results
 {
@@ -33,7 +34,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void Execute(ActionExecutionContext context)
 		{
-			var manager = (Extentions.WindowManager)IoC.Get<IWindowManager>();
+			var manager = (WindowManager)IoC.Get<IWindowManager>();
 			switch (Type) {
 				case MessageType.Error:
 					manager.Error(Message);

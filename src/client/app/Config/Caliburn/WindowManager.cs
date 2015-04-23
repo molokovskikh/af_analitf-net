@@ -1,20 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
-using AnalitF.Net.Client.Binders;
-using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using DialogResult = System.Windows.Forms.DialogResult;
 
-namespace AnalitF.Net.Client.Extentions
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class Win32Stub : System.Windows.Forms.IWin32Window
 	{
@@ -26,7 +21,7 @@ namespace AnalitF.Net.Client.Extentions
 		public IntPtr Handle { get; private set; }
 	}
 
-	public class WindowManager : Caliburn.Micro.WindowManager
+	public class WindowManager : global::Caliburn.Micro.WindowManager
 	{
 #if DEBUG
 		public bool UnitTesting;

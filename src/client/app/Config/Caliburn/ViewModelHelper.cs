@@ -6,7 +6,7 @@ using System.Windows.Input;
 using Caliburn.Micro;
 using Common.Tools;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class ViewModelHelper
 	{

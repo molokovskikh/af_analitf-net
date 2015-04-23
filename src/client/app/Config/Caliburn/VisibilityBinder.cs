@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using Caliburn.Micro;
-using NPOI.SS.Formula.Functions;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class VisibilityBinder
 	{

@@ -8,15 +8,16 @@ using Caliburn.Micro;
 using Common.Tools;
 using ReactiveUI;
 using Message = Common.Tools.Message;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class InlineEditWarning : ViewAware
 	{
 		private string _orderWarning;
-		private Extentions.WindowManager _manager;
+		private WindowManager _manager;
 
-		public InlineEditWarning(IScheduler scheduler, Extentions.WindowManager manager)
+		public InlineEditWarning(IScheduler scheduler, WindowManager manager)
 		{
 			_manager = manager;
 

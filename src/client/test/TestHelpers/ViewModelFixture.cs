@@ -25,6 +25,7 @@ using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 using LogManager = log4net.LogManager;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -65,7 +66,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 	public class ViewModelFixture : DbFixture
 	{
-		protected Extentions.WindowManager manager;
+		protected WindowManager manager;
 		protected TestScheduler testScheduler;
 		protected Lazy<ShellViewModel> lazyshell;
 		protected MessageBus bus;
@@ -133,9 +134,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			get { return lazyshell.Value; }
 		}
 
-		public static Extentions.WindowManager StubWindowManager(Lazy<ShellViewModel> shell = null)
+		public static WindowManager StubWindowManager(Lazy<ShellViewModel> shell = null)
 		{
-			var manager = new Extentions.WindowManager();
+			var manager = new WindowManager();
 			manager.UnitTesting = true;
 			IoC.GetInstance = (type, key) => {
 				if (type == typeof(IWindowManager))

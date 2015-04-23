@@ -8,13 +8,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.ViewModels;
-using Caliburn.Micro;
 using Common.Tools;
-using NHibernate.Loader.Entity;
-using ReactiveUI.Xaml;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class QuickSearchBehavior
 	{

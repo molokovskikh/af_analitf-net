@@ -4,7 +4,7 @@
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
 
 	<i:Interaction.Behaviors>
@@ -12,7 +12,7 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
 	<Grid>

@@ -10,7 +10,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Interactivity;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
@@ -20,7 +19,7 @@ using Xceed.Wpf.Toolkit.Primitives;
 using DataGrid = System.Windows.Controls.DataGrid;
 using Selector = System.Windows.Controls.Primitives.Selector;
 
-namespace AnalitF.Net.Client.UI
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class Conventions
 	{

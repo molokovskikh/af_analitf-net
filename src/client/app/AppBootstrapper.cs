@@ -15,7 +15,6 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
-using AnalitF.Net.Client.Binders;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -32,6 +31,7 @@ using ReactiveUI;
 using log4net.Config;
 using ILog = log4net.ILog;
 using LogManager = Caliburn.Micro.LogManager;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client
 {
@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client
 		protected override object GetInstance(Type service, string key)
 		{
 			if (typeof(IWindowManager) == service)
-				return new Extentions.WindowManager();
+				return new WindowManager();
 			return base.GetInstance(service, key);
 		}
 

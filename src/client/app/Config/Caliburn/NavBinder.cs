@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 
-namespace AnalitF.Net.Client.UI
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class NavBinder
 	{

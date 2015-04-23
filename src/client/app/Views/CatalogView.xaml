@@ -1,15 +1,15 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.CatalogView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	IsEnabled="{Binding IsEnabled.Value}">
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="F4" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchViewOffersByCatalog" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
-		<KeyBinding Gesture="CTRL+N" Command="binders:Commands.InvokeViewModel" CommandParameter="SwitchMnnFilter" />
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F4" Command="caliburn:Commands.InvokeViewModel" CommandParameter="SwitchViewOffersByCatalog" />
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel" CommandParameter="SwitchMnnFilter" />
 	</UserControl.InputBindings>
 
 	<Grid>

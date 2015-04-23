@@ -4,7 +4,7 @@ using System.Windows;
 using Caliburn.Micro;
 using EventTrigger = System.Windows.Interactivity.EventTrigger;
 
-namespace AnalitF.Net.Client.Binders
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class EnabledBinder
 	{

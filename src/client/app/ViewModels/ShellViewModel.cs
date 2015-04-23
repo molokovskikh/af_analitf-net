@@ -15,7 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
-using AnalitF.Net.Client.Binders;
+using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -34,7 +34,7 @@ using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
-using WindowManager = AnalitF.Net.Client.Extentions.WindowManager;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {

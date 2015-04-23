@@ -18,6 +18,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Doc = new NotifyValue<OrderReject>();
 			Lines = new NotifyValue<List<OrderRejectLine>>();
 			CurrentLine = new NotifyValue<OrderRejectLine>();
+			DisplayName = "Отказ";
 		}
 
 		public NotifyValue<OrderRejectLine> CurrentLine { get; set; }

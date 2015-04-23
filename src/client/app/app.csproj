@@ -161,16 +161,16 @@
     <Compile Include="..\..\service\app\Models\Contract.cs">
       <Link>Models\Contract.cs</Link>
     </Compile>
-    <Compile Include="Binders\BaseShell.cs" />
-    <Compile Include="Binders\Commands.cs" />
-    <Compile Include="Binders\ContentElementBinder.cs" />
-    <Compile Include="Binders\EnabledBinder.cs" />
-    <Compile Include="Binders\NotifyValueSupport.cs" />
-    <Compile Include="Binders\VisibilityBinder.cs" />
-    <Compile Include="Binders\EnterBinder.cs" />
-    <Compile Include="Binders\QuickSearchBehavior.cs" />
-    <Compile Include="Binders\SearchBinder.cs" />
-    <Compile Include="Binders\ViewModelHelper.cs" />
+    <Compile Include="Config\Caliburn\BaseShell.cs" />
+    <Compile Include="Config\Caliburn\Commands.cs" />
+    <Compile Include="Config\Caliburn\ContentElementBinder.cs" />
+    <Compile Include="Config\Caliburn\EnabledBinder.cs" />
+    <Compile Include="Config\Caliburn\NotifyValueSupport.cs" />
+    <Compile Include="Config\Caliburn\VisibilityBinder.cs" />
+    <Compile Include="Config\Caliburn\EnterBinder.cs" />
+    <Compile Include="Config\Caliburn\QuickSearchBehavior.cs" />
+    <Compile Include="Config\Caliburn\SearchBinder.cs" />
+    <Compile Include="Config\Caliburn\ViewModelHelper.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="Config\Env.cs" />
     <Compile Include="Config\Initializers\Caliburn.cs" />
@@ -189,8 +189,8 @@
     <Compile Include="Controls\Behaviors\Selectable.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
-    <Compile Include="Binders\Converters.cs" />
-    <Compile Include="Binders\WindowManager.cs" />
+    <Compile Include="Helpers\Converters.cs" />
+    <Compile Include="Config\Caliburn\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
     <Compile Include="Controls\DocumentViewer2.cs" />
     <Compile Include="Controls\GrayScaleEffect.cs" />
@@ -316,8 +316,8 @@
     <Compile Include="Models\WaybillOrder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\Conventions.cs" />
-    <Compile Include="UI\NavBinder.cs" />
+    <Compile Include="Config\Caliburn\Conventions.cs" />
+    <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Feedback.cs" />

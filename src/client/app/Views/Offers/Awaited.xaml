@@ -5,10 +5,9 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
-	xmlns:ui="clr-namespace:AnalitF.Net.Client.UI"
-	xmlns:binders="clr-namespace:AnalitF.Net.Client.Binders"
 	xmlns:parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Items}">
 
 	<i:Interaction.Behaviors>
@@ -16,11 +15,11 @@
 	</i:Interaction.Behaviors>
 
 	<UserControl.InputBindings>
-		<KeyBinding Gesture="F1" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="SPACE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowDescription" />
-		<KeyBinding Gesture="ESCAPE" Command="binders:Commands.InvokeViewModel"
+		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
@@ -46,7 +45,7 @@
 		</StackPanel>
 
 		<controls:DataGrid2 x:Name="Items" Grid.Row="1" Grid.ColumnSpan="2"
-			ui:NavBinder.Next="{x:Reference Offers}"
+			caliburn:NavBinder.Next="{x:Reference Offers}"
 			CanUserSortColumns="False"
 			CanUserDeleteRows="True"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('Items')]">
@@ -64,7 +63,7 @@
 
 		<controls:DataGrid2 x:Name="Offers" Grid.Row="3" Grid.ColumnSpan="2"
 			CanUserSortColumns="False"
-			ui:NavBinder.Prev="{x:Reference Items}"
+			caliburn:NavBinder.Prev="{x:Reference Items}"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('Offers')]">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="177*"
