@@ -20,16 +20,18 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private NotifyValue<OrderLine> current;
 		private uint lastEditCountCandidate;
 		private uint lastValidCount;
+		private NotifyValue<IList> lines;
 
-		public Editor(InlineEditWarning warning, WindowManager manager, NotifyValue<OrderLine> current)
+		public Editor(InlineEditWarning warning, WindowManager manager,
+			NotifyValue<OrderLine> current,
+			NotifyValue<IList> lines)
 		{
 			this.warning = warning;
 			this.manager = manager;
 			this.current = current;
+			this.lines = lines;
 			current.Subscribe(x => lastEditCountCandidate = x != null ?  x.Count : 0);
 		}
-
-		public IList Lines { get; set; }
 
 		private void ShowValidationError(List<Message> messages)
 		{
@@ -74,7 +76,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					if (order.IsEmpty)
 						order.Address.Orders.Remove(order);
 				}
-				Lines.Remove(orderLine);
+				if (lines.Value != null)
+					lines.Value.Remove(orderLine);
 			}
 
 			if (order != null)

@@ -95,14 +95,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				currentOrderLine = CurrentLine.Select(v => (OrderLine)v).ToValue();
 				currentOrderLine.Subscribe(v => CurrentLine.Value = v);
 			}
-			editor = new Editor(OrderWarning, Manager, currentOrderLine);
+			editor = new Editor(OrderWarning, Manager, currentOrderLine, Lines.Cast<IList>().ToValue());
 			CurrentLine
 				.Subscribe(_ => {
 					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
 				});
 
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
-			Lines.Subscribe(_ => editor.Lines = Lines.Value as IList);
 		}
 
 		protected override void OnViewAttached(object view, object context)
@@ -117,6 +116,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (OnlyWarning)
 				return Source
 					.OfType<OrderLine>().Where(l => l.SendResult != LineResultStatus.OK)
+					.OrderBy(l => l.ProducerSynonym)
 					.LinkTo(Source);
 
 			return Source;
@@ -144,8 +144,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				Order.Lines.Each(l => l.Configure(User));
 			}
 
-
-			Source = new ObservableCollection<IOrderLine>(Order.Lines);
+			Source = new ObservableCollection<IOrderLine>(Order.Lines.OrderBy(l => l.ProductSynonym));
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
 				.Subscribe(_ => {

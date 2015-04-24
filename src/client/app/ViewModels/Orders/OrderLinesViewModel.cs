@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -44,9 +45,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentLine);
 			AddressSelector = new AddressSelector(Session, this);
-			editor = new Editor(OrderWarning, Manager, CurrentLine);
+			editor = new Editor(OrderWarning, Manager, CurrentLine, Lines.Cast<IList>().ToValue());
 
-			Lines.CatchSubscribe(v => editor.Lines = v);
 			var currentLinesChanged = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
 				.Throttle(Consts.RefreshOrderStatTimeout, UiScheduler)
 				.Select(e => new Stat(Address));
@@ -220,10 +220,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.ToArray();
 				query = query.Where(l => addresses.Contains(l.Order.Address.Id));
 
-				Lines.Value = query
-					.OrderBy(l => l.ProductSynonym)
-					.ThenBy(l => l.ProducerSynonym)
-					.ToObservableCollection();
+				//осознанно сортировка по первичному ключу
+				Lines.Value = query.ToObservableCollection();
 
 				Calculate();
 			}
