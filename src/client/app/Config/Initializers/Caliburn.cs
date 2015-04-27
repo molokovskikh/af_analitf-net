@@ -92,13 +92,17 @@ namespace AnalitF.Net.Client.Config.Initializers
 				//что бы избежать множественных подписок
 				if (baseScreen != null && !baseScreen.ResultsSink.HasObservers) {
 					baseScreen.ResultsSink
-						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
+						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator(), new ActionExecutionContext {
+							View = view
+						}),
 							baseScreen.CloseCancellation);
 				}
 				var baseShell = viewModel as BaseShell;
 				if (baseShell != null && !baseShell.ResultsSink.HasObservers) {
 					baseShell.ResultsSink
-						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator()),
+						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator(), new ActionExecutionContext {
+							View = view
+						}),
 							baseShell.CancelDisposable);
 				}
 			};

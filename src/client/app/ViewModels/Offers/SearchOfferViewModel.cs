@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NHibernate.Linq;

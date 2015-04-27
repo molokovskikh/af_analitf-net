@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
@@ -23,6 +24,11 @@ namespace AnalitF.Net.Client.Views.Offers
 					Source = Offers,
 					Converter = new LambdaConverter<double>(v => v * 0.7)
 				});
+			SearchText.KeyDown += (sender, args) => {
+				if (args.Key == Key.Return) {
+					DataGridHelper.Focus(Offers);
+				}
+			};
 		}
 
 		public void ApplyStyles()

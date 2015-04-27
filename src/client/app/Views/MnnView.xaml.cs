@@ -22,6 +22,11 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 			ApplyStyles();
+			SearchText.KeyDown += (sender, args) => {
+				if (args.Key == Key.Return) {
+					DataGridHelper.Focus(Mnns);
+				}
+			};
 		}
 
 		public void ApplyStyles()
