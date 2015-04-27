@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -135,6 +136,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.Fetch(o => o.Address)
 					.Take(1000)
 					.ToObservableCollection();
+				SentOrders.Each(o => o.CalculateStyle(Address));
 			}
 
 			//обновить данные нужно в нескольких ситуациях
@@ -152,6 +154,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.SelectMany(a => a.Orders)
 					.OrderBy(o => o.PriceName)
 					.ToList();
+				orders.Each(o => o.CalculateStyle(Address));
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};

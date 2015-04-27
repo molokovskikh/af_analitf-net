@@ -133,6 +133,12 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Style("Order.AddressName")]
+		public virtual bool IsCurrentAddress
+		{
+			get { return Order.IsCurrentAddress; }
+		}
+
 		[Style("Sum", Description = "Корректировка по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsSendError
 		{

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 
@@ -199,6 +200,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Style("AddressName"), Ignore]
+		public virtual bool IsCurrentAddress { get; set; }
+
 		public virtual bool IsPriceExists()
 		{
 			bool priceNotFound;
@@ -226,6 +230,11 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return String.Format("Заявка поставщика {0} на сумму {1}", Price, Sum);
+		}
+
+		public virtual bool CalculateStyle(Address address)
+		{
+			return IsCurrentAddress = IsAddressExists() && Address.Id == address.Id;
 		}
 	}
 }

@@ -179,9 +179,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.ToList();
 					if (Settings.Value.HighlightUnmatchedOrderLines) {
 						var lookup = MatchedWaybills.GetLookUp(s, lines);
+						lines.Each(l => l.Order.CalculateStyle(Address));
 						lines.Each(l => l.Configure(User, lookup));
 					}
 					else {
+						lines.Each(l => l.Order.CalculateStyle(Address));
 						lines.Each(l => l.Configure(User));
 					}
 					return lines;
@@ -222,6 +224,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 				//осознанно сортировка по первичному ключу
 				Lines.Value = query.ToObservableCollection();
+				Lines.Value.Each(l => l.Order.CalculateStyle(Address));
 
 				Calculate();
 			}

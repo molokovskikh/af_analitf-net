@@ -68,6 +68,12 @@ namespace AnalitF.Net.Client.Models
 		[Ignore, Style(Description = "Несоответствие в накладной")]
 		public virtual bool IsUnmatchedByWaybill { get; set; }
 
+		[Style("Order.AddressName")]
+		public virtual bool IsCurrentAddress
+		{
+			get { return Order.IsCurrentAddress; }
+		}
+
 		public virtual void Configure(User user, Dictionary<uint, WaybillLine[]> matchedWaybillLines)
 		{
 			Configure(user);

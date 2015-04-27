@@ -7,6 +7,7 @@ using System.Text;
 using AnalitF.Net.Client.Config.Initializers;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Proxy;
@@ -194,6 +195,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			get { return Lines.Any(l => l.IsSendError); }
 		}
+
+		[Style("AddressName"), Ignore, JsonIgnore]
+		public virtual bool IsCurrentAddress { get; set; }
 
 		public virtual bool IsEmpty
 		{
@@ -413,6 +417,11 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			Lines.Each(l => l.Apply(result.Lines.FirstOrDefault(r => r.ClientLineId == l.Id)));
+		}
+
+		public virtual void CalculateStyle(Address address)
+		{
+			IsCurrentAddress = IsAddressExists() && Address.Id == address.Id;
 		}
 	}
 }
