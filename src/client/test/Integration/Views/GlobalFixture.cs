@@ -324,7 +324,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				}
 				else {
 					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
-					Assert.AreEqual(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
 					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
 				}
 			});
