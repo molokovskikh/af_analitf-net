@@ -45,6 +45,24 @@ using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class PersistedValue
+	{
+		public object DefaultValue;
+		public string Key;
+		public Func<object> Getter;
+		public Action<object> Setter;
+
+		public static PersistedValue Create<T>(NotifyValue<T> value, string key)
+		{
+			return new PersistedValue {
+				DefaultValue = value.Value,
+				Key = key,
+				Getter = () => value.Value,
+				Setter = v => value.Value = (T)v,
+			};
+		}
+	}
+
 	public class AppTestContext
 	{
 		public AppTestContext(User user)
@@ -109,6 +127,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static AppTestContext TestContext;
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
+		protected List<PersistedValue> persisted = new List<PersistedValue>();
 
 		public BaseScreen()
 		{
@@ -201,6 +220,19 @@ namespace AnalitF.Net.Client.ViewModels
 				tableSettings.Persisted = Shell.ViewSettings;
 				tableSettings.Prefix = GetType().Name + ".";
 				excelExporter.ExportDir = Shell.Config.TmpDir;
+				try {
+					foreach (var value in persisted) {
+						value.Setter(Shell.GetPersistedValue(value.Key, value.DefaultValue));
+					}
+				}
+				catch(Exception e) {
+
+	#if DEBUG
+					throw;
+	#else
+					log.Error("Не удалось восстановить состояние", e);
+	#endif
+				}
 			}
 		}
 
@@ -241,6 +273,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
+			foreach (var value in persisted) {
+				Shell.PersistentContext[value.Key] = value.Getter();
+			}
+
 			if (close)
 				OnCloseDisposable.Dispose();
 
@@ -644,6 +680,11 @@ namespace AnalitF.Net.Client.ViewModels
 			var t = new Task(() => Drained.Wait());
 			t.Start(QueryScheduler);
 			return t;
+		}
+
+		public void Persist<T>(NotifyValue<T> value, string key)
+		{
+			persisted.Add(PersistedValue.Create(value, key));
 		}
 	}
 }

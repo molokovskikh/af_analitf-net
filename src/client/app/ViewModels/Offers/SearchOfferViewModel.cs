@@ -45,6 +45,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			});
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>();
+			Persist(HideJunk, "HideJunk");
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -53,18 +54,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<bool> HideJunk { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
 
-		protected override void OnDeactivate(bool close)
-		{
-			if (HideJunk.Value) {
-				Shell.PersistentContext["HideJunk"] = HideJunk.Value;
-			}
-			base.OnDeactivate(close);
-		}
-
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			HideJunk.Value = Shell.GetPersistedValue("HideJunk", HideJunk.Value);
 
 			RxQuery(s => new [] { EmptyProducer }
 					.Concat(s.Query<Producer>()

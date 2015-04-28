@@ -54,6 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					RetailCost.Recalculate();
 					RetailMarkup.Recalculate();
 				});
+			Persist(HideJunk, "HideJunk");
 		}
 
 		//для восстановления состояния
@@ -105,18 +106,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			get { return User.CanPrint<CatalogOfferDocument>(); }
 		}
 
-		protected override void OnDeactivate(bool close)
-		{
-			if (HideJunk.Value) {
-				Shell.PersistentContext["HideJunk"] = HideJunk.Value;
-			}
-			base.OnDeactivate(close);
-		}
-
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			HideJunk.Value = Shell.GetPersistedValue("HideJunk", HideJunk.Value);
 
 			Update();
 			UpdateMaxProducers();

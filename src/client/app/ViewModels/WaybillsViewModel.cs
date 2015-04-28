@@ -43,6 +43,8 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressSelector = new AddressSelector(Session, this) {
 				Description = "Все адреса"
 			};
+			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
+			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
 		}
 
 		public IList<Selectable<Supplier>> Suppliers { get; set; }
