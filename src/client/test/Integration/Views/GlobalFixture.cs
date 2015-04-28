@@ -323,8 +323,9 @@ namespace AnalitF.Net.Test.Integration.Views
 					Assert.AreEqual("#FFCDEAB9", newcost.Background.ToString());
 				}
 				else {
-					Assert.AreEqual("#FFE3B4BA", oldcost.Background.ToString());
-					Assert.AreEqual("#FFE3B4BA", newcost.Background.ToString());
+					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
+					Assert.AreEqual(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
 				}
 			});
 
