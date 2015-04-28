@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -33,11 +34,13 @@ using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
+using Microsoft.Test.CommandLineParsing;
 using NHibernate.Linq;
 using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Microsoft.Win32;
+using TestStack.White.UIItems.TableItems;
 using Screen = Caliburn.Micro.Screen;
 using Action = System.Action;
 using Address = AnalitF.Net.Client.Models.Address;
@@ -309,6 +312,21 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			WaitMessageBox("Обновление завершено успешно.");
 			WaitWindow("Корректировка восстановленных заказов");
+			var line = session.Query<OrderLine>().First(l => l.SendResult == LineResultStatus.CostChanged);
+			dispatcher.Invoke(() => {
+				var lines = activeWindow.Descendants<DataGrid>().First(x => x.Name == "Lines");
+				var cells = lines.Descendants<DataGridCell>().Where(x => ((OrderLine)x.DataContext).Id == line.Id).ToArray();
+				var oldcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedOldCost");
+				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
+				if (line.IsCostDecreased) {
+					Assert.AreEqual("#FFCDEAB9", oldcost.Background.ToString());
+					Assert.AreEqual("#FFCDEAB9", newcost.Background.ToString());
+				}
+				else {
+					Assert.AreEqual("#FFE3B4BA", oldcost.Background.ToString());
+					Assert.AreEqual("#FFE3B4BA", newcost.Background.ToString());
+				}
+			});
 
 			WaitIdle();
 			ShallowBindingErrors();

@@ -99,19 +99,19 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint? OldQuantity { get; set;  }
 
-		[Style("NewCost", "OldCost")]
+		[Style("MixedNewCost", "MixedOldCost")]
 		public virtual bool IsCostChanged
 		{
 			get { return (SendResult & LineResultStatus.CostChanged) > 0; }
 		}
 
-		[Style("NewCost", "OldCost")]
+		[Style("MixedNewCost", "MixedOldCost")]
 		public virtual bool IsCostIncreased
 		{
 			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost > OldCost; }
 		}
 
-		[Style("NewCost", "OldCost")]
+		[Style("MixedNewCost", "MixedOldCost")]
 		public virtual bool IsCostDecreased
 		{
 			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost < OldCost; }
@@ -338,11 +338,10 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-
 		public virtual void Apply(OrderLineResult result)
 		{
+			ResetStatus();
 			if (result == null) {
-				ResetStatus();
 				return;
 			}
 			SendResult = result.Result;

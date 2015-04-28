@@ -28,6 +28,16 @@ namespace AnalitF.Net.Test.Unit.Models
 		}
 
 		[Test]
+		public void Reset_status_before_apply_new()
+		{
+			line.Apply(new OrderLineResult {
+				Result = LineResultStatus.NoOffers
+			});
+			Assert.IsNull(line.NewCost);
+			Assert.IsNull(line.OldCost);
+		}
+
+		[Test]
 		public void Mark_cost()
 		{
 			Assert.IsTrue(line.IsCostChanged);
