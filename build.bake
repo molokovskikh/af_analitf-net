@@ -51,12 +51,15 @@ def CopyUpdateBin(channel as string):
 		else:
 			MkDir(dir)
 		Cp(files, dir, true)
+		print "Скопировано ${files.Files.Count} в $dir"
 
 Global(
 	HumanReadableName: "AnalitF.Net",
 	Profile: @catalog,
 	Variables : {
 		@Local: {
+			@FtpRoot: """C:\inetpub\wwwroot\data\ftp\""",
+			@SetupDeployRoot: """C:\inetpub\wwwroot\data\setup\""",
 			@UpdateDeployRoot: """C:\inetpub\wwwroot\data\update\""",
 			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://localhost/AnalitF.Net.Service",
@@ -71,6 +74,7 @@ Global(
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
 		},
 		@Production : {
+			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
@@ -78,7 +82,8 @@ Global(
 			@IISSiteName: "IOS",
 			@IISHost: ("solo", "frontrmt"),
 			@IISPathRoot: "U:\\WebApps",
-			@IISAppPool: "Runer"
+			@IISAppPool: "Runer",
+			@PackageRoot: """//offdc/MMedia/"""
 		},
 	},
 	JenkinsProject: "AnalitF.Net",
@@ -162,11 +167,17 @@ task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "dep
 
 task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
-task "deploy:client", ["deploy:client:package"]
-
-task "deploy:client:package", ["build:client:package"]:
-	ImpersonateIfNeeded(Globals):
-		Cp("output/package/*.nupkg", "//offdc/MMedia/packages", true)
+task "deploy:client", ["build:setup"]:
+	if Globals.Maybe.SetupDeployRoot:
+		root = Globals.Maybe.SetupDeployRoot
+		MkDir(root)
+		version = File.ReadAllText("output/setup/version.txt")
+		dst = Path.Combine(root, "AnalitF.Net-$version.exe")
+		Cp("output/setup/setup.exe", dst)
+	if Globals.Maybe.PackageRoot:
+		ImpersonateIfNeeded(Globals):
+			root = Globals.PackageRoot
+			Cp("output/package/*.nupkg", "$root/packages", true)
 
 task "build:client:package", ["build:client"]:
 	proj = "src/client/app/app.csproj"
@@ -195,7 +206,7 @@ task "build:client:package", ["build:client"]:
 task "deploy:update", ["build:update"]:
 	CopyUpdateBin(Globals.DefaultUpdateChannel)
 
-task "build:client", ["env", "build:client:bin", "build:setup", "build:update"]
+task "build:client", ["build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
 	proj = "src/client/app/app.csproj"
@@ -365,9 +376,6 @@ task "test:binary":
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta")
-		if Globals.Maybe.SetupDeployRoot:
-			dst = Path.Combine(Globals.Maybe.SetupDeployRoot, "AnalitF.Net-$version.exe")
-			Cp("output/setup/setup.exe", dst)
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
@@ -401,15 +409,26 @@ task "deploy:announce":
 desc """
 делает текущий релиз релизом по умолчанию - отправляет обновление всем клиента
 устанавливает ссылку на него с ftp
+параметры
+	channel - название каннала который следует считать rtm (доступным всем пользователям)
 """
 task "promote:to:rtm":
-	return unless Globals.Environment == @Production
-
-	version = File.ReadAllText("output/setup/version.txt")
+	channel = Configuration.channel
+	ftp = Globals.FtpRoot
+	MkDir(ftp)
+	root = Globals.UpdateDeployRoot
+	source = Path.Combine(root, channel)
+	target = Path.Combine(root, @rtm)
+	version = File.ReadAllText("$source/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
-	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET_0_9_0_28.exe""", true)
-	Cp(setupBin, """\\adc.analit.net\Inforoom\FTP\anonymous\AnalitFNET.exe""", true)
-	CopyUpdateBin("rtm")
+	Cp(setupBin, """$ftp\AnalitFNET_0_9_0_28.exe""", true)
+	Cp(setupBin, """$ftp\AnalitFNET.exe""", true)
+
+	files = FileSet("*", BaseDirectory: source)
+	ftp = Globals.FtpRoot
+	MkDir(target)
+	Rm("$target/*")
+	Cp(files, target, true)
 
 task "iis:clean":
 	iishost = Globals.IISHost
