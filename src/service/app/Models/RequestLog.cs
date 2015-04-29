@@ -1,19 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
-using AnalitF.Net.Service.Helpers;
 using Common.Models;
 using Common.Tools;
-using Newtonsoft.Json;
+using log4net;
+using NHibernate;
 
 namespace AnalitF.Net.Service.Models
 {
 	public class RequestLog
 	{
+		private static ILog log = LogManager.GetLogger(typeof(RequestLog));
+
 		public RequestLog()
 		{
 		}
@@ -30,7 +35,7 @@ namespace AnalitF.Net.Service.Models
 		{
 			User = user;
 			CreatedOn = DateTime.Now;
-			Version = RequestHelper.GetVersion(request);
+			Version = GetVersion(request);
 			LocalHost = Environment.MachineName;
 			UpdateType = updateType;
 			LastSync = lastSync;
@@ -154,6 +159,65 @@ namespace AnalitF.Net.Service.Models
 			IsConfirmed = true;
 			if (!config.DebugExport)
 				File.Delete(OutputFile(config));
+		}
+
+		public static Version GetVersion(HttpRequestMessage request)
+		{
+			var headers = request.Headers;
+			var version = new Version();
+			IEnumerable<string> header;
+			if (headers.TryGetValues("Version", out header)) {
+				Version.TryParse(header.FirstOrDefault(), out version);
+			}
+			return version;
+		}
+
+		public virtual Task StartJob(ISession session,
+			Config.Config config,
+			ISessionFactory sessionFactory,
+			Action<ISession, Config.Config, RequestLog> cmd)
+		{
+			var principal = Thread.CurrentPrincipal;
+			session.Save(this);
+			session.Transaction.Commit();
+			var jobId = Id;
+
+			var task = new Task(() => {
+				try {
+					Thread.CurrentPrincipal = principal;
+					using (var logSession = sessionFactory.OpenSession())
+					using (var logTransaction = logSession.BeginTransaction()) {
+						var job = logSession.Load<RequestLog>(jobId);
+						try {
+							using(var cmdSession = sessionFactory.OpenSession())
+							using(var cmdTransaction = cmdSession.BeginTransaction()) {
+								cmd(cmdSession, config, job);
+								cmdTransaction.Commit();
+							}
+						}
+						catch(ExporterException e) {
+							log.Warn("Ошибка при обработке автозаказа", e);
+							job.ErrorDescription = e.Message;
+							job.Faulted(e);
+						}
+						catch(Exception e) {
+							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
+							job.Faulted(e);
+						}
+						finally {
+							job.Completed();
+							logSession.Save(job);
+							logSession.Flush();
+							logTransaction.Commit();
+						}
+					}
+				}
+				catch(Exception e) {
+					log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
+				}
+			});
+			task.Start();
+			return task;
 		}
 	}
 }

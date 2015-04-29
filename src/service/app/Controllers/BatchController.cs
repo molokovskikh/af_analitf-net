@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Http;
 using System.Xml;
-using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
 using Ionic.Zip;
 using Newtonsoft.Json;
-using NHibernate;
 using SmartOrderFactory;
 using SmartOrderFactory.Domain;
 

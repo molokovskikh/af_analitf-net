@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Text;
-using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
-using NHibernate;
 
 namespace AnalitF.Net.Service.Controllers
 {

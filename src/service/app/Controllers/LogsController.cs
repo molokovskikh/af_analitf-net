@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Web.Http;
-using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
-using Common.Tools;
 using Ionic.Zip;
-using NHibernate;
 using log4net;
+using NHibernate;
 
 namespace AnalitF.Net.Service.Controllers
 {
@@ -32,7 +27,7 @@ namespace AnalitF.Net.Service.Controllers
 					entry.Extract(memory);
 					memory.Position = 0;
 					var log = new ClientAppLog(CurrentUser, new StreamReader(memory).ReadToEnd());
-					log.Version = RequestHelper.GetVersion(Request);
+					log.Version = RequestLog.GetVersion(Request);
 					if (String.IsNullOrWhiteSpace(log.Text))
 						continue;
 

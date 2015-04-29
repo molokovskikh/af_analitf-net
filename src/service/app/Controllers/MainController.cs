@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
@@ -19,7 +17,7 @@ namespace AnalitF.Net.Service.Controllers
 
 			if (existsJob == null) {
 				existsJob  = new RequestLog(CurrentUser, Request, data, lastSync);
-				RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory,
+				existsJob.StartJob(Session, Config, Session.SessionFactory,
 					(session, config, job) => {
 						using (var exporter = new Exporter(session, config, job)) {
 							if (data.Match("Waybills"))

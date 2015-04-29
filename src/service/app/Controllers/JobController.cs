@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using AnalitF.Net.Service.Helpers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using log4net;
@@ -61,7 +60,7 @@ namespace AnalitF.Net.Service.Controllers
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)
 		{
 			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
-			Task = RequestHelper.StartJob(Session, existsJob, Config, Session.SessionFactory, cmd);
+			Task = existsJob.StartJob(Session, Config, Session.SessionFactory, cmd);
 			return existsJob.ToResult(Config);
 		}
 	}

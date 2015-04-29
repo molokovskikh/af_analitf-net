@@ -25,10 +25,20 @@ using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
 using log4net;
+using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
 
 namespace AnalitF.Net.Service.Models
 {
+	//исключение что бы сигнализировать об ошибке понятной пользователю
+	//передается клиенту
+	public class ExporterException : Exception
+	{
+		public ExporterException(string message) : base(message)
+		{
+		}
+	}
+
 	public class Offer3 : Offer2
 	{
 		public ulong OfferId;
@@ -141,8 +151,18 @@ namespace AnalitF.Net.Service.Models
 			//на случай если были созданы тестовые данные нужно перечитать конфиг
 			Application.ReadDbConfig(Config);
 #endif
-			data = data ?? new AnalitfNetData(user);
+
+			if (userSettings.CheckClientToken && !String.IsNullOrEmpty(job.ClientToken)) {
+				if (String.IsNullOrEmpty(data.ClientToken)) {
+					data.ClientToken = job.ClientToken;
+				}
+				else if (data.ClientToken != job.ClientToken) {
+					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АК \"Инфорум\".");
+				}
+			}
+			data = data ?? new AnalitfNetData(job);
 			data.LastPendingUpdateAt = DateTime.Now;
+			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
 				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
 					" последние обновление на клиента {0}" +
