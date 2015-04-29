@@ -319,8 +319,9 @@ namespace AnalitF.Net.Test.Integration.Views
 				var oldcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedOldCost");
 				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
 				if (line.IsCostDecreased) {
-					Assert.AreEqual("#FFCDEAB9", oldcost.Background.ToString());
-					Assert.AreEqual("#FFCDEAB9", newcost.Background.ToString());
+					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF7"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF7"));
 				}
 				else {
 					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
