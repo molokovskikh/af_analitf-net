@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using AnalitF.Net.Service.Helpers;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Service.Test.Unit
