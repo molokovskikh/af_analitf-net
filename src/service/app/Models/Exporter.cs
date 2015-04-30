@@ -447,7 +447,7 @@ where
 	products.CatalogId,
 	pr.Name as Producer,
 	mx.Cost as MaxProducerCost,
-	core.VitallyImportant or catalog.VitallyImportant as VitallyImportant,
+	core.VitallyImportant as VitallyImportant,
 	s.Synonym as ProductSynonym,
 	sfc.Synonym as ProducerSynonym,
 	ct.Cost,
