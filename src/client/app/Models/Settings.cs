@@ -80,6 +80,7 @@ namespace AnalitF.Net.Client.Models
 
 	public class Settings : BaseNotify
 	{
+		private ILog log = LogManager.GetLogger(typeof(Settings));
 		private bool groupWaybillBySupplier;
 		private bool _useProxy;
 
@@ -353,14 +354,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CheckToken()
 		{
-			if (String.IsNullOrEmpty(GetClientToken())) {
-				ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
+			try {
+				if (String.IsNullOrEmpty(GetClientToken())) {
+					ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
+				}
+			}
+			catch(Exception e) {
+				log.Error("Не удалось сгенерировать токен приложения", e);
 			}
 		}
 
 		public virtual string GetClientToken()
 		{
-			var log = LogManager.GetLogger(typeof(Settings));
 			try {
 				if (String.IsNullOrEmpty(ClientToken))
 					return "";
