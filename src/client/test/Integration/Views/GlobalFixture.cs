@@ -320,8 +320,8 @@ namespace AnalitF.Net.Test.Integration.Views
 				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
 				if (line.IsCostDecreased) {
 					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
-					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF7"));
-					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF7"));
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
 				}
 				else {
 					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
