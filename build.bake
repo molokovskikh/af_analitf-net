@@ -194,6 +194,7 @@ task "build:client:package", ["build:client"]:
 	bin = FileSet("*.exe", BaseDirectory: output).First()
 
 	assembly = AssemblyDefinition.ReadAssembly(bin)
+	version = assembly.Name.Version.ToString()
 	build = Configuration.Maybe.buildId
 	if build:
 		version += "-build" + build
@@ -243,7 +244,6 @@ task "build:client:merged", ["build:client:bin"]:
 	Cp(FileSet("*.config", BaseDirectory: source), output)
 	#тк мы обединили сборки библиотки содержащие wpf контролы не найдут свои ресурсы правим это
 	outputAssembly = AssemblyDefinition.ReadAssembly(name)
-	version = outputAssembly.Name.Version
 	resources = outputAssembly.MainModule.Resources
 	appBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "AnalitF.Net.Client.g.resources"})
 	libBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "Xceed.Wpf.Toolkit.g.resources"})
