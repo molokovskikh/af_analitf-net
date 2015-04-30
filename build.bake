@@ -104,8 +104,16 @@ task @build, ["build:service", "build:client"]
 task @prepare, ["packages:install", "packages:fix", "generate:assembly:info"]
 
 task "build:service", ["prepare"]:
-	CleanWeb(Globals, "src/service/app/app.csproj")
-	BuildWeb(Globals, "src/service/app/app.csproj")
+	version = Globals.Version
+	proj = "src/service/app/app.csproj"
+	_, output, _ = GetBuildConfig(Globals, proj)
+	CleanWeb(Globals, proj)
+	BuildWeb(Globals, proj)
+	#каждая версия должна иметь свой лог
+	for f in FileSet("*.config", BaseDirectory: output):
+		text = File.ReadAllText(f)
+		text = text.Replace("AnalitF.Net.Service.log", "AnalitF.Net.Service-$version.log")
+		File.WriteAllText(f, text)
 
 task "deploy:service", ["build:service"]:
 	proj = "src/service/app/app.csproj"
@@ -186,7 +194,6 @@ task "build:client:package", ["build:client"]:
 	bin = FileSet("*.exe", BaseDirectory: output).First()
 
 	assembly = AssemblyDefinition.ReadAssembly(bin)
-	version = assembly.Name.Version.ToString()
 	build = Configuration.Maybe.buildId
 	if build:
 		version += "-build" + build
@@ -236,6 +243,7 @@ task "build:client:merged", ["build:client:bin"]:
 	Cp(FileSet("*.config", BaseDirectory: source), output)
 	#тк мы обединили сборки библиотки содержащие wpf контролы не найдут свои ресурсы правим это
 	outputAssembly = AssemblyDefinition.ReadAssembly(name)
+	version = outputAssembly.Name.Version
 	resources = outputAssembly.MainModule.Resources
 	appBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "AnalitF.Net.Client.g.resources"})
 	libBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "Xceed.Wpf.Toolkit.g.resources"})
