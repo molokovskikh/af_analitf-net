@@ -51,7 +51,7 @@ def CopyUpdateBin(channel as string):
 		else:
 			MkDir(dir)
 		Cp(files, dir, true)
-		print "Скопировано ${files.Files.Count} в $dir"
+		print "Скопировано ${files.Files.Count} файлов в $dir"
 
 Global(
 	HumanReadableName: "AnalitF.Net",
@@ -181,7 +181,7 @@ task "deploy:client", ["build:setup"]:
 		MkDir(root)
 		version = File.ReadAllText("output/setup/version.txt")
 		dst = Path.Combine(root, "AnalitF.Net-$version.exe")
-		Cp("output/setup/setup.exe", dst)
+		Cp("output/setup/setup.exe", dst, true)
 	if Globals.Maybe.PackageRoot:
 		ImpersonateIfNeeded(Globals):
 			root = Globals.PackageRoot
@@ -393,7 +393,6 @@ task "deploy:announce":
 
 	url = "http://redmine.analit.net/projects/afn"
 	version = File.ReadAllText("output/setup/version.txt")
-	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	client = WebClient()
 	client.Encoding = Encoding.UTF8
 	client.Headers.Add(HttpRequestHeader.ContentType, "application/json")
