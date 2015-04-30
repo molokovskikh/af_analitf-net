@@ -59,8 +59,6 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			//по умолчанию ShowDialog вернет false те по умолчанию мы продолжаем выполение
-			//что бы отменить выполение цепочки нужно явно сказать TryClose(true)
 			if (ShowSizeToContent)
 				manager.ShowFixedDialog(Model);
 			else

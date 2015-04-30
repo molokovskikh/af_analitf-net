@@ -16,7 +16,7 @@ using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Client.ViewModels
 {
-	public class Feedback : Screen, IDisposable
+	public class Feedback : Screen, IDisposable, ICancelable
 	{
 		public Feedback(Config.Config config)
 		{
@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 			SendLog = true;
 			Attachments = new ObservableCollection<string>();
 			IsSupport = true;
+			WasCancelled = true;
 		}
 
 		private Config.Config config;
@@ -38,6 +39,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool SendLog { get; set; }
 		public ObservableCollection<string> Attachments { get; set; }
 		public string CurrentAttachment { get; set; }
+		public bool WasCancelled { get; set; }
 
 		public void DeleteAttachment()
 		{
@@ -55,6 +57,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Send()
 		{
+			WasCancelled = false;
 			if (Attachments.Count == 0) {
 				TryClose();
 				yield break;
@@ -100,7 +103,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Cancel()
 		{
-			TryClose(true);
+			TryClose();
 		}
 
 		public FeedbackMessage GetMessage()
