@@ -351,17 +351,23 @@ namespace AnalitF.Net.Client.Models
 			};
 		}
 
+		public virtual void CheckToken()
+		{
+			if (String.IsNullOrEmpty(GetClientToken())) {
+				ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
+			}
+		}
+
 		public virtual string GetClientToken()
 		{
 			var log = LogManager.GetLogger(typeof(Settings));
 			try {
-				if (String.IsNullOrEmpty(ClientToken)) {
-					ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
-				}
+				if (String.IsNullOrEmpty(ClientToken))
+					return "";
 				return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(ClientToken), null, DataProtectionScope.CurrentUser));
 			}
 			catch(Exception e) {
-				log.Error("Ошибка при получение токена приложения", e);
+				log.Error(String.Format("Ошибка при получение токена приложения, токен = {0}", ClientToken), e);
 				return null;
 			}
 		}

@@ -262,7 +262,7 @@
     <Compile Include="Unit\RxHelperFixture.cs" />
     <Compile Include="Unit\SearchableDataGridColumnFixture.cs" />
     <Compile Include="Unit\SearchBehaviorFixture.cs" />
-    <Compile Include="Unit\SettingsFixture.cs" />
+    <Compile Include="Unit\Models\SettingsFixture.cs" />
     <Compile Include="Unit\SingleInstanceFixture.cs" />
     <Compile Include="Unit\StyleHelperFixture.cs" />
     <Compile Include="Unit\TableSettingsFixture.cs" />

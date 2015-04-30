@@ -2,7 +2,7 @@
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit.Models
 {
 	[TestFixture]
 	public class SettingsFixture
@@ -22,6 +22,20 @@ namespace AnalitF.Net.Test.Unit
 			settings.ShowPriceName = false;
 			settings.UpdatePriceNames(prices);
 			Assert.That(price.Name, Is.EqualTo("Протек"));
+		}
+
+		[Test]
+		public void Client_token()
+		{
+			var settings = new Settings();
+			settings.CheckToken();
+			var oldToken = settings.ClientToken;
+			Assert.IsNotNullOrEmpty(oldToken);
+
+			settings.ClientToken = "123";
+			settings.CheckToken();
+			Assert.IsNotNullOrEmpty(oldToken);
+			Assert.AreNotEqual(oldToken, settings.ClientToken);
 		}
 	}
 }
