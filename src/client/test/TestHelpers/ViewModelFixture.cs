@@ -111,7 +111,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 
 		[TearDown]
-		public void TearDown()
+		public void BaseFixtureTearDown()
 		{
 			if (catcher != null) {
 				var events = ((MemoryAppender)catcher.Appender).GetEvents();

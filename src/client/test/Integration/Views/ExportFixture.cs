@@ -29,7 +29,15 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
 			var model = new CatalogOfferViewModel(catalog);
-			CheckExport(model);
+			WpfTestHelper.WithWindow2(async w => {
+				var view = Bind(model);
+				w.Content = view;
+				await view.WaitLoaded();
+
+				Assert.IsTrue(model.CanExport.Value);
+				result = (OpenResult)model.Export();
+				Assert.That(File.Exists(result.Filename), result.Filename);
+			});
 		}
 
 		[Test]

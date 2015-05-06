@@ -55,23 +55,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				Assert.AreEqual("1", ((TextBox)cell.Content).Text);
 			});
 
-			CleanSafeError();
-		}
-
-		private static void CleanSafeError()
-		{
-			//на форме корректировки могут возникнуть ошибки биндинга
-			//судя по обсуждению это ошибки wpf и они безобидны
-			//http://wpf.codeplex.com/discussions/47047
-			//игнорирую их
-			var ignored = new[] {
-				"System.Windows.Data Error: 4",
-				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=AreRowDetailsFrozen; DataItem=null; target element is 'DataGridDetailsPresenter' (Name=''); target property is 'SelectiveScrollingOrientation' (type 'SelectiveScrollingOrientation')",
-				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=HeadersVisibility; DataItem=null; target element is 'DataGridRowHeader' (Name=''); target property is 'Visibility' (type 'Visibility')",
-				//todo - разобрать причину ошибки
-				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=NewItemMargin; DataItem=null; target element is 'DataGridRow' (Name=''); target property is 'Margin' (type 'Thickness')"
-			};
-			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
+			WpfTestHelper.CleanSafeError();
 		}
 
 		[Test]
@@ -90,7 +74,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				view.Descendants<Button>().First(b => b.Name == "PrintWaybill")
 					.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
 			});
-			CleanSafeError();
+			WpfTestHelper.CleanSafeError();
 		}
 	}
 }
