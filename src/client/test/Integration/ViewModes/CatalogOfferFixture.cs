@@ -70,15 +70,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.First().Cost;
 
 			settings.Markups.Clear();
-			var markupType = catalog.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			//позиция не может быть жизненно важной тк мы не генерируем таких тестовых данных
+			var markupType = MarkupType.Over;
 			settings.AddMarkup(new MarkupConfig(0, splitCost, 20, markupType));
 			settings.AddMarkup(new MarkupConfig(splitCost, decimal.MaxValue, 30, markupType));
 			session.Save(settings);
 
 			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));
 
+			model.CurrentOffer.Value = null;
 			model.CurrentOffer.Value = model.Offers.Value[0];
-			Assert.That(model.RetailMarkup.Value, Is.EqualTo(20));
+			Assert.That(model.RetailMarkup.Value, Is.EqualTo(20), model.CurrentOffer.Value.Id.ToString());
 			var expected = Math.Round(model.Offers.Value[0].Cost * (decimal)1.2, 2);
 			Assert.That(model.RetailCost.Value, Is.EqualTo(expected));
 

@@ -51,11 +51,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(HideJunk.Select(v => (object)v).Skip(1))
 				.Subscribe(_ => Update());
 
-			this.ObservableForProperty(m => m.CurrentOffer.Value)
-				.Subscribe(_ => {
-					RetailCost.Recalculate();
-					RetailMarkup.Recalculate();
-				});
+			CurrentOffer.Subscribe(_ => {
+				RetailCost.Recalculate();
+				RetailMarkup.Recalculate();
+			});
 			Persist(HideJunk, "HideJunk");
 			DisplayItems = new NotifyValue<List<object>>();
 			CurrentDisplayItem = new NotifyValue<object>();
