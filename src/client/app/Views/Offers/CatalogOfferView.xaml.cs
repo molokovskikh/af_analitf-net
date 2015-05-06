@@ -17,11 +17,6 @@ namespace AnalitF.Net.Client.Views.Offers
 		{
 			InitializeComponent();
 			var grid = Offers;
-			Loaded += (sender, args) => {
-				var model = DataContext as CatalogOfferViewModel;
-				if (model != null && model.IsFilterByCatalogName)
-					Offers.Items.GroupDescriptions.Add(new PropertyGroupDescription("GroupName"));
-			};
 
 			new Editable().Attach(grid);
 			DataGridHelper.CalculateColumnWidths(Offers);

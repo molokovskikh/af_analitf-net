@@ -4,10 +4,40 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
+using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.Views.Offers;
 using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Extentions
 {
+	public class GroupNameConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value is GroupHeader)
+				return ((GroupHeader)value).Name;
+			return "";
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class GroupConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return value is GroupHeader;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 	public class LambdaConverter<T> : IValueConverter
 	{
 		private Func<T, object> @select;

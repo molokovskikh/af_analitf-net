@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Views.Offers;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -55,6 +57,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					RetailMarkup.Recalculate();
 				});
 			Persist(HideJunk, "HideJunk");
+			DisplayItems = new NotifyValue<List<object>>();
+			CurrentDisplayItem = new NotifyValue<object>();
 		}
 
 		//для восстановления состояния
@@ -100,6 +104,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<bool> GroupByProduct { get; set; }
 		public NotifyValue<decimal?> RetailCost { get; set; }
 		public NotifyValue<decimal> RetailMarkup { get; set; }
+		public NotifyValue<List<object>> DisplayItems { get; set; }
+		public NotifyValue<object> CurrentDisplayItem { get; set; }
 
 		public bool CanPrint
 		{
@@ -109,6 +115,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			Offers.Select(v => {
+					v = v ?? new List<Offer>();
+					if (IsFilterByCatalogName) {
+						return v.GroupBy(g => g.GroupName).Select(g => new object[] { new GroupHeader(g.Key) }.Concat(g)).SelectMany(o => o).ToList();
+					}
+					else {
+						return v.Cast<object>().ToList();
+					}
+				})
+				.Subscribe(DisplayItems);
+			CurrentDisplayItem.OfType<Offer>().Subscribe(CurrentOffer);
+			CurrentOffer.Subscribe(CurrentDisplayItem);
 
 			Update();
 			UpdateMaxProducers();

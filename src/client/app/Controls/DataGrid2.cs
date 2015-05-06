@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
-using Caliburn.Micro;
-using Common.Tools;
-using Action = System.Action;
 
 namespace AnalitF.Net.Client.Controls
 {
+	public class GroupHeader
+	{
+		public GroupHeader(string name)
+		{
+			Name = name;
+		}
+
+		public string Name { get; set; }
+	}
+
 	public class DataGrid2 : DataGrid
 	{
 		public static DependencyProperty ShowAddressColumnProperty
@@ -64,6 +65,8 @@ namespace AnalitF.Net.Client.Controls
 			return basevalue;
 		}
 
+		public bool GroupNav { get; set; }
+
 		public object CurrentItemStub
 		{
 			get { return GetValue(CurrentItemStubProperty); }
@@ -83,7 +86,7 @@ namespace AnalitF.Net.Client.Controls
 		}
 
 		/*
-		проблемы с фоксом
+		проблемы с фокусом
 		1 - тк ScrollViewer Focusable то он может получить фокус если на него кликнуть
 		это правильно когда таблица пуста для того что бы получать ввод с клавиатуры
 		и не правильно когда в таблице есть элементы
@@ -186,8 +189,83 @@ namespace AnalitF.Net.Client.Controls
 					return;
 				}
 			}
+			if (GroupNav) {
+				if (e.Key == Key.Up) {
+					e.Handled = true;
+					var index = Items.IndexOf(CurrentItem);
+					index--;
+					if (index >= 0 && index < Items.Count) {
+						if (Items[index] is GroupHeader)
+							index--;
+					}
+					ShowAndFocus(index);
+					return;
+				}
+				else if (e.Key == Key.Down) {
+					var index = Items.IndexOf(CurrentItem);
+					index++;
+					if (index >= 0 && index < Items.Count) {
+						if (Items[index] is GroupHeader)
+							index++;
+					}
+					ShowAndFocus(index);
+					e.Handled = true;
+					return;
+				}
+				else if (e.Key == Key.PageUp) {
+					e.Handled = true;
+					var index = Items.IndexOf(CurrentItem);
+					var jumpDistance = Math.Max(1, (int)viewer.ViewportHeight - 1);
+					index = Math.Max(index - jumpDistance, 0);
+					if (index >= 0 && index < Items.Count) {
+						if (Items[index] is GroupHeader)
+							index++;
+					}
+					ShowAndFocus(index);
+					return;
+				}
+				else if (e.Key == Key.PageDown) {
+					e.Handled = true;
+					var index = Items.IndexOf(CurrentItem);
+					var jumpDistance = Math.Max(1, (int)viewer.ViewportHeight - 1);
+					index = Math.Min(index + jumpDistance, Items.Count - 1);
+					if (index >= 0 && index < Items.Count) {
+						if (Items[index] is GroupHeader)
+							index--;
+					}
+					ShowAndFocus(index);
+					return;
+				}
+			}
 
 			base.OnKeyDown(e);
+		}
+
+		private void ShowAndFocus(int index)
+		{
+			if (index < 0)
+				return;
+			if (index > Items.Count - 1)
+				return;
+			var item = Items[index];
+			if (item == null)
+				return;
+
+			var row = ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+			if (row != null) {
+				row.BringIntoView();
+			}
+			else {
+				ScrollIntoView(item);
+			}
+			if (CurrentColumn == null)
+				return;
+			var cellInfo = new DataGridCellInfo(item, CurrentColumn);
+			var cell = DataGridHelper.GetCell(this, cellInfo);
+			if (cell != null) {
+				cell.Focus();
+				SelectedItem = item;
+			}
 		}
 
 		protected override void OnExecutedDelete(ExecutedRoutedEventArgs e)
