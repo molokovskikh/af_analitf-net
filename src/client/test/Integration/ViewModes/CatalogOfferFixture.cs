@@ -155,7 +155,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			//предельные цены формируются только для прайса которые был создан в текущем импорте
 			//и для прайсов созданных в предыдущих импортах он не будет сформирован
 			var currentPrice = session.Query<Price>().Select(p => p.Id).ToArray().Max();
-			var catalogId = session.Query<Offer>().First(o => o.Price.Id == currentPrice && o.VitallyImportant).CatalogId;
+			var catalogId = session.Query<Offer>().First(o => o.Price.Id == currentPrice && session.Query<Catalog>().Any(c => c.Id == o.CatalogId && c.VitallyImportant)).CatalogId;
 			catalog = session.Load<Catalog>(catalogId);
 
 			Assert.That(model.MaxProducerCosts.Value.Count, Is.GreaterThan(0));
