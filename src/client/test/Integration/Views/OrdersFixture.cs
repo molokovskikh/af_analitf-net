@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -78,6 +80,33 @@ namespace AnalitF.Net.Test.Integration.Views
 				var cell = grid.Descendants<DataGridCell>().First(x => x.Column == column);
 				var text = cell.Descendants<TextBlock>().First();
 				Assert.AreEqual(FontWeights.Bold, text.FontWeight);
+			});
+		}
+
+		[Test]
+		public void Save_column_sort()
+		{
+			var model = new OrdersViewModel();
+			UseWindow(model, async (w, view) => {
+				var tabs = view.Descendants<TabControl>().First();
+				tabs.SelectedItem = tabs.Items[1];
+
+				var grid = (DataGrid)((TabItem)tabs.Items[1]).Content;
+				await grid.WaitLoaded();
+				var column = DataGridHelper.FindColumn(grid.Columns, "Прайс-лист");
+				column.SortDirection = ListSortDirection.Ascending;
+				Close(model);
+			});
+
+			model = new OrdersViewModel();
+			UseWindow(model, async (w, view) => {
+				var tabs = view.Descendants<TabControl>().First();
+				tabs.SelectedItem = tabs.Items[1];
+
+				var grid = (DataGrid)((TabItem)tabs.Items[1]).Content;
+				await grid.WaitLoaded();
+				var column = DataGridHelper.FindColumn(grid.Columns, "Прайс-лист");
+				Assert.AreEqual(ListSortDirection.Ascending, column.SortDirection);
 			});
 		}
 	}

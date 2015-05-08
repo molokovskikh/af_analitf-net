@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Models
 			var dependencyObject = view as DependencyObject;
 			if (dependencyObject == null)
 				return Enumerable.Empty<DataGrid>();
-			return dependencyObject.Descendants<DataGrid>()
+			return dependencyObject.LogicalDescendants().OfType<DataGrid>()
 				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
 		}
 

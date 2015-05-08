@@ -89,6 +89,8 @@ namespace AnalitF.Net.Client.Helpers
 			return o is Visual || o is Visual3D;
 		}
 
+
+
 		public static IEnumerable<DependencyObject> Children(this DependencyObject o)
 		{
 			var visualCount = IsVisual(o) ? VisualTreeHelper.GetChildrenCount(o) : 0;
@@ -112,6 +114,13 @@ namespace AnalitF.Net.Client.Helpers
 							yield return content;
 					}
 				}
+			}
+		}
+
+		public static IEnumerable<DependencyObject> LogicalChildren(this DependencyObject o)
+		{
+			foreach (var child in LogicalTreeHelper.GetChildren(o).OfType<DependencyObject>()) {
+				yield return child;
 			}
 		}
 
@@ -164,6 +173,11 @@ namespace AnalitF.Net.Client.Helpers
 			if (o is Visual || o is Visual3D)
 				return VisualTreeHelper.GetParent(o);
 			return null;
+		}
+
+		public static IEnumerable<DependencyObject> LogicalDescendants(this DependencyObject view)
+		{
+			return view.LogicalChildren().Flat(LogicalChildren);
 		}
 
 		public static IEnumerable<DependencyObject> Descendants(this DependencyObject view)
