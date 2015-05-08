@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels
 			SelectedWaybills = new List<Waybill>();
 			Waybills = new NotifyValue<ObservableCollection<Waybill>>();
 			CurrentWaybill = new NotifyValue<Waybill>();
-			Begin = new NotifyValue<DateTime>(DateTime.Today.FirstDayOfMonth());
+			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
 			IsFilterByWriteTime = new NotifyValue<bool>();
