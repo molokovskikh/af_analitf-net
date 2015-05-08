@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
+using Common.Tools.Calendar;
 using DotRas;
 using Iesi.Collections;
 using NHibernate;
@@ -53,6 +54,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public string ErrorMessage;
 		public string SuccessMessage;
 		public List<IResult> Results = new List<IResult>();
+		protected TimeSpan? RequestInterval;
 
 		protected RemoteCommand()
 		{
@@ -144,7 +146,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
 		}
 
-		public void Configure(Settings value)
+		public void Configure(Settings value, Config.Config config, CancellationToken token)
 		{
 			Credentials = value.GetCredential();
 			Proxy = value.GetProxy();
@@ -152,6 +154,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (value.UseRas) {
 				RasConnection = value.RasConnection;
 			}
+			Config = config;
+			Token = token;
 		}
 
 		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task)
@@ -179,7 +183,7 @@ namespace AnalitF.Net.Client.Models.Commands
 							&& response.Content.Headers.ContentType.MediaType == "application/json") {
 							requestId = ((dynamic)response.Content.ReadAsAsync<object>().Result).RequestId;
 						}
-						Token.WaitHandle.WaitOne(Config.RequestInterval);
+						Token.WaitHandle.WaitOne(RequestInterval ?? Config.RequestInterval);
 						Token.ThrowIfCancellationRequested();
 						task = Client.GetAsync(statusCheckUrl, HttpCompletionOption.ResponseHeadersRead, Token);
 						continue;

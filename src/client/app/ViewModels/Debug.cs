@@ -7,6 +7,7 @@ using Caliburn.Micro;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Layout;
+using log4net.Repository.Hierarchy;
 using NHibernate.AdoNet.Util;
 using Test.Support.log4net;
 
@@ -36,11 +37,12 @@ namespace AnalitF.Net.Client.ViewModels
 			catcherSql.Appender = this;
 			catcherSql.Start();
 
-			var catcher = new QueryCatcher("AnalitF.Net.Client");
-			catcher.Additivity = true;
-			catcher.Level = Level.Warn;
-			catcher.Appender = this;
-			catcher.Start();
+			var repository = (Hierarchy)log4net.LogManager.GetRepository();
+			var logger = (Logger)repository.GetLogger("AnalitF.Net.Client");
+			if (logger.Level > Level.Warn) {
+				logger.Level = Level.Warn;
+			}
+			logger.AddAppender(this);
 
 			var caliburncatcher = new QueryCatcher("Caliburn.Micro");
 			caliburncatcher.Additivity = true;
@@ -80,6 +82,8 @@ namespace AnalitF.Net.Client.ViewModels
 					Sql.Value = new StackTrace() + Environment.NewLine + Sql.Value;
 			}
 			else {
+				if (loggingEvent.Level < Level.Warn)
+					return;
 				ErrorCount.Value++;
 				if (Error.Length > limit)
 					Error = "";
