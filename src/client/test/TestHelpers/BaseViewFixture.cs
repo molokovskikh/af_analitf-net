@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.ViewModels;
@@ -33,6 +34,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ViewModelBinder.Bind(model, view, null);
 			ForceBinding(view);
 			return (UserControl)view;
+		}
+
+		protected void UseWindow(BaseScreen model, Func<Window, UserControl, Task> action)
+		{
+			WpfTestHelper.WithWindow2(async w => {
+				var view = Bind(model);
+				w.Content = view;
+
+				await w.WaitLoaded();
+				await action(w, view);
+			});
 		}
 	}
 }

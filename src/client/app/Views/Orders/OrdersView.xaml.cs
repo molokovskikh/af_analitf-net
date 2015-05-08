@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Views.Orders
 			if (((BaseScreen)DataContext).User != null && ((BaseScreen)DataContext).User.IsPreprocessOrders)
 				context = "CorrectionEnabled";
 			StyleHelper.ApplyStyles(typeof(Order), Orders, Application.Current.Resources, Legend, context);
+			StyleHelper.ApplyStyles(typeof(SentOrder), SentOrders, Application.Current.Resources, Legend);
 		}
 	}
 }
