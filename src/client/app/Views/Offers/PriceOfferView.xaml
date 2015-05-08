@@ -119,7 +119,7 @@
 					Header="Цена" Binding="{Binding ResultCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="39*" Header="Остаток"
-					Binding="{Binding Quantity}" TextAlignment="Right" />
+					Binding="{Binding Quantity}" TextAlignment="Right" SortMemberPath="SortQuantity" />
 				<c:DataGridTextColumnEx Width="51*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="51*" Header="Мин.цена" Binding="{Binding LeaderCost}"

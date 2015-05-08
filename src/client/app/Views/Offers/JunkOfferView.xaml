@@ -77,8 +77,8 @@
 					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="50*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="37*" Header="Остаток" Binding="{Binding Quantity}"
-					TextAlignment="Right" />
+				<c:DataGridTextColumnEx Width="37*" Header="Остаток"
+					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="46*"
 					Header="Заказ"
 					Binding="{Binding OrderCount}" />

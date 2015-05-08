@@ -105,7 +105,8 @@
 				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" />
 				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
 				<c:DataGridTextColumnEx Width="59*" FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" />
-				<c:DataGridTextColumnEx Width="39*" Header="Остаток" Binding="{Binding Quantity}" />
+				<c:DataGridTextColumnEx Width="39*" Header="Остаток"
+					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" />
 				<c:DataGridTextColumnEx Width="50*" Header="Комментарий"

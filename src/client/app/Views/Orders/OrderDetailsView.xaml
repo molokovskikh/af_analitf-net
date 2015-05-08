@@ -105,7 +105,7 @@
 					Binding="{Binding MixedCost}"
 					TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Остаток" Binding="{Binding Quantity}"
-					TextAlignment="Right" />
+					SortMemberPath="SortQuantity" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="65*" Header="Заказ" Binding="{Binding Count}"
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />

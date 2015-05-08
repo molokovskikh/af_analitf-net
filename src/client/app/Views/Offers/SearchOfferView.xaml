@@ -124,7 +124,7 @@
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}" TextAlignment="Right" />
 				<c:DataGridTextColumnEx Width="68*" Header="Остаток" Binding="{Binding Quantity}"
-					TextAlignment="Right" />
+					TextAlignment="Right" SortMemberPath="SortQuantity" />
 				<c:DataGridTextColumnEx Width="47*"
 					Header="Заказ"
 					Binding="{Binding OrderCount}" />

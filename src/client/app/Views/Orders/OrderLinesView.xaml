@@ -101,7 +101,7 @@
 					TextAlignment="Right"
 					FontWeight="Bold" />
 				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
-					TextAlignment="Right" />
+					TextAlignment="Right" SortMemberPath="SortQuantity" />
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}"
 					TextAlignment="Right" />
@@ -174,7 +174,7 @@
 					TextAlignment="Right"
 					FontWeight="Bold" />
 				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
-					TextAlignment="Right" />
+					TextAlignment="Right" SortMemberPath="SortQuantity" />
 				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}"
 					TextAlignment="Right" />
