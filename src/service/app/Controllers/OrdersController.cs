@@ -32,6 +32,7 @@ namespace AnalitF.Net.Service.Controllers
 
 		public HttpResponseMessage Put(ConfirmRequest confirm)
 		{
+			//теоретически здесь лимит может стать меньше нуля, игнорируем эту возможность как незначительную
 			Session.CreateSQLQuery(@"
 update Orders.OrdersHead o
 join Logs.AcceptedOrderLogs l on l.OrderId = o.RowId
@@ -39,6 +40,14 @@ set o.Deleted = 0
 where l.RequestId = :id;
 
 delete l from Logs.AcceptedOrderLogs l
+where l.RequestId = :id;
+
+update OrderSendRules.SmartOrderLimits l
+join Logs.PendingLimitLogs p on p.LimitId = l.Id
+set l.Value = l.Value - p.Value, l.ToDay = l.ToDay - p.ToDay
+where p.RequestId = :id;
+
+delete l from Logs.PendingLimitLogs l
 where l.RequestId = :id;")
 				.SetParameter("id", confirm.RequestId)
 				.ExecuteUpdate();
@@ -135,17 +144,18 @@ where l.RequestId = :id;")
 					var addressIds = orders.Select(o => o.AddressId).Distinct().ToArray();
 					if (addressIds.Length > 0) {
 						var addresses = session.Query<Address>()
-							.Where(a => addressIds.Contains(a.Id) && a.SmartOrderLimits.Count > 0)
+							.Where(a => addressIds.Contains(a.Id) && a.OrderLimits.Count > 0)
 							.ToArray();
 						foreach (var order in orders) {
 							var limit = addresses.Where(a => a.Id == order.AddressId)
-								.SelectMany(a => a.SmartOrderLimits)
+								.SelectMany(a => a.OrderLimits)
 								.FirstOrDefault(l => l.Supplier.Id == order.PriceList.Supplier.Id);
 							if (limit != null) {
-								limit.ConsumeLimit(Address.CalculateSum(session, order));
+								session.Save(new PendingLimitLog(log, limit, limit.ConsumeLimit((decimal)order.CalculateSum())));
 							}
 						}
 					}
+					//отмечаем заказа как удаленный до подтверждения
 					orders.Each(o => o.Deleted = true);
 					session.SaveEach(orders);
 					session.SaveEach(orders.Select(o => new AcceptedOrderLog(log, o)));

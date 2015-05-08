@@ -110,6 +110,7 @@
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\PendingDocLog.cs" />
+    <Compile Include="Models\PendingLimit.cs" />
     <Compile Include="Models\PendingMailLog.cs" />
     <Compile Include="Models\PendingOrderLog.cs" />
     <Compile Include="Models\Promotion.cs" />

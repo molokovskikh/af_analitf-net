@@ -172,8 +172,10 @@ namespace AnalitF.Net.Service.Test
 			supplier.Maintain(session);
 
 			var address = session.Load<Address>(user.AvaliableAddresses[0].Id);
-			var limit = new SmartOrderLimit(session.Load<Supplier>(supplier.Id), 1000);
-			address.SmartOrderLimits.Add(limit);
+			var limit = new OrderLimit(session.Load<Supplier>(supplier.Id), 1000) {
+				Today = 500
+			};
+			address.OrderLimits.Add(limit);
 
 			var settings = session.Load<ClientSettings>(user.Client.Id);
 			settings.AllowDelayOfPayment = true;
@@ -186,6 +188,7 @@ namespace AnalitF.Net.Service.Test
 
 			session.Refresh(limit);
 			Assert.AreEqual(900, limit.Value);
+			Assert.AreEqual(500, limit.Today);
 		}
 
 		[Test]
@@ -254,8 +257,10 @@ namespace AnalitF.Net.Service.Test
 				CurrentUser = user,
 				Config = config,
 			};
-			ordersController.Post(syncRequest);
+			var value = ((ObjectContent)ordersController.Post(syncRequest).Content).Value;
+			var id = (uint)value.GetType().GetProperty("RequestId").GetValue(value, null);
 			ordersController.Task.Wait();
+			ordersController.Put(new ConfirmRequest(id));
 		}
 
 		private SyncRequest ToClientOrder(TestCore offer)

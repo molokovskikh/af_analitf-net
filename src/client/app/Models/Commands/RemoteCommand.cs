@@ -7,14 +7,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
-using Common.Tools.Calendar;
-using DotRas;
-using Iesi.Collections;
-using NHibernate;
-using Remotion.Linq;
-using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands

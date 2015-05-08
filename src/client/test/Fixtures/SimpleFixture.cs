@@ -51,10 +51,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var value = Convert.ToDecimal(Console.ReadLine());
 			var user = ServerFixture.User(session);
 			var address = session.Load<Common.Models.Address>(user.AvaliableAddresses[0].Id);
-			var limit = address.SmartOrderLimits.FirstOrDefault(l => l.Supplier.Id == supplierId);
+			var limit = address.OrderLimits.FirstOrDefault(l => l.Supplier.Id == supplierId);
 			if (limit == null) {
-				limit = new SmartOrderLimit(session.Load<Common.Models.Supplier>(supplierId), value);
-				address.SmartOrderLimits.Add(limit);
+				limit = new OrderLimit(session.Load<Common.Models.Supplier>(supplierId), value);
+				address.OrderLimits.Add(limit);
 			}
 			limit.Value = value;
 			session.Save(address);
