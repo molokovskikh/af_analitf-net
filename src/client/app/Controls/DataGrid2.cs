@@ -120,6 +120,13 @@ namespace AnalitF.Net.Client.Controls
 			}
 		}
 
+		protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+		{
+			//переопределяем штатное поведение вместо прокрутки перемещаем выделение
+			e.Handled = true;
+			Jump(e.Delta / Mouse.MouseWheelDeltaForOneLine * -1);
+		}
+
 		private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			//если строка удаляет с помощью функции datagrid то после удалении фокус остается в datagrid
@@ -214,31 +221,28 @@ namespace AnalitF.Net.Client.Controls
 				}
 				else if (e.Key == Key.PageUp) {
 					e.Handled = true;
-					var index = Items.IndexOf(CurrentItem);
 					var jumpDistance = Math.Max(1, (int)viewer.ViewportHeight - 1);
-					index = Math.Max(index - jumpDistance, 0);
-					if (index >= 0 && index < Items.Count) {
-						if (Items[index] is GroupHeader)
-							index++;
-					}
-					ShowAndFocus(index);
+					Jump(-jumpDistance);
 					return;
 				}
 				else if (e.Key == Key.PageDown) {
 					e.Handled = true;
-					var index = Items.IndexOf(CurrentItem);
 					var jumpDistance = Math.Max(1, (int)viewer.ViewportHeight - 1);
-					index = Math.Min(index + jumpDistance, Items.Count - 1);
-					if (index >= 0 && index < Items.Count) {
-						if (Items[index] is GroupHeader)
-							index--;
-					}
-					ShowAndFocus(index);
+					Jump(jumpDistance);
 					return;
 				}
 			}
 
 			base.OnKeyDown(e);
+		}
+
+		private void Jump(int jumpDistance)
+		{
+			var index = Items.IndexOf(CurrentItem);
+			index = Math.Max(Math.Min(index + jumpDistance, Items.Count - 1), 0);
+			if (Items[index] is GroupHeader)
+				index += jumpDistance > 0 ? -1 : 1;
+			ShowAndFocus(index);
 		}
 
 		private void ShowAndFocus(int index)
