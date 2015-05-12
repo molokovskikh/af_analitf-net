@@ -159,8 +159,7 @@ namespace AnalitF.Net.Client
 				log.Error("Не удалось инициализировать стили", e);
 			}
 			var windowManager = IoC.Get<IWindowManager>();
-			Shell = (ShellViewModel) IoC.GetInstance(typeof(ShellViewModel), null);
-			Shell.Config = Config;
+			Shell = new ShellViewModel(Config);
 			Deserialize();
 
 			windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {

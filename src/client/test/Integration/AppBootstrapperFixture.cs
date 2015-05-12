@@ -90,6 +90,7 @@ namespace AnalitF.Net.Test.Integration
 			disposable.Add(app);
 			app.Config.RootDir = "test";
 			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
+			app.Config.IsUnitTesting = true;
 			Execute.ResetWithoutDispatcher();
 			return app;
 		}
