@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Client.ViewModels.Orders;
 
 namespace AnalitF.Net.Client.Views.Orders
 {
@@ -17,6 +18,15 @@ namespace AnalitF.Net.Client.Views.Orders
 			Loaded += (sender, args) => {
 				ApplyStyles();
 			};
+
+			DataContextChanged += (sender, args) => {
+				var model = DataContext as OrdersViewModel;
+				if (model != null) {
+					if (!model.User.HaveLimits)
+						Orders.Columns.Remove(DataGridHelper.FindColumn(Orders, "Лимит"));
+				}
+			};
+
 
 			Orders.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,

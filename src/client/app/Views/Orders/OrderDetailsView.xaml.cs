@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Views.Orders
 			DataContextChanged += (sender, args) => {
 				var model = DataContext as OrderDetailsViewModel;
 				if (model != null) {
-					if (!model.IsCurrentOrder)
+					if (!model.IsCurrentOrder || !model.User.HaveLimits)
 						Lines.Columns.Remove(DataGridHelper.FindColumn(Lines, "Эффективность"));
 				}
 			};

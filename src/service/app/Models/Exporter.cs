@@ -332,7 +332,15 @@ select u.Id,
 	?supportPhone as SupportPhone,
 	?supportHours as SupportHours,
 	?lastSync as LastSync,
-	rcs.SaveOrders
+	rcs.SaveOrders,
+	exists(
+		select *
+		from Customers.UserAddresses ua
+			join Customers.Addresses a on a.Id = ua.AddressId
+			join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
+			join Usersettings.Prices p on p.FirmCode = l.SupplierId
+		where ua.UserId = u.Id and a.Enabled = 1
+	) as HaveLimits
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id

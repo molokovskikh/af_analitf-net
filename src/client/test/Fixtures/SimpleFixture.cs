@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		}
 
 		[Service]
-		public static void SmartOrderSetLimit(ISession session)
+		public static void SetLimit(ISession session)
 		{
 			Console.Write("Поставщик:");
 			var supplierId = Convert.ToUInt32(Console.ReadLine());
