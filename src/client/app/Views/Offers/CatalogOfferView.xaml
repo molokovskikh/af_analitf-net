@@ -254,7 +254,7 @@
 							Name="CurrentOffer_Price_OperativeInfo" />
 					</Grid>
 				</TabItem>
-				<TabItem Header="Предельные отпускные цены производителей на ЖНВЛС">
+				<TabItem Header="Предельные отпускные цены производителей (Пред.зарег.цена)">
 					<c:DataGrid2 x:Name="MaxProducerCosts">
 						<FrameworkElement.Style>
 							<Style TargetType="c:DataGrid2" BasedOn="{StaticResource {x:Type c:DataGrid2}}">
