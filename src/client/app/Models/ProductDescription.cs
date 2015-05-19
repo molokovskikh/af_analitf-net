@@ -57,7 +57,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string FullName
 		{
-			get { return String.Format("{0} ({1})", Name, EnglishName); }
+			get
+			{
+				if (!String.IsNullOrEmpty(EnglishName))
+					return String.Format("{0} ({1})", Name, EnglishName);
+				return Name;
+			}
 		}
 
 		public virtual string DisplayName

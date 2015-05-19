@@ -92,7 +92,7 @@ namespace AnalitF.Net.Client.Controls
 			_writer.WritingCancelled += Cancelled;
 			CommandManager.InvalidateRequerySuggested();
 			if (PrintResult != null)
-				_writer.WriteAsync(PrintResult.GetPaginator(dialog.PageRangeSelection, dialog.PageRange));
+				_writer.WriteAsync(PrintResult.GetPaginator(dialog));
 			else if (Document is FixedDocumentSequence)
 				_writer.WriteAsync(Document as FixedDocumentSequence);
 			else if (Document is FixedDocument)
@@ -116,7 +116,7 @@ namespace AnalitF.Net.Client.Controls
 			//кидать здесь исключение не кажется хорошей идей
 			//поэтому делаем это только в дебаге что бы было понятно почему
 			//ничего не печатает
-			if (e != null) {
+			if (e != null && !(e is PrintingCanceledException)) {
 #if DEBUG
 				throw new Exception("Ошибка при печати документа", e);
 #else

@@ -8,10 +8,11 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class WrapDocumentPaginator : DocumentPaginator, IDocumentPaginatorSource
 	{
+		public static Thickness Margins = new Thickness(0, 50, 0, 50);
+
 		private BaseDocument document;
 		private DocumentPaginator paginator;
 		private Size pageSize;
-		private Thickness margins;
 		private PageRangeSelection selection;
 		private PageRange range;
 
@@ -29,8 +30,8 @@ namespace AnalitF.Net.Client.Models.Print
 			this.document = document;
 			this.paginator = paginator;
 
-			margins = new Thickness(0, 50, 0, 50);
-			PageSize = paginator.PageSize;
+			pageSize = new Size(paginator.PageSize.Width + Margins.Right + Margins.Left,
+				paginator.PageSize.Height + Margins.Top + Margins.Bottom);
 		}
 
 		public override DocumentPage GetPage(int pageNumber)
@@ -49,8 +50,8 @@ namespace AnalitF.Net.Client.Models.Print
 			var visual = new ContainerVisual();
 			var pageVisual = new ContainerVisual {
 				Transform = new TranslateTransform(
-					margins.Left,
-					margins.Top)
+					Margins.Left,
+					Margins.Top)
 			};
 			pageVisual.Children.Add(originalVisual);
 			visual.Children.Add(pageVisual);
@@ -58,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var header = Header(pageNumber);
 			if (header != null) {
 				var headerContainer = new ContainerVisual {
-					Transform = new TranslateTransform(margins.Left, 0)
+					Transform = new TranslateTransform(Margins.Left, 0)
 				};
 				headerContainer.Children.Add(header);
 				visual.Children.Add(headerContainer);
@@ -67,7 +68,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var footer = Footer(pageNumber);
 			if (footer != null) {
 				var footerContainer = new ContainerVisual {
-					Transform = new TranslateTransform(margins.Left, PageSize.Height - margins.Bottom)
+					Transform = new TranslateTransform(Margins.Left, PageSize.Height - Margins.Bottom)
 				};
 				footerContainer.Children.Add(footer);
 				visual.Children.Add(footerContainer);
@@ -76,7 +77,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var documentPage = new DocumentPage(visual,
 				pageSize,
 				new Rect(new Point(), pageSize),
-				new Rect(new Point(margins.Left, margins.Top), ContentSize()));
+				new Rect(new Point(Margins.Left, Margins.Top), ContentSize()));
 			return documentPage;
 		}
 
@@ -96,8 +97,8 @@ namespace AnalitF.Net.Client.Models.Print
 
 		private Size ContentSize()
 		{
-			return new Size(pageSize.Width - margins.Left - margins.Right,
-				pageSize.Height - margins.Top - margins.Bottom);
+			return new Size(pageSize.Width - Margins.Left - Margins.Right,
+				pageSize.Height - Margins.Top - Margins.Bottom);
 		}
 
 		private Visual ToVisual(FrameworkContentElement section)
@@ -145,8 +146,11 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 			set
 			{
-				pageSize = value;
-				paginator.PageSize = ContentSize();
+				//операцию обновления размера невозможно реализовать корректно
+				//размер сраницы должен быть на 50 сверху и на 50 снизу меньше чем размер a4 что бы уместились подписи
+				//но если мы сконструируем 2 WrapDocumentPaginator каждаый из них уменьшит размер страницы на 100
+				//в результате страница странет меньше на 200px
+				throw new NotImplementedException("Эту операцию невозможно реализовать корректно");
 			}
 		}
 

@@ -78,6 +78,7 @@ namespace AnalitF.Net.Client.Models.Print
 		public DefaultDocument(FlowDocument doc)
 		{
 			this.doc = doc;
+			Configure();
 		}
 
 		protected override void BuildDoc()
@@ -98,7 +99,7 @@ namespace AnalitF.Net.Client.Models.Print
 		public BaseDocument()
 		{
 			doc.FontFamily = new FontFamily("Arial");
-			doc.PagePadding = new Thickness(36, 36, 50, 36);
+			Configure();
 			HeaderStyle = new Style(typeof(Run)) {
 				Setters = {
 					new Setter(Control.FontSizeProperty, 16d),
@@ -130,6 +131,16 @@ namespace AnalitF.Net.Client.Models.Print
 					new Setter(Table.BorderThicknessProperty, new Thickness(1, 1, 0, 0)),
 				}
 			};
+		}
+
+		protected void Configure()
+		{
+			//отступы должны быть тк большенство принтеров требует их
+			doc.PagePadding = new Thickness(36, 36, 50, 36);
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			//мы должны оставить место для "шапки" и "подвала"
+			paginator.PageSize = new Size(paginator.PageSize.Width - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right,
+				paginator.PageSize.Height - WrapDocumentPaginator.Margins.Bottom - WrapDocumentPaginator.Margins.Top);
 		}
 
 		public FlowDocument Build()

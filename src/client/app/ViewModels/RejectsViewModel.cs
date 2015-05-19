@@ -97,8 +97,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (toPrint.Count == 0) {
 				toPrint = Rejects.Value;
 			}
-			var doc = new RejectsDocument(toPrint, ShowCauseReason).Build();
-			return new PrintResult(DisplayName, doc);
+			return new PrintResult(DisplayName, new RejectsDocument(toPrint, ShowCauseReason));
 		}
 	}
 }

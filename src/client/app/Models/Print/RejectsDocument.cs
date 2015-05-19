@@ -19,10 +19,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			var size = paginator.PageSize;
-			paginator.PageSize = new Size(size.Height, size.Width);
-
+			Landscape();
 			Header("Препараты, предписанные к изъятию из аптечной сети");
 			var headers = new[] {
 				new PrintColumn("Серия", 96),
