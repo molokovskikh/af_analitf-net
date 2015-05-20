@@ -365,7 +365,10 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			var size = paginator.PageSize;
-			paginator.PageSize = new Size(size.Height, size.Width);
+			paginator.PageSize = new Size(size.Height - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right
+					+ WrapDocumentPaginator.Margins.Top + WrapDocumentPaginator.Margins.Bottom,
+				size.Width - WrapDocumentPaginator.Margins.Bottom - WrapDocumentPaginator.Margins.Top
+					+ WrapDocumentPaginator.Margins.Left + WrapDocumentPaginator.Margins.Right);
 		}
 	}
 }

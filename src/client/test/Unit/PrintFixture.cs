@@ -58,6 +58,10 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var doc = new RejectsDocument(Enumerable.Repeat(1, 100).Select(i => new Reject()).ToList(), false).Build();
 			Assert.IsNotNull(doc);
+			var size = ((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize;
+			//816 - отступы
+			Assert.AreEqual(716, size.Height);
+			Assert.AreEqual(1056, size.Width);
 		}
 
 		[Test]
