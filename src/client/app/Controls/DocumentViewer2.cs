@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,46 @@ using log4net;
 
 namespace AnalitF.Net.Client.Controls
 {
+	public class FixedDocumentPaginator : DocumentPaginator
+	{
+		private FixedDocument doc;
+		private FixedPage[] pages;
+
+		public FixedDocumentPaginator(FixedDocument doc, FixedPage[] pages)
+		{
+			this.doc = doc;
+			this.pages = pages;
+		}
+
+		public override DocumentPage GetPage(int pageNumber)
+		{
+			if (pageNumber < 0 || pageNumber >= pages.Length)
+				return DocumentPage.Missing;
+			return new DocumentPage(pages[pageNumber].Children[0], new Size(816.0, 1056.0), new Rect(0, 0, 816.0, 1056.0), new Rect(0, 0, 816.0, 1056.0));
+		}
+
+		public override bool IsPageCountValid
+		{
+			get { return true; }
+		}
+
+		public override int PageCount
+		{
+			get { return pages.Length; }
+		}
+
+		public override Size PageSize
+		{
+			get { return new Size(816.0, 1056.0); }
+			set { throw new NotImplementedException(); }
+		}
+
+		public override IDocumentPaginatorSource Source
+		{
+			get { return doc; }
+		}
+	}
+
 	public class DocumentViewer2 : DocumentViewer
 	{
 		private ILog log = LogManager.GetLogger(typeof(DocumentViewer2));
@@ -95,8 +136,20 @@ namespace AnalitF.Net.Client.Controls
 				_writer.WriteAsync(PrintResult.GetPaginator(dialog));
 			else if (Document is FixedDocumentSequence)
 				_writer.WriteAsync(Document as FixedDocumentSequence);
-			else if (Document is FixedDocument)
-				_writer.WriteAsync(Document as FixedDocument);
+			else if (Document is FixedDocument) {
+				var fixedDocument = Document as FixedDocument;
+				if (dialog.PageRangeSelection == PageRangeSelection.AllPages) {
+					_writer.WriteAsync(fixedDocument);
+				}
+				else {
+					var pages = new List<FixedPage>();
+					var begin = Math.Max(0, dialog.PageRange.PageFrom - 1);
+					var end = Math.Min(fixedDocument.Pages.Count, dialog.PageRange.PageTo);
+					for(var i = begin; i < end; i++)
+						pages.Add(fixedDocument.Pages[i].Child);
+					_writer.WriteAsync(new FixedDocumentPaginator(fixedDocument, pages.ToArray()));
+				}
+			}
 			else
 				_writer.WriteAsync(Document.DocumentPaginator);
 		}
