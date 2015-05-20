@@ -9,11 +9,11 @@
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
-	xmlns:extentions="clr-namespace:AnalitF.Net.Client.Extentions"
+	xmlns:helpers="clr-namespace:AnalitF.Net.Client.Helpers"
 	behaviors:Focusable.DefaultFocus="{x:Reference Offers}">
 	<UserControl.Resources>
-		<extentions:GroupConverter x:Key="GroupConverter" />
-		<extentions:GroupNameConverter x:Key="GroupNameConverter" />
+		<helpers:GroupConverter x:Key="GroupConverter" />
+		<helpers:GroupNameConverter x:Key="GroupNameConverter" />
 		<!--
 		реализация группировки для datagrid
 		штатная группировка работает из рук вон плохо тк в .net 4 не реализована виртуализация в режиме группировки

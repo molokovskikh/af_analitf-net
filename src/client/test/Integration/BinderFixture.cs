@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client;
 using AnalitF.Net.Client.Controls;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Test.Integration.Views;
 using Caliburn.Micro;

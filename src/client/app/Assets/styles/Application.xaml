@@ -1,17 +1,17 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:Extentions="clr-namespace:AnalitF.Net.Client.Extentions"
 	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls"
-	xmlns:cal="http://www.caliburnproject.org">
+	xmlns:cal="http://www.caliburnproject.org"
+	xmlns:helpers="clr-namespace:AnalitF.Net.Client.Helpers">
 
 	<BooleanToVisibilityConverter x:Key="BoolToCollapsed" />
-	<Extentions:BoolToHiddenConverter x:Key="BoolToHidden" />
-	<Extentions:BoolToMarkerConverter x:Key="BoolToMarker" />
-	<Extentions:IntToBoolConverter x:Key="IntToBool" />
-	<Extentions:IntToCollapsedConverter x:Key="IntToCollapsed" />
-	<Extentions:UriToBitmapConverter x:Key="UriToBitmap" />
-	<Extentions:InvertConverter x:Key="BoolInvert" />
-	<Extentions:NullableConverter x:Key="NullableConverter" />
+	<helpers:BoolToHiddenConverter x:Key="BoolToHidden" />
+	<helpers:BoolToMarkerConverter x:Key="BoolToMarker" />
+	<helpers:IntToBoolConverter x:Key="IntToBool" />
+	<helpers:IntToCollapsedConverter x:Key="IntToCollapsed" />
+	<helpers:UriToBitmapConverter x:Key="UriToBitmap" />
+	<helpers:InvertConverter x:Key="BoolInvert" />
+	<helpers:NullableConverter x:Key="NullableConverter" />
 
 
 	<Style x:Key="DownloadLink" TargetType="ContentControl">

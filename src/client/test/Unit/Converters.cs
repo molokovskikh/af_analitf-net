@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit

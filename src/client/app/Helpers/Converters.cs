@@ -5,10 +5,8 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Controls;
-using AnalitF.Net.Client.Views.Offers;
-using NHibernate.Mapping;
 
-namespace AnalitF.Net.Client.Extentions
+namespace AnalitF.Net.Client.Helpers
 {
 	public class GroupNameConverter : IValueConverter
 	{

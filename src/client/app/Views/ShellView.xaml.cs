@@ -16,7 +16,6 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;

@@ -5,7 +5,6 @@ using System.Windows.Data;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls.Behaviors;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Offers;

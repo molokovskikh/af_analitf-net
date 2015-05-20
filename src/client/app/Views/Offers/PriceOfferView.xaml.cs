@@ -2,7 +2,6 @@
 using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Controls.Behaviors;
-using AnalitF.Net.Client.Extentions;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 

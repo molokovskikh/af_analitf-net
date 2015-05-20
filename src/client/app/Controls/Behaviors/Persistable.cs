@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Interactivity;
 using AnalitF.Net.Client.Config.Caliburn;
-using AnalitF.Net.Client.Extentions;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
