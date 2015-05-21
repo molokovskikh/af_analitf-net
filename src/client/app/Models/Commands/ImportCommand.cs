@@ -65,6 +65,12 @@ where Sum = 0;")
 					.ExecuteUpdate();
 			}
 			if (IsImported<Waybill>()) {
+				Session.CreateSQLQuery(@"
+update Waybills set IsNew = 0;
+update Waybills w
+	join LoadedDocuments d on d.Id = w.Id
+set IsNew = 1;")
+					.ExecuteUpdate();
 				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
 				foreach (var waybill in newWaybills)
 					waybill.Calculate(settings);

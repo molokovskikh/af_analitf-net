@@ -88,6 +88,9 @@ namespace AnalitF.Net.Client.Models
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }
 
+		[Style]
+		public virtual bool IsNew { get; set; }
+
 		public virtual IList<WaybillLine> Lines { get; set; }
 
 		[Ignore]

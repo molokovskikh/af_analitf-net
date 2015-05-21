@@ -160,9 +160,8 @@ namespace AnalitF.Net.Test.Integration.Views
 				var view = (FrameworkElement)lines.GetView();
 				var grid = (DataGrid)view.FindName("Lines");
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
-				Assert.AreEqual(source[0].Id, ((OrderLine)grid.SelectedItem).Id);
-				Assert.AreEqual(source[0].Id, ((OrderLine)grid.CurrentItem).Id);
-
+				grid.SelectedItem = grid.Items.OfType<OrderLine>().First(x => x.Id == source[0].Id);
+				grid.CurrentItem = grid.Items.OfType<OrderLine>().First(x => x.Id == source[0].Id);
 				Input(grid, term);
 				Assert.AreEqual(source[1].Id, ((OrderLine)grid.SelectedItem).Id,
 					"term = {0}, value = {1}", term, grid.SelectedItem);

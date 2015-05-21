@@ -13,6 +13,22 @@
 	<helpers:InvertConverter x:Key="BoolInvert" />
 	<helpers:NullableConverter x:Key="NullableConverter" />
 
+	<Style x:Key="MarkerStyle" TargetType="TextBlock">
+		<Setter Property="Background" Value="#FDB50D" />
+		<Setter Property="Foreground" Value="Black" />
+		<Setter Property="VerticalAlignment" Value="Bottom" />
+		<Setter Property="HorizontalAlignment" Value="Right" />
+		<Setter Property="FontSize" Value="10" />
+		<Setter Property="Padding" Value="2" />
+	</Style>
+
+	<Style x:Key="MarkerBorderStyle" TargetType="Border">
+		<Setter Property="VerticalAlignment" Value="Bottom" />
+		<Setter Property="HorizontalAlignment" Value="Right" />
+		<Setter Property="BorderThickness" Value="2" />
+		<Setter Property="CornerRadius" Value="4" />
+		<Setter Property="BorderBrush" Value="White" />
+	</Style>
 
 	<Style x:Key="DownloadLink" TargetType="ContentControl">
 		<Style.Setters>

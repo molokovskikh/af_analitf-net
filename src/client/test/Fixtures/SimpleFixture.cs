@@ -71,7 +71,16 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		}
 
 		[Description("Создает отказ, на сервере"), Service]
-		public static void CreateOrderReject(ISession session, uint productId = 0)
+		public static void CreateOrderReject(ISession session)
+		{
+			var user = ServerFixture.User(session);
+			InnerCreateOrderReject(session,
+				session.Query<TestProduct>().First(p => !p.Hidden).Id,
+				user.GetActivePricesNaked(session).First().Price.Core[0].Product.Id);
+		}
+
+		[Description("Создает отказ, на сервере, для тестов"), Service]
+		public static void InnerCreateOrderReject(ISession session, params uint[] productIds)
 		{
 			var user = ServerFixture.User(session);
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
@@ -80,10 +89,11 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(log);
 			session.Save(new TestDocumentSendLog(user, log));
 			var orderReject = new TestOrderReject(log);
-			var product = session.Query<TestProduct>().First(p => !p.Hidden);
-			if (productId > 0)
-				product = session.Load<TestProduct>(productId);
-			orderReject.CreateLine(product, 1);
+			foreach(var productId in productIds) {
+				var product = session.Get<TestProduct>(productId)
+						?? session.Query<TestProduct>().First(p => !p.Hidden);
+				orderReject.CreateLine(product, 1);
+			}
 			session.Save(orderReject);
 		}
 	}

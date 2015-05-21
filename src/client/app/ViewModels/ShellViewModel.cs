@@ -126,6 +126,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.ToValue();
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 			NewMailsCount = new NotifyValue<int>();
+			NewDocsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
 
 #if DEBUG
@@ -225,6 +226,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Stat> Stat { get; set; }
 		public NotifyValue<bool> IsDataLoaded { get; set; }
 		public NotifyValue<int> NewMailsCount { get; set; }
+		public NotifyValue<int> NewDocsCount { get; set; }
 
 		public string Version { get; set; }
 
@@ -417,7 +419,8 @@ namespace AnalitF.Net.Client.ViewModels
 			//сбросит его
 			var addressId = CurrentAddress == null ? 0u : CurrentAddress.Id;
 
-			NewMailsCount.Value = session.Query<Mail>().Count(m => m.IsNew);
+			NewMailsCount.Value = statelessSession.Query<Mail>().Count(m => m.IsNew);
+			NewDocsCount.Value = statelessSession.Query<Waybill>().Count(m => m.IsNew);
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();

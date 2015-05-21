@@ -74,10 +74,13 @@ namespace AnalitF.Net.Client.Test.Tasks
 
 					using (var session = factory.OpenSession())
 					using (session.BeginTransaction()) {
-						if (method.GetParameters().Length == 1)
-							method.Invoke(null, new object[] { session });
-						else
+						var infos = method.GetParameters();
+						if (infos.Length > 1 && infos[1].ParameterType == typeof(bool)) {
 							method.Invoke(null, new object[] { session, true });
+						}
+						else {
+							method.Invoke(null, new object[] { session });
+						}
 						session.Transaction.Commit();
 					}
 				}

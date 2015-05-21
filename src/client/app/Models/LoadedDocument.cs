@@ -1,10 +1,12 @@
-﻿namespace AnalitF.Net.Client.Models
+﻿using System.ComponentModel;
+
+namespace AnalitF.Net.Client.Models
 {
 	public enum DocumentType
 	{
-		Docs,
-		Waybills,
-		Rejects,
+		[Description("Документ")] Docs,
+		[Description("Накладная")] Waybills,
+		[Description("Отказ")] Rejects,
 	}
 
 	public class LoadedDocument

@@ -5,6 +5,7 @@
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	xmlns:cal="http://www.caliburnproject.org"
 	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
 
 	<i:Interaction.Behaviors>
@@ -13,12 +14,23 @@
 
 	<UserControl.InputBindings>
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="NavigateBackward" />
+		<KeyBinding Gesture="F1" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="ShowDescription" />
+		<KeyBinding Gesture="F2" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="ShowCatalog" />
+		<KeyBinding Gesture="CTRL+N" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="ShowCatalogWithMnnFilter" />
+		<KeyBinding Gesture="SPACE" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="ShowDescription" />
 	</UserControl.InputBindings>
 
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
@@ -50,12 +62,75 @@
 			</Grid>
 		</StackPanel>
 
-		<controls:DataGrid2 Grid.Row="1" x:Name="Lines">
+		<controls:DataGrid2 Grid.Row="1" x:Name="Lines" caliburn:NavBinder.Next="{x:Reference Offers}">
 			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Width="*" Header="Код" Binding="{Binding Code}" />
 				<controls:DataGridTextColumnEx Width="*" Header="Наименование" Binding="{Binding Product}" />
 				<controls:DataGridTextColumnEx Width="*" Header="Производитель" Binding="{Binding Producer}" />
 				<controls:DataGridTextColumnEx Width="*" Header="Количество" Binding="{Binding Count}" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
+
+		<ContentControl Grid.Row="2" x:Name="ProductInfo" />
+
+		<controls:DataGrid2 x:Name="Offers" Grid.Row="3"
+			caliburn:NavBinder.Prev="{x:Reference Lines}"
+			CanUserSelectMultipleItems="False"
+			CanUserSortColumns="False">
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="177*"
+					Header="Название"
+					Binding="{Binding ProductSynonym}" />
+				<controls:DataGridTextColumnEx Width="89*"
+					Header="Производитель"
+					Binding="{Binding ProducerSynonym}" />
+				<controls:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Кат.производитель" Binding="{Binding Producer}" />
+				<controls:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
+					TextAlignment="Right" />
+				<controls:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+					Binding="{Binding Doc}" />
+				<controls:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
+				<controls:DataGridTextColumnEx Width="56*"
+					Header="Срок годн."
+					Binding="{Binding Period}" TextAlignment="Center" />
+				<controls:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
+					Binding="{Binding Price.Name}" />
+				<controls:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
+					Binding="{Binding Price.RegionName}" />
+				<controls:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
+					Binding="{Binding Price.PriceDate}" />
+				<controls:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
+					Binding="{Binding RequestRatio}" />
+				<controls:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.сумма" Binding="{Binding MinOrderSum}" />
+				<controls:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+				<controls:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
+				<controls:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" />
+				<controls:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+				<controls:DataGridTextColumnEx Width="59*"
+					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" />
+				<controls:DataGridTextColumnEx Width="39*" Header="Остаток"
+					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" />
+				<controls:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
+					Binding="{Binding RetailCost}" />
+				<controls:DataGridTextColumnEx Width="50*" Header="Комментарий"
+					Binding="{Binding OrderLine.Comment}" />
+				<controls:DataGridTextColumnEx Width="34*"
+					Header="Заказ"
+					Binding="{Binding OrderCount}" />
+				<controls:DataGridTextColumnEx Width="51*"
+					Header="Сумма"
+					Binding="{Binding OrderLine.ResultSum}" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+
+		<ContentControl Grid.Row="3" x:Name="OrderWarning" />
+
+		<StackPanel Grid.Row="4" Name="Legend" />
 	</Grid>
 </UserControl>

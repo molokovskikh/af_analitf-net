@@ -78,6 +78,11 @@ namespace AnalitF.Net.Client.Config
 				}
 			}
 		}
+
+		public override string ToString()
+		{
+			return "ResultDir: " + Name;
+		}
 	}
 
 

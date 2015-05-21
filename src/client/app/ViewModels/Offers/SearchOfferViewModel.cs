@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
@@ -110,27 +111,29 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			//используется в случае если нужно найти предложения по позиции отказа
 			if (!String.IsNullOrEmpty(initTerm)) {
 				IsLoading.Value = true;
-				RxQuery(s => {
-					var offers = StatelessSession
-						.CreateSQLQuery(@"
+				RxQuery(s => QueryByFullText(s, initTerm))
+					.ObserveOn(UiScheduler)
+					.Do(v => {
+						LoadOrderItems(v);
+						CalculateRetailCost(v);
+						IsLoading.Value = false;
+					})
+					.Subscribe(Offers, CloseCancellation.Token);
+			}
+		}
+
+		public static IList<Offer> QueryByFullText(IStatelessSession statelessSession, string term)
+		{
+			return statelessSession
+				.CreateSQLQuery(@"
 select {o.*}, {p.*}, match (productsynonym) against (:term in natural language mode)
 from Offers o
 	join Prices p on p.PriceId = o.PriceId and p.RegionId = o.RegionId
 where match (ProductSynonym) against (:term in natural language mode)")
-						.AddEntity("o", typeof(Offer))
-						.AddJoin("p", "o.Price")
-						.SetParameter("term", initTerm)
-						.List<Offer>();
-					return offers;
-				})
-				.ObserveOn(UiScheduler)
-				.Do(v => {
-					LoadOrderItems(v);
-					CalculateRetailCost(v);
-					IsLoading.Value = false;
-				})
-				.Subscribe(Offers, CloseCancellation.Token);
-			}
+				.AddEntity("o", typeof(Offer))
+				.AddJoin("p", "o.Price")
+				.SetParameter("term", term)
+				.List<Offer>();
 		}
 
 		private IList<Offer> SortOffers(IList<Offer> offers)

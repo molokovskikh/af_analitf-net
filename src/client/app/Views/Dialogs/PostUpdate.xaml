@@ -4,7 +4,9 @@
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
-	behaviors:Focusable.DefaultFocus="{x:Reference TryClose}">
+	behaviors:Focusable.DefaultFocus="{x:Reference TryClose}"
+	MinHeight="150"
+	MinWidth="300">
 
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
@@ -14,10 +16,15 @@
 		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="TryClose" />
 	</UserControl.InputBindings>
 
-	<StackPanel>
-		<Label Name="Header" FontWeight="Bold" />
-		<TextBlock Padding="5" Name="Text" TextWrapping="Wrap" />
-		<StackPanel Orientation="Horizontal">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0" Name="Header" FontWeight="Bold" />
+		<TextBlock Grid.Row="1" Padding="5" Name="Text" TextWrapping="Wrap" />
+		<StackPanel Grid.Row="2" Orientation="Horizontal">
 			<Button Name="TryClose" Margin="4" MinWidth="30">ОК</Button>
 			<Button Name="ShowRejects" Margin="4"
 				Visibility="{Binding IsRejected, Converter={StaticResource BoolToCollapsed}}">
@@ -27,6 +34,10 @@
 				Visibility="{Binding IsAwaited, Converter={StaticResource BoolToCollapsed}}">
 				Показать ожидаемые позиции
 			</Button>
+			<Button Name="ShowNewDocs" Margin="4"
+				Visibility="{Binding IsDocsReceived, Converter={StaticResource BoolToCollapsed}}">
+				Показать документы
+			</Button>
 		</StackPanel>
-	</StackPanel>
+	</Grid>
 </UserControl>

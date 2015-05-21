@@ -188,8 +188,14 @@
 			</Button>
 
 			<Button x:Name="ShowWaybills" ToolTip="Накладные" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
-				<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"
-						Style="{StaticResource ButtonImage}" />
+				<Grid>
+					<Image Source="/AnalitF.Net.Client;component/assets/images/My Documents3_32.ico"
+							Style="{StaticResource ButtonImage}" />
+					<Border Style="{StaticResource MarkerBorderStyle}">
+						<TextBlock Style="{StaticResource MarkerStyle}" Name="NewDocsCount"
+								Visibility="{Binding NewDocsCount.Value, Converter={StaticResource IntToCollapsed}}" />
+					</Border>
+				</Grid>
 			</Button>
 
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
@@ -198,14 +204,11 @@
 				<Grid>
 					<Image Source="/AnalitF.Net.Client;component/assets/images/Compose Email_32.ico"
 							Style="{StaticResource ButtonImage}" />
-					<TextBlock Padding="2, 0, 2, 2"
-							Background="Green"
-							Foreground="White"
-							VerticalAlignment="Top"
-							HorizontalAlignment="Left"
-							FontSize="10"
-							Name="NewMailsCount"
-							Visibility="{Binding NewMailsCount.Value, Converter={StaticResource IntToCollapsed}}" />
+					<Border  Style="{StaticResource MarkerBorderStyle}">
+						<TextBlock Style="{StaticResource MarkerStyle}"
+								Name="NewMailsCount"
+								Visibility="{Binding NewMailsCount.Value, Converter={StaticResource IntToCollapsed}}" />
+					</Border>
 				</Grid>
 			</Button>
 

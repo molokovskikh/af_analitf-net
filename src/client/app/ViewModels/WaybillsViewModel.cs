@@ -26,6 +26,14 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Измененные накладные")] Changed
 	}
 
+	public enum DocumentTypeFilter
+	{
+		[Description("Все")] All,
+		[Description("Накладная")] Waybills,
+		[Description("Отказ")] Rejects,
+	}
+
+
 	public class WaybillsViewModel : BaseScreen
 	{
 		public WaybillsViewModel()
@@ -39,6 +47,7 @@ namespace AnalitF.Net.Client.ViewModels
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
 			IsFilterByWriteTime = new NotifyValue<bool>();
 			RejectFilter = new NotifyValue<RejectFilter>();
+			TypeFilter = new NotifyValue<DocumentTypeFilter>();
 			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
 			AddressSelector = new AddressSelector(Session, this) {
 				Description = "Все адреса"
@@ -59,6 +68,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsFilterByWriteTime { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
 		public NotifyValue<RejectFilter> RejectFilter { get; set; }
+		public NotifyValue<DocumentTypeFilter> TypeFilter { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 
 		protected override void OnInitialize()
@@ -82,6 +92,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(RejectFilter.Changed())
 				.Merge(supplierSelectionChanged)
 				.Merge(AddressSelector.FilterChanged)
+				.Merge(TypeFilter.Changed())
 				.Subscribe(_ => Update());
 			OnCloseDisposable.Add(subscription);
 		}
@@ -189,6 +200,11 @@ namespace AnalitF.Net.Client.ViewModels
 			var addressIds = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 			if (addressIds.Length != AddressSelector.Addresses.Count)
 				query = query.Where(w => addressIds.Contains(w.Address.Id));
+
+			if (TypeFilter.Value == DocumentTypeFilter.Waybills)
+				query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
+			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
+				query = query.Where(w => w.DocType == DocType.Reject);
 
 			Waybills.Value = query
 				.OrderByDescending(w => w.WriteTime)

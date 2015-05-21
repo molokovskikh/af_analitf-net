@@ -21,8 +21,12 @@ namespace AnalitF.Net.Client.Models
 	{
 		public virtual uint Id { get; set; }
 		public virtual OrderReject OrderReject { get; set; }
+		public virtual string Code { get; set; }
 		public virtual string Product { get; set; }
+		public virtual uint? ProductId { get; set; }
+		public virtual uint? CatalogId { get; set; }
 		public virtual string Producer { get; set; }
+		public virtual uint? ProducerId { get; set; }
 		public virtual uint Count { get; set; }
 	}
 }

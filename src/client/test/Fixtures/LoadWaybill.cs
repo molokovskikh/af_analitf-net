@@ -33,9 +33,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = User(session);
 			Waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
-			var log = Waybill.Log;
+			Document = Waybill.Log;
 			session.Save(Waybill);
-			SendLog = new TestDocumentSendLog(user, log);
+			SendLog = new TestDocumentSendLog(user, Document);
 			session.Save(SendLog);
 			if (createFile)
 				Filename = Waybill.Log.CreateFile(Config.DocsPath, "waybill content");

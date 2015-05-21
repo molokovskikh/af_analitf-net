@@ -179,6 +179,15 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsNew",
+					new DataTrigger {
+						Binding = new Binding("IsNew"),
+						Value = true,
+						Setters = {
+							new Setter(Control.FontWeightProperty, FontWeights.Bold)
+						}
+					}
+				},
 			};
 		}
 

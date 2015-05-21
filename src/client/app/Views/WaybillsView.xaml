@@ -24,6 +24,10 @@
 
 		<WrapPanel Orientation="Horizontal" Margin="4">
 			<StackPanel Orientation="Vertical">
+				<Label>Тип</Label>
+				<ComboBox Style="{StaticResource Select}" x:Name="TypeFilter" />
+			</StackPanel>
+			<StackPanel Orientation="Vertical">
 				<Label>Забраковка</Label>
 				<ComboBox Style="{StaticResource Select}" x:Name="RejectFilter" />
 			</StackPanel>

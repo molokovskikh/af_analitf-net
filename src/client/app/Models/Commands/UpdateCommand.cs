@@ -228,11 +228,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			var offersImported = imports.Contains("offers", StringComparer.OrdinalIgnoreCase);
 			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
 
-			var isRejected = CalculateRejects(settings);
-			var isAwaited = offersImported && CalculateAwaited();
+			var postUpdate = new PostUpdate();
+			postUpdate.IsRejected = CalculateRejects(settings);
+			postUpdate.IsAwaited = offersImported && CalculateAwaited();
+				//в режиме получения документов мы не должны предлагать а должны просто открывать
+			if (!syncData.Match("Waybills"))
+				postUpdate.IsDocsReceived = Session.Query<LoadedDocument>().Count(d => d.IsDocDelivered) > 0;
 
-			if (isAwaited || isRejected) {
-				Results.Add(new DialogResult(new PostUpdate(isRejected, isAwaited), sizeToContent: true));
+			if (postUpdate.IsMadeSenseToShow) {
+				Results.Add(new DialogResult(postUpdate, sizeToContent: true));
 				result = UpdateResult.SilentOk;
 			}
 
@@ -260,7 +264,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				RestoreOrders();
 
 			foreach (var dir in settings.DocumentDirs)
-				FileHelper.CreateDirectoryRecursive(dir);
+				Directory.CreateDirectory(dir);
 
 			resultDirs.Each(Move);
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));

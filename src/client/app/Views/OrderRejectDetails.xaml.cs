@@ -11,17 +11,30 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Controls.Behaviors;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views
 {
-	/// <summary>
-	/// Interaction logic for OrderRejectDetails.xaml
-	/// </summary>
 	public partial class OrderRejectDetails : UserControl
 	{
 		public OrderRejectDetails()
 		{
 			InitializeComponent();
+
+			Loaded += (sender, args) => {
+				ApplyStyles();
+			};
+
+
+			new Editable().Attach(Offers);
+			DataGridHelper.CalculateColumnWidths(Offers);
+		}
+
+		public void ApplyStyles()
+		{
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 		}
 	}
 }
