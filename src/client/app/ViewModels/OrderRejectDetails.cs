@@ -14,6 +14,12 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private uint id;
 
+		//для восстановления состояния
+		public OrderRejectDetails(long id)
+			: this((uint)id)
+		{
+		}
+
 		public OrderRejectDetails(uint id)
 		{
 			this.id = id;
@@ -50,7 +56,18 @@ namespace AnalitF.Net.Client.ViewModels
 							return offers.OrderBy(c => c.ResultCost).ToList();
 						}
 						else {
-							return SearchOfferViewModel.QueryByFullText(s, CurrentLine.Value.Product);
+							var offers = SearchOfferViewModel.QueryByFullText(s, CurrentLine.Value.Product);
+							//выделяем цветом предложения которые относятся к одному товару
+							uint lastCatalogId = 0;
+							bool lastGroup = true;
+							foreach (var offer in offers) {
+								if (offer.CatalogId != lastCatalogId) {
+									lastCatalogId = offer.CatalogId;
+									lastGroup = !lastGroup;
+								}
+								offer.IsGrouped = lastGroup;
+							}
+							return offers;
 						}
 					}))
 				.Switch()
@@ -73,5 +90,14 @@ namespace AnalitF.Net.Client.ViewModels
 			else
 				Shell.Navigate(new CatalogOfferViewModel((long)CurrentLine.Value.CatalogId));
 		}
+
+#if DEBUG
+		public override object[] GetRebuildArgs()
+		{
+			return new object[] {
+				id
+			};
+		}
+#endif
 	}
 }

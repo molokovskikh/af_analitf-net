@@ -20,11 +20,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Init(model);
 			Assert.IsNotNull(model.Doc.Value);
 			Assert.That(model.Lines.Value.Count, Is.GreaterThan(0));
-			model.CurrentLine.Value = model.Lines.Value[0];
-			model.EnterLine();
-			var offers = (SearchOfferViewModel)shell.ActiveItem;
+			//для первой могу не найтись предложения
+			model.CurrentLine.Value = model.Lines.Value.Skip(1).First(l => l.ProductId == null);
 			testScheduler.Start();
-			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+
+			model.CurrentLine.Value = model.Lines.Value.First(l => l.ProductId != null);
+			testScheduler.Start();
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 		}
 	}
 }

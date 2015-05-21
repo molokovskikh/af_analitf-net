@@ -1595,9 +1595,17 @@ where r.DownloadId in ({0})", ids);
 			Export(Result, sql, "OrderRejects", truncate: false, parameters: new { userId = user.Id });
 
 			sql = String.Format(@"
-select l.Id, l.Product, l.Producer, l.Rejected as Count, l.HeaderId as OrderRejectId
+select l.Id,
+	l.Product,
+	l.ProductId,
+	p.CatalogId,
+	l.Producer,
+	l.ProducerId,
+	l.Rejected as Count,
+	l.HeaderId as OrderRejectId
 from Documents.RejectHeaders r
 	join Documents.RejectLines l on l.Headerid = r.Id
+		left join Catalogs.Products p on p.Id = l.ProductId
 where r.DownloadId in ({0})", ids);
 			Export(Result, sql, "OrderRejectLines", truncate: false, parameters: new { userId = user.Id });
 
