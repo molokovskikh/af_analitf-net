@@ -452,7 +452,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 					//формы должны показываться в определенном порядке
 					Results.Add(new DialogResult(new TextViewModel(report) {
 						Header = "Предложения по данным позициям из заказа отсутствуют",
-						DisplayName = "Не найденные позиции"
+						DisplayName = "Ненайденные позиции"
 					}, sizeToContent: true));
 					Results.Add(new MessageResult(SuccessMessage));
 					result = UpdateResult.SilentOk;

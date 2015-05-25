@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public TextViewModel(string text)
 		{
-			DisplayName = "Не найденные позиции";
+			DisplayName = "Ненайденные позиции";
 			Header = "Предложения по данным позициям из заказа отсутствуют:";
 			Text = text;
 		}
