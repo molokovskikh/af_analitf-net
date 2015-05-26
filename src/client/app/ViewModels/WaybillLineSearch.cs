@@ -29,9 +29,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Lines = new NotifyValue<List<WaybillLine>>(new List<WaybillLine>());
 			SearchBehavior = new SearchBehavior(this);
+			CurrentLine = new NotifyValue<WaybillLine>();
+			CanEnterLine = new NotifyValue<bool>();
+
+			CurrentLine.Select(x => x != null)
+				.Subscribe(CanEnterLine);
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
+		public NotifyValue<WaybillLine> CurrentLine { get; set; }
+		public NotifyValue<bool> CanEnterLine { get; set; }
 		public NotifyValue<List<WaybillLine>> Lines { get; set; }
 
 		protected override void OnInitialize()
@@ -122,6 +129,15 @@ namespace AnalitF.Net.Client.ViewModels
 				yield break;
 			}
 			base.Download(loadable);
+		}
+
+
+		public void EnterLine()
+		{
+			if (CurrentLine.Value == null)
+				return;
+
+			Shell.Navigate(new WaybillDetails(CurrentLine.Value.Waybill.Id));
 		}
 	}
 }

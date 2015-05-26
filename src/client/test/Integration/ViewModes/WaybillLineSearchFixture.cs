@@ -13,13 +13,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 	[TestFixture]
 	public class WaybillLineSearchFixture : ViewModelFixture
 	{
-		[Test]
-		public void Save_not_found_state()
+		private Supplier supplier;
+		private Waybill waybill;
+
+		[SetUp]
+		public void Setup()
 		{
-			Env.Barrier = new Barrier(2);
-			var supplier = session.Query<Supplier>().First();
-			supplier.HaveCertificates = true;
-			var waybill = new Waybill(address, supplier);
+			supplier = session.Query<Supplier>().First();
+			waybill = new Waybill(address, supplier);
 			var line = new WaybillLine(waybill) {
 				Product = "АКРИДЕРМ ГК 15,0 МАЗЬ",
 				Certificates = "РОСС RU.ФМ01.Д19782",
@@ -32,7 +33,15 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			};
 			waybill.AddLine(line);
 			session.Save(waybill);
+		}
 
+		[Test]
+		public void Save_not_found_state()
+		{
+			Env.Barrier = new Barrier(2);
+			supplier.HaveCertificates = true;
+
+			var line = waybill.Lines[0];
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			testScheduler.Start();
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
@@ -51,24 +60,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Display_download_state_after_reload()
 		{
 			Env.Barrier = new Barrier(2);
-			var supplier = session.Query<Supplier>().First();
 			supplier.HaveCertificates = true;
-			var waybill = new Waybill(address, supplier);
-			var line = new WaybillLine(waybill) {
-				Product = "АКРИДЕРМ ГК 15,0 МАЗЬ",
-				Certificates = "РОСС RU.ФМ01.Д19782",
-				ProducerCost = 258,
-				Nds = 10,
-				SupplierCostWithoutNds = 258,
-				SupplierCost = 283.8m,
-				Quantity = 2,
-				SerialNumber = "120214"
-			};
-			waybill.AddLine(line);
-			session.Save(waybill);
 
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			testScheduler.Start();
+			var line = waybill.Lines[0];
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
 			Assert.AreEqual(0, results.Length);
@@ -80,6 +76,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			testScheduler.Start();
 			waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			Assert.IsTrue(waybillLine.IsDownloading);
+		}
+
+		[Test]
+		public void Enter_line()
+		{
+			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			testScheduler.Start();
+			model.CurrentLine.Value = model.Lines.Value.First();
+			Assert.IsTrue(model.CanEnterLine.Value);
+			model.EnterLine();
+			Assert.IsInstanceOf<WaybillDetails>(shell.ActiveItem);
 		}
 	}
 }

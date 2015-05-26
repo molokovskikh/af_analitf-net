@@ -187,8 +187,10 @@
     <Compile Include="Controls\Behaviors\Focusable.cs" />
     <Compile Include="Controls\Behaviors\Persistable.cs" />
     <Compile Include="Controls\Behaviors\Selectable.cs" />
+    <Compile Include="Controls\Behaviors\Watermark.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
+    <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
@@ -547,6 +549,10 @@
     <Page Include="Assets\styles\TransitionContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Assets\styles\Watermark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AboutView.xaml">
       <SubType>Designer</SubType>

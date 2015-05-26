@@ -22,7 +22,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<WrapPanel Orientation="Horizontal" Margin="4">
+		<c:ToolBar2>
 			<StackPanel Orientation="Vertical">
 				<Label>Тип</Label>
 				<ComboBox Style="{StaticResource Select}" x:Name="TypeFilter" />
@@ -53,7 +53,7 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
 			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">Отчет для Росздравнадзора</Button>
-		</WrapPanel>
+		</c:ToolBar2>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">

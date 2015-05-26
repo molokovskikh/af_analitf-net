@@ -6,6 +6,13 @@
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Lines}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="../Assets/styles/Watermark.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
 
 	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
@@ -21,17 +28,25 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
+		<ToolBar Grid.Row="0">
 			<Button Name="NavigateBackward" Style="{StaticResource FilterElement}">Назад</Button>
 			<TextBox x:Name="SearchText"
+				caliburn:SearchBinder.Grid="Lines"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
-				Style="{StaticResource SearchText}" caliburn:SearchBinder.Grid="Lines" />
-		</StackPanel>
+				Style="{StaticResource SearchTerm}" Width="400">
+				<i:Interaction.Behaviors>
+					<behaviors:Watermark Text="Поиск строки, наименование или серия" />
+				</i:Interaction.Behaviors>
+			</TextBox>
+			<Button Name="EnterLine">В накладную</Button>
+		</ToolBar>
 		<c:DataGrid2 Grid.Row="1" x:Name="Lines"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"
 			c:SearchableDataGridColumn.SplitTerm="True">
 			<DataGrid.Columns>
-				<DataGridTextColumn Width="*" Header="Дата документа"
+				<c:DataGridTextColumnEx Width="*" Header="Дата документа"
+					Binding="{Binding Waybill.DocumentDate}" />
+				<c:DataGridTextColumnEx Width="*" Header="Дата получения документа"
 					Binding="{Binding Waybill.WriteTime}" />
 				<DataGridTextColumn Width="*" Header="№"
 					Binding="{Binding Waybill.Id}" />
