@@ -104,7 +104,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",
 						DisplayName = "Не отправленные заказы"
 					};
-					Results.Add(new DialogResult(text, sizeToContent: true));
+					Results.Add(new DialogResult(text));
 				}
 				else {
 					Results.Add(new DialogResult(new Correction(address.Id), fullScreen: true));

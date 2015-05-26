@@ -162,7 +162,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return null;
 
 			LoadHistoryOrders();
-			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer.Value, HistoryOrders));
+			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer.Value, HistoryOrders), fixedSize: true);
 		}
 
 		public IResult EnterOffer()

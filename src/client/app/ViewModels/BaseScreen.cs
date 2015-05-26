@@ -75,33 +75,37 @@ namespace AnalitF.Net.Client.ViewModels
 
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
+		public static AppTestContext TestContext;
+		public static bool UnitTesting;
+		public static IScheduler TestSchuduler;
+		public static IScheduler TestUiSchuduler;
+
 		private bool clearSession;
-		public TableSettings tableSettings = new TableSettings();
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
 		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestUiSchuduler ?? TestSchuduler ?? DispatcherScheduler.Current);
 
-		protected bool updateOnActivate = true;
-
+		protected bool UpdateOnActivate = true;
 		//Флаг отвечает за обновление данных на форме после активации
 		//если форма отображает только статичные данные, которые не могут быть отредактированы на других формах
 		//тогда нужно установить этот флаг что бы избежать лишних обновлений
 		protected bool Readonly;
-		protected ILog log;
+		protected ILog Log;
 		protected ExcelExporter excelExporter;
 		protected IMessageBus Bus = RxApp.MessageBus;
+		protected SimpleMRUCache cache = new SimpleMRUCache(10);
+		protected List<PersistedValue> persisted = new List<PersistedValue>();
+
 		protected ISession Session;
 		public IStatelessSession StatelessSession;
+
+		public TableSettings tableSettings = new TableSettings();
 
 		//освобождает ресурсы при закрытии формы
 		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();
 		//сигнал который подается при закрытии формы, может быть использован для отмены операций который выполняются в фоне
 		//например web запросов
 		public CancellationDisposable CloseCancellation = new CancellationDisposable();
-
-		public static bool UnitTesting;
-		public static IScheduler TestSchuduler;
-		public static IScheduler TestUiSchuduler;
 
 		public NotifyValue<Settings> Settings { get; private set; }
 		public WindowManager Manager { get; private set; }
@@ -116,23 +120,19 @@ namespace AnalitF.Net.Client.ViewModels
 		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
 		public static TaskScheduler TestQueryScheduler = null;
 		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
-		public int BackgrountQueryCount = 0;
+		public int BackgrountQueryCount;
 
 		//адрес доставки который выбран в ui
 		public Address Address;
 		public Address[] Addresses = new Address[0];
 
-		protected SimpleMRUCache cache = new SimpleMRUCache(10);
-
-		public static AppTestContext TestContext;
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
-		protected List<PersistedValue> persisted = new List<PersistedValue>();
 
 		public BaseScreen()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
-			log = log4net.LogManager.GetLogger(GetType());
+			Log = log4net.LogManager.GetLogger(GetType());
 			Manager = (WindowManager)IoC.Get<IWindowManager>();
 			OnCloseDisposable.Add(CloseCancellation);
 			OnCloseDisposable.Add(ResultsSink);
@@ -204,7 +204,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Bus.Listen<string>("db")
 					.Where(m => m == "Changed")
 					.Subscribe(_ => {
-						updateOnActivate = true;
+						UpdateOnActivate = true;
 					}, CloseCancellation.Token);
 			}
 			Bus.Listen<string>("db")
@@ -265,9 +265,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			IsSuccessfulActivated = true;
 
-			if (updateOnActivate) {
+			if (UpdateOnActivate) {
 				Update();
-				updateOnActivate = false;
+				UpdateOnActivate = false;
 			}
 		}
 
@@ -366,7 +366,7 @@ namespace AnalitF.Net.Client.ViewModels
 					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, JsonHelper.SerializerSettings());
 				}
 				catch (Exception e) {
-					log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
+					Log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
 				}
 				finally {
 					IsNotifying = true;
@@ -467,11 +467,11 @@ namespace AnalitF.Net.Client.ViewModels
 		~BaseScreen()
 		{
 			try {
-				log.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
+				Log.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
 				Dispose();
 			}
 			catch(Exception e) {
-				log.Error(String.Format("Ошибка при освобождении объекта {0} {1}", GetType(), GetHashCode()), e);
+				Log.Error(String.Format("Ошибка при освобождении объекта {0} {1}", GetType(), GetHashCode()), e);
 			}
 		}
 
@@ -648,7 +648,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult ConfigureGrid(DataGrid grid)
 		{
-			return new DialogResult(new GridConfig(grid), sizeToContent: true);
+			return new DialogResult(new GridConfig(grid));
 		}
 
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)

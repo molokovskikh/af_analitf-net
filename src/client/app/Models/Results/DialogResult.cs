@@ -36,14 +36,14 @@ namespace AnalitF.Net.Client.Models.Results
 	public class DialogResult : IResult
 	{
 		public Screen Model;
-		public bool ShowSizeToContent;
 		public bool FullScreen;
+		public bool FixedSize;
 
-		public DialogResult(Screen model, bool fullScreen = false, bool sizeToContent = false)
+		public DialogResult(Screen model, bool fullScreen = false, bool fixedSize = false)
 		{
 			Model = model;
 			FullScreen = fullScreen;
-			ShowSizeToContent = sizeToContent;
+			FixedSize = fixedSize;
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -59,10 +59,10 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			if (ShowSizeToContent)
-				manager.ShowFixedDialog(Model);
-			else
+			if (FixedSize)
 				manager.ShowDialog(Model, null, settings);
+			else
+				manager.ShowFixedDialog(Model);
 
 			var cancellable = Model as ICancelable;
 			if (cancellable != null)

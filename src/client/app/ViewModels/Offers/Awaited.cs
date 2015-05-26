@@ -83,7 +83,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public IEnumerable<IResult> Add()
 		{
 			var addAwaited = new AddAwaited();
-			yield return new DialogResult(addAwaited, sizeToContent: true);
+			yield return new DialogResult(addAwaited);
 			Items.Value.Add(addAwaited.Item);
 			Items.Value = Items.Value.OrderBy(i => i.Catalog.FullName)
 				.ThenBy(i => i.Producer != null ? i.Producer.Name : null)

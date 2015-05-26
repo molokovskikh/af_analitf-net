@@ -151,7 +151,7 @@ namespace AnalitF.Net.Client.ViewModels
 							FileHelper.CreateDirectoryRecursive(dirMap.Dir);
 					}
 					catch(Exception e) {
-						log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+						Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
 					}
 				}
 			}

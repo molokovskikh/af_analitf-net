@@ -717,12 +717,10 @@ namespace AnalitF.Net.Client.ViewModels
 				log.WarnFormat("Обновление по расписанию не может быть запущено тк есть открытые диалоговые окна");
 				yield break;
 			}
-			yield return new DialogResult(new Dialogs.SelfClose("Сейчас будет произведено обновление данных\r\nпо установленному расписанию.",
+			yield return new DialogResult(new SelfClose("Сейчас будет произведено обновление данных\r\nпо установленному расписанию.",
 				"Обновление", 10) {
 					Scheduler = UiScheduler
-				}) {
-					ShowSizeToContent = true,
-				};
+				});
 			foreach (var result in Update()) {
 				yield return result;
 			}
@@ -774,7 +772,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
-				yield return new DialogResult(orderWarning, sizeToContent: true);
+				yield return new DialogResult(orderWarning);
 			}
 
 			var results = Sync(new SendOrders(CurrentAddress, force));
@@ -826,7 +824,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> Feedback()
 		{
 			using (var feedback = new Feedback(Config)) {
-				yield return new DialogResult(feedback, sizeToContent: true);
+				yield return new DialogResult(feedback);
 				foreach (var result in Sync(new SendFeedback(feedback)))
 					yield return result;
 			}

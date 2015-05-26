@@ -224,7 +224,7 @@ namespace AnalitF.Net.Client.ViewModels
 				DocumentDate = DateTime.Now,
 				IsCreatedByUser = true
 			};
-			yield return new DialogResult(new CreateWaybill(waybill), sizeToContent: true);
+			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();
 		}

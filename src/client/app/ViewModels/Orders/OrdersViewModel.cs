@@ -144,8 +144,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			//изменились данные в базе
 			//если изменился фильтры данные загружать не нужно
 			//если изменились данные то нужно загрузить данные повторно
-			if (IsCurrentSelected || updateOnActivate) {
-				if (updateOnActivate)
+			if (IsCurrentSelected || UpdateOnActivate) {
+				if (UpdateOnActivate)
 					RebuildSessionIfNeeded();
 
 				//этот вызов должен быть после RebuildSessionIfNeeded
@@ -488,7 +488,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				using(var transaction = session.BeginTransaction()) {
 					command.Session = session;
 					command.Execute();
-					updateOnActivate = session.IsDirty();
+					UpdateOnActivate = session.IsDirty();
 					transaction.Commit();
 				}
 			});
@@ -496,13 +496,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			yield return new Models.Results.TaskResult(task, new WaitViewModel("Выполнение операции, подождите."));
 
 			if (task.IsFaulted)
-				log.Error(String.Format("Ошибка при выполнение команды {0}", command), task.Exception);
+				Log.Error(String.Format("Ошибка при выполнение команды {0}", command), task.Exception);
 
 			Update();
 
 			var text = command.Result as string;
 			if (!String.IsNullOrEmpty(text))
-				yield return new DialogResult(new TextViewModel(text), sizeToContent: true);
+				yield return new DialogResult(new TextViewModel(text));
 		}
 	}
 }

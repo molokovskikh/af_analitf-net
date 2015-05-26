@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public BaseOfferViewModel(OfferComposedId initOfferId = null)
 		{
 			Readonly = true;
-			updateOnActivate = false;
+			UpdateOnActivate = false;
 
 			this.initOfferId = initOfferId;
 
