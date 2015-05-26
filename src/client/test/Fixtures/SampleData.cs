@@ -196,6 +196,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				};
 				core.Exp = DateTime.Today.AddMonths(random.Next(0, 60));
 				core.Period = core.Exp.Value.ToShortDateString();
+				//в 30% случаев товар имеет штрих код
+				if (random.Next(2) == 0) {
+					core.EAN13 = String.Join("", Enumerable.Range(0, 13).Select(_ => random.Next(9)));
+				}
 				session.Save(core);
 				core.AddCost((decimal)(random.NextDouble() * maxCost));
 				price.Core.Add(core);

@@ -64,9 +64,9 @@ namespace AnalitF.Net.Test.Integration.Commands
 
 			var command = new UpdateCommand();
 			Run(command);
-			var offers = localSession.CreateSQLQuery("select * from offers").List();
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
-			Assert.That(offers.Count, Is.GreaterThan(0));
+			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
+			Assert.That(localSession.Query<Offer>().Count(x => x.BarCode != null), Is.GreaterThan(0));
 
 			var catalogId = localSession.Query<Offer>()
 				.Where(o => !o.Junk).GroupBy(o => o.CatalogId)

@@ -5,10 +5,14 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels;
+using Common.Tools;
 using NHibernate.Engine;
+using NHibernate.Util;
 using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
@@ -123,6 +127,18 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static void CalculateColumnWidths(DataGrid grid)
 		{
+			int index = grid.Columns.OfType<DataGridBoundColumn>().IndexOf(c => ((Binding)c.Binding).Path.Path == "Note");
+			if (index >= 0) {
+				grid.Columns.Insert(
+					index + 1,
+					new DataGridTextColumnEx {
+						Width = new DataGridLength(13, DataGridLengthUnitType.Star),
+						Header = "Штрихкод",
+						Binding = new Binding("BarCode"),
+						Visibility = Visibility.Collapsed
+					});
+			}
+
 			var col = FindColumn(grid, "Срок годн.");
 			if (col != null) {
 				col.SortMemberPath = "Exp";

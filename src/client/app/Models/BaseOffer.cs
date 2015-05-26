@@ -106,6 +106,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string ProducerSynonym { get; set; }
 
+		public virtual string BarCode { get; set; }
+
 		/// <summary>
 		/// цена поставщика
 		/// </summary>

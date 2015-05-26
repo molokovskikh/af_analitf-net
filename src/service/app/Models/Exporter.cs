@@ -567,7 +567,8 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 				"ProducerSynonym",
 				"Cost",
 				"BuyingMatrixType",
-				"Exp"
+				"Exp",
+				"BarCode"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -602,7 +603,8 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 				o.ProducerSynonym,
 				o.Cost,
 				o.BuyingMatrixType,
-				o.Exp
+				o.Exp,
+				o.EAN13
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh

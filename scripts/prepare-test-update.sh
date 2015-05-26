@@ -1,4 +1,5 @@
-update=src/data/update
+update=src/data/update/rtm
+mkdir -p $update
 rm $update/*
 bake build:client env=local
 bake build:update env=local
