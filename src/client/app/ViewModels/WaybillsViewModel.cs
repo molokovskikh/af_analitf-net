@@ -211,6 +211,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Fetch(w => w.Supplier)
 				.Fetch(w => w.Address)
 				.ToObservableCollection();
+			Waybills.Value.Each(w => w.CalculateStyle(Address));
 		}
 
 		public IEnumerable<IResult> Create()

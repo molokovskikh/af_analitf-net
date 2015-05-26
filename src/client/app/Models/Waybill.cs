@@ -170,13 +170,13 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				try {
-					return Address != null ? Address.Name : "";
+					return Address != null ? Address.Name : "Адрес отключен/удален из системы";
 				}
 				catch(LazyInitializationException) {
-					return "";
+					return "Адрес отключен/удален из системы";
 				}
 				catch(SessionException) {
-					return "";
+					return "Адрес отключен/удален из системы";
 				}
 			}
 		}
@@ -186,6 +186,24 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual Settings Settings { get; set; }
+
+		[Style("AddressName"), Ignore]
+		public virtual bool IsCurrentAddress { get; set; }
+
+		public virtual bool IsAddressExists()
+		{
+			bool addressNotFound;
+			try {
+				addressNotFound = Address == null || Address.Name == "";
+			}
+			catch (SessionException) {
+				addressNotFound = true;
+			}
+			catch (ObjectNotFoundException) {
+				addressNotFound = true;
+			}
+			return !addressNotFound;
+		}
 
 		public virtual void Calculate(Settings settings)
 		{
@@ -281,6 +299,11 @@ namespace AnalitF.Net.Client.Models
 			if (Settings.RegistryDoc == null)
 				Settings.RegistryDoc = new RegistryDocumentSettings();
 			return Settings.RegistryDoc.Setup(this);
+		}
+
+		public virtual void CalculateStyle(Address address)
+		{
+			IsCurrentAddress = IsAddressExists() && Address.Id == address.Id;
 		}
 	}
 }
