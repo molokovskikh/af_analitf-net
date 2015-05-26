@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.ViewModels
 				//тк синхронизация не производится загрузка должна выполняться в основной нитке
 				.Do(v => {
 					LoadOrderItems(v);
-					CalculateRetailCost(v);
+					Calculate(v);
 				})
 				.Subscribe(Offers, CloseCancellation.Token);
 		}

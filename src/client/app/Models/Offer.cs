@@ -305,6 +305,9 @@ namespace AnalitF.Net.Client.Models
 			if (address.Orders.Where(o => o.Frozen).SelectMany(o => o.Lines).Any(l => l.ProductId == ProductId)) {
 				result.Add(Message.Warning("Товар присутствует в замороженных заказах."));
 			}
+			if (address.YesterdayOrders.Contains(Tuple.Create(ProductId, OrderCount.GetValueOrDefault()))) {
+				result.Add(Message.Warning("Препарат был заказан вчера."));
+			}
 
 			if (PrevOrderAvgCount != null && OrderCount > PrevOrderAvgCount * settings.OverCountWarningFactor) {
 				result.Add(Message.Warning("Превышение среднего заказа!"));

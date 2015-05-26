@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public void BindOffers(List<Offer> offers)
 		{
-			CalculateRetailCost(offers);
+			Calculate(offers);
 			LoadOrderItems(offers);
 			PriceOffers = offers;
 			FillProducerFilter(PriceOffers);

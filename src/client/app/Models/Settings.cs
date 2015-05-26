@@ -96,6 +96,7 @@ namespace AnalitF.Net.Client.Models
 
 		public Settings()
 		{
+			WarnIfOrderedYesterday = true;
 			UseSupplierPriceWithNdsForMarkup = false;
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
@@ -114,6 +115,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual int Id { get; set; }
 
+		public virtual bool WarnIfOrderedYesterday { get; set; }
 		public virtual bool UseSupplierPriceWithNdsForMarkup { get; set; }
 		public virtual bool CanViewOffersByCatalogName { get; set; }
 		public virtual bool GroupByProduct { get; set; }

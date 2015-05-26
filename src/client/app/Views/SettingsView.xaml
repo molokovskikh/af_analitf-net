@@ -265,6 +265,7 @@
 				<StackPanel>
 					<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
 					<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
+					<CheckBox x:Name="Settings_WarnIfOrderedYesterday">Предупреждать, если товар был заказан вчера</CheckBox>
 
 					<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
 					<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>

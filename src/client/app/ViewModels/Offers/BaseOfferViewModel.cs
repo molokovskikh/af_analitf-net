@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
+using Common.NHibernate;
 using Common.Tools;
 using Dapper;
 using NHibernate;
@@ -302,11 +303,6 @@ where c.Id = ?";
 			return offers;
 		}
 
-		protected void CalculateRetailCost(IEnumerable<Offer> offers)
-		{
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User));
-		}
-
 		public virtual void OfferUpdated()
 		{
 			if (CurrentOffer.Value == null)
@@ -347,17 +343,44 @@ where c.Id = ?";
 
 		protected void Calculate()
 		{
-			if (NeedToCalculateDiff)
-				CalculateDiff();
-
-			CalculateRetailCost(Offers.Value);
+			Calculate(Offers.Value ?? new List<Offer>());
 		}
 
-		private void CalculateDiff()
+		protected void Calculate(IEnumerable<Offer> offers)
+		{
+			if (Address == null)
+				return;
+
+			if (NeedToCalculateDiff)
+				CalculateDiff(offers);
+
+			CalculateRetailCost(offers);
+
+			if (Settings.Value.WarnIfOrderedYesterday) {
+				RxQuery(s => s.CreateSQLQuery(@"select ProductId, Count
+from SentOrderLines l
+join SentOrders o on o.Id = l.OrderId
+where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
+group by l.ProductId, l.Count")
+					.SetParameter("begin", DateTime.Today.AddDays(-1))
+					.SetParameter("end", DateTime.Today)
+					.SetParameter("addressId", Address.Id)
+					.List<object[]>())
+					.ObserveOn(UiScheduler)
+					.Select(x => x.Select(y => Tuple.Create(Convert.ToUInt32(y[0]), Convert.ToUInt32(y[1]))).ToList())
+					.Subscribe(x => Address.YesterdayOrders = x);
+			}
+		}
+
+		private void CalculateRetailCost(IEnumerable<Offer> offers)
+		{
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User));
+		}
+
+		private void CalculateDiff(IEnumerable<Offer> offers)
 		{
 			decimal baseCost = 0;
 			var diffCalcMode = Settings.Value.DiffCalcMode;
-			var offers = Offers.Value;
 			if (diffCalcMode == DiffCalcMode.MinCost)
 				baseCost = offers.Select(o => o.ResultCost).MinOrDefault();
 			else if (diffCalcMode == DiffCalcMode.MinBaseCost)

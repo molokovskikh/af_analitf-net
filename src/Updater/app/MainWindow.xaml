@@ -4,7 +4,7 @@
 	Title="АналитФАРМАЦИЯ" Height="150" Width="300">
 	<StackPanel>
 		<Label>
-			<TextBlock>Внимание! Происходит обновление программы.</TextBlock>
+			<TextBlock TextWrapping="Wrap">Внимание! Происходит обновление программы.</TextBlock>
 		</Label>
 		<Label>
 			<TextBlock>Пожалуйста, подождите...</TextBlock>

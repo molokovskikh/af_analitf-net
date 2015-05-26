@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Models
 			Orders = new List<Order>();
 			Rules = new List<MinOrderSumRule>();
 			StatSubject = new Subject<Stat>();
+			YesterdayOrders = new List<Tuple<uint, uint>>();
 		}
 
 		public virtual uint Id { get; set; }
@@ -52,6 +53,9 @@ namespace AnalitF.Net.Client.Models
 
 		[IgnoreDataMember, Ignore]
 		public virtual Subject<Stat> StatSubject { get; protected set; }
+
+		[IgnoreDataMember, Ignore]
+		public virtual List<Tuple<uint, uint>> YesterdayOrders { get; set; }
 
 		public override string ToString()
 		{

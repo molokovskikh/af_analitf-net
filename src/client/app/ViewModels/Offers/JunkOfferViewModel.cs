@@ -30,17 +30,16 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			base.OnInitialize();
 
 			RxQuery(s => {
-					var offers = StatelessSession.Query<Offer>()
+					return StatelessSession.Query<Offer>()
 						.Where(o => o.Junk)
 						.OrderBy(o => o.ProductSynonym)
 						.Fetch(o => o.Price)
 						.ToList();
-					CalculateRetailCost(offers);
-					LoadOrderItems(offers);
-					return offers;
 				})
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(o => {
+					Calculate(o);
+					LoadOrderItems(o);
 					Offers.Value = o;
 					SelectOffer();
 					IsLoading.Value = false;

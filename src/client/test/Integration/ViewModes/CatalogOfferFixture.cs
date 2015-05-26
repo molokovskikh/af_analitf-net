@@ -358,5 +358,21 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.AreEqual(1, orders.Count());
 			Assert.AreEqual(2, orders[0].Lines.Count);
 		}
+
+		[Test]
+		public void Warn_on_yesterday_orders()
+		{
+			Assert.IsTrue(settings.WarnIfOrderedYesterday);
+			var order = MakeSentOrder();
+			order.SentOn = DateTime.Now.AddDays(-1);
+			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			testScheduler.Start();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Препарат был заказан вчера."));
+		}
 	}
 }

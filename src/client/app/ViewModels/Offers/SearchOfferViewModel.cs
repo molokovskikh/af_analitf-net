@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				//тк синхронизация не производится загрузка должна выполняться в основной нитке
 				.Do(v => {
 					LoadOrderItems(v);
-					CalculateRetailCost(v);
+					Calculate(v);
 					IsLoading.Value = false;
 				})
 				.Subscribe(Offers, CloseCancellation.Token);
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					.ObserveOn(UiScheduler)
 					.Do(v => {
 						LoadOrderItems(v);
-						CalculateRetailCost(v);
+						Calculate(v);
 						IsLoading.Value = false;
 					})
 					.Subscribe(Offers, CloseCancellation.Token);
