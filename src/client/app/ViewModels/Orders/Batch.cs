@@ -102,7 +102,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
 			WatchForUpdate(CurrentReportLine.Select(l => l == null ? null : l.BatchLine).ToValue());
 			ActivePrint = new NotifyValue<string>();
-			ActivePrint.Subscribe(excelExporter.ActiveProperty);
+			ActivePrint.Subscribe(ExcelExporter.ActiveProperty);
 			CurrentFilter.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
 		}
 

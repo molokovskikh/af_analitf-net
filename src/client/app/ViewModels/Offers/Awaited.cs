@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			CurrentItem = new NotifyValue<AwaitedItem>();
 			CanDelete = CurrentItem.Select(i => i != null).ToValue();
 			ActivePrint = new NotifyValue<string>();
-			ActivePrint.Subscribe(excelExporter.ActiveProperty);
+			ActivePrint.Subscribe(ExcelExporter.ActiveProperty);
 		}
 
 		public NotifyValue<bool> CanDelete { get; set; }

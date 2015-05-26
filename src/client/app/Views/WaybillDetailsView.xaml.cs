@@ -247,8 +247,8 @@ namespace AnalitF.Net.Client.Views
 			Grid.SetColumn(lines, 1);
 			Editable.AutoEditOnDigit(grid, "Розничная наценка");
 			if (model != null) {
-				model.tableSettings.Restore(lines);
-				model.tableSettings.Restore(OrderLines);
+				model.TableSettings.Restore(lines);
+				model.TableSettings.Restore(OrderLines);
 
 				foreach (var gridColumn in lines.Columns.OfType<DataGridTextColumn>().Where(c => !c.IsReadOnly)) {
 					if (gridColumn.ReadLocalValue(DataGridColumn.IsReadOnlyProperty) == DependencyProperty.UnsetValue) {

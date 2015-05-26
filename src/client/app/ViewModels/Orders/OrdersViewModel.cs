@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
 			IsCurrentSelected
 				.Select(v => v ? "Orders" : "SentOrders")
-				.Subscribe(excelExporter.ActiveProperty);
+				.Subscribe(ExcelExporter.ActiveProperty);
 		}
 
 		public AddressSelector AddressSelector { get; set; }

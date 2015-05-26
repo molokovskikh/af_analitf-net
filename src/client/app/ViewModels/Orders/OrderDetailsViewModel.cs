@@ -38,10 +38,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
 			if (User.CanExport(this, type.Name))
-				excelExporter.Properties = new []{ "Lines" };
+				ExcelExporter.Properties = new []{ "Lines" };
 			else
-				excelExporter.Properties = new string[0];
-			excelExporter.ActiveProperty.Refresh();
+				ExcelExporter.Properties = new string[0];
+			ExcelExporter.ActiveProperty.Refresh();
 		}
 
 		public IList<IOrderLine> Source { get; set; }

@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			MatchedWaybills = new MatchedWaybills(this, SelectedSentLine, IsSentSelected);
 			IsCurrentSelected
 				.Select(v => v ? "Lines" : "SentLines")
-				.Subscribe(excelExporter.ActiveProperty);
+				.Subscribe(ExcelExporter.ActiveProperty);
 
 			Observable.Merge(IsCurrentSelected.Select(x => (object)x), Lines, SentLines, currentLinesChanged)
 				.Select(_ => {

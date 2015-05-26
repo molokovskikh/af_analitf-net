@@ -80,6 +80,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static IScheduler TestSchuduler;
 		public static IScheduler TestUiSchuduler;
 
+		private List<PersistedValue> persisted = new List<PersistedValue>();
 		private bool clearSession;
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
@@ -91,15 +92,14 @@ namespace AnalitF.Net.Client.ViewModels
 		//тогда нужно установить этот флаг что бы избежать лишних обновлений
 		protected bool Readonly;
 		protected ILog Log;
-		protected ExcelExporter excelExporter;
+		protected ExcelExporter ExcelExporter;
 		protected IMessageBus Bus = RxApp.MessageBus;
-		protected SimpleMRUCache cache = new SimpleMRUCache(10);
-		protected List<PersistedValue> persisted = new List<PersistedValue>();
+		protected SimpleMRUCache Cache = new SimpleMRUCache(10);
 
 		protected ISession Session;
 		public IStatelessSession StatelessSession;
 
-		public TableSettings tableSettings = new TableSettings();
+		public TableSettings TableSettings = new TableSettings();
 
 		//освобождает ресурсы при закрытии формы
 		public CompositeDisposable OnCloseDisposable = new CompositeDisposable();
@@ -162,8 +162,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(p => p.Name)
 				.Where(p => User.CanExport(this, p))
 				.ToArray();
-			excelExporter = new ExcelExporter(this, properties, Path.GetTempPath());
-			CanExport = excelExporter.CanExport.ToValue();
+			ExcelExporter = new ExcelExporter(this, properties, Path.GetTempPath());
+			CanExport = ExcelExporter.CanExport.ToValue();
 		}
 
 		public IScheduler UiScheduler
@@ -217,9 +217,9 @@ namespace AnalitF.Net.Client.ViewModels
 			Restore();
 
 			if (Shell != null) {
-				tableSettings.Persisted = Shell.ViewSettings;
-				tableSettings.Prefix = GetType().Name + ".";
-				excelExporter.ExportDir = Shell.Config.TmpDir;
+				TableSettings.Persisted = Shell.ViewSettings;
+				TableSettings.Prefix = GetType().Name + ".";
+				ExcelExporter.ExportDir = Shell.Config.TmpDir;
 				try {
 					foreach (var value in persisted) {
 						value.Setter(Shell.GetPersistedValue(value.Key, value.DefaultValue));
@@ -230,7 +230,7 @@ namespace AnalitF.Net.Client.ViewModels
 	#if DEBUG
 					throw;
 	#else
-					log.Error("Не удалось восстановить состояние", e);
+					Log.Error("Не удалось восстановить состояние", e);
 	#endif
 				}
 			}
@@ -298,7 +298,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (close) {
 				Save();
-				tableSettings.SaveView(GetView());
+				TableSettings.SaveView(GetView());
 				Dispose();
 			}
 
@@ -377,7 +377,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ResetView(DataGrid grid)
 		{
-			tableSettings.Reset(grid);
+			TableSettings.Reset(grid);
 		}
 
 		protected override void OnViewLoaded(object view)
@@ -392,18 +392,18 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			if (!SkipRestoreTable)
-				tableSettings.RestoreView(view);
+				TableSettings.RestoreView(view);
 		}
 
 		//для тестов
 		public void SaveDefaults(object view)
 		{
-			tableSettings.RestoreView(view);
+			TableSettings.RestoreView(view);
 		}
 
 		public virtual IResult Export()
 		{
-			return excelExporter.Export();
+			return ExcelExporter.Export();
 		}
 
 		protected bool Confirm(string message)

@@ -148,7 +148,7 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 
 			var book = ExcelExporter.ExportTable(columns, items);
-			return excelExporter.Export(book);
+			return ExcelExporter.Export(book);
 		}
 
 		public void EnterWaybill()

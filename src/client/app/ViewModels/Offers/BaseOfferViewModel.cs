@@ -469,7 +469,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		private void InvalidateHistoryOrders()
 		{
-			HistoryOrders = (List<SentOrderLine>)cache[HistoryOrdersCacheKey()];
+			HistoryOrders = (List<SentOrderLine>)Cache[HistoryOrdersCacheKey()];
 		}
 
 		public void LoadHistoryOrders()
@@ -478,7 +478,7 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 				return;
 
 			var key = HistoryOrdersCacheKey();
-			HistoryOrders = Util.Cache(cache, key, k => {
+			HistoryOrders = Util.Cache(Cache, key, k => {
 				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)

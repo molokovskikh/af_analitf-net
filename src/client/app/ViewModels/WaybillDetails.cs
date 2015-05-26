@@ -277,7 +277,7 @@ namespace AnalitF.Net.Client.ViewModels
 			row.CreateCell(1).SetCellValue("_______________________");
 			row.CreateCell(5).SetCellValue("Доверенность №_____");
 			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
-			return excelExporter.Export(book);
+			return ExcelExporter.Export(book);
 		}
 
 		public IResult ExportRegistry()
@@ -326,7 +326,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Waybill.SupplierName,
 				Waybill.ProviderDocumentId,
 				Waybill.DocumentDate.ToShortDateString()));
-			return excelExporter.Export(book);
+			return ExcelExporter.Export(book);
 		}
 
 		public override IEnumerable<IResult> Download(Loadable loadable)
