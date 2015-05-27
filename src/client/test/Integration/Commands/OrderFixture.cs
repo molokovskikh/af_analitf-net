@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using log4net.Config;
@@ -34,7 +35,8 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var command = new SendOrders(address);
 			Run(command);
 
-			var text = command.Results
+			var results = command.Results.ToArray();
+			var text = results
 				.OfType<DialogResult>()
 				.Select(d => d.Model)
 				.OfType<TextViewModel>()
@@ -43,7 +45,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			var expected = String.Format("прайс-лист {0} - Поставщик отказал в приеме заказа." +
 				" Сумма заказа меньше минимально допустимой." +
 				" Минимальный заказ {1:0.00} заказано {2:0.00}.", order.Price.Name, 1500, order.Sum);
-			Assert.AreEqual(expected, text);
+			Assert.AreEqual(expected, text, results.Implode());
 		}
 
 		[Test]

@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 			}
 
-			if (FixedSize)
+			if (FixedSize || FullScreen)
 				manager.ShowDialog(Model, null, settings);
 			else
 				manager.ShowFixedDialog(Model);

@@ -363,7 +363,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Warn_on_yesterday_orders()
 		{
 			Assert.IsTrue(settings.WarnIfOrderedYesterday);
-			var order = MakeSentOrder();
+			var order = MakeSentOrder(session.Query<Offer>().First(o => !o.Junk));
 			order.SentOn = DateTime.Now.AddDays(-1);
 			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 

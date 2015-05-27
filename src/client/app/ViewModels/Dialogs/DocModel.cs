@@ -3,21 +3,61 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Media;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
+	public class TextDoc : IDocModel
+	{
+		public TextDoc(string displayName, string text)
+		{
+			DisplayName = displayName;
+			Text = text;
+		}
+
+		public string Text { get; set; }
+
+		public string DisplayName { get; set; }
+
+		public FlowDocument ToFlowDocument()
+		{
+			var doc = new FlowDocument();
+			doc.FontSize = 12;
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			//мы должны оставить место для "шапки" и "подвала"
+			paginator.PageSize = new Size(paginator.PageSize.Width - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right,
+				paginator.PageSize.Height - WrapDocumentPaginator.Margins.Bottom - WrapDocumentPaginator.Margins.Top);
+
+			doc.Blocks.Add(new Paragraph(new Bold(new Run("Предложения по данным позициям из заказа отсутствуют") { FontSize = 16 })));
+			foreach (var line in Text.Split(new [] { Environment.NewLine }, StringSplitOptions.None)) {
+				doc.Blocks.Add(new Paragraph(new Run(line)) { Margin = new Thickness(0)});
+			}
+			return doc;
+		}
+
+		public void Init(Config.Config config)
+		{
+		}
+	}
+
 	public class DocModel<T> : BaseScreen, IPrintable where T : class, IDocModel
 	{
+		public DocModel(IDocModel docModel)
+		{
+			Model = docModel;
+		}
+
 		public DocModel(uint id)
 		{
 			Model = Session.Get<T>(id);
 		}
 
-		public T Model { get; set; }
+		public IDocModel Model { get; set; }
 
 		public FlowDocument Document { get; set; }
 

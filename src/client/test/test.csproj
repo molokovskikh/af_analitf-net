@@ -281,6 +281,7 @@
     <Compile Include="Unit\ViewModels\OffersSearchFixture.cs" />
     <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />
+    <Compile Include="Unit\ViewModels\TextDocModelFixture.cs" />
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var result = view.Print();
 			Assert.That(result.Paginator, Is.Not.Null);
 			var doc = (FlowDocument)result.Paginator.Source;
-			var asText = FlowDocumentToText(doc);
+			var asText = WpfTestHelper.FlowDocumentToText(doc);
 			Assert.AreEqual("Папаверин\r\n" +
 				"|Наименование|Производитель|Прайс-лист|Срок год.|Дата пр.|Разн.|Цена\r\n" +
 				"|Папаверин|ВоронежФарм|||01.01.0001 0:00:00||0\r\n" +
@@ -83,27 +83,6 @@ namespace AnalitF.Net.Client.Test.Unit
 			paginator.GetPage(0);
 			Assert.AreEqual(2, paginator.PageCount);
 		}
-
-		private static string FlowDocumentToText(FlowDocument doc)
-		{
-			var builder = new StringBuilder();
-			foreach (var el in doc.Descendants().Distinct()) {
-				if (el is Paragraph && !(((Paragraph)el).Parent is TableCell)) {
-					builder.AppendLine();
-				}
-				if (el is Run) {
-					builder.Append((((Run)el).Text ?? "").Trim());
-				}
-				if (el is TableRow) {
-					builder.AppendLine();
-				}
-				if (el is TableCell) {
-					builder.Append("|");
-				}
-			}
-			return builder.ToString().Trim();
-		}
-
 
 		private static List<Offer> Offers()
 		{

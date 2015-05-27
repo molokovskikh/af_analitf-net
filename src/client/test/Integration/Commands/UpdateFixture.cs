@@ -230,7 +230,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Run(cmd);
 
 			var text = cmd.Results.OfType<DialogResult>()
-				.Select(r => (TextViewModel)r.Model)
+				.Select(r => (TextDoc)((DocModel<TextDoc>)r.Model).Model)
 				.Select(m => m.Text)
 				.First();
 

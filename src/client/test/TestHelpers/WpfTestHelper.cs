@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Threading;
 using System.Xml;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Test.Integration.Views;
 using Common.Tools.Calendar;
 using ReactiveUI;
@@ -196,6 +199,26 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				"Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.DataGrid', AncestorLevel='1''. BindingExpression:Path=NewItemMargin; DataItem=null; target element is 'DataGridRow' (Name=''); target property is 'Margin' (type 'Thickness')"
 			};
 			ViewSetup.BindingErrors.RemoveAll(s => ignored.Any(m => s.Contains(m)));
+		}
+
+		public static string FlowDocumentToText(FlowDocument doc)
+		{
+			var builder = new StringBuilder();
+			foreach (var el in doc.Descendants().Distinct()) {
+				if (el is Paragraph && !(((Paragraph)el).Parent is TableCell)) {
+					builder.AppendLine();
+				}
+				if (el is Run) {
+					builder.Append((((Run)el).Text ?? "").Trim());
+				}
+				if (el is TableRow) {
+					builder.AppendLine();
+				}
+				if (el is TableCell) {
+					builder.Append("|");
+				}
+			}
+			return builder.ToString().Trim();
 		}
 	}
 

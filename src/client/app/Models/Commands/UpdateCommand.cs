@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
@@ -26,6 +27,7 @@ using NHibernate.Linq;
 using log4net.Config;
 using NPOI.SS.Formula.Functions;
 using LogManager = log4net.LogManager;
+using PostUpdate = AnalitF.Net.Client.ViewModels.Dialogs.PostUpdate;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -450,9 +452,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			else {
 				if (!String.IsNullOrEmpty(report)) {
 					//формы должны показываться в определенном порядке
-					Results.Add(new DialogResult(new TextViewModel(report) {
-						Header = "Предложения по данным позициям из заказа отсутствуют",
-					}));
+					Results.Add(new DialogResult(new DocModel<TextDoc>(new TextDoc("Ненайденные позиции", report)),
+						fixedSize: true));
 					Results.Add(new MessageResult(SuccessMessage));
 					result = UpdateResult.SilentOk;
 				}
