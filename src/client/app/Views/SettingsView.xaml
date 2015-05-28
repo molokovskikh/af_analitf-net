@@ -55,12 +55,16 @@
 			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab">
 				<Grid>
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition></ColumnDefinition>
-						<ColumnDefinition Width="100"></ColumnDefinition>
+						<ColumnDefinition />
+						<ColumnDefinition Width="100" />
 					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
 
-					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0"
-						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]" Margin="0,0,0,75">
+					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0" Grid.Row="0"
+						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
 								Header="Левая граница"
@@ -76,11 +80,7 @@
 								Binding="{Binding MaxSupplierMarkup}" />
 						</DataGrid.Columns>
 					</DataGrid>
-					<StackPanel Grid.Column="0"  Margin="10,350,0,0" >
-						<CheckBox  x:Name="Settings_UseSupplierPriceWithNdsForMarkup" Content="Использовать цену завода с НДС при определении ценового диапозона"/>
-						<CheckBox  x:Name="Settings_ApplyToAllAdresses" Content="Применить ко всем адресам(точкам) доставки"/>
-					</StackPanel>
-					<StackPanel Grid.Column="1">
+					<StackPanel Grid.Column="1" Grid.Row="0">
 						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}"
 							Command="ApplicationCommands.Delete">
 							Удалить
@@ -95,6 +95,10 @@
 						<Label Margin="3" Height="13" Width="30" Background="#800000"
 							HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
+					</StackPanel>
+					<StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+						<CheckBox x:Name="Settings_UseSupplierPriceWithNdsForMarkup" Content="Использовать цену завода с НДС при определении ценового диапозона"/>
+						<CheckBox x:Name="Settings_ApplyToAllAdresses" Content="Применить ко всем адресам(точкам) доставки"/>
 					</StackPanel>
 				</Grid>
 			</TabItem>
@@ -389,7 +393,6 @@
 					<Label>Задержка в обработке запросов (секунд)</Label>
 					<TextBox Name="Settings_DebugTimeout" />
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
-					<CheckBox Name="User_UseBatch2">Показывать форму редактирования автозаказа</CheckBox>
 				</StackPanel>
 			</TabItem>
 		</TabControl>
