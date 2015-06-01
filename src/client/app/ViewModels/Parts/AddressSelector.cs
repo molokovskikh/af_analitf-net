@@ -23,18 +23,12 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public IObservable<EventPattern<PropertyChangedEventArgs>> FilterChanged;
 
-		public AddressSelector(ISession session, BaseScreen screen)
+		public AddressSelector(BaseScreen screen)
 		{
 			this.screen = screen;
 			All = new NotifyValue<bool>();
 			AddressesEnabled = new NotifyValue<bool>(() => All.Value, All);
-			if (session != null)
-				Addresses = session.Query<Address>()
-					.OrderBy(a => a.Name)
-					.Select(a => new Selectable<Address>(a)).ToList();
-			else
-				Addresses = new List<Selectable<Address>>();
-
+			Addresses = new List<Selectable<Address>>();
 			Description = "Все заказы";
 		}
 
@@ -58,6 +52,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Init()
 		{
+			Addresses = screen.Addresses
+				.OrderBy(a => a.Name)
+				.Select(a => new Selectable<Address>(a))
+				.ToList();
 			var shell = screen.Shell;
 			if (shell != null) {
 				All.Value = (bool)shell.PersistentContext.GetValueOrDefault("ShowAllAddresses", All.Value);

@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			base.OnInitialize();
 
 			RxQuery(s => {
-					return StatelessSession.Query<Offer>()
+					return s.Query<Offer>()
 						.Where(o => o.Junk)
 						.OrderBy(o => o.ProductSynonym)
 						.Fetch(o => o.Price)

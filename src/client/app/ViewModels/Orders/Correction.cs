@@ -53,7 +53,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnInitialize();
 
 			if (IsUpdate)
-				CurrentLine.Subscribe(_ => Update());
+				CurrentLine
+					.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+					.Subscribe(_ => Update());
 
 			CanSend = Address.BindableOrders.Changed()
 				.Merge(Observable.Return<object>(null))
@@ -65,9 +67,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 				DisplayName = string.Format("Корректировка восстановленных заказов");
 			ProductInfo = new ProductInfo(this, CurrentLine);
-			var view = GetView();
-			if (view != null)
-				Attach(view, ProductInfo.Bindings);
+			Attach(GetView(), ProductInfo.Bindings);
 		}
 
 		protected override void OnActivate()
@@ -91,13 +91,15 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 			}
 
-			var productId = CurrentLine.Value.ProductId;
-			Offers.Value = StatelessSession.Query<Offer>()
-				.Fetch(o => o.Price)
-				.Where(o => o.ProductId == productId)
-				.ToList()
-				.OrderBy(o => o.ResultCost)
-				.ToList();
+			lock (StatelessSession) {
+				var productId = CurrentLine.Value.ProductId;
+				Offers.Value = StatelessSession.Query<Offer>()
+					.Fetch(o => o.Price)
+					.Where(o => o.ProductId == productId)
+					.ToList()
+					.OrderBy(o => o.ResultCost)
+					.ToList();
+			}
 		}
 
 		public IEnumerable<IResult> Save()

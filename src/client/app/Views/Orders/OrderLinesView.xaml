@@ -22,11 +22,6 @@
 			<RowDefinition />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
@@ -51,165 +46,244 @@
 			</CheckBox>
 		</StackPanel>
 
-		<c:DataGrid2 Grid.Row="1" x:Name="Lines"
-			Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
-			ShowAddressColumn="{Binding AddressSelector.All.Value}">
-			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.AddressName}"
+		<Grid Grid.Row="1" Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}">
+			<Grid.RowDefinitions>
+				<RowDefinition />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition />
+			</Grid.RowDefinitions>
+
+			<c:DataGrid2 Grid.Row="0" x:Name="Lines"
+				ShowAddressColumn="{Binding AddressSelector.All.Value}"
+				behaviors:Editable.Editor="{Binding Editor}"
+				caliburn:NavBinder.Next="{x:Reference Offers}">
+				<DataGrid.Columns>
+					<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.AddressName}"
 					Visibility="Collapsed" />
-				<c:SearchableDataGridColumn Width="225*" Header="Наименование" Binding="{Binding ProductSynonym}"
+					<c:SearchableDataGridColumn Width="225*" Header="Наименование" Binding="{Binding ProductSynonym}"
 					HighlightStyle="{StaticResource DataGridHighlight}" />
-				<c:DataGridTextColumnEx Width="140*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель"
+					<c:DataGridTextColumnEx Width="140*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Кат.производитель"
 					Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}"
+					<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка" Binding="{Binding Volume}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="45*" Header="Примечание" Binding="{Binding Note}" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+					<c:DataGridTextColumnEx Width="45*" Header="Примечание" Binding="{Binding Note}" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="61*"
+					<c:DataGridTextColumnEx Width="61*"
 					Header="Срок годн."
 					Binding="{Binding Period}"
 					TextAlignment="Center" />
 
-				<c:DataGridTextColumnEx Width="82*" Header="Прайс-лист" Binding="{Binding Order.PriceName}" />
-				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Регион"
+					<c:DataGridTextColumnEx Width="82*" Header="Прайс-лист" Binding="{Binding Order.PriceName}" />
+					<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Регион"
 					Binding="{Binding Order.SafePrice.RegionName}" />
 
-				<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
+					<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена" Binding="{Binding RegistryCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность"
+					<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность"
 					Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.сумма"
 					Binding="{Binding MinOrderSum}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Мин.кол-во"
 					Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}"
+					<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}"
+					<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}"
+					<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-				<c:DataGridTextColumnEx Width="67*"
+					<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+					<c:DataGridTextColumnEx Width="67*"
 					Header="Цена" Binding="{Binding MixedCost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
-				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
+					<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" SortMemberPath="SortQuantity" />
-				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
+					<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
+					<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
-				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding MixedSum}"
+					<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding MixedSum}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
+				</DataGrid.Columns>
+			</c:DataGrid2>
 
-		<ContentControl x:Name="QuickSearch" Grid.Row="1" />
-		<ContentControl x:Name="OrderWarning" Grid.Row="1" />
+			<ContentControl x:Name="QuickSearch" Grid.Row="0" />
+			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
 
-		<c:DataGrid2 Grid.Row="1" x:Name="SentLines"
-			Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
-			ShowAddressColumn="{Binding AddressSelector.All.Value}">
-			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.AddressName}"
-					Visibility="Collapsed" />
-				<DataGridTextColumn Width="255*" Header="Наименование"
+			<ContentControl x:Name="ProductInfo" Grid.Row="1" />
+
+			<StackPanel Grid.Row="2">
+				<Label Padding="5, 2, 2, 0">Комментарий</Label>
+				<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
+			</StackPanel>
+
+			<StackPanel Grid.Row="3" Visibility="{Binding OnlyWarningVisible.Value,
+				Converter={StaticResource BoolToCollapsed}}">
+				<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
+				<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
+				Style="{StaticResource ReadOnlyText}" />
+			</StackPanel>
+
+			<c:DataGrid2 x:Name="Offers" Grid.Row="4"
+				caliburn:NavBinder.Prev="{x:Reference Lines}"
+				CanUserSelectMultipleItems="False"
+				CanUserSortColumns="False">
+				<DataGrid.Columns>
+					<DataGridTextColumn Width="177*"
+					Header="Название"
 					Binding="{Binding ProductSynonym}" />
-				<DataGridTextColumn Width="140*" Header="Производитель"
+					<c:DataGridTextColumnEx Width="89*"
+					Header="Производитель"
 					Binding="{Binding ProducerSynonym}" />
-				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Кат.производитель" Binding="{Binding Producer}" />
-				<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка"
+					<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
+					TextAlignment="Right" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+					Binding="{Binding Doc}" />
+					<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
+					<c:DataGridTextColumnEx Width="56*"
+					Header="Срок годн."
+					Binding="{Binding Period}" TextAlignment="Center" />
+					<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
+					Binding="{Binding Price.Name}" />
+					<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
+					Binding="{Binding Price.RegionName}" />
+					<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
+					Binding="{Binding Price.PriceDate}" />
+					<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
+					Binding="{Binding RequestRatio}" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.сумма" Binding="{Binding MinOrderSum}" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+					<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+					<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
+					<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+					<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
+					<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" />
+					<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+					<c:DataGridTextColumnEx Width="59*"
+					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" />
+					<c:DataGridTextColumnEx Width="39*" Header="Остаток"
+					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
+					<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
+					Binding="{Binding RetailCost}" />
+					<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
+					Binding="{Binding OrderLine.Comment}" />
+					<c:DataGridTextColumnEx Width="34*"
+					Header="Заказ"
+					Binding="{Binding OrderCount}" />
+					<c:DataGridTextColumnEx Width="51*"
+					Header="Сумма"
+					Binding="{Binding OrderLine.ResultSum}" />
+				</DataGrid.Columns>
+			</c:DataGrid2>
+
+			<ContentControl x:Name="OrderWarning" Grid.Row="4" />
+		</Grid>
+
+		<Grid Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}" Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+
+			<c:DataGrid2 Grid.Row="0" x:Name="SentLines"
+				ShowAddressColumn="{Binding AddressSelector.All.Value}">
+				<DataGrid.Columns>
+					<c:DataGridTextColumnEx Width="54*" Header="Адрес заказа" Binding="{Binding Order.AddressName}"
+					Visibility="Collapsed" />
+					<DataGridTextColumn Width="255*" Header="Наименование"
+					Binding="{Binding ProductSynonym}" />
+					<DataGridTextColumn Width="140*" Header="Производитель"
+					Binding="{Binding ProducerSynonym}" />
+					<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed"
+					Header="Кат.производитель" Binding="{Binding Producer}" />
+					<c:DataGridTextColumnEx Width="*" Visibility="Collapsed" Header="Упаковка"
 					Binding="{Binding Volume}"
 					TextAlignment="Right" />
-				<DataGridTextColumn Width="45*" Header="Примечание" Binding="{Binding Note}" />
-				<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+					<DataGridTextColumn Width="45*" Header="Примечание" Binding="{Binding Note}" />
+					<DataGridTextColumn Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
 					Binding="{Binding Doc}" />
-				<c:DataGridTextColumnEx Width="61*"
+					<c:DataGridTextColumnEx Width="61*"
 					Header="Срок годн."
 					Binding="{Binding Period}"
 					TextAlignment="Center" />
 
-				<DataGridTextColumn Width="82*" Header="Прайс-лист"
+					<DataGridTextColumn Width="82*" Header="Прайс-лист"
 					Binding="{Binding Order.PriceName}" />
-				<DataGridTextColumn Width="62*" Visibility="Collapsed" Header="Регион"
+					<DataGridTextColumn Width="62*" Visibility="Collapsed" Header="Регион"
 					Binding="{Binding Order.SafePrice.RegionName}" />
 
-				<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена"
+					<c:DataGridTextColumnEx Width="58*" Header="Реестр.цена"
 					Binding="{Binding RegistryCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность"
+					<c:DataGridTextColumnEx Width="59*" Visibility="Collapsed" Header="Кратность"
 					Binding="{Binding RequestRatio}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Мин.сумма" Binding="{Binding MinOrderSum}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
 					Header="Мин.кол-во" Binding="{Binding MinOrderCount}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
+					<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена"
 					Binding="{Binding MaxProducerCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
+					<c:DataGridTextColumnEx Width="*" Header="Цена производителя"
 					Binding="{Binding ProducerCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
+					<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика"
 					Binding="{Binding SupplierMarkup}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
+					<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="67*"
+					<c:DataGridTextColumnEx Width="67*"
 					Header="Цена"
 					Binding="{Binding ResultCost}"
 					TextAlignment="Right"
 					FontWeight="Bold" />
-				<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
+					<c:DataGridTextColumnEx Width="43*" Header="Остаток" Binding="{Binding Quantity}"
 					TextAlignment="Right" SortMemberPath="SortQuantity" />
-				<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
+					<c:DataGridTextColumnEx Width="62*" Visibility="Collapsed" Header="Розн.цена"
 					Binding="{Binding RetailCost}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
+					<c:DataGridTextColumnEx Width="44*" Header="Заказ" Binding="{Binding Count}"
 					TextAlignment="Right"
 					CellStyle="{StaticResource CountColumn}" />
-				<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding MixedSum}"
+					<c:DataGridTextColumnEx Width="58*" Header="Сумма" Binding="{Binding MixedSum}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="65*" Header="Отправлено"
+					<c:DataGridTextColumnEx Width="65*" Header="Отправлено"
 					Binding="{Binding Order.SentOn}"
 					TextAlignment="Center" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
-		<ProgressBar Grid.Row="1" IsIndeterminate="True"
-			Width="200"
-			Height="20"
-			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+				</DataGrid.Columns>
+			</c:DataGrid2>
 
-		<StackPanel Grid.Row="2" Name="Legend" />
+			<ProgressBar Grid.Row="0" IsIndeterminate="True"
+				Width="200"
+				Height="20"
+				Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
 
-		<ContentControl x:Name="ProductInfo" Grid.Row="3" />
+			<ContentControl x:Name="ProductInfo2" Grid.Row="1" />
 
-		<StackPanel Grid.Row="4">
-			<Label Padding="5, 2, 2, 0">Комментарий</Label>
-			<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
-		</StackPanel>
+			<ContentControl Grid.Row="2" Name="MatchedWaybills" />
+		</Grid>
 
-		<StackPanel Grid.Row="5" Visibility="{Binding OnlyWarningVisible.Value,
-			Converter={StaticResource BoolToCollapsed}}">
-			<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
-			<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
-				Style="{StaticResource ReadOnlyText}" />
-		</StackPanel>
-
-		<StackPanel Grid.Row="6" Style="{StaticResource FilterPanel}">
+		<StackPanel Grid.Row="2" Style="{StaticResource FilterPanel}">
 			<Button x:Name="Delete" Style="{StaticResource FilterButton}">Удалить</Button>
 
 			<Button x:Name="ShowCatalog"
@@ -225,6 +299,6 @@
 			</TextBlock>
 		</StackPanel>
 
-		<ContentControl Grid.Row="7" Name="MatchedWaybills" />
+		<StackPanel Grid.Row="3" Name="Legend" />
 	</Grid>
 </UserControl>

@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class Debug : Screen, IAppender
 	{
 		private LayoutSkeleton layout = new PatternLayout("%d{dd.MM.yyyy HH:mm:ss.fff} [%t] %-5p %c - %m%n%exception%n");
-		private int limit = 10000;
+		private int limit = 100000;
 
 		public Debug()
 		{
@@ -64,6 +64,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Clear()
 		{
 			Sql.Value = "";
+			SqlCount.Value = 0;
 		}
 
 		public void Close()

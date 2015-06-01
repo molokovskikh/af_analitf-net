@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Models
 			Orders = new List<Order>();
 			Rules = new List<MinOrderSumRule>();
 			StatSubject = new Subject<Stat>();
-			YesterdayOrders = new List<Tuple<uint, uint>>();
+			YesterdayOrders = null;
 		}
 
 		public virtual uint Id { get; set; }

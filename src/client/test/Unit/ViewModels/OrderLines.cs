@@ -40,9 +40,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Persis_address_settings()
 		{
-			model.AddressSelector.Addresses.Add(new Selectable<Address>(new Address("тест1") { Id = 1 }));
-			model.AddressSelector.Addresses.Add(new Selectable<Address>(new Address("тест2") { Id = 2 }));
-			Activate(model);
+			Activate(model, new Address("тест1") { Id = 1 }, new Address("тест2") { Id = 2 });
 			model.AddressSelector.All.Value = true;
 			model.AddressSelector.Addresses[0].IsSelected = false;
 			Close(model);
@@ -60,9 +58,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			serializer.Populate(new StreamReader(memory), shell);
 
 			model = new OrderLinesViewModel();
-			model.AddressSelector.Addresses.Add(new Selectable<Address>(new Address("тест1") { Id = 1 }));
-			model.AddressSelector.Addresses.Add(new Selectable<Address>(new Address("тест2") { Id = 2 }));
-			Activate(model);
+			Activate(model, new Address("тест1") { Id = 1 }, new Address("тест2") { Id = 2 });
 			Assert.IsTrue(model.AddressSelector.All.Value);
 			Assert.IsFalse(model.AddressSelector.Addresses[0].IsSelected);
 			Assert.IsTrue(model.AddressSelector.Addresses[1].IsSelected);
@@ -80,10 +76,10 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.Lines.Value = new ObservableCollection<OrderLine>(order.Lines);
 			model.CurrentLine.Value = model.Lines.Value[0];
 			model.CurrentLine.Value.Count = 9;
-			model.OfferUpdated();
+			model.Editor.Updated();
 			//симулируем переход на другую строку
 			model.CurrentLine.Value = model.Lines.Value[1];
-			model.OfferCommitted();
+			model.Editor.Committed();
 
 			Assert.AreEqual(15, model.Lines.Value[0].Count);
 		}
@@ -100,7 +96,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.Lines.Value = new ObservableCollection<OrderLine>(order.Lines);
 			model.CurrentLine.Value = model.Lines.Value[0];
 			model.CurrentLine.Value.Count = 9;
-			model.OfferUpdated();
+			model.Editor.Updated();
 			Close(model);
 			model.TryClose();
 

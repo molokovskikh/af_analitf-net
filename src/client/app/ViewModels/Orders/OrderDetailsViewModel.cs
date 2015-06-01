@@ -107,8 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		protected override void OnViewAttached(object view, object context)
 		{
 			base.OnViewAttached(view, context);
-
-			Attach(view, ProductInfo.Bindings);
+			Attach(view as UIElement, ProductInfo.Bindings);
 		}
 
 		private IList<IOrderLine> Filter()

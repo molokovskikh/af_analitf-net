@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			NavigateOnShowCatalog = true;
 			DisplayName = "АвтоЗаказ";
-			AddressSelector = new AddressSelector(Session, this);
+			AddressSelector = new AddressSelector(this);
 			Filter = new[] {
 				"Все",
 				"Заказано",
@@ -499,12 +499,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 
 			var productId = CurrentReportLine.Value.BatchLine.ProductId;
-			var offers = StatelessSession.Query<Offer>()
+			Offers.Value = StatelessSession.Query<Offer>()
 				.Fetch(o => o.Price)
 				.Where(o => o.ProductId == productId)
 				.OrderBy(o => o.Cost)
+				.ToList()
+				.OrderBy(o => o.ResultCost)
 				.ToList();
-			Offers.Value = offers.OrderBy(o => o.ResultCost).ToList();
 		}
 
 		public PrintResult Print()

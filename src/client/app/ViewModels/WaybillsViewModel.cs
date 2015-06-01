@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.ViewModels
 			RejectFilter = new NotifyValue<RejectFilter>();
 			TypeFilter = new NotifyValue<DocumentTypeFilter>();
 			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
-			AddressSelector = new AddressSelector(Session, this) {
+			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");

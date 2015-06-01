@@ -136,6 +136,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Manager = (WindowManager)IoC.Get<IWindowManager>();
 			OnCloseDisposable.Add(CloseCancellation);
 			OnCloseDisposable.Add(ResultsSink);
+			Settings = new NotifyValue<Settings>();
 
 			if (!UnitTesting) {
 				StatelessSession = Env.Factory.OpenStatelessSession();
@@ -145,7 +146,7 @@ namespace AnalitF.Net.Client.ViewModels
 				//если транзакции нет он это делать не будет
 				Session.BeginTransaction();
 
-				Settings = new NotifyValue<Settings>(Session.Query<Settings>().First());
+				Settings.Value = Session.Query<Settings>().First();
 				User = Session.Query<User>().FirstOrDefault()
 					?? new User {
 						SupportHours = "будни: с 07:00 до 19:00",
@@ -153,7 +154,7 @@ namespace AnalitF.Net.Client.ViewModels
 					};
 			}
 			else {
-				Settings = new NotifyValue<Settings>(new Settings(defaults: true));
+				Settings.Value = new Settings(defaults: true);
 				User = TestContext != null ? TestContext.User : new User();
 			}
 
@@ -313,11 +314,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Load()
 		{
-			if (Shell == null)
+			if (Shell == null || Session == null)
 				return;
-
-			if (Shell.CurrentAddress != null && Session != null)
+			if (Shell.CurrentAddress != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
+			Addresses = Session.Query<Address>().ToArray();
 		}
 
 		//метод вызывается если нужно обновить данные на форме
@@ -413,25 +414,26 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected static void Attach(object view, CommandBinding[] commands)
 		{
-			var ui = view as UIElement;
-			if (ui == null)
+			var el = view as UIElement;
+			if (el == null)
 				return;
 
 			foreach (var binding in commands) {
-				ui.CommandBindings.Add(binding);
+				el.CommandBindings.Add(binding);
 				var command = binding.Command as RoutedUICommand;
 				if (command == null)
 					continue;
 
 				foreach (InputGesture o in command.InputGestures) {
-					ui.InputBindings.Add(new InputBinding(command, o));
+					el.InputBindings.Add(new InputBinding(command, o));
 				}
 			}
 		}
 
 		protected void WatchForUpdate(object sender, PropertyChangedEventArgs e)
 		{
-			StatelessSession.Update(sender);
+			lock (StatelessSession)
+				StatelessSession.Update(sender);
 		}
 
 		protected void WatchForUpdate<T>(NotifyValue<T> currentReject)
@@ -622,19 +624,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> EditLegend(string name)
 		{
-			var styles = StatelessSession.Query<CustomStyle>().ToArray();
-			var style = styles.FirstOrDefault(s => s.Name == name);
-			if (style == null)
-				yield break;
-			var isDirty = false;
-			style.PropertyChanged += (sender, args) => {
-				isDirty = true;
-			};
-			foreach(var result in CustomStyle.Edit(style))
-				yield return result;
-			if (!isDirty)
-				yield break;
-			StatelessSession.Update(style);
+			CustomStyle[] styles;
+			lock (StatelessSession) {
+				styles = StatelessSession.Query<CustomStyle>().ToArray();
+				var style = styles.FirstOrDefault(s => s.Name == name);
+				if (style == null)
+					yield break;
+				var isDirty = false;
+				style.PropertyChanged += (sender, args) => {
+					isDirty = true;
+				};
+				foreach(var result in CustomStyle.Edit(style))
+					yield return result;
+				if (!isDirty)
+					yield break;
+				StatelessSession.Update(style);
+			}
 			StyleHelper.BuildStyles(App.Current.Resources, styles);
 			Bus.SendMessage(styles);
 		}

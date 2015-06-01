@@ -368,6 +368,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.ProductId == order.Lines[0].ProductId);
 			testScheduler.Start();
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();

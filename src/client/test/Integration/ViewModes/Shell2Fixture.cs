@@ -308,13 +308,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			Assert.That(correction.Lines.Count, Is.GreaterThan(0));
 			correction.CurrentLine.Value = correction.Lines.First();
-			var offers = correction.Offers.Value;
 			Assert.IsFalse(correction.IsOrderSend);
 			order = session.Query<Order>().First();
+			testScheduler.AdvanceByMs(200);
 			//тк мы оперируем случайными данными то мы можем изменить OfferId заказанной позиции если
 			//все остальные атрибуты совпали а цена у нее ниже
-			Assert.That(offers.Count, Is.GreaterThan(0));
-			var offer = offers.First(o => o.Id == order.Lines[0].OfferId);
+			Assert.That(correction.Offers.Value.Count, Is.GreaterThan(0));
+			var offer = correction.Offers.Value.First(o => o.Id == order.Lines[0].OfferId);
 			Assert.AreEqual(1, offer.OrderCount,
 				String.Format("рассматриваемый offerId = {0}, существующие = {1}",
 					order.Lines[0].OfferId,

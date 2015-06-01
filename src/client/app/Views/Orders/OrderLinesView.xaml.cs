@@ -20,6 +20,9 @@ namespace AnalitF.Net.Client.Views.Orders
 			DataGridHelper.CalculateColumnWidths(Lines);
 			DataGridHelper.CalculateColumnWidths(SentLines);
 			new Editable().Attach(Lines);
+
+			new Editable().Attach(Offers);
+			DataGridHelper.CalculateColumnWidths(Offers);
 		}
 
 		public void ApplyStyles()
@@ -32,6 +35,8 @@ namespace AnalitF.Net.Client.Views.Orders
 
 			if (baseScreen.Settings.Value != null && baseScreen.Settings.Value.HighlightUnmatchedOrderLines)
 				StyleHelper.ApplyStyles(typeof(SentOrderLine), SentLines, Application.Current.Resources, Legend);
+
+			StyleHelper.ApplyStyles(typeof(Offer), Offers, Application.Current.Resources, Legend);
 		}
 	}
 }

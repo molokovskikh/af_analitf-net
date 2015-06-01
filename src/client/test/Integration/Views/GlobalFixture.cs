@@ -30,6 +30,7 @@ using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
+using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -40,6 +41,7 @@ using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Microsoft.Win32;
+using Test.Support.log4net;
 using TestStack.White.UIItems.TableItems;
 using Screen = Caliburn.Micro.Screen;
 using Action = System.Action;
@@ -138,7 +140,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Click("ShowOrderLines");
 			var lines = (OrderLinesViewModel)shell.ActiveItem;
 			await ViewLoaded(lines);
-			Input((FrameworkElement)lines.GetView(), "Lines", Key.Enter);
+			Input((FrameworkElement)lines.GetView(), "Lines", Key.F2);
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}
 
@@ -403,6 +405,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Start();
 			Click("ShowCatalog");
+			//QueryCatcher.Catch();
 			var catalogModel = (CatalogViewModel)shell.ActiveItem;
 			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
 			var view = (FrameworkElement)viewModel.GetView();

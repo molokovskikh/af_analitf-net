@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -167,18 +168,16 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Promotions = new PromotionPopup(StatelessSession, Shell.Config);
 				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false)
 					.Subscribe(c => Promotions.Activate(c.Value == null ? null : c.Value.Name));
-
-				Addresses = Session.Query<Address>().ToArray();
 			}
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
-			this.ObservableForProperty(m => m.CurrentOffer.Value)
-				.Where(o => o != null)
+			CurrentOffer
+				.Where(x => x != null)
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
 
-			this.ObservableForProperty(m => m.CurrentOffer.Value)
+			CurrentOffer
 #if !DEBUG
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 #endif
@@ -305,25 +304,26 @@ where c.Id = ?";
 
 		public virtual void OfferUpdated()
 		{
-			if (CurrentOffer.Value == null)
+			var offer = CurrentOffer.Value;
+			if (offer == null)
 				return;
 
-			if (CurrentOffer.Value.Price.IsOrderDisabled) {
-				CurrentOffer.Value.OrderCount = null;
+			if (offer.Price.IsOrderDisabled) {
+				offer.OrderCount = null;
 				return;
 			}
-
-			LastEditOffer.Value = CurrentOffer.Value;
+			LastEditOffer.Value = offer;
 			LoadStat();
-			ShowValidationError(CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
+			ShowValidationError(offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
-		public void OfferCommitted()
+		public virtual void OfferCommitted()
 		{
-			if (LastEditOffer.Value == null)
+			var offer = LastEditOffer.Value;
+			if (offer == null)
 				return;
 
-			ShowValidationError(LastEditOffer.Value.SaveOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
+			ShowValidationError(offer.SaveOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
 		}
 
 		protected void ShowValidationError(List<Message> messages)
@@ -356,7 +356,8 @@ where c.Id = ?";
 
 			CalculateRetailCost(offers);
 
-			if (Settings.Value.WarnIfOrderedYesterday) {
+			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrders == null) {
+				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId, Count
 from SentOrderLines l
 join SentOrders o on o.Id = l.OrderId
@@ -364,11 +365,11 @@ where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
 group by l.ProductId, l.Count")
 					.SetParameter("begin", DateTime.Today.AddDays(-1))
 					.SetParameter("end", DateTime.Today)
-					.SetParameter("addressId", Address.Id)
+					.SetParameter("addressId", addressId)
 					.List<object[]>())
 					.ObserveOn(UiScheduler)
 					.Select(x => x.Select(y => Tuple.Create(Convert.ToUInt32(y[0]), Convert.ToUInt32(y[1]))).ToList())
-					.Subscribe(x => Address.YesterdayOrders = x);
+					.Subscribe(x => Address.YesterdayOrders = x, CloseCancellation.Token);
 			}
 		}
 
@@ -454,17 +455,19 @@ group by l.ProductId, l.Count")
 				return;
 
 			var begin = DateTime.Now.AddMonths(-1);
-			var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
-from SentOrderLines ol
-join SentOrders o on o.Id = ol.OrderId
-where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
-				.SetParameter("begin", begin)
-				.SetParameter("productId", CurrentOffer.Value.ProductId)
-				.SetParameter("addressId", ActualAddress.Id)
-				.UniqueResult<object[]>();
-			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
-			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
-			CurrentOffer.Value.StatLoaded = true;
+			lock (StatelessSession) {
+				var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
+	from SentOrderLines ol
+	join SentOrders o on o.Id = ol.OrderId
+	where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
+					.SetParameter("begin", begin)
+					.SetParameter("productId", CurrentOffer.Value.ProductId)
+					.SetParameter("addressId", ActualAddress.Id)
+					.UniqueResult<object[]>();
+				CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
+				CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
+				CurrentOffer.Value.StatLoaded = true;
+			}
 		}
 
 		private void InvalidateHistoryOrders()
@@ -476,30 +479,31 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		{
 			if (ActualAddress == null || CurrentOffer.Value == null || StatelessSession == null)
 				return;
-
 			var key = HistoryOrdersCacheKey();
 			HistoryOrders = Util.Cache(Cache, key, k => {
-				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
-					.OrderByDescending(o => o.Order.SentOn);
-				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
-				//переместить в общий блок то первый
-				//where применяться не будет
-				var addressId = ActualAddress.Id;
-				if (Settings.Value.GroupByProduct) {
-					var productId = CurrentOffer.Value.ProductId;
-					query = query.Where(o => o.ProductId == productId)
-						.Where(o => o.Order.Address.Id == addressId);
+				lock (StatelessSession) {
+					IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
+						.OrderByDescending(o => o.Order.SentOn);
+					//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
+					//переместить в общий блок то первый
+					//where применяться не будет
+					var addressId = ActualAddress.Id;
+					if (Settings.Value.GroupByProduct) {
+						var productId = CurrentOffer.Value.ProductId;
+						query = query.Where(o => o.ProductId == productId)
+							.Where(o => o.Order.Address.Id == addressId);
+					}
+					else {
+						var catalogId = CurrentOffer.Value.CatalogId;
+						query = query.Where(o => o.CatalogId == catalogId)
+							.Where(o => o.Order.Address.Id == addressId);
+					}
+					return query
+						.Fetch(l => l.Order)
+						.ThenFetch(o => o.Price)
+						.Take(20)
+						.ToList();
 				}
-				else {
-					var catalogId = CurrentOffer.Value.CatalogId;
-					query = query.Where(o => o.CatalogId == catalogId)
-						.Where(o => o.Order.Address.Id == addressId);
-				}
-				return query
-					.Fetch(l => l.Order)
-					.ThenFetch(o => o.Price)
-					.Take(20)
-					.ToList();
 			});
 
 			LoadStat();

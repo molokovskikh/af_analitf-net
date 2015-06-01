@@ -24,15 +24,13 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					Id = 2
 				},
 			};
-			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
-			Activate(model, addresses[0]);
+			Activate(model, addresses);
 			model.AddressSelector.All.Value = true;
 			model.AddressSelector.Addresses[1].IsSelected = false;
 			ScreenExtensions.TryDeactivate(model, true);
 
 			model = new OrdersViewModel();
-			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
-			Activate(model, addresses[0]);
+			Activate(model, addresses);
 			Assert.IsTrue(model.AddressSelector.All.Value);
 			Assert.IsFalse(model.AddressSelector.Addresses[1].IsSelected);
 		}
@@ -45,12 +43,11 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 				new Address("Тестовый адрес доставки 1") {
 					Id = 1
 				},
-				new Address("Тестовый адрес доставки ") {
+				new Address("Тестовый адрес доставки 2") {
 					Id = 2
 				},
 			};
-			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
-			Activate(model, addresses[0]);
+			Activate(model, addresses);
 			model.AddressSelector.All.Value = true;
 			model.AddressSelector.Addresses[1].IsSelected = false;
 			ScreenExtensions.TryDeactivate(model, true);
@@ -64,8 +61,7 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 					Id = 3
 				},
 			};
-			addresses.Each(a => model.AddressSelector.Addresses.Add(new Selectable<Address>(a)));
-			Activate(model, addresses[0]);
+			Activate(model, addresses);
 			Assert.IsTrue(model.AddressSelector.All.Value);
 			Assert.IsFalse(model.AddressSelector.Addresses[0].IsSelected);
 			Assert.IsTrue(model.AddressSelector.Addresses[1].IsSelected);

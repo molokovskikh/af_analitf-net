@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Controls.Behaviors
@@ -21,6 +22,19 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 		private static TimeSpan inputInterval = TimeSpan.FromMilliseconds(1500);
 		private static TimeSpan commitInterval = TimeSpan.FromMilliseconds(750);
 		private IScheduler scheduler;
+
+		//для регистрации editor в xaml
+		public static DependencyProperty EditorProperty = DependencyProperty.Register("Editor", typeof(Editor), typeof(Editable));
+
+		public static void SetEditor(UIElement el, Editor value)
+		{
+			el.SetValue(EditorProperty, value);
+		}
+
+		public static Editor GetEditor(UIElement el)
+		{
+			return (Editor)el.GetValue(EditorProperty);
+		}
 
 		public Editable(IScheduler scheduler = null)
 		{
@@ -73,7 +87,13 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 				.ObserveOn(scheduler)
 				.Subscribe(e => {
 					lastEdit = DateTime.MinValue;
-					ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
+					var editor = GetEditor(grid);
+					if (editor != null) {
+						editor.Committed();
+					}
+					else {
+						ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
+					}
 				});
 		}
 
@@ -84,9 +104,13 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			if (item == null)
 				return;
 			item.Value = SafeConvert.ToUInt32(value(item.Value == 0 ? "" : item.Value.ToString()));
-			var viewModel = dataGrid.DataContext;
-			if (viewModel != null)
+			var editor = GetEditor(dataGrid);
+			if (editor != null) {
+				editor.Updated();
+			}
+			else {
 				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
+			}
 		}
 
 		public static void AutoEditOnDigit(DataGrid2 grid, string name)

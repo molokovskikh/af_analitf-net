@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.ViewModels.Parts;
 
 namespace AnalitF.Net.Client.Controls
 {

@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			DisplayName = "Заказы";
 
-			AddressSelector = new AddressSelector(Session, this);
+			AddressSelector = new AddressSelector(this);
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
 

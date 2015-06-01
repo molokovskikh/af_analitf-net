@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Linq;
+using System.IO;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
@@ -64,13 +65,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return cleaner.RandomFile();
 		}
 
-		protected void Activate(BaseScreen screen, Address address = null)
+		protected void Activate(BaseScreen screen, params Address[] addresses)
 		{
-			address = address ?? new Address("тест");
+			var address = addresses.FirstOrDefault() ?? new Address("тест");
+			if (addresses.Length == 0) {
+				addresses = new[] { address };
+			}
 			screen.User = user;
 			screen.Address = address;
 			screen.Parent = shell;
-			screen.Addresses = new[] { screen.Address };
+			screen.Addresses = addresses;
 			ScreenExtensions.TryActivate(screen);
 		}
 	}

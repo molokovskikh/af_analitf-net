@@ -68,16 +68,16 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 			Assert.That(localSession.Query<Offer>().Count(x => x.BarCode != null), Is.GreaterThan(0));
 
-			var catalogId = localSession.Query<Offer>()
-				.Where(o => !o.Junk).GroupBy(o => o.CatalogId)
+			var productId = localSession.Query<Offer>()
+				.Where(o => !o.Junk).GroupBy(o => o.ProductId)
 				.Where(g => g.Count() > 1)
 				.Select(g => g.Key)
 				.First();
 			var minCostCount = localSession.Query<MinCost>().Count();
 			Assert.That(minCostCount, Is.GreaterThan(0));
-			var cost = localSession.Query<MinCost>().First(m => m.Catalog.Id == catalogId);
-			Assert.IsNotNull(cost.Catalog);
-			Assert.IsNotNull(cost.NextCost);
+			var cost = localSession.Query<MinCost>().First(m => m.ProductId == productId);
+			Assert.IsNotNull(cost.Catalog, "product id = {0}", productId);
+			Assert.IsNotNull(cost.NextCost, "product id = {0}", productId);
 			Assert.That(localSession.Query<Offer>().Count(o => o.Exp != null), Is.GreaterThan(0));
 		}
 

@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.Windows;
-using System.Windows.Shapes;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.Views;
-using Caliburn.Micro;
 using Common.NHibernate;
-using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -95,8 +87,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 			model.CurrentLine.Value.Count = 0;
-			model.OfferUpdated();
-			model.OfferCommitted();
+			model.Editor.Updated();
+			model.Editor.Committed();
 			testScheduler.AdvanceByMs(5000);
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
 			Assert.That(model.Sum.Value, Is.EqualTo(0));
@@ -117,7 +109,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.NotifyOfPropertyChange("CurrentAddress");
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 			model.CurrentLine.Value.Count = 0;
-			model.OfferUpdated();
+			model.Editor.Updated();
 			testScheduler.AdvanceByMs(1000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
@@ -128,8 +120,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeOrder();
 			model.CurrentLine.Value = model.Lines.Value.FirstOrDefault();
 			model.CurrentLine.Value.Count = 100;
-			model.OfferUpdated();
-			model.OfferCommitted();
+			model.Editor.Updated();
+			model.Editor.Updated();
 			testScheduler.AdvanceByMs(1000);
 			Assert.That(shell.Stat.Value.Sum, Is.EqualTo(model.CurrentLine.Value.Sum));
 		}
@@ -163,7 +155,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.IsSentSelected.Value = true;
 			testScheduler.Start();
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
-			Assert.AreEqual(catalogId, model.ProductInfo.CurrentCatalog.Id);
+			Assert.AreEqual(catalogId, model.ProductInfo2.CurrentCatalog.Id);
 		}
 
 		[Test]
@@ -187,6 +179,30 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.SelectedSentLine.Value = matchedLine;
 			testScheduler.AdvanceByMs(1000);
 			Assert.AreEqual(1, model.MatchedWaybills.WaybillLines.Value.Count);
+		}
+
+		[Test]
+		public void Sync_order_line_with_offers()
+		{
+			var productId = session.Query<Offer>().GroupBy(o => o.ProductId)
+				.Where(g => g.Count() > 1)
+				.Select(g => g.Key)
+				.First();
+			MakeOrder(session.Query<Offer>().First(o => o.ProductId == productId));
+			model.CurrentLine.Value = model.Lines.Value.First();
+			testScheduler.Start();
+
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.OrderCount == null);
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.AreEqual(2, model.Lines.Value.Count);
+
+			model.CurrentOffer.Value.OrderCount = 0;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.AreEqual(1, model.Lines.Value.Count);
 		}
 
 		private void CreateMatchedWaybill(SentOrderLine orderLine)
