@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Web;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Models.Helpers;
@@ -161,8 +162,24 @@ where l.RequestId = :id;")
 					session.SaveEach(orders.Select(o => new AcceptedOrderLog(log, o)));
 				}
 
-				return errors.Concat(orders.Select(o => new OrderResult(o, orderitemMap))).ToList();
+				errors = errors.Concat(orders.Select(o => new OrderResult(o, orderitemMap))).ToList();
 			}
+			//информацию по отказам сохраняем для техподдержки
+			foreach (var result in errors.Where(x => x.Result == OrderResultStatus.Reject)) {
+				if (!String.IsNullOrEmpty(log.Error)) {
+					log.Error += Environment.NewLine;
+				}
+				var order = clientOrders.FirstOrDefault(x => x.ClientOrderId == result.ClientOrderId);
+				if (order == null)
+					continue;
+				var price = session.Get<PriceList>(order.PriceId);
+				log.Error += String.Format("Заказ {0} на сумму {1} на поставщика {2} бы отклонен по причине: {3}",
+					result.ClientOrderId,
+					order.Items.Sum(x => x.Count * x.Cost),
+					price != null ? price.Supplier.Name : "",
+					result.Error);
+			}
+			return errors;
 		}
 
 		private static List<OrderResult> Validate(ISession session, User user,
