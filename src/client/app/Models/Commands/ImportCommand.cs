@@ -111,6 +111,12 @@ from BatchLines b
 left join Addresses a on a.Id = b.AddressId
 where a.Id is null;")
 				.ExecuteUpdate();
+			//очищаем ожидаемые позиции если товар был удален
+			Session.CreateSQLQuery(@"delete i
+from AwaitedItems i
+left join Catalogs c on c.Id = i.CatalogId
+where c.Id is null")
+				.ExecuteUpdate();
 
 			//вычисляю таблицы в которых нужно производить чистку
 			//Hidden = 1 экспортируется в том случае если позиция была удалена

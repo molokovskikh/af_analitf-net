@@ -24,7 +24,15 @@ namespace AnalitF.Net.Test.Integration
 		{
 			app = CreateBootstrapper();
 			FileHelper.InitDir("test");
-			disposable.Add(Disposable.Create(() => Directory.Delete("test", true)));
+			disposable.Add(Disposable.Create(() => {
+				try {
+					Directory.Delete("test", true);
+				}
+				catch(IOException e) {
+					Console.WriteLine("HResult = " + e.HResult);
+					throw;
+				}
+			}));
 		}
 
 		[Test]
