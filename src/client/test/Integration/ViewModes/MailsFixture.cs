@@ -13,16 +13,35 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
+using log4net.Appender;
 using log4net.Config;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
+using Test.Support.log4net;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
 	[TestFixture]
 	public class MailsFixture : ViewModelFixture<Mails>
 	{
+		QueryCatcher catcher;
+
+		[SetUp]
+		public void Setup()
+		{
+			catcher = new QueryCatcher("AnalitF.Net");
+			catcher.Appender = new MemoryAppender();
+			catcher.Start();
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed)
+				Console.WriteLine(((MemoryAppender)catcher.Appender).GetEvents().Implode(e => e.MessageObject));
+		}
+
 		[Test]
 		public void Download_attachment()
 		{
