@@ -540,6 +540,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.Select(t => Tuple.Create(
 					Path.GetFullPath(Path.Combine(Config.UpdateTmpDir, t.Item2)),
 					File.ReadAllLines(Path.Combine(Config.UpdateTmpDir, t.Item1))))
+				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
+					.Select(x => Tuple.Create(Path.Combine(Config.UpdateTmpDir, x), new string[0])))
 				.ToList();
 		}
 

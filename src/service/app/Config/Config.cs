@@ -46,5 +46,6 @@ namespace AnalitF.Net.Service.Config
 		}
 
 		public TimeSpan ExportTimeout { get; set; }
+		public string PerUserSqlPath { get; set; }
 	}
 }

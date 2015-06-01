@@ -875,6 +875,22 @@ where PublicationDate < curdate() + interval 1 day
 			ExportMails();
 			ExportDocs();
 			ExportOrders();
+			//выбираем sql запросы которые будут выполнены на клиенте что бы в случае аварии починить базу клиента
+			try {
+				if (Directory.Exists(Config.PerUserSqlPath)) {
+					var content = Directory.GetFiles(Config.PerUserSqlPath, job.User.Id + ".*")
+						.SelectMany(f => File.ReadLines(f))
+						.Implode(Environment.NewLine);
+					if (!String.IsNullOrEmpty(content)) {
+						Result.Add(new UpdateData("cmds") {
+							Content = content
+						});
+					}
+				}
+			}
+			catch(Exception e) {
+				log.Error("Не удалось выбрать дополнительные sql команды", e);
+			}
 		}
 
 		private string HtmlToText(string value)
