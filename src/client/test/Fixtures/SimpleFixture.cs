@@ -74,18 +74,18 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public static void CreateOrderReject(ISession session)
 		{
 			var user = ServerFixture.User(session);
-			var products = new[] {
-				session.Query<TestProduct>().First(p => !p.Hidden),
-				user.GetActivePricesNaked(session).First().Price.Core[0].Product
-			};
+			var price = user.GetActivePricesNaked(session).First().Price;
+			var product = session.Query<TestProduct>().First(p => !p.Hidden).Name;
+			var product1 = price.Core[0].Product;
+			var product2 = price.Core.First(c => c.Product != product1).Product;
 			InnerCreateOrderReject(session,
-				Tuple.Create(products[0].Name, 0u),
-				Tuple.Create(products[1].Name, products[1].Id),
-				Tuple.Create(products[1].Name, 0u));
+				Tuple.Create(product, 0u, 10u),
+				Tuple.Create(product1.Name, product1.Id, 1u),
+				Tuple.Create(product2.Name, 0u, 1u));
 		}
 
 		[Description("Создает отказ, на сервере, для тестов"), Service]
-		public static void InnerCreateOrderReject(ISession session, params Tuple<string, uint>[] linesMap)
+		public static void InnerCreateOrderReject(ISession session, params Tuple<string, uint, uint>[] linesMap)
 		{
 			var user = ServerFixture.User(session);
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
@@ -95,7 +95,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(new TestDocumentSendLog(user, log));
 			var orderReject = new TestOrderReject(log);
 			foreach(var map in linesMap) {
-				orderReject.CreateLine(map.Item1, session.Get<TestProduct>(map.Item2), 1);
+				var product = session.Get<TestProduct>(map.Item2);
+				orderReject.CreateLine(map.Item1, product, map.Item3);
 			}
 			session.Save(orderReject);
 		}
