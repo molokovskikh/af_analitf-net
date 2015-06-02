@@ -80,7 +80,7 @@ order by Score, {c.FullName}")
 						return Producers.Value;
 
 					CurrentProducer.Value = null;
-					var items = StatelessSession.CreateSQLQuery(@"
+					var items = s.CreateSQLQuery(@"
 (select {p.*}, 0 as Score
 from Producers p
 where p.Name like :term)

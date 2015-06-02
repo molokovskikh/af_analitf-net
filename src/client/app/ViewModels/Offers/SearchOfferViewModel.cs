@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						return Observable.Return(new List<Offer>());
 					IsLoading.Value = true;
 					return RxQuery(s => {
-						var query = StatelessSession.Query<Offer>();
+						var query = s.Query<Offer>();
 						query = Util.ContainsAny(query, o => o.ProductSynonym,
 							term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 						query = Util.Filter(query, o => o.Price.Id, Prices);

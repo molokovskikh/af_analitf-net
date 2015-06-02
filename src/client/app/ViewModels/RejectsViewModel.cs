@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.ViewModels
 					IsLoading.Value = true;
 					var begin = Begin.Value;
 					var end = End.Value.AddDays(1);
-					var result = StatelessSession.Query<Reject>()
+					var result = s.Query<Reject>()
 						.Where(r => r.LetterDate >= begin && r.LetterDate < end)
 						.OrderBy(r => r.LetterDate)
 						.ToList();
