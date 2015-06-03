@@ -478,8 +478,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void WatchForUpdate(object sender, PropertyChangedEventArgs e)
 		{
-			lock (StatelessSession)
-				StatelessSession.Update(sender);
+			StatelessSession.Update(sender);
 		}
 
 		protected void WatchForUpdate<T>(NotifyValue<T> currentReject)
@@ -498,12 +497,8 @@ namespace AnalitF.Net.Client.ViewModels
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
 			if (StatelessSession != null) {
-				//методы RxQuery обращается к StatelessSession в другой нитке
-				//вроде бы это безопасно но для освобождения нужно установить блокировку
-				lock (StatelessSession) {
-					StatelessSession.Dispose();
-					StatelessSession = null;
-				}
+				StatelessSession.Dispose();
+				StatelessSession = null;
 			}
 
 			if (Session != null) {
@@ -670,22 +665,19 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> EditLegend(string name)
 		{
-			CustomStyle[] styles;
-			lock (StatelessSession) {
-				styles = StatelessSession.Query<CustomStyle>().ToArray();
-				var style = styles.FirstOrDefault(s => s.Name == name);
-				if (style == null)
-					yield break;
-				var isDirty = false;
-				style.PropertyChanged += (sender, args) => {
-					isDirty = true;
-				};
-				foreach(var result in CustomStyle.Edit(style))
-					yield return result;
-				if (!isDirty)
-					yield break;
-				StatelessSession.Update(style);
-			}
+			var styles = StatelessSession.Query<CustomStyle>().ToArray();
+			var style = styles.FirstOrDefault(s => s.Name == name);
+			if (style == null)
+				yield break;
+			var isDirty = false;
+			style.PropertyChanged += (sender, args) => {
+				isDirty = true;
+			};
+			foreach(var result in CustomStyle.Edit(style))
+				yield return result;
+			if (!isDirty)
+				yield break;
+			StatelessSession.Update(style);
 			StyleHelper.BuildStyles(App.Current.Resources, styles);
 			Bus.SendMessage(styles);
 		}

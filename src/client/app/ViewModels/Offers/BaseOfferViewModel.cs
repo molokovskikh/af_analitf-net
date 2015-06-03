@@ -455,19 +455,17 @@ group by l.ProductId, l.Count")
 				return;
 
 			var begin = DateTime.Now.AddMonths(-1);
-			lock (StatelessSession) {
-				var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
-	from SentOrderLines ol
-	join SentOrders o on o.Id = ol.OrderId
-	where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
-					.SetParameter("begin", begin)
-					.SetParameter("productId", CurrentOffer.Value.ProductId)
-					.SetParameter("addressId", ActualAddress.Id)
-					.UniqueResult<object[]>();
-				CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
-				CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
-				CurrentOffer.Value.StatLoaded = true;
-			}
+			var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
+from SentOrderLines ol
+join SentOrders o on o.Id = ol.OrderId
+where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
+				.SetParameter("begin", begin)
+				.SetParameter("productId", CurrentOffer.Value.ProductId)
+				.SetParameter("addressId", ActualAddress.Id)
+				.UniqueResult<object[]>();
+			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
+			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
+			CurrentOffer.Value.StatLoaded = true;
 		}
 
 		private void InvalidateHistoryOrders()
@@ -481,29 +479,27 @@ group by l.ProductId, l.Count")
 				return;
 			var key = HistoryOrdersCacheKey();
 			HistoryOrders = Util.Cache(Cache, key, k => {
-				lock (StatelessSession) {
-					IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
-						.OrderByDescending(o => o.Order.SentOn);
-					//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
-					//переместить в общий блок то первый
-					//where применяться не будет
-					var addressId = ActualAddress.Id;
-					if (Settings.Value.GroupByProduct) {
-						var productId = CurrentOffer.Value.ProductId;
-						query = query.Where(o => o.ProductId == productId)
-							.Where(o => o.Order.Address.Id == addressId);
-					}
-					else {
-						var catalogId = CurrentOffer.Value.CatalogId;
-						query = query.Where(o => o.CatalogId == catalogId)
-							.Where(o => o.Order.Address.Id == addressId);
-					}
-					return query
-						.Fetch(l => l.Order)
-						.ThenFetch(o => o.Price)
-						.Take(20)
-						.ToList();
+				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
+					.OrderByDescending(o => o.Order.SentOn);
+				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
+				//переместить в общий блок то первый
+				//where применяться не будет
+				var addressId = ActualAddress.Id;
+				if (Settings.Value.GroupByProduct) {
+					var productId = CurrentOffer.Value.ProductId;
+					query = query.Where(o => o.ProductId == productId)
+						.Where(o => o.Order.Address.Id == addressId);
 				}
+				else {
+					var catalogId = CurrentOffer.Value.CatalogId;
+					query = query.Where(o => o.CatalogId == catalogId)
+						.Where(o => o.Order.Address.Id == addressId);
+				}
+				return query
+					.Fetch(l => l.Order)
+					.ThenFetch(o => o.Price)
+					.Take(20)
+					.ToList();
 			});
 
 			LoadStat();

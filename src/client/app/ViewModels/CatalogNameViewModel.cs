@@ -194,29 +194,27 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 			//сессия может использоваться для асинхронной загрузки данных выполняем синхронизацию
-			lock (StatelessSession) {
-				var nameId = CurrentCatalogName.Value.Id;
-				var queryable = StatelessSession.Query<Catalog>()
-					.Fetch(c => c.Name)
-					.ThenFetch(c => c.Mnn)
-					.Where(c => c.Name.Id == nameId);
+			var nameId = CurrentCatalogName.Value.Id;
+			var queryable = StatelessSession.Query<Catalog>()
+				.Fetch(c => c.Name)
+				.ThenFetch(c => c.Mnn)
+				.Where(c => c.Name.Id == nameId);
 
-				if (!ParentModel.ShowWithoutOffers)
-					queryable = queryable.Where(c => c.HaveOffers);
+			if (!ParentModel.ShowWithoutOffers)
+				queryable = queryable.Where(c => c.HaveOffers);
 
-				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
-					queryable = queryable.Where(c => c.VitallyImportant);
+			if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+				queryable = queryable.Where(c => c.VitallyImportant);
 
-				if (ParentModel.CurrentFilter == ParentModel.Filters[2])
-					queryable = queryable.Where(c => c.MandatoryList);
+			if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+				queryable = queryable.Where(c => c.MandatoryList);
 
-				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-					queryable = queryable.Where(c => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog == c));
+			if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+				queryable = queryable.Where(c => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog == c));
 
-				Catalogs.Value = queryable
-					.OrderBy(c => c.Form)
-					.ToList();
-			}
+			Catalogs.Value = queryable
+				.OrderBy(c => c.Form)
+				.ToList();
 		}
 
 		//todo: если поставить фокус в строку поиска и ввести запрос

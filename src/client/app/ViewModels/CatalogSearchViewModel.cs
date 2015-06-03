@@ -78,19 +78,16 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentItem = new NotifyValue<CatalogDisplayItem>();
 			CurrentCatalog = CurrentItem
 #if !DEBUG
-				.Throttle(Consts.ScrollLoadTimeout)
-				.ObserveOn(UiScheduler)
+				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
 #endif
 				.ToValue(_ => {
 					if (CurrentItem.Value == null)
 						return null;
 					var catalogId = CurrentItem.Value.CatalogId;
-					lock (StatelessSession) {
-						return StatelessSession.Query<Catalog>()
-							.Fetch(c => c.Name)
-							.ThenFetch(n => n.Mnn)
-							.FirstOrDefault(c => c.Id == catalogId);
-					}
+					return StatelessSession.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.FirstOrDefault(c => c.Id == catalogId);
 				});
 			ParentModel = catalog;
 			QuickSearch = new QuickSearch<CatalogDisplayItem>(UiScheduler,

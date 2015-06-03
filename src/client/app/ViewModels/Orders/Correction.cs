@@ -91,15 +91,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return;
 			}
 
-			lock (StatelessSession) {
-				var productId = CurrentLine.Value.ProductId;
-				Offers.Value = StatelessSession.Query<Offer>()
-					.Fetch(o => o.Price)
-					.Where(o => o.ProductId == productId)
-					.ToList()
-					.OrderBy(o => o.ResultCost)
-					.ToList();
-			}
+			var productId = CurrentLine.Value.ProductId;
+			Offers.Value = StatelessSession.Query<Offer>()
+				.Fetch(o => o.Price)
+				.Where(o => o.ProductId == productId)
+				.ToList()
+				.OrderBy(o => o.ResultCost)
+				.ToList();
 		}
 
 		public IEnumerable<IResult> Save()
