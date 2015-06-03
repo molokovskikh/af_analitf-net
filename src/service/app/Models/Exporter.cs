@@ -192,12 +192,12 @@ from (
 
 update Usersettings.ActivePrices ap
 	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
-set ap.Fresh = (r.ForceReplication = 1 or :cumulative)
+set ap.Fresh = (r.ForceReplication > 0 or :cumulative)
 where r.UserId = :userId;
 
 update Usersettings.ActivePrices ap
 	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
-set r.ForceReplication = 0
+set r.ForceReplication = 2
 where r.UserId = :userId and ap.Fresh = 1;")
 				.SetParameter("userId", user.Id)
 				.SetParameter("cumulative", cumulative)

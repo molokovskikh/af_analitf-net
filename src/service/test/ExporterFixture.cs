@@ -30,11 +30,12 @@ namespace AnalitF.Net.Service.Test
 		private TestClient client;
 		private Config.Config config;
 		private RequestLog requestLog;
+		private MainController controller;
 
 		[SetUp]
 		public void Setup()
 		{
-			client = TestClient.CreateNaked();
+			client = TestClient.CreateNaked(session);
 			session.Save(client);
 
 			config = FixtureSetup.Config;
@@ -42,6 +43,10 @@ namespace AnalitF.Net.Service.Test
 			FileHelper.InitDir("data", "update");
 			Directory.CreateDirectory(config.LocalExportPath);
 			Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
+			controller = new MainController {
+				CurrentUser = user,
+				Session = session
+			};
 
 			file = "data.zip";
 			File.Delete(file);
@@ -184,7 +189,6 @@ namespace AnalitF.Net.Service.Test
 		public void Sync_only_changed()
 		{
 			InitAd();
-			exporter.ExportAll();
 			var result = ReadResult();
 			var zeros = new [] {
 				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt"
@@ -197,17 +201,12 @@ namespace AnalitF.Net.Service.Test
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
-			var controller = new MainController {
-				CurrentUser = user,
-				Session = session
-			};
 			controller.Delete();
 
 			session.Flush();
 			session.Clear();
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
 			exporter.AdsPath = "ads";
-			exporter.ExportAll();
 			result = ReadResult();
 			foreach (var zero in zeros) {
 				Assert.AreEqual(0, result.First(r => r.FileName.Match(zero)).UncompressedSize,
@@ -216,6 +215,24 @@ namespace AnalitF.Net.Service.Test
 			resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.Not.StringContaining("MaxProducerCosts"));
 			Assert.That(resultFiles, Is.Not.StringContaining("ads"));
+		}
+
+		[Test(Description = "Флаг синхронизации прайс-листов должен быть сброшен только при подтверждении")]
+		public void Do_not_skip_unconfirmed_prices()
+		{
+			var result = ReadResult();
+			var size = result.First(r => r.FileName.Match("offers.txt")).UncompressedSize;
+			Assert.That(size, Is.GreaterThan(0));
+			var data = session.Load<AnalitfNetData>(user.Id);
+			data.LastUpdateAt = DateTime.Now.AddDays(-1);
+			//надо очистить тк в сессии остались activeprices
+			session.Flush();
+			session.Clear();
+
+			Init(data.LastUpdateAt);
+			result = ReadResult();
+			//10 - на случай перевода строки
+			Assert.AreEqual(size, result.First(r => r.FileName.Match("offers.txt")).UncompressedSize);
 		}
 
 		[Test]
@@ -271,10 +288,6 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
-			var controller = new MainController {
-				CurrentUser = user,
-				Session = session
-			};
 			controller.Delete();
 			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
 set ForceReplication = 1
@@ -304,9 +317,16 @@ where userId = :userId and FirmCode = :supplierId")
 
 		private void Init(DateTime? lastSync = null)
 		{
+			if (lastSync != null) {
+				//в базе даты хранятся с точностью до секунды
+				lastSync = new DateTime(lastSync.Value.Year, lastSync.Value.Month, lastSync.Value.Day,
+					lastSync.Value.Hour, lastSync.Value.Minute, lastSync.Value.Second);
+			}
 			requestLog = new RequestLog(user, Version.Parse("1.1")) {
 				LastSync = lastSync
 			};
+			if (exporter != null)
+				exporter.Dispose();
 			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
@@ -326,6 +346,7 @@ where userId = :userId and FirmCode = :supplierId")
 
 		private ZipFile ReadResult()
 		{
+			exporter.ExportAll();
 			var memory = new MemoryStream();
 			exporter.Compress(memory);
 			memory.Position = 0;

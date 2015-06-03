@@ -33,7 +33,7 @@ namespace AnalitF.Net.Service.Test
 		public void Setup()
 		{
 			config = FixtureSetup.Config;
-			var client = TestClient.CreateNaked();
+			var client = TestClient.CreateNaked(session);
 			session.Save(client);
 
 			user = session.Load<User>(client.Users[0].Id);

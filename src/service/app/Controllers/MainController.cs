@@ -39,6 +39,10 @@ namespace AnalitF.Net.Service.Controllers
 			Session.Save(data);
 
 			Session.CreateSQLQuery(@"
+update Usersettings.AnalitFReplicationInfo r
+set r.ForceReplication = 0
+where r.UserId = :userId and r.ForceReplication = 2;
+
 update Logs.DocumentSendLogs l
 	join Logs.PendingDocLogs p on p.SendLogId = l.Id
 set l.Committed = 1
