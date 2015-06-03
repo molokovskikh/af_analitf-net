@@ -14,7 +14,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
 {
-	public class RealThreadScheduler : TaskScheduler
+	public class ThreadPerTaskScheduler : TaskScheduler
 	{
 		protected override void QueueTask(Task task)
 		{
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Unit
 		[TestFixtureSetUp]
 		public void FixtureSetup()
 		{
-			factory = new TaskFactory(new RealThreadScheduler());
+			factory = new TaskFactory(new ThreadPerTaskScheduler());
 		}
 
 		[SetUp]

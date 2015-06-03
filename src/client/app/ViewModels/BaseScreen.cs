@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -45,6 +46,46 @@ using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	/// <summary>
+	/// планировщик задач который все задачи выполняет в одной нитке последовательно
+	/// нужен тк mysql требует что бы подключение к базе использовала таже нитка что и создала это подключение
+	/// иначе приложение будет падать
+	/// </summary>
+	public class QueueScheduler : TaskScheduler
+	{
+		private BlockingCollection<Task> tasks = new BlockingCollection<Task>(new ConcurrentQueue<Task>());
+
+		public QueueScheduler()
+		{
+			var thread = new Thread(Dispatch) { IsBackground = true };
+			thread.Start();
+		}
+
+		protected override void QueueTask(Task task)
+		{
+			tasks.Add(task);
+		}
+
+		public void Dispatch()
+		{
+			while (true) {
+				foreach (var task in tasks.GetConsumingEnumerable()) {
+					TryExecuteTask(task);
+				}
+			}
+		}
+
+		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+		{
+			return false;
+		}
+
+		protected override IEnumerable<Task> GetScheduledTasks()
+		{
+			return tasks;
+		}
+	}
+
 	public class PersistedValue
 	{
 		public object DefaultValue;
@@ -117,7 +158,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//в приложении его обрабатывает Coroutine см Config/Initializers/Caliburn
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
 		public Env Env = new Env();
-		public TaskScheduler QueryScheduler = TestQueryScheduler ?? TaskScheduler.Current;
+		public TaskScheduler QueryScheduler = TestQueryScheduler ?? new QueueScheduler();
 		public static TaskScheduler TestQueryScheduler = null;
 		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
 		public int BackgrountQueryCount;
@@ -128,6 +169,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
+		/// <summary>
+		/// использовать только через RxQuery,
+		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
+		/// </summary>
+		private static IStatelessSession _backgroundSession;
 
 		public BaseScreen()
 		{
@@ -658,16 +704,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
-			if (StatelessSession == null)
-				return Observable.Empty<T>();
 			var task = new Task<T>(() => {
+				if (_backgroundSession == null)
+					_backgroundSession = Env.Factory.OpenStatelessSession();
 				Interlocked.Increment(ref BackgrountQueryCount);
 				try{
 					Drained.Reset();
-					if (StatelessSession == null)
+					if (_backgroundSession == null)
 						return default(T);
-					lock (StatelessSession) {
-						return @select(StatelessSession);
+					lock (_backgroundSession) {
+						return @select(_backgroundSession);
 					}
 				}
 				finally {
