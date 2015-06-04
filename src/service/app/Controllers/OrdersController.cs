@@ -173,7 +173,7 @@ where l.RequestId = :id;")
 				if (order == null)
 					continue;
 				var price = session.Get<PriceList>(order.PriceId);
-				log.Error += String.Format("Заказ {0} на сумму {1} на поставщика {2} бы отклонен по причине: {3}",
+				log.Error += String.Format("Заказ {0} на сумму {1} на поставщика {2} был отклонен по причине: {3}",
 					result.ClientOrderId,
 					order.Items.Sum(x => x.Count * x.Cost),
 					price != null ? price.Supplier.Name : "",
