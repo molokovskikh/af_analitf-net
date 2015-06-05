@@ -26,24 +26,34 @@ namespace AnalitF.Net.Client.Test.Tasks
 			types = types.Where(t => String.IsNullOrEmpty(pattern) || t.Name.ToLower().Contains(pattern)).OrderBy(t => t.Name);
 
 			foreach (var type in types) {
-				var desc = DescriptionHelper.GetDescription(type);
-				Console.Write(type.Name);
-				if (!String.IsNullOrEmpty(desc)) {
-					Console.Write(" - ");
-					Console.Write(desc);
-				}
-				Console.WriteLine();
+				WriteDesc(type.Name, type);
 			}
 
 			foreach (var method in GetMethods().OrderBy(m => m.Name)) {
-				var desc = DescriptionHelper.GetDescription(method);
-				Console.Write(method.Name);
-				if (!String.IsNullOrEmpty(desc)) {
-					Console.Write(" - ");
-					Console.Write(desc);
-				}
-				Console.WriteLine();
+				WriteDesc(method.Name, method);
 			}
+		}
+
+		private static void WriteDesc(string text, ICustomAttributeProvider method)
+		{
+			var desc = DescriptionHelper.GetDescription(method);
+			if (!String.IsNullOrEmpty(desc)) {
+				text += " - ";
+				text += desc;
+			}
+			Console.WriteLine(text);
+			//на подумать, получается все равно криво
+			//var rest = text.Length;
+			//var begin = 0;
+			//while (rest > 0) {
+			//	var length = Math.Min(Math.Min(Console.WindowWidth - 1, 64), rest);
+			//	var line = text.Substring(begin, length);
+			//	if (begin > 0)
+			//		Console.Write("    ");
+			//	Console.WriteLine(line);
+			//	begin += length;
+			//	rest -= length;
+			//}
 		}
 
 		private static MethodInfo[] GetMethods()

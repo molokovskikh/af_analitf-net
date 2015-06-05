@@ -630,8 +630,12 @@ namespace AnalitF.Net.Client.ViewModels
 				.GroupBy(l => l.Waybill.Address.Id)
 				.Select(g => new { addressId = g.Key, count = g.Count()})
 				.ToArray();
-			var addressId = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId).FirstOrDefault();
-			CurrentAddress = addresses.First(a => a.Id == addressId);
+			//мы можем найти отказ в накладной которая принадлежит адресу который больше не доступен клиенту
+			//по этому выбранные идентификаторы нужно сопоставить с существующими адресами
+			var address = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId)
+				.Select(x => addresses.FirstOrDefault(y => y.Id == x))
+				.FirstOrDefault(x => x != null);
+			CurrentAddress = address ?? CurrentAddress;
 
 			var model = new WaybillsViewModel();
 			model.RejectFilter.Value = RejectFilter.Changed;

@@ -132,20 +132,9 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		{
 			var unmatchedElements = new List<FrameworkElement>();
 			foreach (var element in namedElements) {
-				var cleanName = element.Name.Trim('_');
-				var parts = cleanName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-				var property = viewModelType.GetPropertyCaseInsensitive(parts[0]);
-				var interpretedViewModelType = viewModelType;
-
-				for (int i = 1; i < parts.Count && property != null; i++) {
-					interpretedViewModelType = property.PropertyType;
-					property = interpretedViewModelType.GetPropertyCaseInsensitive(parts[i]);
-					if (property == null && IsNotifyValue(interpretedViewModelType)) {
-						property = interpretedViewModelType.GetProperty("Value");
-						parts.Insert(i, "Value");
-					}
-				}
+				PropertyInfo property;
+				Type interpretedViewModelType;
+				var bindPath = Patch(viewModelType, element.Name, out property, out interpretedViewModelType);
 
 				if (property == null) {
 					unmatchedElements.Add(element);
@@ -162,11 +151,10 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 				var applied = convention.ApplyBinding(
 					interpretedViewModelType,
-					string.Join(".", parts),
+					bindPath,
 					property,
 					element,
-					convention
-					);
+					convention);
 
 				if (applied) {
 					Log.Info("Binding Convention Applied: Element {0}.", element.Name);
@@ -178,6 +166,25 @@ namespace AnalitF.Net.Client.Config.Caliburn
 			}
 
 			return unmatchedElements;
+		}
+
+		public static string Patch(Type viewModelType, string name, out PropertyInfo property, out Type interpretedViewModelType)
+		{
+			var cleanName = name.Trim('_');
+			var parts = cleanName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+			property = viewModelType.GetPropertyCaseInsensitive(parts[0]);
+			interpretedViewModelType = viewModelType;
+
+			for (int i = 1; i < parts.Count && property != null; i++) {
+				interpretedViewModelType = property.PropertyType;
+				property = interpretedViewModelType.GetPropertyCaseInsensitive(parts[i]);
+				if (property == null && IsNotifyValue(interpretedViewModelType)) {
+					property = interpretedViewModelType.GetProperty("Value");
+					parts.Insert(i, "Value");
+				}
+			}
+			return String.Join(".", parts);
 		}
 
 		public static bool IsArrayOfPrimitive(Type posibleArrayOrList)

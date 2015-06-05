@@ -91,16 +91,14 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					baseScreen.ResultsSink
 						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator(), new ActionExecutionContext {
 							View = view
-						}),
-							baseScreen.CloseCancellation);
+						}), baseScreen.CloseCancellation);
 				}
 				var baseShell = viewModel as BaseShell;
 				if (baseShell != null && !baseShell.ResultsSink.HasObservers) {
 					baseShell.ResultsSink
 						.CatchSubscribe(r => Coroutine.BeginExecute(new List<IResult> { r }.GetEnumerator(), new ActionExecutionContext {
 							View = view
-						}),
-							baseShell.CancelDisposable);
+						}), baseShell.CancelDisposable);
 				}
 			};
 

@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Threading;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Test.Integration.Views;
 using Caliburn.Micro;
-using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI;
-using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace AnalitF.Net.Test.Integration
 {
@@ -38,15 +30,22 @@ namespace AnalitF.Net.Test.Integration
 		[Test]
 		public void Bind_content_elements()
 		{
-			model.Text = "123";
-			var text = new TextBlock();
 			var item = new Run { Name = "Text" };
-			text.Inlines.Add(item);
+			var notify = new Run { Name = "NotifyItems_Count" };
+			model.Text = "123";
+			model.NotifyItems.Value = new List<string>();
+			var text = new TextBlock {
+				Inlines = {
+					item,
+					notify
+				}
+			};
 			view.Content = text;
 
 			Assert.That(view.Descendants().Count(), Is.GreaterThan(0));
 			ViewModelBinder.Bind(model, view, null);
 			Assert.That(item.Text, Is.EqualTo("123"));
+			Assert.IsNotNull(BindingOperations.GetBinding(notify, Run.TextProperty));
 		}
 
 		[Test]
@@ -293,6 +292,7 @@ namespace AnalitF.Net.Test.Integration
 		{
 			public ViewModel()
 			{
+				NotifyText = new NotifyValue<string>();
 				SelectedItems = new ReactiveCollection<string>();
 				CurrentItem = new NotifyValue<string>();
 				NotifyItems = new NotifyValue<List<string>>();
@@ -302,6 +302,8 @@ namespace AnalitF.Net.Test.Integration
 			public int ResetValue;
 
 			public string Text { get; set; }
+
+			public NotifyValue<string> NotifyText { get; set; }
 
 			public NotifyValue<string> Term { get; set; }
 

@@ -53,30 +53,21 @@ namespace AnalitF.Net.Client.Config.Caliburn
 				.ToList();
 
 			foreach (var element in elements) {
-				var cleanName = element.Name.Trim('_');
-				var parts = cleanName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-
-				var property = viewModelType.GetPropertyCaseInsensitive(parts[0]);
-				var interpretedViewModelType = viewModelType;
-
-				for(int i = 1; i < parts.Length && property != null; i++) {
-					interpretedViewModelType = property.PropertyType;
-					property = interpretedViewModelType.GetPropertyCaseInsensitive(parts[i]);
-				}
-
-				if(property == null) {
-					continue;
-				}
-
 				var convention = ConventionManager.GetElementConvention(element.GetType());
-				if(convention == null) {
+				if(convention == null)
 					continue;
-				}
-				Bind(convention, element, cleanName, property, viewModelType);
+
+				PropertyInfo property;
+				Type resultViewModelType;
+				var bindPath = NotifyValueSupport.Patch(viewModelType, element.Name, out property, out resultViewModelType);
+				if(property == null)
+					continue;
+
+				Bind(convention, element, bindPath, property, viewModelType);
 			}
 		}
 
-		private static bool Bind(ElementConvention convention, FrameworkContentElement element, string cleanName, PropertyInfo property, Type viewModelType)
+		private static bool Bind(ElementConvention convention, FrameworkContentElement element, string bindPath, PropertyInfo property, Type viewModelType)
 		{
 			var bindableProperty = convention.GetBindableProperty(element);
 
@@ -84,9 +75,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 				return false;
 			}
 
-			var path = cleanName.Replace('_', '.');
-
-			var binding = new Binding(path);
+			var binding = new Binding(bindPath);
 
 			ConventionManager.ApplyBindingMode(binding, property);
 			ConventionManager.ApplyValueConverter(binding, bindableProperty, property);
