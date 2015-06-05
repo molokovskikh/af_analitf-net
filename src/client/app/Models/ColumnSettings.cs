@@ -55,21 +55,11 @@ namespace AnalitF.Net.Client.Models
 			//мы не можем установить неопределенный индекс или больше максимально индекса
 			if (DisplayIndex >= 0 && DisplayIndex <= columns.Count - 1)
 				column.DisplayIndex = DisplayIndex;
-			if (grid.CanUserSortColumns && column.CanUserSort) {
-				if (SortDirection != null)
-					column.SortDirection = SortDirection;
-
-				if (column.SortDirection != null && !String.IsNullOrEmpty(column.SortMemberPath)) {
-					grid.Items.SortDescriptions.Clear();
-					grid.Items.SortDescriptions.Add(new SortDescription(column.SortMemberPath, column.SortDirection.Value));
-				}
-			}
 		}
 
 		public string Name { get; set; }
 		public Visibility Visible { get; set; }
 		public ListSortDirection? SortDirection;
-		public string SortMemberPath;
 
 		[JsonIgnore]
 		public bool IsVisible

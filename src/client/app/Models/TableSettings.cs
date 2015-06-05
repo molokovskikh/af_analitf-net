@@ -92,6 +92,23 @@ namespace AnalitF.Net.Client.Models
 			foreach (var column in settings)
 				column.Restore(dataGrid, dataGrid.Columns);
 
+			//восстанавливаем порядок сортировки
+			//нужно сбросить макер для всех колонок в ручную тк
+			//dataGrid.Items.SortDescriptions.Clear(); делает это только для колонок которые отсортированы с
+			//помищью SortDescriptions если сортировка по умолчанию делается при выборке а колонке просто назначается маркер
+			//сортировка не будет сброшена
+			var sorted = settings.FirstOrDefault(x => x.SortDirection != null);
+			if (sorted != null) {
+				var column = DataGridHelper.FindColumn(dataGrid, sorted.Name);
+				if (column != null) {
+					foreach (var gridColumn in dataGrid.Columns)
+						gridColumn.SortDirection = null;
+					column.SortDirection = sorted.SortDirection;
+					dataGrid.Items.SortDescriptions.Clear();
+					dataGrid.Items.SortDescriptions.Add(new SortDescription(column.SortMemberPath, column.SortDirection.Value));
+				}
+			}
+
 			//тк новые колонки не имеют сохраненных настроек
 			//они окажутся в конце таблицы
 			//назначаем им индексы из значений по умолчанию

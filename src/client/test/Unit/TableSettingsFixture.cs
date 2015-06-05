@@ -93,6 +93,50 @@ namespace AnalitF.Net.Test.Unit
 			Assert.AreEqual(ListSortDirection.Descending, grid.Columns[0].SortDirection);
 		}
 
+		[Test]
+		public void Reset_sort_direction_if_sort_direction_defined()
+		{
+			grid.Columns.Add(new DataGridTextColumn {
+				Header = "Наименование",
+				SortDirection = ListSortDirection.Descending,
+				SortMemberPath = "Name",
+			});
+			grid.Items.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Descending));
+			grid.Columns.Add(new DataGridTextColumn {
+				Header = "Срок годности",
+				SortMemberPath = "Exp",
+			});
+
+			grid.Items.SortDescriptions.Clear();
+			grid.Items.SortDescriptions.Add(new SortDescription("Exp", ListSortDirection.Descending));
+			grid.Columns[0].SortDirection = null;
+			grid.Columns[1].SortDirection = ListSortDirection.Descending;
+			settings.SaveView(content);
+
+			InitGrid();
+			grid.Columns.Add(new DataGridTextColumn {
+				Header = "Наименование",
+				SortDirection = ListSortDirection.Descending,
+				SortMemberPath = "Name"
+			});
+			grid.Items.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Descending));
+			grid.Columns.Add(new DataGridTextColumn {
+				Header = "Срок годности",
+				SortMemberPath = "Exp",
+			});
+			settings.RestoreView(content);
+
+			Assert.AreEqual(1, grid.Items.SortDescriptions.Count);
+			var sortDescription = grid.Items.SortDescriptions[0];
+			Assert.AreEqual("Exp", sortDescription.PropertyName);
+			Assert.AreEqual(ListSortDirection.Descending, sortDescription.Direction);
+			var column = grid.Columns[1];
+			Assert.AreEqual("Exp", column.SortMemberPath);
+			Assert.AreEqual(ListSortDirection.Descending, column.SortDirection);
+			column = grid.Columns[0];
+			Assert.IsNull(column.SortDirection);
+		}
+
 		private void InitGrid()
 		{
 			grid = new DataGrid();
