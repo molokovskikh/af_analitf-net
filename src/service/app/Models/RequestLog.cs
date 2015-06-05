@@ -177,14 +177,14 @@ namespace AnalitF.Net.Service.Models
 			ISessionFactory sessionFactory,
 			Action<ISession, Config.Config, RequestLog> cmd)
 		{
-			var principal = Thread.CurrentPrincipal;
+			var username = Thread.CurrentPrincipal.Identity.Name;
 			session.Save(this);
 			session.Transaction.Commit();
 			var jobId = Id;
 
 			var task = new Task(() => {
 				try {
-					Thread.CurrentPrincipal = principal;
+					ThreadContext.Properties["username"] = username;
 					using (var logSession = sessionFactory.OpenSession())
 					using (var logTransaction = logSession.BeginTransaction()) {
 						var job = logSession.Load<RequestLog>(jobId);
