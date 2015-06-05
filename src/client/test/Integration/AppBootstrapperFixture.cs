@@ -25,10 +25,15 @@ namespace AnalitF.Net.Test.Integration
 			app = CreateBootstrapper();
 			FileHelper.InitDir("test");
 			disposable.Add(Disposable.Create(() => {
+				var count = 0;
+				repeat:
+				count++;
 				try {
 					Directory.Delete("test", true);
 				}
 				catch(IOException e) {
+					if (e.HResult == 0x80070091 && count < 3)
+						goto repeat;
 					Console.WriteLine("HResult = " + e.HResult);
 					throw;
 				}

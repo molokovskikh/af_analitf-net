@@ -137,6 +137,7 @@ namespace AnalitF.Net.Client.Helpers
 						Binding = new Binding("BarCode"),
 						Visibility = Visibility.Collapsed
 					});
+				CalculateColumnWidth(grid, "0000000000000", "Штрихкод");
 			}
 
 			var col = FindColumn(grid, "Срок годн.");
