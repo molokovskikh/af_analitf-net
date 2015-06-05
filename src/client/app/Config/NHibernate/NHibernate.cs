@@ -12,20 +12,18 @@ using AnalitF.Net.Client.Models;
 using Common.MySql;
 using Common.Tools;
 using Devart.Data.MySql;
+using log4net;
 using NHibernate;
-using NHibernate.Cfg;
+using NHibernate.Cfg.MappingSchema;
 using NHibernate.Dialect;
 using NHibernate.Mapping.ByCode;
-using NHibernate.Proxy;
 using NHibernate.Type;
-using log4net;
-using NHibernate.Cfg.MappingSchema;
 using Cascade = NHibernate.Mapping.ByCode.Cascade;
 using Configuration = NHibernate.Cfg.Configuration;
 using Environment = NHibernate.Cfg.Environment;
 using Settings = AnalitF.Net.Client.Models.Settings;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
 	public class MEMORYSTATUSEX

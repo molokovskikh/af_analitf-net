@@ -1,7 +1,7 @@
 ﻿using System;
 using NHibernate.Type;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	//в базе всегда храниться время в utc, при загрузке данных
 	//преобразуем utc -> локальное

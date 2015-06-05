@@ -97,7 +97,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			if (IntegrationSetup.Factory != null)
 				return IntegrationSetup.Factory;
-			AppBootstrapper.NHibernate = new Config.Initializers.NHibernate();
+			AppBootstrapper.NHibernate = new Config.NHibernate.NHibernate();
 			AppBootstrapper.NHibernate.UseRelativePath = true;
 			AppBootstrapper.NHibernate.Init();
 			return AppBootstrapper.NHibernate.Factory;

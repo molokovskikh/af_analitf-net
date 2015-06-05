@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -8,6 +9,7 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
+	[Description("Создает накладную на сервере с забракованной позицией, для тестирования уведомления, подсветки и фильтра")]
 	public class RejectedWaybill : ServerFixture
 	{
 		public TestWaybill Doc;

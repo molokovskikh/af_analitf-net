@@ -47,8 +47,8 @@ namespace AnalitF.Net.Client
 
 		public ShellViewModel Shell;
 
-		public static Config.Initializers.Caliburn Caliburn;
-		public static Config.Initializers.NHibernate NHibernate;
+		public static Config.Caliburn.Caliburn Caliburn;
+		public static Config.NHibernate.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
 
 		public AppBootstrapper()
@@ -276,7 +276,7 @@ namespace AnalitF.Net.Client
 			//если сборки обединены то логика определения системы протоколирование не работает
 			//нужно вручную настроить ее
 			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
-			NHibernate = new Config.Initializers.NHibernate();
+			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
 			var sanityCheck = new SanityCheck();
 			sanityCheck.Config = Config;
@@ -290,7 +290,7 @@ namespace AnalitF.Net.Client
 			if (Caliburn != null)
 				return;
 
-			Caliburn = new Config.Initializers.Caliburn();
+			Caliburn = new Config.Caliburn.Caliburn();
 			Caliburn.Init(failfast);
 		}
 

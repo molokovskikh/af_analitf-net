@@ -118,7 +118,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Offers.Select(v => {
 					v = v ?? new List<Offer>();
 					if (IsFilterByCatalogName) {
-						return v.GroupBy(g => g.GroupName).Select(g => new object[] { new GroupHeader(g.Key) }.Concat(g)).SelectMany(o => o).ToList();
+						return v.GroupBy(g => g.GroupName)
+							.Select(g => new object[] { new GroupHeader(g.Key) }.Concat(g))
+							.SelectMany(o => o)
+							.ToList();
 					}
 					else {
 						return v.Cast<object>().ToList();

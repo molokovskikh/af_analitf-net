@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Inflector;
-using NHibernate.Mapping;
 using ReactiveUI;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.Caliburn
 {
 	public class Caliburn
 	{

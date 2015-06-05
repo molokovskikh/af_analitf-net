@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.RightsManagement;
-using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Config.NHibernate;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print

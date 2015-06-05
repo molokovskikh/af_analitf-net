@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.Serialization;
-using AnalitF.Net.Client.Config.Initializers;
+using AnalitF.Net.Client.Config.NHibernate;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Models

@@ -1,7 +1,7 @@
 using Inflector;
 using NHibernate.Cfg;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	public class PluralizeNamingStrategy : INamingStrategy
 	{

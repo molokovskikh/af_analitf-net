@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using NHibernate.Dialect.Schema;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	public class DevartMySqlTableMetadata : AbstractTableMetadata
 	{

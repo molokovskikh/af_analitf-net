@@ -9,7 +9,7 @@ using NHibernate.Proxy.DynamicProxy;
 using NHibernate.Type;
 using IInterceptor = NHibernate.Proxy.DynamicProxy.IInterceptor;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	public class ProxyFactoryFactory : DefaultProxyFactoryFactory, IProxyFactoryFactory
 	{

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Data;
-using Common.Tools;
-using NHibernate.Dialect.Schema;
 using NHibernate.Driver;
 using NHibernate.Engine;
 
-namespace AnalitF.Net.Client.Config.Initializers
+namespace AnalitF.Net.Client.Config.NHibernate
 {
 	public class DevartDriver : ReflectionBasedDriver
 	{

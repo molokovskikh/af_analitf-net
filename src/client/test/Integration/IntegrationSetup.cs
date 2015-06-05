@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Integration
 			global::Test.Support.Setup.SessionFactory = DataHelper.ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);
 
-			var nhibernate = new Client.Config.Initializers.NHibernate();
+			var nhibernate = new Client.Config.NHibernate.NHibernate();
 			AppBootstrapper.NHibernate = nhibernate;
 			AppBootstrapper.NHibernate.Init("client");
 			Factory = nhibernate.Factory;

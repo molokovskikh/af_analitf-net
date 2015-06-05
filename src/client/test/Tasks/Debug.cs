@@ -9,14 +9,14 @@ namespace AnalitF.Net.Client.Test.Tasks
 		[Description("Выводит маппинг nhibernate")]
 		public void Mapping()
 		{
-			var init = new Config.Initializers.NHibernate();
+			var init = new Config.NHibernate.NHibernate();
 			init.Init(debug: true);
 		}
 
 		[Description("Выводит схему данных")]
 		public void Schema()
 		{
-			var init = new Config.Initializers.NHibernate();
+			var init = new Config.NHibernate.NHibernate();
 			init.Init();
 			var export = new SchemaExport(init.Configuration);
 			export.Create(true, false);
