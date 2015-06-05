@@ -905,6 +905,8 @@ namespace AnalitF.Net.Test.Integration.Views
 				});
 			}
 			Input(view, "CatalogNames", Key.Enter);
+			Assert.That(viewModel.Catalogs.Value.Count, Is.GreaterThan(0),
+				"нет ни одной формы выпуска, для {0}", viewModel.CurrentCatalogName.Value);
 			if (viewModel.Catalogs.Value.Count > 1) {
 				if (catalog != null) {
 					dispatcher.Invoke(() => {
