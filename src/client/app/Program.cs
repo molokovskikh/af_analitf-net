@@ -92,8 +92,8 @@ namespace AnalitF.Net.Client
 
 				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				try {
-					log.DebugFormat("Версия операционной системы {0}", Environment.OSVersion);
-					log.DebugFormat("Версия среды выполнения {0}", Environment.Version);
+					log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
+					log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
 				}
 				catch (Exception e) {
 					log.Error("Не удалось получить информацию о версии среды или ос", e);
