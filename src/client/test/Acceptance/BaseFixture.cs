@@ -289,8 +289,16 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				dialog = Opened.Timeout(UpdateTimeout).First();
 			}
 
-			Assert.AreEqual(result, AutomationHelper.ToText(dialog));
-			ClickByName("Закрыть", dialog);
+			//может быть простое уведомление а может быть уведомление о новых документах
+			var text = AutomationHelper.ToText(dialog);
+			if (text == result) {
+				Assert.AreEqual(result, text);
+				ClickByName("Закрыть", dialog);
+			}
+			else {
+				Assert.That(result, Is.StringContaining(text));
+				ClickByName("TryClose", dialog);
+			}
 		}
 
 		protected AutomationElement WaitDialog(string name)
