@@ -91,8 +91,7 @@ namespace AnalitF.Net.Service.Test
 		public void Process_request()
 		{
 			var job = new RequestLog(user, new Version());
-			var task = job.StartJob(session, config, session.SessionFactory,
-				(jobSession, jobConfig, requestJob) => {});
+			var task = job.StartJob(session, config, (_, __, ___) => {});
 			task.Wait();
 
 			session.Refresh(job);
@@ -105,7 +104,7 @@ namespace AnalitF.Net.Service.Test
 		public void Log_broken_job()
 		{
 			var job = new RequestLog(user, new Version());
-			var task = job.StartJob(session, config, session.SessionFactory,
+			var task = job.StartJob(session, config,
 				(jobSession, jobConfig, requestJob) => {
 					throw new Exception("Тестовое исключение");
 				});

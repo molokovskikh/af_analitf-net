@@ -179,9 +179,9 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual Task StartJob(ISession session,
 			Config.Config config,
-			ISessionFactory sessionFactory,
 			Action<ISession, Config.Config, RequestLog> cmd)
 		{
+			var sessionFactory = session.SessionFactory;
 			var username = Thread.CurrentPrincipal.Identity.Name;
 			session.Save(this);
 			session.Transaction.Commit();

@@ -39,11 +39,10 @@ namespace AnalitF.Net.Service.Controllers
 			Log = LogManager.GetLogger(GetType());
 		}
 
-		protected RequestLog TryFindJob(bool reset, string type = null)
+		protected RequestLog TryFindJob(bool reset, string updateType)
 		{
 			var query = Session.Query<RequestLog>();
-			if (type != null)
-				query = query.Where(j => j.UpdateType == type);
+			query = query.Where(j => j.UpdateType == updateType);
 
 			var existsJob = query.OrderByDescending(j => j.CreatedOn)
 				.FirstOrDefault(j => j.User == CurrentUser);
@@ -60,7 +59,7 @@ namespace AnalitF.Net.Service.Controllers
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)
 		{
 			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
-			Task = existsJob.StartJob(Session, Config, Session.SessionFactory, cmd);
+			Task = existsJob.StartJob(Session, Config, cmd);
 			return existsJob.ToResult(Config);
 		}
 	}

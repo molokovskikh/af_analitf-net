@@ -13,11 +13,12 @@ namespace AnalitF.Net.Service.Controllers
 	{
 		public HttpResponseMessage Get(bool reset = false, string data = null, DateTime? lastSync = null)
 		{
-			var existsJob = TryFindJob(reset);
+			var updateType = data ?? GetType().Name;
+			var existsJob = TryFindJob(reset, updateType);
 
 			if (existsJob == null) {
-				existsJob  = new RequestLog(CurrentUser, Request, data, lastSync);
-				existsJob.StartJob(Session, Config, Session.SessionFactory,
+				existsJob  = new RequestLog(CurrentUser, Request, updateType, lastSync);
+				existsJob.StartJob(Session, Config,
 					(session, config, job) => {
 						using (var exporter = new Exporter(session, config, job)) {
 							if (data.Match("Waybills"))
@@ -84,21 +85,35 @@ where UserId = :userId;")
 		{
 			if (settings == null)
 				return;
-
+			var log = "";
 			foreach (var setting in settings) {
 				var userPrice = Session.Query<UserPrice>().FirstOrDefault(u => u.User == CurrentUser
 					&& u.Price.PriceCode == setting.PriceId
 					&& u.RegionId == setting.RegionId);
 
 				if (!setting.Active && userPrice != null) {
+					log += String.Format("{0} {1} ({2}) {3}- выкл;", userPrice.Price.PriceCode,
+						userPrice.Price.Supplier.Name,
+						userPrice.Price.PriceName,
+						userPrice.Price.Supplier.HomeRegion.Name);
 					Session.Delete(userPrice);
 				}
 				else if (setting.Active && userPrice == null) {
 					var price = Session.Get<PriceList>(setting.PriceId);
 					if (price == null)
 						return;
-					Session.Save(new UserPrice(CurrentUser, setting.RegionId, price));
+					userPrice = new UserPrice(CurrentUser, setting.RegionId, price);
+					log += String.Format("{0} {1} ({2}) {3}- вкл;", userPrice.Price.PriceCode,
+						userPrice.Price.Supplier.Name,
+						userPrice.Price.PriceName,
+						userPrice.Price.Supplier.HomeRegion.Name);
+					Session.Save(userPrice);
 				}
+			}
+			if (!String.IsNullOrEmpty(log)) {
+				Session.Save(new RequestLog(CurrentUser, Request, "Prices") {
+					Error = log
+				});
 			}
 		}
 	}
