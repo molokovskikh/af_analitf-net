@@ -46,6 +46,9 @@ namespace AnalitF.Net.Service.Models
 			if (request.Headers.TryGetValues("Client-Token", out values)) {
 				ClientToken = values.Implode();
 			}
+			if (request.Headers.TryGetValues("OS-Version", out values)) {
+				OSVersion = values.Implode();
+			}
 			if (String.IsNullOrEmpty(RemoteHost)) {
 				if (request.Properties.ContainsKey("MS_HttpContext"))
 					RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
@@ -86,6 +89,8 @@ namespace AnalitF.Net.Service.Models
 		public virtual long? Size { get; set; }
 
 		public virtual string ClientToken { get; set; }
+
+		public virtual string OSVersion { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

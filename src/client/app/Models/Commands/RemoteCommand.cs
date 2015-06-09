@@ -108,6 +108,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				ras.Open();
 				client.DefaultRequestHeaders.Add("Version", version.ToString());
 				client.DefaultRequestHeaders.Add("Client-Token", ClientToke);
+				try {
+					client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
+				}
+				catch (Exception) { }
 				return action(client);
 			}
 		}
