@@ -121,7 +121,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var url = Config.SyncUrl(syncData, lastSync);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
-				response = Wait(Config.WaitUrl(url).ToString(), request);
+				response = Wait(Config.WaitUrl(url, syncData).ToString(), request);
 			}
 
 			Reporter.Stage("Загрузка данных");

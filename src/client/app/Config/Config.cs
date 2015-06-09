@@ -179,10 +179,12 @@ namespace AnalitF.Net.Client.Config
 			}
 		}
 
-		public Uri WaitUrl(Uri url)
+		public Uri WaitUrl(Uri url, string key)
 		{
 			var builder = new UriBuilder(url) {
-				Query = ""
+				Query = BuildQueryString(new List<KeyValuePair<string, string>> {
+					new KeyValuePair<string, string>("data", key)
+				})
 			};
 			return builder.Uri;
 		}
@@ -197,6 +199,14 @@ namespace AnalitF.Net.Client.Config
 			if (lastSync != null)
 				queryString.Add(new KeyValuePair<string, string>("lastSync", lastSync.Value.ToString("O")));
 
+			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
+				Query = BuildQueryString(queryString)
+			};
+			return builder.Uri;
+		}
+
+		private static string BuildQueryString(List<KeyValuePair<string, string>> queryString)
+		{
 			var stringBuilder = new StringBuilder();
 			foreach (var keyValuePair in queryString) {
 				if (stringBuilder.Length > 0)
@@ -205,10 +215,7 @@ namespace AnalitF.Net.Client.Config
 				stringBuilder.Append('=');
 				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
 			}
-			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
-				Query = stringBuilder.ToString(),
-			};
-			return builder.Uri;
+			return stringBuilder.ToString();
 		}
 
 		public List<ResultDir> KnownDirs(Settings settings)

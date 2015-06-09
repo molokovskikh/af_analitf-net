@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			config.BaseUrl = new Uri("http://localhost:1056/");
 			var waybills = config.SyncUrl("waybills", null);
 			Assert.AreEqual("http://localhost:1056/Main?reset=true&data=waybills", waybills.ToString());
-			Assert.AreEqual("http://localhost:1056/Main", config.WaitUrl(waybills).ToString());
+			Assert.AreEqual("http://localhost:1056/Main?data=waybills", config.WaitUrl(waybills, "waybills").ToString());
 		}
 	}
 }
