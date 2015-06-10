@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Runtime.CompilerServices;
@@ -89,7 +90,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			t.SetApartmentState(ApartmentState.STA);
 			t.Start();
-			var stopped = t.Join(20.Second());
+			var timeSpan = 20.Second();
+			if (Debugger.IsAttached)
+				timeSpan = new TimeSpan(Int32.MaxValue);
+			var stopped = t.Join(timeSpan);
 			if (!stopped)
 				t.Abort();
 			if (exceptions.Count > 0 && !(exceptions.FirstOrDefault() is TaskCanceledException))

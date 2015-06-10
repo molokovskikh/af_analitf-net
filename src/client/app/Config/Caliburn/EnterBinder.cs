@@ -28,7 +28,17 @@ namespace AnalitF.Net.Client.Config.Caliburn
 					.Parents<DataGridCell>().FirstOrDefault());
 
 			keydown.Merge(mouseDoubleClick).Where(i => i != null)
-				.CatchSubscribe(_ => ViewModelHelper.InvokeDataContext(element, method.Name));
+				.CatchSubscribe(_ => {
+					var context = new ActionExecutionContext {
+						Method = method,
+						Source = element,
+						Message = new ActionMessage {
+							MethodName = method.Name,
+						}
+					};
+					ActionMessage.PrepareContext(context);
+					ActionMessage.InvokeAction(context);
+				});
 		}
 
 		public static void Bind(Type type, IEnumerable<FrameworkElement> elements, List<FrameworkElement> binded)

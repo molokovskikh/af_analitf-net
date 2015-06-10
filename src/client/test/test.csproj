@@ -200,6 +200,7 @@
     <Compile Include="Integration\ViewModes\WaybillsFixture.cs" />
     <Compile Include="Integration\Views\BaseScreenFixture.cs" />
     <Compile Include="Integration\Views\BatchFixture.cs" />
+    <Compile Include="Integration\Views\CatalogFixture.cs" />
     <Compile Include="Integration\Views\CatalogOfferFixture.cs" />
     <Compile Include="Integration\Views\CatalogSearchFixture.cs" />
     <Compile Include="Integration\Views\ControlsFixture.cs" />

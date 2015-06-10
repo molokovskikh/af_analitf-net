@@ -509,6 +509,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		~BaseScreen()
 		{
+			//если ошибка возникла в конструкторе, например outofmemory
+			if (Log == null)
+				return;
 			try {
 				Log.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
 				Dispose();

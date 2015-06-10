@@ -123,7 +123,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}
 
 			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
-				if (DebugContext.Count > 0)
+				if (DebugContext != null && DebugContext.Count > 0)
 					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
 			}
 			DataHelper.SaveFailData();
