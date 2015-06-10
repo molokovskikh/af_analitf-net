@@ -32,7 +32,6 @@ namespace AnalitF.Net.Test.Integration.Views
 				names.Focus();
 				Assert.IsTrue(names.IsKeyboardFocusWithin);
 				Assert.IsFalse(forms.IsKeyboardFocusWithin);
-				WpfHelper.TraceEvent(typeof(UIElement), UIElement.GotFocusEvent, trace: true);
 				var id = session.Query<CatalogName>()
 					.First(c => c.HaveOffers && session.Query<Catalog>().Count(x => x.HaveOffers && x.Name == c) > 1)
 					.Id;
