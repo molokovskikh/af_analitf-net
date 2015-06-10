@@ -87,10 +87,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			HttpResponseMessage response;
 			var updateType = "накопительное";
 			var user = Session.Query<User>().FirstOrDefault();
+			uint requestId = 0;
 			if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
 				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
-				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user), Token));
+				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user), Token), ref requestId);
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
@@ -99,7 +100,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 					IgnoreOrders = true,
 				};
-				response = Wait("History", Client.PostAsJsonAsync("History", data, Token));
+				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else if (SyncData.Match("OrderHistory")) {
 				SuccessMessage = "Загрузка истории заказов завершена успешно.";
@@ -108,7 +109,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
 					IgnoreWaybills = true,
 				};
-				response = Wait("History", Client.PostAsJsonAsync("History", data, Token));
+				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else {
 				var lastSync = user == null ? null : user.LastSync;
@@ -121,14 +122,24 @@ namespace AnalitF.Net.Client.Models.Commands
 				var url = Config.SyncUrl(syncData, lastSync);
 				SendPrices(Client, Token);
 				var request = Client.GetAsync(url, Token);
-				response = Wait(Config.WaitUrl(url, syncData).ToString(), request);
+				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
+			}
+			if (requestId > 0) {
+				sendLogsTask = sendLogsTask.ContinueWith(x => {
+					var t = x.Result;
+					if (t.IsSuccessStatusCode) {
+						var logId = t.Content.ReadAsAsync<uint>().Result;
+						return Client.PutAsync(String.Format("Logs?logId={0}&requestId={1}", logId, requestId), null, Token).Result;
+					}
+					return t;
+				});
 			}
 
 			Reporter.Stage("Загрузка данных");
 			log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
 			log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
-			var result = ProcessUpdate();
+			var result = ProcessUpdate(Config.ArchiveFile);
 			log.InfoFormat("Обновление завершено успешно");
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
@@ -173,14 +184,14 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		public UpdateResult ProcessUpdate()
+		public UpdateResult ProcessUpdate(string file)
 		{
 			if (Directory.Exists(Config.UpdateTmpDir))
 				Directory.Delete(Config.UpdateTmpDir, true);
 
 			Directory.CreateDirectory(Config.UpdateTmpDir);
 
-			using (var zip = new ZipFile(Config.ArchiveFile)) {
+			using (var zip = new ZipFile(file)) {
 				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
 			}
 
@@ -197,7 +208,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			List<System.Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(Config.ArchiveFile))
-				data = GetDbData(zip.Select(z => z.FileName));
+				data = GetDbData(zip.Select(z => z.FileName), Config.UpdateTmpDir);
 
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
@@ -531,17 +542,17 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			return result;
 		}
 
-		private List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files)
+		private static List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files, string tmpDir)
 		{
 			return files.Where(f => f.EndsWith("meta.txt"))
 				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
 					.Match(f.Replace(".meta.txt", "")))))
 				.Where(t => t.Item2 != null)
 				.Select(t => Tuple.Create(
-					Path.GetFullPath(Path.Combine(Config.UpdateTmpDir, t.Item2)),
-					File.ReadAllLines(Path.Combine(Config.UpdateTmpDir, t.Item1))))
+					Path.GetFullPath(Path.Combine(tmpDir, t.Item2)),
+					File.ReadAllLines(Path.Combine(tmpDir, t.Item1))))
 				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
-					.Select(x => Tuple.Create(Path.Combine(Config.UpdateTmpDir, x), new string[0])))
+					.Select(x => Tuple.Create(Path.Combine(tmpDir, x), new string[0])))
 				.ToList();
 		}
 
@@ -629,9 +640,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				XmlConfigurator.Configure();
 			}
 
-			var uri = new Uri(Config.BaseUrl, "Logs");
 			var stream = File.OpenRead(file);
-			var post = client.PostAsync(uri, new StreamContent(stream), token);
+			var post = client.PostAsync("Logs", new StreamContent(stream), token);
 			//TODO мы никогда не узнаем об ошибке
 			post.ContinueWith(t => {
 				stream.Dispose();

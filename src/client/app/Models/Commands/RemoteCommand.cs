@@ -155,12 +155,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			Token = token;
 		}
 
-		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task)
-		{
-			uint id = 0;
-			return Wait(statusCheckUrl, task, ref id);
-		}
-
 		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task, ref uint requestId)
 		{
 			HttpResponseMessage response = null;

@@ -112,7 +112,9 @@ where UserId = :userId;")
 			}
 			if (!String.IsNullOrEmpty(log)) {
 				Session.Save(new RequestLog(CurrentUser, Request, "Prices") {
-					Error = log
+					Error = log,
+					IsConfirmed = true,
+					IsCompleted = true,
 				});
 			}
 		}

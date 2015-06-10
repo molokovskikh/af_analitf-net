@@ -21,5 +21,6 @@ namespace AnalitF.Net.Service.Models
 		public virtual User User { get; set; }
 		public virtual Version Version { get; set; }
 		public virtual string Text { get; set; }
+		public virtual RequestLog Request { get; set; }
 	}
 }
