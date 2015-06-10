@@ -28,7 +28,7 @@ namespace test.release
 		//string prevSetupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
 
 		string setupBin = @"..\\..\\..\\..\\..\\output\\setup\\setup.exe";
-		string archiveDir = @"\\offdc\MMedia\packages";
+		string archiveDir = @"\\offdc\MMedia\AnalitF.Net";
 		string name = "АналитФАРМАЦИЯ";
 		string prevSetupBin = null;
 		string testUserName = "26307";
@@ -121,23 +121,16 @@ namespace test.release
 			if (!String.IsNullOrEmpty(prevSetupBin))
 				return prevSetupBin;
 			var prevName = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(setupBin)), "prev-setup.exe");
-			if (File.Exists(prevName))
-				File.Delete(prevName);
-			var pattern = new Regex(@"analitf\.net\.(\d+\.\d+\.\d+\.\d+)\.nupkg");
-			var pkg = Directory.GetFiles(archiveDir)
+			File.Delete(prevName);
+			var pattern = new Regex(@"analitf\.net.(\d+\.\d+\.\d+\.\d+)\.exe", RegexOptions.IgnoreCase);
+			var setup = Directory.GetFiles(archiveDir)
 				.Where(f => pattern.IsMatch(Path.GetFileName(f)))
 				.Select(f => Tuple.Create(f, Version.Parse(pattern.Match(Path.GetFileName(f)).Groups[1].Value)))
 				.Where(t => t.Item2 < version)
 				.OrderByDescending(f => f.Item2)
 				.Select(t => t.Item1)
 				.First();
-			using(var zipfile = new ZipFile(pkg)) {
-				var entry = zipfile.GetEntry("tools/analitf.net.setup.exe");
-				using (var output = File.Create(prevName))
-				using (var input = zipfile.GetInputStream(entry)) {
-					input.CopyTo(output);
-				}
-			}
+			File.Copy(setup, prevName);
 			return prevName;
 		}
 
