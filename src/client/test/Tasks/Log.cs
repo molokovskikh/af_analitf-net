@@ -29,7 +29,8 @@ namespace AnalitF.Net.Client.Test.Tasks
 				var s = "";
 				if (!string.IsNullOrEmpty(version))
 					s = "and version = ?version";
-				var records = connection.Read(String.Format("select * from Logs.ClientAppLogs where CreatedOn > ?begin {0}", s), new { begin, version });
+				var sql = String.Format("select * from Logs.ClientAppLogs where CreatedOn > ?begin and userId <> 758 {0} ", s);
+				var records = connection.Read(sql, new { begin, version });
 				foreach (var record in records) {
 					var log = record["Text"].ToString();
 					var reader = new StringReader(log);

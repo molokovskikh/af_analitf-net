@@ -41,7 +41,6 @@ namespace AnalitF.Net.Service.Models
 
 	public class Offer3 : Offer2
 	{
-		public ulong OfferId;
 		public uint CatalogId;
 		public string Producer;
 		public decimal? MaxProducerCost;
@@ -315,7 +314,8 @@ from Customers.Addresses a
 where a.Enabled = 1 and ua.UserId = ?userId";
 			Export(Result, sql, "Limits", truncate: true, parameters: new { userId = user.Id });
 
-			var contacts = session.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
+			var contacts = session
+				.CreateSQLQuery("select TechContact, TechOperatingMode from Farm.Regions where RegionCode = :id")
 				.SetParameter("id", user.Client.RegionCode)
 				.List<object[]>();
 			var rawPhone = contacts.Select(d => d[0]).Cast<string>().FirstOrDefault();
@@ -423,6 +423,11 @@ where
 				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
 			});
 
+			//для выборки данных используется кеш оптимизированных цен
+			//кеш нужен что бы все пользователи одного клиента имели одинаковый набор цен
+			//кеш перестраивается на основании даты прайс-листа, при выборке проверяется дата
+			//если кеш актуален выбирается цена из кеша и позиция отмечается как неоптимизируемая
+			//если кеш неактуален то производится оптимизация по завершении которой цена сохраняется см UpdateCostCache
 			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
 			sql = @"select
 	core.Id as OfferId,
@@ -458,11 +463,11 @@ where
 	core.VitallyImportant as VitallyImportant,
 	s.Synonym as ProductSynonym,
 	sfc.Synonym as ProducerSynonym,
-	ct.Cost,
+	if(k.Id is null or k.Date < at.PriceDate, ct.Cost, ifnull(ca.Cost, ct.Cost)) as Cost,
 
 	at.FirmCode as SupplierId,
 	core.MaxBoundCost,
-	core.OptimizationSkip,
+	if(k.Id is null or k.Date < at.PriceDate, core.OptimizationSkip, 1) as OptimizationSkip,
 	core.Exp
 ";
 			sql += offersQueryParts.Select + "\r\n";
@@ -471,6 +476,8 @@ left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
+left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.RegionCode and k.ClientId = ?clientCode
+	left join farm.CachedCosts ca on ca.CoreId = core.Id and ca.KeyId = k.Id
 ");
 			var offers = new List<Offer3>();
 			var cmd = new MySqlCommand(sql, (MySqlConnection)session.Connection);
@@ -528,6 +535,7 @@ left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCo
 			optimizer.PatchFresh(prices);
 			session.Flush();
 			var logs = optimizer.Optimize(offers);
+			UpdateCostCache(session, prices, logs, optimizer.Rules);
 			CostOptimizer.SaveLogs((MySqlConnection)session.Connection, logs, user);
 			var freshPrices = prices.Where(p => p.Fresh).Select(p => p.Id.Price.PriceCode).OrderBy(i => i).ToArray();
 			IEnumerable<Offer3> toExport = offers;
@@ -890,6 +898,55 @@ where PublicationDate < curdate() + interval 1 day
 			}
 			catch(Exception e) {
 				log.Error("Не удалось выбрать дополнительные sql команды", e);
+			}
+		}
+
+		private void UpdateCostCache(ISession session,
+			IEnumerable<ActivePrice> prices,
+			IEnumerable<CostOptimizationLog> logs,
+			IEnumerable<CostOptimizationRule> rules)
+		{
+			var keys = session.Query<CachedCostKey>().Where(k => k.Client == user.Client).ToList();
+			var optimizedSuppliers = rules.Select(r => r.Supplier.Id);
+			var insertKeys = prices.Where(p => optimizedSuppliers.Contains(p.Id.Price.Supplier.Id)
+					&& !keys.Any(k => k.Price.PriceCode == p.Id.Price.PriceCode && k.RegionId == p.Id.RegionCode));
+			var deleteKeys = keys.Where(p => !optimizedSuppliers.Contains(p.Price.Supplier.Id)).ToList();
+			keys = keys.Except(deleteKeys).ToList();
+			foreach (var activePrice in insertKeys) {
+				keys.Add(new CachedCostKey {
+					Client = user.Client,
+					Price = activePrice.Id.Price,
+					RegionId = activePrice.Id.RegionCode,
+					User = user
+				});
+			}
+
+			session.DeleteEach(deleteKeys);
+			session.SaveEach(keys);
+			foreach (var key in keys) {
+				var price = prices.First(p => p.Id.Price.PriceCode == key.Price.PriceCode && p.Id.RegionCode == key.RegionId);
+				if (key.Date < price.PriceDate) {
+					key.Date = price.PriceDate;
+					session.CreateSQLQuery("delete from Farm.CachedCosts where KeyId = :id")
+						.SetParameter("id", key.Id)
+						.ExecuteUpdate();
+				}
+				var sql = new StringBuilder();
+				var pages = logs.Where(l => l.PriceId == key.Price.PriceCode && l.RegionId == key.RegionId).Page(500);
+				foreach (var page in pages) {
+					foreach (var log in page) {
+						if (sql.Length > 0)
+							sql.Append(", ");
+						sql.AppendFormat("({0}, {1}, {2})", key.Id, log.OfferId, log.ResultCost.Value.ToString(CultureInfo.InvariantCulture));
+					}
+					if (sql.Length > 0) {
+						sql.Insert(0, "insert into Farm.CachedCosts (KeyId, CoreId, Cost) values");
+						var cmd = session.Connection.CreateCommand();
+						cmd.CommandText = sql.ToString();
+						cmd.ExecuteNonQuery();
+						sql.Clear();
+					}
+				}
 			}
 		}
 

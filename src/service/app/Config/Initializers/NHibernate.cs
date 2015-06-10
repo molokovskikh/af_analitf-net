@@ -20,6 +20,8 @@ namespace AnalitF.Net.Service.Config.Initializers
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(Assembly.Load("Common.Models")));
 			Configuration.AddInputStream(HbmSerializer.Default.Serialize(typeof(SmartOrderRule).Assembly));
 
+			Mapper.Class<CachedCostKey>(m => m.Schema("Farm"));
+
 			Mapper.Class<AnalitfNetData>(m => {
 				m.Schema("Customers");
 				m.Id(p => p.Id, c => {

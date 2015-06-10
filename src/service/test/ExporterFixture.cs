@@ -306,6 +306,48 @@ where userId = :userId and FirmCode = :supplierId")
 			Assert.AreEqual(1, Convert.ToUInt32(priceData[17]));
 		}
 
+		[Test(Description = "Оптимизация цен должна производится только после обновления поставщиком прайс-листа, в инфом случае данные нужно цешировать")]
+		public void Optimize_cost_only_once()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			var products = TestProduct.RandomProducts(session).Take(2).ToArray();
+			supplier.CreateSampleCore(session, new [] { products[0] });
+			var supplier2 = TestSupplier.CreateNaked(session);
+			supplier2.CreateSampleCore(session, new [] { products[1] });
+			var rule = new CostOptimizationRule(session.Load<Supplier>(supplier.Id), RuleType.MaxCost) {
+				Diapasons = { new CostOptimizationDiapason(0, decimal.MaxValue, 20) },
+				Clients = { session.Load<Client>(client.Id) },
+				Concurrents = { session.Load<Supplier>(supplier2.Id) }
+			};
+			session.Save(rule);
+			client.Users[0].CleanPrices(session, supplier, supplier2);
+			client.MaintainIntersection(session);
+			session.Flush();
+			exporter.ExportAll();
+			controller.Delete();
+			var id = supplier.Prices[0].Core[0].Id;
+			var offers = ParseData("offers").ToArray();
+			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
+			Assert.AreEqual(120, Convert.ToDecimal(offer[31], CultureInfo.InvariantCulture));
+
+			//симулируем обновление прайс-листа
+			supplier2.CreateSampleCore(session, new [] { products[0] }, new [] { supplier.Prices[0].Core[0].Producer });
+			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
+set ForceReplication = 1
+where userId = :userId and FirmCode = :supplierId")
+				.SetParameter("supplierId", supplier2.Id)
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
+			session.Flush();
+			session.Clear();
+
+			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
+			exporter.ExportAll();
+			offers = ParseData("offers").ToArray();
+			offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
+			Assert.AreEqual(120, Convert.ToDecimal(offer[31], CultureInfo.InvariantCulture));
+		}
+
 		private IEnumerable<string[]> ParseData(string name)
 		{
 			return exporter.Result

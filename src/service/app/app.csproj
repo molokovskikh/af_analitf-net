@@ -104,6 +104,7 @@
     <Compile Include="Models\AcceptOrderLog.cs" />
     <Compile Include="Models\AnalitfNetData.cs" />
     <Compile Include="Models\Attachment.cs" />
+    <Compile Include="Models\CachedCostKey.cs" />
     <Compile Include="Models\ClientAppLog.cs" />
     <Compile Include="Models\ClientSettings.cs" />
     <Compile Include="Models\Contract.cs" />
