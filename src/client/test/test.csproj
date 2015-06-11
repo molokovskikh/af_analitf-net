@@ -56,6 +56,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\DotRas.dll</HintPath>
     </Reference>
+    <Reference Include="Humanizer">
+      <HintPath>..\..\..\packages\Humanizer.1.36.0\lib\portable-win+net40+sl50+wp8+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Humanizer.dll</HintPath>
+    </Reference>
     <Reference Include="Inflector">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Inflector.1.0.0.0\lib\net45\Inflector.dll</HintPath>
