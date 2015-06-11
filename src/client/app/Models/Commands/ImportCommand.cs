@@ -64,7 +64,7 @@ set Sum = (select sum(round(l.Cost * l.Count, 2)) from SentOrderLines l where l.
 where Sum = 0;")
 					.ExecuteUpdate();
 			}
-			if (IsImported<Waybill>()) {
+			if (Session.Query<LoadedDocument>().Any()) {
 				Session.CreateSQLQuery(@"
 update Waybills set IsNew = 0;
 update Waybills w
