@@ -108,6 +108,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				ras.Open();
 				client.DefaultRequestHeaders.Add("Version", version.ToString());
 				client.DefaultRequestHeaders.Add("Client-Token", ClientToke);
+				//признак по которому запросы можно объединить, нужно что бы в интерфейсе связать лог и запрос
+				client.DefaultRequestHeaders.Add("Request-Token", Guid.NewGuid().ToString());
 				try {
 					client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
 				}

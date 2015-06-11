@@ -124,16 +124,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				var request = Client.GetAsync(url, Token);
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
-			if (requestId > 0) {
-				sendLogsTask = sendLogsTask.ContinueWith(x => {
-					var t = x.Result;
-					if (t.IsSuccessStatusCode) {
-						var logId = t.Content.ReadAsAsync<uint>().Result;
-						return Client.PutAsync(String.Format("Logs?logId={0}&requestId={1}", logId, requestId), null, Token).Result;
-					}
-					return t;
-				});
-			}
 
 			Reporter.Stage("Загрузка данных");
 			log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);

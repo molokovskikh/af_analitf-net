@@ -53,6 +53,9 @@ namespace AnalitF.Net.Service.Models
 				if (request.Properties.ContainsKey("MS_HttpContext"))
 					RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 			}
+			if (request.Headers.TryGetValues("Request-Token", out values)) {
+					RequestToken = values.Implode();
+				}
 		}
 
 		public virtual uint Id { get; set; }
@@ -91,6 +94,8 @@ namespace AnalitF.Net.Service.Models
 		public virtual string ClientToken { get; set; }
 
 		public virtual string OSVersion { get; set; }
+
+		public virtual string RequestToken { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

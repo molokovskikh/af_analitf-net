@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using AnalitF.Net.Service.Models;
 using Common.Models;
+using Common.Tools;
 using Ionic.Zip;
 using log4net;
 using NHibernate;
@@ -20,11 +21,9 @@ namespace AnalitF.Net.Service.Controllers
 		public ISession Session { get; set; }
 		public User CurrentUser { get; set; }
 
-		public uint Post(HttpRequestMessage request)
+		public void Post(HttpRequestMessage request)
 		{
 			var requestStream = request.Content.ReadAsStreamAsync().Result;
-
-			var ids = new List<uint>();
 			using(var zip = ZipFile.Read(requestStream)) {
 				foreach (var entry in zip) {
 					var memory = new MemoryStream();
@@ -32,23 +31,17 @@ namespace AnalitF.Net.Service.Controllers
 					memory.Position = 0;
 					var log = new ClientAppLog(CurrentUser, new StreamReader(memory).ReadToEnd());
 					log.Version = RequestLog.GetVersion(Request);
+					IEnumerable<string> values;
+					if (request.Headers.TryGetValues("Request-Token", out values)) {
+						log.RequestToken = values.Implode();
+					}
+
 					if (String.IsNullOrWhiteSpace(log.Text))
 						continue;
 
 					Session.Save(log);
-					ids.Add(log.Id);
 				}
 			}
-			return ids.FirstOrDefault();
-		}
-
-		public void Put(uint logId, uint requestId)
-		{
-			var log = Session.Query<ClientAppLog>().FirstOrDefault(x => x.User == CurrentUser && x.Id == logId);
-			var request = Session.Query<RequestLog>().First(x => x.User == CurrentUser && x.Id == requestId);
-			if (log == null || request == null)
-				return;
-			log.Request = request;
 		}
 	}
 }
