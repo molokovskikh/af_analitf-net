@@ -32,10 +32,10 @@ namespace AnalitF.Net.Test.Integration
 					Directory.Delete("test", true);
 				}
 				catch(IOException e) {
+					Console.WriteLine("HResult = " + ((uint)e.HResult).ToString("x8"));
 					//System.IO.IOException : Папка не пуста
 					if (e.HResult == 0x80070091 && count > 3)
 						goto repeat;
-					Console.WriteLine("HResult = " + e.HResult);
 					throw;
 				}
 			}));
