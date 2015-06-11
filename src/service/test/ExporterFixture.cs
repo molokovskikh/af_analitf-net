@@ -35,10 +35,15 @@ namespace AnalitF.Net.Service.Test
 		[SetUp]
 		public void Setup()
 		{
+			config = FixtureSetup.Config;
 			client = TestClient.CreateNaked(session);
 			session.Save(client);
 
-			config = FixtureSetup.Config;
+			if (config.RegulatorRegistryPriceId == 0) {
+				var supplier = TestSupplier.CreateNaked(session);
+				supplier.CreateSampleCore(session);
+				config.RegulatorRegistryPriceId = supplier.Prices[0].Id;
+			}
 			user = session.Load<User>(client.Users[0].Id);
 			FileHelper.InitDir("data", "update");
 			Directory.CreateDirectory(config.LocalExportPath);
@@ -56,7 +61,8 @@ namespace AnalitF.Net.Service.Test
 		[TearDown]
 		public void TearDown()
 		{
-			exporter.Dispose();
+			if (exporter != null)
+				exporter.Dispose();
 		}
 
 		[Test]
@@ -191,10 +197,12 @@ namespace AnalitF.Net.Service.Test
 			InitAd();
 			var result = ReadResult();
 			var zeros = new [] {
-				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt"
+				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt"
 			};
 			foreach (var zero in zeros) {
-				Assert.That(result.First(r => r.FileName.Match(zero)).UncompressedSize, Is.GreaterThan(0),
+				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));
+				Assert.IsNotNull(entry, "Не удалось найти {0}", zero);
+				Assert.That(entry.UncompressedSize, Is.GreaterThan(0),
 					"пользователь {0} файл {1}", user.Id, zero);
 			}
 
@@ -209,8 +217,10 @@ namespace AnalitF.Net.Service.Test
 			exporter.AdsPath = "ads";
 			result = ReadResult();
 			foreach (var zero in zeros) {
-				Assert.AreEqual(0, result.First(r => r.FileName.Match(zero)).UncompressedSize,
-					"пользователь {0} файл {1}", user.Id, zero);
+				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));
+				//если объект не нашли значит мы не экспортируем его и все как и должно быть
+				if (entry != null)
+					Assert.AreEqual(0, entry.UncompressedSize, "пользователь {0} файл {1}", user.Id, zero);
 			}
 			resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.Not.StringContaining("MaxProducerCosts"));

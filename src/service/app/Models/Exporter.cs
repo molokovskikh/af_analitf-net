@@ -811,7 +811,17 @@ where p.UpdateTime > ?lastSync";
 				Export(Result, sql, "producers", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			sql = @"
+			var lastFormalization = session.CreateSQLQuery(@"
+select if(LastFormalization > PriceDate, LastFormalization, PriceDate)
+from usersettings.priceitems i
+	join Usersettings.PricesCosts pc on pc.PriceItemId = i.Id
+		join Usersettings.PricesData pd on pd.PriceCode = pc.PriceCode
+where pd.PriceCode = :priceId;")
+				.SetParameter("priceId", Config.RegulatorRegistryPriceId)
+				.List<DateTime?>()
+				.FirstOrDefault();
+			if (cumulative || data.LastUpdateAt < lastFormalization) {
+				sql = @"
 select c.Id,
 	c.Code as DrugID,
 	c.Note as InnR,
@@ -826,7 +836,9 @@ select c.Id,
 from Farm.Core0 c
 	join Farm.SynonymFirmCr s on s.SynonymFirmCrCode = c.SynonymFirmCrCode
 where c.PriceCode = ?priceId";
-			Export(Result, sql, "RegulatorRegistry", truncate: true, parameters: new { priceId = Config.RegulatorRegistryPriceId });
+				Export(Result, sql, "RegulatorRegistry", truncate: true,
+					parameters: new { priceId = Config.RegulatorRegistryPriceId });
+			}
 
 			IList<object[]> newses = new List<object[]>();
 			if (cumulative) {
