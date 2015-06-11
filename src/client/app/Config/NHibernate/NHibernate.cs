@@ -92,6 +92,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<Reject>(w => w.Series);
 			Index<Offer>(o => o.ProductId);
 			Index<Offer>(o => o.CatalogId);
+			//индекс для восстановления заявок
+			Index<Offer>(o => o.ProductSynonymId);
 			Index<SentOrder>(o => o.SentOn);
 			Index<SentOrder>(o => o.ServerId);
 			Index<MinCost>(r => r.Diff);

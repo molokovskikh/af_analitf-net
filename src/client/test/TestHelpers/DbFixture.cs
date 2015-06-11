@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected FileCleaner cleaner;
 
 		private FixtureHelper fixtureHelper;
+		private IStatelessSession stateless;
 
 		[SetUp]
 		public void DbSetup()
@@ -44,6 +45,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			session = IntegrationSetup.Factory.OpenSession();
 			disposable.Add(session);
 			session.Transaction.Begin();
+			stateless = IntegrationSetup.Factory.OpenStatelessSession();
+			disposable.Add(stateless);
 
 			config = IntegrationSetup.clientConfig;
 			user = session.Query<User>().FirstOrDefault();
@@ -80,6 +83,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			cmd.Config = config;
 			cmd.Token = new CancellationTokenSource().Token;
 			cmd.Session = session;
+			cmd.StatelessSession = stateless;
 			return cmd;
 		}
 

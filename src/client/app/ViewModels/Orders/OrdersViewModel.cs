@@ -485,8 +485,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Session.Flush();
 			var task = new Task(() => {
 				using(var session = Session.SessionFactory.OpenSession())
+				using(var stateless = Session.SessionFactory.OpenStatelessSession())
 				using(var transaction = session.BeginTransaction()) {
 					command.Session = session;
+					command.StatelessSession = stateless;
+					command.Config = Shell.Config;
 					command.Execute();
 					UpdateOnActivate = session.IsDirty();
 					transaction.Commit();

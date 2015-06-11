@@ -63,7 +63,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(order.Sum, Is.GreaterThan(0));
 			Assert.That(order.LinesCount, Is.GreaterThan(0));
 			Assert.AreEqual(order.LinesCount, order.Lines.Count);
-			Assert.IsFalse(order.Frozen);
+			Assert.IsFalse(order.Frozen, "Заказ заморожен {0}", order.SendError + order.Lines.Implode(l => l.SendError));
 			Assert.IsNotNull(order.Address);
 			Assert.IsNotNull(order.Price);
 		}

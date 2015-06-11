@@ -110,11 +110,18 @@ namespace AnalitF.Net.Client.Models.Commands
 				return null;
 			}
 
+			var ids = sourceOrder.Lines.Select(l => l.ProductSynonymId).ToArray();
+			var orderOffers = new Offer[0];
+			if (ids.Length > 0)
+				orderOffers = Offer.Orderable(StatelessSession.Query<Offer>())
+					.Where(o => ids.Contains(o.ProductSynonymId) && o.Price == sourceOrder.Price)
+					.Fetch(o => o.Price)
+					.ToArray();
 			foreach (var line in sourceOrder.Lines.ToArray()) {
-				var offers = Offer.Orderable(session.Query<Offer>())
+				var offers = orderOffers
 					.Where(o => o.ProductSynonymId == line.ProductSynonymId
 						&& o.ProducerSynonymId == line.ProducerSynonymId
-						&& o.Price == sourceOrder.Price
+						&& o.Price.Id == sourceOrder.Price.Id
 						&& o.Code == line.Code
 						&& o.RequestRatio == line.RequestRatio
 						&& o.MinOrderCount == line.MinOrderCount

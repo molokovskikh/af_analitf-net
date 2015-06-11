@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Reactive.Linq.Observαble;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,20 +11,14 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.Views.Dialogs;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
-using log4net.Appender;
-using log4net.Repository.Hierarchy;
+using log4net;
+using log4net.Config;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
-using log4net.Config;
-using NPOI.SS.Formula.Functions;
-using LogManager = log4net.LogManager;
-using PostUpdate = AnalitF.Net.Client.ViewModels.Dialogs.PostUpdate;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -196,7 +187,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Import()
 		{
-			List<System.Tuple<string, string[]>> data;
+			List<Tuple<string, string[]>> data;
 			using (var zip = new ZipFile(Config.ArchiveFile))
 				data = GetDbData(zip.Select(z => z.FileName), Config.UpdateTmpDir);
 
@@ -276,7 +267,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Directory.Delete(Config.UpdateTmpDir, true);
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
-			WaitAndLog(Confirm(), "Подтверждение обновления");
+			WaitAndLog(Client.DeleteAsync("Main"), "Подтверждение обновления");
 		}
 
 		private bool CalculateAwaited()
@@ -532,7 +523,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			return result;
 		}
 
-		private static List<System.Tuple<string, string[]>> GetDbData(IEnumerable<string> files, string tmpDir)
+		private static List<Tuple<string, string[]>> GetDbData(IEnumerable<string> files, string tmpDir)
 		{
 			return files.Where(f => f.EndsWith("meta.txt"))
 				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
@@ -569,11 +560,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			if (clientPrices.Length == 0)
 				return;
 
-			var response = client.PostAsync(new Uri(Config.BaseUrl, "Main").ToString(),
-				new SyncRequest(clientPrices),
-				Formatter,
-				token)
-				.Result;
+			var response = client.PostAsync("Main", new SyncRequest(clientPrices), Formatter, token).Result;
 			CheckResult(response);
 		}
 
@@ -590,11 +577,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			catch(AggregateException e) {
 				log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
 			}
-		}
-
-		public Task<HttpResponseMessage> Confirm()
-		{
-			return Client.DeleteAsync(new Uri(Config.BaseUrl, "Main"));
 		}
 
 		public Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
