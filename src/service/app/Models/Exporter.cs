@@ -535,7 +535,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 			optimizer.PatchFresh(prices);
 			session.Flush();
 			var logs = optimizer.Optimize(offers);
-			UpdateCostCache(session, prices, logs, optimizer.Rules);
+			optimizer.UpdateCostCache(session, prices, logs);
 			CostOptimizer.SaveLogs((MySqlConnection)session.Connection, logs, user);
 			var freshPrices = prices.Where(p => p.Fresh).Select(p => p.Id.Price.PriceCode).OrderBy(i => i).ToArray();
 			IEnumerable<Offer3> toExport = offers;
@@ -910,55 +910,6 @@ where PublicationDate < curdate() + interval 1 day
 			}
 			catch(Exception e) {
 				log.Error("Не удалось выбрать дополнительные sql команды", e);
-			}
-		}
-
-		private void UpdateCostCache(ISession session,
-			IEnumerable<ActivePrice> prices,
-			IEnumerable<CostOptimizationLog> logs,
-			IEnumerable<CostOptimizationRule> rules)
-		{
-			var keys = session.Query<CachedCostKey>().Where(k => k.Client == user.Client).ToList();
-			var optimizedSuppliers = rules.Select(r => r.Supplier.Id);
-			var insertKeys = prices.Where(p => optimizedSuppliers.Contains(p.Id.Price.Supplier.Id)
-					&& !keys.Any(k => k.Price.PriceCode == p.Id.Price.PriceCode && k.RegionId == p.Id.RegionCode));
-			var deleteKeys = keys.Where(p => !optimizedSuppliers.Contains(p.Price.Supplier.Id)).ToList();
-			keys = keys.Except(deleteKeys).ToList();
-			foreach (var activePrice in insertKeys) {
-				keys.Add(new CachedCostKey {
-					Client = user.Client,
-					Price = activePrice.Id.Price,
-					RegionId = activePrice.Id.RegionCode,
-					User = user
-				});
-			}
-
-			session.DeleteEach(deleteKeys);
-			session.SaveEach(keys);
-			foreach (var key in keys) {
-				var price = prices.First(p => p.Id.Price.PriceCode == key.Price.PriceCode && p.Id.RegionCode == key.RegionId);
-				if (key.Date < price.PriceDate) {
-					key.Date = price.PriceDate;
-					session.CreateSQLQuery("delete from Farm.CachedCosts where KeyId = :id")
-						.SetParameter("id", key.Id)
-						.ExecuteUpdate();
-				}
-				var sql = new StringBuilder();
-				var pages = logs.Where(l => l.PriceId == key.Price.PriceCode && l.RegionId == key.RegionId).Page(500);
-				foreach (var page in pages) {
-					foreach (var log in page) {
-						if (sql.Length > 0)
-							sql.Append(", ");
-						sql.AppendFormat("({0}, {1}, {2})", key.Id, log.OfferId, log.ResultCost.Value.ToString(CultureInfo.InvariantCulture));
-					}
-					if (sql.Length > 0) {
-						sql.Insert(0, "insert into Farm.CachedCosts (KeyId, CoreId, Cost) values");
-						var cmd = session.Connection.CreateCommand();
-						cmd.CommandText = sql.ToString();
-						cmd.ExecuteNonQuery();
-						sql.Clear();
-					}
-				}
 			}
 		}
 

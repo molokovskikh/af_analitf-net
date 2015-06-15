@@ -317,7 +317,7 @@ where userId = :userId and FirmCode = :supplierId")
 		}
 
 		[Test(Description = "Оптимизация цен должна производится только после обновления поставщиком прайс-листа, в инфом случае данные нужно цешировать")]
-		public void Optimize_cost_only_once()
+		public void Cache_optimized_costs()
 		{
 			var supplier = TestSupplier.CreateNaked(session);
 			var products = TestProduct.RandomProducts(session).Take(2).ToArray();
