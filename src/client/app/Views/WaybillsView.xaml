@@ -22,7 +22,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:ToolBar2>
+		<WrapPanel Orientation="Horizontal" Margin="4" FocusManager.IsFocusScope="True">
 			<StackPanel Orientation="Vertical">
 				<Label>Тип</Label>
 				<ComboBox Style="{StaticResource Select}" x:Name="TypeFilter" />
@@ -37,12 +37,14 @@
 					<RadioButton GroupName="Source" Name="IsFilterByWriteTime">по дате загрузки</RadioButton>
 				</StackPanel>
 			</GroupBox>
-			<StackPanel Orientation="Horizontal" Style="{StaticResource FilterElement}">
-				<Label VerticalAlignment="Center" Padding="5,0,5,0">за период с</Label>
-				<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
-				<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
-				<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
-			</StackPanel>
+			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+				</StackPanel>
+			</GroupBox>
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 2, 4, 0" x:Name="Suppliers"
 				ButtonContent="Поставщики"
 				Member="Item.FullName" />
@@ -53,7 +55,7 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
 			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">Отчет для Росздравнадзора</Button>
-		</c:ToolBar2>
+		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
