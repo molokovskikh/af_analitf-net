@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Прайс-листы фирм";
 			CurrentPrice = new NotifyValue<Price>();
 			ShowLeaders = new NotifyValue<bool>();
+			Prices = new List<Price>();
 			QuickSearch = new QuickSearch<Price>(UiScheduler,
 				t => Prices.FirstOrDefault(p => p.Name.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentPrice);
@@ -64,6 +65,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			if (Session == null)
+				return;
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {
 				Session.Evict(Address);
@@ -89,7 +92,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void EnterPrice()
 		{
-			if (CurrentPrice == null)
+			if (CurrentPrice.Value == null || !CurrentPrice.Value.Active)
 				return;
 
 			Shell.Navigate(new PriceOfferViewModel(CurrentPrice.Value.Id, ShowLeaders));

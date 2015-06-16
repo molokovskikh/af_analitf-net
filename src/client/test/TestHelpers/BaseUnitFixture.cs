@@ -76,6 +76,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			screen.Parent = shell;
 			screen.Addresses = addresses;
 			ScreenExtensions.TryActivate(screen);
+			shell.ActiveItem = screen;
 		}
 	}
 }
