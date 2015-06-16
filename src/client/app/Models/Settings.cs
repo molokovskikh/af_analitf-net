@@ -83,6 +83,9 @@ namespace AnalitF.Net.Client.Models
 		private ILog log = LogManager.GetLogger(typeof(Settings));
 		private bool groupWaybillBySupplier;
 		private bool _useProxy;
+		private string _waybillDir;
+		private string _reportDir;
+		private string _rejectDir;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -209,6 +212,36 @@ namespace AnalitF.Net.Client.Models
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
 		public virtual string ClientToken { get; set; }
 
+		public virtual string WaybillDir
+		{
+			get { return _waybillDir; }
+			set
+			{
+				_waybillDir = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public virtual string RejectDir
+		{
+			get { return _rejectDir; }
+			set
+			{
+				_rejectDir = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public virtual string ReportDir
+		{
+			get { return _reportDir; }
+			set
+			{
+				_reportDir = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public virtual IEnumerable<string> DocumentDirs
 		{
 			get
@@ -268,15 +301,15 @@ namespace AnalitF.Net.Client.Models
 		{
 			var root = GetVarRoot();
 			if (name.Match("Waybills"))
-				return Path.Combine(root, "Накладные");
+				return String.IsNullOrEmpty(WaybillDir) ? Path.Combine(root, "Накладные") : WaybillDir;
 			if (name.Match("Docs"))
 				return Path.Combine(root, "Документы");
 			if (name.Match("Rejects"))
-				return Path.Combine(root, "Отказы");
+				return String.IsNullOrEmpty(RejectDir) ? Path.Combine(root, "Отказы") : RejectDir;
 			if (name.Match("Orders"))
 				return Path.Combine(root, "Накладные", "Заявки");
 			if (name.Match("Reports"))
-				return Path.Combine(root, "Отчеты");
+				return String.IsNullOrEmpty(ReportDir) ? Path.Combine(root, "Отчеты") : ReportDir;
 			return null;
 		}
 

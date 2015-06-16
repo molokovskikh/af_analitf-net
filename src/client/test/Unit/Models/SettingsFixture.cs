@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
@@ -36,6 +37,17 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			settings.CheckToken();
 			Assert.IsNotNullOrEmpty(oldToken);
 			Assert.AreNotEqual(oldToken, settings.ClientToken);
+		}
+
+		[Test]
+		public void Map_path()
+		{
+			var settings = new Settings();
+			Assert.AreEqual(Path.GetFullPath(@"var\client\АналитФАРМАЦИЯ\Накладные"), settings.MapPath("Waybills"));
+			settings.WaybillDir = "";
+			Assert.AreEqual(Path.GetFullPath(@"var\client\АналитФАРМАЦИЯ\Накладные"), settings.MapPath("Waybills"));
+			settings.WaybillDir = @"C:\";
+			Assert.AreEqual(@"C:\", settings.MapPath("Waybills"));
 		}
 	}
 }

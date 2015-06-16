@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -16,6 +17,7 @@ using Common.Tools;
 using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
+using ReactiveUI;
 using Color = System.Drawing.Color;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -34,6 +36,13 @@ namespace AnalitF.Net.Client.ViewModels
 			SelectedTab = new NotifyValue<string>(lastTab ?? "OverMarkupsTab");
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 			CurrentDirMap = new NotifyValue<DirMap>();
+			IsWaybillDirEnabled = new NotifyValue<bool>();
+			if (String.IsNullOrEmpty(Settings.Value.WaybillDir))
+				Settings.Value.WaybillDir = Settings.Value.MapPath("Waybills");
+			if (String.IsNullOrEmpty(Settings.Value.RejectDir))
+				Settings.Value.RejectDir = Settings.Value.MapPath("Rejects");
+			if (String.IsNullOrEmpty(Settings.Value.ReportDir))
+				Settings.Value.ReportDir = Settings.Value.MapPath("Reports");
 
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
@@ -66,7 +75,12 @@ namespace AnalitF.Net.Client.ViewModels
 				SelectedTab.Value = "LoginTab";
 
 			SelectedTab.Subscribe(_ => lastTab = SelectedTab.Value);
+			Settings.Value.ObservableForProperty(x => x.GroupWaybillsBySupplier, skipInitial: false)
+				.Select(x => !x.Value)
+				.Subscribe(IsWaybillDirEnabled);
 		}
+
+		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
 
 		public string Password
 		{
@@ -111,15 +125,49 @@ namespace AnalitF.Net.Client.ViewModels
 			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
 		}
 
+		public IEnumerable<IResult> SelectWaybillDir()
+		{
+			var dir = Settings.Value.WaybillDir ?? Settings.Value.MapPath("Waybills");
+			if (!Directory.Exists(dir))
+				FileHelper.CreateDirectoryRecursive(dir);
+
+			var dialog = new SelectDirResult(dir);
+			yield return dialog;
+			Settings.Value.WaybillDir = dialog.Result;
+		}
+
+		public IEnumerable<IResult> SelectRejectDir()
+		{
+			var dir = Settings.Value.RejectDir ?? Settings.Value.MapPath("Rejects");
+			if (!Directory.Exists(dir))
+				FileHelper.CreateDirectoryRecursive(dir);
+
+			var dialog = new SelectDirResult(dir);
+			yield return dialog;
+			Settings.Value.RejectDir = dialog.Result;
+		}
+
+		public IEnumerable<IResult> SelectReportDir()
+		{
+			var dir = Settings.Value.ReportDir ?? Settings.Value.MapPath("Reports");
+			if (!Directory.Exists(dir))
+				FileHelper.CreateDirectoryRecursive(dir);
+
+			var dialog = new SelectDirResult(dir);
+			yield return dialog;
+			Settings.Value.ReportDir = dialog.Result;
+		}
+
 		public IEnumerable<IResult> SelectDir()
 		{
 			if (CurrentDirMap.Value == null)
 				yield break;
 
-			if (!Directory.Exists(CurrentDirMap.Value.Dir))
-				FileHelper.CreateDirectoryRecursive(CurrentDirMap.Value.Dir);
+			var dir = CurrentDirMap.Value.Dir;
+			if (!Directory.Exists(dir))
+				FileHelper.CreateDirectoryRecursive(dir);
 
-			var dialog = new SelectDirResult(CurrentDirMap.Value.Dir);
+			var dialog = new SelectDirResult(dir);
 			yield return dialog;
 			CurrentDirMap.Value.Dir = dialog.Result;
 		}
