@@ -170,6 +170,24 @@ namespace AnalitF.Net.Client.Controls
 			column.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
 		}
 
+
+		protected override void OnPreviewKeyDown(KeyEventArgs e)
+		{
+			if (e.Key == Key.Down) {
+				var cell = DataGridHelper.GetCell(this, CurrentCell);
+				if (cell != null && cell.IsEditing) {
+					CommitEdit();
+				}
+			}
+			if (e.Key == Key.Up) {
+				var cell = DataGridHelper.GetCell(this, CurrentCell);
+				if (cell != null && cell.IsEditing) {
+					CommitEdit();
+				}
+			}
+			base.OnPreviewKeyDown(e);
+		}
+
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter) {
