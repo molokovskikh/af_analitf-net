@@ -171,16 +171,24 @@ namespace AnalitF.Net.Client.Controls
 		}
 
 
+		protected override void OnSorting(DataGridSortingEventArgs eventArgs)
+		{
+			base.OnSorting(eventArgs);
+
+			viewer.ScrollToHome();
+			SelectedItem = Items.Cast<object>().FirstOrDefault();
+		}
+
 		protected override void OnPreviewKeyDown(KeyEventArgs e)
 		{
 			if (e.Key == Key.Down) {
-				var cell = DataGridHelper.GetCell(this, CurrentCell);
+				var cell = TryFindCurrentCell();
 				if (cell != null && cell.IsEditing) {
 					CommitEdit();
 				}
 			}
 			if (e.Key == Key.Up) {
-				var cell = DataGridHelper.GetCell(this, CurrentCell);
+				var cell = TryFindCurrentCell();
 				if (cell != null && cell.IsEditing) {
 					CommitEdit();
 				}
@@ -188,12 +196,17 @@ namespace AnalitF.Net.Client.Controls
 			base.OnPreviewKeyDown(e);
 		}
 
+		private DataGridCell TryFindCurrentCell()
+		{
+			return DataGridHelper.GetCell(this, CurrentCell);
+		}
+
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter) {
 				if (IsReadOnly)
 					return;
-				var cell = DataGridHelper.GetCell(this, CurrentCell);
+				var cell = TryFindCurrentCell();
 				if (cell == null)
 					return;
 				if (!cell.IsEditing)
@@ -392,7 +405,7 @@ namespace AnalitF.Net.Client.Controls
 			//у Items не сбрасывается флаг IsEditingItem и повторно нажатие escape интерпретируется как завершение
 			//редактирования строки
 			//тк на некоторых формах escape обрабатывается как выход из формы такое поведение неприемлемо
-			var cell = DataGridHelper.GetCell(this, CurrentCell);
+			var cell = TryFindCurrentCell();
 			if (cell == null || !cell.IsEditing) {
 				e.Handled = false;
 				var editable = ((IEditableCollectionView)Items);
