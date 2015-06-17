@@ -356,20 +356,21 @@ where c.Id = ?";
 
 			CalculateRetailCost(offers);
 
-			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrders == null) {
+			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrderedProductIds == null) {
 				var addressId = Address.Id;
-				RxQuery(s => s.CreateSQLQuery(@"select ProductId, Count
+				RxQuery(s => s.CreateSQLQuery(@"select ProductId
 from SentOrderLines l
 join SentOrders o on o.Id = l.OrderId
 where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
-group by l.ProductId, l.Count")
+group by l.ProductId")
 					.SetParameter("begin", DateTime.Today.AddDays(-1))
 					.SetParameter("end", DateTime.Today)
 					.SetParameter("addressId", addressId)
-					.List<object[]>())
+					.List<object>()
+					.Select(Convert.ToUInt32)
+					.ToList())
 					.ObserveOn(UiScheduler)
-					.Select(x => x.Select(y => Tuple.Create(Convert.ToUInt32(y[0]), Convert.ToUInt32(y[1]))).ToList())
-					.Subscribe(x => Address.YesterdayOrders = x, CloseCancellation.Token);
+					.Subscribe(x => Address.YesterdayOrderedProductIds = x, CloseCancellation.Token);
 			}
 		}
 
