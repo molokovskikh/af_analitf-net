@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			user.Client.Settings.AllowAnalitFSchedule = true;
 			if (Verbose && Schedules.Length == 0) {
 				Console.Write("Ввидите время автоматического обновления:");
-				Schedules = new [] { TimeSpan.Parse(Console.ReadLine()) };
+				Schedules = new[] { TimeSpan.Parse(Console.ReadLine()) };
 			}
 
 			session.DeleteEach(session.Query<TestAnalitFSchedule>().Where(s => s.Client == user.Client));

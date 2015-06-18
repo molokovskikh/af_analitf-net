@@ -471,14 +471,14 @@ where
 	core.Exp
 ";
 			sql += offersQueryParts.Select + "\r\n";
-			sql += String.Format(SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false), @"
-left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
+			var query = SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false);
+			query.Join(@"left join Catalogs.Producers pr on pr.Id = core.CodeFirmCr
 left join Usersettings.MaxProducerCosts mx on mx.ProductId = core.ProductId and mx.ProducerId = core.CodeFirmCr
 join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.RegionCode and k.ClientId = ?clientCode
-	left join farm.CachedCosts ca on ca.CoreId = core.Id and ca.KeyId = k.Id
-");
+	left join farm.CachedCosts ca on ca.CoreId = core.Id and ca.KeyId = k.Id");
+			sql += query.ToSql();
 			var offers = new List<Offer3>();
 			var cmd = new MySqlCommand(sql, (MySqlConnection)session.Connection);
 			cmd.Parameters.AddWithValue("userId", user.Id);
