@@ -429,7 +429,7 @@ where
 			//если кеш актуален выбирается цена из кеша и позиция отмечается как неоптимизируемая
 			//если кеш неактуален то производится оптимизация по завершении которой цена сохраняется см UpdateCostCache
 			var offersQueryParts = new MatrixHelper(orderRules).BuyingMatrixCondition(false);
-			sql = @"select
+			sql = @"
 	core.Id as OfferId,
 	ct.RegionCode as RegionId,
 	ct.PriceCode as PriceId,
@@ -478,7 +478,7 @@ join farm.Synonym s on core.synonymcode = s.synonymcode
 left join farm.SynonymFirmCr sfc on sfc.SynonymFirmCrCode = core.SynonymFirmCrCode
 left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.RegionCode and k.ClientId = ?clientCode
 	left join farm.CachedCosts ca on ca.CoreId = core.Id and ca.KeyId = k.Id");
-			sql += query.ToSql();
+			sql = query.Select(sql).ToSql();
 			var offers = new List<Offer3>();
 			var cmd = new MySqlCommand(sql, (MySqlConnection)session.Connection);
 			cmd.Parameters.AddWithValue("userId", user.Id);
