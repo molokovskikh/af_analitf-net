@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
@@ -107,6 +108,20 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			result.Clear();
 			scheduler.AdvanceByMs(30000);
 			Assert.IsInstanceOf<UpdateCommand>(result[0]);
+		}
+
+		[Test]
+		public void On_start_check_schedule()
+		{
+			shell.Settings.Value.LastUpdate = DateTime.Today.AddDays(-16);
+			shell.Settings.Value.UserName = "test";
+			shell.Settings.Value.Password = "password";
+			shell.Schedules.Value = new List<Schedule> {
+				new Schedule(new TimeSpan(20, 0, 0))
+			};
+			var result = shell.StartCheck().FirstOrDefault();
+			Assert.IsInstanceOf<DialogResult>(result);
+			Assert.IsInstanceOf<SelfClose>(((DialogResult)result).Model);
 		}
 
 		[Test]

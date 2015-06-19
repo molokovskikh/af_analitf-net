@@ -356,6 +356,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return Enumerable.Empty<IResult>();
 
 			if (!Config.Quiet) {
+				if (Schedule.IsOutdate(Schedules.Value, Settings.Value.LastUpdate.GetValueOrDefault())) {
+					return UpdateBySchedule();
+				}
 				var request = Settings.Value.CheckUpdateCondition();
 				if (!String.IsNullOrEmpty(request) && Confirm(request))
 					return Update();
