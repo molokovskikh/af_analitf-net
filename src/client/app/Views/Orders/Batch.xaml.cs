@@ -21,13 +21,14 @@ namespace AnalitF.Net.Client.Views.Orders
 			};
 
 			DataGridHelper.CalculateColumnWidths(ReportLines);
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Заказано", "Нет");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Есть производитель", "Нет");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Цена поставщика", "0000.00");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Цена", "0000.00");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Количество", "0000.00");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Заказ", "0000.00");
-			DataGridHelper.CalculateColumnWidth(ReportLines, "Сумма", "0000.00");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "Нет", "Заказано");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "Нет", "Есть производитель");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000.00", "Цена поставщика");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000.00", "Цена");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000.00", "Количество");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000.00", "Заказ");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000.00", "Сумма");
+			DataGridHelper.CalculateColumnWidth(ReportLines, "0000000000000", "Штрихкод");
 
 			new Editable().Attach(Offers);
 			DataGridHelper.CalculateColumnWidths(Offers);

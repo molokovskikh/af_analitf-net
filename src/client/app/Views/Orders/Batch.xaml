@@ -73,7 +73,8 @@
 				<c:SearchableDataGridColumn Header="Наименование" Binding="{Binding Product}" Width="*"
 					HighlightStyle="{StaticResource DataGridHighlight}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" IsReadOnly="True" />
-				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding BatchLine.Producer}" Visibility="Collapsed" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding BatchLine.Producer}"
+					Visibility="Collapsed" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Количество" Binding="{Binding BatchLine.Quantity}" />
 				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding OrderLine.Order.PriceName}" Width="*" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding OrderLine.Cost}" IsReadOnly="True" />
@@ -81,6 +82,8 @@
 				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding OrderLine.Count}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding OrderLine.MixedSum}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Комментарий" Binding="{Binding BatchLine.Comment}" Width="*" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Штрихкод" Binding="{Binding OrderLine.BarCode}" Width="*"
+					Visibility="Collapsed" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
