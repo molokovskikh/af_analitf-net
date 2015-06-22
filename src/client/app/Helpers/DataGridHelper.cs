@@ -91,19 +91,24 @@ namespace AnalitF.Net.Client.Helpers
 			return cell;
 		}
 
-		public static void CalculateColumnWidth(DataGrid dataGrid, string template, string header)
+		public static void CalculateColumnWidth(DataGrid grid, string template, string header)
 		{
-			var column = FindColumn(dataGrid.Columns, header);
+			var column = FindColumn(grid.Columns, header);
 			if (column == null)
 				return;
 
+			column.Width = CalculateWidth(grid, template);
+		}
+
+		public static DataGridLength CalculateWidth(DataGrid grid, string template)
+		{
 			var text = new FormattedText(template,
 				CultureInfo.CurrentUICulture,
-				dataGrid.FlowDirection,
-				new Typeface(dataGrid.FontFamily, dataGrid.FontStyle, dataGrid.FontWeight, dataGrid.FontStretch),
-				dataGrid.FontSize,
-				dataGrid.Foreground);
-			column.Width = new DataGridLength(text.Width + 4/*отступы*/ + 2/*окаймление*/, DataGridLengthUnitType.Pixel);
+				grid.FlowDirection,
+				new Typeface(grid.FontFamily, grid.FontStyle, grid.FontWeight, grid.FontStretch),
+				grid.FontSize,
+				grid.Foreground);
+			 return new DataGridLength(text.Width + 4 /*отступы*/+ 2 /*окаймление*/, DataGridLengthUnitType.Pixel);
 		}
 
 		public static DataGridColumn FindColumn(DataGrid grid, string name)
@@ -139,7 +144,16 @@ namespace AnalitF.Net.Client.Helpers
 					});
 				CalculateColumnWidth(grid, "0000000000000", "Штрихкод");
 			}
-
+			var producerColumn = FindColumn(grid, "Кат.производитель");
+			if (producerColumn != null) {
+				var propertiesColumn = new DataGridTextColumnEx {
+					Header = "Кат.свойства",
+					Binding = new Binding("Properties"),
+					Visibility = Visibility.Collapsed,
+					Width = CalculateWidth(grid, "Кат.свойства"),
+				};
+				grid.Columns.Insert(grid.Columns.IndexOf(producerColumn) + 1, propertiesColumn);
+			}
 			var col = FindColumn(grid, "Срок годн.");
 			if (col != null) {
 				col.SortMemberPath = "Exp";

@@ -8,7 +8,6 @@ using Castle.ActiveRecord;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using Test.Support;
 using Test.Support.Suppliers;
 using DataMother = AnalitF.Net.Service.Test.TestHelpers.DataMother;
@@ -155,11 +154,17 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			return price;
 		}
 
+		public IEnumerable<T> Random<T>(T[] items)
+		{
+			return Generator.Random(items.Length).Select(i => items.Skip(i).Take(1).First());
+		}
+
 		public void CreateSampleCore(ISession session, TestSupplier supplier, double maxCost = 10000)
 		{
 			var price = supplier.Prices[0];
 			var random = new Random();
 			var producers = session.Query<TestProducer>().Take(1000).ToList();
+			var productWithProperties = session.Query<TestProduct>().Where(p => p.Properties != "").Take(50).ToArray();
 			var products = session.Query<TestProduct>().Fetch(p => p.CatalogProduct).Where(p => !p.CatalogProduct.Hidden).Take(1000).ToList();
 
 			var maxProducer = producers.Count();
@@ -173,6 +178,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				.Concat(randomProducts.Where(p => p.CatalogProduct.VitallyImportant).Take(7))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList).Take(3))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList && p.CatalogProduct.VitallyImportant).Take(2))
+				.Concat(Random(productWithProperties).Take(2))
 				.Concat(products.Where(p => products.Count(c => c.CatalogProduct == p.CatalogProduct) > 1).Take(3));
 
 			foreach (var product in productForCreate) {

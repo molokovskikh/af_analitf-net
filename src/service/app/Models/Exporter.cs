@@ -46,6 +46,7 @@ namespace AnalitF.Net.Service.Models
 		public decimal? MaxProducerCost;
 		public string ProductSynonym;
 		public string ProducerSynonym;
+		public string Properties;
 	}
 
 	public class UpdateData
@@ -468,7 +469,8 @@ where
 	at.FirmCode as SupplierId,
 	core.MaxBoundCost,
 	if(k.Id is null or k.Date < at.PriceDate, core.OptimizationSkip, 1) as OptimizationSkip,
-	core.Exp
+	core.Exp,
+	products.Properties
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			var query = SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false);
@@ -523,8 +525,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 						MaxBoundCost = reader.GetNullableFloat(33),
 						OptimizationSkip = reader.GetBoolean(34),
 						Exp = reader.GetNullableDateTime(35),
+						Properties = reader.GetNullableString(36),
 
-						BuyingMatrixType = reader.GetUInt32(36),
+						BuyingMatrixType = reader.GetUInt32(37),
 					});
 				}
 			}
@@ -576,7 +579,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Cost",
 				"BuyingMatrixType",
 				"Exp",
-				"BarCode"
+				"BarCode",
+				"Properties"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -612,7 +616,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Cost,
 				o.BuyingMatrixType,
 				o.Exp,
-				o.EAN13
+				o.EAN13,
+				o.Properties
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -1637,6 +1642,7 @@ select l.Id,
 	l.Product,
 	l.ProductId,
 	p.CatalogId,
+	l.Code,
 	l.Producer,
 	l.ProducerId,
 	l.Rejected as Count,

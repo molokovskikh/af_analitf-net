@@ -108,6 +108,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string BarCode { get; set; }
 
+		public virtual string Properties { get; set; }
+
 		/// <summary>
 		/// цена поставщика
 		/// </summary>
