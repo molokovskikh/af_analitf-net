@@ -74,10 +74,10 @@ namespace AnalitF.Net.Client
 			}
 
 			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
-			PresentationTraceSources.Refresh();
 			//ошибки которые возникают при биндинге wpf проглатывает это могут быть как безобидные ошибки
 			//например не удалось преобразовать строку в число так и критические
-			PresentationTraceSources.DataBindingSource.Listeners.Add(new DelegateTraceListner(m => log.Error(m)));
+			//конфигурация должна быть в конфигурационном файле иначе все игнорируется
+			PresentationTraceSources.Refresh();
 
 			LogManager.GetLog = t => new Log4net(t);
 			TaskScheduler.UnobservedTaskException += (sender, args) => {
