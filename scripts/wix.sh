@@ -4,7 +4,7 @@ set -o errexit
 
 wixpath=$(cygpath -wa "$(dirname "`which candle`")")
 output=output/setup
-input=build
+input=src/setup
 
 rm -rf $output
 mkdir $output
