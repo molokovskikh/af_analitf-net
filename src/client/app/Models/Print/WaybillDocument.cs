@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Models.Print
 				+ "кому: ___________________________________\n"
 				+ "Основание отпуска________________________\n");
 			left.TextAlignment = TextAlignment.Center;
-			Header(String.Format("Накладная №  {0}\n", docSettings.ProviderDocumentId)
+			Header(String.Format("Накладная № {0} {1}\n", docSettings.ProviderDocumentId, waybill.SupplierName)
 				+ String.Format("от  {0:d}\n", docSettings.DocumentDate)
 				+ String.Format("Через кого   {0}\n", docSettings.OperatedBy)
 				+ "Доверенность № _______от \"______\" ________20__г\n");

@@ -11,6 +11,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Test.Integration.ViewModes

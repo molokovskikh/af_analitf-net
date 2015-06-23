@@ -57,7 +57,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			settings.GroupWaybillsBySupplier = true;
 			settings.OpenWaybills = true;
 
-			var fixture = Fixture<LoadWaybill>();
+			var fixture = Fixture<CreateWaybill>();
 			var command = new UpdateCommand();
 			Run(command);
 
@@ -94,7 +94,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
-			Fixture(new LoadWaybill(createFile: false));
+			Fixture(new CreateWaybill(createFile: false));
 
 			var command = new UpdateCommand {
 				SyncData = "Waybills"
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 				.SetParameter("userId", ServerUser().Id)
 				.ExecuteUpdate();
 			session.Transaction.Commit();
-			Fixture(new LoadWaybill());
+			Fixture(new CreateWaybill());
 
 			var command = new UpdateCommand {
 				SyncData = "Waybills"
@@ -131,7 +131,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Import_waybill()
 		{
-			var fixture = Fixture<LoadWaybill>();
+			var fixture = Fixture<CreateWaybill>();
 			var sendLog = fixture.SendLog;
 			Run(new UpdateCommand());
 

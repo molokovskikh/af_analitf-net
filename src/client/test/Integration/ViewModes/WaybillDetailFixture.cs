@@ -17,6 +17,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -116,7 +117,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
 
-			var waybillFixture = Fixture<LoadWaybill>();
+			var waybillFixture = Fixture<CreateWaybill>();
 			var fixture = new CreateCertificate {
 				Waybill = waybillFixture.Waybill
 			};

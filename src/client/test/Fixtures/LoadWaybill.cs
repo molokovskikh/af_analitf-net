@@ -10,7 +10,7 @@ using Test.Support.Documents;
 namespace AnalitF.Net.Client.Test.Fixtures
 {
 	[Description("Создает накладную на сервере с файлом")]
-	public class LoadWaybill : ServerFixture
+	public class CreateWaybill : ServerFixture
 	{
 		public TestDocumentLog Document;
 		public TestDocumentSendLog SendLog;
@@ -19,12 +19,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		private bool createFile;
 
-		public LoadWaybill()
+		public CreateWaybill()
 		{
 			createFile = true;
 		}
 
-		public LoadWaybill(bool createFile = true)
+		public CreateWaybill(bool createFile = true)
 		{
 			this.createFile = createFile;
 		}
