@@ -42,7 +42,8 @@
 		<Style.Triggers>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsNewItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}}" Value="False" />
+					<!--IsNewItem - этого свойства нет в .net 4.0-->
+					<Condition Binding="{Binding IsNewItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}, FallbackValue=False}" Value="False" />
 					<Condition Binding="{Binding Waybill.IsCreatedByUser, FallbackValue=True}" Value="False" />
 				</MultiDataTrigger.Conditions>
 				<Setter Property="Template">

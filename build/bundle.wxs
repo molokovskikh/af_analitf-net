@@ -19,6 +19,7 @@
 
 		<Chain>
 			<PackageGroupRef Id="Netfx4Full" />
+			<PackageGroupRef Id="NetFx452Web" />
 			<RollbackBoundary />
 			<MsiPackage
 				Id="Setup"
@@ -39,6 +40,7 @@
 		<util:RegistrySearch Root="HKLM" Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" Value="Version" Variable="Netfx4x64FullVersion" Win64="yes" />
 
 <?if $(var.Setup.NetInstallCommand) = "" ?>
+
 		<PackageGroup Id="Netfx4Full">
 				<ExePackage Id="Netfx4Full"
 					Cache="no"
@@ -48,7 +50,40 @@
 					Vital="yes"
 					Name="dotNetFx40_Full_x86_x64.exe"
 					DownloadUrl="http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe"
-					DetectCondition="Netfx4FullVersion AND (NOT VersionNT64 OR Netfx4x64FullVersion)" />
+					DetectCondition="(VersionNT &gt;= v6.0 OR VersionNT64 &gt;= v6.0) or (Netfx4FullVersion AND (NOT VersionNT64 OR Netfx4x64FullVersion))">
+				<RemotePayload
+					Size="50449456"
+					Version="4.0.30319.1"
+					ProductName="Microsoft .NET Framework 4"
+					Description="Microsoft .NET Framework 4 Setup"
+					CertificatePublicKey="672605E36DD71EC6B8325B91C5FE6971390CB6B6"
+					CertificateThumbprint="9617094A1CFB59AE7C1F7DFDB6739E4E7C40508F"
+					Hash="58DA3D74DB353AAD03588CBB5CEA8234166D8B99"/>
+			</ExePackage>
+		</PackageGroup>
+	    <PackageGroup Id="NetFx452Web">
+		  <ExePackage
+			  InstallCommand="/q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot;"
+			  RepairCommand="/q /norestart /repair /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot;"
+			  UninstallCommand="/uninstall /q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot;"
+			  PerMachine="yes"
+			  Id="NetFx452Web"
+			  Vital="yes"
+			  Permanent="yes"
+			  Protocol="netfx4"
+			  DownloadUrl="http://go.microsoft.com/fwlink/?LinkId=397707"
+			  LogPathVariable="NetFx452FullWebLog"
+			  Compressed="no"
+			  Name="NDP452-KB2901954-Web.exe"
+			  DetectCondition="not (VersionNT &gt;= v6.0 OR VersionNT64 &gt;= v6.0) or (Netfx4FullVersion and (NOT VersionNT64 OR Netfx4x64FullVersion))">
+			<RemotePayload CertificatePublicKey="B78FE7F6917E1BC5F4A9C77BA3D555A0E807B9E0"
+						   CertificateThumbprint="67B1757863E3EFF760EA9EBB02849AF07D3A8080"
+						   Description="Microsoft .NET Framework 4.5.2 Setup"
+						   Hash="5B71B20A455F6EEAB79DD1EDCAB0BA66AD0D2208"
+						   ProductName="Microsoft .NET Framework 4.5.2"
+						   Size="1118920"
+						   Version="4.5.51209.34209" />
+		  </ExePackage>
 		</PackageGroup>
 <?else ?>
 		<PackageGroup Id="Netfx4Full">
@@ -61,7 +96,40 @@
 					Name="dotNetFx40_Full_x86_x64.exe"
 					DownloadUrl="http://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe"
 					InstallCommand="$(var.Setup.NetInstallCommand)"
-					DetectCondition="Netfx4FullVersion AND (NOT VersionNT64 OR Netfx4x64FullVersion)" />
+					DetectCondition="(VersionNT &gt;= v6.0 OR VersionNT64 &gt;= v6.0) or (Netfx4FullVersion AND (NOT VersionNT64 OR Netfx4x64FullVersion))">
+					<RemotePayload
+						Size="50449456"
+						Version="4.0.30319.1"
+						ProductName="Microsoft .NET Framework 4"
+						Description="Microsoft .NET Framework 4 Setup"
+						CertificatePublicKey="672605E36DD71EC6B8325B91C5FE6971390CB6B6"
+						CertificateThumbprint="9617094A1CFB59AE7C1F7DFDB6739E4E7C40508F"
+						Hash="58DA3D74DB353AAD03588CBB5CEA8234166D8B99"/>
+				</ExePackage>
+		</PackageGroup>
+	    <PackageGroup Id="NetFx452Web">
+		  <ExePackage
+			  InstallCommand="/q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot; $(var.Setup.NetInstallCommand)"
+			  RepairCommand="/q /norestart /repair /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot;"
+			  UninstallCommand="/uninstall /q /norestart /ChainingPackage &quot;[WixBundleName]&quot; /log &quot;[NetFx452FullWebLog].html&quot;"
+			  PerMachine="yes"
+			  Id="NetFx452Web"
+			  Vital="yes"
+			  Permanent="yes"
+			  Protocol="netfx4"
+			  DownloadUrl="http://go.microsoft.com/fwlink/?LinkId=397707"
+			  LogPathVariable="NetFx452FullWebLog"
+			  Compressed="no"
+			  Name="NDP452-KB2901954-Web.exe"
+			  DetectCondition="not (VersionNT &gt;= v6.0 OR VersionNT64 &gt;= v6.0) or (Netfx4FullVersion and (NOT VersionNT64 OR Netfx4x64FullVersion))">
+			<RemotePayload CertificatePublicKey="B78FE7F6917E1BC5F4A9C77BA3D555A0E807B9E0"
+						   CertificateThumbprint="67B1757863E3EFF760EA9EBB02849AF07D3A8080"
+						   Description="Microsoft .NET Framework 4.5.2 Setup"
+						   Hash="5B71B20A455F6EEAB79DD1EDCAB0BA66AD0D2208"
+						   ProductName="Microsoft .NET Framework 4.5.2"
+						   Size="1118920"
+						   Version="4.5.51209.34209" />
+		  </ExePackage>
 		</PackageGroup>
 <?endif ?>
 	</Fragment>
