@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -6,6 +7,7 @@ using System.Reactive.PlatformServices;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
@@ -15,6 +17,7 @@ using Common.Tools;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
+using log4net.Core;
 using log4net.Layout;
 using log4net.ObjectRenderer;
 using log4net.Repository.Hierarchy;
@@ -72,6 +75,9 @@ namespace AnalitF.Net.Client
 			var quiet = false;
 			var faultInject = false;
 			var debugpipe = "";
+			var debug = new List<string>();
+			var console = false;
+			var encoding = "";
 			int result;
 			try {
 				//проверка для ilmerge
@@ -90,21 +96,14 @@ namespace AnalitF.Net.Client
 				else
 					XmlConfigurator.Configure();
 
-				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
-				try {
-					log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
-					log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
-				}
-				catch (Exception e) {
-					log.Error("Не удалось получить информацию о версии среды или ос", e);
-				}
-				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
-
 				string batchFile = null;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
 					{"quiet", "Не выводить предупреждения при запуске", v => quiet = v != null},
+					{"console", v => console = v != null},
+					{"encoding=", v => encoding = v},
+					{"debug=", v => debug.Add(v) },
 					{"batch=", "Запустить приложение и вызвать автозаказ с указанным файлом", v => batchFile = v},
 #if DEBUG
 					{"fault-inject", "", v => faultInject = v != null},
@@ -112,6 +111,11 @@ namespace AnalitF.Net.Client
 #endif
 				};
 				var cmds = options.Parse(args);
+
+				if (!String.IsNullOrEmpty(encoding)) {
+					Console.OutputEncoding = Encoding.GetEncoding(encoding);
+				}
+
 				if (help) {
 					options.WriteOptionDescriptions(Console.Out);
 					return 0;
@@ -128,8 +132,8 @@ namespace AnalitF.Net.Client
 					return 0;
 				}
 
-				if (quiet) {
-					var repository = (Hierarchy)LogManager.GetRepository();
+				var repository = (Hierarchy)LogManager.GetRepository();
+				if (console) {
 					if (!repository.GetAppenders().OfType<ConsoleAppender>().Any()) {
 						var layout = new PatternLayout("%d{dd.MM.yyyy HH:mm:ss.fff} [%t] %-5p %c - %m%n");
 						layout.ActivateOptions();
@@ -140,6 +144,20 @@ namespace AnalitF.Net.Client
 					}
 				}
 
+				foreach (var loggername in debug) {
+					var logger = (Logger)repository.GetLogger(loggername);
+					logger.Level = Level.Debug;
+				}
+
+				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
+				try {
+					log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
+					log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
+				}
+				catch (Exception e) {
+					log.Error("Не удалось получить информацию о версии среды или ос", e);
+				}
+				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
 					return 0;

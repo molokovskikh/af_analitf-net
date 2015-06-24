@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		public Subject<Window> WindowOpened = new Subject<Window>();
 		public Subject<object> OsDialog = new Subject<object>();
 		public Subject<string> MessageOpened = new Subject<string>();
+		public Subject<object> WindowViewModelOpened = new Subject<object>();
 
 		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
@@ -41,8 +42,10 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		public override void ShowWindow(object rootModel, object context = null, IDictionary<string, object> settings = null)
 		{
 #if DEBUG
-			if (UnitTesting)
+			if (UnitTesting) {
+				WindowViewModelOpened.OnNext(rootModel);
 				return;
+			}
 #endif
 			base.ShowWindow(rootModel, context, settings);
 		}

@@ -851,10 +851,12 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			RunTask(model,
 				t => {
-					cmd.Token = t;
-					cmd.Config = Config;
-					cmd.Execute();
-					return cmd.Result;
+					using (cmd) {
+						cmd.Token = t;
+						cmd.Config = Config;
+						cmd.Execute();
+						return cmd.Result;
+					}
 				},
 				t => {
 					if (success != null)

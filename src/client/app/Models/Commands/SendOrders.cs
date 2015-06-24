@@ -43,15 +43,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			Progress.OnNext(new Progress("Соединение", 100, 0));
 			Progress.OnNext(new Progress("Отправка заказов", 0, 50));
 			var orders = Session.Query<Order>().ReadyToSend(address).ToList();
-			log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", orders.Count);
+			Log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", orders.Count);
 			try {
 				foreach (var order in orders) {
-					log.InfoFormat("Попытка отправки заказа {0} по прайсу {1} ({2}) от {3} с кол-вом позиций {4}",
+					Log.InfoFormat("Попытка отправки заказа {0} по прайсу {1} ({2}) от {3} с кол-вом позиций {4}",
 						order.Id, order.PriceName, order.Price.Id.PriceId, order.Price.PriceDate, order.Lines.Count);
 				}
 			}
 			catch(Exception e) {
-				log.Error("Ошибка протоколирования", e);
+				Log.Error("Ошибка протоколирования", e);
 			}
 			var clientOrders = orders.Select(o => o.ToClientOrder(Session)).Where(o => o != null).ToArray();
 			if (clientOrders.Length == 0)
@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				ref requestId);
 			CheckResult(Client.PutAsJsonAsync("Orders", new ConfirmRequest(requestId), Token).Result);
 
-			log.InfoFormat("Заказы отправлены успешно");
+			Log.InfoFormat("Заказы отправлены успешно");
 
 			var results = response.Content.ReadAsAsync<OrderResult[]>().Result
 				?? new OrderResult[0];
@@ -74,9 +74,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			acceptedOrders.Where(o => o.Limit != null).Each(o => o.Limit.Value -= o.Sum);
 			foreach (var order in orders) {
 				if (order.IsAccepted)
-					log.InfoFormat("Заказ {0} успешно отправлен, Id заказа на сервере: {1}", order.Id, order.ServerId);
+					Log.InfoFormat("Заказ {0} успешно отправлен, Id заказа на сервере: {1}", order.Id, order.ServerId);
 				else
-					log.InfoFormat("Заказ {0} отвергнут сервером, причина: {1}", order.Id, order.SendError);
+					Log.InfoFormat("Заказ {0} отвергнут сервером, причина: {1}", order.Id, order.SendError);
 			}
 
 			Session.SaveEach(sentOrders);

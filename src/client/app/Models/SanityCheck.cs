@@ -56,12 +56,12 @@ namespace AnalitF.Net.Client.Models
 			catch(GenericADOException e) {
 				//Unknown column '%s' in '%s'
 				//Table '%s.%s' doesn't exist
-				//http://dev.mysql.com/doc/refman/4.1/en/error-messages-server.html
+				//http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
 				if (e.InnerException is MySqlException &&
 					(((MySqlException)e.InnerException).Code == 1054
 						|| ((MySqlException)e.InnerException).Code == 1146)) {
 					crushOnFirstTry = true;
-					log.Error("База данных повреждена попробую восстановить", e);
+					Log.Error("База данных повреждена попробую восстановить", e);
 				}
 				else {
 					throw;
@@ -220,13 +220,13 @@ namespace AnalitF.Net.Client.Models
 					if (alters.Count > 0) {
 						foreach (var alter in alters) {
 							try {
-								if (log.IsDebugEnabled)
-									log.Debug(alter);
+								if (Log.IsDebugEnabled)
+									Log.Debug(alter);
 								cmd.CommandText = alter;
 								cmd.ExecuteNonQuery();
 							}
 							catch(Exception e) {
-								log.Warn("Ошибка при обновлении схемы", e);
+								Log.Warn("Ошибка при обновлении схемы", e);
 							}
 						}
 					}
@@ -260,13 +260,13 @@ namespace AnalitF.Net.Client.Models
 				};
 				foreach (var alter in alters) {
 					try {
-						if (log.IsDebugEnabled)
-							log.Debug(alter);
+						if (Log.IsDebugEnabled)
+							Log.Debug(alter);
 						cmd.CommandText = alter;
 						cmd.ExecuteNonQuery();
 					}
 					catch(Exception e) {
-						log.Warn("Ошибка при обновлении схемы", e);
+						Log.Warn("Ошибка при обновлении схемы", e);
 					}
 				}
 			}

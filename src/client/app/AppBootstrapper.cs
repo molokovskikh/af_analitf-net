@@ -19,11 +19,13 @@ using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Helpers;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
@@ -66,31 +68,6 @@ namespace AnalitF.Net.Client
 
 		public bool IsInitialized { get; private set; }
 
-		private void InitLog()
-		{
-			if (FailFast) {
-				LogManager.GetLog = t => new FailFastLog(t);
-				return;
-			}
-
-			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
-			//ошибки которые возникают при биндинге wpf проглатывает это могут быть как безобидные ошибки
-			//например не удалось преобразовать строку в число так и критические
-			//конфигурация должна быть в конфигурационном файле иначе все игнорируется
-			PresentationTraceSources.Refresh();
-
-			LogManager.GetLog = t => new Log4net(t);
-			TaskScheduler.UnobservedTaskException += (sender, args) => {
-				if (!FailFast)
-					args.SetObserved();
-				log.Error("Ошибка при выполнении задачи", args.Exception.GetBaseException());
-			};
-			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
-				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);
-				CheckShutdown(args.ExceptionObject as Exception);
-			};
-		}
-
 		protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 		{
 			if (FailFast)
@@ -103,26 +80,29 @@ namespace AnalitF.Net.Client
 
 		private void CheckShutdown(Exception e)
 		{
-			if (!IsInitialized) {
-				//нужно закрыть заставку прежде чем показывать сообщение
-				//иначе окно с сообщение будет закрыто и не отобразится
-				var app = ((App)Application);
-				if (app != null && app.Splash != null) {
-					app.Splash.Close(TimeSpan.Zero);
-				}
-				//если не запустились то нужно сказать что случилась беда
-				//если запуск состоялся просто проглатываем исключение
-				var message = ErrorHelper.TranslateException(e)
-					?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e.Message);
-				if (!Config.Quiet)
-					MessageBox.Show(
-						message,
-						"АналитФАРМАЦИЯ: Внимание",
-						MessageBoxButton.OK,
-						MessageBoxImage.Warning);
+			//если не запустились то нужно сказать что случилась беда
+			//если запуск состоялся просто проглатываем исключение
+			if (IsInitialized)
+				return;
 
-				Application.Current.Shutdown(1);
+			//нужно закрыть заставку прежде чем показывать сообщение
+			//иначе окно с сообщение будет закрыто и не отобразится
+			var app = ((App)Application);
+			if (app != null && app.Splash != null) {
+				app.Splash.Close(TimeSpan.Zero);
 			}
+			//нужно вывалить все исключение тк человек всего скорее пришлет снимок экрана
+			//и по нему нужно произвести диагностику
+			var message = ErrorHelper.TranslateException(e)
+				?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e);
+			if (!Config.Quiet)
+				MessageBox.Show(
+					message,
+					"АналитФАРМАЦИЯ: Внимание",
+					MessageBoxButton.OK,
+					MessageBoxImage.Warning);
+
+			Application.Current.Shutdown(1);
 		}
 
 		protected override void OnExit(object sender, EventArgs e)
@@ -144,28 +124,6 @@ namespace AnalitF.Net.Client
 			InitUi(FailFast);
 			InitDb();
 			InitShell();
-		}
-
-		public void InitShell()
-		{
-			try {
-				if (Application != null) {
-					using(var session = NHibernate.Factory.OpenSession()) {
-						StyleHelper.BuildStyles(Application.Resources, session.Query<CustomStyle>());
-					}
-				}
-			}
-			catch(Exception e) {
-				log.Error("Не удалось инициализировать стили", e);
-			}
-			var windowManager = IoC.Get<IWindowManager>();
-			Shell = new ShellViewModel(Config);
-			Deserialize();
-
-			windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
-				{"WindowState", WindowState.Maximized}
-			});
-			IsInitialized = true;
 		}
 
 		public void Serialize()
@@ -231,6 +189,31 @@ namespace AnalitF.Net.Client
 			Util.SetValue(instance, "Env", Shell.Env);
 		}
 
+		private void InitLog()
+		{
+			if (FailFast) {
+				LogManager.GetLog = t => new FailFastLog(t);
+				return;
+			}
+
+			//нужно вызвать иначе wpf игнорирует все настройки протоколирование
+			//ошибки которые возникают при биндинге wpf проглатывает это могут быть как безобидные ошибки
+			//например не удалось преобразовать строку в число так и критические
+			//конфигурация должна быть в конфигурационном файле иначе все игнорируется
+			PresentationTraceSources.Refresh();
+
+			LogManager.GetLog = t => new Log4net(t);
+			TaskScheduler.UnobservedTaskException += (sender, args) => {
+				if (!FailFast)
+					args.SetObserved();
+				log.Error("Ошибка при выполнении задачи", args.Exception.GetBaseException());
+			};
+			AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
+				log.Error("Ошибка в приложении", args.ExceptionObject as Exception);
+				CheckShutdown(args.ExceptionObject as Exception);
+			};
+		}
+
 		public void InitApp()
 		{
 			if (ConfigurationManager.AppSettings["Uri"] != null)
@@ -268,19 +251,83 @@ namespace AnalitF.Net.Client
 			}
 		}
 
+		public void InitShell()
+		{
+			try {
+				if (Application != null) {
+					using(var session = NHibernate.Factory.OpenSession()) {
+						StyleHelper.BuildStyles(Application.Resources, session.Query<CustomStyle>());
+					}
+				}
+			}
+			catch(Exception e) {
+				log.Error("Не удалось инициализировать стили", e);
+			}
+
+			var count = 0;
+			repeat:
+			try {
+				count++;
+				//если это попытка восстановления нужно очистить
+				if (Shell != null) {
+					Shell.Dispose();
+				}
+				var windowManager = IoC.Get<IWindowManager>();
+				Shell = new ShellViewModel(Config);
+				Deserialize();
+				windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
+					{"WindowState", WindowState.Maximized}
+				});
+
+				if (Application != null) {
+					//если это повторный запуск то мы можем потерять окно
+					//в этом случа нужно найти потеряные окна и закрыть их
+					//что бы избежать ситуации когда главное окно закрылось а приложение не завершилось
+					//тк windows считает что у него еще есть активные окна
+					//
+					//мы не можем выполнять очистку вместе с очисткой предудущего главного экрана
+					//тк если мы это сделаем windows попытается завершить процесс тк у него не будет больше окон
+					var lostWindows = Application.Windows.OfType<Window>()
+						.Where(x => x.DataContext is ShellViewModel && ((ShellViewModel)x.DataContext) != Shell);
+					foreach (var window in lostWindows)
+						window.Close();
+				}
+			}
+			catch(Exception e) {
+				log.Error("Ошибка при запуске приложения", e);
+				if (count > 1 || !RepairDb.TryToRepair(e, Config)) {
+					throw;
+				}
+				else  {
+					goto repeat;
+				}
+			}
+			IsInitialized = true;
+		}
+
 		private void InitDb()
 		{
 			if (NHibernate != null)
 				return;
 
+			//ilmerge
 			//если сборки обединены то логика определения системы протоколирование не работает
 			//нужно вручную настроить ее
 			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
 			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
-			var sanityCheck = new SanityCheck();
-			sanityCheck.Config = Config;
-			sanityCheck.Check(Config.Cmd.Match("import"));
+
+			using (var sanityCheck = new SanityCheck()) {
+				sanityCheck.Config = Config;
+				sanityCheck.Check(Config.Cmd.Match("import"));
+			}
+
+			if (Config.Cmd.Match("repair")) {
+				using(var cmd = new RepairDb()) {
+					cmd.Config = Config;
+					cmd.Execute();
+				}
+			}
 		}
 
 		public static void InitUi(bool failfast)

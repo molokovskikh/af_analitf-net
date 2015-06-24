@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
 using NHibernate;
@@ -9,9 +11,10 @@ using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	public class BaseCommand
+	public class BaseCommand : IDisposable
 	{
-		protected ILog log;
+		protected CompositeDisposable Disposable = new CompositeDisposable();
+		protected ILog Log;
 		protected Configuration Configuration;
 		protected ISessionFactory Factory;
 
@@ -26,11 +29,19 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			Progress = new BehaviorSubject<Progress>(new Progress());
 			Reporter = new ProgressReporter(Progress);
-			log = LogManager.GetLogger(GetType());
+			Log = LogManager.GetLogger(GetType());
 			if (AppBootstrapper.NHibernate != null) {
 				Configuration = AppBootstrapper.NHibernate.Configuration;
 				Factory = AppBootstrapper.NHibernate.Factory;
 			}
+		}
+
+		protected void InitSession()
+		{
+			if (StatelessSession == null)
+				Disposable.Add(StatelessSession = Factory.OpenStatelessSession());
+			if (Session == null)
+				Disposable.Add(Session = Factory.OpenSession());
 		}
 
 		protected T RunCommand<T>(DbCommand<T> command)
@@ -60,6 +71,11 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected IEnumerable<string> TableNames()
 		{
 			return Tables().Select(t => t.Name);
+		}
+
+		public void Dispose()
+		{
+			Disposable.Dispose();
 		}
 	}
 

@@ -117,11 +117,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			Reporter.Stage("Загрузка данных");
-			log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
+			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
-			log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
+			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
 			var result = ProcessUpdate(Config.ArchiveFile);
-			log.InfoFormat("Обновление завершено успешно");
+			Log.InfoFormat("Обновление завершено успешно");
 
 			WaitAndLog(sendLogsTask, "Отправка логов");
 			return result;
@@ -177,7 +177,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe"))) {
-				log.InfoFormat("Получено обновление приложения");
+				Log.InfoFormat("Получено обновление приложения");
 				return UpdateResult.UpdatePending;
 			}
 
@@ -517,7 +517,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 					}
 				}
 				catch(Exception e) {
-					log.Error("Ошибка перемещения файла", e);
+					Log.Error("Ошибка перемещения файла", e);
 				}
 			}
 			return result;
@@ -572,10 +572,10 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			try {
 				task.Wait();
 				if (!IsOkStatusCode(task.Result.StatusCode))
-					log.ErrorFormat("Задача '{0}' завершилась ошибкой {1}", name, task.Result.StatusCode);
+					Log.ErrorFormat("Задача '{0}' завершилась ошибкой {1}", name, task.Result.StatusCode);
 			}
 			catch(AggregateException e) {
-				log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
+				Log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
 			}
 		}
 

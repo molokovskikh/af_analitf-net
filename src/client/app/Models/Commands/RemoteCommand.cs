@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		protected RemoteCommand()
 		{
-			log = LogManager.GetLogger(GetType());
+			Log = LogManager.GetLogger(GetType());
 
 			Formatter = new JsonMediaTypeFormatter {
 				SerializerSettings = JsonHelper.SerializerSettings()
@@ -122,14 +122,14 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			if (!IsOkStatusCode(response.StatusCode)) {
 				//если включена отладка попробуем собрать дополнительную отладочную информацию
-				if (log.IsDebugEnabled) {
+				if (Log.IsDebugEnabled) {
 					try {
 						var content = response.Content.ReadAsStringAsync().Result;
-						log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}",
+						Log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}",
 							response.RequestMessage, response, content);
 					}
 					catch(Exception e) {
-						log.Warn(String.Format("Не удалось получить отладочную" +
+						Log.Warn(String.Format("Не удалось получить отладочную" +
 							" информацию об ошибке при обработке запроса {0}",
 							response.RequestMessage), e);
 					}

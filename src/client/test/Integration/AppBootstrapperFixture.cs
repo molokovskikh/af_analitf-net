@@ -85,11 +85,22 @@ namespace AnalitF.Net.Test.Integration
 			Assert.IsTrue(File.Exists("test/temp/update/offers.txt"));
 		}
 
+		[Test]
+		public void Repair_and_restart_if_db_broken()
+		{
+			restore = true;
+			File.WriteAllBytes(Path.Combine(config.DbDir, "sentorders.frm"), new byte[0]);
+			StartShell();
+			Assert.IsTrue(app.Shell.IsActive);
+			Assert.IsTrue(app.Shell.IsInitialized);
+			Assert.IsTrue(app.IsInitialized);
+		}
+
 		private void StartShell()
 		{
+			manager.WindowViewModelOpened.Subscribe(Activate);
 			app.InitApp();
 			app.InitShell();
-			Activate(app.Shell);
 		}
 
 		protected override ShellViewModel shell
@@ -103,6 +114,7 @@ namespace AnalitF.Net.Test.Integration
 			var app = new AppBootstrapper(false);
 			disposable.Add(app);
 			app.Config.RootDir = "test";
+			app.Config.DbDir = Path.GetFullPath(IntegrationSetup.clientConfig.DbDir);
 			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
 			app.Config.IsUnitTesting = true;
 			Execute.ResetWithoutDispatcher();

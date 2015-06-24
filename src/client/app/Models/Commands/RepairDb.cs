@@ -1,9 +1,12 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Common.Tools;
+using Common.Tools.Helpers;
+using Devart.Data.MySql;
 using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -20,36 +23,35 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public override void Execute()
 		{
+			InitSession();
 			var tables = TableNames().ToArray();
 			Reporter.Weight(tables.Length);
 			var results = new List<RepairStatus>();
 
-			using(var session = Factory.OpenSession()) {
-				foreach (var table in tables) {
-					Token.ThrowIfCancellationRequested();
+			foreach (var table in tables) {
+				Token.ThrowIfCancellationRequested();
 
-					var messages = ExecuteMaintainsQuery(String.Format("REPAIR TABLE {0} EXTENDED", table), session);
-					var result = Parse(messages);
+				var messages = ExecuteMaintainsQuery(String.Format("REPAIR TABLE {0} EXTENDED", table));
+				var result = Parse(messages);
+				results.Add(result);
+				if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
+					result = Parse(ExecuteMaintainsQuery(String.Format("OPTIMIZE TABLE {0}", table)));
 					results.Add(result);
-					if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
-						result = Parse(ExecuteMaintainsQuery(String.Format("OPTIMIZE TABLE {0}", table), session));
-						results.Add(result);
-					}
-					results.Add(result);
-					if (result == RepairStatus.Fail) {
-						log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
-						log.Error(String.Format("DROP TABLE IF EXISTS {0}", table));
-						session
-							.CreateSQLQuery(String.Format("DROP TABLE IF EXISTS {0}", table))
-							.ExecuteUpdate();
-						//если заголовок таблицы поврежден то drop table не даст результатов
-						//файлы останутся а при попытке создать таблицу будет ошибка
-						//нужно удалить файлы
-						Directory.GetFiles(Config.DbDir, table + ".*").Each(File.Delete);
-					}
-
-					Reporter.Progress();
 				}
+				results.Add(result);
+				if (result == RepairStatus.Fail) {
+					Log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
+					Log.Error(String.Format("DROP TABLE IF EXISTS {0}", table));
+					StatelessSession
+						.CreateSQLQuery(String.Format("DROP TABLE IF EXISTS {0}", table))
+						.ExecuteUpdate();
+					//если заголовок таблицы поврежден то drop table не даст результатов
+					//файлы останутся а при попытке создать таблицу будет ошибка
+					//нужно удалить файлы
+					Directory.GetFiles(Config.DbDir, table + ".*").Each(File.Delete);
+				}
+
+				Reporter.Progress();
 			}
 
 			Configure(new SanityCheck()).Check(true);
@@ -57,15 +59,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			Result = results.All(r => r == RepairStatus.Ok);
 		}
 
-		private List<string[]> ExecuteMaintainsQuery(string sql, ISession session)
+		private List<string[]> ExecuteMaintainsQuery(string sql)
 		{
-			log.ErrorFormat(sql);
-			var messages = session
+			Log.ErrorFormat(sql);
+			var messages = StatelessSession
 				.CreateSQLQuery(sql)
 				.List<object[]>()
 				.Select(m => m.Select(v => v.ToString()).ToArray())
 				.ToList();
-			log.Error(messages.Implode(s => s.Implode(), Environment.NewLine));
+			Log.Error(messages.Implode(s => s.Implode(), Environment.NewLine));
 			return messages;
 		}
 
@@ -89,6 +91,32 @@ namespace AnalitF.Net.Client.Models.Commands
 				return RepairStatus.Ok;
 			}
 			return RepairStatus.Fail;
+		}
+
+		public static bool TryToRepair(Exception exception, Config.Config config)
+		{
+			var codes = new[] {
+				//Incorrect information in file: '%s'
+				1033,
+				//Incorrect key file for table '%s'; try to repair it
+				1034,
+				//Old key file for table '%s'; repair it!
+				1035,
+				//Table '%s' is marked as crashed and should be repaired
+				1194,
+				//Table '%s' is marked as crashed and last (automatic?) repair failed
+				1195,
+				//Table upgrade required. Please do "REPAIR TABLE `%s`" to fix it!
+				1459
+			};
+			if (exception.Chain().OfType<MySqlException>().Any(x => codes.Contains(x.Code))) {
+				using (var cmd = new RepairDb()) {
+					cmd.Config = config;
+					cmd.Execute();
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }
