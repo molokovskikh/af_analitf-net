@@ -152,7 +152,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static void SendKey(this FrameworkElement d, Key key)
 		{
-			d.RaiseEvent(KeyArgs(d, key));
+			var args = KeyArgs(d, key);
+			args.RoutedEvent = UIElement.PreviewKeyDownEvent;
+			d.RaiseEvent(args);
+			if (!args.Handled)
+				d.RaiseEvent(KeyArgs(d, key));
 		}
 
 		public static void SendText(this FrameworkElement d, string text)

@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
+using Common.Tools.Calendar;
 using NUnit.Framework;
 using Remotion.Linq.Parsing;
 using Keyboard = System.Windows.Input.Keyboard;
@@ -201,11 +204,13 @@ namespace AnalitF.Net.Test.Integration.Views
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("ProductSynonym") });
 				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("OrderCount") });
 				w.Content = grid;
+				StyleHelper.ApplyStyles(typeof(Offer), grid, resources);
 				grid.ItemsSource = offers;
 				await w.Dispatcher.WaitIdle();
-				var cells = grid.Children().OfType<DataGridCell>().ToArray();
+				var cells = grid.Descendants<DataGridCell>().ToArray();
+				Assert.That(cells.Length, Is.GreaterThan(0));
 				foreach (var cell in cells)
-					Assert.AreEqual("Red", cell.Background.ToString(), cell.ToString());
+					Assert.AreEqual("#FFFF0000", cell.Background.ToString(), ((TextBlock)cell.Content).Text);
 			});
 		}
 
@@ -257,6 +262,35 @@ namespace AnalitF.Net.Test.Integration.Views
 				var inlines = text.Inlines.OfType<Run>().ToArray();
 				Assert.AreEqual("5", inlines[0].Text);
 				Assert.AreEqual("0", inlines[1].Text);
+			});
+		}
+
+		[Test]
+		public void Revert_value_on_incorrect_input()
+		{
+			var waybill = new Waybill(new Address("тест"), new Supplier());
+			var line = new WaybillLine(waybill);
+			line.RetailCost = 150;
+			waybill.AddLine(line);
+			WpfTestHelper.WithWindow2(async w => {
+				var grid = new DataGrid2();
+				grid.IsReadOnly = false;
+				grid.AutoGenerateColumns = false;
+				grid.Columns.Add(new DataGridTextColumnEx { Binding = new Binding("Product") });
+				grid.Columns.Add(new DataGridTextColumnEx { Binding = new Binding("RetailCost") });
+				w.Content = grid;
+				grid.ItemsSource = waybill.Lines;
+				await w.Dispatcher.WaitIdle();
+				var cell = grid.Descendants<DataGridCell>()
+					.First(x => x.Column == grid.Columns[1] && x.DataContext == line);
+				Assert.IsTrue(cell.Focus());
+				cell.SendKey(Key.F2);
+				Assert.IsTrue(cell.IsEditing);
+				var input = cell.Descendants<TextBox>().First();
+				input.SendText("asd");
+				grid.SendKey(Key.Down);
+				Assert.IsFalse(cell.IsEditing);
+				Assert.AreEqual(150, line.RetailCost);
 			});
 		}
 	}

@@ -198,19 +198,21 @@ namespace AnalitF.Net.Client.Views
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Розничная наценка",
-				Binding = new Binding("RetailMarkup"),
+				Binding = new Binding("RetailMarkup") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
 				IsReadOnly = false,
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Реальная наценка",
-				Binding = new Binding("RealRetailMarkup"),
+				Binding = new Binding("RealRetailMarkup") { Converter = InputConverter.Instance, ValidatesOnExceptions = true, },
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
 				IsReadOnly = false,
 			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Розничная цена",
-				Binding = new Binding("RetailCost"),
+				Binding = new Binding("RetailCost") {
+					Converter = InputConverter.Instance, ValidatesOnExceptions = true,
+				},
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
 				IsReadOnly = false,
 			});
@@ -223,7 +225,7 @@ namespace AnalitF.Net.Client.Views
 				Header = "Розничная сумма",
 				Binding = new Binding("RetailSum"),
 				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-				IsReadOnly = false,
+				IsReadOnly = true,
 			});
 
 			var grid = lines;

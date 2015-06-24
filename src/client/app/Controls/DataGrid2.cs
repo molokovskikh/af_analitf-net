@@ -413,5 +413,16 @@ namespace AnalitF.Net.Client.Controls
 					editable.CancelEdit();
 			}
 		}
+
+		protected override void OnExecutedCommitEdit(ExecutedRoutedEventArgs e)
+		{
+			base.OnExecutedCommitEdit(e);
+			var val = (bool)typeof(DataGrid)
+				.GetProperty("HasCellValidationError", BindingFlags.Instance | BindingFlags.NonPublic)
+				.GetValue(this, null);
+			if (val) {
+				CancelEdit();
+			}
+		}
 	}
 }

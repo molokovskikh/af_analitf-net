@@ -170,4 +170,27 @@ namespace AnalitF.Net.Client.Helpers
 			return TypeDescriptor.GetConverter(targetType).ConvertFrom(value);
 		}
 	}
+
+	public class InputConverter : IValueConverter
+	{
+		public static InputConverter Instance = new InputConverter();
+
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return value;
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value == null)
+				return null;
+			targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+			try {
+				return System.Convert.ChangeType(value, targetType, culture);
+			}
+			catch(FormatException) {
+				return System.Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+			}
+		}
+	}
 }

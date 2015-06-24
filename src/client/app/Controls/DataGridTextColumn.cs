@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -36,15 +37,26 @@ namespace AnalitF.Net.Client.Controls
 			set { SetValue(TextAlignmentProperty, value); }
 		}
 
+
 		protected override bool CommitCellEdit(FrameworkElement editingElement)
 		{
-			var result = base.CommitCellEdit(editingElement);
-			if (result) {
+			bool isValid;
+			try {
+				isValid = base.CommitCellEdit(editingElement);
+			}
+			catch(FormatException) {
+				//analitf в случае невозможности преобразовать значение восстанавливает старое
+				//реализуем аналогичное поведение
+				//это единственный разумный способ реализации, все остальное порушит логику работы таблицы
+				isValid = false;
+			}
+
+			if (isValid) {
 				var exp = BindingOperations.GetBindingExpression(editingElement, TextBox.TextProperty);
 				if (exp != null)
 					exp.UpdateSource();
 			}
-			return result;
+			return isValid;
 		}
 
 		public string Name
