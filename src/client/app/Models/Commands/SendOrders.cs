@@ -154,7 +154,7 @@ namespace AnalitF.Net.Client.Models.Commands
 #if DEBUG
 						throw;
 #else
-						log.Error("Ошибка при сохранении заявок", e);
+						Log.Error("Ошибка при сохранении заявок", e);
 #endif
 					}
 				}
