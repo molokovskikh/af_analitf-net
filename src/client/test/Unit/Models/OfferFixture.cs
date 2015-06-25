@@ -3,12 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
-using Microsoft.Win32;
-using NHibernate.Hql.Ast.ANTLR;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI;
-using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Unit
 {
@@ -326,6 +321,13 @@ namespace AnalitF.Net.Test.Unit
 			confirm = false;
 			Validate(true);
 			Assert.IsNull(offer.OrderCount);
+		}
+
+		[Test]
+		public void Calculate_diff()
+		{
+			offer.CalculateDiff(36.23m);
+			Assert.AreEqual(46.56, offer.Diff);
 		}
 
 		private void Validate(bool save = false)

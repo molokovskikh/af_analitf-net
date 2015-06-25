@@ -195,7 +195,7 @@ namespace AnalitF.Net.Client.Models
 			if (cost == ResultCost || cost == 0)
 				return;
 
-			_diff = Math.Round((ResultCost - cost) / cost, 2);
+			_diff = Math.Round((ResultCost - cost) / cost * 100, 2);
 		}
 
 		[Ignore]
