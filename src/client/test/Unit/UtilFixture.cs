@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Text;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using Common.Tools;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Test.Unit
@@ -31,6 +34,14 @@ namespace AnalitF.Net.Test.Unit
 		public void Get_value()
 		{
 			Assert.AreEqual(1, Util.GetValue(new Test { I = 1 }, "I"));
+		}
+
+		[Test]
+		public void Test1()
+		{
+			foreach (var window in Win32.GetWindows()) {
+				Schedule.DumpWindow(window);
+			}
 		}
 	}
 }
