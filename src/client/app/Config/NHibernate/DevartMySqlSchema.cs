@@ -38,21 +38,18 @@ namespace AnalitF.Net.Client.Config.NHibernate
 		public override DataTable GetIndexInfo(string catalog, string schemaPattern, string tableName)
 		{
 			var restrictions = new[] {catalog, tableName, null};
-			var t = Connection.GetSchema("Indexes", restrictions);;
 			return Connection.GetSchema("Indexes", restrictions);
 		}
 
 		public override DataTable GetIndexColumns(string catalog, string schemaPattern, string tableName, string indexName)
 		{
 			var restrictions = new[] {catalog, tableName, indexName, null};
-			var t = Connection.GetSchema("IndexColumns", restrictions);;
 			return Connection.GetSchema("IndexColumns", restrictions);
 		}
 
 		public override DataTable GetForeignKeys(string catalog, string schema, string table)
 		{
 			var restrictions = new[] {catalog, table, null};
-			var t = Connection.GetSchema("ForeignKeyColumns", restrictions);;
 			return Connection.GetSchema("ForeignKeyColumns", restrictions);
 		}
 	}

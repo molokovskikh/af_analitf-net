@@ -95,8 +95,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 
-			var count = session.Query<Offer>().Count(o => o.Price == sourceOrder.Price);
-			if (count == 0) {
+			var anyOffer = session.Query<Offer>().Any(o => o.Price == sourceOrder.Price);
+			if (!anyOffer) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = ((Order)sourceOrder);
 					order.SendResult = OrderResultStatus.Reject;

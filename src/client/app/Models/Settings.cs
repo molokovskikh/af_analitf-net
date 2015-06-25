@@ -99,6 +99,7 @@ namespace AnalitF.Net.Client.Models
 
 		public Settings()
 		{
+			DiffCalcMode = DiffCalcMode.MinCost;
 			WarnIfOrderedYesterday = true;
 			UseSupplierPriceWithNdsForMarkup = false;
 			OverCountWarningFactor = 5;

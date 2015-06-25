@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
@@ -9,8 +8,6 @@ using Common.Tools.Calendar;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
-using Remotion.Linq.Utilities;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -86,7 +83,7 @@ namespace AnalitF.Net.Client.Models
 
 			var id = obj as PriceComposedId;
 			if (id == null)
-				throw new ArgumentTypeException("obj", typeof(PriceComposedId), obj.GetType());
+				throw new Exception(String.Format("Unexpected object type {0} {1}", obj, obj.GetType()));
 
 			if (PriceId != id.PriceId)
 				if (PriceId > id.PriceId)
@@ -267,7 +264,7 @@ namespace AnalitF.Net.Client.Models
 		[Ignore, JsonIgnore]
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
-		private static List<System.Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
+		private static List<Tuple<PriceComposedId, decimal>> OrderStat(DateTime from,
 			Address address, IStatelessSession session)
 		{
 			var addressId = address.Id;

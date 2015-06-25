@@ -41,7 +41,7 @@
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
 
-		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
+		<WrapPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterWrapPanel}">
 			<TextBox x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
 				Style="{StaticResource SearchText}"
@@ -56,7 +56,7 @@
 			</TextBlock>
 			<Button Style="{StaticResource FilterElement}" x:Name="Save">Сохранить</Button>
 			<ContentControl x:Name="AddressSelector" />
-		</StackPanel>
+		</WrapPanel>
 
 		<c:DataGrid2 x:Name="ReportLines" Grid.Row="1" Grid.ColumnSpan="2"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}"

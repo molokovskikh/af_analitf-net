@@ -211,8 +211,7 @@ namespace AnalitF.Net.Client.Models
 					}
 
 					if (table.Name.Match("Offers")){
-						var col = table.ColumnIterator.First(c => c.Name.Match("ProductSynonym"));
-						if (!table.IndexIterator.Any(i => i.ContainsColumn(col))) {
+						if (tableMeta.GetIndexMetadata("ProductSynonym") == null) {
 							alters.Add("alter table Offers add fulltext (ProductSynonym);");
 						}
 					}

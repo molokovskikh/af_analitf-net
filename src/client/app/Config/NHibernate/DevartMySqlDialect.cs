@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 		{
 			get
 			{
-				return true;
+				return false;
 			}
 		}
 	}

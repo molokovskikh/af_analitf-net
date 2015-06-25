@@ -17,7 +17,6 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using NUnit.Framework;
-using Remotion.Linq.Parsing;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;

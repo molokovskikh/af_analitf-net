@@ -8,7 +8,6 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NUnit.Framework;
-using Remotion.Linq.Parsing;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {

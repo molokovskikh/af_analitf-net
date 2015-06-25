@@ -22,7 +22,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<WrapPanel Orientation="Horizontal" Margin="4" FocusManager.IsFocusScope="True">
+		<WrapPanel Style="{StaticResource FilterWrapPanel}">
 			<StackPanel Orientation="Vertical">
 				<Label>Тип</Label>
 				<ComboBox Style="{StaticResource Select}" x:Name="TypeFilter" />

@@ -210,6 +210,12 @@
 		<Setter Property="FocusManager.IsFocusScope" Value="True"/>
 	</Style>
 
+	<Style TargetType="WrapPanel" x:Key="FilterWrapPanel">
+		<Setter Property="Orientation" Value="Horizontal" />
+		<Setter Property="Margin" Value="4" />
+		<Setter Property="FocusManager.IsFocusScope" Value="True"/>
+	</Style>
+
 	<Style TargetType="DockPanel" x:Key="FilterDockPanel">
 		<Setter Property="Margin" Value="4" />
 		<Setter Property="LastChildFill" Value="False" />
