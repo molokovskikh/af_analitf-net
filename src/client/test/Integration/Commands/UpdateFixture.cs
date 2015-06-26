@@ -68,6 +68,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 			Assert.That(localSession.Query<Offer>().Count(x => x.BarCode != null), Is.GreaterThan(0));
 			Assert.That(localSession.Query<Offer>().Count(x => x.Properties != ""), Is.GreaterThan(0));
+			Assert.That(localSession.Query<Offer>().Count(x => x.NDS != null), Is.GreaterThan(0));
 
 			var productId = localSession.Query<Offer>()
 				.Where(o => !o.Junk).GroupBy(o => o.ProductId)

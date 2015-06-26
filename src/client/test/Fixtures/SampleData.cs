@@ -206,6 +206,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				if (random.Next(2) == 0) {
 					core.EAN13 = String.Join("", Enumerable.Range(0, 13).Select(_ => random.Next(9)));
 				}
+				//в 10% случаев есть ндс
+				if (random.Next(9) == 0) {
+					core.NDS = 10;
+				}
 				session.Save(core);
 				core.AddCost((decimal)(random.NextDouble() * maxCost));
 				price.Core.Add(core);

@@ -470,7 +470,8 @@ where
 	core.MaxBoundCost,
 	if(k.Id is null or k.Date < at.PriceDate, core.OptimizationSkip, 1) as OptimizationSkip,
 	core.Exp,
-	products.Properties
+	products.Properties,
+	Core.Nds
 ";
 			sql += offersQueryParts.Select + "\r\n";
 			var query = SqlQueryBuilderHelper.GetFromPartForCoreTable(offersQueryParts, false);
@@ -526,8 +527,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 						OptimizationSkip = reader.GetBoolean(34),
 						Exp = reader.GetNullableDateTime(35),
 						Properties = reader.GetNullableString(36),
+						Nds = reader.GetNullableUInt32(37),
 
-						BuyingMatrixType = reader.GetUInt32(37),
+						BuyingMatrixType = reader.GetUInt32(38),
 					});
 				}
 			}
@@ -580,7 +582,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"BuyingMatrixType",
 				"Exp",
 				"BarCode",
-				"Properties"
+				"Properties",
+				"Nds"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -617,7 +620,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.BuyingMatrixType,
 				o.Exp,
 				o.EAN13,
-				o.Properties
+				o.Properties,
+				o.Nds
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
