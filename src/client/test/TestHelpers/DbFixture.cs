@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		protected CompositeDisposable disposable;
 
+		protected IStatelessSession stateless;
 		protected ISession session;
 		protected Address address;
 		protected User user;
@@ -29,7 +30,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected FileCleaner cleaner;
 
 		private FixtureHelper fixtureHelper;
-		private IStatelessSession stateless;
 
 		[SetUp]
 		public void DbSetup()

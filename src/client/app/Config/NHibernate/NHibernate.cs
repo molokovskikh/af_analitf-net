@@ -63,6 +63,11 @@ namespace AnalitF.Net.Client.Config.NHibernate
 
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
+			//ilmerge
+			//если сборки обединены то логика определения системы протоколирование не работает
+			//нужно вручную настроить ее
+			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
+
 			var mappingDialect = new MySQL5Dialect();
 			var mapper = new ConventionModelMapper();
 			var baseInspector = new SimpleModelInspector();
@@ -251,8 +256,16 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				if (indexes.Any(m => m.MetadataToken == propertyInfo.MetadataToken && m.Module == propertyInfo.Module))
 					customizer.Index(propertyInfo.Name);
 			};
+			mapper.BeforeMapManyToMany += (inspector, member, customizer) => {
+				//myisam не поддерживает внешние ключи
+				customizer.ForeignKey("none");
+			};
 			mapper.BeforeMapBag += (inspector, member, customizer) => {
-				customizer.Key(k => k.Column(member.GetContainerEntity(inspector).Name + "Id"));
+				customizer.Key(k => {
+					k.Column(member.GetContainerEntity(inspector).Name + "Id");
+					//myisam не поддерживает внешние ключи
+					k.ForeignKey("none");
+				});
 			};
 			mapper.BeforeMapManyToOne += (inspector, member, customizer) => {
 				var propertyInfo = ((PropertyInfo)member.LocalMember);
@@ -266,6 +279,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					}
 				}
 				customizer.NotFound(NotFoundMode.Ignore);
+				//myisam не поддерживает внешние ключи
+				customizer.ForeignKey("none");
 			};
 			var assembly = typeof(Offer).Assembly;
 			var types = assembly.GetTypes()

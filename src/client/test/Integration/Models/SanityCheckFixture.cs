@@ -30,6 +30,16 @@ namespace AnalitF.Net.Test.Integration.Models
 		}
 
 		[Test]
+		public void Update_scheam_fix_error()
+		{
+			session.CreateSQLQuery("alter table Offers add fulltext (ProductSynonym);").ExecuteUpdate();
+			check.UpgradeSchema();
+			var create = session.CreateSQLQuery("show create table Offers;")
+				.UniqueResult<object[]>()[1].ToString();
+			Assert.That(create, Is.Not.StringContaining("ProductSynonym_2"), create);
+		}
+
+		[Test]
 		public void Update_column_types()
 		{
 			session.CreateSQLQuery("alter table Settings change column ProxyPort ProxyPort int NOT NULL DEFAULT '0';")

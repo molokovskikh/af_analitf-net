@@ -310,21 +310,15 @@ namespace AnalitF.Net.Client
 			if (NHibernate != null)
 				return;
 
-			//ilmerge
-			//если сборки обединены то логика определения системы протоколирование не работает
-			//нужно вручную настроить ее
-			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
 			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
 
-			using (var sanityCheck = new SanityCheck()) {
-				sanityCheck.Config = Config;
+			using (var sanityCheck = new SanityCheck(Config)) {
 				sanityCheck.Check(Config.Cmd.Match("import"));
 			}
 
 			if (Config.Cmd.Match("repair")) {
-				using(var cmd = new RepairDb()) {
-					cmd.Config = Config;
+				using(var cmd = new RepairDb(Config)) {
 					cmd.Execute();
 				}
 			}

@@ -21,6 +21,22 @@ namespace AnalitF.Net.Client.Models.Commands
 			Fail
 		}
 
+		/// <summary>
+		/// конструктор предназначин для ситуации когда ты используешь готовую инфраструктуру инициализации
+		/// ShellViewModel.RunCmd или Configure.BaseCommand
+		/// </summary>
+		public RepairDb()
+		{
+		}
+
+		/// <summary>
+		/// конструктор предназначен для ситуации когда вызов производится из контекста где нет инфраструктуры инициализации
+		/// </summary>
+		public RepairDb(Config.Config config)
+		{
+			Config = config;
+		}
+
 		public override void Execute()
 		{
 			InitSession();
@@ -110,9 +126,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				1459
 			};
 			if (exception.Chain().OfType<MySqlException>().Any(x => codes.Contains(x.Code))) {
-				using (var cmd = new RepairDb()) {
-					cmd.Config = config;
+				using (var cmd = new RepairDb(config)) {
 					cmd.Execute();
+					//todo - по хорошему нужно проверить статус и если нашли проблемы, нужно известить человека о том что
+					//случилась беда данные были потеряны и отправить на получение каммулятивное обновление
 					return true;
 				}
 			}

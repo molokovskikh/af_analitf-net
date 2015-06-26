@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using Common.NHibernate;
@@ -31,6 +32,15 @@ namespace AnalitF.Net.Client.Models
 	public class SanityCheck : BaseCommand
 	{
 		public bool Debug;
+
+		public SanityCheck()
+		{
+		}
+
+		public SanityCheck(Config.Config config)
+		{
+			Config = config;
+		}
 
 		/// <summary>
 		/// true - если схема была обновлена
@@ -214,6 +224,14 @@ namespace AnalitF.Net.Client.Models
 						if (tableMeta.GetIndexMetadata("ProductSynonym") == null) {
 							alters.Add("alter table Offers add fulltext (ProductSynonym);");
 						}
+						//из-за ошибки в 0.15.0, были созданы дублирующие индексы чистим их
+						var schema = new DevartMySqlSchema(connection);
+						var indexes = schema.GetIndexInfo(tableMeta.Catalog, null, tableMeta.Name).AsEnumerable()
+							.Select(x => new DevartMySQLIndexMetadata(x))
+							.Where(x => Regex.IsMatch(x.Name, @"ProductSynonym_\d+", RegexOptions.IgnoreCase))
+							.ToArray();
+						foreach (var index in indexes)
+							alters.Add(String.Format("alter table {0} drop index {1};", tableMeta.Name, index.Name));
 					}
 
 					if (alters.Count > 0) {
