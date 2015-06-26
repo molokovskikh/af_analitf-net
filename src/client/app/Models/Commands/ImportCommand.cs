@@ -18,6 +18,44 @@ namespace AnalitF.Net.Client.Models.Commands
 			{ "prices", -1 }
 		};
 
+#if DEBUG
+		private static Dictionary<string, string[]> ignoredColumns
+			= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) {
+				{"WaybillLines", new [] {
+					//локальные поля
+					"Print", "Edited",
+					//сертификаты
+					"IsError", "IsDownloaded", "IsCertificateNotFound",
+					//вычисляемые поля, поиск забраковки
+					"IsRejectCanceled", "IsRejectNew", "RejectId",
+					//вычисления розничной цены
+					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost",
+				}},
+				{"Mails",new [] {
+					//локальные поля
+					"IsNew", "IsImportant"
+				}},
+				{"Waybills", new [] {
+					//вычисления розничной цены
+					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error"
+				}},
+				{"Orders", new [] {
+					//локальные поля
+					"Id", "LinesCount", "Sum", "Send", "Frozen", "PersonalComment", "SendResult", "SendError"
+				}},
+				{"SentOrderLines", new [] {
+					//локальные поля
+					"Id", "Comment", "OrderId", "Exp", "Properties", "BuyingMatrixType"
+				}},
+				{"SentOrders", new [] {
+					//локальные поля
+					"Id", "LinesCount", "Sum", "PersonalComment"
+				}}
+			};
+#endif
+
+		public bool Strict = true;
+
 		public ImportCommand(List<System.Tuple<string, string[]>> data)
 		{
 			this.data = data;
@@ -44,7 +82,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Reporter.Progress();
 				}
 				catch (Exception e) {
-					throw new Exception(String.Format("Не могу импортировать {0}", table), e);
+					throw new Exception(String.Format("Не могу импортировать {0}", table.Item1), e);
 				}
 			}
 
@@ -155,9 +193,9 @@ where c.Id is null")
 				return null;
 
 			var sql = "";
-			var meta = table.Item2;
-			if (meta.FirstOrDefault().Match("truncate")) {
-				meta = meta.Skip(1).ToArray();
+			var exportedColumns = table.Item2;
+			if (exportedColumns.FirstOrDefault().Match("truncate")) {
+				exportedColumns = exportedColumns.Skip(1).ToArray();
 				sql += String.Format("TRUNCATE {0}; ", tableName);
 			}
 			else if (tableName.Match("offers")) {
@@ -168,16 +206,67 @@ delete o from Offers o
 where p.IsSynced = 1 or p.PriceId is null;";
 			}
 
-			var columns = meta;
 			//некоторые колонки могут отсутствовать в базе но быть в данных
 			//имена таких колонок заменяем на @<название> что вместо таблицы они попадали
 			//в переменную
-			var targetColumns = columns.Select(c => {
-				if (dbTable.ColumnIterator.Select(cl => cl.Name).Contains(c, StringComparer.OrdinalIgnoreCase))
+			var tableColumns = dbTable.ColumnIterator.Select(cl => cl.Name).ToArray();
+			var targetColumns = exportedColumns.Select(c => {
+				if (tableColumns.Contains(c, StringComparer.OrdinalIgnoreCase))
 					return c;
 				else
 					return "@" + c;
 			}).Implode();
+#if DEBUG
+			if (Strict) {
+				//код для отладки, при тестировании мы должны передавать\принимать все колонки таблицы
+				//проверяем что все колонки котоые есть в таблице передаются с сервера
+				var ignored = new [] {
+					"Timestamp",//нужен для синхронизации не доджен импортироваться
+					"HaveOffers",//всегда вычисляется на стророне клиента
+					"Hidden",//не передается в случае каммулятивного обновления
+					//информация о лидерах вичисляется на клиенте тк не может быть достоверно вычислена на сервере
+					"LeaderPriceId",
+					"LeaderRegionId",
+					"LeaderCost",
+					"MinBoundCost",
+					"MaxBoundCost",
+					"Marked",
+				};
+				if (dbTable.Name.Match("DelayOfPayments") || dbTable.Name.Match("BatchLines")) {
+					ignored = ignored.Concat(new [] { "Id" }).ToArray();
+				}
+				if (dbTable.Name.Match("OrderLines")) {
+					ignored = ignored.Concat(new [] { "Id", "SendError", "SendResult", "OrderId",
+						"NewCost", "OldCost", "OptimalFactor", "NewQuantity", "OldQuantity", "Comment",
+						"BuyingMatrixType",//нет смысла передавать статус матрицы
+						"Properties",//todo не вычисляются исправить
+						"Exp",//todo не сохраняются исправить
+						"ExportId", "ExportBatchLineId"
+					})
+					.ToArray();
+				}
+				if (dbTable.Name.Match("Attachments")) {
+					ignored = ignored.Concat(new [] {
+						//локальные поля
+						"LocalFilename", "IsError", "IsDownloaded"
+					})
+					.ToArray();
+				}
+
+				ignored = ignored.Concat(ignoredColumns.GetValueOrDefault(dbTable.Name, new string[0])).ToArray();
+				var columnsToCheck = tableColumns.Except(ignored, StringComparer.OrdinalIgnoreCase).ToArray();
+				var notFoundInTable = exportedColumns.Except(tableColumns, StringComparer.OrdinalIgnoreCase).ToArray();
+				var notFoundInData = columnsToCheck.Except(exportedColumns, StringComparer.OrdinalIgnoreCase).ToArray();
+				if (notFoundInTable.Length > 0) {
+					throw new Exception(String.Format("В таблице {0} не найдены колонки полученные с сервера {1}",
+						dbTable.Name, notFoundInTable.Implode()));
+				}
+				if (notFoundInData.Length > 0) {
+					throw new Exception(String.Format("В таблице {0} есть колонки которые отсутствуют в данных {1}",
+						dbTable.Name, notFoundInData.Implode()));
+				}
+			}
+#endif
 			sql += String.Format("LOAD DATA INFILE '{0}' REPLACE INTO TABLE {1} ({2})",
 				Path.GetFullPath(table.Item1).Replace("\\", "/"),
 				tableName,

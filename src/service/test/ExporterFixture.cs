@@ -278,7 +278,8 @@ namespace AnalitF.Net.Service.Test
 			var offerData = offers.First();
 			var id = Convert.ToUInt64(offerData[0]);
 			var offer = supplier.Prices[0].Core.First(c => c.Id == id);
-			Assert.AreEqual(offer.Costs[0].Cost * 1.2m, Convert.ToDecimal(offerData[31], CultureInfo.InvariantCulture));
+			var resultCost = Convert.ToDecimal(GetColumnValue("Offers", "Cost", offerData), CultureInfo.InvariantCulture);
+			Assert.AreEqual(offer.Costs[0].Cost * 1.2m, resultCost);
 		}
 
 		[Test]
@@ -338,7 +339,7 @@ where userId = :userId and FirmCode = :supplierId")
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
 			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
-			Assert.AreEqual(120, Convert.ToDecimal(offer[31], CultureInfo.InvariantCulture));
+			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
 
 			//симулируем обновление прайс-листа
 			supplier2.CreateSampleCore(session, new [] { products[0] }, new [] { supplier.Prices[0].Core[0].Producer });
@@ -355,13 +356,24 @@ where userId = :userId and FirmCode = :supplierId")
 			exporter.ExportAll();
 			offers = ParseData("offers").ToArray();
 			offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
-			Assert.AreEqual(120, Convert.ToDecimal(offer[31], CultureInfo.InvariantCulture));
+			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
+		}
+
+		private string GetColumnValue(string table, string column, string[] data)
+		{
+			var meta = exporter.Result
+				.First(r => Path.GetFileName(r.ArchiveFileName).Match(table + ".meta.txt"))
+				.ReadContent()
+				.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+				.Where(x => x != "truncate")
+				.ToArray();
+			return data[meta.IndexOf(column)];
 		}
 
 		private IEnumerable<string[]> ParseData(string name)
 		{
 			return exporter.Result
-				.First(r => Path.GetFileNameWithoutExtension(r.ArchiveFileName).Match(name))
+				.First(r => Path.GetFileName(r.ArchiveFileName).Match(name + ".txt"))
 				.ReadContent()
 				.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
 				.Select(l => l.Split('\t'));

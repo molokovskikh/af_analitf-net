@@ -164,6 +164,7 @@ namespace AnalitF.Net.Test.Integration.Commands
 		[Test]
 		public void Import_after_update()
 		{
+			//todo здесь мы симулируем обновление приложения, это коряво переделать
 			var src = Directory.GetFiles(serviceConfig.ResultPath)
 				.OrderByDescending(l => new FileInfo(l).LastWriteTime)
 				.Last();

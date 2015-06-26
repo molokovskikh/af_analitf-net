@@ -11,15 +11,10 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
-using log4net.Config;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using Test.Support.log4net;
-using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Integration.Commands
 {

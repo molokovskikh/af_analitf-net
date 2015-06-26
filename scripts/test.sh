@@ -4,7 +4,7 @@ set -o errexit
 mkdir output || :
 mkdir output/test || :
 
-mkdir src/client/test/bin/Debug/var ||
+mkdir src/client/test/bin/Debug/var || :
 mkdir src/client/test/bin/Debug/var/service || :
 mkdir src/client/test/bin/Debug/var/service/localexport || :
 

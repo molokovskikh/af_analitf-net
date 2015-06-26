@@ -96,8 +96,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint? NDS { get; set; }
 
-		public virtual string EAN13 { get; set; }
-
 		public virtual string CodeOKP { get; set; }
 
 		public virtual string Series { get; set; }

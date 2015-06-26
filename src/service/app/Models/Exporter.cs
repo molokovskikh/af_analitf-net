@@ -227,7 +227,7 @@ and s.Enable = 1";
 				//если настройка отключена мы все равно должны экспортировать пустую таблицу
 				//тк у клиента опция сначала опция могла быть включена а затем выключена
 				//что бы отключение сработало нужно очистить таблицу
-				Export(Result, "Schedules", new[] { "Id" }, Enumerable.Empty<object[]>());
+				Export(Result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
 			}
 
 			if (cumulative) {
@@ -558,7 +558,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Code",
 				"CodeCr",
 				"Junk",
-				"Await",
 				"Unit",
 				"Volume",
 				"Note",
@@ -566,7 +565,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Doc",
 				"RegistryCost",
 				"ProducerCost",
-				"EAN13",
 				"CodeOKP",
 				"Series",
 				"RequestRatio",
@@ -596,7 +594,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Code,
 				o.CodeCr,
 				o.Junk,
-				o.Await,
 				o.Unit,
 				o.Volume,
 				o.Note,
@@ -604,7 +601,6 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Doc,
 				o.RegistryCost,
 				o.ProducerCost,
-				o.EAN13,
 				o.CodeOKP,
 				o.Series,
 				o.RequestRatio,
@@ -635,7 +631,10 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	s.Name as SupplierName,
 	s.FullName as SupplierFullName,
 	rd.Storage,
-	if(p.DisabledByClient or not p.Actual, 0, (select count(*) from UserSettings.Core c where c.PriceCode = p.PriceCode and c.RegionCode = p.RegionCode)) as PositionCount,
+	if(p.DisabledByClient or not p.Actual,
+		0,
+		(select count(*)
+			from UserSettings.Core c where c.PriceCode = p.PriceCode and c.RegionCode = p.RegionCode)) as PositionCount,
 	convert_tz(p.PriceDate, @@session.time_zone,'+00:00') as PriceDate,
 	rd.OperativeInfo,
 	rd.ContactInfo,
@@ -644,7 +643,10 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	p.FirmCategory as Category,
 	p.DisabledByClient,
 	ifnull(ap.Fresh, 1) IsSynced,
-	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled
+	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled,
+	p.MainFirm as BasePrice,
+	(p.OtherDelay + 100) / 100 as CostFactor,
+	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor
 from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
@@ -1183,8 +1185,6 @@ where a.MailId in ({0})", ids.Implode());
 						"Note",
 						"Period",
 						"Doc",
-						"MinBoundCost",
-						"MaxBoundCost",
 						"VitallyImportant",
 						"RegistryCost",
 						"MaxProducerCost",
@@ -1193,7 +1193,6 @@ where a.MailId in ({0})", ids.Implode());
 						"MinOrderCount",
 						"ProducerCost",
 						"NDS",
-						"EAN13",
 						"CodeOKP",
 						"Series",
 						"ProductSynonym",
@@ -1201,7 +1200,9 @@ where a.MailId in ({0})", ids.Implode());
 						"Cost",
 						"RegionId",
 						"OfferId",
-						"ExportBatchLineId"
+						"ExportBatchLineId",
+						"Junk",
+						"BarCode",
 					},
 					items
 						.Select(i => new object[] {
@@ -1222,8 +1223,6 @@ where a.MailId in ({0})", ids.Implode());
 							i.OfferInfo.Note,
 							i.OfferInfo.Period,
 							i.OfferInfo.Doc,
-							i.OfferInfo.MinBoundCost,
-							i.OfferInfo.MaxBoundCost,
 							i.OfferInfo.VitallyImportant,
 							i.OfferInfo.RegistryCost,
 							maxProducerCost[Tuple.Create(i.ProductId, i.CodeFirmCr)].FirstOrDefault(),
@@ -1232,7 +1231,6 @@ where a.MailId in ({0})", ids.Implode());
 							i.MinOrderCount,
 							i.OfferInfo.ProducerCost,
 							i.OfferInfo.NDS,
-							i.EAN13,
 							i.CodeOKP,
 							i.Series,
 							productSynonymLookup[i.SynonymCode.GetValueOrDefault()].FirstOrDefault(),
@@ -1240,7 +1238,9 @@ where a.MailId in ({0})", ids.Implode());
 							i.Cost,
 							i.Order.RegionCode,
 							i.CoreId,
-							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault()
+							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault(),
+							i.Junk,
+							i.EAN13
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1350,8 +1350,6 @@ select l.ExportId as ExportOrderId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.MinBoundCost,
-	oo.MaxBoundCost,
 	oo.VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
@@ -1360,7 +1358,7 @@ select l.ExportId as ExportOrderId,
 	ol.MinOrderCount,
 	oo.ProducerCost,
 	oo.NDS,
-	ol.EAN13,
+	ol.EAN13 as BarCode,
 	ol.CodeOKP,
 	ol.Series,
 	st.Synonym as ProductSynonym,
@@ -1444,8 +1442,6 @@ select ol.RowId as ServerId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.MinBoundCost,
-	oo.MaxBoundCost,
 	oo.VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
@@ -1454,15 +1450,13 @@ select ol.RowId as ServerId,
 	ol.MinOrderCount,
 	oo.ProducerCost,
 	oo.NDS,
-	ol.EAN13,
+	ol.EAN13 as BarCode,
 	ol.CodeOKP,
 	ol.Series,
 	st.Synonym as ProductSynonym,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
-	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
-	oh.RegionCode as RegionId,
-	ol.CoreId as OfferId
+	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
@@ -1493,7 +1487,7 @@ group by ol.RowId", condition);
 				//мы должны передать LoadedDocuments что бы клиент очистил таблицу
 				Export(Result,
 					"LoadedDocuments",
-					new[] { "Id", "Type", "SupplierId", "OriginFilename" },
+					new[] { "Id", "Type", "SupplierId", "OriginFilename", "IsDocDelivered" },
 					new object[0][]);
 				return;
 			}
