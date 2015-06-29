@@ -24,7 +24,8 @@ namespace AnalitF.Net.Test.Integration.Views
 			session.Save(new Address("Тестовый адрес доставки"));
 			session.DeleteEach<BatchLine>();
 			session.Save(new BatchLine(session.Query<Catalog>().First(), address) {
-				Comment = "test comment"
+				Comment = "test comment",
+				Properties = "Клубничный",
 			});
 
 			WpfTestHelper.WithWindow2(async w => {
@@ -38,12 +39,19 @@ namespace AnalitF.Net.Test.Integration.Views
 				searchCheck.IsChecked = true;
 
 				var grid = view.Descendants<DataGrid>().First(c => c.Name == "ReportLines");
-				var col = DataGridHelper.FindColumn(grid, "Адрес заказа");
-				Assert.AreEqual(col.Visibility, Visibility.Visible);
 				grid.CurrentItem = grid.Items[0];
 				await view.WaitIdle();
+
+				var col = DataGridHelper.FindColumn(grid, "Адрес заказа");
+				Assert.AreEqual(col.Visibility, Visibility.Visible);
 				var comment = view.Descendants<TextBox>().First(c => c.Name == "CurrentReportLine_Value_BatchLine_Comment");
 				Assert.AreEqual("test comment", comment.Text);
+
+				col = DataGridHelper.FindColumn(grid, "Кат.свойства");
+				col.Visibility = Visibility.Visible;
+				await view.WaitIdle();
+				var cell = grid.Descendants<DataGridCell>().First(x => x.Column == col);
+				Assert.AreEqual("Клубничный", cell.Descendants<TextBlock>().First().Text);
 			});
 		}
 	}

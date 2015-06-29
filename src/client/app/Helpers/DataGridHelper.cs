@@ -146,13 +146,19 @@ namespace AnalitF.Net.Client.Helpers
 			}
 			var producerColumn = FindColumn(grid, "Кат.производитель");
 			if (producerColumn != null) {
-				var propertiesColumn = new DataGridTextColumnEx {
-					Header = "Кат.свойства",
-					Binding = new Binding("Properties"),
-					Visibility = Visibility.Collapsed,
-					Width = CalculateWidth(grid, "Кат.свойства"),
-				};
-				grid.Columns.Insert(grid.Columns.IndexOf(producerColumn) + 1, propertiesColumn);
+				var propertiesColumn = FindColumn(grid, "Кат.свойства");
+				if (propertiesColumn == null) {
+					propertiesColumn = new DataGridTextColumnEx {
+						Header = "Кат.свойства",
+						Binding = new Binding("Properties"),
+						Visibility = Visibility.Collapsed,
+						Width = CalculateWidth(grid, "Кат.свойства"),
+					};
+					grid.Columns.Insert(grid.Columns.IndexOf(producerColumn) + 1, propertiesColumn);
+				}
+				else {
+					propertiesColumn.Width = CalculateWidth(grid, "Кат.свойства");
+				}
 			}
 			var col = FindColumn(grid, "Срок годн.");
 			if (col != null) {

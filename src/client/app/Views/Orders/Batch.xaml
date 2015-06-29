@@ -75,6 +75,8 @@
 				<c:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Кат.производитель" Width="*" Binding="{Binding BatchLine.Producer}"
 					Visibility="Collapsed" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Кат.свойства" Binding="{Binding BatchLine.Properties}"
+					Visibility="Collapsed" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Количество" Binding="{Binding BatchLine.Quantity}" />
 				<c:DataGridTextColumnEx Header="Прайс-лист" Binding="{Binding OrderLine.Order.PriceName}" Width="*" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Цена поставщика" Binding="{Binding OrderLine.Cost}" IsReadOnly="True" />
