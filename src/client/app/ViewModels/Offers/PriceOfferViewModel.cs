@@ -152,7 +152,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public PrintResult Print()
 		{
-			var doc = new PriceOfferDocument(Offers.Value, Price, Address);
+			var offers = GetPrintableOffers();
+			var doc = new PriceOfferDocument(offers, Price, Address);
 			return new PrintResult(DisplayName, doc);
 		}
 

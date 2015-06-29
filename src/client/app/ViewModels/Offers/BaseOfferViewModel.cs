@@ -532,5 +532,10 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			OfferCommitted();
 			base.TryClose();
 		}
+
+		protected IList<Offer> GetPrintableOffers()
+		{
+			return GetItemsFromView<Offer>("Offers") ?? Offers.Value;
+		}
 	}
 }

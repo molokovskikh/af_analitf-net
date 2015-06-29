@@ -36,9 +36,7 @@ using Ionic.Zip;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Util;
-using NPOI.HSSF.UserModel;
 using Newtonsoft.Json;
-using NPOI.SS.Formula.Functions;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 using ILog = log4net.ILog;
@@ -731,6 +729,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Persist<T>(NotifyValue<T> value, string key)
 		{
 			persisted.Add(PersistedValue.Create(value, key));
+		}
+
+		public IList<T> GetItemsFromView<T>(string name)
+		{
+			var view = GetView();
+			if (view == null)
+				return null;
+			return ((FrameworkElement)view).Descendants<DataGrid>()
+				.First(g => g.Name == name)
+				.Items
+				.OfType<T>().ToArray();
 		}
 	}
 }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -54,19 +57,19 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Rejects = Begin.Concat(End)
+				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(s => {
-					IsLoading.Value = true;
 					var begin = Begin.Value;
 					var end = End.Value.AddDays(1);
 					var result = s.Query<Reject>()
 						.Where(r => r.LetterDate >= begin && r.LetterDate < end)
 						.OrderBy(r => r.LetterDate)
 						.ToList();
-					IsLoading.Value = false;
 					return result;
 				}))
 				.Switch()
 				.ObserveOn(UiScheduler)
+				.Do(_ => IsLoading.Value = false)
 				.ToValue(CloseCancellation);
 		}
 
@@ -93,11 +96,30 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public PrintResult Print()
 		{
-			IList<Reject> toPrint = StatelessSession.Query<Reject>().Where(r => r.Marked).ToList();
+			IList<Reject> toPrint = StatelessSession.Query<Reject>().Where(r => r.Marked)
+				.OrderBy(r => r.LetterDate).ToList();
 			if (toPrint.Count == 0) {
-				toPrint = Rejects.Value;
+				toPrint = GetItemsFromView<Reject>("Rejects") ?? Rejects.Value;
+			}
+			else {
+				toPrint = ApplySort("Rejects", toPrint);
 			}
 			return new PrintResult(DisplayName, new RejectsDocument(toPrint, ShowCauseReason));
+		}
+
+		private Reject[] ApplySort(string name, IList<Reject> items)
+		{
+			var array = items.ToArray();
+			var view = GetView();
+			if (view == null)
+				return array;
+			var grid = ((FrameworkElement)view).Descendants<DataGrid>().First(g => g.Name == name);
+			var desc = grid.Items.SortDescriptions.FirstOrDefault();
+			if (desc == null || String.IsNullOrEmpty(desc.PropertyName))
+				return array;
+			var direction = desc.Direction == ListSortDirection.Ascending ? SortDirection.Asc : SortDirection.Desc;
+			Array.Sort(array, new PropertyComparer(direction, desc.PropertyName));
+			return array;
 		}
 	}
 }

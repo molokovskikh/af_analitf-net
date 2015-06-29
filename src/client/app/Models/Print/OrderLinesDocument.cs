@@ -49,9 +49,9 @@ namespace AnalitF.Net.Client.Models.Print
 			IEnumerable<object[]> rows;
 
 			if (model.IsCurrentSelected) {
-				var lines = model.Lines;
-				count = lines.Value.Count;
-				sum = lines.Value.Sum(l => l.MixedSum);
+				var lines = model.GetItemsFromView<OrderLine>("Lines") ?? model.Lines.Value;
+				count = lines.Count;
+				sum = lines.Sum(l => l.MixedSum);
 				rows = model.Lines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
@@ -62,9 +62,9 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 			else {
-				var lines = model.SentLines;
-				count = lines.Value.Count;
-				sum = lines.Value.Sum(l => l.MixedSum);
+				var lines = model.GetItemsFromView<SentOrderLine>("SentLines") ?? model.SentLines.Value;
+				count = lines.Count;
+				sum = lines.Sum(l => l.MixedSum);
 				rows = model.SentLines.Value.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,

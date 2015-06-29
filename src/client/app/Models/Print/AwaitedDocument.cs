@@ -5,9 +5,9 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class AwaitedDocument : BaseDocument
 	{
-		private IEnumerable<AwaitedItem> items;
+		private IList<AwaitedItem> items;
 
-		public AwaitedDocument(IEnumerable<AwaitedItem> items)
+		public AwaitedDocument(IList<AwaitedItem> items)
 		{
 			this.items = items;
 		}

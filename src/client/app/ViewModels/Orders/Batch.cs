@@ -513,10 +513,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (ActivePrint.Value.Match("Offers")) {
 				if (CurrentCatalog == null)
 					return null;
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, Offers.Value));
+				var offers = GetPrintableOffers();
+				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, offers));
 			}
 			else if (Address != null) {
-				return new PrintResult(DisplayName, new BatchReport(ReportLines.Value, Address));
+				var lines = GetItemsFromView<BatchLineView>("ReportLines") ?? ReportLines.Value;
+				return new PrintResult(DisplayName, new BatchReport(lines, Address));
 			}
 			return null;
 		}

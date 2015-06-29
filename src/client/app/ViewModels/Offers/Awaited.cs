@@ -115,10 +115,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (ActivePrint.Value.Match("Offers")) {
 				if (CurrentCatalog == null)
 					return null;
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, Offers.Value));
+				var offers = GetPrintableOffers();
+				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, offers));
 			}
 			else if (Address != null) {
-				return new PrintResult(DisplayName, new AwaitedDocument(Items.Value));
+				var items = GetItemsFromView<AwaitedItem>("Items") ?? Items.Value;
+				return new PrintResult(DisplayName, new AwaitedDocument(items));
 			}
 			return null;
 		}

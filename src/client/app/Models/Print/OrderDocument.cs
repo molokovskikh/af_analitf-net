@@ -11,9 +11,9 @@ namespace AnalitF.Net.Client.Models.Print
 	public class OrderDocument : BaseDocument
 	{
 		public IOrder Order;
-		public IOrderLine[] Lines;
+		public IList<IOrderLine> Lines;
 
-		public OrderDocument(IOrder order, IOrderLine[] lines)
+		public OrderDocument(IOrder order, IList<IOrderLine> lines)
 		{
 			Order = order;
 			Lines = lines;

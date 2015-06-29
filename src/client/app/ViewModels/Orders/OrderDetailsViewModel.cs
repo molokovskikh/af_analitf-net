@@ -156,8 +156,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public PrintResult Print()
 		{
 			//порядок сортировки должен быть такой же как в таблице
-			var lines = ((FrameworkElement)GetView()).Descendants<DataGrid>()
-				.First(g => g.Name == "Lines").Items.OfType<IOrderLine>().ToArray();
+			var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;
 			return new PrintResult(DisplayName, new OrderDocument(Order, lines));
 		}
 
