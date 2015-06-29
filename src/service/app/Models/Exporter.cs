@@ -1156,10 +1156,15 @@ where a.MailId in ({0})", ids.Implode());
 					.Read("select * from Usersettings.MaxProducerCosts")
 					.ToLookup(r => Tuple.Create((uint)r["ProductId"], r.GetNullableUInt32("ProducerId")), r => r.GetNullableDecimal("Cost"));
 
-				var catalogIdLookup = connection
-					.Read(String.Format("select Id, CatalogId from Catalogs.Products where Id in ({0})",
-						items.Select(i => i.ProductId).DefaultIfEmpty(0u).Implode()))
-					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Convert.ToUInt32(r["CatalogId"]));
+				var productIds = items.Select(i => i.ProductId);
+				if (BatchItems != null)
+					productIds = productIds.Concat(BatchItems.Where(x => x.Item != null).Select(i => i.Item.ProductId));
+				productIds = productIds.Distinct().ToArray();
+
+				var productLookup = connection
+					.Read(String.Format("select Id, CatalogId, Properties from Catalogs.Products where Id in ({0})",
+						productIds.DefaultIfEmpty(0u).Implode()))
+					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Tuple.Create(r["CatalogId"], r["Properties"]));
 
 				var orderbatchLookup = (from batch in (BatchItems ?? new List<OrderBatchItem>())
 					where batch.Item != null
@@ -1210,7 +1215,7 @@ where a.MailId in ({0})", ids.Implode());
 							i.RowId,
 							i.Quantity,
 							i.ProductId,
-							catalogIdLookup[i.ProductId].FirstOrDefault(),
+							productLookup[i.ProductId].Select(x => x.Item1).FirstOrDefault(),
 							i.SynonymCode,
 							producerLookup[i.CodeFirmCr.GetValueOrDefault()].FirstOrDefault(),
 							i.CodeFirmCr,
@@ -1240,7 +1245,7 @@ where a.MailId in ({0})", ids.Implode());
 							i.CoreId,
 							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault(),
 							i.Junk,
-							i.EAN13
+							i.EAN13,
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1262,6 +1267,7 @@ where a.MailId in ({0})", ids.Implode());
 							"Status",
 							"Priority",
 							"BaseCost",
+							"Properties",
 							"ServiceFields",
 						},
 						BatchItems.Select(i => new object[] {
@@ -1281,6 +1287,7 @@ where a.MailId in ({0})", ids.Implode());
 							i.Item == null ? (int)ItemToOrderStatus.NotOrdered : (int)i.Item.Status,
 							i.Priority,
 							i.BaseCost,
+							i.Item != null ? productLookup[i.Item.ProductId].Select(x => x.Item2).FirstOrDefault() : null,
 							JsonConvert.SerializeObject(i.ServiceValues)
 						}), truncate: false);
 				}

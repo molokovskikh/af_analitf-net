@@ -206,6 +206,11 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ServiceFields { get; set; }
 		public virtual uint? ExportId { get; set; }
 
+		/// <summary>
+		/// каталожные свойства товара с которым было произведено сопоставление
+		/// </summary>
+		public virtual string Properties { get; set; }
+
 		public virtual string HasProducerLabel
 		{
 			get { return ProducerId == null ? "Нет" : "Да"; }
