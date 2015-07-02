@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +16,18 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using Common.Tools;
+using Diadoc.Api;
+using Diadoc.Api.Cryptography;
+using Diadoc.Api.Proto.Documents;
+using Diadoc.Api.Proto.Documents.NonformalizedDocument;
+using Diadoc.Api.Proto.Events;
 using Ionic.Zip;
 using log4net;
 using log4net.Config;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
+using AggregateException = System.AggregateException;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -120,6 +129,24 @@ namespace AnalitF.Net.Client.Models.Commands
 			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
+			try {
+				LoadDiadok();
+			}
+			catch(WebException e) {
+				Log.Error("Ошибка при обращении к Диадок", e);
+				var http = e.Response as HttpWebResponse;
+				if (http != null && (int)http.StatusCode == 401) {
+					Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Введены некорректные учетные данные."));
+				}
+				else {
+					Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Попробуйте повторить операцию позднее."));
+				}
+			}
+			catch(Exception e) {
+				Log.Error("Ошибка при обращении к Диадок", e);
+				Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Попробуйте повторить операцию позднее."));
+			}
+
 			var result = ProcessUpdate(Config.ArchiveFile);
 			Log.InfoFormat("Обновление завершено успешно");
 
@@ -472,16 +499,13 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		private static List<string> Move(string source, string destination)
 		{
 			var files = new List<string>();
-			if (Directory.Exists(source)) {
-				Directory.CreateDirectory(destination);
-
-				foreach (var file in Directory.GetFiles(source)) {
-					var dst = Path.Combine(destination, Path.GetFileName(file));
-					if (File.Exists(dst))
-						File.Delete(dst);
-					File.Move(file, dst);
-					files.Add(dst);
-				}
+			Directory.CreateDirectory(destination);
+			foreach (var file in Directory.GetFiles(source)) {
+				var dst = Path.Combine(destination, Path.GetFileName(file));
+				if (File.Exists(dst))
+					File.Delete(dst);
+				File.Move(file, dst);
+				files.Add(dst);
 			}
 			return files;
 		}
@@ -620,6 +644,112 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				cleaner.Dispose();
 			});
 			return post;
+		}
+
+		public void LoadDiadok()
+		{
+			var settings = Session.Query<Settings>().First();
+			if (String.IsNullOrEmpty(settings.DiadokUsername) || String.IsNullOrEmpty(settings.DiadokPassword))
+				return;
+			var api = new DiadocApi(Config.DiadokApiKey, Config.DiadokUrl, new WinApiCrypt());
+			var token = api.Authenticate(settings.DiadokUsername, settings.DiadokPassword);
+
+			var toSing = Session.Query<Waybill>().Where(x => x.DocType == DocType.Diadok && x.IsSign && !x.IsSigned)
+				.ToArray();
+			foreach (var waybill in toSing) {
+				var patch = new MessagePatchToPost {
+					BoxId = waybill.DiadokBoxId,
+					MessageId = waybill.DiadokMessageId
+				};
+				patch.AddSignature(new DocumentSignature {
+					ParentEntityId = waybill.DiadokEnityId,
+					SignWithTestSignature = true
+				});
+				Log.InfoFormat("Попытка подписать вложение {0} документа {1}", waybill.DiadokEnityId, waybill.DiadokMessageId);
+				try {
+					api.PostMessagePatch(token, patch);
+					waybill.IsSigned = true;
+					var fullname = waybill.TryGetFile(settings);
+					Session.Save(new JournalRecord {
+						CreateAt = DateTime.Now,
+						Name = String.Format("Подписан документ Диадок {0}", waybill.Filename),
+						Filename = fullname
+					});
+					Log.InfoFormat("Подписано вложение {0} документа {1}", waybill.DiadokEnityId, waybill.DiadokMessageId);
+				}
+				catch(WebException e) {
+					var http = e.Response as HttpWebResponse;
+					if (http != null && (int)http.StatusCode == 409) {
+						Log.Warn(String.Format("Не удалось подписать документ {0}. Документ уже подписан.", waybill.Filename), e);
+						Results.Add(MessageResult.Error("Не удалось подписать документ {0}. Документ уже подписан.", waybill.Filename));
+					}
+					else {
+						throw;
+					}
+				}
+			}
+
+			var boxes = api.GetMyOrganizations(token).Organizations.SelectMany(x => x.Boxes);
+			foreach (var box in boxes) {
+				var documentsFilter = new DocumentsFilter {
+					FilterCategory = "Any.Inbound",
+					BoxId = box.BoxId,
+					SortDirection = "Descending"
+				};
+
+				DocumentList documents;
+				do {
+					documents = api.GetDocuments(token, documentsFilter);
+					var endFound = false;
+					foreach (var doc in documents.Documents.Where(x => !x.IsDeleted)) {
+						documentsFilter.AfterIndexKey = doc.IndexKey;
+						if (Session.Query<Waybill>().Any(x => x.DiadokMessageId == doc.MessageId)) {
+							endFound = true;
+							break;
+						}
+
+						var supplier = Session.Query<Supplier>().FirstOrDefault(x => x.DiadokOrgId == doc.CounteragentBoxId);
+						var message = api.GetMessage(token, box.BoxId, doc.MessageId);
+						var files = message.Entities
+							.Where(e => e.EntityType == EntityType.Attachment
+								&& !String.IsNullOrEmpty(e.FileName)
+								&& e.AttachmentType == AttachmentType.Nonformalized);
+						foreach (var file in files) {
+							var waybill = new Waybill {
+								DiadokMessageId = doc.MessageId,
+								DiadokBoxId = box.BoxId,
+								DiadokEnityId = file.EntityId,
+								DocType = DocType.Diadok,
+								Filename = file.FileName,
+								//подписывать надо только если документ не был подписан ранее и требует подписи
+								IsSigned = doc.NonformalizedDocumentMetadata.DocumentStatus
+									!= NonformalizedDocumentStatus.InboundWaitingForRecipientSignature,
+								IsNew = true,
+								WriteTime = DateTime.Now,
+								ProviderDocumentId = String.IsNullOrEmpty(doc.CustomDocumentId) ? doc.MessageId : doc.CustomDocumentId,
+								DocumentDate = NullableConvert.ToDateTime(doc.DocumentDate).GetValueOrDefault(doc.CreationTimestamp),
+								Supplier = supplier,
+								UserSupplierName = supplier == null ? message.FromTitle : null,
+							};
+							Session.Save(waybill);
+							var path = settings.MapPath("Waybills");
+							Directory.CreateDirectory(path);
+							var fullname = Path.Combine(path, waybill.Id + "_" + FileHelper.StringToFileName(file.FileName));
+							if (fullname.Length > 260)
+								fullname = Path.Combine(path, waybill.Id + Path.GetExtension(file.FileName));
+							File.WriteAllBytes(fullname, file.Content.Data);
+							Log.InfoFormat("Получен документ Диадок {0} файл {1}", doc.MessageId, file.FileName);
+							Session.Save(new JournalRecord {
+								CreateAt = DateTime.Now,
+								Name = String.Format("Загружен документ Диадок {0}", file.FileName),
+								Filename = fullname
+							});
+						}
+					}
+					if (endFound)
+						break;
+				} while (documents.TotalCount > documents.Documents.Count);
+			}
 		}
 	}
 }

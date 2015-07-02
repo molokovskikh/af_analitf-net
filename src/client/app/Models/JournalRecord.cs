@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using NHibernate;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -15,11 +15,13 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
-		public JournalRecord(Loadable loadable)
+		public JournalRecord(Loadable loadable, string name, string filename)
 		{
 			CreateAt = DateTime.Now;
 			RecordId = loadable.GetId();
 			RecordType = NHibernateUtil.GetClass(loadable).Name;
+			Name = name;
+			Filename = filename;
 		}
 
 		public virtual uint Id { get; set; }
@@ -34,7 +36,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				if (String.IsNullOrEmpty(Filename))
+				if (String.IsNullOrEmpty(Filename) || !File.Exists(Filename))
 					return null;
 
 				var icon = Icon.ExtractAssociatedIcon(Filename);

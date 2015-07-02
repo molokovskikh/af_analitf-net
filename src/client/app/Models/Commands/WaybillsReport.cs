@@ -9,10 +9,16 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
-	public class WaybillsReport : DbCommand
+	public class WaybillsReport : DbCommand<string>
 	{
+		public WaybillsReport(Config.Config config)
+		{
+			Config = config;
+		}
+
 		public override void Execute()
 		{
+			EnsureInit();
 			var end = DateTime.Today.FirstDayOfWeek();
 			var begin = end.AddDays(-7);
 			var period = end.ToShortDateString();
@@ -33,7 +39,7 @@ group by r.DrugID")
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.MapPath("Reports");
 			Directory.CreateDirectory(dir);
-			var filename = Path.Combine(dir, FileHelper.StringToFileName(String.Format("Росздравнадзор-{0}.xls", period)));
+			Result = Path.Combine(dir, FileHelper.StringToFileName(String.Format("Росздравнадзор-{0}.xls", period)));
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Отчет");
 			var reportRow = sheet.CreateRow(0);
@@ -55,22 +61,8 @@ group by r.DrugID")
 					reportRow.CreateCell(j).SetCellValue(row[j].ToString());
 				}
 			}
-			using(var stream = File.Create(filename))
+			using(var stream = File.Create(Result))
 				book.Write(stream);
-		}
-
-		public Task ToTask(Config.Config config)
-		{
-			var task = new Task(() => {
-				using(var session = Factory.OpenSession())
-				using(var stateless = Factory.OpenStatelessSession()) {
-					Config = config;
-					Session = session;
-					StatelessSession = stateless;
-					Execute();
-				}
-			});
-			return task;
 		}
 	}
 }

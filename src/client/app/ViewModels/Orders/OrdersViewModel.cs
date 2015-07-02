@@ -496,13 +496,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				}
 			});
 
-			yield return new Models.Results.TaskResult(task, new WaitViewModel("Выполнение операции, подождите."));
-
-			if (task.IsFaulted)
-				Log.Error(String.Format("Ошибка при выполнение команды {0}", command), task.Exception);
-
+			yield return new Models.Results.TaskResult(task);
 			Update();
-
 			var text = command.Result as string;
 			if (!String.IsNullOrEmpty(text))
 				yield return new DialogResult(new TextViewModel(text));

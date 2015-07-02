@@ -80,6 +80,9 @@
     <Reference Include="ProductionStackTrace">
       <HintPath>..\..\..\packages\ProductionStackTrace.1.0.16\lib\net40\ProductionStackTrace.dll</HintPath>
     </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\..\..\..\..\tmp\C#\References\protobuf-net\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="reactiveui">
       <SpecificVersion>False</SpecificVersion>
@@ -772,6 +775,10 @@
     <Resource Include="Assets\images\Download_32.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\tmp\C#\DiadocApi\DiadocApi.csproj">
+      <Project>{992AFD96-B3EE-4124-8788-022F867E2EF0}</Project>
+      <Name>DiadocApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Common.MySql\Common.MySql\Common.MySql.csproj">
       <Project>{8A680813-C83B-497A-85E6-E8F07B7D7650}</Project>
       <Name>Common.MySql</Name>

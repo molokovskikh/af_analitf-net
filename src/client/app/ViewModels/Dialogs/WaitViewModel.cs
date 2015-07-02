@@ -9,6 +9,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public WaitViewModel()
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
+			if (String.IsNullOrEmpty(Text))
+				Text = "Выполнение операции, подождите.";
 			GenericErrorMessage = "Не удалось выполнить операцию. Обратитесь в АК\"Инфорум\".";
 			Cancellation = new CancellationTokenSource();
 		}

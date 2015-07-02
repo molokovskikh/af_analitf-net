@@ -5,6 +5,25 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Models.Results
 {
+	public class SelectResult : IResult
+	{
+		public string Filename;
+
+		public SelectResult(string filename)
+		{
+			Filename = filename;
+		}
+
+		public void Execute(ActionExecutionContext context)
+		{
+			Process.Start("explorer.exe", String.Format("/select,{0}", Filename));
+			if (Completed != null)
+				Completed(this, new ResultCompletionEventArgs());
+		}
+
+		public event EventHandler<ResultCompletionEventArgs> Completed;
+	}
+
 	public class OpenResult : IResult
 	{
 		public string Filename;

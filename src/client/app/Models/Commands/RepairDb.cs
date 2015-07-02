@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public override void Execute()
 		{
-			InitSession();
+			EnsureInit();
 			var tables = TableNames().ToArray();
 			Reporter.Weight(tables.Length);
 			var results = new List<RepairStatus>();

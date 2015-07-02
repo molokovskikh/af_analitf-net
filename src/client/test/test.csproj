@@ -72,6 +72,10 @@
     <Reference Include="npoi" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFrameWork" />
+    <Reference Include="protobuf-net, Version=1.0.0.282, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\tmp\C#\References\protobuf-net\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="ReactiveUI" />
     <Reference Include="ReactiveUI.Routing">
@@ -290,6 +294,10 @@
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\tmp\C#\DiadocApi\DiadocApi.csproj">
+      <Project>{992AFD96-B3EE-4124-8788-022F867E2EF0}</Project>
+      <Name>DiadocApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>app</Name>

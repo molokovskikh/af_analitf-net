@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Runtime.Serialization;
 using System.Windows.Controls;
-using System.Windows.Forms;
-using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
-using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using Color = System.Drawing.Color;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -27,9 +21,12 @@ namespace AnalitF.Net.Client.ViewModels
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
 		private static string lastTab;
+		private string password;
+		private bool passwordUpdated;
+		private string diadokPassword;
+		private bool diadokPasswordUpdated;
+
 		public bool IsCredentialsChanged;
-		private bool _passwordUpdated;
-		private string _password;
 
 		public SettingsViewModel()
 		{
@@ -47,7 +44,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Session.FlushMode =  FlushMode.Never;
 			DisplayName = "Настройка";
 
-			_password = new string(Enumerable.Repeat('*', Settings.Value.Password != null ? Settings.Value.Password.Length : 0).ToArray());
+			password = Mask(Settings.Value.Password);
+			diadokPassword = Mask(Settings.Value.DiadokPassword);
 
 			waybillConfig = Settings.Value.Waybills;
 			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -84,11 +82,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public string Password
 		{
-			get { return _password; }
+			get { return password; }
 			set
 			{
-				_passwordUpdated = true;
-				_password = value;
+				passwordUpdated = true;
+				password = value;
+			}
+		}
+
+		public string DiadokPassword
+		{
+			get { return diadokPassword; }
+			set
+			{
+				diadokPasswordUpdated = true;
+				diadokPassword = value;
 			}
 		}
 
@@ -119,6 +127,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+
+		private static string Mask(string password1)
+		{
+			return new string(Enumerable.Repeat('*', (password1 ?? "").Length).ToArray());
+		}
 
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
@@ -182,9 +195,10 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			if (_passwordUpdated) {
-				Settings.Value.Password = _password;
-			}
+			if (passwordUpdated)
+				Settings.Value.Password = password;
+			if (diadokPasswordUpdated)
+				Settings.Value.DiadokPassword = diadokPassword;
 
 			if (App.Current != null)
 				StyleHelper.BuildStyles(App.Current.Resources, Styles);

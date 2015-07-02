@@ -292,10 +292,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			IsDownloaded = true;
 			CertificateFiles.Add(new CertificateFile(localFileName));
-			return new JournalRecord(this) {
-				Name = String.Format("Сертификаты для {0} серия {1}", Product, SerialNumber),
-				Filename = localFileName,
-			};
+			return new JournalRecord(this,
+				String.Format("Сертификаты для {0} серия {1}", Product, SerialNumber),
+				localFileName);
 		}
 
 		public override IEnumerable<string> GetFiles()

@@ -106,6 +106,8 @@ namespace AnalitF.Net.Client.Config
 		public Uri BaseUrl;
 		public TimeSpan RequestInterval = TimeSpan.FromSeconds(15);
 		public string RootDir;
+		public string DiadokApiKey;
+		public string DiadokUrl;
 #if DEBUG
 		public bool IsUnitTesting;
 		public bool SkipOpenSession;

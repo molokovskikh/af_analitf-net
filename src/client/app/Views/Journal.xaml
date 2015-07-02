@@ -18,10 +18,17 @@
 						<Grid.RowDefinitions>
 							<RowDefinition Height="Auto" />
 							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
 						</Grid.RowDefinitions>
-						<Image Source="{Binding FileTypeIcon}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />
+						<Image Source="{Binding FileTypeIcon}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" />
 						<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
 						<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CreateAt}" Foreground="Gray" />
+						<TextBlock Grid.Row="2" Grid.Column="1"
+							cal:Message.Attach="[Event PreviewMouseDown] = [Action Show($dataContext)]">
+							<Hyperlink>
+								Показать в папке
+							</Hyperlink>
+						</TextBlock>
 					</Grid>
 				</DataTemplate>
 			</ListView.ItemTemplate>

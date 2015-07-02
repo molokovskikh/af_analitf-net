@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -16,6 +18,9 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Diadoc.Api;
+using Diadoc.Api.Cryptography;
+using Diadoc.Api.Proto.Events;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -31,11 +36,15 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Все")] All,
 		[Description("Накладная")] Waybills,
 		[Description("Отказ")] Rejects,
+		[Description("Диадок")] Diadok
 	}
 
 
 	public class WaybillsViewModel : BaseScreen
 	{
+		private DiadocApi api;
+		private string token;
+
 		public WaybillsViewModel()
 		{
 			DisplayName = "Документы";
@@ -52,10 +61,14 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
+			CanSign = new NotifyValue<bool>();
+			CurrentWaybill.Select(x => x != null && x.DocType == DocType.Diadok && !x.IsSigned)
+				.Subscribe(CanSign);
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
 		}
 
+		public NotifyValue<bool> CanSign { get; set; }
 		public IList<Selectable<Supplier>> Suppliers { get; set; }
 
 		[Export]
@@ -151,15 +164,25 @@ namespace AnalitF.Net.Client.ViewModels
 			return ExcelExporter.Export(book);
 		}
 
-		public void EnterWaybill()
+		public IEnumerable<IResult> EnterWaybill()
 		{
-			if (CurrentWaybill.Value == null)
-				return;
+			var waybill = CurrentWaybill.Value;
+			if (waybill == null)
+				yield break;
+			if (waybill.DocType == DocType.Diadok) {
+				var file = waybill.TryGetFile(Settings.Value);
+				if (file == null) {
+					yield return MessageResult.Error("Файл Диадок не найден.");
+					yield break;
+				}
+				yield return new OpenResult(file);
+				yield break;
+			}
 
-			if (CurrentWaybill.Value.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
-				Shell.Navigate(new OrderRejectDetails(CurrentWaybill.Value.Id));
+			if (waybill.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
+				Shell.Navigate(new OrderRejectDetails(waybill.Id));
 			else
-				Shell.Navigate(new WaybillDetails(CurrentWaybill.Value.Id));
+				Shell.Navigate(new WaybillDetails(waybill.Id));
 		}
 
 		public void SearchLine()
@@ -205,12 +228,16 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
 			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
 				query = query.Where(w => w.DocType == DocType.Reject);
+			else if (TypeFilter.Value == DocumentTypeFilter.Diadok)
+				query = query.Where(w => w.DocType == DocType.Diadok);
 
-			Waybills.Value = query
+			var docs = query
 				.OrderByDescending(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
 				.Fetch(w => w.Address)
 				.ToObservableCollection();
+
+			Waybills.Value = docs;
 			Waybills.Value.Each(w => w.CalculateStyle(Address));
 		}
 
@@ -218,22 +245,25 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (Address == null)
 				yield break;
-			var waybill = new Waybill {
-				Address = Address,
-				WriteTime = DateTime.Now,
-				DocumentDate = DateTime.Now,
-				IsCreatedByUser = true
-			};
+			var waybill = new Waybill(Address);
 			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();
 		}
 
+		public void Sign()
+		{
+			if (!CanSign.Value)
+				return;
+
+			StatelessSession.Update(CurrentWaybill.Value);
+		}
+
 		public IEnumerable<IResult> RegulatorReport()
 		{
-			var commnand = new WaybillsReport();
-			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config), new WaitViewModel("Выполнение операции, подождите."));
-			yield return new OpenResult(Settings.Value.MapPath("Reports"));
+			var commnand = new WaybillsReport(Shell.Config);
+			yield return new Models.Results.TaskResult(commnand.ToTask());
+			yield return new SelectResult(commnand.Result);
 		}
 	}
 }

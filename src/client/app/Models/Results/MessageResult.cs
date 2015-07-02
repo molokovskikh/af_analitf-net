@@ -32,6 +32,11 @@ namespace AnalitF.Net.Client.Models.Results
 			return new MessageResult(message, MessageType.Error);
 		}
 
+		public static MessageResult Error(string message, params object[] args)
+		{
+			return new MessageResult(String.Format(message, args), MessageType.Error);
+		}
+
 		public void Execute(ActionExecutionContext context)
 		{
 			var manager = (WindowManager)IoC.Get<IWindowManager>();

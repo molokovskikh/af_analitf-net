@@ -216,6 +216,22 @@ namespace AnalitF.Net.Client
 
 		public void InitApp()
 		{
+			foreach (var key in ConfigurationManager.AppSettings.AllKeys) {
+				var value = ConfigurationManager.AppSettings[key];
+				try {
+					var property = Config.GetType().GetField(key);
+					if (property == null)
+						continue;
+					property.SetValue(Config, value);
+				}
+				catch(Exception e) {
+#if DEBUG
+					throw;
+#else
+					log.Warn(String.Format("Не удалось считать параметр '{0}'='{1}'", key, value), e);
+#endif
+				}
+			}
 			if (ConfigurationManager.AppSettings["Uri"] != null)
 				Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
 

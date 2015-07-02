@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using NHibernate;
 using NHibernate.Cfg;
 using log4net;
@@ -36,7 +37,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		protected void InitSession()
+		protected void EnsureInit()
 		{
 			if (StatelessSession == null)
 				Disposable.Add(StatelessSession = Factory.OpenStatelessSession());
@@ -84,6 +85,17 @@ namespace AnalitF.Net.Client.Models.Commands
 		public T Result;
 
 		public abstract void Execute();
+
+		public Task<T> ToTask()
+		{
+			var task = new Task<T>(() => {
+				using (this) {
+					Execute();
+					return Result;
+				}
+			});
+			return task;
+		}
 	}
 
 	public abstract class DbCommand : DbCommand<object>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
@@ -32,6 +33,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult Open(JournalRecord record)
 		{
 			return new OpenResult(record.Filename);
+		}
+
+		public IResult Show(JournalRecord record)
+		{
+			return new SelectResult(record.Filename);
 		}
 	}
 }

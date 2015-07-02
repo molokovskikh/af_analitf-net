@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -8,6 +10,10 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
+using Diadoc.Api;
+using Diadoc.Api.Cryptography;
+using Diadoc.Api.Proto.Events;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
@@ -105,6 +111,60 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			task.Task.Wait();
 			var open = Next<OpenResult>(result);
 			Assert.That(Directory.GetFiles(open.Filename)[0], Is.StringContaining("Росздравнадзор"));
+		}
+
+		[Test]
+		public void diadoc()
+		{
+			var api = new DiadocApi(ConfigurationManager.AppSettings["DiadokApi"], "https://diadoc-api.kontur.ru", new WinApiCrypt());
+			var token = api.Authenticate(ConfigurationManager.AppSettings["DiadokLogin"], ConfigurationManager.AppSettings["DiadokPassword"]);
+			var boxes = api.GetMyOrganizations(token).Organizations.SelectMany(x => x.Boxes);
+			foreach (var box in boxes) {
+				var ev = api.GetNewEvents(token, box.BoxId).Events;
+				foreach (var e in ev) {
+					Console.WriteLine("{3} {2} - {0} {1}", e.MessageId, e.Message != null ? e.Message.FromTitle : "<null>", e.Timestamp, e.EventId);
+					foreach (var entity in e.Entities) {
+						Console.WriteLine(entity);
+					}
+				}
+			}
+		}
+
+		[Test]
+		public void diadoc1()
+		{
+			var api = new DiadocApi(ConfigurationManager.AppSettings["DiadokApi"], "https://diadoc-api.kontur.ru", new WinApiCrypt());
+			var token = api.Authenticate(ConfigurationManager.AppSettings["DiadokLogin"], ConfigurationManager.AppSettings["DiadokPassword"]);
+			//var user = api.GetMyUser(token);
+			Console.WriteLine(api.GetMessage(token, "99f634490f4e469da56dd47b724eba81@diadoc.ru", "02a73097-27e6-4f5f-841e-f6b3ef7d1c65", "1be8e8f2-b513-4911-ab61-f0cc83b02391"));
+			//var patch = new MessagePatchToPost
+			//{
+			//	BoxId = "99f634490f4e469da56dd47b724eba81@diadoc.ru",
+			//	MessageId = "02a73097-27e6-4f5f-841e-f6b3ef7d1c65",
+			//};
+			//patch.AddSignature(new DocumentSignature {
+			//	ParentEntityId = "1be8e8f2-b513-4911-ab61-f0cc83b02391",
+			//	//Signature = new byte[0],
+			//	SignWithTestSignature = true
+			//});
+			//api.PostMessagePatch(token, patch);
+			var boxes = api.GetMyOrganizations(token).Organizations.SelectMany(x => x.Boxes);
+			foreach (var box in boxes) {
+				Console.WriteLine("box id = {0}", box.BoxId);
+				var docs = api.GetDocuments(token, new DocumentsFilter {
+					BoxId = box.BoxId,
+					FilterCategory = "Any.Inbound"
+				});
+				foreach (var doc in docs.Documents) {
+					Console.WriteLine(JsonConvert.SerializeObject(doc, Formatting.Indented));
+					var m = api.GetMessage(token, box.BoxId, doc.MessageId);
+					//Console.WriteLine(m.MessageId);
+					//foreach (var entity in m.Entities) {
+					//	Console.WriteLine("{0} {1} {2} {3}", entity.EntityId, entity.EntityType, entity.AttachmentType, entity.FileName);
+					//}
+					Console.WriteLine(JsonConvert.SerializeObject(m, Formatting.Indented));
+				}
+			}
 		}
 	}
 }

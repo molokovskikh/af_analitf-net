@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
@@ -9,13 +10,15 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class TaskResult : IResult
 	{
-		public Task Task;
-		WaitViewModel viewModel;
+		private log4net.ILog log = log4net.LogManager.GetLogger(typeof(TaskResult));
+		private WaitViewModel viewModel;
 
-		public TaskResult(Task task, WaitViewModel viewModel)
+		public Task Task;
+
+		public TaskResult(Task task, WaitViewModel viewModel = null)
 		{
 			this.Task = task;
-			this.viewModel = viewModel;
+			this.viewModel = viewModel ?? new WaitViewModel();
 		}
 
 		public void Execute(ActionExecutionContext context)
@@ -26,6 +29,8 @@ namespace AnalitF.Net.Client.Models.Results
 			else
 				scheduler = TaskScheduler.Current;
 			Task.ContinueWith(t => {
+				if (t.IsFaulted)
+					log.Error("Выполнение задачи завершилось ошибкой", t.Exception);
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
 			}, scheduler);

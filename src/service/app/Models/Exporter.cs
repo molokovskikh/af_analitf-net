@@ -396,11 +396,13 @@ where pc.CostCode = :costId")
 				Export(Result, sql, "MaxProducerCosts", truncate: true);
 			}
 
+			//todo DiadokOrgId
 			sql = @"select
 	s.Id,
 	s.Name,
 	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
-	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates
+	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates,
+	'' as DiadokOrgId
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(Result, sql, "suppliers", truncate: true);

@@ -272,6 +272,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string DiadokUsername { get; set;}
+		public virtual string DiadokPassword { get; set; }
+
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
 
@@ -298,6 +301,10 @@ namespace AnalitF.Net.Client.Models
 			return proxy;
 		}
 
+
+		/// <param name="name">
+		/// доступные значения - Waybills, Docs, Rejects, Orders, Reports
+		/// </param>
 		public virtual string MapPath(string name)
 		{
 			var root = GetVarRoot();

@@ -425,6 +425,14 @@
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Диадок">
+				<StackPanel>
+					<Label>Имя пользователя</Label>
+					<TextBox Name="Settings_DiadokUsername" />
+					<Label>Пароль</Label>
+					<TextBox Name="DiadokPassword" />
+				</StackPanel>
+			</TabItem>
 		</TabControl>
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

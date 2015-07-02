@@ -55,6 +55,10 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
 			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">Отчет для Росздравнадзора</Button>
+			<ToggleButton Grid.Row="0" Grid.Column="2"
+				Style="{StaticResource FilterElement}" Name="Sign" IsChecked="{Binding CurrentWaybill.Value.IsSign}">
+				Подписать
+			</ToggleButton>
 		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
@@ -74,6 +78,10 @@
 					Binding="{Binding WriteTime}" />
 				<c:DataGridTextColumnEx Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
+				<c:DataGridTextColumnEx Width="100*" Header="Имя файла"
+					Binding="{Binding Filename}" />
+				<c:DataGridTextColumnEx Width="100*" Header="Статус"
+					Binding="{Binding Status}" />
 				<c:DataGridTextColumnEx Width="64*" Header="Поставщик"
 					Binding="{Binding SupplierName}" />
 				<c:DataGridTextColumnEx Width="64*" Header="Сумма опт"
