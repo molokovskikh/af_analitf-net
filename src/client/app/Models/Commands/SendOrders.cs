@@ -59,14 +59,13 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			uint requestId = 0;
 			var response = Wait("Orders",
-				Client.PostAsync("Orders", new SyncRequest(clientOrders, Force), Formatter, Token),
-				ref requestId);
-			CheckResult(Client.PutAsJsonAsync("Orders", new ConfirmRequest(requestId), Token).Result);
-
-			Log.InfoFormat("Заказы отправлены успешно");
+				Client.PostAsync("Orders", new SyncRequest(clientOrders, Force), Formatter, Token), ref requestId);
 
 			var results = response.Content.ReadAsAsync<OrderResult[]>().Result
 				?? new OrderResult[0];
+			CheckResult(Client.PutAsJsonAsync("Orders", new ConfirmRequest(requestId), Token));
+			Log.InfoFormat("Заказы отправлены успешно");
+
 			orders.Each(o => o.Apply(results.FirstOrDefault(r => r.ClientOrderId == o.Id)));
 			var acceptedOrders = orders.Where(o => o.IsAccepted).ToArray();
 			var rejectedOrders = orders.Where(o => !o.IsAccepted).ToArray();

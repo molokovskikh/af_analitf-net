@@ -560,8 +560,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			if (clientPrices.Length == 0)
 				return;
 
-			var response = client.PostAsync("Main", new SyncRequest(clientPrices), Formatter, token).Result;
-			CheckResult(response);
+			CheckResult(client.PostAsync("Main", new SyncRequest(clientPrices), Formatter, token));
 		}
 
 		private void WaitAndLog(Task<HttpResponseMessage> task, string name)
