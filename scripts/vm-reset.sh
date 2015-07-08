@@ -2,7 +2,7 @@
 
 version=$1
 if [[ -z "$version" ]]; then
-	echo "Укажи версию ос для сброса, доступно xp, 7, 8"
+	echo "Укажи версию ос для сброса, доступно xp, vista, 7, 8"
 	exit
 fi
 src="win$version-base-box"

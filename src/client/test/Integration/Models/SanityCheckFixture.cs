@@ -5,6 +5,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Devart.Data.MySql;
 using System.Linq;
+using AnalitF.Net.Client.Models.Commands;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support.log4net;
