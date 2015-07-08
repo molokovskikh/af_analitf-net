@@ -298,9 +298,7 @@ namespace AnalitF.Net.Client
 				if (count > 1 || !RepairDb.TryToRepair(e, Config)) {
 					throw;
 				}
-				else  {
-					goto repeat;
-				}
+				goto repeat;
 			}
 			IsInitialized = true;
 		}
@@ -313,14 +311,26 @@ namespace AnalitF.Net.Client
 			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
 
-			using (var sanityCheck = new SanityCheck(Config)) {
-				sanityCheck.Check(Config.Cmd.Match("import"));
-			}
-
 			if (Config.Cmd.Match("repair")) {
 				using(var cmd = new RepairDb(Config)) {
 					cmd.Execute();
 				}
+			}
+
+			var count = 0;
+			repeat:
+			try {
+				count++;
+				using (var sanityCheck = new SanityCheck(Config)) {
+					sanityCheck.Check(Config.Cmd.Match("import"));
+				}
+			}
+			catch(Exception e) {
+				log.Error("Ошибка при запуске приложения", e);
+				if (count > 1 || !RepairDb.TryToRepair(e, Config)) {
+					throw;
+				}
+				goto repeat;
 			}
 		}
 
