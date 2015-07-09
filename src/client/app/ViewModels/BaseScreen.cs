@@ -120,6 +120,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public static IScheduler TestUiSchuduler;
 
 		private List<PersistedValue> persisted = new List<PersistedValue>();
+		private List<PersistedValue> session = new List<PersistedValue>();
 		private bool clearSession;
 		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
 		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
@@ -266,9 +267,11 @@ namespace AnalitF.Net.Client.ViewModels
 				TableSettings.Prefix = GetType().Name + ".";
 				ExcelExporter.ExportDir = Shell.Config.TmpDir;
 				try {
-					foreach (var value in persisted) {
+					foreach (var value in persisted)
 						value.Setter(Shell.GetPersistedValue(value.Key, value.DefaultValue));
-					}
+
+					foreach (var value in session)
+						value.Setter(Shell.SessionContext.GetValueOrDefault(value.Key, value.DefaultValue));
 				}
 				catch(Exception e) {
 
@@ -318,9 +321,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			foreach (var value in persisted) {
+			foreach (var value in persisted)
 				Shell.PersistentContext[value.Key] = value.Getter();
+
+			foreach (var value in session) {
+				if (value.DefaultValue != value.Getter())
+					Shell.SessionContext[value.Key] = value.Getter();
+				else if (Shell.SessionContext.ContainsKey(value.Key))
+					Shell.SessionContext.Remove(value.Key);
 			}
+
 
 			if (close)
 				OnCloseDisposable.Dispose();
@@ -729,6 +739,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Persist<T>(NotifyValue<T> value, string key)
 		{
 			persisted.Add(PersistedValue.Create(value, key));
+		}
+
+		public void SessionValue<T>(NotifyValue<T> value, string key)
+		{
+			session.Add(PersistedValue.Create(value, key));
 		}
 
 		public IList<T> GetItemsFromView<T>(string name)
