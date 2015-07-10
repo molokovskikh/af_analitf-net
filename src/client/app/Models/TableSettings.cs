@@ -5,13 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interactivity;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.ViewModels;
-using Caliburn.Micro;
 using Common.Tools;
-using Newtonsoft.Json;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -89,7 +85,21 @@ namespace AnalitF.Net.Client.Models
 			var settings = storage.GetValueOrDefault(GetViewKey(dataGrid));
 			if (settings == null)
 				return;
-			foreach (var column in settings)
+
+			//набор колонок для которых производится восстановление и сохраненный набор колонок
+			//могут отличаться тк ui может захотеть удалить какую нибудь колонку
+			//в этом случае
+			//в начале с0 с1 с2 с3 ui удалил колонку с1 с2 с3 пользователь поменял местами с2 с1 с3
+			//получим сохраненные значения с1-1 с2-0 с3-2
+			//восстановление с0 с1 с2 с3
+			//шаг1 (с1 и так 1 ничего не поменялось) - с0 с1 с2 с3
+			//шаг2 (у с2 0 ставим его вперед все сдвигаем)- с2 с0 с1 с3
+			//шаг3 (у с3 2 ставим на место с1, с1 сдвигаем)- с2 с0 с3 с1
+			//после того как ui удалит колонку получис с2 с3 с1 те с3 и с1 поменялись местами что не верно
+			//если колонки бновлять в порядки отображения то слева от текущей позиции будут младшие колонки в правильном
+			//порядке а справа старшие но порядок будет неправильный и отображаться будет верный порядок вне зависимости
+			//от удаления клонок
+			foreach (var column in settings.OrderBy(c => c.DisplayIndex))
 				column.Restore(dataGrid, dataGrid.Columns);
 
 			//восстанавливаем порядок сортировки
