@@ -135,13 +135,14 @@ namespace AnalitF.Net.Service.Models
 			MaxProducerCostCostId = config.MaxProducerCostCostId;
 
 			user = job.User;
-			data = session.Get<AnalitfNetData>(user.Id);
+			data = session.Get<AnalitfNetData>(user.Id)
+				?? new AnalitfNetData(job);
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
 
 			UpdatePath = Path.Combine(config.UpdatePath,
-				data == null || String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
+				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
 		}
 
 		//Все даты передаются в UTC!
@@ -160,7 +161,7 @@ namespace AnalitF.Net.Service.Models
 					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АК \"Инфорум\".");
 				}
 			}
-			data = data ?? new AnalitfNetData(job);
+
 			data.LastPendingUpdateAt = DateTime.Now;
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {

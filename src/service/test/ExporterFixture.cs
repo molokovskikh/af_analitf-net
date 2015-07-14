@@ -66,6 +66,15 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Export_with_check_token()
+		{
+			requestLog.ClientToken = Guid.NewGuid().ToString();
+			var settings = session.Load<UserSettings>(user.Id);
+			settings.CheckClientToken = true;
+			exporter.ExportAll();
+		}
+
+		[Test]
 		public void Export_update()
 		{
 			File.WriteAllText("update\\version.txt", "1.2");
