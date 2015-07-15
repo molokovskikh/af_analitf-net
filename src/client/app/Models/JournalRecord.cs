@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -35,6 +36,8 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				if (String.IsNullOrEmpty(Filename))
+					return null;
+				if (!File.Exists(Filename))
 					return null;
 
 				var icon = Icon.ExtractAssociatedIcon(Filename);

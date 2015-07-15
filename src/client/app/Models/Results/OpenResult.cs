@@ -22,7 +22,8 @@ namespace AnalitF.Net.Client.Models.Results
 				ProcessHelper.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
 			}
 			catch(Win32Exception e) {
-				//System.ComponentModel.Win32Exception (0x80004005): Указанному файлу не сопоставлено ни одно приложение для выполнения данной операции
+				//System.ComponentModel.Win32Exception (0x80004005):
+				//Указанному файлу не сопоставлено ни одно приложение для выполнения данной операции
 				//если нет сопоставленного приложения выбераем файл в shell
 				if (e.NativeErrorCode == 0x80004005)
 					selectWithShell = true;
