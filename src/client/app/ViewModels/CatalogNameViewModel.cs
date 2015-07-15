@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Shell = catalog.Shell;
 			ParentModel = catalog;
+			CatalogNames = new NotifyValue<List<CatalogName>>(new List<CatalogName>());
 			Catalogs = new NotifyValue<List<Catalog>>(new List<Catalog>());
 			CurrentItem = new NotifyValue<object>();
 			CurrentCatalogName = new NotifyValue<CatalogName>();
@@ -119,13 +120,13 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Promotions = new PromotionPopup(StatelessSession, Shell.Config);
-			CatalogNames = ParentModel.ObservableForProperty(m => (object)m.FilterByMnn, skipInitial: false)
+			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn, skipInitial: false)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Select(_ => RxQuery(LoadCatalogNames))
 				.Switch()
 				.ObserveOn(UiScheduler)
-				.ToValue(CloseCancellation);
+				.Subscribe(CatalogNames, CloseCancellation.Token);
 			CatalogNames.Subscribe(_ => {
 				CurrentCatalogName.Value = CurrentCatalogName.Value
 					?? (CatalogNames.Value ?? Enumerable.Empty<CatalogName>()).FirstOrDefault();
