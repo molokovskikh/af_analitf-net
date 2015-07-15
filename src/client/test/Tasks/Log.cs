@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 			//todo нужно подумать как быть с out of memory но пока игнорируем
 			"System.OutOfMemoryException: Insufficient memory to continue the execution of the program.",
 			"System.OutOfMemoryException: Недостаточно памяти для продолжения выполнения программы.",
-			//думаю что это тоже out of memory но из mysql
+			//todo думаю что это тоже out of memory но из mysql
 			"Got error 134 from storage engine",
 		};
 		private Regex[] cleanup = {

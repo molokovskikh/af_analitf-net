@@ -983,9 +983,8 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 			var ids = session.CreateSQLQuery(@"
 select Id
 from usersettings.SupplierPromotions sp
-where sp.Status = 1 and (sp.RegionMask & :regionMask > 0)")
-				.SetParameter("regionMask", userSettings.WorkRegionMask)
-				.List<uint>();
+	join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1").List<uint>();
 
 			string sql;
 			sql = @"
@@ -995,16 +994,18 @@ select
 	sp.Name,
 	sp.Annotation
 from usersettings.SupplierPromotions sp
-where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "Promotions", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
+	join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1";
+			Export(Result, sql, "Promotions", truncate: true);
 			sql = @"
 select
 	pc.CatalogId,
 	pc.PromotionId
 from usersettings.PromotionCatalogs pc
 	join usersettings.SupplierPromotions sp on pc.PromotionId = sp.Id
-where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "PromotionCatalogs", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
+		join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1";
+			Export(Result, sql, "PromotionCatalogs", truncate: true);
 
 			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
 			if (Directory.Exists(Config.PromotionsPath)) {
