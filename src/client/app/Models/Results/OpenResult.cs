@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
@@ -14,10 +15,21 @@ namespace AnalitF.Net.Client.Models.Results
 			Filename = filename;
 		}
 
-		//TODO: Обработка ошибок?
 		public void Execute(ActionExecutionContext context)
 		{
-			ProcessHelper.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
+			var selectWithShell = false;
+			try {
+				ProcessHelper.Start(new ProcessStartInfo(Filename) { Verb = "Open" });
+			}
+			catch(Win32Exception e) {
+				//System.ComponentModel.Win32Exception (0x80004005): Указанному файлу не сопоставлено ни одно приложение для выполнения данной операции
+				//если нет сопоставленного приложения выбераем файл в shell
+				if (e.NativeErrorCode == 0x80004005)
+					selectWithShell = true;
+			}
+			if (selectWithShell)
+				ProcessHelper.Start(new ProcessStartInfo("explorer.exe", String.Format("/select,{0}", Filename)));
+
 			if (Completed != null)
 				Completed(this, new ResultCompletionEventArgs());
 		}

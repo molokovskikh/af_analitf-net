@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 			public string Version;
 			public DateTime Date;
 			public string Text;
+			public string StackTrace;
 		}
 
 		public class UpdateStat
@@ -74,7 +75,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 								Type = type,
 								UpdateDate = begin,
 								UserId = Convert.ToUInt32(log["UserId"]),
-								Version = System.Version.Parse(log["Version"].ToString()),
+								Version = Version.Parse(log["Version"].ToString()),
 								Size = size,
 								Time = updateEnd - updateBegin,
 							});
@@ -105,23 +106,26 @@ namespace AnalitF.Net.Client.Test.Tasks
 				foreach (var record in records) {
 					var log = record["Text"].ToString();
 					var reader = new StringReader(log);
-					var messageHeader = new Regex(@"^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}:\d{2}\.\d{3} \[\d+\] \w+ ");
-					var lastError = new Error {
-						Version = record["Version"].ToString()
-					};
+					var messageHeader = new Regex(@"^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}:\d{2}\.\d{3} \[\d+\] (?<level>\w+) (?<text>.*)");
+					Error lastError = null;
 					string line;
 					while ((line = reader.ReadLine()) != null) {
-						if (messageHeader.IsMatch(line)) {
-							if (lastError.User != null) {
+						var match = messageHeader.Match(line);
+						if (match.Success) {
+							if (match.Groups["level"].Value == "ERROR") {
 								lastError = new Error {
-									Version = record["Version"].ToString()
+									Version = record["Version"].ToString(),
+									User = record["UserId"].ToString(),
+									Text = match.Groups["text"].Value + "\r\n"
 								};
 								errors.Add(lastError);
 							}
-							lastError.User = record["UserId"].ToString();
 						}
 						else {
-							lastError.Text += line + "\r\n";
+							if (!String.IsNullOrEmpty(lastError.StackTrace) || line.StartsWith("   at ") || line.StartsWith("   в "))
+								lastError.StackTrace += line + "\r\n";
+							else
+								lastError.Text += line + "\r\n";
 						}
 					}
 				}
@@ -133,7 +137,8 @@ namespace AnalitF.Net.Client.Test.Tasks
 				if (String.IsNullOrEmpty(version))
 					Console.WriteLine("Versions = " + @group.Select(g => g.Version ?? "").Distinct().Implode());
 				Console.WriteLine("Users = " + @group.Select(g => g.User).Distinct().Implode());
-				Console.WriteLine(@group.Key);
+				Console.WriteLine((@group.Key ?? "").Trim());
+				Console.WriteLine((@group.First().StackTrace ?? "").Trim());
 				Console.WriteLine();
 			}
 		}
