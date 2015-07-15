@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			element.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent, element));
 		}
 
-		public void SimClikc(ButtonBase element)
+		public void SimClick(ButtonBase element)
 		{
 			element.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left) {
 				RoutedEvent = Control.MouseDownEvent,

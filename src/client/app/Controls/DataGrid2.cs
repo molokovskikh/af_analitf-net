@@ -271,6 +271,9 @@ namespace AnalitF.Net.Client.Controls
 		private void Jump(int jumpDistance)
 		{
 			var index = Items.IndexOf(CurrentItem);
+			//если коллекция пуста
+			if (index < 0)
+				return;
 			index = Math.Max(Math.Min(index + jumpDistance, Items.Count - 1), 0);
 			if (Items[index] is GroupHeader)
 				index += jumpDistance > 0 ? -1 : 1;
