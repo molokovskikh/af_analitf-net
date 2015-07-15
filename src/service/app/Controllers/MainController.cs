@@ -92,7 +92,7 @@ where UserId = :userId;")
 					&& u.RegionId == setting.RegionId);
 
 				if (!setting.Active && userPrice != null) {
-					log += String.Format("{0} {1} ({2}) {3}- выкл;", userPrice.Price.PriceCode,
+					log += String.Format("{0} {1} ({2}) {3} - выкл;", userPrice.Price.PriceCode,
 						userPrice.Price.Supplier.Name,
 						userPrice.Price.PriceName,
 						userPrice.Price.Supplier.HomeRegion.Name);
@@ -103,7 +103,7 @@ where UserId = :userId;")
 					if (price == null)
 						return;
 					userPrice = new UserPrice(CurrentUser, setting.RegionId, price);
-					log += String.Format("{0} {1} ({2}) {3}- вкл;", userPrice.Price.PriceCode,
+					log += String.Format("{0} {1} ({2}) {3} - вкл;", userPrice.Price.PriceCode,
 						userPrice.Price.Supplier.Name,
 						userPrice.Price.PriceName,
 						userPrice.Price.Supplier.HomeRegion.Name);
