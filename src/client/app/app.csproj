@@ -41,6 +41,9 @@
   <PropertyGroup>
     <ApplicationIcon>Assets\images\mainicon_original.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
     <Reference Include="Devart.Data">
@@ -762,6 +765,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="app.manifest" />
     <None Include="App.release.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
