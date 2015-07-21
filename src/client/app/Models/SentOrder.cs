@@ -205,26 +205,32 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsPriceExists()
 		{
-			bool priceNotFound;
+			bool notFound;
 			try {
-				priceNotFound = Price == null || Price.Name == "";
+				notFound = Price == null || Price.Name == "";
 			}
 			catch (ObjectNotFoundException) {
-				priceNotFound = true;
+				notFound = true;
 			}
-			return !priceNotFound;
+			catch(SessionException) {
+				notFound = true;
+			}
+			return !notFound;
 		}
 
 		public virtual bool IsAddressExists()
 		{
-			bool addressNotFound;
+			bool notFound;
 			try {
-				addressNotFound = Address == null || Address.Name == "";
+				notFound = Address == null || Address.Name == "";
 			}
 			catch (ObjectNotFoundException) {
-				addressNotFound = true;
+				notFound = true;
 			}
-			return !addressNotFound;
+			catch(SessionException) {
+				notFound = true;
+			}
+			return !notFound;
 		}
 
 		public override string ToString()

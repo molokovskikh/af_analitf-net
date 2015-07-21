@@ -29,10 +29,13 @@ namespace AnalitF.Net.Client.Test.Tasks
 			"System.OutOfMemoryException: Недостаточно памяти для продолжения выполнения программы.",
 			//todo думаю что это тоже out of memory но из mysql
 			"Got error 134 from storage engine",
+			//todo пока не понятно что с ним делать нужно осмыслить\добавить диагностику
+			"System.OutOfMemoryException"
 		};
 		private Regex[] cleanup = {
 			new Regex(@"\(HashCode=\d+\)", RegexOptions.Compiled | RegexOptions.IgnoreCase),
 			new Regex(@"токен = \S+", RegexOptions.Compiled | RegexOptions.IgnoreCase),
+			new Regex(@"#PriceId: \d+, RegionId: \d+", RegexOptions.Compiled | RegexOptions.IgnoreCase),
 		};
 
 		public class Error
