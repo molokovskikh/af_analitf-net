@@ -149,7 +149,7 @@ namespace AnalitF.Net.Client
 					logger.Level = Level.Debug;
 				}
 
-				log.DebugFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
+				log.InfoFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				try {
 					log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
 					log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
