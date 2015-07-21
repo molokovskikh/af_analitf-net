@@ -110,6 +110,12 @@ namespace AnalitF.Net.Test.Integration.Views
 			var view = (FrameworkElement)search.GetView();
 			Input(view, "SearchText", term);
 			Input(view, "SearchText", Key.Enter);
+
+			dispatcher.Invoke(() => {
+				testScheduler.AdvanceByMs(100);
+			});
+			catalog.WaitQueryDrain().Wait();
+
 			WaitIdle();
 
 			dispatcher.Invoke(() => {
