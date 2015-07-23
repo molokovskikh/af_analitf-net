@@ -115,8 +115,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_certificate()
 		{
-			Env.Scheduler = ImmediateScheduler.Instance;
-
 			var waybillFixture = Fixture<CreateWaybill>();
 			var fixture = new CreateCertificate {
 				Waybill = waybillFixture.Waybill
@@ -132,6 +130,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsInstanceOf<DialogResult>(updateResults[0]);
 			Assert.IsInstanceOf<OpenResult>(updateResults[1]);
 
+			Env.Scheduler = ImmediateScheduler.Instance;
+			Env.UiScheduler = ImmediateScheduler.Instance;
 			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == line.Id)).ToArray();
 			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
 			Assert.AreEqual(String.Format("Файл 'Сертификаты для {0} серия {1}' загружен", line.Product, line.SerialNumber), WaitNotification());
