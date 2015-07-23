@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -77,9 +78,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private Main defaultItem;
 
-		protected IScheduler Scheduler = BaseScreen.TestSchuduler ?? DefaultScheduler.Instance;
-		protected IMessageBus Bus = RxApp.MessageBus;
-
 		[DataMember]
 		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
 		[DataMember]
@@ -90,7 +88,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
-		protected IScheduler UiScheduler = BaseScreen.TestSchuduler ?? DispatcherScheduler.Current;
 		//параметры авто-комментария должны быть одинаковыми на время работы приложения
 		public bool ResetAutoComment;
 		public string AutoCommentText;
@@ -98,23 +95,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 		//не верь решарперу
 		public ShellViewModel()
-			: this(null)
+			: this(new Config.Config())
 		{
 		}
 
-		public ShellViewModel(Config.Config config = null)
+		public ShellViewModel(Config.Config config)
 		{
-			this.config = config = config ?? new Config.Config();
-#if DEBUG
-			Env.IsUnitTesting = config.IsUnitTesting;
-#endif
+			this.config = config;
 			CloseDisposable.Add(CancelDisposable);
 			DisplayName = "АналитФАРМАЦИЯ";
 			defaultItem = new Main(Config);
 			Navigator.DefaultScreen = defaultItem;
 
 #if DEBUG
-			if (!config.IsUnitTesting)
+			if (!Env.IsUnitTesting)
 				Debug = new Debug();
 #endif
 
@@ -129,15 +123,10 @@ namespace AnalitF.Net.Client.ViewModels
 			NewDocsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
 
-#if DEBUG
-			if (!config.SkipOpenSession) {
+			if (Env.Factory != null) {
 				session = Env.Factory.OpenSession();
 				statelessSession = Env.Factory.OpenStatelessSession();
 			}
-#else
-			session = Env.Factory.OpenSession();
-			statelessSession = Env.Factory.OpenStatelessSession();
-#endif
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -172,21 +161,21 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange("CanLoadOrderHistory");
 				});
 
-			CloseDisposable.Add(Bus.Listen<Loadable>().ObserveOn(UiScheduler).Subscribe(l => {
+			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
 				CloseDisposable.Add(l.RequstCancellation);
 				PendingDownloads.Add(l);
 			}));
-			CloseDisposable.Add(Bus.Listen<Loadable>("completed").ObserveOn(UiScheduler).Subscribe(l => {
+			CloseDisposable.Add(Env.Bus.Listen<Loadable>("completed").ObserveOn(Env.UiScheduler).Subscribe(l => {
 				CloseDisposable.Remove(l.RequstCancellation);
 				PendingDownloads.Remove(l);
 			}));
-			CloseDisposable.Add(Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
-			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, session));
+			CloseDisposable.Add(Env.Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
+			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Env.Bus, Env.UiScheduler, session));
 
 			Schedules.Select(_ =>
 				Schedules.Value.Count == 0
 					? Observable.Empty<bool>()
-					: Observable.Timer(TimeSpan.Zero, 20.Second(), UiScheduler)
+					: Observable.Timer(TimeSpan.Zero, 20.Second(), Env.UiScheduler)
 						.Select(__ => Schedule.IsOutdate(Schedules.Value, Settings.Value.LastUpdate.GetValueOrDefault())))
 				.Switch()
 				.Where(k => k)
@@ -270,7 +259,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override IEnumerable<IResult> OnViewReady()
 		{
-			Bus.SendMessage("Startup");
+			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
 				return Import();
 			}
@@ -376,7 +365,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 
 #if DEBUG
-			if (!Config.IsUnitTesting) {
+			if (!Env.IsUnitTesting) {
 				var disposable = new CompositeDisposable();
 				try {
 					NavigateAndReset(PersistentNavigationStack
@@ -726,7 +715,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			yield return new DialogResult(new SelfClose("Сейчас будет произведено обновление данных\r\nпо установленному расписанию.",
 				"Обновление", 10) {
-					Scheduler = UiScheduler
+					Scheduler = Env.UiScheduler
 				});
 			foreach (var result in Update()) {
 				yield return result;
@@ -870,11 +859,11 @@ namespace AnalitF.Net.Client.ViewModels
 				return Enumerable.Empty<IResult>();
 
 #if DEBUG
-			if(config.IsUnitTesting)
+			if(Env.IsUnitTesting)
 				command = OnCommandExecuting(command);
 #endif
 
-			var wait = new SyncViewModel(command.Progress) {
+			var wait = new SyncViewModel(command.Progress, Env.Scheduler) {
 				GenericErrorMessage = command.ErrorMessage
 			};
 			command.Config = Config;

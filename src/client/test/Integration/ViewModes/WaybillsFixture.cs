@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups[0].MaxMarkup = 50;
 			settings.Save();
 			Close(settings);
-			testScheduler.AdvanceByMs(50);
+			scheduler.AdvanceByMs(50);
 
 			Assert.That(details.Waybill.RetailSum, Is.GreaterThan(retailSum));
 			Close(details);

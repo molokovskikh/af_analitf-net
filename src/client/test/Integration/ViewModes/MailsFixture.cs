@@ -73,7 +73,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var value = shell.NewMailsCount.Value;
 			Assert.That(value, Is.GreaterThan(0));
 			model.CurrentItem.Value = model.Items.Value.First(m => m.Id == mail.Id);
-			testScheduler.AdvanceByMs(10000);
+			scheduler.AdvanceByMs(10000);
 			Assert.AreEqual(value - 1, shell.NewMailsCount.Value);
 		}
 
@@ -113,7 +113,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(new Mail());
 			Assert.That(model.Items.Value.Count, Is.GreaterThan(0));
 			model.Term.Value = "тasdasест";
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual(0, model.Items.Value.Count);
 		}
 
@@ -123,7 +123,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Env.Barrier = new Barrier(2);
 			var attachment = Download();
 			Close(model);
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.AreEqual(1, shell.PendingDownloads.Count);
 			shell.ShowMails();
 			var reloaded = model.Items.Value.SelectMany(m => m.Attachments).First(a => a.Id == attachment.Id);
@@ -147,14 +147,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var oldCount = journal.Items.Value.Count;
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
 			WaitNotification();
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(journal.Items.Value.Count, Is.GreaterThan(oldCount));
 		}
 
 		private Attachment Download()
 		{
 			//что бы выполнить запланированную задачу
-			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
+			//todo это как то криво лучше не переопределять планировщики а запускать тестовый
+			Env.Scheduler = ImmediateScheduler.Instance;
+			Env.UiScheduler = ImmediateScheduler.Instance;
 
 			var att = session.Query<Attachment>().First(a => a.Name == "отказ.txt");
 			att.IsDownloaded = false;

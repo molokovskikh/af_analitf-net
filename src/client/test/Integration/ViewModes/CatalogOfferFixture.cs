@@ -1,25 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Client.Views;
-using AnalitF.Net.Client.Views.Dialogs;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using AnalitF.Net.Client.Helpers;
-using Test.Support.log4net;
-using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Test.Integration.ViewModes
 {
@@ -173,7 +166,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(sentOrder);
 
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
-			testScheduler.AdvanceToMs(4000);
+			scheduler.AdvanceToMs(4000);
 
 			Assert.AreEqual(1, model.HistoryOrders.Count, model.HistoryOrders.Implode(l => l.Id));
 			Assert.AreEqual(1, model.HistoryOrders[0].Count);
@@ -291,7 +284,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.ShowCatalog();
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			testScheduler.Start();
+			scheduler.Start();
 			names.CurrentCatalog = names.Catalogs.Value[0];
 			names.EnterCatalog();
 			shell.ShowOrders();
@@ -369,7 +362,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.ProductId == order.Lines[0].ProductId);
-			testScheduler.Start();
+			scheduler.Start();
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();

@@ -21,7 +21,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			session.Save(new BatchLine(catalog, address));
 
 			model.CurrentReportLine.Value = model.Lines.Value.First();
-			testScheduler.AdvanceByMs(2000);
+			scheduler.AdvanceByMs(2000);
 			Assert.IsNotNull(model.CurrentCatalog);
 			Assert.AreEqual(catalog.Id, model.CurrentCatalog.Id);
 		}

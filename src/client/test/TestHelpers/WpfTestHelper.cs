@@ -114,12 +114,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			dispatcherThread.IsBackground = true;
 			dispatcherThread.Start();
 			started.Wait();
-			var dispatcher = Dispatcher.FromThread(dispatcherThread);
-			dispatcher.Invoke(() => {
-				RxApp.DeferredScheduler = DispatcherScheduler.Current;
-				action();
-			});
-			return dispatcher;
+			return Dispatcher.FromThread(dispatcherThread);
 		}
 
 		public static TextCompositionEventArgs TextArgs(string text)

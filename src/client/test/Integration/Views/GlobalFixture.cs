@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -26,27 +22,29 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
-using Common.MySql;
+using AnalitF.Net.Client.Views.Parts;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
-using Microsoft.Test.CommandLineParsing;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Microsoft.Win32;
-using Test.Support.log4net;
-using TestStack.White.UIItems.TableItems;
-using Screen = Caliburn.Micro.Screen;
 using Action = System.Action;
-using Address = AnalitF.Net.Client.Models.Address;
-using Hyperlink = System.Windows.Documents.Hyperlink;
+using Binding = System.Windows.Data.Binding;
+using CheckBox = System.Windows.Controls.CheckBox;
+using DataGrid = System.Windows.Controls.DataGrid;
+using DataGridCell = System.Windows.Controls.DataGridCell;
+using Label = System.Windows.Controls.Label;
+using Menu = System.Windows.Controls.Menu;
+using MenuItem = System.Windows.Controls.MenuItem;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Panel = System.Windows.Controls.Panel;
+using Screen = Caliburn.Micro.Screen;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace AnalitF.Net.Test.Integration.Views
 {
@@ -112,7 +110,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Input(view, "SearchText", Key.Enter);
 
 			dispatcher.Invoke(() => {
-				testScheduler.AdvanceByMs(100);
+				scheduler.AdvanceByMs(100);
 			});
 			catalog.WaitQueryDrain().Wait();
 
@@ -373,7 +371,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 			Input("Prices", Key.Enter);
 			WaitIdle();
-			dispatcher.Invoke(() => testScheduler.Start());
+			dispatcher.Invoke(() => scheduler.Start());
 			WaitIdle();
 			dispatcher.Invoke(() => {
 				var count = activeWindow.Descendants<Label>().First(l => l.Name == "Offers_Count");
@@ -428,7 +426,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			if (viewModel.Catalogs.Value.Count > 1)
 				Input(view, "Catalogs", Key.Enter);
 			dispatcher.Invoke(() => {
-				testScheduler.AdvanceByMs(3000);
+				scheduler.AdvanceByMs(3000);
 			});
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -538,7 +536,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
 			dispatcher.Invoke(() => {
-				var promotions = activeWindow.Descendants<Client.Views.Parts.PromotionPopup>().First();
+				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);
 				Assert.That(promotions.AsText(), Is.StringContaining(fixture.Promotion.Name));
 				var presenter = promotions.Descendants<ContentPresenter>()
@@ -629,7 +627,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			Start();
 
 			SystemTime.Now = () => DateTime.Now.AddMinutes(20);
-			testScheduler.AdvanceByMs(30000);
+			scheduler.AdvanceByMs(30000);
 
 			AsyncClick("Update");
 			WaitMessageBox("Обновление завершено успешно.");
@@ -637,7 +635,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => {
 				SystemTime.Now = () => DateTime.Now.AddMinutes(40);
-				testScheduler.AdvanceByMs(30000);
+				scheduler.AdvanceByMs(30000);
 			}));
 
 			WaitWindow("Обновление");
@@ -684,7 +682,7 @@ namespace AnalitF.Net.Test.Integration.Views
 					.First(i => i.Name == "JunkLegendItem");
 				DoubleClick(el);
 			}));
-			var dialog = manager.OsDialog.OfType<System.Windows.Forms.ColorDialog>().Timeout(2.Second())
+			var dialog = manager.OsDialog.OfType<ColorDialog>().Timeout(2.Second())
 				.Take(1)
 				.Do(d => {
 					d.Color = System.Drawing.Color.MistyRose;
@@ -692,7 +690,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				.First();
 			Assert.IsNotNull(dialog);
 			WaitIdle();
-			dispatcher.Invoke(() => testScheduler.Start());
+			dispatcher.Invoke(() => scheduler.Start());
 			WaitIdle();
 
 			dispatcher.Invoke(() => {

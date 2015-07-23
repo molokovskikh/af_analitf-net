@@ -53,7 +53,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var searchCheck = view.Descendants<CheckBox>().First(c => c.Name == "CatalogSearch");
 				searchCheck.IsChecked = true;
 				await view.WaitIdle();
-				testScheduler.Start();
+				scheduler.Start();
 
 				var grid = view.Descendants<DataGrid>().First(g => g.Name == "Items");
 				grid.SendText(term);

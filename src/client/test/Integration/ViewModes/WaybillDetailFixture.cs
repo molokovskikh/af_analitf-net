@@ -72,7 +72,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups[0].MaxMarkup = 50;
 			settings.Save();
 			Close(settings);
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
 			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(30.8, waybillLine.RetailCost);
@@ -115,7 +115,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_certificate()
 		{
-			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
+			Env.Scheduler = ImmediateScheduler.Instance;
 
 			var waybillFixture = Fixture<CreateWaybill>();
 			var fixture = new CreateCertificate {

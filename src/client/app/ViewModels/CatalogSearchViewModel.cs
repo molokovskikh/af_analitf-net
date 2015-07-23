@@ -131,7 +131,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<Object>())
-				.Throttle(TimeSpan.FromMilliseconds(30), TestSchuduler)
+				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
 				.Select(_ => RxQuery(LoadData))
 				.Switch()
 				.ObserveOn(UiScheduler)

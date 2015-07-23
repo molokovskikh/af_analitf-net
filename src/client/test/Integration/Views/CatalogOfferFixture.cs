@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -57,7 +57,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			StyleHelper.BuildStyles(App.Current.Resources, new[] { new CustomStyle("Junk", "Red") });
 			bus.SendMessage(settings);
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 
 			var legend = view.Descendants().OfType<Panel>().First(p => p.Name == "Legend");
 			var label = legend.Descendants<Label>()

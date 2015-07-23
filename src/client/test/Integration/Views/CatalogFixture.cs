@@ -25,7 +25,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = view;
 
 				await view.WaitLoaded();
-				testScheduler.Start();
+				scheduler.Start();
 				await view.WaitIdle();
 				var names = view.Descendants<DataGrid2>().First(x => x.Name == "CatalogNames");
 				var forms = view.Descendants<DataGrid2>().First(x => x.Name == "Catalogs");

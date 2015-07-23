@@ -56,9 +56,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			lazyModel = new Lazy<PriceOfferViewModel>(
 				() => {
 					var model = new PriceOfferViewModel(price.Id, false);
-					model.QueryScheduler = new CurrentThreadTaskScheduler();
+					//model.QueryScheduler = new CurrentThreadTaskScheduler();
 					Init(model);
-					testScheduler.Start();
+					scheduler.Start();
 					return model;
 				});
 		}

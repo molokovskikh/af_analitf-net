@@ -56,6 +56,7 @@ namespace AnalitF.Net.Client
 		public AppBootstrapper()
 			: this(true)
 		{
+			Env.Current = new Env();
 		}
 
 		public AppBootstrapper(bool useApplication = true)

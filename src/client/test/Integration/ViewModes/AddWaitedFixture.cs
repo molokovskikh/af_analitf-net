@@ -18,11 +18,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Search_items()
 		{
 			model.CatalogTerm.Value = session.Query<Catalog>().First().FullName.Substring(0, 3);
-			testScheduler.AdvanceByMs(500);
+			scheduler.AdvanceByMs(500);
 			Assert.That(model.Catalogs.Value.Count, Is.GreaterThan(0));
 
 			model.ProducerTerm.Value = session.Query<Producer>().First().Name.Substring(0, 3);
-			testScheduler.AdvanceByMs(500);
+			scheduler.AdvanceByMs(500);
 			//в списке всегда будет Все производители
 			Assert.That(model.Producers.Value.Count, Is.GreaterThan(1));
 		}

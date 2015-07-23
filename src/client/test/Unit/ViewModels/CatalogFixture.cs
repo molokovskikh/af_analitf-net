@@ -25,7 +25,6 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		[Test]
 		public void Reset_term_on_show_with_same_mnn()
 		{
-			BaseScreen.TestQueryScheduler = new CurrentThreadTaskScheduler();
 			var model = new CatalogViewModel();
 			Activate(model);
 			model.CatalogSearch.Value = true;

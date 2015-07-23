@@ -35,11 +35,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 			Close(model);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.UpdateStat();
 			Assert.That(shell.CanSendOrders, Is.True);
 
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 			Assert.That(shell.CanSendOrders, Is.False);
 		}
 
@@ -111,7 +111,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.True(model.CanFreeze);
 			model.Freeze();
 
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.That(shell.CanSendOrders, Is.False);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
@@ -271,7 +271,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(model.CanDelete);
 			model.Delete();
 
-			testScheduler.AdvanceByMs(10000);
+			scheduler.AdvanceByMs(10000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 

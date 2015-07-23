@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
 using Common.Tools.Calendar;
 using NHibernate;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Config
 {
@@ -14,10 +19,38 @@ namespace AnalitF.Net.Client.Config
 #if DEBUG
 		public bool IsUnitTesting;
 #endif
+		public IScheduler Scheduler;
+		public IScheduler UiScheduler;
+		public IMessageBus Bus;
+		public TaskScheduler TplScheduler;
+		public TaskScheduler TplUiScheduler;
+		//планировщик для выболнения запросов
+		//нужен тк mysql требует что бы запросы производились в той же нитке что и инициализировала подключение
+		//фактически это очередь задач которая обрабатывается одной ниткой глабальной для всего приложения
+		public TaskScheduler QueryScheduler;
+		public ISessionFactory Factory;
 
-		public ISessionFactory Factory
+		public User User;
+		public static Env Current;
+
+		public Env(User user, IMessageBus bus, IScheduler scheduler, ISessionFactory factory)
 		{
-			get { return AppBootstrapper.NHibernate.Factory; }
+			IsUnitTesting = true;
+			Bus = bus;
+			Scheduler = scheduler;
+			UiScheduler = scheduler;
+			User = user;
+			Factory = factory;
+		}
+
+		public Env()
+		{
+			Bus = RxApp.MessageBus;
+			Scheduler = DefaultScheduler.Instance;
+			UiScheduler = DispatcherScheduler.Current;
+			TplUiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			Factory = AppBootstrapper.NHibernate.Factory;
+			QueryScheduler = new QueueScheduler();
 		}
 
 		public Tuple<IObservable<T1>, IObservable<T2>>

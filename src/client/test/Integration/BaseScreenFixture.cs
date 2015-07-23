@@ -38,7 +38,7 @@ namespace AnalitF.Net.Test.Integration
 			shell.ShowCatalog();
 			var catalog = ((CatalogViewModel)shell.ActiveItem);
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			testScheduler.Start();
+			scheduler.Start();
 			names.CurrentCatalog = names.Catalogs.Value[0];
 			names.EnterCatalog();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());

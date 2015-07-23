@@ -99,16 +99,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem,
 				prices.CurrentPrice.Value.Id + manager.MessageBoxes.Implode());
 			var offers = (PriceOfferViewModel)shell.ActiveItem;
-			testScheduler.Start();
+			scheduler.Start();
 			offers.CurrentOffer.Value.OrderCount = 1;
 			offers.OfferUpdated();
 			offers.OfferCommitted();
 
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 
 			offers.NavigateBackward();
 
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 
 			var stat = shell.Stat.Value;
 			Assert.That(stat.OrdersCount, Is.EqualTo(1));
@@ -260,7 +260,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settingsModel.Save();
 			Close(settingsModel);
 
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual(settingsModel.Settings.Value.OpenRejects,
 				shell.Settings.Value.OpenRejects);
 		}
@@ -310,7 +310,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			correction.CurrentLine.Value = correction.Lines.First();
 			Assert.IsFalse(correction.IsOrderSend);
 			order = session.Query<Order>().First();
-			testScheduler.AdvanceByMs(200);
+			scheduler.AdvanceByMs(200);
 			//тк мы оперируем случайными данными то мы можем изменить OfferId заказанной позиции если
 			//все остальные атрибуты совпали а цена у нее ниже
 			Assert.That(correction.Offers.Value.Count, Is.GreaterThan(0));

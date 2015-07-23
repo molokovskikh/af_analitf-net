@@ -116,9 +116,7 @@ namespace AnalitF.Net.Test.Integration
 			app.Config.RootDir = "test";
 			app.Config.DbDir = Path.GetFullPath(IntegrationSetup.clientConfig.DbDir);
 			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
-			app.Config.IsUnitTesting = true;
 			Execute.ResetWithoutDispatcher();
-			disposable.Add(app);
 			return app;
 		}
 	}

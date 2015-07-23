@@ -31,13 +31,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			MakeDifferentCategory(catalog);
 
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			testScheduler.Start();
+			scheduler.Start();
 
 			var originCount = model.Offers.Value.Count;
 			Assert.That(originCount, Is.GreaterThan(0));
 
 			model.OnlyBase.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(model.Offers.Value.Count, Is.LessThan(originCount));
 			foreach (var offer in model.Offers.Value) {
 				Assert.That(offer.Price.BasePrice, Is.True);
@@ -49,16 +49,16 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			var catalog = FindMultiOfferCatalog();
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
-			testScheduler.Start();
+			scheduler.Start();
 
 			var id = model.Offers.Value[0].Price.Id;
 			model.Prices.Each(p => p.IsSelected = false);
-			testScheduler.AdvanceByMs(10000);
+			scheduler.AdvanceByMs(10000);
 			Assert.AreEqual(0, model.Offers.Value.Count());
 
 			model.Prices.First(p => p.Item.Id == id).IsSelected = true;
 			model.Prices.First(p => p.Item.Id != id).IsSelected = true;
-			testScheduler.AdvanceByMs(10000);
+			scheduler.AdvanceByMs(10000);
 			Assert.That(model.Offers.Value.Count(), Is.GreaterThan(0));
 		}
 
@@ -71,7 +71,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 			model.SearchBehavior.SearchText.Value = catalog.Name.Name.Slice(3);
 			model.SearchBehavior.Search();
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 
 			var offer = model.Offers.Value.First(o => o.Id == order.Lines[0].OfferId);

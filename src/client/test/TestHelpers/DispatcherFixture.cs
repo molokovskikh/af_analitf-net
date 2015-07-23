@@ -65,7 +65,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[TearDown]
 		public void TearDown()
 		{
-			BaseScreen.TestUiSchuduler = null;
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
@@ -241,19 +240,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
 				//в других нитках что бы избежать ошибок очищаем статические структуры
 				StyleHelper.Reset();
-				//DeferredScheduler TaskpoolScheduler thread static тк dispatcher выполняется в своей нитке
-				//здесь будет непойми что
-				var originDeferred = RxApp.DeferredScheduler;
-				var originTask = RxApp.TaskpoolScheduler;
-				var originbus = RxApp.MessageBus;
-				RxApp.DeferredScheduler = testScheduler;
-				RxApp.TaskpoolScheduler = testScheduler;
-				RxApp.MessageBus = bus;
-				disposable.Add(Disposable.Create(() => {
-					RxApp.DeferredScheduler = originDeferred;
-					RxApp.TaskpoolScheduler = originTask;
-					RxApp.MessageBus = originbus;
-				}));
 				activeWindow = (Window)ViewLocator.LocateForModel(shell, null, null);
 				//такой размер нужен что бы уместились все кнопки на панели инструментов
 				//тк невидимую кнопку нельзя нажать
@@ -267,7 +253,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				activeWindow.ShowInTaskbar = false;
 				activeWindow.Show();
 			});
-			BaseScreen.TestUiSchuduler = new DispatcherScheduler(dispatcher);
+			Env.UiScheduler = new MixedScheduler((TestScheduler)Env.UiScheduler, new DispatcherScheduler(dispatcher));
 
 			dispatcher.UnhandledException += (sender, args) => {
 				args.Handled = true;
