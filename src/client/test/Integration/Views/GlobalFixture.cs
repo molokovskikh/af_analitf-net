@@ -122,8 +122,11 @@ namespace AnalitF.Net.Test.Integration.Views
 				var grid = (DataGrid)view.FindName("Items");
 				var selectMany = grid.Descendants<DataGridCell>()
 					.SelectMany(c => c.Descendants<Run>())
-					.Where(r => r.Text.ToLower() == term);
-				DoubleClick(grid, selectMany.First());
+					.Where(r => r.Text.ToLower().Contains(term));
+				var text = selectMany.FirstOrDefault();
+				Assert.IsNotNull(text, "Не удалось найти ни одного элемента с текстом {0}, всего элементов {1}",
+					term, grid.Items.Count);
+				DoubleClick(grid, text);
 			});
 			var offers = await ViewLoaded<CatalogOfferViewModel>();
 			Assert.That(offers.Offers.Value.Count, Is.GreaterThan(0));

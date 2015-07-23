@@ -153,13 +153,12 @@ namespace AnalitF.Net.Service.Models
 			Application.ReadDbConfig(Config);
 #endif
 
-			if (userSettings.CheckClientToken && !String.IsNullOrEmpty(job.ClientToken)) {
-				if (String.IsNullOrEmpty(data.ClientToken)) {
-					data.ClientToken = job.ClientToken;
-				}
-				else if (data.ClientToken != job.ClientToken) {
+			if (userSettings.CheckClientToken
+				&& !String.IsNullOrEmpty(job.ClientToken)) {
+				if (String.IsNullOrEmpty(data.ClientTokenV2))
+					data.ClientTokenV2 = job.ClientToken;
+				else if (data.ClientTokenV2 != job.ClientToken)
 					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АК \"Инфорум\".");
-				}
 			}
 
 			data.LastPendingUpdateAt = DateTime.Now;

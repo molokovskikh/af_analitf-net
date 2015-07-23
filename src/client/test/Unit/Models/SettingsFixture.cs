@@ -30,13 +30,17 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var settings = new Settings();
 			settings.CheckToken();
-			var oldToken = settings.ClientToken;
-			Assert.IsNotNullOrEmpty(oldToken);
+			var crypToken = settings.ClientTokenV2;
+			var token = settings.GetClientToken();
+			Assert.IsNotNullOrEmpty(crypToken);
+			Assert.IsNotNullOrEmpty(settings.GetClientToken());
 
-			settings.ClientToken = "123";
+			settings.ClientTokenV2 = "123";
+			Assert.IsNull(settings.GetClientToken());
 			settings.CheckToken();
-			Assert.IsNotNullOrEmpty(oldToken);
-			Assert.AreNotEqual(oldToken, settings.ClientToken);
+			Assert.IsNotNullOrEmpty(crypToken);
+			Assert.AreNotEqual(crypToken, settings.ClientTokenV2);
+			Assert.AreNotEqual(token, settings.GetClientToken());
 		}
 
 		[Test]

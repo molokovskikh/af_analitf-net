@@ -112,7 +112,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
 				m.Bag(o => o.Waybills, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
-				m.Property(x => x.ClientToken, c => c.Length(10000));
+				m.Property(x => x.ClientTokenV2, c => c.Length(10000));
 			});
 			mapper.Class<MarkupConfig>(m => {
 				m.Property(o => o.Begin, om => om.Access(Accessor.Field));
