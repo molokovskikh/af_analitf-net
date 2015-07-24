@@ -411,7 +411,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Start();
 			Click("ShowCatalog");
-			//QueryCatcher.Catch();
 			var catalogModel = (CatalogViewModel)shell.ActiveItem;
 			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
 			var view = (FrameworkElement)viewModel.GetView();

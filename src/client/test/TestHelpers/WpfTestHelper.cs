@@ -106,8 +106,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			var started = new ManualResetEventSlim();
 			var dispatcherThread = new Thread(() => {
-				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
 				Dispatcher.CurrentDispatcher.BeginInvoke(action);
+				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
 				Dispatcher.Run();
 			});
 
