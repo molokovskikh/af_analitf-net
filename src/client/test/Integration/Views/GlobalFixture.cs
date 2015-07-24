@@ -319,7 +319,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			WaitMessageBox("Обновление завершено успешно.");
 			WaitWindow("Корректировка восстановленных заказов");
-			var line = session.Query<OrderLine>().First(l => l.SendResult == LineResultStatus.CostChanged);
+			var line = session.Query<OrderLine>().FirstOrDefault(l => l.SendResult == LineResultStatus.CostChanged);
+			Assert.IsNotNull(session.Query<OrderLine>().ToArray().Implode(x => String.Format("{0:r}", x)));
 			dispatcher.Invoke(() => {
 				var lines = activeWindow.Descendants<DataGrid>().First(x => x.Name == "Lines");
 				var cells = lines.Descendants<DataGridCell>().Where(x => ((OrderLine)x.DataContext).Id == line.Id).ToArray();
