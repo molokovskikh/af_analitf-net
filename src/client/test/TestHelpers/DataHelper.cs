@@ -83,7 +83,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static void SaveFailData()
 		{
-			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed && DispatcherFixture.IsCI()) {
+			if (IsTestFail() && DispatcherFixture.IsCI()) {
 				var root = "fail-test-data";
 				var dir = Directory.CreateDirectory(root);
 				if (dir.GetDirectories().Length > 10) {
@@ -92,6 +92,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 				CopyDb(Path.Combine(root, FileHelper.StringToPath(TestContext.CurrentContext.Test.FullName)));
 			}
+		}
+
+		public static bool IsTestFail()
+		{
+			return TestContext.CurrentContext.Result.State == TestState.Failure
+				|| TestContext.CurrentContext.Result.State == TestState.Error;
 		}
 	}
 }
