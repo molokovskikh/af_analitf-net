@@ -8,7 +8,7 @@ using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillLineSearchFixture : ViewModelFixture

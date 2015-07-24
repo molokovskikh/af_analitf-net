@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Config.Caliburn;
 using Caliburn.Micro;
-using Ionic.Zip;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class BaseConductorFixture

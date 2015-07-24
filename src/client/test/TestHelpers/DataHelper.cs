@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Test.Fixtures;
-using AnalitF.Net.Test.Integration;
+using AnalitF.Net.Client.Test.Integration;
 using Castle.ActiveRecord;
 using Common.Tools;
 using NHibernate;

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Runtime.ConstrainedExecution;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
@@ -12,7 +9,7 @@ using AnalitF.Net.Client.Models;
 using Common.Tools.Calendar;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	public class ThreadPerTaskScheduler : TaskScheduler
 	{

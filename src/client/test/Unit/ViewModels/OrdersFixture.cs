@@ -1,13 +1,11 @@
 ﻿using System;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Caliburn.Micro;
-using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class OrdersFixture : BaseUnitFixture

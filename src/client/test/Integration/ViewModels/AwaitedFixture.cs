@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -10,7 +9,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class AwaitedFixture : ViewModelFixture<Awaited>

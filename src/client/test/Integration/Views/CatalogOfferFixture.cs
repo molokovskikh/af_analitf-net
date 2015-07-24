@@ -3,7 +3,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -19,7 +18,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class CatalogOfferFixture : BaseViewFixture

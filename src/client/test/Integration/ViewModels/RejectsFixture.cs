@@ -1,15 +1,10 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using AnalitF.Net.Client.Helpers;
+﻿using System.Linq;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class RejectsFixture : ViewModelFixture<RejectsViewModel>

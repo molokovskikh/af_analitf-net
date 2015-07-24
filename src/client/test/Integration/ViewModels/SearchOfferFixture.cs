@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Common.NHibernate;
 using Common.Tools;
-using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class SearchOfferFixture : ViewModelFixture<SearchOfferViewModel>

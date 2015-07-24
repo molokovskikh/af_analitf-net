@@ -216,11 +216,6 @@ namespace AnalitF.Net.Client.ViewModels
 			get { return Env.Scheduler; }
 		}
 
-		public TaskScheduler TplUiScheduler
-		{
-			get { return Env.TplUiScheduler; }
-		}
-
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;

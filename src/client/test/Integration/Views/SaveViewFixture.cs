@@ -10,11 +10,11 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.Views.Offers;
 using Caliburn.Micro;
 using Common.Tools;
+using Newtonsoft.Json;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Newtonsoft.Json;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class SaveViewFixture : BaseViewFixture

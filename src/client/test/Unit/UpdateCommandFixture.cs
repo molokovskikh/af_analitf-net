@@ -1,12 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
-using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class UpdateCommandFixture
@@ -36,7 +35,7 @@ namespace AnalitF.Net.Test.Unit
 		[Test]
 		public void Clear_ads()
 		{
-			var cfg = new Config {
+			var cfg = new Config.Config {
 				RootDir = "test-tmp"
 			};
 			cleaner.WatchDir(cfg.RootDir);

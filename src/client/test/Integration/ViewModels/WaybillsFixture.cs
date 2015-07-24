@@ -5,16 +5,13 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.ViewModels.Dialogs;
-using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillsFixture : ViewModelFixture<WaybillsViewModel>

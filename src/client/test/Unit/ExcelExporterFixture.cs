@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using NPOI.SS.UserModel;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class ExcelExporterFixture

@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class DebugPipeFixture

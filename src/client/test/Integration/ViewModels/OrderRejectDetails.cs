@@ -2,12 +2,10 @@
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels.Offers;
 using NHibernate.Linq;
-using NHibernate.Util;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class OrderRejectDetails : ViewModelFixture

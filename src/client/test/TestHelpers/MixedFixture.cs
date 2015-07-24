@@ -8,7 +8,6 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Service.Test;
-using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate;
@@ -44,14 +43,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			fixtureHelper = new FixtureHelper();
 			disposable.Add(fixtureHelper);
 
-			clientConfig = Net.Test.Integration.IntegrationSetup.clientConfig;
-			serviceConfig = Net.Test.Integration.IntegrationSetup.serviceConfig;
+			clientConfig = Integration.IntegrationSetup.clientConfig;
+			serviceConfig = Integration.IntegrationSetup.serviceConfig;
 
 			FileHelper.InitDir(serviceConfig.RtmUpdatePath,
 				clientConfig.TmpDir,
 				Path.Combine(ConfigurationManager.AppSettings["ClientDocPath"], "АналитФАРМАЦИЯ"));
 
-			localSession = Net.Test.Integration.IntegrationSetup.Factory.OpenSession();
+			localSession = Integration.IntegrationSetup.Factory.OpenSession();
 
 			settings = localSession.Query<Settings>().First();
 			address = localSession.Query<Address>().First();

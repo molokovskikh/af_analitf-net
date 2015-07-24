@@ -1,37 +1,26 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq.Observαble;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
-using AnalitF.Net.Client.Test.Tasks;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
-using AnalitF.Net.Service.Config;
-using Castle.ActiveRecord;
-using Common.Models;
 using Common.Tools;
 using Common.Tools.Calendar;
-using Devart.Data.MySql;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI;
 using Test.Support;
 using LogManager = Caliburn.Micro.LogManager;
 using User = AnalitF.Net.Client.Models.User;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[SetUpFixture]
 	public class IntegrationSetup
@@ -45,7 +34,7 @@ namespace AnalitF.Net.Test.Integration
 		public static Configuration Configuration;
 		public static Client.Config.Config clientConfig = new Client.Config.Config();
 
-		public static Config serviceConfig;
+		public static Service.Config.Config serviceConfig;
 		public static string BackupDir = @"var\client\backup";
 
 		[SetUp]

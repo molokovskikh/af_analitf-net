@@ -154,7 +154,7 @@ namespace AnalitF.Net.Client.ViewModels
 							}
 							NotifyOfPropertyChange("ActiveItem");
 							IsEnabled.Value = true;
-						}, TplUiScheduler);
+						}, Env.TplUiScheduler);
 				}
 				else {
 					ScreenExtensions.TryDeactivate(activeItem, true);

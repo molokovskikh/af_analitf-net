@@ -8,7 +8,7 @@ using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class CatalogSearchFixture : BaseViewFixture

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -12,14 +8,12 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillDetailFixture : ViewModelFixture

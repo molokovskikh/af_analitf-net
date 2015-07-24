@@ -4,23 +4,20 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Web.UI.WebControls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
 using log4net.Appender;
-using log4net.Config;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class MailsFixture : ViewModelFixture<Mails>

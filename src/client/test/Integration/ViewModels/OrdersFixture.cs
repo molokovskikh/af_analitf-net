@@ -1,29 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;
-using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
-using log4net.Config;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class OrdersFixture : ViewModelFixture<OrdersViewModel>

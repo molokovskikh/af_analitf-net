@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -15,14 +13,13 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
-using Common.Tools.Calendar;
 using NUnit.Framework;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;
 using Point = System.Windows.Point;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class ControlsFixture

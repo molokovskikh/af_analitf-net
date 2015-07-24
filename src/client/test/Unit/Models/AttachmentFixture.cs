@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit.Models
 {
 	[TestFixture]
 	public class AttachmentFixture

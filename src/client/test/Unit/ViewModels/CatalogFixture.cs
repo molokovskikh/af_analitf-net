@@ -1,10 +1,9 @@
 ﻿using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Test.Integration.ViewModes;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class CatalogFixture : BaseUnitFixture

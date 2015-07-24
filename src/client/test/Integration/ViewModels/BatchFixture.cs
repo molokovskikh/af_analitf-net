@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
-using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels.Orders;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	public class BatchFixture : ViewModelFixture<Batch>
 	{

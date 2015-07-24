@@ -1,13 +1,11 @@
 ﻿using System;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Address = AnalitF.Net.Client.Models.Address;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class OrderDetailsFixture : BaseUnitFixture

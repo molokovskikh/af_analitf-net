@@ -1,15 +1,12 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class AddAwaitedFixture : ViewModelFixture<AddAwaited>

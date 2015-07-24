@@ -5,12 +5,11 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Client.Views;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class ExportFixture : BaseViewFixture

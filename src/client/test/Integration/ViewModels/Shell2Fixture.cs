@@ -22,12 +22,11 @@ using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 using Main = AnalitF.Net.Client.ViewModels.Main;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	public class StubRemoteCommand : RemoteCommand
 	{

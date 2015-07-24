@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -11,12 +9,9 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI.Testing;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	public class CatalogFixture : ViewModelFixture
 	{

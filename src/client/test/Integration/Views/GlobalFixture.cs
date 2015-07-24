@@ -17,7 +17,6 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -46,7 +45,7 @@ using Panel = System.Windows.Controls.Panel;
 using Screen = Caliburn.Micro.Screen;
 using TextBox = System.Windows.Controls.TextBox;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class GlobalFixture : DispatcherFixture

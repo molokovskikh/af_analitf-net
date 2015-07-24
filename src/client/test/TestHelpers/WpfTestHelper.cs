@@ -15,7 +15,7 @@ using System.Windows.Markup;
 using System.Windows.Threading;
 using System.Xml;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Test.Integration.Views;
+using AnalitF.Net.Client.Test.Integration.Views;
 using Common.Tools.Calendar;
 using ReactiveUI;
 
@@ -107,6 +107,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var started = new ManualResetEventSlim();
 			var dispatcherThread = new Thread(() => {
 				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
+				Dispatcher.CurrentDispatcher.BeginInvoke(action);
 				Dispatcher.Run();
 			});
 

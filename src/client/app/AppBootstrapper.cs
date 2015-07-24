@@ -56,7 +56,6 @@ namespace AnalitF.Net.Client
 		public AppBootstrapper()
 			: this(true)
 		{
-			Env.Current = new Env();
 		}
 
 		public AppBootstrapper(bool useApplication = true)
@@ -124,6 +123,7 @@ namespace AnalitF.Net.Client
 			}
 			InitUi(FailFast);
 			InitDb();
+			Env.Current = new Env();
 			InitShell();
 		}
 

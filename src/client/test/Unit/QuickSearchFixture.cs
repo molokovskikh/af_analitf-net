@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class QuickSearchFixture

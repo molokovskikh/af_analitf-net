@@ -4,26 +4,20 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Media;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Integration.ViewModels;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
-using Microsoft.Win32;
 using NPOI.HSSF.UserModel;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Xceed.Wpf.Toolkit;
 using Address = AnalitF.Net.Client.Models.Address;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class BatchFixture : BaseUnitFixture

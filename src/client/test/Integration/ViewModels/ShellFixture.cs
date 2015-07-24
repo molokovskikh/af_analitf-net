@@ -1,22 +1,15 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Models.Commands;
-using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.ViewModels.Orders;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
-using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture, Ignore("Тесты сломаны, из-за обработки диалога я не знаю как их чинить")]
 	public class ShellFixture : ViewModelFixture

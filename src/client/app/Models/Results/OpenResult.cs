@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Models.Results
 				//System.ComponentModel.Win32Exception (0x80004005):
 				//Указанному файлу не сопоставлено ни одно приложение для выполнения данной операции
 				//если нет сопоставленного приложения выбераем файл в shell
-				if (e.NativeErrorCode == 0x80004005)
+				if ((uint)e.NativeErrorCode == 0x80004005)
 					selectWithShell = true;
 			}
 			if (selectWithShell)

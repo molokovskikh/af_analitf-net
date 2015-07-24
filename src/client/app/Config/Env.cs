@@ -13,6 +13,8 @@ namespace AnalitF.Net.Client.Config
 {
 	public class Env
 	{
+		private TaskScheduler tplUiScheduler;
+
 		public TimeSpan RequestDelay = TimeSpan.Zero;
 		//механизм синхронизации для тестов
 		public Barrier Barrier;
@@ -22,14 +24,13 @@ namespace AnalitF.Net.Client.Config
 		public IScheduler Scheduler;
 		public IScheduler UiScheduler;
 		public IMessageBus Bus;
-		public TaskScheduler TplScheduler;
-		public TaskScheduler TplUiScheduler;
 		//планировщик для выболнения запросов
 		//нужен тк mysql требует что бы запросы производились в той же нитке что и инициализировала подключение
 		//фактически это очередь задач которая обрабатывается одной ниткой глабальной для всего приложения
 		public TaskScheduler QueryScheduler;
 		public ISessionFactory Factory;
 
+		//для тестирования
 		public User User;
 		public static Env Current;
 
@@ -50,9 +51,14 @@ namespace AnalitF.Net.Client.Config
 			Bus = RxApp.MessageBus;
 			Scheduler = DefaultScheduler.Instance;
 			UiScheduler = DispatcherScheduler.Current;
-			TplUiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 			Factory = AppBootstrapper.NHibernate.Factory;
 			QueryScheduler = new QueueScheduler();
+		}
+
+		public TaskScheduler TplUiScheduler
+		{
+			get { return tplUiScheduler = tplUiScheduler ?? TaskScheduler.FromCurrentSynchronizationContext(); }
+			set { tplUiScheduler = value; }
 		}
 
 		public Tuple<IObservable<T1>, IObservable<T2>>

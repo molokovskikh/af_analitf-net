@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Test.Integration;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate;

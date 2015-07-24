@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Test.TestHelpers;
-using Caliburn.Micro;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using View = System.Web.UI.WebControls.View;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class EditableFixture

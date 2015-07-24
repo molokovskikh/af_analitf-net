@@ -5,7 +5,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class PriceResultFixture

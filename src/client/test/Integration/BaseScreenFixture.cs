@@ -2,11 +2,10 @@
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[TestFixture]
 	public class BaseScreenFixture : ViewModelFixture

@@ -4,7 +4,7 @@ using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class WaybillDetailsFixture : BaseUnitFixture

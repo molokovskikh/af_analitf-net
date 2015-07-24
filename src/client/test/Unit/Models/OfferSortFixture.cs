@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit.Models
 {
 	[TestFixture]
 	public class OfferSortFixture

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Windows.Media;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -9,12 +8,10 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Tools;
-using log4net.Config;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.Commands
+namespace AnalitF.Net.Client.Test.Integration.Commands
 {
 	[TestFixture]
 	public class WaybillsFixture : MixedFixture

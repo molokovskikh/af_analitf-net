@@ -4,7 +4,7 @@ using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class SaveViewModelFixture : ViewModelFixture

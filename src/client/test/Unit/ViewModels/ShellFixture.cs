@@ -6,15 +6,15 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Test.Integration.ViewModels;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class ShellFixture : BaseUnitFixture

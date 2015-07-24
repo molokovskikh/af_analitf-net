@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
-using NPOI.Util;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Commands
+namespace AnalitF.Net.Client.Test.Integration.Commands
 {
 	[TestFixture]
 	public class ImportFixture : DbFixture

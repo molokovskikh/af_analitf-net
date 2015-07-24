@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class ProgressReporterFixture

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
-using AnalitF.Net.Test.Integration.Views;
+using AnalitF.Net.Client.Test.Integration.Views;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Test.TestHelpers

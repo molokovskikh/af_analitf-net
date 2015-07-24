@@ -3,7 +3,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Parts;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class SearchBehaviorFixture : BaseUnitFixture
