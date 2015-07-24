@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Runtime.Serialization;
 using System.Windows.Controls;
-using System.Windows.Forms;
-using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
-using Iesi.Collections;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using Color = System.Drawing.Color;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -27,9 +21,10 @@ namespace AnalitF.Net.Client.ViewModels
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
 		private static string lastTab;
-		public bool IsCredentialsChanged;
 		private bool _passwordUpdated;
 		private string _password;
+
+		public bool IsCredentialsChanged;
 
 		public SettingsViewModel()
 		{
@@ -37,6 +32,11 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 			CurrentDirMap = new NotifyValue<DirMap>();
 			IsWaybillDirEnabled = new NotifyValue<bool>();
+			DirMaps = new List<DirMap>();
+			Addresses = new List<Address>();
+			Styles = new List<CustomStyle>();
+			DisplayName = "Настройка";
+
 			if (String.IsNullOrEmpty(Settings.Value.WaybillDir))
 				Settings.Value.WaybillDir = Settings.Value.MapPath("Waybills");
 			if (String.IsNullOrEmpty(Settings.Value.RejectDir))
@@ -44,21 +44,20 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(Settings.Value.ReportDir))
 				Settings.Value.ReportDir = Settings.Value.MapPath("Reports");
 
-			Session.FlushMode =  FlushMode.Never;
-			DisplayName = "Настройка";
-
 			_password = new string(Enumerable.Repeat('*', Settings.Value.Password != null ? Settings.Value.Password.Length : 0).ToArray());
-
 			waybillConfig = Settings.Value.Waybills;
-			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-			CurrentAddress = Addresses.FirstOrDefault();
-			DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
-			CurrentDirMap.Value = DirMaps.FirstOrDefault();
+			if (Session != null) {
+				Session.FlushMode =  FlushMode.Never;
+				Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+				CurrentAddress = Addresses.FirstOrDefault();
+				DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
+				CurrentDirMap.Value = DirMaps.FirstOrDefault();
 
-			var styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
-			var newStyles = StyleHelper.GetDefaultStyles().Except(styles);
-			Session.SaveEach(newStyles);
-			Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+				var styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+				var newStyles = StyleHelper.GetDefaultStyles().Except(styles);
+				Session.SaveEach(newStyles);
+				Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+			}
 
 			Markups = Settings.Value.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)

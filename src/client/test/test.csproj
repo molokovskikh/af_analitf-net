@@ -197,7 +197,6 @@
     <Compile Include="Integration\ViewModels\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModels\Shell2Fixture.cs" />
-    <Compile Include="Integration\ViewModels\ShellFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillsFixture.cs" />

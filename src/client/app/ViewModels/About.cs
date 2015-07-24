@@ -18,9 +18,7 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
-
-			var addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-			AboutText = addresses.Select(a => String.Format("адрес заказа {0}\n"
+			AboutText = Addresses.Select(a => String.Format("адрес заказа {0}\n"
 				+ "   E-mail для накладных: {1}@waybills.analit.net\n"
 				+ "   E-mail для отказов: {1}@refused.analit.net", a.Name, a.Id))
 				.Implode("\n\n");

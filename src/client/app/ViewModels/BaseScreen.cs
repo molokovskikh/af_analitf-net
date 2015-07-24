@@ -279,9 +279,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected virtual void RecreateSession()
 		{
 			Session.Clear();
-			Addresses = Session.Query<Address>().ToArray();
-			if (Address != null)
-				Address = Session.Get<Address>(Address.Id);
+			Load();
 			User = Session.Query<User>().FirstOrDefault();
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
@@ -353,11 +351,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Load()
 		{
-			if (Shell == null || Session == null)
+			if (Session == null)
 				return;
-			if (Shell.CurrentAddress != null)
+			if (Shell != null && Shell.CurrentAddress != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
-			Addresses = Session.Query<Address>().ToArray();
+			Addresses = Session.Query<Address>().OrderBy(x => x.Name).ToArray();
 		}
 
 		//метод вызывается если нужно обновить данные на форме
@@ -482,7 +480,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override string ToString()
 		{
-			return DisplayName;
+			return String.IsNullOrEmpty(DisplayName) ? base.ToString() : DisplayName;
 		}
 
 		public void Dispose()

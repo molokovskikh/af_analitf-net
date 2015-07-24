@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Integration.ViewModels;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
@@ -196,6 +197,54 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var results = shell.OnViewReady().ToArray();
 			Assert.AreEqual(1, cmds.Count);
 			Assert.AreEqual("1.txt", ((UpdateCommand)cmds[0]).BatchFile);
+		}
+
+		[Test]
+		public void Close_current_on_address_change()
+		{
+			shell.CurrentAddress = new Address("тест");
+			shell.Addresses = new List<Address> { shell.CurrentAddress, new Address("тест") };
+			shell.ShowPrice();
+			Assert.IsInstanceOf<PriceViewModel>(shell.ActiveItem);
+			shell.CurrentAddress = shell.Addresses[1];
+
+			Assert.IsInstanceOf<Main>(shell.ActiveItem);
+			Assert.That(shell.NavigationStack, Is.Empty);
+		}
+
+		[Test]
+		public void If_user_name_empty_open_configuration_form()
+		{
+			var dialogs = manager.DialogOpened.Collect();
+			var messages = manager.MessageOpened.Collect();
+			shell.OnViewReady();
+			Assert.That(messages.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
+			Assert.That(dialogs[0], Is.TypeOf<SettingsViewModel>());
+		}
+
+		[Test]
+		public void Reject_update_with_empty_user_name()
+		{
+			shell.OnViewReady();
+
+			var dialogs = manager.DialogOpened.Collect();
+			var messages = manager.MessageOpened.Collect();
+			shell.Update();
+			Assert.That(messages.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
+			Assert.That(dialogs[0], Is.TypeOf<SettingsViewModel>());
+		}
+
+		[Test]
+		public void Before_sync_close_active_items()
+		{
+			shell.Settings.Value.UserName = "test";
+			shell.Settings.Value.Password = "password";
+
+			shell.ShowCatalog();
+			shell.Update();
+
+			Assert.IsInstanceOf<Main>(shell.ActiveItem);
+			Assert.AreEqual(0, shell.NavigationStack.Count());
 		}
 	}
 }

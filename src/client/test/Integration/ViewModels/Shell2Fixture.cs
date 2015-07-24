@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	}
 
 	[TestFixture]
-	public class Shell2Fixture : ViewModelFixture
+	public class ShellFixture : ViewModelFixture
 	{
 		private RemoteCommand command;
 		private StubRemoteCommand stub;

@@ -550,10 +550,12 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowSettings()
 		{
 			windowManager.ShowFixedDialog(new SettingsViewModel());
-			//настройки будут обновлены автоматически но в случае если
-			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
-			//это будет слишком поздно
-			session.Refresh(Settings.Value);
+			if (session != null) {
+				//настройки будут обновлены автоматически но в случае если
+				//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
+				//это будет слишком поздно
+				session.Refresh(Settings.Value);
+			}
 		}
 
 		public bool CanShowOrderLines

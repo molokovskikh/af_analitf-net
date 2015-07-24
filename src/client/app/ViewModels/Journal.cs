@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
@@ -14,6 +15,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public Journal()
 		{
 			DisplayName = "Журнал загрузок";
+			Items = new NotifyValue<List<JournalRecord>>();
 		}
 
 		public NotifyValue<List<JournalRecord>> Items { get; set; }
@@ -22,11 +24,12 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Items = Bus.Listen<JournalRecord>()
-				.SubscribeOn(UiScheduler)
+			Bus.Listen<JournalRecord>()
 				.Merge(Observable.Return<JournalRecord>(null))
-				.Select(r => Session.Query<JournalRecord>().OrderByDescending(o => o.CreateAt).ToList())
-				.ToValue();
+				.Select(_ => RxQuery(x => x.Query<JournalRecord>().OrderByDescending(o => o.CreateAt).ToList()))
+				.ObserveOn(UiScheduler)
+				.Switch()
+				.Subscribe(Items, CloseCancellation.Token);
 		}
 
 		public IResult Open(JournalRecord record)
