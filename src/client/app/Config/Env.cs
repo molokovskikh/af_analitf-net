@@ -35,7 +35,9 @@ namespace AnalitF.Net.Client.Config
 
 		public Env(User user, IMessageBus bus, IScheduler scheduler, ISessionFactory factory)
 		{
+#if DEBUG
 			IsUnitTesting = true;
+#endif
 			Bus = bus;
 			Scheduler = scheduler;
 			UiScheduler = scheduler;
