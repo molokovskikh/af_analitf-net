@@ -8,7 +8,7 @@ using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class CatalogSearchFixture : BaseViewFixture
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var searchCheck = view.Descendants<CheckBox>().First(c => c.Name == "CatalogSearch");
 				searchCheck.IsChecked = true;
 				await view.WaitIdle();
-				testScheduler.Start();
+				scheduler.Start();
 
 				var grid = view.Descendants<DataGrid>().First(g => g.Name == "Items");
 				grid.SendText(term);

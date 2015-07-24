@@ -1,15 +1,9 @@
-﻿using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
+﻿using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using Microsoft.Reactive.Testing;
 using NUnit.Framework;
-using ReactiveUI;
-using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class CatalogNameFixture : BaseUnitFixture

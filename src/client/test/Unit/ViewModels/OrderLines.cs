@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.ObjectModel;
 using System.IO;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Orders;
@@ -11,7 +9,7 @@ using Common.NHibernate;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	public class OrderLines : BaseUnitFixture
 	{

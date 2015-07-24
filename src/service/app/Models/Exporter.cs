@@ -135,13 +135,14 @@ namespace AnalitF.Net.Service.Models
 			MaxProducerCostCostId = config.MaxProducerCostCostId;
 
 			user = job.User;
-			data = session.Get<AnalitfNetData>(user.Id);
+			data = session.Get<AnalitfNetData>(user.Id)
+				?? new AnalitfNetData(job);
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
 
 			UpdatePath = Path.Combine(config.UpdatePath,
-				data == null || String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
+				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
 		}
 
 		//Все даты передаются в UTC!
@@ -152,15 +153,14 @@ namespace AnalitF.Net.Service.Models
 			Application.ReadDbConfig(Config);
 #endif
 
-			if (userSettings.CheckClientToken && !String.IsNullOrEmpty(job.ClientToken)) {
-				if (String.IsNullOrEmpty(data.ClientToken)) {
-					data.ClientToken = job.ClientToken;
-				}
-				else if (data.ClientToken != job.ClientToken) {
+			if (userSettings.CheckClientToken
+				&& !String.IsNullOrEmpty(job.ClientToken)) {
+				if (String.IsNullOrEmpty(data.ClientTokenV2))
+					data.ClientTokenV2 = job.ClientToken;
+				else if (data.ClientTokenV2 != job.ClientToken)
 					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АК \"Инфорум\".");
-				}
 			}
-			data = data ?? new AnalitfNetData(job);
+
 			data.LastPendingUpdateAt = DateTime.Now;
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
@@ -984,9 +984,8 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 			var ids = session.CreateSQLQuery(@"
 select Id
 from usersettings.SupplierPromotions sp
-where sp.Status = 1 and (sp.RegionMask & :regionMask > 0)")
-				.SetParameter("regionMask", userSettings.WorkRegionMask)
-				.List<uint>();
+	join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1").List<uint>();
 
 			string sql;
 			sql = @"
@@ -996,16 +995,18 @@ select
 	sp.Name,
 	sp.Annotation
 from usersettings.SupplierPromotions sp
-where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "Promotions", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
+	join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1";
+			Export(Result, sql, "Promotions", truncate: true);
 			sql = @"
 select
 	pc.CatalogId,
 	pc.PromotionId
 from usersettings.PromotionCatalogs pc
 	join usersettings.SupplierPromotions sp on pc.PromotionId = sp.Id
-where sp.Status = 1 and (sp.RegionMask & ?regionMask > 0)";
-			Export(Result, sql, "PromotionCatalogs", truncate: true, parameters: new { regionMask = userSettings.WorkRegionMask });
+		join Usersettings.Prices p on p.FirmCode = sp.SupplierId
+where sp.Status = 1";
+			Export(Result, sql, "PromotionCatalogs", truncate: true);
 
 			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
 			if (Directory.Exists(Config.PromotionsPath)) {

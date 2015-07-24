@@ -164,7 +164,7 @@ namespace AnalitF.Net.Client.Helpers
 			if (!values.Any())
 				return query;
 
-			var field = (MemberExpression)select.Body;
+			var field = (MemberExpression)@select.Body;
 			Expression result = null;
 			foreach (var value in values) {
 				var exp = Expression.Call(field, typeof(String).GetMethod("Contains"), Expression.Constant(value));
@@ -187,6 +187,11 @@ namespace AnalitF.Net.Client.Helpers
 			}
 			var f = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
 			return String.Format("{0} = {1}", name, f.GetValue(value));
+		}
+
+		public static string FormatCost(this decimal? value)
+		{
+			return value != null ? value.Value.ToString("0.00") : "";
 		}
 	}
 }

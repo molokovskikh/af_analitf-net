@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Windows;
-using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -12,14 +8,12 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillDetailFixture : ViewModelFixture
@@ -72,7 +66,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups[0].MaxMarkup = 50;
 			settings.Save();
 			Close(settings);
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
 			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(30.8, waybillLine.RetailCost);
@@ -115,8 +109,6 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		[Test]
 		public void Load_certificate()
 		{
-			BaseScreen.TestSchuduler = ImmediateScheduler.Instance;
-
 			var waybillFixture = Fixture<CreateWaybill>();
 			var fixture = new CreateCertificate {
 				Waybill = waybillFixture.Waybill
@@ -132,6 +124,8 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsInstanceOf<DialogResult>(updateResults[0]);
 			Assert.IsInstanceOf<OpenResult>(updateResults[1]);
 
+			Env.Scheduler = ImmediateScheduler.Instance;
+			Env.UiScheduler = ImmediateScheduler.Instance;
 			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == line.Id)).ToArray();
 			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
 			Assert.AreEqual(String.Format("Файл 'Сертификаты для {0} серия {1}' загружен", line.Product, line.SerialNumber), WaitNotification());

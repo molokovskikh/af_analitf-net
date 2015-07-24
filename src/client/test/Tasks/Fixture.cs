@@ -8,7 +8,6 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Service;
 using AnalitF.Net.Service.Config.Environments;
-using AnalitF.Net.Test.Integration;
 using Common.Tools;
 using NPOI.SS.Formula.Functions;
 

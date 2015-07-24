@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
@@ -11,12 +9,9 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
-using ReactiveUI.Testing;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	public class CatalogFixture : ViewModelFixture
 	{
@@ -28,7 +23,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			catalogModel = Init(new CatalogViewModel());
 			nameViewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
-			testScheduler.Start();
+			scheduler.Start();
 		}
 
 		[Test, Ignore]
@@ -56,7 +51,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(nameViewModel.CatalogNames.Value.Select(c => c.Name).ToList(),
 				Is.EquivalentTo(expectedNames.Select(n => n.Name).ToArray()));
 			catalogModel.FilterByMnn = false;
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(1));
 		}
 
@@ -116,7 +111,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Activete_search()
 		{
 			catalogModel.CatalogSearch.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -139,7 +134,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Clear_search_term()
 		{
 			catalogModel.CatalogSearch.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
@@ -156,14 +151,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Filter_by_mnn_in_search()
 		{
 			catalogModel.CatalogSearch.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			var searchModel = (CatalogSearchViewModel)catalogModel.ActiveItem;
 
 			var catalog = session.Query<Catalog>().First(c => c.HaveOffers && c.Name.Mnn != null);
 			var total = searchModel.Items.Value.Count;
 			searchModel.CurrentCatalog.Value = catalog;
 			catalogModel.FilterByMnn = true;
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(searchModel.Items.Value.Count, Is.LessThan(total));
 		}
 
@@ -224,7 +219,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		{
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First(n => n.Mnn != null);
 			catalogModel.FilterByMnn = true;
-			testScheduler.Start();
+			scheduler.Start();
 		}
 	}
 }

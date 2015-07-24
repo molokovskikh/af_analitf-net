@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private CatalogName filterCatalogName;
 		private Catalog filterCatalog;
 
-		private List<Offer> CatalogOffers = new List<Offer>();
+		public List<Offer> CatalogOffers = new List<Offer>();
 
 		private CatalogOfferViewModel(OfferComposedId initOfferId = null)
 			: base(initOfferId)
@@ -56,6 +56,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				RetailMarkup.Recalculate();
 			});
 			Persist(HideJunk, "HideJunk");
+			SessionValue(CurrentRegion, "CurrentRegion");
+			SessionValue(CurrentFilter, "CurrentFilter");
 			DisplayItems = new NotifyValue<List<object>>();
 			CurrentDisplayItem = new NotifyValue<object>();
 		}

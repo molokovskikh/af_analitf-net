@@ -7,7 +7,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class MnnFixture : ViewModelFixture<MnnViewModel>
@@ -20,13 +20,13 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 					&& n.Mnn != null
 					&& !n.Mnn.HaveOffers);
 			var items = model.Mnns;
-			testScheduler.Start();
+			scheduler.Start();
 			Assert.That(items.Value.Count, Is.GreaterThan(0));
 			model.ShowWithoutOffers.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			model.CurrentMnn = items.Value.First(m => m.Id == catalogName.Mnn.Id);
 			model.EnterMnn();
-			testScheduler.Start();
+			scheduler.Start();
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
 			Assert.IsTrue(catalog.FilterByMnn, model.CurrentMnn.ToString());
@@ -41,12 +41,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Search()
 		{
 			var items = model.Mnns;
-			testScheduler.Start();
+			scheduler.Start();
 			var count = items.Value.Count;
 			Assert.That(count, Is.GreaterThan(0));
 			model.SearchBehavior.SearchText.Value = items.Value[0].Name;
-			testScheduler.AdvanceByMs(5000);
-			testScheduler.Start();
+			scheduler.AdvanceByMs(5000);
+			scheduler.Start();
 			Assert.That(model.Mnns.Value.Count, Is.LessThan(count));
 			Assert.That(model.Mnns.Value.Count, Is.GreaterThan(0));
 		}

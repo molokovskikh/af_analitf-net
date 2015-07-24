@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq.Observαble;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -8,9 +7,8 @@ using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.Models
+namespace AnalitF.Net.Client.Test.Integration.Models
 {
 	[TestFixture]
 	public class RestoreOrderFixture : DbFixture

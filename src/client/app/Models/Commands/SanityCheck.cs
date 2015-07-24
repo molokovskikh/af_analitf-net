@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -8,13 +8,9 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Config.NHibernate;
-using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models.Commands;
 using Common.NHibernate;
 using Common.Tools;
 using Devart.Data.MySql;
-using Iesi.Collections;
-using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Connection;
 using NHibernate.Dialect;
@@ -24,10 +20,9 @@ using NHibernate.Exceptions;
 using NHibernate.Linq;
 using NHibernate.Mapping;
 using NHibernate.Tool.hbm2ddl;
-using log4net;
 using NHibernate.Util;
 
-namespace AnalitF.Net.Client.Models
+namespace AnalitF.Net.Client.Models.Commands
 {
 	public class SanityCheck : BaseCommand
 	{

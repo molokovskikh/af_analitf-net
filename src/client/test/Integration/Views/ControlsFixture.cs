@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -15,14 +13,13 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
-using Common.Tools.Calendar;
 using NUnit.Framework;
 using Keyboard = System.Windows.Input.Keyboard;
 using Mouse = Microsoft.Test.Input.Mouse;
 using MouseButton = Microsoft.Test.Input.MouseButton;
 using Point = System.Windows.Point;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class ControlsFixture
@@ -73,7 +70,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var selector = InitSelector(w);
 				await selector.WaitLoaded();
 				selector.IsOpened = true;
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				var scrollViewer = selector.Descendants<ScrollViewer>().First();
 				Assert.AreEqual(Visibility.Visible, scrollViewer.ComputedVerticalScrollBarVisibility);
 			});
@@ -123,7 +120,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				await grid.WaitLoaded();
 				DataGridHelper.Focus(grid);
 				grid.ItemsSource = Enumerable.Range(500, 100).Select(i => Tuple.Create(i.ToString())).ToList();
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 				Assert.IsInstanceOf<DataGridCell>(Keyboard.FocusedElement);
 			});
@@ -141,7 +138,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				var point = grid.PointToScreen(new Point(3, 3));
 				Mouse.MoveTo(new System.Drawing.Point((int)point.X, (int)point.Y));
 				Mouse.Click(MouseButton.Left);
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 			});
 		}
@@ -156,7 +153,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = grid;
 				grid.ItemsSource = Enumerable.Empty<Tuple<string>>().ToList();
 
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				DataGridHelper.Focus(grid);
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 			});
@@ -174,12 +171,12 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = grid;
 				grid.ItemsSource = data;
 
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				DataGridHelper.Focus(grid);
 				Assert.IsNotNull(grid.CurrentItem);
 				data.Remove((Tuple<string>)grid.SelectedItem);
 
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				Assert.IsTrue(grid.IsKeyboardFocusWithin);
 				Assert.IsNotNull(grid.CurrentItem);
 			});
@@ -205,11 +202,43 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = grid;
 				StyleHelper.ApplyStyles(typeof(Offer), grid, resources);
 				grid.ItemsSource = offers;
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				var cells = grid.Descendants<DataGridCell>().ToArray();
 				Assert.That(cells.Length, Is.GreaterThan(0));
 				foreach (var cell in cells)
 					Assert.AreEqual("#FFFF0000", cell.Background.ToString(), ((TextBlock)cell.Content).Text);
+			});
+		}
+
+		[Test]
+		public void Scroll_on_wheel()
+		{
+			var items = Enumerable.Range(1, 100).Select(i => Tuple.Create(i.ToString())).ToList();
+			WpfTestHelper.WithWindow2(async w => {
+				var grid = new DataGrid2();
+				grid.AutoGenerateColumns = false;
+				grid.Columns.Add(new DataGridTextColumn { Binding = new Binding("Item1") });
+				w.Content = grid;
+
+				grid.RaiseEvent(new MouseWheelEventArgs(System.Windows.Input.Mouse.PrimaryDevice,
+					0,
+					-System.Windows.Input.Mouse.MouseWheelDeltaForOneLine) {
+						RoutedEvent = UIElement.PreviewMouseWheelEvent,
+						Source = grid,
+					});
+				grid.ItemsSource = items;
+				await grid.WaitIdle();
+				grid.CurrentItem = items[0];
+				grid.CurrentColumn = grid.Columns[0];
+				grid.RaiseEvent(new MouseWheelEventArgs(System.Windows.Input.Mouse.PrimaryDevice,
+					0,
+					-System.Windows.Input.Mouse.MouseWheelDeltaForOneLine) {
+						RoutedEvent = UIElement.PreviewMouseWheelEvent,
+						Source = grid,
+					});
+				Assert.AreEqual("2", ((Tuple<string>)grid.CurrentItem).Item1);
+
+				await w.WaitIdle();
 			});
 		}
 
@@ -246,14 +275,14 @@ namespace AnalitF.Net.Test.Integration.Views
 				});
 				w.Content = grid;
 				await grid.WaitLoaded();
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 
 				model.Items.Value = Enumerable.Range(0, 49).Select(i => Tuple.Create(i.ToString())).ToList();
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 
 				model.Term.Value = "5";
 				model.Items.Value = Enumerable.Range(50, 100).Select(i => Tuple.Create(i.ToString())).ToList();
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 
 				var row = grid.Descendants<DataGridRow>().First(r => ((Tuple<String>)r.DataContext).Item1 == "50");
 				var text = row.Descendants<TextBlock>().First();
@@ -279,7 +308,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				grid.Columns.Add(new DataGridTextColumnEx { Binding = new Binding("RetailCost") });
 				w.Content = grid;
 				grid.ItemsSource = waybill.Lines;
-				await w.Dispatcher.WaitIdle();
+				await w.WaitIdle();
 				var cell = grid.Descendants<DataGridCell>()
 					.First(x => x.Column == grid.Columns[1] && x.DataContext == line);
 				Assert.IsTrue(cell.Focus());

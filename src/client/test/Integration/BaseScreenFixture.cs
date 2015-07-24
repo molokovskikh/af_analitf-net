@@ -2,11 +2,10 @@
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[TestFixture]
 	public class BaseScreenFixture : ViewModelFixture
@@ -38,7 +37,7 @@ namespace AnalitF.Net.Test.Integration
 			shell.ShowCatalog();
 			var catalog = ((CatalogViewModel)shell.ActiveItem);
 			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			testScheduler.Start();
+			scheduler.Start();
 			names.CurrentCatalog = names.Catalogs.Value[0];
 			names.EnterCatalog();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());

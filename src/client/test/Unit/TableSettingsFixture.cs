@@ -6,7 +6,7 @@ using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class TableSettingsFixture
@@ -136,6 +136,33 @@ namespace AnalitF.Net.Test.Unit
 			column = grid.Columns[0];
 			Assert.IsNull(column.SortDirection);
 		}
+
+		[Test]
+		public void Restore_display_index()
+		{
+			grid.Columns.Add(new DataGridTextColumn { Header = "Наименование", DisplayIndex = 0 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Остаток", DisplayIndex = 1 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Заказ", DisplayIndex = 2 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Сумма", DisplayIndex = 3 });
+
+			grid.Columns[1].DisplayIndex = 2;
+			//ui может захотеть удалить колонку тк пользователю нельзя видить ее
+			//восстановление настроек должно корректно обрабатывать эту ситуацию
+			grid.Columns.Remove(grid.Columns[0]);
+			settings.SaveView(content);
+
+			InitGrid();
+			grid.Columns.Add(new DataGridTextColumn { Header = "Наименование", DisplayIndex = 0 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Остаток", DisplayIndex = 1 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Заказ", DisplayIndex = 2 });
+			grid.Columns.Add(new DataGridTextColumn { Header = "Сумма", DisplayIndex = 3 });
+			settings.RestoreView(content);
+			Assert.AreEqual(0, grid.Columns[0].DisplayIndex);
+			Assert.AreEqual(2, grid.Columns[1].DisplayIndex);
+			Assert.AreEqual(1, grid.Columns[2].DisplayIndex);
+			Assert.AreEqual(3, grid.Columns[3].DisplayIndex);
+		}
+
 
 		private void InitGrid()
 		{

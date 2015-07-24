@@ -153,31 +153,31 @@ namespace AnalitF.Net.Client.Models.Print
 				l.SerialNumber,
 				l.Period,
 				string.Format("{0} {1}", l.Producer, l.Country),
-				l.ProducerCost,
-				l.ProducerCostWithTax,
-				l.RegistryCost,
+				l.ProducerCost != null ? l.ProducerCost.Value.ToString("0.00") : "",
+				l.ProducerCostWithTax != null ? l.ProducerCostWithTax.Value.ToString("0.00") : "",
+				l.RegistryCost != null ? l.RegistryCost.Value.ToString("0.00") : "",
 				l.SupplierPriceMarkup,
-				l.SupplierCostWithoutNds,
+				l.SupplierCostWithoutNds != null ? l.SupplierCostWithoutNds.Value.ToString("0.00") : "",
 				l.TaxPerUnit,
-				l.SupplierCost,
+				l.SupplierCost != null ? l.SupplierCost.Value.ToString("0.00") : "",
 				l.RetailMarkup,
-				l.RetailCost,
+				l.RetailCost != null ? l.RetailCost.Value.ToString("0.00") : "",
 				l.Quantity,
-				l.RetailSum,
+				l.RetailSum != null ? l.RetailSum.Value.ToString("0.00") : "",
 			});
 			BuildTable(rows, columns, columnGrops);
 
 			var retailsSum = lines.Sum(l => l.RetailSum);
-			block = Block("Продажная сумма: " + RusCurrency.Str((double)retailsSum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(retailsSum.ToString()))) {
+			block = Block("Продажная сумма: " + (retailsSum != null ? RusCurrency.Str((double)retailsSum) : ""));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(retailsSum != null ? retailsSum.Value.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),
 				Margin = new Thickness(0)
 			});
 			var sum = lines.Sum(l => l.Amount);
-			block = Block("Сумма поставки: " + RusCurrency.Str((double)sum));
-			block.Inlines.Add(new Figure(new Paragraph(new Run(sum.ToString()))) {
+			block = Block("Сумма поставки: " + (sum != null ? RusCurrency.Str((double)sum) : ""));
+			block.Inlines.Add(new Figure(new Paragraph(new Run(sum != null ? sum.Value.ToString("0.00") : ""))) {
 				FontWeight = FontWeights.Bold,
 				HorizontalAnchor = FigureHorizontalAnchor.ContentRight,
 				Padding = new Thickness(0),

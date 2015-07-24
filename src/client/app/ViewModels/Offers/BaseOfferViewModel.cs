@@ -229,7 +229,7 @@ where c.Id = ?";
 				Shell.ResetAutoComment = ResetAutoComment;
 			}
 
-			if (Session != null) {
+			if (StatelessSession != null) {
 				var newLines = Addresses.Where(a => NHibernateUtil.IsInitialized(a.Orders))
 					.SelectMany(a => a.Orders)
 					.Where(o => NHibernateUtil.IsInitialized(o.Lines))
@@ -239,7 +239,7 @@ where c.Id = ?";
 				if (newLines.Count > 0) {
 					var condition = newLines.Implode(l => String.Format("(a.CatalogId = {0} and (a.ProducerId = {1} or a.Producerid is null))",
 						l.CatalogId, l.ProducerId != null ? l.ProducerId.ToString() : "null"), " or ");
-					Session.CreateSQLQuery(String.Format("delete a from AwaitedItems a where {0}", condition))
+					StatelessSession.CreateSQLQuery(String.Format("delete a from AwaitedItems a where {0}", condition))
 						.ExecuteUpdate();
 				}
 			}

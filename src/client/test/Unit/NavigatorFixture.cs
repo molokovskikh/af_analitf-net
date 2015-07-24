@@ -3,11 +3,9 @@ using System.Linq;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
-using Castle.Components.DictionaryAdapter;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class NavigatorFixture

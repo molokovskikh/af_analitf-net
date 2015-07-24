@@ -41,6 +41,9 @@
   <PropertyGroup>
     <ApplicationIcon>Assets\images\mainicon_original.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
     <Reference Include="Devart.Data">
@@ -246,6 +249,7 @@
     <Compile Include="Models\Commands\DbCommand.cs" />
     <Compile Include="Models\Commands\RemoteCommand.cs" />
     <Compile Include="Models\Commands\ReorderCommand.cs" />
+    <Compile Include="Models\Commands\SanityCheck.cs" />
     <Compile Include="Models\Commands\SendFeedback.cs" />
     <Compile Include="Models\Commands\SendOrders.cs" />
     <Compile Include="Models\Commands\UnfreezeCommand.cs" />
@@ -305,7 +309,6 @@
     <Compile Include="Models\Results\ShellResult.cs" />
     <Compile Include="Models\Results\ShowPopupResult.cs" />
     <Compile Include="Models\Results\TaskResult.cs" />
-    <Compile Include="Models\SanityCheck.cs" />
     <Compile Include="Models\Schedule.cs" />
     <Compile Include="Models\SentOrder.cs" />
     <Compile Include="Models\SentOrderLine.cs" />
@@ -765,6 +768,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="app.manifest" />
     <None Include="App.release.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />

@@ -6,7 +6,7 @@ using AnalitF.Net.Client.Config.Caliburn;
 using Caliburn.Micro;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class ViewModelHelperFixture

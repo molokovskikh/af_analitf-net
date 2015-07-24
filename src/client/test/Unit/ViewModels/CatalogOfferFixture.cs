@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
-using Microsoft.Reactive.Testing;
 using NUnit.Framework;
-using ReactiveUI;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class CatalogOfferFixture : BaseUnitFixture
@@ -26,6 +21,18 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		public void Setup()
 		{
 			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
+			model.CatalogOffers = new List<Offer> {
+				new Offer(new Price("test1") { RegionName = "Воронеж" }, 100) {
+					Id = {
+						OfferId = 1
+					}
+				},
+				new Offer(new Price("test2") { RegionName = "Воронеж" }, 150) {
+					Id = {
+						OfferId = 2
+					},
+				}
+			};
 			Activate(model);
 		}
 
@@ -90,11 +97,16 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 		{
 			model.AutoCommentText = "test";
 			Assert.IsTrue(model.IsActive);
-			ScreenExtensions.TryDeactivate(model, false);
+			Close(model);
 			Assert.IsFalse(model.IsActive);
 			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
 			Activate(model);
 			Assert.AreEqual("test", model.AutoCommentText);
+		}
+
+		private void Close(object model)
+		{
+			ScreenExtensions.TryDeactivate(model, false);
 		}
 
 		[Test]
@@ -114,6 +126,21 @@ namespace AnalitF.Net.Test.Unit.ViewModels
 			model.OfferUpdated();
 			Assert.IsNull(model.CurrentOffer.Value.OrderCount);
 			Assert.IsNull(model.CurrentOffer.Value.OrderLine);
+		}
+
+		[Test]
+		public void Save_region_and_type()
+		{
+			Assert.AreEqual("Воронеж", model.Regions.Value[1]);
+			model.CurrentRegion.Value = "Воронеж";
+			Assert.AreEqual("Основные", model.Filters[1]);
+			model.CurrentFilter.Value = model.Filters[1];
+			Close(model);
+
+			model = new CatalogOfferViewModel(new Catalog("Тестовый"));
+			Activate(model);
+			Assert.AreEqual("Воронеж", model.CurrentRegion.Value);
+			Assert.AreEqual("Основные", model.CurrentFilter.Value);
 		}
 	}
 }

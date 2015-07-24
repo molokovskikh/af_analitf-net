@@ -1,29 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Windows;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
-using AnalitF.Net.Client.Views.Dialogs;
 using Caliburn.Micro;
-using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
-using log4net.Config;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class OrdersFixture : ViewModelFixture<OrdersViewModel>
@@ -35,11 +28,11 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			shell.UpdateStat();
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 
 			Assert.That(model.CanDelete, Is.True);
 			model.Delete();
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 			Close(model);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 
@@ -95,7 +88,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			shell.UpdateStat();
 			Assert.That(shell.CanSendOrders, Is.True);
 
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 			Assert.That(shell.CanSendOrders, Is.False);
 		}
 
@@ -111,7 +104,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.True(model.CanFreeze);
 			model.Freeze();
 
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.That(shell.CanSendOrders, Is.False);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
@@ -271,7 +264,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.IsTrue(model.CanDelete);
 			model.Delete();
 
-			testScheduler.AdvanceByMs(10000);
+			scheduler.AdvanceByMs(10000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 

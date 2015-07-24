@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Threading;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -8,7 +7,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Models
+namespace AnalitF.Net.Client.Test.Integration.Models
 {
 	public class DbCommandFixture : DbFixture
 	{

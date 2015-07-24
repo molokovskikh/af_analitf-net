@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -12,7 +11,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[TestFixture]
 	public class AppBootstrapperFixture : ViewModelFixture
@@ -34,7 +33,7 @@ namespace AnalitF.Net.Test.Integration
 				catch(IOException e) {
 					Console.WriteLine("HResult = " + ((uint)e.HResult).ToString("x8"));
 					//System.IO.IOException : Папка не пуста
-					if (e.HResult == 0x80070091 && count > 3)
+					if ((uint)e.HResult == 0x80070091 && count < 4)
 						goto repeat;
 					throw;
 				}
@@ -116,9 +115,7 @@ namespace AnalitF.Net.Test.Integration
 			app.Config.RootDir = "test";
 			app.Config.DbDir = Path.GetFullPath(IntegrationSetup.clientConfig.DbDir);
 			app.Config.SettingsPath = "AnalitF.Net.Client.Test";
-			app.Config.IsUnitTesting = true;
 			Execute.ResetWithoutDispatcher();
-			disposable.Add(app);
 			return app;
 		}
 	}

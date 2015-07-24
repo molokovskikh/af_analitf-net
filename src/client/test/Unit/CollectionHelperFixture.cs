@@ -4,7 +4,7 @@ using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class CollectionHelperFixture

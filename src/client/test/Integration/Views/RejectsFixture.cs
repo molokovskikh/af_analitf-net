@@ -4,7 +4,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class RejectsFixture : BaseViewFixture
@@ -14,7 +14,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			var model = new RejectsViewModel();
 			Bind(model);
-			testScheduler.Start();
+			scheduler.Start();
 
 			Assert.IsTrue(model.CanExport);
 			var result = (OpenResult)model.Export();

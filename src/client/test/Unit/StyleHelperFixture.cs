@@ -3,19 +3,14 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
 using System.Windows.Media;
-using System.Xml;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
-using NPOI.HSSF.Record.Chart;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class StyleHelperFixture

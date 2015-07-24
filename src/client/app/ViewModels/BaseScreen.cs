@@ -102,28 +102,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 	}
 
-	public class AppTestContext
-	{
-		public AppTestContext(User user)
-		{
-			User = user;
-		}
-
-		public User User;
-	}
-
 	public class BaseScreen : Screen, IActivateEx, IExportable, IDisposable
 	{
-		public static AppTestContext TestContext;
-		public static bool UnitTesting;
-		public static IScheduler TestSchuduler;
-		public static IScheduler TestUiSchuduler;
-
 		private List<PersistedValue> persisted = new List<PersistedValue>();
+		private List<PersistedValue> session = new List<PersistedValue>();
 		private bool clearSession;
-		//screen может быть сконструирован не в главном потоке в этом случае DispatcherScheduler.Current
-		//будет недоступен по этому делаем его ленивым и вызываем только в OnInitialize и позже
-		private Lazy<IScheduler> uiSheduler = new Lazy<IScheduler>(() => TestUiSchuduler ?? TestSchuduler ?? DispatcherScheduler.Current);
 
 		protected bool UpdateOnActivate = true;
 		//Флаг отвечает за обновление данных на форме после активации
@@ -132,7 +115,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool Readonly;
 		protected ILog Log;
 		protected ExcelExporter ExcelExporter;
-		protected IMessageBus Bus = RxApp.MessageBus;
 		protected SimpleMRUCache Cache = new SimpleMRUCache(10);
 
 		protected ISession Session;
@@ -146,20 +128,16 @@ namespace AnalitF.Net.Client.ViewModels
 		//например web запросов
 		public CancellationDisposable CloseCancellation = new CancellationDisposable();
 
-		public NotifyValue<Settings> Settings { get; private set; }
-		public WindowManager Manager { get; private set; }
-		public IScheduler Scheduler = TestSchuduler ?? DefaultScheduler.Instance;
-
 		public ShellViewModel Shell;
 		//источник результатов обработки данных которая производится в фоне
 		//в тестах на него можно подписаться и проверить что были обработаны нужные результаты
 		//в приложении его обрабатывает Coroutine см Config/Initializers/Caliburn
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
-		public Env Env = new Env();
-		public TaskScheduler QueryScheduler = TestQueryScheduler ?? new QueueScheduler();
-		public static TaskScheduler TestQueryScheduler = null;
+		public Env Env = Env.Current ?? new Env();
+
+		//todo сессии для фоновых задач здесь не место нужно перенести ее в планировщик
 		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
-		public int BackgrountQueryCount;
+		private int backgrountQueryCount;
 
 		//адрес доставки который выбран в ui
 		public Address Address;
@@ -182,7 +160,8 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(ResultsSink);
 			Settings = new NotifyValue<Settings>();
 
-			if (!UnitTesting) {
+			//в юнит тестах база не должна использоваться
+			if (Env.Factory != null) {
 				StatelessSession = Env.Factory.OpenStatelessSession();
 				Session = Env.Factory.OpenSession();
 				//для mysql это все бутафория
@@ -190,7 +169,8 @@ namespace AnalitF.Net.Client.ViewModels
 				//если транзакции нет он это делать не будет
 				Session.BeginTransaction();
 
-				Settings.Value = Session.Query<Settings>().First();
+				Settings.Value = Session.Query<Settings>().FirstOrDefault()
+					?? new Settings(defaults: true);
 				User = Session.Query<User>().FirstOrDefault()
 					?? new User {
 						SupportHours = "будни: с 07:00 до 19:00",
@@ -199,7 +179,10 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			else {
 				Settings.Value = new Settings(defaults: true);
-				User = TestContext != null ? TestContext.User : new User();
+				User = Env.User ?? new User {
+					SupportHours = "будни: с 07:00 до 19:00",
+					SupportPhone = "тел.: 473-260-60-00",
+				};
 			}
 
 			var properties = GetType().GetProperties()
@@ -211,24 +194,27 @@ namespace AnalitF.Net.Client.ViewModels
 			CanExport = ExcelExporter.CanExport.ToValue();
 		}
 
+		public User User { get; set; }
+		public NotifyValue<Settings> Settings { get; private set; }
+		public bool IsSuccessfulActivated { get; protected set; }
+		public NotifyValue<bool> CanExport { get; set; }
+
+		public WindowManager Manager { get; private set; }
+
+		public IMessageBus Bus
+		{
+			get { return Env.Bus; }
+		}
+
 		public IScheduler UiScheduler
 		{
-			get { return uiSheduler.Value; }
+			get { return Env.UiScheduler; }
 		}
 
-		public TaskScheduler TplUiScheduler
+		public IScheduler Scheduler
 		{
-			get
-			{
-				return TestQueryScheduler ?? TaskScheduler.FromCurrentSynchronizationContext();
-			}
+			get { return Env.Scheduler; }
 		}
-
-		public bool IsSuccessfulActivated { get; protected set; }
-
-		public User User { get; set; }
-
-		public NotifyValue<bool> CanExport { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -266,9 +252,11 @@ namespace AnalitF.Net.Client.ViewModels
 				TableSettings.Prefix = GetType().Name + ".";
 				ExcelExporter.ExportDir = Shell.Config.TmpDir;
 				try {
-					foreach (var value in persisted) {
+					foreach (var value in persisted)
 						value.Setter(Shell.GetPersistedValue(value.Key, value.DefaultValue));
-					}
+
+					foreach (var value in session)
+						value.Setter(Shell.SessionContext.GetValueOrDefault(value.Key, value.DefaultValue));
 				}
 				catch(Exception e) {
 
@@ -291,9 +279,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected virtual void RecreateSession()
 		{
 			Session.Clear();
-			Addresses = Session.Query<Address>().ToArray();
-			if (Address != null)
-				Address = Session.Get<Address>(Address.Id);
+			Load();
 			User = Session.Query<User>().FirstOrDefault();
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
@@ -318,9 +304,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			foreach (var value in persisted) {
+			foreach (var value in persisted)
 				Shell.PersistentContext[value.Key] = value.Getter();
+
+			foreach (var value in session) {
+				if (value.DefaultValue != value.Getter())
+					Shell.SessionContext[value.Key] = value.Getter();
+				else if (Shell.SessionContext.ContainsKey(value.Key))
+					Shell.SessionContext.Remove(value.Key);
 			}
+
 
 			if (close)
 				OnCloseDisposable.Dispose();
@@ -358,11 +351,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void Load()
 		{
-			if (Shell == null || Session == null)
+			if (Session == null)
 				return;
-			if (Shell.CurrentAddress != null)
+			if (Shell != null && Shell.CurrentAddress != null)
 				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
-			Addresses = Session.Query<Address>().ToArray();
+			Addresses = Session.Query<Address>().OrderBy(x => x.Name).ToArray();
 		}
 
 		//метод вызывается если нужно обновить данные на форме
@@ -487,7 +480,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override string ToString()
 		{
-			return DisplayName;
+			return String.IsNullOrEmpty(DisplayName) ? base.ToString() : DisplayName;
 		}
 
 		public void Dispose()
@@ -700,7 +693,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task<T>(() => {
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
-				Interlocked.Increment(ref BackgrountQueryCount);
+				Interlocked.Increment(ref backgrountQueryCount);
 				try{
 					Drained.Reset();
 					if (_backgroundSession == null)
@@ -710,25 +703,30 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 				}
 				finally {
-					var val = Interlocked.Decrement(ref BackgrountQueryCount);
+					var val = Interlocked.Decrement(ref backgrountQueryCount);
 					if (val == 0)
 						Drained.Set();
 				}
 			}, CloseCancellation.Token);
-			task.Start(QueryScheduler);
+			task.Start(Env.QueryScheduler);
 			return Observable.FromAsync(() => task);
 		}
 
 		public Task WaitQueryDrain()
 		{
 			var t = new Task(() => Drained.Wait());
-			t.Start(QueryScheduler);
+			t.Start(Env.QueryScheduler);
 			return t;
 		}
 
 		public void Persist<T>(NotifyValue<T> value, string key)
 		{
 			persisted.Add(PersistedValue.Create(value, key));
+		}
+
+		public void SessionValue<T>(NotifyValue<T> value, string key)
+		{
+			session.Add(PersistedValue.Create(value, key));
 		}
 
 		public IList<T> GetItemsFromView<T>(string name)

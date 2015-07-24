@@ -118,8 +118,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		protected void CheckResult(HttpResponseMessage response)
+		protected void CheckResult(Task<HttpResponseMessage> task)
 		{
+			var response = task.Result;
 			if (!IsOkStatusCode(response.StatusCode)) {
 				//если включена отладка попробуем собрать дополнительную отладочную информацию
 				if (Log.IsDebugEnabled) {

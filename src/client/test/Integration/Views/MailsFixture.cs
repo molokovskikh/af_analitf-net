@@ -9,14 +9,13 @@ using System.Windows.Media;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using Common.NHibernate;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class MailsFixture : DispatcherFixture
@@ -29,7 +28,7 @@ namespace AnalitF.Net.Test.Integration.Views
 
 			Open();
 			Input("Term", subject);
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			WaitIdle();
 			AssertItemsCount("Items", 1);
 		}
@@ -95,7 +94,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			});
 
 			//проверяем что анимация загрузки завершилась в случае отмены
-			testScheduler.Start();
+			scheduler.Start();
 			//даем возможность начать анимацию
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -132,7 +131,7 @@ namespace AnalitF.Net.Test.Integration.Views
 		{
 			Env.RequestDelay = 0.1.Second();
 			var attachment = Download();
-			testScheduler.AdvanceByMs(100);
+			scheduler.AdvanceByMs(100);
 			Click("ShowMain");
 			Click("ShowMails");
 			var localAttachment = SelectByAttachmentId(attachment.Id);
@@ -222,7 +221,7 @@ namespace AnalitF.Net.Test.Integration.Views
 			att.IsDownloaded = false;
 
 			Start();
-			BaseScreen.TestSchuduler = new MixedScheduler(testScheduler, new DispatcherScheduler(dispatcher));
+			Env.Scheduler = new MixedScheduler(scheduler, new DispatcherScheduler(dispatcher));
 			Click("ShowMails");
 			return att;
 		}

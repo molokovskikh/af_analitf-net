@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.Test.Unit;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Test.Unit;
 using Caliburn.Micro;
-using Common.Tools.Calendar;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class BaseScreenFixture : BaseViewFixture

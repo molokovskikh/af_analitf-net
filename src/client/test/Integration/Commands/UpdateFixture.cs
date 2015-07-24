@@ -15,13 +15,12 @@ using Ionic.Zip;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Test.Support;
-using Test.Support.log4net;
 using Test.Support.Suppliers;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
 
-namespace AnalitF.Net.Test.Integration.Commands
+namespace AnalitF.Net.Client.Test.Integration.Commands
 {
 	[TestFixture]
 	public class UpdateFixture : MixedFixture

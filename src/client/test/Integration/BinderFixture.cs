@@ -12,7 +12,7 @@ using Caliburn.Micro;
 using NUnit.Framework;
 using ReactiveUI;
 
-namespace AnalitF.Net.Test.Integration
+namespace AnalitF.Net.Client.Test.Integration
 {
 	[TestFixture]
 	public class BinderFixture

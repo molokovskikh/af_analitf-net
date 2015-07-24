@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Web.UI.WebControls;
-using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -11,7 +9,7 @@ using AnalitF.Net.Client.ViewModels;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class CatalogFixture : BaseViewFixture
@@ -25,7 +23,7 @@ namespace AnalitF.Net.Test.Integration.Views
 				w.Content = view;
 
 				await view.WaitLoaded();
-				testScheduler.Start();
+				scheduler.Start();
 				await view.WaitIdle();
 				var names = view.Descendants<DataGrid2>().First(x => x.Name == "CatalogNames");
 				var forms = view.Descendants<DataGrid2>().First(x => x.Name == "Catalogs");

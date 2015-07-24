@@ -6,13 +6,11 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class SettingsFixture : ViewModelFixture<SettingsViewModel>

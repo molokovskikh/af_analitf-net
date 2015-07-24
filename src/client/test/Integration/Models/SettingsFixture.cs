@@ -4,7 +4,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Models
+namespace AnalitF.Net.Client.Test.Integration.Models
 {
 	[TestFixture]
 	public class SettingsFixture : DbFixture

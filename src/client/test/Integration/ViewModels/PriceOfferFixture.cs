@@ -2,23 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
-using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	public class CurrentThreadTaskScheduler : TaskScheduler
 	{
@@ -56,9 +51,9 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			lazyModel = new Lazy<PriceOfferViewModel>(
 				() => {
 					var model = new PriceOfferViewModel(price.Id, false);
-					model.QueryScheduler = new CurrentThreadTaskScheduler();
+					//model.QueryScheduler = new CurrentThreadTaskScheduler();
 					Init(model);
-					testScheduler.Start();
+					scheduler.Start();
 					return model;
 				});
 		}

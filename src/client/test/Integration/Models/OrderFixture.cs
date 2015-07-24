@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
-using NHibernate;
-using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.Models
+namespace AnalitF.Net.Client.Test.Integration.Models
 {
 	[TestFixture]
 	public class OrderFixture : DbFixture

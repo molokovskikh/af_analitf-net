@@ -108,10 +108,6 @@ namespace AnalitF.Net.Client.Config
 		public string RootDir;
 		public string DiadokApiKey;
 		public string DiadokUrl;
-#if DEBUG
-		public bool IsUnitTesting;
-		public bool SkipOpenSession;
-#endif
 
 		public string TmpDir
 		{

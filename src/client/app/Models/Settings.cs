@@ -211,7 +211,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
-		public virtual string ClientToken { get; set; }
+		//врорая версия токена приложения, хеш guid и путь, первая версия просто guid
+		public virtual string ClientTokenV2 { get; set; }
 
 		public virtual string WaybillDir
 		{
@@ -399,7 +400,10 @@ namespace AnalitF.Net.Client.Models
 		{
 			try {
 				if (String.IsNullOrEmpty(GetClientToken())) {
-					ClientToken = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()), null, DataProtectionScope.CurrentUser));
+					var encoding = Encoding.UTF8;
+					var tokenSource = Guid.NewGuid() + "|" + Path.GetDirectoryName(typeof(Settings).Assembly.Location);
+					var token = SHA1.Create().ComputeHash(encoding.GetBytes(tokenSource));
+					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(token, null, DataProtectionScope.CurrentUser));
 				}
 			}
 			catch(Exception e) {
@@ -410,12 +414,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual string GetClientToken()
 		{
 			try {
-				if (String.IsNullOrEmpty(ClientToken))
+				if (String.IsNullOrEmpty(ClientTokenV2))
 					return "";
-				return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(ClientToken), null, DataProtectionScope.CurrentUser));
+				var tokenSource = ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser);
+				return String.Join("", tokenSource.Select(x => x.ToString("X2")));
 			}
 			catch(Exception e) {
-				log.Error(String.Format("Ошибка при получение токена приложения, токен = {0}", ClientToken), e);
+				log.Error(String.Format("Ошибка при получение токена приложения, токен = {0}", ClientTokenV2), e);
 				return null;
 			}
 		}

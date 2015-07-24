@@ -2,7 +2,7 @@
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit.Models
+namespace AnalitF.Net.Client.Test.Unit.Models
 {
 	[TestFixture]
 	public class OrderLineFixture

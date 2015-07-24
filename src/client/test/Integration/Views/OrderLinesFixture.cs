@@ -4,12 +4,10 @@ using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
-using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class OrderLinesFixture : BaseViewFixture

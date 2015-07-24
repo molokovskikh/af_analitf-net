@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		public Subject<string> MessageOpened = new Subject<string>();
 		public Subject<object> WindowViewModelOpened = new Subject<object>();
 
-		public List<Window> Dialogs = new List<Window>();
 		public List<string> MessageBoxes = new List<string>();
 #endif
 
@@ -174,12 +173,6 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 		private void ShowDialog(Window window)
 		{
-#if DEBUG
-			if (UnitTesting) {
-				window.Closed += (sender, args) => Dialogs.Remove(window);
-				Dialogs.Add(window);
-			}
-#endif
 			window.InputBindings.Add(new KeyBinding(Commands.InvokeViewModel, new KeyGesture(Key.Escape)) {
 				CommandParameter = "TryClose"
 			});

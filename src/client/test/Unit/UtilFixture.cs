@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Reactive.Linq;
-using System.Text;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class UtilFixture

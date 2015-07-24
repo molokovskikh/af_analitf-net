@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -12,7 +10,7 @@ using Common.NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class BatchFixture : BaseViewFixture

@@ -1,11 +1,10 @@
 ﻿using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
-using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Unit.ViewModels
+namespace AnalitF.Net.Client.Test.Unit.ViewModels
 {
 	[TestFixture]
 	public class SelfCloseFixture : BaseUnitFixture

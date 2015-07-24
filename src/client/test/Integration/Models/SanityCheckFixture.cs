@@ -1,15 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Devart.Data.MySql;
-using System.Linq;
 using NHibernate.Linq;
 using NUnit.Framework;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.Models
+namespace AnalitF.Net.Client.Test.Integration.Models
 {
 	[TestFixture]
 	public class SanityCheckFixture : DbFixture

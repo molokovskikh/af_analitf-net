@@ -1,14 +1,11 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
-using AnalitF.Net.Client;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
-using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	public class ViewSetup
 	{

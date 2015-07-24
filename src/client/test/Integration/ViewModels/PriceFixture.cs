@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Linq;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
-using Caliburn.Micro;
 using Common.NHibernate;
-using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
-using ReactiveUI;
-using Test.Support.log4net;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class PriceFixture : ViewModelFixture<PriceViewModel>
@@ -77,7 +72,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
-			RxApp.MessageBus.SendMessage("Changed", "db");
+			bus.SendMessage("Changed", "db");
 
 			Activate(model);
 

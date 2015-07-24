@@ -8,7 +8,7 @@ using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillLineSearchFixture : ViewModelFixture
@@ -43,12 +43,12 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			var line = waybill.Lines[0];
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
-			testScheduler.Start();
+			scheduler.Start();
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
 			Assert.AreEqual(0, results.Length);
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
-			testScheduler.Start();
+			scheduler.Start();
 			Close(model);
 
 			session.Refresh(line);
@@ -63,17 +63,17 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			supplier.HaveCertificates = true;
 
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
-			testScheduler.Start();
+			scheduler.Start();
 			var line = waybill.Lines[0];
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
 			Assert.AreEqual(0, results.Length);
-			testScheduler.Start();
+			scheduler.Start();
 
 			Close(model);
 
 			model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
-			testScheduler.Start();
+			scheduler.Start();
 			waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			Assert.IsTrue(waybillLine.IsDownloading);
 		}
@@ -82,7 +82,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 		public void Enter_line()
 		{
 			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
-			testScheduler.Start();
+			scheduler.Start();
 			model.CurrentLine.Value = model.Lines.Value.First();
 			Assert.IsTrue(model.CanEnterLine.Value);
 			model.EnterLine();

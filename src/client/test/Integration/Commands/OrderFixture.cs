@@ -16,7 +16,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.Commands
+namespace AnalitF.Net.Client.Test.Integration.Commands
 {
 	[TestFixture]
 	public class OrderFixture : MixedFixture

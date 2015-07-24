@@ -7,8 +7,6 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Client.ViewModels.Dialogs;
-using Caliburn.Micro;
 using Common.Tools;
 using Diadoc.Api;
 using Diadoc.Api.Cryptography;
@@ -16,11 +14,10 @@ using Diadoc.Api.Proto.Events;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using Test.Support.log4net;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class WaybillsFixture : ViewModelFixture<WaybillsViewModel>
@@ -78,7 +75,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			settings.Markups[0].MaxMarkup = 50;
 			settings.Save();
 			Close(settings);
-			testScheduler.AdvanceByMs(50);
+			scheduler.AdvanceByMs(50);
 
 			Assert.That(details.Waybill.RetailSum, Is.GreaterThan(retailSum));
 			Close(details);

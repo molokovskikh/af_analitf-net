@@ -9,7 +9,7 @@ using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class CorrectionFixture : ViewModelFixture

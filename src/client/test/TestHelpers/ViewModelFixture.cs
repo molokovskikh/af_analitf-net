@@ -8,8 +8,9 @@ using System.Reactive.Linq;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Integration;
+using AnalitF.Net.Client.Test.Integration.ViewModels;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Test.Integration.ViewModes;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -47,7 +48,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void ForceInit()
 		{
 			Assert.IsNotNull(lazyModel.Value);
-			testScheduler.Start();
+			scheduler.Start();
 		}
 
 		protected void Reset()
@@ -67,7 +68,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	public class ViewModelFixture : DbFixture
 	{
 		protected WindowManager manager;
-		protected TestScheduler testScheduler;
+		protected TestScheduler scheduler;
 		protected Lazy<ShellViewModel> lazyshell;
 		protected MessageBus bus;
 		protected Env Env;
@@ -79,24 +80,19 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			catcher = null;
 			DebugContext = new Dictionary<string, object>();
-			Env = new Env {
-				IsUnitTesting = true
-			};
 			ProcessHelper.UnitTesting = true;
 			ProcessHelper.ExecutedProcesses.Clear();
 
 			bus = new MessageBus();
-			RxApp.MessageBus = bus;
-			RxApp.MessageBus.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
+			bus.RegisterScheduler<string>(ImmediateScheduler.Instance, "db");
 
-			BaseScreen.TestQueryScheduler = new CurrentThreadTaskScheduler();
-			testScheduler = new TestScheduler();
-			BaseScreen.TestSchuduler = testScheduler;
-			disposable.Add(TestUtils.WithScheduler(testScheduler));
+			scheduler = new TestScheduler();
+			Env = Env.Current = new Env(null, bus, scheduler, IntegrationSetup.Factory);
+			Env.QueryScheduler = new CurrentThreadTaskScheduler();
+			Env.TplUiScheduler = new CurrentThreadTaskScheduler();
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
 				var value = new ShellViewModel(config);
-				value.Env = Env;
 				disposable.Add(value);
 				ScreenExtensions.TryActivate(value);
 				return value;
@@ -122,7 +118,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				XmlConfigurator.Configure();
 			}
 
-			if (TestContext.CurrentContext.Result.Status == TestStatus.Failed) {
+			if (DataHelper.IsTestFail()) {
 				if (DebugContext != null && DebugContext.Count > 0)
 					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
 			}

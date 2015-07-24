@@ -120,16 +120,23 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Shell = ParentModel.Shell;
 
+			//если установили фильтр по мнн нужно сбросить поисковый запрос что бы отобразить все
+			//товары с таким мнн
+			ParentModel.ObservableForProperty(m => m.FilterByMnn).Where(x => x.Value)
+				.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
+
 			//после закрытия формы нужно отписаться от событий родительской формы
 			//что бы не делать лишних обновлений
-			Items = ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
+			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<Object>())
+				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
 				.Select(_ => RxQuery(LoadData))
 				.Switch()
 				.ObserveOn(UiScheduler)
-				.ToValue(CloseCancellation);
+				.Subscribe(Items, CloseCancellation.Token);
+
 			Items.Subscribe(_ => {
 				CurrentItem.Value = (Items.Value ?? Enumerable.Empty<CatalogDisplayItem>()).FirstOrDefault();
 			});

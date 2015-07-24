@@ -34,6 +34,11 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 			CurrentDirMap = new NotifyValue<DirMap>();
 			IsWaybillDirEnabled = new NotifyValue<bool>();
+			DirMaps = new List<DirMap>();
+			Addresses = new List<Address>();
+			Styles = new List<CustomStyle>();
+			DisplayName = "Настройка";
+
 			if (String.IsNullOrEmpty(Settings.Value.WaybillDir))
 				Settings.Value.WaybillDir = Settings.Value.MapPath("Waybills");
 			if (String.IsNullOrEmpty(Settings.Value.RejectDir))
@@ -41,22 +46,22 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(Settings.Value.ReportDir))
 				Settings.Value.ReportDir = Settings.Value.MapPath("Reports");
 
-			Session.FlushMode =  FlushMode.Never;
-			DisplayName = "Настройка";
-
 			password = Mask(Settings.Value.Password);
 			diadokPassword = Mask(Settings.Value.DiadokPassword);
 
 			waybillConfig = Settings.Value.Waybills;
-			Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-			CurrentAddress = Addresses.FirstOrDefault();
-			DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
-			CurrentDirMap.Value = DirMaps.FirstOrDefault();
+			if (Session != null) {
+				Session.FlushMode =  FlushMode.Never;
+				Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
+				CurrentAddress = Addresses.FirstOrDefault();
+				DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
+				CurrentDirMap.Value = DirMaps.FirstOrDefault();
 
-			var styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
-			var newStyles = StyleHelper.GetDefaultStyles().Except(styles);
-			Session.SaveEach(newStyles);
-			Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+				var styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+				var newStyles = StyleHelper.GetDefaultStyles().Except(styles);
+				Session.SaveEach(newStyles);
+				Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
+			}
 
 			Markups = Settings.Value.Markups.Where(t => t.Type == MarkupType.Over)
 				.OrderBy(m => m.Begin)

@@ -70,7 +70,7 @@ namespace AnalitF.Net.Client.Models.Print
 						FontFamily = new FontFamily("Arial"),
 						FontSize = 14,
 						FontWeight = FontWeights.Bold,
-						Content = string.Format("СЧЕТ-ФАКТУРА № {0} от {1:d}", waybill.InvoiceId, waybill.InvoiceDate) 
+						Content = string.Format("СЧЕТ-ФАКТУРА № {0} от {1:d}", waybill.InvoiceId, waybill.InvoiceDate)
 					},
 					new Label {
 						FontFamily = new FontFamily("Arial"),
@@ -160,12 +160,12 @@ namespace AnalitF.Net.Client.Models.Print
 					null,
 					l.Unit,
 					l.Quantity,
-					l.SupplierCostWithoutNds,
-					l.Amount - l.NdsAmount,
+					l.SupplierCostWithoutNds.FormatCost(),
+					l.AmountExcludeTax.FormatCost(),
 					l.ExciseTax,
 					string.Format("{0}%", l.Nds),
-					l.NdsAmount,
-					l.Amount,
+					l.NdsAmount.FormatCost(),
+					l.Amount.FormatCost(),
 					l.CountryCode,
 					l.Country,
 					l.BillOfEntryNumber
@@ -174,9 +174,9 @@ namespace AnalitF.Net.Client.Models.Print
 				var row = new TableRow();
 				row.FontWeight = FontWeights.Bold;
 				row.Cells.Add(Cell("Итого", 5));
-				row.Cells.Add(Cell(taxGroup.Sum(l => l.AmountExcludeTax)));
-				row.Cells.Add(Cell(taxGroup.Sum(l => l.NdsAmount), 3));
-				row.Cells.Add(Cell(taxGroup.Sum(l => l.Amount)));
+				row.Cells.Add(Cell(taxGroup.Sum(l => l.AmountExcludeTax).FormatCost()));
+				row.Cells.Add(Cell(taxGroup.Sum(l => l.NdsAmount).FormatCost(), 3));
+				row.Cells.Add(Cell(taxGroup.Sum(l => l.Amount).FormatCost()));
 				row.Cells.Add(Cell("", 3));
 				dataTable.RowGroups[0].Rows.Add(row);
 			}
@@ -184,18 +184,18 @@ namespace AnalitF.Net.Client.Models.Print
 			var result = new TableRow();
 			result.FontWeight = FontWeights.Bold;
 			result.Cells.Add(Cell("Всего к оплате", 5));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.AmountExcludeTax)));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.NdsAmount), 3));
-			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.Amount)));
+			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.AmountExcludeTax).FormatCost()));
+			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.NdsAmount).FormatCost(), 3));
+			result.Cells.Add(Cell(waybill.Lines.Sum(l => l.Amount).FormatCost()));
 			dataTable.RowGroups[0].Rows.Add(result);
 			doc.Blocks.Add(dataTable);
 
 			var tax10Sum = waybill.Lines.Where(l => l.Nds == 10).Select(l => l.NdsAmount).Sum();
-			var tax10Block = Block(string.Format("Итого НДС 10%: {0} руб", tax10Sum));
+			var tax10Block = Block(string.Format("Итого НДС 10%: {0:0.00} руб", tax10Sum));
 			tax10Block.FontWeight = FontWeights.Bold;
 
 			var tax18Sum = waybill.Lines.Where(l => l.Nds == 18).Select(l => l.NdsAmount).Sum();
-			var tax18Block = Block(string.Format("Итого НДС 18%: {0} руб", tax18Sum));
+			var tax18Block = Block(string.Format("Итого НДС 18%: {0:0.00} руб", tax18Sum));
 			tax18Block.FontWeight = FontWeights.Bold;
 
 			doc.Blocks.Add(new BlockUIContainer(new Grid()

@@ -3,6 +3,7 @@ using System.IO;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.Integration.ViewModels;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
@@ -29,34 +30,27 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void BaseUnitFixtureSetup()
 		{
-			user = new User();
 			cleaner = new FileCleaner();
 			cleanup = new CompositeDisposable();
 			cleanup.Add(cleaner);
-			BaseScreen.UnitTesting = true;
+			user = new User();
 			bus = new MessageBus();
-			RxApp.MessageBus = bus;
 			scheduler = new TestScheduler();
-			BaseScreen.TestSchuduler = scheduler;
-			cleanup.Add(TestUtils.WithScheduler(scheduler));
+			Env.Current = new Env(user, bus, scheduler, null/*не нужно использовать базу для этого есть интеграционные тесты*/) {
+				//тк в юнит тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
+				QueryScheduler = new CurrentThreadTaskScheduler(),
+				TplUiScheduler = new CurrentThreadTaskScheduler()
+			};
 
 			manager = ViewModelFixture.StubWindowManager();
-			var config = new Config.Config {
-				IsUnitTesting = true,
-				SkipOpenSession = true,
-			};
-			shell = new ShellViewModel(config);
-			shell.Env = new Env {
-				IsUnitTesting = true
-			};
-			BaseScreen.TestContext = new AppTestContext(user);
+			shell = new ShellViewModel();
 		}
 
 		[TearDown]
 		public void BaseUnitFixtureTearDown()
 		{
-			BaseScreen.UnitTesting = false;
-			BaseScreen.TestContext = null;
+			//конструируем пустой контекст что бы обращения без явной инициализации привели к ошибкам
+			Env.Current = new Env(null, null, null, null);
 			cleanup.Dispose();
 		}
 

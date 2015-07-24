@@ -77,13 +77,13 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private List<string[]> ExecuteMaintainsQuery(string sql)
 		{
-			Log.ErrorFormat(sql);
+			Log.Info(sql);
 			var messages = StatelessSession
 				.CreateSQLQuery(sql)
 				.List<object[]>()
 				.Select(m => m.Select(v => v.ToString()).ToArray())
 				.ToList();
-			Log.Error(messages.Implode(s => s.Implode(), Environment.NewLine));
+			Log.Info(messages.Implode(s => s.Implode(), Environment.NewLine));
 			return messages;
 		}
 

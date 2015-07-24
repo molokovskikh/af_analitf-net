@@ -2,7 +2,7 @@
 using Common.Tools;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit.Models
 {
 	[TestFixture]
 	public class PriceFixture

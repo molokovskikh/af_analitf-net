@@ -9,7 +9,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class OrderLinesFixture : ViewModelFixture<OrderLinesViewModel>
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(2));
 			model.AddressSelector.Addresses[1].IsSelected = false;
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(2));
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(1));
 		}
 
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.CurrentLine.Value.Count = 0;
 			model.Editor.Updated();
 			model.Editor.Committed();
-			testScheduler.AdvanceByMs(5000);
+			scheduler.AdvanceByMs(5000);
 			Assert.That(model.Lines.Value.Count, Is.EqualTo(0));
 			Assert.That(model.Sum.Value, Is.EqualTo(0));
 
@@ -110,7 +110,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 			model.CurrentLine.Value.Count = 0;
 			model.Editor.Updated();
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 
@@ -122,7 +122,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 			model.CurrentLine.Value.Count = 100;
 			model.Editor.Updated();
 			model.Editor.Updated();
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.That(shell.Stat.Value.Sum, Is.EqualTo(model.CurrentLine.Value.Sum));
 		}
 
@@ -153,7 +153,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
 			Assert.AreEqual(catalogId, model.ProductInfo2.CurrentCatalog.Id);
 		}
@@ -170,14 +170,14 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;
-			testScheduler.Start();
+			scheduler.Start();
 
 			var matchedLine = model.SentLines.Value.First(l => l.Id == sendOrder.Lines[0].Id);
 			Assert.IsFalse(matchedLine.IsUnmatchedByWaybill);
 			Assert.IsTrue(model.SentLines.Value.First(l => l.Id == sendOrder.Lines[1].Id).IsUnmatchedByWaybill);
 
 			model.SelectedSentLine.Value = matchedLine;
-			testScheduler.AdvanceByMs(1000);
+			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual(1, model.MatchedWaybills.WaybillLines.Value.Count);
 		}
 
@@ -190,7 +190,7 @@ namespace AnalitF.Net.Test.Integration.ViewModes
 				.First();
 			MakeOrder(session.Query<Offer>().First(o => o.ProductId == productId));
 			model.CurrentLine.Value = model.Lines.Value.First();
-			testScheduler.Start();
+			scheduler.Start();
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.OrderCount == null);

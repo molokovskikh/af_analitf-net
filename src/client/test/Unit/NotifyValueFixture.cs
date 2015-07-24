@@ -1,13 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Dynamic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using AnalitF.Net.Client.Helpers;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Unit
+namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
 	public class NotifyValueFixture

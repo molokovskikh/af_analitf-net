@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 	{
 		public Navigator Navigator;
 
-		public Env Env = new Env();
+		public Env Env = Env.Current ?? new Env();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
 		public CompositeDisposable CloseDisposable = new CompositeDisposable();

@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.Models.Print
 			Line(grid, "PrintSupplier", "Поставщик", line.Waybill.SupplierName, defaultHeight, ref row);
 			Line(grid, "PrintCertificates", "Номер сертификата", line.Certificates, defaultHeight, ref row);
 			Line(grid, "PrintDocumentDate", "Дата поступления", line.Waybill.DocumentDate.ToString(), defaultHeight, ref row);
-			Line(grid, "PrintRetailCost", "Цена", line.RetailCost.ToString(), defaultHeight, ref row);
+			Line(grid, "PrintRetailCost", "Цена", Util.FormatCost(line.RetailCost), defaultHeight, ref row);
 
 			return grid;
 		}

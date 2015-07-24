@@ -3,10 +3,9 @@ using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
-using Microsoft.Win32;
 using NUnit.Framework;
 
-namespace AnalitF.Net.Test.Integration.ViewModes
+namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
 	[TestFixture]
 	public class FeedbackFixture

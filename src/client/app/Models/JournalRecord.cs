@@ -38,6 +38,8 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (String.IsNullOrEmpty(Filename) || !File.Exists(Filename))
 					return null;
+				if (!File.Exists(Filename))
+					return null;
 
 				var icon = Icon.ExtractAssociatedIcon(Filename);
 				return Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
