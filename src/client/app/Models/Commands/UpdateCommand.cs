@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Download(response, Config.ArchiveFile, Reporter);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
 			try {
-				LoadDiadok();
+				Diadok();
 			}
 			catch(WebException e) {
 				Log.Error("Ошибка при обращении к Диадок", e);
@@ -645,7 +645,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			return post;
 		}
 
-		public void LoadDiadok()
+		public void Diadok()
 		{
 			var settings = Session.Query<Settings>().First();
 			if (String.IsNullOrEmpty(settings.DiadokUsername) || String.IsNullOrEmpty(settings.DiadokPassword))
@@ -653,17 +653,23 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			var api = new DiadocApi(Config.DiadokApiKey, Config.DiadokUrl, new WinApiCrypt());
 			var token = api.Authenticate(settings.DiadokUsername, settings.DiadokPassword);
 
-			var toSing = Session.Query<Waybill>().Where(x => x.DocType == DocType.Diadok && x.IsSign && !x.IsSigned)
+			var toSign = Session.Query<Waybill>().Where(x => x.DocType == DocType.Diadok && x.IsSign && !x.IsSigned)
 				.ToArray();
-			foreach (var waybill in toSing) {
+			foreach (var waybill in toSign) {
 				var patch = new MessagePatchToPost {
 					BoxId = waybill.DiadokBoxId,
 					MessageId = waybill.DiadokMessageId
 				};
-				patch.AddSignature(new DocumentSignature {
+				var sign = new DocumentSignature {
 					ParentEntityId = waybill.DiadokEnityId,
-					SignWithTestSignature = true
-				});
+				};
+				if (settings.DebugUseTestSign) {
+					sign.SignWithTestSignature = true;
+				}
+				else {
+					sign.Signature = Session.Load<Sign>(waybill.Id).SignBytes;
+				}
+				patch.AddSignature(sign);
 				Log.InfoFormat("Попытка подписать вложение {0} документа {1}", waybill.DiadokEnityId, waybill.DiadokMessageId);
 				try {
 					api.PostMessagePatch(token, patch);

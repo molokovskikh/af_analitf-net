@@ -431,6 +431,10 @@
 					<TextBox Name="Settings_DiadokUsername" />
 					<Label>Пароль</Label>
 					<TextBox Name="DiadokPassword" />
+					<Label>Сертификат для подписи</Label>
+					<ComboBox Style="{StaticResource Select}"
+						ItemsSource="{Binding Settings.Value.DiadokCerts}"
+						SelectedItem="{Binding Settings.Value.DiadokCert}" />
 				</StackPanel>
 			</TabItem>
 		</TabControl>

@@ -228,6 +228,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
+			mapper.Class<Sign>(x => {
+				x.Table("Waybills");
+				x.Property(y => y.SignBytes, y => y.Type(NHibernateUtil.BinaryBlob));
+			});
 
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));

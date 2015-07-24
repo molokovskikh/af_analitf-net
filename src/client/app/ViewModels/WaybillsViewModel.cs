@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -256,7 +257,29 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!CanSign.Value)
 				return;
 
-			StatelessSession.Update(CurrentWaybill.Value);
+			var waybill = CurrentWaybill.Value;
+			try
+			{
+				if (waybill.IsSign) {
+					var cert = Settings.Value.TryGetCert;
+					if (cert == null)
+						throw new EndUserError("Сертификат для подписи не найден.");
+					var sign = StatelessSession.Get<Sign>(waybill.Id);
+					var filename = waybill.TryGetFile(Settings.Value);
+					if (String.IsNullOrEmpty(filename))
+						throw new EndUserError("Не найден файл накладной.");
+
+					var api = new WinApiCrypt();
+					sign.SignBytes = api.Sign(File.ReadAllBytes(filename), cert.RawData);
+					StatelessSession.Update(sign);
+				}
+				StatelessSession.Update(waybill);
+			}
+			catch(Exception e) {
+				Log.Error(String.Format("Ошибка при подписании документа {0}", waybill.Id), e);
+				Manager.Error(ErrorHelper.TranslateException(e) ?? "Не удалось подписать документ");
+				waybill.IsSign = false;
+			}
 		}
 
 		public IEnumerable<IResult> RegulatorReport()
