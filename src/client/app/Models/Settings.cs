@@ -393,10 +393,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			try {
 				if (String.IsNullOrEmpty(GetClientToken())) {
-					var encoding = Encoding.UTF8;
-					var tokenSource = Guid.NewGuid() + "|" + Path.GetDirectoryName(typeof(Settings).Assembly.Location);
-					var token = SHA1.Create().ComputeHash(encoding.GetBytes(tokenSource));
-					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(token, null, DataProtectionScope.CurrentUser));
+					var data = Guid.NewGuid().ToByteArray();
+					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser));
 				}
 			}
 			catch(Exception e) {
@@ -404,12 +402,17 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string GetClientToken()
+		public virtual string GetClientToken(string dir = null)
 		{
 			try {
+				dir = dir ?? Path.GetDirectoryName(typeof(Settings).Assembly.Location);
 				if (String.IsNullOrEmpty(ClientTokenV2))
 					return "";
-				var tokenSource = ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser);
+				var encoding = Encoding.UTF8;
+				var id = new Guid(ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser));
+				var tokenString = id + "|" + dir;
+				//что бы токен выглядел мистически вычисляем его хеш
+				var tokenSource = SHA1.Create().ComputeHash(encoding.GetBytes(tokenString));
 				return String.Join("", tokenSource.Select(x => x.ToString("X2")));
 			}
 			catch(Exception e) {
