@@ -138,6 +138,10 @@ where l.RequestId = :id;")
 				}
 
 				errors.AddEach(Validate(session, user, orders, force, orderitemMap));
+				//удаление дублей должно производиться после всех проверок тк заказ будет отброшен полностью
+				//и проверки для него не важны или пройдет часть позиций которые пользователь "донабил"
+				//в этом случае проверки для них не должны применяться тк они идут в "догонку"
+				RemoveDuplicate(session, orders);
 
 				//мы не должны сохранять валидные заказы если корректировка заказов
 				//включена
@@ -180,6 +184,51 @@ where l.RequestId = :id;")
 					result.Error);
 			}
 			return errors;
+		}
+
+		private static void RemoveDuplicate(ISession session, List<Order> orders)
+		{
+			foreach (var order in orders) {
+				var begin = order.WriteTime.AddMinutes(-60);
+				var lines = session.Query<OrderItem>()
+					.Where(x => x.Order.AddressId == order.AddressId
+						&& x.Order.UserId == order.UserId
+						&& x.Order.PriceList == order.PriceList
+						&& x.Order.ClientOrderId == order.ClientOrderId
+						&& x.Order.RegionCode == order.RegionCode
+						&& x.Order.Deleted == false
+						&& x.Order.WriteTime > begin)
+					//часам нельзя верить
+					.ToArray();
+				var duplicateLines = order.OrderItems.Where(x => IsDuplicate(lines, x)).ToArray();
+				duplicateLines.Each(order.RemoveItem);
+				foreach (var line in duplicateLines) {
+					Log.WarnFormat("Строка {3} заявки {0} на {1} в количестве {2} отброшена как дубль",
+						order.PriceList.Supplier.Name,
+						order.ClientOrderId,
+						line.Quantity,
+						line.CoreId);
+				}
+			}
+			var duplicates = orders.Where(x => x.OrderItems.Count == 0).ToArray();
+			orders.RemoveEach(duplicates);
+
+			foreach (var order in duplicates) {
+				Log.WarnFormat("Заявка {1} на {0} отброшена как дубль ",
+					order.PriceList.Supplier.Name,
+					order.ClientOrderId);
+			}
+		}
+
+		private static bool IsDuplicate(OrderItem[] existLines, OrderItem line)
+		{
+			return existLines.Any(x => x.ProductId == line.ProductId
+				&& x.SynonymCode == line.SynonymCode
+				&& x.SynonymFirmCrCode == line.SynonymFirmCrCode
+				&& x.Code == line.Code
+				&& x.CodeCr == line.CodeCr
+				&& x.Junk == line.Junk
+				&& x.Quantity == line.Quantity);
 		}
 
 		private static List<OrderResult> Validate(ISession session, User user,

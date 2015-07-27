@@ -248,8 +248,31 @@ namespace AnalitF.Net.Service.Test
 			Assert.IsTrue(log.IsFaulted);
 		}
 
+		[Test]
+		public void Drop_duplicate_order()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			var price = supplier.Prices[0];
+			supplier.CreateSampleCore(session);
+			price.Costs[0].PriceItem.PriceDate = DateTime.Now.AddDays(-10);
+			session.Save(supplier);
+			supplier.Maintain(session);
+
+			var offer = price.Core[0];
+			PostOrder(ToClientOrder(offer));
+
+			PostOrder(ToClientOrder(offer));
+
+			var orders = session.Query<TestOrder>()
+				.Where(x => x.User.Id == user.Id).ToArray();
+			Assert.AreEqual(1, orders.Length);
+		}
+
 		private void PostOrder(SyncRequest syncRequest)
 		{
+			if (!session.Transaction.IsActive)
+				session.Transaction.Begin();
+
 			var ordersController = new OrdersController {
 				Request = new HttpRequestMessage(),
 				Session = session,
