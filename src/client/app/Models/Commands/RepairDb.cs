@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Common.Tools.Helpers;
 using Devart.Data.MySql;
@@ -111,29 +112,15 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public static bool TryToRepair(Exception exception, Config.Config config)
 		{
-			var codes = new[] {
-				//Incorrect information in file: '%s'
-				1033,
-				//Incorrect key file for table '%s'; try to repair it
-				1034,
-				//Old key file for table '%s'; repair it!
-				1035,
-				//Table '%s' is marked as crashed and should be repaired
-				1194,
-				//Table '%s' is marked as crashed and last (automatic?) repair failed
-				1195,
-				//Table upgrade required. Please do "REPAIR TABLE `%s`" to fix it!
-				1459
-			};
-			if (exception.Chain().OfType<MySqlException>().Any(x => codes.Contains(x.Code))) {
-				using (var cmd = new RepairDb(config)) {
-					cmd.Execute();
-					//todo - по хорошему нужно проверить статус и если нашли проблемы, нужно известить человека о том что
-					//случилась беда данные были потеряны и отправить на получение каммулятивное обновление
-					return true;
-				}
+			if (!ErrorHelper.IsDbCorrupted(exception))
+				return false;
+
+			using (var cmd = new RepairDb(config)) {
+				cmd.Execute();
+				//todo - по хорошему нужно проверить статус и если нашли проблемы, нужно известить человека о том что
+				//случилась беда данные были потеряны и отправить на получение каммулятивное обновление
+				return true;
 			}
-			return false;
 		}
 	}
 }

@@ -52,6 +52,7 @@ namespace AnalitF.Net.Client
 		public static Config.Caliburn.Caliburn Caliburn;
 		public static Config.NHibernate.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
+		private WindowManager windowManager;
 
 		public AppBootstrapper()
 			: this(true)
@@ -75,15 +76,18 @@ namespace AnalitF.Net.Client
 
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
-			CheckShutdown(e.Exception);
+			if (!CheckShutdown(e.Exception)) {
+				if (windowManager != null && ErrorHelper.IsDbCorrupted(e.Exception))
+					windowManager.Error(ErrorHelper.TranslateException(e.Exception));
+			}
 		}
 
-		private void CheckShutdown(Exception e)
+		private bool CheckShutdown(Exception e)
 		{
 			//если не запустились то нужно сказать что случилась беда
 			//если запуск состоялся просто проглатываем исключение
 			if (IsInitialized)
-				return;
+				return false;
 
 			//нужно закрыть заставку прежде чем показывать сообщение
 			//иначе окно с сообщение будет закрыто и не отобразится
@@ -103,6 +107,7 @@ namespace AnalitF.Net.Client
 					MessageBoxImage.Warning);
 
 			Application.Current.Shutdown(1);
+			return true;
 		}
 
 		protected override void OnExit(object sender, EventArgs e)
@@ -273,7 +278,7 @@ namespace AnalitF.Net.Client
 				if (Shell != null) {
 					Shell.Dispose();
 				}
-				var windowManager = IoC.Get<IWindowManager>();
+				windowManager = (WindowManager)IoC.Get<IWindowManager>();
 				Shell = new ShellViewModel(Config);
 				Deserialize();
 				windowManager.ShowWindow(Shell, null, new Dictionary<string, object> {
