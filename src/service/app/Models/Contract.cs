@@ -122,6 +122,13 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
+		public OrderLineResult(uint clientId, uint serverId)
+		{
+			ClientLineId = clientId;
+			ServerLineId = serverId;
+			Result = LineResultStatus.OK;
+		}
+
 		public OrderLineResult(uint id)
 		{
 			ClientLineId = id;
@@ -143,8 +150,8 @@ namespace AnalitF.Net.Client.Models
 		public uint ClientOrderId;
 		public ulong ServerOrderId;
 		public string Error;
-		public OrderResultStatus Result;
-		public OrderLineResult[] Lines = new OrderLineResult[0];
+		public OrderResultStatus Result = OrderResultStatus.OK;
+		public List<OrderLineResult> Lines = new List<OrderLineResult>();
 
 		public OrderResult()
 		{
@@ -162,7 +169,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			ClientOrderId = order.ClientOrderId.GetValueOrDefault();
 			ServerOrderId = order.RowId;
-			Lines = order.OrderItems.Select(i => new OrderLineResult(map.GetValueOrDefault(i)) { ServerLineId = i.RowId }).ToArray();
+			Lines = order.OrderItems.Select(i => new OrderLineResult(map.GetValueOrDefault(i), i.RowId)).ToList();
 		}
 #endif
 
@@ -171,7 +178,7 @@ namespace AnalitF.Net.Client.Models
 			ClientOrderId = clientOrderId.GetValueOrDefault();
 			Error = error;
 			Result = OrderResultStatus.Warning;
-			Lines = lines.ToArray();
+			Lines = lines.ToList();
 		}
 
 		public override string ToString()
