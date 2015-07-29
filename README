@@ -3,7 +3,7 @@
 cygwin - скрипты, cinst cygwin
 wix - установщик, должен быть в PATH
 virtualbox - тесты, должен быть в PATH
-lib/dcmysql72std.exe - драйвер mysql
+lib/dcmysql[*]std.exe - драйвер mysql
 для удобства есть конфигурационный файл зависимостей - choco.config
 для установки choco install choco.config
 
