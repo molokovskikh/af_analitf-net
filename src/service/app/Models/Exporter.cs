@@ -1822,12 +1822,16 @@ where r.DownloadId in (:ids)")
 				zip.Add(new UpdateData("ads/delete.me") { Content = "" });
 				return;
 			}
-			if (!Directory.Exists(AdsPath))
+			if (!Directory.Exists(AdsPath)) {
+				log.WarnFormat("Директория рекламы не найдена '{0}'", AdsPath);
 				return;
+			}
 			var template = String.Format("_{0}", user.Client.RegionCode);
 			var dir = Directory.GetDirectories(AdsPath).FirstOrDefault(d => d.EndsWith(template));
-			if (String.IsNullOrEmpty(dir))
+			if (String.IsNullOrEmpty(dir)) {
+				log.WarnFormat("Директория рекламы не найдена по маске '{0}' в '{1}'", template, AdsPath);
 				return;
+			}
 
 			var files = new DirectoryInfo(dir).EnumerateFiles()
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
