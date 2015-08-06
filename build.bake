@@ -40,10 +40,10 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
 	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
-def CopyUpdateBin(channel as string):
+def CopyUpdateBin(channel as string, src as string):
 	root = Globals.UpdateDeployRoot
 	dir = Path.Combine(root, channel)
-	files = FileSet("*", BaseDirectory: "output/updater/", Excludes: ["*.pdb", ])
+	files = FileSet("*", BaseDirectory: src, Excludes: ["*.pdb", ])
 	ImpersonateIfNeeded(Globals):
 		MkDir(root) unless Exist(root)
 		if Exist(dir):
@@ -51,7 +51,7 @@ def CopyUpdateBin(channel as string):
 		else:
 			MkDir(dir)
 		Cp(files, dir, true)
-		print "Скопировано ${files.Files.Count} файлов в $dir"
+		print "Скопировано ${files.Files.Count} файлов из $src в $dir"
 
 Global(
 	HumanReadableName: "AnalitF.Net",
@@ -96,6 +96,10 @@ Global(
 		}
 	}
 )
+
+task @ready:
+	#для 4.6 сломан ilemege и devart mysql
+	Globals.MsbuildExe = """C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"""
 
 task @default, [@build]
 
@@ -212,7 +216,8 @@ task "build:client:package", ["build:client"]:
 	Exec("cmd.exe", "/C choco pack", BaseDirectory: "output/package").Execute()
 
 task "deploy:update", ["build:update"]:
-	CopyUpdateBin(Globals.DefaultUpdateChannel)
+	channel = Configuration.Maybe.channel or Globals.DefaultUpdateChannel
+	CopyUpdateBin(channel, "output/updater/")
 
 task "build:client", ["build:client:bin", "build:setup", "build:update"]
 
@@ -383,7 +388,7 @@ task "test:binary":
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
-		CopyUpdateBin("beta")
+		CopyUpdateBin("beta", "output/updater/")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
@@ -421,21 +426,19 @@ desc """
 """
 task "promote:to:rtm":
 	channel = Configuration.channel
+	dstChannel = @rtm
 	ftp = Globals.FtpRoot
 	MkDir(ftp)
 	root = Globals.UpdateDeployRoot
 	source = Path.Combine(root, channel)
-	target = Path.Combine(root, @rtm)
+	target = Path.Combine(root, dstChannel)
 	version = File.ReadAllText("$source/version.txt")
 	setupBin = Path.Combine(Globals.SetupDeployRoot, "AnalitF.Net-$version.exe")
 	Cp(setupBin, """$ftp\AnalitFNET_0_9_0_28.exe""", true)
 	Cp(setupBin, """$ftp\AnalitFNET.exe""", true)
 
-	files = FileSet("*", BaseDirectory: source)
-	ftp = Globals.FtpRoot
-	MkDir(target)
-	Rm("$target/*")
-	Cp(files, target, true)
+	CopyUpdateBin(dstChannel, source)
+	print "Версия $version установлена в канал $dstChannel"
 
 task "iis:clean":
 	iishost = Globals.IISHost
