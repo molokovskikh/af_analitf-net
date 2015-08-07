@@ -36,7 +36,7 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Delete()
 		{
 			var data = Session.Load<AnalitfNetData>(CurrentUser.Id);
-			data.LastUpdateAt = data.LastPendingUpdateAt.GetValueOrDefault();
+			data.Confirm();
 			Session.Save(data);
 
 			Session.CreateSQLQuery(@"

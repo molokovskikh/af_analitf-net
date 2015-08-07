@@ -168,7 +168,7 @@ namespace AnalitF.Net.Service.Models
 					" последние обновление на клиента {0}" +
 					" последнее обновление на сервере {1}" +
 					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
-				data.LastUpdateAt = DateTime.MinValue;
+				data.Reset();
 			}
 			session.Save(data);
 
@@ -1835,10 +1835,11 @@ where r.DownloadId in (:ids)")
 
 			var files = new DirectoryInfo(dir).EnumerateFiles()
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
-					&& f.LastWriteTime > data.LastUpdateAt
+					&& f.LastWriteTime > data.LastReclameUpdateAt
 					&& f.Length < Config.MaxReclameFileSize)
-				.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName });
-			zip.AddRange(files);
+					.ToArray();
+			zip.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
+			data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
 		}
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
