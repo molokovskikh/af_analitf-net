@@ -15,6 +15,7 @@ using Common.Models.Repositories;
 using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using HtmlAgilityPack;
 using ICSharpCode.SharpZipLib.Core;
@@ -1835,7 +1836,7 @@ where r.DownloadId in (:ids)")
 
 			var files = new DirectoryInfo(dir).EnumerateFiles()
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
-					&& f.LastWriteTime > data.LastReclameUpdateAt.GetValueOrDefault()
+					&& RoundToSeconds(f.LastWriteTime) > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
 					.ToArray();
 			zip.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
@@ -1844,6 +1845,14 @@ where r.DownloadId in (:ids)")
 			else
 				data.LastPendingReclameUpdateAt = null;
 		}
+
+		//mysql хранит даты с точностью дос секунды и если мы сравниваем дату из базы с датой из другого источника
+		//например файловой системы, перед сравнением ее нужно округлить
+		public static DateTime RoundToSeconds(DateTime value)
+		{
+			return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind);
+		}
+
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
 		{
