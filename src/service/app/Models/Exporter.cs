@@ -1835,11 +1835,14 @@ where r.DownloadId in (:ids)")
 
 			var files = new DirectoryInfo(dir).EnumerateFiles()
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
-					&& f.LastWriteTime > data.LastReclameUpdateAt
+					&& f.LastWriteTime > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
 					.ToArray();
 			zip.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
-			data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
+			if (files.Length > 0)
+				data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
+			else
+				data.LastPendingReclameUpdateAt = null;
 		}
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
