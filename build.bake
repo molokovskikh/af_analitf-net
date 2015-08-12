@@ -97,10 +97,6 @@ Global(
 	}
 )
 
-task @ready:
-	#для 4.6 сломан ilemege и devart mysql
-	Globals.MsbuildExe = """C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe"""
-
 task @default, [@build]
 
 task @build, ["build:service", "build:client"]

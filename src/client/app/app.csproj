@@ -830,10 +830,8 @@
     <Resource Include="Assets\images\price-tag-log.png" />
     <Resource Include="Assets\images\splash.png" />
     <Resource Include="Assets\images\Question.ico" />
+    <EmbeddedResource Include="exe.licenses" />
     <Content Include="Assets\shaders\grayscale.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
