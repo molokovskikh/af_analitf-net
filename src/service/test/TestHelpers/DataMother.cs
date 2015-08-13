@@ -15,13 +15,13 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			var waybill = new TestWaybill(log);
 			var products = session.Query<TestProduct>().Take(32).ToArray();
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Азарга капли глазные 5мл Фл.-кап. Х1",
+				Product = "РђР·Р°СЂРіР° РєР°РїР»Рё РіР»Р°Р·РЅС‹Рµ 5РјР» Р¤Р».-РєР°Рї. РҐ1",
 				CatalogProduct = products[0],
-				Certificates = "РОСС BE.ФМ11.Д06711",
+				Certificates = "Р РћРЎРЎ BE.Р¤Рњ11.Р”06711",
 				CertificatesDate = "01.16.2013",
 				Period = "30.09.2014",
-				Producer = "Алкон-Куврер н.в. с.а.",
-				Country = "БЕЛЬГИЯ",
+				Producer = "РђР»РєРѕРЅ-РљСѓРІСЂРµСЂ РЅ.РІ. СЃ.Р°.",
+				Country = "Р‘Р•Р›Р¬Р“РРЇ",
 				SupplierCostWithoutNDS = 536.17m,
 				SupplierCost = 589.79m,
 				Quantity = 1,
@@ -31,11 +31,11 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				NDSAmount = 53.62m,
 			});
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Доксазозин 4мг таб. Х30 (R)",
+				Product = "Р”РѕРєСЃР°Р·РѕР·РёРЅ 4РјРі С‚Р°Р±. РҐ30 (R)",
 				CatalogProduct = products[1],
-				Certificates = "РОСС RU.ФМ08.Д38737",
+				Certificates = "Р РћРЎРЎ RU.Р¤Рњ08.Р”38737",
 				Period = "01.05.2017",
-				Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+				Producer = "РќСЊСЋ-Р¤Р°СЂРј РРЅРє./Р’РµРєС‚РѕСЂ-РњРµРґРёРєР° Р—РђРћ, Р РћРЎРЎРРЇ",
 				ProducerCost = 213.18m,
 				RegistryCost = 382.89m,
 				SupplierPriceMarkup = -5.746m,
@@ -52,11 +52,11 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			});
 			for (var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
-					Product = "Доксазозин 4мг таб. Х30 (R)",
+					Product = "Р”РѕРєСЃР°Р·РѕР·РёРЅ 4РјРі С‚Р°Р±. РҐ30 (R)",
 					CatalogProduct = products[i + 1],
-					Certificates = "РОСС RU.ФМ08.Д38737",
+					Certificates = "Р РћРЎРЎ RU.Р¤Рњ08.Р”38737",
 					Period = "01.05.2017",
-					Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+					Producer = "РќСЊСЋ-Р¤Р°СЂРј РРЅРє./Р’РµРєС‚РѕСЂ-РњРµРґРёРєР° Р—РђРћ, Р РћРЎРЎРРЇ",
 				});
 			return waybill;
 		}
@@ -66,8 +66,8 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
 				+ " values(:publicationDate, :header, :body, :destinationType)")
 				.SetParameter("publicationDate", DateTime.Now)
-				.SetParameter("header", "Тестовая новость")
-				.SetParameter("body", "<h1>Тесто</h1>")
+				.SetParameter("header", "РўРµСЃС‚РѕРІР°СЏ РЅРѕРІРѕСЃС‚СЊ")
+				.SetParameter("body", "<h1>РўРµСЃС‚Рѕ</h1>")
 				.SetParameter("destinationType", "1")
 				.ExecuteUpdate();
 		}

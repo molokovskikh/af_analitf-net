@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.Controls
 {
-	//фактически это stackpanel но stackpanel не зажимает combobox а эта панель зажимает
+	//С„Р°РєС‚РёС‡РµСЃРєРё СЌС‚Рѕ stackpanel РЅРѕ stackpanel РЅРµ Р·Р°Р¶РёРјР°РµС‚ combobox Р° СЌС‚Р° РїР°РЅРµР»СЊ Р·Р°Р¶РёРјР°РµС‚
 	public class ToolbarPanel : Panel
 	{
 		protected override Size MeasureOverride(Size availableSize)
