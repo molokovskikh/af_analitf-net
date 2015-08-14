@@ -496,7 +496,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				}
 			});
 
-			yield return new Models.Results.TaskResult(task, new WaitViewModel("Выполнение операции, подождите."));
+			yield return new Models.Results.TaskResult(task);
 
 			if (task.IsFaulted)
 				Log.Error(String.Format("Ошибка при выполнение команды {0}", command), task.Exception);

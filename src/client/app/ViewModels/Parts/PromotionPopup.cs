@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -9,51 +12,47 @@ using Caliburn.Micro;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class PromotionPopup : ViewAware
 	{
-		private IStatelessSession session;
-		private Config.Config config;
-
 		public uint? FilterBySupplierId;
 
-		public PromotionPopup(IStatelessSession session, Config.Config config)
+		public PromotionPopup(Config.Config config,
+			IObservable<CatalogName> catalog,
+			Func<Func<IStatelessSession, List<Promotion>>, IObservable<List<Promotion>>> rxQuery,
+			Env env)
 		{
-			Name = new NotifyValue<CatalogName>();
+			Name = new NotifyValue<CatalogName>(catalog);
 			Visible = new NotifyValue<bool>();
 			Promotions = new NotifyValue<List<Promotion>>(new List<Promotion>());
-			this.session = session;
-			this.config = config;
+			catalog
+				.Throttle(Consts.ScrollLoadTimeout, env.Scheduler)
+				.Select(x => rxQuery(s => {
+					if (x == null)
+						return new List<Promotion>();
+					var nameId = x.Id;
+					var query = s.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId));
+					if (FilterBySupplierId != null)
+						query = query.Where(p => p.Supplier.Id == FilterBySupplierId);
+					return query
+						.OrderBy(p => p.Name)
+						.Fetch(p => p.Supplier)
+						.ToList();
+				}))
+				.Switch()
+				.ObserveOn(env.UiScheduler)
+				.Subscribe(x => {
+					Promotions.Value = x;
+					Promotions.Value.Each(p => p.Init(config));
+					Visible.Value = Promotions.Value.Count > 0;
+				});
 		}
 
 		public NotifyValue<CatalogName> Name { get; set; }
 		public NotifyValue<List<Promotion>> Promotions { get; set; }
 		public NotifyValue<bool> Visible { get; set; }
-
-		public void Activate(CatalogName name)
-		{
-			if (name == null) {
-				Visible.Value = false;
-				return;
-			}
-			Name.Value = name;
-			var nameId = name.Id;
-			//сессия может использоваться для асинхронной загрузки данных выполняем синхронизацию
-			lock (session) {
-				var query = session.Query<Promotion>().Where(p => p.Catalogs.Any(c => c.Name.Id == nameId));
-				if (FilterBySupplierId != null)
-					query = query.Where(p => p.Supplier.Id == FilterBySupplierId);
-				Promotions.Value = query
-					.OrderBy(p => p.Name)
-					.Fetch(p => p.Supplier)
-					.ToList();
-			}
-			Promotions.Value.Each(p => p.Init(config));
-			Visible.Value = Promotions.Value.Count > 0;
-		}
 
 		public void Deactivate()
 		{

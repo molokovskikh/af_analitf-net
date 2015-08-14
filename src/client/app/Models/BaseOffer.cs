@@ -70,6 +70,12 @@ namespace AnalitF.Net.Client.Models
 		[Style("Period", "ResultCost", "MixedCost", Description = "Уцененные препараты")]
 		public virtual bool Junk { get; set; }
 
+		/// <summary>
+		/// Junk - флаг уценки с учетом клиентских настроек
+		/// OriginalJunk - флаг уценки без учета клиентских настроек
+		/// </summary>
+		public virtual bool OriginalJunk { get; set; }
+
 
 		public virtual decimal? MinBoundCost { get; set; }
 

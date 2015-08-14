@@ -26,6 +26,7 @@ using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 using LogManager = log4net.LogManager;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -57,11 +58,25 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			lazyModel = new Lazy<T>(Init<T>);
 		}
 
+		protected T Next<T>(IEnumerable<IResult> results)
+		{
+			return Next<T>(results.GetEnumerator());
+		}
+
 		protected T Next<T>(IEnumerator<IResult> results)
 		{
 			Assert.IsTrue(results.MoveNext());
 			Assert.IsInstanceOf<T>(results.Current);
 			return (T)results.Current;
+		}
+
+		protected void TaskResult(IEnumerable<IResult> result)
+		{
+			var enumerator = result.GetEnumerator();
+			var task = Next<TaskResult>(enumerator).Task;
+			task.Start();
+			task.Wait();
+			enumerator.MoveNext();
 		}
 	}
 

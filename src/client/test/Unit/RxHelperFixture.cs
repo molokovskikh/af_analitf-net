@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;

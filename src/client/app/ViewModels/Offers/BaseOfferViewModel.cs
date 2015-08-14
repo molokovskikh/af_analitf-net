@@ -164,12 +164,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			if (StatelessSession != null) {
-				Promotions = new PromotionPopup(StatelessSession, Shell.Config);
-				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false)
-					.Subscribe(c => Promotions.Activate(c.Value == null ? null : c.Value.Name));
-			}
-
+			Promotions = new PromotionPopup(Shell.Config,
+				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false).Select(x => x.Value?.Name),
+				RxQuery, Env);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
 				.Where(x => x != null)

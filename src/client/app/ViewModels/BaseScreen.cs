@@ -712,6 +712,30 @@ namespace AnalitF.Net.Client.ViewModels
 			return Observable.FromAsync(() => task);
 		}
 
+		public Task TplQuery(Action<IStatelessSession> action)
+		{
+			var task = new Task(() => {
+				if (_backgroundSession == null)
+					_backgroundSession = Env.Factory.OpenStatelessSession();
+				Interlocked.Increment(ref backgrountQueryCount);
+				try{
+					Drained.Reset();
+					if (_backgroundSession == null)
+						return;
+					lock (_backgroundSession) {
+						action(_backgroundSession);
+					}
+				}
+				finally {
+					var val = Interlocked.Decrement(ref backgrountQueryCount);
+					if (val == 0)
+						Drained.Set();
+				}
+			}, CloseCancellation.Token);
+			task.Start(Env.QueryScheduler);
+			return task;
+		}
+
 		public Task WaitQueryDrain()
 		{
 			var t = new Task(() => Drained.Wait());

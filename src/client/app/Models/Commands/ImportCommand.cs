@@ -139,6 +139,7 @@ set m.HaveOffers = 1,
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
 				DbMaintain.UpdateLeaders(Session, settings);
+				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
 
 			//очистка результатов автозаказа

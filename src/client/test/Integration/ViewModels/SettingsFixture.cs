@@ -103,5 +103,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			results.MoveNext();
 			Assert.AreEqual("#FFFF0A00", appStyle.Background);
 		}
+
+		[Test]
+		public void Recalculate_junk_on_junk_period_change()
+		{
+			var offer = session.Query<Offer>().First();
+			var newOffer = new Offer(offer.Price, offer, offer.Cost);
+			newOffer.Exp = DateTime.Now.AddMonths(9);
+			newOffer.Id.OfferId += (ulong)Generator.Random().First();
+			session.Save(newOffer);
+
+			model.Settings.Value.JunkPeriod = 10;
+			TaskResult(model.Save());
+
+			session.Refresh(newOffer);
+			Assert.IsTrue(newOffer.Junk, newOffer.Id.ToString());
+			Assert.IsFalse(newOffer.OriginalJunk);
+		}
 	}
 }

@@ -232,7 +232,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> RegulatorReport()
 		{
 			var commnand = new WaybillsReport();
-			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config), new WaitViewModel("Выполнение операции, подождите."));
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(Settings.Value.MapPath("Reports"));
 		}
 	}

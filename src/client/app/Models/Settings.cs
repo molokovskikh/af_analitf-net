@@ -111,6 +111,7 @@ namespace AnalitF.Net.Client.Models
 			ConfirmDeleteOldWaybills = true;
 			DeleteWaybillsOlderThan = 150;
 			TrackRejectChangedDays = 90;
+			JunkPeriod = 6;
 			OpenRejects = true;
 			HighlightUnmatchedOrderLines = true;
 			RackingMap = new RackingMapSettings();
@@ -301,6 +302,11 @@ namespace AnalitF.Net.Client.Models
 				return ImageCache = new MemoryStream(File.ReadAllBytes(file));
 			}
 		}
+
+		/// <summary>
+		/// Количество месяцев до истечения срока годности когда препараты будут отмечаться как уцененные
+		/// </summary>
+		public virtual int JunkPeriod { get; set; }
 
 		public virtual IWebProxy GetProxy()
 		{

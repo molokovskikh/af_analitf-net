@@ -12,6 +12,12 @@ namespace AnalitF.Net.Client.Models.Results
 		public Task Task;
 		WaitViewModel viewModel;
 
+		public TaskResult(Task task)
+		{
+			this.Task = task;
+			this.viewModel = new WaitViewModel();
+		}
+
 		public TaskResult(Task task, WaitViewModel viewModel)
 		{
 			this.Task = task;
@@ -29,7 +35,8 @@ namespace AnalitF.Net.Client.Models.Results
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
 			}, scheduler);
-			Task.Start();
+			if (Task.Status == TaskStatus.Created)
+				Task.Start();
 			Manager.ShowFixedDialog(viewModel);
 			if (Completed != null)
 				Completed(this, new ResultCompletionEventArgs());

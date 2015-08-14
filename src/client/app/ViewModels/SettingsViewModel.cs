@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
@@ -171,14 +174,14 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentDirMap.Value.Dir = dialog.Result;
 		}
 
-		public void Save()
+		public IEnumerable<IResult> Save()
 		{
 			var error = Settings.Value.ValidateMarkups();
 
 			if (!String.IsNullOrEmpty(error)) {
 				Session.FlushMode = FlushMode.Never;
 				Manager.Warning(error);
-				return;
+				yield break;
 			}
 
 			if (_passwordUpdated) {
@@ -201,6 +204,10 @@ namespace AnalitF.Net.Client.ViewModels
 						Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
 					}
 				}
+			}
+
+			if (Session.IsChanged(Settings.Value, x => x.JunkPeriod)) {
+				yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
 			}
 
 			Session.FlushMode = FlushMode.Auto;
