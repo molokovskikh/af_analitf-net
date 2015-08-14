@@ -1323,7 +1323,7 @@ where a.MailId in ({0})", ids.Implode());
 
 			if (orders.Length > 0) {
 				var ids = orders.Select(x => x.RowId);
-				job.Error = $"Экспортированы неподтвержденные заказа: {ids.Implode()}";
+				job.Error = $"Экспортированы неподтвержденные заявки: {ids.Implode()}";
 			}
 
 			Export(Result, "Orders",
