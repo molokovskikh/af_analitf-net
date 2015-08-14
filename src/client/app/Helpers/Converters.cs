@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -65,8 +66,13 @@ namespace AnalitF.Net.Client.Helpers
 
 			var bi = new BitmapImage();
 			bi.BeginInit();
-			bi.UriSource = new Uri(value.ToString());
-			bi.CacheOption = BitmapCacheOption.OnLoad;
+			if (value is string) {
+				bi.UriSource = new Uri(value.ToString());
+				bi.CacheOption = BitmapCacheOption.OnLoad;
+			}
+			else {
+				bi.StreamSource = (Stream)value;
+			}
 			bi.EndInit();
 			return bi;
 		}

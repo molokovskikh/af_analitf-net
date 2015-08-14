@@ -170,6 +170,8 @@ where c.Id is null")
 			}
 
 			settings.LastUpdate = DateTime.Now;
+			//очищаем кеш изображения что бы перезагрузить его
+			Settings.ImageCache = null;
 			settings.ApplyChanges(Session);
 		}
 
