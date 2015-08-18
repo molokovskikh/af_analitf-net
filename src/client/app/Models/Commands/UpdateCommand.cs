@@ -78,11 +78,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			HttpResponseMessage response;
 			var updateType = "накопительное";
 			var user = Session.Query<User>().FirstOrDefault();
+			var settings = Session.Query<Settings>().First();
 			uint requestId = 0;
 			if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
 				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
-				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user), Token), ref requestId);
+				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user, settings), Token), ref requestId);
 			}
 			else if (SyncData.Match("WaybillHistory")) {
 				SuccessMessage = "Загрузка истории документов завершена успешно.";
@@ -103,7 +104,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else {
-				var lastSync = user == null ? null : user.LastSync;
+				var lastSync = user?.LastSync;
 				if (lastSync == null) {
 					updateType = "куммулятивное";
 				}
@@ -111,7 +112,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					updateType = "загрузка накладных";
 				}
 				var url = Config.SyncUrl(syncData, lastSync);
-				SendPrices(Client, Token);
+				SendPrices(Client, settings, Token);
 				var request = Client.GetAsync(url, Token);
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
@@ -127,9 +128,9 @@ namespace AnalitF.Net.Client.Models.Commands
 			return result;
 		}
 
-		private HttpContent GetBatchRequest(User user)
+		private HttpContent GetBatchRequest(User user, Settings settings)
 		{
-			var request = new BatchRequest(AddressId, user == null ? null : user.LastSync);
+			var request = new BatchRequest(AddressId, settings.JunkPeriod, user?.LastSync);
 			if (String.IsNullOrEmpty(BatchFile)) {
 				request.BatchItems = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
 					Code = l.Code,
@@ -551,9 +552,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 		}
 
-		private void SendPrices(HttpClient client, CancellationToken token)
+		private void SendPrices(HttpClient client, Settings settings, CancellationToken token)
 		{
-			var settings = Session.Query<Settings>().First();
 			var lastUpdate = settings.LastUpdate;
 			var prices = Session.Query<Price>().Where(p => p.Timestamp > lastUpdate).ToArray();
 			var clientPrices = prices.Select(p => new PriceSettings(p.Id.PriceId, p.Id.RegionId, p.Active)).ToArray();

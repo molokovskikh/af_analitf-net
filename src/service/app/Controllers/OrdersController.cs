@@ -53,8 +53,7 @@ where l.RequestId = :id;")
 				.SetParameter("id", confirm.RequestId)
 				.ExecuteUpdate();
 			var job = Session.Get<RequestLog>(confirm.RequestId);
-			if (job != null)
-				job.Confirm(Config);
+			job?.Confirm(Config);
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
@@ -104,6 +103,9 @@ where l.RequestId = :id;")
 								var value = property.GetValue(sourceItem, null);
 								property.SetValue(offer, value, null);
 							}
+							//клиент в поле уценка передает уценку с учетом клиентских настроек
+							//оригинальная уценка хранится в поле OriginalJunk
+							offer.Junk = sourceItem.OriginalJunk;
 
 							try {
 								var item = order.AddOrderItem(offer, sourceItem.Count);
@@ -112,11 +114,9 @@ where l.RequestId = :id;")
 									item.LeaderInfo = new OrderItemLeadersInfo {
 										OrderItem = item,
 										MinCost = (float?)sourceItem.MinCost,
-										PriceCode = sourceItem.MinPrice != null
-											? (uint?)sourceItem.MinPrice.PriceId : null,
+										PriceCode = sourceItem.MinPrice?.PriceId,
 										LeaderMinCost = (float?)sourceItem.LeaderCost,
-										LeaderPriceCode = sourceItem.LeaderPrice != null
-											? (uint?)sourceItem.LeaderPrice.PriceId : null,
+										LeaderPriceCode = sourceItem.LeaderPrice?.PriceId,
 									};
 								}
 								orderitemMap.Add(item, sourceItem.Id);

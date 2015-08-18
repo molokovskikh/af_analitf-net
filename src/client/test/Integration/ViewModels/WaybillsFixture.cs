@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
-			settings.Save();
+			var result = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(50);
 

@@ -54,11 +54,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		public NotifyValue<List<Promotion>> Promotions { get; set; }
 		public NotifyValue<bool> Visible { get; set; }
 
-		public void Deactivate()
-		{
-			Visible.Value = false;
-		}
-
 		public void Hide()
 		{
 			Visible.Value = false;

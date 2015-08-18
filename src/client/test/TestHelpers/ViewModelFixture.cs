@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -74,8 +75,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			var enumerator = result.GetEnumerator();
 			var task = Next<TaskResult>(enumerator).Task;
-			task.Start();
-			task.Wait();
+			if (task.Status == TaskStatus.Created)
+				task.Start();
+			if (!task.Wait(30.Second()))
+				throw new Exception("Не удалось дождаться задачи за 30 секунд");
 			enumerator.MoveNext();
 		}
 	}

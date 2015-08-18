@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.Models
 			if (Settings == null)
 				return;
 
-			Settings.ValidateMarkups();
+			Settings.Validate();
 		}
 
 		[Ignore, Style("Begin")]

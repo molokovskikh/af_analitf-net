@@ -176,7 +176,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Save()
 		{
-			var error = Settings.Value.ValidateMarkups();
+			var error = Settings.Value.Validate();
 
 			if (!String.IsNullOrEmpty(error)) {
 				Session.FlushMode = FlushMode.Never;

@@ -161,15 +161,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
-		public void Import_after_update()
+		public void Version_update()
 		{
-			//todo здесь мы симулируем обновление приложения, это коряво переделать
-			var src = Directory.GetFiles(serviceConfig.ResultPath)
-				.OrderByDescending(l => new FileInfo(l).LastWriteTime)
-				.Last();
-			File.Copy(src, clientConfig.ArchiveFile);
-			using(var file = new ZipFile(clientConfig.ArchiveFile))
-				file.ExtractAll(clientConfig.UpdateTmpDir);
+			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
+			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
+
+			var result1 = Run(new UpdateCommand());
+			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			RemoteCommand command1 = new UpdateCommand();

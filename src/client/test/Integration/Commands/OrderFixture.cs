@@ -266,14 +266,16 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			MakeOrderClean();
 
-			Run(new SendOrders(address));
+			Assert.AreEqual(UpdateResult.OK, Run(new SendOrders(address)));
 			var fixture = Fixture<MatchedWaybill>();
-			Run(new UpdateCommand());
+			Assert.AreEqual(UpdateResult.SilentOk, Run(new UpdateCommand()));
 
 			var order = localSession.Query<SentOrder>().First(o => o.SentOn >= begin);
-			var docLines = localSession.CreateSQLQuery("select DocumentLineId from WaybillOrders where OrderLineId = :orderLineId")
+			var docLines = localSession
+				.CreateSQLQuery("select DocumentLineId from WaybillOrders where OrderLineId = :orderLineId")
 				.SetParameter("orderLineId", order.Lines[0].ServerId)
 				.List();
+			Assert.AreEqual(1, docLines.Count, $"не удалось найти накладную для заявки {order.Id}");
 			Assert.AreEqual(Convert.ToUInt32(docLines[0]), fixture.Waybill.Lines[0].Id);
 		}
 

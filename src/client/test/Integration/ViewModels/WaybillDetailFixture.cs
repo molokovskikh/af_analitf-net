@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
-			settings.Save();
+			var results = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());

@@ -121,6 +121,9 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="UIAutomationTypes" />
     <Reference Include="WindowsBase" />
+    <Reference Include="WpfAnimatedGif">
+      <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
+    </Reference>
     <Reference Include="Xceed.Wpf.Toolkit">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Extended.Wpf.Toolkit.1.9.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
@@ -196,7 +199,7 @@
     <Compile Include="Integration\ViewModels\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModels\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\SettingsFixture.cs" />
-    <Compile Include="Integration\ViewModels\Shell2Fixture.cs" />
+    <Compile Include="Integration\ViewModels\ShellFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillsFixture.cs" />

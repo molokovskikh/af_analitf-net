@@ -1,12 +1,13 @@
 ﻿using System;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
-	public class BaseConductorFixture
+	public class BaseConductorFixture : BaseUnitFixture
 	{
 		private BaseShell conductor;
 

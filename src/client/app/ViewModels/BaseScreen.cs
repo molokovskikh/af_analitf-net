@@ -708,7 +708,9 @@ namespace AnalitF.Net.Client.ViewModels
 						Drained.Set();
 				}
 			}, CloseCancellation.Token);
-			task.Start(Env.QueryScheduler);
+			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(Env.QueryScheduler);
 			return Observable.FromAsync(() => task);
 		}
 
@@ -732,7 +734,9 @@ namespace AnalitF.Net.Client.ViewModels
 						Drained.Set();
 				}
 			}, CloseCancellation.Token);
-			task.Start(Env.QueryScheduler);
+			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(Env.QueryScheduler);
 			return task;
 		}
 

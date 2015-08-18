@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -219,9 +220,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected static void AssertInputable(UIElement element)
 		{
-			Assert.IsTrue(element.IsVisible, "элемент {0} невидим IsVisible=False", element.ToString());
-			Assert.IsTrue(element.IsEnabled, "элемент {0} недоступен для ввода IsEnabled=False", element);
+			Assert.IsTrue(element.IsVisible, "элемент {0} {1} невидим IsVisible=False", element, ((FrameworkElement)element).Name);
+			Assert.IsTrue(element.IsEnabled, "элемент {0} {1} недоступен для ввода IsEnabled=False", element, ((FrameworkElement)element).Name);
 		}
+
 		protected static void AssertInputable(ContentElement element)
 		{
 			Assert.IsTrue(element.IsEnabled, element.ToString());
@@ -257,7 +259,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			dispatcher.UnhandledException += (sender, args) => {
 				args.Handled = true;
-				exceptions.Add(args.Exception);
+				//ошибки отмены могут возникнуть если мы закроем форму до завершения всех запросов
+				//игнорируем их
+				if (!(args.Exception is TaskCanceledException))
+					exceptions.Add(args.Exception);
 			};
 
 			await loaded.WaitAsync();

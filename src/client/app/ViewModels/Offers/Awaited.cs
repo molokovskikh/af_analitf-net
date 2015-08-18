@@ -53,9 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			CurrentItem
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => {
-					Update();
-				}, CloseCancellation.Token);
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
 		protected override void Query()

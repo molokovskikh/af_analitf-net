@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ScreenExtensions.TryActivate(m);
 				m.Settings.Value.UserName = "test";
 				m.Settings.Value.Password = "123";
-				m.Save();
+				var results = m.Save().ToList();
 				Deactivate(m);
 				Close(m);
 			});
@@ -256,7 +256,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			restore = true;
 			var settingsModel = Init<SettingsViewModel>();
 			settingsModel.Settings.Value.OpenRejects = !settingsModel.Settings.Value.OpenRejects;
-			settingsModel.Save();
+			var results = settingsModel.Save().ToList();
 			Close(settingsModel);
 
 			scheduler.AdvanceByMs(1000);
@@ -278,7 +278,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 					stub.Do = c => c.result;
 					var model = (SettingsViewModel)d;
 					model.Settings.Value.Password = "aioxct2";
-					model.Save();
+					var results = model.Save().ToList();
 					Close(model);
 				}
 			});

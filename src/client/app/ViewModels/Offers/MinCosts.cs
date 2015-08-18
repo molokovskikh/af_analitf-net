@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			CurrentCost
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Query(), CloseCancellation.Token);
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
 		private List<MinCost> Load(IStatelessSession session)

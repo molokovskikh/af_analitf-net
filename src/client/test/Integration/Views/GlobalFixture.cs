@@ -33,6 +33,7 @@ using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using Action = System.Action;
+using Application = System.Windows.Application;
 using Binding = System.Windows.Data.Binding;
 using CheckBox = System.Windows.Controls.CheckBox;
 using DataGrid = System.Windows.Controls.DataGrid;
@@ -90,6 +91,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public async void Open_catalog_offers()
 		{
+			AppDomain.CurrentDomain.FirstChanceException += (sender, args) => {
+				Console.WriteLine(args.Exception);
+			};
 			var term = session.Query<CatalogName>()
 				.First(n => n.HaveOffers && n.Name.StartsWith("б"))
 				.Name.Slice(3).ToLower();
@@ -534,6 +538,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Start();
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
+			dispatcher.Invoke(() => {
+				scheduler.AdvanceByMs(500);
+			});
+			WaitIdle();
 			dispatcher.Invoke(() => {
 				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);

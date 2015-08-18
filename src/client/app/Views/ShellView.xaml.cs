@@ -35,6 +35,9 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 			notificationTimer.Tick += UpdateNot;
+			ShowOrderLines.IsEnabledChanged += (sender, args) => {
+				Console.WriteLine("ShowOrderLines.IsEnabledChanged=" + args.NewValue);
+			};
 			Loaded += (sender, args) => {
 				//для тестов
 				var button = Update.Descendants<Button>().First(b => b.Name == "PART_ActionButton");

@@ -52,9 +52,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					"Id", "LinesCount", "Sum", "PersonalComment"
 				}}
 			};
-#endif
 
 		public bool Strict = true;
+#endif
 
 		public ImportCommand(List<System.Tuple<string, string[]>> data)
 		{

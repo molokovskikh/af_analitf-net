@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var settings = new Settings(defaults: true);
 			settings.Markups[2].End = 100;
-			Assert.AreEqual("Некорректно введены границы цен.", settings.ValidateMarkups());
+			Assert.AreEqual("Некорректно введены границы цен.", settings.Validate());
 		}
 
 		[Test]
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var settings = new Settings(defaults: true);
 			settings.Markups.RemoveEach(settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant));
-			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.ValidateMarkups());
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate());
 		}
 
 		[Test]
@@ -91,7 +91,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var markups = settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant).OrderBy(m => m.Begin).ToArray();
 			markups[0].End = 40;
 			markups[1].Begin = 40;
-			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.ValidateMarkups());
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate());
 		}
 	}
 }

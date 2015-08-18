@@ -36,7 +36,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		protected void InitSession()
+		public void InitSession()
 		{
 			if (StatelessSession == null)
 				Disposable.Add(StatelessSession = Factory.OpenStatelessSession());

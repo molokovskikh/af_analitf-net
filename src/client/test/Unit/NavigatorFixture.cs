@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NUnit.Framework;
@@ -8,7 +9,7 @@ using NUnit.Framework;
 namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
-	public class NavigatorFixture
+	public class NavigatorFixture : BaseUnitFixture
 	{
 		private BaseShell shell;
 		private DefaultScreen defaultScreen;

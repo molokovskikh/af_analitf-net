@@ -19,7 +19,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsNotNull(model.Doc.Value);
 			Assert.That(model.Lines.Value.Count, Is.GreaterThan(0));
 			//для первой могу не найтись предложения
-			model.CurrentLine.Value = model.Lines.Value.Skip(1).First(l => l.ProductId == null && l.Count == 1);
+			model.CurrentLine.Value = model.Lines.Value.Skip(1).First(l => l.ProductId == null
+				&& l.Product == "ПАПАВЕРИНА ГИДРОХЛОРИД супп. 20 мг N10");
 			scheduler.Start();
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0), model.CurrentLine.Value.Product);
 

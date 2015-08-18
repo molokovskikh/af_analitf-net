@@ -269,7 +269,7 @@ namespace AnalitF.Net.Client.ViewModels
 				ExcelExporter.ActiveProperty.Value = "CatalogNames";
 				activeItemType = typeof(CatalogName);
 				CurrentItem.Value = CurrentCatalogName.Value;
-				Promotions.Deactivate();
+				Promotions.Hide();
 			}
 		}
 	}

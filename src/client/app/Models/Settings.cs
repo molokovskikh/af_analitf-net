@@ -390,11 +390,14 @@ namespace AnalitF.Net.Client.Models
 
 			markup.Settings = this;
 			Markups.Add(markup);
-			ValidateMarkups();
+			Validate();
 		}
 
-		public virtual string ValidateMarkups()
+		public virtual string Validate()
 		{
+			if (JunkPeriod < 6)
+				return "Срок уценки не может быть менее 6 месяцев";
+
 			return MarkupConfig.Validate(Markups);
 		}
 

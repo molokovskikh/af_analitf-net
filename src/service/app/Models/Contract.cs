@@ -226,6 +226,8 @@ namespace AnalitF.Net.Client.Models
 		public PriceComposedId LeaderPrice;
 		public decimal? MinCost;
 		public PriceComposedId MinPrice;
+
+		public bool OriginalJunk;
 	}
 #endif
 
@@ -254,6 +256,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public DateTime? LastSync;
 		public uint AddressId;
+		public int JunkPeriod;
 		public List<BatchItem> BatchItems;
 
 		public BatchRequest()
@@ -261,11 +264,12 @@ namespace AnalitF.Net.Client.Models
 			BatchItems = new List<BatchItem>();
 		}
 
-		public BatchRequest(uint addressId, DateTime? lastSync)
+		public BatchRequest(uint addressId, int junkPeriod, DateTime? lastSync)
 			: this()
 		{
 			AddressId = addressId;
 			LastSync = lastSync;
+			JunkPeriod = junkPeriod;
 		}
 	}
 }

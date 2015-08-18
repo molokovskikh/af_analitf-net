@@ -1212,6 +1212,7 @@ where a.MailId in ({0})", ids.Implode());
 						"ExportBatchLineId",
 						"Junk",
 						"BarCode",
+						"OriginalJunk",
 					},
 					items
 						.Select(i => new object[] {
@@ -1248,8 +1249,11 @@ where a.MailId in ({0})", ids.Implode());
 							i.Order.RegionCode,
 							i.CoreId,
 							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault(),
+							//уценка с учтом клиентских настроек, будет пересчитана на клиенте
 							i.Junk,
 							i.EAN13,
+							//оригинальная уценка
+							i.Junk,
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1381,7 +1385,8 @@ select l.ExportId as ExportOrderId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	oh.RegionCode as RegionId,
-	ol.CoreId as OfferId
+	ol.CoreId as OfferId,
+	ol.Junk as OriginalJunk
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
@@ -1472,7 +1477,8 @@ select ol.RowId as ServerId,
 	st.Synonym as ProductSynonym,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
-	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost
+	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
+	ol.Junk as OriginalJunk
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId

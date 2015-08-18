@@ -6,6 +6,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
+using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -25,7 +26,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Calculate_base_category()
 		{
 			model.Settings.Value.GroupByProduct = !model.Settings.Value.GroupByProduct;
-			model.Save();
+			var results = model.Save().ToList();
 		}
 
 		[Test]
@@ -34,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var origin = model.Markups.Count;
 			Assert.AreEqual(0, model.Markups[0].Begin);
 			model.Markups.Add(new MarkupConfig());
-			model.Save();
+			var results = model.Save().ToList();
 			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
 
 			Reset();
@@ -49,7 +50,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			model.Markups.RemoveEach(model.Markups);
 			model.Markups.Add(new MarkupConfig());
-			model.Save();
+			var results = model.Save().ToList();
 			Close(model);
 
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
@@ -72,7 +73,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Save_waybill_settings()
 		{
 			model.CurrentWaybillSettings.Value.Name = "test";
-			model.Save();
+			var results = model.Save().ToList();
 			Close(model);
 			var waybillSettings = session.Load<WaybillSettings>(model.CurrentWaybillSettings.Value.Id);
 			Assert.AreEqual("test", waybillSettings.Name);
@@ -111,6 +112,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var newOffer = new Offer(offer.Price, offer, offer.Cost);
 			newOffer.Exp = DateTime.Now.AddMonths(9);
 			newOffer.Id.OfferId += (ulong)Generator.Random().First();
+			newOffer.OriginalJunk = false;
+			newOffer.Junk = false;
 			session.Save(newOffer);
 
 			model.Settings.Value.JunkPeriod = 10;
