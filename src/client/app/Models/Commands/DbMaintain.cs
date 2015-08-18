@@ -84,7 +84,11 @@ drop temporary table Leaders;")
 		{
 			session.CreateSQLQuery(@"
 update Offers
-set Junk = OriginalJunk or (Exp is not null and Exp < :end)")
+set Junk = OriginalJunk or (Exp is not null and Exp < :end);
+
+update OrderLines
+set Junk = OriginalJunk or (Exp is not null and Exp < :end);")
+
 				.SetParameter("end", DateTime.Now.AddMonths(settings.JunkPeriod))
 				.ExecuteUpdate();
 		}
