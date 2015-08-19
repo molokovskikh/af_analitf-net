@@ -87,7 +87,10 @@ where l.RequestId = :id;")
 							ClientOrderId = clientOrder.ClientOrderId,
 							PriceDate = clientOrder.PriceDate,
 							ClientAddition = clientOrder.Comment,
-							CalculateLeader = false
+							CalculateLeader = false,
+							PriceName = clientOrder.PriceName,
+							CostId = clientOrder.CostId,
+							CostName = clientOrder.CostName,
 						};
 						foreach (var sourceItem in clientOrder.Items) {
 							var offer = new Offer {
