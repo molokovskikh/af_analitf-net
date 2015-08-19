@@ -76,6 +76,12 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ConsigneeNameAndAddress { get; set; }
 		public virtual string UserSupplierName { get; set; }
 
+		/// <summary>
+		/// наименование файла в случае если используется механизм переопределения имен файлов
+		/// если используется стандартное именование файла тогда null
+		/// </summary>
+		public virtual string Filename { get; set; }
+
 		//для биндинга
 		public virtual bool IsReadOnly
 		{
@@ -234,9 +240,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void DeleteFiles(Settings settings)
 		{
-			var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
 			try {
-				files.Each(f => File.Delete(f));
+				if (String.IsNullOrEmpty(Filename)) {
+					var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
+					files.Each(f => File.Delete(f));
+				}
+				else {
+					File.Delete(Path.Combine(settings.MapPath("Waybills"), Filename));
+				}
 			}
 			catch(Exception e) {
 				_log.Warn(String.Format("Ошибка при удалении документа {0}", Id), e);

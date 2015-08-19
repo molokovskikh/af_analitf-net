@@ -176,5 +176,22 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsTrue(line.IsRejectNew);
 			Assert.AreEqual(reject.Id, line.RejectId, line.Id.ToString());
 		}
+
+		[Test]
+		public void Export_waybill_preserve_file_name()
+		{
+			var fixture = Fixture<CreateWaybill>();
+			fixture.Waybill.Log.FileName = Guid.NewGuid().ToString();
+			fixture.Waybill.Log.PreserveFilename = true;
+			session.Update(fixture.Waybill.Log);
+			Run(new UpdateCommand());
+
+			var path = settings.MapPath("Waybills");
+			var files = Directory.GetFiles(path);
+			var filename = Path.Combine(path, fixture.Waybill.Log.FileName);
+			Assert.IsTrue(File.Exists(filename), $"не найден файл накладной {filename} есть {files.Implode()}");
+			var waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
+			Assert.AreEqual(fixture.Waybill.Log.FileName, waybill.Filename);
+		}
 	}
 }

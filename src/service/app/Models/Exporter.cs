@@ -1534,10 +1534,12 @@ group by ol.RowId", condition);
 					var path = Path.Combine(DocsPath,
 						doc.Document.AddressId.ToString(),
 						type);
-					if (!Directory.Exists(path))
+					if (!Directory.Exists(path)) {
+						log.Warn($"Директория для загрузки документов не существует {path}");
 						continue;
+					}
 					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
-					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
+					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
@@ -1568,7 +1570,8 @@ select d.RowId as Id,
 	i.ConsigneeInfo as ConsigneeNameAndAddress,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
-	i.InvoiceDate
+	i.InvoiceDate,
+	if(d.PreserveFilename, d.FileName, null) as Filename
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
@@ -1593,7 +1596,8 @@ select d.RowId as Id,
 	null as ConsigneeNameAndAddress,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
-	null as InvoiceDate
+	null as InvoiceDate,
+	if(d.PreserveFilename, d.FileName, null) as Filename
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
