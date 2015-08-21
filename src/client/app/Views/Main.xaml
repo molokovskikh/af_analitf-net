@@ -19,7 +19,7 @@
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
-				<Image Grid.Column="0" Source="/AnalitF.Net.Client;component/assets/images/Logo.png"
+				<Image Grid.Column="0" Source="/assets/images/Logo.png"
 					Width="79"
 					Height="74" />
 				<StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
