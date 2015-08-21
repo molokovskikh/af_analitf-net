@@ -9,7 +9,7 @@ namespace AnalitF.Net.Client.Controls
 	{
 		private static PixelShader _pixelShader
 			= new PixelShader {
-				UriSource = new Uri("/AnalitF.Net.Client;component/assets/shaders/grayscale.ps", UriKind.Relative)
+				UriSource = new Uri("/assets/shaders/grayscale.ps", UriKind.Relative)
 			};
 
 		public static readonly DependencyProperty InputProperty
