@@ -1,0 +1,55 @@
+TicketReportPrintEmptyTickets	0
+TicketReportSizePercent	100
+TicketReportClientNameVisible	1
+TicketReportProductVisible	1
+TicketReportCountryVisible	1
+TicketReportProducerVisible	1
+TicketReportPeriodVisible	1
+TicketReportProviderDocumentIdVisible	1
+ExclusiveId	
+ExclusiveComputerName	
+ExclusiveDate	0
+NetworkExportPricesFolder	
+NetworkPositionPercent	0
+NetworkExternalOrder	0
+NetworkMinCostPercent	7
+WaybillsHistoryDayCount	150
+ConfirmDeleteOldWaybills	1
+BaseFirmCategory	0
+Excess	5
+ExcessAvgOrderTimes	5
+DeltaMode	1
+ShowPriceName	0
+StoredUserId	
+LastDayOfWeek	Wednesday
+GroupWaybillsBySupplier	0
+UseColorOnWaybillOrders	1
+ShowRejectsReason	0
+LastRequestWithRejects	2012-09-01 00:00:00
+NewRejectsDayCount	90
+lnFrozenOrder	12632256
+lnImportantMail	65280
+lnVitallyImportant	32768
+lnRejectedColor	10398631
+lnNeedCorrect	10789024
+lnSmartOrderOptimalCost	9961388
+lnModifiedWaybillByReject	33023
+lnCreatedByUserWaybill	12639424
+lnNotSetNDS	255
+lnSmartOrderAnotherError	8421631
+lnMinReq	255
+lnNonMain	-16777201
+lnMatchWaybill	9367289
+lnRejectedWaybillPosition	33023
+lnUnrejectedWaybillPosition	32896
+lnNewLetter	14926284
+lnAwait	12124017
+lnLeader	12639424
+lnBuyingBan	255
+lnOrderedLikeFrozen	12632256
+lnRetailMarkup	255
+lnRetailPrice	255
+lnCertificateNotFound	8421504
+lnSupplierPriceMarkup	255
+lnJunk	6725362
+LocalUpdateDateTime	2015-08-26 12:34:42

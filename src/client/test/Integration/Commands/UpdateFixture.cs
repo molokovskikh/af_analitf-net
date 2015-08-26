@@ -446,5 +446,20 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsNull(oldOffer);
 			Assert.IsNotNull(newOffer);
 		}
+
+		[Test]
+		public void Migrate()
+		{
+			localSession.BeginTransaction();
+			new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => x.CopyTo(x.Name, true));
+			Directory.CreateDirectory("in\\update");
+			var cmd = new UpdateCommand {
+				Config = clientConfig
+			};
+			cmd.Process(() => {
+				cmd.Migrate();
+				return UpdateResult.OK;
+			});
+		}
 	}
 }

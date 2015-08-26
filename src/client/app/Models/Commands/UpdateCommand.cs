@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
@@ -186,12 +187,398 @@ namespace AnalitF.Net.Client.Models.Commands
 			return result;
 		}
 
+
+		//миграция данных из delphi приложения
+		public void Migrate()
+		{
+			var filename = FileHelper.MakeRooted("Params.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+drop temporary table if exists temp_params;
+create temporary table temp_params (
+	Id int unsigned not null auto_increment,
+	UseRas tinyint(1) not null,
+	RasConnection varchar(255),
+	UserName varchar(255),
+	Password varchar(255),
+	UseProxy  tinyint(1) not null,
+	ProxyHost varchar(255),
+	ProxyPort int,
+	ProxyUserName varchar(255),
+	ProxyPassword varchar(255),
+	DeleteOrdersOlderThan int,
+	ConfirmDeleteOldOrders tinyint(1) not null,
+	OpenWaybills tinyint(1) not null,
+	OpenRejects tinyint(1) not null,
+	PrintOrdersAfterSend tinyint(1) not null,
+	ConfirmSendOrders tinyint(1) not null,
+	CanViewOffersByCatalogName tinyint(1) not null,
+	GroupByProduct tinyint(1) not null,
+	primary key(Id)
+);
+
+load data infile '{mysqlFilename}' into table temp_params
+(UseRas, RasConnection, UserName, Password, UseProxy, ProxyHost, ProxyPort,
+ProxyUserName, ProxyPassword, DeleteOrdersOlderThan, ConfirmDeleteOldOrders, OpenWaybills,
+OpenRejects, PrintOrdersAfterSend, ConfirmSendOrders, CanViewOffersByCatalogName, GroupByProduct);
+
+update (Settings s, temp_params t)
+set s.UseRas = t.UseRas,
+	s.RasConnection = t.RasConnection,
+	s.UserName = t.UserName,
+	s.UseProxy = t.UseProxy,
+	s.ProxyHost = t.ProxyHost,
+	s.ProxyPort = t.ProxyPort,
+	s.ProxyUserName = t.ProxyUserName,
+	s.ProxyPassword = t.ProxyPassword,
+	s.DeleteOrdersOlderThan = t.DeleteOrdersOlderThan,
+	s.ConfirmDeleteOldOrders = t.ConfirmDeleteOldOrders,
+	s.OpenWaybills = t.OpenWaybills,
+	s.OpenRejects = t.OpenRejects,
+	s.PrintOrdersAfterSend = t.PrintOrdersAfterSend,
+	s.ConfirmSendOrders = t.ConfirmSendOrders,
+	s.CanViewOffersByCatalogName = t.CanViewOffersByCatalogName,
+	s.GroupByProduct = t.GroupByProduct;
+
+drop temporary table if exists temp_params;")
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("RetailMargins.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+delete from MarkupConfigs
+where Type = 0;
+
+load data infile '{mysqlFilename}' into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
+
+update MarkupConfigs
+set Type = 0
+where SettingsId is null;
+
+update MarkupConfigs
+set SettingsId = (select Id from Settings limit 1)
+where SettingsId is null;")
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("VitallyImportantMarkups.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+delete from MarkupConfigs
+where Type = 1;
+
+load data infile '{mysqlFilename}' into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
+
+update MarkupConfigs
+set Type = 1
+where SettingsId is null;
+
+update MarkupConfigs
+set SettingsId = (select Id from Settings limit 1)
+where SettingsId is null;")
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("Password.txt");
+			if (File.Exists(filename)) {
+				var password = File.ReadAllText(filename);
+				Session.CreateSQLQuery("update Settings set Password = :password")
+					.SetParameter("password", password);
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("GlobalParams.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+drop temporary table if exists temp_global_params;
+create temporary table temp_global_params (
+	Id int unsigned not null auto_increment,
+	`Key` varchar(255),
+	`Value` varchar(255),
+	primary key(Id)
+);
+
+load data infile '{mysqlFilename}' into table temp_global_params (`Key`, `Value`);
+
+update (Settings s, temp_global_params t)
+set s.GroupWaybillsBySupplier = t.Value
+where t.`Key` = 'GroupWaybillsBySupplier';
+
+update (Settings s, temp_global_params t)
+set s.DeleteWaybillsOlderThan = t.Value
+where t.`Key` = 'WaybillsHistoryDayCount';
+
+update (Settings s, temp_global_params t)
+set s.ConfirmDeleteOldWaybills = t.Value
+where t.`Key` = 'ConfirmDeleteOldWaybills';
+
+update (Settings s, temp_global_params t)
+set s.MaxOverCostOnRestoreOrder = t.Value
+where t.`Key` = 'NetworkPositionPercent';
+
+update (Settings s, temp_global_params t)
+set s.BaseFromCategory = t.Value
+where t.`Key` = 'BaseFirmCategory';
+
+update (Settings s, temp_global_params t)
+set s.OverCostWarningPercent = t.Value
+where t.`Key` = 'Excess';
+
+update (Settings s, temp_global_params t)
+set s.OverCountWarningFactor = t.Value
+where t.`Key` = 'ExcessAvgOrderTimes';
+
+update (Settings s, temp_global_params t)
+set s.DiffCalcMode = t.Value
+where t.`Key` = 'DeltaMode';
+
+update (Settings s, temp_global_params t)
+set s.ShowPriceName = t.Value
+where t.`Key` = 'ShowPriceName';
+
+update (Settings s, temp_global_params t)
+set s.HighlightUnmatchedOrderLines = t.Value
+where t.`Key` = 'UseColorOnWaybillOrders';
+
+update (Settings s, temp_global_params t)
+set s.TrackRejectChangedDays = t.Value
+where t.`Key` = 'NewRejectsDayCount';
+
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintProduct = t.Value
+where t.`Key` = 'RackCardReportProductVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintProducer = t.Value
+where t.`Key` = 'RackCardReportProducerVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintSerialNumber = t.Value
+where t.`Key` = 'RackCardReportSerialNumberVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintPeriod = t.Value
+where t.`Key` = 'RackCardReportPeriodVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintQuantity = t.Value
+where t.`Key` = 'RackCardReportQuantityVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintSupplier = t.Value
+where t.`Key` = 'RackCardReportProviderVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintRetailCost = t.Value
+where t.`Key` = 'RackCardReportCostVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintCertificates = t.Value
+where t.`Key` = 'RackCardReportCertificatesVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapPrintDocumentDate = t.Value
+where t.`Key` = 'RackCardReportDateOfReceiptVisible';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapHideNotPrinted = t.Value
+where t.`Key` = 'RackCardReportDeleteUnprintableElemnts';
+
+update (Settings s, temp_global_params t)
+set s.RackingMapSize = t.Value
+where t.`Key` = 'RackCardReportRackCardSize';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintEmpty = t.Value
+where t.`Key` = 'TicketReportPrintEmptyTickets';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintFullName = t.Value
+where t.`Key` = 'TicketReportClientNameVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintProduct = t.Value
+where t.`Key` = 'TicketReportProductVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintCountry = t.Value
+where t.`Key` = 'TicketReportCountryVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintProducer = t.Value
+where t.`Key` = 'TicketReportProducerVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintPeriod = t.Value
+where t.`Key` = 'TicketReportPeriodVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintProviderDocumentId = t.Value
+where t.`Key` = 'TicketReportProviderDocumentIdVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintSupplier = t.Value
+where t.`Key` = 'TicketReportSignatureVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintSerialNumber = t.Value
+where t.`Key` = 'TicketReportSerialNumberVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagPrintDocumentDate = t.Value
+where t.`Key` = 'TicketReportDocumentDateVisible';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagHideNotPrinted = t.Value
+where t.`Key` = 'TicketReportDeleteUnprintableElemnts';
+
+update (Settings s, temp_global_params t)
+set s.PriceTagType = t.Value
+where t.`Key` = 'TicketReportTicketSize';")
+					.ExecuteUpdate();
+
+				var colors = Session.CreateSQLQuery("select `Key`, `Value` from temp_global_params where `Key` like 'ln%'")
+					.List<object[]>();
+
+				//мы не можем обращаться к DefaultStyles тк они уже знают о dispatcher и при обращении бросят ошибку
+				var defaultStyles = StyleHelper.GetDefaultStyles(StyleHelper.BuildDefaultStyles());
+				var styleMap = new Dictionary<string, string> {
+					{ "lnFrozenOrder", "Frozen" },
+					{ "lnImportantMail", "" },
+					{ "lnVitallyImportant", "VitallyImportant" },
+					{ "lnRejectedColor", "IsReject" },
+					{ "lnNeedCorrect", "IsOrderLineSendError" },
+					{ "lnSmartOrderOptimalCost", "IsMinCost" },
+					{ "lnModifiedWaybillByReject", "IsRejectChanged" },
+					{ "lnCreatedByUserWaybill", "IsCreatedByUser" },
+					{ "lnNotSetNDS", "IsNdsInvalid" },
+					{ "lnSmartOrderAnotherError", "IsNotOrdered" },
+					{ "lnMinReq", "IsInvalid" },
+					{ "lnNonMain", "NotBase" },
+					{ "lnMatchWaybill", "IsUnmatchedByWaybill" },
+					{ "lnRejectedWaybillPosition", "IsRejectNew" },
+					{ "lnUnrejectedWaybillPosition", "IsRejectCanceled" },
+					{ "lnNewLetter", "" },
+					{ "lnAwait", "" },
+					{ "lnLeader", "Leader" },
+					{ "lnBuyingBan", "IsForbidden" },
+					{ "lnOrderedLikeFrozen", "ExistsInFreezed" },
+					{ "lnRetailMarkup", "" },
+					{ "lnRetailPrice", "" },
+					{ "lnCertificateNotFound", "IsCertificateNotFound" },
+					{ "lnSupplierPriceMarkup", "IsMarkupToBig" },
+					{ "lnJunk", "Junk" },
+				};
+				foreach (var color in colors) {
+					var styleName = styleMap[Convert.ToString(color[0])];
+					if (string.IsNullOrEmpty(styleName))
+						continue;
+					var style = defaultStyles.FirstOrDefault(c => c.Name == styleName);
+
+					var colorBytes = BitConverter.GetBytes(Convert.ToInt32(color[1]));
+					//если это цвет начинается с ff то он из системной палитры а значит нужно использовать значение по умолчанию
+					if (colorBytes[3] == 0xFF) {
+						continue;
+					}
+					var importColor = Color.FromRgb(colorBytes[0], colorBytes[1], colorBytes[2]);
+					if (style.Color != importColor)
+					{
+						var dbStyle = Session.Query<CustomStyle>().FirstOrDefault(x => x.Name == style.Name)
+							?? style;
+						dbStyle.Color = importColor;
+						Session.Save(dbStyle);
+					}
+				}
+
+				Session.CreateSQLQuery("drop temporary table if exists temp_global_params;").ExecuteUpdate();
+
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("ClientSettings.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+drop temporary table if exists temp_client_settings;
+create temporary table temp_client_settings (
+	Id int unsigned not null auto_increment,
+	AddressId int unsigned,
+	Name varchar(255),
+	Address varchar(255),
+	Director varchar(255),
+	Accountant varchar(255),
+	Taxation int not null,
+	IncludeNds tinyint(1) not null,
+	IncludeNdsForVitallyImportant tinyint(1) not null,
+	primary key(Id)
+);
+
+load data infile '{mysqlFilename}' into table temp_client_settings (AddressId, Name, Address, Director, Accountant,
+	Taxation, IncludeNds, IncludeNdsForVitallyImportant);
+
+update WaybillSettings s
+join temp_client_settings t on t.AddressId = s.BelongsToAddressId
+set s.Name = t.Name,
+	s.Address = t.Address,
+	s.Director = t.Director,
+	s.Accountant = t.Accountant,
+	s.Taxation = t.Taxation,
+	s.IncludeNds = t.IncludeNds,
+	s.IncludeNdsForVitallyImportant = t.IncludeNdsForVitallyImportant;
+
+drop temporary table if exists temp_client_settings;")
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
+
+			filename = FileHelper.MakeRooted("ProviderSettings.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+drop temporary table if exists temp_provider_settings;
+create temporary table temp_provider_settings (
+	Id int unsigned not null auto_increment,
+	SupplierId int unsigned,
+	Dir varchar(255),
+	primary key(Id)
+);
+
+load data infile '{mysqlFilename}' into table temp_provider_settings (SupplierId, Dir);
+
+update DirMaps s
+join temp_provider_settings t on t.SupplierId = s.SupplierId
+set s.Dir = t.Dir;
+
+drop temporary table if exists temp_provider_settings;")
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
+
+			//при миграции данные для импорта хранатся в паки in,
+			//глобальный конфиг нельзя менять иначе все последующая работа
+			//будет вестись не там где нужно, создаем нужную конфигурация для данной операции
+			Config = Config.Clone();
+			Config.TmpDir = FileHelper.MakeRooted("In");
+			var settings = Session.Query<Settings>().First();
+			settings.WaybillDir = FileHelper.MakeRooted("Waybills");
+			settings.RejectDir = FileHelper.MakeRooted("Rejects");
+			settings.DocDir = FileHelper.MakeRooted("Docs");
+			Session.Flush();
+			Import();
+		}
+
 		public void Import()
 		{
-			List<Tuple<string, string[]>> data;
-			using (var zip = new ZipFile(Config.ArchiveFile))
-				data = GetDbData(zip.Select(z => z.FileName), Config.UpdateTmpDir);
-
+			var data = GetDbData(Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName), Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
 			//будь бдителен ImportCommand очистит сессию

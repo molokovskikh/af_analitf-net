@@ -341,4 +341,7 @@
   <ItemGroup>
     <Resource Include="dll.licenses" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
 </Project>

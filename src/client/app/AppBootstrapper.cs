@@ -225,6 +225,8 @@ namespace AnalitF.Net.Client
 			if (ConfigurationManager.AppSettings["Uri"] != null)
 				Config.BaseUrl = new Uri(ConfigurationManager.AppSettings["Uri"]);
 
+			if (ConfigurationManager.AppSettings["RootDir"] != null)
+				Config.RootDir = ConfigurationManager.AppSettings["RootDir"];
 			Config.RootDir = FileHelper.MakeRooted(Config.RootDir);
 #if DEBUG
 			debugPipe = new DebugPipe(Config.DebugPipeName);

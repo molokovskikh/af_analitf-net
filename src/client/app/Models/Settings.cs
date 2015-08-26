@@ -88,6 +88,7 @@ namespace AnalitF.Net.Client.Models
 		private string _waybillDir;
 		private string _reportDir;
 		private string _rejectDir;
+		private string _docDir;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -217,6 +218,16 @@ namespace AnalitF.Net.Client.Models
 		//врорая версия токена приложения, хеш guid и путь, первая версия просто guid
 		public virtual string ClientTokenV2 { get; set; }
 
+		public virtual string DocDir
+		{
+			get { return _docDir; }
+			set
+			{
+				_docDir = value;
+				OnPropertyChanged();
+			}
+		}
+
 		public virtual string WaybillDir
 		{
 			get { return _waybillDir; }
@@ -325,12 +336,16 @@ namespace AnalitF.Net.Client.Models
 			var root = GetVarRoot();
 			if (name.Match("Waybills"))
 				return String.IsNullOrEmpty(WaybillDir) ? Path.Combine(root, "Накладные") : WaybillDir;
+
 			if (name.Match("Docs"))
-				return Path.Combine(root, "Документы");
+				return String.IsNullOrEmpty(DocDir) ? Path.Combine(root, "Документы") : DocDir;
+
 			if (name.Match("Rejects"))
 				return String.IsNullOrEmpty(RejectDir) ? Path.Combine(root, "Отказы") : RejectDir;
+
 			if (name.Match("Orders"))
 				return Path.Combine(root, "Накладные", "Заявки");
+
 			if (name.Match("Reports"))
 				return String.IsNullOrEmpty(ReportDir) ? Path.Combine(root, "Отчеты") : ReportDir;
 			return null;

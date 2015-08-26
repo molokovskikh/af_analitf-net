@@ -627,6 +627,11 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static List<CustomStyle> GetDefaultStyles()
 		{
+			return GetDefaultStyles(DefaultStyles);
+		}
+
+		public static List<CustomStyle> GetDefaultStyles(Dictionary<string, DataTrigger> defaults)
+		{
 			var styles = GetTypes()
 				.SelectMany(t => t.GetProperties().Select(p => Tuple.Create(p, p.GetCustomAttributes(typeof(StyleAttribute), true).OfType<StyleAttribute>().ToArray())))
 				.SelectMany(t => t.Item2.Select(a => Tuple.Create(t.Item1, a)))
@@ -637,7 +642,7 @@ namespace AnalitF.Net.Client.Helpers
 					Name = t.Item2.GetName(t.Item1),
 					Description = t.Item2.Description,
 				};
-				var trigger = DefaultStyles.GetValueOrDefault(appStyle.Name)
+				var trigger = defaults.GetValueOrDefault(appStyle.Name)
 					?? Background(DefaultColor.Color);
 				var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
 				var foreground = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.ForegroundProperty);
