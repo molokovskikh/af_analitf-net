@@ -82,7 +82,8 @@ namespace AnalitF.Net.Client
 			try {
 				//проверка для ilmerge
 				var merged = new [] {
-					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net", "Devart.Data", "Devart.Data.MySql"
+					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net", "Devart.Data",
+					"Devart.Data.MySql", "WpfAnimatedGif"
 				};
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
 					if (merged.Any(n => eventArgs.Name.StartsWith(n)))
