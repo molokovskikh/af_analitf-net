@@ -5,31 +5,28 @@ using System.Linq;
 #if SERVER
 using Common.Models;
 namespace AnalitF.Net.Service.Models
+{
 #endif
 #if CLIENT
 using AnalitF.Net.Client.Models;
+
 namespace AnalitF.Net.Client.Models
-#endif
 {
+#endif
+#if CLIENT
 	public class ClientOrder
 	{
 		public uint ClientOrderId;
 		public uint PriceId;
-		public string PriceName;
-		public uint? CostId;
-		public string CostName;
 		public uint AddressId;
 		public ulong RegionId;
 		public DateTime CreatedOn;
 		public DateTime PriceDate;
 		public string Comment;
-#if SERVER
-		public ClientOrderItem[] Items;
-#endif
-#if CLIENT
+
 		public OrderLine[] Items;
-#endif
 	}
+#endif
 
 	public class HistoryRequest
 	{
@@ -190,6 +187,19 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 #if SERVER
+
+	public class ClientOrder
+	{
+		public uint ClientOrderId;
+		public uint PriceId;
+		public uint AddressId;
+		public ulong RegionId;
+		public DateTime CreatedOn;
+		public DateTime PriceDate;
+		public string Comment;
+
+		public ClientOrderItem[] Items;
+	}
 
 	public class OfferComposedId
 	{

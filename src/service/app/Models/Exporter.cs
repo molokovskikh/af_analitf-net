@@ -649,9 +649,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled,
 	p.MainFirm as BasePrice,
 	(p.OtherDelay + 100) / 100 as CostFactor,
-	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor,
-	p.CostCode as CostId,
-	pc.CostName
+	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor
 from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
@@ -660,7 +658,6 @@ from (Usersettings.Prices p, Customers.Users u)
 	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
 	join Customers.Clients c on c.Id = u.ClientId
 	join Usersettings.RetClientsSet r on r.ClientCode = c.Id
-	join Usersettings.PricesCosts pc on pc.CostCode = p.CostCode
 where u.Id = ?userId";
 			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
 

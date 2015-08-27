@@ -160,10 +160,6 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual string PriceName { get; set; }
 
-		public virtual uint? CostId { get; set; }
-
-		public virtual string CostName { get; set; }
-
 		public virtual ulong RegionId { get; set; }
 
 		public virtual string RegionName { get; set; }
