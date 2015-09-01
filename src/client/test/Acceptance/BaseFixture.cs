@@ -296,7 +296,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				ClickByName("Закрыть", dialog);
 			}
 			else {
-				Assert.That(result, Is.StringContaining(text));
+				Assert.That(text, Is.StringContaining(result));
 				ClickByName("TryClose", dialog);
 			}
 		}
