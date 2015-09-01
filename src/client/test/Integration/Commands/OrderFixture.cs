@@ -15,6 +15,7 @@ using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands
 {
@@ -73,23 +74,29 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(new SendOrders(address));
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
-			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
-			Assert.That(sentOrders.Count, Is.EqualTo(1), sentOrders.Implode());
-			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
+			var srcOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
+			var srcOrder = srcOrders[0];
+			Assert.That(srcOrders.Count, Is.EqualTo(1), srcOrders.Implode());
+			Assert.That(srcOrder.Lines.Count, Is.EqualTo(1));
 
-			var orders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
-			Assert.That(orders.Count, Is.EqualTo(1));
-			Assert.IsFalse(orders[0].Deleted);
-			var resultOrder = orders[0];
-			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
-			var item = resultOrder.OrderItems[0];
+			var dstOrders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
+			var dstOrder = dstOrders[0];
+			Assert.AreEqual(dstOrder.RowId, srcOrder.ServerId);
+			Assert.AreEqual(1, dstOrders.Count);
+			Assert.IsFalse(dstOrders[0].Deleted);
+			Assert.AreEqual(1, dstOrder.RowCount);
+			Assert.AreEqual("Базовый", dstOrder.PriceName);
+			Assert.AreEqual(session.Load<TestPrice>(dstOrder.PriceList.PriceCode).Costs[0].Id, dstOrder.CostId);
+			Assert.AreEqual("Тестовая", dstOrder.CostName);
+
+			var item = dstOrder.OrderItems[0];
 			Assert.That(item.CodeFirmCr, Is.EqualTo(line.ProducerId));
 			Assert.That(item.SynonymCode, Is.EqualTo(line.ProductSynonymId));
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
 
 			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
 			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0), "номер строки заказа {0}", item.RowId);
-			Assert.AreEqual(item.RowId, sentOrders[0].Lines[0].ServerId);
+			Assert.AreEqual(item.RowId, srcOrder.Lines[0].ServerId);
 		}
 
 		[Test]
