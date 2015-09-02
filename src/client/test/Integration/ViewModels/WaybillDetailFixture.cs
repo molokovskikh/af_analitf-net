@@ -42,8 +42,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.8, waybillLine.RetailCost);
-			Assert.IsTrue(model.RoundToSingleDigit);
-			model.RoundToSingleDigit.Value = false;
+			Assert.AreEqual(Rounding.To0_10, model.Rounding.Value);
+			model.Rounding.Value = Rounding.None;
 			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.82, waybillLine.RetailCost);
 		}

@@ -440,19 +440,27 @@ namespace AnalitF.Net.Client.Models
 				baseCost = SupplierCostWithoutNds;
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
-			rawCost = value;
 			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
-			if (Waybill.RoundTo1) {
-				rawCost = ((int?)(value * 10)) / 10m;
-			}
+			rawCost = Round(value);
 			return RoundCost(value);
 		}
 
-		private decimal? RoundCost(decimal? value)
+		private decimal? RoundCost(decimal? value) => Round(NullableHelper.Round(value, 2));
+
+		private decimal? Round(decimal? value)
 		{
-			value = NullableHelper.Round(value, 2);
-			if (Waybill.RoundTo1)
-				return ((int?)(value * 10)) / 10m;
+			if (Waybill.Rounding != Rounding.None) {
+				var @base = 10;
+				var factor = 1;
+				if (Waybill.Rounding == Rounding.To1_00) {
+					@base = 1;
+				}
+				else if (Waybill.Rounding == Rounding.To0_50) {
+					@factor = 5;
+				}
+				var normalized = ((int?)(value * @base));
+				return (normalized - normalized % factor) / (decimal)@base;
+			}
 			return value;
 		}
 

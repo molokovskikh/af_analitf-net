@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Round_value()
 		{
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			var line = new WaybillLine(waybill) {
 				Nds = 10,
 				SupplierCost = 251.20m,
@@ -317,7 +317,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Do_not_recalc_markup()
 		{
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			var line = new WaybillLine(waybill) {
 				ProducerCost = 30.57m,
 				SupplierCostWithoutNds = 26.80m,
@@ -338,7 +338,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var markup = settings.Markups.First(m => m.Type == MarkupType.Over);
 			markup.Markup = 60;
 			markup.MaxMarkup = 60;
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			waybillSettings.IncludeNds = false;
 			var line = new WaybillLine(waybill) {
 				SupplierCostWithoutNds = 185.50m,
@@ -350,6 +350,21 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(60, line.RetailMarkup);
 			Assert.AreEqual(50.85, line.RealRetailMarkup);
 			Assert.AreEqual(330.19, line.RetailCost);
+		}
+
+		[Test]
+		public void Roung_to_1_00()
+		{
+			waybill.Rounding = Rounding.To1_00;
+			var line = new WaybillLine(waybill) {
+				Nds = 10,
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				Quantity = 1
+			};
+			Calculate(line);
+			Assert.AreEqual(301, line.RetailCost);
+			Assert.AreEqual(19.83, line.RetailMarkup);
 		}
 
 		[Test]

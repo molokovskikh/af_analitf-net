@@ -31,6 +31,15 @@ namespace AnalitF.Net.Client.Models
 		Reject = 2
 	}
 
+	//цифры важны они используются при миграции настроек
+	public enum Rounding
+	{
+		[Description("не округлять")] None = 0,
+		[Description("до 10 коп.")] To0_10 = 1,
+		[Description("до 50 коп.")] To0_50 = 2,
+		[Description("до 1 руб.")] To1_00 = 3,
+	}
+
 	//на текущий момент эта модель может представлять как заголовок накладной так и заголовок отказа
 	//однако существует отдельная модель для заголовка отказа
 	//что бы можно было создать отдельную модель для общего отображения а модели развести по своим углам
@@ -44,7 +53,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			WaybillSettings = new WaybillSettings();
 			Lines = new List<WaybillLine>();
-			RoundTo1 = true;
+			Rounding = Rounding.To0_10;
 		}
 
 		public Waybill(Address address, Supplier supplier)
@@ -83,10 +92,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string Filename { get; set; }
 
 		//для биндинга
-		public virtual bool IsReadOnly
-		{
-			get { return !IsCreatedByUser; }
-		}
+		public virtual bool IsReadOnly => !IsCreatedByUser;
 
 		[Style(Description = "Накладная, созданная пользователем")]
 		public virtual bool IsCreatedByUser { get; set; }
@@ -100,7 +106,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<WaybillLine> Lines { get; set; }
 
 		[Ignore]
-		public virtual bool RoundTo1 { get; set; }
+		public virtual Rounding Rounding { get; set; }
 
 		[Ignore]
 		public virtual bool VitallyImportant
