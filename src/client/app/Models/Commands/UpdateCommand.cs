@@ -563,6 +563,208 @@ drop temporary table if exists temp_provider_settings;")
 				File.Delete(filename);
 			}
 
+			filename = FileHelper.MakeRooted("Orders.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table Orders
+(Id, AddressId, PriceId, RegionId, CreatedOn, PersonalComment, Comment, Frozen);")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("Lines.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table OrderLines
+(
+		`OrderId`,
+		`OfferId`,
+		`ProductId`,
+		`ProducerId`,
+		`ProductSynonymId`,
+		`ProducerSynonymId`,
+		`Code`,
+		`CodeCr`,
+		`ProductSynonym`,
+		`ProducerSynonym`,
+		`Cost`,
+		`Junk`,
+		OriginalJunk,
+		`Count`,
+		`RequestRatio`,
+		`MinOrderSum`,
+		`MinOrderCount`,
+		`Quantity`,
+		`Unit`,
+		`Volume`,
+		`Note`,
+		`Period`,
+		`Doc`,
+		`RegistryCost`,
+		`VitallyImportant`,
+		`ProducerCost`,
+		`NDS`,
+		`Comment`,
+		`BarCode`,
+		`CodeOKP`,
+		`Series`,
+		`Exp`
+);
+
+update OrderLines l
+join Orders o on o.Id = l.OrderId
+set l.RegionId = o.RegionId
+where l.RegionId = 0;
+
+update OrderLines l
+join Catalogs c on c.ProductId = l.ProductId
+set l.CatalogId = c.CatalogId
+where l.CatalogId = 0;")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("SentOrders.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table SentOrders
+(
+	Id,
+	ServerId,
+	Addressid,
+	PriceId,
+	RegionId,
+	CreatedOn,
+	SentOn,
+	PersonalComment,
+	Comment,
+	PriceDate
+);")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("SentOrderLines.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table SentOrderLines
+(
+	OrderId,
+	ProductId,
+	ProducerId,
+	`ProductSynonymId`,
+	`ProducerSynonymId`,
+	`Code`,
+	`CodeCr`,
+	`ProductSynonym`,
+	`ProducerSynonym`,
+	`Cost`,
+	`Junk`,
+		OriginalJunk,
+	`Count`,
+	`RequestRatio`,
+	`MinOrderSum`,
+	`MinOrderCount`,
+	`Quantity`,
+	`Unit`,
+	`Volume`,
+	`Note`,
+	`Period`,
+	`Doc`,
+	`RegistryCost`,
+	`VitallyImportant`,
+	`ProducerCost`,
+	`NDS`,
+	`Comment`,
+	`BarCode`,
+	`CodeOKP`,
+	`Series`,
+	`Exp`
+);
+
+update SentOrderLines l
+join Catalogs c on c.ProductId = l.ProductId
+set l.CatalogId = c.CatalogId
+where l.CatalogId = 0;")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("Waybills.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table Waybills
+(
+	Id,
+	DocumentDate,
+	SupplierId,
+	AddressId,
+	ProviderDocumentId,
+	WriteTime,
+	IsCreatedByUser,
+	UserSupplierName,
+	InvoiceId,
+	InvoiceDate,
+	SellerName,
+	SellerAddress,
+	SellerINN,
+	SellerKPP,
+	ShipperNameAndAddress,
+	ConsigneeNameAndAddress,
+	BuyerName,
+	BuyerAddress,
+	BuyerINN,
+	BuyerKPP
+);")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("WaybillLines.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table WaybillLines
+(
+	Id,
+	WaybillId,
+	Product,
+	Certificates,
+	Period,
+	Producer,
+	Country,
+	ProducerCost,
+	RegistryCost,
+	SupplierPriceMarkup,
+	SupplierCostWithoutNDS,
+	SupplierCost,
+	Quantity,
+	VitallyImportant,
+	NDS,
+	SerialNumber,
+	RetailMarkup,
+	Edited,
+	Amount,
+	NdsAmount,
+	Unit,
+	ExciseTax,
+	BillOfEntryNumber,
+	EAN13,
+	ProductId,
+	ProducerId,
+	RejectId);")
+					.ExecuteUpdate();
+			}
+
+			filename = FileHelper.MakeRooted("WaybillOrders.txt");
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery($@"
+load data infile '{mysqlFilename}' into table WaybillOrders (DocumentLineId, OrderLineId);")
+					.ExecuteUpdate();
+			}
+
+
 			//при миграции данные для импорта хранатся в паки in,
 			//глобальный конфиг нельзя менять иначе все последующая работа
 			//будет вестись не там где нужно, создаем нужную конфигурация для данной операции
