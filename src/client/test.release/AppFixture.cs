@@ -63,10 +63,10 @@ namespace test.release
 			Activate();
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
 
-			var dialog = WaitDialog("Настройка");
 			Type("Settings_UserName", testUserName);
 			Type("Password", testPassword);
 
+			var dialog = WaitDialog("Настройка");
 			Click("Save", dialog);
 
 			WaitIdle();
@@ -88,10 +88,10 @@ namespace test.release
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
 			Assert.That(AutomationHelper.ToText(MainWindow), Is.StringContaining(prevVersion.ToString()));
 
-			var dialog = WaitDialog("Настройка");
 			Type("Settings_UserName", testUserName);
 			Type("Password", testPassword);
 
+			var dialog = WaitDialog("Настройка");
 			Click("Save", dialog);
 
 			WaitIdle();

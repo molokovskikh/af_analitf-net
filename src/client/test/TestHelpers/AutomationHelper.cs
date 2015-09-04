@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows.Automation;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
@@ -127,16 +128,30 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}, "Не удалось дождаться появления диалога открытия файла");
 			input.SetValue(filename);
 			var button = dialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Открыть"));
-			button.Invoke();
+				button.Invoke();
 		}
 
-		public static AutomationElement FindWindow(string name)
+		public static AutomationElement FindWindow(string name, int pid)
 		{
-			AutomationElement window = null;
-			var handle = WinApi.FindWindow(IntPtr.Zero, name);
-			if (handle != IntPtr.Zero)
-				window = AutomationElement.FromHandle(handle);
-			return window;
+			foreach (var handle in Win32.GetWindows()) {
+				AutomationElement window;
+				try {
+					window = AutomationElement.FromHandle(handle);
+				}
+				catch(ElementNotAvailableException e) {
+					Console.WriteLine(e);
+					//окно закрылось
+					continue;
+				}
+				if ((int)window.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) == pid) {
+					var text = new StringBuilder(Win32.GetWindowTextLength(handle) + 1);
+					Win32.GetWindowText(handle, text, text.Capacity);
+					var title = text.ToString().Trim('{', '}');
+					if (title.Equals(name, StringComparison.CurrentCultureIgnoreCase))
+						return window;
+				}
+			}
+			return null;
 		}
 	}
 }
