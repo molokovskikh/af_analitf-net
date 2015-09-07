@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.Config
 	}
 
 
-	public class Config
+	public class Config : ICloneable
 	{
 		private string dbDir;
 		private string tmpDir;
@@ -225,6 +225,16 @@ namespace AnalitF.Net.Client.Config
 				new ResultDir("attachments", settings, this),
 				new ResultDir("promotions", settings, this),
 			};
+		}
+
+		object ICloneable.Clone()
+		{
+			return MemberwiseClone();
+		}
+
+		public Config Clone()
+		{
+			return (Config)MemberwiseClone();
 		}
 	}
 }

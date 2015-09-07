@@ -231,7 +231,7 @@ def CopyResource(res as EmbeddedResource, writer as ResourceWriter):
 		writer.AddResource(item.Key, item.Value)
 
 task "build:client:merged", ["build:client:bin"]:
-	_, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
+	projectName, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
 	output = "output/merged"
 	RmDir(output, true) if Exist(output)
 	while Exist(output):
@@ -246,7 +246,9 @@ task "build:client:merged", ["build:client:bin"]:
 	#тк мы обединили сборки библиотки содержащие wpf контролы не найдут свои ресурсы правим это
 	outputAssembly = AssemblyDefinition.ReadAssembly(name)
 	resources = outputAssembly.MainModule.Resources
-	appBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "AnalitF.Net.Client.g.resources"})
+	res = "${projectName}.g.resources"
+	appBaml = resources.OfType[of EmbeddedResource]().FirstOrDefault({x| x.Name == res})
+	raise "Ресурс $res не найден" unless appBaml
 	libBaml = resources.OfType[of EmbeddedResource]().First({x| x.Name == "Xceed.Wpf.Toolkit.g.resources"})
 	memory = MemoryStream()
 	writer = ResourceWriter(memory)

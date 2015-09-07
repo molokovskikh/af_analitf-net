@@ -35,6 +35,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string FullName { get; set; }
 
+		public virtual uint ProductId { get; set; }
+
 		[Style(Description = "Предложения отсутствуют")]
 		public virtual bool DoNotHaveOffers
 		{

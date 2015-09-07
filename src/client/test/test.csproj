@@ -342,6 +342,9 @@
     <Resource Include="dll.licenses" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="..\..\..\lib\libmysqld\libmysqld.dll">
       <Link>libmysqld.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -82,8 +82,9 @@ namespace AnalitF.Net.Client
 			try {
 				//проверка для ilmerge
 				var merged = new [] {
-					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net", "Devart.Data",
-					"Devart.Data.MySql", "WpfAnimatedGif"
+					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net",
+					"Devart.Data", "Devart.Data.MySql",
+					"AnalitF.Net.Client", "WpfAnimatedGif"
 				};
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
 					if (merged.Any(n => eventArgs.Name.StartsWith(n)))
@@ -98,6 +99,7 @@ namespace AnalitF.Net.Client
 					XmlConfigurator.Configure();
 
 				string batchFile = null;
+				var migrate = false;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
@@ -106,12 +108,15 @@ namespace AnalitF.Net.Client
 					{"encoding=", v => encoding = v},
 					{"debug=", v => debug.Add(v) },
 					{"batch=", "Запустить приложение и вызвать автозаказ с указанным файлом", v => batchFile = v},
+					{"i", "", v => migrate = true},
 #if DEBUG
 					{"fault-inject", "", v => faultInject = v != null},
 					{"debug-pipe=", "", v => debugpipe = v},
 #endif
 				};
 				var cmds = options.Parse(args);
+				if (migrate)
+					cmds = new List<string> { "migrate" };
 
 				if (!String.IsNullOrEmpty(encoding)) {
 					Console.OutputEncoding = Encoding.GetEncoding(encoding);

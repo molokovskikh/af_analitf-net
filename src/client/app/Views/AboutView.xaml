@@ -23,11 +23,11 @@
 			</Grid.ColumnDefinitions>
 			<Canvas Width="95" Height="90">
 				<Image Panel.ZIndex="0"
-					Source="/AnalitF.Net.Client;component/assets/images/Logo.png"
+					Source="/assets/images/Logo.png"
 					Width="79"
 					Height="74" />
 				<Image Panel.ZIndex="1"
-					Source="/AnalitF.Net.Client;component/assets/images/mainicon_original.ico"
+					Source="/assets/images/mainicon_original.ico"
 					Height="32"
 					Width="32"
 					Canvas.Left="63"

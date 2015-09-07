@@ -449,7 +449,7 @@ namespace AnalitF.Net.Client.Models.Print
 							new Image {
 								Height = 20,
 								Width = 18,
-								Source = new BitmapImage(new Uri(@"pack://application:,,,/AnalitF.Net.Client;component/assets/images/price-tag-log.png"))
+								Source = new BitmapImage(new Uri(@"/assets/images/price-tag-log.png"))
 							},
 							new TextBlock {
 								Height = 20,
