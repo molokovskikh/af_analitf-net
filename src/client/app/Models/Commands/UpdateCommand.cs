@@ -218,7 +218,7 @@ create temporary table temp_params (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' into table temp_params
+load data infile '{mysqlFilename}' replace into table temp_params
 (UseRas, RasConnection, UserName, Password, UseProxy, ProxyHost, ProxyPort,
 ProxyUserName, ProxyPassword, DeleteOrdersOlderThan, ConfirmDeleteOldOrders, OpenWaybills,
 OpenRejects, PrintOrdersAfterSend, ConfirmSendOrders, CanViewOffersByCatalogName, GroupByProduct);
@@ -253,7 +253,7 @@ drop temporary table if exists temp_params;")
 delete from MarkupConfigs
 where Type = 0;
 
-load data infile '{mysqlFilename}' into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
+load data infile '{mysqlFilename}' replace into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
 
 update MarkupConfigs
 set Type = 0
@@ -273,7 +273,7 @@ where SettingsId is null;")
 delete from MarkupConfigs
 where Type = 1;
 
-load data infile '{mysqlFilename}' into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
+load data infile '{mysqlFilename}' replace into table MarkupConfigs(Begin, End, Markup, MaxMarkup, MaxSupplierMarkup);
 
 update MarkupConfigs
 set Type = 1
@@ -306,7 +306,7 @@ create temporary table temp_global_params (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' into table temp_global_params (`Key`, `Value`);
+load data infile '{mysqlFilename}' replace into table temp_global_params (`Key`, `Value`);
 
 update (Settings s, temp_global_params t)
 set s.GroupWaybillsBySupplier = t.Value
@@ -522,7 +522,7 @@ create temporary table temp_client_settings (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' into table temp_client_settings (AddressId, Name, Address, Director, Accountant,
+load data infile '{mysqlFilename}' replace into table temp_client_settings (AddressId, Name, Address, Director, Accountant,
 	Taxation, IncludeNds, IncludeNdsForVitallyImportant);
 
 update WaybillSettings s
@@ -552,7 +552,7 @@ create temporary table temp_provider_settings (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' into table temp_provider_settings (SupplierId, Dir);
+load data infile '{mysqlFilename}' replace into table temp_provider_settings (SupplierId, Dir);
 
 update DirMaps s
 join temp_provider_settings t on t.SupplierId = s.SupplierId
@@ -567,7 +567,7 @@ drop temporary table if exists temp_provider_settings;")
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table Orders
+load data infile '{mysqlFilename}' replace into table Orders
 (Id, AddressId, PriceId, RegionId, CreatedOn, PersonalComment, Comment, Frozen);")
 					.ExecuteUpdate();
 			}
@@ -576,51 +576,47 @@ load data infile '{mysqlFilename}' into table Orders
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table OrderLines
+load data infile '{mysqlFilename}' replace into table OrderLines
 (
-		`OrderId`,
-		`OfferId`,
-		`ProductId`,
-		`ProducerId`,
-		`ProductSynonymId`,
-		`ProducerSynonymId`,
-		`Code`,
-		`CodeCr`,
-		`ProductSynonym`,
-		`ProducerSynonym`,
-		`Cost`,
-		`Junk`,
-		OriginalJunk,
-		`Count`,
-		`RequestRatio`,
-		`MinOrderSum`,
-		`MinOrderCount`,
-		`Quantity`,
-		`Unit`,
-		`Volume`,
-		`Note`,
-		`Period`,
-		`Doc`,
-		`RegistryCost`,
-		`VitallyImportant`,
-		`ProducerCost`,
-		`NDS`,
-		`Comment`,
-		`BarCode`,
-		`CodeOKP`,
-		`Series`,
-		`Exp`
+	`OrderId`,
+	`OfferId`,
+	`ProductId`,
+	CatalogId,
+	`ProducerId`,
+	`ProductSynonymId`,
+	`ProducerSynonymId`,
+	`Code`,
+	`CodeCr`,
+	`ProductSynonym`,
+	`ProducerSynonym`,
+	`Cost`,
+	`Junk`,
+	OriginalJunk,
+	`Count`,
+	`RequestRatio`,
+	`MinOrderSum`,
+	`MinOrderCount`,
+	`Quantity`,
+	`Unit`,
+	`Volume`,
+	`Note`,
+	`Period`,
+	`Doc`,
+	`RegistryCost`,
+	`VitallyImportant`,
+	`ProducerCost`,
+	`NDS`,
+	`Comment`,
+	`BarCode`,
+	`CodeOKP`,
+	`Series`,
+	`Exp`
 );
 
 update OrderLines l
 join Orders o on o.Id = l.OrderId
 set l.RegionId = o.RegionId
-where l.RegionId = 0;
-
-update OrderLines l
-join Catalogs c on c.ProductId = l.ProductId
-set l.CatalogId = c.CatalogId
-where l.CatalogId = 0;")
+where l.RegionId = 0;")
 					.ExecuteUpdate();
 			}
 
@@ -628,7 +624,7 @@ where l.CatalogId = 0;")
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table SentOrders
+load data infile '{mysqlFilename}' replace into table SentOrders
 (
 	Id,
 	ServerId,
@@ -648,10 +644,14 @@ load data infile '{mysqlFilename}' into table SentOrders
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table SentOrderLines
+load data infile '{mysqlFilename}' replace into table SentOrderLines
 (
+	Id,
 	OrderId,
+	ServerId,
+	ServerOrderId,
 	ProductId,
+	CatalogId,
 	ProducerId,
 	`ProductSynonymId`,
 	`ProducerSynonymId`,
@@ -683,10 +683,13 @@ load data infile '{mysqlFilename}' into table SentOrderLines
 	`Exp`
 );
 
-update SentOrderLines l
-join Catalogs c on c.ProductId = l.ProductId
-set l.CatalogId = c.CatalogId
-where l.CatalogId = 0;")
+update SentOrders o
+set LinesCount = (select count(*) from SentOrderLines l where o.Id = l.OrderId)
+where LinesCount = 0;
+
+update SentOrders o
+set Sum = (select Sum(l.Count * l.Cost) from SentOrderLines l where o.Id = l.OrderId)
+where Sum = 0;")
 					.ExecuteUpdate();
 			}
 
@@ -694,7 +697,7 @@ where l.CatalogId = 0;")
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table Waybills
+load data infile '{mysqlFilename}' replace into table Waybills
 (
 	Id,
 	DocumentDate,
@@ -724,7 +727,7 @@ load data infile '{mysqlFilename}' into table Waybills
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table WaybillLines
+load data infile '{mysqlFilename}' replace into table WaybillLines
 (
 	Id,
 	WaybillId,
@@ -760,7 +763,7 @@ load data infile '{mysqlFilename}' into table WaybillLines
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' into table WaybillOrders (DocumentLineId, OrderLineId);")
+load data infile '{mysqlFilename}' replace into table WaybillOrders (DocumentLineId, OrderLineId);")
 					.ExecuteUpdate();
 			}
 
