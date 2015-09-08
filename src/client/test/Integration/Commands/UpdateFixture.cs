@@ -451,15 +451,17 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Migrate()
 		{
 			localSession.BeginTransaction();
-			new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => x.CopyTo(x.Name, true));
-			Directory.CreateDirectory("in\\update");
-			var cmd = new UpdateCommand {
-				Config = clientConfig
-			};
-			cmd.Process(() => {
-				cmd.Migrate();
-				return UpdateResult.OK;
-			});
+			using (var cleaner = new FileCleaner()) {
+				new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
+				Directory.CreateDirectory("in\\update");
+				var cmd = new UpdateCommand {
+					Config = clientConfig
+				};
+				cmd.Process(() => {
+					cmd.Migrate();
+					return UpdateResult.OK;
+				});
+			}
 		}
 	}
 }
