@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			var exceptions = new List<Exception>();
 			var t = new Thread(() => {
+				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
 				var window = new Window();
 				SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
 				try {
@@ -64,6 +65,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			var exceptions = new List<Exception>();
 			var t = new Thread(() => {
+				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
 				var window = new Window();
 				SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(window.Dispatcher));
 				try {
