@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using System.Xml;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Integration.Views;
+using AnalitF.Net.Client.ViewModels;
 using Common.Tools.Calendar;
 using ReactiveUI;
 
@@ -105,17 +106,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public static Dispatcher WithDispatcher(Action action)
 		{
 			var started = new ManualResetEventSlim();
-			var dispatcherThread = new Thread(() => {
+			var errors = new List<Exception>();
+			var thread = new Thread(() => {
+				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
+				Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) => {
+					errors.Add(args.Exception);
+				};
 				Dispatcher.CurrentDispatcher.BeginInvoke(action);
 				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
 				Dispatcher.Run();
 			});
 
-			dispatcherThread.SetApartmentState(ApartmentState.STA);
-			dispatcherThread.IsBackground = true;
-			dispatcherThread.Start();
-			started.Wait();
-			return Dispatcher.FromThread(dispatcherThread);
+			thread.SetApartmentState(ApartmentState.STA);
+			thread.IsBackground = true;
+			thread.Start();
+			if (!started.Wait(10.Second()))
+				throw new AggregateException("Не удалось дождаться запуска, что то сломалось подключай дебагер и смотри", errors);
+			return Dispatcher.FromThread(thread);
 		}
 
 		public static TextCompositionEventArgs TextArgs(string text)
