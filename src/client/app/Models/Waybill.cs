@@ -235,6 +235,24 @@ namespace AnalitF.Net.Client.Models
 			CalculateRetailSum();
 		}
 
+		public virtual void CalculateForMigrated(Settings settings)
+		{
+			if (settings == null)
+				return;
+			Settings = settings;
+			WaybillSettings = settings.Waybills
+				.FirstOrDefault(s => s.BelongsToAddress != null
+					&& Address != null
+					&& s.BelongsToAddress.Id == Address.Id)
+				?? WaybillSettings;
+
+			foreach (var waybillLine in Lines)
+				waybillLine.CalculateForMigrated(Settings);
+
+			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			CalculateRetailSum();
+		}
+
 		public virtual void CalculateRetailSum()
 		{
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();

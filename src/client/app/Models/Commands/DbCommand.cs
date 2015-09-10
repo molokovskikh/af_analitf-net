@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
 using log4net;
@@ -76,6 +77,16 @@ namespace AnalitF.Net.Client.Models.Commands
 		public void Dispose()
 		{
 			Disposable.Dispose();
+		}
+
+		public void ProcessBatch(uint[] ids, Action<ISession, IEnumerable<uint>> process)
+		{
+			using (var session = Factory.OpenSession())
+			using (var trx = session.BeginTransaction()) {
+				foreach (var page in ids.Page(100))
+					process(session, page);
+				trx.Commit();
+			}
 		}
 	}
 

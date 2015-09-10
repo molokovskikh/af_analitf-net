@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
+using Common.Tools;
+using NHibernate;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -163,8 +165,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			HttpResponseMessage response = null;
 			try {
 				while (true) {
-					if (response != null)
-						response.Dispose();
+					response?.Dispose();
 
 					response = task.Result;
 					if (response.StatusCode == HttpStatusCode.OK)
@@ -200,8 +201,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 			catch(Exception) {
-				if (response != null)
-					response.Dispose();
+				response?.Dispose();
 				throw;
 			}
 		}

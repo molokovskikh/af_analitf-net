@@ -450,7 +450,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Migrate()
 		{
+			localSession.DeleteEach<LoadedDocument>();
 			localSession.BeginTransaction();
+			settings.Password = null;
+			localSession.Flush();
 			using (var cleaner = new FileCleaner()) {
 				new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
 				Directory.CreateDirectory("in\\update");
@@ -462,6 +465,32 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 					return UpdateResult.OK;
 				});
 			}
+
+			localSession.Refresh(settings);
+			Assert.IsNotNull(settings.Password);
+
+			var waybill = localSession.Query<Waybill>().First(x => x.Id == 39153110);
+			var line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10891996");
+			Assert.AreEqual(35, line.MaxRetailMarkup);
+			Assert.AreEqual(678.50, line.RetailCost);
+			Assert.AreEqual(35, line.RetailMarkup);
+			Assert.AreEqual(35, line.RealRetailMarkup);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10137353"
+				&& x.Product.Contains("Ацетилсалициловой"));
+			Assert.AreEqual(29.99m, line.RetailMarkup);
+			Assert.AreEqual(70.21m, line.RealRetailMarkup);
+			Assert.AreEqual(613.70m, line.RetailCost);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "017022014");
+			Assert.AreEqual(21.36m, line.RetailMarkup);
+			Assert.AreEqual(49.99m, line.RealRetailMarkup);
+			Assert.AreEqual(540.80m, line.RetailCost);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "156014");
+			Assert.AreEqual(77.63m, line.RetailMarkup);
+			Assert.AreEqual(82.03m, line.RealRetailMarkup);
+			Assert.AreEqual(500m, line.RetailCost);
 		}
 	}
 }

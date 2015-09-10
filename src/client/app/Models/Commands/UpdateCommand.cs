@@ -290,7 +290,8 @@ where SettingsId is null;")
 			if (File.Exists(filename)) {
 				var password = File.ReadAllText(filename);
 				Session.CreateSQLQuery("update Settings set Password = :password")
-					.SetParameter("password", password);
+					.SetParameter("password", password)
+					.ExecuteUpdate();
 				File.Delete(filename);
 			}
 
@@ -570,6 +571,7 @@ drop temporary table if exists temp_provider_settings;")
 load data infile '{mysqlFilename}' replace into table Orders
 (Id, AddressId, PriceId, RegionId, CreatedOn, PersonalComment, Comment, Frozen);")
 					.ExecuteUpdate();
+				File.Delete(filename);
 			}
 
 			filename = FileHelper.MakeRooted("Lines.txt");
@@ -618,6 +620,7 @@ join Orders o on o.Id = l.OrderId
 set l.RegionId = o.RegionId
 where l.RegionId = 0;")
 					.ExecuteUpdate();
+				File.Delete(filename);
 			}
 
 			filename = FileHelper.MakeRooted("SentOrders.txt");
@@ -638,6 +641,7 @@ load data infile '{mysqlFilename}' replace into table SentOrders
 	PriceDate
 );")
 					.ExecuteUpdate();
+				File.Delete(filename);
 			}
 
 			filename = FileHelper.MakeRooted("SentOrderLines.txt");
@@ -691,13 +695,11 @@ update SentOrders o
 set Sum = (select Sum(l.Count * l.Cost) from SentOrderLines l where o.Id = l.OrderId)
 where Sum = 0;")
 					.ExecuteUpdate();
+				File.Delete(filename);
 			}
 
-			filename = FileHelper.MakeRooted("Waybills.txt");
-			if (File.Exists(filename)) {
-				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
-				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' replace into table Waybills
+			MigrateTable("Waybills.txt", @"
+load data infile '{0}' replace into table Waybills
 (
 	Id,
 	DocumentDate,
@@ -719,15 +721,9 @@ load data infile '{mysqlFilename}' replace into table Waybills
 	BuyerAddress,
 	BuyerINN,
 	BuyerKPP
-);")
-					.ExecuteUpdate();
-			}
-
-			filename = FileHelper.MakeRooted("WaybillLines.txt");
-			if (File.Exists(filename)) {
-				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
-				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' replace into table WaybillLines
+);");
+			MigrateTable("WaybillLines.txt", @"
+load data infile '{0}' replace into table WaybillLines
 (
 	Id,
 	WaybillId,
@@ -746,6 +742,7 @@ load data infile '{mysqlFilename}' replace into table WaybillLines
 	NDS,
 	SerialNumber,
 	RetailMarkup,
+	RetailCost,
 	Edited,
 	Amount,
 	NdsAmount,
@@ -755,18 +752,9 @@ load data infile '{mysqlFilename}' replace into table WaybillLines
 	EAN13,
 	ProductId,
 	ProducerId,
-	RejectId);")
-					.ExecuteUpdate();
-			}
-
-			filename = FileHelper.MakeRooted("WaybillOrders.txt");
-			if (File.Exists(filename)) {
-				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
-				Session.CreateSQLQuery($@"
-load data infile '{mysqlFilename}' replace into table WaybillOrders (DocumentLineId, OrderLineId);")
-					.ExecuteUpdate();
-			}
-
+	RejectId);");
+			MigrateTable("WaybillOrders.txt", @"
+load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLineId);");
 
 			//при миграции данные для импорта хранатся в паки in,
 			//глобальный конфиг нельзя менять иначе все последующая работа
@@ -777,8 +765,27 @@ load data infile '{mysqlFilename}' replace into table WaybillOrders (DocumentLin
 			settings.WaybillDir = FileHelper.MakeRooted("Waybills");
 			settings.RejectDir = FileHelper.MakeRooted("Rejects");
 			settings.DocDir = FileHelper.MakeRooted("Docs");
+			ProcessBatch(
+				Session.Query<Waybill>().Where(w => w.Sum == 0).Select(x => x.Id).ToArray(),
+				(s, x) => {
+					foreach (var id in x) {
+						s.Load<Waybill>(id).CalculateForMigrated(settings);
+					}
+				});
+
 			Session.Flush();
 			Import();
+		}
+
+		private void MigrateTable(string filename, string sql)
+		{
+			filename = FileHelper.MakeRooted(filename);
+			if (File.Exists(filename)) {
+				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
+				Session.CreateSQLQuery(String.Format(sql, mysqlFilename))
+					.ExecuteUpdate();
+				File.Delete(filename);
+			}
 		}
 
 		public void Import()

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -191,57 +190,31 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsRejectNew { get; set; }
 
 		[Style(Description = "Забракованная позиция")]
-		public virtual bool IsReject
-		{
-			get { return !IsRejectNew && RejectId != null; }
-		}
+		public virtual bool IsReject => !IsRejectNew && RejectId != null;
 
 		[Style("Nds", Description = "НДС: не установлен для ЖНВЛС")]
-		public virtual bool IsNdsInvalid
-		{
-			get { return ActualVitallyImportant && Nds.GetValueOrDefault(10) != 10;}
-		}
+		public virtual bool IsNdsInvalid => ActualVitallyImportant && Nds.GetValueOrDefault(10) != 10;
 
 		[Style("RetailMarkup", "MaxRetailMarkup",
 			Description = "Розничная наценка: превышение максимальной розничной наценки")]
-		public virtual bool IsMarkupToBig
-		{
-			get { return RetailMarkup > MaxRetailMarkup; }
-		}
+		public virtual bool IsMarkupToBig => RetailMarkup > MaxRetailMarkup;
 
 		[Style("RetailMarkup", "RetailCost", "RetailSum", "RealRetailMarkup",
 			Description = "Розничная цена: не рассчитана")]
-		public virtual bool IsMarkupInvalid
-		{
-			get { return RetailMarkup == null; }
-		}
+		public virtual bool IsMarkupInvalid => RetailMarkup == null;
 
 		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]
-		public virtual bool IsSupplierPriceMarkupInvalid
-		{
-			get { return SupplierPriceMarkup > _maxSupplierMarkup; }
-		}
+		public virtual bool IsSupplierPriceMarkupInvalid => SupplierPriceMarkup > _maxSupplierMarkup;
 
-		public virtual decimal? RetailSum
-		{
-			get { return Quantity * RetailCost; }
-		}
+		public virtual decimal? RetailSum => Quantity * RetailCost;
 
-		public virtual decimal? AmountExcludeTax
-		{
-			get { return Amount - NdsAmount; }
-		}
+		public virtual decimal? AmountExcludeTax => Amount - NdsAmount;
 
 		[Style(Name = "VitallyImportant")]
-		public virtual bool ActualVitallyImportant
-		{
-			get { return Waybill != null && Waybill.VitallyImportant || VitallyImportant.GetValueOrDefault(); }
-		}
+		public virtual bool ActualVitallyImportant => (Waybill?.VitallyImportant).GetValueOrDefault()
+			|| VitallyImportant.GetValueOrDefault();
 
-		public virtual decimal? ProducerCostWithTax
-		{
-			get { return ProducerCost * (1 + (decimal?) Nds / 100); }
-		}
+		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
 		private decimal TaxFactor
 		{
@@ -257,10 +230,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual decimal? TaxPerUnit
-		{
-			get { return SupplierCost - SupplierCostWithoutNds; }
-		}
+		public virtual decimal? TaxPerUnit => SupplierCost - SupplierCostWithoutNds;
 
 		public virtual string Details
 		{
@@ -343,6 +313,21 @@ namespace AnalitF.Net.Client.Models
 			RecalculateMarkups(RetailCost);
 			OnPropertyChanged("RetailCost");
 			OnPropertyChanged("RetailSum");
+		}
+
+		public virtual void CalculateForMigrated(Settings settings)
+		{
+			if (Edited) {
+				if (RetailCost == null) {
+					RecalculateFromRetailMarkup();
+				}
+				else {
+					RecalculateMarkups(RetailCost);
+				}
+			}
+			else {
+				Calculate(settings);
+			}
 		}
 
 		public virtual void Calculate(Settings settings)
@@ -441,7 +426,11 @@ namespace AnalitF.Net.Client.Models
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
-			rawCost = Round(value);
+			//это миграция с analitf?
+			if (RetailMarkup != null && RetailCost == null)
+				rawCost = value;
+			else
+				rawCost = Round(value);
 			return RoundCost(value);
 		}
 

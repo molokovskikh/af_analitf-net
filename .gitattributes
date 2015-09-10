@@ -1,1 +1,1 @@
-src/client/test/assets/* -whitespace
+src/client/test/assets/* -whitespace -diff
