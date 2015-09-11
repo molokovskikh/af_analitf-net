@@ -77,8 +77,8 @@ namespace AnalitF.Net.Client
 			log.Error("Ошибка в главной нитки приложения", e.Exception);
 			e.Handled = true;
 			if (!CheckShutdown(e.Exception)) {
-				if (windowManager != null && ErrorHelper.IsDbCorrupted(e.Exception))
-					windowManager.Error(ErrorHelper.TranslateException(e.Exception));
+				if (ErrorHelper.IsDbCorrupted(e.Exception))
+					windowManager?.Error(ErrorHelper.TranslateException(e.Exception));
 			}
 		}
 
@@ -91,10 +91,7 @@ namespace AnalitF.Net.Client
 
 			//нужно закрыть заставку прежде чем показывать сообщение
 			//иначе окно с сообщение будет закрыто и не отобразится
-			var app = ((App)Application);
-			if (app != null && app.Splash != null) {
-				app.Splash.Close(TimeSpan.Zero);
-			}
+			((App)Application)?.Splash?.Close(TimeSpan.Zero);
 			//нужно вывалить все исключение тк человек всего скорее пришлет снимок экрана
 			//и по нему нужно произвести диагностику
 			var message = ErrorHelper.TranslateException(e)
@@ -365,8 +362,7 @@ namespace AnalitF.Net.Client
 
 		public void Dispose()
 		{
-			if (Shell != null)
-				Shell.Dispose();
+			Shell?.Dispose();
 		}
 	}
 }

@@ -1126,7 +1126,8 @@ where a.MailId in ({0})", ids.Implode());
 						"AddressId",
 						"PriceId",
 						"RegionId",
-						"Comment"
+						"Comment",
+						"SkipRestore"
 					},
 					Orders.Select(g => new object[] {
 						g.RowId,
@@ -1134,7 +1135,9 @@ where a.MailId in ({0})", ids.Implode());
 						g.AddressId,
 						g.PriceList.PriceCode,
 						g.RegionCode,
-						g.ClientAddition
+						g.ClientAddition,
+						//для автозаказа нужно игнорировать восстановление
+						BatchItems != null,
 					}),
 					false);
 
@@ -1288,10 +1291,10 @@ where a.MailId in ({0})", ids.Implode());
 							i.SupplierDeliveryId,
 							GetAddressId(BatchAddress, i),
 							i.ProductName,
-							i.Item == null ? null : (uint?)i.Item.ProductId,
-							i.Item == null ? null : (uint?)i.Item.CatalogId,
+							i.Item?.ProductId,
+							i.Item?.CatalogId,
 							i.ProducerName,
-							i.Item == null ? null : i.Item.ProducerId,
+							i.Item?.ProducerId,
 							i.Item == null ? null : producerLookup[i.Item.ProducerId.GetValueOrDefault()].FirstOrDefault(),
 							i.Quantity,
 							i.Item == null ? i.Comment : i.Item.Comments.Implode(Environment.NewLine),

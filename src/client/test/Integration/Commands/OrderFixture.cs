@@ -224,6 +224,35 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Ignore_restore_order_for_batch()
+		{
+			localSession.DeleteEach<Order>();
+
+			var price = session.Load<TestPrice>(localSession.Query<Price>().First().Id.PriceId);
+			var ids = localSession.Query<Offer>().Select(x => x.ProductId).Distinct().ToArray();
+			var product = session.Query<TestProduct>().First(x => !x.Hidden && !ids.Contains(x.Id));
+			var offer = price.Supplier.AddCore(product);
+			price.Supplier.SaveCore(session, offer);
+
+			offer.RequestRatio = 5;
+			price.Supplier.InvalidateCache(session, ServerUser().Id);
+
+			var fixture = new SmartOrder();
+			fixture.Rule.CheckOrderCost = false;
+			fixture.Rule.CheckMinOrderCount = false;
+			fixture.Rule.CheckRequestRatio = false;
+			fixture.ProductIds = new [] { offer.Product.Id };
+			Fixture(fixture);
+
+			MakeBatch("1|1");
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(1, orders.Length);
+			var order = orders[0];
+			Assert.IsFalse(order.Frozen, order.Lines.Implode(x => x.SendError));
+			Assert.AreEqual(offer.Id, order.Lines[0].OfferId.OfferId);
+		}
+
+		[Test]
 		public void Transit_service_fields()
 		{
 			var fixture = new SmartOrder {

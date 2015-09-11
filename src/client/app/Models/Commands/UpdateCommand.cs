@@ -1021,6 +1021,10 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 					orders = orders.Except(todelete).ToArray();
 					Session.DeleteEach(todelete);
 				}
+
+				var loaded = orders.Where(x => x.SkipRestore).ToArray();
+				loaded.Each(x => x.SkipRestore = false);
+				orders = orders.Except(loaded).ToArray();
 			}
 
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете

@@ -231,8 +231,7 @@ namespace AnalitF.Net.Client
 				}
 			}
 			finally {
-				if (instance != null)
-					instance.SignalShutdown();
+				instance?.SignalShutdown();
 			}
 
 			return result;

@@ -309,12 +309,8 @@ namespace AnalitF.Net.Service.Test
 			session.Flush();
 			exporter.ExportAll();
 			controller.Delete();
-			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
-set ForceReplication = 1
-where userId = :userId and FirmCode = :supplierId")
-				.SetParameter("supplierId", supplier2.Id)
-				.SetParameter("userId", user.Id)
-				.ExecuteUpdate();
+
+			supplier2.InvalidateCache(session, user.Id);
 
 			session.Flush();
 			session.Clear();
