@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 
@@ -216,6 +217,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
+		[Ignore]
+		public bool IsMigrate { get; set; }
+
 		private decimal TaxFactor
 		{
 			get
@@ -317,6 +321,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateForMigrated(Settings settings)
 		{
+			IsMigrate = true;
 			if (Edited) {
 				if (RetailCost == null) {
 					RecalculateFromRetailMarkup();
@@ -427,7 +432,7 @@ namespace AnalitF.Net.Client.Models
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
 			//это миграция с analitf?
-			if (RetailMarkup != null && RetailCost == null)
+			if (IsMigrate)
 				rawCost = value;
 			else
 				rawCost = Round(value);
