@@ -89,8 +89,17 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? MaxProducerCost { get; set; }
 
-
 		public virtual uint? RequestRatio { get; set; }
+
+		public virtual uint SafeRequestRatio
+		{
+			get
+			{
+				if (RequestRatio == 0)
+					return 1;
+				return RequestRatio.GetValueOrDefault(1);
+			}
+		}
 
 		[JsonProperty("OrderCost")]
 		public virtual decimal? MinOrderSum { get; set; }

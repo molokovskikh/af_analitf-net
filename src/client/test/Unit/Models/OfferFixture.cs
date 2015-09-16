@@ -330,6 +330,17 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(46.56, offer.Diff);
 		}
 
+		[Test]
+		public void Ignore_zero_request_ratio()
+		{
+			offer.RequestRatio = 0;
+			offer.Quantity = "10";
+			offer.OrderCount = 1;
+			Validate(true);
+			Assert.That(offer.OrderCount, Is.EqualTo(1));
+			Assert.That(error, Is.Null.Or.Empty);
+		}
+
 		private void Validate(bool save = false)
 		{
 			messages = offer.UpdateOrderLine(address, settings);
