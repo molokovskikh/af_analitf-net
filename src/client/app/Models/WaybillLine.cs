@@ -218,7 +218,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
 		[Ignore]
-		public bool IsMigrate { get; set; }
+		public virtual bool IsMigrate { get; set; }
 
 		private decimal TaxFactor
 		{
