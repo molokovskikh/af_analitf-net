@@ -119,7 +119,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Offer SafeOffer()
 		{
-			return localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ"));
+			return localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ")
+				&& o.RequestRatio == null);
 		}
 
 		protected Order MakeOrderClean(Address address = null, Offer offer = null)
