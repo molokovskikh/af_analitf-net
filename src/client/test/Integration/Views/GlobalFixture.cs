@@ -144,7 +144,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var catalog = await ViewLoaded<CatalogViewModel>();
 			await ViewLoaded(catalog.ActiveItem);
 			var name = (CatalogNameViewModel)catalog.ActiveItem;
-			var offers = await OpenOffers(name);
+			var load = session.Load<Catalog>(session.Query<Offer>().First(x => x.RequestRatio == null).CatalogId);
+			var offers = await OpenOffers(name, load);
 			Input((FrameworkElement)offers.GetView(), "Offers", "1");
 
 			Click("ShowOrderLines");
