@@ -59,18 +59,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			lazyModel = new Lazy<T>(Init<T>);
 		}
 
-		protected T Next<T>(IEnumerable<IResult> results)
-		{
-			return Next<T>(results.GetEnumerator());
-		}
-
-		protected T Next<T>(IEnumerator<IResult> results)
-		{
-			Assert.IsTrue(results.MoveNext());
-			Assert.IsInstanceOf<T>(results.Current);
-			return (T)results.Current;
-		}
-
 		protected void TaskResult(IEnumerable<IResult> result)
 		{
 			var enumerator = result.GetEnumerator();
@@ -263,6 +251,18 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected string WaitNotification()
 		{
 			return shell.Notifications.Timeout(10.Second()).First();
+		}
+
+		protected T Next<T>(IEnumerator<IResult> results)
+		{
+			Assert.IsTrue(results.MoveNext());
+			Assert.IsInstanceOf<T>(results.Current);
+			return (T)results.Current;
+		}
+
+		protected T Next<T>(IEnumerable<IResult> results)
+		{
+			return Next<T>(results.GetEnumerator());
 		}
 	}
 }

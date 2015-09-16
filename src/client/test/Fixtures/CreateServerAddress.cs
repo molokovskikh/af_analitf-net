@@ -1,9 +1,11 @@
-﻿using NHibernate;
+﻿using System.ComponentModel;
+using NHibernate;
 using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class CreateServerAddress : ServerFixture
+	[Description("Создает адрес доставки на сервере")]
+	public class CreateAddress : ServerFixture
 	{
 		public override void Execute(ISession session)
 		{

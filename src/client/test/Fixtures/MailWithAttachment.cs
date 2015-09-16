@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
+using System.IO;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NHibernate;
 using Test.Support.Documents;
@@ -6,7 +7,8 @@ using Test.Support.Logs;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class MailWithAttachment : ServerFixture
+	[Description("Создает письмо для минипочты")]
+	public class CreateMail : ServerFixture
 	{
 		public TestMail Mail;
 		public bool IsSpecial;

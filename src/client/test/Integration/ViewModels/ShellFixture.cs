@@ -432,7 +432,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//тест на ошибку, после обновления если мы отображаем PostUpdate
 			//мы должны обновить данные в shell иначе последующие действия приведут к ошибкам
 			stub = null;
-			Fixture<CreateAddress>();
+			Fixture<LocalAddress>();
 			Fixture<RejectedWaybill>();
 
 			Collect(shell.Update());

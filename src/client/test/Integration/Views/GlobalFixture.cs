@@ -188,7 +188,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		public async void Current_address_visivility()
 		{
 			restore = true;
-			Fixture<CreateAddress>();
+			Fixture<LocalAddress>();
 
 			Start();
 			Click("ShowOrderLines");

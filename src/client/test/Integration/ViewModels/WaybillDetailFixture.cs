@@ -75,9 +75,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_waybill()
 		{
-			var results = model.PrintWaybill();
-			var settings = (SimpleSettings)((DialogResult)results.First()).Model;
+			var results = model.PrintWaybill().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]
@@ -89,11 +92,30 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Print_price_tags()
+		{
+			var result = (DialogResult)model.PrintPriceTags();
+			var preview = ((PrintPreviewViewModel)result.Model);
+			Assert.IsNotNull(preview);
+		}
+
+		[Test]
 		public void Print_invoice()
 		{
 			var result = (DialogResult)model.PrintInvoice().First();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview.Document);
+		}
+
+		[Test]
+		public void Print_registry()
+		{
+			var results = model.PrintRegistry().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]

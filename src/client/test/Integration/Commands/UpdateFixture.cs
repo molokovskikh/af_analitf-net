@@ -290,7 +290,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Load_mails()
 		{
-			var fixture = new MailWithAttachment {
+			var fixture = new CreateMail {
 				IsSpecial = true,
 			};
 			Fixture(fixture);

@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					r.ControlMinReq = true;
 				});
 
-			ExecuteFixture(new MailWithAttachment(), session);
+			ExecuteFixture(new CreateMail(), session);
 
 			DataMother.News(session);
 
