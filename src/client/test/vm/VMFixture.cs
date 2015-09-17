@@ -30,15 +30,12 @@ namespace vm
 		string guiType = "headless";
 		string vmName = "winxp";
 
-		public VMFixture()
-		{
-			root = Path.GetFullPath(@"..\..\..\..\..\..\");
-			setup = Path.Combine(root, @"output\setup\setup.exe");
-		}
-
 		[SetUp]
 		public void Setup()
 		{
+			root = Path.GetFullPath(@"..\..\..\..\..\..\");
+			setup = Path.Combine(root, @"output\setup\setup.exe");
+
 			//кэшируем файл что бы каждый раз не собирать
 			if (!File.Exists("setup.exe")) {
 				var cmd = $"C:\\cygwin\\bin\\bash.exe -l -c \"cd `cygpath '{root}'`;bake build:client env=test\"";
