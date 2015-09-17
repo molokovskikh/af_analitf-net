@@ -1,5 +1,4 @@
 using NHibernate;
-using Test.Support.Suppliers;
 
 namespace AnalitF.Net.Client.Models
 {
