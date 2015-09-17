@@ -79,7 +79,7 @@ namespace vm
 			copyLog.WaitForCompletion(-1);
 			Assert.IsNull(copyLog.ErrorInfo, copyLog.ErrorInfo?.Text);
 			var logText = File.ReadAllText("log.txt");
-			Assert.AreEqual(logText, Is.Not.StringContaining("ERROR"));
+			Assert.That(logText, Is.Not.StringContaining("ERROR"));
 		}
 
 		[Test, Ignore]
