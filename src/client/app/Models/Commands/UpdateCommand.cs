@@ -1173,55 +1173,49 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 			try {
 				task.Wait();
-				if (!IsOkStatusCode(task.Result.StatusCode))
-					Log.ErrorFormat("Задача '{0}' завершилась ошибкой {1}", name, task.Result.StatusCode);
+				if (!IsOkStatusCode(task.Result?.StatusCode))
+					Log.Error($"Задача '{name}' завершилась ошибкой {task.Result}");
 			}
 			catch(AggregateException e) {
-				Log.Error(String.Format("Задача '{0}' завершилась ошибкой", name), e.GetBaseException());
+				Log.Error($"Задача '{name}' завершилась ошибкой", e.GetBaseException());
 			}
 		}
 
-		public Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
+		public async Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
 		{
-			var file = Path.GetTempFileName();
-			var cleaner = new FileCleaner();
-			cleaner.Watch(file);
+			using (var cleaner = new FileCleaner()) {
+				var file = cleaner.TmpFile();
 
-			//TODO: в тестах сброс конфигурации может сильно испортить жизнь
-			//например если нужно отладить запросы
-			LogManager.ResetConfiguration();
-			try
-			{
-				var logs = Directory.GetFiles(Config.RootDir, "*.log")
-					.Where(f => new FileInfo(f).Length > 0)
-					.ToArray();
+				//TODO: в тестах сброс конфигурации может сильно испортить жизнь
+				//например если нужно отладить запросы
+				LogManager.ResetConfiguration();
+				try
+				{
+					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
+						.Where(f => new FileInfo(f).Length > 0)
+						.ToArray();
 
-				if (logs.Length == 0)
-					return null;
+					if (logs.Length == 0)
+						return null;
 
-				using(var zip = new ZipFile()) {
-					foreach (var logFile in logs) {
-						zip.AddFile(logFile);
+					using(var zip = new ZipFile()) {
+						foreach (var logFile in logs) {
+							zip.AddFile(logFile);
+						}
+						zip.Save(file);
 					}
-					zip.Save(file);
+
+					var logsWatch = new FileCleaner();
+					logsWatch.Watch(logs);
+					logsWatch.Dispose();
+				}
+				finally {
+					XmlConfigurator.Configure();
 				}
 
-				var logsWatch = new FileCleaner();
-				logsWatch.Watch(logs);
-				logsWatch.Dispose();
+				using (var stream = File.OpenRead(file))
+					return await client.PostAsync("Logs", new StreamContent(stream), token);
 			}
-			finally {
-				XmlConfigurator.Configure();
-			}
-
-			var stream = File.OpenRead(file);
-			var post = client.PostAsync("Logs", new StreamContent(stream), token);
-			//TODO мы никогда не узнаем об ошибке
-			post.ContinueWith(t => {
-				stream.Dispose();
-				cleaner.Dispose();
-			});
-			return post;
 		}
 	}
 }

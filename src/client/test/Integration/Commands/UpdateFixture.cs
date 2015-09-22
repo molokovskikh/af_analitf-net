@@ -133,7 +133,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Send_logs()
 		{
-			File.WriteAllText(Path.Combine(clientConfig.RootDir, "AnalitF.Net.Client.log"), "123");
+			File.WriteAllText(Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log"), "123");
 
 			Run(new UpdateCommand());
 

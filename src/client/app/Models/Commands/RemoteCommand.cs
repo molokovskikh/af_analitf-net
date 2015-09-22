@@ -143,9 +143,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		protected static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
+		protected static bool IsOkStatusCode(HttpStatusCode? code)
 		{
-			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
+			//запрос не производился
+			if (code == null)
+				return true;
+			return code == HttpStatusCode.OK || code == HttpStatusCode.NoContent;
 		}
 
 		public void Configure(Settings value, Config.Config config, CancellationToken token)
