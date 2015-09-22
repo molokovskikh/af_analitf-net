@@ -35,11 +35,9 @@ namespace AnalitF.Net.Client.Test.Unit
 		}
 
 		[Test]
-		public void Test1()
+		public void Error_helper()
 		{
-			foreach (var window in Win32.GetWindows()) {
-				Schedule.DumpWindow(window);
-			}
+			Assert.IsNull(ErrorHelper.TranslateException(new Exception("test")));
 		}
 	}
 }

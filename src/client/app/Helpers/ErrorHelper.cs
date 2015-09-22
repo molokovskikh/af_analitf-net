@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.Helpers
 			if (IsDbCorrupted(exception))
 				return "База данных повреждена, используйте функцию" +
 					" \"Восстановление базы данных\" из меню \"Сервис\" что бы починить базу данных.";
-			if (exception.Chain().OfType<MySqlException>().All(x => x.Code == 28))
+			if (exception.Chain().OfType<MySqlException>().Any(x => x.Code == 28))
 				return "Недостаточно свободного места на диске для выполения операции.";
 
 			return null;
