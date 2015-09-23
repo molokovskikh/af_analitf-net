@@ -84,13 +84,13 @@ namespace AnalitF.Net.Client
 				var merged = new [] {
 					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net",
 					"Devart.Data", "Devart.Data.MySql",
-					"WpfAnimatedGif"
+					"WpfAnimatedGif",
+					"AnalitF.Net.Client"
 				};
-				if (!typeof(Program).Assembly.GetName().Name.Match("AnalitF.Net.Client")) {
-					merged = new [] { "AnalitF.Net.Client" }.Concat(merged).ToArray();
-				}
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
-					if (merged.Any(n => eventArgs.Name.StartsWith(n, StringComparison.CurrentCultureIgnoreCase)))
+					Console.WriteLine(eventArgs.Name);
+					var name = new AssemblyName(eventArgs.Name);
+					if (merged.Any(n => name.Name.Equals(n, StringComparison.CurrentCultureIgnoreCase)))
 						return typeof(Program).Assembly;
 					return null;
 				};

@@ -218,6 +218,7 @@ task "deploy:update", ["build:update"]:
 task "build:client", ["build:client:bin", "build:setup", "build:update"]
 
 task "build:client:bin":
+	#собираем обычную версию
 	proj = "src/client/app/app.csproj"
 	name, output, _ = GetBuildConfig(Globals, proj)
 	Clean(Globals, proj)
@@ -230,12 +231,8 @@ def CopyResource(res as EmbeddedResource, writer as ResourceWriter):
 	for item in reader:
 		writer.AddResource(item.Key, item.Value)
 
-task "build:client:merged", ["build:client:bin"]:
-	projectName, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
-	output = "output/merged"
-	RmDir(output, true) if Exist(output)
-	while Exist(output):
-		Thread.Sleep(10)
+def Merge(output as string, projectName as string, source as string):
+	RmDir(output)
 	MkDir(output)
 	files = String.Join(" ", FileSet(["*.dll", "*.exe"], BaseDirectory: source, Excludes: ["libmysqld.dll", ]))
 	exe = FileSet("*.exe", BaseDirectory: source).First()
@@ -259,6 +256,41 @@ task "build:client:merged", ["build:client:bin"]:
 	resources.Remove(libBaml)
 	memory.Position = 0
 	resources.Add(EmbeddedResource(appBaml.Name, ManifestResourceAttributes.Public, memory))
+
+	outputAssembly.Write(name)
+
+task "build:client:merged", ["build:client:bin"]:
+	projectName, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
+	output = "output/merged"
+	Merge(output, projectName, source)
+
+	#собираем версию которая называется AnalitF.exe
+	root = "output/migration"
+	name = "$root/AnalitF.exe"
+	projectName = "AnalitF"
+	RmDir(root)
+	MkDir(root)
+	Cp(FileSet("**", BaseDirectory: output), root)
+	Mv("$root/AnalitF.Net.Client.exe", name)
+	Rm("$root/AnalitF.Net.Client.exe.config")
+	Rm("$root/AnalitF.Net.Client.pdb")
+	Cp("src/client/app/App.migration.config", "$name.config")
+	MkDir("output/migration-update")
+	Cp(name, "output/migration-update/$projectName.exe")
+	Cp("$name.config", "output/migration-update/$projectName.exe.config")
+
+	#из-за изменения имени сборки нужно сгенерировать лицензию заново
+	outputAssembly = AssemblyDefinition.ReadAssembly(name)
+	resources = outputAssembly.MainModule.Resources
+	spec = "${output}/license"
+	File.WriteAllText(spec, "Devart.Data.MySql.MySqlConnection, AnalitF.Net.Client")
+	lc = "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.6 Tools\\lc.exe"
+	Sh("\"\"${lc}\"\" /target:${name} /complist:${spec} /i:${name}")
+	Rm(spec)
+	compiledLicense = "${name}.licenses"
+	resources.Add(EmbeddedResource("${projectName}.exe.licenses", ManifestResourceAttributes.Public, File.ReadAllBytes(compiledLicense)))
+	Rm(compiledLicense)
+
 	outputAssembly.Write(name)
 
 task "build:setup", ["build:client:merged"]:
@@ -387,6 +419,7 @@ task "test:binary":
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta", "output/updater/")
+		CopyUpdateBin("migration", "output/migration/")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise

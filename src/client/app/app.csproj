@@ -770,6 +770,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="app.manifest" />
+    <None Include="App.migration.config" />
     <None Include="App.release.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
