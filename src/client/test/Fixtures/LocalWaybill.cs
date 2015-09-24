@@ -15,6 +15,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var address = session.Query<Address>().First();
 			var settings = session.Query<Settings>().First();
+			var user = session.Query<User>().First();
 
 			Waybill = new Waybill(address, session.Query<Supplier>().First());
 			Waybill.Lines = Enumerable.Range(0, 10).Select(i => new WaybillLine(Waybill)).ToList();
@@ -24,7 +25,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			line.ProducerCost = 15.13m;
 			line.SupplierCostWithoutNds = 18.25m;
 			line.SupplierCost = 20.8m;
-			Waybill.Calculate(settings);
+			Waybill.Calculate(settings, user);
 			session.Save(Waybill);
 			session.Flush();
 		}

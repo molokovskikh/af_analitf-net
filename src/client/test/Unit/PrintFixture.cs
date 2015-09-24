@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				Quantity = 1
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
 			Assert.IsNotNull(doc);
 		}

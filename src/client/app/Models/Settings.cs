@@ -150,8 +150,6 @@ namespace AnalitF.Net.Client.Models
 		//тк отсрочки на каждый день могут быть разные
 		public virtual DateTime LastLeaderCalculation { get; set; }
 
-		public virtual bool LookupMarkByProducerCost { get; set; }
-
 		public virtual RackingMapSettings RackingMap { get; set; }
 
 		public virtual PriceTagSettings PriceTag { get; set; }

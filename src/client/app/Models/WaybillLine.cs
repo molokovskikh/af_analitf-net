@@ -353,9 +353,7 @@ namespace AnalitF.Net.Client.Models
 				return;
 			}
 
-			var vitallyImportant = ActualVitallyImportant;
-			//LookupMarkByProducerCost - странный флаг, который нигде не проставляется и неизвестно зачем он нужен. Возможно это пережиток и его следует удалить.
-			var lookByProducerCost = vitallyImportant && settings.LookupMarkByProducerCost;
+			var lookByProducerCost = ActualVitallyImportant && (Waybill?.User?.CalculateOnProducerCost).GetValueOrDefault();
 			var sourceCost = (lookByProducerCost ? ProducerCost : SupplierCostWithoutNds).GetValueOrDefault();
 
 			//флаг в настройках накладных ЖНВЛС заставляет использовать для определения диапозона наценки цену производителя с ндс
@@ -363,7 +361,7 @@ namespace AnalitF.Net.Client.Models
 
 			if (sourceCost == 0)
 				return;
-			var markupType = vitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			var markupType = ActualVitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
 			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost);
 			if (markup == null)
 				return;
@@ -471,7 +469,7 @@ namespace AnalitF.Net.Client.Models
 				foreach (var property in typeof(WaybillLine).GetProperties()) {
 					OnPropertyChanged(property.Name);
 				}
-				Waybill.Calculate(Waybill.Settings);
+				Waybill.Recalculate();
 			}
 		}
 

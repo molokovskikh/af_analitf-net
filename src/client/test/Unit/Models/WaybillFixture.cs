@@ -10,6 +10,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 	[TestFixture]
 	public class WaybillFixture
 	{
+		private User user;
 		private Waybill waybill;
 		private Settings settings;
 		private WaybillSettings waybillSettings;
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[SetUp]
 		public void Setup()
 		{
+			user = new User();
 			settings = new Settings(true);
 			waybillSettings = new WaybillSettings();
 			settings.Waybills.Add(waybillSettings);
@@ -186,10 +188,10 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var line = Line();
 			waybill.Lines.Add(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			Assert.AreEqual(600, waybill.RetailSum);
 		}
 
@@ -276,7 +278,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_fields_for_user_created_waybill()
 		{
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			waybill.AddLine(waybillLine);
@@ -301,7 +303,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				SupplierCostWithoutNds = 8.84m
 			};
 			waybill.AddLine(waybillLine);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			Assert.IsTrue(waybill.CanBeVitallyImportant);
 			var changes = waybillLine.CollectChanges();
 			waybill.VitallyImportant = true;
@@ -326,7 +328,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				VitallyImportant = true,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			Assert.AreEqual(20, line.RetailMarkup);
 			Assert.AreEqual(22.81, line.RealRetailMarkup);
 			Assert.AreEqual(36.21, line.RetailCost);
@@ -383,8 +385,33 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(5000, line.RetailCost);
 			Assert.AreEqual(250.14, line.RetailMarkup);
 
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 			Assert.AreEqual(5000, line.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_markup_on_producer_cost()
+		{
+			user.CalculateOnProducerCost = true;
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 0)
+				.Markup = 23;
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 50)
+				.Markup = 18;
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 500)
+				.Markup = 12;
+			var line = new WaybillLine(waybill) {
+				Product = "АМИКСИН 0,125 N6 ТАБЛ П/ПЛЕН/ОБОЛОЧ",
+				VitallyImportant = true,
+				ProducerCost = 501.91m,
+				Nds = 10,
+				SupplierCost = 529.65m,
+				SupplierCostWithoutNds = 481.50m,
+				Quantity = 3
+			};
+			Calculate(line);
+			Assert.AreEqual(595.90, line.RetailCost);
+			Assert.AreEqual(12.00, line.RetailMarkup);
+			Assert.AreEqual(12.51, line.RealRetailMarkup);
 		}
 
 		private WaybillLine Line()
@@ -404,7 +431,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			waybill.WaybillSettings = waybillSettings;
 			waybill.Lines.Add(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, user);
 		}
 	}
 }
