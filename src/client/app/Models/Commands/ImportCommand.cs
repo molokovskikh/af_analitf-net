@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//локальные поля
 					"Id", "LinesCount", "Sum", "Send", "Frozen", "PersonalComment", "SendResult", "SendError",
 					//может передаваться а может и нет
-					"SkipRestore"
+					"SkipRestore", "IsLoaded"
 				}},
 				{"SentOrderLines", new [] {
 					//локальные поля

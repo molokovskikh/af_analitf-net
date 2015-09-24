@@ -14,8 +14,10 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Test.Support;
+using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands
 {
@@ -48,20 +50,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Load_orders()
 		{
 			localSession.DeleteEach<Order>();
-			var priceId = localSession.Query<Offer>().First().Price.Id.PriceId;
-			Fixture(new UnconfirmedOrder(priceId));
+			var order = MakeOrder();
+			Fixture(new UnconfirmedOrder(order.Price.Id.PriceId));
 
 			Run(new UpdateCommand());
 
 			var orders = localSession.Query<Order>().ToArray();
-			Assert.AreEqual(1, orders.Length);
-			var order = orders[0];
-			Assert.That(order.Sum, Is.GreaterThan(0));
-			Assert.That(order.LinesCount, Is.GreaterThan(0));
-			Assert.AreEqual(order.LinesCount, order.Lines.Count);
-			Assert.IsFalse(order.Frozen, "Заказ заморожен {0}", order.SendError + order.Lines.Implode(l => l.SendError));
-			Assert.IsNotNull(order.Address);
-			Assert.IsNotNull(order.Price);
+			Assert.AreEqual(2, orders.Length);
+
+			var loaded = orders.First(x => x.Id != order.Id);
+			Assert.That(loaded.Sum, Is.GreaterThan(0));
+			Assert.That(loaded.LinesCount, Is.GreaterThan(0));
+			Assert.AreEqual(loaded.LinesCount, loaded.Lines.Count);
+			Assert.IsFalse(loaded.Frozen, "Заказ заморожен {0}", loaded.SendError + loaded.Lines.Implode(l => l.SendError));
+			Assert.IsNotNull(loaded.Address);
+			Assert.IsNotNull(loaded.Price);
+
+			localSession.Refresh(order);
+			Assert.IsTrue(order.Frozen);
+			Assert.AreEqual(1, order.Lines.Count);
 		}
 
 		[Test]

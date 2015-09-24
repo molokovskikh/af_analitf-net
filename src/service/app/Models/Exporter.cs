@@ -1345,7 +1345,8 @@ where a.MailId in ({0})", ids.Implode());
 					"AddressId",
 					"PriceId",
 					"RegionId",
-					"Comment"
+					"Comment",
+					"IsLoaded"
 				},
 				groups.Select(g => new object[] {
 					g.First().RowId,
@@ -1354,7 +1355,8 @@ where a.MailId in ({0})", ids.Implode());
 					g.Key.PriceList.PriceCode,
 					g.Key.RegionCode,
 					g.Where(o => !String.IsNullOrWhiteSpace(o.ClientAddition))
-						.Implode(o => String.Format("{0}: {1}", o.UserId, o.ClientAddition), " | ")
+						.Implode(o => $"{o.UserId}: {o.ClientAddition}", " | "),
+					true
 				}),
 				false);
 

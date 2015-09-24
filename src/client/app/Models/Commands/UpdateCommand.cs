@@ -1026,6 +1026,13 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				loaded.Each(x => x.SkipRestore = false);
 				orders = orders.Except(loaded).ToArray();
 			}
+			else {
+				//todo наверное это можно использовать и при загрузке автозаказа, протестировать
+				//если мы загрузили заказ с сервера а у нас уже есть заказ на этого поставщика мы должны заморозить существующий
+				var loaded = ordersToRestore.Where(x => x.IsLoaded).Select(x => x.SafePrice.Id).ToArray();
+				ordersToRestore = ordersToRestore.Where(x => x.IsLoaded || !loaded.Contains(x.SafePrice.Id)).ToArray();
+			}
+
 
 			//нужно сбросить статус для ранее замороженных заказов что бы они не отображались в отчете
 			//каждый раз

@@ -70,7 +70,7 @@ namespace AnalitF.Net.Client.ViewModels
 				ArchiveName = Path.GetTempFileName();
 				var files = Attachments.ToArray();
 				if (SendLog)
-					files = files.Concat(Directory.GetFiles(config.RootDir, "*.log")).ToArray();
+					files = files.Concat(Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")).ToArray();
 
 				try {
 					log4net.LogManager.ResetConfiguration();

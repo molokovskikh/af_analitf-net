@@ -275,9 +275,6 @@ task "build:client:merged", ["build:client:bin"]:
 	Rm("$root/AnalitF.Net.Client.exe.config")
 	Rm("$root/AnalitF.Net.Client.pdb")
 	Cp("src/client/app/App.migration.config", "$name.config")
-	MkDir("output/migration-update")
-	Cp(name, "output/migration-update/$projectName.exe")
-	Cp("$name.config", "output/migration-update/$projectName.exe.config")
 
 	#из-за изменения имени сборки нужно сгенерировать лицензию заново
 	outputAssembly = AssemblyDefinition.ReadAssembly(name)
@@ -324,19 +321,26 @@ task "build:update", ["build:client:merged"]:
 	merged = FileSet(["*.exe", "*.dll"], BaseDirectory: updaterOutput)
 	files = String.Join(" ", merged.OrderByDescending({f|f.IndexOf(".exe")}))
 	exe = merged.First({f| Path.GetExtension(f) == ".exe"})
-	MkDir("output/updater/merged") unless Exist("output/updater/merged")
+	MkDir("output/updater/merged")
 	name = Path.Combine(Path.GetDirectoryName(exe), "merged", Path.GetFileName(exe))
 	Sh("ilmerge /targetplatform:v4,\"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\" $files /allowdup /out:$name")
 	for f in merged.Concat(merged.Select({f| Path.ChangeExtension(f, ".pdb")})):
 		Rm(f)
-	Mv(name, exe)
+	Cp(name, exe)
 	Mv(Path.ChangeExtension(name, ".pdb"), Path.ChangeExtension(exe, ".pdb"))
 	#файл маркер для удаления старых бинарников
 	File.WriteAllText(Path.Combine(updaterOutput, "delete.me"), "*.exe\r\n*.dll\r\n*.pdb")
-
 	Cp("output/setup/version.txt", updaterOutput, true)
 	Cp(FileSet("*", BaseDirectory: clientOutput), updaterOutput, true)
 	Rm(FileSet("*.xml", BaseDirectory: updaterOutput))
+
+	output = "output/migration-update/"
+	MkDir(output)
+	Cp("output/setup/version.txt", output)
+	Cp(FileSet("*", BaseDirectory: "output/migration", Excludes: ["libmysqld.dll"]), output)
+	Cp(name, output)
+	Cp(Path.Combine(updaterOutput, Path.GetFileName(name) + ".config"), output)
+	RmDir("output/updater/merged")
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production

@@ -103,6 +103,11 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual bool SkipRestore { get; set; }
 
+		/// <summary>
+		/// Заказ был загружен с сервера в последнем обновлении
+		/// </summary>
+		public virtual bool IsLoaded { get; set; }
+
 		public virtual int LinesCount
 		{
 			get { return linesCount; }
@@ -269,6 +274,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void ResetStatus()
 		{
+			IsLoaded = false;
 			SendError = "";
 			SendResult = OrderResultStatus.OK;
 			Lines.Each(l => l.Apply(null));
