@@ -88,7 +88,6 @@ namespace AnalitF.Net.Client
 					"AnalitF.Net.Client"
 				};
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
-					Console.WriteLine(eventArgs.Name);
 					var name = new AssemblyName(eventArgs.Name);
 					if (merged.Any(n => name.Name.Equals(n, StringComparison.CurrentCultureIgnoreCase)))
 						return typeof(Program).Assembly;
