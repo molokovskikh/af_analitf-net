@@ -89,6 +89,11 @@ namespace AnalitF.Net.Client.Models
 		private string _reportDir;
 		private string _rejectDir;
 		private string _docDir;
+		private string _userName;
+		private string _password;
+		private string _proxyUserName;
+		private string _proxyPassword;
+		private string _proxyHost;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -139,9 +144,17 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DiffCalcMode DiffCalcMode { get; set; }
 
-		public virtual string UserName { get; set; }
+		public virtual string UserName
+		{
+			get { return _userName; }
+			set { _userName = value?.Trim(); }
+		}
 
-		public virtual string Password { get; set; }
+		public virtual string Password
+		{
+			get { return _password; }
+			set { _password = value?.Trim(); }
+		}
 
 		public virtual DateTime? LastUpdate { get; set; }
 
@@ -198,13 +211,25 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string ProxyHost { get; set; }
+		public virtual string ProxyHost
+		{
+			get { return _proxyHost; }
+			set { _proxyHost = value?.Trim(); }
+		}
 
 		public virtual int? ProxyPort { get; set; }
 
-		public virtual string ProxyUserName { get; set; }
+		public virtual string ProxyUserName
+		{
+			get { return _proxyUserName; }
+			set { _proxyUserName = value?.Trim(); }
+		}
 
-		public virtual string ProxyPassword { get; set; }
+		public virtual string ProxyPassword
+		{
+			get { return _proxyPassword; }
+			set { _proxyPassword = value?.Trim(); }
+		}
 
 		public virtual bool IsValid
 		{
@@ -323,9 +348,9 @@ namespace AnalitF.Net.Client.Models
 				return null;
 			if (String.IsNullOrEmpty(ProxyHost) || ProxyPort.GetValueOrDefault() <= 0)
 				return null;
-			var proxy = new WebProxy(ProxyHost, ProxyPort.Value);
+			var proxy = new WebProxy(ProxyHost?.Trim(), ProxyPort.GetValueOrDefault());
 			if (!String.IsNullOrEmpty(ProxyUserName))
-				proxy.Credentials = new NetworkCredential(ProxyUserName, ProxyPassword);
+				proxy.Credentials = new NetworkCredential(ProxyUserName?.Trim(), ProxyPassword?.Trim());
 			return proxy;
 		}
 
@@ -416,7 +441,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ICredentials GetCredential()
 		{
-			return new NetworkCredential(UserName, Password);
+			return new NetworkCredential(UserName?.Trim(), Password?.Trim());
 		}
 
 		public virtual DelegatingHandler[] Handlers()
