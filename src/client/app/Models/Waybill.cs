@@ -120,7 +120,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				_vitallyImportant = value;
-				Recalculate();
+				Calculate(Settings);
 				OnPropertyChanged();
 			}
 		}
@@ -199,9 +199,6 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual Settings Settings { get; set; }
 
-		[Ignore]
-		public virtual User User { get; set; }
-
 		[Style("AddressName"), Ignore]
 		public virtual bool IsCurrentAddress { get; set; }
 
@@ -220,17 +217,11 @@ namespace AnalitF.Net.Client.Models
 			return !addressNotFound;
 		}
 
-		public virtual void Recalculate()
-		{
-			Calculate(Settings, User);
-		}
-
-		public virtual void Calculate(Settings settings, User user)
+		public virtual void Calculate(Settings settings)
 		{
 			if (settings == null)
 				return;
 			Settings = settings;
-			User = user;
 			WaybillSettings = settings.Waybills
 				.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null
@@ -291,14 +282,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			line.Waybill = null;
 			Lines.Remove(line);
-			Recalculate();
+			Calculate(Settings);
 		}
 
 		public virtual void AddLine(WaybillLine line)
 		{
 			line.Waybill = this;
 			Lines.Add(line);
-			Recalculate();
+			Calculate(Settings);
 		}
 
 		public virtual string this[string columnName]

@@ -222,7 +222,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				SupplierCost = orderLine.Cost,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			session.Save(waybill);
 			session.Save(new WaybillOrder(line.Id, orderLine.ServerId.Value));
 		}

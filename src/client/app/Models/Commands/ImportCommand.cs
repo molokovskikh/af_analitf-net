@@ -91,7 +91,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			Configure(new SanityCheck()).Check();
 
 			var settings = Session.Query<Settings>().First();
-			var user = Session.Query<User>().First();
 			if (IsImported<SentOrder>()) {
 				Session.CreateSQLQuery(@"
 update SentOrderLines l
@@ -114,7 +113,7 @@ set IsNew = 1;")
 					.ExecuteUpdate();
 				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
 				foreach (var waybill in newWaybills)
-					waybill.Calculate(settings, user);
+					waybill.Calculate(settings);
 			}
 			if (IsImported<Offer>()) {
 				Session.CreateSQLQuery(@"

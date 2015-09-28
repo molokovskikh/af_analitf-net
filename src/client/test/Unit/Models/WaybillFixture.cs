@@ -188,10 +188,10 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var line = Line();
 			waybill.Lines.Add(line);
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			Assert.AreEqual(600, waybill.RetailSum);
 		}
 
@@ -278,7 +278,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_fields_for_user_created_waybill()
 		{
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			waybill.AddLine(waybillLine);
@@ -303,7 +303,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				SupplierCostWithoutNds = 8.84m
 			};
 			waybill.AddLine(waybillLine);
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			Assert.IsTrue(waybill.CanBeVitallyImportant);
 			var changes = waybillLine.CollectChanges();
 			waybill.VitallyImportant = true;
@@ -328,7 +328,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				VitallyImportant = true,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			Assert.AreEqual(20, line.RetailMarkup);
 			Assert.AreEqual(22.81, line.RealRetailMarkup);
 			Assert.AreEqual(36.21, line.RetailCost);
@@ -385,14 +385,13 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(5000, line.RetailCost);
 			Assert.AreEqual(250.14, line.RetailMarkup);
 
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 			Assert.AreEqual(5000, line.RetailCost);
 		}
 
 		[Test]
 		public void Calculate_markup_on_producer_cost()
 		{
-			user.CalculateOnProducerCost = true;
 			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 0)
 				.Markup = 23;
 			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 50)
@@ -431,7 +430,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			waybill.WaybillSettings = waybillSettings;
 			waybill.Lines.Add(line);
-			waybill.Calculate(settings, user);
+			waybill.Calculate(settings);
 		}
 	}
 }

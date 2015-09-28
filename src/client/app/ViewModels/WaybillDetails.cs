@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null)
 				return;
 			Waybill.Rounding = Rounding.Value;
-			Waybill.Calculate(Settings.Value, User);
+			Waybill.Calculate(Settings.Value);
 		}
 
 		protected override void OnInitialize()

@@ -100,8 +100,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool HaveLimits { get; set; }
 
-		public virtual bool CalculateOnProducerCost { get; set; }
-
 		public virtual IList<Permission> Permissions { get; set; }
 
 		public virtual bool CanPrint<T>()

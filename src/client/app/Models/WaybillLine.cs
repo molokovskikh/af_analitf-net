@@ -353,11 +353,16 @@ namespace AnalitF.Net.Client.Models
 				return;
 			}
 
-			var lookByProducerCost = ActualVitallyImportant && (Waybill?.User?.CalculateOnProducerCost).GetValueOrDefault();
-			var sourceCost = (lookByProducerCost ? ProducerCost : SupplierCostWithoutNds).GetValueOrDefault();
-
-			//флаг в настройках накладных ЖНВЛС заставляет использовать для определения диапозона наценки цену производителя с ндс
-			sourceCost = settings.UseSupplierPriceWithNdsForMarkup && ProducerCostWithTax != null ? (decimal)ProducerCostWithTax : sourceCost;
+			var sourceCost = SupplierCostWithoutNds.GetValueOrDefault();
+			if (ActualVitallyImportant) {
+				sourceCost = ProducerCost.GetValueOrDefault();
+				if (RegistryCost.GetValueOrDefault() > 0 && (sourceCost == 0 || sourceCost > RegistryCost.GetValueOrDefault())) {
+					sourceCost = RegistryCost.GetValueOrDefault();
+				}
+				if (settings.UseSupplierPriceWithNdsForMarkup) {
+					sourceCost = sourceCost * (1 + (decimal)Nds.GetValueOrDefault() / 100);
+				}
+			}
 
 			if (sourceCost == 0)
 				return;
@@ -469,7 +474,7 @@ namespace AnalitF.Net.Client.Models
 				foreach (var property in typeof(WaybillLine).GetProperties()) {
 					OnPropertyChanged(property.Name);
 				}
-				Waybill.Recalculate();
+				Waybill.Calculate(Waybill.Settings);
 			}
 		}
 

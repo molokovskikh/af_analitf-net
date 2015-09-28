@@ -342,12 +342,10 @@ select u.Id,
 			join OrderSendRules.SmartOrderLimits l on l.AddressId = a.Id
 			join Usersettings.Prices p on p.FirmCode = l.SupplierId
 		where ua.UserId = u.Id and a.Enabled = 1
-	) as HaveLimits,
-	r.CalculateOnProducerCost
+	) as HaveLimits
 from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
-		join farm.Regions r on r.RegionCode = c.RegionCode
 where u.Id = ?userId";
 			Export(Result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
