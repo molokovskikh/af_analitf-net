@@ -164,9 +164,10 @@ namespace AnalitF.Net.Service.Models
 			};
 		}
 
-		public virtual void Confirm(Config.Config config)
+		public virtual void Confirm(Config.Config config, string message = null)
 		{
 			IsConfirmed = true;
+			Error += message;
 			if (!config.DebugExport)
 				File.Delete(OutputFile(config));
 		}

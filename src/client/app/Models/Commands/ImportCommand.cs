@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Mapping;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -81,6 +84,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					var dbCommand = Session.Connection.CreateCommand();
 					dbCommand.CommandText = sql;
 					dbCommand.ExecuteNonQuery();
+					CheckWarning(dbCommand);
 					Reporter.Progress();
 				}
 				catch (Exception e) {
@@ -221,62 +225,81 @@ where p.IsSynced = 1 or p.PriceId is null;";
 				else
 					return "@" + c;
 			}).Implode();
-#if DEBUG
-			if (Strict) {
-				//код для отладки, при тестировании мы должны передавать\принимать все колонки таблицы
-				//проверяем что все колонки котоые есть в таблице передаются с сервера
-				var ignored = new [] {
-					"Timestamp",//нужен для синхронизации не доджен импортироваться
-					"HaveOffers",//всегда вычисляется на стророне клиента
-					"Hidden",//не передается в случае каммулятивного обновления
-					//информация о лидерах вичисляется на клиенте тк не может быть достоверно вычислена на сервере
-					"LeaderPriceId",
-					"LeaderRegionId",
-					"LeaderCost",
-					"MinBoundCost",
-					"MaxBoundCost",
-					"Marked",
-				};
-				if (dbTable.Name.Match("DelayOfPayments") || dbTable.Name.Match("BatchLines")) {
-					ignored = ignored.Concat(new [] { "Id" }).ToArray();
-				}
-				if (dbTable.Name.Match("OrderLines")) {
-					ignored = ignored.Concat(new [] { "Id", "SendError", "SendResult", "OrderId",
-						"NewCost", "OldCost", "OptimalFactor", "NewQuantity", "OldQuantity", "Comment",
-						"BuyingMatrixType",//нет смысла передавать статус матрицы
-						"Properties",//todo не вычисляются исправить
-						"Exp",//todo не сохраняются исправить
-						"ExportId", "ExportBatchLineId"
-					})
-					.ToArray();
-				}
-				if (dbTable.Name.Match("Attachments")) {
-					ignored = ignored.Concat(new [] {
-						//локальные поля
-						"LocalFilename", "IsError", "IsDownloaded"
-					})
-					.ToArray();
-				}
-
-				ignored = ignored.Concat(ignoredColumns.GetValueOrDefault(dbTable.Name, new string[0])).ToArray();
-				var columnsToCheck = tableColumns.Except(ignored, StringComparer.OrdinalIgnoreCase).ToArray();
-				var notFoundInTable = exportedColumns.Except(tableColumns, StringComparer.OrdinalIgnoreCase).ToArray();
-				var notFoundInData = columnsToCheck.Except(exportedColumns, StringComparer.OrdinalIgnoreCase).ToArray();
-				if (notFoundInTable.Length > 0) {
-					throw new Exception(String.Format("В таблице {0} не найдены колонки полученные с сервера {1}",
-						dbTable.Name, notFoundInTable.Implode()));
-				}
-				if (notFoundInData.Length > 0) {
-					throw new Exception(String.Format("В таблице {0} есть колонки которые отсутствуют в данных {1}",
-						dbTable.Name, notFoundInData.Implode()));
-				}
-			}
-#endif
+			StrictCheck(dbTable, tableColumns, exportedColumns);
 			sql += String.Format("LOAD DATA INFILE '{0}' REPLACE INTO TABLE {1} ({2})",
 				Path.GetFullPath(table.Item1).Replace("\\", "/"),
 				tableName,
 				targetColumns);
 			return sql;
+		}
+
+		[Conditional("DEBUG")]
+		private void CheckWarning(IDbCommand cmd)
+		{
+			var warnings = new List<string>();
+			cmd.CommandText = "show warnings";
+			using (var reader = cmd.ExecuteReader()) {
+				while (reader.Read()) {
+					warnings.Add(reader["Message"].ToString());
+				}
+			}
+			if (warnings.Count > 0)
+				throw new Exception(warnings.Implode());
+		}
+
+		[Conditional("DEBUG")]
+		private void StrictCheck(Table dbTable, string[] tableColumns, string[] exportedColumns)
+		{
+			if (!Strict)
+				return;
+			//код для отладки, при тестировании мы должны передавать\принимать все колонки таблицы
+			//проверяем что все колонки котоые есть в таблице передаются с сервера
+			var ignored = new[] {
+				"Timestamp", //нужен для синхронизации не доджен импортироваться
+				"HaveOffers", //всегда вычисляется на стророне клиента
+				"Hidden", //не передается в случае каммулятивного обновления
+				//информация о лидерах вичисляется на клиенте тк не может быть достоверно вычислена на сервере
+				"LeaderPriceId",
+				"LeaderRegionId",
+				"LeaderCost",
+				"MinBoundCost",
+				"MaxBoundCost",
+				"Marked",
+			};
+			if (dbTable.Name.Match("DelayOfPayments") || dbTable.Name.Match("BatchLines")) {
+				ignored = ignored.Concat(new[] { "Id" }).ToArray();
+			}
+			if (dbTable.Name.Match("OrderLines")) {
+				ignored = ignored.Concat(new[] {
+					"Id", "SendError", "SendResult", "OrderId",
+					"NewCost", "OldCost", "OptimalFactor", "NewQuantity", "OldQuantity", "Comment",
+					"BuyingMatrixType", //нет смысла передавать статус матрицы
+					"Properties", //todo не вычисляются исправить
+					"Exp", //todo не сохраняются исправить
+					"ExportId", "ExportBatchLineId"
+				})
+					.ToArray();
+			}
+			if (dbTable.Name.Match("Attachments")) {
+				ignored = ignored.Concat(new[] {
+					//локальные поля
+					"LocalFilename", "IsError", "IsDownloaded"
+				})
+					.ToArray();
+			}
+
+			ignored = ignored.Concat(ignoredColumns.GetValueOrDefault(dbTable.Name, new string[0])).ToArray();
+			var columnsToCheck = tableColumns.Except(ignored, StringComparer.OrdinalIgnoreCase).ToArray();
+			var notFoundInTable = exportedColumns.Except(tableColumns, StringComparer.OrdinalIgnoreCase).ToArray();
+			var notFoundInData = columnsToCheck.Except(exportedColumns, StringComparer.OrdinalIgnoreCase).ToArray();
+			if (notFoundInTable.Length > 0) {
+				throw new Exception(String.Format("В таблице {0} не найдены колонки полученные с сервера {1}",
+					dbTable.Name, notFoundInTable.Implode()));
+			}
+			if (notFoundInData.Length > 0) {
+				throw new Exception(String.Format("В таблице {0} есть колонки которые отсутствуют в данных {1}",
+					dbTable.Name, notFoundInData.Implode()));
+			}
 		}
 	}
 }

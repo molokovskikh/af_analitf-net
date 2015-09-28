@@ -53,7 +53,7 @@ where l.RequestId = :id;")
 				.SetParameter("id", confirm.RequestId)
 				.ExecuteUpdate();
 			var job = Session.Get<RequestLog>(confirm.RequestId);
-			job?.Confirm(Config);
+			job?.Confirm(Config, confirm.Message);
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 

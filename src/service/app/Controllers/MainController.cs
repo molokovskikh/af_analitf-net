@@ -33,7 +33,7 @@ namespace AnalitF.Net.Service.Controllers
 			return existsJob.ToResult(Config);
 		}
 
-		public HttpResponseMessage Delete()
+		public HttpResponseMessage Put(ConfirmRequest confirm)
 		{
 			var data = Session.Load<AnalitfNetData>(CurrentUser.Id);
 			data.Confirm();
@@ -66,47 +66,37 @@ delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();
-			var job = Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
-				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
-			if (job != null) {
-				job.Confirm(Config);
-			}
+			var job = Session.Get<RequestLog>((confirm?.RequestId).GetValueOrDefault())
+				?? Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
+					.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
+			job?.Confirm(Config, confirm?.Message);
 
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
 		public HttpResponseMessage Post(SyncRequest request)
 		{
-			SavePriceSettings(request.Prices);
-			return new HttpResponseMessage(HttpStatusCode.OK);
-		}
+			if (request.Prices == null)
+				return new HttpResponseMessage(HttpStatusCode.OK);
 
-		private void SavePriceSettings(PriceSettings[] settings)
-		{
-			if (settings == null)
-				return;
 			var log = "";
-			foreach (var setting in settings) {
+			foreach (var setting in request.Prices) {
 				var userPrice = Session.Query<UserPrice>().FirstOrDefault(u => u.User == CurrentUser
 					&& u.Price.PriceCode == setting.PriceId
 					&& u.RegionId == setting.RegionId);
 
 				if (!setting.Active && userPrice != null) {
-					log += String.Format("{0} {1} ({2}) {3} - выкл;", userPrice.Price.PriceCode,
-						userPrice.Price.Supplier.Name,
-						userPrice.Price.PriceName,
-						userPrice.Price.Supplier.HomeRegion.Name);
+					log += $"{userPrice.Price.PriceCode} {userPrice.Price.Supplier.Name}" +
+						$" ({userPrice.Price.PriceName}) {userPrice.Price.Supplier.HomeRegion.Name} - выкл;";
 					Session.Delete(userPrice);
 				}
 				else if (setting.Active && userPrice == null) {
 					var price = Session.Get<PriceList>(setting.PriceId);
 					if (price == null)
-						return;
+						continue;
 					userPrice = new UserPrice(CurrentUser, setting.RegionId, price);
-					log += String.Format("{0} {1} ({2}) {3} - вкл;", userPrice.Price.PriceCode,
-						userPrice.Price.Supplier.Name,
-						userPrice.Price.PriceName,
-						userPrice.Price.Supplier.HomeRegion.Name);
+					log += $"{userPrice.Price.PriceCode} {userPrice.Price.Supplier.Name}" +
+						$" ({userPrice.Price.PriceName}) {userPrice.Price.Supplier.HomeRegion.Name} - вкл;";
 					Session.Save(userPrice);
 				}
 			}
@@ -117,6 +107,7 @@ where UserId = :userId;")
 					IsCompleted = true,
 				});
 			}
+			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 	}
 }

@@ -633,7 +633,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	s.Id as SupplierId,
 	s.Name as SupplierName,
 	s.FullName as SupplierFullName,
-	rd.Storage,
+	ifnull(rd.Storage, 0) as Storage,
 	if(p.DisabledByClient or not p.Actual,
 		0,
 		(select count(*)
@@ -1333,11 +1333,7 @@ where a.MailId in ({0})", ids.Implode());
 				}
 			}
 
-			if (orders.Length > 0) {
-				var ids = orders.Select(x => x.RowId);
-				job.Error = $"Экспортированы неподтвержденные заявки: {ids.Implode()}";
-			}
-
+			//ExportId обнуляется ServerId нужно что бы запротоколировать
 			Export(Result, "Orders",
 				new[] {
 					"ExportId",
@@ -1378,7 +1374,7 @@ select l.ExportId as ExportOrderId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.VitallyImportant,
+	ifnull(oo.VitallyImportant, 0) as VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
 	ol.RequestRatio,

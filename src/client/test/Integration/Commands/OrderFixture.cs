@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
@@ -18,6 +19,8 @@ using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Test.Support;
 using Address = AnalitF.Net.Client.Models.Address;
+using OfferComposedId = AnalitF.Net.Client.Models.OfferComposedId;
+using OrderResultStatus = AnalitF.Net.Client.Models.OrderResultStatus;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands
 {
@@ -51,7 +54,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			localSession.DeleteEach<Order>();
 			var order = MakeOrder();
-			Fixture(new UnconfirmedOrder(order.Price.Id.PriceId));
+			var fixture = new UnconfirmedOrder(order.Price.Id.PriceId);
+			Fixture(fixture);
 
 			Run(new UpdateCommand());
 
@@ -69,6 +73,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.Refresh(order);
 			Assert.IsTrue(order.Frozen);
 			Assert.AreEqual(1, order.Lines.Count);
+
+			var log = session.Query<RequestLog>().OrderByDescending(x => x.Id).First();
+			//протоколируем номер заказа на клиенте и сервере
+			Assert.AreEqual($"Экспортированы неподтвержденные заявки: {fixture.Order.Id} -> {order.Id + 1}", log.Error);
 		}
 
 		[Test]

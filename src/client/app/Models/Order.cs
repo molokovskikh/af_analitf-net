@@ -274,6 +274,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void ResetStatus()
 		{
+			ExportId = null;
 			IsLoaded = false;
 			SendError = "";
 			SendResult = OrderResultStatus.OK;

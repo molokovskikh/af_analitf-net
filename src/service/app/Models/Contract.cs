@@ -141,10 +141,12 @@ namespace AnalitF.Net.Client.Models
 	public class ConfirmRequest
 	{
 		public uint RequestId;
+		public string Message;
 
-		public ConfirmRequest(uint requestId)
+		public ConfirmRequest(uint requestId, string message = null)
 		{
 			RequestId = requestId;
+			Message = message;
 		}
 	}
 

@@ -49,6 +49,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
+		private uint requestId;
 
 		public UpdateCommand()
 		{
@@ -80,7 +81,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			var updateType = "накопительное";
 			var user = Session.Query<User>().FirstOrDefault();
 			var settings = Session.Query<Settings>().First();
-			uint requestId = 0;
 			if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
 				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
@@ -854,8 +854,9 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 				}
 			}
 
+			var confirm =  new ConfirmRequest(requestId);
 			if (offersImported || ordersImported)
-				RestoreOrders();
+				RestoreOrders(confirm);
 
 			foreach (var dir in settings.DocumentDirs)
 				Directory.CreateDirectory(dir);
@@ -867,7 +868,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			Directory.Delete(Config.UpdateTmpDir, true);
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
-			WaitAndLog(Client.DeleteAsync("Main"), "Подтверждение обновления");
+			WaitAndLog(Client.PutAsync("Main", confirm, Formatter), "Подтверждение обновления");
 		}
 
 		private bool CalculateAwaited()
@@ -982,9 +983,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			Session.CreateSQLQuery("update OrderLines ol "
 				+ "join Orders o on o.ExportId = ol.ExportOrderId "
 				+ "set ol.OrderId = o.Id "
-				+ "where ol.ExportOrderId is not null;"
-				+ "update OrderLines set ExportOrderId = null;"
-				+ "update Orders set ExportId = null")
+				+ "where ol.ExportOrderId is not null and ol.OrderId is null;"
+				+ "update OrderLines set ExportOrderId = null;")
 				.ExecuteUpdate();
 
 			var loaded = Session.Query<Order>().Where(o => o.LinesCount == 0).ToArray();
@@ -993,7 +993,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 		}
 
-		private void RestoreOrders()
+		private void RestoreOrders(ConfirmRequest confirm)
 		{
 			var orders = Session.Query<Order>()
 				.Fetch(o => o.Address)
@@ -1029,8 +1029,11 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			else {
 				//todo наверное это можно использовать и при загрузке автозаказа, протестировать
 				//если мы загрузили заказ с сервера а у нас уже есть заказ на этого поставщика мы должны заморозить существующий
-				var loaded = ordersToRestore.Where(x => x.IsLoaded).Select(x => x.SafePrice.Id).ToArray();
-				ordersToRestore = ordersToRestore.Where(x => x.IsLoaded || !loaded.Contains(x.SafePrice.Id)).ToArray();
+				var loaded = ordersToRestore.Where(x => x.IsLoaded).ToArray();
+				if (loaded.Length > 0)
+					confirm.Message = "Экспортированы неподтвержденные заявки: " + loaded.Implode(x => $"{x.ExportId} -> {x.Id}");
+				var loadedIds = loaded.Select(x => x.SafePrice.Id).ToArray();
+				ordersToRestore = ordersToRestore.Where(x => x.IsLoaded || !loadedIds.Contains(x.SafePrice.Id)).ToArray();
 			}
 
 
