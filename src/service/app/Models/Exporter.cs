@@ -1434,7 +1434,7 @@ group by ol.RowId";
 			condition.Append(addresses.Implode(a => a.Id));
 			condition.Append(") ");
 
-			var sql = String.Format(@"
+			var sql = $@"
 select oh.RowId as ServerId,
 	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as CreatedOn,
 	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as SentOn,
@@ -1444,10 +1444,10 @@ select oh.RowId as ServerId,
 	oh.RegionCode as RegionId,
 	oh.ClientAddition as Comment
 from Orders.OrdersHead oh
-{0}", condition);
+{condition}";
 			Export(Result, sql, "SentOrders", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select ol.RowId as ServerId,
 	oh.RowId as ServerOrderId,
 	ol.Quantity as Count,
@@ -1466,7 +1466,7 @@ select ol.RowId as ServerId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.VitallyImportant,
+	ifnull(oo.VitallyImportant, 0) as VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
 	ol.RequestRatio,
@@ -1490,8 +1490,8 @@ from Orders.OrdersHead oh
 		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
 		left join Orders.OrderedOffers oo on oo.Id = ol.RowId
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
-{0}
-group by ol.RowId", condition);
+{condition}
+group by ol.RowId";
 			Export(Result, sql, "SentOrderLines", truncate: false, parameters: new { userId = user.Id });
 		}
 
