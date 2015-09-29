@@ -209,7 +209,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected SentOrder MakeSentOrder(params Offer[] offers)
 		{
-			offers = offers.DefaultIfEmpty(session.Query<Offer>().First()).ToArray();
+			offers = offers.DefaultIfEmpty(session.Query<Offer>().First(x => x.RequestRatio == null)).ToArray();
 			var offer = offers.First();
 			var order = new Order(offer.Price, address);
 			foreach (var offerToOrder in offers) {
@@ -224,7 +224,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
-			offer = offer ?? session.Query<Offer>().First();
+			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null);
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.TryOrder(offer, 1);
 			offer.OrderLine = order.Lines[0];
