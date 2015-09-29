@@ -1333,7 +1333,6 @@ where a.MailId in ({0})", ids.Implode());
 				}
 			}
 
-			//ExportId обнуляется ServerId нужно что бы запротоколировать
 			Export(Result, "Orders",
 				new[] {
 					"ExportId",
