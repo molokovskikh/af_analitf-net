@@ -60,7 +60,6 @@
     <Compile Include="FixtureSetup.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\ZipHelper.cs" />
-    <Compile Include="Unit\MySqlHelperFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common.MySql\Common.MySql\Common.MySql.csproj">
