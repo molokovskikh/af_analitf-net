@@ -163,6 +163,12 @@ namespace AnalitF.Net.Service.Models
 			}
 
 			data.LastPendingUpdateAt = DateTime.Now;
+			//при переходе на новую версию мы должны отдать все данныех тк между версиями могла измениться схема
+			//и если не отдать все то часть данных останится в старом состоянии а часть в новом,
+			//что может привести к странным результатам
+			if (data.ClientVersion != job.Version)
+				data.Reset();
+
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
 				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
@@ -858,7 +864,11 @@ where c.PriceCode = ?priceId";
 					parameters: new { priceId = Config.RegulatorRegistryPriceId });
 			}
 
-			sql = @"
+			var lastDataUpdate = ((MySqlConnection)session.Connection)
+				.Read<DateTime>("select Max(LastUpdate) from Reports.Drugs")
+				.FirstOrDefault();
+			if (lastDataUpdate > data.LastUpdateAt) {
+				sql = @"
 select DrugId,
   TradeNmR,
   InnR,
@@ -888,7 +898,8 @@ select DrugId,
   RegNr,
   RegDate
 from Reports.Drugs";
-			Export(Result, sql, "Drugs", truncate: true);
+				Export(Result, sql, "Drugs", truncate: true);
+			}
 
 			IList<object[]> newses = new List<object[]>();
 			if (cumulative) {
