@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Все, Нет значения, 10", model.Taxes.Implode(t => t.Name));
 			Assert.AreEqual("Все", model.CurrentTax.Value.Name);
 			model.CurrentTax.Value = model.Taxes.First(t => t.Value == 10);
-			Assert.AreEqual(1, model.Lines.Value.Count);
+			Assert.AreEqual(2, model.Lines.Value.Count);
 		}
 
 		[Test]
@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			model.Lines.Value.AddNewItem(waybillLine);
-			Assert.AreEqual(11, model.Waybill.Lines.Count);
+			Assert.AreEqual(12, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 
