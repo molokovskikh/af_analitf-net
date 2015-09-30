@@ -39,22 +39,22 @@ where w.WriteTime > ?
 	and l.SupplierCost is not null
 	and s.VendorID is not null
 group by l.EAN13
-;
+;";
 
+			StatelessSession.Connection.Execute(sql, new { Begin, end = End.AddDays(1) });
+			sql = @"
 select l.Quantity, l.ProducerCost, l.SerialNumber, l.NDS, l.SupplierCost, s.VendorId, d.DrugId, d.MaxMnfPrice, l.RetailCost
 from WaybillLines l
 	join Waybills w on w.Id = l.WaybillId
 		join Suppliers s on s.Id = w.SupplierId
 	join uniq_document_lines u on u.Id = l.Id
 	join Drugs d on d.EAN = l.EAN13
-;
-drop temporary table if exists uniq_document_lines;
-";
+;";
 
 			using (var stream = File.Create(Result))
 			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251))) {
 				writer.WriteLine("DrugID;Segment;Year;Month;Series;TotDrugQn;MnfPrice;PrcPrice;RtlPrice;Funds;VendorID;Remark;SrcOrg");
-				foreach (var row in StatelessSession.Connection.Query(sql, new { Begin, end = End.AddDays(1) })) {
+				foreach (var row in StatelessSession.Connection.Query(sql)) {
 					var producerCost = row.ProducerCost == null ? 0 : Convert.ToDecimal(row.ProducerCost);
 					var supplierCost = Convert.ToDecimal(row.SupplierCost);
 					var nds = row.NDS == null ? 10 : Convert.ToDecimal(row.NDS);
@@ -97,6 +97,9 @@ drop temporary table if exists uniq_document_lines;
 					writer.WriteLine();
 				}
 			}
+
+			sql = "drop temporary table if exists uniq_document_lines;";
+			StatelessSession.Connection.Execute(sql);
 		}
 	}
 
