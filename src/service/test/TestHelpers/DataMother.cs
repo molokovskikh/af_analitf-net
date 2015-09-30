@@ -50,6 +50,27 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				BillOfEntryNumber = "10609010/101209/0004305/1",
 				EAN13 = "4605635002748",
 			});
+			waybill.Lines.Add(new TestWaybillLine(waybill) {
+				Product = "Доксазозин 4мг таб. Х30 (R)",
+				CatalogProduct = products[1],
+				Certificates = "РОСС RU.ФМ08.Д38737",
+				Period = "01.05.2017",
+				Producer = "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ",
+				ProducerCost = 213.18m,
+				RegistryCost = 382.89m,
+				SupplierPriceMarkup = -5.746m,
+				SupplierCostWithoutNDS = 200.93m,
+				SupplierCost = 221.03m,
+				Quantity = 2,
+				VitallyImportant = true,
+				NDS = 10,
+				SerialNumber = "21012",
+				Amount = 442.05m,
+				NDSAmount = 40.19m,
+				BillOfEntryNumber = "10609010/101209/0004305/1",
+				//для отчета по жизененно важным
+				EAN13 = "4606915000379",
+			});
 			for (var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
 					Product = "Доксазозин 4мг таб. Х30 (R)",

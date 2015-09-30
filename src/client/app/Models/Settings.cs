@@ -376,6 +376,13 @@ namespace AnalitF.Net.Client.Models
 			return null;
 		}
 
+		public virtual string InitAndMap(string name)
+		{
+			var dir = MapPath(name);
+			Directory.CreateDirectory(dir);
+			return dir;
+		}
+
 		public virtual string GetVarRoot()
 		{
 			var root = ConfigurationManager.AppSettings["ClientDocPath"] ??

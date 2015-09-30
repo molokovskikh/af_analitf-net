@@ -401,7 +401,8 @@ where pc.CostCode = :costId")
 	s.Id,
 	s.Name,
 	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
-	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates
+	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates,
+	s.VendorId
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(Result, sql, "suppliers", truncate: true);
@@ -856,6 +857,38 @@ where c.PriceCode = ?priceId";
 				Export(Result, sql, "RegulatorRegistry", truncate: true,
 					parameters: new { priceId = Config.RegulatorRegistryPriceId });
 			}
+
+			sql = @"
+select DrugId,
+  TradeNmR,
+  InnR,
+  PackNx,
+  DosageR,
+  PackQn,
+  Pack,
+  DrugFmNmRS,
+  Segment,
+  Year,
+  Month,
+  Series,
+  TotDrugQn,
+  MnfPrice,
+  PrcPrice,
+  RtlPrice,
+  Funds,
+  VendorID,
+  Remark,
+  SrcOrg,
+  EAN,
+  MaxMnfPrice,
+  ExpiTermR,
+  ClNm,
+  MnfNm,
+  PckNm,
+  RegNr,
+  RegDate
+from Reports.Drugs";
+			Export(Result, sql, "Drugs", truncate: true);
 
 			IList<object[]> newses = new List<object[]>();
 			if (cumulative) {

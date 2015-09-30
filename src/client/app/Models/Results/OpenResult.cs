@@ -29,10 +29,28 @@ namespace AnalitF.Net.Client.Models.Results
 					selectWithShell = true;
 			}
 			if (selectWithShell)
-				ProcessHelper.Start(new ProcessStartInfo("explorer.exe", String.Format("/select,{0}", Filename)));
+				ProcessHelper.Start(new ProcessStartInfo("explorer.exe", $"/select,{Filename}"));
 
-			if (Completed != null)
-				Completed(this, new ResultCompletionEventArgs());
+			Completed?.Invoke(this, new ResultCompletionEventArgs());
+		}
+
+		public event EventHandler<ResultCompletionEventArgs> Completed;
+	}
+
+	public class SelectResult : IResult
+	{
+		public string Filename;
+
+		public SelectResult(string filename)
+		{
+			Filename = filename;
+		}
+
+		public void Execute(ActionExecutionContext context)
+		{
+			ProcessHelper.Start(new ProcessStartInfo("explorer.exe", $"/select,{Filename}"));
+
+			Completed?.Invoke(this, new ResultCompletionEventArgs());
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;

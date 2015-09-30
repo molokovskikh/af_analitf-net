@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
@@ -95,6 +96,20 @@ namespace AnalitF.Net.Client.Models.Commands
 		public T Result;
 
 		public abstract void Execute();
+
+		public Task ToTask(Config.Config config)
+		{
+			var task = new Task(() => {
+				using(var session = Factory.OpenSession())
+				using(var stateless = Factory.OpenStatelessSession()) {
+					Config = config;
+					Session = session;
+					StatelessSession = stateless;
+					Execute();
+				}
+			});
+			return task;
+		}
 	}
 
 	public abstract class DbCommand : DbCommand<object>

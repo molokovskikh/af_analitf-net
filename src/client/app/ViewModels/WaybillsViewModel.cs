@@ -229,11 +229,22 @@ namespace AnalitF.Net.Client.ViewModels
 			Update();
 		}
 
+		public IEnumerable<IResult> VitallyImportantReport()
+		{
+			var commnand = new VitallyImportantReport {
+				Begin = Begin.Value,
+				End = End.Value,
+				AddressIds = AddressSelector.GetActiveFilter().Select(x => x.Id).ToArray()
+			};
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
+
 		public IEnumerable<IResult> RegulatorReport()
 		{
 			var commnand = new WaybillsReport();
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
-			yield return new OpenResult(Settings.Value.MapPath("Reports"));
+			yield return new OpenResult(commnand.Result);
 		}
 	}
 }

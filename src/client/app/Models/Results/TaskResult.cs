@@ -9,8 +9,9 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class TaskResult : IResult
 	{
+		private log4net.ILog log = log4net.LogManager.GetLogger(typeof(TaskResult));
+		private WaitViewModel viewModel;
 		public Task Task;
-		WaitViewModel viewModel;
 
 		public TaskResult(Task task)
 		{
@@ -31,15 +32,19 @@ namespace AnalitF.Net.Client.Models.Results
 				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
 			else
 				scheduler = TaskScheduler.Current;
+			var args = new ResultCompletionEventArgs();
 			Task.ContinueWith(t => {
+				if (t.IsFaulted)
+					args.Error = t.Exception;
+				if (t.IsCanceled)
+					args.WasCancelled = t.IsCanceled;
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
 			}, scheduler);
 			if (Task.Status == TaskStatus.Created)
 				Task.Start();
 			Manager.ShowFixedDialog(viewModel);
-			if (Completed != null)
-				Completed(this, new ResultCompletionEventArgs());
+			Completed?.Invoke(this, args);
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;

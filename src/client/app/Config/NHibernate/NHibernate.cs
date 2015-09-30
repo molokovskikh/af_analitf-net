@@ -105,7 +105,9 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<SentOrder>(o => o.ServerId);
 			Index<MinCost>(r => r.Diff);
 			Index<Catalog>(r => r.Name);
+			Index<Drug>(r => r.EAN);
 
+			mapper.Class<Drug>(x => x.Id(y => y.DrugId));
 			mapper.Class<Settings>(m => {
 				m.Bag(o => o.Markups, c => {
 					c.Inverse(true);
@@ -288,7 +290,8 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				.Where(t => !t.IsAbstract && !t.IsInterface && t.GetProperty("Id") != null
 					|| t == typeof(MinOrderSumRule)
 					|| t == typeof(WaybillOrder)
-					|| t == typeof(Limit));
+					|| t == typeof(Limit)
+					|| t == typeof(Drug));
 			var mapping = mapper.CompileMappingFor(types);
 
 			PatchComponentColumnName(mapping);
