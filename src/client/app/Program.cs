@@ -14,6 +14,8 @@ using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using Common.Tools.Helpers;
+using Devart.Data.MySql;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -38,10 +40,25 @@ namespace AnalitF.Net.Client
 		public void RenderObject(RendererMap rendererMap, object obj, TextWriter writer)
 		{
 			var ex = obj as ReflectionTypeLoadException;
-			if (ex == null)
-				return;
-			foreach (var loaderException in ex.LoaderExceptions) {
-				writer.WriteLine(loaderException);
+			if (ex != null) {
+				foreach (var loaderException in ex.LoaderExceptions) {
+					writer.WriteLine(loaderException);
+				}
+			}
+
+			var db = obj as MySqlException;
+			if (db != null) {
+				writer.Write($"ErrorCode = {db.Code}, ");
+				writer.Write(db.ToString());
+			}
+
+			var e = obj as Exception;
+			if (e != null) {
+				var mysql = e.Chain().OfType<MySqlException>().FirstOrDefault();
+				if (mysql != null) {
+					writer.Write($"MySql ErrorCode = {mysql.Code}, ");
+				}
+				writer.Write(e);
 			}
 		}
 	}
@@ -165,7 +182,7 @@ namespace AnalitF.Net.Client
 				catch (Exception e) {
 					log.Error("Не удалось получить информацию о версии среды или ос", e);
 				}
-				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
+				log.Logger.Repository.RendererMap.Put(typeof(Exception), new ExceptionRenderer());
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
 					return 0;

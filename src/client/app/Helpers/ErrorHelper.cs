@@ -62,19 +62,21 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static bool IsDbCorrupted(Exception e)
 		{
+			//для некоторых ошибок есть два кода, один это официальный код mysql второй это код ошибки myisam
+			//для embedded преобразование этих кодов не происходит
 			var codes = new[] {
 				//Incorrect information in file: '%s'
 				1033,
 				//Incorrect key file for table '%s'; try to repair it
-				1034,
+				126, 1034,
 				//Old key file for table '%s'; repair it!
-				1035,
+				132, 1035,
 				//Table '%s' is marked as crashed and should be repaired
-				1194,
+				127, 144, 1194,
 				//Table '%s' is marked as crashed and last (automatic?) repair failed
-				1195,
+				145, 1195,
 				//Table upgrade required. Please do "REPAIR TABLE `%s`" to fix it!
-				1459
+				164, 1459
 			};
 			return e.Chain().OfType<MySqlException>().Any(x => codes.Contains(x.Code));
 		}
@@ -89,7 +91,7 @@ namespace AnalitF.Net.Client.Helpers
 		public static string TranslateIO(IOException exception)
 		{
 			if (exception is FileNotFoundException) {
-				return String.Format("Файл {0} не найден", exception.Message);
+				return $"Файл {exception.Message} не найден";
 			}
 			return exception.Message;
 		}

@@ -18,7 +18,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			{ "prices", -1 }
 		};
 
-#if DEBUG
 		private static Dictionary<string, string[]> ignoredColumns
 			= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase) {
 				{"WaybillLines", new [] {
@@ -56,7 +55,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			};
 
 		public bool Strict = true;
-#endif
 
 		public ImportCommand(List<System.Tuple<string, string[]>> data)
 		{
