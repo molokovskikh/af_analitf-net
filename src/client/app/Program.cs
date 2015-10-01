@@ -134,6 +134,15 @@ namespace AnalitF.Net.Client
 #endif
 				};
 				var cmds = options.Parse(args);
+
+				//при определения установлен ли .net могла произойти ошибка и мы решили что .net установлен но на самом деле нет
+				//или человек мог сменить компьютер
+				//в этом случае при первом запуске с ключом миграции приложение свалится, и человек получит предложение установить .net
+				//если он егу установит то при последующем запуске мы должны понять что нужно импортировать данные
+				var files = new [] { "Params.txt", "Password.txt", "GlobalParams.txt" };
+				if (files.All(x => File.Exists(FileHelper.MakeRooted(x)))) {
+					migrate = true;
+				}
 				if (migrate)
 					cmds = new List<string> { "migrate" };
 
