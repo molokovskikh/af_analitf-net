@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Promotions = new PromotionPopup(StatelessSession, Shell.Config);
+			Promotions = new PromotionPopup(Shell.Config, CurrentCatalogName, RxQuery, Env);
 			ParentModel.ObservableForProperty(m => (object)m.FilterByMnn, skipInitial: false)
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.CurrentFilter))
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
@@ -260,7 +260,6 @@ namespace AnalitF.Net.Client.ViewModels
 				ExcelExporter.ActiveProperty.Value = "Catalogs";
 				activeItemType = typeof(Catalog);
 				CurrentItem.Value = CurrentCatalog;
-				Promotions.Activate(CurrentCatalogName);
 			}
 		}
 
@@ -270,7 +269,7 @@ namespace AnalitF.Net.Client.ViewModels
 				ExcelExporter.ActiveProperty.Value = "CatalogNames";
 				activeItemType = typeof(CatalogName);
 				CurrentItem.Value = CurrentCatalogName.Value;
-				Promotions.Deactivate();
+				Promotions.Hide();
 			}
 		}
 	}

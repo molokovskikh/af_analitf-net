@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Все, Нет значения, 10", model.Taxes.Implode(t => t.Name));
 			Assert.AreEqual("Все", model.CurrentTax.Value.Name);
 			model.CurrentTax.Value = model.Taxes.First(t => t.Value == 10);
-			Assert.AreEqual(1, model.Lines.Value.Count);
+			Assert.AreEqual(2, model.Lines.Value.Count);
 		}
 
 		[Test]
@@ -42,8 +42,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.8, waybillLine.RetailCost);
-			Assert.IsTrue(model.RoundToSingleDigit);
-			model.RoundToSingleDigit.Value = false;
+			Assert.AreEqual(Rounding.To0_10, model.Rounding.Value);
+			model.Rounding.Value = Rounding.None;
 			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.82, waybillLine.RetailCost);
 		}
@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
-			settings.Save();
+			var results = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
@@ -75,15 +75,26 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_waybill()
 		{
-			var results = model.PrintWaybill();
-			var settings = (SimpleSettings)((DialogResult)results.First()).Model;
+			var results = model.PrintWaybill().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
 		[Test]
 		public void Print_racking_map()
 		{
 			var result = (DialogResult)model.PrintRackingMap();
+			var preview = ((PrintPreviewViewModel)result.Model);
+			Assert.IsNotNull(preview);
+		}
+
+		[Test]
+		public void Print_price_tags()
+		{
+			var result = (DialogResult)model.PrintPriceTags();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview);
 		}
@@ -97,12 +108,23 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Print_registry()
+		{
+			var results = model.PrintRegistry().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
 		public void Create_new_line()
 		{
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			model.Lines.Value.AddNewItem(waybillLine);
-			Assert.AreEqual(11, model.Waybill.Lines.Count);
+			Assert.AreEqual(12, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 

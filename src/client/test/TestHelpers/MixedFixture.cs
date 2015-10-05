@@ -10,6 +10,12 @@ using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Service.Test;
 using Common.NHibernate;
 using Common.Tools;
+using log4net;
+using log4net.Appender;
+using log4net.Config;
+using log4net.Core;
+using log4net.Layout;
+using log4net.Repository.Hierarchy;
 using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -30,10 +36,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected DateTime begin;
 		private FileCleaner cleaner;
+		private Random random;
 
 		[SetUp]
 		public void MixedFixtureSetup()
 		{
+			//в качестве начального значения используется время если оно совпадет то и значения будут идентичные
+			//для этого тесты должны иметь общий генератор случайных чисел
+			random = new Random();
 			begin = DateTime.Now;
 
 			cleaner = new FileCleaner();
@@ -56,13 +66,30 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			address = localSession.Query<Address>().First();
 
 			ViewModelFixture.StubWindowManager();
+
+			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
+			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
+				var repository = (Hierarchy)LogManager.GetRepository();
+				repository.Configured = true;
+				var logger = (Logger)repository.GetLogger("AnalitF.Net");
+				if (logger.Level == null || logger.Level > Level.Warn)
+					logger.Level = Level.Warn;
+				var appender = new ConsoleAppender(new PatternLayout(PatternLayout.DefaultConversionPattern));
+				appender.ActivateOptions();
+				logger.AddAppender(appender);
+			}
 		}
 
 		[TearDown]
 		public void MixedFixtureTearDown()
 		{
-			if (disposable != null)
-				disposable.Dispose();
+			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
+			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
+				var repository = (Hierarchy)LogManager.GetRepository();
+				repository.ResetConfiguration();
+				XmlConfigurator.Configure();
+			}
+			disposable?.Dispose();
 			DataHelper.SaveFailData();
 		}
 
@@ -83,6 +110,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				offer = offer ?? SafeOffer();
 				var order = new Order(offer.Price, address);
 				order.TryOrder(offer, 1);
+				//что бы сервер не считал завки дублями нужно генерировать разные коды
+				order.Lines[0].CodeCr = order.CreatedOn.AddSeconds(random.Next(-15, 15)).ToString();
 				localSession.Save(order);
 				return order;
 			}
@@ -90,7 +119,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Offer SafeOffer()
 		{
-			return localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ"));
+			return localSession.Query<Offer>().First(o => !o.Price.Name.Contains("минимальный заказ")
+				&& o.RequestRatio == null);
 		}
 
 		protected Order MakeOrderClean(Address address = null, Offer offer = null)

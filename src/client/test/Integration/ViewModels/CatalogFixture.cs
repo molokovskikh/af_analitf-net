@@ -10,6 +10,7 @@ using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -199,6 +200,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsFalse(promotions.Visible.Value);
 			nameViewModel.ActivateCatalog();
 
+			scheduler.AdvanceByMs(500);
 			Assert.IsTrue(promotions.Visible.Value);
 			Assert.AreEqual(name.Value.Name, promotions.Name.Value.Name);
 			Assert.That(promotions.Promotions.Value.Count, Is.GreaterThan(0));

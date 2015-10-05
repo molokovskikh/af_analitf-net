@@ -159,8 +159,10 @@ namespace AnalitF.Net.Client.Helpers
 		private static void CollectResult(IEnumerator<IResult> enumerator, IObserver<IResult> observer, CancellationDisposable cancellation)
 		{
 			try {
-				if (cancellation.Token.IsCancellationRequested || !enumerator.MoveNext())
+				if (cancellation.Token.IsCancellationRequested || !enumerator.MoveNext()) {
 					observer.OnCompleted();
+					return;
+				}
 				IoC.BuildUp(enumerator.Current);
 			}
 			catch(Exception e) {

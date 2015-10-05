@@ -61,6 +61,16 @@ namespace AnalitF.Net.Client.Helpers
 		public static Color ActiveColor = Color.FromRgb(0xD7, 0xF0, 0xFF);
 		public static Color InactiveColor = Color.FromRgb(0xDA, 0xDA, 0xDA);
 
+		//в каталоге людям не нравится бледное выделение, нужно использовать обычное
+		//но в этом случае смешение цветов работает плохо из-за того что цвет текста становится не контрастным
+		//и он плохо читается, по хорошему нужно вычислять контрастный цвет текста но это банка червей
+		//по этому для этих стилей смешение не используется
+		public static Dictionary<Type, Tuple<Color, Color, string>> BaseStyles
+			= new Dictionary<Type, Tuple<Color, Color, string>> {
+				{typeof(CatalogName), Tuple.Create(SystemColors.HighlightColor, SystemColors.HighlightColor, "Normal") },
+				{typeof(Catalog), Tuple.Create(SystemColors.HighlightColor, SystemColors.HighlightColor, "Normal") },
+			};
+
 		public static Dictionary<string, DataTrigger> BuildDefaultStyles()
 		{
 			return new Dictionary<string, DataTrigger> {
@@ -234,11 +244,17 @@ namespace AnalitF.Net.Client.Helpers
 				var mainStyle = type == typeof (WaybillLine)
 					? (Style)app["DefaultEditableCell"]
 					: (Style)app[typeof(DataGridCell)];
-				BuildStyles(localResources, app,
-					type,
-					ActiveColor,
-					InactiveColor,
-					mainStyle);
+				var activeColor = ActiveColor;
+				var inactiveColor = InactiveColor;
+				var baseStyle = BaseStyles.GetValueOrDefault(type);
+				var mixColors = true;
+				if (baseStyle != null) {
+					activeColor = baseStyle.Item1;
+					inactiveColor = baseStyle.Item2;
+					mainStyle = (Style)app[baseStyle.Item3];
+					mixColors = false;
+				}
+				BuildStyles(localResources, app, type, activeColor, inactiveColor, mainStyle, mixColors);
 			}
 		}
 
@@ -257,7 +273,8 @@ namespace AnalitF.Net.Client.Helpers
 			Type type,
 			Color activeColor,
 			Color inactiveColor,
-			Style baseStyle = null)
+			Style baseStyle = null,
+			bool mixColors = true)
 		{
 			var styles = from p in type.GetProperties()
 				from a in p.GetCustomAttributes(typeof(StyleAttribute), true)
@@ -265,7 +282,7 @@ namespace AnalitF.Net.Client.Helpers
 				select Tuple.Create(type, p, d);
 			var rowStyles = styles.Where(l => l.Item3.Columns == null || l.Item3.Columns.Length == 0).ToArray();
 			var rowStyle = new Style(typeof(DataGridCell), baseStyle);
-			ApplyToStyle(rowStyles.OrderBy(s => s.Item3.Priority), rowStyle);
+			ApplyToStyle(rowStyles.OrderBy(s => s.Item3.Priority), rowStyle, mixColors);
 
 			if (rowStyle.Triggers.Count > 0) {
 				local.Add(type.Name + "Row", rowStyle);
@@ -275,7 +292,7 @@ namespace AnalitF.Net.Client.Helpers
 			var cellStyles = styles.Where(l => !String.IsNullOrEmpty(l.Item3.Description));
 			foreach (var legend in cellStyles) {
 				var style = new Style(typeof(Label), (Style)app["Legend"]);
-				GetCombinedStyle(legend.Item3.GetName(legend.Item2), legend.Item1.Name)
+				GetCombinedTrigger(legend.Item3.GetName(legend.Item2), legend.Item1.Name)
 					.Setters
 					.OfType<Setter>()
 					.Each(s => style.Setters.Add(new Setter(s.Property, s.Value, s.TargetName)));
@@ -293,7 +310,7 @@ namespace AnalitF.Net.Client.Helpers
 				string context = null;
 
 				//низко-приоритетные стили строки
-				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority < 0).OrderBy(s => s.Item3.Priority), style);
+				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority < 0).OrderBy(s => s.Item3.Priority), style, mixColors);
 
 				foreach (var styleDef in column) {
 					var prop = styleDef.Item2;
@@ -312,35 +329,50 @@ namespace AnalitF.Net.Client.Helpers
 				}
 
 				//высоко-приоритетные стили строки
-				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority >= 0).OrderBy(s => s.Item3.Priority), style);
+				ApplyToStyle(rowStyles.Where(s => s.Item3.Priority >= 0).OrderBy(s => s.Item3.Priority), style, mixColors);
 
 				style.Seal();
 				local.Add(CellKey(type, column.Key, context), style);
 			}
 		}
 
-		private static void ApplyToStyle(IEnumerable<Tuple<Type, PropertyInfo, StyleAttribute>> styles, Style rowStyle)
+		private static void ApplyToStyle(IEnumerable<Tuple<Type, PropertyInfo, StyleAttribute>> styles, Style rowStyle, bool mixColors)
 		{
-			foreach (var style in styles)
-				PatchBackground(rowStyle, style.Item2.Name, GetCombinedStyle(style.Item3.GetName(style.Item2), style.Item2.Name));
+			foreach (var style in styles) {
+				var property = style.Item2.Name;
+				var trigger = GetCombinedTrigger(style.Item3.GetName(style.Item2), style.Item2.Name);
+				var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
+				if (background == null) {
+					rowStyle.Triggers.Add(trigger);
+					continue;
+				}
+
+				trigger.Setters.Remove(background);
+				if (mixColors)
+					AddMixedBackgroundTriggers(rowStyle, property, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
+				else
+					AddBackgroundTriggers(rowStyle, property, true, (Brush)background.Value);
+				if (trigger.Setters.Count > 0)
+					rowStyle.Triggers.Add(trigger);
+			}
 		}
 
-		private static void PatchBackground(Style style, string property, DataTrigger trigger)
+		private static void AddBackgroundTriggers(Style style, string name, bool value, Brush brush)
 		{
-			var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
-			if (background == null) {
-				style.Triggers.Add(trigger);
-				return;
-			}
-
-			trigger.Setters.Remove(background);
-			AddMixedBackgroundTriggers(style, property, true, ((SolidColorBrush)background.Value).Color, ActiveColor, InactiveColor);
-			if (trigger.Setters.Count > 0) {
-				style.Triggers.Add(trigger);
-			}
+			var trigger = new MultiDataTrigger {
+				Conditions = {
+					new Condition(new Binding(name), value),
+					new Condition(new Binding("(IsSelected)") { RelativeSource = RelativeSource.Self }, false)
+				},
+				Setters = {
+					new Setter(Control.BackgroundProperty, brush),
+					new Setter(Control.BorderBrushProperty, brush)
+				}
+			};
+			style.Triggers.Add(trigger);
 		}
 
-		private static DataTrigger GetCombinedStyle(string key, string property)
+		private static DataTrigger GetCombinedTrigger(string key, string property)
 		{
 			//PatchBackground модифицирует триггер по этому копируем
 			var trigger = Copy(DefaultStyles.GetValueOrDefault(key))
@@ -456,7 +488,6 @@ namespace AnalitF.Net.Client.Helpers
 			};
 			style.Triggers.Add(trigger);
 		}
-
 
 		public static void AddEditableTriggers(Style style, string name, object value,
 			Color baseColor,
@@ -627,6 +658,11 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static List<CustomStyle> GetDefaultStyles()
 		{
+			return GetDefaultStyles(DefaultStyles);
+		}
+
+		public static List<CustomStyle> GetDefaultStyles(Dictionary<string, DataTrigger> defaults)
+		{
 			var styles = GetTypes()
 				.SelectMany(t => t.GetProperties().Select(p => Tuple.Create(p, p.GetCustomAttributes(typeof(StyleAttribute), true).OfType<StyleAttribute>().ToArray())))
 				.SelectMany(t => t.Item2.Select(a => Tuple.Create(t.Item1, a)))
@@ -637,7 +673,7 @@ namespace AnalitF.Net.Client.Helpers
 					Name = t.Item2.GetName(t.Item1),
 					Description = t.Item2.Description,
 				};
-				var trigger = DefaultStyles.GetValueOrDefault(appStyle.Name)
+				var trigger = defaults.GetValueOrDefault(appStyle.Name)
 					?? Background(DefaultColor.Color);
 				var background = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.BackgroundProperty);
 				var foreground = trigger.Setters.OfType<Setter>().FirstOrDefault(s => s.Property == Control.ForegroundProperty);

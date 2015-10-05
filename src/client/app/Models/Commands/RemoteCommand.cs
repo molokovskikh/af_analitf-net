@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
+using Common.Tools;
+using NHibernate;
 using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -141,9 +143,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 		}
 
-		protected static bool IsOkStatusCode(HttpStatusCode httpStatusCode)
+		protected static bool IsOkStatusCode(HttpStatusCode? code)
 		{
-			return httpStatusCode == HttpStatusCode.OK || httpStatusCode == HttpStatusCode.NoContent;
+			//запрос не производился
+			if (code == null)
+				return true;
+			return code == HttpStatusCode.OK || code == HttpStatusCode.NoContent;
 		}
 
 		public void Configure(Settings value, Config.Config config, CancellationToken token)
@@ -163,8 +168,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			HttpResponseMessage response = null;
 			try {
 				while (true) {
-					if (response != null)
-						response.Dispose();
+					response?.Dispose();
 
 					response = task.Result;
 					if (response.StatusCode == HttpStatusCode.OK)
@@ -200,8 +204,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 			catch(Exception) {
-				if (response != null)
-					response.Dispose();
+				response?.Dispose();
 				throw;
 			}
 		}

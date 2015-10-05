@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	public class UnconfirmedOrder : ServerFixture
 	{
 		private uint priceId;
+		public TestOrder Order;
 
 		public UnconfirmedOrder()
 		{
@@ -46,14 +47,14 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				.Concat(activePrices)
 				.First()
 				.Price;
-			var order = new TestOrder(user2, price) {
+			Order = new TestOrder(user2, price) {
 				Submited = false,
 				Processed = false
 			};
 			//уцененные препараты не восстанавливаются
 			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
-			order.AddItem(offer, 1);
-			session.Save(order);
+			Order.AddItem(offer, 1);
+			session.Save(Order);
 		}
 
 		public override void Rollback(ISession session)

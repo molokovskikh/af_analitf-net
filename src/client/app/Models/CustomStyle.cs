@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
-using NPOI.SS.Formula.Functions;
 using Color = System.Drawing.Color;
 using Control = System.Windows.Controls.Control;
 
@@ -63,6 +63,24 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsBackground { get; set; }
 
+		[Ignore]
+		public virtual System.Windows.Media.Color Color
+		{
+			get
+			{
+				if (IsBackground)
+					return (System.Windows.Media.Color)ColorConverter.ConvertFromString(Background);
+				return (System.Windows.Media.Color)ColorConverter.ConvertFromString(Foreground);
+			}
+			set
+			{
+				if (IsBackground)
+					Background = value.ToString();
+				else
+					Foreground = value.ToString();
+			}
+		}
+
 		public virtual bool Equals(CustomStyle other)
 		{
 			if (ReferenceEquals(null, other))
@@ -85,18 +103,16 @@ namespace AnalitF.Net.Client.Models
 
 		public override int GetHashCode()
 		{
-			return (Name != null ? Name.GetHashCode() : 0);
+			return Name?.GetHashCode() ?? 0;
 		}
 
 		public virtual Setter ToSetter()
 		{
 			if (IsBackground) {
-				var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(Background);
-				return new Setter(Control.BackgroundProperty, new SolidColorBrush(color));
+				return new Setter(Control.BackgroundProperty, new SolidColorBrush(Color));
 			}
 			else {
-				var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(Foreground);
-				return new Setter(Control.ForegroundProperty, new SolidColorBrush(color));
+				return new Setter(Control.ForegroundProperty, new SolidColorBrush(Color));
 			}
 		}
 

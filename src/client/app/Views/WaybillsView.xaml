@@ -55,6 +55,7 @@
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
 			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">Отчет для Росздравнадзора</Button>
+			<Button Name="VitallyImportantReport" Style="{StaticResource FilterElement}">Отчет по ЖНВЛП для Росздравнадзора</Button>
 			<ToggleButton Grid.Row="0" Grid.Column="2"
 				Style="{StaticResource FilterElement}" Name="Sign" IsChecked="{Binding CurrentWaybill.Value.IsSign}">
 				Подписать

@@ -8,6 +8,7 @@
 	xmlns:parts="clr-namespace:AnalitF.Net.Client.Views.Parts"
 	xmlns:cal="http://www.caliburnproject.org"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	xmlns:gif="http://wpfanimatedgif.codeplex.com"
 	behaviors:Focusable.DefaultFocus="{x:Reference Costs}">
 
 	<i:Interaction.Behaviors>
@@ -143,7 +144,8 @@
 			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
 
-		<Image Grid.Row="3" Height="125" Source="{Binding Settings.Value.Ad, Converter={StaticResource UriToBitmap}}" />
+		<Image Grid.Row="3" Height="125"
+			gif:ImageBehavior.AnimatedSource="{Binding Settings.Value.AdStream, Converter={StaticResource UriToBitmap}}" />
 
 		<parts:ProductInfoView Grid.Row="4" cal:Bind.ModelWithoutContext="{Binding}" />
 	</Grid>

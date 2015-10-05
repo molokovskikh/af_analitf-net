@@ -116,9 +116,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				if (user.SaveOrders) {
 					try {
-						var dir = settings.MapPath("Orders");
-						Directory.CreateDirectory(dir);
-
+						var dir = settings.InitAndMap("Orders");
 						foreach (var sentOrder in sentOrders) {
 							var name = Path.Combine(dir, sentOrder.ServerId + ".txt");
 							using(var writer = new StreamWriter(name, false, Encoding.Default)) {

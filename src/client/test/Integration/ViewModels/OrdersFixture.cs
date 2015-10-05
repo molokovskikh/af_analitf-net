@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.CanFreeze, Is.True);
 			model.Freeze();
 			Assert.That(model.CanUnfreeze);
-			ProcessTask(model.Unfreeze());
+			TaskResult(model.Unfreeze());
 			Assert.That(model.Orders.Select(o => o.Id).ToArray(), Is.Not.Contains(order.Id));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentOrder = model.Orders.First(o => o.Id == order.Id);
 			Assert.That(model.CanReorder, Is.True);
 			var result = model.Reorder();
-			ProcessTask(result);
+			TaskResult(result);
 
 			Assert.That(model.Orders.Select(o => o.Id).ToArray(), Is.Not.Contains(order.Id));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
@@ -156,7 +156,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			SelectSent();
 
 			Assert.That(model.CanReorder, Is.True);
-			ProcessTask(model.Reorder());
+			TaskResult(model.Reorder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines.Count, Is.EqualTo(2));
@@ -202,7 +202,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			PrepareSent();
 
 			Assert.That(model.CanRestoreOrder, Is.True);
-			ProcessTask(model.RestoreOrder());
+			TaskResult(model.RestoreOrder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
 			model.IsCurrentSelected.Value = true;
 			model.IsSentSelected.Value = false;
@@ -249,7 +249,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.AddressToMove = model.AddressesToMove.Find(a => a.Id == newAddress.Id);
 			Assert.True(model.CanMove);
 			Assert.That(model.MoveVisible);
-			ProcessTask(model.Move());
+			TaskResult(model.Move());
 			Assert.That(model.Orders[0].Address.Id, Is.EqualTo(newAddress.Id));
 		}
 
@@ -360,15 +360,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.IsSentSelected.Value = true;
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
-		}
-
-		private void ProcessTask(IEnumerable<IResult> result)
-		{
-			var enumerator = result.GetEnumerator();
-			var task = Next<TaskResult>(enumerator).Task;
-			task.Start();
-			task.Wait();
-			enumerator.MoveNext();
 		}
 	}
 }

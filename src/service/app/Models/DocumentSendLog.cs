@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using System.IO;
+using Common.Models;
 
 namespace AnalitF.Net.Service.Models
 {
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Service.Models
 		public virtual Supplier Supplier { get; set; }
 		public virtual string Filename { get; set; }
 		public virtual bool IsFake { get; set; }
+		public virtual bool PreserveFilename { get; set; }
 	}
 
 	public class DocumentSendLog
@@ -27,5 +29,13 @@ namespace AnalitF.Net.Service.Models
 		public virtual bool Committed { get; set; }
 		public virtual bool DocumentDelivered { get; set; }
 		public virtual bool FileDelivered { get; set; }
+
+		public virtual string GetTargetFilename(string localFilename)
+		{
+			var filename = Path.GetFileName(localFilename);
+			if (Document.PreserveFilename)
+				filename = Document.Filename ?? filename;
+			return filename;
+		}
 	}
 }

@@ -17,8 +17,8 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Activate(model);
 
 			Assert.IsTrue(model.IsActive);
-			Assert.IsTrue(model.RoundToSingleDigit.Value);
-			model.RoundToSingleDigit.Value = false;
+			Assert.AreEqual(Rounding.To0_10, model.Rounding.Value);
+			model.Rounding.Value = Rounding.None;
 
 			ScreenExtensions.TryDeactivate(model, false);
 			Assert.IsFalse(model.IsActive);
@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			model = new WaybillDetails(1);
 			model.Waybill = new Waybill(model.Address, new Supplier());
 			Activate(model);
-			Assert.IsFalse(model.RoundToSingleDigit.Value);
+			Assert.AreEqual(Rounding.None, model.Rounding.Value);
 		}
 	}
 }

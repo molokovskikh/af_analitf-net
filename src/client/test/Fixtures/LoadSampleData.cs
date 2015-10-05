@@ -22,9 +22,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Execute(ISession session)
 		{
-			var sanityCheck = new SanityCheck();
-			sanityCheck.Config = Config;
-			sanityCheck.InitDb();
+			using (var sanityCheck = new SanityCheck()) {
+				sanityCheck.Config = Config;
+				sanityCheck.InitDb();
+			}
 
 			var result = Files.GroupBy(f => f.ArchiveFileName.Replace(".meta", ""))
 				.Where(g => g.Count() > 1)
@@ -35,14 +36,16 @@ namespace AnalitF.Net.Client.Test.Fixtures
 						.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries)))
 				.ToList();
 
-			var importer = new ImportCommand(result);
-			importer.Config = Config;
-			importer.Session = session;
-			importer.Execute();
+			using (var importer = new ImportCommand(result)) {
+				importer.Config = Config;
+				importer.InitSession();
+				importer.Execute();
+			}
 
 			var settings = session.Query<Settings>().First();
 			settings.UserName = "test";
 			settings.Password = "123";
+			settings.LastUpdate = DateTime.Now;
 			session.Save(settings);
 		}
 	}

@@ -16,7 +16,7 @@ namespace test
 		[Test, RequiresSTA]
 		public void Run_after_update_on_exited_process()
 		{
-			FileHelper.InitDir("test", "test/bin", "test/update");
+			FileHelper.InitDir("test/bin", "test/update");
 			File.Copy("../../../stub/bin/debug/stub.exe", "test/update/stub.exe");
 			File.WriteAllText("test/update/version.txt", "1.0");
 
@@ -33,7 +33,7 @@ namespace test
 		[Test]
 		public void Clean_bin_on_marker_file()
 		{
-			FileHelper.InitDir("test", "test/bin", "test/update");
+			FileHelper.InitDir("test/bin", "test/update");
 			File.WriteAllText("test/bin/app.exe", "");
 			File.WriteAllText("test/bin/lib.dll", "");
 

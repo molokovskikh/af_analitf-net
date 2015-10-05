@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var settings = Init<SettingsViewModel>();
 			settings.Markups[0].Markup = 50;
 			settings.Markups[0].MaxMarkup = 50;
-			settings.Save();
+			var result = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(50);
 
@@ -107,7 +107,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			task.Task.Start();
 			task.Task.Wait();
 			var open = Next<OpenResult>(result);
-			Assert.That(Directory.GetFiles(open.Filename)[0], Is.StringContaining("Росздравнадзор"));
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Is.StringContaining("Росздравнадзор"));
+		}
+
+		[Test]
+		public void Vitally_important_report()
+		{
+			Fixture<LocalWaybill>();
+			FileHelper.InitDir(settings.MapPath("Reports"));
+			var result = model.VitallyImportantReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Is.StringContaining("Росздравнадзор"));
+			//дожна быть строка заголовка и как миниму одна строка данных
+			Assert.That(File.ReadAllText(open.Filename).Length, Is.GreaterThan(1));
 		}
 
 		[Test]

@@ -314,7 +314,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Load_promotion()
 		{
-			var fixture = Fixture<LocalPromotion>();
+			var fixture = new LocalPromotion {
+				Catalog = catalog
+			};
+			Fixture(fixture);
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			scheduler.AdvanceByMs(500);
 			catalog = fixture.Promotion.Catalogs.First();
 			Assert.That(model.Promotions.Promotions.Value.Count, Is.GreaterThan(0));
 		}
@@ -361,7 +366,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
-			model.CurrentOffer.Value = model.Offers.Value.First(o => o.ProductId == order.Lines[0].ProductId);
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.ProductId == order.Lines[0].ProductId && !o.Junk);
 			scheduler.Start();
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();

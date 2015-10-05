@@ -243,7 +243,7 @@ namespace AnalitF.Net.Client.Models
 			}
 
 			string error = null;
-			if (Count % RequestRatio.GetValueOrDefault(1) != 0) {
+			if (Count % SafeRequestRatio != 0) {
 				error = String.Format("Поставщиком определена кратность по заказываемой позиции.\r\nВведенное значение \"{0}\" не кратно установленному значению \"{1}\"",
 					Count,
 					RequestRatio);
@@ -284,10 +284,9 @@ namespace AnalitF.Net.Client.Models
 			topBound = Math.Min(topBound, quantity);
 			var bottomBound = Math.Ceiling(MinOrderSum.GetValueOrDefault() / Cost);
 			bottomBound = Math.Max(MinOrderCount.GetValueOrDefault(), bottomBound);
-			var result = topBound - (topBound % RequestRatio.GetValueOrDefault(1));
-			if (result < bottomBound) {
+			var result = topBound - (topBound % SafeRequestRatio);
+			if (result < bottomBound)
 				return 0;
-			}
 			return result;
 		}
 

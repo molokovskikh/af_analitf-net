@@ -11,10 +11,16 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
+using Test.Support;
+using Address = AnalitF.Net.Client.Models.Address;
+using OfferComposedId = AnalitF.Net.Client.Models.OfferComposedId;
+using OrderResultStatus = AnalitF.Net.Client.Models.OrderResultStatus;
 
 namespace AnalitF.Net.Client.Test.Integration.Commands
 {
@@ -47,20 +53,30 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Load_orders()
 		{
 			localSession.DeleteEach<Order>();
-			var priceId = localSession.Query<Offer>().First().Price.Id.PriceId;
-			Fixture(new UnconfirmedOrder(priceId));
+			var order = MakeOrder();
+			var fixture = new UnconfirmedOrder(order.Price.Id.PriceId);
+			Fixture(fixture);
 
 			Run(new UpdateCommand());
 
 			var orders = localSession.Query<Order>().ToArray();
-			Assert.AreEqual(1, orders.Length);
-			var order = orders[0];
-			Assert.That(order.Sum, Is.GreaterThan(0));
-			Assert.That(order.LinesCount, Is.GreaterThan(0));
-			Assert.AreEqual(order.LinesCount, order.Lines.Count);
-			Assert.IsFalse(order.Frozen, "Заказ заморожен {0}", order.SendError + order.Lines.Implode(l => l.SendError));
-			Assert.IsNotNull(order.Address);
-			Assert.IsNotNull(order.Price);
+			Assert.AreEqual(2, orders.Length);
+
+			var loaded = orders.First(x => x.Id != order.Id);
+			Assert.That(loaded.Sum, Is.GreaterThan(0));
+			Assert.That(loaded.LinesCount, Is.GreaterThan(0));
+			Assert.AreEqual(loaded.LinesCount, loaded.Lines.Count);
+			Assert.IsFalse(loaded.Frozen, "Заказ заморожен {0}", loaded.SendError + loaded.Lines.Implode(l => l.SendError));
+			Assert.IsNotNull(loaded.Address);
+			Assert.IsNotNull(loaded.Price);
+
+			localSession.Refresh(order);
+			Assert.IsTrue(order.Frozen);
+			Assert.AreEqual(1, order.Lines.Count);
+
+			var log = session.Query<RequestLog>().OrderByDescending(x => x.Id).First();
+			//протоколируем номер заказа на клиенте и сервере
+			Assert.AreEqual($"Экспортированы неподтвержденные заявки: {fixture.Order.Id} -> {order.Id + 1}", log.Error);
 		}
 
 		[Test]
@@ -73,23 +89,29 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(new SendOrders(address));
 
 			Assert.That(localSession.Query<Order>().Count(), Is.EqualTo(0));
-			var sentOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
-			Assert.That(sentOrders.Count, Is.EqualTo(1), sentOrders.Implode());
-			Assert.That(sentOrders[0].Lines.Count, Is.EqualTo(1));
+			var srcOrders = localSession.Query<SentOrder>().Where(o => o.SentOn >= begin).ToList();
+			var srcOrder = srcOrders[0];
+			Assert.That(srcOrders.Count, Is.EqualTo(1), srcOrders.Implode());
+			Assert.That(srcOrder.Lines.Count, Is.EqualTo(1));
 
-			var orders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
-			Assert.That(orders.Count, Is.EqualTo(1));
-			Assert.IsFalse(orders[0].Deleted);
-			var resultOrder = orders[0];
-			Assert.That(resultOrder.RowCount, Is.EqualTo(1));
-			var item = resultOrder.OrderItems[0];
+			var dstOrders = session.Query<Common.Models.Order>().Where(o => o.WriteTime >= begin).ToList();
+			var dstOrder = dstOrders[0];
+			Assert.AreEqual(dstOrder.RowId, srcOrder.ServerId);
+			Assert.AreEqual(1, dstOrders.Count);
+			Assert.IsFalse(dstOrders[0].Deleted);
+			Assert.AreEqual(1, dstOrder.RowCount);
+			Assert.AreEqual("Базовый", dstOrder.PriceName);
+			Assert.AreEqual(session.Load<TestPrice>(dstOrder.PriceList.PriceCode).Costs[0].Id, dstOrder.CostId);
+			Assert.AreEqual("Тестовая", dstOrder.CostName);
+
+			var item = dstOrder.OrderItems[0];
 			Assert.That(item.CodeFirmCr, Is.EqualTo(line.ProducerId));
 			Assert.That(item.SynonymCode, Is.EqualTo(line.ProductSynonymId));
 			Assert.That(item.SynonymFirmCrCode, Is.EqualTo(line.ProducerSynonymId));
 
 			Assert.That(item.LeaderInfo.MinCost, Is.GreaterThan(0));
 			Assert.That(item.LeaderInfo.PriceCode, Is.GreaterThan(0), "номер строки заказа {0}", item.RowId);
-			Assert.AreEqual(item.RowId, sentOrders[0].Lines[0].ServerId);
+			Assert.AreEqual(item.RowId, srcOrder.Lines[0].ServerId);
 		}
 
 		[Test]
@@ -217,6 +239,35 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Ignore_restore_order_for_batch()
+		{
+			localSession.DeleteEach<Order>();
+
+			var price = session.Load<TestPrice>(localSession.Query<Price>().First().Id.PriceId);
+			var ids = localSession.Query<Offer>().Select(x => x.ProductId).Distinct().ToArray();
+			var product = session.Query<TestProduct>().First(x => !x.Hidden && !ids.Contains(x.Id));
+			var offer = price.Supplier.AddCore(product);
+			price.Supplier.SaveCore(session, offer);
+
+			offer.RequestRatio = 5;
+			price.Supplier.InvalidateCache(session, ServerUser().Id);
+
+			var fixture = new SmartOrder();
+			fixture.Rule.CheckOrderCost = false;
+			fixture.Rule.CheckMinOrderCount = false;
+			fixture.Rule.CheckRequestRatio = false;
+			fixture.ProductIds = new [] { offer.Product.Id };
+			Fixture(fixture);
+
+			MakeBatch("1|1");
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(1, orders.Length);
+			var order = orders[0];
+			Assert.IsFalse(order.Frozen, order.Lines.Implode(x => x.SendError));
+			Assert.AreEqual(offer.Id, order.Lines[0].OfferId.OfferId);
+		}
+
+		[Test]
 		public void Transit_service_fields()
 		{
 			var fixture = new SmartOrder {
@@ -266,14 +317,16 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			MakeOrderClean();
 
-			Run(new SendOrders(address));
+			Assert.AreEqual(UpdateResult.OK, Run(new SendOrders(address)));
 			var fixture = Fixture<MatchedWaybill>();
-			Run(new UpdateCommand());
+			Assert.AreEqual(UpdateResult.SilentOk, Run(new UpdateCommand()));
 
 			var order = localSession.Query<SentOrder>().First(o => o.SentOn >= begin);
-			var docLines = localSession.CreateSQLQuery("select DocumentLineId from WaybillOrders where OrderLineId = :orderLineId")
+			var docLines = localSession
+				.CreateSQLQuery("select DocumentLineId from WaybillOrders where OrderLineId = :orderLineId")
 				.SetParameter("orderLineId", order.Lines[0].ServerId)
 				.List();
+			Assert.AreEqual(1, docLines.Count, $"не удалось найти накладную для заявки {order.Id}");
 			Assert.AreEqual(Convert.ToUInt32(docLines[0]), fixture.Waybill.Lines[0].Id);
 		}
 
@@ -340,7 +393,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.Select(o => o.ProductId)
 				.Distinct()
 				.ToArray();
-			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId));
+			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId) && o.RequestRatio == null);
 		}
 
 		private UpdateResult MakeBatch(string content)

@@ -157,6 +157,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WpfAnimatedGif">
+      <HintPath>..\..\..\packages\WpfAnimatedGif.1.4.13\lib\net\WpfAnimatedGif.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Xceed.Wpf.Toolkit" />
   </ItemGroup>
   <ItemGroup>
@@ -769,6 +773,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="app.manifest" />
+    <None Include="App.migration.config" />
     <None Include="App.release.config" />
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
@@ -779,7 +784,7 @@
     <Resource Include="Assets\images\Download_32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\tmp\C#\DiadocApi\DiadocApi.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\tmp\diadok\C#\DiadocApi\DiadocApi.csproj">
       <Project>{992AFD96-B3EE-4124-8788-022F867E2EF0}</Project>
       <Name>DiadocApi</Name>
     </ProjectReference>
@@ -837,10 +842,8 @@
     <Resource Include="Assets\images\price-tag-log.png" />
     <Resource Include="Assets\images\splash.png" />
     <Resource Include="Assets\images\Question.ico" />
+    <EmbeddedResource Include="exe.licenses" />
     <Content Include="Assets\shaders\grayscale.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

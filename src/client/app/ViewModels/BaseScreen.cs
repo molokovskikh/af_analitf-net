@@ -708,8 +708,36 @@ namespace AnalitF.Net.Client.ViewModels
 						Drained.Set();
 				}
 			}, CloseCancellation.Token);
-			task.Start(Env.QueryScheduler);
+			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(Env.QueryScheduler);
 			return Observable.FromAsync(() => task);
+		}
+
+		public Task TplQuery(Action<IStatelessSession> action)
+		{
+			var task = new Task(() => {
+				if (_backgroundSession == null)
+					_backgroundSession = Env.Factory.OpenStatelessSession();
+				Interlocked.Increment(ref backgrountQueryCount);
+				try{
+					Drained.Reset();
+					if (_backgroundSession == null)
+						return;
+					lock (_backgroundSession) {
+						action(_backgroundSession);
+					}
+				}
+				finally {
+					var val = Interlocked.Decrement(ref backgrountQueryCount);
+					if (val == 0)
+						Drained.Set();
+				}
+			}, CloseCancellation.Token);
+			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(Env.QueryScheduler);
+			return task;
 		}
 
 		public Task WaitQueryDrain()

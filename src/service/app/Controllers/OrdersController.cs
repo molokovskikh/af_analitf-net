@@ -53,8 +53,7 @@ where l.RequestId = :id;")
 				.SetParameter("id", confirm.RequestId)
 				.ExecuteUpdate();
 			var job = Session.Get<RequestLog>(confirm.RequestId);
-			if (job != null)
-				job.Confirm(Config);
+			job?.Confirm(Config, confirm.Message);
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
@@ -88,7 +87,10 @@ where l.RequestId = :id;")
 							ClientOrderId = clientOrder.ClientOrderId,
 							PriceDate = clientOrder.PriceDate,
 							ClientAddition = clientOrder.Comment,
-							CalculateLeader = false
+							CalculateLeader = false,
+							PriceName = clientOrder.PriceName,
+							CostId = clientOrder.CostId,
+							CostName = clientOrder.CostName,
 						};
 						foreach (var sourceItem in clientOrder.Items) {
 							var offer = new Offer {
@@ -104,6 +106,9 @@ where l.RequestId = :id;")
 								var value = property.GetValue(sourceItem, null);
 								property.SetValue(offer, value, null);
 							}
+							//клиент в поле уценка передает уценку с учетом клиентских настроек
+							//оригинальная уценка хранится в поле OriginalJunk
+							offer.Junk = sourceItem.OriginalJunk;
 
 							try {
 								var item = order.AddOrderItem(offer, sourceItem.Count);
@@ -112,11 +117,9 @@ where l.RequestId = :id;")
 									item.LeaderInfo = new OrderItemLeadersInfo {
 										OrderItem = item,
 										MinCost = (float?)sourceItem.MinCost,
-										PriceCode = sourceItem.MinPrice != null
-											? (uint?)sourceItem.MinPrice.PriceId : null,
+										PriceCode = sourceItem.MinPrice?.PriceId,
 										LeaderMinCost = (float?)sourceItem.LeaderCost,
-										LeaderPriceCode = sourceItem.LeaderPrice != null
-											? (uint?)sourceItem.LeaderPrice.PriceId : null,
+										LeaderPriceCode = sourceItem.LeaderPrice?.PriceId,
 									};
 								}
 								orderitemMap.Add(item, sourceItem.Id);
@@ -138,6 +141,10 @@ where l.RequestId = :id;")
 				}
 
 				errors.AddEach(Validate(session, user, orders, force, orderitemMap));
+				//удаление дублей должно производиться после всех проверок тк заказ будет отброшен полностью
+				//и проверки для него не важны или пройдет часть позиций которые пользователь "донабил"
+				//в этом случае проверки для них не должны применяться тк они идут в "догонку"
+				errors.AddEach(RemoveDuplicate(session, orders, orderitemMap));
 
 				//мы не должны сохранять валидные заказы если корректировка заказов
 				//включена
@@ -179,7 +186,77 @@ where l.RequestId = :id;")
 					price != null ? price.Supplier.Name : "",
 					result.Error);
 			}
-			return errors;
+
+			//в результате удаления дублей для одного клиентского заказа может быть сформировано два результата
+			//один на приемку части заявки второй на удаленные позиций-дублей
+			//нужно объединить эти данные
+			return errors.GroupBy(x => Tuple.Create(x.ClientOrderId, x.Result))
+				.Select(x => {
+					if (x.Count() == 1)
+						return x.First();
+					var dst = x.First();
+					dst.ServerOrderId = x.Max(y => y.ServerOrderId);
+					dst.Lines.AddRange(x.Skip(1).SelectMany(y => y.Lines));
+					return dst;
+				})
+				.ToList();
+		}
+
+		public static OrderResult[] RemoveDuplicate(ISession session, List<Order> orders,
+			Dictionary<OrderItem, uint> lineMap)
+		{
+			var results = new List<OrderResult>();
+			foreach (var order in orders) {
+				var begin = order.WriteTime.AddMinutes(-60);
+				var lines = session.Query<OrderItem>()
+					.Where(x => x.Order.AddressId == order.AddressId
+						&& x.Order.UserId == order.UserId
+						&& x.Order.PriceList == order.PriceList
+						&& x.Order.ClientOrderId == order.ClientOrderId
+						&& x.Order.RegionCode == order.RegionCode
+						&& x.Order.Deleted == false
+						&& x.Order.WriteTime > begin)
+					.ToArray();
+				var result = new OrderResult {
+					ClientOrderId = order.ClientOrderId.GetValueOrDefault(),
+					Result = OrderResultStatus.OK,
+				};
+				foreach (var line in order.OrderItems.ToArray()) {
+					var duplicate = FirstDuplicate(lines, line);
+					if (duplicate == null)
+						continue;
+					Log.WarnFormat("Строка {3} заявки {0} на {1} в количестве {2} отброшена как дубль",
+						order.PriceList.Supplier.Name,
+						order.ClientOrderId,
+						line.Quantity,
+						line.CoreId);
+					order.RemoveItem(line);
+					result.ServerOrderId = duplicate.Order.RowId;
+					result.Lines.Add(new OrderLineResult(lineMap[line], duplicate.RowId));
+				}
+				if (result.Lines.Count > 0)
+					results.Add(result);
+			}
+			var duplicates = orders.Where(x => x.OrderItems.Count == 0).ToArray();
+			orders.RemoveEach(duplicates);
+
+			foreach (var order in duplicates) {
+				Log.WarnFormat("Заявка {1} на {0} отброшена как дубль.",
+					order.PriceList.Supplier.Name,
+					order.ClientOrderId);
+			}
+			return results.ToArray();
+		}
+
+		private static OrderItem FirstDuplicate(OrderItem[] existLines, OrderItem line)
+		{
+			return existLines.FirstOrDefault(x => x.ProductId == line.ProductId
+				&& x.SynonymCode == line.SynonymCode
+				&& x.SynonymFirmCrCode == line.SynonymFirmCrCode
+				&& x.Code == line.Code
+				&& x.CodeCr == line.CodeCr
+				&& x.Junk == line.Junk
+				&& x.Quantity == line.Quantity);
 		}
 
 		private static List<OrderResult> Validate(ISession session, User user,

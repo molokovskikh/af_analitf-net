@@ -61,6 +61,7 @@ namespace AnalitF.Net.Service.Controllers
 							handler = new SmartOrderBatchHandler(session, job.User, batchAddress, payloadStream);
 						}
 					}
+					handler.JunkPeriod = requestMeta.JunkPeriod;
 					var orders = handler.ProcessOrderBatch();
 					var batchItems = handler.OrderBatchItems;
 					orders.Each(o => o.RowId = (uint)o.GetHashCode());

@@ -23,6 +23,28 @@
 		</Style.Triggers>
 	</Style>
 
+	<Style x:Key="Normal" TargetType="DataGridCell">
+		<Style.Triggers>
+			<MultiTrigger>
+				<MultiTrigger.Conditions>
+					<Condition Property="IsSelected" Value="True"></Condition>
+				</MultiTrigger.Conditions>
+				<Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
+				<Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
+				<Setter Property="BorderBrush" Value="{x:Static SystemColors.HighlightBrush}" />
+			</MultiTrigger>
+			<MultiTrigger>
+				<MultiTrigger.Conditions>
+					<Condition Property="IsSelected" Value="True"></Condition>
+					<Condition Property="Selector.IsSelectionActive" Value="False"></Condition>
+				</MultiTrigger.Conditions>
+				<Setter Property="Foreground" Value="{x:Static SystemColors.ControlTextBrush}" />
+				<Setter Property="Background" Value="{x:Static SystemColors.ControlBrush}" />
+				<Setter Property="BorderBrush" Value="{x:Static SystemColors.ControlBrush}" />
+			</MultiTrigger>
+		</Style.Triggers>
+	</Style>
+
 	<Style TargetType="ListViewItem">
 		<Setter Property="Background"
 			Value="Transparent"/>

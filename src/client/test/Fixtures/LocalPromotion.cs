@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		private string file;
 		public Promotion Promotion;
 		public Config.Config Config;
+		public Catalog Catalog;
 		public bool Verbose;
 
 		public LocalPromotion()
@@ -26,15 +27,15 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Execute(ISession session)
 		{
-			var catalog = session.Query<Catalog>().First(c => c.HaveOffers);
+			Catalog = Catalog  ?? session.Query<Catalog>().First(c => c.HaveOffers);
 			Promotion = new Promotion {
 				Supplier = session.Query<Supplier>().First(),
 				Name = "Тестовая промо-акция",
 				Annotation = "Тестовая промо-акция"
 			};
 			if (Verbose)
-				Console.WriteLine("Создана промоакция для товара {0}", catalog.FullName);
-			Promotion.Catalogs.Add(catalog);
+				Console.WriteLine("Создана промоакция для товара {0}", Catalog.FullName);
+			Promotion.Catalogs.Add(Catalog);
 			session.Save(Promotion);
 			if (!String.IsNullOrEmpty(file)) {
 				if (!File.Exists(file)) {

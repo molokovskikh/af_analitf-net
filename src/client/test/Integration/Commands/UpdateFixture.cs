@@ -133,7 +133,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Send_logs()
 		{
-			File.WriteAllText(Path.Combine(clientConfig.RootDir, "AnalitF.Net.Client.log"), "123");
+			File.WriteAllText(Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log"), "123");
 
 			Run(new UpdateCommand());
 
@@ -161,15 +161,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
-		public void Import_after_update()
+		public void Version_update()
 		{
-			//todo здесь мы симулируем обновление приложения, это коряво переделать
-			var src = Directory.GetFiles(serviceConfig.ResultPath)
-				.OrderByDescending(l => new FileInfo(l).LastWriteTime)
-				.Last();
-			File.Copy(src, clientConfig.ArchiveFile);
-			using(var file = new ZipFile(clientConfig.ArchiveFile))
-				file.ExtractAll(clientConfig.UpdateTmpDir);
+			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
+			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
+
+			var result1 = Run(new UpdateCommand());
+			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 			RemoteCommand command1 = new UpdateCommand();
@@ -292,7 +290,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Load_mails()
 		{
-			var fixture = new MailWithAttachment {
+			var fixture = new CreateMail {
 				IsSpecial = true,
 			};
 			Fixture(fixture);
@@ -447,6 +445,52 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			oldOffer = localSession.Get<Offer>(oldOffer.Id);
 			Assert.IsNull(oldOffer);
 			Assert.IsNotNull(newOffer);
+		}
+
+		[Test]
+		public void Migrate()
+		{
+			localSession.DeleteEach<LoadedDocument>();
+			localSession.BeginTransaction();
+			settings.Password = null;
+			localSession.Flush();
+			using (var cleaner = new FileCleaner()) {
+				new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
+				Directory.CreateDirectory("in\\update");
+				var cmd = new UpdateCommand {
+					Config = clientConfig
+				};
+				cmd.Process(() => {
+					cmd.Migrate();
+					return UpdateResult.OK;
+				});
+			}
+
+			localSession.Refresh(settings);
+			Assert.IsNotNull(settings.Password);
+
+			var waybill = localSession.Query<Waybill>().First(x => x.Id == 39153110);
+			var line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10891996");
+			Assert.AreEqual(35, line.MaxRetailMarkup);
+			Assert.AreEqual(678.50, line.RetailCost);
+			Assert.AreEqual(35, line.RetailMarkup);
+			Assert.AreEqual(35, line.RealRetailMarkup);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10137353"
+				&& x.Product.Contains("Ацетилсалициловой"));
+			Assert.AreEqual(29.99m, line.RetailMarkup);
+			Assert.AreEqual(70.21m, line.RealRetailMarkup);
+			Assert.AreEqual(613.70m, line.RetailCost);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "017022014");
+			Assert.AreEqual(21.36m, line.RetailMarkup);
+			Assert.AreEqual(49.99m, line.RealRetailMarkup);
+			Assert.AreEqual(540.80m, line.RetailCost);
+
+			line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "156014");
+			Assert.AreEqual(77.63m, line.RetailMarkup);
+			Assert.AreEqual(82.03m, line.RealRetailMarkup);
+			Assert.AreEqual(500m, line.RetailCost);
 		}
 	}
 }

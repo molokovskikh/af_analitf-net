@@ -260,9 +260,10 @@ namespace AnalitF.Net.Client.ViewModels
 		public override IEnumerable<IResult> OnViewReady()
 		{
 			Env.Bus.SendMessage("Startup");
-			if (Config.Cmd.Match("import")) {
+			if (Config.Cmd.Match("import"))
 				return Import();
-			}
+			if (Config.Cmd.Match("migrate"))
+				return Migrate();
 			if (Config.Cmd.Match("start-check")) {
 				TryClose();
 				return Enumerable.Empty<IResult>();
@@ -778,6 +779,16 @@ namespace AnalitF.Net.Client.ViewModels
 				yield return result;
 		}
 
+		public IEnumerable<IResult> Migrate()
+		{
+			var command = new UpdateCommand();
+			return Sync(command,
+				c => c.Process(() => {
+					((UpdateCommand)c).Migrate();
+					return UpdateResult.OK;
+				}), checkSettings: false);
+		}
+
 		private IEnumerable<IResult> Import()
 		{
 			var command = new UpdateCommand();
@@ -855,9 +866,10 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 		}
 
-		private IEnumerable<IResult> Sync(RemoteCommand command, Func<RemoteCommand, UpdateResult> func)
+		private IEnumerable<IResult> Sync(RemoteCommand command, Func<RemoteCommand, UpdateResult> func,
+			bool checkSettings = true)
 		{
-			if (!CheckSettings())
+			if (checkSettings && !CheckSettings())
 				return Enumerable.Empty<IResult>();
 
 #if DEBUG

@@ -108,7 +108,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 
 		private void Activate(List<Offer> offers)
 		{
-			ScreenExtensions.TryActivate(model);
+			Activate(model);
 			model.BindOffers(offers);
 		}
 

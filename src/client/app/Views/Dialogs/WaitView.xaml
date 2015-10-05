@@ -4,7 +4,7 @@
 		xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 		Height="150" Width="300">
 	<StackPanel Margin="10">
-		<TextBlock Name="Text" Margin="5"></TextBlock>
-		<ProgressBar IsIndeterminate="True" Height="20"></ProgressBar>
+		<TextBlock Name="Text" Margin="5" TextWrapping="Wrap" />
+		<ProgressBar IsIndeterminate="True" Height="20" />
 	</StackPanel>
 </UserControl>

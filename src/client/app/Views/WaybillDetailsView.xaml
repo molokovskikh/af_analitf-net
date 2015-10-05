@@ -28,7 +28,13 @@
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<StackPanel Margin="4, 0">
-				<CheckBox Name="RoundToSingleDigit">Отбрасывать розничную цену до 10 коп. в "меньше"</CheckBox>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock VerticalAlignment="Center" Margin="0, 5, 5, 5" ToolTip="Округлить розничную цену путем уменьшения до цены кратной">
+						Округлить:
+					</TextBlock>
+					<ComboBox ToolTip="Округлить розничную цену путем уменьшения до цены кратной"
+						Style="{StaticResource Select}" x:Name="Rounding" />
+				</StackPanel>
 				<CheckBox Name="Waybill_VitallyImportant" IsEnabled="{Binding Waybill.CanBeVitallyImportant}">
 					Рассчитать накладную как ЖНВЛС
 				</CheckBox>

@@ -40,6 +40,15 @@ namespace AnalitF.Net.Client.Models
 		public virtual byte[] SignBytes { get; set; }
 	}
 
+	//цифры важны они используются при миграции настроек
+	public enum Rounding
+	{
+		[Description("не округлять")] None = 0,
+		[Description("до 10 коп.")] To0_10 = 1,
+		[Description("до 50 коп.")] To0_50 = 2,
+		[Description("до 1 руб.")] To1_00 = 3,
+	}
+
 	//на текущий момент эта модель может представлять как заголовок накладной так и заголовок отказа
 	//однако существует отдельная модель для заголовка отказа
 	//что бы можно было создать отдельную модель для общего отображения а модели развести по своим углам
@@ -54,7 +63,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			WaybillSettings = new WaybillSettings();
 			Lines = new List<WaybillLine>();
-			RoundTo1 = true;
+			Rounding = Rounding.To0_10;
 		}
 
 		public Waybill(Address address, Supplier supplier)
@@ -119,11 +128,15 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual bool IsSigned { get; set; }
 
+		//todo одинаковое поле
+		/// <summary>
+		/// наименование файла в случае если используется механизм переопределения имен файлов
+		/// если используется стандартное именование файла тогда null
+		/// </summary>
+		public virtual string Filename { get; set; }
+
 		//для биндинга
-		public virtual bool IsReadOnly
-		{
-			get { return !IsCreatedByUser; }
-		}
+		public virtual bool IsReadOnly => !IsCreatedByUser;
 
 		[Style(Description = "Накладная, созданная пользователем")]
 		public virtual bool IsCreatedByUser { get; set; }
@@ -137,7 +150,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual IList<WaybillLine> Lines { get; set; }
 
 		[Ignore]
-		public virtual bool RoundTo1 { get; set; }
+		public virtual Rounding Rounding { get; set; }
 
 		[Ignore]
 		public virtual bool VitallyImportant
@@ -165,7 +178,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string Filename { get; set; }
+		//public virtual string Filename { get; set; }
 		public virtual string DiadokMessageId { get; set; }
 		public virtual string DiadokBoxId { get; set; }
 		public virtual string DiadokEnityId { get; set; }
@@ -288,6 +301,24 @@ namespace AnalitF.Net.Client.Models
 			CalculateRetailSum();
 		}
 
+		public virtual void CalculateForMigrated(Settings settings)
+		{
+			if (settings == null)
+				return;
+			Settings = settings;
+			WaybillSettings = settings.Waybills
+				.FirstOrDefault(s => s.BelongsToAddress != null
+					&& Address != null
+					&& s.BelongsToAddress.Id == Address.Id)
+				?? WaybillSettings;
+
+			foreach (var waybillLine in Lines)
+				waybillLine.CalculateForMigrated(Settings);
+
+			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			CalculateRetailSum();
+		}
+
 		public virtual void CalculateRetailSum()
 		{
 			RetailSum = Lines.Sum(l => l.RetailCost * l.Quantity).GetValueOrDefault();
@@ -299,9 +330,14 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void DeleteFiles(Settings settings)
 		{
-			var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
 			try {
-				files.Each(f => File.Delete(f));
+				if (String.IsNullOrEmpty(Filename)) {
+					var files = Directory.GetFiles(settings.MapPath("Waybills"), Id + "_*");
+					files.Each(f => File.Delete(f));
+				}
+				else {
+					File.Delete(Path.Combine(settings.MapPath("Waybills"), Filename));
+				}
 			}
 			catch(Exception e) {
 				_log.Warn(String.Format("Ошибка при удалении документа {0}", Id), e);

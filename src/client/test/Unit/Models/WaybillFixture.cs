@@ -10,6 +10,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 	[TestFixture]
 	public class WaybillFixture
 	{
+		private User user;
 		private Waybill waybill;
 		private Settings settings;
 		private WaybillSettings waybillSettings;
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[SetUp]
 		public void Setup()
 		{
+			user = new User();
 			settings = new Settings(true);
 			waybillSettings = new WaybillSettings();
 			settings.Waybills.Add(waybillSettings);
@@ -77,7 +79,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Round_value()
 		{
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			var line = new WaybillLine(waybill) {
 				Nds = 10,
 				SupplierCost = 251.20m,
@@ -317,7 +319,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Do_not_recalc_markup()
 		{
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			var line = new WaybillLine(waybill) {
 				ProducerCost = 30.57m,
 				SupplierCostWithoutNds = 26.80m,
@@ -338,7 +340,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var markup = settings.Markups.First(m => m.Type == MarkupType.Over);
 			markup.Markup = 60;
 			markup.MaxMarkup = 60;
-			waybill.RoundTo1 = false;
+			waybill.Rounding = Rounding.None;
 			waybillSettings.IncludeNds = false;
 			var line = new WaybillLine(waybill) {
 				SupplierCostWithoutNds = 185.50m,
@@ -350,6 +352,21 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(60, line.RetailMarkup);
 			Assert.AreEqual(50.85, line.RealRetailMarkup);
 			Assert.AreEqual(330.19, line.RetailCost);
+		}
+
+		[Test]
+		public void Roung_to_1_00()
+		{
+			waybill.Rounding = Rounding.To1_00;
+			var line = new WaybillLine(waybill) {
+				Nds = 10,
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				Quantity = 1
+			};
+			Calculate(line);
+			Assert.AreEqual(301, line.RetailCost);
+			Assert.AreEqual(19.83, line.RetailMarkup);
 		}
 
 		[Test]
@@ -370,6 +387,30 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 
 			waybill.Calculate(settings);
 			Assert.AreEqual(5000, line.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_markup_on_producer_cost()
+		{
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 0)
+				.Markup = 23;
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 50)
+				.Markup = 18;
+			settings.Markups.First(x => x.Type == MarkupType.VitallyImportant && x.Begin == 500)
+				.Markup = 12;
+			var line = new WaybillLine(waybill) {
+				Product = "АМИКСИН 0,125 N6 ТАБЛ П/ПЛЕН/ОБОЛОЧ",
+				VitallyImportant = true,
+				ProducerCost = 501.91m,
+				Nds = 10,
+				SupplierCost = 529.65m,
+				SupplierCostWithoutNds = 481.50m,
+				Quantity = 3
+			};
+			Calculate(line);
+			Assert.AreEqual(595.90, line.RetailCost);
+			Assert.AreEqual(12.00, line.RetailMarkup);
+			Assert.AreEqual(12.51, line.RealRetailMarkup);
 		}
 
 		private WaybillLine Line()

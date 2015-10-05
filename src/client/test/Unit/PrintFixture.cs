@@ -84,6 +84,23 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.AreEqual(2, paginator.PageCount);
 		}
 
+		[Test]
+		public void Print_price_tag()
+		{
+			var settings = new Settings(defaults: true);
+			var waybill = new Waybill(new Address("Тестовый"), new Supplier());
+			var line = new WaybillLine(waybill) {
+				Nds = 10,
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				Quantity = 1
+			};
+			waybill.AddLine(line);
+			waybill.Calculate(settings);
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			Assert.IsNotNull(doc);
+		}
+
 		private static List<Offer> Offers()
 		{
 			return new List<Offer> {

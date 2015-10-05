@@ -218,7 +218,7 @@ namespace AnalitF.Net.Service.Test
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
-			controller.Delete();
+			controller.Put(null);
 
 			session.Flush();
 			session.Clear();
@@ -308,13 +308,9 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Delete();
-			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
-set ForceReplication = 1
-where userId = :userId and FirmCode = :supplierId")
-				.SetParameter("supplierId", supplier2.Id)
-				.SetParameter("userId", user.Id)
-				.ExecuteUpdate();
+			controller.Put(null);
+
+			supplier2.InvalidateCache(session, user.Id);
 
 			session.Flush();
 			session.Clear();
@@ -344,7 +340,7 @@ where userId = :userId and FirmCode = :supplierId")
 			client.MaintainIntersection(session);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Delete();
+			controller.Put(null);
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
 			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);

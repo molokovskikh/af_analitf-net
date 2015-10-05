@@ -15,6 +15,7 @@ using Common.Models.Repositories;
 using Common.MySql;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using HtmlAgilityPack;
 using ICSharpCode.SharpZipLib.Core;
@@ -162,13 +163,19 @@ namespace AnalitF.Net.Service.Models
 			}
 
 			data.LastPendingUpdateAt = DateTime.Now;
+			//при переходе на новую версию мы должны отдать все данныех тк между версиями могла измениться схема
+			//и если не отдать все то часть данных останится в старом состоянии а часть в новом,
+			//что может привести к странным результатам
+			if (data.ClientVersion != job.Version)
+				data.Reset();
+
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
 				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
 					" последние обновление на клиента {0}" +
 					" последнее обновление на сервере {1}" +
 					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
-				data.LastUpdateAt = DateTime.MinValue;
+				data.Reset();
 			}
 			session.Save(data);
 
@@ -402,7 +409,8 @@ where pc.CostCode = :costId")
 	s.Name,
 	if(length(s.FullName) = 0, s.Name, s.FullName) as FullName,
 	exists(select * from documents.SourceSuppliers ss where ss.SupplierId = s.Id) HaveCertificates,
-	'' as DiadokOrgId
+	'' as DiadokOrgId,
+	s.VendorId
 from Customers.Suppliers s
 	join Usersettings.Prices p on p.FirmCode = s.Id";
 			Export(Result, sql, "suppliers", truncate: true);
@@ -583,7 +591,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				"Exp",
 				"BarCode",
 				"Properties",
-				"Nds"
+				"Nds",
+				"OriginalJunk"
 			}, toExport.Select(o => new object[] {
 				o.OfferId,
 				o.RegionId,
@@ -619,7 +628,8 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 				o.Exp,
 				o.EAN13,
 				o.Properties,
-				o.Nds
+				o.Nds,
+				o.Junk,
 			}), truncate: cumulative);
 
 			//экспортируем прайс-листы после предложений тк оптимизация может изменить fresh
@@ -632,7 +642,7 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	s.Id as SupplierId,
 	s.Name as SupplierName,
 	s.FullName as SupplierFullName,
-	rd.Storage,
+	ifnull(rd.Storage, 0) as Storage,
 	if(p.DisabledByClient or not p.Actual,
 		0,
 		(select count(*)
@@ -648,7 +658,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 	((u.OrderRegionMask & c.MaskRegion & r.OrderRegionMask & p.RegionCode) = 0) as IsOrderDisabled,
 	p.MainFirm as BasePrice,
 	(p.OtherDelay + 100) / 100 as CostFactor,
-	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor
+	(p.VitallyImportantDelay + 100) / 100 as VitallyImportantCostFactor,
+	p.CostCode as CostId,
+	pc.CostName
 from (Usersettings.Prices p, Customers.Users u)
 	join Usersettings.PricesData pd on pd.PriceCode = p.PriceCode
 		join Customers.Suppliers s on s.Id = pd.FirmCode
@@ -657,6 +669,7 @@ from (Usersettings.Prices p, Customers.Users u)
 	left join Usersettings.ActivePrices ap on ap.PriceCode = p.PriceCode and ap.RegionCode = p.RegionCode
 	join Customers.Clients c on c.Id = u.ClientId
 	join Usersettings.RetClientsSet r on r.ClientCode = c.Id
+	join Usersettings.PricesCosts pc on pc.CostCode = p.CostCode
 where u.Id = ?userId";
 			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
 
@@ -851,6 +864,43 @@ from Farm.Core0 c
 where c.PriceCode = ?priceId";
 				Export(Result, sql, "RegulatorRegistry", truncate: true,
 					parameters: new { priceId = Config.RegulatorRegistryPriceId });
+			}
+
+			var lastDataUpdate = ((MySqlConnection)session.Connection)
+				.Read<DateTime>("select Max(LastUpdate) from Reports.Drugs")
+				.FirstOrDefault();
+			if (lastDataUpdate > data.LastUpdateAt) {
+				sql = @"
+select DrugId,
+  TradeNmR,
+  InnR,
+  PackNx,
+  DosageR,
+  PackQn,
+  Pack,
+  DrugFmNmRS,
+  Segment,
+  Year,
+  Month,
+  Series,
+  TotDrugQn,
+  MnfPrice,
+  PrcPrice,
+  RtlPrice,
+  Funds,
+  VendorID,
+  Remark,
+  SrcOrg,
+  EAN,
+  MaxMnfPrice,
+  ExpiTermR,
+  ClNm,
+  MnfNm,
+  PckNm,
+  RegNr,
+  RegDate
+from Reports.Drugs";
+				Export(Result, sql, "Drugs", truncate: true);
 			}
 
 			IList<object[]> newses = new List<object[]>();
@@ -1122,7 +1172,8 @@ where a.MailId in ({0})", ids.Implode());
 						"AddressId",
 						"PriceId",
 						"RegionId",
-						"Comment"
+						"Comment",
+						"SkipRestore"
 					},
 					Orders.Select(g => new object[] {
 						g.RowId,
@@ -1130,7 +1181,9 @@ where a.MailId in ({0})", ids.Implode());
 						g.AddressId,
 						g.PriceList.PriceCode,
 						g.RegionCode,
-						g.ClientAddition
+						g.ClientAddition,
+						//для автозаказа нужно игнорировать восстановление
+						BatchItems != null,
 					}),
 					false);
 
@@ -1211,6 +1264,7 @@ where a.MailId in ({0})", ids.Implode());
 						"ExportBatchLineId",
 						"Junk",
 						"BarCode",
+						"OriginalJunk",
 					},
 					items
 						.Select(i => new object[] {
@@ -1247,8 +1301,11 @@ where a.MailId in ({0})", ids.Implode());
 							i.Order.RegionCode,
 							i.CoreId,
 							orderbatchLookup[i].Select(x => (object)x.GetHashCode()).FirstOrDefault(),
+							//уценка с учтом клиентских настроек, будет пересчитана на клиенте
 							i.Junk,
 							i.EAN13,
+							//оригинальная уценка
+							i.Junk,
 						}), truncate: false);
 
 				if (BatchItems != null) {
@@ -1280,10 +1337,10 @@ where a.MailId in ({0})", ids.Implode());
 							i.SupplierDeliveryId,
 							GetAddressId(BatchAddress, i),
 							i.ProductName,
-							i.Item == null ? null : (uint?)i.Item.ProductId,
-							i.Item == null ? null : (uint?)i.Item.CatalogId,
+							i.Item?.ProductId,
+							i.Item?.CatalogId,
 							i.ProducerName,
-							i.Item == null ? null : i.Item.ProducerId,
+							i.Item?.ProducerId,
 							i.Item == null ? null : producerLookup[i.Item.ProducerId.GetValueOrDefault()].FirstOrDefault(),
 							i.Quantity,
 							i.Item == null ? i.Comment : i.Item.Comments.Implode(Environment.NewLine),
@@ -1329,7 +1386,8 @@ where a.MailId in ({0})", ids.Implode());
 					"AddressId",
 					"PriceId",
 					"RegionId",
-					"Comment"
+					"Comment",
+					"IsLoaded"
 				},
 				groups.Select(g => new object[] {
 					g.First().RowId,
@@ -1338,7 +1396,8 @@ where a.MailId in ({0})", ids.Implode());
 					g.Key.PriceList.PriceCode,
 					g.Key.RegionCode,
 					g.Where(o => !String.IsNullOrWhiteSpace(o.ClientAddition))
-						.Implode(o => String.Format("{0}: {1}", o.UserId, o.ClientAddition), " | ")
+						.Implode(o => $"{o.UserId}: {o.ClientAddition}", " | "),
+					true
 				}),
 				false);
 
@@ -1360,7 +1419,7 @@ select l.ExportId as ExportOrderId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.VitallyImportant,
+	ifnull(oo.VitallyImportant, 0) as VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
 	ol.RequestRatio,
@@ -1375,7 +1434,8 @@ select l.ExportId as ExportOrderId,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
 	oh.RegionCode as RegionId,
-	ol.CoreId as OfferId
+	ol.CoreId as OfferId,
+	ol.Junk as OriginalJunk
 from Logs.PendingOrderLogs l
 	join Orders.OrdersList ol on ol.OrderId = l.OrderId
 		join Orders.OrdersHead oh on oh.RowId = ol.OrderId
@@ -1420,7 +1480,7 @@ group by ol.RowId";
 			condition.Append(addresses.Implode(a => a.Id));
 			condition.Append(") ");
 
-			var sql = String.Format(@"
+			var sql = $@"
 select oh.RowId as ServerId,
 	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as CreatedOn,
 	convert_tz(oh.WriteTime, @@session.time_zone,'+00:00') as SentOn,
@@ -1430,10 +1490,10 @@ select oh.RowId as ServerId,
 	oh.RegionCode as RegionId,
 	oh.ClientAddition as Comment
 from Orders.OrdersHead oh
-{0}", condition);
+{condition}";
 			Export(Result, sql, "SentOrders", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select ol.RowId as ServerId,
 	oh.RowId as ServerOrderId,
 	ol.Quantity as Count,
@@ -1452,7 +1512,7 @@ select ol.RowId as ServerId,
 	oo.Period,
 	oo.Doc,
 	ol.Junk,
-	oo.VitallyImportant,
+	ifnull(oo.VitallyImportant, 0) as VitallyImportant,
 	oo.RegistryCost,
 	mx.Cost as MaxProducerCost,
 	ol.RequestRatio,
@@ -1466,7 +1526,8 @@ select ol.RowId as ServerId,
 	st.Synonym as ProductSynonym,
 	si.Synonym as ProducerSynonym,
 	ol.Cost,
-	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost
+	ifnull(ol.CostWithDelayOfPayment, ol.Cost) as ResultCost,
+	ol.Junk as OriginalJunk
 from Orders.OrdersHead oh
 	join Orders.OrdersList ol on ol.OrderId = oh.RowId
 		join Catalogs.Products p on p.Id = ol.ProductId
@@ -1475,8 +1536,8 @@ from Orders.OrdersHead oh
 		left join Catalogs.Producers pr on pr.Id = ol.CodefirmCr
 		left join Orders.OrderedOffers oo on oo.Id = ol.RowId
 		left join Usersettings.MaxProducerCosts mx on mx.ProductId = ol.ProductId and mx.ProducerId = ol.CodeFirmCr
-{0}
-group by ol.RowId", condition);
+{condition}
+group by ol.RowId";
 			Export(Result, sql, "SentOrderLines", truncate: false, parameters: new { userId = user.Id });
 		}
 
@@ -1522,10 +1583,12 @@ group by ol.RowId", condition);
 					var path = Path.Combine(DocsPath,
 						doc.Document.AddressId.ToString(),
 						type);
-					if (!Directory.Exists(path))
+					if (!Directory.Exists(path)) {
+						log.Warn($"Директория для загрузки документов не существует {path}");
 						continue;
+					}
 					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
-					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, Path.GetFileName(f))) {
+					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
@@ -1556,7 +1619,8 @@ select d.RowId as Id,
 	i.ConsigneeInfo as ConsigneeNameAndAddress,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
-	i.InvoiceDate
+	i.InvoiceDate,
+	if(d.PreserveFilename, d.FileName, null) as Filename
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
@@ -1581,7 +1645,8 @@ select d.RowId as Id,
 	null as ConsigneeNameAndAddress,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
-	null as InvoiceDate
+	null as InvoiceDate,
+	if(d.PreserveFilename, d.FileName, null) as Filename
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
@@ -1824,20 +1889,36 @@ where r.DownloadId in (:ids)")
 				zip.Add(new UpdateData("ads/delete.me") { Content = "" });
 				return;
 			}
-			if (!Directory.Exists(AdsPath))
+			if (!Directory.Exists(AdsPath)) {
+				log.WarnFormat("Директория рекламы не найдена '{0}'", AdsPath);
 				return;
+			}
 			var template = String.Format("_{0}", user.Client.RegionCode);
 			var dir = Directory.GetDirectories(AdsPath).FirstOrDefault(d => d.EndsWith(template));
-			if (String.IsNullOrEmpty(dir))
+			if (String.IsNullOrEmpty(dir)) {
+				log.WarnFormat("Директория рекламы не найдена по маске '{0}' в '{1}'", template, AdsPath);
 				return;
+			}
 
 			var files = new DirectoryInfo(dir).EnumerateFiles()
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
-					&& f.LastWriteTime > data.LastUpdateAt
+					&& RoundToSeconds(f.LastWriteTime) > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
-				.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName });
-			zip.AddRange(files);
+					.ToArray();
+			zip.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
+			if (files.Length > 0)
+				data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
+			else
+				data.LastPendingReclameUpdateAt = null;
 		}
+
+		//mysql хранит даты с точностью дос секунды и если мы сравниваем дату из базы с датой из другого источника
+		//например файловой системы, перед сравнением ее нужно округлить
+		public static DateTime RoundToSeconds(DateTime value)
+		{
+			return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind);
+		}
+
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
 		{

@@ -81,12 +81,20 @@ namespace AnalitF.Net.Client.Models
 
 	public class Settings : BaseNotify
 	{
+		public static MemoryStream ImageCache;
+
 		private ILog log = LogManager.GetLogger(typeof(Settings));
 		private bool groupWaybillBySupplier;
 		private bool _useProxy;
 		private string _waybillDir;
 		private string _reportDir;
 		private string _rejectDir;
+		private string _docDir;
+		private string _userName;
+		private string _password;
+		private string _proxyUserName;
+		private string _proxyPassword;
+		private string _proxyHost;
 
 		public Settings(bool defaults, int token = 0) : this()
 		{
@@ -110,6 +118,7 @@ namespace AnalitF.Net.Client.Models
 			ConfirmDeleteOldWaybills = true;
 			DeleteWaybillsOlderThan = 150;
 			TrackRejectChangedDays = 90;
+			JunkPeriod = 6;
 			OpenRejects = true;
 			HighlightUnmatchedOrderLines = true;
 			RackingMap = new RackingMapSettings();
@@ -136,9 +145,17 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual DiffCalcMode DiffCalcMode { get; set; }
 
-		public virtual string UserName { get; set; }
+		public virtual string UserName
+		{
+			get { return _userName; }
+			set { _userName = value?.Trim(); }
+		}
 
-		public virtual string Password { get; set; }
+		public virtual string Password
+		{
+			get { return _password; }
+			set { _password = value?.Trim(); }
+		}
 
 		public virtual DateTime? LastUpdate { get; set; }
 
@@ -197,13 +214,25 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string ProxyHost { get; set; }
+		public virtual string ProxyHost
+		{
+			get { return _proxyHost; }
+			set { _proxyHost = value?.Trim(); }
+		}
 
 		public virtual int? ProxyPort { get; set; }
 
-		public virtual string ProxyUserName { get; set; }
+		public virtual string ProxyUserName
+		{
+			get { return _proxyUserName; }
+			set { _proxyUserName = value?.Trim(); }
+		}
 
-		public virtual string ProxyPassword { get; set; }
+		public virtual string ProxyPassword
+		{
+			get { return _proxyPassword; }
+			set { _proxyPassword = value?.Trim(); }
+		}
 
 		public virtual bool IsValid
 		{
@@ -214,6 +243,16 @@ namespace AnalitF.Net.Client.Models
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
 		//врорая версия токена приложения, хеш guid и путь, первая версия просто guid
 		public virtual string ClientTokenV2 { get; set; }
+
+		public virtual string DocDir
+		{
+			get { return _docDir; }
+			set
+			{
+				_docDir = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public virtual string WaybillDir
 		{
@@ -332,15 +371,33 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual Stream AdStream
+		{
+			get
+			{
+				var file = Ad;
+				if (String.IsNullOrEmpty(file))
+					return null;
+				if (ImageCache != null)
+					return ImageCache;
+				return ImageCache = new MemoryStream(File.ReadAllBytes(file));
+			}
+		}
+
+		/// <summary>
+		/// Количество месяцев до истечения срока годности когда препараты будут отмечаться как уцененные
+		/// </summary>
+		public virtual int JunkPeriod { get; set; }
+
 		public virtual IWebProxy GetProxy()
 		{
 			if (!UseProxy)
 				return null;
 			if (String.IsNullOrEmpty(ProxyHost) || ProxyPort.GetValueOrDefault() <= 0)
 				return null;
-			var proxy = new WebProxy(ProxyHost, ProxyPort.Value);
+			var proxy = new WebProxy(ProxyHost?.Trim(), ProxyPort.GetValueOrDefault());
 			if (!String.IsNullOrEmpty(ProxyUserName))
-				proxy.Credentials = new NetworkCredential(ProxyUserName, ProxyPassword);
+				proxy.Credentials = new NetworkCredential(ProxyUserName?.Trim(), ProxyPassword?.Trim());
 			return proxy;
 		}
 
@@ -353,15 +410,26 @@ namespace AnalitF.Net.Client.Models
 			var root = GetVarRoot();
 			if (name.Match("Waybills"))
 				return String.IsNullOrEmpty(WaybillDir) ? Path.Combine(root, "Накладные") : WaybillDir;
+
 			if (name.Match("Docs"))
-				return Path.Combine(root, "Документы");
+				return String.IsNullOrEmpty(DocDir) ? Path.Combine(root, "Документы") : DocDir;
+
 			if (name.Match("Rejects"))
 				return String.IsNullOrEmpty(RejectDir) ? Path.Combine(root, "Отказы") : RejectDir;
+
 			if (name.Match("Orders"))
 				return Path.Combine(root, "Накладные", "Заявки");
+
 			if (name.Match("Reports"))
 				return String.IsNullOrEmpty(ReportDir) ? Path.Combine(root, "Отчеты") : ReportDir;
 			return null;
+		}
+
+		public virtual string InitAndMap(string name)
+		{
+			var dir = MapPath(name);
+			Directory.CreateDirectory(dir);
+			return dir;
 		}
 
 		public virtual string GetVarRoot()
@@ -418,17 +486,20 @@ namespace AnalitF.Net.Client.Models
 
 			markup.Settings = this;
 			Markups.Add(markup);
-			ValidateMarkups();
+			Validate();
 		}
 
-		public virtual string ValidateMarkups()
+		public virtual string Validate()
 		{
+			if (JunkPeriod < 6)
+				return "Срок уценки не может быть менее 6 месяцев";
+
 			return MarkupConfig.Validate(Markups);
 		}
 
 		public virtual ICredentials GetCredential()
 		{
-			return new NetworkCredential(UserName, Password);
+			return new NetworkCredential(UserName?.Trim(), Password?.Trim());
 		}
 
 		public virtual DelegatingHandler[] Handlers()
@@ -442,10 +513,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			try {
 				if (String.IsNullOrEmpty(GetClientToken())) {
-					var encoding = Encoding.UTF8;
-					var tokenSource = Guid.NewGuid() + "|" + Path.GetDirectoryName(typeof(Settings).Assembly.Location);
-					var token = SHA1.Create().ComputeHash(encoding.GetBytes(tokenSource));
-					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(token, null, DataProtectionScope.CurrentUser));
+					var data = Guid.NewGuid().ToByteArray();
+					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser));
 				}
 			}
 			catch(Exception e) {
@@ -453,12 +522,17 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string GetClientToken()
+		public virtual string GetClientToken(string dir = null)
 		{
 			try {
+				dir = dir ?? Path.GetDirectoryName(typeof(Settings).Assembly.Location);
 				if (String.IsNullOrEmpty(ClientTokenV2))
 					return "";
-				var tokenSource = ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser);
+				var encoding = Encoding.UTF8;
+				var id = new Guid(ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser));
+				var tokenString = id + "|" + dir;
+				//что бы токен выглядел мистически вычисляем его хеш
+				var tokenSource = SHA1.Create().ComputeHash(encoding.GetBytes(tokenString));
 				return String.Join("", tokenSource.Select(x => x.ToString("X2")));
 			}
 			catch(Exception e) {

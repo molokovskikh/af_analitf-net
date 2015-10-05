@@ -70,6 +70,12 @@ namespace AnalitF.Net.Client.Models
 		[Style("Period", "ResultCost", "MixedCost", Description = "Уцененные препараты")]
 		public virtual bool Junk { get; set; }
 
+		/// <summary>
+		/// Junk - флаг уценки с учетом клиентских настроек
+		/// OriginalJunk - флаг уценки без учета клиентских настроек
+		/// </summary>
+		public virtual bool OriginalJunk { get; set; }
+
 
 		public virtual decimal? MinBoundCost { get; set; }
 
@@ -83,8 +89,17 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal? MaxProducerCost { get; set; }
 
-
 		public virtual uint? RequestRatio { get; set; }
+
+		public virtual uint SafeRequestRatio
+		{
+			get
+			{
+				if (RequestRatio == 0)
+					return 1;
+				return RequestRatio.GetValueOrDefault(1);
+			}
+		}
 
 		[JsonProperty("OrderCost")]
 		public virtual decimal? MinOrderSum { get; set; }

@@ -36,10 +36,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string FullName { get; set; }
 
 		[Style(Description = "Предложения отсутствуют")]
-		public virtual bool DoNotHaveOffers
-		{
-			get { return !HaveOffers; }
-		}
+		public virtual bool DoNotHaveOffers => !HaveOffers;
 
 		public override string ToString()
 		{

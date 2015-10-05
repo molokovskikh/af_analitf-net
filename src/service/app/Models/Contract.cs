@@ -5,28 +5,31 @@ using System.Linq;
 #if SERVER
 using Common.Models;
 namespace AnalitF.Net.Service.Models
-{
 #endif
 #if CLIENT
 using AnalitF.Net.Client.Models;
-
 namespace AnalitF.Net.Client.Models
-{
 #endif
-#if CLIENT
+{
 	public class ClientOrder
 	{
 		public uint ClientOrderId;
 		public uint PriceId;
+		public string PriceName;
+		public uint? CostId;
+		public string CostName;
 		public uint AddressId;
 		public ulong RegionId;
 		public DateTime CreatedOn;
 		public DateTime PriceDate;
 		public string Comment;
-
-		public OrderLine[] Items;
-	}
+#if SERVER
+		public ClientOrderItem[] Items;
 #endif
+#if CLIENT
+		public OrderLine[] Items;
+#endif
+	}
 
 	public class HistoryRequest
 	{
@@ -122,6 +125,13 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
+		public OrderLineResult(uint clientId, uint serverId)
+		{
+			ClientLineId = clientId;
+			ServerLineId = serverId;
+			Result = LineResultStatus.OK;
+		}
+
 		public OrderLineResult(uint id)
 		{
 			ClientLineId = id;
@@ -131,10 +141,12 @@ namespace AnalitF.Net.Client.Models
 	public class ConfirmRequest
 	{
 		public uint RequestId;
+		public string Message;
 
-		public ConfirmRequest(uint requestId)
+		public ConfirmRequest(uint requestId, string message = null)
 		{
 			RequestId = requestId;
+			Message = message;
 		}
 	}
 
@@ -143,8 +155,8 @@ namespace AnalitF.Net.Client.Models
 		public uint ClientOrderId;
 		public ulong ServerOrderId;
 		public string Error;
-		public OrderResultStatus Result;
-		public OrderLineResult[] Lines = new OrderLineResult[0];
+		public OrderResultStatus Result = OrderResultStatus.OK;
+		public List<OrderLineResult> Lines = new List<OrderLineResult>();
 
 		public OrderResult()
 		{
@@ -162,7 +174,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			ClientOrderId = order.ClientOrderId.GetValueOrDefault();
 			ServerOrderId = order.RowId;
-			Lines = order.OrderItems.Select(i => new OrderLineResult(map.GetValueOrDefault(i)) { ServerLineId = i.RowId }).ToArray();
+			Lines = order.OrderItems.Select(i => new OrderLineResult(map.GetValueOrDefault(i), i.RowId)).ToList();
 		}
 #endif
 
@@ -171,7 +183,7 @@ namespace AnalitF.Net.Client.Models
 			ClientOrderId = clientOrderId.GetValueOrDefault();
 			Error = error;
 			Result = OrderResultStatus.Warning;
-			Lines = lines.ToArray();
+			Lines = lines.ToList();
 		}
 
 		public override string ToString()
@@ -180,19 +192,6 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 #if SERVER
-
-	public class ClientOrder
-	{
-		public uint ClientOrderId;
-		public uint PriceId;
-		public uint AddressId;
-		public ulong RegionId;
-		public DateTime CreatedOn;
-		public DateTime PriceDate;
-		public string Comment;
-
-		public ClientOrderItem[] Items;
-	}
 
 	public class OfferComposedId
 	{
@@ -219,6 +218,8 @@ namespace AnalitF.Net.Client.Models
 		public PriceComposedId LeaderPrice;
 		public decimal? MinCost;
 		public PriceComposedId MinPrice;
+
+		public bool OriginalJunk;
 	}
 #endif
 
@@ -247,6 +248,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public DateTime? LastSync;
 		public uint AddressId;
+		public int JunkPeriod;
 		public List<BatchItem> BatchItems;
 
 		public BatchRequest()
@@ -254,11 +256,12 @@ namespace AnalitF.Net.Client.Models
 			BatchItems = new List<BatchItem>();
 		}
 
-		public BatchRequest(uint addressId, DateTime? lastSync)
+		public BatchRequest(uint addressId, int junkPeriod, DateTime? lastSync)
 			: this()
 		{
 			AddressId = addressId;
 			LastSync = lastSync;
+			JunkPeriod = junkPeriod;
 		}
 	}
 }

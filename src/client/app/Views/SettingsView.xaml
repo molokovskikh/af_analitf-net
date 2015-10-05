@@ -322,6 +322,9 @@
 
 						<Label>Показывать список изменений в забраковке за (дни):</Label>
 						<TextBox x:Name="Settings_TrackRejectChangedDays"></TextBox>
+
+						<Label>Считать уценкой если срок годности менее (месяцы):</Label>
+						<TextBox x:Name="Settings_JunkPeriod" />
 					</StackPanel>
 				</ScrollViewer>
 			</TabItem>

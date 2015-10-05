@@ -440,6 +440,8 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(2)
 			};
 			if (!settings.PriceTag.HideNotPrinted || settings.PriceTag.PrintFullName) {
+				var uri = new Uri(String.Format(@"pack://application:,,,/{0};component/assets/images/price-tag-log.png",
+					typeof(PriceTagDocument).Assembly.GetName().Name));
 				panel.Children.Add(new Border {
 					BorderThickness = new Thickness(0, 0, 0, 0.5),
 					BorderBrush = Brushes.Black,
@@ -449,7 +451,7 @@ namespace AnalitF.Net.Client.Models.Print
 							new Image {
 								Height = 20,
 								Width = 18,
-								Source = new BitmapImage(new Uri(@"pack://application:,,,/AnalitF.Net.Client;component/assets/images/price-tag-log.png"))
+								Source = new BitmapImage(uri)
 							},
 							new TextBlock {
 								Height = 20,

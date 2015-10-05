@@ -274,15 +274,14 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected void WaitMessage(string message)
 		{
-			var window = AutomationHelper.FindWindow("АналитФАРМАЦИЯ: Внимание") ?? Opened.Timeout(Timeout).First();
+			var window = WaitDialog("АналитФАРМАЦИЯ: Внимание");
 			Assert.AreEqual(message, AutomationHelper.ToText(window));
 			ClickByName("ОК", window);
 		}
 
 		protected void AssertUpdate(string result)
 		{
-			var observable = Opened.Timeout(5.Second());
-			var update = AutomationHelper.FindWindow("Обмен данными") ?? observable.First();
+			var update = WaitDialog("Обмен данными");
 			Assert.AreEqual("Обмен данными", update.GetName());
 			var dialog = Opened.Timeout(UpdateTimeout).First();
 			if (dialog.GetName() == "Обмен данными") {
@@ -296,14 +295,22 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				ClickByName("Закрыть", dialog);
 			}
 			else {
-				Assert.That(result, Is.StringContaining(text));
+				Assert.That(text, Is.StringContaining(result));
 				ClickByName("TryClose", dialog);
+			}
+		}
+
+		protected AutomationElement WaitDialog(string name, TimeSpan timeout)
+		{
+			var observable = Opened.Take(1).PublishLast();
+			using (observable.Connect()) {
+				return AutomationHelper.FindWindow(name, Process.Id) ?? observable.Timeout(timeout).First();
 			}
 		}
 
 		protected AutomationElement WaitDialog(string name)
 		{
-			return AutomationHelper.FindWindow(name) ?? Opened.Timeout(Timeout).First();
+			return WaitDialog(name, Timeout);
 		}
 
 		protected void AssertText(AutomationElement el, string text)

@@ -19,9 +19,15 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public TestClient Client;
 		public TestPrice MaxProducerCosts;
 		public List<UpdateData> Files;
+		public TestProduct[] mandatory;
 
 		public override void Execute(ISession session)
 		{
+			//этот товар должен обязательно присутствовать, он проверяется в тестах
+			var product = session.Query<TestProduct>().First(x => x.CatalogProduct.CatalogName.Name == "ПАПАВЕРИНА ГИДРОХЛОРИД"
+				&& x.CatalogProduct.CatalogForm.Form == "супп. 20 мг N10");
+			mandatory = new [] { product };
+
 			var supplier = TestSupplier.CreateNaked(session);
 			supplier.Name += " " + supplier.Id;
 			CreateSampleContactInfo(supplier);
@@ -51,10 +57,14 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					r.ControlMinReq = true;
 				});
 
-			ExecuteFixture(new MailWithAttachment(), session);
+			ExecuteFixture(new CreateMail(), session);
 
 			DataMother.News(session);
-			SimpleFixture.CreateOrderReject(session);
+
+			SimpleFixture.InnerCreateOrderReject(session,
+				Tuple.Create(session.Query<TestProduct>().First(p => !p.Hidden).FullName, 0u, 10u),
+				Tuple.Create(product.FullName, product.Id, 1u),
+				Tuple.Create(product.FullName, 0u, 1u));
 
 			var requestLog = new RequestLog(session.Load<Common.Models.User>(Client.Users[0].Id), new Version());
 			var exporter = new Exporter(session, Config, requestLog) {
@@ -174,7 +184,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var randomProducers = Generator.Random(maxProducer).Select(i => producers.Skip(i).Take(1).First());
 
 			var synonyms = new List<Tuple<string, TestProduct, string, TestProducer>>();
-			var productForCreate = randomProducts.Take(20)
+			var productForCreate = mandatory.Concat(randomProducts.Take(20))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.VitallyImportant).Take(7))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList).Take(3))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList && p.CatalogProduct.VitallyImportant).Take(2))
@@ -200,7 +210,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 					Quantity = random.Next(1, 10 * 1000).ToString(),
 					Junk = random.Next(100) < 5,
 				};
-				core.Exp = DateTime.Today.AddMonths(random.Next(0, 60));
+				core.Exp = DateTime.Today.AddMonths(random.Next(7, 60));
 				core.Period = core.Exp.Value.ToShortDateString();
 				//в 30% случаев товар имеет штрих код
 				if (random.Next(2) == 0) {

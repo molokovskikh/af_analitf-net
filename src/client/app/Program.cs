@@ -14,6 +14,8 @@ using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using Common.Tools.Helpers;
+using Devart.Data.MySql;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -38,10 +40,25 @@ namespace AnalitF.Net.Client
 		public void RenderObject(RendererMap rendererMap, object obj, TextWriter writer)
 		{
 			var ex = obj as ReflectionTypeLoadException;
-			if (ex == null)
-				return;
-			foreach (var loaderException in ex.LoaderExceptions) {
-				writer.WriteLine(loaderException);
+			if (ex != null) {
+				foreach (var loaderException in ex.LoaderExceptions) {
+					writer.WriteLine(loaderException);
+				}
+			}
+
+			var db = obj as MySqlException;
+			if (db != null) {
+				writer.Write($"ErrorCode = {db.Code}, ");
+				writer.Write(db.ToString());
+			}
+
+			var e = obj as Exception;
+			if (e != null) {
+				var mysql = e.Chain().OfType<MySqlException>().FirstOrDefault();
+				if (mysql != null) {
+					writer.Write($"MySql ErrorCode = {mysql.Code}, ");
+				}
+				writer.Write(e);
 			}
 		}
 	}
@@ -82,10 +99,14 @@ namespace AnalitF.Net.Client
 			try {
 				//проверка для ilmerge
 				var merged = new [] {
-					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net", "Devart.Data", "Devart.Data.MySql"
+					"Caliburn.Micro", "Xceed.Wpf.Toolkit", "System.Windows.Interactivity", "log4net",
+					"Devart.Data", "Devart.Data.MySql",
+					"WpfAnimatedGif",
+					"AnalitF.Net.Client"
 				};
 				AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
-					if (merged.Any(n => eventArgs.Name.StartsWith(n)))
+					var name = new AssemblyName(eventArgs.Name);
+					if (merged.Any(n => name.Name.Equals(n, StringComparison.CurrentCultureIgnoreCase)))
 						return typeof(Program).Assembly;
 					return null;
 				};
@@ -97,6 +118,7 @@ namespace AnalitF.Net.Client
 					XmlConfigurator.Configure();
 
 				string batchFile = null;
+				var migrate = false;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
@@ -105,12 +127,15 @@ namespace AnalitF.Net.Client
 					{"encoding=", v => encoding = v},
 					{"debug=", v => debug.Add(v) },
 					{"batch=", "Запустить приложение и вызвать автозаказ с указанным файлом", v => batchFile = v},
+					{"i", "", v => migrate = true},
 #if DEBUG
 					{"fault-inject", "", v => faultInject = v != null},
 					{"debug-pipe=", "", v => debugpipe = v},
 #endif
 				};
 				var cmds = options.Parse(args);
+				if (migrate)
+					cmds = new List<string> { "migrate" };
 
 				if (!String.IsNullOrEmpty(encoding)) {
 					Console.OutputEncoding = Encoding.GetEncoding(encoding);
@@ -157,7 +182,7 @@ namespace AnalitF.Net.Client
 				catch (Exception e) {
 					log.Error("Не удалось получить информацию о версии среды или ос", e);
 				}
-				log.Logger.Repository.RendererMap.Put(typeof(ReflectionTypeLoadException), new ExceptionRenderer());
+				log.Logger.Repository.RendererMap.Put(typeof(Exception), new ExceptionRenderer());
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
 					return 0;
@@ -222,8 +247,7 @@ namespace AnalitF.Net.Client
 				}
 			}
 			finally {
-				if (instance != null)
-					instance.SignalShutdown();
+				instance?.SignalShutdown();
 			}
 
 			return result;

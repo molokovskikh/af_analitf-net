@@ -79,5 +79,17 @@ drop temporary table Leaders;")
 				.ExecuteUpdate();
 			settings.LastLeaderCalculation = DateTime.Today;
 		}
+
+		public static void CalcJunk(IStatelessSession session, Settings settings)
+		{
+			session.CreateSQLQuery(@"
+update Offers
+set Junk = OriginalJunk or (Exp is not null and Exp < :end);
+
+update OrderLines
+set Junk = OriginalJunk or (Exp is not null and Exp < :end);")
+				.SetParameter("end", DateTime.Now.AddMonths(settings.JunkPeriod))
+				.ExecuteUpdate();
+		}
 	}
 }

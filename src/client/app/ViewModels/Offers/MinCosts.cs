@@ -44,19 +44,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Costs = Diff.Skip(1).Throttle(Consts.TextInputLoadTimeout, UiScheduler).Select(v => (object)v)
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(SearchBehavior.ActiveSearchTerm)
+				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(Load))
 				.Switch()
 				.ObserveOn(UiScheduler)
+				.Do(_ => IsLoading.Value = false)
 				.ToValue(CloseCancellation);
 
 			CurrentCost
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Query(), CloseCancellation.Token);
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
 		private List<MinCost> Load(IStatelessSession session)
 		{
-			IsLoading.Value = true;
 			var factor = Diff.Value;
 			var query = session.Query<MinCost>()
 				.Fetch(c => c.Catalog)
@@ -67,13 +68,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (!String.IsNullOrEmpty(term)) {
 				query = query.Where(c => c.Catalog.Name.Name.Contains(term) || c.Catalog.Form.Contains(term));
 			}
-			var result = query.OrderBy(c => c.Catalog.Name.Name)
+			return query.OrderBy(c => c.Catalog.Name.Name)
 				.ThenBy(c => c.Catalog.Form)
 				.Fetch(c => c.Catalog)
 				.ThenFetch(c => c.Name)
 				.ToList();
-			IsLoading.Value = false;
-			return result;
 		}
 
 		protected override void Query()

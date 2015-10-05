@@ -75,13 +75,15 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			var user = ServerFixture.User(session);
 			var price = user.GetActivePricesNaked(session).First().Price;
-			var product = session.Query<TestProduct>().First(p => !p.Hidden).Name;
+			var product = session.Query<TestProduct>().First(p => !p.Hidden).FullName;
 			var product1 = price.Core[0].Product;
-			var product2 = price.Core.First(c => c.Product != product1).Product;
+			//у не фармацевтики может быть наименование которое не работает с полнотекстовым поиском, пример 120-80 (БАД)
+			//фармацевтика лучше
+			var product2 = price.Core.First(c => c.Product != product1 && c.Product.CatalogProduct.Pharmacie).Product;
 			InnerCreateOrderReject(session,
 				Tuple.Create(product, 0u, 10u),
-				Tuple.Create(product1.Name, product1.Id, 1u),
-				Tuple.Create(product2.Name, 0u, 1u));
+				Tuple.Create(product1.FullName, product1.Id, 1u),
+				Tuple.Create(product2.FullName, 0u, 1u));
 		}
 
 		[Description("Создает отказ, на сервере, для тестов"), Service]

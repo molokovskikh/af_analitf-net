@@ -83,10 +83,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId
-		{
-			get { return Id; }
-		}
+		public virtual uint DisplayId => Id;
 
 		public virtual uint? ExportId { get; set; }
 
@@ -95,6 +92,21 @@ namespace AnalitF.Net.Client.Models
 		public virtual Address Address { get; set; }
 
 		public virtual Price Price { get; set; }
+
+		/// <summary>
+		/// заявки отмеченные этим флагом не участвуют в механизме восстановления заявок
+		/// предполагается что эта заявка априори актуальная и ее не нужно восстанавливать
+		/// флаг обрабатывает однакратно, после обработки сбрасывается
+		///
+		/// применяется в автозаказе тк автозаказ может сделать заявку для которой восстановление не пройдет
+		/// тк в автозаказе есть возможность игнорировать кратность
+		/// </summary>
+		public virtual bool SkipRestore { get; set; }
+
+		/// <summary>
+		/// Заказ был загружен с сервера в последнем обновлении
+		/// </summary>
+		public virtual bool IsLoaded { get; set; }
 
 		public virtual int LinesCount
 		{
@@ -156,10 +168,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<OrderLine> Lines { get; set; }
 
-		IEnumerable<IOrderLine> IOrder.Lines
-		{
-			get { return Lines; }
-		}
+		IEnumerable<IOrderLine> IOrder.Lines => Lines;
 
 		public virtual MinOrderSumRule MinOrderSum { get; set; }
 
@@ -180,15 +189,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Style("Limit.Value", Description = "Превышение лимита")]
-		public virtual bool IsOverLimit
-		{
-			get
-			{
-				if (Limit == null)
-					return false;
-				return Sum > Limit.Value;
-			}
-		}
+		public virtual bool IsOverLimit => Sum > Limit?.Value;
 
 		[Style("Sum", Description = "Имеется позиция с корректировкой по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsOrderLineSendError
@@ -199,15 +200,9 @@ namespace AnalitF.Net.Client.Models
 		[Style("AddressName"), Ignore, JsonIgnore]
 		public virtual bool IsCurrentAddress { get; set; }
 
-		public virtual bool IsEmpty
-		{
-			get { return Lines.Count == 0; }
-		}
+		public virtual bool IsEmpty => Lines.Count == 0;
 
-		public virtual string PriceLabel
-		{
-			get { return PriceName; }
-		}
+		public virtual string PriceLabel => PriceName;
 
 		public virtual string PriceName
 		{
@@ -279,6 +274,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void ResetStatus()
 		{
+			ExportId = null;
+			IsLoaded = false;
 			SendError = "";
 			SendResult = OrderResultStatus.OK;
 			Lines.Each(l => l.Apply(null));
@@ -307,7 +304,7 @@ namespace AnalitF.Net.Client.Models
 			uint ordered;
 			var line = TryOrder(offer, count, out ordered);
 			if (count != ordered)
-				throw new Exception(String.Format("Не удалось заказать позицию {0} заказывалось {1} заказано {2}", offer, count, ordered));
+				throw new Exception($"Не удалось заказать позицию {offer} заказывалось {count} заказано {ordered}");
 			return line;
 		}
 
@@ -391,6 +388,9 @@ namespace AnalitF.Net.Client.Models
 				AddressId = Address.Id,
 				CreatedOn = CreatedOn,
 				PriceId = Price.Id.PriceId,
+				PriceName = Price.PriceName,
+				CostId = Price.CostId,
+				CostName = Price.CostName,
 				RegionId = Price.Id.RegionId,
 				PriceDate = Price.PriceDate,
 				Comment = Comment,
@@ -398,10 +398,7 @@ namespace AnalitF.Net.Client.Models
 			};
 		}
 
-		public virtual bool IsAccepted
-		{
-			get { return SendResult == OrderResultStatus.OK && ServerId > 0; }
-		}
+		public virtual bool IsAccepted => SendResult == OrderResultStatus.OK && ServerId > 0;
 
 		public virtual void Apply(OrderResult result)
 		{

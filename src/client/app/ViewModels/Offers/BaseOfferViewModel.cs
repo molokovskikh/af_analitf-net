@@ -102,37 +102,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public NotifyValue<Offer> CurrentOffer { get; set; }
 
-		public Order CurrentOrder
-		{
-			get
-			{
-				if (CurrentOffer.Value == null)
-					return null;
-				if (CurrentOffer.Value.OrderLine == null)
-					return null;
-				return CurrentOffer.Value.OrderLine.Order;
-			}
-		}
+		public Order CurrentOrder => CurrentOffer.Value?.OrderLine?.Order;
 
-		public bool CanShowCatalogWithMnnFilter
-		{
-			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
-		}
+		public bool CanShowCatalogWithMnnFilter => CurrentCatalog?.Name.Mnn != null;
 
-		public bool CanShowDescription
-		{
-			get
-			{
-				return CurrentCatalog != null
-					&& CurrentCatalog.Name.Description != null;
-			}
-		}
+		public bool CanShowDescription => CurrentCatalog?.Name.Description != null;
 
 		//фактический адрес доставки для которого нужно формировать заявки
-		protected Address ActualAddress
-		{
-			get { return CurrentElementAddress ?? Address; }
-		}
+		protected Address ActualAddress => CurrentElementAddress ?? Address;
 
 		public string AutoCommentText
 		{
@@ -164,12 +141,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			if (StatelessSession != null) {
-				Promotions = new PromotionPopup(StatelessSession, Shell.Config);
-				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false)
-					.Subscribe(c => Promotions.Activate(c.Value == null ? null : c.Value.Name));
-			}
-
+			Promotions = new PromotionPopup(Shell.Config,
+				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false).Select(x => x.Value?.Name),
+				RxQuery, Env);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
 				.Where(x => x != null)

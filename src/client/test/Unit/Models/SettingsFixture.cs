@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
@@ -41,6 +42,16 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.IsNotNullOrEmpty(crypToken);
 			Assert.AreNotEqual(crypToken, settings.ClientTokenV2);
 			Assert.AreNotEqual(token, settings.GetClientToken());
+		}
+
+		[Test]
+		public void Change_client_token_on_path_change()
+		{
+			var settings = new Settings();
+			settings.CheckToken();
+			var token = settings.GetClientToken(@"C:\af\");
+			var token2 = settings.GetClientToken(@"C:\users\test\af\");
+			Assert.AreNotEqual(token, token2);
 		}
 
 		[Test]

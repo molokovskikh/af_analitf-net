@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -26,6 +27,7 @@ using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
 using LogManager = log4net.LogManager;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -57,11 +59,15 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			lazyModel = new Lazy<T>(Init<T>);
 		}
 
-		protected T Next<T>(IEnumerator<IResult> results)
+		protected void TaskResult(IEnumerable<IResult> result)
 		{
-			Assert.IsTrue(results.MoveNext());
-			Assert.IsInstanceOf<T>(results.Current);
-			return (T)results.Current;
+			var enumerator = result.GetEnumerator();
+			var task = Next<TaskResult>(enumerator).Task;
+			if (task.Status == TaskStatus.Created)
+				task.Start();
+			if (!task.Wait(30.Second()))
+				throw new Exception("Не удалось дождаться задачи за 30 секунд");
+			enumerator.MoveNext();
 		}
 	}
 
@@ -203,7 +209,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected SentOrder MakeSentOrder(params Offer[] offers)
 		{
-			offers = offers.DefaultIfEmpty(session.Query<Offer>().First()).ToArray();
+			offers = offers.DefaultIfEmpty(session.Query<Offer>().First(x => x.RequestRatio == null)).ToArray();
 			var offer = offers.First();
 			var order = new Order(offer.Price, address);
 			foreach (var offerToOrder in offers) {
@@ -218,7 +224,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
 		{
-			offer = offer ?? session.Query<Offer>().First();
+			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null);
 			var order = new Order(offer.Price, toAddress ?? address);
 			order.TryOrder(offer, 1);
 			offer.OrderLine = order.Lines[0];
@@ -245,6 +251,18 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected string WaitNotification()
 		{
 			return shell.Notifications.Timeout(10.Second()).First();
+		}
+
+		protected T Next<T>(IEnumerator<IResult> results)
+		{
+			Assert.IsTrue(results.MoveNext());
+			Assert.IsInstanceOf<T>(results.Current);
+			return (T)results.Current;
+		}
+
+		protected T Next<T>(IEnumerable<IResult> results)
+		{
+			return Next<T>(results.GetEnumerator());
 		}
 	}
 }

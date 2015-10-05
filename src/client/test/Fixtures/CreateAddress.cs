@@ -3,7 +3,7 @@ using NHibernate;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class CreateAddress
+	public class LocalAddress
 	{
 		public void Execute(ISession session)
 		{

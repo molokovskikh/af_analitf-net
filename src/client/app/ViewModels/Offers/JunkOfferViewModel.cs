@@ -22,8 +22,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			IsLoading = new NotifyValue<bool>(true);
 		}
 
-		public QuickSearch<Offer> QuickSearch { get; private set; }
-		public NotifyValue<bool> IsLoading { get; set; }
+		public QuickSearch<Offer> QuickSearch { get; }
+		public NotifyValue<bool> IsLoading { get; }
 
 		protected override void OnInitialize()
 		{

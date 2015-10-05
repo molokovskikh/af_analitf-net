@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			Message = request;
 			DisplayName = caption;
-			countdown =  caption + " будет произведено через {0} секунд";
+			countdown =  caption + " Р±СѓРґРµС‚ РїСЂРѕРёР·РІРµРґРµРЅРѕ С‡РµСЂРµР· {0} СЃРµРєСѓРЅРґ";
 			this.seconds = seconds;
 			CountDown = new NotifyValue<string>();
 		}

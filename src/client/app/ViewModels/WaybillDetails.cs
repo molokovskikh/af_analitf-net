@@ -38,13 +38,14 @@ namespace AnalitF.Net.Client.ViewModels
 			this.id = id;
 			CurrentLine = new NotifyValue<object>();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
-
 			CurrentTax = new NotifyValue<ValueDescription<int?>>();
-			RoundToSingleDigit = new NotifyValue<bool>(true);
-			RoundToSingleDigit.Changed()
+			Rounding = new NotifyValue<Rounding>(Models.Rounding.To0_10);
+			CurrentOrderLine = new NotifyValue<SentOrderLine>();
+			Lines = new NotifyValue<ListCollectionView>();
+
+			Rounding.Changed()
 				.Merge(Settings.Changed())
 				.Subscribe(v => Calculate());
-			Lines = new NotifyValue<ListCollectionView>();
 			CurrentTax.Subscribe(v => {
 				if (Lines.Value == null)
 					return;
@@ -83,7 +84,6 @@ namespace AnalitF.Net.Client.ViewModels
 					return new List<SentOrderLine>();
 				})
 				.ToValue(CloseCancellation);
-			CurrentOrderLine = new NotifyValue<SentOrderLine>();
 
 			EmptyLabelVisibility = OrderLines
 				.Select(v => v == null || v.Count == 0 ? Visibility.Visible : Visibility.Collapsed)
@@ -91,6 +91,7 @@ namespace AnalitF.Net.Client.ViewModels
 			OrderDetailsVisibility = EmptyLabelVisibility
 				.Select(v => v == Visibility.Collapsed ? Visibility.Visible :  Visibility.Collapsed)
 				.ToValue();
+			SessionValue(Rounding, "Rounding");
 		}
 
 		public Waybill Waybill { get; set; }
@@ -101,7 +102,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<WaybillLine> CurrentWaybillLine { get; set; }
 		public List<ValueDescription<int?>> Taxes { get; set; }
 		public NotifyValue<ValueDescription<int?>> CurrentTax { get; set; }
-		public NotifyValue<bool> RoundToSingleDigit { get; set; }
 
 		public NotifyValue<List<SentOrderLine>> OrderLines { get; set; }
 		public NotifyValue<SentOrderLine> CurrentOrderLine { get; set; }
@@ -109,10 +109,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
 		public NotifyValue<bool> IsRejectVisible { get; set; }
 		public NotifyValue<Reject> Reject { get; set; }
+		public NotifyValue<Rounding> Rounding { get; set; }
 
 		private void Calculate()
 		{
-			Waybill.RoundTo1 = RoundToSingleDigit.Value;
+			//в случае если мы восстановили значение из сессии
+			if (Waybill == null)
+				return;
+			Waybill.Rounding = Rounding.Value;
 			Waybill.Calculate(Settings.Value);
 		}
 
@@ -146,23 +150,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
-		}
-
-		protected override void OnActivate()
-		{
-			base.OnActivate();
-
-			if (Shell != null) {
-				RoundToSingleDigit.Value = Shell.RoundToSingleDigit;
-			}
-		}
-
-		protected override void OnDeactivate(bool close)
-		{
-			base.OnDeactivate(close);
-			if (Shell != null) {
-				Shell.RoundToSingleDigit = RoundToSingleDigit.Value;
-			}
 		}
 
 		public IResult PrintRackingMap()
