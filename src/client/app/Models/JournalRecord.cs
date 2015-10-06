@@ -15,6 +15,13 @@ namespace AnalitF.Net.Client.Models
 		{
 		}
 
+		public JournalRecord(string name, string filename)
+		{
+			CreateAt = DateTime.Now;
+			Name = name;
+			Filename = filename;
+		}
+
 		public JournalRecord(Loadable loadable, string name, string filename)
 		{
 			CreateAt = DateTime.Now;
