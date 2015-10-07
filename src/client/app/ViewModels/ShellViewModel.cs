@@ -172,7 +172,13 @@ namespace AnalitF.Net.Client.ViewModels
 			CloseDisposable.Add(Env.Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
 			CloseDisposable.Add(Env.Bus.Listen<Settings>()
 				.ObserveOn(Env.UiScheduler)
-				.Select(_ => session.Query<Settings>().First())
+				.Select(_ => {
+					//на странице настроек могут быть удалены наценки по этому мы не можем делать refresh
+					//делаем Evict что бы избавиться от кеша
+					//и затем перезагружаем данные
+					session.Evict(Settings.Value);
+					return session.Query<Settings>().First();
+				})
 				.Subscribe(Settings));
 
 			Schedules.Select(_ =>
@@ -246,11 +252,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			if (statelessSession != null) {
-				statelessSession
-					.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0")
-					.ExecuteUpdate();
-			}
+			statelessSession?.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate();
 			Reload();
 		}
 
@@ -413,8 +415,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//нужно сохранить идентификатор выбранного адреса доставки тк
 			//строка Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			//сбросит его
-			var addressId = CurrentAddress == null ? 0u : CurrentAddress.Id;
-
+			var addressId = CurrentAddress?.Id;
 			NewMailsCount.Value = statelessSession.Query<Mail>().Count(m => m.IsNew);
 			NewDocsCount.Value = statelessSession.Query<Waybill>().Count(m => m.IsNew);
 			Settings.Value = session.Query<Settings>().First();
