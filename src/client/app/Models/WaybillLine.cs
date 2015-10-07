@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client.Models
 			|| VitallyImportant.GetValueOrDefault();
 
 		[Ignore]
-		public bool IsMigration { get; set; }
+		public virtual bool IsMigration { get; set; }
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
