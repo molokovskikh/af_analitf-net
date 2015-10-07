@@ -65,8 +65,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			settings.Markups.Clear();
 			//позиция не может быть жизненно важной тк мы не генерируем таких тестовых данных
 			var markupType = MarkupType.Over;
-			settings.AddMarkup(new MarkupConfig(0, splitCost, 20, markupType));
-			settings.AddMarkup(new MarkupConfig(splitCost, decimal.MaxValue, 30, markupType));
+			settings.AddMarkup(new MarkupConfig(address, 0, splitCost, 20, markupType));
+			settings.AddMarkup(new MarkupConfig(address, splitCost, decimal.MaxValue, 30, markupType));
 			session.Save(settings);
 
 			Assert.That(model.Offers.Value[0].RetailCost, Is.Not.EqualTo(0));

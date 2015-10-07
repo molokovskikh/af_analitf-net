@@ -16,7 +16,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Nds_18_markups()
 		{
-			Env.Current.Settings = new Settings(defaults: true);
+			var address = new Address();
+			Env.Current.Settings = new Settings(address);
+			Env.Current.Addresses = new [] { address }.ToList();
 			var model = new SettingsViewModel();
 			Assert.AreEqual(1, model.Nds18Markups.Value.Count);
 		}
@@ -24,22 +26,17 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Overwrite_markups()
 		{
-			var addresses = new List<Address> {
+			var addresses = new [] {
 				new Address("Тестовый адрес 1"),
 				new Address("Тестовый адрес 2"),
 			};
-			var settings = new Settings(defaults: true);
+			var settings = new Settings(addresses);
 			Env.Current.Settings = settings;
-			Env.Current.Addresses = addresses;
-			settings.Markups.Each(x => x.Address = addresses[0]);
-			settings.Markups.Add(new MarkupConfig(0, 50, 20, MarkupType.Nds18) {
-				Address = addresses[1]
-			});
-			settings.Markups.Add(new MarkupConfig(50, decimal.MaxValue, 50, MarkupType.Nds18) {
-				Address = addresses[1]
-			});
+			Env.Current.Addresses = addresses.ToList();
+			settings.Markups.RemoveEach(x => x.Type == MarkupType.Nds18 && x.Address == addresses[1]);
+			settings.Markups.Add(new MarkupConfig(addresses[1], 0, 50, 20, MarkupType.Nds18));
+			settings.Markups.Add(new MarkupConfig(addresses[1], 50, decimal.MaxValue, 50, MarkupType.Nds18));
 			var model = new SettingsViewModel();
-			model.Addresses = addresses;
 			Assert.AreEqual(1, model.Nds18Markups.Value.Count);
 			model.OverwriteNds18Markups = true;
 			model.UpdateMarkups();

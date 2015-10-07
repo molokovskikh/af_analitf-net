@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Setup()
 		{
 			address = new Address();
-			settings = new Settings(true);
+			settings = new Settings(address);
 			settings.Markups.Each(x => x.Address = address);
 			waybillSettings = new WaybillSettings();
 			settings.Waybills.Add(waybillSettings);

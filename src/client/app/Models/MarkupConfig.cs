@@ -38,11 +38,13 @@ namespace AnalitF.Net.Client.Models
 			Settings = config.Settings;
 		}
 
-		public MarkupConfig(decimal begin,
+		public MarkupConfig(Address address,
+			decimal begin,
 			decimal end,
 			decimal markup,
 			MarkupType type = MarkupType.Over)
 		{
+			Address = address;
 			Begin = begin;
 			End = end;
 			Markup = markup;
@@ -135,6 +137,8 @@ namespace AnalitF.Net.Client.Models
 		{
 			if (offer == null)
 				return 0;
+			if (address == null)
+				return 0;
 
 			var type = MarkupType.Over;
 			if (offer.NDS == 18)
@@ -154,21 +158,21 @@ namespace AnalitF.Net.Client.Models
 			foreach (var markup in markups) {
 				if (markup.Type == type
 					&& markup.Address.Id == address.Id
-					&& markup.Begin < cost
-					&& markup.End > cost)
+					&& cost > markup.Begin
+					&& cost <= markup.End)
 					return markup;
 			}
 			return null;
 		}
 
-		public static IEnumerable<MarkupConfig> Defaults()
+		public static IEnumerable<MarkupConfig> Defaults(Address address)
 		{
 			return new[] {
-				new MarkupConfig(0, 10000, 20),
-				new MarkupConfig(0, 10000, 20, MarkupType.Nds18),
-				new MarkupConfig(0, 50, 20, MarkupType.VitallyImportant),
-				new MarkupConfig(50, 500, 20, MarkupType.VitallyImportant),
-				new MarkupConfig(500, 1000000, 20, MarkupType.VitallyImportant)
+				new MarkupConfig(address, 0, 10000, 20),
+				new MarkupConfig(address, 0, 10000, 20, MarkupType.Nds18),
+				new MarkupConfig(address, 0, 50, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(address, 50, 500, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant)
 			};
 		}
 

@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			FileHelper.CreateDirectoryRecursive(adUpdateDir);
 			File.WriteAllText(Path.Combine(adUpdateDir, "delete.me"), "");
 
-			var ads = cfg.KnownDirs(new Settings(true)).First(d => d.Name == "ads");
+			var ads = cfg.KnownDirs(new Settings()).First(d => d.Name == "ads");
 			FileHelper.CreateDirectoryRecursive(ads.Dst);
 			File.WriteAllText(Path.Combine(ads.Dst, "2block.gif"), "");
 

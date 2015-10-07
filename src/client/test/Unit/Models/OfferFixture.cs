@@ -285,7 +285,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			user.IsDelayOfPaymentEnabled = true;
 
 			offer.Price.CostFactor = 1.2m;
-			settings.Markups.Add(new MarkupConfig(0, 1000, 20));
+			settings.Markups.Add(new MarkupConfig(address, 0, 1000, 20));
 			offer.CalculateRetailCost(settings.Markups, user, address);
 			Assert.AreEqual(76.46, offer.RetailCost);
 		}
@@ -297,7 +297,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			//ндс имеет приоритет
 			offer.NDS = 18;
 			offer.VitallyImportant = true;
-			settings.Markups.Add(new MarkupConfig(0, 1000, 37, MarkupType.Nds18));
+			settings.Markups.Add(new MarkupConfig(address, 0, 1000, 37, MarkupType.Nds18));
 			offer.CalculateRetailCost(settings.Markups, user, address);
 			Assert.AreEqual(72.75, offer.RetailCost);
 		}

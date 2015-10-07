@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
-				(o, m) => NullableHelper.Round(o.ResultCost * (1 + m / 100), 2))
+				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
 				.ToValue();
 
 			//.Skip(1) - пропускаем начальные значения

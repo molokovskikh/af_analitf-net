@@ -170,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.BeginTransaction();
 
 				Settings.Value = Session.Query<Settings>().FirstOrDefault()
-					?? new Settings(defaults: true);
+					?? new Settings();
 				User = Session.Query<User>().FirstOrDefault()
 					?? new User {
 						SupportHours = "будни: с 07:00 до 19:00",
@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels
 					};
 			}
 			else {
-				Settings.Value = Env.Settings ?? new Settings(defaults: true);
+				Settings.Value = Env.Settings ?? new Settings();
 				User = Env.User ?? new User {
 					SupportHours = "будни: с 07:00 до 19:00",
 					SupportPhone = "тел.: 473-260-60-00",
@@ -277,7 +277,7 @@ namespace AnalitF.Net.Client.ViewModels
 			User = Session.Query<User>().FirstOrDefault();
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
-			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings(true)));
+			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings()));
 		}
 
 		protected override void OnActivate()

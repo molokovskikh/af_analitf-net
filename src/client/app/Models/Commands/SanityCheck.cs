@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var settings = session.Query<Settings>().FirstOrDefault();
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
-					settings = new Settings(defaults: true, token: mappingToken);
+					settings = new Settings(mappingToken);
 					settings.CheckToken();
 					session.Save(settings);
 				}
@@ -100,16 +100,13 @@ namespace AnalitF.Net.Client.Models.Commands
 
 					if (settings.MappingToken != mappingToken)
 						return true;
-					//проверяем что данные корректны и если не корректны
-					//пытаемся восстановить их
-					if (settings.Markups.Count == 0)
-						session.Query<MarkupConfig>().Each(settings.AddMarkup);
 
 					//если ничего восстановить не удалось тогда берем значения по умолчанию
-					if (settings.Markups.Count == 0) {
-						MarkupConfig.Defaults().Each(settings.AddMarkup);
+					foreach (var address in session.Query<Address>()) {
+						if (settings.Markups.Count(x => x.Address == address) == 0)
+							MarkupConfig.Defaults(address).Each(settings.AddMarkup);
 					}
-					else if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
+					if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
 						settings.Markups.AddEach(settings.Markups.Where(x => x.Type == MarkupType.Over)
 							.Select(x => new MarkupConfig(x, x.Address) {
 								Type = MarkupType.Nds18,
