@@ -252,7 +252,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			statelessSession?.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate();
+			if (statelessSession != null)
+				statelessSession.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate();
 			Reload();
 		}
 
@@ -540,7 +541,8 @@ namespace AnalitF.Net.Client.ViewModels
 			//настройки будут обновлены автоматически но в случае если
 			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
 			//это будет слишком поздно
-			Settings.Value = session?.Query<Settings>()?.First();
+			if (session != null)
+				Settings.Value = session.Query<Settings>()?.First();
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;

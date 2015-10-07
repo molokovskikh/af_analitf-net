@@ -104,11 +104,6 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual("test", model.AutoCommentText);
 		}
 
-		private void Close(object model)
-		{
-			ScreenExtensions.TryDeactivate(model, false);
-		}
-
 		[Test]
 		public void Do_not_order_from_forbidden_prices()
 		{

@@ -683,6 +683,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
 			var task = new Task<T>(() => {
+				if (Env.Factory == null)
+					return default(T);
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
 				Interlocked.Increment(ref backgrountQueryCount);
@@ -709,6 +711,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public Task TplQuery(Action<IStatelessSession> action)
 		{
 			var task = new Task(() => {
+				if (Env.Factory == null)
+					return;
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
 				Interlocked.Increment(ref backgrountQueryCount);

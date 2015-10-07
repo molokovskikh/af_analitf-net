@@ -34,7 +34,7 @@ namespace AnalitF.Net.Client.Config
 		//для тестирования
 		public User User;
 		public Settings Settings;
-		public List<Address> Addresses;
+		public List<Address> Addresses = new List<Address>();
 		public static Env Current;
 
 		public Env(User user, IMessageBus bus, IScheduler scheduler, ISessionFactory factory)

@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var results = batch.Save().GetEnumerator();
 			var save = Next<SaveFileResult>(results);
 			save.Dialog.FilterIndex = 1;
-			var file = RandomFile();
+			var file = cleaner.RandomFile();
 			save.Dialog.FileName = file;
 			Next(results);
 
@@ -104,8 +104,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var results = batch.Save().GetEnumerator();
 			var save = Next<SaveFileResult>(results);
 			save.Dialog.FilterIndex = 4;
-			var file = RandomFile();
-			save.Dialog.FileName = file;
+			var file = save.Dialog.FileName = cleaner.RandomFile();
 			Next(results);
 			var text = File.ReadAllText(file, Encoding.Default);
 			Assert.That(text, Is.StringContaining("Наименование;Производитель;Прайс-лист;Цена;Заказ;Сумма;Комментарий"));
@@ -122,8 +121,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var results = batch.Save().GetEnumerator();
 			var save = Next<SaveFileResult>(results);
 			save.Dialog.FilterIndex = 3;
-			var file = RandomFile();
-			save.Dialog.FileName = file;
+			var file = save.Dialog.FileName = cleaner.RandomFile();
 			Next(results);
 
 			using(var stream = File.OpenRead(file)) {
