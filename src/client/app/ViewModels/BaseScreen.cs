@@ -213,7 +213,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)
-				.Select(_ => Session.Query<Settings>().First())
+				.Select(_ => {
+					Session.Evict(Settings.Value);
+					return Session.Query<Settings>().First();
+				})
 				.Subscribe(Settings));
 			//есть два способа изменить настройки цветов Конфигурация -> Настройка легенды
 			//или дважды кликнуть на элементе легенды, подписываемся на события в результате этих действий

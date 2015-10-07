@@ -541,8 +541,10 @@ namespace AnalitF.Net.Client.ViewModels
 			//настройки будут обновлены автоматически но в случае если
 			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
 			//это будет слишком поздно
-			if (session != null)
-				Settings.Value = session.Query<Settings>()?.First();
+			if (session != null) {
+				session.Evict(Settings.Value);
+				Settings.Value = session.Query<Settings>().First();
+			}
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;

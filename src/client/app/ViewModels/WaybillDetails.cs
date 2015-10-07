@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
@@ -17,8 +14,6 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
 using NHibernate.Linq;
-using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -91,7 +86,7 @@ namespace AnalitF.Net.Client.ViewModels
 			OrderDetailsVisibility = EmptyLabelVisibility
 				.Select(v => v == Visibility.Collapsed ? Visibility.Visible :  Visibility.Collapsed)
 				.ToValue();
-			SessionValue(Rounding, "Rounding");
+			SessionValue(Rounding, nameof(Rounding));
 		}
 
 		public Waybill Waybill { get; set; }

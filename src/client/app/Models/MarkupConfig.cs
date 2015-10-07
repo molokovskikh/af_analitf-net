@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.Models
 
 		public static string Validate(IEnumerable<MarkupConfig> source)
 		{
-			var groups = source.GroupBy(c => new { c.Type, c.Address });
+			var groups = source.GroupBy(c => new { c.Type, c.Address.Id });
 			var errors = new List<string>();
 			foreach (var markups in groups) {
 				var data = markups.OrderBy(m => m.Begin).ToArray();
