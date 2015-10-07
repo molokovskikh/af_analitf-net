@@ -350,7 +350,7 @@ group by l.ProductId")
 
 		private void CalculateRetailCost(IEnumerable<Offer> offers)
 		{
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User));
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User, Address));
 		}
 
 		private void CalculateDiff(IEnumerable<Offer> offers)

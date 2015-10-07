@@ -81,12 +81,12 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var user = new User();
 			line.Order.Price.CostFactor = 1.5m;
-			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user);
+			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user, line.Order.Address);
 			Assert.AreEqual(100, line.MixedCost);
 			Assert.AreEqual(100, line.MixedSum);
 
 			user.IsDelayOfPaymentEnabled = true;
-			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user);
+			line.CalculateRetailCost(Enumerable.Empty<MarkupConfig>(), user, line.Order.Address);
 			Assert.AreEqual(150, line.MixedCost);
 			Assert.AreEqual(150, line.MixedSum);
 		}

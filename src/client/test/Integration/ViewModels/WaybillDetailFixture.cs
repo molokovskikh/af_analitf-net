@@ -62,8 +62,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.8, waybillLine.RetailCost);
 			var settings = Init<SettingsViewModel>();
-			settings.Markups[0].Markup = 50;
-			settings.Markups[0].MaxMarkup = 50;
+			settings.Markups.Value[0].Markup = 50;
+			settings.Markups.Value[0].MaxMarkup = 50;
 			var results = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(1000);

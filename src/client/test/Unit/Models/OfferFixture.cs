@@ -286,8 +286,20 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 
 			offer.Price.CostFactor = 1.2m;
 			settings.Markups.Add(new MarkupConfig(0, 1000, 20));
-			offer.CalculateRetailCost(settings.Markups, user);
+			offer.CalculateRetailCost(settings.Markups, user, address);
 			Assert.AreEqual(76.46, offer.RetailCost);
+		}
+
+		[Test]
+		public void Calculate_retail_cost_on_nds18()
+		{
+			var user = new User();
+			//ндс имеет приоритет
+			offer.NDS = 18;
+			offer.VitallyImportant = true;
+			settings.Markups.Add(new MarkupConfig(0, 1000, 37, MarkupType.Nds18));
+			offer.CalculateRetailCost(settings.Markups, user, address);
+			Assert.AreEqual(72.75, offer.RetailCost);
 		}
 
 		[Test]

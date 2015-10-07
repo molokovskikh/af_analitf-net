@@ -170,7 +170,10 @@ namespace AnalitF.Net.Client.ViewModels
 				PendingDownloads.Remove(l);
 			}));
 			CloseDisposable.Add(Env.Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
-			CloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Env.Bus, Env.UiScheduler, session));
+			CloseDisposable.Add(Env.Bus.Listen<Settings>()
+				.ObserveOn(Env.UiScheduler)
+				.Select(_ => session.Query<Settings>().First())
+				.Subscribe(Settings));
 
 			Schedules.Select(_ =>
 				Schedules.Value.Count == 0
@@ -481,10 +484,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		//отдельные свойства нужны для того что бы к ним могли привязаться пункты меню
-		public bool CanShowCatalog
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowCatalog => Settings.Value.LastUpdate != null;
 
 		public void ShowCatalog()
 		{
@@ -495,10 +495,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new CatalogViewModel());
 		}
 
-		public bool CanShowPrice
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowPrice => Settings.Value.LastUpdate != null;
 
 		public void ShowPrice()
 		{
@@ -508,40 +505,28 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(model);
 		}
 
-		public bool CanShowMinCosts
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowMinCosts => Settings.Value.LastUpdate != null;
 
 		public void ShowMinCosts()
 		{
 			NavigateRoot(new Offers.MinCosts());
 		}
 
-		public bool CanShowAwaited
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowAwaited => Settings.Value.LastUpdate != null;
 
 		public void ShowAwaited()
 		{
 			NavigateRoot(new Awaited());
 		}
 
-		public bool CanShowMnn
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowMnn => Settings.Value.LastUpdate != null;
 
 		public void ShowMnn()
 		{
 			NavigateRoot(new MnnViewModel());
 		}
 
-		public bool CanSearchOffers
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanSearchOffers => Settings.Value.LastUpdate != null;
 
 		public void SearchOffers()
 		{
@@ -551,48 +536,34 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowSettings()
 		{
 			windowManager.ShowFixedDialog(new SettingsViewModel());
-			if (session != null) {
-				//настройки будут обновлены автоматически но в случае если
-				//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
-				//это будет слишком поздно
-				session.Refresh(Settings.Value);
-			}
+			//настройки будут обновлены автоматически но в случае если
+			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
+			//это будет слишком поздно
+			Settings.Value = session?.Query<Settings>()?.First();
 		}
 
-		public bool CanShowOrderLines
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
 
 		public void ShowOrderLines()
 		{
 			NavigateRoot(new OrderLinesViewModel());
 		}
 
-		public bool CanShowJunkOffers
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowJunkOffers => Settings.Value.LastUpdate != null;
 
 		public void ShowJunkOffers()
 		{
 			NavigateRoot(new JunkOfferViewModel());
 		}
 
-		public bool CanShowRejects
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowRejects => Settings.Value.LastUpdate != null;
 
 		public void ShowRejects()
 		{
 			NavigateRoot(new RejectsViewModel());
 		}
 
-		public bool CanShowOrders
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowOrders => Settings.Value.LastUpdate != null;
 
 		public void ShowOrders()
 		{
@@ -602,10 +573,7 @@ namespace AnalitF.Net.Client.ViewModels
 				NavigateRoot(new OrdersViewModel());
 		}
 
-		public bool CanShowBatch
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowBatch => Settings.Value.LastUpdate != null;
 
 		public void ShowBatch()
 		{
@@ -614,10 +582,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Batch());
 		}
 
-		public bool CanShowWaybills
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanShowWaybills => Settings.Value.LastUpdate != null;
 
 		public void ShowRejectedWaybills()
 		{
@@ -658,10 +623,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Journal());
 		}
 
-		public bool CanMicroUpdate
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanMicroUpdate => Settings.Value.LastUpdate != null;
 
 		public IEnumerable<IResult> MicroUpdate()
 		{
@@ -681,10 +643,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool CanLoadOrderHistory
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanLoadOrderHistory => Settings.Value.LastUpdate != null;
 
 		public IEnumerable<IResult> LoadOrderHistory()
 		{
@@ -693,10 +652,7 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 		}
 
-		public bool CanLoadWaybillHistory
-		{
-			get { return Settings.Value.LastUpdate != null; }
-		}
+		public bool CanLoadWaybillHistory => Settings.Value.LastUpdate != null;
 
 		public IEnumerable<IResult> LoadWaybillHistory()
 		{
@@ -740,13 +696,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowBatch();
 		}
 
-		public bool CanSendOrders
-		{
-			get
-			{
-				return Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
-			}
-		}
+		public bool CanSendOrders => Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
 
 		//для "горячей" клавишы
 		public IEnumerable<IResult> SendOrders()
@@ -861,8 +811,7 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 				},
 				t => {
-					if (success != null)
-						success(t.Result);
+					success?.Invoke(t.Result);
 				});
 		}
 
@@ -986,10 +935,7 @@ namespace AnalitF.Net.Client.ViewModels
 			} while (!done);
 		}
 
-		public IEnumerable<IScreen> NavigationStack
-		{
-			get { return Navigator.NavigationStack; }
-		}
+		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;
 
 		private void NavigateRoot(IScreen screen)
 		{
@@ -1014,9 +960,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnActivationProcessed(IScreen item, bool success)
 		{
 			var screen = item as BaseScreen;
-			if (screen != null) {
-				screen.PostActivated();
-			}
+			screen?.PostActivated();
 		}
 
 		protected override void Configure(IScreen newItem)

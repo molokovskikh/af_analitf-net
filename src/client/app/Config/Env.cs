@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
@@ -32,6 +33,8 @@ namespace AnalitF.Net.Client.Config
 
 		//для тестирования
 		public User User;
+		public Settings Settings;
+		public List<Address> Addresses;
 		public static Env Current;
 
 		public Env(User user, IMessageBus bus, IScheduler scheduler, ISessionFactory factory)

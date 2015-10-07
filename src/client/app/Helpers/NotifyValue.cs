@@ -167,20 +167,4 @@ namespace AnalitF.Net.Client.Helpers
 		{
 		}
 	}
-
-	public class NotifyValueHelper
-	{
-		public static IDisposable LiveValue<T>(NotifyValue<T> value,
-			IMessageBus bus,
-			IScheduler scheduler,
-			ISession session)
-		{
-			return bus.Listen<T>()
-				.ObserveOn(scheduler)
-				.Subscribe(_ => {
-					session.Refresh(value.Value);
-					value.Refresh();
-				});
-		}
-	}
 }

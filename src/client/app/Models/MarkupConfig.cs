@@ -4,13 +4,15 @@ using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
 {
 	public enum MarkupType
 	{
 		Over,
-		VitallyImportant
+		VitallyImportant,
+		Nds18
 	}
 
 	public class MarkupConfig : BaseNotify
@@ -23,6 +25,18 @@ namespace AnalitF.Net.Client.Models
 
 		public MarkupConfig()
 		{}
+
+		public MarkupConfig(MarkupConfig config, Address address)
+		{
+			Begin = config.Begin;
+			End = config.End;
+			Type = config.Type;
+			Markup = config.Markup;
+			MaxMarkup = config.MaxMarkup;
+			MaxSupplierMarkup = config.MaxSupplierMarkup;
+			Address = address;
+			Settings = config.Settings;
+		}
 
 		public MarkupConfig(decimal begin,
 			decimal end,
@@ -58,6 +72,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual Address Address { get; set; }
 		public virtual decimal Markup { get; set; }
 		public virtual decimal MaxMarkup { get; set; }
 		public virtual decimal MaxSupplierMarkup { get; set; }
@@ -66,10 +81,7 @@ namespace AnalitF.Net.Client.Models
 
 		private void Validate()
 		{
-			if (Settings == null)
-				return;
-
-			Settings.Validate();
+			Settings?.Validate();
 		}
 
 		[Ignore, Style("Begin")]
@@ -119,31 +131,41 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public static decimal Calculate(IEnumerable<MarkupConfig> markups, BaseOffer offer, User user)
+		public static decimal Calculate(IEnumerable<MarkupConfig> markups, BaseOffer offer, User user, Address address)
 		{
 			if (offer == null)
 				return 0;
 
-			var type = offer.VitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			var type = MarkupType.Over;
+			if (offer.NDS == 18)
+				type = MarkupType.Nds18;
+			else if (offer.VitallyImportant)
+				type = MarkupType.VitallyImportant;
 			var cost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
-			var config = Calculate(markups, type, cost);
+			var config = Calculate(markups, type, cost, address);
 			if (config == null)
 				return 0;
 			return config.Markup;
 		}
 
-		public static MarkupConfig Calculate(IEnumerable<MarkupConfig> markups, MarkupType type, decimal cost)
+		public static MarkupConfig Calculate(IEnumerable<MarkupConfig> markups, MarkupType type, decimal cost, Address address)
 		{
-			return markups
-				.Where(m => m.Type == type)
-				.FirstOrDefault(m => cost > m.Begin && cost <= m.End);
+			foreach (var markup in markups) {
+				if (markup.Type == type
+					&& markup.Address.Id == address.Id
+					&& markup.Begin < cost
+					&& markup.End > cost)
+					return markup;
+			}
+			return null;
 		}
 
 		public static IEnumerable<MarkupConfig> Defaults()
 		{
 			return new[] {
 				new MarkupConfig(0, 10000, 20),
+				new MarkupConfig(0, 10000, 20, MarkupType.Nds18),
 				new MarkupConfig(0, 50, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(50, 500, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(500, 1000000, 20, MarkupType.VitallyImportant)
@@ -152,10 +174,15 @@ namespace AnalitF.Net.Client.Models
 
 		public static string Validate(IEnumerable<MarkupConfig> source)
 		{
-			var groups = source.GroupBy(c => c.Type);
+			var groups = source.GroupBy(c => new { c.Type, c.Address });
 			var errors = new List<string>();
 			foreach (var markups in groups) {
 				var data = markups.OrderBy(m => m.Begin).ToArray();
+				markups.Each(x => {
+					x.HaveGap = false;
+					x.EndLessThanBegin = false;
+					x.BeginOverlap = false;
+				});
 				foreach (var markup in data) {
 					markup.EndLessThanBegin = markup.End < markup.Begin;
 				}

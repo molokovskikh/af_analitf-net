@@ -160,11 +160,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual BuyingMatrixStatus BuyingMatrixType { get; set; }
 
-		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups, User user)
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups, User user, Address address)
 		{
 			Configure(user);
 			var cost =  HideCost ? GetResultCost() : Cost;
-			var markup = MarkupConfig.Calculate(markups, this, user);
+			var markup = MarkupConfig.Calculate(markups, this, user, address);
 			RetailCost = Math.Round(cost * (1 + markup / 100), 2);
 		}
 

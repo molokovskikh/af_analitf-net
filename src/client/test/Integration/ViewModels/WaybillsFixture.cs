@@ -65,8 +65,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var retailSum = details.Waybill.RetailSum;
 
 			var settings = Init<SettingsViewModel>();
-			settings.Markups[0].Markup = 50;
-			settings.Markups[0].MaxMarkup = 50;
+			settings.Markups.Value[0].Markup = 50;
+			settings.Markups.Value[0].MaxMarkup = 50;
 			var result = settings.Save().ToList();
 			Close(settings);
 			scheduler.AdvanceByMs(50);

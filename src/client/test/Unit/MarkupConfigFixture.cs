@@ -93,5 +93,15 @@ namespace AnalitF.Net.Client.Test.Unit
 			markups[1].Begin = 40;
 			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate());
 		}
+
+		[Test]
+		public void Validate_for_address()
+		{
+			var settings = new Settings(defaults: true);
+			var address = new Address();
+			settings.Markups.Each(x => x.Address = address);
+			settings.CopyMarkups(address, new Address());
+			Assert.IsNull(settings.Validate());
+		}
 	}
 }

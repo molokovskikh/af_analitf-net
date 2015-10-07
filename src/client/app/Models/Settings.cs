@@ -491,5 +491,14 @@ namespace AnalitF.Net.Client.Models
 				return null;
 			}
 		}
+
+		public virtual void CopyMarkups(Address src, Address dst)
+		{
+			if (Markups.Any(x => x.Address == dst))
+				return;
+			Markups.AddEach(Markups
+				.Where(x => x.Address == src)
+				.Select(x => new MarkupConfig(x, dst)));
+		}
 	}
 }
