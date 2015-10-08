@@ -89,8 +89,27 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 
-			Configure(new SanityCheck()).Check();
+			//очистка результатов автозаказа
+			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
+			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
+			Session.CreateSQLQuery(@"delete b
+from BatchLines b
+left join Addresses a on a.Id = b.AddressId
+where a.Id is null;
 
+delete m
+from MarkupConfigs m
+left join Addresses a on a.Id = m.AddressId
+where a.Id is null;
+
+-- очищаем ожидаемые позиции если товар был удален
+delete i
+from AwaitedItems i
+left join Catalogs c on c.Id = i.CatalogId
+where c.Id is null;")
+				.ExecuteUpdate();
+
+			Configure(new SanityCheck()).Check();
 			var settings = Session.Query<Settings>().First();
 			if (IsImported<SentOrder>()) {
 				Session.CreateSQLQuery(@"
@@ -144,26 +163,6 @@ drop temporary table ExistsCatalogs;")
 				DbMaintain.UpdateLeaders(Session, settings);
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
-
-			//очистка результатов автозаказа
-			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
-			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
-			Session.CreateSQLQuery(@"delete b
-from BatchLines b
-left join Addresses a on a.Id = b.AddressId
-where a.Id is null;
-
-delete m
-from MarkupConfigs m
-left join Addresses a on a.Id = m.AddressId
-where a.Id is null;
-
--- очищаем ожидаемые позиции если товар был удален
-delete i
-from AwaitedItems i
-left join Catalogs c on c.Id = i.CatalogId
-where c.Id is null;")
-				.ExecuteUpdate();
 
 			//вычисляю таблицы в которых нужно производить чистку
 			//Hidden = 1 экспортируется в том случае если позиция была удалена

@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.That(price.Active, Is.True);
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
-			//данные хранятся с точностью до секунды, в тестах операзия может быть выполнена за одну секунду тогда
+			//данные хранятся с точностью до секунды, в тестах операция может быть выполнена за одну секунду тогда
 			//комманда будет думать что синхронизировать нечего
 			localSession.Refresh(settings);
 			settings.LastUpdate = settings.LastUpdate.Value.AddSeconds(-1);
@@ -447,7 +447,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsNotNull(newOffer);
 		}
 
-		[Test]
+		[Test, Ignore]
 		public void Migrate()
 		{
 			localSession.DeleteEach<LoadedDocument>();

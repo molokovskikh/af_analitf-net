@@ -106,7 +106,9 @@ namespace AnalitF.Net.Client.Test.Unit
 		public void Validate_for_address()
 		{
 			var settings = new Settings(address);
-			settings.CopyMarkups(address, new Address());
+			settings.CopyMarkups(address, new Address {
+				Id = 1
+			});
 			Assert.IsNull(settings.Validate());
 		}
 	}
