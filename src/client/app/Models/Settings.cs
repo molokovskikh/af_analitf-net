@@ -95,6 +95,12 @@ namespace AnalitF.Net.Client.Models
 		private string _proxyPassword;
 		private string _proxyHost;
 
+		public Settings(int token = 0, params Address[] addresses)
+			: this(addresses)
+		{
+			MappingToken = token;
+		}
+
 		public Settings(params Address[] addresses) : this()
 		{
 			addresses.SelectMany(MarkupConfig.Defaults).Each(AddMarkup);

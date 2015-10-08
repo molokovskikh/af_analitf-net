@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var settings = session.Query<Settings>().FirstOrDefault();
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
-					settings = new Settings(mappingToken);
+					settings = new Settings(mappingToken, session.Query<Address>().ToArray());
 					settings.CheckToken();
 					session.Save(settings);
 				}
