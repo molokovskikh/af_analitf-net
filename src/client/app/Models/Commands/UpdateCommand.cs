@@ -796,7 +796,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 				Session.Query<Waybill>().Where(w => w.Sum == 0).Select(x => x.Id).ToArray(),
 				(s, x) => {
 					foreach (var id in x) {
-						s.Load<Waybill>(id).CalculateForMigrated(settings);
+						s.Load<Waybill>(id).Migrate(settings);
 					}
 				});
 

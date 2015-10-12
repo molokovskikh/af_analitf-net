@@ -87,8 +87,9 @@ namespace AnalitF.Net.Client.Test.Unit
 		[Test]
 		public void Print_price_tag()
 		{
-			var settings = new Settings(defaults: true);
-			var waybill = new Waybill(new Address("Тестовый"), new Supplier());
+			var address = new Address("Тестовый");
+			var settings = new Settings(address);
+			var waybill = new Waybill(address, new Supplier());
 			var line = new WaybillLine(waybill) {
 				Nds = 10,
 				SupplierCost = 251.20m,

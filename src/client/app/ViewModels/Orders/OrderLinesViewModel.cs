@@ -209,7 +209,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.ToObservableCollection();
 					lines.Each(l => {
 						l.Order.CalculateStyle(Address);
-						l.CalculateRetailCost(Settings.Value.Markups, User);
+						if (l.Order.IsAddressExists())
+							l.CalculateRetailCost(Settings.Value.Markups, User, l.Order.Address);
 					});
 					return lines;
 				})
@@ -294,8 +295,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		protected void CalculateOrderLine()
 		{
-			foreach (var offer in Lines.Value)
-				offer.CalculateRetailCost(Settings.Value.Markups, User);
+			foreach (var line in Lines.Value) {
+				if (line.Order.IsAddressExists())
+					line.CalculateRetailCost(Settings.Value.Markups, User, line.Order.Address);
+			}
 		}
 
 		public void EnterLine()

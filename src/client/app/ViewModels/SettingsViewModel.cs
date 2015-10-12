@@ -33,6 +33,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public SettingsViewModel()
 		{
+			MarkupAddress = new NotifyValue<Address>();
+			Markups = new NotifyValue<IList<MarkupConfig>>();
+			VitallyImportantMarkups = new NotifyValue<IList<MarkupConfig>>();
+			Nds18Markups = new NotifyValue<IList<MarkupConfig>>();
+
 			SelectedTab = new NotifyValue<string>(lastTab ?? "OverMarkupsTab");
 			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
 			CurrentDirMap = new NotifyValue<DirMap>();
@@ -65,17 +70,17 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.SaveEach(newStyles);
 				Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
 			}
+			else {
+				Addresses = Env.Addresses;
+			}
 
-			Markups = Settings.Value.Markups.Where(t => t.Type == MarkupType.Over)
-				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Value.Markups, i => Settings.Value.AddMarkup((MarkupConfig)i));
-			MarkupConfig.Validate(Markups);
-
-			VitallyImportantMarkups = Settings.Value.Markups
-				.Where(t => t.Type == MarkupType.VitallyImportant)
-				.OrderBy(m => m.Begin)
-				.LinkTo(Settings.Value.Markups, i => Settings.Value.AddMarkup((MarkupConfig)i));
-			MarkupConfig.Validate(VitallyImportantMarkups);
+			MarkupAddress.Select(x => MarkupByType(MarkupType.Over, x))
+				.Subscribe(Markups);
+			MarkupAddress.Select(x => MarkupByType(MarkupType.VitallyImportant, x))
+				.Subscribe(VitallyImportantMarkups);
+			MarkupAddress.Select(x => MarkupByType(MarkupType.Nds18, x))
+				.Subscribe(Nds18Markups);
+			MarkupAddress.Value = Addresses.FirstOrDefault();
 
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
 				SelectedTab.Value = "LoginTab";
@@ -84,8 +89,10 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Value.ObservableForProperty(x => x.GroupWaybillsBySupplier, skipInitial: false)
 				.Select(x => !x.Value)
 				.Subscribe(IsWaybillDirEnabled);
+			HaveAddress = Addresses.Count > 0;
 		}
 
+		public bool HaveAddress { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
 
 		public string Password
@@ -113,9 +120,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public NotifyValue<string> SelectedTab { get; set; }
 
-		public IList<MarkupConfig> Markups { get; set; }
-
-		public IList<MarkupConfig> VitallyImportantMarkups { get; set; }
+		public NotifyValue<Address> MarkupAddress { get; set; }
+		public bool OverwriteNds18Markups { get; set; }
+		public NotifyValue<IList<MarkupConfig>> Nds18Markups { get; set; }
+		public bool OverwriteMarkups { get; set; }
+		public NotifyValue<IList<MarkupConfig>> Markups { get; set; }
+		public bool OverwriteVitallyImportant { get; set; }
+		public NotifyValue<IList<MarkupConfig>> VitallyImportantMarkups { get; set; }
 
 		public List<Address> Addresses { get; set; }
 
@@ -141,9 +152,34 @@ namespace AnalitF.Net.Client.ViewModels
 			return new string(Enumerable.Repeat('*', (password1 ?? "").Length).ToArray());
 		}
 
+		public IList<MarkupConfig> MarkupByType(MarkupType type, Address address)
+		{
+			var result = Settings.Value.Markups
+				.Where(t => t.Type == type && t.Address == address)
+				.OrderBy(m => m.Begin)
+				.LinkTo(Settings.Value.Markups, i => Settings.Value.AddMarkup((MarkupConfig)i));
+			MarkupConfig.Validate(result);
+			return result;
+		}
+
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
-			((MarkupConfig)e.NewItem).Type = MarkupType.VitallyImportant;
+			var markup = ((MarkupConfig)e.NewItem);
+			markup.Type = MarkupType.VitallyImportant;
+			markup.Address = MarkupAddress.Value;
+		}
+
+		public void NewNds18Markup(InitializingNewItemEventArgs e)
+		{
+			var markup = ((MarkupConfig)e.NewItem);
+			markup.Type = MarkupType.Nds18;
+			markup.Address = MarkupAddress.Value;
+		}
+
+		public void NewMarkup(InitializingNewItemEventArgs e)
+		{
+			var markup = ((MarkupConfig)e.NewItem);
+			markup.Address = MarkupAddress.Value;
 		}
 
 		public IEnumerable<IResult> SelectWaybillDir()
@@ -193,13 +229,39 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentDirMap.Value.Dir = dialog.Result;
 		}
 
+		public void UpdateMarkups()
+		{
+			var markups = Settings.Value.Markups;
+			var dstAddresses = Addresses.Where(x => x != MarkupAddress.Value).ToArray();
+			if (OverwriteMarkups) {
+				var items = markups.Where(x => x.Type == MarkupType.Over).ToArray();
+				var src = items.Where(x => x.Address == MarkupAddress.Value).ToArray();
+				markups.RemoveEach(items.Except(src));
+				markups.AddEach(dstAddresses.SelectMany(x => src.Select(y => new MarkupConfig(y, x))));
+			}
+			if (OverwriteNds18Markups) {
+				var items = markups.Where(x => x.Type == MarkupType.Nds18).ToArray();
+				var src = items.Where(x => x.Address == MarkupAddress.Value).ToArray();
+				markups.RemoveEach(items.Except(src));
+				markups.AddEach(dstAddresses.SelectMany(x => src.Select(y => new MarkupConfig(y, x))));
+			}
+			if (OverwriteVitallyImportant) {
+				var items = markups.Where(x => x.Type == MarkupType.VitallyImportant).ToArray();
+				var src = items.Where(x => x.Address == MarkupAddress.Value).ToArray();
+				markups.RemoveEach(items.Except(src));
+				markups.AddEach(dstAddresses.SelectMany(x => src.Select(y => new MarkupConfig(y, x))));
+			}
+		}
+
 		public IEnumerable<IResult> Save()
 		{
-			var error = Settings.Value.Validate();
+			var error = Settings.Value.Validate(validateMarkups: HaveAddress);
 
 			if (!String.IsNullOrEmpty(error)) {
-				Session.FlushMode = FlushMode.Never;
+				if (Session != null)
+					Session.FlushMode = FlushMode.Never;
 				Manager.Warning(error);
+				yield return MessageResult.Warn(error);
 				yield break;
 			}
 
@@ -211,27 +273,28 @@ namespace AnalitF.Net.Client.ViewModels
 			if (App.Current != null)
 				StyleHelper.BuildStyles(App.Current.Resources, Styles);
 
-			IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
-				|| Session.IsChanged(Settings.Value, s => s.UserName);
-			if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
-				&& Settings.Value.GroupWaybillsBySupplier) {
-				foreach (var dirMap in DirMaps) {
-					try {
-						if (!Directory.Exists(dirMap.Dir))
-							FileHelper.CreateDirectoryRecursive(dirMap.Dir);
-					}
-					catch(Exception e) {
-						Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+			if (Session != null) {
+				IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
+					|| Session.IsChanged(Settings.Value, s => s.UserName);
+				if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
+					&& Settings.Value.GroupWaybillsBySupplier) {
+					foreach (var dirMap in DirMaps) {
+						try {
+							if (!Directory.Exists(dirMap.Dir))
+								FileHelper.CreateDirectoryRecursive(dirMap.Dir);
+						}
+						catch(Exception e) {
+							Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+						}
 					}
 				}
-			}
 
-			if (Session.IsChanged(Settings.Value, x => x.JunkPeriod)) {
-				yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
-			}
+				if (Session.IsChanged(Settings.Value, x => x.JunkPeriod))
+					yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
 
-			Session.FlushMode = FlushMode.Auto;
-			Settings.Value.ApplyChanges(Session);
+				Session.FlushMode = FlushMode.Auto;
+				Settings.Value.ApplyChanges(Session);
+			}
 			TryClose();
 		}
 

@@ -301,7 +301,7 @@ namespace AnalitF.Net.Client.Models
 			CalculateRetailSum();
 		}
 
-		public virtual void CalculateForMigrated(Settings settings)
+		public virtual void Migrate(Settings settings)
 		{
 			if (settings == null)
 				return;

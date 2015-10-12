@@ -7,13 +7,12 @@ using System.Linq;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Mapping;
-using ReactiveUI;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
 	public class ImportCommand : DbCommand
 	{
-		private List<System.Tuple<string, string[]>> data;
+		private List<Tuple<string, string[]>> data;
 		//прайс листы должны экспортироваться перед предложениями для этого им назначается вес -1
 		//если мы импортируем предложения и мы получили не полный набор данных то мы должны очистить старые данные
 		//прежде чем вставлять новые
@@ -61,7 +60,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public bool Strict = true;
 
-		public ImportCommand(List<System.Tuple<string, string[]>> data)
+		public ImportCommand(List<Tuple<string, string[]>> data)
 		{
 			this.data = data;
 		}
@@ -88,12 +87,31 @@ namespace AnalitF.Net.Client.Models.Commands
 					Reporter.Progress();
 				}
 				catch (Exception e) {
-					throw new Exception(String.Format("Не могу импортировать {0}", table.Item1), e);
+					throw new Exception($"Не могу импортировать {table.Item1}", e);
 				}
 			}
 
-			Configure(new SanityCheck()).Check();
+			//очистка результатов автозаказа
+			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
+			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
+			Session.CreateSQLQuery(@"delete b
+from BatchLines b
+left join Addresses a on a.Id = b.AddressId
+where a.Id is null;
 
+delete m
+from MarkupConfigs m
+left join Addresses a on a.Id = m.AddressId
+where a.Id is null;
+
+-- очищаем ожидаемые позиции если товар был удален
+delete i
+from AwaitedItems i
+left join Catalogs c on c.Id = i.CatalogId
+where c.Id is null;")
+				.ExecuteUpdate();
+
+			Configure(new SanityCheck()).Check();
 			var settings = Session.Query<Settings>().First();
 			if (IsImported<SentOrder>()) {
 				Session.CreateSQLQuery(@"
@@ -148,21 +166,6 @@ drop temporary table ExistsCatalogs;")
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
 
-			//очистка результатов автозаказа
-			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
-			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
-			Session.CreateSQLQuery(@"delete b
-from BatchLines b
-left join Addresses a on a.Id = b.AddressId
-where a.Id is null;")
-				.ExecuteUpdate();
-			//очищаем ожидаемые позиции если товар был удален
-			Session.CreateSQLQuery(@"delete i
-from AwaitedItems i
-left join Catalogs c on c.Id = i.CatalogId
-where c.Id is null")
-				.ExecuteUpdate();
-
 			//вычисляю таблицы в которых нужно производить чистку
 			//Hidden = 1 экспортируется в том случае если позиция была удалена
 			//или скрыта и не должна больше быть доступна клиенту
@@ -171,7 +174,7 @@ where c.Id is null")
 				var imported = data.Select(d => Path.GetFileNameWithoutExtension(d.Item1))
 					.Contains(cleanupTable.Name, StringComparer.CurrentCultureIgnoreCase);
 				if (imported) {
-					Session.CreateSQLQuery(String.Format("delete from {0} where Hidden = 1", cleanupTable.Name))
+					Session.CreateSQLQuery($"delete from {cleanupTable.Name} where Hidden = 1")
 						.ExecuteUpdate();
 				}
 			}
@@ -189,7 +192,7 @@ where c.Id is null")
 				.Contains(Inflector.Inflector.Pluralize(typeof(T).Name), StringComparer.CurrentCultureIgnoreCase);
 		}
 
-		private string BuildSql(System.Tuple<string, string[]> table)
+		private string BuildSql(Tuple<string, string[]> table)
 		{
 			var tableName = Path.GetFileNameWithoutExtension(table.Item1);
 			if (tableName.Match("cmds")) {
@@ -205,7 +208,7 @@ where c.Id is null")
 			var exportedColumns = table.Item2;
 			if (exportedColumns.FirstOrDefault().Match("truncate")) {
 				exportedColumns = exportedColumns.Skip(1).ToArray();
-				sql += String.Format("TRUNCATE {0}; ", tableName);
+				sql += $"TRUNCATE {tableName}; ";
 			}
 			else if (tableName.Match("offers")) {
 				//мы должны удалить все предложения по загруженным прайс-листам и предложения по отсутствующим прайс-листам
@@ -293,12 +296,10 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			var notFoundInTable = exportedColumns.Except(tableColumns, StringComparer.OrdinalIgnoreCase).ToArray();
 			var notFoundInData = columnsToCheck.Except(exportedColumns, StringComparer.OrdinalIgnoreCase).ToArray();
 			if (notFoundInTable.Length > 0) {
-				throw new Exception(String.Format("В таблице {0} не найдены колонки полученные с сервера {1}",
-					dbTable.Name, notFoundInTable.Implode()));
+				throw new Exception($"В таблице {dbTable.Name} не найдены колонки полученные с сервера {notFoundInTable.Implode()}");
 			}
 			if (notFoundInData.Length > 0) {
-				throw new Exception(String.Format("В таблице {0} есть колонки которые отсутствуют в данных {1}",
-					dbTable.Name, notFoundInData.Implode()));
+				throw new Exception($"В таблице {dbTable.Name} есть колонки которые отсутствуют в данных {notFoundInData.Implode()}");
 			}
 		}
 	}

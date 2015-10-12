@@ -170,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.BeginTransaction();
 
 				Settings.Value = Session.Query<Settings>().FirstOrDefault()
-					?? new Settings(defaults: true);
+					?? new Settings();
 				User = Session.Query<User>().FirstOrDefault()
 					?? new User {
 						SupportHours = "будни: с 07:00 до 19:00",
@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels
 					};
 			}
 			else {
-				Settings.Value = new Settings(defaults: true);
+				Settings.Value = Env.Settings ?? new Settings();
 				User = Env.User ?? new User {
 					SupportHours = "будни: с 07:00 до 19:00",
 					SupportPhone = "тел.: 473-260-60-00",
@@ -195,32 +195,29 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public User User { get; set; }
-		public NotifyValue<Settings> Settings { get; private set; }
+		public NotifyValue<Settings> Settings { get; }
 		public bool IsSuccessfulActivated { get; protected set; }
 		public NotifyValue<bool> CanExport { get; set; }
 
-		public WindowManager Manager { get; private set; }
+		public WindowManager Manager { get; }
 
-		public IMessageBus Bus
-		{
-			get { return Env.Bus; }
-		}
+		public IMessageBus Bus => Env.Bus;
 
-		public IScheduler UiScheduler
-		{
-			get { return Env.UiScheduler; }
-		}
+		public IScheduler UiScheduler => Env.UiScheduler;
 
-		public IScheduler Scheduler
-		{
-			get { return Env.Scheduler; }
-		}
+		public IScheduler Scheduler => Env.Scheduler;
 
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
 
-			OnCloseDisposable.Add(NotifyValueHelper.LiveValue(Settings, Bus, UiScheduler, Session));
+			OnCloseDisposable.Add(Bus.Listen<Settings>()
+				.ObserveOn(UiScheduler)
+				.Select(_ => {
+					Session.Evict(Settings.Value);
+					return Session.Query<Settings>().First();
+				})
+				.Subscribe(Settings));
 			//есть два способа изменить настройки цветов Конфигурация -> Настройка легенды
 			//или дважды кликнуть на элементе легенды, подписываемся на события в результате этих действий
 			OnCloseDisposable.Add(Settings.Subscribe(_ => RefreshStyles()));
@@ -283,7 +280,7 @@ namespace AnalitF.Net.Client.ViewModels
 			User = Session.Query<User>().FirstOrDefault();
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
-			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings(true)));
+			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings()));
 		}
 
 		protected override void OnActivate()
@@ -421,13 +418,11 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnViewLoaded(object view)
 		{
 			var dependencyObject = view as DependencyObject;
-			if (dependencyObject != null) {
-				dependencyObject.Descendants<DataGrid>().Each(g => {
-					if (!User.CanExport(this, g.Name)) {
-						g.ClipboardCopyMode = DataGridClipboardCopyMode.None;
-					}
-				});
-			}
+			dependencyObject?.Descendants<DataGrid>().Each(g => {
+				if (!User.CanExport(this, g.Name)) {
+					g.ClipboardCopyMode = DataGridClipboardCopyMode.None;
+				}
+			});
 
 			if (!SkipRestoreTable)
 				TableSettings.RestoreView(view);
@@ -691,6 +686,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
 			var task = new Task<T>(() => {
+				if (Env.Factory == null)
+					return default(T);
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
 				Interlocked.Increment(ref backgrountQueryCount);
@@ -717,6 +714,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public Task TplQuery(Action<IStatelessSession> action)
 		{
 			var task = new Task(() => {
+				if (Env.Factory == null)
+					return;
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
 				Interlocked.Increment(ref backgrountQueryCount);

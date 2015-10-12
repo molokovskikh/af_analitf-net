@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var settings = session.Query<Settings>().FirstOrDefault();
 				var mappingToken = AppBootstrapper.NHibernate.MappingHash;
 				if (settings == null) {
-					settings = new Settings(defaults: true, token: mappingToken);
+					settings = new Settings(mappingToken, session.Query<Address>().ToArray());
 					settings.CheckToken();
 					session.Save(settings);
 				}
@@ -100,25 +100,36 @@ namespace AnalitF.Net.Client.Models.Commands
 
 					if (settings.MappingToken != mappingToken)
 						return true;
-					//проверяем что данные корректны и если не корректны
-					//пытаемся восстановить их
-					if (settings.Markups.Count == 0)
-						session.Query<MarkupConfig>().Each(settings.AddMarkup);
 
 					//если ничего восстановить не удалось тогда берем значения по умолчанию
-					if (settings.Markups.Count == 0)
-						MarkupConfig.Defaults().Each(settings.AddMarkup);
-
+					foreach (var address in session.Query<Address>()) {
+						if (settings.Markups.Count(x => x.Address == address) == 0)
+							MarkupConfig.Defaults(address).Each(settings.AddMarkup);
+					}
+					if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
+						settings.Markups.AddEach(settings.Markups.Where(x => x.Type == MarkupType.Over)
+							.Select(x => new MarkupConfig(x, x.Address) {
+								Type = MarkupType.Nds18,
+							}));
+					}
 					if (settings.Waybills.Count == 0)
 						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
 				}
+				var addresses = session.Query<Address>().ToList();
+				var mainAddress = addresses.FirstOrDefault();
+				if (mainAddress != null) {
+					if (settings.Markups.All(x => x.Address == null))
+						settings.Markups.Each(x => x.Address = mainAddress);
+				}
+
+				foreach (var address in addresses.Except(new [] { mainAddress }))
+					settings.CopyMarkups(mainAddress, address);
 
 				//если есть адреса то должен быть и пользователь
 				//если только база не была поломана
 				var user = session.Query<User>().FirstOrDefault()
 					?? new User();
 
-				var addresses = session.Query<Address>().ToList();
 				settings.Waybills.AddEach(addresses
 					.Except(settings.Waybills.Select(w => w.BelongsToAddress))
 					.Select(a => new WaybillSettings(user, a)));
@@ -139,7 +150,8 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			using (var session = Factory.OpenSession())
 			using (var transaction = session.BeginTransaction()) {
-				session.Query<MarkupConfig>()
+				var markups = session.Query<MarkupConfig>().ToList();
+				markups
 					.Where(c => c.MaxMarkup < c.Markup)
 					.Each(c => c.MaxMarkup = c.Markup);
 				transaction.Commit();

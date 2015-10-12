@@ -215,10 +215,10 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool ActualVitallyImportant => (Waybill?.VitallyImportant).GetValueOrDefault()
 			|| VitallyImportant.GetValueOrDefault();
 
-		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
-
 		[Ignore]
-		public virtual bool IsMigrate { get; set; }
+		public virtual bool IsMigration { get; set; }
+
+		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
 		private decimal TaxFactor
 		{
@@ -320,7 +320,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateForMigrated(Settings settings)
 		{
-			IsMigrate = true;
+			IsMigration = true;
 			if (Edited) {
 				if (RetailCost == null) {
 					RecalculateFromRetailMarkup();
@@ -366,7 +366,11 @@ namespace AnalitF.Net.Client.Models
 			if (sourceCost == 0)
 				return;
 			var markupType = ActualVitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost);
+			if (Nds == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost == null))
+				markupType = MarkupType.Nds18;
+			if (!Waybill.IsAddressExists())
+				return;
+			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost, Waybill.Address);
 			if (markup == null)
 				return;
 
@@ -434,7 +438,7 @@ namespace AnalitF.Net.Client.Models
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
 			//это миграция с analitf?
-			if (IsMigrate)
+			if (IsMigration)
 				rawCost = value;
 			else
 				rawCost = Round(value);

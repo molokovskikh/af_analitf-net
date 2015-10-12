@@ -256,7 +256,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			restore = true;
 			var settingsModel = Init<SettingsViewModel>();
 			settingsModel.Settings.Value.OpenRejects = !settingsModel.Settings.Value.OpenRejects;
+			var messages = manager.MessageOpened.Collect();
 			var results = settingsModel.Save().ToList();
+			Assert.IsEmpty(messages.Implode());
 			Close(settingsModel);
 
 			scheduler.AdvanceByMs(1000);

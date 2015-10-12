@@ -10,20 +10,23 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 	[TestFixture]
 	public class WaybillFixture
 	{
-		private User user;
 		private Waybill waybill;
 		private Settings settings;
 		private WaybillSettings waybillSettings;
+		private Address address;
 
 		[SetUp]
 		public void Setup()
 		{
-			user = new User();
-			settings = new Settings(true);
+			address = new Address();
+			settings = new Settings(address);
+			settings.Markups.Each(x => x.Address = address);
 			waybillSettings = new WaybillSettings();
 			settings.Waybills.Add(waybillSettings);
 
-			waybill = new Waybill();
+			waybill = new Waybill {
+				Address = address
+			};
 		}
 
 		[Test(Description = "Проверка работы флага из настроек накладных ЖНВЛС - 'Использовать цену завода с НДС при определении ценового диапозона'")]
@@ -31,9 +34,9 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			//Подстраиваем диапозоны наценок под товар в накладной
 			var markups = settings.Markups;
-			var minorMarkup = markups[1];
+			var minorMarkup = markups.First(x => x.Begin == 0 && x.Type == MarkupType.VitallyImportant);
 			minorMarkup.End = 78;
-			var majorMarkup = markups[2];
+			var majorMarkup = markups.First(x => x.Begin == 50 && x.Type == MarkupType.VitallyImportant);
 			majorMarkup.Begin = minorMarkup.End;
 			majorMarkup.Markup = 40;
 			majorMarkup.MaxMarkup = 40;
@@ -162,8 +165,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Recalculate_on_retail_cost_change()
 		{
-			var line = Line();
-			Calculate(line);
+			var line = Calculate(Line());
 
 			Assert.AreEqual(55.70, line.RetailCost);
 			Assert.AreEqual(29.84, line.RealRetailMarkup);
@@ -186,9 +188,9 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Do_not_recalculate_edited_cost()
 		{
-			var line = Line();
-			waybill.Lines.Add(line);
-			waybill.Calculate(settings);
+			var line = Calculate(Line());
+			//waybill.Lines.Add(line);
+			//waybill.Calculate(settings);
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
 			waybill.Calculate(settings);
@@ -199,8 +201,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Check_max_supplier_markup()
 		{
 			settings.Markups[0].MaxSupplierMarkup = 5;
-			var line = Line();
-			Calculate(line);
+			var line = Calculate(Line());
 			line.SupplierPriceMarkup = 10;
 			Assert.IsTrue(line.IsSupplierPriceMarkupInvalid);
 		}
@@ -337,7 +338,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_markup_not_include_nds()
 		{
-			var markup = settings.Markups.First(m => m.Type == MarkupType.Over);
+			var markup = settings.Markups.First(m => m.Type == MarkupType.Nds18);
 			markup.Markup = 60;
 			markup.MaxMarkup = 60;
 			waybill.Rounding = Rounding.None;
@@ -413,9 +414,31 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(12.51, line.RealRetailMarkup);
 		}
 
+		[Test]
+		public void Calculate_with_nds_18()
+		{
+			var markup = settings.Markups.First(x => x.Type == MarkupType.Nds18);
+			markup.Markup = 38;
+			var line = new WaybillLine(waybill) {
+				Nds = 18,
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				Quantity = 1
+			};
+			Calculate(line);
+			Assert.AreEqual(353.60, line.RetailCost);
+			Assert.AreEqual(37.96, line.RetailMarkup);
+
+			line.VitallyImportant = true;
+			Calculate(line);
+			//сомнительно но пусть будет пока так
+			Assert.IsNull(line.RetailCost);
+			//Assert.AreEqual(353.60, line.RetailCost);
+		}
+
 		private WaybillLine Line()
 		{
-			settings.Markups[0].Markup = 30;
+			settings.Markups.First(x => x.Type == MarkupType.Nds18).Markup = 30;
 			var line = new WaybillLine(waybill) {
 				SupplierCost = 42.90m,
 				SupplierCostWithoutNds = 36.36m,
@@ -426,11 +449,12 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			return line;
 		}
 
-		private void Calculate(WaybillLine line)
+		private WaybillLine Calculate(WaybillLine line)
 		{
 			waybill.WaybillSettings = waybillSettings;
 			waybill.Lines.Add(line);
 			waybill.Calculate(settings);
+			return line;
 		}
 	}
 }

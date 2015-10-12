@@ -77,5 +77,14 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			Assert.That(result[1].ToString(), Is.StringContaining("FULLTEXT KEY"));
 			Assert.That(Directory.Exists(config.DbDir));
 		}
+
+		[Test]
+		public void Migrate_markup_settings()
+		{
+			session.CreateSQLQuery(@"delete from MarkupConfigs where Type = 2").ExecuteUpdate();
+			check.Check(updateSchema: true);
+			var settings = session.Query<Settings>().First();
+			Assert.AreEqual(1, settings.Markups.Count(x => x.Type == MarkupType.Nds18));
+		}
 	}
 }

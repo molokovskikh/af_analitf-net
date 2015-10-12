@@ -19,8 +19,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	public class BaseUnitFixture
 	{
 		private CompositeDisposable cleanup;
-		private FileCleaner cleaner;
 
+		protected FileCleaner cleaner;
 		protected TestScheduler scheduler;
 		protected MessageBus bus;
 		protected WindowManager manager;
@@ -39,7 +39,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Env.Current = new Env(user, bus, scheduler, null/*не нужно использовать базу для этого есть интеграционные тесты*/) {
 				//тк в юнит тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
 				QueryScheduler = new CurrentThreadTaskScheduler(),
-				TplUiScheduler = new CurrentThreadTaskScheduler()
+				TplUiScheduler = new CurrentThreadTaskScheduler(),
+				Settings = new Settings()
 			};
 
 			manager = ViewModelFixture.StubWindowManager();
@@ -54,23 +55,24 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			cleanup.Dispose();
 		}
 
-		public string RandomFile()
-		{
-			return cleaner.RandomFile();
-		}
-
 		protected void Activate(BaseScreen screen, params Address[] addresses)
 		{
 			var address = addresses.FirstOrDefault() ?? new Address("тест");
 			if (addresses.Length == 0) {
 				addresses = new[] { address };
 			}
+			screen.Settings.Value = new Settings(addresses);
 			screen.User = user;
 			screen.Address = address;
 			screen.Parent = shell;
 			screen.Addresses = addresses;
 			ScreenExtensions.TryActivate(screen);
 			shell.ActiveItem = screen;
+		}
+
+		protected void Close(object model)
+		{
+			ScreenExtensions.TryDeactivate(model, false);
 		}
 	}
 }

@@ -45,8 +45,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.ObserveOn(env.UiScheduler)
 				.Subscribe(x => {
 					Promotions.Value = x;
-					Promotions.Value.Each(p => p.Init(config));
-					Visible.Value = Promotions.Value.Count > 0;
+					Promotions.Value?.Each(p => p.Init(config));
+					Visible.Value = Promotions.Value?.Count > 0;
 				});
 		}
 

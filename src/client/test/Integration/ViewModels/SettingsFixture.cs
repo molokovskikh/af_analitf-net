@@ -32,31 +32,37 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Not_save_invalid_data()
 		{
-			var origin = model.Markups.Count;
-			Assert.AreEqual(0, model.Markups[0].Begin);
-			model.Markups.Add(new MarkupConfig());
+			var origin = model.Markups.Value.Count;
+			Assert.AreEqual(0, model.Markups.Value[0].Begin);
+			model.Markups.Value.Add(new MarkupConfig {
+				Address = address
+			});
 			var results = model.Save().ToList();
 			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
 
 			Reset();
 			var all = session.Query<MarkupConfig>().ToList();
-			Assert.AreEqual(origin, model.Markups.Count);
+			Assert.AreEqual(origin, model.Markups.Value.Count);
 			//не должно быть потерянных записей
-			Assert.AreEqual(model.Markups.Count + model.VitallyImportantMarkups.Count, all.Count);
+			Assert.AreEqual(model.Markups.Value.Count
+				+ model.VitallyImportantMarkups.Value.Count
+				+ model.Nds18Markups.Value.Count, all.Count);
 		}
 
 		[Test]
 		public void Save_changes()
 		{
-			model.Markups.RemoveEach(model.Markups);
-			model.Markups.Add(new MarkupConfig());
+			model.Markups.Value.RemoveEach(model.Markups.Value);
+			model.Markups.Value.Add(new MarkupConfig {
+				Address = address
+			});
 			var results = model.Save().ToList();
 			Close(model);
 
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
 
 			Reset();
-			Assert.That(model.Markups.Count, Is.EqualTo(1));
+			Assert.That(model.Markups.Value.Count, Is.EqualTo(1));
 		}
 
 		[Test]

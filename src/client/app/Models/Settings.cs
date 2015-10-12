@@ -96,13 +96,19 @@ namespace AnalitF.Net.Client.Models
 		private string _proxyPassword;
 		private string _proxyHost;
 
-		public Settings(bool defaults, int token = 0) : this()
+		public Settings(int token = 0, params Address[] addresses)
+			: this(addresses)
 		{
-			if (defaults) {
-				foreach (var markup in MarkupConfig.Defaults()) {
-					AddMarkup(markup);
-				}
-			}
+			MappingToken = token;
+		}
+
+		public Settings(params Address[] addresses) : this()
+		{
+			addresses.SelectMany(MarkupConfig.Defaults).Each(AddMarkup);
+		}
+
+		public Settings(int token = 0) : this()
+		{
 			MappingToken = token;
 		}
 
@@ -539,6 +545,15 @@ namespace AnalitF.Net.Client.Models
 				log.Error(String.Format("Ошибка при получение токена приложения, токен = {0}", ClientTokenV2), e);
 				return null;
 			}
+		}
+
+		public virtual void CopyMarkups(Address src, Address dst)
+		{
+			if (Markups.Any(x => x.Address == dst))
+				return;
+			Markups.AddEach(Markups
+				.Where(x => x.Address == src)
+				.Select(x => new MarkupConfig(x, dst)));
 		}
 	}
 }

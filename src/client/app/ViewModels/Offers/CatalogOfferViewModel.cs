@@ -38,10 +38,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
-				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User),
+				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
-				(o, m) => o == null ? null : (decimal?)Math.Round(o.ResultCost * (1 + m / 100), 2))
+				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
 				.ToValue();
 
 			//.Skip(1) - пропускаем начальные значения
@@ -52,7 +52,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(_ => Update());
 
 			CurrentOffer.Subscribe(_ => {
-				RetailCost.Recalculate();
 				RetailMarkup.Recalculate();
 			});
 			Persist(HideJunk, "HideJunk");
@@ -88,12 +87,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			ViewHeader = filterCatalogName.Name;
 		}
 
-		public string ViewHeader { get; private set; }
+		public string ViewHeader { get; }
 
-		public bool IsFilterByCatalogName
-		{
-			get { return filterCatalogName != null; }
-		}
+		public bool IsFilterByCatalogName => filterCatalogName != null;
 
 		public string[] Filters { get; set; }
 
