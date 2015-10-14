@@ -33,6 +33,7 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
+using ExtDocs = AnalitF.Net.Client.ViewModels.Diadok.ExtDocs;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
@@ -621,6 +622,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public void ShowMails()
 		{
 			NavigateRoot(new Mails());
+		}
+
+		public void ShowExtDocs()
+		{
+			NavigateRoot(new ExtDocs());
 		}
 
 		public void ShowJournal()

@@ -766,5 +766,14 @@ namespace AnalitF.Net.Client.ViewModels
 				.Items
 				.OfType<T>().ToArray();
 		}
+
+		protected void InitFields()
+		{
+			var notifiable = GetType().GetProperties().Where(x => x.PropertyType.IsGenericType
+				&& typeof(NotifyValue<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition())
+				&& x.CanWrite);
+			foreach (var propertyInfo in notifiable)
+				propertyInfo.SetValue(this, Activator.CreateInstance(propertyInfo.PropertyType), null);
+		}
 	}
 }

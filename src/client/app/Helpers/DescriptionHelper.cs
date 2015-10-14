@@ -57,5 +57,12 @@ namespace AnalitF.Net.Client.Helpers
 				return "";
 			return ((DescriptionAttribute)attributes[0]).Description;
 		}
+
+		public static string GetDescription(Enum value)
+		{
+			var fieldInfo = value.GetType().GetField(value.ToString());
+			return ((DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false))
+				.FirstOrDefault()?.Description;
+		}
 	}
 }

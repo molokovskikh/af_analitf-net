@@ -45,7 +45,7 @@
 		</Style.Triggers>
 	</Style>
 
-	<Style TargetType="ListViewItem">
+	<!--<Style TargetType="ListViewItem">
 		<Setter Property="Background"
 			Value="Transparent"/>
 		<Setter Property="HorizontalContentAlignment"
@@ -86,7 +86,7 @@
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
-	</Style>
+	</Style>-->
 
 	<Style x:Key="DefaultEditableCell" TargetType="DataGridCell">
 		<Style.Triggers>

@@ -37,5 +37,8 @@ namespace AnalitF.Net.Client.Helpers
 
 		[DllImport("user32.dll")]
 		public static extern IntPtr GetCapture();
+
+		[System.Runtime.InteropServices.DllImport("gdi32.dll")]
+		public static extern bool DeleteObject(IntPtr hObject);
 	}
 }

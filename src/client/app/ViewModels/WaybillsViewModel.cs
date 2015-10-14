@@ -37,9 +37,7 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Все")] All,
 		[Description("Накладная")] Waybills,
 		[Description("Отказ")] Rejects,
-		[Description("Диадок")] Diadok
 	}
-
 
 	public class WaybillsViewModel : BaseScreen
 	{
@@ -62,14 +60,10 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
-			CanSign = new NotifyValue<bool>();
-			CurrentWaybill.Select(x => x != null && x.DocType == DocType.Diadok && !x.IsSigned)
-				.Subscribe(CanSign);
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
 		}
 
-		public NotifyValue<bool> CanSign { get; set; }
 		public IList<Selectable<Supplier>> Suppliers { get; set; }
 
 		[Export]
@@ -170,16 +164,6 @@ namespace AnalitF.Net.Client.ViewModels
 			var waybill = CurrentWaybill.Value;
 			if (waybill == null)
 				yield break;
-			if (waybill.DocType == DocType.Diadok) {
-				var file = waybill.TryGetFile(Settings.Value);
-				if (file == null) {
-					yield return MessageResult.Error("Файл Диадок не найден.");
-					yield break;
-				}
-				yield return new OpenResult(file);
-				yield break;
-			}
-
 			if (waybill.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
 				Shell.Navigate(new OrderRejectDetails(waybill.Id));
 			else
@@ -229,8 +213,6 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
 			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
 				query = query.Where(w => w.DocType == DocType.Reject);
-			else if (TypeFilter.Value == DocumentTypeFilter.Diadok)
-				query = query.Where(w => w.DocType == DocType.Diadok);
 
 			var docs = query
 				.OrderByDescending(w => w.WriteTime)
@@ -250,36 +232,6 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();
-		}
-
-		public void Sign()
-		{
-			if (!CanSign.Value)
-				return;
-
-			var waybill = CurrentWaybill.Value;
-			try
-			{
-				if (waybill.IsSign) {
-					var cert = Settings.Value.TryGetCert;
-					if (cert == null)
-						throw new EndUserError("Сертификат для подписи не найден.");
-					var sign = StatelessSession.Get<Sign>(waybill.Id);
-					var filename = waybill.TryGetFile(Settings.Value);
-					if (String.IsNullOrEmpty(filename))
-						throw new EndUserError("Не найден файл накладной.");
-
-					var api = new WinApiCrypt();
-					sign.SignBytes = api.Sign(File.ReadAllBytes(filename), cert.RawData);
-					StatelessSession.Update(sign);
-				}
-				StatelessSession.Update(waybill);
-			}
-			catch(Exception e) {
-				Log.Error(String.Format("Ошибка при подписании документа {0}", waybill.Id), e);
-				Manager.Error(ErrorHelper.TranslateException(e) ?? "Не удалось подписать документ");
-				waybill.IsSign = false;
-			}
 		}
 
 		public IEnumerable<IResult> VitallyImportantReport()

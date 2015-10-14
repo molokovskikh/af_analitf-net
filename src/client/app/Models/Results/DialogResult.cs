@@ -26,8 +26,7 @@ namespace AnalitF.Net.Client.Models.Results
 		public void Execute(ActionExecutionContext context)
 		{
 			Manager.ShowWindow(model);
-			if (Completed != null)
-				Completed(this, new ResultCompletionEventArgs());
+			Completed?.Invoke(this, new ResultCompletionEventArgs());
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -72,13 +71,12 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public void RaiseCompleted(ResultCompletionEventArgs args)
 		{
-			if (Completed != null)
-				Completed(this, args);
+			Completed?.Invoke(this, args);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("Диалог - {0}", Model);
+			return $"Диалог - {Model}";
 		}
 	}
 }

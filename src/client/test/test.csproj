@@ -52,6 +52,10 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DiadocApi, Version=1.27.0.0, Culture=neutral, PublicKeyToken=d18fd4c7ad3c243e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\diadok\DiadocApi.dll</HintPath>
+    </Reference>
     <Reference Include="DotRas">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\DotRas.dll</HintPath>
@@ -74,7 +78,7 @@
     <Reference Include="PresentationFrameWork" />
     <Reference Include="protobuf-net, Version=1.0.0.282, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\tmp\C#\References\protobuf-net\protobuf-net.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\tmp\diadok\C#\References\protobuf-net\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="ReactiveUI" />
@@ -147,6 +151,7 @@
     <Compile Include="Fixtures\CreateSchedule.cs" />
     <Compile Include="Fixtures\CreateServerAddress.cs" />
     <Compile Include="Fixtures\CreateDelayOfPayment.cs" />
+    <Compile Include="Fixtures\Diadok.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
     <Compile Include="Fixtures\LocalDelayOfPayment.cs" />
@@ -166,6 +171,7 @@
     <Compile Include="Fixtures\SmartOrderAddressMapping.cs" />
     <Compile Include="Fixtures\UnconfirmedOrder.cs" />
     <Compile Include="Fixtures\LocalWaybill.cs" />
+    <Compile Include="Glob.cs" />
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
@@ -298,10 +304,6 @@
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\tmp\diadok\C#\DiadocApi\DiadocApi.csproj">
-      <Project>{992AFD96-B3EE-4124-8788-022F867E2EF0}</Project>
-      <Name>DiadocApi</Name>
-    </ProjectReference>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
       <Name>app</Name>

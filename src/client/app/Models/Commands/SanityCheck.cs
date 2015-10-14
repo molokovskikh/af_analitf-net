@@ -124,6 +124,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 				foreach (var address in addresses.Except(new [] { mainAddress }))
 					settings.CopyMarkups(mainAddress, address);
+				settings.Markups.RemoveEach(x => x.Address == null);
 
 				//если есть адреса то должен быть и пользователь
 				//если только база не была поломана

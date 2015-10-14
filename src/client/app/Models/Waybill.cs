@@ -30,14 +30,6 @@ namespace AnalitF.Net.Client.Models
 	{
 		Waybill = 1,
 		Reject = 2,
-		Diadok = 100,
-	}
-
-	//хранится в той же таблице что и Waybill
-	public class Sign
-	{
-		public virtual uint Id { get; set; }
-		public virtual byte[] SignBytes { get; set; }
 	}
 
 	//цифры важны они используются при миграции настроек
@@ -57,7 +49,6 @@ namespace AnalitF.Net.Client.Models
 		private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Waybill));
 
 		private bool _vitallyImportant;
-		private bool _isSign;
 
 		public Waybill()
 		{
@@ -106,29 +97,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ConsigneeNameAndAddress { get; set; }
 		public virtual string UserSupplierName { get; set; }
 
-		/// <summary>
-		/// флаг указывает на то что документ нужно подписать при слудующем обновлении
-		/// </summary>
-		public virtual bool IsSign
-		{
-			get
-			{
-				return _isSign;
-			}
-			set
-			{
-				_isSign = value;
-				OnPropertyChanged();
-				OnPropertyChanged("Status");
-			}
-		}
-
-		/// <summary>
-		/// флаг сообщает что документ был подписан успешно
-		/// </summary>
-		public virtual bool IsSigned { get; set; }
-
-		//todo одинаковое поле
 		/// <summary>
 		/// наименование файла в случае если используется механизм переопределения имен файлов
 		/// если используется стандартное именование файла тогда null
@@ -204,8 +172,6 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (DocType.GetValueOrDefault(Models.DocType.Waybill) == Models.DocType.Reject)
 					return "Отказ";
-				if (DocType == Models.DocType.Diadok)
-					return "Диадок";
 				return "Накладная";
 			}
 		}
@@ -252,21 +218,6 @@ namespace AnalitF.Net.Client.Models
 
 		[Style("AddressName"), Ignore]
 		public virtual bool IsCurrentAddress { get; set; }
-
-		[Ignore]
-		public virtual string Status
-		{
-			get
-			{
-				if (DocType != Models.DocType.Diadok)
-					return "";
-				if (IsSign)
-					return "Подписан ожидает отправки";
-				if (IsSigned)
-					return "Подписан";
-				return "Неподписан";
-			}
-		}
 
 		public virtual bool IsAddressExists()
 		{

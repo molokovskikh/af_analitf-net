@@ -46,5 +46,16 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			result = settings.Markups.Where(x => x.Type == MarkupType.Nds18 && x.Address == addresses[0]).Implode();
 			Assert.AreEqual("Nds18: 0 - 10000 20%", result);
 		}
+
+		[Test]
+		public void Skip_markup_validation_if_no_addresses()
+		{
+			var settings = new Settings();
+			Env.Current.Settings = settings;
+			Env.Current.Addresses = new List<Address>();
+			var model = new SettingsViewModel();
+			var results = model.Save().ToList();
+			Assert.AreEqual(0, results.Count, results.Implode());
+		}
 	}
 }

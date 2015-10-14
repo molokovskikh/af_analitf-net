@@ -11,7 +11,7 @@
 		</Grid.RowDefinitions>
 
 		<TabControl Grid.Row="0" SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
-			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab">
+			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab" IsEnabled="{Binding HaveAddress}">
 				<Grid>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition />
@@ -67,7 +67,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab">
+			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab" IsEnabled="{Binding HaveAddress}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
@@ -122,7 +122,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Наценки товара с 18% НДС" Name="Nds18MarkupsTab">
+			<TabItem Header="Наценки товара с 18% НДС" Name="Nds18MarkupsTab" IsEnabled="{Binding HaveAddress}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
@@ -501,6 +501,7 @@
 					<Label>Задержка в обработке запросов (секунд)</Label>
 					<TextBox Name="Settings_DebugTimeout" />
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
+					<CheckBox Name="Settings_DebugUseTestSign">Диадок - симулировать подпись</CheckBox>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Диадок">

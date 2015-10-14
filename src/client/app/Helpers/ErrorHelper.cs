@@ -9,6 +9,7 @@ using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using Common.Tools.Helpers;
 using Devart.Data.MySql;
+using Diadoc.Api.Http;
 using DotRas;
 
 namespace AnalitF.Net.Client.Helpers
@@ -29,6 +30,21 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static string TranslateException(Exception exception)
 		{
+			if (exception is HttpClientException) {
+				var diadokException = ((HttpClientException)exception);
+				var message = diadokException.AdditionalMessage;
+				if (diadokException.DiadocErrorCode == "Http.Auth.Auth.UserNotFoundOrBadPassword")
+					return "Введены некорректные учетные данные.";
+				if (String.IsNullOrEmpty(message))
+					return TranslateException(exception.InnerException);
+				return message;
+			}
+
+			var webException = exception as WebException;
+			if (webException?.Status == WebExceptionStatus.NameResolutionFailure) {
+				return "Не удалось установить соединение с сервером Диадок. Проверьте подключение к Интернет.";
+			}
+
 			var requestException = exception as RequestException;
 			if (requestException != null) {
 				if (requestException.StatusCode == HttpStatusCode.Unauthorized) {

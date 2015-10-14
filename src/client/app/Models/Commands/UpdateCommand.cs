@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -24,7 +25,9 @@ using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using Diadoc.Api.Proto.Events;
 using Ionic.Zip;
 using log4net;
+using log4net.Appender;
 using log4net.Config;
+using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
@@ -131,24 +134,6 @@ namespace AnalitF.Net.Client.Models.Commands
 			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
-			try {
-				External.Diadok(Session, Config);
-			}
-			catch(WebException e) {
-				Log.Error("Ошибка при обращении к Диадок", e);
-				var http = e.Response as HttpWebResponse;
-				if (http != null && (int)http.StatusCode == 401) {
-					Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Введены некорректные учетные данные."));
-				}
-				else {
-					Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Попробуйте повторить операцию позднее."));
-				}
-			}
-			catch(Exception e) {
-				Log.Error("Ошибка при обращении к Диадок", e);
-				Results.Add(MessageResult.Error("Не удалось получить документы Диадок. Попробуйте повторить операцию позднее."));
-			}
-
 			var result = ProcessUpdate(Config.ArchiveFile);
 			Log.InfoFormat("Обновление завершено успешно");
 
@@ -1220,13 +1205,17 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			using (var cleaner = new FileCleaner()) {
 				var file = cleaner.TmpFile();
 
-				//TODO: в тестах сброс конфигурации может сильно испортить жизнь
-				//например если нужно отладить запросы
-				LogManager.ResetConfiguration();
-				try
-				{
+				//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
+				var appenders = ((Hierarchy)log4net.LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
+				var files = new Dictionary<object, string>();
+				appenders.Each(x => {
+					files.Add(x, x.File);
+					x.Writer = null;
+				});
+				try {
+					//4 - bom
 					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
-						.Where(f => new FileInfo(f).Length > 0)
+						.Where(f => new FileInfo(f).Length > 4)
 						.ToArray();
 
 					if (logs.Length == 0)
@@ -1239,17 +1228,20 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						zip.Save(file);
 					}
 
-					var logsWatch = new FileCleaner();
-					logsWatch.Watch(logs);
-					logsWatch.Dispose();
+					using (var stream = File.OpenRead(file)) {
+						var response = await client.PostAsync("Logs", new StreamContent(stream), token);
+						//удаляем логи только если отправка завершилась успешно
+						if (response.IsSuccessStatusCode)
+							cleaner.Watch(logs);
+						return response;
+					}
 				}
 				finally {
-					XmlConfigurator.Configure();
-				}
-
-				using (var stream = File.OpenRead(file))
-					return await client.PostAsync("Logs", new StreamContent(stream), token);
-			}
+					appenders.Each(x => {
+						x.File = files.GetValueOrDefault(x);
+					});
+				}//try {
+			}//using (var cleaner = new FileCleaner())
 		}
 	}
 }

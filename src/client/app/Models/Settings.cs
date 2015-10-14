@@ -495,12 +495,15 @@ namespace AnalitF.Net.Client.Models
 			Validate();
 		}
 
-		public virtual string Validate()
+		public virtual string Validate(bool validateMarkups = true)
 		{
 			if (JunkPeriod < 6)
 				return "Срок уценки не может быть менее 6 месяцев";
 
-			return MarkupConfig.Validate(Markups);
+			if (validateMarkups)
+				return MarkupConfig.Validate(Markups);
+
+			return null;
 		}
 
 		public virtual ICredentials GetCredential()

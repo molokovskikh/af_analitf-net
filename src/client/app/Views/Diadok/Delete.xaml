@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Diadok.Delete"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	IsEnabled="{Binding IsEnabled.Value}">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0" FontSize="18">Переместить документ в «Удаленные»?</Label>
+		<StackPanel Orientation="Horizontal" Grid.Row="1">
+			<Button Margin="3" Name="Save" Content="Переместить в «Удаленные»" />
+			<Button Margin="3" Name="TryClose">Отмена</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
@@ -183,15 +184,29 @@ namespace AnalitF.Net.Client.Helpers
 			var p = type.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
 			if (p != null) {
 				var result = p.GetValue(value, null);
-				return String.Format("{0} = {1}", name, result);
+				return $"{name} = {result}";
 			}
 			var f = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
-			return String.Format("{0} = {1}", name, f.GetValue(value));
+			return $"{name} = {f.GetValue(value)}";
 		}
 
 		public static string FormatCost(this decimal? value)
 		{
 			return value != null ? value.Value.ToString("0.00") : "";
+		}
+
+		public static Task<T> Run<T>(Func<T> func)
+		{
+			var task = new Task<T>(func);
+			task.Start();
+			return task;
+		}
+
+		public static Task Run(Action action)
+		{
+			var task = new Task(action);
+			task.Start();
+			return task;
 		}
 	}
 }

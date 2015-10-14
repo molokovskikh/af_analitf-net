@@ -212,6 +212,15 @@
 				</Grid>
 			</Button>
 
+			<Button x:Name="ShowExtDocs" ToolTip="Диадок"
+				IsEnabled="{Binding IsDataLoaded.Value}"
+				Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Grid>
+					<Image Source="/assets/images/diadok.png"
+							Style="{StaticResource ButtonImage}" />
+				</Grid>
+			</Button>
+
 			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Home 2_32.ico"
 						Style="{StaticResource ButtonImage}" />

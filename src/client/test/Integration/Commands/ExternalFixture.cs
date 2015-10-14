@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Client.Models.Commands;
+﻿using System.Threading.Tasks;
+using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.TestHelpers;
 using NUnit.Framework;
 
@@ -8,9 +9,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 	public class ExternalFixture : DbFixture
 	{
 		[Test]
-		public void Load_sbis_doc()
+		public async Task Load_sbis_doc()
 		{
-			External.Sbis();
+			await External.Sbis();
 		}
 	}
 }
