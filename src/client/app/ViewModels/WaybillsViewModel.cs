@@ -246,5 +246,12 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}
+
+		public IEnumerable<IResult> WaybillMarkupReport()
+		{
+			var commnand = new WaybillMarkupReport();
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
 	}
 }

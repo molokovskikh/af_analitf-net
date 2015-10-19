@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Reports;
 using Common.MySql;
 using Common.Tools;
 using Devart.Data.MySql;
@@ -91,6 +92,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<WaybillLine>(w => w.Product);
 			Index<WaybillLine>(w => w.SerialNumber);
 			Index<WaybillLine>(w => w.RejectId);
+			Index<WaybillLine>(w => w.EAN13);
 			Index<Reject>(w => w.ProductId);
 			Index<Reject>(w => w.ProducerId);
 			Index<Reject>(w => w.Product);
@@ -106,6 +108,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			Index<MinCost>(r => r.Diff);
 			Index<Catalog>(r => r.Name);
 			Index<Drug>(r => r.EAN);
+			Index<BarCode>(r => r.Value);
 
 			mapper.Class<Drug>(x => x.Id(y => y.DrugId));
 			mapper.Class<Settings>(m => {

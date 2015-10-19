@@ -152,4 +152,55 @@ group by r.DrugID")
 				book.Write(stream);
 		}
 	}
+
+	public class WaybillMarkupReport : DbCommand<string>
+	{
+		public override void Execute()
+		{
+			//отчет всегда готовится за предудущий год
+			var end = new DateTime(DateTime.Today.Year, 1, 1);
+			var year = DateTime.Today.Year - 1;
+			var begin = new DateTime(year, 1, 1);
+			var rows = StatelessSession.CreateSQLQuery(@"
+select
+	b.Value as BarCode,
+	sum(quantity) Total,
+	round(avg(l.SupplierCost),2) SupplierCost,
+	round(avg(l.RetailCost),2) RetailCost,
+	round(avg(producercost),2) ProducerCost,
+	min(registrycost) RegistryCost,
+	sum(quantity) Planned
+from WaybillLines l
+		join Waybills w on w.Id = l.WaybillId
+	join BarCodes b on b.Value = l.EAN13
+where b.Value = l.EAN13 and w.DocumentDate > :begin and w.DocumentDate < :end
+group by b.Value;")
+				.SetParameter("begin", begin)
+				.SetParameter("end", end)
+				.List();
+			var settings = Session.Query<Settings>().First();
+			var dir = settings.InitAndMap("Reports");
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Надб-ЖНВЛС-{year}.xls"));
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("ЛС");
+			var reportRow = sheet.CreateRow(0);
+			reportRow.CreateCell(0).SetCellValue("Штрихкод");
+			reportRow.CreateCell(1).SetCellValue("Количество");
+			reportRow.CreateCell(2).SetCellValue("СтоимостьПриобр");
+			reportRow.CreateCell(3).SetCellValue("СтоимостьРеализ");
+			reportRow.CreateCell(4).SetCellValue("СтоимостьВЦенахПроизв");
+			reportRow.CreateCell(5).SetCellValue("ПредельнаяЦенаПроизв");
+			reportRow.CreateCell(6).SetCellValue("КоличествоПлан");
+			reportRow.CreateCell(7).SetCellValue("ВаловаяПрибыльПлан");
+			for(var i = 0; i < rows.Count; i++) {
+				reportRow = sheet.CreateRow(i + 1);
+				var row = ((object[])rows[i]);
+				for (var j = 0; j < row.Length; j++) {
+					reportRow.CreateCell(j).SetCellValue(row[j].ToString());
+				}
+			}
+			using(var stream = File.Create(Result))
+				book.Write(stream);
+		}
+	}
 }

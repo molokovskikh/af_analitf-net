@@ -901,6 +901,17 @@ from Reports.Drugs";
 				Export(Result, sql, "Drugs", truncate: true);
 			}
 
+			lastDataUpdate = ((MySqlConnection)session.Connection)
+				.Read<DateTime>("select Max(LastUpdate) from Documents.BarCodes")
+				.FirstOrDefault();
+			if (lastDataUpdate > data.LastUpdateAt) {
+				sql = @"
+select Id, BarCode as Value
+from Documents.BarCodes
+where BarCode <> ''";
+				Export(Result, sql, "BarCodes", truncate: true);
+			}
+
 			IList<object[]> newses = new List<object[]>();
 			if (cumulative) {
 				sql = @"

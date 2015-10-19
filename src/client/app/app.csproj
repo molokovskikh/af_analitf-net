@@ -297,6 +297,7 @@
     <Compile Include="Models\RegulatorRegistry.cs" />
     <Compile Include="Models\Reject.cs" />
     <Compile Include="Models\RejectOrderLine.cs" />
+    <Compile Include="Models\Reports\BarCodes.cs" />
     <Compile Include="Models\Results\DialogResult.cs" />
     <Compile Include="Models\Results\FocusResult.cs" />
     <Compile Include="Models\Results\HandledResult.cs" />
