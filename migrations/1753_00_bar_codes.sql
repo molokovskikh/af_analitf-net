@@ -6,7 +6,12 @@ create table Documents.BarCodes
 	primary key(Id)
 );
 
-insert into Documents.BarCodes(BarCode)
+create temporary table Documents.TmpBarCodes
+(
+	BarCode varchar(255)
+) engine=memory;
+
+insert into Documents.TmpBarCodes(BarCode)
 values
 ('14602884002250'),
 ('14602884002250'),
@@ -5268,7 +5273,6 @@ values
 ('24605453000494'),
 ('24605453000500'),
 ('24605453000593'),
-(''),
 ('4030539060608'),
 ('4030539060615'),
 ('4030539060622'),
@@ -5280,7 +5284,6 @@ values
 ('4030539062411'),
 ('4030539062428'),
 ('4030539065764'),
-(''),
 ('4600488002952'),
 ('4600488002969'),
 ('4600488002983'),
@@ -20159,4 +20162,8 @@ values
 ('8902502115874'),
 ('8902502115942'),
 ('8902502115959'),
-('8903726107188')
+('8903726107188');
+
+insert into Documents.BarCodes(BarCode)
+select BarCode From Documents.TmpBarCodes
+group by BarCode;
