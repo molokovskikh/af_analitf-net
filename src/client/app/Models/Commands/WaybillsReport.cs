@@ -145,7 +145,7 @@ group by r.DrugID")
 				reportRow = sheet.CreateRow(i + 1);
 				var row = ((object[])rows[i]);
 				for (var j = 0; j < row.Length; j++) {
-					reportRow.CreateCell(j).SetCellValue(row[j].ToString());
+					reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
 				}
 			}
 			using(var stream = File.Create(Result))
@@ -196,7 +196,7 @@ group by b.Value;")
 				reportRow = sheet.CreateRow(i + 1);
 				var row = ((object[])rows[i]);
 				for (var j = 0; j < row.Length; j++) {
-					reportRow.CreateCell(j).SetCellValue(row[j].ToString());
+					reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
 				}
 			}
 			using(var stream = File.Create(Result))
