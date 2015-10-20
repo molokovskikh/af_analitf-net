@@ -11,7 +11,7 @@
 		</Grid.RowDefinitions>
 
 		<TabControl Grid.Row="0" SelectedValuePath="Name" SelectedValue="{Binding SelectedTab.Value}">
-			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab">
+			<TabItem Header="Наценки ЖНВЛС" Name="VitallyImportantMarkupsTab" IsEnabled="{Binding HaveAddresses}">
 				<Grid>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition />
@@ -67,7 +67,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab">
+			<TabItem Header="Наценки прочий ассортимент" Name="OverMarkupsTab" IsEnabled="{Binding HaveAddresses}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
@@ -122,7 +122,7 @@
 					</StackPanel>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Наценки товара с 18% НДС" Name="Nds18MarkupsTab">
+			<TabItem Header="Наценки товара с 18% НДС" Name="Nds18MarkupsTab" IsEnabled="{Binding HaveAddresses}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />

@@ -101,29 +101,29 @@ namespace AnalitF.Net.Client.Models.Commands
 					if (settings.MappingToken != mappingToken)
 						return true;
 
-					//если ничего восстановить не удалось тогда берем значения по умолчанию
-					foreach (var address in session.Query<Address>()) {
-						if (settings.Markups.Count(x => x.Address == address) == 0)
-							MarkupConfig.Defaults(address).Each(settings.AddMarkup);
-					}
-					if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
-						settings.Markups.AddEach(settings.Markups.Where(x => x.Type == MarkupType.Over)
-							.Select(x => new MarkupConfig(x, x.Address) {
-								Type = MarkupType.Nds18,
-							}));
-					}
 					if (settings.Waybills.Count == 0)
 						session.Query<WaybillSettings>().Each(settings.Waybills.Add);
 				}
+
 				var addresses = session.Query<Address>().ToList();
 				var mainAddress = addresses.FirstOrDefault();
 				if (mainAddress != null) {
 					if (settings.Markups.All(x => x.Address == null))
 						settings.Markups.Each(x => x.Address = mainAddress);
 				}
-
 				foreach (var address in addresses.Except(new [] { mainAddress }))
 					settings.CopyMarkups(mainAddress, address);
+					//если ничего восстановить не удалось тогда берем значения по умолчанию
+				foreach (var address in addresses) {
+					if (settings.Markups.Count(x => x.Address == address) == 0)
+						MarkupConfig.Defaults(address).Each(settings.AddMarkup);
+				}
+				if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
+					settings.Markups.AddEach(settings.Markups.Where(x => x.Type == MarkupType.Over)
+						.Select(x => new MarkupConfig(x, x.Address) {
+							Type = MarkupType.Nds18,
+						}));
+				}
 
 				//если есть адреса то должен быть и пользователь
 				//если только база не была поломана

@@ -70,6 +70,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Addresses = Env.Addresses;
 			}
 
+
+			HaveAddresses = Addresses.Count > 0;
 			MarkupAddress.Select(x => MarkupByType(MarkupType.Over, x))
 				.Subscribe(Markups);
 			MarkupAddress.Select(x => MarkupByType(MarkupType.VitallyImportant, x))
@@ -87,6 +89,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 		}
 
+		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
 
 		public string Password
@@ -234,7 +237,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Save()
 		{
-			var error = Settings.Value.Validate();
+			var error = Settings.Value.Validate(HaveAddresses);
 
 			if (!String.IsNullOrEmpty(error)) {
 				Session.FlushMode = FlushMode.Never;
