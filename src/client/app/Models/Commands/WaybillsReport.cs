@@ -93,7 +93,7 @@ from WaybillLines l
 					writer.Write(";");
 					writer.Write(0.ToString("0.00", CultureInfo.InvariantCulture));
 					writer.Write(";");
-					writer.Write((string)row.VendorID);
+					writer.Write((string)row.VendorId);
 					writer.WriteLine();
 				}
 			}

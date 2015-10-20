@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -108,7 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Vitally_important_report()
 		{
-			Fixture<LocalWaybill>();
+			var fixture = Fixture<LocalWaybill>();
 			FileHelper.InitDir(settings.MapPath("Reports"));
 			var result = model.VitallyImportantReport().GetEnumerator();
 			var task = Next<TaskResult>(result);
@@ -118,7 +119,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
 			Assert.That(open.Filename, Is.StringContaining("Росздравнадзор"));
 			//дожна быть строка заголовка и как миниму одна строка данных
-			Assert.That(File.ReadAllText(open.Filename).Length, Is.GreaterThan(1));
+			var text = File.ReadAllText(open.Filename);
+			Assert.That(text.Length, Is.GreaterThan(1));
+			//в 11 колонке будет vendorid
+			var vendorId = text.Split(new [] { Environment.NewLine }, StringSplitOptions.None)[1].Split(';')[10];
+			//в тестовых данных VendorId == Id
+			Assert.AreEqual(vendorId, fixture.Waybill.Supplier.Id.ToString());
 		}
 	}
 }
