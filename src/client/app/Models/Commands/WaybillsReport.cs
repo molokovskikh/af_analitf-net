@@ -168,7 +168,7 @@ select
 	round(avg(l.SupplierCost),2) SupplierCost,
 	round(avg(l.RetailCost),2) RetailCost,
 	round(avg(producercost),2) ProducerCost,
-	min(registrycost) RegistryCost,
+	min(if(registrycost = 0, null, registrycost)) RegistryCost,
 	sum(quantity) Planned
 from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
