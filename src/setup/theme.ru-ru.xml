@@ -37,7 +37,7 @@
   <String Id="SuccessRestartButton">&amp;Перезагрузка</String>
   <String Id="SuccessCloseButton">&amp;Закрыть</String>
   <String Id="FailureHeader">Не удалось установить приложение</String>
-  <String Id="FailureHyperlinkLogText">При установке приложения возникли проблемы. Обратитесь в АК Инфорум. Дополнительная информация доступна в &lt;a href="#"&gt;журнале установки&lt;/a&gt;.</String>
+  <String Id="FailureHyperlinkLogText">При установке приложения возникли проблемы. Обратитесь в АналитФармация. Дополнительная информация доступна в &lt;a href="#"&gt;журнале установки&lt;/a&gt;.</String>
   <String Id="FailureRestartText">Необходимо перезагрузить компьютер что бы полностью удалить приложение.</String>
   <String Id="FailureRestartButton">&amp;Перезагрузка</String>
   <String Id="FailureCloseButton">&amp;Закрыть</String>

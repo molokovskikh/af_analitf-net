@@ -14,8 +14,8 @@ bake setup:preprocess
 cd $output
 
 version=`cat version.txt`
-publisher="Инфорум"
-product="АналитФАРМАЦИЯ"
+publisher="АналитФармация"
+product="АналитФармация"
 quiet=""
 
 for i in "$@"; do
