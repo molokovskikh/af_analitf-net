@@ -315,7 +315,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			var supplier = ((WaybillLine)loadable).Waybill.SafeSupplier;
 			if (supplier == null || !supplier.HaveCertificates) {
-				yield return new MessageResult("Данный поставщик не предоставляет сертификаты в АК Инфорум." +
+				yield return new MessageResult("Данный поставщик не предоставляет сертификаты в АналитФармация." +
 					"\r\nОбратитесь к поставщику.",
 					MessageResult.MessageType.Warning);
 				yield break;

@@ -69,7 +69,7 @@
 
 			<MenuItem Header="Сервис">
 				<MenuItem Header="Конфигурация" cal:Message.Attach="ShowSettings" />
-				<MenuItem Header="Отправить письмо в АК &quot;Инфорум&quot;" cal:Message.Attach="Feedback" />
+				<MenuItem Header="Отправить письмо в АналитФармация" cal:Message.Attach="Feedback" />
 				<MenuItem Header="Журнал загрузок" cal:Message.Attach="ShowJournal" />
 				<MenuItem Header="Минипочта" cal:Message.Attach="ShowMails" />
 				<MenuItem Header="Восстановление базы данных" cal:Message.Attach="CheckDb" />

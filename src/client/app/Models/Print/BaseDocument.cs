@@ -177,7 +177,7 @@ namespace AnalitF.Net.Client.Models.Print
 						Rows = {
 							new TableRow {
 								Cells = {
-									new TableCell(new Paragraph(new Run("Информационная поддержка \"АК \"Инфорум\"\" 473-2606000")) {
+									new TableCell(new Paragraph(new Run("Информационная поддержка АналитФармация 473-2606000")) {
 										TextAlignment = TextAlignment.Left,
 									}),
 									new TableCell(new Paragraph(new Run(DateTime.Now.ToString()))) {

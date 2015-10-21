@@ -63,7 +63,7 @@ namespace Updater
 		public static void NotifyAboutException(Exception exception)
 		{
 			log.Error("Ошибка в приложении", exception);
-			MessageBox.Show("Не удалось обновить приложение. Пожалуйста обратитесь в АК Инфорум",
+			MessageBox.Show("Не удалось обновить приложение. Пожалуйста обратитесь в АналитФармация",
 				"АналитФАРМАЦИЯ: Ошибка",
 				MessageBoxButton.OK,
 				MessageBoxImage.Error);

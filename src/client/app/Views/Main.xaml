@@ -23,9 +23,7 @@
 					Width="79"
 					Height="74" />
 				<StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-					<TextBlock x:Name="EtalogLabel" FontSize="22" Foreground="#336488">ИНФОРУМ</TextBlock>
-					<TextBlock FontSize="16" Foreground="#336488">аналитическая</TextBlock>
-					<TextBlock x:Name="SmallLabel" FontSize="16" Foreground="#336488">компания</TextBlock>
+					<TextBlock FontSize="16" Foreground="#336488">АналитФармация</TextBlock>
 				</StackPanel>
 			</Grid>
 			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба</TextBlock>

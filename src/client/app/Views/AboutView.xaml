@@ -56,7 +56,7 @@
 			Width="350"></TextBox>
 		<DockPanel LastChildFill="False" Margin="5">
 			<TextBlock VerticalAlignment="Center">
-				<Hyperlink NavigateUri="http://www.analit.net" Command="caliburn:Commands.NavigateUri">АК "Инфорум"</Hyperlink>
+				<Hyperlink NavigateUri="http://www.analit.net" Command="caliburn:Commands.NavigateUri">АналитФармация</Hyperlink>
 			</TextBlock>
 			<Button MinWidth="70" DockPanel.Dock="Right" Name="TryClose">OK</Button>
 		</DockPanel>

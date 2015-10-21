@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public Feedback(Config.Config config)
 		{
 			this.config = config;
-			DisplayName = "Письмо в АК \"Инфорум\"";
+			DisplayName = "Письмо в АналитФармация";
 			SendLog = true;
 			Attachments = new ObservableCollection<string>();
 			IsSupport = true;

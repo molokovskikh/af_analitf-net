@@ -159,7 +159,7 @@ namespace AnalitF.Net.Service.Models
 				if (String.IsNullOrEmpty(data.ClientTokenV2))
 					data.ClientTokenV2 = job.ClientToken;
 				else if (data.ClientTokenV2 != job.ClientToken)
-					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АК \"Инфорум\".");
+					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АналитФармация.");
 			}
 
 			data.LastPendingUpdateAt = DateTime.Now;

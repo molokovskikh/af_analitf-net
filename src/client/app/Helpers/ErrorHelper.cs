@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Helpers
 					return "Доступ запрещен.\r\nВведены некорректные учетные данные.";
 				}
 				if (requestException.StatusCode == HttpStatusCode.Forbidden) {
-					return "Доступ запрещен.\r\nОбратитесь в АК Инфорум.";
+					return "Доступ запрещен.\r\nОбратитесь в АналитФармация.";
 				}
 			}
 

@@ -661,8 +661,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Start();
 			OpenMenu("Сервис");
 			WaitIdle();
-			AsyncClickMenu("Отправить письмо в АК \"Инфорум\"");
-			WaitWindow("Письмо в АК \"Инфорум\"");
+			AsyncClickMenu("Отправить письмо в АналитФармация");
+			WaitWindow("Письмо в АК АналитФармация");
 			InputActiveWindow("Subject", "test");
 			Click("Send");
 			WaitMessageBox("Письмо отправлено.");

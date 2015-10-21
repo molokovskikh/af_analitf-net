@@ -10,7 +10,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			DisplayName = "АналитФАРМАЦИЯ";
 			Text = "Выполнение операции, подождите.";
-			GenericErrorMessage = "Не удалось выполнить операцию. Обратитесь в АК\"Инфорум\".";
+			GenericErrorMessage = "Не удалось выполнить операцию. Обратитесь в АналитФармация.";
 			Cancellation = new CancellationTokenSource();
 		}
 
