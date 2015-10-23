@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Automation;
 using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
+using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using ICSharpCode.SharpZipLib.Zip;
@@ -33,6 +34,7 @@ namespace test.release
 		string prevSetupBin = null;
 		string testUserName = "26307";
 		string testPassword = "TkGJEQUX";
+		string setupId = "{22DC7E87-F9E2-463F-9811-E0C53779C644}";
 
 		[SetUp]
 		public void Setup()
@@ -147,8 +149,8 @@ namespace test.release
 			var cmd = "";
 			foreach (var subKeyName in key.GetSubKeyNames()) {
 				var subkey = key.OpenSubKey(subKeyName);
-				var value = subkey.GetValue("DisplayName");
-				if (name.Equals(value)) {
+				var id = ((string[])subkey?.GetValue("BundleUpgradeCode"))?.FirstOrDefault();
+				if (setupId.Match(id)) {
 					cmd = subkey.GetValue("QuietUninstallString") as string;
 					break;
 				}
