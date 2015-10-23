@@ -662,7 +662,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			OpenMenu("Сервис");
 			WaitIdle();
 			AsyncClickMenu("Отправить письмо в АналитФармация");
-			WaitWindow("Письмо в АК АналитФармация");
+			WaitWindow("Письмо в АналитФармация");
 			InputActiveWindow("Subject", "test");
 			Click("Send");
 			WaitMessageBox("Письмо отправлено.");
