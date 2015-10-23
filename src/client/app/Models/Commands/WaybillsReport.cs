@@ -169,7 +169,8 @@ select
 	round(avg(l.RetailCost),2) RetailCost,
 	round(avg(producercost),2) ProducerCost,
 	min(if(registrycost = 0, null, registrycost)) RegistryCost,
-	sum(quantity) Planned
+	sum(quantity) Planned,
+	round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2) Margin
 from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
 	join BarCodes b on b.Value = l.EAN13

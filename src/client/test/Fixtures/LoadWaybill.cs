@@ -9,6 +9,25 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
+	[Description("Создает накладную для отчета Надб ЖНВЛС")]
+	public class CreateWaybillForReport : ServerFixture
+	{
+		public TestDocumentLog Document;
+		public TestDocumentSendLog SendLog;
+		public TestWaybill Waybill;
+
+		public override void Execute(ISession session)
+		{
+			var user = User(session);
+			Waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
+			Waybill.DocumentDate = DateTime.Now.AddYears(-1);
+			Document = Waybill.Log;
+			session.Save(Waybill);
+			SendLog = new TestDocumentSendLog(user, Document);
+			session.Save(SendLog);
+		}
+	}
+
 	[Description("Создает накладную на сервере с файлом")]
 	public class CreateWaybill : ServerFixture
 	{
