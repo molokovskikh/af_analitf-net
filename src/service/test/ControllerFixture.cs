@@ -313,8 +313,8 @@ namespace AnalitF.Net.Service.Test
 				.Where(x => x.User.Id == user.Id)
 				.ToArray();
 			Assert.AreEqual(2, orders.Length);
-			Assert.AreEqual(1, orders[0].Items.Count);
-			Assert.AreEqual(1, orders[1].Items.Count);
+			Assert.AreEqual(1, orders[0].Items.Count, $"userid = {user.Id}");
+			Assert.AreEqual(1, orders[1].Items.Count, $"userid = {user.Id}");
 		}
 
 		private List<OrderResult> PostOrder(SyncRequest syncRequest)
@@ -362,8 +362,9 @@ namespace AnalitF.Net.Service.Test
 								ProductId = offer.Product.Id,
 								ProducerId = offer.Producer.Id,
 								SynonymCode = offer.ProductSynonym.Id,
-								SynonymFirmCrCode = offer.ProducerSynonym == null ? null : (uint?)offer.ProducerSynonym.Id,
+								SynonymFirmCrCode = offer.ProducerSynonym?.Id,
 								Code = offer.Code,
+								CodeCr = "",
 								Count = 1,
 								Cost = 100
 							}).ToArray(),
