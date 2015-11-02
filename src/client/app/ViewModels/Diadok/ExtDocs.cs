@@ -487,8 +487,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			if (String.IsNullOrEmpty(Settings.Value.DiadokUsername)
 				|| String.IsNullOrEmpty(Settings.Value.DiadokPassword)) {
 				Manager.Warning("Для начала работы нужно ввести учетные данные Диадок." +
-					" Если Вы не зарегистрированны в системе Диадок нужно пройти регистрацию на сайте http://diadoc.kontur.ru.");
-				Shell.ShowSettings();
+					" Если Вы не зарегистрированы в системе Диадок нужно пройти регистрацию на сайте http://diadoc.kontur.ru.");
+				Shell.ShowSettings("DiadokTab");
 				Session.Evict(Settings.Value);
 				Settings.Value = Session.Query<Settings>().First();
 				if (String.IsNullOrEmpty(Settings.Value.DiadokUsername)

@@ -401,7 +401,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Settings.Value.IsValid) {
 				windowManager.Warning("Для начала работы с программой необходимо заполнить учетные данные");
-				ShowSettings();
+				ShowSettings("LoginTab");
 				return false;
 			}
 			return true;
@@ -536,9 +536,12 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new SearchOfferViewModel());
 		}
 
-		public void ShowSettings()
+		public void ShowSettings(string tab = null)
 		{
-			windowManager.ShowFixedDialog(new SettingsViewModel());
+			var model = new SettingsViewModel();
+			if (tab != null)
+				model.SelectedTab.Value = tab;
+			windowManager.ShowFixedDialog(model);
 			//настройки будут обновлены автоматически но в случае если
 			//мы показали форму принудительно что бы человек заполнил имя пользователя и пароль
 			//это будет слишком поздно
@@ -934,13 +937,7 @@ namespace AnalitF.Net.Client.ViewModels
 					if (count == 1
 						&& baseException is RequestException
 						&& ((RequestException)baseException).StatusCode == HttpStatusCode.Unauthorized) {
-						var model = new SettingsViewModel();
-						model.SelectedTab.Value = "LoginTab";
-						windowManager.ShowFixedDialog(model);
-						done = !model.IsCredentialsChanged;
-						if (!done) {
-							session.Refresh(Settings.Value);
-						}
+						ShowSettings("LoginTab");
 					}
 				}
 			} while (!done);

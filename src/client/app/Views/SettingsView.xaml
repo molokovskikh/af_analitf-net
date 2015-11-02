@@ -504,7 +504,7 @@
 					<CheckBox Name="Settings_DebugUseTestSign">Диадок - симулировать подпись</CheckBox>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Диадок">
+			<TabItem Header="Диадок" Name="DiadokTab">
 				<StackPanel>
 					<Label>Имя пользователя</Label>
 					<TextBox Name="Settings_DiadokUsername" />

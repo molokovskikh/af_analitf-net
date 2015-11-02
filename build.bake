@@ -241,6 +241,7 @@ def Merge(output as string, projectName as string, source as string):
 	name = Path.Combine(output, Path.GetFileName(exe))
 	Sh("ilmerge /targetplatform:v4,\"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\" $files /allowdup /out:$name")
 	Cp(FileSet("**", BaseDirectory: "lib/libmysqld", Excludes: ["src", "build.sh", ".gitignore"]), output)
+	Cp("$source/pdfium.dll", output)
 	Cp(FileSet("*.config", BaseDirectory: source), output)
 	#тк мы обединили сборки библиотки содержащие wpf контролы не найдут свои ресурсы правим это
 	outputAssembly = AssemblyDefinition.ReadAssembly(name)
