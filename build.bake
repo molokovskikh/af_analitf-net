@@ -236,7 +236,7 @@ def CopyResource(res as EmbeddedResource, writer as ResourceWriter):
 def Merge(output as string, projectName as string, source as string):
 	RmDir(output)
 	MkDir(output)
-	files = String.Join(" ", FileSet(["*.dll", "*.exe"], BaseDirectory: source, Excludes: ["libmysqld.dll", ]))
+	files = String.Join(" ", FileSet(["*.dll", "*.exe"], BaseDirectory: source, Excludes: ["libmysqld.dll", "pdfium.dll"]))
 	exe = FileSet("*.exe", BaseDirectory: source).First()
 	name = Path.Combine(output, Path.GetFileName(exe))
 	Sh("ilmerge /targetplatform:v4,\"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\" $files /allowdup /out:$name")

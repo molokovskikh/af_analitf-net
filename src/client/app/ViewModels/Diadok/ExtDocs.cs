@@ -575,6 +575,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					items = display.ToObservableCollection();
 					Items.Value = display.ToObservableCollection();
 				}, e => {
+					Log.Error("Не удалось загрузить документы диадок", e);
 					Manager.Error(ErrorHelper.TranslateException(e)
 						?? "Не удалось выполнить операцию, попробуйте повторить позднее.");
 				});
