@@ -38,7 +38,9 @@ namespace AnalitF.Net.Client.Models.Commands
 				}},
 				{"Waybills", new [] {
 					//вычисления розничной цены
-					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error"
+					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error",
+					//диадок
+					"IsSign", "IsSigned", "Filename", "DiadokMessageId", "DiadokBoxId", "DiadokEnityId", "SignBytes"
 				}},
 				{"Orders", new [] {
 					//локальные поля

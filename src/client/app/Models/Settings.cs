@@ -10,6 +10,7 @@ using System.Net.Http.Handlers;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 using AnalitF.Net.Client.Helpers;
@@ -318,8 +319,52 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string DiadokUsername { get; set;}
+		public virtual string DiadokPassword { get; set; }
+		public virtual string DiadokCert { get; set; }
+
+		public virtual string[] DiadokCerts
+		{
+			get
+			{
+				var store = new X509Store();
+				try {
+					store.Open(OpenFlags.ReadOnly);
+					return store.Certificates.OfType<X509Certificate2>()
+						.Select(x => String.Format("{0} - {1}",
+							x.GetNameInfo(X509NameType.SimpleName, false),
+							x.GetNameInfo(X509NameType.SimpleName, true)))
+						.ToArray();
+				}
+				finally {
+					store.Close();
+				}
+			}
+		}
+
+		public virtual X509Certificate2 TryGetCert
+		{
+			get
+			{
+				if (String.IsNullOrEmpty(DiadokCert))
+					return null;
+				var store = new X509Store();
+				try {
+					store.Open(OpenFlags.ReadOnly);
+					return store.Certificates.OfType<X509Certificate2>()
+						.FirstOrDefault(x => String.Format("{0} - {1}",
+							x.GetNameInfo(X509NameType.SimpleName, false),
+							x.GetNameInfo(X509NameType.SimpleName, true)) == DiadokCert);
+				}
+				finally {
+					store.Close();
+				}
+			}
+		}
+
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
+		public virtual bool DebugUseTestSign { get; set; }
 
 		public virtual string Ad
 		{
@@ -362,6 +407,10 @@ namespace AnalitF.Net.Client.Models
 			return proxy;
 		}
 
+
+		/// <param name="name">
+		/// доступные значения - Waybills, Docs, Rejects, Orders, Reports
+		/// </param>
 		public virtual string MapPath(string name)
 		{
 			var root = GetVarRoot();

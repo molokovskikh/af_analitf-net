@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,12 +18,20 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using Common.Tools;
+using Diadoc.Api;
+using Diadoc.Api.Cryptography;
+using Diadoc.Api.Proto.Documents;
+using Diadoc.Api.Proto.Documents.NonformalizedDocument;
+using Diadoc.Api.Proto.Events;
 using Ionic.Zip;
 using log4net;
+using log4net.Appender;
 using log4net.Config;
+using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
+using AggregateException = System.AggregateException;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -1086,16 +1098,13 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		private static List<string> Move(string source, string destination)
 		{
 			var files = new List<string>();
-			if (Directory.Exists(source)) {
-				Directory.CreateDirectory(destination);
-
-				foreach (var file in Directory.GetFiles(source)) {
-					var dst = Path.Combine(destination, Path.GetFileName(file));
-					if (File.Exists(dst))
-						File.Delete(dst);
-					File.Move(file, dst);
-					files.Add(dst);
-				}
+			Directory.CreateDirectory(destination);
+			foreach (var file in Directory.GetFiles(source)) {
+				var dst = Path.Combine(destination, Path.GetFileName(file));
+				if (File.Exists(dst))
+					File.Delete(dst);
+				File.Move(file, dst);
+				files.Add(dst);
 			}
 			return files;
 		}
@@ -1196,13 +1205,17 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			using (var cleaner = new FileCleaner()) {
 				var file = cleaner.TmpFile();
 
-				//TODO: в тестах сброс конфигурации может сильно испортить жизнь
-				//например если нужно отладить запросы
-				LogManager.ResetConfiguration();
-				try
-				{
+				//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
+				var appenders = ((Hierarchy)log4net.LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
+				var files = new Dictionary<object, string>();
+				appenders.Each(x => {
+					files.Add(x, x.File);
+					x.Writer = null;
+				});
+				try {
+					//4 - bom
 					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
-						.Where(f => new FileInfo(f).Length > 0)
+						.Where(f => new FileInfo(f).Length > 4)
 						.ToArray();
 
 					if (logs.Length == 0)
@@ -1215,17 +1228,20 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						zip.Save(file);
 					}
 
-					var logsWatch = new FileCleaner();
-					logsWatch.Watch(logs);
-					logsWatch.Dispose();
+					using (var stream = File.OpenRead(file)) {
+						var response = await client.PostAsync("Logs", new StreamContent(stream), token);
+						//удаляем логи только если отправка завершилась успешно
+						if (response.IsSuccessStatusCode)
+							cleaner.Watch(logs);
+						return response;
+					}
 				}
 				finally {
-					XmlConfigurator.Configure();
-				}
-
-				using (var stream = File.OpenRead(file))
-					return await client.PostAsync("Logs", new StreamContent(stream), token);
-			}
+					appenders.Each(x => {
+						x.File = files.GetValueOrDefault(x);
+					});
+				}//try {
+			}//using (var cleaner = new FileCleaner())
 		}
 	}
 }

@@ -99,12 +99,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public Task ToTask(Config.Config config)
 		{
+			Config = config;
 			var task = new Task(() => {
-				using(var session = Factory.OpenSession())
-				using(var stateless = Factory.OpenStatelessSession()) {
-					Config = config;
-					Session = session;
-					StatelessSession = stateless;
+				using (this) {
+					InitSession();
 					Execute();
 				}
 			});

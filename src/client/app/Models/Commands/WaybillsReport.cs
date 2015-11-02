@@ -105,6 +105,11 @@ from WaybillLines l
 
 	public class WaybillsReport : DbCommand<string>
 	{
+		public WaybillsReport(Config.Config config)
+		{
+			Config = config;
+		}
+
 		public override void Execute()
 		{
 			var end = DateTime.Today.FirstDayOfWeek();

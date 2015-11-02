@@ -119,6 +119,12 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				m.Bag(o => o.Waybills, c => c.Cascade(Cascade.DeleteOrphans | Cascade.All));
 				m.Property(x => x.ClientTokenV2, c => c.Length(10000));
 			});
+			mapper.Class<ExtDoc>(x => {
+				x.Bag(y => y.Attachments, y => {
+					y.Inverse(true);
+					y.Cascade(Cascade.All | Cascade.DeleteOrphans);
+				});
+			});
 			mapper.Class<MarkupConfig>(m => {
 				m.Property(o => o.Begin, om => om.Access(Accessor.Field));
 				m.Property(o => o.End, om => om.Access(Accessor.Field));
@@ -232,6 +238,10 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			mapper.Class<AwaitedItem>(i => {
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
+			});
+			mapper.Class<Sign>(x => {
+				x.Table("ExtDocAttachments");
+				x.Property(y => y.SignBytes, y => y.Type(NHibernateUtil.BinaryBlob));
 			});
 
 			mapper.BeforeMapClass += (inspector, type, customizer) => {

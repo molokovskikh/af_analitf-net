@@ -73,10 +73,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			LocalFilename = Path.GetFullPath(filename);
 			IsDownloaded = true;
-			return new JournalRecord(this) {
-				Name = Name,
-				Filename = filename,
-			};
+			return new JournalRecord(this, Name, filename);
 		}
 
 		public override IEnumerable<string> GetFiles()

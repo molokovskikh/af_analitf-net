@@ -89,12 +89,12 @@ namespace AnalitF.Net.Client.ViewModels
 					XmlConfigurator.Configure();
 				}
 				if (new FileInfo(ArchiveName).Length > 4 * 1024 * 1024)
-					throw new Exception("Размер архива с вложенными файлами превышает 4Мб.");
+					throw new EndUserError("Размер архива с вложенными файлами превышает 4Мб.");
 			});
 			yield return new TaskResult(task, new WaitViewModel("Проверка вложений.\r\nПожалуйста подождите."));
 			if (task.IsFaulted) {
 				var message = task.Exception.GetBaseException().Message;
-				yield return new MessageResult(message, MessageResult.MessageType.Error);
+				yield return MessageResult.Error(message);
 			}
 			else {
 				TryClose();

@@ -24,8 +24,10 @@ namespace AnalitF.Net.Client.ViewModels
 		private Address address;
 		private IList<WaybillSettings> waybillConfig;
 		private static string lastTab;
-		private bool _passwordUpdated;
-		private string _password;
+		private string password;
+		private bool passwordUpdated;
+		private string diadokPassword;
+		private bool diadokPasswordUpdated;
 
 		public bool IsCredentialsChanged;
 
@@ -52,7 +54,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(Settings.Value.ReportDir))
 				Settings.Value.ReportDir = Settings.Value.MapPath("Reports");
 
-			_password = new string(Enumerable.Repeat('*', Settings.Value.Password?.Length ?? 0).ToArray());
+			password = Mask(Settings.Value.Password);
+			diadokPassword = Mask(Settings.Value.DiadokPassword);
+
 			waybillConfig = Settings.Value.Waybills;
 			if (Session != null) {
 				Session.FlushMode =  FlushMode.Never;
@@ -94,11 +98,21 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public string Password
 		{
-			get { return _password; }
+			get { return password; }
 			set
 			{
-				_passwordUpdated = true;
-				_password = value;
+				passwordUpdated = true;
+				password = value;
+			}
+		}
+
+		public string DiadokPassword
+		{
+			get { return diadokPassword; }
+			set
+			{
+				diadokPasswordUpdated = true;
+				diadokPassword = value;
 			}
 		}
 
@@ -133,6 +147,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+
+		private static string Mask(string password1)
+		{
+			return new string(Enumerable.Repeat('*', (password1 ?? "").Length).ToArray());
+		}
 
 		public IList<MarkupConfig> MarkupByType(MarkupType type, Address address)
 		{
@@ -237,41 +256,46 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Save()
 		{
-			var error = Settings.Value.Validate(HaveAddresses);
+			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
 			if (!String.IsNullOrEmpty(error)) {
-				Session.FlushMode = FlushMode.Never;
+				if (Session != null)
+					Session.FlushMode = FlushMode.Never;
 				Manager.Warning(error);
+				yield return MessageResult.Warn(error);
 				yield break;
 			}
 
-			UpdateMarkups();
-			if (_passwordUpdated)
-				Settings.Value.Password = _password;
+			if (passwordUpdated)
+				Settings.Value.Password = password;
+			if (diadokPasswordUpdated)
+				Settings.Value.DiadokPassword = diadokPassword;
 
 			if (App.Current != null)
 				StyleHelper.BuildStyles(App.Current.Resources, Styles);
 
-			IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
-				|| Session.IsChanged(Settings.Value, s => s.UserName);
-			if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
-				&& Settings.Value.GroupWaybillsBySupplier) {
-				foreach (var dirMap in DirMaps) {
-					try {
-						if (!Directory.Exists(dirMap.Dir))
-							FileHelper.CreateDirectoryRecursive(dirMap.Dir);
-					}
-					catch(Exception e) {
-						Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+			if (Session != null) {
+				IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
+					|| Session.IsChanged(Settings.Value, s => s.UserName);
+				if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
+					&& Settings.Value.GroupWaybillsBySupplier) {
+					foreach (var dirMap in DirMaps) {
+						try {
+							if (!Directory.Exists(dirMap.Dir))
+								FileHelper.CreateDirectoryRecursive(dirMap.Dir);
+						}
+						catch(Exception e) {
+							Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+						}
 					}
 				}
+
+				if (Session.IsChanged(Settings.Value, x => x.JunkPeriod))
+					yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
+
+				Session.FlushMode = FlushMode.Auto;
+				Settings.Value.ApplyChanges(Session);
 			}
-
-			if (Session.IsChanged(Settings.Value, x => x.JunkPeriod))
-				yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
-
-			Session.FlushMode = FlushMode.Auto;
-			Settings.Value.ApplyChanges(Session);
 			TryClose();
 		}
 

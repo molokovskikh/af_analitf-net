@@ -23,5 +23,10 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 		}
+
+		private void Hyperlink_OnClick(object sender, RoutedEventArgs e)
+		{
+			Console.WriteLine("click");
+		}
 	}
 }

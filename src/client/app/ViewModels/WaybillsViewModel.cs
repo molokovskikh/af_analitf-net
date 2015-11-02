@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -16,6 +19,9 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Diadoc.Api;
+using Diadoc.Api.Cryptography;
+using Diadoc.Api.Proto.Events;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels
@@ -33,9 +39,11 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Отказ")] Rejects,
 	}
 
-
 	public class WaybillsViewModel : BaseScreen
 	{
+		private DiadocApi api;
+		private string token;
+
 		public WaybillsViewModel()
 		{
 			DisplayName = "Документы";
@@ -151,15 +159,15 @@ namespace AnalitF.Net.Client.ViewModels
 			return ExcelExporter.Export(book);
 		}
 
-		public void EnterWaybill()
+		public IEnumerable<IResult> EnterWaybill()
 		{
-			if (CurrentWaybill.Value == null)
-				return;
-
-			if (CurrentWaybill.Value.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
-				Shell.Navigate(new OrderRejectDetails(CurrentWaybill.Value.Id));
+			var waybill = CurrentWaybill.Value;
+			if (waybill == null)
+				yield break;
+			if (waybill.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
+				Shell.Navigate(new OrderRejectDetails(waybill.Id));
 			else
-				Shell.Navigate(new WaybillDetails(CurrentWaybill.Value.Id));
+				Shell.Navigate(new WaybillDetails(waybill.Id));
 		}
 
 		public void SearchLine()
@@ -206,11 +214,13 @@ namespace AnalitF.Net.Client.ViewModels
 			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
 				query = query.Where(w => w.DocType == DocType.Reject);
 
-			Waybills.Value = query
+			var docs = query
 				.OrderByDescending(w => w.WriteTime)
 				.Fetch(w => w.Supplier)
 				.Fetch(w => w.Address)
 				.ToObservableCollection();
+
+			Waybills.Value = docs;
 			Waybills.Value.Each(w => w.CalculateStyle(Address));
 		}
 
@@ -218,12 +228,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (Address == null)
 				yield break;
-			var waybill = new Waybill {
-				Address = Address,
-				WriteTime = DateTime.Now,
-				DocumentDate = DateTime.Now,
-				IsCreatedByUser = true
-			};
+			var waybill = new Waybill(Address);
 			yield return new DialogResult(new CreateWaybill(waybill));
 			Session.Save(waybill);
 			Update();
@@ -242,7 +247,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> RegulatorReport()
 		{
-			var commnand = new WaybillsReport();
+			var commnand = new WaybillsReport(Shell.Config);
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}

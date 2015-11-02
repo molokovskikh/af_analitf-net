@@ -8,6 +8,8 @@ namespace AnalitF.Net.Client.Models.Results
 {
 	public class OpenResult : IResult
 	{
+		private log4net.ILog log = global::log4net.LogManager.GetLogger(typeof(OpenResult));
+
 		public string Filename;
 
 		public OpenResult(string filename)
@@ -25,8 +27,10 @@ namespace AnalitF.Net.Client.Models.Results
 				//System.ComponentModel.Win32Exception (0x80004005):
 				//Указанному файлу не сопоставлено ни одно приложение для выполнения данной операции
 				//если нет сопоставленного приложения выбераем файл в shell
-				if ((uint)e.NativeErrorCode == 0x80004005)
+				if ((uint)e.NativeErrorCode == 0x80004005 || e.NativeErrorCode == 1155)
 					selectWithShell = true;
+				else
+					log.Error($"Fail to open file {Filename}", e);
 			}
 			if (selectWithShell)
 				ProcessHelper.Start(new ProcessStartInfo("explorer.exe", $"/select,{Filename}"));

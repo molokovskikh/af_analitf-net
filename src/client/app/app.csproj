@@ -54,6 +54,10 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DiadocApi, Version=1.27.0.0, Culture=neutral, PublicKeyToken=d18fd4c7ad3c243e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\lib\diadok\DiadocApi.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
     </Reference>
@@ -79,9 +83,16 @@
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
     <Reference Include="npoi" />
+    <Reference Include="PdfiumViewer">
+      <HintPath>..\..\..\packages\PdfiumViewer.2.7.0.0\lib\net20\PdfiumViewer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationFramework.Aero" />
     <Reference Include="ProductionStackTrace">
       <HintPath>..\..\..\packages\ProductionStackTrace.1.0.16\lib\net40\ProductionStackTrace.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\..\..\..\..\tmp\diadok\C#\References\protobuf-net\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="reactiveui">
@@ -197,6 +208,7 @@
     <Compile Include="Controls\Behaviors\Watermark.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
+    <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -245,6 +257,7 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Commands\External.cs" />
     <Compile Include="Models\Commands\ImportCommand.cs" />
     <Compile Include="Models\Commands\RepairDb.cs" />
     <Compile Include="Models\Commands\DbCommand.cs" />
@@ -259,6 +272,7 @@
     <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
+    <Compile Include="Models\ExtDoc.cs" />
     <Compile Include="Models\JournalRecord.cs" />
     <Compile Include="Models\Loadable.cs" />
     <Compile Include="Models\LoadedDocument.cs" />
@@ -329,7 +343,13 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Diadok\Delete.cs" />
+    <Compile Include="ViewModels\Diadok\Reject.cs" />
+    <Compile Include="ViewModels\Diadok\Revocation.cs" />
+    <Compile Include="ViewModels\Diadok\Resolution.cs" />
+    <Compile Include="ViewModels\Diadok\Sign.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
+    <Compile Include="ViewModels\Diadok\ExtDocs.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -398,6 +418,25 @@
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\Diadok\RequestResolution.cs" />
+    <Compile Include="Views\Diadok\Delete.xaml.cs">
+      <DependentUpon>Delete.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\Revocation.xaml.cs">
+      <DependentUpon>Revocation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\Reject.xaml.cs">
+      <DependentUpon>Reject.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\RequestResolution.xaml.cs">
+      <DependentUpon>RequestResolution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\Resolution.xaml.cs">
+      <DependentUpon>Resolution.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\Sign.xaml.cs">
+      <DependentUpon>Sign.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
       <DependentUpon>CreateWaybill.xaml</DependentUpon>
     </Compile>
@@ -421,6 +460,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Diadok\ExtDocs.xaml.cs">
+      <DependentUpon>ExtDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
@@ -582,6 +624,30 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Diadok\Delete.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\Revocation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\Reject.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\RequestResolution.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\Resolution.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\Sign.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\CreateWaybill.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -611,6 +677,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\TextView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Diadok\ExtDocs.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -841,6 +911,11 @@
       <Link>libmysqld.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\..\packages\PdfiumViewer.2.7.0.0\content\x86\pdfium.dll">
+      <Link>pdfium.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Assets\images\diadok.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

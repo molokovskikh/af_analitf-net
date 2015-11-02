@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Diadok.RequestResolution"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	MinHeight="300" MinWidth="300"
+	IsEnabled="{Binding IsEnabled.Value}">
+	<Grid Margin="3">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+
+		<Label Grid.Row="0" Grid.ColumnSpan="2" FontSize="18" Name="Header" />
+		<Label Grid.Row="1" Grid.Column="0">Подразделение</Label>
+		<ComboBox Grid.Row="1" Grid.Column="1" Name="Departments" DisplayMemberPath="Name" />
+		<Label Grid.Row="2" Grid.Column="0">Сотрудник</Label>
+		<ComboBox Grid.Row="2" Grid.Column="1" Name="Users" DisplayMemberPath="Name" />
+		<Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">Комментарий</Label>
+		<TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"></TextBox>
+
+		<StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0">
+			<Button Margin="3" Name="Save">Передать</Button>
+			<Button Margin="3" Name="TryClose">Отмена</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

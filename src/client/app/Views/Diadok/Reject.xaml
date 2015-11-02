@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Diadok.Reject"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	IsEnabled="{Binding IsEnabled.Value}"
+	MinHeight="300" MinWidth="300">
+	<Grid Margin="3">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<Label Grid.Row="0" FontSize="18">Отказать контрагенту в подписи документа?</Label>
+		<Label Grid.Row="2">Причина отказа</Label>
+		<TextBox Grid.Row="3" Name="Comment" />
+
+		<StackPanel Orientation="Horizontal" Grid.Row="4">
+			<Button Margin="3" Name="Save">Отказать контрагенту в подписи</Button>
+			<Button Margin="3" Name="TryClose">Отмена</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

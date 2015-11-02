@@ -36,5 +36,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new OpenResult(record.Filename);
 		}
+
+		public IResult Show(JournalRecord record)
+		{
+			return new SelectResult(record.Filename);
+		}
 	}
 }
