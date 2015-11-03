@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected bool FilterByProcess;
 
 		[SetUp]
-		public void Setup()
+		public void BaseFixtureSetup()
 		{
 			FilterByProcess = true;
 			Writer = null;
@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		}
 
 		[TearDown]
-		public void Teardown()
+		public void BaseFixtureTeardown()
 		{
 			Opened.OnCompleted();
 			Opened.Dispose();

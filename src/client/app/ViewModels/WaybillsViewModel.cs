@@ -41,9 +41,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 	public class WaybillsViewModel : BaseScreen
 	{
-		private DiadocApi api;
-		private string token;
-
 		public WaybillsViewModel()
 		{
 			DisplayName = "Документы";
