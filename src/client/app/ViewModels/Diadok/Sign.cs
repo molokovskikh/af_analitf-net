@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public Entity Entity { get; set; }
 	}
 
-	public class DiadokAction : BaseScreen
+	public abstract class DiadokAction : BaseScreen
 	{
 		public bool Success;
 

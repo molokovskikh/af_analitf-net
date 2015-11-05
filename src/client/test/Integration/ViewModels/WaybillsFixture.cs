@@ -41,9 +41,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Delete()
 		{
 			var waybill = model.Waybills.Value.First(w => w.Supplier != null);
-			var file = Path.Combine(settings.MapPath("Waybills"), string.Format("{0}_{1}.txt",
-				waybill.Id,
-				waybill.Supplier.Name));
+			var file = Path.Combine(settings.MapPath("Waybills"), $"{waybill.Id}_{waybill.Supplier.Name}.txt");
 			File.WriteAllText(file, "test content");
 			model.CurrentWaybill.Value = waybill;
 			model.SelectedWaybills.Add(waybill);

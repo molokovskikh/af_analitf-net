@@ -156,11 +156,11 @@ namespace AnalitF.Net.Client.ViewModels
 			return ExcelExporter.Export(book);
 		}
 
-		public IEnumerable<IResult> EnterWaybill()
+		public void EnterWaybill()
 		{
 			var waybill = CurrentWaybill.Value;
 			if (waybill == null)
-				yield break;
+				return;
 			if (waybill.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
 				Shell.Navigate(new OrderRejectDetails(waybill.Id));
 			else

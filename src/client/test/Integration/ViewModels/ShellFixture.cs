@@ -319,7 +319,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(1, offer.OrderCount,
 				String.Format("рассматриваемый offerId = {0}, существующие = {1}",
 					order.Lines[0].OfferId,
-					session.Query<OrderLine>().Implode(l => String.Format("offerId = {0}, ошибка = {1}", l.OfferId, l.SendError))));
+					session.Query<OrderLine>().Implode(l => $"offerId = {l.OfferId}, ошибка = {l.SendError}")));
 		}
 
 		[Test]
