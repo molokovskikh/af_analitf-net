@@ -536,7 +536,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new SearchOfferViewModel());
 		}
 
-		public void ShowSettings(string tab = null)
+		public bool ShowSettings(string tab = null)
 		{
 			var model = new SettingsViewModel();
 			if (tab != null)
@@ -549,6 +549,7 @@ namespace AnalitF.Net.Client.ViewModels
 				session.Evict(Settings.Value);
 				Settings.Value = session.Query<Settings>().First();
 			}
+			return model.IsCredentialsChanged;
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
@@ -920,10 +921,10 @@ namespace AnalitF.Net.Client.ViewModels
 					success(task);
 				}
 				else if (task.IsFaulted) {
-					log.Debug(String.Format("Ошибка при выполнении задачи {0}", viewModel.Text), task.Exception);
+					log.Debug($"Ошибка при выполнении задачи {viewModel.Text}", task.Exception);
 					var baseException = task.Exception.GetBaseException();
 					if (ErrorHelper.IsCancalled(baseException)) {
-						log.Warn(String.Format("Отменена задача {0}", viewModel.Text));
+						log.Warn($"Отменена задача {viewModel.Text}");
 						return;
 					}
 
@@ -935,9 +936,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 					//показывать форму с настройками нужно только один раз
 					if (count == 1
-						&& baseException is RequestException
-						&& ((RequestException)baseException).StatusCode == HttpStatusCode.Unauthorized) {
-						ShowSettings("LoginTab");
+						&& (baseException as RequestException)?.StatusCode == HttpStatusCode.Unauthorized) {
+						done = !ShowSettings("LoginTab");
 					}
 				}
 			} while (!done);
