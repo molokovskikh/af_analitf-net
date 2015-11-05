@@ -1213,9 +1213,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 					x.Writer = null;
 				});
 				try {
-					//4 - bom
 					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
-						.Where(f => new FileInfo(f).Length > 4)
+						.Where(f => new FileInfo(f).Length > 0)
 						.ToArray();
 
 					if (logs.Length == 0)
