@@ -97,6 +97,7 @@
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Filters\LogAccess.cs" />
+    <Compile Include="Filters\LogAccessErrors.cs" />
     <Compile Include="Global.asax.cs">
     </Compile>
     <Compile Include="Controllers\MainController.cs">

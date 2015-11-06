@@ -15,6 +15,12 @@ using NHibernate;
 
 namespace AnalitF.Net.Service.Models
 {
+	public enum ErrorType
+	{
+		None,
+		AccessDenied
+	}
+
 	public class RequestLog
 	{
 		private static ILog log = LogManager.GetLogger(typeof(RequestLog));
@@ -87,6 +93,8 @@ namespace AnalitF.Net.Service.Models
 		//описание ошибки которое возвращается пользователю
 		public virtual string ErrorDescription { get; set; }
 
+		public virtual ErrorType ErrorType { get; set; }
+
 		public virtual DateTime? LastSync { get; set; }
 
 		public virtual long? Size { get; set; }
@@ -99,9 +107,15 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual void Faulted(Exception e)
 		{
+			if (e is ExporterException) {
+				var export = (ExporterException)e;
+				ErrorDescription = export.Message;
+				ErrorType = export.ErrorType;
+			}
 			IsFaulted = true;
 			Error = e.ToString();
 			CompletedOn = DateTime.Now;
+			ExecuteInSeconds = (int)(DateTime.Now - CreatedOn).TotalSeconds;
 		}
 
 		public virtual void Completed()
@@ -206,13 +220,12 @@ namespace AnalitF.Net.Service.Models
 								cmdTransaction.Commit();
 							}
 						}
-						catch(ExporterException e) {
-							log.Warn("Ошибка при обработке автозаказа", e);
-							job.ErrorDescription = e.Message;
-							job.Faulted(e);
-						}
 						catch(Exception e) {
-							log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
+							//если это не ошибка кодирования нет смысла писать в рассылку
+							if (e is ExporterException)
+								log.Warn($"Произошла ошибка при обработке запроса {jobId}", e);
+							else
+								log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 							job.Faulted(e);
 						}
 						finally {
@@ -224,7 +237,7 @@ namespace AnalitF.Net.Service.Models
 					}
 				}
 				catch(Exception e) {
-					log.Error(String.Format("Произошла ошибка при обработке запроса {0}", jobId), e);
+					log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 				}
 			});
 			task.Start();

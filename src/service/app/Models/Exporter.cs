@@ -35,9 +35,12 @@ namespace AnalitF.Net.Service.Models
 	//передается клиенту
 	public class ExporterException : Exception
 	{
-		public ExporterException(string message) : base(message)
+		public ExporterException(string message, ErrorType errorType = ErrorType.None) : base(message)
 		{
+			ErrorType = errorType;
 		}
+
+		public ErrorType ErrorType { get; set; }
 	}
 
 	public class Offer3 : Offer2
@@ -159,7 +162,8 @@ namespace AnalitF.Net.Service.Models
 				if (String.IsNullOrEmpty(data.ClientTokenV2))
 					data.ClientTokenV2 = job.ClientToken;
 				else if (data.ClientTokenV2 != job.ClientToken)
-					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АналитФармация.");
+					throw new ExporterException("Обновление программы на данном компьютере запрещено. Пожалуйста, обратитесь в АналитФармация.",
+						ErrorType.AccessDenied);
 			}
 
 			data.LastPendingUpdateAt = DateTime.Now;

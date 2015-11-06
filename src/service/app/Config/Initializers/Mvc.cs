@@ -20,6 +20,7 @@ namespace AnalitF.Net.Service.Config.Initializers
 				routeTemplate: "{controller}/{id}",
 				defaults: new { id = RouteParameter.Optional });
 			config.Filters.Add(new ExceptionFilter());
+			config.Filters.Add(new LogAccessErrors());
 			config.Filters.Add(new DebugFilter());
 			config.Filters.Add(new SessionFilter());
 			config.Filters.Add(new UserFilter());
