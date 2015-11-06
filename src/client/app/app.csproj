@@ -272,7 +272,6 @@
     <Compile Include="Models\DebugPipe.cs" />
     <Compile Include="Models\DirMap.cs" />
     <Compile Include="Models\ExcelExporter.cs" />
-    <Compile Include="Models\ExtDoc.cs" />
     <Compile Include="Models\JournalRecord.cs" />
     <Compile Include="Models\Loadable.cs" />
     <Compile Include="Models\LoadedDocument.cs" />
