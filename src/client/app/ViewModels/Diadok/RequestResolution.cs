@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			var orgs = await Util.Run(() => Payload.Api.GetMyOrganizations(Payload.Token).Organizations);
 			var departments = orgs.SelectMany(x => x.Departments).OrderBy(x => x.Name).ToList();
 			departments.Insert(0, new Department {
-				Name = "Головное подраздиление"
+				Name = "Головное подразделение"
 			});
 			Departments.Value = departments.ToArray();
 			CurrentDepartment.Value = departments.FirstOrDefault();

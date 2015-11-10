@@ -119,7 +119,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			else {
 				var lastSync = user?.LastSync;
 				if (lastSync == null) {
-					updateType = "куммулятивное";
+					updateType = "кумулятивное";
 				}
 				if (syncData.Match("Waybills")) {
 					updateType = "загрузка накладных";

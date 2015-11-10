@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 		public void Init(string connectionStringName = "local", bool debug = false)
 		{
 			//ilmerge
-			//если сборки обединены то логика определения системы протоколирование не работает
+			//если сборки объединены то логика определения системы протоколирование не работает
 			//нужно вручную настроить ее
 			LoggerProvider.SetLoggersFactory(new Log4NetLoggerFactory());
 

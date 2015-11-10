@@ -226,7 +226,7 @@ namespace vm
 		{
 			WaitHelper.WaitOrFail(30.Second(),
 				() => machine.State == state,
-				$"состояния машины {state} текущеее состояние {machine.State}");
+				$"состояния машины {state} текущее состояние {machine.State}");
 		}
 
 		private void Restore()

@@ -324,7 +324,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OfferCommitted();
 			//мы могли создать новую строку или удалить существующую
-			//нужно обновить списко строк
+			//нужно обновить список строк
 			OnlyWarning.Refresh();
 		}
 

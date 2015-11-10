@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected void Configure()
 		{
-			//отступы должны быть тк большенство принтеров требует их
+			//отступы должны быть тк большинство принтеров требует их
 			doc.PagePadding = new Thickness(36, 36, 50, 36);
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			//мы должны оставить место для "шапки" и "подвала"

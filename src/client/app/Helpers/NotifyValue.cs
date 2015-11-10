@@ -157,9 +157,9 @@ namespace AnalitF.Net.Client.Helpers
 		public void OnError(Exception error)
 		{
 #if DEBUG
-			throw new Exception(String.Format("Ошибка при получениии значениея для свойства {0} = {1}", GetType(), this), error);
+			throw new Exception(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
 #else
-			log.Error(String.Format("Ошибка при получениии значениея для свойства {0} = {1}", GetType(), this), error);
+			log.Error(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
 #endif
 		}
 

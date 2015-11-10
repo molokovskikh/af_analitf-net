@@ -279,7 +279,7 @@ namespace AnalitF.Net.Client.ViewModels
 				var results = StartCheck();
 				if ((Config.Cmd ?? "").StartsWith("batch=")) {
 					//вызов Batch должен происходить только после операций в startcheck
-					//тк startcheck мжет изменить данные а batch эти изменения не увидит
+					//тк startcheck может изменить данные а batch эти изменения не увидит
 					results = results.Concat(LazyHelper.Create(() => Batch(config.Cmd.Remove(0, 6))));
 				}
 				return results;
@@ -713,7 +713,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool CanSendOrders => Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
 
-		//для "горячей" клавишы
+		//для "горячей" клавиши
 		public IEnumerable<IResult> SendOrders()
 		{
 			return SendOrders(false);
