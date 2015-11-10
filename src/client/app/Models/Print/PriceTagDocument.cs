@@ -263,7 +263,7 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 
 			var product = new TextBlock {
-				Text = String.Format("{0}\n{1}", line.Product, line.Producer),
+				Text = $"{line.Product}\n{line.Producer}",
 				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
@@ -288,33 +288,31 @@ namespace AnalitF.Net.Client.Models.Print
 			cost.SetValue(Canvas.TopProperty, 78d);
 			canvas.Children.Add(cost);
 
-			var periodLabel = new TextBlock {
+			canvas.Add(0, 68, new TextBlock {
 				TextAlignment = TextAlignment.Right,
 				FontSize = 8,
 				Text = "Годен до",
 				Width = 49,
-			};
-			periodLabel.SetValue(Canvas.LeftProperty, 0d);
-			periodLabel.SetValue(Canvas.TopProperty, 78d);
-			canvas.Children.Add(periodLabel);
-			var period = new TextBlock {
+			});
+
+			canvas.Add(0, 76, new TextBlock {
 				TextAlignment = TextAlignment.Right,
 				FontSize = 9,
 				Text = line.Period,
 				Width = 49,
-			};
-			period.SetValue(Canvas.LeftProperty, 0d);
-			period.SetValue(Canvas.TopProperty, 86d);
-			canvas.Children.Add(period);
+			});
 
-			var singLabel = new TextBlock {
+			canvas.Add(0, 86, new TextBlock {
 				FontSize = 8,
 				Text = "Подпись",
 				Width = 49,
-			};
-			singLabel.SetValue(Canvas.LeftProperty, 0d);
-			singLabel.SetValue(Canvas.TopProperty, 96d);
-			canvas.Children.Add(singLabel);
+			});
+
+			canvas.Add(0, 94, new TextBlock {
+				FontSize = 9,
+				Text = DateTime.Now.ToShortDateString(),
+				Width = 49,
+			});
 
 			ApplyDefaults(canvas);
 
@@ -376,7 +374,7 @@ namespace AnalitF.Net.Client.Models.Print
 			canvas.Children.Add(supplierNameBorder);
 
 			var product = new TextBlock {
-				Text = String.Format("{0}\n{1}", line.Product, line.Producer),
+				Text = $"{line.Product}\n{line.Producer}",
 				FontSize = 11,
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
@@ -550,6 +548,16 @@ namespace AnalitF.Net.Client.Models.Print
 			else {
 				grid.Children.Add(label);
 			}
+		}
+	}
+
+	public static class TagHelper
+	{
+		public static void Add(this Canvas self, double left, double top, UIElement el)
+		{
+			el.SetValue(Canvas.LeftProperty, left);
+			el.SetValue(Canvas.TopProperty, top);
+			self.Children.Add(el);
 		}
 	}
 }
