@@ -146,25 +146,15 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		//public virtual string Filename { get; set; }
 		public virtual string DiadokMessageId { get; set; }
 		public virtual string DiadokBoxId { get; set; }
 		public virtual string DiadokEnityId { get; set; }
 
-		public virtual decimal SumWithoutTax
-		{
-			get { return Sum - TaxSum; }
-		}
+		public virtual decimal SumWithoutTax => Sum - TaxSum;
 
-		public virtual decimal Markup
-		{
-			get { return Sum > 0 ? Math.Round(MarkupSum / Sum * 100, 2) : 0; }
-		}
+		public virtual decimal Markup => Sum > 0 ? Math.Round(MarkupSum / Sum * 100, 2) : 0;
 
-		public virtual decimal MarkupSum
-		{
-			get { return RetailSum - Sum; }
-		}
+		public virtual decimal MarkupSum => RetailSum - Sum;
 
 		public virtual string Type
 		{
@@ -291,7 +281,7 @@ namespace AnalitF.Net.Client.Models
 				}
 			}
 			catch(Exception e) {
-				_log.Warn(String.Format("Ошибка при удалении документа {0}", Id), e);
+				_log.Warn($"Ошибка при удалении документа {Id}", e);
 			}
 		}
 
@@ -363,7 +353,7 @@ namespace AnalitF.Net.Client.Models
 			var path = settings.MapPath("Waybills");
 			if (!Directory.Exists(path))
 				return null;
-			return new DirectoryInfo(path).GetFiles(String.Format("{0}_*", Id))
+			return new DirectoryInfo(path).GetFiles($"{Id}_*")
 				.Select(x => x.FullName).FirstOrDefault();
 		}
 	}

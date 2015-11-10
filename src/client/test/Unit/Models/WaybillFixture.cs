@@ -298,23 +298,36 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Notify_on_uncalculable_lines()
 		{
 			var waybillLine = new WaybillLine(waybill) {
-				Nds = 18,
+				Nds = 10,
 				Quantity = 20,
 				SupplierCost = 9.72m,
 				SupplierCostWithoutNds = 8.84m
 			};
-			waybill.AddLine(waybillLine);
-			waybill.Calculate(settings);
+			Calculate(waybillLine);
 			Assert.IsTrue(waybill.CanBeVitallyImportant);
 			var changes = waybillLine.CollectChanges();
 			waybill.VitallyImportant = true;
-			Assert.IsTrue(waybillLine.IsNdsInvalid);
 			var props = changes.Select(c => c.PropertyName).ToArray();
 			Assert.IsNull(waybillLine.RetailCost);
 			Assert.Contains("IsNdsInvalid", props);
 			Assert.Contains("IsMarkupToBig", props);
 			Assert.Contains("ActualVitallyImportant", props);
 			Assert.Contains("RetailCost", props);
+		}
+
+		[Test]
+		public void Invalid_nds()
+		{
+			var waybillLine = new WaybillLine(waybill) {
+				Nds = 18,
+				Quantity = 20,
+				SupplierCost = 9.72m,
+				SupplierCostWithoutNds = 8.84m
+			};
+			Calculate(waybillLine);
+			Assert.IsTrue(waybill.CanBeVitallyImportant);
+			waybill.VitallyImportant = true;
+			Assert.IsTrue(waybillLine.IsNdsInvalid);
 		}
 
 		[Test]
@@ -431,9 +444,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 
 			line.VitallyImportant = true;
 			Calculate(line);
-			//сомнительно но пусть будет пока так
-			Assert.IsNull(line.RetailCost);
-			//Assert.AreEqual(353.60, line.RetailCost);
+			Assert.AreEqual(353.60, line.RetailCost);
 		}
 
 		private WaybillLine Line()

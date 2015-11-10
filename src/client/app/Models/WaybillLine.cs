@@ -365,9 +365,7 @@ namespace AnalitF.Net.Client.Models
 
 			if (sourceCost == 0)
 				return;
-			var markupType = ActualVitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
-			if (Nds == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost == null))
-				markupType = MarkupType.Nds18;
+			var markupType = GetMarkupType();
 			if (!Waybill.IsAddressExists())
 				return;
 			var markup = MarkupConfig.Calculate(settings.Markups, markupType, sourceCost, Waybill.Address);
@@ -401,6 +399,14 @@ namespace AnalitF.Net.Client.Models
 			OnPropertyChanged("IsSupplierPriceMarkupInvalid");
 		}
 
+		private MarkupType GetMarkupType()
+		{
+			var markupType = ActualVitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
+			if (Nds == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost == null))
+				markupType = MarkupType.Nds18;
+			return markupType;
+		}
+
 		private void UpdateMarkups(decimal? cost)
 		{
 			if (!IsCalculable())
@@ -419,7 +425,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			if (SupplierCost.GetValueOrDefault() == 0)
 				return false;
-			if (ActualVitallyImportant && ProducerCost.GetValueOrDefault() == 0)
+			if (GetMarkupType() == MarkupType.VitallyImportant && ProducerCost.GetValueOrDefault() == 0)
 				return false;
 			return true;
 		}
@@ -431,9 +437,10 @@ namespace AnalitF.Net.Client.Models
 
 		private decimal? CalculateRetailCost(decimal? markup, out decimal? rawCost)
 		{
-			var baseCost = ProducerCost;
-			if (!ActualVitallyImportant)
-				baseCost = SupplierCostWithoutNds;
+			var type = GetMarkupType();
+			var baseCost = SupplierCostWithoutNds;
+			if (type == MarkupType.VitallyImportant)
+				baseCost = ProducerCost;
 
 			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
 			//безумие продолжается если округляем до десятых то тогда считаем от округленного значения
