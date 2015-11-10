@@ -91,6 +91,8 @@ namespace AnalitF.Net.Client.Models
 
 		string AddressName { get; }
 
+		Address SafeAddress { get; }
+
 		Price SafePrice { get; }
 
 		bool IsPriceExists();
@@ -125,10 +127,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId
-		{
-			get { return (uint)ServerId; }
-		}
+		public virtual uint DisplayId => (uint)ServerId;
 
 		public virtual Price Price { get; set; }
 
@@ -160,10 +159,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<SentOrderLine> Lines { get; set; }
 
-		public virtual string PriceName
-		{
-			get { return SafePrice != null ? SafePrice.Name : ""; }
-		}
+		public virtual string PriceName => SafePrice?.Name;
 
 		public virtual string AddressName
 		{
@@ -172,6 +168,16 @@ namespace AnalitF.Net.Client.Models
 				if (IsAddressExists())
 					return Address.Name;
 				return "";
+			}
+		}
+
+		public virtual Address SafeAddress
+		{
+			get
+			{
+				if (IsAddressExists())
+					return Address;
+				return null;
 			}
 		}
 
@@ -187,18 +193,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		IEnumerable<IOrderLine> IOrder.Lines
-		{
-			get { return Lines; }
-		}
+		IEnumerable<IOrderLine> IOrder.Lines => Lines;
 
-		public virtual string PriceLabel
-		{
-			get
-			{
-				return String.Format("{0} от {1}", PriceName, PriceDate);
-			}
-		}
+		public virtual string PriceLabel => $"{PriceName} от {PriceDate}";
 
 		[Style("AddressName"), Ignore]
 		public virtual bool IsCurrentAddress { get; set; }
@@ -235,7 +232,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return String.Format("Заявка поставщика {0} на сумму {1}", Price, Sum);
+			return $"Заявка поставщика {Price} на сумму {Sum}";
 		}
 
 		public virtual bool CalculateStyle(Address address)

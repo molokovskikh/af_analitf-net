@@ -31,6 +31,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Name { get; set; }
 
+		public virtual string Org { get; set; }
+
 		public virtual bool HaveLimits { get; set; }
 
 		[IgnoreDataMember]
@@ -59,7 +61,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("{0} {1}", Id, Name);
+			return $"{Id} {Name}";
 		}
 
 		public virtual bool RemoveLine(OrderLine line)

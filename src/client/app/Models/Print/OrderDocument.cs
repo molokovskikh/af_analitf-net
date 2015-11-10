@@ -27,13 +27,11 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var header = String.Format("Заявка № {0} от {1} на {2} от {3}",
-				Order.DisplayId,
-				Order.CreatedOn,
-				Order.PriceName,
-				Order.AddressName);
-			TwoColumnHeader(header, Order.SafePrice.Phone);
-			Block(String.Format("Дата прайс-листа от {0}", Order.SafePrice.PriceDate));
+			var header =
+				$"Заявка № {Order.DisplayId} от {Order.CreatedOn} на {Order.SafePrice?.SupplierFullName}"
+				+ $" от {Order.SafeAddress?.Org}, {Order.SafeAddress?.Name}";
+			TwoColumnHeader(header, Order.SafePrice?.Phone);
+			Block($"Дата прайс-листа от {Order.SafePrice?.PriceDate}");
 			Block(Order.PersonalComment);
 
 			var headers = new[] {
@@ -42,11 +40,11 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("Производитель", 165),
 				new PrintColumn("Срок годн.", 73),
 				new PrintColumn("Цена", 66),
-				new PrintColumn("Заказ", 45),
+				new PrintColumn("Количество", 45),
 				new PrintColumn("Сумма", 80)
 			};
 
-			var count = Lines.Count();
+			var count = Lines.Count;
 			var sum = Lines.Sum(l => l.MixedSum);
 			var rows = Lines.Select((l, i) => new object[] {
 				i + 1,

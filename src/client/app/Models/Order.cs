@@ -220,6 +220,22 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual Address SafeAddress
+		{
+			get
+			{
+				try
+				{
+					if (String.IsNullOrEmpty(Address?.Name))
+						return null;
+					return Address;
+				}
+				catch(ObjectNotFoundException) {
+					return null;
+				}
+			}
+		}
+
 		public virtual string AddressName
 		{
 			get

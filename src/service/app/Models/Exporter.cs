@@ -306,7 +306,8 @@ where
 			sql = String.Format(@"
 select a.Id,
 	{0} as Name,
-	exists(select * from OrderSendRules.SmartOrderLimits l where l.AddressId = a.Id) as HaveLimits
+	exists(select * from OrderSendRules.SmartOrderLimits l where l.AddressId = a.Id) as HaveLimits,
+	le.FullName as Org
 from Customers.Addresses a
 	join Customers.UserAddresses ua on ua.AddressId = a.Id
 	join Billing.LegalEntities le on le.Id = a.LegalEntityId
