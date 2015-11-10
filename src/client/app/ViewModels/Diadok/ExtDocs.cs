@@ -536,6 +536,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Observable.Start(() => {
 					if (api == null) {
 						api = new DiadocApi(Shell.Config.DiadokApiKey, Shell.Config.DiadokUrl, new WinApiCrypt());
+					}
+					if (String.IsNullOrEmpty(token)) {
 						token = api.Authenticate(Settings.Value.DiadokUsername, Settings.Value.DiadokPassword);
 						box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
 					}
