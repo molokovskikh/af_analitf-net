@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		public void DBFSaveTest()
 		{
 			batch.Lines.Value = new ObservableCollection<BatchLineView> {
-				new BatchLineView(new BatchLine(), new OrderLine { Code = "normal" }),
+				new BatchLineView(new BatchLine(), new OrderLine { Code = "normal", ProductSynonym = "Папаверин" }),
 				new BatchLineView(new BatchLine(), new OrderLine {
 					Code = "SuperLongCodeIsMoreThan9Symbols"
 						+ "BetterToAddMoreSymbolsForClearTest"
@@ -88,8 +88,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			save.Dialog.FileName = file;
 			Next(results);
 
-			var dbf = Dbf.Load(file);
+			var dbf = Dbf.Load(file, Encoding.GetEncoding(1251));
 			Assert.That(dbf.Rows.Count, Is.EqualTo(2));
+			Assert.AreEqual("Папаверин", dbf.Rows[0]["Name"]);
 		}
 
 		[Test]
@@ -113,7 +114,11 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Export_excel()
 		{
-			var order = new Order(new Address("тест"), new Offer(new Price("тест"), 100));
+			var offer = new Offer(new Price("тест"), 100) {
+				ProductSynonym = "Папаверин",
+				ProducerSynonym = "Биосинтез ОАО",
+			};
+			var order = new Order(new Address("тест"), offer);
 			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine(), null),
 				new BatchLineView(new BatchLine(), order.Lines[0])
@@ -127,6 +132,14 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			using(var stream = File.OpenRead(file)) {
 				var book = new HSSFWorkbook(stream);
 				Assert.AreEqual(1, book.NumberOfSheets);
+				var sheet = book.GetSheetAt(0);
+				var row = sheet.GetRow(2);
+				Assert.AreEqual("Папаверин", row.GetCell(0).StringCellValue);
+				Assert.AreEqual("Биосинтез ОАО", row.GetCell(1).StringCellValue);
+				Assert.AreEqual("тест", row.GetCell(2).StringCellValue);
+				Assert.AreEqual(100, row.GetCell(3).NumericCellValue);
+				Assert.AreEqual(1, row.GetCell(4).NumericCellValue);
+				Assert.AreEqual(100, row.GetCell(5).NumericCellValue);
 			}
 		}
 

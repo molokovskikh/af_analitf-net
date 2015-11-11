@@ -373,7 +373,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						var parsedServiceFields = line.BatchLine.ParsedServiceFields.Select(f => f.Value).FirstOrDefault();
 						table.Rows.Add(
 							line.OrderLine.Code,
-							line.OrderLine.ProducerSynonym,
+							line.OrderLine.ProductSynonym,
 							line.OrderLine.Count,
 							line.OrderLine.ResultCost,
 							line.OrderLine.Id,
@@ -431,11 +431,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.OrderLine != null ? line.OrderLine.Order.PriceName : null);
+				writer.Write(line.OrderLine?.Order.PriceName);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.OrderLine != null ? (decimal?)line.OrderLine.MixedCost : null);
+				writer.Write(line.OrderLine?.MixedCost);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
@@ -443,7 +443,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				writer.Write(endQuote);
 
 				writer.Write(quote);
-				writer.Write(line.OrderLine != null ? (decimal?)line.OrderLine.MixedSum : null);
+				writer.Write(line.OrderLine?.MixedSum);
 				writer.Write(endQuote);
 
 				writer.Write(quote);
@@ -476,12 +476,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					columns = columns.Concat(firstLine.BatchLine.ParsedServiceFields.Select(f => f.Key)).ToArray();
 			}
 			var rows = lines.Select(l => new object[] {
-				l.Producer,
 				l.Product,
-				l.OrderLine != null ? l.OrderLine.Order.PriceName : null,
-				l.OrderLine != null ? (decimal?)l.OrderLine.MixedCost : null,
+				l.Producer,
+				l.OrderLine?.Order.PriceName,
+				l.OrderLine?.MixedCost,
 				l.Count,
-				l.OrderLine != null ? (decimal?)l.OrderLine.MixedSum : null,
+				l.OrderLine?.MixedSum,
 				l.BatchLine.Comment
 			}.Concat(exportServiceFields ? l.BatchLine.ParsedServiceFields.Select(f => f.Value) : Enumerable.Empty<object>()).ToArray());
 			var book = ExcelExporter.ExportTable(columns, rows);
