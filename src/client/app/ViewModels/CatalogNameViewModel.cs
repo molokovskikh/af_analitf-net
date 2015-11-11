@@ -28,12 +28,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public CatalogNameViewModel(CatalogViewModel catalog)
 		{
+			InitFields();
 			Shell = catalog.Shell;
 			ParentModel = catalog;
-			CatalogNames = new NotifyValue<List<CatalogName>>(new List<CatalogName>());
-			Catalogs = new NotifyValue<List<Catalog>>(new List<Catalog>());
-			CurrentItem = new NotifyValue<object>();
-			CurrentCatalogName = new NotifyValue<CatalogName>();
+			CatalogNames.Value = new List<CatalogName>();
+			Catalogs.Value = new List<Catalog>();
 
 			CatalogNamesSearch = new QuickSearch<CatalogName>(UiScheduler,
 				v => CatalogNames.Value.FirstOrDefault(n => n.Name.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
@@ -50,7 +49,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(_ => LoadCatalogs()));
 
 			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)
-				.Subscribe(_ => NotifyOfPropertyChange("CatalogsEnabled")));
+				.Select(x => x.Value)
+				.Subscribe(CatalogsEnabled));
 
 			CurrentCatalogName
 				.Subscribe(_ => {
@@ -70,21 +70,18 @@ namespace AnalitF.Net.Client.ViewModels
 			ExcelExporter.ActiveProperty.Value = "CatalogNames";
 		}
 
-		public CatalogViewModel ParentModel { get; private set; }
+		public CatalogViewModel ParentModel { get; }
 
 		public PromotionPopup Promotions { get; set; }
 
-		public QuickSearch<CatalogName> CatalogNamesSearch { get; private set; }
-		public QuickSearch<Catalog> CatalogsSearch { get; private set;}
+		public QuickSearch<CatalogName> CatalogNamesSearch { get; }
+		public QuickSearch<Catalog> CatalogsSearch { get; }
 
 		[Export]
 		public NotifyValue<List<CatalogName>> CatalogNames { get; set; }
 		public NotifyValue<CatalogName> CurrentCatalogName { get; set; }
 
-		public bool CatalogsEnabled
-		{
-			get { return ParentModel.ViewOffersByCatalog; }
-		}
+		public NotifyValue<bool> CatalogsEnabled { get; set; }
 
 		public Catalog CurrentCatalog
 		{
@@ -153,6 +150,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<CatalogName> LoadCatalogNames(IStatelessSession session)
 		{
 			var queryable = session.Query<CatalogName>();
+				var filterType = (ParentModel.CurrentFilter?.FilterType).GetValueOrDefault();
 			if (ParentModel.ShowWithoutOffers) {
 				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 					queryable = queryable.Where(c => c.VitallyImportant);
@@ -162,8 +160,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
 					queryable = queryable.Where(n => session.Query<AwaitedItem>().Any(i => i.Catalog.Name == n));
-			}
-			else {
+				if (filterType == FilterType.PKU)
+					queryable = queryable.Where(c => c.Narcotic || c.Toxic || c.Combined || c.Other);
+				if (filterType == FilterType.PKUNarcotic)
+					queryable = queryable.Where(c => c.Narcotic);
+				if (filterType == FilterType.PKUToxic)
+					queryable = queryable.Where(c => c.Toxic);
+				if (filterType == FilterType.PKUCombined)
+					queryable = queryable.Where(c => c.Combined);
+				if (filterType == FilterType.PKUOther)
+					queryable = queryable.Where(c => c.Other);
+			} else {
 				queryable = queryable.Where(c => c.HaveOffers);
 				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
 					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.VitallyImportant));
@@ -172,7 +179,17 @@ namespace AnalitF.Net.Client.ViewModels
 					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.MandatoryList));
 
 				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
+					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers
+						&& session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
+
+				if (filterType == FilterType.PKUNarcotic)
+					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Narcotic));
+				if (filterType == FilterType.PKUToxic)
+					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Toxic));
+				if (filterType == FilterType.PKUCombined)
+					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Combined));
+				if (filterType == FilterType.PKUOther)
+					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Other));
 			}
 
 			if (ParentModel.FiltredMnn != null) {

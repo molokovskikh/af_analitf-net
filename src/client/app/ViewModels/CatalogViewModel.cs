@@ -22,18 +22,34 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public enum FilterType
+	{
+		None,
+		PKU,
+		PKUNarcotic,
+		PKUToxic,
+		PKUCombined,
+		PKUOther,
+		VitallyImportant,
+		Mandatory,
+		Awaited
+	}
+
 	public class FilterDeclaration
 	{
+		public FilterType FilterType;
+
 		public FilterDeclaration(string name)
+			: this(name, null, null, FilterType.None)
 		{
-			Name = name;
 		}
 
-		public FilterDeclaration(string name, string filterDescription, string filterDescriptionWithMnn)
+		public FilterDeclaration(string name, string filterDescription, string filterDescriptionWithMnn, FilterType type)
 		{
 			Name = name;
 			FilterDescription = filterDescription;
 			FilterDescriptionWithMnn = filterDescriptionWithMnn;
+			FilterType = type;
 		}
 
 		public string Name { get; set; }
@@ -64,9 +80,26 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Поиск препаратов в каталоге";
 			Filters = new[] {
 				new FilterDeclaration("Все"),
-				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные"),
-				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент"),
-				new FilterDeclaration("Ожидаемые позиции", "ожидаемым позициям", "только ожидаемые позиции"),
+				new FilterDeclaration("Жизненно важные", "жизненно важным", "только жизненно важные",
+					FilterType.VitallyImportant),
+				new FilterDeclaration("Обязательный ассортимент", "обязательному ассортименту", "только обязательные ассортимент",
+					FilterType.Mandatory),
+				new FilterDeclaration("Ожидаемые позиции", "ожидаемым позициям", "только ожидаемые позиции",
+					FilterType.Awaited),
+				new FilterDeclaration("ПКУ", "ПКУ", "только ПКУ",
+					FilterType.PKU),
+				new FilterDeclaration("ПКУ:Наркотические и психотропные",
+					"ПКУ:Наркотические и психотропные",
+					"только ПКУ:Наркотические и психотропные",
+					FilterType.PKUNarcotic),
+				new FilterDeclaration("ПКУ:Сильнодействующие. и ядовитые",
+					"ПКУ:Сильнодействующие. и ядовитые",
+					"только ПКУ:Сильнодействующие. и ядовитые",
+					FilterType.PKUToxic),
+				new FilterDeclaration("ПКУ:Комбинированные", "ПКУ:Комбинированные", "только ПКУ:Комбинированные",
+					FilterType.PKUCombined),
+				new FilterDeclaration("ПКУ:Иные лек.средства", "ПКУ:Иные лек.средства", "только ПКУ:Иные лек.средства",
+					FilterType.PKUOther),
 			};
 			CurrentFilter = Filters[0];
 
@@ -279,7 +312,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				var parts = new List<string>();
 				if (FiltredMnn != null)
-					parts.Add(String.Format("\"{0}\"", FiltredMnn.Name));
+					parts.Add($"\"{FiltredMnn.Name}\"");
 
 				if (CurrentFilter != null) {
 					var filter = FiltredMnn == null ? currentFilter.FilterDescription : currentFilter.FilterDescriptionWithMnn;

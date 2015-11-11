@@ -137,5 +137,28 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual("Воронеж", model.CurrentRegion.Value);
 			Assert.AreEqual("Основные", model.CurrentFilter.Value);
 		}
+
+		[Test]
+		public void Warn_on_toxic()
+		{
+			var price = new Price("test1");
+			model.Offers.Value = new List<Offer> {
+				new Offer(price, 100) {
+					Id = {
+						OfferId = 1
+					},
+					CatalogId = 52
+				},
+			};
+			model.CurrentCatalog = new Catalog {
+				Id = 52,
+				Toxic = true,
+			};
+			model.CurrentOffer.Value = model.Offers.Value.First();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			Assert.AreEqual("Вы заказываете препарат, подлежащий предметно-количественному учету и относящийся к ПКУ:Сильнодействующие. и ядовитые",
+				model.OrderWarning.OrderWarning);
+		}
 	}
 }

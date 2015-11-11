@@ -692,9 +692,24 @@ select
 	PharmacologicalAction,
 	Storage,
 	Expiration,
-	Composition
-from Catalogs.Descriptions
-where NeedCorrect = 0";
+	Composition,
+	pku.Narcotic as Narcotic,
+	pku.Toxic as Toxic,
+	pku.Combined as Combined,
+	pku.Other as Other
+from Catalogs.Descriptions d
+join (
+	select cn.DescriptionId,
+		max(cat.Narcotic) as Narcotic,
+		max(cat.Toxic) as Toxic,
+		max(cat.Combined) as Combined,
+		max(cat.Other) as Other
+	from Catalogs.Catalog cat
+			join Catalogs.CatalogNames cn on cat.NameId = cn.Id
+	where cat.Hidden = 0
+	group by cn.DescriptionId
+) pku on pku.DescriptionId = d.Id
+where d.NeedCorrect = 0";
 				CachedExport(Result, sql, "ProductDescriptions");
 			}
 			else {
@@ -714,9 +729,26 @@ select
 	Storage,
 	Expiration,
 	Composition,
-	NeedCorrect as Hidden
-from Catalogs.Descriptions
-where UpdateTime > ?lastSync
+	NeedCorrect as Hidden,
+	pku.Narcotic as Narcotic,
+	pku.Toxic as Toxic,
+	pku.Combined as Combined,
+	pku.Other as Other
+from Catalogs.Descriptions d
+join (
+	select cn.DescriptionId,
+		max(cat.Narcotic) as Narcotic,
+		max(cat.Toxic) as Toxic,
+		max(cat.Combined) as Combined,
+		max(cat.Other) as Other,
+		max(cat.UpdateTime) as CatalogUpdateTime,
+		max(cn.UpdateTime) as CatalogNameUpdateTime
+	from Catalogs.Catalog cat
+			join Catalogs.CatalogNames cn on cat.NameId = cn.Id
+	where cat.Hidden = 0
+	group by cn.DescriptionId
+) pku on pku.DescriptionId = d.Id
+where d.UpdateTime > ?lastSync or pku.CatalogUpdateTime > ?lastSync or pku.CatalogNameUpdateTime > ?lastSync
 union
 select
 	l.DescriptionId,
@@ -733,7 +765,11 @@ select
 	null as Storage,
 	null as Expiration,
 	null as Composition,
-	1 as Hidden
+	1 as Hidden,
+	null as Narcotic,
+	null as Toxic,
+	null as Combined,
+	null as Other
 from logs.DescriptionLogs l
 where l.LogTime >= ?lastSync and l.Operation = 2";
 				Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
@@ -764,7 +800,11 @@ select cn.Id,
 	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
 	cn.MnnId,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Narcotic = 1) as Narcotic,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Toxic = 1) as Toxic,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Combined = 1) as Combined,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Other = 1) as Other
 from Catalogs.CatalogNames cn
 	join Catalogs.Catalog c on c.NameId = cn.Id
 	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
@@ -781,6 +821,10 @@ select cn.Id,
 	cn.MnnId,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
 	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Narcotic = 1) as Narcotic,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Toxic = 1) as Toxic,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Combined = 1) as Combined,
+	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Other = 1) as Other,
 	not exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0) as Hidden
 from Catalogs.CatalogNames cn
 	join Catalogs.Catalog c on c.NameId = cn.Id
@@ -799,7 +843,11 @@ select
 	c.MandatoryList,
 	cf.Id as FormId,
 	cf.Form as Form,
-	c.Name as Fullname
+	c.Name as Fullname,
+	c.Narcotic,
+	c.Toxic,
+	c.Combined,
+	c.Other
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.Hidden = 0";
@@ -815,7 +863,11 @@ select
 	cf.Id as FormId,
 	cf.Form as Form,
 	c.Hidden,
-	c.Name as Fullname
+	c.Name as Fullname,
+	c.Narcotic,
+	c.Toxic,
+	c.Combined,
+	c.Other
 from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
@@ -1000,7 +1052,7 @@ where PublicationDate < curdate() + interval 1 day
 				return HtmlEntity.DeEntitize(doc.DocumentNode.InnerText);
 			}
 			catch(Exception e) {
-				log.Error(String.Format("Ошибка при преобразовании значения {0}", value), e);
+				log.Error($"Ошибка при преобразовании значения {value}", e);
 				return "";
 			}
 		}
@@ -1107,13 +1159,13 @@ limit 200;")
 			var ids = mails.Select(m => Convert.ToUInt32(m[0])).ToArray();
 			var loadMaiIds = mails.Where(m => Convert.ToBoolean(m[1])).Select(m => Convert.ToUInt32(m[0])).ToArray();
 
-			if (ids.Count() == 0)
+			if (ids.Length == 0)
 				return;
 
 			var pendingMails = session.Query<MailSendLog>().Where(l => ids.Contains(l.MailId)).ToArray()
 				.Select(l => new PendingMailLog(l));
 
-			var sql = String.Format(@"
+			var sql = $@"
 select m.Id,
 	convert_tz(m.LogTime, @@session.time_zone,'+00:00') as SentAt,
 	m.IsVIPMail as IsSpecial,
@@ -1123,18 +1175,18 @@ select m.Id,
 	m.Body
 from Documents.Mails m
 	join customers.Suppliers s on s.Id = m.SupplierId
-where m.Id in ({0})", ids.Implode());
+where m.Id in ({ids.Implode()})";
 
 			Export(Result, sql, "mails", truncate: false);
 
-			sql = String.Format(@"
+			sql = $@"
 select a.Id,
 	a.Filename as Name,
 	a.Size,
 	a.MailId
 from Documents.Attachments a
 	join Documents.Mails m on m.Id = a.MailId
-where a.MailId in ({0})", ids.Implode());
+where a.MailId in ({ids.Implode()})";
 
 			Export(Result, sql, "attachments", truncate: false);
 
@@ -1794,7 +1846,7 @@ where r.DownloadId in (:ids)")
 			dictionary.Each(k => command.Parameters.AddWithValue(k.Key, k.Value));
 
 			log.DebugFormat("Запрос {0}{1}", sql,
-				dictionary.Count > 0 ? "\r\nпараметры: " + dictionary.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)) : "");
+				dictionary.Count > 0 ? "\r\nпараметры: " + dictionary.Implode(k => $"{k.Key} = {k.Value}") : "");
 			var watch = new Stopwatch();
 			watch.Start();
 			command.ExecuteNonQuery();
@@ -1851,14 +1903,14 @@ where r.DownloadId in (:ids)")
 						if (Config.ExportTimeout != TimeSpan.Zero)
 							WaitHelper.WaitOrFail(Config.ExportTimeout,
 								() => File.Exists(filename),
-								String.Format("Не найден файл для экспорта {0}", filename));
+								$"Не найден файл для экспорта {filename}");
 
 						if (File.Exists(filename)) {
 							zip.Add(filename, tuple.ArchiveFileName);
 						}
 						else {
 #if DEBUG
-							throw new Exception(String.Format("Не найден файл для экспорта {0}", filename));
+							throw new Exception($"Не найден файл для экспорта {filename}");
 #else
 							log.WarnFormat("Не найден файл для экспорта {0}", filename);
 #endif

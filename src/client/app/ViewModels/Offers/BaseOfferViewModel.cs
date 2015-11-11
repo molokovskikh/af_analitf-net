@@ -212,8 +212,8 @@ where c.Id = ?";
 					.ToList();
 				if (newLines.Count > 0) {
 					var condition = newLines.Implode(l => String.Format("(a.CatalogId = {0} and (a.ProducerId = {1} or a.Producerid is null))",
-						l.CatalogId, l.ProducerId != null ? l.ProducerId.ToString() : "null"), " or ");
-					StatelessSession.CreateSQLQuery(String.Format("delete a from AwaitedItems a where {0}", condition))
+						l.CatalogId, l.ProducerId?.ToString() ?? "null"), " or ");
+					StatelessSession.CreateSQLQuery($"delete a from AwaitedItems a where {condition}")
 						.ExecuteUpdate();
 				}
 			}
@@ -245,7 +245,7 @@ where c.Id = ?";
 				return;
 
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog,
-				CurrentOffer.Value != null ? CurrentOffer.Value.Id : null);
+				CurrentOffer.Value?.Id);
 
 			if (NavigateOnShowCatalog) {
 				Shell.Navigate(offerViewModel);
@@ -288,7 +288,13 @@ where c.Id = ?";
 			}
 			LastEditOffer.Value = offer;
 			LoadStat();
-			ShowValidationError(offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText));
+			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
+			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
+			if (offer.OrderLine != null && CurrentCatalog?.IsPKU == true && CurrentCatalog?.Id == offer.CatalogId) {
+				messages.Add(Message.Warning("Вы заказываете препарат, подлежащий" +
+					$" предметно-количественному учету и относящийся к {CurrentCatalog.PKU}"));
+			}
+			ShowValidationError(messages);
 		}
 
 		public virtual void OfferCommitted()

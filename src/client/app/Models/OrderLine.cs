@@ -220,7 +220,7 @@ namespace AnalitF.Net.Client.Models
 			var quantity = SafeConvert.ToUInt32(Quantity);
 			if (quantity > 0 && Count > quantity) {
 				Count = CalculateAvailableQuantity(Count);
-				result.Add(Message.Error(String.Format("Заказ превышает остаток на складе, товар будет заказан в количестве {0}", Count)));
+				result.Add(Message.Error($"Заказ превышает остаток на складе, товар будет заказан в количестве {Count}"));
 			}
 
 			if (Count > 1000)

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -60,15 +61,38 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				if (!String.IsNullOrEmpty(EnglishName))
-					return String.Format("{0} ({1})", Name, EnglishName);
+					return $"{Name} ({EnglishName})";
 				return Name;
 			}
 		}
 
-		public virtual string DisplayName
+		public virtual bool Narcotic { get; set; }
+
+		public virtual bool Toxic { get; set; }
+
+		public virtual bool Combined { get; set; }
+
+		public virtual bool Other { get; set; }
+
+		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
+
+		public virtual string PKU
 		{
-			get { return "Описание " + FullName; }
+			get
+			{
+				if (Narcotic)
+					return "ПКУ:Наркотические и психотропные";
+				if (Toxic)
+					return "ПКУ:Сильнодействующие. и ядовитые";
+				if (Combined)
+					return "ПКУ:Комбинированные";
+				if (Other)
+					return "ПКУ:Иные лек.средства";
+				return null;
+			}
 		}
+
+		public virtual string DisplayName => "Описание " + FullName;
 
 		public virtual FlowDocument ToFlowDocument()
 		{
@@ -96,6 +120,9 @@ namespace AnalitF.Net.Client.Models
 				FontSize = 20,
 				TextAlignment = TextAlignment.Center
 			});
+			if (IsPKU) {
+				document.Blocks.Add(new Paragraph(new Run(PKU) { Foreground = Brushes.Red }));
+			}
 
 			foreach (var property in properties.OrderBy(p => p.Item1)) {
 				document.Blocks.Add(new Paragraph(new Run(property.Item2) { FontWeight = FontWeights.Bold }));

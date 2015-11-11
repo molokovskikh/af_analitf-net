@@ -240,10 +240,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool StatLoaded { get; set; }
 
 		[Style("ProductSynonym", "ProducerSynonym", Description = "Неосновной поставщик", Name = "NotBase")]
-		public virtual bool IsNotBase
-		{
-			get { return Price.NotBase; }
-		}
+		public virtual bool IsNotBase => Price.NotBase;
 
 		public virtual List<Message> UpdateOrderLine(Address address, Settings settings,
 			Func<string, bool> confirm = null,
@@ -266,8 +263,7 @@ namespace AnalitF.Net.Client.Models
 					OrderLine = new OrderLine(order, this, orderCount.Value);
 					orderLine.Comment = comment;
 					order.AddLine(OrderLine);
-				}
-				else {
+				} else {
 					OrderLine.Count = OrderCount.Value;
 					OrderLine.Comment = comment;
 					order.UpdateStat();
@@ -276,8 +272,7 @@ namespace AnalitF.Net.Client.Models
 				if (edit) {
 					result.AddRange(OrderLine.EditValidate());
 					result.AddRange(EditValidate(address, settings));
-				}
-				else {
+				} else {
 					result = OrderLine.SaveValidate(confirmCallback: confirm);
 				}
 				OrderCount = OrderLine.Count;

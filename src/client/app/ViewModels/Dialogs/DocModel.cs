@@ -61,15 +61,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public FlowDocument Document { get; set; }
 
-		public bool CanPrint
-		{
-			get { return Document != null; }
-		}
+		public bool CanPrint => Document != null;
 
-		public bool CanSave
-		{
-			get { return Document != null; }
-		}
+		public bool CanSave => Document != null;
 
 		protected override void OnActivate()
 		{
@@ -110,10 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public FlowDocument BuildDocument()
 		{
-			if (Model == null)
-				return null;
-
-			return Model.ToFlowDocument();
+			return Model?.ToFlowDocument();
 		}
 	}
 }
