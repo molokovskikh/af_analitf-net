@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => m.ShowWithoutOffers))
 				.Subscribe(_ => LoadCatalogs()));
 
-			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog)
+			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog, skipInitial: false)
 				.Select(x => x.Value)
 				.Subscribe(CatalogsEnabled));
 
