@@ -773,7 +773,8 @@ namespace AnalitF.Net.Client.ViewModels
 				&& typeof(NotifyValue<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition())
 				&& x.CanWrite);
 			foreach (var propertyInfo in notifiable)
-				propertyInfo.SetValue(this, Activator.CreateInstance(propertyInfo.PropertyType), null);
+				if (propertyInfo.GetValue(this, null) == null)
+					propertyInfo.SetValue(this, Activator.CreateInstance(propertyInfo.PropertyType), null);
 		}
 	}
 }
