@@ -33,10 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool VitallyImportant { get; set; }
 
 		[Style(Description = "Предложения отсутствуют")]
-		public virtual bool DoNotHaveOffers
-		{
-			get { return !HaveOffers; }
-		}
+		public virtual bool DoNotHaveOffers => !HaveOffers;
 
 		public CatalogDisplayItem(uint id, string name, string form, bool haveOffers, bool vitallyImportant)
 		{
@@ -132,9 +129,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<Object>())
 				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
+				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(LoadData))
 				.Switch()
 				.ObserveOn(UiScheduler)
+				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Items, CloseCancellation.Token);
 
 			Items.Subscribe(_ => {
@@ -144,7 +143,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public List<CatalogDisplayItem> LoadData(IStatelessSession session)
 		{
-			IsLoading.Value = true;
 			//мы не можем использовать nhibernate для выборки данных тк объем данных слишком велик
 			//выборка может достигать 10**5 записей
 			var connection = session.Connection;
@@ -173,6 +171,7 @@ namespace AnalitF.Net.Client.ViewModels
 				conditions.Add("c.HaveOffers = 1");
 			}
 
+			var filterType = ParentModel.CurrentFilter?.FilterType;
 			if (ParentModel.CurrentFilter == ParentModel.Filters[1]) {
 				conditions.Add("c.VitallyImportant = 1");
 			}
@@ -182,6 +181,21 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 			if (ParentModel.CurrentFilter == ParentModel.Filters[3]) {
 				conditions.Add("exists ( select * from AwaitedItems a where a.CatalogId = c.Id )");
+			}
+			if (filterType == FilterType.PKU) {
+				conditions.Add("(c.Narcotic = 1 || c.Toxic = 1 || c.Combined = 1 || c.Other = 1)");
+			}
+			if (filterType == FilterType.PKUNarcotic) {
+				conditions.Add("c.Narcotic = 1");
+			}
+			if (filterType == FilterType.PKUToxic) {
+				conditions.Add("c.Toxic = 1");
+			}
+			if (filterType == FilterType.PKUCombined) {
+				conditions.Add("c.Combined = 1");
+			}
+			if (filterType == FilterType.PKUOther) {
+				conditions.Add("c.Other = 1");
 			}
 
 			command.CommandText = "select c.Id, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant"
@@ -202,7 +216,6 @@ namespace AnalitF.Net.Client.ViewModels
 						reader.GetBoolean(4)));
 				}
 			}
-			IsLoading.Value = false;
 			return items;
 		}
 
