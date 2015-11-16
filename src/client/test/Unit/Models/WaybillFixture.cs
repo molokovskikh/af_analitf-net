@@ -169,7 +169,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 
 			Assert.AreEqual(55.70, line.RetailCost);
 			Assert.AreEqual(29.84, line.RealRetailMarkup);
-			var items = RxHelper.CollectChanges(line);
+			var items = line.CollectChanges();
 			line.RetailCost = 50;
 			Assert.AreEqual(50, line.RetailCost);
 			Assert.AreEqual(16.55, line.RetailMarkup);
@@ -189,8 +189,6 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Do_not_recalculate_edited_cost()
 		{
 			var line = Calculate(Line());
-			//waybill.Lines.Add(line);
-			//waybill.Calculate(settings);
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
 			waybill.Calculate(settings);
@@ -445,6 +443,25 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			line.VitallyImportant = true;
 			Calculate(line);
 			Assert.AreEqual(353.60, line.RetailCost);
+			Assert.AreEqual(37.96, line.RetailMarkup);
+		}
+
+		[Test]
+		public void Calculate_with_zero_producer_cost()
+		{
+			var markup = settings.Markups.First(x => x.Type == MarkupType.Nds18);
+			markup.Markup = 38;
+			var line = new WaybillLine(waybill) {
+				Nds = 18,
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				ProducerCost = 0,
+				Quantity = 1,
+				VitallyImportant = true
+			};
+			Calculate(line);
+			Assert.AreEqual(353.60, line.RetailCost);
+			Assert.AreEqual(37.96, line.RetailMarkup);
 		}
 
 		private WaybillLine Line()
