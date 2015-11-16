@@ -182,6 +182,9 @@ namespace AnalitF.Net.Client.ViewModels
 					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers
 						&& session.Query<AwaitedItem>().Any(i => i.Catalog == c)));
 
+				if (filterType == FilterType.PKU)
+					queryable = queryable.Where(n => session.Query<Catalog>()
+					.Any(c => c.Name == n && c.HaveOffers && (c.Narcotic || c.Toxic || c.Combined || c.Other)));
 				if (filterType == FilterType.PKUNarcotic)
 					queryable = queryable.Where(n => session.Query<Catalog>().Any(c => c.Name == n && c.HaveOffers && c.Narcotic));
 				if (filterType == FilterType.PKUToxic)

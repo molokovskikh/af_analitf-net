@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			ApplyMnnFilter();
 			Assert.That(catalogModel.FilterDescription,
-				Is.EqualTo(String.Format("Фильтр по \"{0}\"", catalogModel.FiltredMnn.Name)));
+				Is.EqualTo($"Фильтр по \"{catalogModel.FiltredMnn.Name}\""));
 
 			catalogModel.CurrentFilter = catalogModel.Filters[1];
 			Assert.That(catalogModel.FilterDescription, Is.EqualTo("Фильтр по жизненно важным"));
@@ -215,6 +215,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var results = catalogModel.ShowOrderHistory().ToArray();
 			Assert.AreEqual(1, results.Length);
 			Assert.AreEqual("Нет истории заказов", ((MessageResult)results[0]).Message);
+		}
+
+		[Test]
+		public void Filter_by_pku()
+		{
+			catalogModel.CurrentFilter = catalogModel.Filters.First(x => x.FilterType == FilterType.PKU);
+			scheduler.Start();
+
+			Assert.That(nameViewModel.CatalogNames.Value.Count, Is.GreaterThan(0));
+			foreach(var name in nameViewModel.CatalogNames.Value)
+				Assert.IsTrue(name.IsPKU, name.ToString());
 		}
 
 		private void ApplyMnnFilter()
