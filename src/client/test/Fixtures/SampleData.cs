@@ -189,6 +189,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList).Take(3))
 				.Concat(randomProducts.Where(p => p.CatalogProduct.MandatoryList && p.CatalogProduct.VitallyImportant).Take(2))
 				.Concat(Random(productWithProperties).Take(2))
+				.Concat(randomProducts.Where(p => p.CatalogProduct.Narcotic || p.CatalogProduct.Toxic || p.CatalogProduct.Other || p.CatalogProduct.Combined).Take(1))
 				.Concat(products.Where(p => products.Count(c => c.CatalogProduct == p.CatalogProduct) > 1).Take(3));
 
 			foreach (var product in productForCreate) {
