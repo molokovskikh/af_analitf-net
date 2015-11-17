@@ -54,31 +54,19 @@ namespace AnalitF.Net.Client.Models
 			{
 				if (Order == null)
 					return Cost;
-				return GetResultCost(Order.Price);
+				return GetResultCost(Order.SafePrice);
 			}
 		}
 
-		public virtual decimal MixedCost
-		{
-			get
-			{
-				return HideCost ? ResultCost : Cost;
-			}
-		}
+		public virtual decimal MixedCost => HideCost ? ResultCost : Cost;
 
 		public virtual decimal? NewCost { get; set; }
 
-		public virtual decimal? MixedNewCost
-		{
-			get { return GetResultCost(Order.Price, NewCost); }
-		}
+		public virtual decimal? MixedNewCost => GetResultCost(Order.Price, NewCost);
 
 		public virtual decimal? OldCost { get; set; }
 
-		public virtual decimal? MixedOldCost
-		{
-			get { return GetResultCost(Order.Price, OldCost); }
-		}
+		public virtual decimal? MixedOldCost => GetResultCost(Order.Price, OldCost);
 
 		[JsonIgnore]
 		public virtual decimal? OptimalFactor { get; set; }

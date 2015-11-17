@@ -228,7 +228,7 @@
 						<DataGridTextColumn Width="110*" Header="Прайс-лист"
 							Binding="{Binding Order.PriceName}" />
 						<DataGridTextColumn Width="102*" Header="Производитель"
-							Binding="{Binding Producer}" />
+							Binding="{Binding ProducerSynonym}" />
 						<c:DataGridTextColumnEx Width="SizeToHeader"
 							Header="Срок годн."
 							Binding="{Binding Period}" TextAlignment="Center" />
