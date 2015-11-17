@@ -259,7 +259,8 @@ namespace AnalitF.Net.Client.Models
 				if (IsPriceExists())
 					return Price;
 				return new Price {
-					Id = Price.Id
+					Id = Price.Id,
+					CostFactor = 1,
 				};
 			}
 		}

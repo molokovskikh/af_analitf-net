@@ -624,7 +624,8 @@ load data infile '{mysqlFilename}' replace into table OrderLines
 	`BarCode`,
 	`CodeOKP`,
 	`Series`,
-	`Exp`
+	`Exp`,
+	Producer
 );
 
 update OrderLines l
@@ -696,7 +697,9 @@ load data infile '{mysqlFilename}' replace into table SentOrderLines
 	`BarCode`,
 	`CodeOKP`,
 	`Series`,
-	`Exp`
+	`Exp`,
+	ResultCost,
+	Producer
 );
 
 update SentOrders o

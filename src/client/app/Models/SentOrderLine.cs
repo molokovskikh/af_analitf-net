@@ -39,23 +39,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual decimal ResultCost { get; set; }
 
-		public virtual decimal MixedCost
-		{
-			get
-			{
-				return HideCost ? ResultCost : Cost;
-			}
-		}
+		public virtual decimal MixedCost => HideCost ? ResultCost : Cost;
 
-		public virtual decimal Sum
-		{
-			get { return Count * Cost; }
-		}
+		public virtual decimal Sum => Count * Cost;
 
-		public virtual decimal MixedSum
-		{
-			get { return Count * MixedCost; }
-		}
+		public virtual decimal MixedSum => Count * MixedCost;
 
 		public virtual SentOrder Order { get; set; }
 
@@ -69,10 +57,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IsUnmatchedByWaybill { get; set; }
 
 		[Style("Order.AddressName")]
-		public virtual bool IsCurrentAddress
-		{
-			get { return Order.IsCurrentAddress; }
-		}
+		public virtual bool IsCurrentAddress => Order.IsCurrentAddress;
 
 		public virtual void Configure(User user, Dictionary<uint, WaybillLine[]> matchedWaybillLines)
 		{

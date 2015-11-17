@@ -451,6 +451,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void Migrate()
 		{
 			localSession.DeleteEach<LoadedDocument>();
+			localSession.DeleteEach<Order>();
+			localSession.DeleteEach<SentOrder>();
+			localSession.DeleteEach<Waybill>();
 			localSession.BeginTransaction();
 			settings.Password = null;
 			localSession.Flush();
@@ -468,6 +471,14 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			localSession.Refresh(settings);
 			Assert.IsNotNull(settings.Password);
+
+			var order = localSession.Query<Order>().First();
+			Assert.That(order.Lines[0].ResultCost, Is.GreaterThan(0));
+			Assert.IsNotNullOrEmpty(order.Lines[0].Producer);
+
+			var sentOrder = localSession.Query<SentOrder>().First();
+			Assert.That(sentOrder.Lines[0].ResultCost, Is.GreaterThan(0));
+			Assert.IsNotNullOrEmpty(sentOrder.Lines[0].Producer);
 
 			var waybill = localSession.Query<Waybill>().First(x => x.Id == 39153110);
 			var line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10891996");
