@@ -69,6 +69,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
+			Log.Info("Начинаю импорт");
 			var ordered = data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
 			foreach (var table in ordered) {
 				try {
@@ -82,15 +83,17 @@ namespace AnalitF.Net.Client.Models.Commands
 					Reporter.Progress();
 				}
 				catch (Exception e) {
-					throw new Exception(String.Format("Не могу импортировать {0}", table.Item1), e);
+					throw new Exception($"Не могу импортировать {table.Item1}", e);
 				}
 			}
+			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
 
 			Configure(new SanityCheck()).Check();
 
 			var settings = Session.Query<Settings>().First();
 			var user = Session.Query<User>().First();
 			if (IsImported<SentOrder>()) {
+				Log.Info("Пересчет отправленных заявок");
 				Session.CreateSQLQuery(@"
 update SentOrderLines l
 	join SentOrders o on l.ServerOrderId = o.ServerId
@@ -104,6 +107,7 @@ where Sum = 0;")
 					.ExecuteUpdate();
 			}
 			if (Session.Query<LoadedDocument>().Any()) {
+				Log.Info("Пересчет накладных");
 				Session.CreateSQLQuery(@"
 update Waybills set IsNew = 0;
 update Waybills w
@@ -115,6 +119,7 @@ set IsNew = 1;")
 					waybill.Calculate(settings, user);
 			}
 			if (IsImported<Offer>()) {
+				Log.Info("Очистка каталога");
 				Session.CreateSQLQuery(@"
 drop temporary table if exists ExistsCatalogs;
 create temporary table ExistsCatalogs (
@@ -139,7 +144,9 @@ set m.HaveOffers = 1,
 	c.HaveOffers = 1;
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
+				Log.Info("Пересчет лидеров");
 				DbMaintain.UpdateLeaders(Session, settings);
+				Log.Info("Пересчет ученки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
 
