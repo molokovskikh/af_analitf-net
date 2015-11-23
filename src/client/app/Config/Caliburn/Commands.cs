@@ -28,9 +28,9 @@ namespace AnalitF.Net.Client.Config.Caliburn
 			}
 		}
 
-		private static void DoNavigateUri(object sender, ExecutedRoutedEventArgs e)
+		public static void DoNavigateUri(object sender, ExecutedRoutedEventArgs e)
 		{
-			var uri = e.Parameter ?? (e.OriginalSource is Hyperlink ? ((Hyperlink)e.OriginalSource).NavigateUri : null);
+			var uri = e.Parameter ?? (e.OriginalSource as Hyperlink)?.NavigateUri;
 			if (uri == null)
 				return;
 
