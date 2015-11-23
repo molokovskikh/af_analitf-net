@@ -319,6 +319,10 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual string SbisUsername { get; set;}
+		public virtual string SbisPassword { get; set; }
+		public virtual string SbisCert { get; set; }
+
 		public virtual string DiadokUsername { get; set;}
 		public virtual string DiadokPassword { get; set; }
 		public virtual string DiadokCert { get; set; }
@@ -342,23 +346,23 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual X509Certificate2 TryGetCert
+		public virtual X509Certificate2 GetCert(string name)
 		{
-			get
-			{
-				if (String.IsNullOrEmpty(DiadokCert))
-					return null;
-				var store = new X509Store();
-				try {
-					store.Open(OpenFlags.ReadOnly);
-					return store.Certificates.OfType<X509Certificate2>()
-						.FirstOrDefault(x => String.Format("{0} - {1}",
-							x.GetNameInfo(X509NameType.SimpleName, false),
-							x.GetNameInfo(X509NameType.SimpleName, true)) == DiadokCert);
-				}
-				finally {
-					store.Close();
-				}
+			if (String.IsNullOrEmpty(name))
+					throw new EndUserError("Сертификат для подписи не настроен.");
+			var store = new X509Store();
+			try {
+				store.Open(OpenFlags.ReadOnly);
+				var cert = store.Certificates.OfType<X509Certificate2>()
+					.FirstOrDefault(x => String.Format("{0} - {1}",
+						x.GetNameInfo(X509NameType.SimpleName, false),
+						x.GetNameInfo(X509NameType.SimpleName, true)) == name);
+				if (cert == null)
+					throw new EndUserError("Сертификат для подписи не найден.");
+				return cert;
+			}
+			finally {
+				store.Close();
 			}
 		}
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
@@ -16,6 +17,12 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public static class Util
 	{
+		private enum State
+		{
+			Key,
+			Value
+		}
+
 		public static bool IsNumeric(object o)
 		{
 			return o is short || o is ushort
@@ -207,6 +214,51 @@ namespace AnalitF.Net.Client.Helpers
 			var task = new Task(action);
 			task.Start();
 			return task;
+		}
+
+		public static Dictionary<string, string> ParseSubject(X509Certificate2 c)
+		{
+			List<Char> accum = new List<char>();
+			var quoted = false;
+			var state = State.Key;
+			var result = new Dictionary<string, string>();
+			string key = null;
+			for (var i = 0; i < c.Subject.Length; i++) {
+				var current = c.Subject[i];
+				var next = i < c.Subject.Length - 1 ? c.Subject[i + 1] : '\u0000';
+				if (state == State.Key) {
+					if (current == '=') {
+						state = State.Value;
+						key = new String(accum.ToArray());
+						accum.Clear();
+						continue;
+					}
+					if (current == ' ') {
+						continue;
+					}
+				}
+				if (state == State.Value) {
+					if (!quoted && current == ',') {
+						state = State.Key;
+						quoted = false;
+						result[key] = new String(accum.ToArray());
+						accum.Clear();
+						continue;
+					}
+					if (current == '\"') {
+						if (next != '\"') {
+							quoted = !quoted;
+						}
+						else {
+							accum.Add(current);
+							i++;
+						}
+						continue;
+					}
+				}
+				accum.Add(current);
+			}
+			return result;
 		}
 	}
 }

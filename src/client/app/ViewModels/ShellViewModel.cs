@@ -633,6 +633,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new ExtDocs());
 		}
 
+		public void ShowSbis()
+		{
+			NavigateRoot(new Sbis.Index());
+		}
+
 		public void ShowJournal()
 		{
 			NavigateRoot(new Journal());

@@ -257,7 +257,7 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
-    <Compile Include="Models\Commands\External.cs" />
+    <Compile Include="Models\Sbis\SbisApi.cs" />
     <Compile Include="Models\Commands\ImportCommand.cs" />
     <Compile Include="Models\Commands\RepairDb.cs" />
     <Compile Include="Models\Commands\DbCommand.cs" />
@@ -394,6 +394,8 @@
     <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
+    <Compile Include="ViewModels\Sbis\Index.cs" />
+    <Compile Include="ViewModels\Sbis\Reject.cs" />
     <Compile Include="ViewModels\WaybillLineSearch.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -516,6 +518,12 @@
     </Compile>
     <Compile Include="Views\RejectsView.xaml.cs">
       <DependentUpon>RejectsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Sbis\Index.xaml.cs">
+      <DependentUpon>Index.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Sbis\Reject.xaml.cs">
+      <DependentUpon>Reject.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
@@ -799,6 +807,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Sbis\Index.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Sbis\Reject.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -917,6 +933,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\images\diadok.png" />
+    <Resource Include="Assets\images\sbis.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

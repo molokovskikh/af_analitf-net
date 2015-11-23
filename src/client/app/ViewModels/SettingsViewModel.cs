@@ -28,6 +28,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private bool passwordUpdated;
 		private string diadokPassword;
 		private bool diadokPasswordUpdated;
+		private string sbisPassword;
+		private bool sbisPasswordUpdated;
 
 		public bool IsCredentialsChanged;
 
@@ -56,6 +58,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			password = Mask(Settings.Value.Password);
 			diadokPassword = Mask(Settings.Value.DiadokPassword);
+			sbisPassword = Mask(Settings.Value.SbisPassword);
 
 			waybillConfig = Settings.Value.Waybills;
 			if (Session != null) {
@@ -113,6 +116,16 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				diadokPasswordUpdated = true;
 				diadokPassword = value;
+			}
+		}
+
+		public string SbisPassword
+		{
+			get { return sbisPassword; }
+			set
+			{
+				sbisPasswordUpdated = true;
+				sbisPassword = value;
 			}
 		}
 
@@ -270,6 +283,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Settings.Value.Password = password;
 			if (diadokPasswordUpdated)
 				Settings.Value.DiadokPassword = diadokPassword;
+			if (sbisPasswordUpdated)
+				Settings.Value.SbisPassword = sbisPassword;
 
 			if (App.Current != null)
 				StyleHelper.BuildStyles(App.Current.Resources, Styles);

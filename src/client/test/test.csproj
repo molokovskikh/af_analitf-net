@@ -175,7 +175,6 @@
     <Compile Include="Integration\AppBootstrapperFixture.cs" />
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
-    <Compile Include="Integration\Commands\ExternalFixture.cs" />
     <Compile Include="Integration\Commands\ImportFixture.cs" />
     <Compile Include="Integration\Commands\WaybillsFixture.cs" />
     <Compile Include="Integration\Models\RestoreOrderFixture.cs" />

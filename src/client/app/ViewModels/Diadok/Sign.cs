@@ -75,11 +75,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				return true;
 
 			try {
-				var cert = Settings.Value.TryGetCert;
-				if (cert == null)
-					throw new EndUserError("Сертификат для подписи не найден.");
-				var api = new WinApiCrypt();
-				data = api.Sign(Payload.Entity.Content.Data, cert.RawData);
+				var cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
+				data = new WinApiCrypt().Sign(Payload.Entity.Content.Data, cert.RawData);
 			}
 			catch (Win32Exception e) {
 				Log.Error($"Ошибка при подписании документа {Payload.Entity.EntityId}", e);

@@ -516,6 +516,18 @@
 						SelectedItem="{Binding Settings.Value.DiadokCert}" />
 				</StackPanel>
 			</TabItem>
+			<TabItem Header="Сбис" Name="SbisTab">
+				<StackPanel>
+					<Label>Имя пользователя</Label>
+					<TextBox Name="Settings_SbisUsername" />
+					<Label>Пароль</Label>
+					<TextBox Name="SbisPassword" />
+					<Label>Сертификат для подписи</Label>
+					<ComboBox Style="{StaticResource Select}"
+						ItemsSource="{Binding Settings.Value.DiadokCerts}"
+						SelectedItem="{Binding Settings.Value.SbisCert}" />
+				</StackPanel>
+			</TabItem>
 		</TabControl>
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

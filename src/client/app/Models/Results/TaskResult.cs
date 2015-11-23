@@ -34,6 +34,8 @@ namespace AnalitF.Net.Client.Models.Results
 					args.WasCancelled = t.IsCanceled;
 				viewModel.IsCompleted = true;
 				viewModel.TryClose();
+				if (t.IsFaulted)
+					Manager.Error(ErrorHelper.TranslateException(t.Exception) ?? "Не удалось выполнить операцию.");
 			}, scheduler);
 			if (Task.Status == TaskStatus.Created)
 				Task.Start();

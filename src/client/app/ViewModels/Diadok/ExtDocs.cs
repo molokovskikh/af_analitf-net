@@ -320,10 +320,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public ExtDocs()
 		{
+			DisplayName = "Диадок";
 			InitFields();
 
 			CurrentItem.Subscribe(LoadFiles);
-			//todo exception?
 			CurrentItem
 				.Select(x => {
 					if (x == null)
@@ -353,7 +353,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
-				.Subscribe(x => {
+				.CatchSubscribe(x => {
 					if (CurrentItem.Value != null)
 						CurrentItem.Value.LocalFilename = x?.Item1;
 					Filename.Value = x?.Item1;
