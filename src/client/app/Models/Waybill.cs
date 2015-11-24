@@ -148,10 +148,6 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string DiadokMessageId { get; set; }
-		public virtual string DiadokBoxId { get; set; }
-		public virtual string DiadokEnityId { get; set; }
-
 		public virtual decimal SumWithoutTax => Sum - TaxSum;
 
 		public virtual decimal Markup => Sum > 0 ? Math.Round(MarkupSum / Sum * 100, 2) : 0;
@@ -168,13 +164,7 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string SupplierName
-		{
-			get
-			{
-				return SafeSupplier == null ? UserSupplierName : Supplier.FullName;
-			}
-		}
+		public virtual string SupplierName => SafeSupplier == null ? UserSupplierName : Supplier.FullName;
 
 		public virtual Supplier SafeSupplier
 		{
@@ -311,13 +301,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string Error { get; protected set; }
 
-		public virtual string[] FieldsForValidate
-		{
-			get
-			{
-				return new[] { "ProviderDocumentId", "UserSupplierName" };
-			}
-		}
+		public virtual string[] FieldsForValidate => new[] { "ProviderDocumentId", "UserSupplierName" };
 
 		public virtual WaybillDocumentSettings GetWaybillDocSettings()
 		{
