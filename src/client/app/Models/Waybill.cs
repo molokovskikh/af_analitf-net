@@ -243,9 +243,9 @@ namespace AnalitF.Net.Client.Models
 			var isMigrated = IsMigrated && Sum == 0;
 			foreach (var waybillLine in Lines) {
 				if (isMigrated)
-					waybillLine.Calculate(Settings);
-				else
 					waybillLine.CalculateForMigrated(Settings);
+				else
+					waybillLine.Calculate(Settings);
 			}
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
