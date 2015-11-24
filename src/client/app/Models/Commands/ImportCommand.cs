@@ -114,7 +114,9 @@ update Waybills w
 	join LoadedDocuments d on d.Id = w.Id
 set IsNew = 1;")
 					.ExecuteUpdate();
-				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0).ToList();
+				//перенесенных накладных может быть много и их пересчет займет много времени
+				//не вычиляем такие накладные тк всего скорее они ни кому не нужны
+				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0 && !w.IsMigrated).ToList();
 				foreach (var waybill in newWaybills)
 					waybill.Calculate(settings, user);
 			}
@@ -146,7 +148,7 @@ drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
 				Log.Info("Пересчет лидеров");
 				DbMaintain.UpdateLeaders(Session, settings);
-				Log.Info("Пересчет ученки");
+				Log.Info("Пересчет уценки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
 
