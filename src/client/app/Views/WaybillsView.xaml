@@ -74,7 +74,7 @@
 				</Button.ContextMenu>
 				Ежемесячный отчет по ЖНВЛП для Росздравнадзора
 			</Button>
-			<Button Name="WaybillMarkupReport" Style="{StaticResource FilterElement}">Надб. ЖНВЛС</Button>
+			<Button Name="WaybillMarkupReport" Style="{StaticResource FilterElement}">Отчет по розничным надбавкам к ценам на ЖНВЛП за год</Button>
 		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
