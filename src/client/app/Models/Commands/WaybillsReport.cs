@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Dapper;
@@ -16,13 +17,17 @@ namespace AnalitF.Net.Client.Models.Commands
 		public DateTime Begin;
 		public DateTime End;
 		public uint[] AddressIds;
+		public bool FilterByWriteTime;
 
 		public override void Execute()
 		{
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.InitAndMap("Reports");
-			Result = Path.Combine(dir, FileHelper.StringToFileName($"Росздравнадзор-ЖНВЛП-{End:d}.csv"));
+			Result = Path.Combine(dir, FileHelper.StringToFileName($"Росздравнадзор-ЖНВЛП-{Begin:d}-{End:d}.csv"));
 
+			var field = "WriteTime";
+			if (FilterByWriteTime)
+				field = "DocumentDate";
 			var sql = $@"
 drop temporary table if exists uniq_document_lines;
 create temporary table uniq_document_lines engine=memory
@@ -31,8 +36,8 @@ from WaybillLines l
 	join Waybills w on w.Id = l.WaybillId
 		join Suppliers s on s.Id = w.SupplierId
 	join Drugs d on d.EAN = l.EAN13
-where w.WriteTime > ?
-	and w.WriteTime < ?
+where w.{field} > ?
+	and w.{field} < ?
 	and w.AddressId in ({AddressIds.Implode()})
 	and l.Quantity is not null
 	and l.ProducerCost is not null

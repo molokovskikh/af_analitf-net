@@ -96,6 +96,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual string ShipperNameAndAddress { get; set; }
 		public virtual string ConsigneeNameAndAddress { get; set; }
 		public virtual string UserSupplierName { get; set; }
+		//накладная перенесена из analitf и при первом вычислении должен применяться особый механизм вычисления цены
+		public virtual bool IsMigrated { get; set; }
 
 		/// <summary>
 		/// наименование файла в случае если используется механизм переопределения имен файлов
@@ -235,26 +237,14 @@ namespace AnalitF.Net.Client.Models
 					&& s.BelongsToAddress.Id == Address.Id)
 				?? WaybillSettings;
 
-			foreach (var waybillLine in Lines)
-				waybillLine.Calculate(Settings);
-
-			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
-			CalculateRetailSum();
-		}
-
-		public virtual void Migrate(Settings settings)
-		{
-			if (settings == null)
-				return;
-			Settings = settings;
-			WaybillSettings = settings.Waybills
-				.FirstOrDefault(s => s.BelongsToAddress != null
-					&& Address != null
-					&& s.BelongsToAddress.Id == Address.Id)
-				?? WaybillSettings;
-
-			foreach (var waybillLine in Lines)
-				waybillLine.CalculateForMigrated(Settings);
+			//специальный механизм должен отработать только один раз
+			var isMigrated = IsMigrated && Sum == 0;
+			foreach (var waybillLine in Lines) {
+				if (isMigrated)
+					waybillLine.CalculateForMigrated(Settings);
+				else
+					waybillLine.Calculate(Settings);
+			}
 
 			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
 			CalculateRetailSum();

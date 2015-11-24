@@ -236,7 +236,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var commnand = new VitallyImportantReport {
 				Begin = Begin.Value,
 				End = End.Value,
-				AddressIds = AddressSelector.GetActiveFilter().Select(x => x.Id).ToArray()
+				AddressIds = AddressSelector.GetActiveFilter().Select(x => x.Id).ToArray(),
+				FilterByWriteTime = IsFilterByWriteTime.Value
 			};
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);

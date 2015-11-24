@@ -203,6 +203,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		//миграция данных из delphi приложения
 		public void Migrate()
 		{
+			Log.Info("Перенос данных");
 			var filename = FileHelper.MakeRooted("Params.txt");
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
@@ -736,7 +737,8 @@ load data infile '{0}' replace into table Waybills
 	BuyerAddress,
 	BuyerINN,
 	BuyerKPP
-);");
+)
+set IsMigrated = 1;");
 			MigrateTable("WaybillLines.txt", @"
 load data infile '{0}' replace into table WaybillLines
 (
@@ -766,8 +768,7 @@ load data infile '{0}' replace into table WaybillLines
 	BillOfEntryNumber,
 	EAN13,
 	ProductId,
-	ProducerId,
-	RejectId);");
+	ProducerId);");
 			MigrateTable("WaybillOrders.txt", @"
 load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLineId);");
 
@@ -780,15 +781,16 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			settings.WaybillDir = FileHelper.MakeRooted("Waybills");
 			settings.RejectDir = FileHelper.MakeRooted("Rejects");
 			settings.DocDir = FileHelper.MakeRooted("Docs");
+			Log.Info("Пересчет накладных");
 			ProcessBatch(
-				Session.Query<Waybill>().Where(w => w.Sum == 0).Select(x => x.Id).ToArray(),
+				Session.Query<Waybill>().Where(w => w.Sum == 0).OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
 				(s, x) => {
 					foreach (var id in x) {
-						s.Load<Waybill>(id).Migrate(settings);
+						s.Load<Waybill>(id).Calculate(settings);
 					}
 				});
-
 			Session.Flush();
+			Log.Info("Перенос данных завершен");
 			Import();
 		}
 
@@ -812,6 +814,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			RunCommand(new ImportCommand(data));
 			var settings = Session.Query<Settings>().First();
 
+			Log.Info("Пересчет заявок");
 			SyncOrders();
 
 			var batchAddresses = Session.Query<BatchLine>().Where(l => l.Id > maxBatchLineId).Select(l => l.Address)
@@ -838,7 +841,9 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
 
 			var postUpdate = new PostUpdate();
+			Log.Info("Вычисление забраковки");
 			postUpdate.IsRejected = CalculateRejects(settings);
+			Log.Info("Вычисление ожидаемых");
 			postUpdate.IsAwaited = offersImported && CalculateAwaited();
 				//в режиме получения документов мы не должны предлагать а должны просто открывать
 			if (!syncData.Match("Waybills"))
@@ -849,6 +854,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 				result = UpdateResult.SilentOk;
 			}
 
+			Log.Info("Импорт файлов");
 			var dirs = Config.KnownDirs(settings);
 			var resultDirs = Directory.GetDirectories(Config.UpdateTmpDir)
 				.Select(d => dirs.FirstOrDefault(r => r.Name.Match(Path.GetFileName(d))))
@@ -884,6 +890,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			if (Clean)
 				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Client.PutAsync("Main", confirm, Formatter), "Подтверждение обновления");
+			Log.Info("Импорт завершен");
 		}
 
 		private bool CalculateAwaited()
