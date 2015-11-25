@@ -98,7 +98,8 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var columns = new[] {
 				new PrintColumn("№ пп", 27),
-				new PrintColumn("Наименование и краткая характеристика товара", 200),
+				new PrintColumn("Наименование и краткая характеристика товара", 170, colSpan: 2),
+				new PrintColumn("", 30),
 				new PrintColumn("Серия товара", 50),
 				new PrintColumn("Сертификат", 66),
 				new PrintColumn("Срок годности", 60),
@@ -120,6 +121,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = lines.Select((l, i) => new object[] {
 				++i,
 				l.Product,
+				l.ActualVitallyImportant ? "ЖВ" : "",
 				l.SerialNumber,
 				l.Certificates,
 				l.Period,

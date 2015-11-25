@@ -12,12 +12,14 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	public class PrintColumn
 	{
-		public PrintColumn(string name, int width)
+		public PrintColumn(string name, int width, int colSpan = 1)
 		{
 			Name = name;
 			Width = width;
+			ColSpan = colSpan;
 		}
 
+		public int ColSpan;
 		public string Name;
 		public int Width;
 	}
@@ -321,6 +323,8 @@ namespace AnalitF.Net.Client.Models.Print
 			var headerRow = new TableRow();
 			for (var i = 0; i < columns.Length; i++) {
 				var column = columns[i];
+				if (String.IsNullOrEmpty(column.Name))
+					continue;
 				var group = groups.FirstOrDefault(g => i >= g.First && i <= g.Last);
 				if (group != null && group == lastgroup)
 					continue;
@@ -335,6 +339,9 @@ namespace AnalitF.Net.Client.Models.Print
 				}
 				else if (groups.Any()) {
 					tableCell.RowSpan = 2;
+				}
+				if (column.ColSpan > 1) {
+					tableCell.ColumnSpan = column.ColSpan;
 				}
 
 				headerRow.Cells.Add(tableCell);

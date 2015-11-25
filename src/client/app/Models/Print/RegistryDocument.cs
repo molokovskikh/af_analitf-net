@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Models.Print
 			//WrapDirection = WrapDirection.None нужно что бы текст заголовка не пытался заполнить пустое пространство
 			//а располагался отдельно
 			block.Inlines.Add(new Figure(new Paragraph(new Run("УТВЕРЖДАЮ\n"
-				+ String.Format("Зав.аптекой ______________{0}", settings.Director)))) {
+				+ $"Зав.аптекой ______________{settings.Director}"))) {
 					HorizontalAnchor = FigureHorizontalAnchor.PageRight,
 					WrapDirection = WrapDirection.None,
 					Padding = new Thickness(0, 0, 29, 0)
@@ -128,7 +128,8 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var columns = new[] {
 				new PrintColumn("№ пп", 27),
-				new PrintColumn("Наименование и краткая характеристика товара", 200),
+				new PrintColumn("Наименование и краткая характеристика товара", 170, colSpan: 2),
+				new PrintColumn(null, 30),
 				new PrintColumn("Серия товара", 84),
 				new PrintColumn("Срок годности", 60),
 				new PrintColumn("Наименование", 100),
@@ -150,9 +151,10 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = lines.Select((l, i) => new object[] {
 				++i,
 				l.Product,
+				l.ActualVitallyImportant ? "ЖВ" : "",
 				l.SerialNumber,
 				l.Period,
-				string.Format("{0} {1}", l.Producer, l.Country),
+				$"{l.Producer} {l.Country}",
 				l.ProducerCost != null ? l.ProducerCost.Value.ToString("0.00") : "",
 				l.ProducerCostWithTax != null ? l.ProducerCostWithTax.Value.ToString("0.00") : "",
 				l.RegistryCost != null ? l.RegistryCost.Value.ToString("0.00") : "",
@@ -184,9 +186,9 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(0)
 			});
 			Block("Члены комиссии:\n"
-				+ String.Format("_{0}____/             /\n", docSettings.CommitteeMember1)
-				+ String.Format("_{0}____/             /\n", docSettings.CommitteeMember2)
-				+ String.Format("_{0}____/             /", docSettings.CommitteeMember3));
+				+ $"_{docSettings.CommitteeMember1}____/             /\n"
+				+ $"_{docSettings.CommitteeMember2}____/             /\n"
+				+ $"_{docSettings.CommitteeMember3}____/             /");
 		}
 
 		public override FrameworkContentElement GetHeader(int page, int pageCount)
@@ -196,7 +198,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return new Paragraph(new Run(string.Format("страница {0} из {1}", page + 1, pageCount))) {
+			return new Paragraph(new Run($"страница {page + 1} из {pageCount}")) {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8
 			};

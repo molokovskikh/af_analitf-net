@@ -163,7 +163,7 @@ namespace AnalitF.Net.Client.Models.Print
 					l.SupplierCostWithoutNds.FormatCost(),
 					l.AmountExcludeTax.FormatCost(),
 					l.ExciseTax,
-					string.Format("{0}%", l.Nds),
+					$"{l.Nds}%",
 					l.NdsAmount.FormatCost(),
 					l.Amount.FormatCost(),
 					l.CountryCode,
