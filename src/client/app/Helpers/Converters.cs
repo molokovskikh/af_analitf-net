@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Controls;
+using log4net;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -59,22 +60,34 @@ namespace AnalitF.Net.Client.Helpers
 
 	public class UriToBitmapConverter : IValueConverter
 	{
+		private ILog log = LogManager.GetLogger(typeof(UriToBitmapConverter));
+
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			if (value == null || String.IsNullOrEmpty(value.ToString()))
 				return null;
 
-			var bi = new BitmapImage();
-			bi.BeginInit();
-			if (value is string) {
-				bi.UriSource = new Uri(value.ToString());
-				bi.CacheOption = BitmapCacheOption.OnLoad;
+			//здесь может возникнуть ошибка при загрузке картинке например
+			//System.NotSupportedException: No imaging component suitable to complete this operation was found.
+			//---> System.Runtime.InteropServices.COMException: Exception from HRESULT: 0x88982F50
+			//все бы ничего но caliburn деактивации\активации формы не сможет установить фарму из-за этого исключения
+			try {
+				var bi = new BitmapImage();
+				bi.BeginInit();
+				if (value is string) {
+					bi.UriSource = new Uri(value.ToString());
+					bi.CacheOption = BitmapCacheOption.OnLoad;
+				}
+				else {
+					bi.StreamSource = (Stream)value;
+				}
+				bi.EndInit();
+				return bi;
 			}
-			else {
-				bi.StreamSource = (Stream)value;
+			catch(Exception e) {
+				log.Error("Не удалось загрузить изображение", e);
+				return null;
 			}
-			bi.EndInit();
-			return bi;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
