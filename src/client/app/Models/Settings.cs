@@ -310,12 +310,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				using(var user = new RasPhoneBook())
-				using(var all = new RasPhoneBook()) {
-					user.Open(RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.User));
-					all.Open(RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.AllUsers));
-					return user.Entries.Concat(all.Entries).Select(p => p.Name).Distinct().ToArray();
+				var connections = new List<string>();
+				foreach (var path in RasHelper.GetPhoneBooks()) {
+					using(var book = new RasPhoneBook()) {
+						book.Open(path);
+						connections.AddRange(book.Entries.Select(x => x.Name));
+					}
 				}
+				return connections.Distinct(StringComparer.CurrentCultureIgnoreCase).ToArray();
 			}
 		}
 
