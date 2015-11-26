@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive.Disposables;
@@ -6,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Tools;
 using DotRas;
+using log4net;
 
 namespace AnalitF.Net.Client.Helpers
 {
@@ -28,18 +31,18 @@ namespace AnalitF.Net.Client.Helpers
 
 		protected override void Dispose(bool disposing)
 		{
-			if (rasHelper != null)
-				rasHelper.Dispose();
+			rasHelper?.Dispose();
 			base.Dispose(disposing);
 		}
 	}
 
 	public class RasHelper : IDisposable
 	{
-		private string connectionName;
-
-		private static object sync = new object();
+		private static readonly object sync = new object();
 		private static RefCountDisposable connection;
+
+		private ILog log = LogManager.GetLogger(typeof(RasHelper));
+		private readonly string connectionName;
 		private IDisposable connectionRef = Disposable.Empty;
 
 		public RasHelper(string connection)
@@ -65,11 +68,7 @@ namespace AnalitF.Net.Client.Helpers
 				}
 
 				string phonebookPath = null;
-				var paths = new[] {
-					RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.User),
-					RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.AllUsers)
-				};
-				foreach (var path in paths) {
+				foreach (var path in GetPhoneBooks()) {
 					using(var book = new RasPhoneBook()) {
 						book.Open(path);
 						if (book.Entries.Any(e => e.Name.Match(connectionName)))
@@ -77,8 +76,10 @@ namespace AnalitF.Net.Client.Helpers
 					}
 				}
 
-				if (phonebookPath == null)
+				if (phonebookPath == null) {
+					log.Warn($"Не удалось найти соединение {connectionName}, удаленное соединение устанавливаться не будет");
 					return;
+				}
 
 				using(var dialer = new RasDialer()) {
 					dialer.PhoneBookPath = phonebookPath;
@@ -86,14 +87,26 @@ namespace AnalitF.Net.Client.Helpers
 					var handle = dialer.Dial();
 
 					var rasConnection = RasConnection.GetActiveConnections().FirstOrDefault(c => c.Handle == handle);
-					connection = new RefCountDisposable(Disposable.Create(() => {
-						if (rasConnection != null)
-							rasConnection.HangUp();
-					}));
+					connection = new RefCountDisposable(Disposable.Create(() => rasConnection?.HangUp()));
 					connectionRef = connection.GetDisposable();
 					connection.Dispose();
 				}
 			}
+		}
+
+		public static string[] GetPhoneBooks()
+		{
+			var paths = new List<string> {
+				RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.User),
+			};
+			//если пользователь не администратор и включен uac доступа к глабальной телефонной книге не будет
+			try {
+				var path = RasPhoneBook.GetPhoneBookPath(RasPhoneBookType.AllUsers);
+				using (File.OpenRead(path)) { }
+				paths.Add(path);
+			}
+			catch(Exception) { }
+			return paths.ToArray();
 		}
 
 		public void Dispose()
