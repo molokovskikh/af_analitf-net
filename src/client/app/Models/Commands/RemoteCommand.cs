@@ -51,6 +51,12 @@ namespace AnalitF.Net.Client.Models.Commands
 		public List<IResult> Results = new List<IResult>();
 		protected TimeSpan? RequestInterval;
 
+		static RemoteCommand()
+		{
+			//у нас нет валидного сертификата игнорируем проверку
+			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) => true;
+		}
+
 		protected RemoteCommand()
 		{
 			Log = LogManager.GetLogger(GetType());

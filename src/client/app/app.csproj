@@ -859,7 +859,9 @@
     <None Include="App.migration.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="App.release.config" />
+    <None Include="App.release.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
     <None Include="packages.config" />
