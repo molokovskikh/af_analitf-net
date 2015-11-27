@@ -22,10 +22,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		private Lazy<CatalogOfferViewModel> lazyModel;
 		private Catalog catalog;
 
-		private CatalogOfferViewModel model
-		{
-			get { return lazyModel.Value; }
-		}
+		private CatalogOfferViewModel model => lazyModel.Value;
 
 		[SetUp]
 		public void Setup()

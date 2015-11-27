@@ -142,10 +142,7 @@ namespace AnalitF.Net.Client.Models
 
 		//поля для сортировки
 		[IgnoreDataMember]
-		public virtual uint? SortQuantity
-		{
-			get { return NullableConvert.ToUInt32(Quantity); }
-		}
+		public virtual uint? SortQuantity => NullableConvert.ToUInt32(Quantity);
 
 		[Ignore]
 		public virtual decimal? RetailCost

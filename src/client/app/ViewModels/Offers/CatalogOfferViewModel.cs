@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Regions = new NotifyValue<List<string>>();
 			CurrentRegion = new NotifyValue<string>(Consts.AllRegionLabel);
 
-			GroupByProduct = new NotifyValue<bool>(true, () => Settings.Value.GroupByProduct, Settings);
+			GroupByProduct = new NotifyValue<bool>(Settings.Value.GroupByProduct);
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 			RetailMarkup = new NotifyValue<decimal>(true,
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
@@ -55,6 +55,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				RetailMarkup.Recalculate();
 			});
 			Persist(HideJunk, "HideJunk");
+			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");
 			SessionValue(CurrentFilter, "CurrentFilter");
 			DisplayItems = new NotifyValue<List<object>>();
