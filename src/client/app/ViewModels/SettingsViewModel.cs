@@ -269,6 +269,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Save()
 		{
+			UpdateMarkups();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
 			if (!String.IsNullOrEmpty(error)) {
@@ -296,11 +297,10 @@ namespace AnalitF.Net.Client.ViewModels
 					&& Settings.Value.GroupWaybillsBySupplier) {
 					foreach (var dirMap in DirMaps) {
 						try {
-							if (!Directory.Exists(dirMap.Dir))
-								FileHelper.CreateDirectoryRecursive(dirMap.Dir);
+							Directory.CreateDirectory(dirMap.Dir);
 						}
 						catch(Exception e) {
-							Log.Error(String.Format("Не удалось создать директорию {0}", dirMap.Dir), e);
+							Log.Error($"Не удалось создать директорию {dirMap.Dir}", e);
 						}
 					}
 				}

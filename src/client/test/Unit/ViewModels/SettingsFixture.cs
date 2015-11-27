@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var model = new SettingsViewModel();
 			Assert.AreEqual(1, model.Nds18Markups.Value.Count);
 			model.OverwriteNds18Markups = true;
-			model.UpdateMarkups();
+			model.Save().ToArray();
 
 			var result = settings.Markups.Where(x => x.Type == MarkupType.Nds18 && x.Address == addresses[1]).Implode();
 			Assert.AreEqual("Nds18: 0 - 10000 20%", result);
