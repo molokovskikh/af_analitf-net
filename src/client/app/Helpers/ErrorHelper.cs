@@ -55,11 +55,12 @@ namespace AnalitF.Net.Client.Helpers
 				}
 			}
 
-			if ((exception is HttpRequestException
-					&& exception.InnerException is WebException)
+			if ((exception is HttpRequestException && exception.InnerException is WebException)
+				|| exception is RasException
+				//эта ошибка возникнет при чтении тела запроса если мы потеряем соединение
+				|| (exception is IOException && exception.InnerException is WebException)
 				|| (exception is TaskCanceledException
-					&& !((TaskCanceledException)exception).CancellationToken.IsCancellationRequested)
-				|| exception is RasException) {
+					&& !((TaskCanceledException)exception).CancellationToken.IsCancellationRequested)) {
 				return "Не удалось установить соединение с сервером. Проверьте подключение к Интернет.";
 			}
 
