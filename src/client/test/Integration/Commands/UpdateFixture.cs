@@ -33,12 +33,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			revertToDefaults = false;
 			restoreUser = false;
+			DataHelper.RestoreData(localSession);
 		}
 
 		[TearDown]
 		public void Teardown()
 		{
-			DataHelper.RestoreData(localSession);
+			//DataHelper.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();
@@ -457,6 +458,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.BeginTransaction();
 			settings.Password = null;
 			localSession.Flush();
+			var supplierId = localSession.Query<Supplier>().Select(x => x.Id).First();
+			localSession.CreateSQLQuery($@"
+update Addresses set Id = 27695;
+update WaybillSettings set BelongsToAddressId = 27695;
+update Suppliers set Id = 18089 where Id = {supplierId};
+").ExecuteUpdate();
+
 			using (var cleaner = new FileCleaner()) {
 				new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
 				Directory.CreateDirectory("in\\update");
@@ -471,6 +479,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			localSession.Refresh(settings);
 			Assert.IsNotNull(settings.Password);
+			Assert.AreEqual(Taxation.Nds, settings.Waybills[0].Taxation);
+			var map = localSession.Query<DirMap>().First(x => x.Supplier.Id == 18089);
+			Assert.AreEqual(".\\Загрузка\\Предельные цены производителей", map.Dir);
 
 			var order = localSession.Query<Order>().First();
 			Assert.That(order.Lines[0].ResultCost, Is.GreaterThan(0));

@@ -524,8 +524,8 @@ create temporary table temp_client_settings (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' replace into table temp_client_settings (AddressId, Name, Address, Director, Accountant,
-	Taxation, IncludeNds, IncludeNdsForVitallyImportant);
+load data infile '{mysqlFilename}' replace into table temp_client_settings (AddressId, @dummy, Address, Director, Accountant, @dummy,
+	Taxation, IncludeNdsForVitallyImportant, Name, IncludeNds);
 
 update WaybillSettings s
 join temp_client_settings t on t.AddressId = s.BelongsToAddressId
@@ -559,6 +559,11 @@ load data infile '{mysqlFilename}' replace into table temp_provider_settings (Su
 update DirMaps s
 join temp_provider_settings t on t.SupplierId = s.SupplierId
 set s.Dir = t.Dir;
+
+insert into DirMaps(SupplierId, Dir)
+select t.SupplierId, t.Dir from temp_provider_settings t
+	left join DirMaps d on d.SupplierId = t.SupplierId
+where d.Id is null;
 
 drop temporary table if exists temp_provider_settings;")
 					.ExecuteUpdate();
@@ -1126,11 +1131,10 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						continue;
 
 					var map = maps.First(m => m.Supplier.Id == doc.Supplier.Id);
-					var dst = map.Dir;
-					if (!Directory.Exists(dst))
-						FileHelper.CreateDirectoryRecursive(dst);
+					var dst = FileHelper.MakeRooted(map.Dir);
+					Directory.CreateDirectory(dst);
 
-					var files = Directory.GetFiles(srcDir, String.Format("{0}_*", doc.Id));
+					var files = Directory.GetFiles(srcDir, $"{doc.Id}_*");
 					foreach (var src in files) {
 						dst = FileHelper.Uniq(Path.Combine(dst, doc.OriginFilename));
 						File.Move(src, dst);
