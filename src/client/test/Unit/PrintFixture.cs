@@ -102,6 +102,33 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.IsNotNull(doc);
 		}
 
+		[Test]
+		public void Build_all_tags()
+		{
+			var address = new Address("Тестовый");
+			var settings = new Settings(address);
+			settings.PriceTag.Type = PriceTagType.Normal;
+			var waybill = new Waybill(address, new Supplier());
+			for(var i = 0; i < 25; i++) {
+				var line = new WaybillLine(waybill) {
+					Nds = 10,
+					SupplierCost = 251.20m,
+					SupplierCostWithoutNds = 228.36m,
+					Quantity = 1
+				};
+				waybill.AddLine(line);
+			}
+			waybill.Calculate(settings);
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			Assert.IsNotNull(doc);
+			Assert.AreEqual(2, doc.Pages.Count);
+
+			var page1 = doc.Pages[0].Child;
+			Assert.AreEqual(24, page1.Descendants<Grid>().First().Children.Count);
+			var page2 = doc.Pages[1].Child;
+			Assert.AreEqual(1, page2.Descendants<Grid>().First().Children.Count);
+		}
+
 		private static List<Offer> Offers()
 		{
 			return new List<Offer> {

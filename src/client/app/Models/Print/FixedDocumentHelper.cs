@@ -14,12 +14,12 @@ namespace AnalitF.Net.Client.Models.Print
 		public static FixedDocument BuildFixedDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
 		{
 			var document = new FixedDocument();
-			var start = 0;
-			do {
+			var left = lines.Count;
+			while (left > 0) {
 				var panel = new StackPanel();
 				var label = new Label {
 					Padding = new Thickness(0, 5, 0, 5),
-					Content = String.Format("{0} {1}", waybill.ProviderDocumentId, settings.FullName),
+					Content = $"{waybill.ProviderDocumentId} {settings.FullName}",
 					FontFamily = new FontFamily("Arial"),
 				};
 				panel.Children.Add(label);
@@ -32,21 +32,22 @@ namespace AnalitF.Net.Client.Models.Print
 				label.Measure(pageSize);
 				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
 					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
-				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref start, borderThickness));
+				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
 				page.Child.Children.Add(border);
 				document.Pages.Add(page);
-			} while (start < lines.Count - 1);
+			}
 			return document;
 		}
 
-		public static FrameworkElement BuildMapGrid(Func<int, FrameworkElement> map, int count, Size size, ref int start, double borderThickness)
+		public static FrameworkElement BuildMapGrid(Func<int, FrameworkElement> map, int count, Size size, ref int left, double borderThickness)
 		{
 			var panel = new Grid();
 			var border = new Border {
 				Child = panel,
 				BorderBrush = Brushes.Black,
 				SnapsToDevicePixels = true,
-				BorderThickness = new Thickness(borderThickness, borderThickness, 0, 0)
+				BorderThickness = new Thickness(borderThickness, borderThickness, 0, 0),
+				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
 			var height = size.Height - border.BorderThickness.Top - border.BorderThickness.Bottom;
@@ -55,8 +56,8 @@ namespace AnalitF.Net.Client.Models.Print
 			var columnIndex = 0;
 			var rowIndex = 0;
 			double consumedWidth = 0;
-			for (var i = start; i < count; i++) {
-				start = i;
+
+			for (var i = count - left; i < count; i++) {
 				var element = map(i);
 				element.Measure(size);
 
@@ -84,6 +85,7 @@ namespace AnalitF.Net.Client.Models.Print
 				element.SetValue(Grid.ColumnProperty, columnIndex);
 				panel.Children.Add(element);
 				columnIndex++;
+				left--;
 			}
 			return border;
 		}
