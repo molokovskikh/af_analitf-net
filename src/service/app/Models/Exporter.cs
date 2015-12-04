@@ -1890,6 +1890,7 @@ where r.DownloadId in (:ids)")
 
 			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
+
 				zip.BeginUpdate();
 				foreach (var tuple in Result) {
 					var filename = tuple.LocalFileName;
@@ -1906,6 +1907,11 @@ where r.DownloadId in (:ids)")
 								$"Не найден файл для экспорта {filename}");
 
 						if (File.Exists(filename)) {
+							//будь бдителен если в текущей директории существует файл с именем как tuple.ArchiveFileName то будет заархивирован он а не
+							//filename System.Exception : ICSharpCode.SharpZipLib.Zip.ZipException: Entry size/stream size mismatch
+							if (File.Exists(tuple.ArchiveFileName))
+								throw new Exception($"Файл {Path.GetFullPath(tuple.ArchiveFileName)} существует это" +
+									$" приведет к ошибке Entry size/stream size mismatch, удали и повтори попытку.");
 							zip.Add(filename, tuple.ArchiveFileName);
 						}
 						else {
