@@ -74,7 +74,17 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected override UpdateResult Execute()
 		{
 			Reporter.StageCount(4);
+			var sendLogsTask = Download();
+			if (result == UpdateResult.UpdatePending)
+				return result;
+			Import();
+			Log.InfoFormat("Обновление завершено успешно");
+			WaitAndLog(sendLogsTask, "Отправка логов");
+			return result;
+		}
 
+		public Task<HttpResponseMessage> Download()
+		{
 			var sendLogsTask = SendLogs(Client, Token);
 			HttpResponseMessage response;
 			var updateType = "накопительное";
@@ -122,11 +132,19 @@ namespace AnalitF.Net.Client.Models.Commands
 			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile, Reporter);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
-			var result = ProcessUpdate(Config.ArchiveFile);
-			Log.InfoFormat("Обновление завершено успешно");
 
-			WaitAndLog(sendLogsTask, "Отправка логов");
-			return result;
+			if (Directory.Exists(Config.UpdateTmpDir))
+				Directory.Delete(Config.UpdateTmpDir, true);
+			Directory.CreateDirectory(Config.UpdateTmpDir);
+			using (var zip = new ZipFile(Config.ArchiveFile)) {
+				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
+			}
+			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe"))) {
+				Log.InfoFormat("Получено обновление приложения");
+				result = UpdateResult.UpdatePending;
+			}
+
+			return sendLogsTask;
 		}
 
 		private HttpContent GetBatchRequest(User user, Settings settings)
@@ -166,27 +184,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 		}
-
-		public UpdateResult ProcessUpdate(string file)
-		{
-			if (Directory.Exists(Config.UpdateTmpDir))
-				Directory.Delete(Config.UpdateTmpDir, true);
-
-			Directory.CreateDirectory(Config.UpdateTmpDir);
-
-			using (var zip = new ZipFile(file)) {
-				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
-			}
-
-			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe"))) {
-				Log.InfoFormat("Получено обновление приложения");
-				return UpdateResult.UpdatePending;
-			}
-
-			Import();
-			return result;
-		}
-
 
 		//миграция данных из delphi приложения
 		public void Migrate()
@@ -289,7 +286,7 @@ where SettingsId is null;")
 
 			filename = FileHelper.MakeRooted("Password.txt");
 			if (File.Exists(filename)) {
-				var password = File.ReadAllText(filename);
+				var password = File.ReadAllText(filename).Trim();
 				Session.CreateSQLQuery("update Settings set Password = :password")
 					.SetParameter("password", password)
 					.ExecuteUpdate();
@@ -445,7 +442,11 @@ where t.`Key` = 'TicketReportDeleteUnprintableElemnts';
 
 update (Settings s, temp_global_params t)
 set s.PriceTagType = t.Value
-where t.`Key` = 'TicketReportTicketSize';")
+where t.`Key` = 'TicketReportTicketSize';
+
+update (Settings s, temp_global_params t)
+set s.UseSupplierPriceWithNdsForMarkup = t.Value
+where t.`Key` = 'UseProducerCostWithNDS';")
 					.ExecuteUpdate();
 
 				var colors = Session.CreateSQLQuery("select `Key`, `Value` from temp_global_params where `Key` like 'ln%'")
@@ -524,7 +525,7 @@ create temporary table temp_client_settings (
 	primary key(Id)
 );
 
-load data infile '{mysqlFilename}' replace into table temp_client_settings (AddressId, @dummy, Address, Director, Accountant, @dummy,
+load data infile '{mysqlFilename}' replace into table temp_client_settings (AddressId, @dummy, Address, Director, @dummy, Accountant,
 	Taxation, IncludeNdsForVitallyImportant, Name, IncludeNds);
 
 update WaybillSettings s
@@ -536,6 +537,14 @@ set s.Name = t.Name,
 	s.Taxation = t.Taxation,
 	s.IncludeNds = t.IncludeNds,
 	s.IncludeNdsForVitallyImportant = t.IncludeNdsForVitallyImportant;
+
+insert into WaybillSettings(Name, Address, Director, Accountant, BelongsToAddressId, Taxation, IncludeNds,
+	IncludeNdsForVitallyImportant, SettingsId)
+select t.Name, t.Address, t.Director, t.Accountant, t.AddressId, t.Taxation, t.IncludeNds,
+	t.IncludeNdsForVitallyImportant, (select id from Settings limit 1)
+from temp_client_settings t
+	left join WaybillSettings s on s.BelongsToAddressId = t.AddressId
+where s.Id is null;
 
 drop temporary table if exists temp_client_settings;")
 					.ExecuteUpdate();

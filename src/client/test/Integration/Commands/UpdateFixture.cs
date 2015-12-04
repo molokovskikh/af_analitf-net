@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -13,8 +14,10 @@ using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate.Linq;
+using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
+using Test.Support.log4net;
 using Test.Support.Suppliers;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
@@ -39,7 +42,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[TearDown]
 		public void Teardown()
 		{
-			//DataHelper.RestoreData(localSession);
+			DataHelper.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();
@@ -451,33 +454,38 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Migrate()
 		{
-			localSession.DeleteEach<LoadedDocument>();
-			localSession.DeleteEach<Order>();
-			localSession.DeleteEach<SentOrder>();
-			localSession.DeleteEach<Waybill>();
-			localSession.BeginTransaction();
-			settings.Password = null;
-			localSession.Flush();
-			var supplierId = localSession.Query<Supplier>().Select(x => x.Id).First();
-			localSession.CreateSQLQuery($@"
-update Addresses set Id = 27695;
-update WaybillSettings set BelongsToAddressId = 27695;
-update Suppliers set Id = 18089 where Id = {supplierId};
-").ExecuteUpdate();
+			Directory.GetFiles(".", "*.txt").Each(File.Delete);
+			FileHelper.InitDir("in\\update");
+			localSession.Clear();
+			new SchemaExport(AppBootstrapper.NHibernate.Configuration).Drop(false, true);
+			using (var sanityCheck = new SanityCheck(clientConfig))
+				sanityCheck.Check(true);
 
 			using (var cleaner = new FileCleaner()) {
-				new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
-				Directory.CreateDirectory("in\\update");
 				var cmd = new UpdateCommand {
 					Config = clientConfig
 				};
 				cmd.Process(() => {
+					cmd.Download();
+					var dir = Directory.CreateDirectory("in\\update");
+					cleaner.WatchDir(dir.FullName);
+					new DirectoryInfo(clientConfig.UpdateTmpDir).EnumerateFiles().Each(x => {
+						x.MoveTo(Path.Combine(dir.FullName, x.Name));
+					});
+					return UpdateResult.OK;
+				});
+
+				cmd = new UpdateCommand {
+					Config = clientConfig
+				};
+				cmd.Process(() => {
+					new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
 					cmd.Migrate();
 					return UpdateResult.OK;
 				});
 			}
 
-			localSession.Refresh(settings);
+			settings = localSession.Query<Settings>().First();
 			Assert.IsNotNull(settings.Password);
 			Assert.AreEqual(Taxation.Nds, settings.Waybills[0].Taxation);
 			var map = localSession.Query<DirMap>().First(x => x.Supplier.Id == 18089);

@@ -135,8 +135,11 @@ namespace AnalitF.Net.Client.Test.Integration
 		{
 			var helper = new FixtureHelper();
 
-			var sampleData = helper.Run<SampleData>();
-			helper.Run(new LoadSampleData(sampleData.Files));
+			using (var cleaner = new FileCleaner()) {
+				var sampleData = helper.Run<SampleData>();
+				cleaner.Watch(sampleData.Files.Select(x => x.LocalFileName).Where(x => x != null));
+				helper.Run(new LoadSampleData(sampleData.Files));
+			}
 		}
 
 		private void BackupData()
