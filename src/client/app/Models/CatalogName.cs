@@ -11,7 +11,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool HaveOffers { get; set; }
 
-		[Style(Description = "Жизненно важный")]
 		public virtual bool VitallyImportant { get; set; }
 
 		public virtual bool MandatoryList { get; set; }
