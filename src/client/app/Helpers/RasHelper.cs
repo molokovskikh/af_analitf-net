@@ -56,6 +56,9 @@ namespace AnalitF.Net.Client.Helpers
 				return;
 
 			lock(sync) {
+				//если две нитки используют один RasHelper и одна уже получила ссылку
+				if (connectionRef != Disposable.Empty)
+					return;
 				//если соединение есть и его открыли мы тогда берем ссылку
 				if (connection != null && !connection.IsDisposed) {
 					connectionRef = connection.GetDisposable();

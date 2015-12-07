@@ -66,10 +66,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool IncludeNds { get; set; }
 		public virtual bool IncludeNdsForVitallyImportant { get; set; }
 
-		public virtual string FullName
-		{
-			get { return String.Format("{0}, {1}", Name, Address); }
-		}
+		public virtual string FullName => $"{Name}, {Address}";
 	}
 
 	public enum ProxyType
@@ -290,17 +287,11 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual IEnumerable<string> DocumentDirs
-		{
-			get
-			{
-				return new[] {
-					MapPath("waybills"),
-					MapPath("rejects"),
-					MapPath("docs"),
-				};
-			}
-		}
+		public virtual IEnumerable<string> DocumentDirs => new[] {
+			MapPath("waybills"),
+			MapPath("rejects"),
+			MapPath("docs"),
+		};
 
 		public virtual bool UseRas { get; set; }
 
@@ -467,13 +458,13 @@ namespace AnalitF.Net.Client.Models
 		public virtual void UpdatePriceNames(List<Price> prices)
 		{
 			if (ShowPriceName) {
-				prices.Each(p => p.Name = String.Format("{0} {1}", p.SupplierName, p.PriceName));
+				prices.Each(p => p.Name = $"{p.SupplierName} {p.PriceName}");
 			}
 			else {
 				var groups = prices.GroupBy(p => p.SupplierId).ToDictionary(g => g.Key, g => g.Count());
 				prices.Each(p => {
 					if (groups[p.SupplierId] > 1)
-						p.Name = String.Format("{0} {1}", p.SupplierName, p.PriceName);
+						p.Name = $"{p.SupplierName} {p.PriceName}";
 					else
 						p.Name = p.SupplierName;
 				});
@@ -550,7 +541,7 @@ namespace AnalitF.Net.Client.Models
 				return String.Join("", tokenSource.Select(x => x.ToString("X2")));
 			}
 			catch(Exception e) {
-				log.Error(String.Format("Ошибка при получение токена приложения, токен = {0}", ClientTokenV2), e);
+				log.Error($"Ошибка при получение токена приложения, токен = {ClientTokenV2}", e);
 				return null;
 			}
 		}
@@ -562,6 +553,36 @@ namespace AnalitF.Net.Client.Models
 			Markups.AddEach(Markups
 				.Where(x => x.Address == src)
 				.Select(x => new MarkupConfig(x, dst)));
+		}
+
+		public virtual HttpClient GetHttpClient(Config.Config config,
+			ref ProgressMessageHandler progress,
+			ref HttpClientHandler handler)
+		{
+			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
+			handler = new HttpClientHandler {
+				Credentials = GetCredential(),
+				PreAuthenticate = true,
+				Proxy = GetProxy()
+			};
+			if (handler.Credentials == null)
+				handler.UseDefaultCredentials = true;
+			progress = new ProgressMessageHandler();
+			var handlers = Handlers().Concat(new[] { progress }).ToArray();
+			var client = HttpClientFactory.Create(handler, handlers);
+			client.DefaultRequestHeaders.Add("Version", version.ToString());
+			client.DefaultRequestHeaders.Add("Client-Token", GetClientToken());
+			//признак по которому запросы можно объединить, нужно что бы в интерфейсе связать лог и запрос
+			client.DefaultRequestHeaders.Add("Request-Token", Guid.NewGuid().ToString());
+			try {
+				client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
+			} catch (Exception) { }
+			if (DebugTimeout > 0)
+				client.DefaultRequestHeaders.Add("debug-timeout", DebugTimeout.ToString());
+			if (DebugFault)
+				client.DefaultRequestHeaders.Add("debug-fault", "true");
+			client.BaseAddress = config.BaseUrl;
+			return client;
 		}
 	}
 }

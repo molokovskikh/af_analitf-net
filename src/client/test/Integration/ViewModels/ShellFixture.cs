@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 						stub.SuccessMessage = remoteCommand.SuccessMessage;
 					}
 					else {
-						command.Credentials = null;
+						command.Handler.Credentials = null;
 					}
 					return stub;
 				};
@@ -289,8 +289,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
 			Assert.IsTrue(settings);
 			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Обновление завершено успешно"));
-			Assert.AreEqual("test", ((NetworkCredential)stub.Credentials).UserName);
-			Assert.AreEqual("aioxct2", ((NetworkCredential)stub.Credentials).Password);
+			Assert.AreEqual("test", ((NetworkCredential)stub.Handler.Credentials).UserName);
+			Assert.AreEqual("aioxct2", ((NetworkCredential)stub.Handler.Credentials).Password);
 		}
 
 		[Test]

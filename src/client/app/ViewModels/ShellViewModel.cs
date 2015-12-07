@@ -751,22 +751,20 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Migrate()
 		{
-			var command = new UpdateCommand();
-			return Sync(command,
-				c => c.Process(() => {
-					((UpdateCommand)c).Migrate();
-					return UpdateResult.OK;
-				}), checkSettings: false);
+			using (var command = new UpdateCommand())
+				return Sync(command,c => c.Process(() => {
+						((UpdateCommand)c).Migrate();
+						return UpdateResult.OK;
+					}), checkSettings: false);
 		}
 
 		private IEnumerable<IResult> Import()
 		{
-			var command = new UpdateCommand();
-			return Sync(command,
-				c => c.Process(() => {
-					((UpdateCommand)c).Import();
-					return UpdateResult.OK;
-				}));
+			using (var command = new UpdateCommand())
+				return Sync(command, c => c.Process(() => {
+						((UpdateCommand)c).Import();
+						return UpdateResult.OK;
+					}));
 		}
 
 		public void CheckDb()
@@ -776,8 +774,7 @@ namespace AnalitF.Net.Client.ViewModels
 				t => {
 					if (t) {
 						windowManager.Notify("Проверка базы данных завершена.\r\nОшибок не найдено.");
-					}
-					else {
+					} else {
 						var result = windowManager.Question("Восстановление базы данных завершено.\r\n"
 							+ "В результате восстановления некоторые данные могли быть потеряны и необходимо сделать кумулятивное обновление.\r\n"
 							+ "Выполнить кумулятивное обновление?");
@@ -816,7 +813,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private IEnumerable<IResult> Sync(RemoteCommand command)
 		{
-			return Sync(command, c => c.Run());
+			using (command)
+				return Sync(command, c => c.Run());
 		}
 
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)
@@ -893,7 +891,8 @@ namespace AnalitF.Net.Client.ViewModels
 			TryClose();
 		}
 
-		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func, Action<Task<T>> success)
+		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func,
+			Action<Task<T>> success)
 		{
 			ResetNavigation();
 

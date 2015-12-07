@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Net.Http.Handlers;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,18 +39,16 @@ namespace AnalitF.Net.Client.Models.Commands
 
 	public abstract class RemoteCommand : BaseCommand
 	{
-		protected HttpClient Client;
+		protected ProgressMessageHandler HttpProgress;
 		protected JsonMediaTypeFormatter Formatter;
-
-		public string ClientToke;
-		public ICredentials Credentials;
-		public IWebProxy Proxy;
-		public string RasConnection;
+		protected TimeSpan? RequestInterval;
 
 		public string ErrorMessage;
 		public string SuccessMessage;
 		public List<IResult> Results = new List<IResult>();
-		protected TimeSpan? RequestInterval;
+		public Settings Settings;
+		public HttpClientHandler Handler;
+		public HttpClient Client;
 
 		static RemoteCommand()
 		{
@@ -76,53 +75,18 @@ namespace AnalitF.Net.Client.Models.Commands
 		public T Process<T>(Func<T> method)
 		{
 			try {
-				return RemoteTask(Progress, c => {
-					Client = c;
-					var factory = Factory;
-					using (Session = factory.OpenSession())
-					using (StatelessSession = factory.OpenStatelessSession())
-					using (var transaction = Session.BeginTransaction()) {
-						var result = method();
-						transaction.Commit();
-						return result;
-					}
-				});
+				Progress.OnNext(new Progress("Соединение", 0, 0));
+				using (Session = Factory.OpenSession())
+				using (StatelessSession = Factory.OpenStatelessSession())
+				using (var transaction = Session.BeginTransaction()) {
+					var result = method();
+					transaction.Commit();
+					return result;
+				}
 			}
 			finally {
 				Session = null;
 				StatelessSession = null;
-				Client = null;
-			}
-		}
-
-		private T RemoteTask<T>(BehaviorSubject<Progress> progress,
-			Func<HttpClient, T> action)
-		{
-			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
-			progress.OnNext(new Progress("Соединение", 0, 0));
-
-			var handler = new HttpClientHandler {
-				Credentials = Credentials,
-				PreAuthenticate = true,
-				Proxy = Proxy,
-			};
-			if (handler.Credentials == null)
-				handler.UseDefaultCredentials = true;
-
-			using (var ras = new RasHelper(RasConnection))
-			using (handler)
-			using (var client = new HttpClient(handler)) {
-				client.BaseAddress = Config.BaseUrl;
-				ras.Open();
-				client.DefaultRequestHeaders.Add("Version", version.ToString());
-				client.DefaultRequestHeaders.Add("Client-Token", ClientToke);
-				//признак по которому запросы можно объединить, нужно что бы в интерфейсе связать лог и запрос
-				client.DefaultRequestHeaders.Add("Request-Token", Guid.NewGuid().ToString());
-				try {
-					client.DefaultRequestHeaders.Add("OS-Version", Environment.OSVersion.VersionString);
-				}
-				catch (Exception) { }
-				return action(client);
 			}
 		}
 
@@ -134,17 +98,14 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (Log.IsDebugEnabled) {
 					try {
 						var content = response.Content.ReadAsStringAsync().Result;
-						Log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}",
-							response.RequestMessage, response, content);
+						Log.DebugFormat("Ошибка {1} при обработке запроса {0}, {2}", response.RequestMessage, response, content);
 					}
 					catch(Exception e) {
-						Log.Warn(String.Format("Не удалось получить отладочную" +
-							" информацию об ошибке при обработке запроса {0}",
-							response.RequestMessage), e);
+						Log.Warn("Не удалось получить отладочную информацию" +
+							$" об ошибке при обработке запроса {response.RequestMessage}", e);
 					}
 				}
-				throw new RequestException(String.Format("Произошла ошибка при обработке запроса, код ошибки {0}",
-						response.StatusCode),
+				throw new RequestException($"Произошла ошибка при обработке запроса, код ошибки {response.StatusCode}",
 					response.StatusCode);
 			}
 		}
@@ -157,16 +118,25 @@ namespace AnalitF.Net.Client.Models.Commands
 			return code == HttpStatusCode.OK || code == HttpStatusCode.NoContent;
 		}
 
-		public void Configure(Settings value, Config.Config config, CancellationToken token)
+		public virtual void Configure(Settings value, Config.Config config, CancellationToken token)
 		{
-			Credentials = value.GetCredential();
-			Proxy = value.GetProxy();
-			ClientToke = value.GetClientToken();
-			if (value.UseRas) {
-				RasConnection = value.RasConnection;
-			}
 			Config = config;
 			Token = token;
+			Settings = value;
+			if (Client != null) {
+				Client.Dispose();
+				Disposable.Remove(Client);
+			}
+			if (HttpProgress != null) {
+				HttpProgress.HttpReceiveProgress -= ReceiveProgress;
+			}
+			Client = Settings.GetHttpClient(Config, ref HttpProgress, ref Handler);
+			Disposable.Add(Client);
+			HttpProgress.HttpReceiveProgress += ReceiveProgress;
+		}
+
+		protected virtual void ReceiveProgress(object sender, HttpProgressEventArgs args)
+		{
 		}
 
 		protected HttpResponseMessage Wait(string statusCheckUrl, Task<HttpResponseMessage> task, ref uint requestId)

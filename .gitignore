@@ -11,3 +11,4 @@ AssemblyInfo.cs
 TestResult.xml
 *.gen.*
 scripts/guard/
+.vs

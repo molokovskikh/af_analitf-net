@@ -503,29 +503,15 @@ namespace AnalitF.Net.Client.ViewModels
 				Dispose();
 			}
 			catch(Exception e) {
-				Log.Error(String.Format("Ошибка при освобождении объекта {0} {1}", GetType(), GetHashCode()), e);
+				Log.Error($"Ошибка при освобождении объекта {GetType()} {GetHashCode()}", e);
 			}
 		}
 
 		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObservLoad(Loadable loadable)
 		{
-			var version = typeof(AppBootstrapper).Assembly.GetName().Version;
-			var handler = new HttpClientHandler {
-				Credentials = Settings.Value.GetCredential(),
-				PreAuthenticate = true,
-				Proxy = Settings.Value.GetProxy()
-			};
-			if (handler.Credentials == null)
-				handler.UseDefaultCredentials = true;
-			var progress = new ProgressMessageHandler();
-			var handlers = Settings.Value.Handlers().Concat(new[] { progress }).ToArray();
-			var client = HttpClientFactory.Create(handler, handlers);
-			client.DefaultRequestHeaders.Add("version", version.ToString());
-			if (Settings.Value.DebugTimeout > 0)
-				client.DefaultRequestHeaders.Add("debug-timeout", Settings.Value.DebugTimeout.ToString());
-			if (Settings.Value.DebugFault)
-				client.DefaultRequestHeaders.Add("debug-fault", "true");
-			client.BaseAddress = Shell.Config.BaseUrl;
+			ProgressMessageHandler progress = null;
+			HttpClientHandler handler = null;
+			var client = Settings.Value.GetHttpClient(Shell.Config, ref progress, ref handler);
 
 			var data = new[] {
 				String.Format("urn:data:{0}:{1}", NHibernateUtil.GetClass(loadable).Name.ToLower(), loadable.GetId())
@@ -647,8 +633,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			foreach (var view in Views.Values) {
 				var method = view.GetType().GetMethod("ApplyStyles");
-				if (method != null)
-					method.Invoke(view, null);
+				method?.Invoke(view, null);
 			}
 		}
 

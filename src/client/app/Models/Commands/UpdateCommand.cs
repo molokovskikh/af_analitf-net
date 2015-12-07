@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Handlers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -62,6 +63,9 @@ namespace AnalitF.Net.Client.Models.Commands
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
 		private uint requestId;
+		private HttpResponseMessage ProgressMessage;
+		private bool reportProgress;
+		public int lastTransfer;
 
 		public UpdateCommand()
 		{
@@ -142,7 +146,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			Reporter.Stage("Загрузка данных");
 			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
-			Download(response, Config.ArchiveFile, Reporter);
+			Download(response, Config.ArchiveFile).Wait(Token);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
 
 			if (Directory.Exists(Config.UpdateTmpDir))
@@ -1183,17 +1187,25 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.ToList();
 		}
 
-		private static void Download(HttpResponseMessage response, string filename, ProgressReporter reporter)
+		private async Task Download(HttpResponseMessage response, string filename)
 		{
-			using (var file = File.Create(filename))
-			using (var stream = response.Content.ReadAsStreamAsync().Result) {
-				reporter.Weight((int)response.Content.Headers.ContentLength.GetValueOrDefault());
-				var buffer = new byte[4*1024];
-				int count;
-				while ((count = stream.Read(buffer, 0, buffer.Length)) != 0) {
-					file.Write(buffer, 0, count);
-					reporter.Progress(count);
+			reportProgress = true;
+			try {
+				using (var file = File.Create(filename)) {
+					Reporter.Weight((int)response.Content.Headers.ContentLength.GetValueOrDefault());
+					await response.Content.CopyToAsync(file);
 				}
+			} finally {
+				reportProgress = false;
+			}
+		}
+
+		protected override void ReceiveProgress(object sender, HttpProgressEventArgs args)
+		{
+			if (reportProgress) {
+				//Здесь мы получаем передано всего и нам нужно вычислить сколько передали после последнего уведомления
+				Reporter.Progress(args.BytesTransferred - lastTransfer);
+				lastTransfer = args.BytesTransferred;
 			}
 		}
 
@@ -1214,7 +1226,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				return;
 
 			try {
-				task.Wait();
+				task.Wait(Token);
 				if (!IsOkStatusCode(task.Result?.StatusCode))
 					Log.Error($"Задача '{name}' завершилась ошибкой {task.Result}");
 			}
