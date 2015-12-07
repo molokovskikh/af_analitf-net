@@ -76,9 +76,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 						stub.ErrorMessage = remoteCommand.ErrorMessage;
 						stub.SuccessMessage = remoteCommand.SuccessMessage;
 					}
-					else {
-						command.Handler.Credentials = null;
-					}
 					return stub;
 				};
 				return value;
