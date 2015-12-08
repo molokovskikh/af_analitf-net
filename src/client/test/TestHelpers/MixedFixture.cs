@@ -140,7 +140,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (localSession.Transaction.IsActive)
 				localSession.Transaction.Commit();
 
-			command.Config = clientConfig;
+			command.Configure(settings, clientConfig);
 			return command.Run();
 		}
 
