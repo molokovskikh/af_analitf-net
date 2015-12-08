@@ -174,10 +174,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			RemoteCommand command1 = new UpdateCommand();
-			command1.Config = clientConfig;
+			var command1 = new UpdateCommand();
+			command1.Configure(settings, clientConfig);
 			command1.Process(() => {
-				((UpdateCommand)command1).Import();
+				command1.Import();
 				return UpdateResult.OK;
 			});
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));

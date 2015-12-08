@@ -45,7 +45,7 @@ namespace AnalitF.Net.Service.Test
 				config.RegulatorRegistryPriceId = supplier.Prices[0].Id;
 			}
 			user = session.Load<User>(client.Users[0].Id);
-			FileHelper.InitDir("data", "update");
+			FileHelper.InitDir("data", "var/update");
 			Directory.CreateDirectory(config.LocalExportPath);
 			Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
 			controller = new MainController {
@@ -61,8 +61,7 @@ namespace AnalitF.Net.Service.Test
 		[TearDown]
 		public void TearDown()
 		{
-			if (exporter != null)
-				exporter.Dispose();
+			exporter?.Dispose();
 		}
 
 		[Test]
@@ -77,8 +76,8 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_update()
 		{
-			File.WriteAllText("update\\version.txt", "1.2");
-			File.WriteAllBytes("update\\analitf.net.client.exe", new byte[] { 0x00 });
+			File.WriteAllText("var/update/version.txt", "1.2");
+			File.WriteAllBytes("var/update/analitf.net.client.exe", new byte[] { 0x00 });
 
 			exporter.ExportAll();
 			ExportCompressed();
@@ -144,7 +143,7 @@ namespace AnalitF.Net.Service.Test
 		public void Export_all_offers()
 		{
 			var supplier = TestSupplier.CreateNaked(session);
-			client.MaintainIntersection();
+			client.MaintainIntersection(session);
 			var price = supplier.Prices[0];
 			var product = session.Query<TestProduct>().First(p => !p.CatalogProduct.Hidden);
 			var synonym = price.AddProductSynonym(product.CatalogProduct.Name, product);
@@ -394,12 +393,11 @@ where userId = :userId and FirmCode = :supplierId")
 			requestLog = new RequestLog(user, Version.Parse("1.1")) {
 				LastSync = lastSync
 			};
-			if (exporter != null)
-				exporter.Dispose();
+			exporter?.Dispose();
 			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
-				UpdatePath = "update",
+				UpdatePath = "var/update",
 			};
 		}
 

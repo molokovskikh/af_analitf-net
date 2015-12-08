@@ -40,10 +40,7 @@ namespace AnalitF.Net.Service.Config
 		public bool DebugExport { get; set; }
 		public long MaxReclameFileSize { get; set; }
 
-		public string RtmUpdatePath
-		{
-			get { return Path.Combine(UpdatePath, "rtm"); }
-		}
+		public string RtmUpdatePath => Path.Combine(UpdatePath, "rtm");
 
 		public TimeSpan ExportTimeout { get; set; }
 		public string PerUserSqlPath { get; set; }
