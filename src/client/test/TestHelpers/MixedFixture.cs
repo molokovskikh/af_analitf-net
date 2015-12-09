@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				XmlConfigurator.Configure();
 			}
 			disposable?.Dispose();
-			DataHelper.SaveFailData();
+			DbHelper.SaveFailData();
 		}
 
 		protected T Fixture<T>()

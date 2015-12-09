@@ -799,14 +799,6 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 			settings.WaybillDir = FileHelper.MakeRooted("Waybills");
 			settings.RejectDir = FileHelper.MakeRooted("Rejects");
 			settings.DocDir = FileHelper.MakeRooted("Docs");
-			Log.Info("Пересчет накладных");
-			ProcessBatch(
-				Session.Query<Waybill>().Where(w => w.Sum == 0).OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
-				(s, x) => {
-					foreach (var id in x) {
-						s.Load<Waybill>(id).Calculate(settings);
-					}
-				});
 			Session.Flush();
 			Log.Info("Перенос данных завершен");
 			Import();

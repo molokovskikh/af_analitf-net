@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(cert);
 			Line.Certificate = cert;
 			//если тесты запускать несколько раз с перезаливкой базы то id будет одинаковый
-			File.Copy(Path.Combine(DataHelper.GetRoot(), "assets", "certificate.gif"),
+			File.Copy(Path.Combine(DbHelper.GetRoot(), "assets", "certificate.gif"),
 				Path.Combine(Config.CertificatesPath, file.Id + ".gif"), true);
 			if (Verbose)
 				Console.WriteLine("Для строки {0} накладной {1} создан сертификат", Line.Product, Line.Waybill.Log.Id);

@@ -9,13 +9,14 @@ using Common.Tools;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
+using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
 using Environment = System.Environment;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
-	public class DataHelper
+	public class DbHelper
 	{
 		public static void RestoreData(ISession localSession)
 		{
@@ -98,6 +99,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			return TestContext.CurrentContext.Result.State == TestState.Failure
 				|| TestContext.CurrentContext.Result.State == TestState.Error;
+		}
+
+		public static void Drop()
+		{
+			new SchemaExport(AppBootstrapper.NHibernate.Configuration).Drop(false, true);
 		}
 	}
 }

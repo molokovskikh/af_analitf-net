@@ -52,8 +52,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			var serviceConfig = IntegrationSetup.serviceConfig;
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
-			DataHelper.CopyBin("acceptance", serviceConfig.RtmUpdatePath);
-			DataHelper.CopyBin(DataHelper.ProjectBin("updater"), serviceConfig.RtmUpdatePath);
+			DbHelper.CopyBin("acceptance", serviceConfig.RtmUpdatePath);
+			DbHelper.CopyBin(DbHelper.ProjectBin("updater"), serviceConfig.RtmUpdatePath);
 			AccentanceSetup.Configure("acceptance",
 				((HttpSelfHostConfiguration)AccentanceSetup.integrationSetup.server.Configuration).BaseAddress.ToString());
 

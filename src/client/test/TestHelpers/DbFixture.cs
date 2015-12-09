@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					session.Transaction.Commit();
 			}
 			if (restore)
-				DataHelper.RestoreData(session);
+				DbHelper.RestoreData(session);
 			if (disposable != null)
 				disposable.Dispose();
 		}

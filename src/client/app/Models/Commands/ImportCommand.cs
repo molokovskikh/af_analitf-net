@@ -128,6 +128,22 @@ set Sum = (select sum(round(l.Cost * l.Count, 2)) from SentOrderLines l where l.
 where Sum = 0;")
 					.ExecuteUpdate();
 			}
+
+			//при кождом импорте мы пересчитываем 100 перенесенных накладных что бы избежать
+			//ситуации когда после обновления версии нам нужно вычислить десятки тысяч накладных
+			//пересчет должен производиться только после импорта данных
+			//иначе nhibernate попробует выбрать поставщика и получить null тк база не будет заполнена
+			//при сохранении накладной он запишит Null в поле supplierid
+			Log.Info("Пересчет перенесенных накладных");
+			ProcessBatch(
+				Session.Query<Waybill>().Where(w => w.Sum == 0 && w.IsMigrated)
+					.OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
+				(s, x) => {
+					foreach (var id in x) {
+						s.Load<Waybill>(id).Calculate(settings);
+					}
+				});
+
 			if (Session.Query<LoadedDocument>().Any()) {
 				Log.Info("Пересчет накладных");
 				Session.CreateSQLQuery(@"
@@ -136,6 +152,7 @@ update Waybills w
 	join LoadedDocuments d on d.Id = w.Id
 set IsNew = 1;")
 					.ExecuteUpdate();
+
 				//перенесенных накладных может быть много и их пересчет займет много времени
 				//не вычиляем такие накладные тк всего скорее они ни кому не нужны
 				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0 && !w.IsMigrated).ToList();

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -124,11 +124,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				XmlConfigurator.Configure();
 			}
 
-			if (DataHelper.IsTestFail()) {
+			if (DbHelper.IsTestFail()) {
 				if (DebugContext != null && DebugContext.Count > 0)
 					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
 			}
-			DataHelper.SaveFailData();
+			DbHelper.SaveFailData();
 		}
 
 		protected virtual ShellViewModel shell
