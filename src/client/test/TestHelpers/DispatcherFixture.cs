@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			SystemTime.Reset();
 			shell.Config.Quiet = false;
 			if (dispatcher != null) {
-				if (DataHelper.IsTestFail() && IsCI()
+				if (DbHelper.IsTestFail() && IsCI()
 					&& activeWindow != null) {
 					var filename = Path.GetFullPath(FileHelper.StringToFileName(TestContext.CurrentContext.Test.FullName) + ".png");
 					dispatcher.Invoke(() => {

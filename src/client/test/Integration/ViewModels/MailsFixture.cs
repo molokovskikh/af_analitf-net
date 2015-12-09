@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[TearDown]
 		public void TearDown()
 		{
-			if (DataHelper.IsTestFail())
+			if (DbHelper.IsTestFail())
 				Console.WriteLine(((MemoryAppender)catcher.Appender).GetEvents().Implode(e => e.MessageObject));
 		}
 

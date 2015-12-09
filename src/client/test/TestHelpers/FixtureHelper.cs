@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					var development = new Development();
 					development.BasePath = Environment.CurrentDirectory;
 					development.Run(IntegrationSetup.serviceConfig);
-					Setup.SessionFactory = DataHelper.ServerNHConfig("local");
+					Setup.SessionFactory = DbHelper.ServerNHConfig("local");
 				}
 				fixture.Config = IntegrationSetup.serviceConfig;
 				fixture.Verbose = verbose;

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -36,13 +37,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			revertToDefaults = false;
 			restoreUser = false;
-			DataHelper.RestoreData(localSession);
+			DbHelper.RestoreData(localSession);
 		}
 
 		[TearDown]
 		public void Teardown()
 		{
-			DataHelper.RestoreData(localSession);
+			DbHelper.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();
@@ -454,17 +455,19 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Migrate()
 		{
+			var priceId = localSession.Query<Price>().First().Id.PriceId;
+			var supplierId = localSession.Query<Supplier>().First().Id;
+			var addressId = localSession.Query<Address>().First().Id;
 			Directory.GetFiles(".", "*.txt").Each(File.Delete);
 			FileHelper.InitDir("in\\update");
 			localSession.Clear();
-			new SchemaExport(AppBootstrapper.NHibernate.Configuration).Drop(false, true);
+			DbHelper.Drop();
 			using (var sanityCheck = new SanityCheck(clientConfig))
 				sanityCheck.Check(true);
 
 			using (var cleaner = new FileCleaner()) {
-				var cmd = new UpdateCommand {
-					Config = clientConfig
-				};
+				var cmd = new UpdateCommand();
+				cmd.Configure(settings, clientConfig, CancellationToken.None);
 				cmd.Process(() => {
 					cmd.Download();
 					var dir = Directory.CreateDirectory("in\\update");
@@ -472,18 +475,27 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 					new DirectoryInfo(clientConfig.UpdateTmpDir).EnumerateFiles().Each(x => {
 						x.MoveTo(Path.Combine(dir.FullName, x.Name));
 					});
+					//идентфикаторы в тестовых данных
 					return UpdateResult.OK;
 				});
 
-				cmd = new UpdateCommand {
-					Config = clientConfig
-				};
+				cmd = new UpdateCommand();
+				cmd.Configure(settings, clientConfig, CancellationToken.None);
 				cmd.Process(() => {
 					new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
 					cmd.Migrate();
 					return UpdateResult.OK;
 				});
 			}
+			//идентификаторы не совпадают тк данные для переноса статичные, подделываем id для проверки
+			localSession.CreateSQLQuery(@"
+update Prices set PriceId = 7537 where PriceId = :priceId;
+update Suppliers set Id = 234 where Id = :supplierId;
+update Addresses set Id =  2575 where Id = :addressId")
+				.SetParameter("priceId", priceId)
+				.SetParameter("supplierId", supplierId)
+				.SetParameter("addressId", addressId)
+				.ExecuteUpdate();
 
 			settings = localSession.Query<Settings>().First();
 			Assert.IsNotNull(settings.Password);
@@ -492,14 +504,20 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(".\\Загрузка\\Предельные цены производителей", map.Dir);
 
 			var order = localSession.Query<Order>().First();
+			Assert.IsNotNull(order.Price);
+			Assert.IsNotNull(order.Address);
 			Assert.That(order.Lines[0].ResultCost, Is.GreaterThan(0));
 			Assert.IsNotNullOrEmpty(order.Lines[0].Producer);
 
 			var sentOrder = localSession.Query<SentOrder>().First();
+			Assert.IsNotNull(sentOrder.Price);
+			Assert.IsNotNull(sentOrder.Address);
 			Assert.That(sentOrder.Lines[0].ResultCost, Is.GreaterThan(0));
 			Assert.IsNotNullOrEmpty(sentOrder.Lines[0].Producer);
 
 			var waybill = localSession.Query<Waybill>().First(x => x.Id == 39153110);
+			Assert.IsNotNull(waybill.Supplier);
+			Assert.IsNotNull(waybill.Address);
 			var line = waybill.Lines.FirstOrDefault(x => x.SerialNumber == "10891996");
 			Assert.AreEqual(35, line.MaxRetailMarkup);
 			Assert.AreEqual(678.50, line.RetailCost);

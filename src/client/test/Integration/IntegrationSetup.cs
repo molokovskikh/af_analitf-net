@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			LogManager.GetLog = t => new Log4net(t);
 			AppBootstrapper.InitUi(true);
 
-			global::Test.Support.Setup.SessionFactory = DataHelper.ServerNHConfig("server");
+			global::Test.Support.Setup.SessionFactory = DbHelper.ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);
 
 			var nhibernate = new Client.Config.NHibernate.NHibernate();
@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Test.Integration
 				ImportData();
 				BackupData();
 			}
-			DataHelper.SeedDb();
+			DbHelper.SeedDb();
 			isInitialized = true;
 		}
 
@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.Test.Integration
 
 		private void BackupData()
 		{
-			DataHelper.CopyDb(BackupDir);
+			DbHelper.CopyDb(BackupDir);
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public void Rollback(ISession session)
 		{
-			DataHelper.RestoreData(session);
+			DbHelper.RestoreData(session);
 		}
 	}
 }

@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 				else {
 					var factory = FixtureHelper.GetFactory();
 					if (method.GetCustomAttributes(typeof(ServiceAttribute)).Any()) {
-						factory = DataHelper.ServerNHConfig("local");
+						factory = DbHelper.ServerNHConfig("local");
 					}
 
 					using (var session = factory.OpenSession())

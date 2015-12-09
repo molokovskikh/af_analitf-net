@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		public void TearDown()
 		{
 			if (restore)
-				DataHelper.RestoreData(localSession);
+				DbHelper.RestoreData(localSession);
 		}
 
 		[Test]
