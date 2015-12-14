@@ -47,6 +47,8 @@ namespace AnalitF.Net.Client.Controls
 			ItemsSourceProperty.OverrideMetadata(typeof(DataGrid2), new FrameworkPropertyMetadata(null, OnCoerceItemsSourceProperty));
 		}
 
+		public event EventHandler<EventArgs> ItemSourceChanged;
+
 		public DataGrid2()
 		{
 			//раньше для установки восстановления выделения использовалась перегрузка OnItemsChanged но
@@ -352,6 +354,7 @@ namespace AnalitF.Net.Client.Controls
 					DataGridHelper.Focus(this);
 				}));
 			}
+			ItemSourceChanged?.Invoke(this, new EventArgs());
 		}
 
 		protected override Size MeasureOverride(Size availableSize)

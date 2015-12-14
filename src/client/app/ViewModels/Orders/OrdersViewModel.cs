@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Subscribe(_ => Update(), CloseCancellation.Token);
 
-			var addressId = Address != null ? Address.Id : 0;
+			var addressId = (Address?.Id).GetValueOrDefault();
 			if (Session != null) {
 				AddressesToMove = Session.Query<Address>()
 					.Where(a => a.Id != addressId)
@@ -214,7 +214,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			set
 			{
 				orders = value;
-				NotifyOfPropertyChange("Orders");
+				NotifyOfPropertyChange(nameof(Orders));
 			}
 		}
 
@@ -224,8 +224,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			set
 			{
 				currentOrder = value;
-				NotifyOfPropertyChange("CurrentOrder");
-				NotifyOfPropertyChange("EditableOrder");
+				NotifyOfPropertyChange(nameof(CurrentOrder));
+				NotifyOfPropertyChange(nameof(EditableOrder));
 			}
 		}
 
@@ -236,7 +236,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			set
 			{
 				sentOrders = value;
-				NotifyOfPropertyChange("SentOrders");
+				NotifyOfPropertyChange(nameof(SentOrders));
 			}
 		}
 
@@ -296,10 +296,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Orders.Remove(order);
 		}
 
-		public bool FreezeVisible
-		{
-			get { return IsCurrentSelected; }
-		}
+		public bool FreezeVisible => IsCurrentSelected;
 
 		public bool CanFreeze
 		{
@@ -318,15 +315,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				selectedOrder.Frozen = true;
 		}
 
-		public bool UnfreezeVisible
-		{
-			get { return IsCurrentSelected; }
-		}
+		public bool UnfreezeVisible => IsCurrentSelected;
 
-		public bool CanUnfreeze
-		{
-			get { return CurrentOrder != null && CurrentOrder.Frozen && !IsSentSelected; }
-		}
+		public bool CanUnfreeze => (CurrentOrder?.Frozen).GetValueOrDefault() && !IsSentSelected;
 
 		public IEnumerable<IResult> Unfreeze()
 		{
@@ -390,10 +381,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return CurrentSentOrder != null && IsSentSelected; }
 		}
 
-		public bool RestoreOrderVisible
-		{
-			get { return IsSentSelected; }
-		}
+		public bool RestoreOrderVisible => IsSentSelected;
 
 		public IEnumerable<IResult> RestoreOrder()
 		{
@@ -412,10 +400,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			get { return IsCurrentSelected && CurrentOrder != null && AddressesToMove.Count > 0; }
 		}
 
-		public bool MoveVisible
-		{
-			get { return IsCurrentSelected; }
-		}
+		public bool MoveVisible => IsCurrentSelected;
 
 		public IEnumerable<IResult> Move()
 		{
