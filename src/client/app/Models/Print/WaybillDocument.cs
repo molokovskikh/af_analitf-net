@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			Header(String.Format("\n                               Наименование организации: {0}\n", settings.FullName)
+			Header($"\n                               Наименование организации: {settings.FullName}\n"
 				+ "             Отдел:______________________________________________\n");
 
 			TwoColumns();
@@ -91,9 +91,9 @@ namespace AnalitF.Net.Client.Models.Print
 				+ "кому: ___________________________________\n"
 				+ "Основание отпуска________________________\n");
 			left.TextAlignment = TextAlignment.Center;
-			Header(String.Format("Накладная № {0} {1}\n", docSettings.ProviderDocumentId, waybill.SupplierName)
-				+ String.Format("от  {0:d}\n", docSettings.DocumentDate)
-				+ String.Format("Через кого   {0}\n", docSettings.OperatedBy)
+			Header($"Накладная № {docSettings.ProviderDocumentId} {waybill.SupplierName}\n"
+				+ $"от  {docSettings.DocumentDate:d}\n"
+				+ $"Через кого   {docSettings.OperatedBy}\n"
 				+ "Доверенность № _______от \"______\" ________20__г\n");
 
 			var columns = new[] {
@@ -125,7 +125,7 @@ namespace AnalitF.Net.Client.Models.Print
 				l.SerialNumber,
 				l.Certificates,
 				l.Period,
-				string.Format("{0} {1}", l.Producer, l.Country),
+				$"{l.Producer} {l.Country}",
 				l.ProducerCost,
 				l.Quantity,
 				l.SupplierPriceMarkup,
@@ -158,13 +158,13 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 
 			TwoColumns();
-			Block(String.Format("Затребовал:  {0}\n\n", docSettings.ReqestedBy)
+			Block($"Затребовал:  {docSettings.ReqestedBy}\n\n"
 				+ "место печати       подпись     _________________\n\n"
 				+ "\" ____\" _______________20__г\n");
-			Block(String.Format("Отпустил: Сдал (выдал)________________{0}\n\n", docSettings.SentBy)
-				+ String.Format("Получил:Принял(получил)______________{0}\n\n", docSettings.GotBy)
-				+ String.Format("Руководитель учреждения_____________{0}\n\n", settings.Director)
-				+ String.Format("Главный (старший)бухгалтер ________________{0}\n", settings.Accountant));
+			Block($"Отпустил: Сдал (выдал)________________{docSettings.SentBy}\n\n"
+				+ $"Получил:Принял(получил)______________{docSettings.GotBy}\n\n"
+				+ $"Руководитель учреждения_____________{settings.Director}\n\n"
+				+ $"Главный (старший)бухгалтер ________________{settings.Accountant}\n");
 		}
 
 		private void TwoColumns()
@@ -179,7 +179,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return new Paragraph(new Run(string.Format("страница {0} из {1}", page + 1, pageCount))) {
+			return new Paragraph(new Run($"страница {page + 1} из {pageCount}")) {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8
 			};
