@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Printing;
 using System.Reactive.Linq;
 using System.Reactive.PlatformServices;
 using System.Reflection;
@@ -119,6 +121,7 @@ namespace AnalitF.Net.Client
 
 				string batchFile = null;
 				var migrate = false;
+				var firstChance = false;
 				var options = new OptionSet {
 					{"help", "Показать справку", v => help = v != null},
 					{"version", "Показать информацию о версии", v => version = v != null},
@@ -126,6 +129,7 @@ namespace AnalitF.Net.Client
 					{"console", v => console = v != null},
 					{"encoding=", v => encoding = v},
 					{"debug=", v => debug.Add(v) },
+					{"first-chance", v => firstChance = v != null },
 					{"batch=", "Запустить приложение и вызвать автозаказ с указанным файлом", v => batchFile = v},
 					{"i", "", v => migrate = true},
 #if DEBUG
@@ -135,6 +139,16 @@ namespace AnalitF.Net.Client
 				};
 				var cmds = options.Parse(args);
 
+				if (firstChance) {
+					AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) => {
+						log.Error(new StackTrace());
+						log.Error("FirstChanceException", eventArgs.Exception);
+						if (eventArgs.Exception is PrintQueueException) {
+							var ex = (PrintQueueException)eventArgs.Exception;
+							log.ErrorFormat($"Ошибка принтера '{ex.PrinterName}'");
+						}
+					};
+				}
 				//при определения установлен ли .net могла произойти ошибка и мы решили что .net установлен но на самом деле нет
 				//или человек мог сменить компьютер
 				//в этом случае при первом запуске с ключом миграции приложение свалится, и человек получит предложение установить .net
