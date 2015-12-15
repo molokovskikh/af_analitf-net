@@ -473,7 +473,7 @@ namespace AnalitF.Net.Client.Models
 				if (String.IsNullOrEmpty(ClientTokenV2))
 					return "";
 				var encoding = Encoding.UTF8;
-				var id = new Guid(ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.CurrentUser));
+				var id = new Guid(ProtectedData.Unprotect(Convert.FromBase64String(ClientTokenV2), null, DataProtectionScope.LocalMachine));
 				var tokenString = id + "|" + dir;
 				//что бы токен выглядел мистически вычисляем его хеш
 				var tokenSource = SHA1.Create().ComputeHash(encoding.GetBytes(tokenString));
