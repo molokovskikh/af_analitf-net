@@ -785,6 +785,8 @@ ALTER TABLE WaybillLines ENABLE KEYS;
 			MigrateTable("WaybillOrders.txt", @"
 load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLineId);");
 
+			MigrateTable("AwaitedItems.txt", @"
+load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);");
 			//при миграции данные для импорта хранатся в паки in,
 			//глобальный конфиг нельзя менять иначе все последующая работа
 			//будет вестись не там где нужно, создаем нужную конфигурация для данной операции
