@@ -250,7 +250,7 @@ namespace AnalitF.Net.Client
 					bootstapper.Config.Cmd = "batch=" + batchFile;
 				bootstapper.Start();
 				result = app.Run();
-				log.DebugFormat("Приложение завершено");
+				log.InfoFormat("Приложение завершено");
 			}
 			catch(OptionException e) {
 				result = 1;
