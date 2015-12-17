@@ -84,6 +84,8 @@ namespace AnalitF.Net.Client.Helpers
 			var codes = new[] {
 				//Incorrect information in file: '%s'
 				1033,
+				//Can't find file: 'orders' (errno: 2)
+				1017,
 				//Incorrect key file for table '%s'; try to repair it
 				126, 1034,
 				//Old key file for table '%s'; repair it!

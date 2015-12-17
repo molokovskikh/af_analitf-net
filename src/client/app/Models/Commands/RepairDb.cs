@@ -48,19 +48,19 @@ namespace AnalitF.Net.Client.Models.Commands
 			foreach (var table in tables) {
 				Token.ThrowIfCancellationRequested();
 
-				var messages = ExecuteMaintainsQuery(String.Format("REPAIR TABLE {0} EXTENDED", table));
+				var messages = ExecuteMaintainsQuery($"REPAIR TABLE {table} EXTENDED");
 				var result = Parse(messages);
 				results.Add(result);
 				if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
-					result = Parse(ExecuteMaintainsQuery(String.Format("OPTIMIZE TABLE {0}", table)));
+					result = Parse(ExecuteMaintainsQuery($"OPTIMIZE TABLE {table}"));
 					results.Add(result);
 				}
 				results.Add(result);
 				if (result == RepairStatus.Fail) {
 					Log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
-					Log.Error(String.Format("DROP TABLE IF EXISTS {0}", table));
+					Log.Error($"DROP TABLE IF EXISTS {table}");
 					StatelessSession
-						.CreateSQLQuery(String.Format("DROP TABLE IF EXISTS {0}", table))
+						.CreateSQLQuery($"DROP TABLE IF EXISTS {table}")
 						.ExecuteUpdate();
 					//если заголовок таблицы поврежден то drop table не даст результатов
 					//файлы останутся а при попытке создать таблицу будет ошибка

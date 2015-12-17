@@ -67,8 +67,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						|| ((MySqlException)e.InnerException).Code == 1146)) {
 					crushOnFirstTry = true;
 					Log.Error("База данных повреждена попробую восстановить", e);
-				}
-				else {
+				} else {
 					throw;
 				}
 			}

@@ -95,7 +95,7 @@ namespace AnalitF.Net.Client
 			//нужно вывалить все исключение тк человек всего скорее пришлет снимок экрана
 			//и по нему нужно произвести диагностику
 			var message = ErrorHelper.TranslateException(e)
-				?? String.Format("Не удалось запустить приложение из-за ошибки: {0}", e);
+				?? $"Не удалось запустить приложение из-за ошибки: {e}";
 			if (!Config.Quiet)
 				MessageBox.Show(
 					message,
@@ -290,9 +290,7 @@ namespace AnalitF.Net.Client
 			try {
 				count++;
 				//если это попытка восстановления нужно очистить
-				if (Shell != null) {
-					Shell.Dispose();
-				}
+				Shell?.Dispose();
 				windowManager = (WindowManager)IoC.Get<IWindowManager>();
 				Shell = new ShellViewModel(Config);
 				Deserialize();
