@@ -18,8 +18,9 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class QuickSearch<T> : ViewAware
 	{
-		public const string RusKeys = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-		public const string EngKeys = "f,dult`;pbqrkvyjghcnea[wxio]sm.zF<DULT~:PBQRKVYJGHCNEA{WXIO}SM\">Z";
+		public const string RusKeys = "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ";
+		public const string EngKeys = "qwertyuiop[]asdfghjkl;'zxcvbnm,.QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>";
+
 		public static Dictionary<char, char> CharMap = new Dictionary<char, char>();
 
 		private string searchText;

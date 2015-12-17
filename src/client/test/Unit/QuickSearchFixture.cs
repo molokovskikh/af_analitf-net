@@ -62,5 +62,14 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.AreEqual("папа", search.SearchText);
 			Assert.AreEqual("папаверин", result);
 		}
+
+		[Test]
+		public void Remap_chars()
+		{
+			items.Add("эюя");
+			search.RemapChars = true;
+			search.SearchText = "'.z";
+			Assert.AreEqual("эюя", search.SearchText);
+		}
 	}
 }
