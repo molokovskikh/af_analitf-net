@@ -257,6 +257,7 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Print\WaybillsDoc.cs" />
     <Compile Include="Models\Sbis\SbisApi.cs" />
     <Compile Include="Models\Commands\ImportCommand.cs" />
     <Compile Include="Models\Commands\RepairDb.cs" />

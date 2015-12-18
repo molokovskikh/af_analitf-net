@@ -119,10 +119,7 @@ namespace AnalitF.Net.Client.Models.Print
 			return page.Visual;
 		}
 
-		public override bool IsPageCountValid
-		{
-			get { return paginator.IsPageCountValid; }
-		}
+		public override bool IsPageCountValid => paginator.IsPageCountValid;
 
 		public override int PageCount
 		{
@@ -155,17 +152,8 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 		}
 
-		public override IDocumentPaginatorSource Source
-		{
-			get
-			{
-				return paginator.Source;
-			}
-		}
+		public override IDocumentPaginatorSource Source => paginator.Source;
 
-		public DocumentPaginator DocumentPaginator
-		{
-			get { return this; }
-		}
+		public DocumentPaginator DocumentPaginator => this;
 	}
 }

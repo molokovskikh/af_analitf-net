@@ -46,7 +46,7 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 
 			BuildTable(rows, headers);
-			doc.Blocks.Add(new Paragraph(new Run(String.Format("Общее количество предложений: {0}", offers.Count()))));
+			doc.Blocks.Add(new Paragraph(new Run($"Общее количество предложений: {offers.Count()}")));
 		}
 	}
 }

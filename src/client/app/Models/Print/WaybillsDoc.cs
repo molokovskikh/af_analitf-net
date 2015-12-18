@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -37,7 +38,35 @@ namespace AnalitF.Net.Client.Models.Print
 				o.RetailSum
 			});
 
-			BuildTable(rows, headers);
+			var table = BuildTable(rows, headers);
+			if (waybills.Length > 0) {
+				table.RowGroups[0].Rows.Add(new TableRow {
+					Cells = {
+						new TableCell(new Paragraph(new Run("Итого: ")) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							ColumnSpan = 6,
+							TextAlignment = TextAlignment.Right
+						},
+						new TableCell(new Paragraph(new Run(waybills.Sum(x => x.Sum).ToString())) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							TextAlignment = TextAlignment.Right
+						},
+						new TableCell(new Paragraph(new Run(waybills.Sum(x => x.RetailSum).ToString())) {
+							KeepTogether = true
+						}) {
+							Style = CellStyle,
+							FontWeight = FontWeights.Bold,
+							TextAlignment = TextAlignment.Right
+						}
+					}
+				});
+			}
 		}
 	}
 }

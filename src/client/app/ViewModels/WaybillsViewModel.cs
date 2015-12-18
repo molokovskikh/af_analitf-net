@@ -13,6 +13,7 @@ using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -39,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels
 		[Description("Отказ")] Rejects,
 	}
 
-	public class WaybillsViewModel : BaseScreen
+	public class WaybillsViewModel : BaseScreen, IPrintable
 	{
 		public WaybillsViewModel()
 		{
@@ -255,6 +256,13 @@ namespace AnalitF.Net.Client.ViewModels
 			var commnand = new WaybillMarkupReport();
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
+		}
+
+		public bool CanPrint => true;
+
+		public PrintResult Print()
+		{
+			return new PrintResult(DisplayName, new WaybillsDoc(Waybills.Value.ToArray()));
 		}
 	}
 }
