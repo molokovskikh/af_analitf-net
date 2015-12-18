@@ -28,14 +28,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			DisplayName = "Сводный заказ";
 
-			LinesCount = new NotifyValue<int>();
-			OnlyWarning = new NotifyValue<bool>();
-			CurrentLine = new NotifyValue<OrderLine>();
+			InitFields();
 			Lines = new NotifyValue<ObservableCollection<OrderLine>>(new ObservableCollection<OrderLine>());
 			SentLines = new NotifyValue<List<SentOrderLine>>(new List<SentOrderLine>());
-			SelectedSentLine = new NotifyValue<SentOrderLine>();
 			IsCurrentSelected = new NotifyValue<bool>(true);
-			IsSentSelected = new NotifyValue<bool>();
 			Begin = new NotifyValue<DateTime>(DateTime.Today);
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			AddressSelector = new AddressSelector(this);
@@ -82,16 +78,19 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Observable.Merge(IsCurrentSelected.Select(x => (object)x), Lines, SentLines, currentLinesChanged)
 				.Select(_ => {
 					if (IsCurrentSelected)
-						return Lines.Value != null ? Lines.Value.Count : 0;
-					return SentLines.Value != null ? SentLines.Value.Count : 0;
+						return Lines.Value?.Count ?? 0;
+					return SentLines.Value?.Count ?? 0;
 				})
 				.Subscribe(LinesCount);
 			IsLoading = new NotifyValue<bool>();
 			IsCurrentSelected.Where(v => v)
 				.Select(_ => false)
 				.Subscribe(IsLoading);
+
+			Persist(IsExpanded, "IsExpanded");
 		}
 
+		public NotifyValue<bool> IsExpanded { get; set; }
 		public NotifyValue<bool> IsCurrentSelected { get; set ;}
 		public NotifyValue<bool> IsSentSelected { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }

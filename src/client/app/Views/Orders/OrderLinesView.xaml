@@ -46,13 +46,15 @@
 			</CheckBox>
 		</StackPanel>
 
-		<Grid Grid.Row="1" Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}">
+		<Grid Grid.Row="1" Visibility="{Binding IsCurrentSelected.Value, Converter={StaticResource BoolToCollapsed}}"
+			Name="OrdersGrid">
 			<Grid.RowDefinitions>
-				<RowDefinition />
+				<RowDefinition Name="LinesRow" MinHeight="30" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Name="OffersRow" MinHeight="30" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
-				<RowDefinition />
 			</Grid.RowDefinitions>
 
 			<c:DataGrid2 Grid.Row="0" x:Name="Lines"
@@ -122,77 +124,86 @@
 			<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
 
-			<ContentControl x:Name="ProductInfo" Grid.Row="1" />
+			<GridSplitter Grid.Row="1"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Center"
+				ShowsPreview="True"
+				Height="5" />
 
-			<StackPanel Grid.Row="2">
+			<Expander Name="Expander" Grid.Row="2" Collapsed="ExpandedCollapsed" Expanded="ExpandedCollapsed"
+				IsExpanded="{Binding IsExpanded.Value}">
+				<c:DataGrid2 x:Name="Offers"
+						caliburn:NavBinder.Prev="{x:Reference Lines}"
+						CanUserSelectMultipleItems="False"
+						CanUserSortColumns="False">
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="177*"
+								Header="Название"
+								Binding="{Binding ProductSynonym}" />
+							<c:DataGridTextColumnEx Width="89*"
+								Header="Производитель"
+								Binding="{Binding ProducerSynonym}" />
+							<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+								Header="Кат.производитель" Binding="{Binding Producer}" />
+							<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
+								TextAlignment="Right" />
+							<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
+								Binding="{Binding Doc}" />
+							<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
+							<c:DataGridTextColumnEx Width="56*"
+								Header="Срок годн."
+								Binding="{Binding Period}" TextAlignment="Center" />
+							<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
+								Binding="{Binding Price.Name}" />
+							<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
+								Binding="{Binding Price.RegionName}" />
+							<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
+								Binding="{Binding Price.PriceDate}" />
+							<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
+								Binding="{Binding RequestRatio}" />
+							<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+								Header="Мин.сумма" Binding="{Binding MinOrderSum}" />
+							<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
+								Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
+							<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
+							<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
+							<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
+							<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
+							<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" />
+							<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
+							<c:DataGridTextColumnEx Width="59*"
+								FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" />
+							<c:DataGridTextColumnEx Width="39*" Header="Остаток"
+								Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
+							<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
+								Binding="{Binding RetailCost}" />
+							<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
+								Binding="{Binding OrderLine.Comment}" />
+							<c:DataGridTextColumnEx Width="34*"
+								Header="Заказ"
+								Binding="{Binding OrderCount}" />
+							<c:DataGridTextColumnEx Width="51*"
+								Header="Сумма"
+								Binding="{Binding OrderLine.ResultSum}" />
+						</DataGrid.Columns>
+				</c:DataGrid2>
+			</Expander>
+
+			<ContentControl x:Name="OrderWarning" Grid.Row="2" />
+
+			<ContentControl x:Name="ProductInfo" Grid.Row="3" />
+
+			<StackPanel Grid.Row="4">
 				<Label Padding="5, 2, 2, 0">Комментарий</Label>
 				<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
 			</StackPanel>
 
-			<StackPanel Grid.Row="3" Visibility="{Binding OnlyWarningVisible.Value,
+			<StackPanel Grid.Row="5" Visibility="{Binding OnlyWarningVisible.Value,
 				Converter={StaticResource BoolToCollapsed}}">
 				<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
 				<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
 				Style="{StaticResource ReadOnlyText}" />
 			</StackPanel>
-
-			<c:DataGrid2 x:Name="Offers" Grid.Row="4"
-				caliburn:NavBinder.Prev="{x:Reference Lines}"
-				CanUserSelectMultipleItems="False"
-				CanUserSortColumns="False">
-				<DataGrid.Columns>
-					<DataGridTextColumn Width="177*"
-					Header="Название"
-					Binding="{Binding ProductSynonym}" />
-					<c:DataGridTextColumnEx Width="89*"
-					Header="Производитель"
-					Binding="{Binding ProducerSynonym}" />
-					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Кат.производитель" Binding="{Binding Producer}" />
-					<c:DataGridTextColumnEx Width="33*" Header="Упаковка" Binding="{Binding Volume}"
-					TextAlignment="Right" />
-					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed" Header="Документ"
-					Binding="{Binding Doc}" />
-					<c:DataGridTextColumnEx Width="48*" Header="Примечание" Binding="{Binding Note}" />
-					<c:DataGridTextColumnEx Width="56*"
-					Header="Срок годн."
-					Binding="{Binding Period}" TextAlignment="Center" />
-					<c:DataGridTextColumnEx Width="74*" Header="Прайс-лист"
-					Binding="{Binding Price.Name}" />
-					<c:DataGridTextColumnEx Width="72*" Visibility="Collapsed" Header="Регион"
-					Binding="{Binding Price.RegionName}" />
-					<c:DataGridTextColumnEx Width="87*" Header="Дата прайс-листа"
-					Binding="{Binding Price.PriceDate}" />
-					<c:DataGridTextColumnEx Width="61*" Visibility="Collapsed" Header="Кратность"
-					Binding="{Binding RequestRatio}" />
-					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Мин.сумма" Binding="{Binding MinOrderSum}" />
-					<c:DataGridTextColumnEx Width="SizeToHeader" Visibility="Collapsed"
-					Header="Мин.кол-во" Binding="{Binding MinOrderCount}" />
-					<c:DataGridTextColumnEx Width="46*" Header="Реестр.цена" Binding="{Binding RegistryCost}" />
-					<c:DataGridTextColumnEx Width="*" Header="Пред.зарег.цена" Binding="{Binding MaxProducerCost}" />
-					<c:DataGridTextColumnEx Width="*" Header="Цена производителя" Binding="{Binding ProducerCost}" />
-					<c:DataGridTextColumnEx Width="*" Header="Наценка поставщика" Binding="{Binding SupplierMarkup}" />
-					<c:DataGridTextColumnEx Width="SizeToHeader" Header="НДС" Binding="{Binding NDS}" />
-					<c:DataGridTextColumnEx Width="*" Header="Цена поставщика" Binding="{Binding Cost}" />
-					<c:DataGridTextColumnEx Width="59*"
-					FontWeight="Bold" Header="Цена" Binding="{Binding ResultCost}" />
-					<c:DataGridTextColumnEx Width="39*" Header="Остаток"
-					Binding="{Binding Quantity}" SortMemberPath="SortQuantity" TextAlignment="Right" />
-					<c:DataGridTextColumnEx Width="48*" Visibility="Collapsed" Header="Розн.цена"
-					Binding="{Binding RetailCost}" />
-					<c:DataGridTextColumnEx Width="50*" Header="Комментарий"
-					Binding="{Binding OrderLine.Comment}" />
-					<c:DataGridTextColumnEx Width="34*"
-					Header="Заказ"
-					Binding="{Binding OrderCount}" />
-					<c:DataGridTextColumnEx Width="51*"
-					Header="Сумма"
-					Binding="{Binding OrderLine.ResultSum}" />
-				</DataGrid.Columns>
-			</c:DataGrid2>
-
-			<ContentControl x:Name="OrderWarning" Grid.Row="4" />
 		</Grid>
 
 		<Grid Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}" Grid.Row="1">
