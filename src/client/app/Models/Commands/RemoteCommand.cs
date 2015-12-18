@@ -56,6 +56,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) => true;
 		}
 
+		static RemoteCommand()
+		{
+			//у нас нет валидного сертификата игнорируем проверку
+			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) => true;
+		}
+
 		protected RemoteCommand()
 		{
 			Log = LogManager.GetLogger(GetType());

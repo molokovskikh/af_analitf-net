@@ -680,6 +680,8 @@ load data infile '{mysqlFilename}' replace into table SentOrders
 			if (File.Exists(filename)) {
 				var mysqlFilename = Path.GetFullPath(filename).Replace("\\", "/");
 				Session.CreateSQLQuery($@"
+ALTER TABLE SentOrderLines DISABLE KEYS;
+
 load data infile '{mysqlFilename}' replace into table SentOrderLines
 (
 	Id,
@@ -722,12 +724,16 @@ load data infile '{mysqlFilename}' replace into table SentOrderLines
 );
 
 update SentOrders o
-set LinesCount = (select count(*) from SentOrderLines l where o.Id = l.OrderId)
-where LinesCount = 0;
+join (
+	select sum(l.Count * l.Cost) as sm,
+		count(*) as cn, l.OrderId
+	from SentOrderLines l group by l.OrderId
+) t on t.OrderId = o.Id
+set o.Sum = t.sm, o.LinesCount = t.cn
+where o.Sum = 0;
 
-update SentOrders o
-set Sum = (select Sum(l.Count * l.Cost) from SentOrderLines l where o.Id = l.OrderId)
-where Sum = 0;")
+ALTER TABLE SentOrderLines ENABLE KEYS;
+")
 					.ExecuteUpdate();
 				File.Delete(filename);
 			}
@@ -758,6 +764,8 @@ load data infile '{0}' replace into table Waybills
 )
 set IsMigrated = 1;");
 			MigrateTable("WaybillLines.txt", @"
+ALTER TABLE WaybillLines DISABLE KEYS;
+
 load data infile '{0}' replace into table WaybillLines
 (
 	Id,
@@ -786,10 +794,15 @@ load data infile '{0}' replace into table WaybillLines
 	BillOfEntryNumber,
 	EAN13,
 	ProductId,
-	ProducerId);");
+	ProducerId);
+
+ALTER TABLE WaybillLines ENABLE KEYS;
+");
 			MigrateTable("WaybillOrders.txt", @"
 load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLineId);");
 
+			MigrateTable("AwaitedItems.txt", @"
+load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);");
 			//при миграции данные для импорта хранатся в паки in,
 			//глобальный конфиг нельзя менять иначе все последующая работа
 			//будет вестись не там где нужно, создаем нужную конфигурация для данной операции
