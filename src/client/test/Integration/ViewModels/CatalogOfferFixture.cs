@@ -165,15 +165,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
 			scheduler.AdvanceToMs(4000);
 
-			Assert.AreEqual(1, model.HistoryOrders.Count, model.HistoryOrders.Implode(l => l.Id));
-			Assert.AreEqual(1, model.HistoryOrders[0].Count);
+			Assert.AreEqual(1, model.HistoryOrders.Value.Count, model.HistoryOrders.Value.Implode(l => l.Id));
+			Assert.AreEqual(1, model.HistoryOrders.Value[0].Count);
 			Assert.AreEqual(offer.Cost, model.CurrentOffer.Value.PrevOrderAvgCost);
 			Assert.AreEqual(1, model.CurrentOffer.Value.PrevOrderAvgCount);
 
 			model.CurrentOffer.Value = null;
 			Assert.IsNull(model.HistoryOrders);
 			model.CurrentOffer.Value = model.Offers.Value.First();
-			Assert.AreEqual(1, model.HistoryOrders.Count);
+			Assert.AreEqual(1, model.HistoryOrders.Value.Count);
 		}
 
 		[Test]
@@ -209,7 +209,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Load_order_history()
 		{
 			session.DeleteEach<SentOrder>();
-			model.LoadHistoryOrders();
+			model.LoadHistoryOrders(stateless);
 		}
 
 		[Test]
@@ -220,7 +220,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.DeleteEach<SentOrder>();
 			session.DeleteEach<Address>();
 
-			model.LoadHistoryOrders();
+			model.LoadHistoryOrders(stateless);
 		}
 
 		[Test]

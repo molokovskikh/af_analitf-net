@@ -162,7 +162,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (!CanShowHistoryOrders)
 				return null;
 
-			LoadHistoryOrders();
+			LoadHistoryOrders(StatelessSession);
 			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer.Value, HistoryOrders), fixedSize: true);
 		}
 

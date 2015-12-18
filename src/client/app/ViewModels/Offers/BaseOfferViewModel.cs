@@ -24,7 +24,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		private string autoCommentText;
 		private bool resetAutoComment;
 		private Catalog currentCatalog;
-		private List<SentOrderLine> historyOrders;
 
 		protected Producer EmptyProducer = new Producer(Consts.AllProducerLabel);
 		//тк уведомление о сохранении изменений приходит после
@@ -45,9 +44,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			LastEditOffer = new NotifyValue<Offer>();
 			Offers = new NotifyValue<IList<Offer>>(new List<Offer>());
-			CurrentOffer = new NotifyValue<Offer>();
 			CurrentProducer = new NotifyValue<Producer>(EmptyProducer);
 			Producers = new NotifyValue<List<Producer>>(new List<Producer> { EmptyProducer });
+			InitFields();
 
 			CurrentOffer.Subscribe(_ => {
 				if (ResetAutoComment) {
@@ -56,8 +55,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 						: null;
 				}
 			});
-			this.ObservableForProperty(m => m.CurrentOffer.Value)
-				.Subscribe(_ => InvalidateHistoryOrders());
+			CurrentOffer
+				.Select(_ => (List<SentOrderLine>)Cache[HistoryOrdersCacheKey()])
+				.Subscribe(HistoryOrders);
 
 			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
@@ -72,15 +72,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public InlineEditWarning OrderWarning { get; set; }
 
-		public List<SentOrderLine> HistoryOrders
-		{
-			get { return historyOrders; }
-			set
-			{
-				historyOrders = value;
-				NotifyOfPropertyChange("HistoryOrders");
-			}
-		}
+
+		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 
 		public Catalog CurrentCatalog
 		{
@@ -146,10 +139,24 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				RxQuery, Env);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
-				.Where(x => x != null)
-				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
+				.Throttle(Consts.LoadOrderHistoryTimeout)
+				.Select(_ => RxQuery(LoadHistoryOrders))
+				.Switch()
 				.ObserveOn(UiScheduler)
-				.Subscribe(_ => LoadHistoryOrders(), CloseCancellation.Token);
+				.Subscribe(HistoryOrders, CloseCancellation.Token);
+			CurrentOffer
+				.Where(x => !(x?.StatLoaded).GetValueOrDefault())
+				.Throttle(Consts.LoadOrderHistoryTimeout)
+				.Select(_ => RxQuery(LoadStat))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => {
+					if (x == null)
+						return;
+					CurrentOffer.Value.PrevOrderAvgCost = (decimal?)x[0];
+					CurrentOffer.Value.PrevOrderAvgCount = (decimal?)x[1];
+					CurrentOffer.Value.StatLoaded = true;
+				}, CloseCancellation.Token);
 
 			CurrentOffer
 #if !DEBUG
@@ -287,7 +294,7 @@ where c.Id = ?";
 				return;
 			}
 			LastEditOffer.Value = offer;
-			LoadStat();
+			LoadStat(StatelessSession);
 			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
 			if (offer.OrderLine != null && CurrentCatalog?.IsPKU == true && CurrentCatalog?.Id == offer.CatalogId) {
@@ -427,40 +434,34 @@ group by l.ProductId")
 				?? Offers.Value.FirstOrDefault();
 		}
 
-		protected void LoadStat()
+		protected object[] LoadStat(IStatelessSession session)
 		{
-			if (ActualAddress == null || CurrentOffer.Value == null || StatelessSession == null)
-				return;
+			if (ActualAddress == null || CurrentOffer.Value == null)
+				return null;
 
 			if (CurrentOffer.Value.StatLoaded)
-				return;
+				return null;
 
 			var begin = DateTime.Now.AddMonths(-1);
-			var values = StatelessSession.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
+			return Util.Cache(Cache,
+				Tuple.Create(ActualAddress.Id, CurrentOffer.Value.ProductId),
+				k => session.CreateSQLQuery(@"select avg(cost) as avgCost, avg(count) as avgCount
 from SentOrderLines ol
 join SentOrders o on o.Id = ol.OrderId
 where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :addressId")
 				.SetParameter("begin", begin)
 				.SetParameter("productId", CurrentOffer.Value.ProductId)
 				.SetParameter("addressId", ActualAddress.Id)
-				.UniqueResult<object[]>();
-			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)values[0];
-			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)values[1];
-			CurrentOffer.Value.StatLoaded = true;
+				.UniqueResult<object[]>());
 		}
 
-		private void InvalidateHistoryOrders()
+		public List<SentOrderLine> LoadHistoryOrders(IStatelessSession session)
 		{
-			HistoryOrders = (List<SentOrderLine>)Cache[HistoryOrdersCacheKey()];
-		}
-
-		public void LoadHistoryOrders()
-		{
-			if (ActualAddress == null || CurrentOffer.Value == null || StatelessSession == null)
-				return;
+			if (ActualAddress == null || CurrentOffer.Value == null)
+				return new List<SentOrderLine>();
 			var key = HistoryOrdersCacheKey();
-			HistoryOrders = Util.Cache(Cache, key, k => {
-				IQueryable<SentOrderLine> query = StatelessSession.Query<SentOrderLine>()
+			return Util.Cache(Cache, key, k => {
+				IQueryable<SentOrderLine> query = session.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
 				//переместить в общий блок то первый
@@ -482,8 +483,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 					.Take(20)
 					.ToList();
 			});
-
-			LoadStat();
 		}
 
 		private object HistoryOrdersCacheKey()
