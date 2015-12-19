@@ -151,7 +151,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
-					if (x == null)
+					if (x == null || CurrentOffer.Value == null)
 						return;
 					CurrentOffer.Value.PrevOrderAvgCost = (decimal?)x[0];
 					CurrentOffer.Value.PrevOrderAvgCount = (decimal?)x[1];
