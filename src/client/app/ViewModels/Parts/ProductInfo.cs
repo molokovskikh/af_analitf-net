@@ -42,7 +42,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private ShellViewModel Shell;
 
 		private BaseOffer currentOffer;
-		private Catalog currentCatalog;
 
 		private OfferComposedId offerId;
 
@@ -50,6 +49,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public ProductInfo(BaseScreen screen, IObservable<BaseOffer> value = null)
 		{
+			CurrentCatalog = new NotifyValue<Catalog>();
 			StatelessSession = screen.StatelessSession;
 			Manager = screen.Manager;
 			Shell = screen.Shell;
@@ -82,10 +82,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			Bindings = new[] { binding, binding1, binding2 };
 		}
 
-		public Catalog CurrentCatalog
-		{
-			get { return currentCatalog; }
-		}
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		public BaseOffer CurrentOffer
 		{
@@ -98,13 +95,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 				currentOffer = value;
 				if (value == null) {
-					currentCatalog = null;
+					CurrentCatalog.Value = null;
 				}
-				else if (currentCatalog == null || currentCatalog.Id != currentOffer.CatalogId) {
+				else if (CurrentCatalog.Value == null || CurrentCatalog.Value.Id != currentOffer.CatalogId) {
 					var catalogId = CurrentOffer.CatalogId;
 					if (StatelessSession == null)
 						return;
-					currentCatalog = StatelessSession.Query<Catalog>()
+					CurrentCatalog.Value = StatelessSession.Query<Catalog>()
 						.Fetch(c => c.Name)
 						.ThenFetch(n => n.Mnn)
 						.First(c => c.Id == catalogId);
@@ -114,24 +111,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 		}
 
-		public bool CanShowDescription
-		{
-			get
-			{
-				return CurrentCatalog != null
-					&& CurrentCatalog.Name.Description != null;
-			}
-		}
+		public bool CanShowDescription => CurrentCatalog.Value?.Name?.Description != null;
 
-		public bool CanShowCatalog
-		{
-			get { return CurrentCatalog != null; }
-		}
+		public bool CanShowCatalog => CurrentCatalog != null;
 
-		public bool CanShowCatalogWithMnnFilter
-		{
-			get { return CurrentCatalog != null && CurrentCatalog.Name.Mnn != null; }
-		}
+		public bool CanShowCatalogWithMnnFilter => CurrentCatalog.Value?.Name?.Mnn != null;
 
 		public void ShowCatalog()
 		{
@@ -147,7 +131,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Name.Description.Id));
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 
 		public void ShowCatalogWithMnnFilter()
@@ -156,7 +140,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				return;
 
 			var catalogViewModel = new CatalogViewModel {
-				FiltredMnn = CurrentCatalog.Name.Mnn
+				FiltredMnn = CurrentCatalog.Value.Name.Mnn
 			};
 			Shell.Navigate(catalogViewModel);
 		}

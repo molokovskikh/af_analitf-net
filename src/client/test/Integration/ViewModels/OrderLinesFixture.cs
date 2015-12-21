@@ -155,7 +155,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.IsSentSelected.Value = true;
 			scheduler.Start();
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
-			Assert.AreEqual(catalogId, model.ProductInfo2.CurrentCatalog.Id);
+			Assert.AreEqual(catalogId, model.ProductInfo2.CurrentCatalog.Value.Id);
 		}
 
 		[Test]
