@@ -72,7 +72,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public InlineEditWarning OrderWarning { get; set; }
 
-
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 
 		public Catalog CurrentCatalog
@@ -459,8 +458,8 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		{
 			if (ActualAddress == null || CurrentOffer.Value == null)
 				return new List<SentOrderLine>();
-			var key = HistoryOrdersCacheKey();
-			return Util.Cache(Cache, key, k => {
+
+			return Util.Cache(Cache, HistoryOrdersCacheKey(), k => {
 				IQueryable<SentOrderLine> query = session.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
