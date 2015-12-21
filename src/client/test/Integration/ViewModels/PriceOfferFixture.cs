@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var catalog = (CatalogViewModel)shell.ActiveItem;
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0), shell.NavigationStack.Implode());
 			Assert.That(catalog.FilterByMnn, Is.True);
-			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Name.Mnn));
+			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Value.Name.Mnn));
 		}
 
 		[Test]

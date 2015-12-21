@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentReportLine.Value = model.Lines.Value.First();
 			scheduler.AdvanceByMs(2000);
 			Assert.IsNotNull(model.CurrentCatalog);
-			Assert.AreEqual(catalog.Id, model.CurrentCatalog.Id);
+			Assert.AreEqual(catalog.Id, model.CurrentCatalog.Value.Id);
 		}
 
 		[Test]

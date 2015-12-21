@@ -79,12 +79,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			if (CurrentCost.Value == null) {
 				Offers.Value = new List<Offer>();
-				CurrentCatalog = null;
+				CurrentCatalog.Value = null;
 				return;
 			}
 
 			var catalogId = CurrentCost.Value.Catalog.Id;
-			CurrentCatalog = StatelessSession.Query<Catalog>()
+			CurrentCatalog.Value = StatelessSession.Query<Catalog>()
 				.Fetch(c => c.Name)
 				.ThenFetch(n => n.Mnn)
 				.First(c => c.Id == catalogId);

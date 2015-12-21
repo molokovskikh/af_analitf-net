@@ -63,20 +63,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<string> CurrentFilter { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
 
-		public bool CanDeleteOrder
-		{
-			get { return Price.Value.Order != null && Address != null; }
-		}
+		public bool CanDeleteOrder => Price.Value.Order != null && Address != null;
 
-		public bool CanShowHistoryOrders
-		{
-			get { return CurrentCatalog != null; }
-		}
+		public bool CanShowHistoryOrders => CurrentCatalog.Value != null;
 
-		public bool CanPrint
-		{
-			get { return User.CanPrint<PriceOfferDocument>(); }
-		}
+		public bool CanPrint => User.CanPrint<PriceOfferDocument>();
 
 		protected override void OnActivate()
 		{
@@ -163,7 +154,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return null;
 
 			LoadHistoryOrders(StatelessSession);
-			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog, CurrentOffer.Value, HistoryOrders), fixedSize: true);
+			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog.Value,
+				CurrentOffer.Value, HistoryOrders), fixedSize: true);
 		}
 
 		public IResult EnterOffer()

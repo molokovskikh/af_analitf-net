@@ -60,12 +60,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			if (CurrentItem.Value == null) {
 				Offers.Value = new List<Offer>();
-				CurrentCatalog = null;
+				CurrentCatalog.Value = null;
 				return;
 			}
 
 			var catalogId = CurrentItem.Value.Catalog.Id;
-			CurrentCatalog = StatelessSession.Query<Catalog>()
+			CurrentCatalog.Value = StatelessSession.Query<Catalog>()
 				.Fetch(c => c.Name)
 				.ThenFetch(n => n.Mnn)
 				.First(c => c.Id == catalogId);
@@ -111,10 +111,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public PrintResult Print()
 		{
 			if (ActivePrint.Value.Match("Offers")) {
-				if (CurrentCatalog == null)
+				if (CurrentCatalog.Value == null)
 					return null;
 				var offers = GetPrintableOffers();
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, offers));
+				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, offers));
 			}
 			else if (Address != null) {
 				var items = GetItemsFromView<AwaitedItem>("Items") ?? Items.Value;

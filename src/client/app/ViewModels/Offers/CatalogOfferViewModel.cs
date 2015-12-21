@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			filterCatalog = Session.Load<Catalog>((uint)id);
 			ViewHeader = filterCatalog.FullName;
 			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
-			CurrentCatalog = filterCatalog;
+			CurrentCatalog.Value = filterCatalog;
 		}
 
 		public CatalogOfferViewModel(Catalog catalog, OfferComposedId initOfferId = null)
@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			filterCatalog = catalog;
 			ViewHeader = catalog.FullName;
 			//тк мы фильтруем по каталожному продукту то нет нужды загружать его
-			CurrentCatalog = catalog;
+			CurrentCatalog.Value = catalog;
 		}
 
 		public CatalogOfferViewModel(CatalogName catalogName)
@@ -105,10 +105,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<List<object>> DisplayItems { get; set; }
 		public NotifyValue<object> CurrentDisplayItem { get; set; }
 
-		public bool CanPrint
-		{
-			get { return User.CanPrint<CatalogOfferDocument>(); }
-		}
+		public bool CanPrint => User.CanPrint<CatalogOfferDocument>();
 
 		protected override void OnInitialize()
 		{
@@ -158,12 +155,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (StatelessSession == null)
 				return;
 
-			if (CurrentCatalog == null) {
+			if (CurrentCatalog.Value == null) {
 				MaxProducerCosts.Value = new List<MaxProducerCost>();
 				return;
 			}
 
-			var catalogId = CurrentCatalog.Id;
+			var catalogId = CurrentCatalog.Value.Id;
 			MaxProducerCosts.Value = StatelessSession.Query<MaxProducerCost>()
 				.Where(c => c.CatalogId == catalogId)
 				.OrderBy(c => c.Product)

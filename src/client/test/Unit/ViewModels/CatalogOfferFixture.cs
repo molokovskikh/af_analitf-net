@@ -150,7 +150,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 					CatalogId = 52
 				},
 			};
-			model.CurrentCatalog = new Catalog {
+			model.CurrentCatalog.Value = new Catalog {
 				Id = 52,
 				Toxic = true,
 			};

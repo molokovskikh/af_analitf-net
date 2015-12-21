@@ -48,6 +48,13 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Producers = new NotifyValue<List<Producer>>(new List<Producer> { EmptyProducer });
 			InitFields();
 
+			CurrentCatalog.Select(x => x?.Name?.Description != null)
+				.Subscribe(CanShowDescription);
+			CurrentCatalog.Select(x => x?.Name?.Mnn != null)
+				.Subscribe(CanShowCatalogWithMnnFilter);
+			CurrentOffer.Select(x => x?.OrderLine?.Order)
+				.Subscribe(CurrentOrder);
+
 			CurrentOffer.Subscribe(_ => {
 				if (ResetAutoComment) {
 					AutoCommentText = CurrentOffer.Value != null && CurrentOffer.Value.OrderLine != null
@@ -62,9 +69,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			this.ObservableForProperty(m => m.CurrentOffer.Value)
 				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
 
-			this.ObservableForProperty(m => m.CurrentCatalog)
-				.Subscribe(_ => NotifyOfPropertyChange("CanShowCatalogWithMnnFilter"));
-
 			Settings.Subscribe(_ => Calculate());
 		}
 
@@ -74,16 +78,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 
-		public Catalog CurrentCatalog
-		{
-			get { return currentCatalog; }
-			set
-			{
-				currentCatalog = value;
-				NotifyOfPropertyChange("CurrentCatalog");
-				NotifyOfPropertyChange("CanShowDescription");
-			}
-		}
+		public NotifyValue<Catalog> CurrentCatalog { get; set; }
 
 		public NotifyValue<List<Producer>> Producers { get; set; }
 
@@ -94,11 +89,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public NotifyValue<Offer> CurrentOffer { get; set; }
 
-		public Order CurrentOrder => CurrentOffer.Value?.OrderLine?.Order;
+		public NotifyValue<Order> CurrentOrder { get; set; }
 
-		public bool CanShowCatalogWithMnnFilter => CurrentCatalog?.Name.Mnn != null;
+		public NotifyValue<bool> CanShowCatalogWithMnnFilter { get; set; }
 
-		public bool CanShowDescription => CurrentCatalog?.Name.Description != null;
+		public NotifyValue<bool> CanShowDescription { get; set; }
 
 		//фактический адрес доставки для которого нужно формировать заявки
 		protected Address ActualAddress => CurrentElementAddress ?? Address;
@@ -134,7 +129,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			base.OnInitialize();
 
 			Promotions = new PromotionPopup(Shell.Config,
-				this.ObservableForProperty(m => m.CurrentCatalog, skipInitial: false).Select(x => x.Value?.Name),
+				CurrentCatalog.Select(x => x?.Name),
 				RxQuery, Env);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
@@ -159,28 +154,31 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			CurrentOffer
 #if !DEBUG
-				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
+				.Throttle(Consts.ScrollLoadTimeout)
 #endif
-				.Subscribe(_ => {
-					if (Session != null) {
-						if (CurrentOffer.Value != null && (currentCatalog == null || CurrentCatalog.Id != CurrentOffer.Value.CatalogId)) {
-							var sql = @"select c.*, cn.*, m.*, cn.DescriptionId as Id
+				.Select(x => RxQuery(s => {
+					if (x == null)
+						return null;
+					if (CurrentCatalog.Value?.Id == x.CatalogId)
+						return CurrentCatalog.Value;
+					var sql = @"select c.*, cn.*, m.*, cn.DescriptionId as Id
 from Catalogs c
 join CatalogNames cn on cn.Id = c.NameId
 left join Mnns m on m.Id = cn.MnnId
 where c.Id = ?";
-							CurrentCatalog = Session
-								.Connection.Query<Catalog, CatalogName, Mnn, ProductDescription, Catalog>(sql, (c, cn, m, d) => {
-									c.Name = cn;
-									if (cn != null) {
-										cn.Mnn = m;
-										cn.Description = d;
-									}
-									return c;
-								}, new { catalogId = CurrentOffer.Value.CatalogId }).FirstOrDefault();
-						}
-					}
-				}, CloseCancellation.Token);
+					return s
+						.Connection.Query<Catalog, CatalogName, Mnn, ProductDescription, Catalog>(sql, (c, cn, m, d) => {
+							c.Name = cn;
+							if (cn != null) {
+								cn.Mnn = m;
+								cn.Description = d;
+							}
+							return c;
+						}, new { catalogId = CurrentOffer.Value.CatalogId }).FirstOrDefault();
+				}))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 
 			//изменения в LastEditOffer могут произойти уже после перехода на другое предложение
 			//по этому нужно отслеживать изменения в CurrentOffer и LastEditOffer
@@ -232,7 +230,7 @@ where c.Id = ?";
 			if (!CanShowDescription)
 				return;
 
-			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Name.Description.Id));
+			Manager.ShowDialog(new DocModel<ProductDescription>(CurrentCatalog.Value.Name.Description.Id));
 		}
 
 		public void ShowCatalogWithMnnFilter()
@@ -241,24 +239,25 @@ where c.Id = ?";
 				return;
 
 			Shell.Navigate(new CatalogViewModel {
-				FiltredMnn = CurrentCatalog.Name.Mnn
+				FiltredMnn = CurrentCatalog.Value.Name.Mnn
 			});
 		}
 
 		public void ShowCatalog()
 		{
-			if (CurrentCatalog == null)
+			if (CurrentCatalog.Value == null)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog,
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value,
 				CurrentOffer.Value?.Id);
 
 			if (NavigateOnShowCatalog) {
 				Shell.Navigate(offerViewModel);
 			}
 			else {
-				var catalogViewModel = new CatalogViewModel();
-				catalogViewModel.CurrentCatalog = CurrentCatalog;
+				var catalogViewModel = new CatalogViewModel {
+					CurrentCatalog = CurrentCatalog.Value
+				};
 
 				Shell.NavigateAndReset(catalogViewModel, offerViewModel);
 			}
@@ -296,9 +295,9 @@ where c.Id = ?";
 			LoadStat(StatelessSession);
 			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
-			if (offer.OrderLine != null && CurrentCatalog?.IsPKU == true && CurrentCatalog?.Id == offer.CatalogId) {
+			if (offer.OrderLine != null && CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
 				messages.Add(Message.Warning("Вы заказываете препарат, подлежащий" +
-					$" предметно-количественному учету и относящийся к {CurrentCatalog.PKU}"));
+					$" предметно-количественному учету и относящийся к {CurrentCatalog.Value.PKU}"));
 			}
 			ShowValidationError(messages);
 		}

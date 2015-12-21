@@ -210,18 +210,18 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.Subscribe(_ => {
 						var line = CurrentReportLine.Value;
 						if (line == null) {
-							CurrentCatalog = null;
+							CurrentCatalog.Value = null;
 							return;
 						}
 						var catalogId = line.BatchLine.CatalogId;
 						if (catalogId != null) {
-							CurrentCatalog = StatelessSession.Query<Catalog>()
+							CurrentCatalog.Value = StatelessSession.Query<Catalog>()
 								.Fetch(c => c.Name)
 								.ThenFetch(n => n.Mnn)
 								.First(c => c.Id == catalogId);
 						}
 						else {
-							CurrentCatalog = null;
+							CurrentCatalog.Value = null;
 						}
 					}, CloseCancellation.Token);
 
@@ -511,10 +511,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public PrintResult Print()
 		{
 			if (ActivePrint.Value.Match("Offers")) {
-				if (CurrentCatalog == null)
+				if (CurrentCatalog.Value == null)
 					return null;
 				var offers = GetPrintableOffers();
-				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Name.Name, offers));
+				return new PrintResult("Сводный прайс-лист", new CatalogOfferDocument(CurrentCatalog.Value.Name.Name, offers));
 			}
 			else if (Address != null) {
 				var lines = GetItemsFromView<BatchLineView>("ReportLines") ?? ReportLines.Value;

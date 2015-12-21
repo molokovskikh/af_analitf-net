@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var catalog = new Catalog("Папаверин");
 			var view = new CatalogOfferViewModel(catalog);
-			view.CurrentCatalog = catalog;
+			view.CurrentCatalog.Value = catalog;
 			view.Offers.Value = Offers();
 			var result = view.Print();
 			Assert.That(result.Paginator, Is.Not.Null);
