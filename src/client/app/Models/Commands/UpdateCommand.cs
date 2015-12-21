@@ -110,6 +110,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			if (SyncData.Match("Batch")) {
 				updateType = "автозаказ";
 				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
+				Log.Info($"Запрос обновления, тип обновления '{updateType}' файл '{BatchFile}'");
 				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user, settings), Token), ref requestId);
 			}
 			else if (SyncData.Match("WaybillHistory")) {
@@ -119,6 +120,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 					IgnoreOrders = true,
 				};
+				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else if (SyncData.Match("OrderHistory")) {
@@ -128,6 +130,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
 					IgnoreWaybills = true,
 				};
+				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else {
@@ -141,11 +144,11 @@ namespace AnalitF.Net.Client.Models.Commands
 				var url = Config.SyncUrl(syncData, lastSync);
 				SendPrices(Client, settings, Token);
 				var request = Client.GetAsync(url, Token);
+				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
 
 			Reporter.Stage("Загрузка данных");
-			Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
 			Download(response, Config.ArchiveFile).Wait(Token);
 			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
 
