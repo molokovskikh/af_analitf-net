@@ -133,23 +133,21 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				RxQuery, Env);
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
-				.Throttle(Consts.LoadOrderHistoryTimeout)
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.Select(_ => RxQuery(LoadHistoryOrders))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
 			CurrentOffer
 				.Where(x => !(x?.StatLoaded).GetValueOrDefault())
-				.Throttle(Consts.LoadOrderHistoryTimeout)
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.Select(_ => RxQuery(LoadStat))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
 					if (x == null || CurrentOffer.Value == null)
 						return;
-					CurrentOffer.Value.PrevOrderAvgCost = (decimal?)x[0];
-					CurrentOffer.Value.PrevOrderAvgCount = (decimal?)x[1];
-					CurrentOffer.Value.StatLoaded = true;
+					ApplyStat(x);
 				}, CloseCancellation.Token);
 
 			CurrentOffer
@@ -188,6 +186,13 @@ where c.Id = ?";
 				.Select(e => new Stat(Address));
 
 			OnCloseDisposable.Add(Bus.RegisterMessageSource(observable));
+		}
+
+		private void ApplyStat(object[] x)
+		{
+			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)x[0];
+			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)x[1];
+			CurrentOffer.Value.StatLoaded = true;
 		}
 
 		protected override void OnActivate()
@@ -292,7 +297,7 @@ where c.Id = ?";
 				return;
 			}
 			LastEditOffer.Value = offer;
-			LoadStat(StatelessSession);
+			ApplyStat(LoadStat(StatelessSession));
 			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
 			if (offer.OrderLine != null && CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {

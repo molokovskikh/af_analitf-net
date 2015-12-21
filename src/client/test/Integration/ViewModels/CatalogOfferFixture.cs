@@ -171,7 +171,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(1, model.CurrentOffer.Value.PrevOrderAvgCount);
 
 			model.CurrentOffer.Value = null;
-			Assert.IsNull(model.HistoryOrders);
+			Assert.IsNull(model.HistoryOrders.Value);
 			model.CurrentOffer.Value = model.Offers.Value.First();
 			Assert.AreEqual(1, model.HistoryOrders.Value.Count);
 		}
