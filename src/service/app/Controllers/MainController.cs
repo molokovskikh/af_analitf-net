@@ -49,12 +49,15 @@ update Logs.DocumentSendLogs l
 set l.Committed = 1
 where p.UserId = :userId;
 
+delete from Logs.PendingDocLogs
+where UserId = :userId;
+
 update Logs.MailSendLogs l
 	join Logs.PendingMailLogs p on p.SendLogId = l.Id
 set l.Committed = 1
 where p.UserId = :userId;
 
-delete from Logs.PendingDocLogs
+delete from Logs.PendingMailLogs
 where UserId = :userId;
 
 update Orders.OrdersHead oh
