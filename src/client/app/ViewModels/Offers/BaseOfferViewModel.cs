@@ -190,6 +190,8 @@ where c.Id = ?";
 
 		private void ApplyStat(object[] x)
 		{
+			if (x == null)
+				return;
 			CurrentOffer.Value.PrevOrderAvgCost = (decimal?)x[0];
 			CurrentOffer.Value.PrevOrderAvgCount = (decimal?)x[1];
 			CurrentOffer.Value.StatLoaded = true;
