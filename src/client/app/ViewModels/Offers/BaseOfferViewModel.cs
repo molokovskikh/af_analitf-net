@@ -447,6 +447,9 @@ group by l.ProductId")
 			if (CurrentOffer.Value.StatLoaded)
 				return null;
 
+			if (session == null)
+				return null;
+
 			var begin = DateTime.Now.AddMonths(-1);
 			return Util.Cache(Cache,
 				Tuple.Create(ActualAddress.Id, CurrentOffer.Value.ProductId),
