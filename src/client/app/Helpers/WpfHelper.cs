@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -288,6 +288,16 @@ namespace AnalitF.Net.Client.Helpers
 		public static IObservable<EventPattern<TextCompositionEventArgs>> ObservableTextInput(this UIElement el)
 		{
 			return Observable.FromEventPattern<TextCompositionEventArgs>(el, "TextInput");
+		}
+
+		public static void BindTo<T>(this FrameworkElement src, string srcProp, FrameworkElement dst, DependencyProperty dstProp,
+			Func<T, object> convert)
+		{
+			dst.SetBinding(dstProp, new Binding(srcProp) {
+				Source = src,
+				BindsDirectlyToSource = true,
+				Converter = new LambdaConverter<T>(convert)
+			});
 		}
 	}
 }

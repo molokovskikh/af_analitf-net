@@ -4,9 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
@@ -624,15 +626,40 @@ namespace AnalitF.Net.Client.Helpers
 				});
 
 			if (legend.Children.Count == 0) {
-				legend.Children.Add(new Label { Content = "Подсказка", Padding = new Thickness(5, 0, 5, 0) });
-				var stack = new WrapPanel();
-				stack.Orientation = Orientation.Horizontal;
+				var header = new StackPanel {
+					Orientation = Orientation.Horizontal
+				};
+				header.Children.Add(new Label {
+					Content = "Подсказка",
+					Padding = new Thickness(5, 0, 5, 0),
+					VerticalAlignment = VerticalAlignment.Center
+				});
+				var toggleButton = new ToggleButton {
+					Content = "+",
+					ToolTip = "Свернуть\\развернуть",
+					Padding = new Thickness(5, 0, 5, 0),
+					Margin = new Thickness(0),
+					Background = Brushes.Transparent,
+					BorderBrush = Brushes.Transparent,
+					Focusable = false,
+				};
+				header.Children.Add(toggleButton);
+				legend.Children.Add(header);
+
+				var stack = new LegendPanel();
+				stack.BindTo<bool>("IsOverflow",
+					toggleButton, ToggleButton.VisibilityProperty, x => x ? Visibility.Visible : Visibility.Collapsed);
+				stack.BindTo<bool>("IsCollapsed",
+					toggleButton, ToggleButton.ContentProperty, x => x ? "+" : "-");
+				toggleButton.BindTo<bool?>("IsChecked",
+					stack, LegendPanel.IsCollapsedProperty, x => !x.GetValueOrDefault());
+
 				stack.Children.AddRange(labels);
 				legend.Children.Add(stack);
 			}
 			else {
 				//если пользовательские стили изменились нужно перестроить легенду
-				var panel = legend.Children.OfType<Panel>().First();
+				var panel = legend.Children.OfType<LegendPanel>().First();
 				panel.Children.OfType<FrameworkElement>().Where(c => Equals("generated", c.Tag))
 					.ToArray()
 					.Each(c => panel.Children.Remove(c));

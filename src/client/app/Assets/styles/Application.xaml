@@ -165,22 +165,6 @@
 		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
 	</Style>
 
-	<Style TargetType="Label" x:Key="VitallyImportantLegend" BasedOn="{StaticResource Legend}">
-		<Setter Property="Foreground" Value="Green"></Setter>
-	</Style>
-
-	<Style TargetType="Label" x:Key="JunkLegend" BasedOn="{StaticResource Legend}">
-		<Setter Property="Background" Value="#f29e66"></Setter>
-	</Style>
-
-	<Style TargetType="Label" x:Key="BannedLegend" BasedOn="{StaticResource Legend}">
-		<Setter Property="Background" Value="Red"></Setter>
-	</Style>
-
-	<Style TargetType="Label" x:Key="LeaderLegend" BasedOn="{StaticResource Legend}">
-		<Setter Property="Background" Value="#C0DCC0"></Setter>
-	</Style>
-
 	<Style TargetType="ComboBox" x:Key="Select">
 		<Setter Property="IsEditable" Value="False" />
 		<Setter Property="IsReadOnly" Value="True" />
