@@ -42,29 +42,35 @@ namespace AnalitF.Net.Service.Controllers
 			Session.CreateSQLQuery(@"
 update Usersettings.AnalitFReplicationInfo r
 set r.ForceReplication = 0
-where r.UserId = :userId and r.ForceReplication = 2;
+where r.UserId = :userId and r.ForceReplication = 2;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 update Logs.DocumentSendLogs l
 	join Logs.PendingDocLogs p on p.SendLogId = l.Id
 set l.Committed = 1
-where p.UserId = :userId;
+where p.UserId = :userId;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 delete from Logs.PendingDocLogs
-where UserId = :userId;
+where UserId = :userId;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 update Logs.MailSendLogs l
 	join Logs.PendingMailLogs p on p.SendLogId = l.Id
 set l.Committed = 1
-where p.UserId = :userId;
+where p.UserId = :userId;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 delete from Logs.PendingMailLogs
-where UserId = :userId;
+where UserId = :userId;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 update Orders.OrdersHead oh
 	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
 set oh.Deleted = 1
-where l.UserId = :userId;
+where l.UserId = :userId;").SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 
+			Session.CreateSQLQuery(@"
 delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
