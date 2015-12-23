@@ -18,6 +18,7 @@ using Test.Support;
 using Test.Support.Documents;
 using Test.Support.Suppliers;
 using Test.Support.log4net;
+using Test.Support.Logs;
 
 namespace AnalitF.Net.Service.Test
 {
@@ -361,6 +362,21 @@ where userId = :userId and FirmCode = :supplierId")
 			offers = ParseData("offers").ToArray();
 			offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
 			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
+		}
+
+		[Test]
+		public void Do_not_create_duplicate_pending_logs()
+		{
+			var supplier = TestSupplier.CreateNaked(session);
+			var mail = new TestMail(supplier);
+			session.Save(mail);
+			client.CreateUser(session);
+			foreach (var user in client.Users) {
+				session.Save(new TestMailSendLog(user, mail));
+			}
+			session.CreateSQLQuery("delete from Logs.PendingMailLogs").ExecuteUpdate();
+			exporter.ExportAll();
+			Assert.AreEqual(1, session.Query<PendingMailLog>().Count());
 		}
 
 		private string GetColumnValue(string table, string column, string[] data)
