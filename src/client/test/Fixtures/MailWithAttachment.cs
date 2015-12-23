@@ -10,6 +10,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	[Description("Создает письмо для минипочты")]
 	public class CreateMail : ServerFixture
 	{
+		public TestMailSendLog Log;
 		public TestMail Mail;
 		public bool IsSpecial;
 
@@ -24,7 +25,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Mail.SupplierEmail = "test@analit.net";
 			}
 			session.Save(Mail);
-			session.Save(new TestMailSendLog(user, Mail));
+			Log = new TestMailSendLog(user, Mail);
+			session.Save(Log);
 			File.WriteAllText(Path.Combine(Config.AttachmentsPath, Mail.Attachments[0].GetSaveFileName()), "тест");
 		}
 	}

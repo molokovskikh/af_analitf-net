@@ -1143,6 +1143,7 @@ where sp.Status = 1";
 
 			var mails = session.CreateSQLQuery(@"
 select m.Id,
+	ms.Id as LogId,
 	if(m.IsVIPMail and (m.SupplierEmail like '%@analit.net' or m.SupplierEmail like '%.analit.net'), 1, 0)
 from documents.Mails m
 	join Logs.MailSendLogs ms on ms.MailId = m.Id
@@ -1157,12 +1158,13 @@ limit 200;")
 				.SetParameter("userId", user.Id)
 				.List<object[]>();
 			var ids = mails.Select(m => Convert.ToUInt32(m[0])).ToArray();
-			var loadMaiIds = mails.Where(m => Convert.ToBoolean(m[1])).Select(m => Convert.ToUInt32(m[0])).ToArray();
+			var logIds = mails.Select(m => Convert.ToUInt32(m[1])).ToArray();
+			var loadMaiIds = mails.Where(m => Convert.ToBoolean(m[2])).Select(m => Convert.ToUInt32(m[0])).ToArray();
 
 			if (ids.Length == 0)
 				return;
 
-			var pendingMails = session.Query<MailSendLog>().Where(l => ids.Contains(l.MailId)).ToArray()
+			var pendingMails = session.Query<MailSendLog>().Where(l => logIds.Contains(l.Id)).ToArray()
 				.Select(l => new PendingMailLog(l));
 
 			var sql = $@"

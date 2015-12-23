@@ -309,8 +309,11 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			Assert.IsTrue(attachment.IsDownloaded);
 			Assert.IsTrue(File.Exists(attachment.LocalFilename), attachment.LocalFilename);
-			Assert.That(attachment.LocalFilename, Is.StringEnding(String.Format(@"attachments\{0}.txt", attachment.Id)));
+			Assert.That(attachment.LocalFilename, Is.StringEnding($@"attachments\{attachment.Id}.txt"));
 			Assert.AreEqual(Path.GetFullPath(open.Filename), attachment.LocalFilename);
+			session.Refresh(fixture.Log);
+			Console.WriteLine(fixture.Log.Id);
+			Assert.IsTrue(fixture.Log.Committed);
 		}
 
 		[Test]
