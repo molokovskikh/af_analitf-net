@@ -26,5 +26,21 @@ namespace AnalitF.Net.Client.Views
 				Sql.Focus();
 			};
 		}
+
+		private void Set1386x768(object sender, RoutedEventArgs e)
+		{
+			var mainWindow = Application.Current.MainWindow;
+			mainWindow.WindowState = WindowState.Normal;
+			mainWindow.Width = 1386;
+			mainWindow.Height = 768;
+		}
+
+		private void Set800x600(object sender, RoutedEventArgs e)
+		{
+			var mainWindow = Application.Current.MainWindow;
+			mainWindow.WindowState = WindowState.Normal;
+			mainWindow.Width = 800;
+			mainWindow.Height = 600;
+		}
 	}
 }

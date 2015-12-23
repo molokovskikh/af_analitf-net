@@ -28,5 +28,11 @@
 		<TabItem Header="Error">
 			<TextBox Name="Error" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
 		</TabItem>
+		<TabItem Header="Window">
+			<StackPanel>
+				<RadioButton GroupName="WindowSize" Click="Set1386x768">1386x768</RadioButton>
+				<RadioButton GroupName="WindowSize" Click="Set800x600">800x600</RadioButton>
+			</StackPanel>
+		</TabItem>
 	</TabControl>
 </UserControl>
