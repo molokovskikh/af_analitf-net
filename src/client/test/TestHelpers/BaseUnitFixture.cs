@@ -8,6 +8,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using Common.Tools;
+using Common.Tools.Threading;
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using ReactiveUI;
@@ -38,8 +39,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			scheduler = new TestScheduler();
 			Env.Current = new Env(user, bus, scheduler, null/*не нужно использовать базу для этого есть интеграционные тесты*/) {
 				//тк в юнит тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
-				QueryScheduler = new CurrentThreadTaskScheduler(),
-				TplUiScheduler = new CurrentThreadTaskScheduler(),
+				QueryScheduler = new CurrentThreadScheduler(),
+				TplUiScheduler = new CurrentThreadScheduler(),
 				Settings = new Settings()
 			};
 

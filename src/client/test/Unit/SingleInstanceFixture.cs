@@ -1,35 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools.Calendar;
+using Common.Tools.Threading;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
-	public class ThreadPerTaskScheduler : TaskScheduler
-	{
-		protected override void QueueTask(Task task)
-		{
-			var thread = new Thread(() => TryExecuteTask(task));
-			thread.Start();
-		}
-
-		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-		{
-			return false;
-		}
-
-		protected override IEnumerable<Task> GetScheduledTasks()
-		{
-			return Enumerable.Empty<Task>();
-		}
-	}
-
 	[TestFixture]
 	public class SingleInstanceFixture
 	{

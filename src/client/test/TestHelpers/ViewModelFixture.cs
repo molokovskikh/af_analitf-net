@@ -15,6 +15,7 @@ using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Threading;
 using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
@@ -26,6 +27,7 @@ using NUnit.Framework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using Test.Support.log4net;
+using CurrentThreadScheduler = Common.Tools.Threading.CurrentThreadScheduler;
 using LogManager = log4net.LogManager;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
@@ -94,8 +96,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			scheduler = new TestScheduler();
 			Env = Env.Current = new Env(null, bus, scheduler, IntegrationSetup.Factory);
-			Env.QueryScheduler = new CurrentThreadTaskScheduler();
-			Env.TplUiScheduler = new CurrentThreadTaskScheduler();
+			Env.QueryScheduler = new CurrentThreadScheduler();
+			Env.TplUiScheduler = new CurrentThreadScheduler();
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
 				var value = new ShellViewModel(config);

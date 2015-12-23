@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -15,24 +13,6 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
-	public class CurrentThreadTaskScheduler : TaskScheduler
-	{
-		protected override void QueueTask(Task task)
-		{
-			TryExecuteTask(task);
-		}
-
-		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-		{
-			return TryExecuteTaskInline(task, taskWasPreviouslyQueued);
-		}
-
-		protected override IEnumerable<Task> GetScheduledTasks()
-		{
-			return Enumerable.Empty<Task>();
-		}
-	}
-
 	[TestFixture]
 	public class PriceOfferFixture : ViewModelFixture
 	{
