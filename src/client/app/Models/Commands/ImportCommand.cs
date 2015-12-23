@@ -123,9 +123,14 @@ set l.OrderId = o.Id
 where l.OrderId is null;
 
 update SentOrders o
-set Sum = (select sum(round(l.Cost * l.Count, 2)) from SentOrderLines l where l.OrderId = o.Id),
-	LinesCount = (select count(*) from SentOrderLines l where l.OrderId = o.Id)
-where Sum = 0;")
+join (
+		select sum(l.Count * l.Cost) as sm,
+			count(*) as cn, l.OrderId
+		from SentOrderLines l
+		group by l.OrderId
+	) t on t.OrderId = o.Id
+set o.Sum = t.sm, o.LinesCount = t.cn
+where o.Sum = 0;")
 					.ExecuteUpdate();
 			}
 
