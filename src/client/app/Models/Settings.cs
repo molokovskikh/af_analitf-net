@@ -510,10 +510,9 @@ namespace AnalitF.Net.Client.Models
 		public virtual DelegatingHandler[] Handlers()
 		{
 			if (UseRas)
-				return new[] {
-					new RasHandler(RasConnection),
-				};
-				return new DelegatingHandler[0];
+				return new[] { new RasHandler(RasConnection) };
+
+			return new DelegatingHandler[0];
 		}
 
 		public virtual void CheckToken()

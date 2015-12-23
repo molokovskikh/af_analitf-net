@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
+using System.Web.Http;
+using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
@@ -14,6 +16,8 @@ using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
+using log4net;
+using log4net.Config;
 using NHibernate.Linq;
 using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
@@ -542,6 +546,27 @@ update Addresses set Id =  2575 where Id = :addressId")
 			Assert.AreEqual(77.63m, line.RetailMarkup);
 			Assert.AreEqual(82.03m, line.RealRetailMarkup);
 			Assert.AreEqual(500m, line.RetailCost);
+		}
+
+		[Test]
+		public void Select_host()
+		{
+			var emptyServerUrl = String.Format("http://localhost:{0}", new Random().Next(10000, 20000));
+			var cfg = new HttpSelfHostConfiguration(emptyServerUrl);
+			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+			var server = new HttpSelfHostServer(cfg);
+			disposable.Add(server);
+			server.OpenAsync().Wait();
+
+			clientConfig = clientConfig.Clone();
+			var normalServerUrl = new UriBuilder(clientConfig.BaseUrl) {
+				Host = "127.0.0.1"
+			}.ToString();
+			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
+			var cmd = new UpdateCommand();
+			disposable.Add(cmd);
+			cmd.Configure(settings, clientConfig, CancellationToken.None);
+			Assert.AreEqual(normalServerUrl, cmd.ConfigureHttp().ToString());
 		}
 	}
 }

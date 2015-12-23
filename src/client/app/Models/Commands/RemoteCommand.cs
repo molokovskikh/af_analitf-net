@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -183,6 +184,58 @@ namespace AnalitF.Net.Client.Models.Commands
 				response?.Dispose();
 				throw;
 			}
+		}
+
+		public async Task<object> Check(HttpClient client, string url)
+		{
+			try {
+				var response = await client.GetAsync(url + "Status");
+				response.EnsureSuccessStatusCode();
+				var content = await response.Content.ReadAsStringAsync();
+				//в ответ должен прийти номер версии
+				return Version.Parse(content);
+			}
+			catch(Exception e) {
+				return e;
+			}
+		}
+
+		public Uri ConfigureHttp()
+		{
+			try {
+				var urls = Config.AltUri;
+				if (String.IsNullOrEmpty(urls))
+					return null;
+				ProgressMessageHandler progress = null;
+				HttpClientHandler handler = null;
+				//нужен еще один клиент тк BaseAddress после первого запроса менять нельзя
+				using (var client = Settings.GetHttpClient(Config, ref progress, ref handler)) {
+					Log.Info($"Поиск доступного хоста, выбор из {urls}");
+					var requests = urls.Split(',').Select(x => Tuple.Create(x, Check(client, x))).ToArray();
+					Task.WaitAll(requests.Select(x => x.Item2).ToArray(), 10*1000, Token);
+
+					var responded = requests
+						.Where(x => x.Item2.IsCompleted && x.Item2.Result is Version)
+						.ToArray();
+
+					var faulted = requests
+						.Where(x => x.Item2.IsCompleted && x.Item2.Result is Exception)
+						.ToArray();
+
+					var cancelled = requests.Except(responded).Except(faulted).ToArray();
+					Log.Info($"Ответили {responded.Implode(x => x.Item1)} недоступны {faulted.Implode(x => x.Item1)}" +
+						$" не ответа {cancelled.Implode(x => x.Item1)}");
+					if (responded.Length > 0) {
+						var host = new Uri(responded[Generator.Random(responded.Length).First()].Item1);
+						Log.Info($"Выбран для обмена данными {host}");
+						return host;
+					}
+				}
+			}
+			catch(Exception e) {
+				Log.Error("Неудалось определить хост для обмена данными", e);
+			}
+			return null;
 		}
 	}
 }

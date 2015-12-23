@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,20 +15,13 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
 using Common.NHibernate;
 using Common.Tools;
-using Diadoc.Api;
-using Diadoc.Api.Cryptography;
-using Diadoc.Api.Proto.Documents;
-using Diadoc.Api.Proto.Documents.NonformalizedDocument;
-using Diadoc.Api.Proto.Events;
 using Ionic.Zip;
 using log4net;
 using log4net.Appender;
-using log4net.Config;
 using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
-using AggregateException = System.AggregateException;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -63,7 +52,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
 		private uint requestId;
-		private HttpResponseMessage ProgressMessage;
 		private bool reportProgress;
 		public int lastTransfer;
 
@@ -91,6 +79,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected override UpdateResult Execute()
 		{
 			Reporter.StageCount(4);
+			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			var sendLogsTask = Download();
 			if (result == UpdateResult.UpdatePending)
 				return result;
@@ -158,7 +147,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			using (var zip = new ZipFile(Config.ArchiveFile)) {
 				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
 			}
-			if (File.Exists(Path.Combine(Config.UpdateTmpDir, "update", "Updater.exe"))) {
+			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
 				Log.InfoFormat("Получено обновление приложения");
 				result = UpdateResult.UpdatePending;
 			}
@@ -1249,7 +1238,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				var file = cleaner.TmpFile();
 
 				//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
-				var appenders = ((Hierarchy)log4net.LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
+				var appenders = ((Hierarchy)LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
 				var files = new Dictionary<object, string>();
 				appenders.Each(x => {
 					files.Add(x, x.File);

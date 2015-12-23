@@ -104,6 +104,7 @@ namespace AnalitF.Net.Client.Config
 		public bool Quiet;
 		public string Cmd;
 		public Uri BaseUrl;
+		public string AltUri;
 		public TimeSpan RequestInterval = TimeSpan.FromSeconds(15);
 		public string RootDir;
 		public string DiadokApiKey;
@@ -142,20 +143,9 @@ namespace AnalitF.Net.Client.Config
 			set { settingsPath = value; }
 		}
 
-		public string ArchiveFile
-		{
-			get { return Path.Combine(TmpDir, "archive.zip"); }
-		}
-
-		public string UpdateTmpDir
-		{
-			get { return Path.Combine(TmpDir, "update");}
-		}
-
-		public string BinUpdateDir
-		{
-			get { return Path.Combine(UpdateTmpDir, "update"); }
-		}
+		public string ArchiveFile => Path.Combine(TmpDir, "archive.zip");
+		public string UpdateTmpDir => Path.Combine(TmpDir, "update");
+		public string BinUpdateDir => Path.Combine(UpdateTmpDir, "update");
 
 		public void InitDir()
 		{

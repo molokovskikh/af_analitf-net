@@ -7,9 +7,7 @@ using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Print;
 using Common.Tools;
-using Diadoc.Api.Proto.Documents;
-using NHibernate;
-using NHibernate = AnalitF.Net.Client.Config.NHibernate.NHibernate;
+using log4net;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -46,7 +44,7 @@ namespace AnalitF.Net.Client.Models
 	//что бы можно было создать отдельную модель для общего отображения а модели развести по своим углам
 	public class Waybill : BaseStatelessObject, IDataErrorInfo2
 	{
-		private log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Waybill));
+		private ILog _log = LogManager.GetLogger(typeof(Waybill));
 
 		private bool _vitallyImportant;
 

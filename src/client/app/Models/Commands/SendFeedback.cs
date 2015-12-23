@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected override UpdateResult Execute()
 		{
 			Progress.OnNext(new Progress("Соединение", 100, 0));
+			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			Progress.OnNext(new Progress("Отправка", 0, 50));
 			var message = feedback.GetMessage();
 			CheckResult(Client.PostAsJsonAsync("Feedback", message, Token));

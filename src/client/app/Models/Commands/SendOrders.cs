@@ -41,6 +41,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			var updateResult = UpdateResult.OK;
 			Progress.OnNext(new Progress("Соединение", 100, 0));
+			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			Progress.OnNext(new Progress("Отправка заказов", 0, 50));
 			var orders = Session.Query<Order>().ReadyToSend(address).ToList();
 			Log.InfoFormat("Попытка отправить заказы, всего заказов к отправке {0}", orders.Count);
