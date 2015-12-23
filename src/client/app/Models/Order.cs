@@ -1,17 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
-using NHibernate.Proxy;
-using Newtonsoft.Json.Serialization;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -39,7 +34,7 @@ namespace AnalitF.Net.Client.Models
 		public override int GetHashCode()
 		{
 			unchecked {
-				return ((Price != null ? Price.Id.GetHashCode() : 0) * 397) ^ (Address != null ? Address.Id.GetHashCode() : 0);
+				return ((Price?.Id.GetHashCode() ?? 0) * 397) ^ (Address?.Id.GetHashCode() ?? 0);
 			}
 		}
 	}
@@ -48,7 +43,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public static IQueryable<Order> ReadyToSend(this IQueryable<Order> query, Address address)
 		{
-			var id = address != null ? address.Id : 0;
+			var id = address?.Id ?? 0;
 			return query.Where(o => o.Address.Id == id && !o.Frozen && o.Send);
 		}
 	}
@@ -204,53 +199,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual string PriceLabel => PriceName;
 
-		public virtual string PriceName
-		{
-			get
-			{
-				try
-				{
-					if (Price == null)
-						return "";
-					return Price.Name;
-				}
-				catch(ObjectNotFoundException) {
-					return "";
-				}
-			}
-		}
+		public virtual string PriceName => SafePrice?.Name;
 
-		public virtual Address SafeAddress
-		{
-			get
-			{
-				try
-				{
-					if (String.IsNullOrEmpty(Address?.Name))
-						return null;
-					return Address;
-				}
-				catch(ObjectNotFoundException) {
-					return null;
-				}
-			}
-		}
+		public virtual Address SafeAddress => IsAddressExists() ? Address : new Address();
 
-		public virtual string AddressName
-		{
-			get
-			{
-				try
-				{
-					if (Address == null)
-						return "";
-					return Address.Name;
-				}
-				catch(ObjectNotFoundException) {
-					return "";
-				}
-			}
-		}
+		public virtual string AddressName => SafeAddress?.Name;
 
 		public virtual Price SafePrice
 		{
@@ -267,26 +220,12 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsPriceExists()
 		{
-			bool priceNotFound;
-			try {
-				priceNotFound = Price == null || Price.Name == "";
-			}
-			catch (ObjectNotFoundException) {
-				priceNotFound = true;
-			}
-			return !priceNotFound;
+			return NHHelper.IsExists(() => String.IsNullOrEmpty(Price?.Name));
 		}
 
 		public virtual bool IsAddressExists()
 		{
-			bool addressNotFound;
-			try {
-				addressNotFound = Address == null || Address.Name == "";
-			}
-			catch (ObjectNotFoundException) {
-				addressNotFound = true;
-			}
-			return !addressNotFound;
+			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
 		public virtual void ResetStatus()
@@ -356,14 +295,7 @@ namespace AnalitF.Net.Client.Models
 				return null;
 			if (!Send)
 				return null;
-			try {
-				if (Address == null || Price == null) {
-					Send = false;
-					Frozen = true;
-					return null;
-				}
-			}
-			catch(ObjectNotFoundException) {
+			if (!IsPriceExists() || !IsAddressExists()) {
 				Send = false;
 				Frozen = true;
 				return null;
@@ -435,7 +367,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CalculateStyle(Address address)
 		{
-			IsCurrentAddress = IsAddressExists() && Address.Id == address.Id;
+			IsCurrentAddress = SafeAddress?.Id == address.Id;
 		}
 	}
 }

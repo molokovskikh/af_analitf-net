@@ -170,9 +170,7 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				if (NHibernateUtil.IsInitialized(Supplier))
-					return Supplier;
-				return null;
+				return NHHelper.IsExists(() => String.IsNullOrEmpty(Supplier?.Name)) ? Supplier : null;
 			}
 		}
 
@@ -180,15 +178,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			get
 			{
-				try {
-					return Address != null ? Address.Name : "Адрес отключен/удален из системы";
-				}
-				catch(LazyInitializationException) {
-					return "Адрес отключен/удален из системы";
-				}
-				catch(SessionException) {
-					return "Адрес отключен/удален из системы";
-				}
+				return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name))
+						? Address.Name
+						: "Адрес отключен/удален из системы";
 			}
 		}
 
