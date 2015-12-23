@@ -174,15 +174,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string AddressName
-		{
-			get
-			{
-				return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name))
-						? Address.Name
-						: "Адрес отключен/удален из системы";
-			}
-		}
+		public virtual string AddressName => IsAddressExists()
+			? Address.Name
+			: "Адрес отключен/удален из системы";
 
 		[Ignore]
 		public virtual WaybillSettings WaybillSettings { get; set; }
@@ -195,17 +189,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsAddressExists()
 		{
-			bool addressNotFound;
-			try {
-				addressNotFound = Address == null || Address.Name == "";
-			}
-			catch (SessionException) {
-				addressNotFound = true;
-			}
-			catch (ObjectNotFoundException) {
-				addressNotFound = true;
-			}
-			return !addressNotFound;
+			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
 		public virtual void Calculate(Settings settings)
