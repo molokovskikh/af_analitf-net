@@ -217,7 +217,8 @@ namespace AnalitF.Net.Service.Models
 							using(var cmdSession = sessionFactory.OpenSession())
 							using(var cmdTransaction = cmdSession.BeginTransaction()) {
 								cmd(cmdSession, config, job);
-								cmdTransaction.Commit();
+								if (cmdTransaction.IsActive)
+									cmdTransaction.Commit();
 							}
 						}
 						catch(Exception e) {

@@ -191,16 +191,6 @@ drop temporary table if exists usersettings.activeprices;
 call Customers.GetOffers(:userId);
 call Customers.GetPrices(:userId);
 
-insert into Usersettings.AnalitFReplicationInfo (FirmCode, UserId, ForceReplication)
-select i.FirmCode, :userId, 1
-from (
-	select p.FirmCode
-	from UserSettings.Prices p
-	left join Usersettings.AnalitFReplicationInfo r on r.FirmCode = p.FirmCode and r.UserId = :userId
-	where r.UserId is null
-	group by p.FirmCode
-) as i;
-
 update Usersettings.ActivePrices ap
 	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
 set ap.Fresh = (r.ForceReplication > 0 or :cumulative)
@@ -799,18 +789,29 @@ select cn.Id,
 	cn.Name,
 	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
 	cn.MnnId,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Narcotic = 1) as Narcotic,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Toxic = 1) as Toxic,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Combined = 1) as Combined,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Other = 1) as Other
+	pku.VitallyImportant,
+	pku.MandatoryList,
+	pku.Narcotic,
+	pku.Toxic,
+	pku.Combined,
+	pku.Other
 from Catalogs.CatalogNames cn
 	join Catalogs.Catalog c on c.NameId = cn.Id
+	join (
+		select cat.NameId,
+			max(cat.Narcotic) as Narcotic,
+			max(cat.Toxic) as Toxic,
+			max(cat.Combined) as Combined,
+			max(cat.Other) as Other,
+			max(cat.MandatoryList) as MandatoryList,
+			max(cat.VitallyImportant) as VitallyImportant
+		from Catalogs.Catalog cat
+		where cat.Hidden = 0
+		group by cat.NameId
+	) pku on pku.NameId = cn.Id
 	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
-where exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0)
 group by cn.Id
-having sum(if(c.Hidden, 1, 0)) <> count(*)";
+having sum(if(c.Hidden, 0, 1)) > 0";
 				CachedExport(Result, sql, "catalognames");
 			}
 			else {
@@ -819,17 +820,33 @@ select cn.Id,
 	cn.Name,
 	if(d.NeedCorrect = 1, null, cn.DescriptionId) as DescriptionId,
 	cn.MnnId,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.VitallyImportant = 1) as VitallyImportant,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.MandatoryList = 1) as MandatoryList,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Narcotic = 1) as Narcotic,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Toxic = 1) as Toxic,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Combined = 1) as Combined,
-	exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0 and cat.Other = 1) as Other,
+	pku.VitallyImportant,
+	pku.MandatoryList,
+	pku.Narcotic,
+	pku.Toxic,
+	pku.Combined,
+	pku.Other,
 	not exists(select * from Catalogs.Catalog cat where cat.NameId = cn.Id and cat.Hidden = 0) as Hidden
 from Catalogs.CatalogNames cn
 	join Catalogs.Catalog c on c.NameId = cn.Id
+	join (
+		select cat.NameId,
+			max(cat.Narcotic) as Narcotic,
+			max(cat.Toxic) as Toxic,
+			max(cat.Combined) as Combined,
+			max(cat.Other) as Other,
+			max(cat.MandatoryList) as MandatoryList,
+			max(cat.VitallyImportant) as VitallyImportant,
+			max(cat.UpdateTime) as CatalogUpdateTime
+		from Catalogs.Catalog cat
+		where cat.Hidden = 0
+		group by cat.NameId
+	) pku on pku.NameId = cn.Id
 	left join Catalogs.Descriptions d on d.Id = cn.DescriptionId
-where cn.UpdateTime > ?lastSync or d.UpdateTime > ?lastSync or c.UpdateTime > ?lastSync
+where cn.UpdateTime > ?lastSync
+	or d.UpdateTime > ?lastSync
+	or pku.CatalogUpdateTime > ?lastSync
+	or c.UpdateTime > ?lastSync
 group by cn.Id";
 				Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}

@@ -25,6 +25,8 @@ namespace AnalitF.Net.Service.Controllers
 								exporter.ExportDocs();
 							else
 								exporter.ExportAll();
+							//все данные выгружены завершаем транзакцию
+							session.Transaction.Commit();
 							exporter.Compress(job.OutputFile(config));
 						}
 					});

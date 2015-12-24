@@ -63,6 +63,7 @@ namespace AnalitF.Net.Service.Test
 		public void TearDown()
 		{
 			exporter?.Dispose();
+			exporter = null;
 		}
 
 		[Test]
