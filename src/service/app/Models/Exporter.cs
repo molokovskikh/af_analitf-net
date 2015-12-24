@@ -1620,7 +1620,7 @@ group by ol.RowId";
 
 			var logs = session.Query<DocumentSendLog>()
 				.Where(l => !l.Committed && l.User.Id == user.Id)
-				.OrderByDescending(x => x.Document.WriteTime)
+				.OrderByDescending(x => x.Document.LogTime)
 				.Take(1000)
 				.ToArray();
 
@@ -1955,21 +1955,16 @@ where r.DownloadId in (:ids)")
 
 		public void ExportAds()
 		{
-			ExportAds(Result);
-		}
-
-		private void ExportAds(List<UpdateData> zip)
-		{
 			if (!clientSettings.ShowAdvertising) {
 				//нужно подать сигнал клиенту что он должен очистить папку с рекламой
-				zip.Add(new UpdateData("ads/delete.me") { Content = "" });
+				Result.Add(new UpdateData("ads/delete.me") { Content = "" });
 				return;
 			}
 			if (!Directory.Exists(AdsPath)) {
 				log.WarnFormat("Директория рекламы не найдена '{0}'", AdsPath);
 				return;
 			}
-			var template = String.Format("_{0}", user.Client.RegionCode);
+			var template = $"_{user.Client.RegionCode}";
 			var dir = Directory.GetDirectories(AdsPath).FirstOrDefault(d => d.EndsWith(template));
 			if (String.IsNullOrEmpty(dir)) {
 				log.WarnFormat("Директория рекламы не найдена по маске '{0}' в '{1}'", template, AdsPath);
@@ -1980,8 +1975,8 @@ where r.DownloadId in (:ids)")
 				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden)
 					&& RoundToSeconds(f.LastWriteTime) > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
-					.ToArray();
-			zip.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
+				.ToArray();
+			Result.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
 			if (files.Length > 0)
 				data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
 			else

@@ -20,7 +20,7 @@ namespace AnalitF.Net.Service.Models
 		public virtual string Filename { get; set; }
 		public virtual bool IsFake { get; set; }
 		public virtual bool PreserveFilename { get; set; }
-		public virtual DateTime WriteTime { get; set; }
+		public virtual DateTime LogTime { get; set; }
 	}
 
 	public class DocumentSendLog

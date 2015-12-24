@@ -220,10 +220,7 @@ namespace AnalitF.Net.Service.Test
 
 			controller.Put(null);
 
-			session.Flush();
-			session.Clear();
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
-			exporter.AdsPath = "ads";
 			result = ReadResult();
 			foreach (var zero in zeros) {
 				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));
@@ -236,6 +233,18 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(resultFiles, Is.Not.StringContaining("ads"));
 		}
 
+		[Test]
+		public void Reload_ad_on_cumulative_update()
+		{
+			InitAd();
+			var result = ReadResult().Implode(x => x.FileName);
+			Assert.That(result, Is.StringContaining("ads"));
+
+			Init();
+			result = ReadResult().Implode(x => x.FileName);
+			Assert.That(result, Is.StringContaining("ads"));
+		}
+
 		[Test(Description = "Флаг синхронизации прайс-листов должен быть сброшен только при подтверждении")]
 		public void Do_not_skip_unconfirmed_prices()
 		{
@@ -244,10 +253,6 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(size, Is.GreaterThan(0));
 			var data = session.Load<AnalitfNetData>(user.Id);
 			data.LastUpdateAt = DateTime.Now.AddDays(-1);
-			//надо очистить тк в сессии остались activeprices
-			session.Flush();
-			session.Clear();
-
 			Init(data.LastUpdateAt);
 			result = ReadResult();
 			//10 - на случай перевода строки
@@ -312,8 +317,6 @@ namespace AnalitF.Net.Service.Test
 
 			supplier2.InvalidateCache(session, user.Id);
 
-			session.Flush();
-			session.Clear();
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
 			exporter.ExportAll();
 			var ids = ParseData("offers").Select(l => Convert.ToUInt64(l[0])).ToArray();
@@ -348,14 +351,7 @@ namespace AnalitF.Net.Service.Test
 
 			//симулируем обновление прайс-листа
 			supplier2.CreateSampleCore(session, new [] { products[0] }, new [] { supplier.Prices[0].Core[0].Producer });
-			session.CreateSQLQuery(@"update Usersettings.AnalitFReplicationInfo
-set ForceReplication = 1
-where userId = :userId and FirmCode = :supplierId")
-				.SetParameter("supplierId", supplier2.Id)
-				.SetParameter("userId", user.Id)
-				.ExecuteUpdate();
-			session.Flush();
-			session.Clear();
+			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
 			exporter.ExportAll();
@@ -409,12 +405,21 @@ where userId = :userId and FirmCode = :supplierId")
 			requestLog = new RequestLog(user, Version.Parse("1.1")) {
 				LastSync = lastSync
 			};
+			//надо очистить тк в сессии остались activeprices
+			string adsPath = null;
+			if (exporter != null) {
+				session.Flush();
+				session.Clear();
+				adsPath = exporter.AdsPath;
+			}
 			exporter?.Dispose();
 			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
 				UpdatePath = "var/update",
 			};
+			if (adsPath != null)
+				exporter.AdsPath = adsPath;
 		}
 
 		private void InitAd()
