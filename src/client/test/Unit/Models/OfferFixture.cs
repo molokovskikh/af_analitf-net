@@ -26,7 +26,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			confirm = false;
 			confirmMessage = "";
 			settings = new Settings();
-			address = new Address();
+			address = new Address("Тестовый адрес доставки");
 			offer = new Offer {
 				Price = new Price(),
 				Cost = 53.1m

@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[SetUp]
 		public void Setup()
 		{
-			address = new Address();
+			address = new Address("Тестовый");
 			settings = new Settings(address);
 			settings.Markups.Each(x => x.Address = address);
 			waybillSettings = new WaybillSettings();

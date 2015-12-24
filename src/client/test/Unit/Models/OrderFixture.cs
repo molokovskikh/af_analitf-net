@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		public void Setup()
 		{
 			price = new Price("test1");
-			address = new Address();
+			address = new Address("Тестовый адрес доставки");
 			offer = new Offer(price, 100) {
 				ProductId = 1
 			};

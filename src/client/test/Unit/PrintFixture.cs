@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				Name = "Тестовый поставщик",
 				Phone = "473-2606000"
 			};
-			var address = new Address { Name = "Тестовый адрес доставки" };
+			var address = new Address("Тестовый адрес доставки");
 			var doc = new PriceOfferDocument(Offers(), price, address).Build();
 			Assert.That(doc, Is.Not.Null);
 		}

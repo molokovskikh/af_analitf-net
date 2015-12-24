@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Nds_18_markups()
 		{
-			var address = new Address();
+			var address = new Address("Тестовый адрес доставки");
 			Env.Current.Settings = new Settings(address);
 			Env.Current.Addresses = new [] { address }.ToList();
 			var model = new SettingsViewModel();
