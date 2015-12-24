@@ -226,7 +226,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Log.Info($"Ответили {responded.Implode(x => x.Item1)} недоступны {faulted.Implode(x => x.Item1)}" +
 						$" не ответа {cancelled.Implode(x => x.Item1)}");
 					if (responded.Length > 0) {
-						var host = new Uri(responded[Generator.Random(responded.Length).First()].Item1);
+						var host = new Uri(responded[Generator.Random(responded.Length - 1).First()].Item1);
 						Log.Info($"Выбран для обмена данными {host}");
 						return host;
 					}
