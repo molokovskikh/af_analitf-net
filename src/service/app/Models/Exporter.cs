@@ -1620,6 +1620,8 @@ group by ol.RowId";
 
 			var logs = session.Query<DocumentSendLog>()
 				.Where(l => !l.Committed && l.User.Id == user.Id)
+				.OrderByDescending(x => x.Document.WriteTime)
+				.Take(1000)
 				.ToArray();
 
 			if (logs.Length == 0) {
