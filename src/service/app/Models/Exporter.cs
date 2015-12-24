@@ -189,9 +189,26 @@ namespace AnalitF.Net.Service.Models
 drop temporary table if exists usersettings.prices;
 drop temporary table if exists usersettings.activeprices;
 call Customers.GetOffers(:userId);
-call Customers.GetPrices(:userId);
+call Customers.GetPrices(:userId);")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
 
-update Usersettings.ActivePrices ap
+#if DEBUG
+			session.CreateSQLQuery(@"
+insert into Usersettings.AnalitFReplicationInfo (FirmCode, UserId, ForceReplication)
+select i.FirmCode, :userId, 1
+from (
+	select p.FirmCode
+	from UserSettings.Prices p
+	left join Usersettings.AnalitFReplicationInfo r on r.FirmCode = p.FirmCode and r.UserId = :userId
+	where r.UserId is null
+	group by p.FirmCode
+) as i;")
+				.SetParameter("userId", user.Id)
+				.ExecuteUpdate();
+#endif
+
+			session.CreateSQLQuery(@"update Usersettings.ActivePrices ap
 	join Usersettings.AnalitFReplicationInfo r on r.FirmCode = ap.FirmCode
 set ap.Fresh = (r.ForceReplication > 0 or :cumulative)
 where r.UserId = :userId;
