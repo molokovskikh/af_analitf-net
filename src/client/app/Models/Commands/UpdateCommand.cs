@@ -139,7 +139,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			Reporter.Stage("Загрузка данных");
 			Download(response, Config.ArchiveFile).Wait(Token);
-			Log.InfoFormat("Обновление загружено, размер {0}", new FileInfo(Config.ArchiveFile).Length);
+			Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
+				new FileInfo(Config.ArchiveFile).Length, requestId);
 
 			if (Directory.Exists(Config.UpdateTmpDir))
 				Directory.Delete(Config.UpdateTmpDir, true);

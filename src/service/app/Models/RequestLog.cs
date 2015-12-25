@@ -201,7 +201,8 @@ namespace AnalitF.Net.Service.Models
 			var sessionFactory = session.SessionFactory;
 			var username = Thread.CurrentPrincipal.Identity.Name;
 			session.Save(this);
-			session.Transaction.Commit();
+			if (session.Transaction.IsActive)
+				session.Transaction.Commit();
 			var jobId = Id;
 
 			var task = new Task(() => {

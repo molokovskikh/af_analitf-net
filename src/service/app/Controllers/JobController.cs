@@ -41,18 +41,25 @@ namespace AnalitF.Net.Service.Controllers
 
 		protected RequestLog TryFindJob(bool reset, string updateType)
 		{
-			var existsJob = Session.Query<RequestLog>()
-				.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
-				.OrderByDescending(j => j.CreatedOn)
-				.FirstOrDefault();
-
-			if (existsJob != null) {
-				if (existsJob.IsStale)
-					existsJob = null;
-				else if (reset)
-					existsJob = null;
+			if (reset) {
+				//если данные уже готовятся нет смысла делать это повторно тк это все равное не будет работать только
+				//создаст дополнительную нагрузку на базу данных
+				var inProcess = Session.Query<RequestLog>()
+					.Where(j => j.UpdateType == updateType && !j.IsCompleted
+						&& j.User == CurrentUser
+						&& j.CreatedOn > DateTime.Now.AddMinutes(-10))
+					.OrderByDescending(j => j.CreatedOn)
+					.ToList();
+				return inProcess.FirstOrDefault();
+			} else {
+				var existsJob = Session.Query<RequestLog>()
+					.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
+					.OrderByDescending(j => j.CreatedOn)
+					.FirstOrDefault();
+				if (existsJob?.IsStale == true)
+					return null;
+				return existsJob;
 			}
-			return existsJob;
 		}
 
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)

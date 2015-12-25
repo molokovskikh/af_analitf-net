@@ -56,13 +56,30 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Build_new_update_on_reset()
 		{
-			controller.Get(true);
+			Assert.AreEqual(HttpStatusCode.Accepted, controller.Get(true).StatusCode);
+			var log = session.Query<RequestLog>().First(r => r.User == user);
+			log.Completed();
+			log.Confirm(config);
+			session.Flush();
 
-			session.Transaction.Begin();
-			controller.Get(true);
-
+			Assert.AreEqual(HttpStatusCode.Accepted, controller.Get(true).StatusCode);
 			var requests = session.Query<RequestLog>().Where(r => r.User == user).ToList();
 			Assert.That(requests.Count, Is.EqualTo(2));
+		}
+
+		[Test]
+		public void Ignore_request_while_job_in_progress()
+		{
+			var message = controller.Get(true);
+			Assert.AreEqual(HttpStatusCode.Accepted, message.StatusCode);
+			var id = ((ObjectContent)message.Content).Value.GetType().GetProperty("RequestId");
+
+			message = controller.Get(true);
+			Assert.AreEqual(HttpStatusCode.Accepted, message.StatusCode);
+			var newId = ((ObjectContent)message.Content).Value.GetType().GetProperty("RequestId");
+			Assert.AreEqual(newId, id);
+			var requests = session.Query<RequestLog>().Where(r => r.User == user).ToList();
+			Assert.That(requests.Count, Is.EqualTo(1));
 		}
 
 		[Test]
