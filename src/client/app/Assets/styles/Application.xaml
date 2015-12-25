@@ -9,7 +9,6 @@
 	<helpers:BoolToMarkerConverter x:Key="BoolToMarker" />
 	<helpers:IntToBoolConverter x:Key="IntToBool" />
 	<helpers:IntToCollapsedConverter x:Key="IntToCollapsed" />
-	<helpers:UriToBitmapConverter x:Key="UriToBitmap" />
 	<helpers:InvertConverter x:Key="BoolInvert" />
 	<helpers:NullableConverter x:Key="NullableConverter" />
 

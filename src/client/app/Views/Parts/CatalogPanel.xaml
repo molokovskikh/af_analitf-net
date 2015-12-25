@@ -41,6 +41,6 @@
 				FontWeight="Bold" />
 		</Grid>
 
-		<Image Height="125" gif:ImageBehavior.AnimatedSource="{Binding Settings.Value.AdStream, Converter={StaticResource UriToBitmap}}" />
+		<Image Height="125" gif:ImageBehavior.AnimatedSource="{Binding Ad.Value}" />
 	</StackPanel>
 </UserControl>

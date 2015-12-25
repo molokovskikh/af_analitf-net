@@ -211,7 +211,7 @@ drop temporary table ExistsCatalogs;")
 
 			settings.LastUpdate = DateTime.Now;
 			//очищаем кеш изображения что бы перезагрузить его
-			Settings.ImageCache = null;
+			Config.Cache.Clear();
 			settings.ApplyChanges(Session);
 		}
 

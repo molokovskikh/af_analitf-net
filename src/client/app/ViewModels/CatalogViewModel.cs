@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -128,6 +129,7 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}));
 			IsEnabled = new NotifyValue<bool>(true);
+			InitFields();
 		}
 
 		public NotifyValue<bool> ViewOffersByCatalogVisible { get; private set; }
@@ -136,6 +138,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsEnabled { get; set; }
 		[DataMember]
 		public NotifyValue<bool> CatalogSearch { get; set; }
+		public NotifyValue<BitmapImage> Ad { get; set; }
 
 		public override IResult Export()
 		{
@@ -327,13 +330,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public bool CanShowDescription
-		{
-			get
-			{
-				return CurrentCatalogName != null && CurrentCatalogName.Description != null;
-			}
-		}
+		public bool CanShowDescription => CurrentCatalogName?.Description != null;
 
 		public void ShowDescription()
 		{
@@ -385,6 +382,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
+			Ad.Value = Shell.Config.LoadAd("2block.gif");
 			if (ActiveItem != null)
 				ActiveItem.Shell = Shell;
 		}

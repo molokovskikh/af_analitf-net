@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
@@ -18,14 +19,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Config = config;
 			DisplayName = "";
 			Readonly = true;
-			Newses = new NotifyValue<List<News>>();
-			Ad = new NotifyValue<string>();
-			SupportHours = new NotifyValue<string>();
-			SupportPhone = new NotifyValue<string>();
+			InitFields();
 		}
 
 		public NotifyValue<List<News>> Newses { get; set; }
-		public NotifyValue<string> Ad { get; set; }
+		public NotifyValue<BitmapImage> Ad { get; set; }
 		public NotifyValue<string> SupportPhone { get; set; }
 		public NotifyValue<string> SupportHours { get; set; }
 
@@ -39,10 +37,7 @@ namespace AnalitF.Net.Client.ViewModels
 				};
 			Newses.Value = StatelessSession.Query<News>().OrderByDescending(n => n.PublicationDate).ToList();
 			Newses.Value.Each(n => n.Init(Config));
-
-			var filename = FileHelper.MakeRooted(@"ads\index.gif");
-			if (File.Exists(filename))
-				Ad.Value = filename;
+			Ad.Value = Config.LoadAd("index.gif");
 			SupportPhone.Value = User.SupportPhone;
 			SupportHours.Value = User.SupportHours;
 		}

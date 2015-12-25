@@ -78,8 +78,6 @@ namespace AnalitF.Net.Client.Models
 
 	public class Settings : BaseNotify
 	{
-		public static MemoryStream ImageCache;
-
 		private ILog log = LogManager.GetLogger(typeof(Settings));
 		private bool groupWaybillBySupplier;
 		private bool _useProxy;
@@ -362,30 +360,6 @@ namespace AnalitF.Net.Client.Models
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
 		public virtual bool DebugUseTestSign { get; set; }
-
-		public virtual string Ad
-		{
-			get
-			{
-				var filename = FileHelper.MakeRooted(@"ads\2block.gif");
-				if (File.Exists(filename))
-					return filename;
-				return "";
-			}
-		}
-
-		public virtual Stream AdStream
-		{
-			get
-			{
-				var file = Ad;
-				if (String.IsNullOrEmpty(file))
-					return null;
-				if (ImageCache != null)
-					return ImageCache;
-				return ImageCache = new MemoryStream(File.ReadAllBytes(file));
-			}
-		}
 
 		/// <summary>
 		/// Количество месяцев до истечения срока годности когда препараты будут отмечаться как уцененные

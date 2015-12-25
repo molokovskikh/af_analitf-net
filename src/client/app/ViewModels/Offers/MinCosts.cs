@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Linq.Observαble;
+using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -32,11 +33,13 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<List<MinCost>> Costs { get; set; }
 		public NotifyValue<MinCost> CurrentCost { get; set; }
 		public NotifyValue<bool> IsLoading { get; set; }
+		public NotifyValue<BitmapImage> Ad { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
+			Ad.Value = Shell.Config.LoadAd("2block.gif");
 			Prices = Session.Query<Price>()
 				.OrderBy(p => p.Name)
 				.Select(p => new Selectable<Price>(p))

@@ -66,7 +66,7 @@
 			<Image
 				VerticalAlignment="Center"
 				HorizontalAlignment="Center"
-				Source="{Binding Ad, Converter={StaticResource UriToBitmap}}" />
+				Source="{Binding Ad.Value}" />
 		</ScrollViewer>
 	</Grid>
 </UserControl>

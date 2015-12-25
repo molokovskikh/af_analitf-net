@@ -145,7 +145,7 @@
 		</Grid>
 
 		<Image Grid.Row="3" Height="125"
-			gif:ImageBehavior.AnimatedSource="{Binding Settings.Value.AdStream, Converter={StaticResource UriToBitmap}}" />
+			gif:ImageBehavior.AnimatedSource="{Binding Ad.Value}" />
 
 		<parts:ProductInfoView Grid.Row="4" cal:Bind.ModelWithoutContext="{Binding}" />
 	</Grid>

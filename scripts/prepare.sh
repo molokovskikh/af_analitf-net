@@ -16,3 +16,4 @@ cp lib/libmysqld/* src/client/test/bin/debug/ -r
 cp lib/libmysqld/* src/client/app/bin/debug/ -r
 cp lib/libmysqld/* src/client/app/bin/run/ -r
 cp assets/2block.gif src/data/ads/Воронеж_1/
+cp assets/index.gif src/data/ads/Воронеж_1/

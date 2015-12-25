@@ -9,10 +9,12 @@ using Common.MySql;
 using Common.Tools;
 using Iesi.Collections;
 using System.Linq;
+using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Inflector;
 using NHibernate;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.Config
 {
@@ -88,6 +90,7 @@ namespace AnalitF.Net.Client.Config
 
 	public class Config : ICloneable
 	{
+		private log4net.ILog log = log4net.LogManager.GetLogger(typeof(Config));
 		private string dbDir;
 		private string tmpDir;
 		private string settingsPath;
@@ -109,6 +112,7 @@ namespace AnalitF.Net.Client.Config
 		public string RootDir;
 		public string DiadokApiKey;
 		public string DiadokUrl;
+		public SimpleMRUCache Cache = new SimpleMRUCache(10);
 
 		public string TmpDir
 		{
@@ -227,6 +231,30 @@ namespace AnalitF.Net.Client.Config
 		public Config Clone()
 		{
 			return (Config)MemberwiseClone();
+		}
+
+		public BitmapImage LoadAd(string name)
+		{
+			//здесь может возникнуть ошибка при загрузке картинке например
+			//System.NotSupportedException: No imaging component suitable to complete this operation was found.
+			//---> System.Runtime.InteropServices.COMException: Exception from HRESULT: 0x88982F50
+			//все бы ничего но caliburn деактивации\активации формы не сможет установить фарму из-за этого исключения
+			return Cache.Cache(name.ToLower(), x => {
+				try {
+					x = Path.Combine(RootDir, "ads", x);
+					if (!File.Exists(x))
+						return null;
+
+					var bi = new BitmapImage();
+					bi.BeginInit();
+					bi.StreamSource = new MemoryStream(File.ReadAllBytes(x));
+					bi.EndInit();
+					return bi;
+				} catch(Exception e) {
+					log.Error($"Не удалось загрузить изображение {x}", e);
+					return null;
+				}
+			});
 		}
 	}
 }

@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Helpers
 			return (size / 1073741824f).ToString("#.##") + " ГБ";
 		}
 
-		public static T Cache<T, TKey>(SimpleMRUCache cache, TKey key, Func<TKey, T> @select)
+		public static T Cache<T, TKey>(this SimpleMRUCache cache, TKey key, Func<TKey, T> @select)
 		{
 			var cached = (T)cache[key];
 			if (!Equals(cached, default(T))) {
