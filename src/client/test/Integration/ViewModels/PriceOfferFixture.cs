@@ -58,6 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				.Contains(o.CatalogId));
 			price = session.Load<Price>(offer.Price.Id);
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
+			scheduler.Start();
 			Assert.IsTrue(model.CanShowCatalogWithMnnFilter.Value,
 				$"model.CurrentCatalog.Value.Id = {model.CurrentCatalog.Value?.Id}, offer.Id = {offer.Id}");
 			model.ShowCatalogWithMnnFilter();

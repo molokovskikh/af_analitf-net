@@ -38,15 +38,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public ProductInfo ProductInfo { get; set; }
 		public NotifyValue<bool> CanSend { get; set; }
 
-		public bool IsOrderSend
-		{
-			get { return addressId != null; }
-		}
+		public bool IsOrderSend => addressId != null;
 
-		public bool IsUpdate
-		{
-			get { return addressId == null; }
-		}
+		public bool IsUpdate => addressId == null;
 
 		protected override void OnInitialize()
 		{
@@ -63,9 +57,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					&& Address.Orders.Count(o => o.Send && o.SendResult == OrderResultStatus.Reject) == 0);
 
 			if (addressId != null)
-				DisplayName = string.Format("Журнал отправки заказов для адреса {0}", Address.Name);
+				DisplayName = $"Журнал отправки заказов для адреса {Address.Name}";
 			else
-				DisplayName = string.Format("Корректировка восстановленных заказов");
+				DisplayName = "Корректировка восстановленных заказов";
 			ProductInfo = new ProductInfo(this, CurrentLine);
 			Attach(GetView(), ProductInfo.Bindings);
 		}
