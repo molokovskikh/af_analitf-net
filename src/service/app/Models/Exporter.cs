@@ -2059,6 +2059,9 @@ where r.DownloadId in (:ids)")
 			if (updateVersion <= job.Version)
 				return;
 
+			if (!String.IsNullOrEmpty(job.ErrorDescription))
+				job.ErrorDescription += Environment.NewLine;
+			job.ErrorDescription += $"Обновление включает новую версию приложения {updateVersion}";
 			AddDir(Result, UpdatePath, "update");
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
