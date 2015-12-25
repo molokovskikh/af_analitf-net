@@ -66,9 +66,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Select(_ => (List<SentOrderLine>)Cache[HistoryOrdersCacheKey()])
 				.Subscribe(HistoryOrders);
 
-			this.ObservableForProperty(m => m.CurrentOffer.Value)
-				.Subscribe(m => NotifyOfPropertyChange("CurrentOrder"));
-
 			Settings.Subscribe(_ => Calculate());
 		}
 
@@ -172,7 +169,7 @@ where c.Id = ?";
 								cn.Description = d;
 							}
 							return c;
-						}, new { catalogId = CurrentOffer.Value.CatalogId }).FirstOrDefault();
+						}, new { x.CatalogId }).FirstOrDefault();
 				}))
 				.Switch()
 				.ObserveOn(UiScheduler)

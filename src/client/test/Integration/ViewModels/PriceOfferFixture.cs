@@ -19,10 +19,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		Lazy<PriceOfferViewModel> lazyModel;
 		Price price;
 
-		private PriceOfferViewModel model
-		{
-			get { return lazyModel.Value; }
-		}
+		private PriceOfferViewModel model => lazyModel.Value;
 
 		[SetUp]
 		public void Setup()
@@ -31,7 +28,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			lazyModel = new Lazy<PriceOfferViewModel>(
 				() => {
 					var model = new PriceOfferViewModel(price.Id, false);
-					//model.QueryScheduler = new CurrentThreadTaskScheduler();
 					Init(model);
 					scheduler.Start();
 					return model;
@@ -62,6 +58,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				.Contains(o.CatalogId));
 			price = session.Load<Price>(offer.Price.Id);
 			model.CurrentOffer.Value = model.Offers.Value.First(o => o.Id == offer.Id);
+			Assert.IsTrue(model.CanShowCatalogWithMnnFilter.Value,
+				$"model.CurrentCatalog.Value.Id = {model.CurrentCatalog.Value?.Id}");
 			model.ShowCatalogWithMnnFilter();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
