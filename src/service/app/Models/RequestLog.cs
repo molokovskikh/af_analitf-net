@@ -125,10 +125,7 @@ namespace AnalitF.Net.Service.Models
 			CompletedOn = DateTime.Now;
 		}
 
-		public virtual bool IsStale
-		{
-			get { return DateTime.Now > CreatedOn.AddMinutes(30); }
-		}
+		public virtual bool IsStale => DateTime.Now > CreatedOn.AddMinutes(30);
 
 		public virtual string OutputFile(Config.Config config)
 		{
@@ -210,8 +207,7 @@ namespace AnalitF.Net.Service.Models
 			var task = new Task(() => {
 				try {
 					ThreadContext.Properties["username"] = username;
-					using (var logSession = sessionFactory.OpenSession())
-					using (var logTransaction = logSession.BeginTransaction()) {
+					using (var logSession = sessionFactory.OpenSession()) {
 						var job = logSession.Load<RequestLog>(jobId);
 						try {
 							using(var cmdSession = sessionFactory.OpenSession())
@@ -230,10 +226,12 @@ namespace AnalitF.Net.Service.Models
 							job.Faulted(e);
 						}
 						finally {
-							job.Completed();
-							logSession.Save(job);
-							logSession.Flush();
-							logTransaction.Commit();
+							using (var logTrx = logSession.BeginTransaction()) {
+								job.Completed();
+								logSession.Save(job);
+								logSession.Flush();
+								logTrx.Commit();
+							}
 						}
 					}
 				}
