@@ -38,10 +38,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		private Lazy<T> lazyModel;
 
-		protected T model
-		{
-			get { return lazyModel.Value; }
-		}
+		protected T model => lazyModel.Value;
 
 		[SetUp]
 		public void ViewModelFixtureSetup()
@@ -128,15 +125,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			if (DbHelper.IsTestFail()) {
 				if (DebugContext != null && DebugContext.Count > 0)
-					Console.WriteLine(DebugContext.Implode(k => String.Format("{0} = {1}", k.Key, k.Value)));
+					Console.WriteLine(DebugContext.Implode(k => $"{k.Key} = {k.Value}"));
 			}
 			DbHelper.SaveFailData();
 		}
 
-		protected virtual ShellViewModel shell
-		{
-			get { return lazyshell.Value; }
-		}
+		protected virtual ShellViewModel shell => lazyshell.Value;
 
 		public static WindowManager StubWindowManager(Lazy<ShellViewModel> shell = null)
 		{
