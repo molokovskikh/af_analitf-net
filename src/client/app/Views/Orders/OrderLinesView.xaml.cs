@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace AnalitF.Net.Client.Views.Orders
 {
-	public partial class OrderLinesView : UserControl
+	public partial class OrderLinesView : UserControl, IPersistable
 	{
 		public Dictionary<DependencyObject, DependencyProperty> persistable =
 			new Dictionary<DependencyObject, DependencyProperty>();
@@ -30,10 +30,6 @@ namespace AnalitF.Net.Client.Views.Orders
 				Persist(OrdersGrid.RowDefinitions[Grid.GetRow(Expander)], RowDefinition.HeightProperty);
 				Persist(OrdersGrid.RowDefinitions[Grid.GetRow(Lines)], RowDefinition.HeightProperty);
 				Restore();
-			};
-
-			Unloaded += (sender, args) => {
-				Save();
 			};
 
 			DataGridHelper.CalculateColumnWidths(Lines);
@@ -75,7 +71,7 @@ namespace AnalitF.Net.Client.Views.Orders
 			}
 		}
 
-		private void Save()
+		public void Save()
 		{
 			var model = DataContext as BaseScreen;
 			if (model == null)

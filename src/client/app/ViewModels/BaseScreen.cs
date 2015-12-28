@@ -84,6 +84,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 	}
 
+	public interface IPersistable
+	{
+		void Save();
+	}
+
 	public class PersistedValue
 	{
 		public object DefaultValue;
@@ -301,6 +306,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
+			Views.Values.OfType<IPersistable>().Each(x => x.Save());
 			foreach (var value in persisted)
 				Shell.PersistentContext[value.Key] = value.Getter();
 
