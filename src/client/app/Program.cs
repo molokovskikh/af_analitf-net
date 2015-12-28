@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Printing;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.PlatformServices;
 using System.Reflection;

@@ -140,7 +140,10 @@ namespace AnalitF.Net.Client
 
 				using(var stream = new StreamWriter(Config.SettingsPath)) {
 					var serializer = new JsonSerializer {
-						ContractResolver = new NHibernateResolver()
+						ContractResolver = new NHibernateResolver(),
+#if DEBUG
+						Formatting = Formatting.Indented
+#endif
 					};
 					serializer.Serialize(stream, Shell);
 				}

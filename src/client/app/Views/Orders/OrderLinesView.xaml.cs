@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -54,10 +56,21 @@ namespace AnalitF.Net.Client.Views.Orders
 				if (!model.Shell.PersistentContext.ContainsKey(key))
 					return;
 				var value = model.Shell.PersistentContext[key];
-				if (prop.IsValidType(value))
+				if (prop.IsValidType(value)) {
 					property.Key.SetValue(prop, value);
-				if (value is JObject) {
+				} else if (value is JObject) {
 					property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
+				} else {
+					if (value != null) {
+						var converter = TypeDescriptor.GetConverter(prop.PropertyType);
+						if (converter.CanConvertFrom(value.GetType())) {
+							property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
+							continue;
+						}
+					}
+#if DEBUG
+					throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
+#endif
 				}
 			}
 		}
