@@ -427,6 +427,9 @@ task "test:binary":
 		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta", "output/updater/")
 		CopyUpdateBin("migration-beta", "output/migration-update/")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Name = 'beta'")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Name = 'migration-beta'")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Name = 'alpha'")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
 		raise
@@ -476,6 +479,8 @@ task "promote:to:rtm":
 	Cp(setupBin, """$ftp\AnalitFNET.exe""", true)
 
 	CopyUpdateBin(dstChannel, source)
+	Db.Execute("update Customers.BinChannels set Version = '$version' where Name = 'rtm'")
+	Db.Execute("update Customers.BinChannels set Version = '$version' where Name = 'migration'")
 	print "Версия $version установлена в канал $dstChannel"
 
 task "iis:clean":
