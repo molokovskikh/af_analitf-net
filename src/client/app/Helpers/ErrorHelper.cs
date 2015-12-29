@@ -19,6 +19,10 @@ namespace AnalitF.Net.Client.Helpers
 		public EndUserError(string message) : base(message)
 		{
 		}
+
+		public EndUserError(string message, Exception innerException) : base(message, innerException)
+		{
+		}
 	}
 
 	public class ErrorHelper

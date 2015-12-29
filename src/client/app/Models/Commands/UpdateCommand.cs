@@ -42,6 +42,12 @@ namespace AnalitF.Net.Client.Models.Commands
 	}
 #endif
 
+	public enum ErrorResolution
+	{
+		Fail,
+		TryAgain,
+	}
+
 	public class UpdateCommand : RemoteCommand
 	{
 		public bool Clean = true;
@@ -54,6 +60,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		private uint requestId;
 		private bool reportProgress;
 		public int lastTransfer;
+		public Func<Exception, ErrorResolution> ErrorSolver = x => ErrorResolution.Fail;
 
 		public UpdateCommand()
 		{
@@ -1121,16 +1128,24 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 		}
 
-		private static List<string> Move(string source, string destination)
+		private List<string> Move(string source, string destination)
 		{
 			var files = new List<string>();
 			Directory.CreateDirectory(destination);
 			foreach (var file in Directory.GetFiles(source)) {
-				var dst = Path.Combine(destination, Path.GetFileName(file));
-				if (File.Exists(dst))
-					File.Delete(dst);
-				File.Move(file, dst);
-				files.Add(dst);
+				do {
+					try {
+						var dst = Path.Combine(destination, Path.GetFileName(file));
+						if (File.Exists(dst))
+							File.Delete(dst);
+						File.Move(file, dst);
+						files.Add(dst);
+						break;
+					} catch (SystemException e) {
+						if (ErrorSolver(e) == ErrorResolution.Fail)
+							throw new EndUserError(e.Message, e);
+					}
+				} while(true);
 			}
 			return files;
 		}

@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Helpers;
@@ -847,8 +848,27 @@ namespace AnalitF.Net.Client.ViewModels
 			var wait = new SyncViewModel(command.Progress, Env.Scheduler) {
 				GenericErrorMessage = command.ErrorMessage
 			};
-			command.Config = Config;
+			Dispatcher dispatcher = null;
+			if (SynchronizationContext.Current != null)
+				dispatcher = Dispatcher.CurrentDispatcher;
 
+			if (command is UpdateCommand) {
+				((UpdateCommand)command).ErrorSolver = x => {
+					var result = MessageBoxResult.None;
+					var action = new System.Action(() => {
+						result = windowManager.ShowMessageBox(
+							$"При обновлении произошла ошибка {x.Message}\r\nПовторить операцию?",
+							"АналитФАРМАЦИЯ: Ошибка",
+							MessageBoxButton.YesNo,
+							MessageBoxImage.Error);
+					});
+					if (dispatcher != null)
+						dispatcher.Invoke(DispatcherPriority.Normal, action);
+					else
+						action();
+					return result == MessageBoxResult.Yes ? ErrorResolution.TryAgain : ErrorResolution.Fail;
+				};
+			}
 			var results = new IResult[0];
 			RunTask(wait,
 				t => {
