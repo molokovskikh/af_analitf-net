@@ -111,7 +111,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//в случае если мы восстановили значение из сессии
 			if (Waybill == null)
 				return;
-			Waybill.Rounding = Rounding.Value;
+			Settings.Value.Rounding = Rounding.Value;
 			Waybill.Calculate(Settings.Value);
 		}
 

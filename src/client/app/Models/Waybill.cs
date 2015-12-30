@@ -52,7 +52,6 @@ namespace AnalitF.Net.Client.Models
 		{
 			WaybillSettings = new WaybillSettings();
 			Lines = new List<WaybillLine>();
-			Rounding = Rounding.To0_10;
 		}
 
 		public Waybill(Address address, Supplier supplier)
@@ -117,8 +116,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<WaybillLine> Lines { get; set; }
 
-		[Ignore]
-		public virtual Rounding Rounding { get; set; }
+		public virtual Rounding Rounding => (Settings?.Rounding).GetValueOrDefault(Rounding.To0_10);
 
 		[Ignore]
 		public virtual bool VitallyImportant

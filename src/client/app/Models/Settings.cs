@@ -109,6 +109,7 @@ namespace AnalitF.Net.Client.Models
 
 		public Settings()
 		{
+			Rounding = Rounding.To0_10;
 			DiffCalcMode = DiffCalcMode.MinCost;
 			WarnIfOrderedYesterday = true;
 			UseSupplierPriceWithNdsForMarkup = false;
@@ -365,6 +366,11 @@ namespace AnalitF.Net.Client.Models
 		/// Количество месяцев до истечения срока годности когда препараты будут отмечаться как уцененные
 		/// </summary>
 		public virtual int JunkPeriod { get; set; }
+
+		/// <summary>
+		/// Способ округления при расчете цен в накладных
+		/// </summary>
+		public virtual Rounding Rounding { get; set; }
 
 		public virtual IWebProxy GetProxy()
 		{

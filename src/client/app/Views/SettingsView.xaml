@@ -179,6 +179,12 @@
 			</TabItem>
 			<TabItem Header="Накладные" Name="WaybillTab">
 				<StackPanel>
+					<Label ToolTip="Округлить розничную цену путем уменьшения до цены кратной">
+						Округлять:
+					</Label>
+					<ComboBox ToolTip="Округлить розничную цену путем уменьшения до цены кратной"
+						Style="{StaticResource Select}" x:Name="Settings_Value_Rounding" />
+
 					<Label>Адрес заказа:</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="Addresses" DisplayMemberPath="Name" />
 
