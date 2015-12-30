@@ -45,7 +45,7 @@
 					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
 				</StackPanel>
 			</GroupBox>
-			<c:PopupSelector VerticalAlignment="Center" Margin="0, 2, 4, 0" x:Name="Suppliers"
+			<c:PopupSelector VerticalAlignment="Center" x:Name="Suppliers"
 				ButtonContent="Поставщики"
 				Member="Item.FullName" />
 			<ContentControl x:Name="AddressSelector" />
@@ -54,27 +54,29 @@
 			<Button Name="OpenFolders" Style="{StaticResource FilterElement}">Открыть папки</Button>
 			<Button Name="Delete" Style="{StaticResource FilterElement}">Удалить</Button>
 			<Button Name="Create" Style="{StaticResource FilterElement}">Создать</Button>
-			<Button Name="RegulatorReport" Style="{StaticResource FilterElement}">
-				<Button.ContextMenu>
-					<ContextMenu>
-						<TextBlock>
-							Еженедельный мониторинг цен на лекарственные средства (прямая ссылка <Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mcls.roszdravnadzor.ru</Hyperlink>)
-						</TextBlock>
-					</ContextMenu>
-				</Button.ContextMenu>
-				Еженедельный отчет для Росздравнадзора
-			</Button>
-			<Button Name="VitallyImportantReport" Style="{StaticResource FilterElement}">
-				<Button.ContextMenu>
-					<ContextMenu>
-						<TextBlock>
-							Ежемесячный мониторинг цен на ЖНВЛП (прямая ссылка <Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mols.roszdravnadzor.ru</Hyperlink>)
-						</TextBlock>
-					</ContextMenu>
-				</Button.ContextMenu>
-				Ежемесячный отчет по ЖНВЛП для Росздравнадзора
-			</Button>
-			<Button Name="WaybillMarkupReport" Style="{StaticResource FilterElement}">Отчет по розничным надбавкам к ценам на ЖНВЛП за год</Button>
+			<c:PopupButton VerticalAlignment="Center">
+				<c:PopupButton.ButtonContent>
+					Отчеты
+				</c:PopupButton.ButtonContent>
+				<StackPanel Margin="5" MaxWidth="400">
+					<TextBlock Style="{StaticResource HeaderTextBlock}">Еженедельный отчет для Росздравнадзора</TextBlock>
+					<TextBlock TextWrapping="Wrap">
+						Еженедельный мониторинг цен на лекарственные средства (<Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mcls.roszdravnadzor.ru</Hyperlink>)
+					</TextBlock>
+					<Button Name="RegulatorReport" HorizontalAlignment="Left">Сформировать</Button>
+					<Separator />
+
+					<TextBlock Style="{StaticResource HeaderTextBlock}">Ежемесячный отчет по ЖНВЛП для Росздравнадзора</TextBlock>
+					<TextBlock TextWrapping="Wrap">
+						Ежемесячный мониторинг цен на ЖНВЛП (<Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mols.roszdravnadzor.ru</Hyperlink>)
+					</TextBlock>
+					<Button Name="VitallyImportantReport" HorizontalAlignment="Left">Сформировать</Button>
+					<Separator />
+
+					<TextBlock Style="{StaticResource HeaderTextBlock}">Отчет по розничным надбавкам к ценам на ЖНВЛП за год</TextBlock>
+					<Button Name="WaybillMarkupReport" HorizontalAlignment="Left">Сформировать</Button>
+				</StackPanel>
+			</c:PopupButton>
 		</WrapPanel>
 
 		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"

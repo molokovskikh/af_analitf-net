@@ -116,6 +116,8 @@
 				Value="Both"/>
 		<Setter Property="Stylus.IsFlicksEnabled"
 				Value="False"/>
+		<!--у кнопок такие же отступы что бы при выравнивании выглядело одинаково-->
+		<Setter Property="Margin" Value="0, 2, 4, 0"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="MultiSelector">
@@ -211,6 +213,87 @@
 							<Setter TargetName="OpaqueRect"
 										Property="Canvas.Left"
 										Value="{Binding ElementName=DropDownScrollViewer, Path=HorizontalOffset}" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style TargetType="Controls:PopupButton">
+		<Setter Property="FocusVisualStyle"
+				Value="{StaticResource ComboBoxFocusVisual}"/>
+		<Setter Property="Foreground"
+				Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
+		<Setter Property="Background"
+				Value="{StaticResource ButtonNormalBackground}"/>
+		<Setter Property="BorderBrush"
+				Value="{StaticResource ButtonNormalBorder}"/>
+		<Setter Property="BorderThickness"
+				Value="1"/>
+		<Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+				Value="Auto"/>
+		<Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+				Value="Auto"/>
+		<Setter Property="Padding"
+				Value="4,3"/>
+		<Setter Property="ScrollViewer.CanContentScroll"
+				Value="true"/>
+		<Setter Property="ScrollViewer.PanningMode"
+				Value="Both"/>
+		<Setter Property="Stylus.IsFlicksEnabled"
+				Value="False"/>
+		<!--у кнопок такие же отступы что бы при выравнивании выглядело одинаково-->
+		<Setter Property="Margin" Value="0, 2, 4, 0"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Controls:PopupButton">
+					<Grid Name="MainGrid"
+							SnapsToDevicePixels="true">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition MinWidth="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}"
+												Width="0"/>
+						</Grid.ColumnDefinitions>
+						<Popup Name="PART_Popup"
+								AllowsTransparency="true"
+								Grid.ColumnSpan="2"
+								Placement="Bottom"
+								StaysOpen="False"
+								Margin="1"
+								PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}"
+								IsOpen="{Binding Path=IsOpen, RelativeSource={RelativeSource TemplatedParent}}">
+							<Themes:SystemDropShadowChrome Name="Shdw"
+															Color="Transparent"
+															MinWidth="{Binding ElementName=MainGrid,Path=ActualWidth}">
+								<Border x:Name="DropDownBorder"
+										BorderThickness="1"
+										BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}"
+										Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+									<ContentPresenter />
+								</Border>
+							</Themes:SystemDropShadowChrome>
+						</Popup>
+						<ToggleButton Grid.ColumnSpan="2"
+							Background="{TemplateBinding Background}"
+							BorderBrush="{TemplateBinding BorderBrush}"
+							Style="{StaticResource ComboBoxReadonlyToggleButton}"
+							IsChecked="{Binding Path=IsOpen, RelativeSource={RelativeSource TemplatedParent}}" />
+						<StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}">
+							<ContentPresenter IsHitTestVisible="false"
+								Content="{Binding ButtonContent, RelativeSource={RelativeSource TemplatedParent}}"
+								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+						</StackPanel>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsEnabled"
+										Value="false">
+							<Setter Property="Foreground"
+										Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+							<Setter Property="Background"
+										Value="#FFF4F4F4"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>

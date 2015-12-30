@@ -123,8 +123,9 @@
 	</Style>
 
 	<Style TargetType="TextBlock" x:Key="HeaderTextBlock">
-		<Setter Property="FontWeight" Value="Bold"></Setter>
-		<Setter Property="FontSize" Value="14"></Setter>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="FontSize" Value="14"/>
+		<Setter Property="TextWrapping" Value="Wrap"/>
 	</Style>
 
 	<Style TargetType="Label" x:Key="HeaderLabel">

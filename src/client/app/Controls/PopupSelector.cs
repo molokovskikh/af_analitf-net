@@ -43,6 +43,77 @@ namespace AnalitF.Net.Client.Controls
 		public T Item { get; set; }
 	}
 
+	public class PopupButton : ContentControl
+	{
+		public static DependencyProperty ButtonContentProperty
+			= DependencyProperty.RegisterAttached("ButtonContent",
+				typeof(object),
+				typeof(PopupButton),
+				new PropertyMetadata());
+
+		public static DependencyProperty IsOpenProperty
+			= DependencyProperty.RegisterAttached("IsOpen",
+				typeof(bool),
+				typeof(PopupButton),
+				new PropertyMetadata(false, IsOpenChanged));
+
+		static PopupButton()
+		{
+			EventManager.RegisterClassHandler(typeof(PopupButton),
+				Mouse.MouseDownEvent,
+				new MouseButtonEventHandler(OnMouseButtonDown),
+				true);
+		}
+
+		public PopupButton()
+		{
+			Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(this, OnMouseDownOutsideCapturedElement);
+		}
+
+		public string ButtonContent
+		{
+			get { return (string)GetValue(ButtonContentProperty); }
+			set { SetValue(ButtonContentProperty, value); }
+		}
+
+		public bool IsOpened
+		{
+			get { return (bool)GetValue(IsOpenProperty); }
+			set { SetValue(IsOpenProperty, value); }
+		}
+
+		private static void OnMouseButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			var element = (PopupButton)sender;
+			if (Mouse.Captured == element && e.OriginalSource == element)  {
+				element.Close();
+			}
+		}
+
+		public void Close()
+		{
+			if (IsOpened) {
+				IsOpened = false;
+			}
+		}
+
+		private void OnMouseDownOutsideCapturedElement(object sender, MouseButtonEventArgs e)
+		{
+			Close();
+		}
+
+		private static void IsOpenChanged(DependencyObject sender,
+			DependencyPropertyChangedEventArgs args)
+		{
+			if ((bool)args.NewValue) {
+				Mouse.Capture((IInputElement)sender, CaptureMode.SubTree);
+			}
+			else {
+				Mouse.Capture(null);
+			}
+		}
+	}
+
 	public class PopupSelector : MultiSelector
 	{
 		public static RoutedUICommand UnselectAllCommand = new RoutedUICommand();
