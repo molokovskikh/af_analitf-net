@@ -494,7 +494,7 @@ namespace AnalitF.Net.Client.Models
 			try {
 				if (String.IsNullOrEmpty(GetClientToken())) {
 					var data = Guid.NewGuid().ToByteArray();
-					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(data, null, DataProtectionScope.CurrentUser));
+					ClientTokenV2 = Convert.ToBase64String(ProtectedData.Protect(data, null, DataProtectionScope.LocalMachine));
 				}
 			}
 			catch(Exception e) {
