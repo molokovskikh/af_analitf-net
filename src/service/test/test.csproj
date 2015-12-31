@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigFixture.cs" />
     <Compile Include="ControllerFixture.cs" />
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />

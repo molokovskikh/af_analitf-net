@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -553,6 +554,10 @@ namespace AnalitF.Net.Client.Models
 			var client = HttpClientFactory.Create(handler, handlers);
 			client.DefaultRequestHeaders.Add("Version", version.ToString());
 			client.DefaultRequestHeaders.Add("Client-Token", GetClientToken());
+			if (Assembly.GetExecutingAssembly().GetName().Name.Match("AnalitF.Net.Client"))
+				client.DefaultRequestHeaders.Add("Branch", "master");
+			else if (Assembly.GetExecutingAssembly().GetName().Name.Match("AnalitF"))
+				client.DefaultRequestHeaders.Add("Branch", "migration");
 			//признак по которому запросы можно объединить, нужно что бы в интерфейсе связать лог и запрос
 			client.DefaultRequestHeaders.Add("Request-Token", Guid.NewGuid().ToString());
 			try {

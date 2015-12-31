@@ -11,6 +11,7 @@ using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using Test.Support;
 using Environment = System.Environment;
 
@@ -97,8 +98,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static bool IsTestFail()
 		{
-			return TestContext.CurrentContext.Result.State == TestState.Failure
-				|| TestContext.CurrentContext.Result.State == TestState.Error;
+			return TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed;
 		}
 
 		public static void Drop()

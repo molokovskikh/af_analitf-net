@@ -82,7 +82,7 @@ namespace vm
 			Assert.That(logText, Is.Not.StringContaining("ERROR"));
 		}
 
-		[Test, Ignore]
+		[Test, Explicit]
 		public void Snap()
 		{
 			machine.LockMachine(session, LockType.LockType_Write);

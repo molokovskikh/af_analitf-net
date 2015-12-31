@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			scheduler.Start();
 		}
 
-		[Test, Ignore]
+		[Test]
 		public void Show_catalog_view()
 		{
 			nameViewModel.CurrentCatalogName.Value = nameViewModel.CatalogNames.Value.First();

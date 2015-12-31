@@ -145,8 +145,7 @@ namespace AnalitF.Net.Service.Models
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
 
-			UpdatePath = Path.Combine(config.UpdatePath,
-				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
+			UpdatePath = config.GetUpdatePath(data, job);
 		}
 
 		//Все даты передаются в UTC!
@@ -1961,7 +1960,7 @@ where r.DownloadId in (:ids)")
 		public void ExportAll()
 		{
 			Export();
-			ExportUpdate();
+			ExportBin();
 			ExportAds();
 		}
 
@@ -2040,7 +2039,7 @@ where r.DownloadId in (:ids)")
 		//то данные должен готовить сервис той же версии что и бинарники которые передаются
 		//иначе может получиться ситуация когда приложение ожидает что в обновлении будут поля а по факту их не буде
 		//тк обновление приготовлено старой версией сервиса
-		private void ExportUpdate()
+		private void ExportBin()
 		{
 			var file = Path.Combine(UpdatePath, "version.txt");
 			if (!File.Exists(file)) {
@@ -2054,7 +2053,8 @@ where r.DownloadId in (:ids)")
 
 			if (!String.IsNullOrEmpty(job.ErrorDescription))
 				job.ErrorDescription += Environment.NewLine;
-			job.ErrorDescription += $"Обновление включает новую версию приложения {updateVersion}";
+			job.ErrorDescription += $"Обновление включает новую версию приложения {updateVersion}" +
+				$" из канала {Path.GetFileName(UpdatePath)}";
 			AddDir(Result, UpdatePath, "update");
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))

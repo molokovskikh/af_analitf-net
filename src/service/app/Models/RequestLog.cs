@@ -60,8 +60,11 @@ namespace AnalitF.Net.Service.Models
 					RemoteHost = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
 			}
 			if (request.Headers.TryGetValues("Request-Token", out values)) {
-					RequestToken = values.Implode();
-				}
+				RequestToken = values.Implode();
+			}
+			if (request.Headers.TryGetValues("Branch", out values)) {
+				Branch = values.Implode();
+			}
 		}
 
 		public virtual uint Id { get; set; }
@@ -104,6 +107,9 @@ namespace AnalitF.Net.Service.Models
 		public virtual string OSVersion { get; set; }
 
 		public virtual string RequestToken { get; set; }
+
+		//тип релиза обычный или перенос с analitf
+		public virtual string Branch { get; set; }
 
 		public virtual void Faulted(Exception e)
 		{

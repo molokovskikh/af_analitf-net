@@ -281,7 +281,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.Clear();
 			normalOrder = localSession.Get<Order>(normalOrder.Id);
 			Assert.IsNotNull(normalOrder);
-			Assert.IsNullOrEmpty(normalOrder.SendError,
+			Assert.That(normalOrder.SendError, Is.Null.Or.Empty,
 				normalOrder.Lines.Implode(l => l.LongSendError));
 
 			changedOrder = localSession.Get<Order>(changedOrder.Id);
@@ -459,7 +459,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsNotNull(newOffer);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore("тест в данной ветке не актуален")]
 		public void Migrate()
 		{
 			var priceId = localSession.Query<Price>().First().Id.PriceId;
@@ -514,13 +514,13 @@ update Addresses set Id =  2575 where Id = :addressId")
 			Assert.IsNotNull(order.Price);
 			Assert.IsNotNull(order.Address);
 			Assert.That(order.Lines[0].ResultCost, Is.GreaterThan(0));
-			Assert.IsNotNullOrEmpty(order.Lines[0].Producer);
+			Assert.That(order.Lines[0].Producer, Is.Not.Null.Or.Empty);
 
 			var sentOrder = localSession.Query<SentOrder>().First();
 			Assert.IsNotNull(sentOrder.Price);
 			Assert.IsNotNull(sentOrder.Address);
 			Assert.That(sentOrder.Lines[0].ResultCost, Is.GreaterThan(0));
-			Assert.IsNotNullOrEmpty(sentOrder.Lines[0].Producer);
+			Assert.That(sentOrder.Lines[0].Producer, Is.Not.Null.Or.Empty);
 
 			var waybill = localSession.Query<Waybill>().First(x => x.Id == 39153110);
 			Assert.IsNotNull(waybill.Supplier);

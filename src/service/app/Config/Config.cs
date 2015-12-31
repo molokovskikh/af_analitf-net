@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using AnalitF.Net.Service.Models;
+using Common.Tools;
 
 namespace AnalitF.Net.Service.Config
 {
@@ -44,5 +46,23 @@ namespace AnalitF.Net.Service.Config
 
 		public TimeSpan ExportTimeout { get; set; }
 		public string PerUserSqlPath { get; set; }
+
+		public string GetUpdatePath(AnalitfNetData data, RequestLog job)
+		{
+			var channel = data.BinUpdateChannel?.ToLower();
+			if (channel?.StartsWith("migration") == true) {
+				channel = channel.ToLower().Replace("migration-", "").Replace("migration", "");
+			}
+			if (job.Branch == "master")
+				return Path.Combine(UpdatePath,
+					String.IsNullOrEmpty(channel) ? "rtm" : channel);
+			else if (job.Branch == "migration")
+				return Path.Combine(UpdatePath,
+					String.IsNullOrEmpty(channel) || channel == "rtm" ? "migration" : "migration-" + channel);
+
+			return Path.Combine(UpdatePath,
+				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
+
+		}
 	}
 }

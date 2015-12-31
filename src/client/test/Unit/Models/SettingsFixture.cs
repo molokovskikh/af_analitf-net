@@ -33,13 +33,13 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			settings.CheckToken();
 			var crypToken = settings.ClientTokenV2;
 			var token = settings.GetClientToken();
-			Assert.IsNotNullOrEmpty(crypToken);
-			Assert.IsNotNullOrEmpty(settings.GetClientToken());
+			Assert.That(crypToken, Is.Not.Null.Or.Empty);
+			Assert.That(settings.GetClientToken(), Is.Not.Null.Or.Empty);
 
 			settings.ClientTokenV2 = "123";
 			Assert.IsNull(settings.GetClientToken());
 			settings.CheckToken();
-			Assert.IsNotNullOrEmpty(crypToken);
+			Assert.That(crypToken, Is.Not.Null.Or.Empty);
 			Assert.AreNotEqual(crypToken, settings.ClientTokenV2);
 			Assert.AreNotEqual(token, settings.GetClientToken());
 		}
