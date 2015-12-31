@@ -98,7 +98,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static bool IsTestFail()
 		{
-			return TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed;
+			return TestContext.CurrentContext.Result.State == TestState.Failure
+				|| TestContext.CurrentContext.Result.State == TestState.Error;
 		}
 
 		public static void Drop()

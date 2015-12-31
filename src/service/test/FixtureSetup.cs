@@ -11,7 +11,7 @@ namespace AnalitF.Net.Service.Test
 		public static ISessionFactory Factory;
 		public static Config.Config Config;
 
-		[OneTimeSetUp]
+		[SetUp]
 		public void Setup()
 		{
 			global::Test.Support.Setup.BuildConfiguration("local");
