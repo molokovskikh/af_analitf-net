@@ -11,7 +11,6 @@ using NHibernate.Cfg;
 using NHibernate.Linq;
 using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Test.Support;
 using Environment = System.Environment;
 
