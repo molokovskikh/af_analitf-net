@@ -27,10 +27,9 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var header =
-				$"Заявка № {Order.DisplayId} от {Order.CreatedOn} на {Order.SafePrice?.SupplierFullName}"
-				+ $" от {Order.SafeAddress?.Org}, {Order.SafeAddress?.Name}";
-			TwoColumnHeader(header, Order.SafePrice?.Phone);
+			TwoColumnHeader($"Заявка № {Order.DisplayId} от {Order.CreatedOn}", Order.SafePrice?.Phone);
+			Block($"Продавец: {Order.SafePrice?.SupplierFullName}\r\n"
+				+ $"Покупатель: {Order.SafeAddress?.Org}\r\n{Order.SafeAddress?.Name}");
 			Block($"Дата прайс-листа от {Order.SafePrice?.PriceDate}");
 			Block(Order.PersonalComment);
 
