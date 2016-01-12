@@ -315,6 +315,7 @@ task "setup:preprocess":
 	AddDirectory("INSTALLFOLDER", output, document, manager)
 	document.Save(name)
 	Cp("assets/Демонстрационная дефектура.csv", "output/setup/")
+	Cp("assets/ТехПоддержка-idccq5m8vh.exe", "output/setup/")
 
 task "build:update", ["build:client:merged"]:
 	clientOutput = "output/merged"
@@ -333,7 +334,8 @@ task "build:update", ["build:client:merged"]:
 	Mv(Path.ChangeExtension(name, ".pdb"), Path.ChangeExtension(exe, ".pdb"))
 	#файл маркер для удаления старых бинарников
 	File.WriteAllText(Path.Combine(updaterOutput, "delete.me"), "*.exe\r\n*.dll\r\n*.pdb")
-	Cp("output/setup/version.txt", updaterOutput, true)
+	Cp("output/setup/version.txt", updaterOutput)
+	Cp("assets/ТехПоддержка-idccq5m8vh.exe", updaterOutput)
 	Cp(FileSet("*", BaseDirectory: clientOutput), updaterOutput, true)
 	Rm(FileSet("*.xml", BaseDirectory: updaterOutput))
 
@@ -343,6 +345,7 @@ task "build:update", ["build:client:merged"]:
 	Cp(FileSet("*", BaseDirectory: "output/migration", Excludes: ["libmysqld.dll"]), output)
 	Cp(name, output)
 	Cp(Path.Combine(updaterOutput, Path.GetFileName(name) + ".config"), output)
+	Cp("assets/ТехПоддержка-idccq5m8vh.exe", output)
 	RmDir("output/updater/merged")
 
 task "git:push:tags":

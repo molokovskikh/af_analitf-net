@@ -807,6 +807,14 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public void Support()
+		{
+			var file = Directory.GetFiles(FileHelper.MakeRooted("."), "ТехПоддержка*.exe").FirstOrDefault();
+			if (String.IsNullOrEmpty(file))
+				return;
+			StartProcess(file);
+		}
+
 		protected bool Confirm(string text)
 		{
 			return windowManager.Question(text) == MessageBoxResult.Yes;

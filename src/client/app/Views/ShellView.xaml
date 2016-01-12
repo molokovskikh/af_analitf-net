@@ -73,6 +73,7 @@
 				<MenuItem Header="Журнал загрузок" cal:Message.Attach="ShowJournal" />
 				<MenuItem Header="Минипочта" cal:Message.Attach="ShowMails" />
 				<MenuItem Header="Восстановление базы данных" cal:Message.Attach="CheckDb" />
+				<MenuItem Header="ТехПоддержка" cal:Message.Attach="Support" />
 				<MenuItem Header="Служебные">
 					<MenuItem Header="Закрыть все окна" InputGestureText="Ctrl+F4"
 						cal:Message.Attach="ResetNavigation" />

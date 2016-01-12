@@ -28,6 +28,7 @@
 			<ComponentRef Id="AppShortcut" />
 			<ComponentRef Id="SampleData" />
 			<ComponentRef Id="Clean" />
+			<ComponentRef Id="Support" />
 		</Feature>
 		<Property Id="ARPNOREPAIR" Value="no" Secure="yes" />
 		<Property Id="ARPNOMODIFY" Value="no" Secure="yes" />
@@ -40,6 +41,11 @@
 				<RegistryValue Root="HKCU" Key="Software\Microsoft\$(var.Setup.Product)" Name="Path" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
 			</Component>
 		</DirectoryRef>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="Support">
+				<File Id="Support_Exe" Source="ТехПоддержка-idccq5m8vh.exe" />
+			</Component>
+		</DirectoryRef>
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramMenuFolder">
 				<Directory Id="ApplicationProgramsFolder" Name="$(var.Setup.Product)">
@@ -48,6 +54,11 @@
 							Name="$(var.Setup.Product)"
 							Description="$(var.Setup.Product)"
 							Target="[INSTALLFOLDER]Analitf.Net.Client.exe"
+							WorkingDirectory="INSTALLFOLDER"/>
+						<Shortcut Id="SupportStartMenuShortcut"
+							Name="$(var.Setup.Product) ТехПоддержка"
+							Description="$(var.Setup.Product) ТехПоддержка"
+							Target="[INSTALLFOLDER]ТехПоддержка-idccq5m8vh.exe"
 							WorkingDirectory="INSTALLFOLDER"/>
 						<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
 						<RegistryValue Root="HKCU" Key="Software\Microsoft\$(var.Setup.Product)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
