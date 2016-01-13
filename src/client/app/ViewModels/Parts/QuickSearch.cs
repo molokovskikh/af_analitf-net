@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		private Func<string, T> search;
 		private bool _isEnabled = true;
 
-		public bool RemapChars;
+		public bool RemapChars = true;
 
 		static QuickSearch()
 		{

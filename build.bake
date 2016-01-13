@@ -189,7 +189,7 @@ task "deploy:client", ["build:setup"]:
 			root = Globals.PackageRoot
 			Cp("output/package/*.nupkg", "$root/packages", true)
 
-task "build:client:package", ["build:client"]:
+task "build:client:package", ["build:client:merged"]:
 	proj = "src/client/app/app.csproj"
 	name, _, _ = GetBuildConfig(Globals, proj)
 	output = "output/merged"
@@ -217,7 +217,7 @@ task "deploy:update", ["build:update"]:
 	channel = Configuration.Maybe.channel or Globals.DefaultUpdateChannel
 	CopyUpdateBin(channel, "output/updater/")
 
-task "build:client", ["build:client:bin", "build:setup", "build:update"]
+task "build:client", ["build:client:bin", "build:client:package", "build:setup", "build:update"]
 
 task "build:client:bin":
 	#собираем обычную версию

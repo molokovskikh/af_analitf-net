@@ -18,7 +18,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
 				t => Offers.Value.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentOffer);
-			QuickSearch.RemapChars = true;
 			IsLoading = new NotifyValue<bool>(true);
 		}
 

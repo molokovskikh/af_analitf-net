@@ -284,6 +284,7 @@
 				</DataGrid.Columns>
 			</c:DataGrid2>
 
+			<ContentControl x:Name="QuickSearch2" Grid.Row="0" />
 			<ProgressBar Grid.Row="0" IsIndeterminate="True"
 				Width="200"
 				Height="20"

@@ -1103,7 +1103,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			else {
 				if (!String.IsNullOrEmpty(report)) {
 					//формы должны показываться в определенном порядке
-					Results.Add(new DialogResult(new DocModel<TextDoc>(new TextDoc("Ненайденные позиции", report)),
+					Results.Add(new DialogResult(new DocModel<TextDoc>(new TextDoc("Не найденные позиции", report)),
 						fixedSize: true));
 					Results.Add(new MessageResult(SuccessMessage));
 					result = UpdateResult.SilentOk;
@@ -1130,24 +1130,31 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 		private List<string> Move(string source, string destination)
 		{
+			HandleIOException(() => Directory.CreateDirectory(destination));
 			var files = new List<string>();
-			Directory.CreateDirectory(destination);
 			foreach (var file in Directory.GetFiles(source)) {
-				do {
-					try {
-						var dst = Path.Combine(destination, Path.GetFileName(file));
-						if (File.Exists(dst))
-							File.Delete(dst);
-						File.Move(file, dst);
-						files.Add(dst);
-						break;
-					} catch (SystemException e) {
-						if (ErrorSolver(e) == ErrorResolution.Fail)
-							throw new EndUserError(e.Message, e);
-					}
-				} while(true);
+				var dst = Path.Combine(destination, Path.GetFileName(file));
+				HandleIOException(() => {
+					if (File.Exists(dst))
+						File.Delete(dst);
+					File.Move(file, dst);
+					files.Add(dst);
+				});
 			}
 			return files;
+		}
+
+		public void HandleIOException(Action action)
+		{
+			do {
+				try {
+					action();
+					break;
+				} catch (SystemException e) {
+					if (ErrorSolver(e) == ErrorResolution.Fail)
+						throw new EndUserError(e.Message, e);
+				}
+			} while(true);
 		}
 
 		private List<string> MoveToPerSupplierDir(string srcDir, DocumentType type)
@@ -1170,12 +1177,12 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 					var map = maps.First(m => m.Supplier.Id == doc.Supplier.Id);
 					var dst = FileHelper.MakeRooted(map.Dir);
-					Directory.CreateDirectory(dst);
+					HandleIOException(() => Directory.CreateDirectory(dst));
 
 					var files = Directory.GetFiles(srcDir, $"{doc.Id}_*");
 					foreach (var src in files) {
 						dst = FileHelper.Uniq(Path.Combine(dst, doc.OriginFilename));
-						File.Move(src, dst);
+						HandleIOException(() => File.Move(src, dst));
 						result.Add(dst);
 					}
 				}

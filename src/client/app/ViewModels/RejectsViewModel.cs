@@ -30,7 +30,6 @@ namespace AnalitF.Net.Client.ViewModels
 			QuickSearch = new QuickSearch<Reject>(UiScheduler,
 				t => Rejects.Value.FirstOrDefault(o => o.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentReject);
-			QuickSearch.RemapChars = true;
 
 			WatchForUpdate(CurrentReject);
 		}

@@ -53,6 +53,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			QuickSearch = new QuickSearch<OrderLine>(UiScheduler,
 				s => Lines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentLine);
+			QuickSearch2 = new QuickSearch<SentOrderLine>(UiScheduler,
+				s => SentLines.Value.FirstOrDefault(l => l.ProductSynonym.IndexOf(s, StringComparison.CurrentCultureIgnoreCase) >= 0),
+				SelectedSentLine);
 			Editor = new Editor(OrderWarning, Manager, CurrentLine, Lines.Cast<IList>().ToValue());
 
 			var currentLinesChanged = this.ObservableForProperty(m => m.CurrentLine.Value.Count)
@@ -101,6 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public NotifyValue<bool> IsLoading { get; set; }
 		public InlineEditWarning LinesOrderWarning { get; set; }
 		public QuickSearch<OrderLine> QuickSearch { get; set; }
+		public QuickSearch<SentOrderLine> QuickSearch2 { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 		public ProductInfo ProductInfo { get; set; }
 		public ProductInfo ProductInfo2 { get; set; }
