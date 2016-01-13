@@ -130,13 +130,17 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("SerialNumber"),
 				Width = new DataGridLength(160, DataGridLengthUnitType.Star),
 			});
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Width = new DataGridLength(13, DataGridLengthUnitType.Star),
+				Header = "Штрихкод",
+				Binding = new Binding("EAN13"),
+				Visibility = Visibility.Collapsed
+			});
 			lines.Columns.Add(new CustomDataGridColumn((c, i) => null) {
 				Header = "Сертификаты",
 				Name = "CertificateLink",
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
-				Generator = (c, i) => {
-					return new ContentControl { Style = (Style)FindResource("DownloadLink")};
-				}
+				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
 			if (model != null && model.Waybill.IsCreatedByUser) {
 				lines.Columns.Add(new CustomDataGridColumn {
@@ -241,6 +245,7 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная цена");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная сумма");
+			DataGridHelper.CalculateColumnWidth(grid, "0000000000000", "Штрихкод");
 
 			StyleHelper.ApplyStyles(typeof(WaybillLine), lines, Application.Current.Resources, Legend);
 			Conventions.ConfigureDataGrid(lines, typeof(WaybillLine));

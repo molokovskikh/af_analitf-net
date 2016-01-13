@@ -76,7 +76,10 @@ namespace AnalitF.Net.Client.Helpers
 				return "База данных повреждена, используйте функцию" +
 					" \"Восстановление базы данных\" из меню \"Сервис\" что бы починить базу данных.";
 			if (exception.Chain().OfType<MySqlException>().Any(x => x.Code == 28))
-				return "Недостаточно свободного места на диске для выполения операции.";
+				return "Недостаточно свободного места на диске для выполнения операции.";
+
+			if (exception is IOException)
+				return exception.Message;
 
 			return null;
 		}

@@ -20,10 +20,11 @@ lib/dcmysql[*]std.exe - драйвер mysql
 
 Данные
 
-подготовка базы
-bake db:setup
+подготовка базы -  bake db:setup
 загрузка тестовых данных
-rym -f Rymfile.service fixture execute SampleData
+для создания тестовых данных есть ряд задач
+полных список задач - rym -f Rymfile.service fixture List
+пример вызова одной из задач - rym -f Rymfile.service fixture SampleData
 
 Запуск
 
