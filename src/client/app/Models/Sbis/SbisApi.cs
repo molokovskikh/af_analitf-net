@@ -101,34 +101,6 @@ namespace AnalitF.Net.Client.Models.Sbis
 		public Nav Навигация;
 	}
 
-	public class External
-	{
-		private static ILog Log = LogManager.GetLogger(typeof(External));
-
-		public static async Task Sbis()
-		{
-			using (var client = new HttpClient()) {
-				var result = await client.JsonRpc("СБИС.Аутентифицировать", new {
-					Логин = "поставщик",
-					Пароль = "поставщик123"
-				});
-				client.DefaultRequestHeaders.Add("X-SBISSessionID", result["result"].ToObject<string>());
-				result = await client.JsonRpc("СБИС.СписокДокументовПоСобытиям", new {
-					Фильтр = new {
-						ТипРеестра = "Входящие",
-						Навигация = new {
-							РазмерСтраницы = "10",
-							Страница = "0",
-							ВернутьРазмерСписка = "Да"
-						}
-					}
-				});
-				var docs = result.GetValue("result").ToObject<Result>();
-				Console.WriteLine(result);
-			}
-		}
-	}
-
 	public static class RpcHelper
 	{
 		private static ILog log  = LogManager.GetLogger(typeof(RpcHelper));
@@ -151,7 +123,7 @@ namespace AnalitF.Net.Client.Models.Sbis
 			var json = JObject.Parse(await result.Content.ReadAsStringAsync());
 			var error = json["error"];
 			if (error != null) {
-				log.Error($"Ошибка при вызове медота {method} {error}");
+				log.Error($"Ошибка при вызове метода {method} {error}");
 				throw new EndUserError(error["details"]?.ToString() ?? error["message"]?.ToString());
 			}
 			return json;
