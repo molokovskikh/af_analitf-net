@@ -803,7 +803,7 @@ load data infile '{0}' replace into table WaybillOrders (DocumentLineId, OrderLi
 
 			MigrateTable("AwaitedItems.txt", @"
 load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);");
-			//при миграции данные для импорта хранатся в паки in,
+			//при миграции данные для импорта хранится в папке in,
 			//глобальный конфиг нельзя менять иначе все последующая работа
 			//будет вестись не там где нужно, создаем нужную конфигурация для данной операции
 			Config = Config.Clone();
@@ -905,6 +905,10 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			foreach (var dir in settings.DocumentDirs)
 				Directory.CreateDirectory(dir);
 
+			//все ошибки при файловых операциях считаются некритическими и игнорируются
+			//это сделано тк на этой фазе наиболее вероятны разнообразные ошибки
+			//но данные в базу уже импортированы и если подтверждение не произойдет они буду выгружены повторно
+			//это может привести к дублированию заявок если клиент использует функцию загрузки заявок с сервера
 			resultDirs.Each(Move);
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
@@ -1134,12 +1138,16 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			var files = new List<string>();
 			foreach (var file in Directory.GetFiles(source)) {
 				var dst = Path.Combine(destination, Path.GetFileName(file));
-				HandleIOException(() => {
-					if (File.Exists(dst))
-						File.Delete(dst);
-					File.Move(file, dst);
-					files.Add(dst);
-				});
+				try {
+					HandleIOException(() => {
+						if (File.Exists(dst))
+							File.Delete(dst);
+						File.Move(file, dst);
+						files.Add(dst);
+					});
+				} catch(Exception e) {
+					Log.Error($"Ошибка перемещения файла {dst}", e);
+				}
 			}
 			return files;
 		}
@@ -1171,10 +1179,9 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.Where(m => m.Supplier.Name != null)
 				.ToList();
 			foreach (var doc in waybills) {
+				if (String.IsNullOrEmpty(doc.OriginFilename))
+					continue;
 				try {
-					if (String.IsNullOrEmpty(doc.OriginFilename))
-						continue;
-
 					var map = maps.First(m => m.Supplier.Id == doc.Supplier.Id);
 					var dst = FileHelper.MakeRooted(map.Dir);
 					HandleIOException(() => Directory.CreateDirectory(dst));
