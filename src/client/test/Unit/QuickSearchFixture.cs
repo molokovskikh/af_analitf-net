@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		[Test]
 		public void Search()
 		{
+			search.RemapChars = false;
 			search.SearchText = "m";
 			Assert.AreEqual("Microsoft", result);
 			Assert.AreEqual("m", search.SearchText);
@@ -47,6 +48,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		[Test]
 		public void Disable_on_search()
 		{
+			search.RemapChars = false;
 			search.SearchText = "m";
 			Assert.That(result, Is.Not.Null);
 			search.IsEnabled = false;
