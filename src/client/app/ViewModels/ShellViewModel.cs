@@ -22,6 +22,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
@@ -34,7 +35,6 @@ using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
-using ExtDocs = AnalitF.Net.Client.ViewModels.Diadok.ExtDocs;
 using LogManager = log4net.LogManager;
 using ILog = log4net.ILog;
 using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
@@ -631,7 +631,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowExtDocs()
 		{
-			NavigateRoot(new ExtDocs());
+			NavigateRoot(new Index());
 		}
 
 		public void ShowSbis()

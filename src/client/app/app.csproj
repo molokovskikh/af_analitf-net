@@ -350,7 +350,7 @@
     <Compile Include="ViewModels\Diadok\Resolution.cs" />
     <Compile Include="ViewModels\Diadok\Sign.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
-    <Compile Include="ViewModels\Diadok\ExtDocs.cs" />
+    <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -464,8 +464,8 @@
     <Compile Include="Views\Dialogs\TextView.xaml.cs">
       <DependentUpon>TextView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Diadok\ExtDocs.xaml.cs">
-      <DependentUpon>ExtDocs.xaml</DependentUpon>
+    <Compile Include="Views\Diadok\Index.xaml.cs">
+      <DependentUpon>Index.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
@@ -689,7 +689,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Diadok\ExtDocs.xaml">
+    <Page Include="Views\Diadok\Index.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

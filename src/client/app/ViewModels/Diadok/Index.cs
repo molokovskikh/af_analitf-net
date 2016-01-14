@@ -304,7 +304,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 	}
 
 
-	public class ExtDocs : BaseScreen
+	public class Index : BaseScreen
 	{
 		private ObservableCollection<DisplayItem> items = new ObservableCollection<DisplayItem>();
 		private DiadocApi api;
@@ -318,7 +318,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		private OrganizationList orgs;
 
-		public ExtDocs()
+		public Index()
 		{
 			DisplayName = "Диадок";
 			InitFields();

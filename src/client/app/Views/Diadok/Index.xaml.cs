@@ -17,9 +17,9 @@ namespace AnalitF.Net.Client.Views.Diadok
 	/// <summary>
 	/// Interaction logic for ExtDocs.xaml
 	/// </summary>
-	public partial class ExtDocs : UserControl
+	public partial class Index : UserControl
 	{
-		public ExtDocs()
+		public Index()
 		{
 			InitializeComponent();
 		}
