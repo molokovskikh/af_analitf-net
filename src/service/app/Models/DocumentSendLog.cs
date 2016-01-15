@@ -31,6 +31,7 @@ namespace AnalitF.Net.Service.Models
 		public virtual bool Committed { get; set; }
 		public virtual bool DocumentDelivered { get; set; }
 		public virtual bool FileDelivered { get; set; }
+		public virtual DateTime? SendDate { get; set; }
 
 		public virtual string GetTargetFilename(string localFilename)
 		{

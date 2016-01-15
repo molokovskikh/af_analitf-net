@@ -51,7 +51,7 @@ where r.UserId = :userId and r.ForceReplication = 2;")
 			Session.CreateSQLQuery(@"
 update Logs.DocumentSendLogs l
 	join Logs.PendingDocLogs p on p.SendLogId = l.Id
-set l.Committed = 1
+set l.Committed = 1, l.SendDate = now()
 where p.UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
 

@@ -146,6 +146,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.IsTrue(sendLog.Committed);
 			Assert.IsTrue(sendLog.FileDelivered);
 			Assert.IsTrue(sendLog.DocumentDelivered);
+			Assert.IsNotNull(sendLog.SendDate);
 		}
 
 		[Test]
