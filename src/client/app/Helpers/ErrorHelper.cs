@@ -102,7 +102,9 @@ namespace AnalitF.Net.Client.Helpers
 				//Table '%s' is marked as crashed and last (automatic?) repair failed
 				145, 1195,
 				//Table upgrade required. Please do "REPAIR TABLE `%s`" to fix it!
-				164, 1459
+				164, 1459,
+				//Incorrect file format '%s'
+				130,
 			};
 			return e.Chain().OfType<MySqlException>().Any(x => codes.Contains(x.Code));
 		}
