@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		}
 
 		/// <summary>
-		/// конструктор предназначин для ситуации когда ты используешь готовую инфраструктуру инициализации
+		/// конструктор предназначен для ситуации когда ты используешь готовую инфраструктуру инициализации
 		/// ShellViewModel.RunCmd или Configure.BaseCommand
 		/// </summary>
 		public RepairDb()
@@ -112,7 +112,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public static bool TryToRepair(Exception exception, Config.Config config)
 		{
-			if (!ErrorHelper.IsDbCorrupted(exception))
+			//это проверка происходит при инициализации и если здесь возникло исключение то приложение не запустится
+			//и у пользователя не будет возможности что либо сделать по этому лучше перебдеть чем недобдеть
+			//все MySqlException трактуются как повреждение базы данных
+			if (!exception.Chain().OfType<MySqlException>().Any() && !ErrorHelper.IsDbCorrupted(exception))
 				return false;
 
 			using (var cmd = new RepairDb(config)) {
