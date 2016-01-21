@@ -142,6 +142,9 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 						filename = Path.Combine(dir, x.Attachment.Идентификатор + Path.GetExtension(x.FileName));
 						await LoadToFile(filename, attachment.Файл.Ссылка);
 						return filename;
+					}).Catch<string, Exception>(y => {
+						Log.Error("Не удалось загрузить документ", y);
+						return Observable.Empty<string>();
 					});
 				})
 				.Switch()
@@ -159,7 +162,12 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 					if (fileformats.Contains(Path.GetExtension(x) ?? "", StringComparer.CurrentCultureIgnoreCase))
 						return Observable.Return(x);
 
-					return Observable.StartAsync(async () => await LoadPrintPdf(attachment));
+					return Observable
+						.StartAsync(async () => await LoadPrintPdf(attachment))
+						.Catch<string, Exception>(y => {
+							Log.Error("Не удалось загрузить pdf");
+							return Observable.Empty<string>();
+						});
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
@@ -298,7 +306,7 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 				client = new HttpClient();
 				OnCloseDisposable.Add(client);
 			}
-			Observable.Start(async () => {
+			Observable.StartAsync(async () => {
 					if (!client.DefaultRequestHeaders.Contains("X-SBISSessionID")) {
 						var login = await client.JsonRpc("СБИС.Аутентифицировать", new {
 							Логин = Settings.Value.SbisUsername,
@@ -322,10 +330,10 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 				.Do(_ => IsLoading.Value = false, _ => IsLoading.Value = false)
 				.Subscribe(x => {
 					SearchTerm.Value = "";
-					Total.Value = $"{page + 1} из {x.Result.Навигация.РазмерСписка / x.Result.Навигация.РазмерСтраницы}";
+					Total.Value = $"{page + 1} из {x.Навигация.РазмерСписка / x.Навигация.РазмерСтраницы}";
 					currentPage = page;
 					var display = new List<DisplayItem>();
-					foreach (var message in x.Result.Реестр) {
+					foreach (var message in x.Реестр) {
 						DateTime date;
 						DateTime.TryParseExact(message.ДатаВремя, "dd.MM.yyyy HH.mm.ss", CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date);
 						var sender = message.Документ?.Контрагент?.СвЮЛ?.Название;
