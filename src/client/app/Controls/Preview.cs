@@ -27,6 +27,9 @@ namespace AnalitF.Net.Client.Controls
 		private static void FilenameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var preview = (Preview)d;
+			var scroll = preview.Parent as ScrollViewer;
+			scroll.ScrollToHome();
+			scroll.ScrollToTop();
 			var filename = (string)e.NewValue;
 			if (String.IsNullOrEmpty(filename)) {
 				preview.Content = null;

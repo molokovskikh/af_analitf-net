@@ -144,7 +144,7 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 						return filename;
 					}).Catch<string, Exception>(y => {
 						Log.Error("Не удалось загрузить документ", y);
-						return Observable.Empty<string>();
+						return Observable.Return<string>(null);
 					});
 				})
 				.Switch()
@@ -166,7 +166,7 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 						.StartAsync(async () => await LoadPrintPdf(attachment))
 						.Catch<string, Exception>(y => {
 							Log.Error("Не удалось загрузить pdf");
-							return Observable.Empty<string>();
+							return Observable.Return<string>(null);
 						});
 				})
 				.Switch()
@@ -317,6 +317,11 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 					var result = await client.JsonRpc("СБИС.СписокДокументовПоСобытиям", new {
 						Фильтр = new {
 							ТипРеестра = "Входящие",
+							НашаОтганизация = new {
+								СвЮЛ = new {
+									КодФилиала = ""
+								}
+							},
 							Навигация = new {
 								РазмерСтраницы = "100",
 								Страница = page.ToString(),
