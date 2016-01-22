@@ -59,6 +59,7 @@
     <Compile Include="ControllerFixture.cs" />
     <Compile Include="ExporterFixture.cs" />
     <Compile Include="FixtureSetup.cs" />
+    <Compile Include="GlobalSetup.cs" />
     <Compile Include="TestHelpers\DataMother.cs" />
     <Compile Include="TestHelpers\ZipHelper.cs" />
   </ItemGroup>

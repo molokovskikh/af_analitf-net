@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Test.Integration
 		public static Service.Config.Config serviceConfig;
 		public static string BackupDir = @"var\client\backup";
 
-		[SetUp]
+		[OneTimeSetUp]
 		public void Setup()
 		{
 			if (isInitialized) {

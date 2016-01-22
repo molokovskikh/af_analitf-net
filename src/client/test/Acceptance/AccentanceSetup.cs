@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 	{
 		public static IntegrationSetup integrationSetup;
 
-		[SetUp]
+		[OneTimeSetUp]
 		public void Setup()
 		{
 			if (!Directory.Exists(IntegrationSetup.BackupDir))
