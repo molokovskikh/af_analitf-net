@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -14,7 +15,7 @@ using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.Integration
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class BinderFixture
 	{
 		private UserControl view;

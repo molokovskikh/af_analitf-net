@@ -384,9 +384,9 @@ where l.RequestId = :id;")
 			}
 
 			result.ServerCost = (decimal?)offer.Cost;
-			result.ServerQuantity = offer.Quantity;
+			result.ServerQuantity = offer.ProcessedQuantity;
 
-			if (offer.Quantity != null && offer.Quantity < item.Quantity) {
+			if (offer.ProcessedQuantity != null && offer.ProcessedQuantity < item.Quantity) {
 				result.Result |= LineResultStatus.QuantityChanged;
 			}
 

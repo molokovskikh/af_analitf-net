@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Interactivity;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -8,7 +9,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class TableSettingsFixture
 	{
 		private TableSettings settings;

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
+	[Apartment(ApartmentState.STA)]
 	public class BaseViewFixture : ViewModelFixture
 	{
 		[SetUp]
