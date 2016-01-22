@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		//и в предыдущую попытку был выбран элементы который отображается на одном экране с выбранным
 		//в текущую попытку элементом то это приведет к эффекту похожему на "съедание" введенной буквы
 		[Test]
-		public async void Open_catalog_on_quick_search()
+		public async Task Open_catalog_on_quick_search()
 		{
 			Start();
 
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public async void Open_catalog_offers()
+		public async Task Open_catalog_offers()
 		{
 			AppDomain.CurrentDomain.FirstChanceException += (sender, args) => {
 				Console.WriteLine(args.Exception);
@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public async void Open_catalog()
+		public async Task Open_catalog()
 		{
 			session.DeleteEach<Order>();
 
@@ -156,7 +156,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public async void Quick_search()
+		public async Task Quick_search()
 		{
 			session.DeleteEach<Order>();
 			var order = MakeOrder(toAddress: session.Query<Address>().OrderBy(a => a.Name).First());
@@ -186,7 +186,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public async void Current_address_visivility()
+		public async Task Current_address_visivility()
 		{
 			restore = true;
 			Fixture<LocalAddress>();

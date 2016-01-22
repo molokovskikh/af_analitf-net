@@ -116,7 +116,6 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 			InitFields();
 
 			DisplayName = "Сбис";
-			CurrentItem.Subscribe(LoadFiles);
 			CurrentItem
 				.Select(x => {
 					if (x == null)
@@ -222,15 +221,6 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 				return null;
 			await LoadToFile(file, item.Attachment.СсылкаНаPDF);
 			return file;
-		}
-
-		private async void LoadFiles(DisplayItem attachment)
-		{
-			//if (attachment == null)
-			//	return;
-			//var dir = FileHelper.MakeRooted("diadok");
-			//await Util.Run(() => Directory.CreateDirectory(dir));
-			//attachment.LocalFilename = await Util.Run(() => Directory.GetFiles(dir, $"{attachment.Entity.EntityId}.*").FirstOrDefault());
 		}
 
 		public NotifyValue<string> Total { get; set; }
