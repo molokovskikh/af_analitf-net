@@ -327,37 +327,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentItem
 				.Select(x => {
 					if (x == null)
-						return Observable.Return<Tuple<string, string>>(null);
+						return Observable.Return<string>(null);
 					return Observable.Start(() => {
 						var dir = FileHelper.MakeRooted("diadok");
 						Directory.CreateDirectory(dir);
 						var filename = Directory.GetFiles(dir, $"{x.Entity.EntityId}.*").FirstOrDefault();
 						if (!String.IsNullOrEmpty(filename))
-							return Tuple.Create(filename,
-								Directory.GetFiles(dir, $"print.{x.Entity.EntityId}").FirstOrDefault() ?? filename);
+							return filename;
 
 						var bytes = x.Entity.Content.Data
 							?? api.GetEntityContent(token, box.BoxId, x.Entity.DocumentInfo.MessageId, x.Entity.EntityId);
 						filename = Path.Combine(dir, x.Entity.EntityId + Path.GetExtension(x.Entity.FileName));
 						File.WriteAllBytes(filename, bytes);
-						var preview = filename;
-						//if (!fileformats.Contains(Path.GetExtension(x.Entity.FileName) ?? "", StringComparer.CurrentCultureIgnoreCase)) {
-						//	var data = api.GeneratePrintForm(token, box.BoxId, x.Entity.DocumentInfo.MessageId, x.Entity.EntityId);
-						//	if (data.HasContent) {
-						//		preview = Path.Combine(dir, $"print.{x.Entity.EntityId}.pdf");
-						//		File.WriteAllBytes(preview, data.Content.Bytes);
-						//	}
-						//}
-						return Tuple.Create(filename, preview);
-					});
+						return filename;
+					}).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(x => {
 					if (CurrentItem.Value != null)
-						CurrentItem.Value.LocalFilename = x?.Item1;
-					Filename.Value = x?.Item1;
-					//PreviewFilename.Value = x?.Item2;
+						CurrentItem.Value.LocalFilename = x;
+					Filename.Value = x;
 				});
 			Filename.Select(x => {
 					if (x == null)
@@ -367,7 +357,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					if (fileformats.Contains(Path.GetExtension(x) ?? "", StringComparer.CurrentCultureIgnoreCase))
 						return Observable.Return(x);
 
-					return Observable.Start(() => LoadPrintPdf(attachment));
+					return Observable.Start(() => LoadPrintPdf(attachment)).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)

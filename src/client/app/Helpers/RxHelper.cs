@@ -177,5 +177,13 @@ namespace AnalitF.Net.Client.Helpers
 			};
 			observer.OnNext(enumerator.Current);
 		}
+
+		public static IObservable<T> DefaultIfFail<T>(this IObservable<T> observable, T value = default(T))
+		{
+			return observable.Catch<T, Exception>(x => {
+				log.Error("Ошибка при обработке", x);
+				return Observable.Return(value);
+			});
+		}
 	}
 }
