@@ -28,6 +28,7 @@ using Hyperlink = System.Windows.Documents.Hyperlink;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
+	[Apartment(ApartmentState.STA)]
 	public class DispatcherFixture : BaseViewFixture
 	{
 		protected Dispatcher dispatcher;

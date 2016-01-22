@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,7 +13,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class StyleHelperFixture
 	{
 		private ResourceDictionary resource;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using AnalitF.Net.Client.Config.Caliburn;
@@ -8,7 +9,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class ViewModelHelperFixture
 	{
 		private TestViewModel model;

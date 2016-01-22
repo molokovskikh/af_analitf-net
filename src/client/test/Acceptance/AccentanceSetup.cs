@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Configure("acceptance", url);
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void Teardown()
 		{
 			if (integrationSetup != null && integrationSetup.server != null)
