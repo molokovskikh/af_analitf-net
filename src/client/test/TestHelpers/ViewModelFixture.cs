@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
@@ -70,6 +71,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		}
 	}
 
+	[Apartment(ApartmentState.STA)]
 	public class ViewModelFixture : DbFixture
 	{
 		protected WindowManager manager;

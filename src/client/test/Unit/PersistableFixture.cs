@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,7 +10,7 @@ using List = NHibernate.Mapping.List;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class PersistableFixture
 	{
 		[Test]

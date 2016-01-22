@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.IO;
 using System.Reactive.Disposables;
+using System.Threading;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Integration.ViewModels;
@@ -17,6 +18,7 @@ using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
+	[Apartment(ApartmentState.STA)]
 	public class BaseUnitFixture
 	{
 		private CompositeDisposable cleanup;
