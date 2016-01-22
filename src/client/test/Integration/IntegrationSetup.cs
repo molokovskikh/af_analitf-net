@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			isInitialized = true;
 		}
 
-		[TearDown]
+		[OneTimeTearDown]
 		public void TearDown()
 		{
 			server.Dispose();
