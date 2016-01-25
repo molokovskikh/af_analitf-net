@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -9,7 +10,7 @@ using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
-	[TestFixture]
+	[TestFixture, Apartment(ApartmentState.STA)]
 	public class EditableFixture
 	{
 		public class ViewModel

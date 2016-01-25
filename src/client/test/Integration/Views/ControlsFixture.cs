@@ -22,7 +22,7 @@ using Point = System.Windows.Point;
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
-	public class ControlsFixture
+	public class ControlsFixture : BaseViewFixture
 	{
 		public class Model
 		{
@@ -36,15 +36,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			public List<Selectable<Tuple<string, string>>> Items { get; set; }
 		}
 
-		[SetUp]
-		public void Setup()
+		[TearDown]
+		public void TearDown()
 		{
-			//нужны стили
-			if (Application.Current == null)
-				Application.LoadComponent(new Uri("/AnalitF.Net.Client;component/app.xaml", UriKind.Relative));
+			//в этих тестах ошибки биндинга неважны
+			ViewSetup.BindingErrors.Clear();
 		}
 
-		[Test, Explicit("тест конфликтует с пользовательским вводом")]
+		[Test, Ignore("тест конфликтует с пользовательским вводом")]
 		public void Popup_selector()
 		{
 			WpfTestHelper.WithWindow(w => {
@@ -126,7 +125,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 		}
 
-		[Test, Explicit("тест управляет мышкой и движения пользователя могут его сломать")]
+		[Test, Ignore("тест управляет мышкой и движения пользователя могут его сломать")]
 		public void Set_focus_on_empty_grid()
 		{
 			WpfTestHelper.WithWindow2(async w => {

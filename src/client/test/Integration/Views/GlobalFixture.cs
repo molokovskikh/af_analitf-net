@@ -91,9 +91,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public async Task Open_catalog_offers()
 		{
-			AppDomain.CurrentDomain.FirstChanceException += (sender, args) => {
-				Console.WriteLine(args.Exception);
-			};
 			var term = session.Query<CatalogName>()
 				.First(n => n.HaveOffers && n.Name.StartsWith("б"))
 				.Name.Slice(3).ToLower();
