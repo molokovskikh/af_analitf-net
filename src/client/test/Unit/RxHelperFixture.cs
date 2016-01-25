@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Test.TestHelpers;
 using Caliburn.Micro;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
 {
 	[TestFixture]
-	public class RxHelperFixture
+	public class RxHelperFixture : BaseUnitFixture
 	{
 		public class CancelResult : IResult
 		{
@@ -35,10 +36,12 @@ namespace AnalitF.Net.Client.Test.Unit
 		public void To_observable()
 		{
 			var results = new List<IResult>();
+			Exception e = null;
 			RxHelper.ToObservable(FakeResult()).Subscribe(r => {
 				results.Add(r);
 				r.Execute(new ActionExecutionContext());
-			});
+			}, x => e = x);
+			Assert.IsNull(e, e?.ToString());
 			Assert.AreEqual(1, results.Count);
 		}
 

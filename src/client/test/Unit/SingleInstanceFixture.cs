@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		private TaskFactory factory;
 		private CompositeDisposable disposable;
 
-		[TestFixtureSetUp]
+		[OneTimeSetUp]
 		public void FixtureSetup()
 		{
 			factory = new TaskFactory(new ThreadPerTaskScheduler());

@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Helpers
 #else
 				log.Error("Ошибка при обработке задачи", e);
 #endif
-			}, cancellation != null ? cancellation.Token : CancellationToken.None);
+			}, (cancellation?.Token).GetValueOrDefault());
 		}
 
 		//фактический это просто переписанный SequentialResult
