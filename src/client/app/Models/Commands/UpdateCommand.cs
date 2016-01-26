@@ -1268,13 +1268,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				var file = cleaner.TmpFile();
 
 				//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
-				var appenders = ((Hierarchy)LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
-				var files = new Dictionary<object, string>();
-				appenders.Each(x => {
-					files.Add(x, x.File);
-					x.Writer = null;
-				});
-				try {
+				using (Util.FlushLogs()) {
 					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
 						.Where(f => new FileInfo(f).Length > 0)
 						.ToArray();
@@ -1282,7 +1276,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 					if (logs.Length == 0)
 						return null;
 
-					using(var zip = new ZipFile()) {
+					using (var zip = new ZipFile()) {
 						foreach (var logFile in logs) {
 							zip.AddFile(logFile);
 						}
@@ -1297,11 +1291,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						return response;
 					}
 				}
-				finally {
-					appenders.Each(x => {
-						x.File = files.GetValueOrDefault(x);
-					});
-				}//try {
 			}//using (var cleaner = new FileCleaner())
 		}
 	}

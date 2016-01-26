@@ -18,17 +18,14 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class Feedback : Screen, IDisposable, ICancelable
 	{
-		public Feedback(Config.Config config)
+		public Feedback()
 		{
-			this.config = config;
 			DisplayName = "Письмо в АналитФармация";
 			SendLog = true;
 			Attachments = new ObservableCollection<string>();
 			IsSupport = true;
 			WasCancelled = true;
 		}
-
-		private Config.Config config;
 
 		public string ArchiveName;
 		public bool IsSupport { get; set; }
@@ -58,7 +55,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public IEnumerable<IResult> Send()
 		{
 			WasCancelled = false;
-			if (Attachments.Count == 0) {
+			var files = Attachments.ToArray();
+			if (SendLog)
+				files = files.Concat(Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")).ToArray();
+
+			if (files.Length == 0) {
 				TryClose();
 				yield break;
 			}
@@ -66,30 +67,22 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task(() => {
 				if (!String.IsNullOrEmpty(ArchiveName))
 					File.Delete(ArchiveName);
-
 				ArchiveName = Path.GetTempFileName();
-				var files = Attachments.ToArray();
-				if (SendLog)
-					files = files.Concat(Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")).ToArray();
-
 				try {
-					log4net.LogManager.ResetConfiguration();
+					using (Util.FlushLogs())
 					using(var zip = new ZipFile()) {
 						foreach (var attachment in files) {
-							zip.AddFile(attachment);
+							zip.AddFile(attachment, "");
 						}
 						zip.Save(ArchiveName);
 					}
+					if (new FileInfo(ArchiveName).Length > 4 * 1024 * 1024)
+						throw new EndUserError("Размер архива с вложенными файлами превышает 4Мб.");
 				}
 				catch(Exception) {
 					File.Delete(ArchiveName);
 					throw;
 				}
-				finally {
-					XmlConfigurator.Configure();
-				}
-				if (new FileInfo(ArchiveName).Length > 4 * 1024 * 1024)
-					throw new EndUserError("Размер архива с вложенными файлами превышает 4Мб.");
 			});
 			yield return new TaskResult(task, new WaitViewModel("Проверка вложений.\r\nПожалуйста подождите."));
 			if (task.IsFaulted) {

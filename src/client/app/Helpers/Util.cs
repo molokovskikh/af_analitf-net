@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Models;
 using Common.Tools;
+using log4net;
+using log4net.Appender;
+using log4net.Repository.Hierarchy;
 using NHibernate.Linq;
 using NHibernate.Util;
 using NPOI.SS.Formula.Functions;
@@ -259,6 +262,21 @@ namespace AnalitF.Net.Client.Helpers
 				accum.Add(current);
 			}
 			return result;
+		}
+
+		public static IDisposable FlushLogs()
+		{
+			var appenders = ((Hierarchy)LogManager.GetRepository()).GetAppenders().OfType<FileAppender>().ToArray();
+			var files = new Dictionary<object, string>();
+			appenders.Each(x => {
+				files.Add(x, x.File);
+				x.Writer = null;
+			});
+			return new DisposibleAction(() => {
+				appenders.Each(x => {
+					x.File = files.GetValueOrDefault(x);
+				});
+			});
 		}
 	}
 }

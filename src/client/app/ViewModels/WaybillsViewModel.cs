@@ -2,13 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -20,9 +15,6 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
-using Diadoc.Api;
-using Diadoc.Api.Cryptography;
-using Diadoc.Api.Proto.Events;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels

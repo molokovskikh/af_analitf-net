@@ -800,7 +800,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Feedback()
 		{
-			using (var feedback = new Feedback(Config)) {
+			using (var feedback = new Feedback()) {
 				yield return new DialogResult(feedback);
 				foreach (var result in Sync(new SendFeedback(feedback)))
 					yield return result;

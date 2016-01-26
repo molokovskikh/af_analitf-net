@@ -1,9 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reactive.Disposables;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
+using AnalitF.Net.Service.Test.TestHelpers;
+using Caliburn.Micro;
 using Common.Tools;
 using NUnit.Framework;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -17,7 +22,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
-			feedback = new Feedback(IntegrationSetup.clientConfig);
+			feedback = new Feedback();
 			cleaner = new FileCleaner();
 			trash.Add(cleaner);
 		}
@@ -42,10 +47,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(1, feedback.Attachments.Count);
 
 			result = feedback.Send().GetEnumerator();
-			result.MoveNext();
-			var task = ((TaskResult)result.Current).Task;
-			task.Start();
-			task.Wait();
+			RunTask(result);
 			Assert.IsNotNull(feedback.ArchiveName);
 			var message = feedback.GetMessage();
 			Assert.IsNull(feedback.ArchiveName);
@@ -57,12 +59,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Get_message_without_attachments()
 		{
+			cleaner.Watch("test.log");
+			File.WriteAllText("test.log", "test");
 			trash.Add(feedback);
 			var result = feedback.Send().GetEnumerator();
-			Assert.IsFalse(result.MoveNext());
+			RunTask(result);
 			var message = feedback.GetMessage();
 			Assert.IsNull(feedback.ArchiveName);
-			Assert.IsNull(message.Attachments);
+			Assert.AreEqual("test.log", ZipHelper.lsZip(message.Attachments).Implode());
+		}
+
+		private static void RunTask(IEnumerator<IResult> result)
+		{
+			Assert.IsTrue(result.MoveNext());
+			var task = ((TaskResult)result.Current).Task;
+			task.Start();
+			task.Wait();
 		}
 	}
 }
