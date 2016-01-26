@@ -27,7 +27,7 @@
 						SelectedItem="{Binding MarkupAddress.Value}"
 						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
 
-					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0" Grid.Row="1"
+					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
 						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
@@ -83,7 +83,7 @@
 						SelectedItem="{Binding MarkupAddress.Value}"
 						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
 
-					<DataGrid x:Name="Markups" Grid.Row="1" Grid.Column="0"
+					<DataGrid x:Name="Markups" Grid.Row="1" Grid.Column="0" CanUserSortColumns="False"
 						cal:Message.Attach="[Event InitializingNewItem] = [Action NewMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
@@ -138,7 +138,7 @@
 						SelectedItem="{Binding MarkupAddress.Value}"
 						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
 
-					<DataGrid x:Name="Nds18Markups" Grid.Column="0" Grid.Row="1"
+					<DataGrid x:Name="Nds18Markups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
 						cal:Message.Attach="[Event InitializingNewItem] = [Action NewNds18Markup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
