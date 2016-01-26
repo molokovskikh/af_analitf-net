@@ -32,16 +32,16 @@
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
 								Header="Левая граница"
-								Binding="{Binding Begin}" />
+								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
 								Header="Правая граница"
-								Binding="{Binding End}" />
+								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup}" />
+								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup}" />
+								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup}" />
+								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 					<StackPanel Grid.Column="1" Grid.Row="1">
@@ -88,16 +88,16 @@
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
 								Header="Левая граница"
-								Binding="{Binding Begin}" />
+								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
 								Header="Правая граница"
-								Binding="{Binding End}" />
+								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup}" />
+								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup}" />
+								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup}" />
+								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 
@@ -143,16 +143,16 @@
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
 								Header="Левая граница"
-								Binding="{Binding Begin}" />
+								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
 								Header="Правая граница"
-								Binding="{Binding End}" />
+								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup}" />
+								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup}" />
+								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup}" />
+								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 

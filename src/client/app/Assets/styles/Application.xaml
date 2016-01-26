@@ -11,6 +11,7 @@
 	<helpers:IntToCollapsedConverter x:Key="IntToCollapsed" />
 	<helpers:InvertConverter x:Key="BoolInvert" />
 	<helpers:NullableConverter x:Key="NullableConverter" />
+	<helpers:InputConverter x:Key="InputConverter" />
 
 	<Style x:Key="Borderless" TargetType="Control">
 		<Style.Triggers>
