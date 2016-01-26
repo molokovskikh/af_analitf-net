@@ -79,15 +79,23 @@ namespace AnalitF.Net.Client.Views
 			};
 			lines.IsReadOnly = false;
 			lines.Name = "Lines";
-			var header = new CheckBox {
-				Content = "Печатать",
+			var check = new CheckBox {
 				IsChecked = true,
+				Focusable = false,
+				VerticalAlignment = VerticalAlignment.Center
 			};
-			header.Checked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = header.IsChecked.GetValueOrDefault());
+			var textBlock = new TextBlock {
+				Text = "Печатать"
 			};
-			header.Unchecked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = header.IsChecked.GetValueOrDefault());
+			var header = new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = { check, textBlock }
+			};
+			check.Checked += (sender, args) => {
+				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
+			};
+			check.Unchecked += (sender, args) => {
+				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
 			};
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Наименование",
@@ -108,6 +116,7 @@ namespace AnalitF.Net.Client.Views
 			lines.Columns.Add(new CustomDataGridColumn {
 				Header = header,
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+				SortMemberPath = "Print",
 				Generator = (c, i) => {
 					var el = new CheckBox {
 						VerticalAlignment = VerticalAlignment.Center,
