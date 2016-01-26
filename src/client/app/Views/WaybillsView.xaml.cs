@@ -27,10 +27,5 @@ namespace AnalitF.Net.Client.Views
 		{
 			StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
 		}
-
-		private void Navigate(object sender, RoutedEventArgs e)
-		{
-			new OpenResult(((Hyperlink)sender).NavigateUri.ToString()).Execute(new ActionExecutionContext());
-		}
 	}
 }

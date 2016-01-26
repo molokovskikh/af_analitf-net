@@ -61,14 +61,14 @@
 				<StackPanel Margin="5" MaxWidth="400">
 					<TextBlock Style="{StaticResource HeaderTextBlock}">Еженедельный отчет для Росздравнадзора</TextBlock>
 					<TextBlock TextWrapping="Wrap">
-						Еженедельный мониторинг цен на лекарственные средства (<Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mcls.roszdravnadzor.ru</Hyperlink>)
+						Еженедельный мониторинг цен на лекарственные средства (<Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru">http://mcls.roszdravnadzor.ru</Hyperlink>)
 					</TextBlock>
 					<Button Name="RegulatorReport" HorizontalAlignment="Left">Сформировать</Button>
 					<Separator />
 
 					<TextBlock Style="{StaticResource HeaderTextBlock}">Ежемесячный отчет по ЖНВЛП для Росздравнадзора</TextBlock>
 					<TextBlock TextWrapping="Wrap">
-						Ежемесячный мониторинг цен на ЖНВЛП (<Hyperlink NavigateUri="http://mcls.roszdravnadzor.ru" Click="Navigate">http://mols.roszdravnadzor.ru</Hyperlink>)
+						Ежемесячный мониторинг цен на ЖНВЛП (<Hyperlink NavigateUri="http://mols.roszdravnadzor.ru">http://mols.roszdravnadzor.ru</Hyperlink>)
 					</TextBlock>
 					<Button Name="VitallyImportantReport" HorizontalAlignment="Left">Сформировать</Button>
 					<Separator />
