@@ -4,6 +4,7 @@ using AnalitF.Net.Service.Filters;
 using Common.Web.Service.Filters;
 using NHibernate;
 using DebugFilter = AnalitF.Net.Service.Filters.DebugFilter;
+using UserFilter = AnalitF.Net.Service.Filters.UserFilter;
 
 namespace AnalitF.Net.Service.Config.Initializers
 {

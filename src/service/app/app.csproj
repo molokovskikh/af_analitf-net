@@ -98,6 +98,7 @@
     <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Filters\LogAccess.cs" />
     <Compile Include="Filters\LogAccessErrors.cs" />
+    <Compile Include="Filters\UserFilter.cs" />
     <Compile Include="Global.asax.cs">
     </Compile>
     <Compile Include="Controllers\MainController.cs">

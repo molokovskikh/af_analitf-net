@@ -154,8 +154,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					if (response.StatusCode == HttpStatusCode.Accepted) {
 						Reporter.Stage("Подготовка данных");
 						if (requestId == 0
-							&& response.Content.Headers.ContentType != null
-							&& response.Content.Headers.ContentType.MediaType == "application/json") {
+							&& response.Content.Headers.ContentType?.MediaType == "application/json") {
 							requestId = ((dynamic)response.Content.ReadAsAsync<object>().Result).RequestId;
 						}
 						Token.WaitHandle.WaitOne(RequestInterval ?? Config.RequestInterval);
@@ -163,13 +162,17 @@ namespace AnalitF.Net.Client.Models.Commands
 						task = Client.GetAsync(statusCheckUrl, HttpCompletionOption.ResponseHeadersRead, Token);
 						continue;
 					}
+					//если это запрет то сервер может в теле передать причину
+					if (response.StatusCode == HttpStatusCode.Forbidden
+						&& response.Content.Headers.ContentType?.MediaType == "text/plain") {
+						throw new EndUserError(response.Content.ReadAsStringAsync().Result);
+					}
 
-					if (response.StatusCode == HttpStatusCode.InternalServerError
-						&& response.Content.Headers.ContentType != null) {
-						if (response.Content.Headers.ContentType.MediaType == "text/plain")
+					if (response.StatusCode == HttpStatusCode.InternalServerError) {
+						if (response.Content.Headers.ContentType?.MediaType == "text/plain")
 							throw new EndUserError(response.Content.ReadAsStringAsync().Result);
 #if DEBUG
-						if (response.Content.Headers.ContentType.MediaType == "application/json")
+						if (response.Content.Headers.ContentType?.MediaType == "application/json")
 							throw new Exception(response.Content.ReadAsAsync<DebugServerError>().Result.ToString());
 #endif
 					}
