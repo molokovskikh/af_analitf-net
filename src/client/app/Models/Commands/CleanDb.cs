@@ -18,7 +18,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				"WaybillSettings",
 				"MarkupConfigs",
 				"DirMaps",
-				"AwaitedItems"
+				"AwaitedItems",
+				"Waybills",
+				"WaybillLines",
+				"WaybillOrders"
 			};
 
 			using(var sesssion = Factory.OpenSession()) {
@@ -33,7 +36,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				Reporter.Weight(tables.Length + dirs.Count);
 				foreach (var table in tables) {
 					Token.ThrowIfCancellationRequested();
-					sesssion.CreateSQLQuery(String.Format("TRUNCATE {0}", table))
+					sesssion.CreateSQLQuery($"TRUNCATE {table}")
 						.ExecuteUpdate();
 					Reporter.Progress();
 				}

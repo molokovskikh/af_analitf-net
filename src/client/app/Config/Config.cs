@@ -238,7 +238,7 @@ namespace AnalitF.Net.Client.Config
 			//здесь может возникнуть ошибка при загрузке картинке например
 			//System.NotSupportedException: No imaging component suitable to complete this operation was found.
 			//---> System.Runtime.InteropServices.COMException: Exception from HRESULT: 0x88982F50
-			//все бы ничего но caliburn деактивации\активации формы не сможет установить фарму из-за этого исключения
+			//все бы ничего но caliburn деактивации\активации формы не сможет установить форму из-за этого исключения
 			return Cache.Cache(name.ToLower(), x => {
 				try {
 					x = Path.Combine(RootDir, "ads", x);

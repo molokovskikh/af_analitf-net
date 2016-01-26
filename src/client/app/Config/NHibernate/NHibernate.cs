@@ -186,7 +186,7 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			});
 			mapper.Class<Waybill>(m => {
-				//при миграции могут если поставщик отсутсвует nhibernate будет перезаписывать
+				//при миграции могут если поставщик отсутствует nhibernate будет перезаписывать
 				m.ManyToOne(x => x.Address, x => x.Update(false));
 				m.ManyToOne(x => x.Supplier, x => x.Update(false));
 				m.Bag(o => o.Lines, c => {
