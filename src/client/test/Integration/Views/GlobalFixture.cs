@@ -322,19 +322,19 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitMessageBox("Обновление завершено успешно.");
 			WaitWindow("Корректировка восстановленных заказов");
 			var line = session.Query<OrderLine>().FirstOrDefault(l => l.SendResult == LineResultStatus.CostChanged);
-			Assert.IsNotNull(session.Query<OrderLine>().ToArray().Implode(x => String.Format("{0:r}", x)));
+			Assert.IsNotNull(session.Query<OrderLine>().ToArray().Implode(x => $"{x:r}"));
 			dispatcher.Invoke(() => {
 				var lines = activeWindow.Descendants<DataGrid>().First(x => x.Name == "Lines");
 				var cells = lines.Descendants<DataGridCell>().Where(x => ((OrderLine)x.DataContext).Id == line.Id).ToArray();
 				var oldcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedOldCost");
 				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
 				if (line.IsCostDecreased) {
-					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
+					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
 					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
 					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
 				}
 				else {
-					//цвет может быть смешаный если строка выбрана или не смешаный если строка не выбрана
+					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
 					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
 					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
 				}
@@ -496,7 +496,29 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var waybills = (DataGrid)view.FindName("Waybills");
 				Assert.AreEqual(1, waybills.Items.Count);
+				Input(waybills, Key.Enter);
 			});
+			var details = (WaybillDetails)shell.ActiveItem;
+			view = (FrameworkElement)details.GetView();
+			dispatcher.Invoke(() => {
+				var lines = view.Descendants().OfType<DataGrid>().First(x => x.Name == "Lines");
+				lines.SelectedItem = lines.ItemsSource.OfType<WaybillLine>().First(x => x.IsRejectNew);
+				scheduler.AdvanceByMs(500);
+			});
+			details.WaitQueryDrain().Wait();
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var panel = (FrameworkElement)view.FindName("RejectPanel");
+				Assert.IsTrue(details.IsRejectVisible.Value);
+				AssertEndUserVisible(view, panel);
+			});
+		}
+
+		private static void AssertEndUserVisible(FrameworkElement parent, FrameworkElement el)
+		{
+			Assert.IsTrue(el.IsVisible);
+			var hitTestResult = VisualTreeHelper.HitTest(parent, el.TransformToAncestor(parent).Transform(new Point(0, 0)));
+			Assert.AreEqual(hitTestResult.VisualHit, el);
 		}
 
 		[Test]
@@ -909,7 +931,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			var view = (FrameworkElement)viewModel.GetView();
 			if (view == null)
-				throw new Exception(String.Format("Не удалось получить view из {0}", viewModel.GetType()));
+				throw new Exception($"Не удалось получить view из {viewModel.GetType()}");
 			if (catalog != null) {
 				dispatcher.Invoke(() => {
 					var names = activeWindow.Descendants<DataGrid>().First(g => g.Name == "CatalogNames");
