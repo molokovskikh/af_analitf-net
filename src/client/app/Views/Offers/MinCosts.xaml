@@ -26,10 +26,11 @@
 			CommandParameter="NavigateBackward" />
 	</UserControl.InputBindings>
 
-	<Grid>
+	<Grid Name="MainGrid">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition Height="3*" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -37,7 +38,7 @@
 
 		<StackPanel Grid.Row="0" Style="{StaticResource FilterPanel}">
 			<Label>Оставить товары с разницей</Label>
-			<TextBox Width="20" Text="{Binding Diff.Value, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBox Width="30" VerticalAlignment="Center" Text="{Binding Diff.Value, UpdateSourceTrigger=PropertyChanged}" />
 			<Label>% между первой и второй ценой</Label>
 			<Label>
 				<TextBlock>
@@ -68,12 +69,14 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 
-		<ProgressBar Grid.Row="1" IsIndeterminate="True"
+		<GridSplitter Grid.Row="2" Style="{StaticResource HorizontalSplitter}" />
+
+		<ProgressBar Grid.Row="3" IsIndeterminate="True"
 			Width="200"
 			Height="20"
 			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
 
-		<controls:DataGrid2 x:Name="Offers" Grid.Row="2"
+		<controls:DataGrid2 x:Name="Offers" Grid.Row="3"
 			CanUserSortColumns="False"
 			caliburn:NavBinder.Prev="{x:Reference Costs}">
 			<DataGrid.Columns>
@@ -135,7 +138,7 @@
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 
-		<Grid Grid.Row="2" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<Grid Grid.Row="3" Name="OfferOverlayPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="*" />
@@ -144,9 +147,9 @@
 			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
 
-		<Image Grid.Row="3" Height="125"
+		<Image Grid.Row="4" Height="125"
 			gif:ImageBehavior.AnimatedSource="{Binding Ad.Value}" />
 
-		<parts:ProductInfoView Grid.Row="4" cal:Bind.ModelWithoutContext="{Binding}" />
+		<parts:ProductInfoView Grid.Row="5" cal:Bind.ModelWithoutContext="{Binding}" />
 	</Grid>
 </UserControl>

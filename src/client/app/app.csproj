@@ -236,6 +236,7 @@
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\NHHelper.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />
+    <Compile Include="Helpers\Persistence.cs" />
     <Compile Include="Helpers\RasHelper.cs" />
     <Compile Include="Helpers\RxHelper.cs" />
     <Compile Include="Helpers\PersistentList.cs" />

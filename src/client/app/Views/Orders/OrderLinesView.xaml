@@ -124,11 +124,7 @@
 			<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
 
-			<GridSplitter Grid.Row="1"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Center"
-				ShowsPreview="True"
-				Height="5" />
+			<GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}" />
 
 			<Expander Name="Expander" Grid.Row="2" Collapsed="ExpandedCollapsed" Expanded="ExpandedCollapsed"
 				IsExpanded="{Binding IsExpanded.Value}">

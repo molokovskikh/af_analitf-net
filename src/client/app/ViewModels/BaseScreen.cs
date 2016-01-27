@@ -2,11 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Reactive;
@@ -20,16 +17,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Config.Caliburn;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using AnalitF.Net.Client.ViewModels.Offers;
 using Caliburn.Micro;
 using Common.Tools;
 using Ionic.Zip;
@@ -81,29 +75,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
 			return tasks;
-		}
-	}
-
-	public interface IPersistable
-	{
-		void Save();
-	}
-
-	public class PersistedValue
-	{
-		public object DefaultValue;
-		public string Key;
-		public Func<object> Getter;
-		public Action<object> Setter;
-
-		public static PersistedValue Create<T>(NotifyValue<T> value, string key)
-		{
-			return new PersistedValue {
-				DefaultValue = value.Value,
-				Key = key,
-				Getter = () => value.Value,
-				Setter = v => value.Value = (T)v,
-			};
 		}
 	}
 
@@ -306,7 +277,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			Views.Values.OfType<IPersistable>().Each(x => x.Save());
+			Views.Values.OfType<IPersistable>().Each(x => x.Persister.Save());
 			foreach (var value in persisted)
 				Shell.PersistentContext[value.Key] = value.Getter();
 

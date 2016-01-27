@@ -1,6 +1,4 @@
-﻿using Common.Tools;
-
-namespace AnalitF.Net.Client.Models
+﻿namespace AnalitF.Net.Client.Models
 {
 	public class MinCost
 	{
@@ -20,7 +18,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("Cost: {0}, NextCost: {1}, ProductId: {2}, Diff: {3}", Cost, NextCost, ProductId, Diff);
+			return $"Cost: {Cost}, NextCost: {NextCost}, ProductId: {ProductId}, Diff: {Diff}";
 		}
 	}
 }

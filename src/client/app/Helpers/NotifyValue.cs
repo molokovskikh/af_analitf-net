@@ -98,13 +98,7 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 
-		public bool HasValue
-		{
-			get
-			{
-				return !Equals(value, default(T));
-			}
-		}
+		public bool HasValue => !Equals(value, default(T));
 
 		public void Recalculate()
 		{
@@ -114,9 +108,7 @@ namespace AnalitF.Net.Client.Helpers
 				Value = calc();
 				respectValue = origin;
 			}
-			if (refreshSubject != null) {
-				refreshSubject.OnNext(null);
-			}
+			refreshSubject?.OnNext(null);
 		}
 
 		public void Mute(T value)
@@ -157,7 +149,7 @@ namespace AnalitF.Net.Client.Helpers
 		public void OnError(Exception error)
 		{
 #if DEBUG
-			throw new Exception(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
+			throw new Exception($"Ошибка при получении значения для свойства {GetType()} = {this}", error);
 #else
 			log.Error(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
 #endif

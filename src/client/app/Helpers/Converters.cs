@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((int)value) > 0;
+			return (int)value > 0;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -75,7 +75,7 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((bool)value) ? "+" : "";
+			return (bool)value ? "+" : "";
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -88,12 +88,12 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((bool)value) ? Visibility.Visible : Visibility.Hidden;
+			return (bool)value ? Visibility.Visible : Visibility.Hidden;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((Visibility)value) == Visibility.Visible;
+			return (Visibility)value == Visibility.Visible;
 		}
 	}
 
@@ -101,12 +101,12 @@ namespace AnalitF.Net.Client.Helpers
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((Visibility)value) == Visibility.Visible;
+			return (Visibility)value == Visibility.Visible;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return ((bool)value) ? Visibility.Visible : Visibility.Collapsed;
+			return (bool)value ? Visibility.Visible : Visibility.Collapsed;
 		}
 	}
 

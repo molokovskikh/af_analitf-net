@@ -15,21 +15,19 @@ namespace AnalitF.Net.Client.Views.Orders
 {
 	public partial class OrderLinesView : UserControl, IPersistable
 	{
-		public Dictionary<DependencyObject, DependencyProperty> persistable =
-			new Dictionary<DependencyObject, DependencyProperty>();
-
 		private GridLength height = new GridLength(1, GridUnitType.Star);
 
 		public OrderLinesView()
 		{
 			InitializeComponent();
+			Persister = new ViewPersister(this);
 
 			Loaded += (sender, args) => {
 				ApplyStyles();
-				Persist(Expander, Expander.IsExpandedProperty);
-				Persist(OrdersGrid.RowDefinitions[Grid.GetRow(Expander)], RowDefinition.HeightProperty);
-				Persist(OrdersGrid.RowDefinitions[Grid.GetRow(Lines)], RowDefinition.HeightProperty);
-				Restore();
+				Persister.Track(Expander, Expander.IsExpandedProperty);
+				Persister.Track(OrdersGrid.RowDefinitions[Grid.GetRow(Expander)], RowDefinition.HeightProperty);
+				Persister.Track(OrdersGrid.RowDefinitions[Grid.GetRow(Lines)], RowDefinition.HeightProperty);
+				Persister.Restore();
 			};
 
 			DataGridHelper.CalculateColumnWidths(Lines);
@@ -41,65 +39,12 @@ namespace AnalitF.Net.Client.Views.Orders
 			ExpandedCollapsed(Expander, null);
 		}
 
-		private void Restore()
-		{
-			var model = DataContext as BaseScreen;
-			if (model == null)
-				return;
-			foreach (var property in persistable) {
-				var prop = property.Value;
-				var key = GetKey(property);
-				if (!model.Shell.PersistentContext.ContainsKey(key))
-					return;
-				var value = model.Shell.PersistentContext[key];
-				if (prop.IsValidType(value)) {
-					property.Key.SetValue(prop, value);
-				} else if (value is JObject) {
-					property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
-				} else {
-					if (value != null) {
-						var converter = TypeDescriptor.GetConverter(prop.PropertyType);
-						if (converter.CanConvertFrom(value.GetType())) {
-							property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
-							continue;
-						}
-					}
-#if DEBUG
-					throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
-#endif
-				}
-			}
-		}
-
-		public void Save()
-		{
-			var model = DataContext as BaseScreen;
-			if (model == null)
-				return;
-			foreach (var property in persistable) {
-				var prop = property.Value;
-				model.Shell.PersistentContext[GetKey(property)] = property.Key.GetValue(prop);
-			}
-		}
-
-		private static string GetKey(KeyValuePair<DependencyObject, DependencyProperty> prop)
-		{
-			var name = (prop.Key as FrameworkElement)?.Name
-				?? (prop.Key as FrameworkContentElement)?.Name;
-			if (String.IsNullOrEmpty(name))
-				return "OrderLinesView." + prop.Value.Name;
-			return $"OrderLinesView.{name}.{prop.Value.Name}";
-		}
-
-		private void Persist(DependencyObject o, DependencyProperty property)
-		{
-			persistable.Add(o, property);
-		}
+		public ViewPersister Persister { get; }
 
 		public void ApplyStyles()
 		{
 			var context = "";
-			var baseScreen = ((BaseScreen)DataContext);
+			var baseScreen = (BaseScreen)DataContext;
 			if (baseScreen.User != null && baseScreen.User.IsPreprocessOrders)
 				context = "CorrectionEnabled";
 			StyleHelper.ApplyStyles(typeof(OrderLine), Lines, Application.Current.Resources, Legend, context);

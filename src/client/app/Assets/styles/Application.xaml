@@ -22,6 +22,13 @@
 		</Style.Triggers>
 	</Style>
 
+	<Style x:Key="HorizontalSplitter" TargetType="GridSplitter">
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="VerticalAlignment" Value="Center" />
+		<Setter Property="ShowsPreview" Value="True" />
+		<Setter Property="Height" Value="5" />
+	</Style>
+
 	<Style x:Key="MarkerStyle" TargetType="TextBlock">
 		<Setter Property="Background" Value="#FDB50D" />
 		<Setter Property="Foreground" Value="Black" />

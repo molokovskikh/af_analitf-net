@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Diff = new NotifyValue<int>(7);
 			SearchBehavior = new SearchBehavior(this);
 			IsLoading = new NotifyValue<bool>(true);
+			Persist(Diff, "Diff");
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
