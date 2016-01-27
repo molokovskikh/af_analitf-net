@@ -222,13 +222,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IResult EnterItem()
 		{
-			if (CurrentCatalog.Value == null)
+			if (CurrentItem.Value == null)
 				return null;
 
-			if (!CurrentCatalog.Value.HaveOffers)
+			if (!CurrentItem.Value.HaveOffers)
 				return new ShowPopupResult(() => ParentModel.ShowOrderHistory());
 
-			Shell.Navigate(new CatalogOfferViewModel(CurrentCatalog));
+			Shell.Navigate(new CatalogOfferViewModel(CurrentItem.Value.CatalogId));
 			return null;
 		}
 	}
