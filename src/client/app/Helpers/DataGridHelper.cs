@@ -6,19 +6,28 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
 using System.Windows.Media;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
-using NHibernate.Engine;
-using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public class DataGridHelper
 	{
+		public static DependencyProperty ColumnDisplayNameProperty
+			= DependencyProperty.RegisterAttached("ColumnDisplayName", typeof(String), typeof(DataGridHelper));
+
+		public static string GetColumnDisplayName(DependencyObject src)
+		{
+			return src.GetValue(ColumnDisplayNameProperty) as string;
+		}
+
+		public static void SetColumnDisplayName(DependencyObject src, string value)
+		{
+			src.SetValue(ColumnDisplayNameProperty, value);
+		}
+
 		public static void Centrify(DataGrid grid)
 		{
 			if (grid == null)
@@ -41,7 +50,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		//магия, когда datagrid получает фокус он не ставит фокус на ячейку
 		//и ввод обрабатывается KeyboardNavigation который стрелки интерпретирует
-		//как перевод фокуса нужно ставить фокус не на грид
+		//как перевод фокуса нужно ставить фокус не на таблицу
 		//а на ячейку что бы фокус работал как следует
 		public static bool Focus(DataGrid grid)
 		{
@@ -123,11 +132,9 @@ namespace AnalitF.Net.Client.Helpers
 
 		public static string GetHeader(DataGridColumn column)
 		{
-			if (column.Header is string)
-				return column.Header.ToString();
-			if (column.Header is TextBlock)
-				return ((TextBlock)column.Header).Text;
-			return "";
+			return column.Header as string
+				?? (column.Header as TextBlock)?.Text
+				?? GetColumnDisplayName(column);
 		}
 
 		public static void CalculateColumnWidths(DataGrid grid)

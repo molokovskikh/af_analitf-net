@@ -105,7 +105,7 @@ namespace AnalitF.Net.Client.Models
 			//восстанавливаем порядок сортировки
 			//нужно сбросить маркер для всех колонок в ручную тк
 			//dataGrid.Items.SortDescriptions.Clear(); делает это только для колонок которые отсортированы с
-			//помищью SortDescriptions если сортировка по умолчанию делается при выборке а колонке просто назначается маркер
+			//помощью SortDescriptions если сортировка по умолчанию делается при выборке а колонке просто назначается маркер
 			//сортировка не будет сброшена
 			var sorted = settings.FirstOrDefault(x => x.SortDirection != null);
 			if (sorted != null) {

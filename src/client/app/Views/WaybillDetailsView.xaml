@@ -116,14 +116,12 @@
 				Command="ApplicationCommands.Delete">Удалить строку</Button>
 		</StackPanel>
 
-		<!--Panel.ZIndex="100"-->
 		<Border Grid.Row="2" BorderThickness="1" BorderBrush="Black" HorizontalAlignment="Center" VerticalAlignment="Center"
 			SnapsToDevicePixels="True"
 			Visibility="{Binding IsRejectVisible.Value, Converter={StaticResource BoolToHidden}}"
 			Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
 			Name="RejectPanel"
-			Panel.ZIndex="100"
-			>
+			Panel.ZIndex="100">
 			<Grid
 				Height="150"
 				Width="575">

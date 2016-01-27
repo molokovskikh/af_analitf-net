@@ -113,7 +113,7 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("Country"),
 				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
 			});
-			lines.Columns.Add(new CustomDataGridColumn {
+			var printColumn = new CustomDataGridColumn {
 				Header = header,
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
 				SortMemberPath = "Print",
@@ -127,7 +127,9 @@ namespace AnalitF.Net.Client.Views
 					});
 					return el;
 				}
-			});
+			};
+			DataGridHelper.SetColumnDisplayName(printColumn, "Печатать");
+			lines.Columns.Add(printColumn);
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Срок годности",
 				Binding = new Binding("Period"),
