@@ -22,18 +22,15 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			var address = ((ShellViewModel)model.Parent).CurrentAddress;
 			if (model.IsCurrentSelected) {
-				var text = String.Format("Текущий сводный заказ от {0}", address == null ? "" : address.Name);
+				var text = $"Текущий сводный заказ от {address?.Name}";
 				doc.Blocks.Add(new Paragraph(new Run(text)) {
 					FontWeight = FontWeights.Bold,
 					FontSize = 16
 				});
 			}
 			else {
-				Header(String.Format("Отправленный сводный заказ {0}", address == null ? "" : address.Name));
-				var text = String.Format("Период: {0} - {1}",
-					model.Begin.Value.ToShortDateString(),
-					model.End.Value.ToShortDateString());
-				Header(text);
+				Header($"Отправленный сводный заказ {address?.Name}");
+				Header($"Период: {model.Begin.Value:d} - {model.End.Value:d}");
 			}
 			var headers = new[] {
 				new PrintColumn("Наименование", 232),
@@ -52,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var lines = model.GetItemsFromView<OrderLine>("Lines") ?? model.Lines.Value;
 				count = lines.Count;
 				sum = lines.Sum(l => l.MixedSum);
-				rows = model.Lines.Value.Select(l => new object[] {
+				rows = lines.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.PriceName,
@@ -65,7 +62,7 @@ namespace AnalitF.Net.Client.Models.Print
 				var lines = model.GetItemsFromView<SentOrderLine>("SentLines") ?? model.SentLines.Value;
 				count = lines.Count;
 				sum = lines.Sum(l => l.MixedSum);
-				rows = model.SentLines.Value.Select(l => new object[] {
+				rows = lines.Select(l => new object[] {
 					l.ProductSynonym,
 					l.ProducerSynonym,
 					l.Order.PriceName,
