@@ -298,10 +298,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public bool FreezeVisible => IsCurrentSelected;
 
-		public bool CanFreeze
-		{
-			get { return CurrentOrder != null && !CurrentOrder.Frozen && !IsSentSelected; }
-		}
+		public bool CanFreeze => CurrentOrder?.Frozen == false && !IsSentSelected;
 
 		public void Freeze()
 		{
@@ -313,11 +310,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			foreach (var selectedOrder in SelectedOrders)
 				selectedOrder.Frozen = true;
+			Log.Info($"Заморожены заявки {SelectedOrders.Implode(x => x.Id)}");
 		}
 
 		public bool UnfreezeVisible => IsCurrentSelected;
 
-		public bool CanUnfreeze => (CurrentOrder?.Frozen).GetValueOrDefault() && !IsSentSelected;
+		public bool CanUnfreeze => CurrentOrder?.Frozen == true && !IsSentSelected;
 
 		public IEnumerable<IResult> Unfreeze()
 		{
@@ -328,7 +326,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return null;
 
 			var ids = SelectedOrders.Where(o => o.Frozen).Select(o => o.Id).ToArray();
-			return Run(new UnfreezeCommand<Order>(ids));
+			return Run(new UnfreezeCommand<Order>(ids, action: "Разморозка"));
 		}
 
 		public bool CanReorder

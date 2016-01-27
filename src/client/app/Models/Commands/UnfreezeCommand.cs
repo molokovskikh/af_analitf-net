@@ -12,6 +12,7 @@ namespace AnalitF.Net.Client.Models.Commands
 	{
 		private uint[] ids;
 		private uint addressId;
+		private string action;
 
 		public bool Restore;
 
@@ -20,11 +21,17 @@ namespace AnalitF.Net.Client.Models.Commands
 			ids = new[] { id };
 		}
 
-		public UnfreezeCommand(uint[] ids, Address address = null)
+		/// <summary>
+		/// action - название операции если передается будет производиться протоколирование
+		/// </summary>
+		public UnfreezeCommand(uint[] ids,
+			Address address = null,
+			string action = null)
 		{
 			this.ids = ids;
 			if (address != null)
 				addressId = address.Id;
+			this.action = action;
 		}
 
 		public override void Execute()
@@ -42,6 +49,9 @@ namespace AnalitF.Net.Client.Models.Commands
 					orders.Add(resultOrder);
 					Session.Save(resultOrder);
 				}
+				if (!string.IsNullOrEmpty(action))
+					Log.Info($"{action} заказ N{id} -> N{resultOrder?.Id}");
+
 				if (ShouldCalculateStatus(order)) {
 					var currentOrder = order as Order;
 					if (!currentOrder.IsEmpty) {
@@ -59,7 +69,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			if (!sourceOrder.IsAddressExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
-					var order = ((Order)sourceOrder);
+					var order = (Order)sourceOrder;
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = Restore
 						? "Заказ был заморожен, т.к. адрес доставки больше не доступен"
@@ -203,10 +213,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						((OrderLine)sourceLine).SendResult = LineResultStatus.NoOffers;
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
-					log.AppendLine(String.Format("{0} : {1} - {2} ; Предложений не найдено",
-						order.Price.Name,
-						sourceLine.ProductSynonym,
-						sourceLine.ProducerSynonym));
+					log.AppendLine(
+						$"{order.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym} ; Предложений не найдено");
 				}
 				else {
 					if (ShouldCalculateStatus(sourceLine)) {
