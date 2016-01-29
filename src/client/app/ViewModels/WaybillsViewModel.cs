@@ -16,6 +16,8 @@ using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -133,20 +135,48 @@ namespace AnalitF.Net.Client.ViewModels
 				"Наценка,%",
 				"Сумма НДС",
 				"Срок оплаты"};
-			var items = Waybills.Value.Select(w => new object[] {
-				w.DocumentDate,
-				w.ProviderDocumentId,
-				w.SupplierName,
-				w.SumWithoutTax,
-				w.Sum,
-				w.RetailSum,
-				w.MarkupSum,
-				w.Markup,
-				w.TaxSum
-			});
+			Func<Waybill, object[]> toRow = x => new object[] {
+				x.DocumentDate.ToShortDateString(),
+				x.ProviderDocumentId,
+				x.SupplierName,
+				x.SumWithoutTax,
+				x.Sum,
+				x.RetailSum,
+				x.MarkupSum,
+				x.Markup,
+				x.TaxSum
+			};
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var items = Waybills.Value;
+			var groups = items.GroupBy(x => x.SafeSupplier);
+			var row = 0;
+			ExcelExporter.WriteRow(sheet, columns, row++);
+			row += 2;
+			foreach (var group in groups) {
+				row = ExcelExporter.WriteRows(sheet, group.OrderByDescending(x => x.WriteTime).Select(toRow), row);
+				row = WriteStatRow(sheet, row, @group, "Всего");
+			}
 
-			var book = ExcelExporter.ExportTable(columns, items);
+			WriteStatRow(sheet, row, items, "Итого");
+
 			return ExcelExporter.Export(book);
+		}
+
+		private static int WriteStatRow(ISheet sheet, int row, IEnumerable<Waybill> items, string label)
+		{
+			var statRow = sheet.CreateRow(row++);
+			ExcelExporter.SetCellValue(statRow, 0, label);
+			ExcelExporter.SetCellValue(statRow, 3, items.Sum(x => x.SumWithoutTax));
+			var total = items.Sum(x => x.Sum);
+			ExcelExporter.SetCellValue(statRow, 4, total);
+			var retailTotal = items.Sum(x => x.RetailSum);
+			ExcelExporter.SetCellValue(statRow, 5, retailTotal);
+			ExcelExporter.SetCellValue(statRow, 6, retailTotal - total);
+			ExcelExporter.SetCellValue(statRow, 7, Math.Round((retailTotal / total - 1) * 100m, 2));
+			ExcelExporter.SetCellValue(statRow, 8, items.Sum(x => x.TaxSum));
+			row += 2;
+			return row;
 		}
 
 		public void EnterWaybill()

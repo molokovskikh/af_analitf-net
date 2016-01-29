@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var items = PrintableLines().Select((l, i) => new object[] {
 				i + 1,
 				l.Product,
-				String.Format("{0} {1}", l.SerialNumber, l.Certificates),
+				$"{l.SerialNumber} {l.Certificates}",
 				l.Period,
 				l.Producer,
 				l.ProducerCost,
@@ -232,8 +232,8 @@ namespace AnalitF.Net.Client.ViewModels
 			});
 			var book = ExcelExporter.ExportTable(columns, items, 8);
 			var sheet = book.GetSheetAt(0);
-			sheet.CreateRow(1).CreateCell(6).SetCellValue(String.Format("Наименование организации: Сотрудник {0}",
-				Waybill.WaybillSettings.FullName));
+			sheet.CreateRow(1).CreateCell(6).SetCellValue(
+				$"Наименование организации: Сотрудник {Waybill.WaybillSettings.FullName}");
 			var row = sheet.CreateRow(2);
 			row.CreateCell(3).SetCellValue("Отдел:");
 			row.CreateCell(4).SetCellValue("_______________________________________");
@@ -304,10 +304,8 @@ namespace AnalitF.Net.Client.ViewModels
 			sheet.CreateRow(2).CreateCell(3)
 				.SetCellValue("розничных цен на лекарственные средства и изделия медицинского назначения,");
 			sheet.CreateRow(3).CreateCell(3)
-				.SetCellValue(String.Format("полученные от {0}-по счету (накладной) №{1} от {2}",
-				Waybill.SupplierName,
-				Waybill.ProviderDocumentId,
-				Waybill.DocumentDate.ToShortDateString()));
+				.SetCellValue(
+					$"полученные от {Waybill.SupplierName}-по счету (накладной) №{Waybill.ProviderDocumentId} от {Waybill.DocumentDate:d}");
 			return ExcelExporter.Export(book);
 		}
 

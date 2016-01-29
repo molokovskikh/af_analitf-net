@@ -141,14 +141,28 @@ namespace AnalitF.Net.Client.Models
 			for(var i = 0; i < columns.Length; i++) {
 				row.CreateCell(i).SetCellValue(columns[i]);
 			}
+			WriteRows(sheet, items, rowIndex);
+
+			return book;
+		}
+
+		public static void WriteRow(ISheet sheet, object[] items, int rowIndex)
+		{
+			var row = sheet.CreateRow(rowIndex++);
+			for (var i = 0; i < items.Length; i++) {
+				SetCellValue(row, i, items[i]);
+			}
+		}
+
+		public static int WriteRows(ISheet sheet, IEnumerable<object[]> items, int rowIndex)
+		{
 			foreach (var item in items) {
-				row = sheet.CreateRow(rowIndex++);
-				for(var i = 0; i < item.Length; i++) {
+				var row = sheet.CreateRow(rowIndex++);
+				for (var i = 0; i < item.Length; i++) {
 					SetCellValue(row, i, item[i]);
 				}
 			}
-
-			return book;
+			return rowIndex;
 		}
 	}
 }
