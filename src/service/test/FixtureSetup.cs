@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Service.Config.Environments;
+﻿using System;
+using AnalitF.Net.Service.Config.Environments;
 using Castle.ActiveRecord;
 using NHibernate;
 using NUnit.Framework;
@@ -14,6 +15,8 @@ namespace AnalitF.Net.Service.Test
 		[OneTimeSetUp]
 		public void Setup()
 		{
+			Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+
 			global::Test.Support.Setup.BuildConfiguration("local");
 			var holder = ActiveRecordMediator.GetSessionFactoryHolder();
 

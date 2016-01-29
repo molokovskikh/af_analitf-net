@@ -23,7 +23,7 @@ using Test.Support.log4net;
 namespace AnalitF.Net.Service.Test
 {
 	[TestFixture]
-	public class ControllerFixture : IntegrationFixture
+	public class ControllerFixture : IntegrationFixture2
 	{
 		private MainController controller;
 		private User user;

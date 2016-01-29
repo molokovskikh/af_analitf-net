@@ -23,7 +23,7 @@ using Test.Support.Logs;
 namespace AnalitF.Net.Service.Test
 {
 	[TestFixture]
-	public class ExporterFixture : IntegrationFixture
+	public class ExporterFixture : IntegrationFixture2
 	{
 		private User user;
 		private Exporter exporter;
