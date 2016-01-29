@@ -143,10 +143,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var files = Directory.GetFiles(path).Select(Path.GetFileName);
 			Assert.That(files, Contains.Item(Path.GetFileName(fixture.Filename)));
 			session.Refresh(sendLog);
-			Assert.IsTrue(sendLog.Committed);
-			Assert.IsTrue(sendLog.FileDelivered);
-			Assert.IsTrue(sendLog.DocumentDelivered);
-			Assert.IsNotNull(sendLog.SendDate);
+			Assert.IsTrue(sendLog.Committed, $"documentId = {fixture.Document.Id}");
+			Assert.IsTrue(sendLog.FileDelivered, $"documentId = {fixture.Document.Id}");
+			Assert.IsTrue(sendLog.DocumentDelivered, $"documentId = {fixture.Document.Id}");
+			Assert.IsNotNull(sendLog.SendDate, $"documentId = {fixture.Document.Id}");
 		}
 
 		[Test]
