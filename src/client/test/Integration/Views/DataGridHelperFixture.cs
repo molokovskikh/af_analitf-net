@@ -1,6 +1,10 @@
+using System;
+using System.Diagnostics;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.TestHelpers;
+using Common.Tools;
+using Microsoft.Diagnostics.Runtime;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Integration.Views

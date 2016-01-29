@@ -17,7 +17,9 @@ using System.Xml;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Integration.Views;
 using AnalitF.Net.Client.ViewModels;
+using Common.Tools;
 using Common.Tools.Calendar;
+using Microsoft.Diagnostics.Runtime;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
@@ -97,12 +99,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (Debugger.IsAttached)
 				timeSpan = new TimeSpan(Int32.MaxValue);
 			var stopped = t.Join(timeSpan);
-			if (!stopped)
+			string stack = null;
+			if (!stopped) {
+				stack = GetStackTrace(t);
 				t.Abort();
+			}
 			if (exceptions.Count > 0 && !(exceptions.FirstOrDefault() is TaskCanceledException))
 				throw new AggregateException(exceptions);
 			if (!stopped)
-				throw new Exception("Тест не завершился добровольно убит по таймауту 20 секунд");
+				throw new Exception($"Тест не завершился добровольно убит по таймауту 20 секунд\r\n{stack}");
+		}
+
+		private static string GetStackTrace(Thread src)
+		{
+			var target = DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, 10000, AttachFlag.Passive);
+			var runtime = target.ClrVersions[0].CreateRuntime();
+			return runtime.Threads.First(x => x.ManagedThreadId == src.ManagedThreadId)
+				.StackTrace.Implode(x => x.DisplayString, Environment.NewLine);
 		}
 
 		public static Dispatcher WithDispatcher(Action action)
