@@ -55,7 +55,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsFalse(attachment.IsConnecting);
 
 			Assert.IsNotNull(attachment.FileTypeIcon);
-			Assert.IsNotNull(attachment.LocalFilename);
+			Assert.That(attachment.LocalFilename, Is.Not.Null.Or.Empty);
+			Assert.IsTrue(model.IsActive);
 			Assert.AreEqual(1, results.Count);
 			Assert.IsInstanceOf<OpenResult>(results[0]);
 		}

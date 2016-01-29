@@ -564,7 +564,7 @@ namespace AnalitF.Net.Client.ViewModels
 							var record = a.UpdateLocalFile(name);
 							s.Save(record);
 							Bus.SendMessage(record);
-							notification = String.Format("Файл '{0}' загружен", record.Name);
+							notification = $"Файл '{record.Name}' загружен";
 							if (IsActive)
 								Open(a).ToObservable().CatchSubscribe(r => ResultsSink.OnNext(r));
 						});
