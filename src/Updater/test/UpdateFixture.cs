@@ -13,7 +13,7 @@ namespace test
 	[TestFixture]
 	public class UpdateFixture
 	{
-		[Test, RequiresSTA]
+		[Test, Apartment(ApartmentState.STA)]
 		public void Run_after_update_on_exited_process()
 		{
 			FileHelper.InitDir("test/bin", "test/update");
