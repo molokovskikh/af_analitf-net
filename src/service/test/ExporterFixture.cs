@@ -62,6 +62,7 @@ namespace AnalitF.Net.Service.Test
 		[TearDown]
 		public void TearDown()
 		{
+			FlushAndCommit();
 			exporter?.Dispose();
 			exporter = null;
 		}
@@ -326,14 +327,14 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(1, Convert.ToUInt32(priceData[17]));
 		}
 
-		[Test(Description = "Оптимизация цен должна производится только после обновления поставщиком прайс-листа, в инфом случае данные нужно цешировать")]
+		[Test(Description = "Оптимизация цен должна производится только после обновления поставщиком прайс-листа, в инфом случае данные нужно кешировать")]
 		public void Cache_optimized_costs()
 		{
 			var supplier = TestSupplier.CreateNaked(session);
 			var products = TestProduct.RandomProducts(session).Take(2).ToArray();
-			supplier.CreateSampleCore(session, new [] { products[0] });
+			supplier.CreateSampleCore(session, new[] { products[0] });
 			var supplier2 = TestSupplier.CreateNaked(session);
-			supplier2.CreateSampleCore(session, new [] { products[1] });
+			supplier2.CreateSampleCore(session, new[] { products[1] });
 			var rule = new CostOptimizationRule(session.Load<Supplier>(supplier.Id), RuleType.MaxCost) {
 				Diapasons = { new CostOptimizationDiapason(0, decimal.MaxValue, 20) },
 				Clients = { session.Load<Client>(client.Id) },
@@ -351,7 +352,7 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
 
 			//симулируем обновление прайс-листа
-			supplier2.CreateSampleCore(session, new [] { products[0] }, new [] { supplier.Prices[0].Core[0].Producer });
+			supplier2.CreateSampleCore(session, new[] { products[0] }, new[] { supplier.Prices[0].Core[0].Producer });
 			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
