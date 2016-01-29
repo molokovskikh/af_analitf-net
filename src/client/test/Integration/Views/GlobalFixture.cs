@@ -243,7 +243,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var view = (FrameworkElement)((WaybillDetails)shell.ActiveItem).GetView();
 				var datagrid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
 				var printColumn = datagrid.Columns.First(c => !(c.Header is TextBlock));
-				var all = datagrid.Descendants<CheckBox>().First(c => "Печатать".Equals(c.Content));
+				var all = datagrid.Descendants<CheckBox>().First(x => x.Name == "CheckAllPrint");
 				Assert.IsTrue(all.IsChecked.Value);
 				all.IsChecked = false;
 

@@ -82,7 +82,8 @@ namespace AnalitF.Net.Client.Views
 			var check = new CheckBox {
 				IsChecked = true,
 				Focusable = false,
-				VerticalAlignment = VerticalAlignment.Center
+				VerticalAlignment = VerticalAlignment.Center,
+				Name = "CheckAllPrint"
 			};
 			var textBlock = new TextBlock {
 				Text = "Печатать"
