@@ -296,11 +296,11 @@
 					<FrameworkElement.Style>
 						<Style TargetType="Label">
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding CurrentOffer.Value.OrderLine.Order.IsInvalid}"
+								<DataTrigger Binding="{Binding CurrentOffer.Value.Price.Order.IsInvalid}"
 									Value="false">
 									<Setter Property="Foreground" Value="Green" />
 								</DataTrigger>
-								<DataTrigger Binding="{Binding CurrentOffer.Value.OrderLine.Order.IsInvalid}"
+								<DataTrigger Binding="{Binding CurrentOffer.Value.Price.Order.IsInvalid}"
 									Value="true">
 									<Setter Property="Foreground" Value="Red" />
 								</DataTrigger>
