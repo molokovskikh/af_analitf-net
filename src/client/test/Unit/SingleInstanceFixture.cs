@@ -118,8 +118,8 @@ namespace AnalitF.Net.Client.Test.Unit
 
 			var task = factory.StartNew(() => single2.TryStart());
 			Assert.IsTrue(single2.WaitStartup.Wait(1.Second()));
-			single1.SignalStartup();
 			single2.ActivationResult = true;
+			single1.SignalStartup();
 
 			Assert.IsFalse(task.Result);
 		}
