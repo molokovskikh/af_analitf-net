@@ -220,14 +220,17 @@ namespace AnalitF.Net.Client.Models.Commands
 					var responded = requests
 						.Where(x => x.Item2.IsCompleted && x.Item2.Result is Version)
 						.ToArray();
-
 					var faulted = requests
 						.Where(x => x.Item2.IsCompleted && x.Item2.Result is Exception)
 						.ToArray();
-
 					var cancelled = requests.Except(responded).Except(faulted).ToArray();
-					Log.Info($"Ответили {responded.Implode(x => x.Item1)} недоступны {faulted.Implode(x => x.Item1)}" +
-						$" не ответа {cancelled.Implode(x => x.Item1)}");
+					if (responded.Length > 0)
+						Log.Info($"Ответили {responded.Implode(x => x.Item1)}");
+					if (faulted.Length > 0)
+						Log.Info("Недоступны {faulted.Implode(x => x.Item1)}");
+					if (cancelled.Length > 0)
+						Log.Info($"Нет ответа {cancelled.Implode(x => x.Item1)}");
+
 					if (responded.Length > 0) {
 						var host = new Uri(responded[Generator.Random(responded.Length - 1).First()].Item1);
 						Log.Info($"Выбран для обмена данными {host}");
@@ -236,7 +239,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}
 			catch(Exception e) {
-				Log.Error("Неудалось определить хост для обмена данными", e);
+				Log.Error("Не удалось определить хост для обмена данными", e);
 			}
 			return null;
 		}

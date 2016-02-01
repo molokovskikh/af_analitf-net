@@ -75,8 +75,8 @@ namespace AnalitF.Net.Client.Models.Commands
 						? "Заказ был заморожен, т.к. адрес доставки больше не доступен"
 						: "Адрес доставки больше не доступен";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. адрес доставки больше не доступен.",
-					sourceOrder.DisplayId, GuesAction(sourceOrder)));
+				log.AppendLine($"Заказ №{sourceOrder.DisplayId} невозможно" +
+					$" {GuesAction(sourceOrder)}, т.к. адрес доставки больше не доступен.");
 				return null;
 			}
 
@@ -86,8 +86,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
 				}
-				log.AppendLine(String.Format("Заказ №{0} невозможно {1}, т.к. прайс-листа нет в обзоре.",
-					sourceOrder.DisplayId, GuesAction(sourceOrder)));
+				log.AppendLine($"Заказ №{sourceOrder.DisplayId} невозможно" +
+						$" {GuesAction(sourceOrder)}, т.к. прайс-листа нет в обзоре.");
 				return null;
 			}
 			var address = addressToOverride ?? sourceOrder.Address;
