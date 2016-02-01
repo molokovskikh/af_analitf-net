@@ -427,7 +427,7 @@ task "test:binary":
 				print e.Message
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
-		Sh("nunit-console-x86 /nologo /stoponerror /labels /run test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
+		Sh("nunit3-console --labels=all --stoponerror --verbose --full --test test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
 		CopyUpdateBin("beta", "output/updater/")
 		CopyUpdateBin("migration-beta", "output/migration-update/")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'beta'")
