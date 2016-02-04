@@ -145,7 +145,20 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			Reporter.Stage("Загрузка данных");
-			Download(response, Config.ArchiveFile).Wait(Token);
+			//для того что бы обеспечить возможность отмены запускаем загрузку с помощью asyc
+			//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
+			using (response) {
+				var task = Download(response, Config.ArchiveFile);
+				task.ContinueWith(x => {
+					//нам не интересны ошибки которые возникли здесь
+					//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
+					//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу
+					//но ловить ошибку надо тк иначе приложение будет завершено если оно выполняется на .net 4.0
+					if (x.IsFaulted)
+						Log.Debug("Ошибка при загрузке данных", x.Exception);
+				});
+				task.Wait(Token);
+			}
 			Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
 				new FileInfo(Config.ArchiveFile).Length, requestId);
 

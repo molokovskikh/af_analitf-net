@@ -949,6 +949,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 				windowManager.ShowFixedDialog(viewModel);
 
+				if (task.IsCanceled)
+					log.Warn($"Отменена задача {viewModel.Text}");
+
 				if (!task.IsCanceled && !task.IsFaulted) {
 					success(task);
 				}

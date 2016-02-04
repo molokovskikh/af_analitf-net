@@ -227,7 +227,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					if (responded.Length > 0)
 						Log.Info($"Ответили {responded.Implode(x => x.Item1)}");
 					if (faulted.Length > 0)
-						Log.Info("Недоступны {faulted.Implode(x => x.Item1)}");
+						Log.Info($"Недоступны {faulted.Implode(x => x.Item1)}");
 					if (cancelled.Length > 0)
 						Log.Info($"Нет ответа {cancelled.Implode(x => x.Item1)}");
 
