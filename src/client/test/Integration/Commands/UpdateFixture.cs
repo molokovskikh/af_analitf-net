@@ -474,7 +474,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			using (var cleaner = new FileCleaner()) {
 				var cmd = new UpdateCommand();
-				cmd.Configure(settings, clientConfig, CancellationToken.None);
+				cmd.Configure(settings, clientConfig);
 				cmd.Process(() => {
 					cmd.Download();
 					var dir = Directory.CreateDirectory("in\\update");
@@ -487,7 +487,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				});
 
 				cmd = new UpdateCommand();
-				cmd.Configure(settings, clientConfig, CancellationToken.None);
+				cmd.Configure(settings, clientConfig);
 				cmd.Process(() => {
 					new DirectoryInfo("../../Assets/").EnumerateFiles().Each(x => cleaner.Watch(x.CopyTo(x.Name, true).FullName));
 					cmd.Migrate();
@@ -565,7 +565,7 @@ update Addresses set Id =  2575 where Id = :addressId")
 			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
 			var cmd = new UpdateCommand();
 			disposable.Add(cmd);
-			cmd.Configure(settings, clientConfig, CancellationToken.None);
+			cmd.Configure(settings, clientConfig);
 			Assert.AreEqual(normalServerUrl, cmd.ConfigureHttp().ToString());
 		}
 	}

@@ -50,22 +50,30 @@ namespace AnalitF.Net.Client.Models.Commands
 
 	public class UpdateCommand : RemoteCommand
 	{
-		public bool Clean = true;
-
-		public uint AddressId;
-		public string BatchFile;
-
 		private string syncData = "";
 		private UpdateResult result = UpdateResult.OK;
 		private uint requestId;
 		private bool reportProgress;
-		public int lastTransfer;
+		private int downloadedBytes;
+		private int downloadeBytesDelta;
+
 		public Func<Exception, ErrorResolution> ErrorSolver = x => ErrorResolution.Fail;
+		public CancellationTokenSource Cancellation;
+		public bool Clean = true;
+		public uint AddressId;
+		public string BatchFile;
+		public bool SelfCancelled;
 
 		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
 			SuccessMessage = "Обновление завершено успешно.";
+		}
+
+		public override void Configure(Settings value, Config.Config config, CancellationTokenSource cancellation = null)
+		{
+			base.Configure(value, config, cancellation);
+			Cancellation = cancellation;
 		}
 
 		public string SyncData
@@ -147,6 +155,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Reporter.Stage("Загрузка данных");
 			//для того что бы обеспечить возможность отмены запускаем загрузку с помощью asyc
 			//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
+			using (new Timer(WatchDownload, null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20)))
 			using (response) {
 				var task = Download(response, Config.ArchiveFile);
 				task.ContinueWith(x => {
@@ -159,6 +168,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				});
 				task.Wait(Token);
 			}
+
 			Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
 				new FileInfo(Config.ArchiveFile).Length, requestId);
 
@@ -174,6 +184,20 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			return sendLogsTask;
+		}
+
+		private void WatchDownload(object state)
+		{
+			try {
+				if (downloadeBytesDelta == 0) {
+					Log.Warn("Таймаут загрузки данных, операция отменена");
+					Cancellation.Cancel();
+					SelfCancelled = true;
+				}
+				downloadeBytesDelta = 0;
+			} catch(Exception e) {
+				Log.Error("Ошибка при отмене загрузки", e);
+			}
 		}
 
 		private HttpContent GetBatchRequest(User user, Settings settings)
@@ -1244,8 +1268,9 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		{
 			if (reportProgress) {
 				//Здесь мы получаем передано всего и нам нужно вычислить сколько передали после последнего уведомления
-				Reporter.Progress(args.BytesTransferred - lastTransfer);
-				lastTransfer = args.BytesTransferred;
+				downloadeBytesDelta += args.BytesTransferred - downloadedBytes;
+				Reporter.Progress(args.BytesTransferred - downloadedBytes);
+				downloadedBytes = args.BytesTransferred;
 			}
 		}
 

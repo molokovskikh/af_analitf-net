@@ -370,7 +370,7 @@ namespace AnalitF.Net.Client.ViewModels
 						DbMaintain.UpdateLeaders(session, Settings.Value);
 						session.Flush();
 						return Enumerable.Empty<IResult>();
-					}, r => { });
+					});
 			}
 
 #if DEBUG
@@ -820,18 +820,12 @@ namespace AnalitF.Net.Client.ViewModels
 			return windowManager.Question(text) == MessageBoxResult.Yes;
 		}
 
-		private IEnumerable<IResult> Sync(RemoteCommand command)
-		{
-			using (command)
-				return Sync(command, c => c.Run());
-		}
-
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)
 		{
 			RunTask(model,
 				t => {
 					using (cmd) {
-						cmd.Token = t;
+						cmd.Token = t.Token;
 						cmd.Config = Config;
 						cmd.Execute();
 						return cmd.Result;
@@ -842,7 +836,14 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 		}
 
-		private IEnumerable<IResult> Sync(RemoteCommand command, Func<RemoteCommand, UpdateResult> func,
+		private IEnumerable<IResult> Sync(RemoteCommand command)
+		{
+			using (command)
+				return Sync(command, c => c.Run());
+		}
+
+		private IEnumerable<IResult> Sync(RemoteCommand command,
+			Func<RemoteCommand, UpdateResult> func,
 			bool checkSettings = true)
 		{
 			if (checkSettings && !CheckSettings())
@@ -903,7 +904,7 @@ namespace AnalitF.Net.Client.ViewModels
 						windowManager.Notify(command.SuccessMessage);
 					}
 					results = command.Results.ToArray();
-				});
+				}, command as UpdateCommand);
 			return results;
 		}
 
@@ -919,8 +920,9 @@ namespace AnalitF.Net.Client.ViewModels
 			TryClose();
 		}
 
-		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationToken, T> func,
-			Action<Task<T>> success)
+		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationTokenSource, T> func,
+			Action<Task<T>> success = null,
+			UpdateCommand cmd = null)
 		{
 			ResetNavigation();
 
@@ -940,7 +942,7 @@ namespace AnalitF.Net.Client.ViewModels
 				//и ничего не запустится
 				viewModel.Cancellation = new CancellationTokenSource();
 				var token = viewModel.Cancellation.Token;
-				var task = new Task<T>(() => func(token), token);
+				var task = new Task<T>(() => func(viewModel.Cancellation), token);
 				task.ContinueWith(t => {
 					viewModel.IsCompleted = true;
 					viewModel.TryClose();
@@ -949,13 +951,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 				windowManager.ShowFixedDialog(viewModel);
 
-				if (task.IsCanceled)
+				if (task.IsCanceled) {
+					//отмена может произойти как по инициативе пользователя так и если данные не загружаются
+					//если пользователь отменил ничего делать не надо
+					//если отмена произведена таймером нужно показать сообщение об ошибке
 					log.Warn($"Отменена задача {viewModel.Text}");
-
-				if (!task.IsCanceled && !task.IsFaulted) {
-					success(task);
-				}
-				else if (task.IsFaulted) {
+					if (cmd?.SelfCancelled == true)
+						windowManager.Error("Не удалось установить соединение с сервером. Проверьте подключение к Интернет.");
+				} else if (task.IsFaulted) {
 					log.Debug($"Ошибка при выполнении задачи {viewModel.Text}", task.Exception);
 					var baseException = task.Exception.GetBaseException();
 					if (ErrorHelper.IsCancalled(baseException)) {
@@ -974,6 +977,8 @@ namespace AnalitF.Net.Client.ViewModels
 						&& (baseException as RequestException)?.StatusCode == HttpStatusCode.Unauthorized) {
 						done = !ShowSettings("LoginTab");
 					}
+				} else {
+					success?.Invoke(task);
 				}
 			} while (!done);
 		}

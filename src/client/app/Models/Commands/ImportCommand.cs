@@ -266,7 +266,7 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			return sql;
 		}
 
-		[Conditional("DEBUG")]
+		[Conditional("test")]
 		private void CheckWarning(IDbCommand cmd)
 		{
 			var warnings = new List<string>();
