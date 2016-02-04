@@ -482,6 +482,7 @@ task "promote:to:rtm":
 	Cp(setupBin, """$ftp\AnalitFNET.exe""", true)
 
 	CopyUpdateBin(dstChannel, source)
+	CopyUpdateBin("migration", Path.Combine(root, "migration-beta"))
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'rtm'")
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration'")
 	print "Версия $version установлена в канал $dstChannel"
