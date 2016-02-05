@@ -1,24 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
-using NHibernate;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Newtonsoft.Json;
 using Test.Support;
 using Test.Support.Suppliers;
-using Test.Support.log4net;
 
 namespace AnalitF.Net.Service.Test
 {
@@ -29,10 +24,12 @@ namespace AnalitF.Net.Service.Test
 		private User user;
 		private Config.Config config;
 		private TestClient client;
+		private FileCleaner tmpFiles;
 
 		[SetUp]
 		public void Setup()
 		{
+			tmpFiles = new FileCleaner();
 			config = FixtureSetup.Config;
 			client = TestClient.CreateNaked(session);
 			session.Save(client);
@@ -44,6 +41,12 @@ namespace AnalitF.Net.Service.Test
 				CurrentUser = user,
 				Config = config,
 			};
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			tmpFiles?.Dispose();
 		}
 
 		[Test]
@@ -72,11 +75,11 @@ namespace AnalitF.Net.Service.Test
 		{
 			var message = controller.Get(true);
 			Assert.AreEqual(HttpStatusCode.Accepted, message.StatusCode);
-			var id = ((ObjectContent)message.Content).Value.GetType().GetProperty("RequestId");
+			var id = GetRequestId(message);
 
 			message = controller.Get(true);
 			Assert.AreEqual(HttpStatusCode.Accepted, message.StatusCode);
-			var newId = ((ObjectContent)message.Content).Value.GetType().GetProperty("RequestId");
+			var newId = GetRequestId(message);
 			Assert.AreEqual(newId, id);
 			var requests = session.Query<RequestLog>().Where(r => r.User == user).ToList();
 			Assert.That(requests.Count, Is.EqualTo(1));
@@ -85,7 +88,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Do_not_load_stale_data()
 		{
-			var job = new RequestLog(user, new Version());
+			var job = GetJob();
 			job.CreatedOn = DateTime.Now.AddMonths(-1);
 			session.Save(job);
 
@@ -94,14 +97,25 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Do_not_build_new_data_if_not_stale()
+		{
+			var job = GetJob();
+			job.Completed();
+			session.Save(job);
+			FileHelper.Touch(tmpFiles.Watch(job.OutputFile(config)));
+
+			var response = controller.Get(reset: true);
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.AreEqual(job.Id, Convert.ToUInt32(response.Headers.GetValues("Request-Id").Implode()));
+		}
+
+		[Test]
 		public void Reset_error()
 		{
-			var job = new RequestLog(user, new Version()) {
-				IsCompleted = true,
-				IsFaulted = true
-			};
+			var job = GetJob();
+			job.Faulted(new Exception("Fail"));
 			session.Save(job);
-			var response = controller.Get(true);
+			var response = controller.Get(reset: true);
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
 		}
 
@@ -235,8 +249,8 @@ namespace AnalitF.Net.Service.Test
 			user.UseAdjustmentOrders = true;
 			session.Flush();
 			var offer = price.Core.First();
-			var postResult = ((ObjectContent)ordersController.Post(ToClientOrder(offer)).Content).Value;
-			Assert.That(postResult.GetType().GetProperty("RequestId").GetValue(postResult), Is.GreaterThan(0));
+			var postResult = ordersController.Post(ToClientOrder(offer));
+			Assert.That(GetRequestId(postResult), Is.GreaterThan(0));
 
 			ordersController.Task.Wait();
 			ordersController.Session.Clear();
@@ -332,6 +346,20 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(2, orders.Length);
 			Assert.AreEqual(1, orders[0].Items.Count, $"userid = {user.Id}");
 			Assert.AreEqual(1, orders[1].Items.Count, $"userid = {user.Id}");
+		}
+
+		private RequestLog GetJob()
+		{
+			var job = new RequestLog(user, new Version()) {
+				UpdateType = controller.GetType().Name
+			};
+			return job;
+		}
+
+		private static uint GetRequestId(HttpResponseMessage message)
+		{
+			var value = ((ObjectContent)message.Content).Value;
+			return (uint)value.GetType().GetProperty("RequestId").GetValue(value);
 		}
 
 		private List<OrderResult> PostOrder(SyncRequest syncRequest)

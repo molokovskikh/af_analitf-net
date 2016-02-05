@@ -45,9 +45,9 @@ namespace AnalitF.Net.Service.Controllers
 				//если данные уже готовятся нет смысла делать это повторно тк это все равное не будет работать только
 				//создаст дополнительную нагрузку на базу данных
 				var inProcess = Session.Query<RequestLog>()
-					.Where(j => j.UpdateType == updateType && !j.IsCompleted
-						&& j.User == CurrentUser
-						&& j.CreatedOn > DateTime.Now.AddMinutes(-10))
+					.Where(x => x.UpdateType == updateType && !x.IsCompleted
+						&& x.User == CurrentUser
+						&& x.CreatedOn > DateTime.Now.AddMinutes(-10))
 					.OrderByDescending(j => j.CreatedOn)
 					.ToList();
 				return inProcess.FirstOrDefault();

@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static TestClient CreateUser(ISession session, string login)
 		{
-			//очищаем предудыщие попытки
+			//очищаем предыдущие попытки
 			session.CreateSQLQuery("update Customers.Users set Login = Id where login = :login")
 				.SetParameter("login", login)
 				.ExecuteUpdate();

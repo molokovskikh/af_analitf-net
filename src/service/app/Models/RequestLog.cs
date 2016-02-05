@@ -177,6 +177,7 @@ namespace AnalitF.Net.Service.Models
 			if (UpdateType.Match("OrdersController"))
 				streamContent.Headers.Add("Content-Type", "application/json");
 			return new HttpResponseMessage(HttpStatusCode.OK) {
+				Headers = { { "Request-Id", Id.ToString() } },
 				Content = streamContent
 			};
 		}

@@ -15,6 +15,15 @@ namespace AnalitF.Net.Service.Controllers
 		{
 			var updateType = data ?? GetType().Name;
 			var existsJob = TryFindJob(reset, updateType);
+			//если есть не загруженные данные отдаем их
+			if (reset && existsJob == null) {
+					existsJob = Session.Query<RequestLog>()
+					.Where(j => j.UpdateType == updateType && !j.IsConfirmed && !j.IsFaulted && j.User == CurrentUser)
+					.OrderByDescending(j => j.CreatedOn)
+					.Take(1)
+					.ToArray()
+					.FirstOrDefault(x => x.IsStale == false);
+			}
 
 			if (existsJob == null) {
 				existsJob  = new RequestLog(CurrentUser, Request, updateType, lastSync);
