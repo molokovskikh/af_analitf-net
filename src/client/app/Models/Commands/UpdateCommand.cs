@@ -153,36 +153,45 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			Reporter.Stage("Загрузка данных");
+
 			//для того что бы обеспечить возможность отмены запускаем загрузку с помощью asyc
 			//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
-			using (new Timer(WatchDownload, null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20)))
-			using (response) {
-				var task = Download(response, Config.ArchiveFile);
-				task.ContinueWith(x => {
-					//нам не интересны ошибки которые возникли здесь
-					//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
-					//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу
-					//но ловить ошибку надо тк иначе приложение будет завершено если оно выполняется на .net 4.0
-					if (x.IsFaulted)
-						Log.Debug("Ошибка при загрузке данных", x.Exception);
-				});
-				task.Wait(Token);
-			}
+			using (var cleaner = new FileCleaner()) {
+				string[] files;
+				using (new Timer(WatchDownload, null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20)))
+				using (response)
+				{
+					var task = Download(response, cleaner);
+					task.ContinueWith(x =>
+					{
+						//нам не интересны ошибки которые возникли здесь
+						//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
+						//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу
+						//но ловить ошибку надо тк иначе приложение будет завершено если оно выполняется на .net 4.0
+						if (x.IsFaulted)
+							Log.Debug("Ошибка при загрузке данных", x.Exception);
+					});
+					task.Wait(Token);
+					files = task.Result;
+				}
 
-			Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
-				new FileInfo(Config.ArchiveFile).Length, requestId);
+				Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
+					files.Sum(x => new FileInfo(x).Length), requestId);
 
-			if (Directory.Exists(Config.UpdateTmpDir))
-				Directory.Delete(Config.UpdateTmpDir, true);
-			Directory.CreateDirectory(Config.UpdateTmpDir);
-			using (var zip = new ZipFile(Config.ArchiveFile)) {
-				zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
-			}
+				if (Directory.Exists(Config.UpdateTmpDir))
+					Directory.Delete(Config.UpdateTmpDir, true);
+				Directory.CreateDirectory(Config.UpdateTmpDir);
+				foreach (var file in files) {
+					using (var zip = new ZipFile(file)) {
+						zip.ExtractAll(Config.UpdateTmpDir, ExtractExistingFileAction.OverwriteSilently);
+					}
+				}
+			}//using (var cleaner = new FileCleaner())
+
 			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
 				Log.InfoFormat("Получено обновление приложения");
 				result = UpdateResult.UpdatePending;
 			}
-
 			return sendLogsTask;
 		}
 
@@ -950,10 +959,9 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
 
-			Directory.Delete(Config.UpdateTmpDir, true);
-			if (Clean)
-				File.Delete(Config.ArchiveFile);
 			WaitAndLog(Client.PutAsync("Main", confirm, Formatter), "Подтверждение обновления");
+			if (Clean)
+				Directory.Delete(Config.UpdateTmpDir, true);
 			Log.Info("Импорт завершен");
 		}
 
@@ -1251,13 +1259,23 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.ToList();
 		}
 
-		private async Task Download(HttpResponseMessage response, string filename)
+		private async Task<string[]> Download(HttpResponseMessage response, FileCleaner cleaner)
 		{
 			reportProgress = true;
 			try {
-				using (var file = File.Create(filename)) {
-					Reporter.Weight((int)response.Content.Headers.ContentLength.GetValueOrDefault());
-					await response.Content.CopyToAsync(file);
+				Reporter.Weight((int)response.Content.Headers.ContentLength.GetValueOrDefault());
+				if (response.Content.IsMimeMultipartContent()) {
+					var provider = await response.Content.ReadAsMultipartAsync(new MultipartFileStreamProvider(Config.TmpDir));
+					var files = provider.FileData.Select(x => x.LocalFileName).ToArray();
+					cleaner.Watch(files);
+					return files;
+				}
+				else {
+					var filename = cleaner.RandomFile(Config.TmpDir);
+					using (var file = File.Create(filename)) {
+						await response.Content.CopyToAsync(file);
+						return new []{ filename };
+					}
 				}
 			} finally {
 				reportProgress = false;

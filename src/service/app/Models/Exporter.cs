@@ -53,6 +53,23 @@ namespace AnalitF.Net.Service.Models
 		public string Properties;
 	}
 
+	//результат подготовки может включать как файлы которые должны быть включен в архив
+	//так и файлы которые не должны включаться в архив и должны передаваться как есть
+	//в виде multipart content
+	//это оптимизация что бы избежать архивирования бинарных файлов тк на практике в этом нет смысла
+	public class ExternalRawFile
+	{
+		public string Dir;
+		public string Name;
+		public string Filename;
+
+		public ExternalRawFile(string dir, string name)
+		{
+			Dir = dir;
+			Name = name;
+		}
+	}
+
 	public class UpdateData
 	{
 		public string LocalFileName { get; set; }
@@ -124,6 +141,7 @@ namespace AnalitF.Net.Service.Models
 		public List<OrderBatchItem> BatchItems;
 		public Address BatchAddress;
 		public List<UpdateData> Result = new List<UpdateData>();
+		public List<ExternalRawFile> External = new List<ExternalRawFile>();
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
@@ -1955,6 +1973,45 @@ where r.DownloadId in (:ids)")
 				}
 				zip.CommitUpdate();
 			}
+
+			foreach (var raw in External.Where(x => String.IsNullOrEmpty(x.Filename))) {
+				var key = "ext-" + Path.GetFileName(raw.Dir) + ".zip";
+				var cacheFile = Path.Combine(Config.CachePath, key);
+				var files = new DirectoryInfo(raw.Dir).EnumerateFiles();
+				if (!files.Any())
+					continue;
+				if (new FileInfo(cacheFile).LastWriteTime > files.Select(x => x.LastWriteTime).Max()) {
+					raw.Filename = cacheFile;
+					continue;
+				}
+
+				var tmp = cleaner.TmpFile();
+				using (var zip = ZipFile.Create(tmp)) {
+					zip.BeginUpdate();
+					var dir = raw.Dir;
+					var name = raw.Name;
+					var transform = new ZipNameTransform();
+					transform.TrimPrefix = dir;
+
+					var scanned = new FileSystemScanner(".+");
+					scanned.ProcessFile += (sender, args) => {
+						if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
+							return;
+						if (name != "")
+							name = name + "/";
+						zip.Add(args.Name, name + transform.TransformFile(args.Name));
+					};
+					scanned.Scan(dir, true);
+					zip.CommitUpdate();
+				}
+				File.Delete(cacheFile);
+				File.Move(tmp, cacheFile);
+				raw.Filename = cacheFile;
+			}
+
+			//на разных серверах абсолютные пути могут отличаться но относительные будут совпадать
+			var multiparts = External.Select(x => FileHelper.RelativeTo(x.Filename, Path.GetFullPath(FileHelper.MakeRooted(@".\")))).ToArray();
+			job.MultipartContent = JsonConvert.SerializeObject(multiparts);
 		}
 
 		public void ExportAll()
@@ -2055,7 +2112,9 @@ where r.DownloadId in (:ids)")
 				job.ErrorDescription += Environment.NewLine;
 			job.ErrorDescription += $"Обновление включает новую версию приложения {updateVersion}" +
 				$" из канала {Path.GetFileName(UpdatePath)}";
-			AddDir(Result, UpdatePath, "update");
+
+			External.Add(new ExternalRawFile(UpdatePath, "update"));
+
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
 				AddDir(Result, perUserUpdate, "update");

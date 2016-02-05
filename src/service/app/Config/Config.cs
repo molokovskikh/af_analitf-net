@@ -46,6 +46,7 @@ namespace AnalitF.Net.Service.Config
 
 		public TimeSpan ExportTimeout { get; set; }
 		public string PerUserSqlPath { get; set; }
+		public TimeSpan UpdateLifeTime { get; set; }
 
 		public string GetUpdatePath(AnalitfNetData data, RequestLog job)
 		{

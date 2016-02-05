@@ -147,7 +147,6 @@ namespace AnalitF.Net.Client.Config
 			set { settingsPath = value; }
 		}
 
-		public string ArchiveFile => Path.Combine(TmpDir, "archive.zip");
 		public string UpdateTmpDir => Path.Combine(TmpDir, "update");
 		public string BinUpdateDir => Path.Combine(UpdateTmpDir, "update");
 

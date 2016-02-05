@@ -78,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			};
 			Run(command);
 
-			var files = ZipHelper.lsZip(clientConfig.ArchiveFile).Implode();
+			var files = Directory.GetFiles(clientConfig.UpdateTmpDir).Implode(Path.GetFileName);
 			Assert.AreEqual("Новых файлов документов нет.", command.SuccessMessage);
 			Assert.AreEqual("LoadedDocuments.meta.txt, LoadedDocuments.txt", files);
 		}

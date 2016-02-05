@@ -56,7 +56,7 @@ namespace AnalitF.Net.Service.Controllers
 					.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
 					.OrderByDescending(j => j.CreatedOn)
 					.FirstOrDefault();
-				if (existsJob?.IsStale == true)
+				if (existsJob?.GetIsStale(TimeSpan.FromMinutes(30)) == true)
 					return null;
 				return existsJob;
 			}

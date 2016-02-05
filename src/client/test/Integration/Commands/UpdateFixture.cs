@@ -175,7 +175,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
 
-			var result1 = Run(new UpdateCommand());
+			var updateCommand = new UpdateCommand();
+			updateCommand.Clean = false;
+			var result1 = Run(updateCommand);
 			Assert.That(result1, Is.EqualTo(UpdateResult.UpdatePending));
 
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();

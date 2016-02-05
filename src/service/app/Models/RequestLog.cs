@@ -11,6 +11,7 @@ using System.Web;
 using Common.Models;
 using Common.Tools;
 using log4net;
+using Newtonsoft.Json;
 using NHibernate;
 
 namespace AnalitF.Net.Service.Models
@@ -111,8 +112,12 @@ namespace AnalitF.Net.Service.Models
 		//тип релиза обычный или перенос с analitf
 		public virtual string Branch { get; set; }
 
+		//дополнительные файлы которые следует передать с обновлением
+		public virtual string MultipartContent { get; set; }
+
 		public virtual void Faulted(Exception e)
 		{
+			ErrorDescription = null;
 			if (e is ExporterException) {
 				var export = (ExporterException)e;
 				ErrorDescription = export.Message;
@@ -131,18 +136,29 @@ namespace AnalitF.Net.Service.Models
 			CompletedOn = DateTime.Now;
 		}
 
-		public virtual bool IsStale => DateTime.Now > CreatedOn.AddMinutes(30);
+		public virtual bool GetIsStale(TimeSpan lifetime) => DateTime.Now > CreatedOn.Add(lifetime);
 
 		public virtual string OutputFile(Config.Config config)
 		{
 			return Path.Combine(config.ResultPath, Id.ToString());
 		}
 
-		public virtual Stream GetResult(Config.Config config)
+		public virtual HttpContent GetResult(Config.Config config)
 		{
 			if (IsFaulted)
 				throw new Exception("Обработка запроса завершилась ошибкой");
-			return File.OpenRead(OutputFile(config));
+			HttpContent content = null;
+			if (!String.IsNullOrEmpty(MultipartContent)) {
+				var multipart = new MultipartContent();
+				multipart.Add(new StreamContent(File.OpenRead(OutputFile(config))));
+				foreach (var file in JsonConvert.DeserializeObject<string[]>(MultipartContent))
+					multipart.Add(new StreamContent(File.OpenRead(FileHelper.MakeRooted(file))));
+				content = multipart;
+			}
+			content = content ?? new StreamContent(File.OpenRead(OutputFile(config)));
+			if (UpdateType.Match("OrdersController"))
+				content.Headers.Add("Content-Type", "application/json");
+			return content;
 		}
 
 		public virtual HttpResponseMessage ToResult(Config.Config config)
@@ -173,12 +189,9 @@ namespace AnalitF.Net.Service.Models
 					};
 			}
 
-			var streamContent = new StreamContent(GetResult(config));
-			if (UpdateType.Match("OrdersController"))
-				streamContent.Headers.Add("Content-Type", "application/json");
 			return new HttpResponseMessage(HttpStatusCode.OK) {
 				Headers = { { "Request-Id", Id.ToString() } },
-				Content = streamContent
+				Content = GetResult(config)
 			};
 		}
 
