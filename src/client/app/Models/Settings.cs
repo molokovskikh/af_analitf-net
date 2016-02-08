@@ -554,9 +554,10 @@ namespace AnalitF.Net.Client.Models
 			var client = HttpClientFactory.Create(handler, handlers);
 			client.DefaultRequestHeaders.Add("Version", version.ToString());
 			client.DefaultRequestHeaders.Add("Client-Token", GetClientToken());
-			if (Assembly.GetExecutingAssembly().GetName().Name.Match("AnalitF.Net.Client"))
+			var exe = Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
+			if (exe.Match("AnalitF.Net.Client"))
 				client.DefaultRequestHeaders.Add("Branch", "master");
-			else if (Assembly.GetExecutingAssembly().GetName().Name.Match("AnalitF"))
+			else if (exe.Match("AnalitF"))
 				client.DefaultRequestHeaders.Add("Branch", "migration");
 			//признак по которому запросы можно объединить, нужно что бы в интерфейсе связать лог и запрос
 			client.DefaultRequestHeaders.Add("Request-Token", Guid.NewGuid().ToString());
