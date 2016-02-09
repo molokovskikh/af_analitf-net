@@ -77,34 +77,34 @@ namespace AnalitF.Net.Service.Controllers
 				}
 				catch(SmartOrderException e) {
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = e.Message;
 					job.Faulted(e);
+					job.ErrorDescription = e.Message;
 				}
 				catch(ExcelException e) {
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 					job.Faulted(e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 				}
 				catch(XmlException e) {
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 					job.Faulted(e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 				}
 				catch(DbfException e) {
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 					job.Faulted(e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 				}
 				catch(DuplicateNameException e) {
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 					job.Faulted(e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 				}
 				catch(IndexOutOfRangeException e) {
 					//это исключение возникнет в DefaultSource если на вход сунуть какую нибудь ерунду
 					Log.Warn("Ошибка при обработке автозаказа", e);
-					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 					job.Faulted(e);
+					job.ErrorDescription = "Не удалось разобрать файл дефектуры, проверьте формат файла.";
 				}
 			});
 		}

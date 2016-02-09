@@ -95,10 +95,8 @@ delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", CurrentUser.Id)
 				.ExecuteUpdate();
-			var job = Session.Get<RequestLog>((confirm?.RequestId).GetValueOrDefault())
-				?? Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
-					.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
-			job?.Confirm(Config, confirm?.Message);
+			var job = Session.Load<RequestLog>(confirm.RequestId);
+			job.Confirm(Config, confirm.Message);
 
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}

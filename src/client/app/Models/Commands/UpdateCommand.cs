@@ -175,6 +175,14 @@ namespace AnalitF.Net.Client.Models.Commands
 					files = task.Result;
 				}
 
+				//подтверждение обновления является критической операцией из-за функции загрузки заявок
+				//если мы сначала импортируем данные а потом подтвердим обновление то при поломке импорта мы загрузим данные
+				//повторно и получим дубли тк поломка всего скорее произойдет после импорта таблиц
+				//если же мы будем подтверждать после загрузки то в случае поломки на импорте файлов
+				//мы потеряем эти файлы а в случае поломки на импорте мы потеряем загруженные заявки что предпочтительней чем
+				//дубли
+				CheckResult(Client.PutAsync("Main", new ConfirmRequest(requestId), Formatter));
+
 				Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
 					files.Sum(x => new FileInfo(x).Length), requestId);
 
@@ -944,9 +952,12 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 				}
 			}
 
-			var confirm =  new ConfirmRequest(requestId);
-			if (offersImported || ordersImported)
-				RestoreOrders(confirm);
+
+			ConfirmRequest request = null;
+			if (offersImported || ordersImported) {
+				request = new ConfirmRequest(requestId);
+				RestoreOrders(request);
+			}
 
 			foreach (var dir in settings.DocumentDirs)
 				Directory.CreateDirectory(dir);
@@ -959,9 +970,11 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			Results.AddRange(ResultDir.OpenResultFiles(resultDirs));
 			ProcessAttachments(resultDirs);
 
-			WaitAndLog(Client.PutAsync("Main", confirm, Formatter), "Подтверждение обновления");
 			if (Clean)
 				Directory.Delete(Config.UpdateTmpDir, true);
+
+			if (request != null)
+				WaitAndLog(Client.PutAsync("Main", request, Formatter), "Отправка лога импорта заявок");
 			Log.Info("Импорт завершен");
 		}
 

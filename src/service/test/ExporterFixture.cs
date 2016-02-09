@@ -51,7 +51,8 @@ namespace AnalitF.Net.Service.Test
 			Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
 			controller = new MainController {
 				CurrentUser = user,
-				Session = session
+				Session = session,
+				Config = config
 			};
 
 			file = "data.zip";
@@ -232,7 +233,7 @@ namespace AnalitF.Net.Service.Test
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
-			controller.Put(null);
+			controller.Put(new ConfirmRequest(requestLog.Id));
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
 			result = ReadResult();
@@ -327,7 +328,7 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Put(null);
+			controller.Put(new ConfirmRequest(requestLog.Id));
 
 			supplier2.InvalidateCache(session, user.Id);
 
@@ -357,7 +358,7 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Put(null);
+			controller.Put(new ConfirmRequest(requestLog.Id));
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
 			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
@@ -419,6 +420,7 @@ namespace AnalitF.Net.Service.Test
 			requestLog = new RequestLog(user, Version.Parse("1.1")) {
 				LastSync = lastSync
 			};
+			session.Save(requestLog);
 			//надо очистить тк в сессии остались activeprices
 			string adsPath = null;
 			if (exporter != null) {

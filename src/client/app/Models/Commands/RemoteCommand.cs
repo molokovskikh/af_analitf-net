@@ -232,7 +232,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						Log.Info($"Нет ответа {cancelled.Implode(x => x.Item1)}");
 
 					if (responded.Length > 0) {
-						var host = new Uri(responded[Generator.Random(responded.Length - 1).First()].Item1);
+						var host = new Uri(responded[new Random().Next(responded.Length)].Item1);
 						Log.Info($"Выбран для обмена данными {host}");
 						return host;
 					}

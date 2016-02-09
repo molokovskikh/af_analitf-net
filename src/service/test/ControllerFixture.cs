@@ -99,13 +99,14 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Do_not_build_new_data_if_not_stale()
 		{
+			config.UpdateLifeTime = TimeSpan.FromMinutes(30);
 			var job = GetJob();
 			job.Completed();
 			session.Save(job);
 			FileHelper.Touch(tmpFiles.Watch(job.OutputFile(config)));
 
 			var response = controller.Get(reset: true);
-			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), $"user id = {user.Id}");
 			Assert.AreEqual(job.Id, Convert.ToUInt32(response.Headers.GetValues("Request-Id").Implode()));
 		}
 

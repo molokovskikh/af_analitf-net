@@ -65,5 +65,10 @@ namespace AnalitF.Net.Service.Config
 			return Path.Combine(UpdatePath,
 				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
 		}
+
+		public Config Clone()
+		{
+			return (Config)MemberwiseClone();
+		}
 	}
 }
