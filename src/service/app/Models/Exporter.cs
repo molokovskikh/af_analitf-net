@@ -63,10 +63,20 @@ namespace AnalitF.Net.Service.Models
 		public string Name;
 		public string Filename;
 
-		public ExternalRawFile(string dir, string name)
+
+		public static ExternalRawFile FromDir(string name, string dir)
 		{
-			Dir = dir;
-			Name = name;
+			return new ExternalRawFile {
+				Name = name,
+				Dir = dir
+			};
+		}
+
+		public static ExternalRawFile FromFile(string filename)
+		{
+			return new ExternalRawFile {
+				Filename = filename
+			};
 		}
 
 		public override string ToString()
@@ -136,7 +146,6 @@ namespace AnalitF.Net.Service.Models
 		public string Prefix = "";
 		public string ResultPath = "";
 		public string AdsPath = "";
-		public string UpdatePath;
 		public string DocsPath = "";
 
 		public uint MaxProducerCostPriceId;
@@ -167,8 +176,6 @@ namespace AnalitF.Net.Service.Models
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
-
-			UpdatePath = config.GetUpdatePath(data, job);
 		}
 
 		//Все даты передаются в UTC!
@@ -2103,7 +2110,8 @@ where r.DownloadId in (:ids)")
 		//тк обновление приготовлено старой версией сервиса
 		private void ExportBin()
 		{
-			var file = Path.Combine(UpdatePath, "version.txt");
+			var updateDir = Config.GetUpdatePath(data, job);
+			var file = Path.Combine(updateDir, "version.txt");
 			if (!File.Exists(file)) {
 				log.DebugFormat("Не найден файл версии {0}", Path.GetFullPath(file));
 				return;
@@ -2116,9 +2124,13 @@ where r.DownloadId in (:ids)")
 			if (!String.IsNullOrEmpty(job.ErrorDescription))
 				job.ErrorDescription += Environment.NewLine;
 			job.ErrorDescription += $"Обновление включает новую версию приложения {updateVersion}" +
-				$" из канала {Path.GetFileName(UpdatePath)}";
+				$" из канала {Path.GetFileName(updateDir)}";
 
-			External.Add(new ExternalRawFile(UpdatePath, "update"));
+			var deltaUpdate = Path.Combine(Config.UpdatePath, $"delta-{job.Version}-{updateVersion}.zip");
+			if (File.Exists(deltaUpdate))
+				External.Add(ExternalRawFile.FromFile(deltaUpdate));
+			else
+				External.Add(ExternalRawFile.FromDir("update", updateDir));
 
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
