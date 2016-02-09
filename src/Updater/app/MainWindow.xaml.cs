@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using BsDiff;
 using Common.Tools;
 using log4net;
 using Path = System.IO.Path;
@@ -178,9 +179,21 @@ namespace Updater
 		private static void CopyFiles(IEnumerable<string> sources, string path)
 		{
 			foreach (var source in sources) {
-				var dest = Path.Combine(path, Path.GetFileName(source));
-				log.DebugFormat("Копирую {0} > {1}", source, dest);
-				SafeFromAv(() => File.Copy(source, dest, true));
+				if (Path.GetExtension(source).Match(".bsdiff")) {
+					var dst = Path.Combine(path, Path.GetFileNameWithoutExtension(source));
+					var src = dst + ".old";
+					log.Debug($"Применяю патч {source} > {dst}");
+					SafeFromAv(() => File.Delete(src));
+					SafeFromAv(() => File.Move(dst, src));
+					using (var srcStream = File.OpenRead(src))
+					using (var dstStream = File.Create(dst))
+						BinaryPatchUtility.Apply(srcStream, () => File.OpenRead(source), dstStream);
+					SafeFromAv(() => File.Delete(src));
+				} else {
+					var dst = Path.Combine(path, Path.GetFileName(source));
+					log.Debug($"Копирую {source} > {dst}");
+					SafeFromAv(() => File.Copy(source, dst, true));
+				}
 			}
 		}
 	}

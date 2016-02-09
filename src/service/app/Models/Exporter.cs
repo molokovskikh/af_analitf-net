@@ -68,6 +68,11 @@ namespace AnalitF.Net.Service.Models
 			Dir = dir;
 			Name = name;
 		}
+
+		public override string ToString()
+		{
+			return $"External file: {Filename}";
+		}
 	}
 
 	public class UpdateData

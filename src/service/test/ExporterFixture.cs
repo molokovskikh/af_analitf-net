@@ -46,7 +46,7 @@ namespace AnalitF.Net.Service.Test
 				config.RegulatorRegistryPriceId = supplier.Prices[0].Id;
 			}
 			user = session.Load<User>(client.Users[0].Id);
-			FileHelper.InitDir("data", "var/update");
+			FileHelper.InitDir("data", "var/update", "var/update/rtm");
 			Directory.CreateDirectory(config.LocalExportPath);
 			Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
 			controller = new MainController {
@@ -79,14 +79,23 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_update()
 		{
-			File.WriteAllText("var/update/version.txt", "1.2");
-			File.WriteAllBytes("var/update/analitf.net.client.exe", new byte[] { 0x00 });
+			File.WriteAllText("var/update/rtm/version.txt", "1.2");
+			File.WriteAllBytes("var/update/rtm/analitf.net.client.exe", new byte[] { 0x00 });
 
 			exporter.ExportAll();
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
 
-			Assert.That(files.Implode(), Is.StringContaining("update/analitf.net.client.exe"));
+			Assert.That(exporter.External[0].Filename, Does.EndWith(@"var\cache\ext-rtm.zip"));
+			var extFiles = ZipHelper.lsZip(exporter.External[0].Filename).Implode();
+			Assert.That(extFiles, Does.Contain("update/analitf.net.client.exe"));
+			Assert.That(files.Implode(), Does.Not.Contains("update/analitf.net.client.exe"));
+		}
+
+		[Test]
+		public void Export_diff_update()
+		{
+
 		}
 
 		[Test]
@@ -418,7 +427,6 @@ namespace AnalitF.Net.Service.Test
 			exporter = new Exporter(session, config, requestLog) {
 				Prefix = "1",
 				ResultPath = "data",
-				UpdatePath = "var/update",
 			};
 			if (adsPath != null)
 				exporter.AdsPath = adsPath;
