@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using AnalitF.Net.Service.Models;
 using Common.Models;
 using Common.Tools;
+using Newtonsoft.Json;
+using NHibernate;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Service.Controllers
@@ -29,16 +32,16 @@ namespace AnalitF.Net.Service.Controllers
 
 			if (existsJob == null) {
 				existsJob  = new RequestLog(CurrentUser, Request, updateType, lastSync);
-				existsJob.StartJob(Session, Config,
-					(session, config, job) => {
-						using (var exporter = new Exporter(session, config, job)) {
+				existsJob.StartJob(Session,
+					(session, job) => {
+						using (var exporter = new Exporter(session, Config, job)) {
 							if (data.Match("Waybills"))
 								exporter.ExportDocs();
 							else
 								exporter.ExportAll();
 							//все данные выгружены завершаем транзакцию
 							session.Transaction.Commit();
-							exporter.Compress(job.OutputFile(config));
+							exporter.Compress(job.OutputFile(Config));
 						}
 					});
 			}
@@ -46,59 +49,86 @@ namespace AnalitF.Net.Service.Controllers
 			return existsJob.ToResult(Config);
 		}
 
-		public HttpResponseMessage Put(ConfirmRequest confirm)
+		public HttpResponseMessage Put(ConfirmRequest request)
 		{
-			var data = Session.Load<AnalitfNetData>(CurrentUser.Id);
-			data.Confirm();
-			Session.Save(data);
+			var log = Session.Load<RequestLog>(request.RequestId);
+			//если уже подтверждено значит мы получили информацию об импортированных заявках
+			if (log.IsConfirmed) {
+				log.Error += request.Message;
+			} else {
+				//записываем информацию о запросе что бы в случае ошибки повторить попытку
+				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
+				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
+				Task = RequestLog.RunTask(Session, x => Confirm(x, CurrentUser.Id, request, Config));
+			}
 
-			//каждый запрос выполняется отдельно что бы проще было диагностировать блокировки
-			Session.CreateSQLQuery(@"
+			return new HttpResponseMessage(HttpStatusCode.OK);
+		}
+
+		public static void Confirm(ISession session, uint userId, ConfirmRequest request, Config.Config config)
+		{
+			var failsafe = Path.Combine(config.FailsafePath, request.RequestId.ToString());
+			try {
+				var log = session.Load<RequestLog>(request.RequestId);
+				log.Confirm(config, request.Message);
+				var data = session.Load<AnalitfNetData>(userId);
+				data.Confirm();
+				session.Save(data);
+
+					//каждый запрос выполняется отдельно что бы проще было диагностировать блокировки
+				session.CreateSQLQuery(@"
 update Usersettings.AnalitFReplicationInfo r
 set r.ForceReplication = 0
 where r.UserId = :userId and r.ForceReplication = 2;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 update Logs.DocumentSendLogs l
 	join Logs.PendingDocLogs p on p.SendLogId = l.Id
 set l.Committed = 1, l.SendDate = now()
 where p.UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 delete from Logs.PendingDocLogs
 where UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId).ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 update Logs.MailSendLogs l
 	join Logs.PendingMailLogs p on p.SendLogId = l.Id
 set l.Committed = 1
 where p.UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 delete from Logs.PendingMailLogs
 where UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 update Orders.OrdersHead oh
 	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
 set oh.Deleted = 1
 where l.UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id).ExecuteUpdate();
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
 
-			Session.CreateSQLQuery(@"
+				session.CreateSQLQuery(@"
 delete from Logs.PendingOrderLogs
 where UserId = :userId;")
-				.SetParameter("userId", CurrentUser.Id)
-				.ExecuteUpdate();
-			var job = Session.Load<RequestLog>(confirm.RequestId);
-			job.Confirm(Config, confirm.Message);
-
-			return new HttpResponseMessage(HttpStatusCode.OK);
+					.SetParameter("userId", userId)
+					.ExecuteUpdate();
+				File.Delete(failsafe);
+			}
+			catch(Exception) {
+				File.Move(failsafe, Path.ChangeExtension(failsafe, ".err"));
+				throw;
+			}
 		}
 
 		public HttpResponseMessage Post(SyncRequest request)

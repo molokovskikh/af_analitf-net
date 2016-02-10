@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Common.Models;
 using Common.Tools;
+using Common.Tools.Calendar;
 using log4net;
 using Newtonsoft.Json;
 using NHibernate;
@@ -215,10 +216,8 @@ namespace AnalitF.Net.Service.Models
 		}
 
 		public virtual Task StartJob(ISession session,
-			Config.Config config,
-			Action<ISession, Config.Config, RequestLog> cmd)
+			Action<ISession, RequestLog> cmd)
 		{
-			var sessionFactory = session.SessionFactory;
 			var username = Thread.CurrentPrincipal.Identity.Name;
 			session.Save(this);
 			if (session.Transaction.IsActive)
@@ -228,15 +227,17 @@ namespace AnalitF.Net.Service.Models
 			var task = new Task(() => {
 				try {
 					ThreadContext.Properties["username"] = username;
-					using (var logSession = sessionFactory.OpenSession()) {
+					using (var logSession = session.SessionFactory.OpenSession()) {
 						var job = logSession.Load<RequestLog>(jobId);
 						try {
-							using(var cmdSession = sessionFactory.OpenSession())
-							using(var cmdTransaction = cmdSession.BeginTransaction()) {
-								cmd(cmdSession, config, job);
-								if (cmdTransaction.IsActive)
-									cmdTransaction.Commit();
-							}
+							Common.MySql.With.DeadlockWraper(() => {
+								using(var cmdSession = session.SessionFactory.OpenSession())
+								using(var cmdTransaction = cmdSession.BeginTransaction()) {
+									cmd(cmdSession, job);
+									if (cmdTransaction.IsActive)
+										cmdTransaction.Commit();
+								}
+							}, sleepTime: 10.Second(), countRepeats: 5, maxDuration: TimeSpan.FromMinutes(10));
 						}
 						catch(Exception e) {
 							//если это не ошибка кодирования нет смысла писать в рассылку
@@ -259,6 +260,30 @@ namespace AnalitF.Net.Service.Models
 				catch(Exception e) {
 					log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 				}
+			});
+			task.Start();
+			return task;
+		}
+
+		public static Task RunTask(ISession session, Action<ISession> action)
+		{
+			if (session.Transaction.IsActive)
+				session.Transaction.Commit();
+			var username = Thread.CurrentPrincipal.Identity.Name;
+			var task = new Task(() => {
+				ThreadContext.Properties["username"] = username;
+				Common.MySql.With.DeadlockWraper(() => {
+					using(var cmdSession = session.SessionFactory.OpenSession())
+					using(var cmdTransaction = cmdSession.BeginTransaction()) {
+						action(cmdSession);
+						if (cmdTransaction.IsActive)
+							cmdTransaction.Commit();
+					}
+				}, sleepTime: 10.Second(), countRepeats: 5, maxDuration: TimeSpan.FromMinutes(10));
+			});
+			task.ContinueWith(x => {
+				if (x.IsFaulted)
+					log.Error("Ошибка при выполнении фоновой задачи", x.Exception);
 			});
 			task.Start();
 			return task;

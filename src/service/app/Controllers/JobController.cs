@@ -65,7 +65,7 @@ namespace AnalitF.Net.Service.Controllers
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)
 		{
 			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
-			Task = existsJob.StartJob(Session, Config, cmd);
+			Task = existsJob.StartJob(Session, (x, y) => cmd(x, Config, y));
 			return existsJob.ToResult(Config);
 		}
 	}

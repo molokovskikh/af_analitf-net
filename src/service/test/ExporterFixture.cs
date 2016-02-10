@@ -234,8 +234,12 @@ namespace AnalitF.Net.Service.Test
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
 			controller.Put(new ConfirmRequest(requestLog.Id));
+			controller.Task.Wait();
 
-			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
+			//кеш данной сессии неактуальный тк обновление происходит в другой сессии
+			var data = session.Load<AnalitfNetData>(user.Id);
+			session.Refresh(data);
+			Init(data.LastUpdateAt);
 			result = ReadResult();
 			foreach (var zero in zeros) {
 				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));
@@ -329,6 +333,7 @@ namespace AnalitF.Net.Service.Test
 			session.Flush();
 			exporter.ExportAll();
 			controller.Put(new ConfirmRequest(requestLog.Id));
+			controller.Task.Wait();
 
 			supplier2.InvalidateCache(session, user.Id);
 
@@ -359,6 +364,7 @@ namespace AnalitF.Net.Service.Test
 			session.Flush();
 			exporter.ExportAll();
 			controller.Put(new ConfirmRequest(requestLog.Id));
+			controller.Task.Wait();
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
 			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
@@ -449,6 +455,9 @@ namespace AnalitF.Net.Service.Test
 
 		private ZipFile ReadResult()
 		{
+			//для подготовки данных нужна транзакция
+			if (!session.Transaction.IsActive)
+				session.BeginTransaction();
 			exporter.ExportAll();
 			var memory = new MemoryStream();
 			exporter.Compress(memory);
