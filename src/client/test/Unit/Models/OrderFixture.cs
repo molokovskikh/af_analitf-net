@@ -18,6 +18,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			price = new Price("test1");
 			address = new Address("Тестовый адрес доставки");
 			offer = new Offer(price, 100) {
+				Id = new OfferComposedId(4, price.Id.PriceId),
 				ProductId = 1
 			};
 		}
@@ -151,6 +152,18 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(1, order.LinesCount);
 			order.RemoveLine(line);
 			Assert.AreEqual(0, order.LinesCount);
+		}
+
+		[Test]
+		public void Update_stat_on_duplicate_offer_order()
+		{
+			var order = new Order(price, address);
+			var line = order.TryOrder(offer, 10);
+			Assert.AreEqual(1, order.LinesCount);
+			order.TryOrder(offer, 10);
+			Assert.AreEqual(1, order.Lines.Count);
+			Assert.AreEqual(20, line.Count);
+			Assert.AreEqual(2000, order.Sum);
 		}
 	}
 }

@@ -24,6 +24,16 @@ namespace AnalitF.Net.Client.Models
 
 		public ulong RegionId { get; set; }
 
+		public OfferComposedId(ulong offerId, ulong regionId)
+		{
+			OfferId = offerId;
+			RegionId = regionId;
+		}
+
+		public OfferComposedId()
+		{
+		}
+
 		protected bool Equals(OfferComposedId other)
 		{
 			return OfferId == other.OfferId && RegionId == other.RegionId;

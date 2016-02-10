@@ -285,6 +285,7 @@ namespace AnalitF.Net.Client.Models
 				ordered = count - (originCount - line.Count);
 				if (ordered == 0)
 					line = null;
+				UpdateStat();
 			}
 			return line;
 		}
