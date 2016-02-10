@@ -106,7 +106,9 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public Task<HttpResponseMessage> Download()
 		{
-			var sendLogsTask = SendLogs(Client, Token);
+			var logCaptured = new ManualResetEventSlim();
+			var sendLogsTask = SendLogs(Client, Token, logCaptured);
+			logCaptured.Wait(Token);
 			HttpResponseMessage response;
 			var updateType = "накопительное";
 			var user = Session.Query<User>().FirstOrDefault();
@@ -152,6 +154,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
 
+			Log.Info($"Загрузка данных, идентификатор обновления {requestId}");
 			Reporter.Stage("Загрузка данных");
 
 			//для того что бы обеспечить возможность отмены запускаем загрузку с помощью asyc
@@ -205,6 +208,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		private void WatchDownload(object state)
 		{
+			Log.Info($"Проверка загрузки данных, загружено байт {downloadeBytesDelta}");
 			try {
 				if (downloadeBytesDelta == 0) {
 					Log.Warn("Таймаут загрузки данных, операция отменена");
@@ -1299,9 +1303,11 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		{
 			if (reportProgress) {
 				//Здесь мы получаем передано всего и нам нужно вычислить сколько передали после последнего уведомления
-				downloadeBytesDelta += args.BytesTransferred - downloadedBytes;
-				Reporter.Progress(args.BytesTransferred - downloadedBytes);
+				var bytes = args.BytesTransferred - downloadedBytes;
+				Log.Info($"Загружено байт {bytes}, всего загружено {args.BytesTransferred}");
+				downloadeBytesDelta += bytes;
 				downloadedBytes = args.BytesTransferred;
+				Reporter.Progress(bytes);
 			}
 		}
 
@@ -1313,6 +1319,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			if (clientPrices.Length == 0)
 				return;
 
+			Log.Info($"Отправка настроек прайс-листов, измененных прайс листов {clientPrices.Length}");
 			CheckResult(client.PostAsync("Main", new SyncRequest(clientPrices), Formatter, token));
 		}
 
@@ -1331,7 +1338,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 		}
 
-		public async Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token)
+		public async Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token, ManualResetEventSlim logCaptured)
 		{
 			using (var cleaner = new FileCleaner()) {
 				var file = cleaner.TmpFile();
@@ -1346,11 +1353,11 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						return null;
 
 					using (var zip = new ZipFile()) {
-						foreach (var logFile in logs) {
+						foreach (var logFile in logs)
 							zip.AddFile(logFile);
-						}
 						zip.Save(file);
 					}
+					logCaptured.Set();
 
 					using (var stream = File.OpenRead(file)) {
 						var response = await client.PostAsync("Logs", new StreamContent(stream), token);
