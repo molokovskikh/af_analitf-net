@@ -326,7 +326,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				return null;
 
 			var ids = SelectedOrders.Where(o => o.Frozen).Select(o => o.Id).ToArray();
-			return Run(new UnfreezeCommand<Order>(ids, action: "Разморозка"));
+			return Run(new UnfreezeCommand<Order>(ids));
 		}
 
 		public bool CanReorder

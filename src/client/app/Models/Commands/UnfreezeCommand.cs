@@ -12,7 +12,6 @@ namespace AnalitF.Net.Client.Models.Commands
 	{
 		private uint[] ids;
 		private uint addressId;
-		private string action;
 
 		public bool Restore;
 
@@ -24,14 +23,11 @@ namespace AnalitF.Net.Client.Models.Commands
 		/// <summary>
 		/// action - название операции если передается будет производиться протоколирование
 		/// </summary>
-		public UnfreezeCommand(uint[] ids,
-			Address address = null,
-			string action = null)
+		public UnfreezeCommand(uint[] ids, Address address = null)
 		{
 			this.ids = ids;
 			if (address != null)
 				addressId = address.Id;
-			this.action = action;
 		}
 
 		public override void Execute()
@@ -49,8 +45,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					orders.Add(resultOrder);
 					Session.Save(resultOrder);
 				}
-				if (!string.IsNullOrEmpty(action))
-					Log.Info($"{action} заказ N{id} -> N{resultOrder?.Id}");
+				Log.Info($"Попытка {GuesAction(order)} заказ N{id} -> N{resultOrder?.Id}");
 
 				if (ShouldCalculateStatus(order)) {
 					var currentOrder = order as Order;
