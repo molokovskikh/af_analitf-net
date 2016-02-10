@@ -306,6 +306,7 @@
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />
     <Compile Include="Unit\ViewModels\TextDocModelFixture.cs" />
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
+    <Compile Include="Unit\ViewModels\WaybillsFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\app\app.csproj">

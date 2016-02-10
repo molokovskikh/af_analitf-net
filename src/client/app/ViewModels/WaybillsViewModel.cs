@@ -76,10 +76,13 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			AddressSelector.Init();
-			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name)
-				.ToList()
-				.Select(i => new Selectable<Supplier>(i))
-				.ToList();
+			if (StatelessSession != null)
+				Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name)
+					.ToList()
+					.Select(i => new Selectable<Supplier>(i))
+					.ToList();
+			else
+				Suppliers = new List<Selectable<Supplier>>();
 
 			var supplierSelectionChanged = Suppliers
 				.Select(a => a.Changed())
@@ -173,7 +176,8 @@ namespace AnalitF.Net.Client.ViewModels
 			var retailTotal = items.Sum(x => x.RetailSum);
 			ExcelExporter.SetCellValue(statRow, 5, retailTotal);
 			ExcelExporter.SetCellValue(statRow, 6, retailTotal - total);
-			ExcelExporter.SetCellValue(statRow, 7, Math.Round((retailTotal / total - 1) * 100m, 2));
+			if (total > 0)
+				ExcelExporter.SetCellValue(statRow, 7, Math.Round((retailTotal / total - 1) * 100m, 2));
 			ExcelExporter.SetCellValue(statRow, 8, items.Sum(x => x.TaxSum));
 			row += 2;
 			return row;
@@ -203,7 +207,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//RadioButton имеет внутри статичный список всех кнопок на форме и обновляет их состояние
 			//наверно в качестве родителя считается окно и для всех потомков с одинаковым GroupName
 			//производится обновление
-			if (!StatelessSession.IsOpen)
+			if (StatelessSession == null || !StatelessSession.IsOpen)
 				return;
 
 			var query = StatelessSession.Query<Waybill>();
