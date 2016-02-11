@@ -28,6 +28,7 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
+using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
 {
@@ -1884,7 +1885,7 @@ where r.DownloadId in (:ids)")
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
 			cleaner.Watch(filename);
 			using(var file = new StreamWriter(File.Create(filename), Encoding.GetEncoding(1251))) {
-				Common.MySql.MySqlHelper.Export(exportData, file);
+				MySqlHelper.Export(exportData, file);
 			}
 		}
 
@@ -2143,6 +2144,63 @@ where r.DownloadId in (:ids)")
 				return;
 			disposed = true;
 			cleaner.Dispose();
+		}
+
+		public static void Confirm(ISession session, uint userId, ConfirmRequest request, Config.Config config)
+		{
+			var log = session.Load<RequestLog>(request.RequestId);
+			log.Confirm(config, request.Message);
+			var data = session.Load<AnalitfNetData>(userId);
+			data.Confirm();
+
+			//каждый запрос выполняется отдельно что бы проще было диагностировать блокировки
+			session.CreateSQLQuery(@"
+update Usersettings.AnalitFReplicationInfo r
+set r.ForceReplication = 0
+where r.UserId = :userId and r.ForceReplication = 2;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+update Logs.DocumentSendLogs l
+	join Logs.PendingDocLogs p on p.SendLogId = l.Id
+set l.Committed = 1, l.SendDate = now()
+where p.UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+delete from Logs.PendingDocLogs
+where UserId = :userId;")
+				.SetParameter("userId", userId).ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+update Logs.MailSendLogs l
+	join Logs.PendingMailLogs p on p.SendLogId = l.Id
+set l.Committed = 1
+where p.UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+delete from Logs.PendingMailLogs
+where UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+update Orders.OrdersHead oh
+	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
+set oh.Deleted = 1
+where l.UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
+
+			session.CreateSQLQuery(@"
+delete from Logs.PendingOrderLogs
+where UserId = :userId;")
+				.SetParameter("userId", userId)
+				.ExecuteUpdate();
 		}
 	}
 

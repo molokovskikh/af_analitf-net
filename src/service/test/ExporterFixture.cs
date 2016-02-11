@@ -31,7 +31,6 @@ namespace AnalitF.Net.Service.Test
 		private TestClient client;
 		private Config.Config config;
 		private RequestLog requestLog;
-		private MainController controller;
 
 		[SetUp]
 		public void Setup()
@@ -49,11 +48,6 @@ namespace AnalitF.Net.Service.Test
 			FileHelper.InitDir("data", "var/update", "var/update/rtm");
 			Directory.CreateDirectory(config.LocalExportPath);
 			Directory.GetFiles(config.LocalExportPath).Each(File.Delete);
-			controller = new MainController {
-				CurrentUser = user,
-				Session = session,
-				Config = config
-			};
 
 			file = "data.zip";
 			File.Delete(file);
@@ -233,12 +227,10 @@ namespace AnalitF.Net.Service.Test
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
-			controller.Put(new ConfirmRequest(requestLog.Id));
-			controller.Task.Wait();
+			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
 
 			//кеш данной сессии неактуальный тк обновление происходит в другой сессии
 			var data = session.Load<AnalitfNetData>(user.Id);
-			session.Refresh(data);
 			Init(data.LastUpdateAt);
 			result = ReadResult();
 			foreach (var zero in zeros) {
@@ -332,8 +324,7 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Put(new ConfirmRequest(requestLog.Id));
-			controller.Task.Wait();
+			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
 
 			supplier2.InvalidateCache(session, user.Id);
 
@@ -363,8 +354,8 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			session.Flush();
 			exporter.ExportAll();
-			controller.Put(new ConfirmRequest(requestLog.Id));
-			controller.Task.Wait();
+			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
+
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
 			var offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
@@ -418,6 +409,8 @@ namespace AnalitF.Net.Service.Test
 
 		private void Init(DateTime? lastSync = null)
 		{
+			if (!session.Transaction.IsActive)
+				session.BeginTransaction();
 			if (lastSync != null) {
 				//в базе даты хранятся с точностью до секунды
 				lastSync = new DateTime(lastSync.Value.Year, lastSync.Value.Month, lastSync.Value.Day,
