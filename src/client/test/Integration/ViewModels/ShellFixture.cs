@@ -408,9 +408,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var done = new ManualResetEvent(false);
 			stub.Do = c => {
 				ready.WaitOne();
+				scheduler.AdvanceByMs(400);
 				c.Reporter.Stage("1");
+				scheduler.AdvanceByMs(400);
 				c.Reporter.Progress();
+				scheduler.AdvanceByMs(400);
 				c.Reporter.Stage("2");
+				scheduler.AdvanceByMs(400);
 				done.Set();
 				return c.result;
 			};
