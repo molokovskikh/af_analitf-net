@@ -57,7 +57,7 @@ namespace AnalitF.Net.Client.Models
 				var totalBytes = weight.Bytes().ToString("#.00");
 				behavior.OnNext(new Progress($"{stage} ({currentBytes}/{totalBytes})", normalized, total));
 			}
-			if (current / weight >= 100)
+			if (normalized >= 100)
 				EndStage();
 		}
 
