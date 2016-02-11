@@ -1,5 +1,6 @@
 using System.Reactive.Subjects;
 using AnalitF.Net.Client.ViewModels;
+using Humanizer;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -9,7 +10,7 @@ namespace AnalitF.Net.Client.Models
 		private string stage;
 		private int weight;
 		private int total;
-		private decimal current;
+		private int current;
 		private int stageImpact;
 		private int defaultImpact = 100;
 		private bool isStageCompleted = true;
@@ -41,14 +42,22 @@ namespace AnalitF.Net.Client.Models
 			behavior.OnNext(new Progress(stage, 0, total));
 		}
 
-		public void Progress(int value = 1)
+		public void Progress(int value = 1, bool inBytes = false)
 		{
 			if (weight <= 0)
 				return;
 
-			current += value * 100m / weight;
-			behavior.OnNext(new Progress(stage, (int)current, total));
-			if (current == 100)
+			current += value;
+			var normalized = (int) (current * 100m / weight);
+
+			if (!inBytes)
+				behavior.OnNext(new Progress(stage, normalized, total));
+			else {
+				var currentBytes = current.Bytes().ToString("#.00");
+				var totalBytes = weight.Bytes().ToString("#.00");
+				behavior.OnNext(new Progress($"{stage} ({currentBytes}/{totalBytes})", normalized, total));
+			}
+			if (current / weight >= 100)
 				EndStage();
 		}
 

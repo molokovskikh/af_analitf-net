@@ -1307,7 +1307,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				Log.Info($"Загружено байт {bytes}, всего загружено {args.BytesTransferred}");
 				downloadeBytesDelta += bytes;
 				downloadedBytes = args.BytesTransferred;
-				Reporter.Progress(bytes);
+				Reporter.Progress(bytes, inBytes: true);
 			}
 		}
 
@@ -1340,34 +1340,38 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 		public async Task<HttpResponseMessage> SendLogs(HttpClient client, CancellationToken token, ManualResetEventSlim logCaptured)
 		{
-			using (var cleaner = new FileCleaner()) {
-				var file = cleaner.TmpFile();
+			try {
+				using (var cleaner = new FileCleaner()) {
+					var file = cleaner.TmpFile();
 
-				//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
-				using (Util.FlushLogs()) {
-					var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
-						.Where(f => new FileInfo(f).Length > 0)
-						.ToArray();
+					//черная магия здесь мы закрываем файлы открытые логером что бы отправить их
+					using (Util.FlushLogs()) {
+						var logs = Directory.GetFiles(FileHelper.MakeRooted("."), "*.log")
+							.Where(f => new FileInfo(f).Length > 0)
+							.ToArray();
 
-					if (logs.Length == 0)
-						return null;
+						if (logs.Length == 0)
+							return null;
 
-					using (var zip = new ZipFile()) {
-						foreach (var logFile in logs)
-							zip.AddFile(logFile);
-						zip.Save(file);
+						using (var zip = new ZipFile()) {
+							foreach (var logFile in logs)
+								zip.AddFile(logFile);
+							zip.Save(file);
+						}
+						logCaptured.Set();
+
+						using (var stream = File.OpenRead(file)) {
+							var response = await client.PostAsync("Logs", new StreamContent(stream), token);
+							//удаляем логи только если отправка завершилась успешно
+							if (response.IsSuccessStatusCode)
+								cleaner.Watch(logs);
+							return response;
+						}
 					}
-					logCaptured.Set();
-
-					using (var stream = File.OpenRead(file)) {
-						var response = await client.PostAsync("Logs", new StreamContent(stream), token);
-						//удаляем логи только если отправка завершилась успешно
-						if (response.IsSuccessStatusCode)
-							cleaner.Watch(logs);
-						return response;
-					}
-				}
-			}//using (var cleaner = new FileCleaner())
+				}//using (var cleaner = new FileCleaner())
+			} finally {
+				logCaptured.Set();
+			}
 		}
 	}
 }
