@@ -17,7 +17,7 @@ import Newtonsoft.Json
 
 
 def Sign(dir as string):
-	return unless Exist("C:\\1\\cs.pfx"):
+	return unless Exist("C:\\1\\cs.pfx")
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
 		SignFile(file, "C:\\1\\cs.pfx", "password")
 
