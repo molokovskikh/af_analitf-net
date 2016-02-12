@@ -15,6 +15,12 @@ import System.Resources
 import Mono.Cecil
 import Newtonsoft.Json
 
+
+def Sign(dir as string):
+	return unless Exist("C:\\1\\cs.pfx"):
+	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
+		SignFile(file, "C:\\1\\cs.pfx", "password")
+
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
 
@@ -266,6 +272,7 @@ task "build:client:merged", ["build:client:bin"]:
 	projectName, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
 	output = "output/merged"
 	Merge(output, projectName, source)
+	Sign(output)
 
 	#собираем версию которая называется AnalitF.exe
 	root = "output/migration"
@@ -292,6 +299,7 @@ task "build:client:merged", ["build:client:bin"]:
 	Rm(compiledLicense)
 
 	outputAssembly.Write(name)
+	Sign(root)
 
 task "build:setup", ["build:client:merged"]:
 	arg = ""
@@ -338,15 +346,19 @@ task "build:update", ["build:client:merged"]:
 	Cp("assets/ТехПоддержка-idccq5m8vh.exe", updaterOutput)
 	Cp(FileSet("*", BaseDirectory: clientOutput), updaterOutput, true)
 	Rm(FileSet("*.xml", BaseDirectory: updaterOutput))
+	Sign(updaterOutput)
+	RmDir("output/updater/merged")
 
 	output = "output/migration-update/"
 	MkDir(output)
-	Cp("output/setup/version.txt", output)
-	Cp(FileSet("*", BaseDirectory: "output/migration", Excludes: ["libmysqld.dll"]), output)
-	Cp(name, output)
-	Cp(Path.Combine(updaterOutput, Path.GetFileName(name) + ".config"), output)
-	Cp("assets/ТехПоддержка-idccq5m8vh.exe", output)
-	RmDir("output/updater/merged")
+	Cp(FileSet("**.*", BaseDirectory: updaterOutput), output)
+	Rm(FileSet("AnalitF.Net.Client.*", BaseDirectory: output))
+	Cp(FileSet("AnalitF.*", BaseDirectory: "output/migration"), output)
+	#Cp("output/setup/version.txt", output)
+	#Cp(FileSet("*", BaseDirectory: "output/migration", Excludes: ["libmysqld.dll"]), output)
+	#Cp(name, output)
+	#Cp(Path.Combine(updaterOutput, Path.GetFileName(name) + ".config"), output)
+	#Cp("assets/ТехПоддержка-idccq5m8vh.exe", output)
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production
