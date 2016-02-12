@@ -5,6 +5,8 @@ using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -155,9 +157,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.OrderBy(o => o.PriceName)
 					.ToList();
 				orders.Each(o => o.CalculateStyle(Address));
+				if (CurrentOrder != null)
+					CurrentOrder = orders.FirstOrDefault(x => x.Id == CurrentOrder.Id);
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};
+
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}

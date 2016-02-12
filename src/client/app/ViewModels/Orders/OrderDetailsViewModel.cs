@@ -143,6 +143,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				Order.Lines.Each(l => l.Configure(User));
 			}
 
+			if (CurrentLine.Value != null)
+				CurrentLine.Value = Order.Lines.FirstOrDefault(x => x.Id == CurrentLine.Value.Id);
+
 			Source = new ObservableCollection<IOrderLine>(Order.Lines.OrderBy(l => l.ProductSynonym));
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)

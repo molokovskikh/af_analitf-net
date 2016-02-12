@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.Models
 {
 	public interface IOrderLine
 	{
+		uint Id { get; }
+
 		uint ProductSynonymId { get; }
 
 		string ProductSynonym { get; }
