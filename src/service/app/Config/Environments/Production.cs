@@ -26,6 +26,7 @@ namespace AnalitF.Net.Service.Config.Environments
 
 			Directory.CreateDirectory(config.CachePath);
 			Directory.CreateDirectory(config.ResultPath);
+			Directory.CreateDirectory(config.FailsafePath);
 		}
 	}
 }

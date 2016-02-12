@@ -148,8 +148,12 @@ namespace AnalitF.Net.Client.Models.Commands
 					response?.Dispose();
 
 					response = task.Result;
-					if (response.StatusCode == HttpStatusCode.OK)
+					if (response.StatusCode == HttpStatusCode.OK) {
+						IEnumerable<string> headers;
+						if (response.Headers.TryGetValues("Request-Id", out headers))
+							requestId = SafeConvert.ToUInt32(headers.FirstOrDefault());
 						return response;
+					}
 
 					if (response.StatusCode == HttpStatusCode.Accepted) {
 						Reporter.Stage("Подготовка данных");
