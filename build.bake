@@ -359,11 +359,6 @@ task "build:update", ["build:client:merged"]:
 	Cp(FileSet("**.*", BaseDirectory: updaterOutput), output)
 	Rm(FileSet("AnalitF.Net.Client.*", BaseDirectory: output))
 	Cp(FileSet("AnalitF.*", BaseDirectory: "output/migration"), output)
-	#Cp("output/setup/version.txt", output)
-	#Cp(FileSet("*", BaseDirectory: "output/migration", Excludes: ["libmysqld.dll"]), output)
-	#Cp(name, output)
-	#Cp(Path.Combine(updaterOutput, Path.GetFileName(name) + ".config"), output)
-	#Cp("assets/ТехПоддержка-idccq5m8vh.exe", output)
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production
