@@ -306,6 +306,7 @@ task "build:setup", ["build:client:merged"]:
 	if Globals.Environment != @Production:
 		arg = "--quiet"
 	Bash("./scripts/wix.sh $arg")
+	Sign("output/setup")
 
 task "setup:preprocess":
 	proj = "src/client/app/app.csproj"
