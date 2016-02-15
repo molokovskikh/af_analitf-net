@@ -69,6 +69,7 @@ Global(
 			@UpdateDeployRoot: """C:\inetpub\wwwroot\data\update\""",
 			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://localhost/AnalitF.Net.Service",
+			@ProxyUrlRoot: "http://localhost/AnalitF.Net.Service",
 			@IISSiteName: "local",
 			@IISHost: "localhost",
 			@IISAppPool: "DefaultAppPool"
@@ -78,6 +79,7 @@ Global(
 			@UpdateDeployRoot: """\\solo\TEST\AnalitF.Net.Service.Test\var\update\""",
 			@DefaultUpdateChannel: "rtm",
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
+			@ProxyUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
 		},
 		@Production : {
 			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
@@ -85,6 +87,9 @@ Global(
 			@DefaultUpdateChannel: "alpha",
 			@SetupDeployRoot: """\\offdc\MMedia\AnalitF.Net""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service",
+			#проксирование должно выполняться локально избегая перенаправления
+			#запроса на другой сервер
+			@ProxyUrlRoot: "http://localhost/AnalitF.Net.Service",
 			@IISSiteName: "IOS",
 			@IISHost: ("solo", "frontrmt"),
 			@IISPathRoot: "U:\\WebApps",
@@ -147,7 +152,6 @@ task "deploy:service", ["build:service"]:
 	XCopyDeploy(Globals, proj, deployToBin)
 
 	return unless Globals.Maybe.IISHost
-	return if Globals.Maybe.skipRegisterApp
 
 	fsPath = Path.GetFullPath(deployToBin)
 	if Globals.Maybe.IISPathRoot:
@@ -158,7 +162,7 @@ task "deploy:service", ["build:service"]:
 	deployTo = Path.Combine(GetDeploy(Globals, "proxy"), "var")
 	proxyConfig = Path.Combine(deployTo, @config)
 	using writer = StreamWriter(proxyConfig, true):
-		writer.WriteLine("$version " + Globals.CheckUrlRoot + "-$version")
+		writer.WriteLine("$version " + Globals.ProxyUrlRoot + "-$version")
 
 task "build:proxy", ["prepare"]:
 	CleanWeb(Globals, "src/proxy/app/app.csproj")
