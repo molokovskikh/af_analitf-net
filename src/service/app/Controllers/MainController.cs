@@ -51,7 +51,12 @@ namespace AnalitF.Net.Service.Controllers
 
 		public HttpResponseMessage Put(ConfirmRequest request)
 		{
-			var log = Session.Load<RequestLog>(request.RequestId);
+			//при обновлении версии у нас нет идентификатора обновления
+			var log = Session.Get<RequestLog>(request.RequestId)
+				?? Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
+				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
+			if (log == null)
+				return new HttpResponseMessage(HttpStatusCode.OK);
 			//если уже подтверждено значит мы получили информацию об импортированных заявках
 			if (log.IsConfirmed) {
 				log.Error += request.Message;
