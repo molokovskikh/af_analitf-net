@@ -121,12 +121,12 @@
 
 		<Grid Grid.Row="4">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition></ColumnDefinition>
-				<ColumnDefinition></ColumnDefinition>
+				<ColumnDefinition />
+				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
 
 			<StackPanel Grid.Column="0">
-				<ContentControl Name="ProductInfo"></ContentControl>
+				<ContentControl Name="ProductInfo" />
 
 				<StackPanel>
 					<Label Padding="5, 2, 2, 0">Комментарий</Label>
@@ -142,7 +142,7 @@
 
 			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
+				<TextBox MaxHeight="100" Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
 			</DockPanel>
 		</Grid>
 
