@@ -2072,11 +2072,16 @@ where r.DownloadId in (:ids)")
 					&& RoundToSeconds(f.LastWriteTime) > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
 				.ToArray();
-			Result.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
-			if (files.Length > 0)
-				data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
-			else
+			if (files.Length == 0) {
 				data.LastPendingReclameUpdateAt = null;
+				return;
+			}
+			data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
+			//мы должны экспортировать все файлы
+			files = new DirectoryInfo(dir).EnumerateFiles()
+				.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden) && f.Length < Config.MaxReclameFileSize)
+				.ToArray();
+			Result.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
 		}
 
 		//mysql хранит даты с точностью дос секунды и если мы сравниваем дату из базы с датой из другого источника
