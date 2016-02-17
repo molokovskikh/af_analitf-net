@@ -55,25 +55,16 @@ namespace AnalitF.Net.Client.Models.Commands
 		private uint requestId;
 		private bool reportProgress;
 		private int downloadedBytes;
-		private int downloadeBytesDelta;
 
 		public Func<Exception, ErrorResolution> ErrorSolver = x => ErrorResolution.Fail;
-		public CancellationTokenSource Cancellation;
 		public bool Clean = true;
 		public uint AddressId;
 		public string BatchFile;
-		public bool SelfCancelled;
 
 		public UpdateCommand()
 		{
 			ErrorMessage = "Не удалось получить обновление. Попробуйте повторить операцию позднее.";
 			SuccessMessage = "Обновление завершено успешно.";
-		}
-
-		public override void Configure(Settings value, Config.Config config, CancellationTokenSource cancellation = null)
-		{
-			base.Configure(value, config, cancellation);
-			Cancellation = cancellation;
 		}
 
 		public string SyncData
@@ -161,9 +152,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
 			using (var cleaner = new FileCleaner()) {
 				string[] files;
-				using (new Timer(WatchDownload, null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20)))
-				using (response)
-				{
+				using (response) {
 					var task = Download(response, cleaner);
 					task.ContinueWith(x =>
 					{
@@ -204,21 +193,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				result = UpdateResult.UpdatePending;
 			}
 			return sendLogsTask;
-		}
-
-		private void WatchDownload(object state)
-		{
-			Log.Info($"Проверка загрузки данных, загружено байт {downloadeBytesDelta}");
-			try {
-				if (downloadeBytesDelta == 0) {
-					Log.Warn("Таймаут загрузки данных, операция отменена");
-					Cancellation.Cancel();
-					SelfCancelled = true;
-				}
-				downloadeBytesDelta = 0;
-			} catch(Exception e) {
-				Log.Error("Ошибка при отмене загрузки", e);
-			}
 		}
 
 		private HttpContent GetBatchRequest(User user, Settings settings)
@@ -1304,8 +1278,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			if (reportProgress) {
 				//Здесь мы получаем передано всего и нам нужно вычислить сколько передали после последнего уведомления
 				var bytes = args.BytesTransferred - downloadedBytes;
-				Log.Info($"Загружено байт {bytes}, всего загружено {args.BytesTransferred}");
-				downloadeBytesDelta += bytes;
 				downloadedBytes = args.BytesTransferred;
 				Reporter.Progress(bytes, inBytes: true);
 			}

@@ -882,7 +882,7 @@ namespace AnalitF.Net.Client.ViewModels
 			RunTask(wait,
 				t => {
 					//настраивать команду нужно каждый раз тк учетные данные могут быть изменены в RunTask
-					command.Configure(Settings.Value, config, t);
+					command.Configure(Settings.Value, config, t.Token);
 					return func(command);
 				},
 				t => {
@@ -904,7 +904,7 @@ namespace AnalitF.Net.Client.ViewModels
 						windowManager.Notify(command.SuccessMessage);
 					}
 					results = command.Results.ToArray();
-				}, command as UpdateCommand);
+				});
 			return results;
 		}
 
@@ -921,8 +921,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationTokenSource, T> func,
-			Action<Task<T>> success = null,
-			UpdateCommand cmd = null)
+			Action<Task<T>> success = null)
 		{
 			ResetNavigation();
 
@@ -955,14 +954,12 @@ namespace AnalitF.Net.Client.ViewModels
 					//отмена может произойти как по инициативе пользователя так и если данные не загружаются
 					//если пользователь отменил ничего делать не надо
 					//если отмена произведена таймером нужно показать сообщение об ошибке
-					log.Warn($"Отменена задача {viewModel.Text}");
-					if (cmd?.SelfCancelled == true)
-						windowManager.Error("Не удалось установить соединение с сервером. Проверьте подключение к Интернет.");
+					log.Warn($"Отменена задача {viewModel.DisplayName}");
 				} else if (task.IsFaulted) {
-					log.Debug($"Ошибка при выполнении задачи {viewModel.Text}", task.Exception);
+					log.Debug($"Ошибка при выполнении задачи {viewModel.DisplayName}", task.Exception);
 					var baseException = task.Exception.GetBaseException();
 					if (ErrorHelper.IsCancalled(baseException)) {
-						log.Warn($"Отменена задача {viewModel.Text}");
+						log.Warn($"Отменена задача {viewModel.DisplayName}");
 						return;
 					}
 

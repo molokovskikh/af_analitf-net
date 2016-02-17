@@ -119,10 +119,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			return code == HttpStatusCode.OK || code == HttpStatusCode.NoContent;
 		}
 
-		public virtual void Configure(Settings value, Config.Config config, CancellationTokenSource cancellation = null)
+		public virtual void Configure(Settings value, Config.Config config,
+			CancellationToken token = default(CancellationToken))
 		{
 			Config = config;
-			Token = (cancellation?.Token).GetValueOrDefault();
+			Token = token;
 			Settings = value;
 			if (Client != null) {
 				Client.Dispose();
