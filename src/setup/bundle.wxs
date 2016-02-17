@@ -42,24 +42,15 @@
 		<util:RegistrySearch Root="HKCR" Key="Installer\Products\E49D96A6965C45146934279ED4D1FDAD" Value="Version" Variable="XspEsInstalled" />
 
 		<PackageGroup Id="XPSEP">
-				<ExePackage Id="XPSEP"
-					InstallCommand="/install /quiet"
-					UninstallCommand="/uninstall /quiet"
-					Cache="no"
-					Compressed="no"
-					PerMachine="yes"
-					Permanent="yes"
-					Vital="yes"
-					Name="XPSEP.exe"
-					DownloadUrl="http://ios.analit.net/Files/XPSEP.exe"
-					DetectCondition="not (VersionNT = v5.1) or XspEsInstalled">
-				<RemotePayload
-					Size="8388096"
-					Version="1.0.0.0"
-					ProductName="XPSEP"
-					Description="XPSEP"
-					Hash="0b9cc74e4a201c440a722b96799f0c8661fb1275"/>
-			</ExePackage>
+			<MsiPackage
+				Id="XPSEP"
+				Compressed="yes"
+				ForcePerMachine="no"
+				SourceFile="XPSEP.msi"
+				Permanent="yes"
+				Vital="yes"
+				InstallCondition="VersionNT = v5.1">
+			</MsiPackage>
 		</PackageGroup>
 
 <?if $(var.Setup.NetInstallCommand) = "" ?>

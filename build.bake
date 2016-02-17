@@ -17,9 +17,8 @@ import Newtonsoft.Json
 
 
 def Sign(dir as string):
-	return unless Exist("C:\\1\\cs.pfx")
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
-		SignFile(file, "C:\\1\\cs.pfx", "password")
+		SignFile(file, "assets/cs.pfx", "password")
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
