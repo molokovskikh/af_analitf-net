@@ -44,13 +44,12 @@ namespace AnalitF.Net.Service.Controllers
 			if (reset) {
 				//если данные уже готовятся нет смысла делать это повторно тк это все равное не будет работать только
 				//создаст дополнительную нагрузку на базу данных
-				var inProcess = Session.Query<RequestLog>()
+				return Session.Query<RequestLog>()
 					.Where(x => x.UpdateType == updateType && !x.IsCompleted
 						&& x.User == CurrentUser
 						&& x.CreatedOn > DateTime.Now.AddMinutes(-10))
 					.OrderByDescending(j => j.CreatedOn)
-					.ToList();
-				return inProcess.FirstOrDefault();
+					.FirstOrDefault();
 			} else {
 				var existsJob = Session.Query<RequestLog>()
 					.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)

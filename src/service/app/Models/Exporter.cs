@@ -172,8 +172,11 @@ namespace AnalitF.Net.Service.Models
 			MaxProducerCostCostId = config.MaxProducerCostCostId;
 
 			user = job.User;
-			data = session.Get<AnalitfNetData>(user.Id)
-				?? new AnalitfNetData(job);
+			data = session.Get<AnalitfNetData>(user.Id);
+			if (data == null) {
+				data = new AnalitfNetData(job);
+				session.Save(data);
+			}
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
@@ -2084,7 +2087,7 @@ where r.DownloadId in (:ids)")
 			Result.AddRange(files.Select(f => new UpdateData("ads/" + f.Name) { LocalFileName = f.FullName }));
 		}
 
-		//mysql хранит даты с точностью дос секунды и если мы сравниваем дату из базы с датой из другого источника
+		//mysql хранит даты с точностью до секунды и если мы сравниваем дату из базы с датой из другого источника
 		//например файловой системы, перед сравнением ее нужно округлить
 		public static DateTime RoundToSeconds(DateTime value)
 		{
@@ -2151,12 +2154,11 @@ where r.DownloadId in (:ids)")
 			cleaner.Dispose();
 		}
 
-		public static void Confirm(ISession session, uint userId, ConfirmRequest request, Config.Config config)
+		public void Confirm(ConfirmRequest request)
 		{
-			var log = session.Load<RequestLog>(request.RequestId);
-			log.Confirm(config, request.Message);
-			var data = session.Load<AnalitfNetData>(userId);
+			job.Confirm(Config, request.Message);
 			data.Confirm();
+			var userId = job.User.Id;
 
 			//каждый запрос выполняется отдельно что бы проще было диагностировать блокировки
 			session.CreateSQLQuery(@"
@@ -2206,6 +2208,11 @@ delete from Logs.PendingOrderLogs
 where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+		}
+
+		public static void Confirm(ISession session, ConfirmRequest request, Config.Config config)
+		{
+			new Exporter(session, config, session.Load<RequestLog>(request.RequestId)).Confirm(request);
 		}
 	}
 

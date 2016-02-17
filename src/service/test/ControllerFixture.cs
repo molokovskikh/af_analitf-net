@@ -349,6 +349,12 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(1, orders[1].Items.Count, $"userid = {user.Id}");
 		}
 
+		[Test]
+		public void Build_update_on_error()
+		{
+
+		}
+
 		private RequestLog GetJob()
 		{
 			var job = new RequestLog(user, new Version()) {

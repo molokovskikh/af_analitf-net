@@ -126,8 +126,7 @@ namespace AnalitF.Net.Service.Models
 			}
 			IsFaulted = true;
 			Error = e.ToString();
-			CompletedOn = DateTime.Now;
-			ExecuteInSeconds = (int)(DateTime.Now - CreatedOn).TotalSeconds;
+			Completed();
 		}
 
 		public virtual void Completed()

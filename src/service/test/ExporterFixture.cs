@@ -137,6 +137,21 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Ads_sync()
+		{
+			InitAd();
+			FileHelper.Touch(@"ads\Воронеж_1\index.gif");
+			exporter.ExportAds();
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
+			Assert.AreEqual("ads/2block.gif, ads/index.gif", exporter.Result.Implode(x => x.ArchiveFileName));
+
+			new FileInfo(@"ads\Воронеж_1\index.gif").LastWriteTime = DateTime.Now.AddMinutes(10);
+			Init();
+			exporter.ExportAds();
+			Assert.AreEqual("ads/2block.gif, ads/index.gif", exporter.Result.Implode(x => x.ArchiveFileName));
+		}
+
+		[Test]
 		public void Export_empty_ad()
 		{
 			InitAd();
@@ -227,7 +242,7 @@ namespace AnalitF.Net.Service.Test
 			var resultFiles = result.Implode(r => r.FileName);
 			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
 
-			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			//кеш данной сессии неактуальный тк обновление происходит в другой сессии
 			var data = session.Load<AnalitfNetData>(user.Id);
@@ -324,7 +339,7 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
 			exporter.ExportAll();
-			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			supplier2.InvalidateCache(session, user.Id);
 
@@ -354,7 +369,7 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			session.Flush();
 			exporter.ExportAll();
-			Exporter.Confirm(session, user.Id, new ConfirmRequest(requestLog.Id), config);
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			var id = supplier.Prices[0].Core[0].Id;
 			var offers = ParseData("offers").ToArray();
@@ -440,7 +455,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			FileHelper.InitDir("ads");
 			FileHelper.CreateDirectoryRecursive(@"ads\Воронеж_1\");
-			File.WriteAllBytes(@"ads\Воронеж_1\2block.gif", new byte[] { 0x00 });
+			FileHelper.Touch(@"ads\Воронеж_1\2block.gif");
 			var file = new FileInfo(@"ads\Воронеж_1\2block.gif");
 			file.LastWriteTime = DateTime.Now.AddSeconds(-1);
 			exporter.AdsPath = "ads";

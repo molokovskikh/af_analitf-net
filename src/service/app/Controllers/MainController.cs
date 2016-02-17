@@ -64,17 +64,17 @@ namespace AnalitF.Net.Service.Controllers
 				//записываем информацию о запросе что бы в случае ошибки повторить попытку
 				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
 				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
-				Task = RequestLog.RunTask(Session, x => Confirm(x, CurrentUser.Id, request, Config));
+				Task = RequestLog.RunTask(Session, x => Confirm(x, request, Config));
 			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
-		public static void Confirm(ISession session, uint userId, ConfirmRequest request, Config.Config config)
+		public static void Confirm(ISession session, ConfirmRequest request, Config.Config config)
 		{
 			var failsafe = Path.Combine(config.FailsafePath, request.RequestId.ToString());
 			try {
-				Exporter.Confirm(session, userId, request, config);
+				Exporter.Confirm(session, request, config);
 				File.Delete(failsafe);
 			}
 			catch(Exception) {
