@@ -17,7 +17,7 @@ namespace AnalitF.Net.Service.Controllers
 	{
 		public HttpResponseMessage Get()
 		{
-			var existsJob = TryFindJob(false, GetType().Name);
+			var existsJob = TryFindJob(GetType().Name);
 			if (existsJob == null)
 				return new HttpResponseMessage(HttpStatusCode.Accepted);
 			return existsJob.ToResult(Config);
@@ -39,26 +39,15 @@ namespace AnalitF.Net.Service.Controllers
 			Log = LogManager.GetLogger(GetType());
 		}
 
-		protected RequestLog TryFindJob(bool reset, string updateType)
+		protected RequestLog TryFindJob(string updateType)
 		{
-			if (reset) {
-				//если данные уже готовятся нет смысла делать это повторно тк это все равное не будет работать только
-				//создаст дополнительную нагрузку на базу данных
-				return Session.Query<RequestLog>()
-					.Where(x => x.UpdateType == updateType && !x.IsCompleted
-						&& x.User == CurrentUser
-						&& x.CreatedOn > DateTime.Now.AddMinutes(-10))
-					.OrderByDescending(j => j.CreatedOn)
-					.FirstOrDefault();
-			} else {
-				var existsJob = Session.Query<RequestLog>()
-					.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
-					.OrderByDescending(j => j.CreatedOn)
-					.FirstOrDefault();
-				if (existsJob?.GetIsStale(TimeSpan.FromMinutes(30)) == true)
-					return null;
-				return existsJob;
-			}
+			var existsJob = Session.Query<RequestLog>()
+				.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
+				.OrderByDescending(j => j.CreatedOn)
+				.FirstOrDefault();
+			if (existsJob?.GetIsStale(TimeSpan.FromMinutes(30)) == true)
+				return null;
+			return existsJob;
 		}
 
 		protected HttpResponseMessage StartJob(Action<ISession, Config.Config, RequestLog> cmd)

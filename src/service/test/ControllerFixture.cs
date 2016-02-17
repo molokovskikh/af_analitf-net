@@ -350,9 +350,28 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
-		public void Build_update_on_error()
+		public void Build_update_on_error_production()
 		{
+			config.UpdateLifeTime = TimeSpan.FromMinutes(30);
+			var errorLog = new RequestLog(user, new HttpRequestMessage(HttpMethod.Get, "http://localhost/Main/"), controller.GetType().Name);
+			errorLog.Faulted(new ExporterException("Пожалуйста, обратитесь в бухгалтерию АналитФармация.", ErrorType.AccessDenied));
+			session.Save(errorLog);
 
+			var message = controller.Get(true);
+			Assert.AreEqual(message.StatusCode, HttpStatusCode.Accepted);
+			Assert.AreNotEqual(errorLog.Id, GetRequestId(message).ToString());
+		}
+
+		[Test]
+		public void Build_update_on_error_debug()
+		{
+			var errorLog = new RequestLog(user, new HttpRequestMessage(HttpMethod.Get, "http://localhost/Main/"), controller.GetType().Name);
+			errorLog.Faulted(new ExporterException("Пожалуйста, обратитесь в бухгалтерию АналитФармация.", ErrorType.AccessDenied));
+			session.Save(errorLog);
+
+			var message = controller.Get(true);
+			Assert.AreEqual(message.StatusCode, HttpStatusCode.Accepted);
+			Assert.AreNotEqual(errorLog.Id, GetRequestId(message).ToString());
 		}
 
 		private RequestLog GetJob()

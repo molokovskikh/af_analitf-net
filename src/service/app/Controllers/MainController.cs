@@ -17,17 +17,21 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Get(bool reset = false, string data = null, DateTime? lastSync = null)
 		{
 			var updateType = data ?? GetType().Name;
-			var existsJob = TryFindJob(reset, updateType);
-			if (Config.UpdateLifeTime > TimeSpan.Zero) {
-				//если есть не загруженные данные отдаем их
-				if (reset && existsJob == null) {
-						existsJob = Session.Query<RequestLog>()
+			RequestLog existsJob = null;
+			//если это новый запрос то пытаемся найти уже подготовленные данные которые не протухли или в процессе
+			//что бы избежать дополнительной нагрузки на сервер
+			if (reset) {
+				if (Config.UpdateLifeTime > TimeSpan.Zero) {
+					//если есть не загруженные данные отдаем их
+					existsJob = Session.Query<RequestLog>()
 						.Where(j => j.UpdateType == updateType && !j.IsConfirmed && !j.IsFaulted && j.User == CurrentUser)
 						.OrderByDescending(j => j.CreatedOn)
 						.Take(1)
 						.ToArray()
 						.FirstOrDefault(x => x.GetIsStale(Config.UpdateLifeTime) == false);
 				}
+			} else {
+				existsJob = TryFindJob(updateType);
 			}
 
 			if (existsJob == null) {
