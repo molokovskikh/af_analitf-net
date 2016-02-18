@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
 using System.Text;
@@ -1297,8 +1298,11 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 		private void WaitAndLog(Task<HttpResponseMessage> task, string name)
 		{
-			if (task == null)
-				return;
+#if DEBUG
+			//при тестирование все ошибки являются критическими
+			if ((task.Result?.StatusCode).GetValueOrDefault(HttpStatusCode.OK) != HttpStatusCode.OK)
+				throw new Exception($"Запрос завершился ошибкой {task.Result.StatusCode}");
+#endif
 
 			try {
 				task.Wait(Token);

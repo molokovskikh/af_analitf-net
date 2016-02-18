@@ -25,6 +25,8 @@ namespace AnalitF.Net.Service.Models
 
 	public class RequestLog
 	{
+		//используется для тестирования что бы избежать асинхронного поведения
+		public static TaskScheduler Scheduler;
 		private static ILog log = LogManager.GetLogger(typeof(RequestLog));
 
 		public RequestLog()
@@ -284,7 +286,10 @@ namespace AnalitF.Net.Service.Models
 				if (x.IsFaulted)
 					log.Error("Ошибка при выполнении фоновой задачи", x.Exception);
 			});
-			task.Start();
+			if (Scheduler != null)
+				task.Start(Scheduler);
+			else
+				task.Start();
 			return task;
 		}
 	}

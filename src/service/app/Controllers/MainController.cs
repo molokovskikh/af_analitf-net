@@ -58,7 +58,7 @@ namespace AnalitF.Net.Service.Controllers
 			//при обновлении версии у нас нет идентификатора обновления
 			var log = Session.Get<RequestLog>(request.RequestId)
 				?? Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
-				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsConfirmed);
+				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsFaulted);
 			if (log == null)
 				return new HttpResponseMessage(HttpStatusCode.OK);
 			//если уже подтверждено значит мы получили информацию об импортированных заявках
@@ -68,17 +68,22 @@ namespace AnalitF.Net.Service.Controllers
 				//записываем информацию о запросе что бы в случае ошибки повторить попытку
 				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
 				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
-				Task = RequestLog.RunTask(Session, x => Confirm(x, request, Config));
+				Task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
+				if (Task.IsFaulted)
+					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+				if (Task.IsCompleted)
+					return new HttpResponseMessage(HttpStatusCode.OK);
+				return new HttpResponseMessage(HttpStatusCode.Accepted);
 			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 
-		public static void Confirm(ISession session, ConfirmRequest request, Config.Config config)
+		public static void Confirm(ISession session, uint requestLogId, Config.Config config, ConfirmRequest request)
 		{
-			var failsafe = Path.Combine(config.FailsafePath, request.RequestId.ToString());
+			var failsafe = Path.Combine(config.FailsafePath, requestLogId.ToString());
 			try {
-				Exporter.Confirm(session, request, config);
+				new Exporter(session, config, session.Load<RequestLog>(requestLogId)).Confirm(request);
 				File.Delete(failsafe);
 			}
 			catch(Exception) {

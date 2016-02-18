@@ -2210,11 +2210,6 @@ where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 		}
-
-		public static void Confirm(ISession session, ConfirmRequest request, Config.Config config)
-		{
-			new Exporter(session, config, session.Load<RequestLog>(request.RequestId)).Confirm(request);
-		}
 	}
 
 	public static class DbRecordHelper

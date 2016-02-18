@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using AnalitF.Net.Service.Models;
@@ -21,7 +22,7 @@ namespace AnalitF.Net.Service.Controllers
 		public ISession Session { get; set; }
 		public User CurrentUser { get; set; }
 
-		public void Post(HttpRequestMessage request)
+		public HttpResponseMessage Post(HttpRequestMessage request)
 		{
 			var requestStream = request.Content.ReadAsStreamAsync().Result;
 			using(var zip = ZipFile.Read(requestStream)) {
@@ -42,6 +43,7 @@ namespace AnalitF.Net.Service.Controllers
 					Session.Save(log);
 				}
 			}
+			return new HttpResponseMessage(HttpStatusCode.OK);
 		}
 	}
 }

@@ -12,6 +12,7 @@ using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Service;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Threading;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
@@ -122,6 +123,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			if (server != null)
 				return Task.FromResult(1);
 			if (cfg == null) {
+				Service.Models.RequestLog.Scheduler = new CurrentThreadScheduler();
 				cfg = new HttpSelfHostConfiguration(url);
 				cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 				serviceConfig = Application.InitApp(cfg);
