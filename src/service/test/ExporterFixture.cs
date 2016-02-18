@@ -105,8 +105,8 @@ namespace AnalitF.Net.Service.Test
 			var zipEntries = ZipHelper.lsZip(file).Implode();
 
 			Assert.That(File.Exists(file), "{0} не существует", file);
-			Assert.That(zipEntries, Is.StringContaining("Addresses.txt"));
-			Assert.That(zipEntries, Is.StringContaining("Addresses.meta.txt"));
+			Assert.That(zipEntries, Does.Contain("Addresses.txt"));
+			Assert.That(zipEntries, Does.Contain("Addresses.meta.txt"));
 
 			Assert.That(Path.GetFileName(Directory.GetFiles(exporter.Config.LocalExportPath)[0]),
 				Is.EqualTo("1Addresses.txt"));
@@ -133,7 +133,7 @@ namespace AnalitF.Net.Service.Test
 			exporter.ExportAll();
 			var files = ListResult();
 
-			Assert.That(files, Is.StringContaining("ads/2block.gif"));
+			Assert.That(files, Does.Contain("ads/2block.gif"));
 		}
 
 		[Test]
@@ -190,8 +190,8 @@ namespace AnalitF.Net.Service.Test
 
 			var offers = exporter.Result.First(t => t.ArchiveFileName.EndsWith("offers.txt"));
 			var text = File.ReadAllText(offers.LocalFileName);
-			Assert.That(text, Is.StringContaining(core1.Id.ToString()));
-			Assert.That(text, Is.StringContaining(core2.Id.ToString()));
+			Assert.That(text, Does.Contain(core1.Id.ToString()));
+			Assert.That(text, Does.Contain(core2.Id.ToString()));
 		}
 
 		[Test]
@@ -240,7 +240,7 @@ namespace AnalitF.Net.Service.Test
 			}
 
 			var resultFiles = result.Implode(r => r.FileName);
-			Assert.That(resultFiles, Is.StringContaining("MaxProducerCosts"));
+			Assert.That(resultFiles, Does.Contain("MaxProducerCosts"));
 
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
@@ -264,11 +264,11 @@ namespace AnalitF.Net.Service.Test
 		{
 			InitAd();
 			var result = ReadResult().Implode(x => x.FileName);
-			Assert.That(result, Is.StringContaining("ads"));
+			Assert.That(result, Does.Contain("ads"));
 
 			Init();
 			result = ReadResult().Implode(x => x.FileName);
-			Assert.That(result, Is.StringContaining("ads"));
+			Assert.That(result, Does.Contain("ads"));
 		}
 
 		[Test(Description = "Флаг синхронизации прайс-листов должен быть сброшен только при подтверждении")]

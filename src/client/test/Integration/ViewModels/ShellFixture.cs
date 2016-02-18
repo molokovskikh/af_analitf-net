@@ -136,9 +136,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Assert.That(shell.Settings.Value.UserName, Is.Not.Null);
 			Assert.That(shell.Settings.Value.Password, Is.Not.Null);
-			Assert.That(manager.MessageBoxes[0], Is.StringContaining("необходимо заполнить учетные данные"));
-			Assert.That(manager.MessageBoxes[1], Is.StringContaining("База данных программы не заполнена"));
-			Assert.That(manager.MessageBoxes[2], Is.StringContaining("Обновление завершено успешно"));
+			Assert.That(manager.MessageBoxes[0], Does.Contain("необходимо заполнить учетные данные"));
+			Assert.That(manager.MessageBoxes[1], Does.Contain("База данных программы не заполнена"));
+			Assert.That(manager.MessageBoxes[2], Does.Contain("Обновление завершено успешно"));
 			Assert.That(command, Is.InstanceOf<UpdateCommand>());
 		}
 
@@ -154,8 +154,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			shell.Reload();
 
 			shell.StartCheck();
-			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Вы работаете с устаревшим набором данных."));
-			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Обновление завершено успешно"));
+			Assert.That(manager.MessageBoxes[0], Does.Contain("Вы работаете с устаревшим набором данных."));
+			Assert.That(manager.MessageBoxes[1], Does.Contain("Обновление завершено успешно"));
 			Assert.That(command, Is.InstanceOf<UpdateCommand>());
 		}
 
@@ -176,8 +176,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			shell.CanClose(b => canClose = b);
 
 			Assert.IsTrue(canClose);
-			Assert.That(manager.MessageBoxes[0], Is.StringContaining("Обнаружены не отправленные заказы."));
-			Assert.That(manager.MessageBoxes[1], Is.StringContaining("Отправка заказов завершена успешно."));
+			Assert.That(manager.MessageBoxes[0], Does.Contain("Обнаружены не отправленные заказы."));
+			Assert.That(manager.MessageBoxes[1], Does.Contain("Отправка заказов завершена успешно."));
 			Assert.That(command, Is.InstanceOf<SendOrders>());
 		}
 
@@ -283,9 +283,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			});
 			shell.Update();
 
-			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Введены некорректные учетные данные"));
+			Assert.That(manager.MessageBoxes.Implode(), Does.Contain("Введены некорректные учетные данные"));
 			Assert.IsTrue(settings);
-			Assert.That(manager.MessageBoxes.Implode(), Is.StringContaining("Обновление завершено успешно"));
+			Assert.That(manager.MessageBoxes.Implode(), Does.Contain("Обновление завершено успешно"));
 			Assert.AreEqual("test", ((NetworkCredential)stub.Handler.Credentials).UserName);
 			Assert.AreEqual("aioxct2", ((NetworkCredential)stub.Handler.Credentials).Password);
 		}

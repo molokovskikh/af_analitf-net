@@ -218,7 +218,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var dialogs = manager.DialogOpened.Collect();
 			var messages = manager.MessageOpened.Collect();
 			shell.OnViewReady();
-			Assert.That(messages.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
+			Assert.That(messages.Implode(), Does.Contain("необходимо заполнить учетные данные"));
 			Assert.That(dialogs[0], Is.TypeOf<SettingsViewModel>());
 		}
 
@@ -230,7 +230,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var dialogs = manager.DialogOpened.Collect();
 			var messages = manager.MessageOpened.Collect();
 			shell.Update();
-			Assert.That(messages.Implode(), Is.StringContaining("необходимо заполнить учетные данные"));
+			Assert.That(messages.Implode(), Does.Contain("необходимо заполнить учетные данные"));
 			Assert.That(dialogs[0], Is.TypeOf<SettingsViewModel>());
 		}
 

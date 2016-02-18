@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				w.Content = selector;
 				selector.Loaded += (sender, args) => {
 					var text = selector.AsText();
-					Assert.That(text, Is.StringContaining("test2"));
+					Assert.That(text, Does.Contain("test2"));
 
 					WpfTestHelper.Shutdown(w);
 				};
@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				Assert.That(stackPanel.AsText(), Is.Not.StringContaining(", фильтр применен"));
 				selector.IsOpened = true;
 				((ISelectable)selector.Items[0]).IsSelected = false;
-				Assert.That(stackPanel.AsText(), Is.StringContaining(", фильтр применен"));
+				Assert.That(stackPanel.AsText(), Does.Contain(", фильтр применен"));
 			});
 		}
 

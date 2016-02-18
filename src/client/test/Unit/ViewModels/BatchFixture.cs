@@ -108,7 +108,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var file = save.Dialog.FileName = cleaner.RandomFile();
 			Next(results);
 			var text = File.ReadAllText(file, Encoding.Default);
-			Assert.That(text, Is.StringContaining("Наименование;Производитель;Прайс-лист;Цена;Заказ;Сумма;Комментарий"));
+			Assert.That(text, Does.Contain("Наименование;Производитель;Прайс-лист;Цена;Заказ;Сумма;Комментарий"));
 		}
 
 		[Test]

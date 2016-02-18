@@ -295,7 +295,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 				ClickByName("Закрыть", dialog);
 			}
 			else {
-				Assert.That(text, Is.StringContaining(result));
+				Assert.That(text, Does.Contain(result));
 				ClickByName("TryClose", dialog);
 			}
 		}
@@ -315,7 +315,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected void AssertText(AutomationElement el, string text)
 		{
-			Assert.That(AutomationHelper.ToText(el), Is.StringContaining(text), el.ToShortText());
+			Assert.That(AutomationHelper.ToText(el), Does.Contain(text), el.ToShortText());
 		}
 	}
 }

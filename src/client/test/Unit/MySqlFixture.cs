@@ -12,7 +12,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var value = "User Id=root; Server Parameters=\"--basedir=.;--datadir=.;--innodb=OFF\"; Embedded=True; Database=data";
 			var nhibernate = new Client.Config.NHibernate.NHibernate();
 			var result = nhibernate.FixRelativePaths(value);
-			Assert.That(result, Is.StringContaining("--basedir=" + Environment.CurrentDirectory.Replace("\\", "/")));
+			Assert.That(result, Does.Contain("--basedir=" + Environment.CurrentDirectory.Replace("\\", "/")));
 		}
 	}
 }

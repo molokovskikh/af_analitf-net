@@ -47,7 +47,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			check.Check(true);
 			var result = session.CreateSQLQuery("show create table Settings")
 				.UniqueResult<object[]>();
-			Assert.That(result[1].ToString(), Is.StringContaining("`ProxyPort` int(11) DEFAULT NULL,"));
+			Assert.That(result[1].ToString(), Does.Contain("`ProxyPort` int(11) DEFAULT NULL,"));
 		}
 
 		[Test]
@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 
 			check.Check();
 			var result = session.CreateSQLQuery("show create table Offers").UniqueResult<object[]>();
-			Assert.That(result[1].ToString(), Is.StringContaining("FULLTEXT KEY"));
+			Assert.That(result[1].ToString(), Does.Contain("FULLTEXT KEY"));
 			Assert.That(Directory.Exists(config.DbDir));
 		}
 

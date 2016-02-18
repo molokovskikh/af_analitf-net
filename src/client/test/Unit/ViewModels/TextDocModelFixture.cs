@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
         АЛЛЕРГЕНЫ ПЫЛЬЦЕВЫЕ в комплектах - CANPOL 905024831: имеется различие в цене препарата (старая цена: 456,32р.; новая цена: 7 283,92р.)";
 			var model = new TextDoc("тест", text);
 			var doc = model.ToFlowDocument();
-			Assert.That(WpfTestHelper.FlowDocumentToText(doc), Is.StringContaining("АЛЛЕРГЕНЫ ПЫЛЬЦЕВЫЕ"));
+			Assert.That(WpfTestHelper.FlowDocumentToText(doc), Does.Contain("АЛЛЕРГЕНЫ ПЫЛЬЦЕВЫЕ"));
 		}
 	}
 }

@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsFalse(correction.IsOrderSend);
 			var report = correction.Save().ToArray().OfType<SaveFileResult>().First();
 			var text = File.ReadAllText(report.Dialog.FileName, Encoding.Default);
-			Assert.That(text, Is.StringContaining(String.Format("адрес доставки {0}", address.Name)));
+			Assert.That(text, Does.Contain(String.Format("адрес доставки {0}", address.Name)));
 		}
 
 		[Test]

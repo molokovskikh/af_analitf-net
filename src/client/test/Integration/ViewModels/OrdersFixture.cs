@@ -177,7 +177,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			task.Task.Wait();
 
 			var text = ((TextViewModel)Next<DialogResult>(result).Model).Text;
-			Assert.That(text, Is.StringContaining("предложение отсутствует"));
+			Assert.That(text, Does.Contain("предложение отсутствует"));
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines.Count, Is.EqualTo(1));
 			Assert.That(model.Orders[0].Lines[0].Count, Is.EqualTo(1));

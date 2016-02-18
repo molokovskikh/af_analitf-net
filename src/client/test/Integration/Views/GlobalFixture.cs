@@ -353,9 +353,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var view = (FrameworkElement)((PriceViewModel)shell.ActiveItem).GetView();
 				var block = (TextBlock)view.FindName("CurrentPrice_Value_SupplierFullName");
-				Assert.That(block.Text, Is.StringContaining("Тестовый"));
+				Assert.That(block.Text, Does.Contain("Тестовый"));
 				var text = (TextBox)view.FindName("CurrentPrice_Value_ContactInfo");
-				Assert.That(text.Text, Is.StringContaining("тестовая контактная информация"));
+				Assert.That(text.Text, Does.Contain("тестовая контактная информация"));
 			});
 		}
 
@@ -486,7 +486,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitWindow("АналитФАРМАЦИЯ: Внимание");
 			dispatcher.Invoke(() => {
 				Assert.That(activeWindow.AsText(),
-					Is.StringContaining("обнаружены препараты," +
+					Does.Contain("обнаружены препараты," +
 						" предписанные к изъятию, в имеющихся у Вас электронных накладных"));
 			});
 			Click("ShowRejects");
@@ -532,7 +532,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Start();
 
 			var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
-			Assert.That(waitWindow.AsText(), Is.StringContaining("Пересчет отсрочки платежа"));
+			Assert.That(waitWindow.AsText(), Does.Contain("Пересчет отсрочки платежа"));
 			//ждем пока закроется
 			WaitHelper.WaitOrFail(10.Second(), () => activeWindow != waitWindow);
 
@@ -565,7 +565,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);
-				Assert.That(promotions.AsText(), Is.StringContaining(fixture.Promotion.Name));
+				Assert.That(promotions.AsText(), Does.Contain(fixture.Promotion.Name));
 				var presenter = promotions.Descendants<ContentPresenter>()
 					.First(c => c.DataContext is Promotion && ((Promotion)c.DataContext).Id == fixture.Promotion.Id);
 				var link = presenter.Descendants<TextBlock>().SelectMany(b => b.Inlines).OfType<Hyperlink>().First();
@@ -668,7 +668,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitWindow("Обновление");
 			dispatcher.Invoke(() => {
 				Assert.That(activeWindow.AsText(),
-					Is.StringContaining("Сейчас будет произведено обновление данных"));
+					Does.Contain("Сейчас будет произведено обновление данных"));
 			});
 			AsyncClick("TryClose");
 			WaitMessageBox("Обновление завершено успешно.");
@@ -838,7 +838,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var text = opened.AsText();
 				Assert.AreEqual(title, opened.Title, text);
 				if (!String.IsNullOrEmpty(body))
-					Assert.That(text, Is.StringContaining(body), text);
+					Assert.That(text, Does.Contain(body), text);
 			});
 		}
 

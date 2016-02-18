@@ -212,7 +212,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var changes = line.CollectChanges();
 			line.RetailCost = 100;
 			Assert.IsTrue(line.IsMarkupToBig);
-			Assert.That(changes.Implode(e => e.PropertyName), Is.StringContaining("IsMarkupToBig"));
+			Assert.That(changes.Implode(e => e.PropertyName), Does.Contain("IsMarkupToBig"));
 		}
 
 		[Test]

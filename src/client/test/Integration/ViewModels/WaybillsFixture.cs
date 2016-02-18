@@ -100,7 +100,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			task.Task.Wait();
 			var open = Next<OpenResult>(result);
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-			Assert.That(open.Filename, Is.StringContaining("Росздравнадзор"));
+			Assert.That(open.Filename, Does.Contain("Росздравнадзор"));
 		}
 
 		[Test]
@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			task.Task.Wait();
 			var open = Next<OpenResult>(result);
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-			Assert.That(open.Filename, Is.StringContaining("Росздравнадзор"));
+			Assert.That(open.Filename, Does.Contain("Росздравнадзор"));
 			//дожна быть строка заголовка и как миниму одна строка данных
 			var text = File.ReadAllText(open.Filename);
 			Assert.That(text.Length, Is.GreaterThan(1));

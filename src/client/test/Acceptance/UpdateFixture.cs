@@ -153,7 +153,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			var window = WaitWindow();
 			var text = AutomationHelper.ToText(window);
-			Assert.That(text, Is.StringContaining(message));
+			Assert.That(text, Does.Contain(message));
 			ClickByName("ОК", window);
 		}
 	}

@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			offer.Junk = true;
 			offer.OrderCount = 1;
 			Validate();
-			Assert.That(warning, Is.StringContaining("Вы заказали препарат с ограниченным сроком годности"));
+			Assert.That(warning, Does.Contain("Вы заказали препарат с ограниченным сроком годности"));
 		}
 
 		[Test]

@@ -88,7 +88,7 @@ namespace test.release
 
 			Activate();
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
-			Assert.That(AutomationHelper.ToText(MainWindow), Is.StringContaining(prevVersion.ToString()));
+			Assert.That(AutomationHelper.ToText(MainWindow), Does.Contain(prevVersion.ToString()));
 
 			Type("Settings_UserName", testUserName);
 			Type("Password", testPassword);
@@ -114,7 +114,7 @@ namespace test.release
 
 			var message = Opened.Timeout(UpdateTimeout).First();
 			AssertText(message, "Обновление завершено успешно.");
-			Assert.That(AutomationHelper.ToText(MainWindow), Is.StringContaining(currentVersion.ToString()));
+			Assert.That(AutomationHelper.ToText(MainWindow), Does.Contain(currentVersion.ToString()));
 			ClickByName("ОК", message);
 		}
 

@@ -247,7 +247,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			localSession.Clear();
 
-			Assert.That(text, Is.StringContaining("предложение отсутствует"));
+			Assert.That(text, Does.Contain("предложение отсутствует"));
 			order = localSession.Load<Order>(order.Id);
 			Assert.IsTrue(order.Frozen);
 			Assert.AreEqual(1, order.Lines.Count);
@@ -391,7 +391,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(cmd);
 
 			var model = ((PostUpdate)((DialogResult)cmd.Results[0]).Model);
-			Assert.That(model.Text, Is.StringContaining("появились препараты, которые включены Вами в список ожидаемых позиций"));
+			Assert.That(model.Text, Does.Contain("появились препараты, которые включены Вами в список ожидаемых позиций"));
 			Assert.IsTrue(model.IsAwaited);
 		}
 

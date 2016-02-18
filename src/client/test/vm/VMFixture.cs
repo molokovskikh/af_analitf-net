@@ -146,7 +146,7 @@ namespace vm
 					done = echoTest.Status == ProcessStatus.ProcessStatus_TerminatedNormally;
 				}
 				catch (COMException e) {
-					Assert.That(e.Message, Is.StringContaining("The guest execution service is not ready (yet)"));
+					Assert.That(e.Message, Does.Contain("The guest execution service is not ready (yet)"));
 				}
 			}
 			return guestsession;
