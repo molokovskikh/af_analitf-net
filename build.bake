@@ -15,10 +15,12 @@ import System.Resources
 import Mono.Cecil
 import Newtonsoft.Json
 
+def SignFileLocal(file as string):
+	SignFile(file, "assets/cs.pfx", "password")
 
-def Sign(dir as string):
+def SignDir(dir as string):
 	for file in FileSet(["*.dll", "*.exe"], BaseDirectory: dir, Excludes: ["ТехПоддержка*.exe"]):
-		SignFile(file, "assets/cs.pfx", "password")
+		SignFileLocal(file)
 
 def FileElement(file as string, id as string, element as XElement):
 	return XElement(element.Name.Namespace + "File", XAttribute("Id", id), XAttribute("Source", Path.GetFullPath(file)))
@@ -275,7 +277,7 @@ task "build:client:merged", ["build:client:bin"]:
 	projectName, source, _ = GetBuildConfig(Globals, "src/client/app/app.csproj")
 	output = "output/merged"
 	Merge(output, projectName, source)
-	Sign(output)
+	SignDir(output)
 
 	#собираем версию которая называется AnalitF.exe
 	root = "output/migration"
@@ -302,14 +304,17 @@ task "build:client:merged", ["build:client:bin"]:
 	Rm(compiledLicense)
 
 	outputAssembly.Write(name)
-	Sign(root)
+	SignDir(root)
 
 task "build:setup", ["build:client:merged"]:
 	arg = ""
 	if Globals.Environment != @Production:
 		arg = "--quiet"
 	Bash("./scripts/wix.sh $arg")
-	Sign("output/setup")
+	Sh("insignia -ib output/setup/setup.exe -o output/setup/engine.exe")
+	SignFileLocal("output/setup/engine.exe")
+	Sh("insignia -ab output/setup/engine.exe output/setup/setup.exe -o output/setup/setup.exe")
+	SignFileLocal("output/setup/setup.exe")
 
 task "setup:preprocess":
 	proj = "src/client/app/app.csproj"
@@ -350,7 +355,7 @@ task "build:update", ["build:client:merged"]:
 	Cp("assets/ТехПоддержка-idccq5m8vh.exe", updaterOutput)
 	Cp(FileSet("*", BaseDirectory: clientOutput), updaterOutput, true)
 	Rm(FileSet("*.xml", BaseDirectory: updaterOutput))
-	Sign(updaterOutput)
+	SignDir(updaterOutput)
 	RmDir("output/updater/merged")
 
 	output = "output/migration-update/"
