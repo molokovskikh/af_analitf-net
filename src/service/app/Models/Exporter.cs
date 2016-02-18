@@ -2003,6 +2003,7 @@ where r.DownloadId in (:ids)")
 
 				var tmp = cleaner.TmpFile();
 				using (var zip = ZipFile.Create(tmp)) {
+					((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 					zip.BeginUpdate();
 					var dir = raw.Dir;
 					var name = raw.Name;
