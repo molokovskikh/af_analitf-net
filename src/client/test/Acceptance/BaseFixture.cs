@@ -282,7 +282,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected void AssertUpdate(string result)
 		{
 			var update = WaitDialog("Обмен данными");
-			Assert.AreEqual("Обмен данными", update.GetName());
+			Assert.AreEqual("Обмен данными", update.GetName(), AutomationHelper.ToText(update));
 			var dialog = Opened.Timeout(UpdateTimeout).First();
 			if (dialog.GetName() == "Обмен данными") {
 				dialog = Opened.Timeout(UpdateTimeout).First();
