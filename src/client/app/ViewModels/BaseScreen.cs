@@ -198,23 +198,18 @@ namespace AnalitF.Net.Client.ViewModels
 			//или дважды кликнуть на элементе легенды, подписываемся на события в результате этих действий
 			OnCloseDisposable.Add(Settings.Subscribe(_ => RefreshStyles()));
 			OnCloseDisposable.Add(Bus.Listen<CustomStyle[]>().ObserveOn(UiScheduler).Subscribe(_ => RefreshStyles()));
-			if (!Readonly) {
-				//для сообщений типа string используется ImmediateScheduler
-				//те вызов произойдет в той же нитке что и SendMessage
-				//если делать это как показано выше .ObserveOn(UiScheduler)
-				//то вызов произойдет после того как Dispatcher поделает все дела
-				//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
-				//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
-				Bus.Listen<string>("db")
-					.Where(m => m == "Changed")
-					.Subscribe(_ => {
-						UpdateOnActivate = true;
-					}, CloseCancellation.Token);
-			}
+			//для сообщений типа string используется ImmediateScheduler
+			//те вызов произойдет в той же нитке что и SendMessage
+			//если делать это как показано выше .ObserveOn(UiScheduler)
+			//то вызов произойдет после того как Dispatcher поделает все дела
+			//те деактивирует текущую -> активирует сохраненную форму и вызовет OnActivate
+			//установка флага произойдет позже нежели вызов для которого этот флаг устанавливается
 			Bus.Listen<string>("db")
 				.Where(m => m == "Changed")
 				.Subscribe(_ => {
 					clearSession = true;
+					if (!Readonly)
+						UpdateOnActivate = true;
 				}, CloseCancellation.Token);
 
 			Load();
@@ -378,7 +373,7 @@ namespace AnalitF.Net.Client.ViewModels
 					JsonConvert.PopulateObject(Shell.ViewModelSettings[key], this, JsonHelper.SerializerSettings());
 				}
 				catch (Exception e) {
-					Log.Error(String.Format("Не удалось прочитать настройки, для {0}", GetType()), e);
+					Log.Error($"Не удалось прочитать настройки, для {GetType()}", e);
 				}
 				finally {
 					IsNotifying = true;

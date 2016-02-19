@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
+using Common.NHibernate;
+using Common.Tools;
 using NUnit.Framework;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -108,6 +113,29 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var orderLine = model.Lines.Value[0];
 			Assert.AreEqual(cost, orderLine.MixedSum);
 			Assert.AreEqual(cost, orderLine.ResultCost);
+		}
+
+		[Test]
+		public void Notify_on_order_reload()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			var cost = order.Lines[0].Cost;
+			var model = Init(new OrderDetailsViewModel(order));
+			var events = model.ObservableForProperty(x => x.Order.Value.Sum).Collect();
+			model.CurrentLine.Value = model.Lines.Value.First();
+			model.EnterLine();
+			var offers = (CatalogOfferViewModel)shell.ActiveItem;
+			offers.CurrentOffer.Value.OrderCount = 2;
+			offers.OfferUpdated();
+			offers.OfferCommitted();
+			offers.NavigateBackward();
+			((OrderLine)model.CurrentLine.Value).Count = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.AreEqual(2, events.Count, $"cost = {cost}, {events.Implode(x => x.Value)}");
+			Assert.AreEqual(cost * 2, events[0].Value);
+			Assert.AreEqual(cost, events[1].Value);
 		}
 	}
 }

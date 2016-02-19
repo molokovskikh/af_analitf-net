@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public OrderDetailsViewModel(IOrder order)
 		{
+			Order = new NotifyValue<IOrder>();
 			orderId = order.Id;
 			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
@@ -46,10 +47,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public IList<IOrderLine> Source { get; set; }
 
-		public bool IsCurrentOrder
-		{
-			get { return type == typeof(Order); }
-		}
+		public bool IsCurrentOrder => type == typeof(Order);
 
 		public NotifyValue<bool> OnlyWarning { get; set; }
 		public NotifyValue<bool> OnlyWarningVisible { get; set; }
@@ -58,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public ProductInfo ProductInfo { get; set; }
 
-		public IOrder Order { get; set; }
+		public NotifyValue<IOrder> Order { get; set; }
 
 		[Export]
 		public NotifyValue<IList<IOrderLine>> Lines { get; set; }
@@ -67,20 +65,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public MatchedWaybills MatchedWaybills { get; set; }
 
-		public bool CanPrint
-		{
-			get { return User.CanPrint<OrderDocument>(type); }
-		}
+		public bool CanPrint => User.CanPrint<OrderDocument>(type);
 
-		public bool ShowPriceVisible
-		{
-			get { return IsCurrentOrder; }
-		}
+		public bool ShowPriceVisible => IsCurrentOrder;
 
-		public bool CanShowPrice
-		{
-			get { return Order.Price != null && IsCurrentOrder; }
-		}
+		public bool CanShowPrice => Order.Value.SafePrice != null && IsCurrentOrder;
 
 		protected override void OnInitialize()
 		{
@@ -126,27 +115,27 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			//Update - может быть вызван повторно если
 			//мы вернулись на текущую форму с другой формы где были отредактированы данные
-			if (Order != null)
-				Session.Evict(Order);
-			Order = (IOrder)Session.Get(type, orderId);
+			if (Order.Value != null)
+				Session.Evict(Order.Value);
+			Order.Value = (IOrder)Session.Get(type, orderId);
 			//если заказ был удален
-			if (Order == null) {
+			if (Order.Value == null) {
 				IsSuccessfulActivated = false;
 				return;
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
-				var sentLines =  (IList<SentOrderLine>)Order.Lines;
+				var sentLines =  (IList<SentOrderLine>)Order.Value.Lines;
 				var lookup = MatchedWaybills.GetLookUp(StatelessSession, sentLines);
 				sentLines.Each(l => l.Configure(User, lookup));
 			}
 			else {
-				Order.Lines.Each(l => l.Configure(User));
+				Order.Value.Lines.Each(l => l.Configure(User));
 			}
 
 			if (CurrentLine.Value != null)
-				CurrentLine.Value = Order.Lines.FirstOrDefault(x => x.Id == CurrentLine.Value.Id);
+				CurrentLine.Value = Order.Value.Lines.FirstOrDefault(x => x.Id == CurrentLine.Value.Id);
 
-			Source = new ObservableCollection<IOrderLine>(Order.Lines.OrderBy(l => l.ProductSynonym));
+			Source = new ObservableCollection<IOrderLine>(Order.Value.Lines.OrderBy(l => l.ProductSynonym));
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
 				.Subscribe(_ => {
@@ -160,7 +149,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			//порядок сортировки должен быть такой же как в таблице
 			var lines = GetItemsFromView<IOrderLine>("Lines") ?? Lines.Value;
-			return new PrintResult(DisplayName, new OrderDocument(Order, lines));
+			return new PrintResult(DisplayName, new OrderDocument(Order.Value, lines));
 		}
 
 		public void EnterLine()
@@ -173,7 +162,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (!CanShowPrice)
 				return;
 
-			var offerViewModel = new PriceOfferViewModel(Order.Price.Id,
+			var offerViewModel = new PriceOfferViewModel(Order.Value.Price.Id,
 				false,
 				CurrentLine.Value == null ? null : ((OrderLine)CurrentLine).OfferId);
 			Shell.Navigate(offerViewModel);

@@ -86,7 +86,7 @@ from WaybillLines l
 					writer.Write(";");
 					writer.Write(DateTime.Now.Month);
 					writer.Write(";");
-					writer.Write("\"" + (row.SerialNumber == null ? "-" : row.SerialNumber) + "\"");
+					writer.Write("\"" + (row.SerialNumber ?? "-") + "\"");
 					writer.Write(";");
 					writer.Write(Convert.ToDecimal(row.Quantity).ToString("0.00", CultureInfo.InvariantCulture));
 					writer.Write(";");

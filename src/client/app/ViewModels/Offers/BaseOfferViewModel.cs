@@ -104,7 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			set
 			{
 				autoCommentText = value;
-				NotifyOfPropertyChange("AutoCommentText");
+				NotifyOfPropertyChange(nameof(AutoCommentText));
 			}
 		}
 
@@ -117,7 +117,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			set
 			{
 				resetAutoComment = value;
-				NotifyOfPropertyChange("ResetAutoComment");
+				NotifyOfPropertyChange(nameof(ResetAutoComment));
 			}
 		}
 

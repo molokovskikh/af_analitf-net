@@ -56,22 +56,22 @@
 				</Grid.RowDefinitions>
 
 				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Заказ №:</Label>
-				<Label Grid.Row="0" Grid.Column="1" Name="Order_DisplayId" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="1" Content="{Binding Order.Value.DisplayId}" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
 				<Label Grid.Row="1" Grid.Column="1" Name="Source_Count" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
-				<Label Grid.Row="0" Grid.Column="3" Name="Order_CreatedOn" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="3" Content="{Binding Order.Value.CreatedOn}" FontWeight="Bold"></Label>
 
 				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">на сумму:</Label>
-				<Label Grid.Row="1" Grid.Column="3" Name="Order_Sum" FontWeight="Bold"></Label>
+				<Label Grid.Row="1" Grid.Column="3" Content="{Binding Order.Value.Sum}" FontWeight="Bold" />
 
 				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Прайс-лист:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Order_PriceLabel" FontWeight="Bold"></Label>
+				<Label Grid.Row="0" Grid.Column="5" Content="{Binding Order.Value.PriceLabel}" FontWeight="Bold" />
 
 				<Label Grid.Row="1" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">Регион:</Label>
-				<Label Grid.Row="1" Grid.Column="5" Name="Order_SafePrice_RegionName" FontWeight="Bold"></Label>
+				<Label Grid.Row="1" Grid.Column="5" Content="{Binding Order.Value.SafePrice.RegionName}" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 
@@ -142,7 +142,8 @@
 
 			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox MaxHeight="100" Name="Order_Comment" IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
+				<TextBox MaxHeight="100" Text="{Binding Order.Value.Comment}"
+					IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
 			</DockPanel>
 		</Grid>
 
