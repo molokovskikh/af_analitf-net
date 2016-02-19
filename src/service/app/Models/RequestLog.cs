@@ -167,7 +167,7 @@ namespace AnalitF.Net.Service.Models
 		{
 			if (!IsCompleted) {
 				return new HttpResponseMessage(HttpStatusCode.Accepted) {
-					Content = new ObjectContent<object>(new { RequestId = Id }, new JsonMediaTypeFormatter())
+					Headers = { { "Request-Id", Id.ToString() } },
 				};
 			}
 			if (IsFaulted) {
@@ -187,7 +187,7 @@ namespace AnalitF.Net.Service.Models
 			if (config.ResultTimeout > TimeSpan.Zero) {
 				if (!File.Exists(OutputFile(config)) && DateTime.Now < (CompletedOn + config.ResultTimeout))
 					return new HttpResponseMessage(HttpStatusCode.Accepted) {
-						Content = new ObjectContent<object>(new { RequestId = Id }, new JsonMediaTypeFormatter())
+						Headers = { { "Request-Id", Id.ToString() } },
 					};
 			}
 

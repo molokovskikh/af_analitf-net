@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -24,6 +25,13 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			Key,
 			Value
+		}
+
+		[Conditional("DEBUG")]
+		public static void Assert(bool condition, string error)
+		{
+			if (!condition)
+				throw new Exception(error);
 		}
 
 		public static bool IsNumeric(object o)

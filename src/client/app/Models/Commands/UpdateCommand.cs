@@ -146,6 +146,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
 
+			File.WriteAllText(Path.Combine(Config.TmpDir, "id"), requestId.ToString());
 			Log.Info($"Загрузка данных, идентификатор обновления {requestId}");
 			Reporter.Stage("Загрузка данных");
 
@@ -863,6 +864,8 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 
 		public void Import()
 		{
+			requestId = Convert.ToUInt32(File.ReadAllText(Path.Combine(Config.TmpDir, "id")));
+
 			var data = GetDbData(Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName), Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
@@ -1298,11 +1301,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 		private void WaitAndLog(Task<HttpResponseMessage> task, string name)
 		{
-#if DEBUG
-			//при тестирование все ошибки являются критическими
-			if ((task.Result?.StatusCode).GetValueOrDefault(HttpStatusCode.OK) != HttpStatusCode.OK)
-				throw new Exception($"Запрос завершился ошибкой {task.Result.StatusCode}");
-#endif
+			Util.Assert((task.Result?.StatusCode).GetValueOrDefault(HttpStatusCode.OK) == HttpStatusCode.OK,
+				$"Запрос завершился ошибкой {task.Result?.StatusCode}");
 
 			try {
 				task.Wait(Token);

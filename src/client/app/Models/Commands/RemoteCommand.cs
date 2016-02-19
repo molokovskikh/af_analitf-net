@@ -149,19 +149,16 @@ namespace AnalitF.Net.Client.Models.Commands
 					response?.Dispose();
 
 					response = task.Result;
-					if (response.StatusCode == HttpStatusCode.OK) {
-						IEnumerable<string> headers;
-						if (response.Headers.TryGetValues("Request-Id", out headers))
-							requestId = SafeConvert.ToUInt32(headers.FirstOrDefault());
-						return response;
-					}
 
+					IEnumerable<string> headers;
+					if (response.Headers.TryGetValues("Request-Id", out headers))
+						requestId = SafeConvert.ToUInt32(headers.FirstOrDefault());
+					Util.Assert(requestId != 0, "Request-Id должен быть указан");
+
+					if (response.StatusCode == HttpStatusCode.OK)
+						return response;
 					if (response.StatusCode == HttpStatusCode.Accepted) {
 						Reporter.Stage("Подготовка данных");
-						if (requestId == 0
-							&& response.Content.Headers.ContentType?.MediaType == "application/json") {
-							requestId = ((dynamic)response.Content.ReadAsAsync<object>().Result).RequestId;
-						}
 						Token.WaitHandle.WaitOne(RequestInterval ?? Config.RequestInterval);
 						Token.ThrowIfCancellationRequested();
 						task = Client.GetAsync(statusCheckUrl, HttpCompletionOption.ResponseHeadersRead, Token);
