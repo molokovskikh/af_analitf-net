@@ -976,7 +976,7 @@ select c.Id,
 	c.CodeFirmCr as ProducerId
 from Farm.Core0 c
 	join Farm.SynonymFirmCr s on s.SynonymFirmCrCode = c.SynonymFirmCrCode
-where c.PriceCode = ?priceId";
+where c.PriceCode = ?priceId and c.CodeFirmCr is not null";
 				Export(Result, sql, "RegulatorRegistry", truncate: true,
 					parameters: new { priceId = Config.RegulatorRegistryPriceId });
 			}
