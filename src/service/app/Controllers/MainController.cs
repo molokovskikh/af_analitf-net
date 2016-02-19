@@ -55,12 +55,15 @@ namespace AnalitF.Net.Service.Controllers
 
 		public HttpResponseMessage Put(ConfirmRequest request)
 		{
-			//при обновлении версии у нас нет идентификатора обновления
-			var log = Session.Get<RequestLog>(request.RequestId)
-				?? Session.Query<RequestLog>().OrderByDescending(j => j.CreatedOn)
-				.FirstOrDefault(l => l.User == CurrentUser && l.IsCompleted && !l.IsFaulted);
-			if (log == null)
+#if DEBUG
+			if (request.RequestId == 0)
+				throw new Exception("При подтверждении должен быть указан идентификатор обновления");
+#endif
+			//из-за изменения схемы подтверждения обновления при переходе с версии на версию идентификатор обновления
+			//не передается
+			if (request.RequestId == 0)
 				return new HttpResponseMessage(HttpStatusCode.OK);
+			var log = Session.Get<RequestLog>(request.RequestId);
 			//если уже подтверждено значит мы получили информацию об импортированных заявках
 			if (log.IsConfirmed) {
 				log.Error += request.Message;
@@ -71,9 +74,6 @@ namespace AnalitF.Net.Service.Controllers
 				Task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
 				if (Task.IsFaulted)
 					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-				if (Task.IsCompleted)
-					return new HttpResponseMessage(HttpStatusCode.OK);
-				return new HttpResponseMessage(HttpStatusCode.Accepted);
 			}
 
 			return new HttpResponseMessage(HttpStatusCode.OK);

@@ -123,7 +123,6 @@ namespace AnalitF.Net.Client.Test.Integration
 			if (server != null)
 				return Task.FromResult(1);
 			if (cfg == null) {
-				Service.Models.RequestLog.Scheduler = new CurrentThreadScheduler();
 				cfg = new HttpSelfHostConfiguration(url);
 				cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 				serviceConfig = Application.InitApp(cfg);
