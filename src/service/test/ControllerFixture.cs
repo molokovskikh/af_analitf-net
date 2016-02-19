@@ -398,12 +398,12 @@ namespace AnalitF.Net.Service.Test
 				CurrentUser = user,
 				Config = config,
 			};
-			var value = ((ObjectContent)ordersController.Post(syncRequest).Content).Value;
-			var id = (uint)value.GetType().GetProperty("RequestId").GetValue(value, null);
+			var message = ordersController.Post(syncRequest);
+			var id = GetRequestId(message);
 			ordersController.Task.Wait();
 			session.Refresh(session.Load<RequestLog>(id));
 			var results = new List<OrderResult>();
-			using (var message = ordersController.Get())
+			using (message = ordersController.Get())
 				results = message.Content.ReadAsAsync<List<OrderResult>>().Result;
 			ordersController.Put(new ConfirmRequest(id));
 			return results;
