@@ -167,20 +167,20 @@ group by r.DrugID")
 	{
 		public override void Execute()
 		{
-			//отчет всегда готовится за предудущий год
+			//отчет всегда готовится за предыдущий год
 			var end = new DateTime(DateTime.Today.Year, 1, 1);
 			var year = DateTime.Today.Year - 1;
 			var begin = new DateTime(year, 1, 1);
 			var rows = StatelessSession.CreateSQLQuery(@"
 select
 	b.Value as BarCode,
-	sum(quantity) Total,
-	round(avg(l.SupplierCost),2) SupplierCost,
-	round(avg(l.RetailCost),2) RetailCost,
-	round(avg(producercost),2) ProducerCost,
+	sum(l.Quantity) / 1000 Total,
+	round(avg(l.SupplierCost),2) / 1000 SupplierCost,
+	round(avg(l.RetailCost),2) / 1000 RetailCost,
+	round(avg(producercost),2) / 1000 ProducerCost,
 	min(if(registrycost = 0, null, registrycost)) RegistryCost,
-	sum(quantity) Planned,
-	round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2) Margin
+	sum(quantity) / 1000 Planned,
+	(round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2)) / 1000 as Margin
 from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
 	join BarCodes b on b.Value = l.EAN13
