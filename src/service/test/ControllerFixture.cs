@@ -384,8 +384,7 @@ namespace AnalitF.Net.Service.Test
 
 		private static uint GetRequestId(HttpResponseMessage message)
 		{
-			var value = ((ObjectContent)message.Content).Value;
-			return (uint)value.GetType().GetProperty("RequestId").GetValue(value);
+			return Convert.ToUInt32(message.Headers.GetValues("Request-Id").Implode());
 		}
 
 		private List<OrderResult> PostOrder(SyncRequest syncRequest)
