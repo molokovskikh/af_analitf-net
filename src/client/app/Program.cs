@@ -162,12 +162,8 @@ namespace AnalitF.Net.Client
 
 				if (firstChance) {
 					AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) => {
-						log.Error(new StackTrace());
-						log.Error("FirstChanceException", eventArgs.Exception);
-						if (eventArgs.Exception is PrintQueueException) {
-							var ex = (PrintQueueException)eventArgs.Exception;
-							log.ErrorFormat($"Ошибка принтера '{ex.PrinterName}'");
-						}
+						Log.Error(new StackTrace());
+						Log.Error("FirstChanceException", eventArgs.Exception);
 					};
 				}
 				//при определения установлен ли .net могла произойти ошибка и мы решили что .net установлен но на самом деле нет
@@ -218,15 +214,15 @@ namespace AnalitF.Net.Client
 					logger.Level = Level.Debug;
 				}
 
-				log.InfoFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
+				Log.InfoFormat("Приложение запущено {0}", typeof(Program).Assembly.Location);
 				try {
-					log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
-					log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
+					Log.InfoFormat("Версия операционной системы {0}", Environment.OSVersion);
+					Log.InfoFormat("Версия среды выполнения {0}", Environment.Version);
 				}
 				catch (Exception e) {
-					log.Error("Не удалось получить информацию о версии среды или ос", e);
+					Log.Error("Не удалось получить информацию о версии среды или ос", e);
 				}
-				log.Logger.Repository.RendererMap.Put(typeof(Exception), new ExceptionRenderer());
+				Log.Logger.Repository.RendererMap.Put(typeof(Exception), new ExceptionRenderer());
 				instance = new SingleInstance(typeof(AppBootstrapper).Assembly.GetName().Name);
 				if (!instance.TryStart())
 					return 0;
@@ -251,7 +247,7 @@ namespace AnalitF.Net.Client
 						splash.Show(true);
 					}
 					catch(Exception e) {
-						log.Error("Ошибка при отображение заставки", e);
+						Log.Error("Ошибка при отображение заставки", e);
 					}
 				}
 
@@ -271,7 +267,7 @@ namespace AnalitF.Net.Client
 					bootstapper.Config.Cmd = "batch=" + batchFile;
 				bootstapper.Start();
 				result = app.Run();
-				log.InfoFormat("Приложение завершено");
+				Log.InfoFormat("Приложение завершено");
 			}
 			catch(OptionException e) {
 				result = 1;
@@ -281,7 +277,7 @@ namespace AnalitF.Net.Client
 				var message = e is EndUserError ? e.Message : e.ToString();
 				result = 1;
 				Console.WriteLine(message);
-				log.Error("Ошибка при запуске приложения", e);
+				Log.Error("Ошибка при запуске приложения", e);
 				if (!quiet) {
 					MessageBox.Show(
 						message,
