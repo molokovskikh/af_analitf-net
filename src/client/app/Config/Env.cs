@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Config
 		public IScheduler Scheduler;
 		public IScheduler UiScheduler;
 		public IMessageBus Bus;
-		//планировщик для выболнения запросов
+		//планировщик для выполнения запросов
 		//нужен тк mysql требует что бы запросы производились в той же нитке что и инициализировала подключение
 		//фактически это очередь задач которая обрабатывается одной ниткой глобальной для всего приложения
 		public TaskScheduler QueryScheduler;

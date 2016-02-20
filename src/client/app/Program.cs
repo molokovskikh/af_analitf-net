@@ -66,9 +66,29 @@ namespace AnalitF.Net.Client
 		}
 	}
 
+	public class RxExceptionService : IExceptionServices
+	{
+		public void Rethrow(Exception exception)
+		{
+			Program.Log.Warn("Ошибка при выполнении операции", exception);
+			throw exception;
+		}
+	}
+
+	public class RxProvider : CurrentPlatformEnlightenmentProvider
+	{
+		public override T GetService<T>(object[] args)
+		{
+			if (typeof(T) == typeof(IExceptionServices)) {
+				return new RxExceptionService() as T;
+			}
+			return base.GetService<T>(args);
+		}
+	}
+
 	public class Program
 	{
-		private static ILog log = LogManager.GetLogger(typeof(Program));
+		public static ILog Log = LogManager.GetLogger(typeof(Program));
 
 		public const uint ATTACH_PARENT_PROCESS = 0x0ffffffff;
 		public const int ERROR_ACCESS_DENIED = 5;
@@ -211,7 +231,7 @@ namespace AnalitF.Net.Client
 				if (!instance.TryStart())
 					return 0;
 
-				PlatformEnlightenmentProvider.Current = new CurrentPlatformEnlightenmentProvider();
+				PlatformEnlightenmentProvider.Current = new RxProvider();
 				//регистрация объектов reactiveui в нормальной жизни это должно произойти автоматический
 				//но после ilmerge логика регистрации будет сломана
 				new ReactiveUI.Routing.ServiceLocationRegistration().Register();

@@ -111,10 +111,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
 		public Env Env = Env.Current ?? new Env();
 
-		//todo сессии для фоновых задач здесь не место нужно перенести ее в планировщик
-		public ManualResetEventSlim Drained = new ManualResetEventSlim(true);
-		private int backgrountQueryCount;
-
 		//адрес доставки который выбран в ui
 		public Address Address;
 		public Address[] Addresses = new Address[0];
@@ -136,7 +132,7 @@ namespace AnalitF.Net.Client.ViewModels
 			OnCloseDisposable.Add(ResultsSink);
 			Settings = new NotifyValue<Settings>();
 
-			//в юнит тестах база не должна использоваться
+			//в модульных тестах база не должна использоваться
 			if (Env.Factory != null) {
 				StatelessSession = Env.Factory.OpenStatelessSession();
 				Session = Env.Factory.OpenSession();
@@ -647,25 +643,14 @@ namespace AnalitF.Net.Client.ViewModels
 					return default(T);
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
-				Interlocked.Increment(ref backgrountQueryCount);
-				try{
-					Drained.Reset();
-					if (_backgroundSession == null)
-						return default(T);
-					lock (_backgroundSession) {
-						return @select(_backgroundSession);
-					}
-				}
-				finally {
-					var val = Interlocked.Decrement(ref backgrountQueryCount);
-					if (val == 0)
-						Drained.Set();
-				}
+				lock (_backgroundSession)
+					return @select(_backgroundSession);
 			}, CloseCancellation.Token);
-			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
 				task.Start(Env.QueryScheduler);
-			return Observable.FromAsync(() => task);
+			//игнорируем отмену задачи, она произойдет если закрыли форму
+			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
 		}
 
 		public Task TplQuery(Action<IStatelessSession> action)
@@ -675,22 +660,10 @@ namespace AnalitF.Net.Client.ViewModels
 					return;
 				if (_backgroundSession == null)
 					_backgroundSession = Env.Factory.OpenStatelessSession();
-				Interlocked.Increment(ref backgrountQueryCount);
-				try{
-					Drained.Reset();
-					if (_backgroundSession == null)
-						return;
-					lock (_backgroundSession) {
-						action(_backgroundSession);
-					}
-				}
-				finally {
-					var val = Interlocked.Decrement(ref backgrountQueryCount);
-					if (val == 0)
-						Drained.Set();
-				}
+				lock (_backgroundSession)
+					action(_backgroundSession);
 			}, CloseCancellation.Token);
-			//в жизне это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
 				task.Start(Env.QueryScheduler);
 			return task;
@@ -698,7 +671,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public Task WaitQueryDrain()
 		{
-			var t = new Task(() => Drained.Wait());
+			var t = new Task(() => { });
 			t.Start(Env.QueryScheduler);
 			return t;
 		}
