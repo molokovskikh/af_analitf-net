@@ -321,11 +321,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				"Продолжить?"))
 				yield break;
 
-			var dialog = new OpenFileResult {
-				Dialog = {
-					InitialDirectory = lastUsedDir
-				}
-			};
+			var dialog = new OpenFileResult();
+			//если установить директорию на не существующем диске диалог не будет отображен
+			if (Directory.Exists(lastUsedDir))
+				dialog.Dialog.InitialDirectory = lastUsedDir;
 			yield return dialog;
 			lastUsedDir = Path.GetDirectoryName(dialog.Dialog.FileName) ?? lastUsedDir;
 			foreach (var result in Shell.Batch(dialog.Dialog.FileName)) {
