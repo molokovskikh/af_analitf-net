@@ -22,9 +22,16 @@ namespace AnalitF.Net.Service.Controllers
 			//что бы избежать дополнительной нагрузки на сервер
 			if (reset) {
 				if (Config.UpdateLifeTime > TimeSpan.Zero) {
+					var version = RequestLog.GetVersion(Request);
 					//если есть не загруженные данные отдаем их
+					//каждая версия хранит подготовленные данные в своей директории
+					//по этому передавать неподтвержденные данные есть смысл только в рамках версии
 					existsJob = Session.Query<RequestLog>()
-						.Where(j => j.UpdateType == updateType && !j.IsConfirmed && !j.IsFaulted && j.User == CurrentUser)
+						.Where(j => j.UpdateType == updateType
+							&& !j.IsConfirmed
+							&& !j.IsFaulted
+							&& j.User == CurrentUser
+							&& j.Version == version)
 						.OrderByDescending(j => j.CreatedOn)
 						.Take(1)
 						.ToArray()
