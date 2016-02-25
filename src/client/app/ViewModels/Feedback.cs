@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -71,6 +72,8 @@ namespace AnalitF.Net.Client.ViewModels
 				try {
 					using (Util.FlushLogs())
 					using(var zip = new ZipFile()) {
+						zip.AlternateEncoding = Encoding.UTF8;
+						zip.AlternateEncodingUsage = ZipOption.AsNecessary;
 						foreach (var attachment in files) {
 							zip.AddFile(attachment, "");
 						}

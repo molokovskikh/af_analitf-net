@@ -153,7 +153,8 @@ namespace AnalitF.Net.Client.Models.Commands
 					IEnumerable<string> headers;
 					if (response.Headers.TryGetValues("Request-Id", out headers))
 						requestId = SafeConvert.ToUInt32(headers.FirstOrDefault());
-					Util.Assert(requestId != 0, "Request-Id должен быть указан");
+					if (response.IsSuccessStatusCode)
+						Util.Assert(requestId != 0, "Request-Id должен быть указан");
 
 					if (response.StatusCode == HttpStatusCode.OK)
 						return response;
