@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var catalog = session.Query<Catalog>()
 				.First(c => c.HaveOffers && session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
 
-			var model = Init(new CatalogOfferViewModel(catalog.Name));
+			var model = Open(new CatalogOfferViewModel(catalog.Name));
 			Assert.That(model.IsFilterByCatalogName, Is.True);
 			Assert.That(model.Offers.Value[0].GroupName, Is.Not.Null);
 		}

@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			lazyModel = new Lazy<PriceOfferViewModel>(
 				() => {
 					var model = new PriceOfferViewModel(price.Id, false);
-					Init(model);
+					Open(model);
 					scheduler.Start();
 					return model;
 				});
@@ -64,7 +64,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ShowCatalogWithMnnFilter();
 
 			var catalog = (CatalogViewModel)shell.ActiveItem;
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0), shell.NavigationStack.Implode());
+			Assert.AreEqual(1, shell.NavigationStack.Count(), shell.NavigationStack.Implode());
+			Assert.AreEqual(model, shell.NavigationStack.Last());
 			Assert.That(catalog.FilterByMnn, Is.True);
 			Assert.That(catalog.FiltredMnn, Is.EqualTo(model.CurrentCatalog.Value.Name.Mnn));
 		}

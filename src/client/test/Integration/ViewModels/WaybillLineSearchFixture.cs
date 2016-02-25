@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			supplier.HaveCertificates = true;
 
 			var line = waybill.Lines[0];
-			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			var model = Open(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			scheduler.Start();
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			var results = model.Download(waybillLine).ToArray();
@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Env.Barrier = new Barrier(2);
 			supplier.HaveCertificates = true;
 
-			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			var model = Open(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			scheduler.Start();
 			var line = waybill.Lines[0];
 			var waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Close(model);
 
-			model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			model = Open(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			scheduler.Start();
 			waybillLine = model.Lines.Value.First(l => l.Id == line.Id);
 			Assert.IsTrue(waybillLine.IsDownloading);
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Enter_line()
 		{
-			var model = Init(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
+			var model = Open(new WaybillLineSearch(DateTime.Today.AddDays(-1), DateTime.Today.AddDays(+1)));
 			scheduler.Start();
 			model.CurrentLine.Value = model.Lines.Value.First();
 			Assert.IsTrue(model.CanEnterLine.Value);

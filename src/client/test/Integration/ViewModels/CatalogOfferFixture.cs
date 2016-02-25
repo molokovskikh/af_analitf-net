@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
-			lazyModel = new Lazy<CatalogOfferViewModel>(() => Init(new CatalogOfferViewModel(catalog)));
+			lazyModel = new Lazy<CatalogOfferViewModel>(() => Open(new CatalogOfferViewModel(catalog)));
 			catalog = session.Query<Catalog>()
 				.First(c => c.HaveOffers && session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
 		}
@@ -231,7 +231,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.OfferCommitted();
 			Close(model);
 
-			var renewModel = Init(new CatalogOfferViewModel(catalog));
+			var renewModel = Open(new CatalogOfferViewModel(catalog));
 			Assert.That(renewModel.CurrentOffer.Value.OrderCount, Is.EqualTo(1));
 			Assert.That(renewModel.CurrentOffer.Value.OrderLine, Is.Not.Null);
 			Assert.That(renewModel.CurrentOrder, Is.Not.Null);

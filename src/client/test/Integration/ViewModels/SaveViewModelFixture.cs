@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
-			model = Init(new Model());
+			model = Open(new Model());
 			shell.ActivateItem(model);
 			model.Test = true;
 			model.TryClose();
@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Save_view_model()
 		{
-			model = Init(new Model());
+			model = Open(new Model());
 			shell.ActivateItem(model);
 			Assert.That(model.Test, Is.True);
 		}
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			model = new Model();
 			var changes = TrackChanges(model);
-			model = Init(model);
+			model = Open(model);
 			Assert.That(changes.Implode(), Is.Not.StringContaining("Test"));
 		}
 	}

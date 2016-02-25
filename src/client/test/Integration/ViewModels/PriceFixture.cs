@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentPrice.Value = price;
 			Close(model);
 
-			var model2 = Init(new PriceViewModel());
+			var model2 = Open(new PriceViewModel());
 			Assert.That(model2.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
 			var persistedPrice = model2.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
 			Assert.That(model2.CurrentPrice.Value, Is.EqualTo(persistedPrice));

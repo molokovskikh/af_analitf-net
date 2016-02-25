@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var id = session.Query<Waybill>().First(w => w.DocType == DocType.Reject).Id;
 			var model = new Client.ViewModels.OrderRejectDetails(id);
-			Init(model);
+			Open(model);
 			Assert.IsNotNull(model.Doc.Value);
 			Assert.That(model.Lines.Value.Count, Is.GreaterThan(0));
 			//для первой могу не найтись предложения

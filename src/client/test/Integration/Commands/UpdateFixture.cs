@@ -317,7 +317,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.That(attachment.LocalFilename, Is.StringEnding($@"attachments\{attachment.Id}.txt"));
 			Assert.AreEqual(Path.GetFullPath(open.Filename), attachment.LocalFilename);
 			session.Refresh(fixture.Log);
-			Console.WriteLine(fixture.Log.Id);
 			Assert.IsTrue(fixture.Log.Committed);
 		}
 

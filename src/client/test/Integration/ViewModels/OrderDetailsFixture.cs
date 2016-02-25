@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Edit_order()
 		{
 			var order = MakeOrder();
-			var model = Init(new OrderDetailsViewModel(order));
+			var model = Open(new OrderDetailsViewModel(order));
 
 			model.CurrentLine.Value = model.Lines.Value.First();
 			((OrderLine)model.CurrentLine.Value).Count = 1;
@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Delete_line()
 		{
 			var order = MakeOrder();
-			var model = Init(new OrderDetailsViewModel(order));
+			var model = Open(new OrderDetailsViewModel(order));
 
 			model.CurrentLine.Value = model.Lines.Value.First();
 			model.Delete();
@@ -68,7 +68,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Show_price()
 		{
 			var order = MakeOrder();
-			var model = Init(new OrderDetailsViewModel(order));
+			var model = Open(new OrderDetailsViewModel(order));
 
 			Assert.That(model.CanShowPrice, Is.True);
 			Assert.That(model.ShowPriceVisible, Is.True);
@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			order.Price.CostFactor = 1.5m;
 			order.Price.VitallyImportantCostFactor = 1.5m;
-			var model = Init(new OrderDetailsViewModel(order));
+			var model = Open(new OrderDetailsViewModel(order));
 
 			var cost = Math.Round(1.5m * order.Lines[0].Cost, 2);
 			var orderLine = model.Lines.Value[0];
@@ -121,7 +121,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.DeleteEach<Order>();
 			var order = MakeOrder();
 			var cost = order.Lines[0].Cost;
-			var model = Init(new OrderDetailsViewModel(order));
+			var model = Open(new OrderDetailsViewModel(order));
 			var events = model.ObservableForProperty(x => x.Order.Value.Sum).Collect();
 			model.CurrentLine.Value = model.Lines.Value.First();
 			model.EnterLine();

@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void ViewModelFixtureSetup()
 		{
-			lazyModel = new Lazy<T>(Init<T>);
+			lazyModel = new Lazy<T>(Open<T>);
 		}
 
 		protected void ForceInit()
@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Reset()
 		{
 			Close(model);
-			lazyModel = new Lazy<T>(Init<T>);
+			lazyModel = new Lazy<T>(Open<T>);
 		}
 
 		protected void TaskResult(IEnumerable<IResult> result)
@@ -157,6 +157,18 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return manager;
 		}
 
+		protected T Open<T>() where T : BaseScreen, new()
+		{
+			return Open(new T());
+		}
+
+		protected T Open<T>(T model) where T : BaseScreen
+		{
+			Init(model);
+			shell.NavigateRoot(model);
+			return model;
+		}
+
 		protected T Init<T>() where T : BaseScreen, new()
 		{
 			return Init(new T());
@@ -172,7 +184,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			model.Parent = shell;
 			model.Env = Env;
 			Activate(model);
-			shell.NavigateRoot(model);
 			return model;
 		}
 

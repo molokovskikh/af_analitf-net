@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Correction_report()
 		{
-			correction = Init(new Correction());
+			correction = Open(new Correction());
 			Assert.IsTrue(correction.IsUpdate);
 			Assert.IsFalse(correction.IsOrderSend);
 			var report = correction.Save().ToArray().OfType<SaveFileResult>().First();
@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Disable_send_as_is()
 		{
-			correction = Init(new Correction(address.Id));
+			correction = Open(new Correction(address.Id));
 
 			Assert.AreEqual(1, correction.Lines.Count);
 			Assert.IsTrue(correction.CanSend.Value);

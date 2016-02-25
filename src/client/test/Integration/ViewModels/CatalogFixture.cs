@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
-			catalogModel = Init(new CatalogViewModel());
+			catalogModel = Open(new CatalogViewModel());
 			nameViewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
 			scheduler.Start();
 		}
