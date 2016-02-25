@@ -58,7 +58,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			var shell = new Conductor<IScreen>();
 			var model = new TestScreen();
-			Open(model);
+			Init(model);
 
 			WpfTestHelper.WithWindow2(async w => {
 				var view = (FrameworkElement)ViewLocator.LocateForModel(shell, null, null);

@@ -142,7 +142,8 @@
 
 			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox MaxHeight="100" Text="{Binding Order.Value.Comment}"
+				<TextBox MaxHeight="100" Name="Order_Comment"
+					Text="{Binding Order.Value.Comment}"
 					IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
 			</DockPanel>
 		</Grid>
