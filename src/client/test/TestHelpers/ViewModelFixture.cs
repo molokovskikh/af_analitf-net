@@ -99,6 +99,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Env.TplUiScheduler = new CurrentThreadScheduler();
 
 			lazyshell = new Lazy<ShellViewModel>(() => {
+				session.Flush();
 				var value = new ShellViewModel(config);
 				disposable.Add(value);
 				ScreenExtensions.TryActivate(value);

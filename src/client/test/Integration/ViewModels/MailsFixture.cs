@@ -72,6 +72,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(value, Is.GreaterThan(0));
 			model.CurrentItem.Value = model.Items.Value.First(m => m.Id == mail.Id);
 			scheduler.AdvanceByMs(10000);
+			Assert.IsFalse(model.CurrentItem.Value.IsNew);
 			Assert.AreEqual(value - 1, shell.NewMailsCount.Value);
 		}
 
@@ -130,7 +131,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(reloaded.IsDownloading);
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
 			WaitNotification();
-			Assert.IsTrue(reloaded.IsDownloaded, reloaded.GetHashCode().ToString());
+			Assert.IsTrue(reloaded.IsDownloaded, $"{reloaded} {reloaded.GetHashCode()}");
 			Assert.That(changes, Has.Some.EqualTo("IsDownloaded"));
 		}
 

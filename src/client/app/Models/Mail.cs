@@ -62,19 +62,13 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual bool IsEdited { get; set; }
 
-		public virtual string SenderUri
-		{
-			get { return "mailto:" + SenderEmail; }
-		}
+		public virtual string SenderUri => "mailto:" + SenderEmail;
 
-		public virtual bool HaveAttachments
-		{
-			get { return Attachments.Count > 0; }
-		}
+		public virtual bool HaveAttachments => Attachments.Count > 0;
 
 		public override string ToString()
 		{
-			return String.Format("{0} - {1}", SentAt, Subject);
+			return $"{SentAt} - {Subject}";
 		}
 
 		public static void TrackIsNew(IScheduler scheduler, NotifyValue<Mail> current)

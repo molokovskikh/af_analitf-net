@@ -82,5 +82,10 @@ namespace AnalitF.Net.Client.Models
 				yield return LocalFilename;
 			}
 		}
+
+		public override string ToString()
+		{
+			return $"Id: {Id}, Name: {Name}";
+		}
 	}
 }
