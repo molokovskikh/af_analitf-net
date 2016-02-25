@@ -171,7 +171,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			model.Parent = shell;
 			model.Env = Env;
 			Activate(model);
-			shell.ActiveItem = model;
+			shell.NavigateRoot(model);
 			return model;
 		}
 

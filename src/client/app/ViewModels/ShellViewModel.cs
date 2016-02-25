@@ -982,7 +982,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;
 
-		private void NavigateRoot(IScreen screen)
+		public void NavigateRoot(IScreen screen)
 		{
 			Navigator.NavigateRoot(screen);
 		}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -8,7 +7,6 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Orders;
-using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
@@ -317,7 +315,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Try_send_not_active_order_from_orders_view()
 		{
 			PrepareCurrent();
-			shell.NavigateAndReset(model);
 			model.CurrentOrder.Send = false;
 			var e = Assert.Throws<AggregateException>(() => shell.SendOrders().ToArray());
 			Assert.AreEqual("Не заказов для отправки", ErrorHelper.TranslateException(e), e.ToString());
