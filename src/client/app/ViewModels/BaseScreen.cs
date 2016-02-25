@@ -475,7 +475,7 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObservLoad(Loadable loadable)
+		private System.Tuple<IObservable<EventPattern<HttpProgressEventArgs>>, IObservable<Stream>> ObserveLoad(Loadable loadable)
 		{
 			ProgressMessageHandler progress = null;
 			HttpClientHandler handler = null;
@@ -536,7 +536,7 @@ namespace AnalitF.Net.Client.ViewModels
 			loadable.Session = Session;
 			loadable.Entry = Session.GetSessionImplementation().PersistenceContext.GetEntry(loadable);
 
-			var result = ObservLoad(loadable);
+			var result = ObserveLoad(loadable);
 			var disposable = new CompositeDisposable(3) {
 				Disposable.Create(() => Bus.SendMessage(loadable, "completed"))
 			};

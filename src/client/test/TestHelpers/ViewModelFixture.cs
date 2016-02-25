@@ -241,6 +241,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Close(object model)
 		{
 			ScreenExtensions.TryDeactivate(model, true);
+			if (shell.ActiveItem == model)
+				shell.ActiveItem = null;
 		}
 
 		protected void Activate(object model)

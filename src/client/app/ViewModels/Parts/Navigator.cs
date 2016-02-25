@@ -100,10 +100,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			}
 
 			HideDefault();
-
-			if (conductor.ActiveItem != null)
-				conductor.ActiveItem.TryClose();
-
+			conductor.ActiveItem?.TryClose();
 			HideDefault();
 
 			if (IsEmptyOrDefault())
