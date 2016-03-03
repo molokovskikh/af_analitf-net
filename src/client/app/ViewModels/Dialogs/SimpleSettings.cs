@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				.GetProperties()
 				.Select(p => Tuple.Create(p, p.GetCustomAttributes(typeof(DisplayAttribute), true)))
 				.Where(t => t.Item2.Length > 0)
-				.OrderBy(t => ((DisplayAttribute)t.Item2[0]).Order)
+				.OrderBy(t => ((DisplayAttribute)t.Item2[0]).GetOrder())
 				.ToArray();
 			WasCancelled = true;
 		}
@@ -65,7 +65,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 					inputProperty = DatePicker.SelectedDateProperty;
 				}
 				else {
-					input = new TextBox();
+					input = new TextBox {
+						MinWidth = 100
+					};
 					inputProperty = TextBox.TextProperty;
 				}
 				BindingOperations.SetBinding(input, inputProperty, new Binding(property.Item1.Name));

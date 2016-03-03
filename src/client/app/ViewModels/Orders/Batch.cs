@@ -236,7 +236,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		protected override void OnDeactivate(bool close)
 		{
-			AddressSelector.Deinit();
+			AddressSelector.OnDeactivate();
 			if (close) {
 				LastSelectedLine = CurrentReportLine.Value != null ? CurrentReportLine.Value.BatchLine.Id : 0;
 				if (Settings.Value.GetVarRoot() != lastUsedDir)

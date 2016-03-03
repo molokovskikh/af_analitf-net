@@ -149,6 +149,7 @@ namespace AnalitF.Net.Client.Config
 
 		public string UpdateTmpDir => Path.Combine(TmpDir, "update");
 		public string BinUpdateDir => Path.Combine(UpdateTmpDir, "update");
+		public string Opt => Path.Combine(RootDir, "Opt");
 
 		public void InitDir()
 		{

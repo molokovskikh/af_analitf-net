@@ -12,18 +12,5 @@ namespace AnalitF.Net.Client.Helpers
 			FileHelper.CreateDirectoryRecursive(Path.GetDirectoryName(filename));
 			File.WriteAllText(filename, "");
 		}
-
-		public static void CopyDir(string src, string dst)
-		{
-			Directory.CreateDirectory(dst);
-
-			foreach (var file in Directory.GetFiles(src)) {
-				File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
-			}
-
-			foreach (var dir in Directory.GetDirectories(src)) {
-				CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
-			}
-		}
 	}
 }

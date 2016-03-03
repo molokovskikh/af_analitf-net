@@ -59,8 +59,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			Directory.CreateDirectory(dst);
 			DbHelper.CopyBin(src, dst);
-			FileHelper2.CopyDir("share", Path.Combine(dst, "share"));
-			FileHelper2.CopyDir(IntegrationSetup.BackupDir, Path.Combine(dst, "data"));
+			FileHelper.CopyDir("share", Path.Combine(dst, "share"));
+			FileHelper.CopyDir(IntegrationSetup.BackupDir, Path.Combine(dst, "data"));
 		}
 	}
 }

@@ -91,5 +91,10 @@ namespace AnalitF.Net.Client.Views
 			notificationTimer.Interval = 3.Second();
 			notificationTimer.Start();
 		}
+
+		private void CloneClick(object sender, RoutedEventArgs e)
+		{
+			((ShellViewModel)DataContext).OpenClone(((string)((MenuItem)e.OriginalSource).DataContext));
+		}
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -124,6 +126,7 @@ namespace AnalitF.Net.Client.ViewModels
 			NewMailsCount = new NotifyValue<int>();
 			NewDocsCount = new NotifyValue<int>();
 			PendingDownloads = new ObservableCollection<Loadable>();
+			Instances = new NotifyValue<string[]>();
 
 			if (Env.Factory != null) {
 				session = Env.Factory.OpenSession();
@@ -137,30 +140,30 @@ namespace AnalitF.Net.Client.ViewModels
 
 			this.ObservableForProperty(m => (object)m.Stat.Value)
 				.Merge(this.ObservableForProperty(m => (object)m.CurrentAddress))
-				.Subscribe(_ => NotifyOfPropertyChange("CanSendOrders"));
+				.Subscribe(_ => NotifyOfPropertyChange(nameof(CanSendOrders)));
 
 			this.ObservableForProperty(m => m.CurrentAddress)
 				.Subscribe(e => UpdateStat());
 
 			this.ObservableForProperty(m => m.Settings.Value)
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("CanShowCatalog");
-					NotifyOfPropertyChange("CanSearchOffers");
-					NotifyOfPropertyChange("CanShowMnn");
-					NotifyOfPropertyChange("CanShowPrice");
-					NotifyOfPropertyChange("CanShowMinCosts");
+					NotifyOfPropertyChange(nameof(CanShowCatalog));
+					NotifyOfPropertyChange(nameof(CanSearchOffers));
+					NotifyOfPropertyChange(nameof(CanShowMnn));
+					NotifyOfPropertyChange(nameof(CanShowPrice));
+					NotifyOfPropertyChange(nameof(CanShowMinCosts));
 
-					NotifyOfPropertyChange("CanShowOrders");
-					NotifyOfPropertyChange("CanShowOrderLines");
+					NotifyOfPropertyChange(nameof(CanShowOrders));
+					NotifyOfPropertyChange(nameof(CanShowOrderLines));
 
-					NotifyOfPropertyChange("CanShowJunkOffers");
-					NotifyOfPropertyChange("CanShowRejects");
-					NotifyOfPropertyChange("CanShowWaybills");
-					NotifyOfPropertyChange("CanMicroUpdate");
-					NotifyOfPropertyChange("CanShowBatch");
-					NotifyOfPropertyChange("CanShowAwaited");
-					NotifyOfPropertyChange("CanLoadWaybillHistory");
-					NotifyOfPropertyChange("CanLoadOrderHistory");
+					NotifyOfPropertyChange(nameof(CanShowJunkOffers));
+					NotifyOfPropertyChange(nameof(CanShowRejects));
+					NotifyOfPropertyChange(nameof(CanShowWaybills));
+					NotifyOfPropertyChange(nameof(CanMicroUpdate));
+					NotifyOfPropertyChange(nameof(CanShowBatch));
+					NotifyOfPropertyChange(nameof(CanShowAwaited));
+					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
+					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -227,6 +230,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<bool> IsDataLoaded { get; set; }
 		public NotifyValue<int> NewMailsCount { get; set; }
 		public NotifyValue<int> NewDocsCount { get; set; }
+		public NotifyValue<string[]> Instances { get; set; }
 
 		public string Version { get; set; }
 
@@ -236,7 +240,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				addresses = value;
-				NotifyOfPropertyChange("Addresses");
+				NotifyOfPropertyChange(nameof(Addresses));
 			}
 		}
 
@@ -248,7 +252,7 @@ namespace AnalitF.Net.Client.ViewModels
 			{
 				currentAddress = value;
 				ResetNavigation();
-				NotifyOfPropertyChange("CurrentAddress");
+				NotifyOfPropertyChange(nameof(CurrentAddress));
 			}
 		}
 
@@ -256,6 +260,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (statelessSession != null)
 				statelessSession.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate();
+			Instances.Value = new string[0];
+			if (Directory.Exists(Config.Opt)) {
+				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
+			}
 			Reload();
 		}
 
@@ -300,8 +308,8 @@ namespace AnalitF.Net.Client.ViewModels
 					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
 				if (orderQuery.Any()) {
 					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
-						Confirm(String.Format("В архиве заказов обнаружены заказы," +
-							" сделанные более {0} дней назад. Удалить их?", Settings.Value.DeleteOrdersOlderThan));
+						Confirm("В архиве заказов обнаружены заказы," +
+							$" сделанные более {Settings.Value.DeleteOrdersOlderThan} дней назад. Удалить их?");
 					if (deleteOldOrders) {
 						var orders = orderQuery.ToArray();
 						foreach (var order in orders) {
@@ -315,9 +323,8 @@ namespace AnalitF.Net.Client.ViewModels
 					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
 				if (query.Any()) {
 					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
-						Confirm(String.Format("В архиве заказов обнаружены документы (накладные, отказы)," +
-							" сделанные более {0} дней назад. Удалить их?",
-								Settings.Value.DeleteWaybillsOlderThan));
+						Confirm("В архиве заказов обнаружены документы (накладные, отказы)," +
+							$" сделанные более {Settings.Value.DeleteWaybillsOlderThan} дней назад. Удалить их?");
 					if (deleteOldWaybills) {
 						var waybills = query.ToArray();
 						foreach (var waybill in waybills) {
@@ -813,6 +820,61 @@ namespace AnalitF.Net.Client.ViewModels
 			if (String.IsNullOrEmpty(file))
 				return;
 			StartProcess(file);
+		}
+
+		public class CloneSettings
+		{
+			[Display(Name = "Наименование копии")]
+			public string Name { get; set; }
+		}
+
+		public void OpenClone(string name)
+		{
+			var dst = Path.Combine(Config.Opt, name);
+			var exe = Directory.GetFiles(dst, "AnalitF*.exe").First();
+			StartProcess(exe, workDir: dst);
+		}
+
+		public IEnumerable<IResult> Clone()
+		{
+			var settings = new CloneSettings();
+			yield return new DialogResult(new SimpleSettings(settings));
+			var name = settings.Name;
+			if (String.IsNullOrWhiteSpace(name)) {
+				windowManager.Error("Наименование должно быть указано");
+				yield break;
+			}
+			var src = new DirectoryInfo(FileHelper.MakeRooted("."));
+			var dst = Path.Combine(Config.Opt, name);
+			Directory.CreateDirectory(dst);
+			var files = src.GetFiles("*.dll").Concat(src.GetFiles("*.exe")).Concat(src.GetFiles("*.config"));
+			foreach (var file in files)
+				file.CopyTo(Path.Combine(dst, file.Name), true);
+			FileHelper.CopyDir(Path.Combine(src.FullName, "share"), Path.Combine(dst, "share"));
+			var exe = Directory.GetFiles(dst, "AnalitF*.exe").First();
+
+			var srcLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "АналитФармация.lnk");
+			CreateLink(srcLink, name, exe);
+			srcLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "АналитФармация", "АналитФармация.lnk");
+			CreateLink(srcLink, name, exe);
+
+			StartProcess(exe, workDir: dst);
+			Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
+		}
+
+		private static void CreateLink(string srcLink, string name, string exe)
+		{
+			if (File.Exists(srcLink)) {
+				var dstLink = Path.Combine(Path.GetDirectoryName(srcLink), $"АналитФармация - {name}.lnk");
+				File.Copy(srcLink, dstLink);
+				var link = new ShellLink(dstLink) {
+					Target = exe,
+					IconPath = exe,
+					IconIndex = 0,
+					WorkingDirectory = Path.GetDirectoryName(exe),
+				};
+				link.Save();
+			}
 		}
 
 		protected bool Confirm(string text)

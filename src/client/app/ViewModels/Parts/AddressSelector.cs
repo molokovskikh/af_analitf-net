@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Runtime.Serialization;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
 using Common.Tools;
-using Newtonsoft.Json.Linq;
-using NHibernate;
-using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
@@ -36,17 +31,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public NotifyValue<bool> All { get; set; }
 
-		public bool AllVisible
-		{
-			get { return Addresses.Count > 1; }
-		}
+		public bool AllVisible => Addresses.Count > 1;
 
 		public IList<Selectable<Address>> Addresses { get; set; }
 
-		public bool AddressesVisible
-		{
-			get { return Addresses.Count > 1; }
-		}
+		public bool AddressesVisible => Addresses.Count > 1;
 
 		public NotifyValue<bool> AddressesEnabled { get; set; }
 
@@ -68,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				.Merge(All.Changed());
 		}
 
-		public void Deinit()
+		public void OnDeactivate()
 		{
 			var shell = screen.Shell;
 			if (shell != null) {

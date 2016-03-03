@@ -120,7 +120,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		protected override void OnDeactivate(bool close)
 		{
-			AddressSelector.Deinit();
+			AddressSelector.OnDeactivate();
 			base.OnDeactivate(close);
 		}
 

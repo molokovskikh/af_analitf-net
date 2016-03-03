@@ -78,9 +78,12 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		{
 		}
 
-		protected void StartProcess(string exe, string args = "")
+		protected void StartProcess(string exe, string args = "", string workDir = null)
 		{
-			ProcessHelper.Start(new ProcessStartInfo(exe, args));
+			var info = new ProcessStartInfo(exe, args);
+			if (!String.IsNullOrEmpty(workDir))
+				info.WorkingDirectory = workDir;
+			ProcessHelper.Start(info);
 		}
 
 		public override void TryClose(bool? dialogResult)

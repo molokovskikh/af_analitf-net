@@ -15,10 +15,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			DisplayName = "Ошибка отправки заказов";
 
 			Text = orders.Implode(
-				o => string.Format("прайс-лист {0} - минимальный заказа {1:C} - заказано {2:C}",
-					o.Price.Name,
-					o.MinOrderSum.MinOrderSum,
-					o.Sum),
+				o => $"прайс-лист {o.Price.Name} - минимальный заказа {o.MinOrderSum.MinOrderSum:C} - заказано {o.Sum:C}",
 				Environment.NewLine);
 			WasCancelled = true;
 		}

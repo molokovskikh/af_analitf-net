@@ -102,7 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			AddressSelector.Deinit();
+			AddressSelector.OnDeactivate();
 			base.OnDeactivate(close);
 		}
 

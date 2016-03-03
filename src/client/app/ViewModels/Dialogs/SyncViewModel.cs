@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
