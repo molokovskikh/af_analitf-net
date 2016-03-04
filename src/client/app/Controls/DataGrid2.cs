@@ -88,6 +88,11 @@ namespace AnalitF.Net.Client.Controls
 			set { CanSelectMultipleItems = value; }
 		}
 
+		protected override void OnExecutedBeginEdit(ExecutedRoutedEventArgs e)
+		{
+			base.OnExecutedBeginEdit(e);
+		}
+
 		/*
 		проблемы с фокусом
 		1 - тк ScrollViewer Focusable то он может получить фокус если на него кликнуть

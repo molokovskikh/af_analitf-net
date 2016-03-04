@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			Waybill = waybill;
 			Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name).ToArray();
+			DisplayName = "Создание накладной";
 			WasCancelled = true;
 		}
 

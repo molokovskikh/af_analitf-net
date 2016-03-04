@@ -771,6 +771,40 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitWindow("Предварительный просмотр");
 		}
 
+		[Test]
+		public async Task Create_waybill()
+		{
+			Start();
+			Click("ShowWaybills");
+			AsyncClick("Create");
+			WaitWindow("Создание накладной");
+			var id = Guid.NewGuid().ToString();
+			dispatcher.Invoke(() => {
+				Input(activeWindow.Descendants<FrameworkElement>().First(x => x.Name == "Waybill_ProviderDocumentId"), id);
+				activeWindow.Descendants<System.Windows.Controls.ComboBox>().First(x => x.Name == "SupplierName").Text = "Test Supplier";
+			});
+			Click("OK");
+			dispatcher.Invoke(() => {
+				var model = (WaybillsViewModel)shell.ActiveItem;
+				var waybill = model.Waybills.Value.First(x => x.ProviderDocumentId == id);
+				model.CurrentWaybill.Value = waybill;
+				model.EnterWaybill();
+			});
+
+			await ViewLoaded((Screen)shell.ActiveItem);
+			WaitIdle();
+
+			dispatcher.Invoke(() => {
+				var grid = activeWindow.Descendants().OfType<DataGrid>().First(x => x.Name == "Lines");
+				Assert.IsTrue(grid.CanUserAddRows);
+				Assert.IsTrue(grid.CanUserDeleteRows);
+				EditCell(grid, "Цена поставщика без НДС", 0, "500");
+				EditCell(grid, "Цена поставщика с НДС", 0, "510");
+				EditCell(grid, "НДС", 0, "10");
+				Assert.AreEqual("620.00", GetCell(grid, "Розничная цена").AsText());
+			});
+		}
+
 		private static void ShallowBindingErrors()
 		{
 			//на форме корректировки могут возникнуть ошибки биндинга
@@ -865,11 +899,20 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			}
 		}
 
+		private void EditCell(DataGrid grid, string column, int row, string text)
+		{
+			EditCell(grid, DataGridHelper.FindColumn(grid, column).DisplayIndex, row, text);
+		}
+
 		private void EditCell(DataGrid grid, int column, int row, string text)
 		{
 			var cell = GetCell(grid, column, row);
 			cell.Focus();
 			Input(cell, Key.F2);
+			if (cell.DataContext.ToString() == "{DataGrid.NewItemPlaceholder}") {
+				cell = GetCell(grid, column, row);
+				Input(cell, Key.F2);
+			}
 			var edit = cell.Descendants<TextBox>().First();
 			Input(edit, text);
 			Input(cell, Key.Enter);

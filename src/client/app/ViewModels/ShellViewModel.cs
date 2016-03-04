@@ -544,7 +544,13 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new SearchOfferViewModel());
 		}
 
-		public bool ShowSettings(string tab = null)
+		//для вызова из меню
+		public bool ShowSettings()
+		{
+			return ShowSettings(tab: null);
+		}
+
+		public bool ShowSettings(string tab)
 		{
 			var model = new SettingsViewModel();
 			if (tab != null)

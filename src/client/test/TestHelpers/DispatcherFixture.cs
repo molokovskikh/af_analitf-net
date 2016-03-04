@@ -164,7 +164,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void Input(FrameworkElement view, string name, string text)
 		{
 			view.Dispatcher.Invoke(() => {
-				Input((UIElement)view.FindName(name), text);
+				var el = (UIElement)view.FindName(name);
+				Assert.IsNotNull(el, $"Элемент {name} не найден");
+				Input(el, text);
 			});
 		}
 

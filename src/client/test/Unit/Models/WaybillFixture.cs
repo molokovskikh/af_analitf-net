@@ -32,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test(Description = "Проверка работы флага из настроек накладных ЖНВЛС - 'Использовать цену завода с НДС при определении ценового диапозона'")]
 		public void Calculate_markup_with_supplierPriceWithNDS_flag()
 		{
-			//Подстраиваем диапозоны наценок под товар в накладной
+			//Подстраиваем диапазоны наценок под товар в накладной
 			var markups = settings.Markups;
 			var minorMarkup = markups.First(x => x.Begin == 0 && x.Type == MarkupType.VitallyImportant);
 			minorMarkup.End = 78;
@@ -279,17 +279,19 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			waybill.Calculate(settings);
 			waybill.IsCreatedByUser = true;
-			var waybillLine = new WaybillLine();
-			waybill.AddLine(waybillLine);
+			var line = new WaybillLine();
+			waybill.AddLine(line);
 
-			waybillLine.SupplierCost = 75;
-			waybillLine.Nds = 10;
-			waybillLine.Quantity = 2;
+			line.SupplierCostWithoutNds = 67.5m;
+			line.SupplierCost = 75;
+			line.Nds = 10;
+			line.Quantity = 2;
 
-			waybillLine.EndEdit();
+			line.EndEdit();
 
-			Assert.AreEqual(150, waybillLine.Amount);
+			Assert.AreEqual(150, line.Amount);
 			Assert.AreEqual(150, waybill.Sum);
+			Assert.AreEqual(89.8, line.RetailCost);
 		}
 
 		[Test]

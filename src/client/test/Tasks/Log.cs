@@ -119,12 +119,12 @@ namespace AnalitF.Net.Client.Test.Tasks
 		public void Execute(string user, string password, DateTime begin, string version = null, int minCount = 0)
 		{
 			var errors = new List<Error>();
-			using(var connection = new MySqlConnection(String.Format("server=sql.analit.net; user={0}; Password={1};", user, password))) {
+			using(var connection = new MySqlConnection($"server=sql.analit.net; user={user}; Password={password};")) {
 				connection.Open();
 				var s = "";
 				if (!string.IsNullOrEmpty(version))
 					s = "and version = ?version";
-				var sql = String.Format("select * from Logs.ClientAppLogs where CreatedOn > ?begin and userId <> 758 {0} ", s);
+				var sql = $"select * from Logs.ClientAppLogs where CreatedOn > ?begin and userId <> 758 {s} ";
 				var records = connection.Read(sql, new { begin, version });
 				foreach (var record in records) {
 					var log = record["Text"].ToString();
@@ -143,8 +143,7 @@ namespace AnalitF.Net.Client.Test.Tasks
 								};
 								errors.Add(lastError);
 							}
-						}
-						else {
+						} else if (lastError != null	) {
 							if (!String.IsNullOrEmpty(lastError.StackTrace) || line.StartsWith("   at ") || line.StartsWith("   в "))
 								lastError.StackTrace += line + "\r\n";
 							else

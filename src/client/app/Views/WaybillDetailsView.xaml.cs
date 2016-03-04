@@ -154,7 +154,9 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
 				Generator = (c, i) => new ContentControl { Style = (Style)FindResource("DownloadLink") }
 			});
-			if (model != null && model.Waybill.IsCreatedByUser) {
+			if (model?.Waybill.IsCreatedByUser == true) {
+				lines.CanUserAddRows = true;
+				lines.CanUserDeleteRows = true;
 				lines.Columns.Add(new CustomDataGridColumn {
 					Header = "ЖНВЛС",
 					Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
