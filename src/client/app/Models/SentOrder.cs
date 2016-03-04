@@ -81,6 +81,8 @@ namespace AnalitF.Net.Client.Models
 
 		decimal Sum { get; }
 
+		int LinesCount { get; set; }
+
 		string Comment { get; set; }
 
 		string PersonalComment { get; set; }
@@ -102,7 +104,7 @@ namespace AnalitF.Net.Client.Models
 		bool IsAddressExists();
 	}
 
-	public class SentOrder : BaseNotify, IOrder
+	public class SentOrder : BaseNotify, IOrder, IFormattable
 	{
 		private string personalComment;
 
@@ -215,6 +217,16 @@ namespace AnalitF.Net.Client.Models
 		public override string ToString()
 		{
 			return $"Заявка поставщика {Price} на сумму {Sum}";
+		}
+
+		public virtual string ToString(string format, IFormatProvider formatProvider)
+		{
+			switch (format) {
+				case "full":
+					return $"{DisplayId} дата отправки: {SentOn} прайс-лист: {SafePrice?.Name} позиций: {LinesCount}";
+				default:
+					return base.ToString();
+			}
 		}
 
 		public virtual bool CalculateStyle(Address address)

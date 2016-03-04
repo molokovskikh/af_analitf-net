@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using log4net;
 using NHibernate;
 using NHibernate.Linq;
 using NHibernate.Mapping;
@@ -15,7 +16,14 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public bool Restore;
 
+		public UnfreezeCommand()
+		{
+			//что бы в логах было имя покороче
+			Log = LogManager.GetLogger(typeof(UnfreezeCommand<>));
+		}
+
 		public UnfreezeCommand(uint id)
+			: this()
 		{
 			ids = new[] { id };
 		}
@@ -24,6 +32,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		/// action - название операции если передается будет производиться протоколирование
 		/// </summary>
 		public UnfreezeCommand(uint[] ids, Address address = null)
+			: this()
 		{
 			this.ids = ids;
 			if (address != null)
@@ -39,20 +48,23 @@ namespace AnalitF.Net.Client.Models.Commands
 			var orders = new List<Order>();
 			foreach (var id in ids) {
 				var order = Session.Load<T>(id);
+				Log.Info($"Попытка {GuesAction(order)} заказ {order:full}");
 				var address = Session.Get<Address>(addressId);
 				var resultOrder = Unfreeze(order, address, Session, log);
 				if (resultOrder != null) {
 					orders.Add(resultOrder);
 					Session.Save(resultOrder);
 				}
-				Log.Info($"Попытка {GuesAction(order)} заказ N{id} -> N{resultOrder?.Id}");
-
 				if (ShouldCalculateStatus(order)) {
 					var currentOrder = order as Order;
 					if (!currentOrder.IsEmpty) {
 						orders.Add(currentOrder);
 					}
 				}
+				if (resultOrder != null)
+					Log.Info($"Операция завершена успешно, сформирован заказ {resultOrder:full}");
+				else
+					Log.Info("Не удалось сформировать заказ");
 			}
 			if (Restore)
 				Result = OrderLine.RestoreReport(orders);
@@ -77,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			if (!sourceOrder.IsPriceExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
-					var order = ((Order)sourceOrder);
+					var order = (Order)sourceOrder;
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
 				}
@@ -193,7 +205,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 
 			if (sourceOrder is Order) {
-				var srcLine = ((OrderLine)sourceLine);
+				var srcLine = (OrderLine)sourceLine;
 				if (rest == 0) {
 					((Order)sourceOrder).RemoveLine(srcLine);
 				}
@@ -216,12 +228,9 @@ namespace AnalitF.Net.Client.Models.Commands
 						((OrderLine)sourceLine).SendResult = LineResultStatus.CountReduced;
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
-					log.AppendLine(String.Format("{0} : {1} - {2} ; Уменьшено заказное количество {3} вместо {4}",
-						sourceOrder.Price.Name,
-						sourceLine.ProductSynonym,
-						sourceLine.ProducerSynonym,
-						sourceLine.Count - rest,
-						sourceLine.Count));
+					log.AppendLine(
+						$"{sourceOrder.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym}" +
+							$" ; Уменьшено заказное количество {sourceLine.Count - rest} вместо {sourceLine.Count}");
 				}
 			}
 		}

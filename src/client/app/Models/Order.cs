@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models
 		}
 	}
 
-	public class Order : BaseNotify, IOrder
+	public class Order : BaseNotify, IOrder, IFormattable
 	{
 		private decimal sum;
 		private int linesCount;
@@ -369,6 +369,16 @@ namespace AnalitF.Net.Client.Models
 		public virtual void CalculateStyle(Address address)
 		{
 			IsCurrentAddress = SafeAddress?.Id == address.Id;
+		}
+
+		public virtual string ToString(string format, IFormatProvider formatProvider)
+		{
+			switch (format) {
+				case "full":
+					return $"{DisplayId} дата создания: {CreatedOn} прайс-лист: {SafePrice?.Name} позиций: {LinesCount}";
+				default:
+					return base.ToString();
+			}
 		}
 	}
 }
