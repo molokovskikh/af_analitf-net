@@ -46,39 +46,39 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OnCloseDisposable.Add(this.ObservableForProperty(m => (object)m.CurrentOrder)
 				.Merge(this.ObservableForProperty(m => (object)m.IsCurrentSelected.Value))
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("CanDelete");
-					NotifyOfPropertyChange("CanFreeze");
-					NotifyOfPropertyChange("CanUnfreeze");
-					NotifyOfPropertyChange("CanReorder");
-					NotifyOfPropertyChange("CanMove");
+					NotifyOfPropertyChange(nameof(CanDelete));
+					NotifyOfPropertyChange(nameof(CanFreeze));
+					NotifyOfPropertyChange(nameof(CanUnfreeze));
+					NotifyOfPropertyChange(nameof(CanReorder));
+					NotifyOfPropertyChange(nameof(CanMove));
 				}));
 
 			OnCloseDisposable.Add(IsSentSelected
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("RestoreOrderVisible");
-					NotifyOfPropertyChange("CanReorder");
-					NotifyOfPropertyChange("EditableOrder");
+					NotifyOfPropertyChange(nameof(RestoreOrderVisible));
+					NotifyOfPropertyChange(nameof(CanReorder));
+					NotifyOfPropertyChange(nameof(EditableOrder));
 				}));
 
 			OnCloseDisposable.Add(IsCurrentSelected
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("FreezeVisible");
-					NotifyOfPropertyChange("UnfreezeVisible");
-					NotifyOfPropertyChange("MoveVisible");
-					NotifyOfPropertyChange("EditableOrder");
+					NotifyOfPropertyChange(nameof(FreezeVisible));
+					NotifyOfPropertyChange(nameof(UnfreezeVisible));
+					NotifyOfPropertyChange(nameof(MoveVisible));
+					NotifyOfPropertyChange(nameof(EditableOrder));
 				}));
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentSentOrder)
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("CanDelete");
-					NotifyOfPropertyChange("CanRestoreOrder");
-					NotifyOfPropertyChange("CanReorder");
+					NotifyOfPropertyChange(nameof(CanDelete));
+					NotifyOfPropertyChange(nameof(CanRestoreOrder));
+					NotifyOfPropertyChange(nameof(CanReorder));
 				}));
 
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.CurrentOrder.Frozen)
 				.Subscribe(_ => {
-					NotifyOfPropertyChange("CanFreeze");
-					NotifyOfPropertyChange("CanUnfreeze");
+					NotifyOfPropertyChange(nameof(CanFreeze));
+					NotifyOfPropertyChange(nameof(CanUnfreeze));
 				}));
 
 			var ordersChanged = this.ObservableForProperty(m => m.Orders);
@@ -260,8 +260,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				if (currentSentOrder != null)
 					currentSentOrder.PropertyChanged += WatchForUpdate;
 
-				NotifyOfPropertyChange("CurrentSentOrder");
-				NotifyOfPropertyChange("EditableOrder");
+				NotifyOfPropertyChange(nameof(CurrentSentOrder));
+				NotifyOfPropertyChange(nameof(EditableOrder));
 			}
 		}
 
@@ -286,6 +286,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 			else {
 				foreach (var selected in SelectedSentOrders.ToArray()) {
+					Log.Info($"Удаление отправленного заказа {selected.DisplayId} дата отправки: {selected.SentOn}" +
+						$" прайс-лист: {selected.SafePrice?.Name}" +
+						$" позиций: {selected.LinesCount}");
 					StatelessSession.Delete(selected);
 					SentOrders.Remove(selected);
 				}
@@ -294,6 +297,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		private void DeleteOrder(Order order)
 		{
+			Log.Info($"Удаление текущего заказа {order.DisplayId} дата создания: {order.CreatedOn}" +
+				$" прайс-лист: {order.SafePrice?.Name}" +
+				$" позиций: {order.LinesCount}");
 			Session.Delete(order);
 			if (order.Address != null) {
 				order.Address.Orders.Remove(order);
