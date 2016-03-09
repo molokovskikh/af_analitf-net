@@ -78,8 +78,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			try {
 				Progress.OnNext(new Progress("Соединение", 0, 0));
 				using (Session = Factory.OpenSession())
-				using (StatelessSession = Factory.OpenStatelessSession())
-				using (var transaction = Session.BeginTransaction()) {
+				using (var transaction = Session.BeginTransaction())
+				using (StatelessSession = Factory.OpenStatelessSession(Session.Connection)) {
 					var result = method();
 					transaction.Commit();
 					return result;

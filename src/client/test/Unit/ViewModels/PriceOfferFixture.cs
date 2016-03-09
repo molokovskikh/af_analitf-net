@@ -18,7 +18,6 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		{
 			price = new Price("test1");
 			model = new PriceOfferViewModel(price.Id, false);
-			model.Address = new Address("test addr");
 			model.Price.Value = price;
 		}
 

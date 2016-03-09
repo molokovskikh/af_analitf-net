@@ -171,26 +171,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			if (Session == null)
 				return;
+
 			Session.Flush();
-			Session.Clear();
+			RecreateSession();
 			//после того как мы очистили сессию нам нужно перезагрузить все объекты которые
 			//были связаны с закрытой сессией иначе где нибудь позже мы попробуем обратиться
 			//к объекты закрытой сессии и получим ошибку
 
 			//загружаем все в память что не делать лишних запросов
-			var addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-
-			if (Address != null)
-				Address = Session.Load<Address>(Address.Id);
-			User = Session.Get<User>(User.Id) ?? User;
-
 			foreach (var item in AddressSelector.Addresses)
 				item.Item = Session.Load<Address>(item.Item.Id);
 
 			if (AddressToMove != null)
 				AddressToMove = Session.Load<Address>(AddressToMove.Id);
 
-			AddressesToMove = addresses.Where(a => a != Address)
+			AddressesToMove = Addresses.Where(a => a != Address)
 				.OrderBy(a => a.Name)
 				.ToList();
 		}
@@ -479,8 +474,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Session.Flush();
 			var task = new Task(() => {
 				using(var session = Session.SessionFactory.OpenSession())
-				using(var stateless = Session.SessionFactory.OpenStatelessSession())
-				using(var transaction = session.BeginTransaction()) {
+				using(var transaction = session.BeginTransaction())
+				using(var stateless = Session.SessionFactory.OpenStatelessSession(session.Connection)) {
 					command.Session = session;
 					command.StatelessSession = stateless;
 					command.Config = Shell.Config;

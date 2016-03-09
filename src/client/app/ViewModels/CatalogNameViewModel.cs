@@ -101,7 +101,7 @@ namespace AnalitF.Net.Client.ViewModels
 				if (activeItemType == typeof(Catalog))
 					CurrentItem.Value = value;
 
-				NotifyOfPropertyChange("CurrentCatalog");
+				NotifyOfPropertyChange(nameof(CurrentCatalog));
 			}
 		}
 

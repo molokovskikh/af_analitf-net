@@ -28,9 +28,9 @@
 			</Grid>
 			<TextBlock TextWrapping="Wrap" FontSize="14">Централизованная служба</TextBlock>
 			<TextBlock TextWrapping="Wrap" FontSize="14">поддержки пользователей:</TextBlock>
-			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding SupportPhone.Value}" />
+			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding CurrentUser.Value.SupportPhone}" />
 			<TextBlock TextWrapping="Wrap" FontSize="14">Режим работы:</TextBlock>
-			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding SupportHours.Value}" />
+			<TextBlock TextWrapping="Wrap" FontSize="14" Text="{Binding CurrentUser.Value.SupportHours}" />
 			<TextBlock TextWrapping="Wrap" FontSize="14">
 				E-mail:
 				<Hyperlink NavigateUri="mailto:tech@analit.net">

@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Config.NHibernate;
 using Common.NHibernate;
 using Common.Tools;
+using Common.Tools.Helpers;
 using Devart.Data.MySql;
 using NHibernate.Cfg;
 using NHibernate.Connection;
@@ -62,9 +63,10 @@ namespace AnalitF.Net.Client.Models.Commands
 				//Unknown column '%s' in '%s'
 				//Table '%s.%s' doesn't exist
 				//http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-				if (e.InnerException is MySqlException &&
-					(((MySqlException)e.InnerException).Code == 1054
-						|| ((MySqlException)e.InnerException).Code == 1146)) {
+				var code = e.Chain().OfType<MySqlException>().Select(x => x.Code).FirstOrDefault();
+				if (code == 0)
+					code = e.Chain().OfType<MySql.Data.MySqlClient.MySqlException>().Select(x => x.Number).FirstOrDefault();
+				if (code == 1054 || code == 1146) {
 					crushOnFirstTry = true;
 					Log.Error("База данных повреждена попробую восстановить", e);
 				} else {

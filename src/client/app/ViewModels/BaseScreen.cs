@@ -93,9 +93,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected ExcelExporter ExcelExporter;
 		protected SimpleMRUCache Cache = new SimpleMRUCache(10);
 
-		protected ISession Session;
-		public IStatelessSession StatelessSession;
-
 		public TableSettings TableSettings = new TableSettings();
 
 		//освобождает ресурсы при закрытии формы
@@ -111,17 +108,19 @@ namespace AnalitF.Net.Client.ViewModels
 		public Subject<IResult> ResultsSink = new Subject<IResult>();
 		public Env Env = Env.Current ?? new Env();
 
-		//адрес доставки который выбран в ui
-		public Address Address;
-		public Address[] Addresses = new Address[0];
-
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
 		/// <summary>
 		/// использовать только через RxQuery,
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
 		/// </summary>
-		private static IStatelessSession _backgroundSession;
+		private static IStatelessSession backgroundSession;
+		private Lazy<ISession> lazySession;
+		private Lazy<IStatelessSession> lazyStatelessSession;
+		public Lazy<User> lazyUser;
+		private Lazy<NotifyValue<Settings>> lazySettings;
+		public Lazy<Address> lazyAddress;
+		public Lazy<Address[]> lazyAddresses;
 
 		public BaseScreen()
 		{
@@ -130,32 +129,26 @@ namespace AnalitF.Net.Client.ViewModels
 			Manager = (WindowManager)IoC.Get<IWindowManager>();
 			OnCloseDisposable.Add(CloseCancellation);
 			OnCloseDisposable.Add(ResultsSink);
-			Settings = new NotifyValue<Settings>();
 
 			//в модульных тестах база не должна использоваться
-			if (Env.Factory != null) {
-				StatelessSession = Env.Factory.OpenStatelessSession();
-				Session = Env.Factory.OpenSession();
-				//для mysql это все бутафория
+			lazyStatelessSession = new Lazy<IStatelessSession>(() => Env.Factory?.OpenStatelessSession());
+			lazySession = new Lazy<ISession>(() => {
+				var result = Env.Factory?.OpenSession();
+				//для myisam это все бутафория
 				//нужно что бы nhibernate делал flush перед запросами
 				//если транзакции нет он это делать не будет
-				Session.BeginTransaction();
-
-				Settings.Value = Session.Query<Settings>().FirstOrDefault()
-					?? new Settings();
-				User = Session.Query<User>().FirstOrDefault()
-					?? new User {
-						SupportHours = "будни: с 07:00 до 19:00",
-						SupportPhone = "тел.: 473-260-60-00",
-					};
-			}
-			else {
-				Settings.Value = Env.Settings ?? new Settings();
-				User = Env.User ?? new User {
+				result?.BeginTransaction();
+				return result;
+			});
+			lazyUser = new Lazy<User>(() => Session?.Query<User>()?.FirstOrDefault()
+				?? Env.User ?? new User {
 					SupportHours = "будни: с 07:00 до 19:00",
 					SupportPhone = "тел.: 473-260-60-00",
-				};
-			}
+				});
+			lazySettings = new Lazy<NotifyValue<Settings>>(
+				() => new NotifyValue<Settings>(Session?.Query<Settings>()?.FirstOrDefault() ?? Env.Settings ?? new Settings()));
+			lazyAddress = new Lazy<Address>(() => Session?.Get<Address>((Shell?.CurrentAddress?.Id).GetValueOrDefault()));
+			lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray());
 
 			var properties = GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
@@ -166,18 +159,20 @@ namespace AnalitF.Net.Client.ViewModels
 			CanExport = ExcelExporter.CanExport.ToValue();
 		}
 
-		public User User { get; set; }
-		public NotifyValue<Settings> Settings { get; }
+		//адрес доставки который выбран в ui
+		public Address Address => lazyAddress.Value;
+		public Address[] Addresses => lazyAddresses.Value;
+		public User User => lazyUser.Value;
+		public NotifyValue<Settings> Settings => lazySettings.Value;
 		public bool IsSuccessfulActivated { get; protected set; }
 		public NotifyValue<bool> CanExport { get; set; }
 
 		public WindowManager Manager { get; }
-
 		public IMessageBus Bus => Env.Bus;
-
 		public IScheduler UiScheduler => Env.UiScheduler;
-
 		public IScheduler Scheduler => Env.Scheduler;
+		public ISession Session => lazySession?.Value;
+		public IStatelessSession StatelessSession => lazyStatelessSession?.Value;
 
 		protected override void OnInitialize()
 		{
@@ -208,7 +203,6 @@ namespace AnalitF.Net.Client.ViewModels
 						UpdateOnActivate = true;
 				}, CloseCancellation.Token);
 
-			Load();
 			Restore();
 
 			if (Shell != null) {
@@ -242,12 +236,24 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected virtual void RecreateSession()
 		{
+			if (!lazySession.IsValueCreated)
+				return;
 			Session.Clear();
-			Load();
-			User = Session.Query<User>().FirstOrDefault();
+			if (lazyAddress.IsValueCreated)
+				lazyAddress = new Lazy<Address>(() => Session?.Get<Address>((Shell?.CurrentAddress?.Id).GetValueOrDefault()));
+			if (lazyAddresses.IsValueCreated)
+				lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name)?.ToArray());
+			if (lazyUser.IsValueCreated) {
+				lazyUser = new Lazy<User>(() => Session?.Query<User>()?.FirstOrDefault()
+				?? new User {
+					SupportHours = "будни: с 07:00 до 19:00",
+					SupportPhone = "тел.: 473-260-60-00",
+				});
+			}
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
-			Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings()));
+			if (lazySettings.IsValueCreated)
+				Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings()));
 		}
 
 		protected override void OnActivate()
@@ -312,15 +318,6 @@ namespace AnalitF.Net.Client.ViewModels
 		protected virtual void Broadcast()
 		{
 			Bus.SendMessage("Changed", "db");
-		}
-
-		private void Load()
-		{
-			if (Session == null)
-				return;
-			if (Shell != null && Shell.CurrentAddress != null)
-				Address = Session.Load<Address>(Shell.CurrentAddress.Id);
-			Addresses = Session.Query<Address>().OrderBy(x => x.Name).ToArray();
 		}
 
 		//метод вызывается если нужно обновить данные на форме
@@ -450,28 +447,26 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
-			if (StatelessSession != null) {
-				StatelessSession.Dispose();
-				StatelessSession = null;
+			if (lazyStatelessSession?.IsValueCreated == true) {
+				lazyStatelessSession.Value?.Dispose();
+				lazyStatelessSession = null;
 			}
 
-			if (Session != null) {
-				Session.Dispose();
-				Session = null;
+			if (lazySession?.IsValueCreated == true) {
+				lazySession.Value?.Dispose();
+				lazySession = null;
 			}
 		}
 
 		~BaseScreen()
 		{
 			//если ошибка возникла в конструкторе, например outofmemory
-			if (Log == null)
-				return;
 			try {
-				Log.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
+				Log?.ErrorFormat("Вызван деструктор для {0} {1}", GetType(), GetHashCode());
 				Dispose();
 			}
 			catch(Exception e) {
-				Log.Error($"Ошибка при освобождении объекта {GetType()} {GetHashCode()}", e);
+				Log?.Error($"Ошибка при освобождении объекта {GetType()} {GetHashCode()}", e);
 			}
 		}
 
@@ -641,10 +636,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task<T>(() => {
 				if (Env.Factory == null)
 					return default(T);
-				if (_backgroundSession == null)
-					_backgroundSession = Env.Factory.OpenStatelessSession();
-				lock (_backgroundSession)
-					return @select(_backgroundSession);
+				if (backgroundSession == null)
+					backgroundSession = Env.Factory.OpenStatelessSession();
+				lock (backgroundSession)
+					return @select(backgroundSession);
 			}, CloseCancellation.Token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
@@ -658,10 +653,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task(() => {
 				if (Env.Factory == null)
 					return;
-				if (_backgroundSession == null)
-					_backgroundSession = Env.Factory.OpenStatelessSession();
-				lock (_backgroundSession)
-					action(_backgroundSession);
+				if (backgroundSession == null)
+					backgroundSession = Env.Factory.OpenStatelessSession();
+				lock (backgroundSession)
+					action(backgroundSession);
 			}, CloseCancellation.Token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)

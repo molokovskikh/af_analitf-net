@@ -44,11 +44,8 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var address = new Address("тест") {
 				Id = 100,
 			};
-			batch.Address = address;
-			shell.User.Value = new User();
+			Activate(batch, address);
 			shell.Settings.Value.LastUpdate = DateTime.Now;
-			shell.CurrentAddress = address;
-			shell.ActiveItem = batch;
 			var stub = new StubRemoteCommand(UpdateResult.OK);
 			UpdateCommand cmd = null;
 			shell.CommandExecuting += c => {
@@ -161,6 +158,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		public void Mark_line()
 		{
 			var order = MakeOrderLine().Order;
+			Activate(batch, order.Address);
 			order.Frozen = true;
 			batch.Lines.Value = new ObservableCollection<BatchLineView> {
 				new BatchLineView(new BatchLine {
@@ -179,7 +177,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var line = MakeOrderLine();
 			line.ExportId = 45;
 
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, line.Order.Address);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 			Assert.AreEqual(line, batch.ReportLines.Value[0].OrderLine);
 		}
@@ -193,10 +191,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			order.Lines[0].ExportId = 203;
 			address.Orders.Add(order);
 
-			batch.Address = address;
 			Stat lastStat = null;
 			bus.Listen<Stat>().Subscribe(s => lastStat = s);
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, address);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(order.Lines[0]) });
 
 			batch.SelectedReportLines.Add(batch.Lines.Value[0]);
@@ -213,7 +210,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var address1 = new Address("тест1");
 			var address2 = new Address("тест2");
 			InitAddress(address1, address2);
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, address1, address2);
 
 			batch.Lines.Value.Add(new BatchLineView(new BatchLine { Address = address1 }, null));
 
@@ -252,7 +249,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address2.Order(offer, 5);
 			line.ExportId = 562;
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, address1, address2);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
 			Assert.IsTrue(batch.CanReload);
@@ -268,7 +265,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address.Order(offer, 5);
 			line.ExportId = 562;
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, address);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
 
 			batch.CurrentReportLine.Value = batch.Lines.Value[0];
@@ -290,11 +287,10 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		{
 			var address = new Address("тест");
 			InitAddress(address);
-
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address.Order(offer, 5);
 			line.ExportId = 562;
-			ScreenExtensions.TryActivate(batch);
+			Activate(batch, address);
 			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line), new BatchLine(new Catalog("тест"), address) });
 
 			//заказано
@@ -318,17 +314,12 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			for(var i = 0; i < addresses.Length; i++) {
 				addresses[i].Id = (uint)i;
 			}
-			batch.Addresses = addresses;
-			batch.Address = addresses.FirstOrDefault();
-			shell.Addresses = addresses.ToList();
-			shell.CurrentAddress = addresses.FirstOrDefault();
 		}
 
 		private OrderLine MakeOrderLine()
 		{
 			var address = new Address("тест");
 			InitAddress(address);
-			batch.Address = address;
 			var offer = new Offer(new Price("тест"), 100) {
 				ProductId = 105
 			};

@@ -3,18 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
-using System.Threading;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
-using Caliburn.Micro;
 using Common.Tools;
-using Common.Tools.Calendar;
-using Devart.Common;
-using NHibernate;
-using NHibernate.Criterion;
 using NHibernate.Linq;
 using ReactiveUI;
 
@@ -69,9 +63,6 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {
-				Session.Evict(Address);
-				Address = Session.Load<Address>(Address.Id);
-
 				Price.LoadOrderStat(prices, Address, StatelessSession);
 				prices.Each(p => p.Order = Address.Orders.Where(o => !o.Frozen).FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));

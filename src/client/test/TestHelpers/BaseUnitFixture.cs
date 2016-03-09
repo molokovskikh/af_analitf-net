@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.IO;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -40,7 +41,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			bus = new MessageBus();
 			scheduler = new TestScheduler();
 			Env.Current = new Env(user, bus, scheduler, null/*не нужно использовать базу для этого есть интеграционные тесты*/) {
-				//тк в юнит тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
+				//тк в модульных тестах сессия не инициализируется все запросы будут "завершаться" моментально в той же нитке
 				QueryScheduler = new CurrentThreadScheduler(),
 				TplUiScheduler = new CurrentThreadScheduler(),
 				Settings = new Settings()
@@ -65,12 +66,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				addresses = new[] { address };
 			}
 			screen.Settings.Value = new Settings(addresses);
-			screen.User = user;
-			screen.Address = address;
+			screen.lazyUser = new Lazy<User>(() => user);
+			screen.lazyAddress = new Lazy<Address>(() => address);
 			screen.Parent = shell;
-			screen.Addresses = addresses;
+			screen.lazyAddresses = new Lazy<Address[]>(() => addresses);
 			ScreenExtensions.TryActivate(screen);
 			shell.ActiveItem = screen;
+			shell.CurrentAddress = address;
+			shell.Addresses = addresses.ToList();
 		}
 
 		protected void Close(object model)
