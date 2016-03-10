@@ -435,7 +435,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
 			Schedules.Value = session.Query<Schedule>().ToList();
-			defaultItem.Update();
+			defaultItem.Reload();
 		}
 
 		protected void UpdateDisplayName()

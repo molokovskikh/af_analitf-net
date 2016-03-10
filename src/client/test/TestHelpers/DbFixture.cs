@@ -64,8 +64,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}
 			if (restore)
 				DbHelper.RestoreData(session);
-			if (disposable != null)
-				disposable.Dispose();
+			disposable?.Dispose();
 		}
 
 		protected T Fixture<T>()

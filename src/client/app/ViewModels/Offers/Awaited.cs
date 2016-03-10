@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			yield return new DialogResult(addAwaited);
 			Items.Value.Add(addAwaited.Item);
 			Items.Value = Items.Value.OrderBy(i => i.Catalog.FullName)
-				.ThenBy(i => i.Producer != null ? i.Producer.Name : null)
+				.ThenBy(i => i.Producer?.Name)
 				.ToObservableCollection();
 			CurrentItem.Value = addAwaited.Item;
 			yield return new FocusResult("Items");
@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public void ActivatePrint(string name)
 		{
 			ActivePrint.Value = name;
-			NotifyOfPropertyChange("CanPrint");
+			NotifyOfPropertyChange(nameof(CanPrint));
 		}
 	}
 }

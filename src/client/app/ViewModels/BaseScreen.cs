@@ -147,7 +147,6 @@ namespace AnalitF.Net.Client.ViewModels
 				});
 			lazySettings = new Lazy<NotifyValue<Settings>>(
 				() => new NotifyValue<Settings>(Session?.Query<Settings>()?.FirstOrDefault() ?? Env.Settings ?? new Settings()));
-			lazyAddress = new Lazy<Address>(() => Session?.Get<Address>((Shell?.CurrentAddress?.Id).GetValueOrDefault()));
 			lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray());
 
 			var properties = GetType().GetProperties()
@@ -160,7 +159,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		//адрес доставки который выбран в ui
-		public Address Address => lazyAddress.Value;
+		public Address Address => lazyAddress?.Value;
 		public Address[] Addresses => lazyAddresses.Value;
 		public User User => lazyUser.Value;
 		public NotifyValue<Settings> Settings => lazySettings.Value;
@@ -177,14 +176,16 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
+			lazyAddress = new Lazy<Address>(() => Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id));
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)
+				.Where(_ => lazySettings.IsValueCreated)
 				.Select(_ => {
 					Session.Evict(Settings.Value);
 					return Session.Query<Settings>().First();
 				})
-				.Subscribe(Settings));
+				.Subscribe(x => Settings.Value = x));
 			//есть два способа изменить настройки цветов Конфигурация -> Настройка легенды
 			//или дважды кликнуть на элементе легенды, подписываемся на события в результате этих действий
 			OnCloseDisposable.Add(Settings.Subscribe(_ => RefreshStyles()));
@@ -239,10 +240,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!lazySession.IsValueCreated)
 				return;
 			Session.Clear();
-			if (lazyAddress.IsValueCreated)
-				lazyAddress = new Lazy<Address>(() => Session?.Get<Address>((Shell?.CurrentAddress?.Id).GetValueOrDefault()));
 			if (lazyAddresses.IsValueCreated)
-				lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name)?.ToArray());
+				lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray());
+			if (lazyAddress.IsValueCreated)
+				lazyAddress = lazyAddress = new Lazy<Address>(() => Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id));
 			if (lazyUser.IsValueCreated) {
 				lazyUser = new Lazy<User>(() => Session?.Query<User>()?.FirstOrDefault()
 				?? new User {
@@ -447,15 +448,13 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
-			if (lazyStatelessSession?.IsValueCreated == true) {
+			if (lazyStatelessSession?.IsValueCreated == true)
 				lazyStatelessSession.Value?.Dispose();
-				lazyStatelessSession = null;
-			}
+			lazyStatelessSession = null;
 
-			if (lazySession?.IsValueCreated == true) {
+			if (lazySession?.IsValueCreated == true)
 				lazySession.Value?.Dispose();
-				lazySession = null;
-			}
+			lazySession = null;
 		}
 
 		~BaseScreen()

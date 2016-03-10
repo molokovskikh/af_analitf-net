@@ -51,12 +51,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var id = model.Offers.Value[0].Price.Id;
 			model.Prices.Each(p => p.IsSelected = false);
 			scheduler.AdvanceByMs(10000);
-			Assert.AreEqual(0, model.Offers.Value.Count());
+			Assert.AreEqual(0, model.Offers.Value.Count);
 
 			model.Prices.First(p => p.Item.Id == id).IsSelected = true;
 			model.Prices.First(p => p.Item.Id != id).IsSelected = true;
 			scheduler.AdvanceByMs(10000);
-			Assert.That(model.Offers.Value.Count(), Is.GreaterThan(0));
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 		}
 
 		[Test]

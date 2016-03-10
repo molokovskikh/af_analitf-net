@@ -20,7 +20,6 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Config = config;
 			DisplayName = "";
-			Readonly = true;
 			InitFields();
 		}
 
@@ -28,7 +27,13 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<List<News>> Newses { get; set; }
 		public NotifyValue<BitmapImage> Ad { get; set; }
 
-		public override void Update()
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+			Reload();
+		}
+
+		public void Reload()
 		{
 			RxQuery(s => s.Query<User>().FetchMany(x => x.Permissions).FirstOrDefault())
 				.ObserveOn(UiScheduler)

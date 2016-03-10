@@ -341,6 +341,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Init_newses_url()
 		{
 			var main = (Main)shell.ActiveItem;
+			scheduler.Start();
 			Assert.IsNotNull(main.Newses.Value[0].Url);
 		}
 
