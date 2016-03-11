@@ -66,10 +66,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				addresses = new[] { address };
 			}
 			screen.Settings.Value = new Settings(addresses);
-			screen.lazyUser = new Lazy<User>(() => user);
-			screen.lazyAddress = new Lazy<Address>(() => address);
+			screen.User = user;
+			screen.Address = address;
 			screen.Parent = shell;
-			screen.lazyAddresses = new Lazy<Address[]>(() => addresses);
+			screen.Addresses = addresses;
 			ScreenExtensions.TryActivate(screen);
 			shell.ActiveItem = screen;
 			shell.CurrentAddress = address;

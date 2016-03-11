@@ -115,12 +115,6 @@ namespace AnalitF.Net.Client.ViewModels
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
 		/// </summary>
 		private static IStatelessSession backgroundSession;
-		private Lazy<ISession> lazySession;
-		private Lazy<IStatelessSession> lazyStatelessSession;
-		public Lazy<User> lazyUser;
-		private Lazy<NotifyValue<Settings>> lazySettings;
-		public Lazy<Address> lazyAddress;
-		public Lazy<Address[]> lazyAddresses;
 
 		public BaseScreen()
 		{
@@ -129,26 +123,15 @@ namespace AnalitF.Net.Client.ViewModels
 			Manager = (WindowManager)IoC.Get<IWindowManager>();
 			OnCloseDisposable.Add(CloseCancellation);
 			OnCloseDisposable.Add(ResultsSink);
-
+			Settings = new NotifyValue<Settings>();
+			Session = Env.Factory?.OpenSession();
+			//для myisam это все бутафория
+			//нужно что бы nhibernate делал flush перед запросами
+			//если транзакции нет он это делать не будет
+			Session?.BeginTransaction();
 			//в модульных тестах база не должна использоваться
-			lazyStatelessSession = new Lazy<IStatelessSession>(() => Env.Factory?.OpenStatelessSession());
-			lazySession = new Lazy<ISession>(() => {
-				var result = Env.Factory?.OpenSession();
-				//для myisam это все бутафория
-				//нужно что бы nhibernate делал flush перед запросами
-				//если транзакции нет он это делать не будет
-				result?.BeginTransaction();
-				return result;
-			});
-			lazyUser = new Lazy<User>(() => Session?.Query<User>()?.FirstOrDefault()
-				?? Env.User ?? new User {
-					SupportHours = "будни: с 07:00 до 19:00",
-					SupportPhone = "тел.: 473-260-60-00",
-				});
-			lazySettings = new Lazy<NotifyValue<Settings>>(
-				() => new NotifyValue<Settings>(Session?.Query<Settings>()?.FirstOrDefault() ?? Env.Settings ?? new Settings()));
-			lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray());
-
+			StatelessSession = Env.Factory?.OpenStatelessSession(Session?.Connection);
+			Load();
 			var properties = GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)
 				.Select(p => p.Name)
@@ -159,10 +142,10 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		//адрес доставки который выбран в ui
-		public Address Address => lazyAddress?.Value;
-		public Address[] Addresses => lazyAddresses.Value;
-		public User User => lazyUser.Value;
-		public NotifyValue<Settings> Settings => lazySettings.Value;
+		public Address Address { get; set; }
+		public Address[] Addresses { get; set; }
+		public User User { get; set; }
+		public NotifyValue<Settings> Settings { get; set; }
 		public bool IsSuccessfulActivated { get; protected set; }
 		public NotifyValue<bool> CanExport { get; set; }
 
@@ -170,17 +153,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public IMessageBus Bus => Env.Bus;
 		public IScheduler UiScheduler => Env.UiScheduler;
 		public IScheduler Scheduler => Env.Scheduler;
-		public ISession Session => lazySession?.Value;
-		public IStatelessSession StatelessSession => lazyStatelessSession?.Value;
+		public ISession Session;
+		public IStatelessSession StatelessSession;
 
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
-			lazyAddress = new Lazy<Address>(() => Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id));
+			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id);
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)
-				.Where(_ => lazySettings.IsValueCreated)
 				.Select(_ => {
 					Session.Evict(Settings.Value);
 					return Session.Query<Settings>().First();
@@ -237,24 +219,24 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected virtual void RecreateSession()
 		{
-			if (!lazySession.IsValueCreated)
-				return;
-			Session.Clear();
-			if (lazyAddresses.IsValueCreated)
-				lazyAddresses = new Lazy<Address[]>(() => Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray());
-			if (lazyAddress.IsValueCreated)
-				lazyAddress = lazyAddress = new Lazy<Address>(() => Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id));
-			if (lazyUser.IsValueCreated) {
-				lazyUser = new Lazy<User>(() => Session?.Query<User>()?.FirstOrDefault()
-				?? new User {
+			Session?.Clear();
+			Load();
+		}
+
+		private void Load()
+		{
+			User = Session?.Query<User>()?.FirstOrDefault()
+				?? Env.User ?? new User {
 					SupportHours = "будни: с 07:00 до 19:00",
 					SupportPhone = "тел.: 473-260-60-00",
-				});
-			}
+				};
 			//обновление настроек обрабатывается отдельно, здесь нужно только загрузить объект из сессии
 			//что бы избежать ошибок ленивой загрузки
-			if (lazySettings.IsValueCreated)
-				Settings.Mute(Session.Query<Settings>().FirstOrDefault(new Settings()));
+			Settings.Mute(Session?.Query<Settings>()?.FirstOrDefault()
+				?? Env.Settings
+					?? new Settings());
+			Addresses = Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray() ?? new Address[0];
+			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id);
 		}
 
 		protected override void OnActivate()
@@ -448,13 +430,10 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			GC.SuppressFinalize(this);
 			OnCloseDisposable.Dispose();
-			if (lazyStatelessSession?.IsValueCreated == true)
-				lazyStatelessSession.Value?.Dispose();
-			lazyStatelessSession = null;
-
-			if (lazySession?.IsValueCreated == true)
-				lazySession.Value?.Dispose();
-			lazySession = null;
+			StatelessSession?.Dispose();
+			StatelessSession = null;
+			Session?.Dispose();
+			Session = null;
 		}
 
 		~BaseScreen()
