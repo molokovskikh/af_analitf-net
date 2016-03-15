@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.ViewModels
 			//если транзакции нет он это делать не будет
 			Session?.BeginTransaction();
 			//в модульных тестах база не должна использоваться
-			StatelessSession = Env.Factory?.OpenStatelessSession(Session?.Connection);
+			StatelessSession = Env.Factory?.OpenStatelessSession();
 			Load();
 			var properties = GetType().GetProperties()
 				.Where(p => p.GetCustomAttributes(typeof(ExportAttribute), true).Length > 0)

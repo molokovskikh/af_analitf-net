@@ -67,9 +67,9 @@ namespace AnalitF.Net.Client.Test.Tasks
 				begin = DateTime.Today.AddDays(-14);
 			}
 
-			using(var connection = new MySqlConnection(String.Format("server=sql.analit.net; user={0}; Password={1};", user, password))) {
+			using(var connection = new MySqlConnection($"server=sql.analit.net; user={user}; Password={password};")) {
 				connection.Open();
-				var sql = String.Format("select * from Logs.ClientAppLogs where CreatedOn > ?begin and userId <> 758");
+				var sql = "select * from Logs.ClientAppLogs where CreatedOn > ?begin and userId <> 758";
 				var records = connection.Read(sql, new { begin, });
 
 				foreach (var log in records) {
