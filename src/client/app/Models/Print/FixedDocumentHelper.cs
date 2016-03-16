@@ -50,44 +50,63 @@ namespace AnalitF.Net.Client.Models.Print
 				HorizontalAlignment = HorizontalAlignment.Left
 			};
 
-			var height = size.Height - border.BorderThickness.Top - border.BorderThickness.Bottom;
 			var width = size.Width - border.BorderThickness.Left - border.BorderThickness.Right;
+			var height = size.Height - border.BorderThickness.Top - border.BorderThickness.Bottom;
+			var resultSize = new Size(width, height);
+			var leftLocal = left;
+			var offset = count - left;
+			MakeGrid(resultSize, left, i => {
+					var element = map(offset + i);
+					element.Measure(resultSize);
+				return element.DesiredSize;
+				}, (i, r, c) => {
+					leftLocal--;
+					var element = map(offset + i);
+					element.Measure(resultSize);
+					if (r > panel.RowDefinitions.Count - 1)
+						panel.RowDefinitions.Add(new RowDefinition());
+					if (c > panel.ColumnDefinitions.Count - 1)
+						panel.ColumnDefinitions.Add(new ColumnDefinition());
 
-			var columnIndex = 0;
-			var rowIndex = 0;
-			double consumedWidth = 0;
+					element.SetValue(Grid.RowProperty, r);
+					element.SetValue(Grid.ColumnProperty, c);
+					panel.Children.Add(element);
+				});
+			left = leftLocal;
+			return border;
+		}
 
-			for (var i = count - left; i < count; i++) {
-				var element = map(i);
-				element.Measure(size);
-
-				if (consumedWidth + element.DesiredSize.Width > width) {
-					consumedWidth = 0;
-					columnIndex = 0;
-					rowIndex++;
-				}
-				consumedWidth += element.DesiredSize.Width;
-
-				if (columnIndex == 0) {
-					if (height < element.DesiredSize.Height) {
+		public static void MakeGrid(Size size, int count, Func<int, Size> mesure, Action<int, int, int> place)
+		{
+			var index = 0;
+			var col = 0;
+			var row = 0;
+			var width = size.Width;
+			var height = size.Height;
+			var leftHeight = height;
+			while (leftHeight > 0) {
+				var leftWidth = width;
+				var rowHeight = 0d;
+				while (leftWidth > 0) {
+					var cellSize = mesure(index);
+					rowHeight = Math.Max(rowHeight, cellSize.Height);
+					//если есть достаточно место формируем ячейку
+					//если ячейка первая но места нет значит размер ячейки больше размера страницы и мы все равно должны его ее сформировать
+					if ((cellSize.Height <= leftHeight || row == 0) && (cellSize.Width <= leftWidth || col == 0)) {
+						place(index, row, col);
+						col++;
+						leftWidth -= cellSize.Width;
+						index++;
+						if (index == count)
+							return;
+					} else {
 						break;
 					}
-					else {
-						height -= element.DesiredSize.Height;
-					}
 				}
-				if (rowIndex > panel.RowDefinitions.Count - 1)
-					panel.RowDefinitions.Add(new RowDefinition());
-				if (columnIndex > panel.ColumnDefinitions.Count - 1)
-					panel.ColumnDefinitions.Add(new ColumnDefinition());
-
-				element.SetValue(Grid.RowProperty, rowIndex);
-				element.SetValue(Grid.ColumnProperty, columnIndex);
-				panel.Children.Add(element);
-				columnIndex++;
-				left--;
+				leftHeight -= rowHeight;
+				col = 0;
+				row++;
 			}
-			return border;
 		}
 	}
 }

@@ -35,19 +35,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public SettingsViewModel()
 		{
-			MarkupAddress = new NotifyValue<Address>();
-			Markups = new NotifyValue<IList<MarkupConfig>>();
-			VitallyImportantMarkups = new NotifyValue<IList<MarkupConfig>>();
-			Nds18Markups = new NotifyValue<IList<MarkupConfig>>();
+			InitFields();
 
-			SelectedTab = new NotifyValue<string>(lastTab ?? "OverMarkupsTab");
-			CurrentWaybillSettings = new NotifyValue<WaybillSettings>();
-			CurrentDirMap = new NotifyValue<DirMap>();
-			IsWaybillDirEnabled = new NotifyValue<bool>();
-			DirMaps = new List<DirMap>();
-			Addresses = new List<Address>();
-			Styles = new List<CustomStyle>();
 			DisplayName = "Настройка";
+			SelectedTab.Value = lastTab ?? "OverMarkupsTab";
 
 			if (String.IsNullOrEmpty(Settings.Value.WaybillDir))
 				Settings.Value.WaybillDir = Settings.Value.MapPath("Waybills");
@@ -63,8 +54,6 @@ namespace AnalitF.Net.Client.ViewModels
 			waybillConfig = Settings.Value.Waybills;
 			if (Session != null) {
 				Session.FlushMode =  FlushMode.Never;
-				Addresses = Session.Query<Address>().OrderBy(a => a.Name).ToList();
-				CurrentAddress = Addresses.FirstOrDefault();
 				DirMaps = Session.Query<DirMap>().Where(m => m.Supplier.Name != null).OrderBy(d => d.Supplier.FullName).ToList();
 				CurrentDirMap.Value = DirMaps.FirstOrDefault();
 
@@ -73,19 +62,15 @@ namespace AnalitF.Net.Client.ViewModels
 				Session.SaveEach(newStyles);
 				Styles = Session.Query<CustomStyle>().OrderBy(s => s.Description).ToList();
 			}
-			else {
-				Addresses = Env.Addresses;
-			}
 
 
-			HaveAddresses = Addresses.Count > 0;
+			HaveAddresses = Addresses.Length > 0;
 			MarkupAddress.Select(x => MarkupByType(MarkupType.Over, x))
 				.Subscribe(Markups);
 			MarkupAddress.Select(x => MarkupByType(MarkupType.VitallyImportant, x))
 				.Subscribe(VitallyImportantMarkups);
 			MarkupAddress.Select(x => MarkupByType(MarkupType.Nds18, x))
 				.Subscribe(Nds18Markups);
-			MarkupAddress.Value = Addresses.FirstOrDefault();
 
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
 				SelectedTab.Value = "LoginTab";
@@ -142,8 +127,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool OverwriteVitallyImportant { get; set; }
 		public NotifyValue<IList<MarkupConfig>> VitallyImportantMarkups { get; set; }
 
-		public List<Address> Addresses { get; set; }
-
 		public List<CustomStyle> Styles { get; set; }
 
 		public Address CurrentAddress
@@ -160,6 +143,14 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+
+			MarkupAddress.Value = Address;
+			CurrentAddress = Address;
+		}
 
 		private static string Mask(string password1)
 		{

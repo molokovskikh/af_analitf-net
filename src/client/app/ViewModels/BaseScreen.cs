@@ -159,7 +159,8 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
-			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id);
+			if (Shell != null)
+				Address = Addresses.FirstOrDefault(x => x.Id == Shell.CurrentAddress?.Id);
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)
@@ -235,7 +236,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Mute(Session?.Query<Settings>()?.FirstOrDefault()
 				?? Env.Settings
 					?? new Settings());
-			Addresses = Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray() ?? new Address[0];
+			Addresses = Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray()
+				?? Env.Addresses?.ToArray() ?? new Address[0];
 			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id);
 		}
 

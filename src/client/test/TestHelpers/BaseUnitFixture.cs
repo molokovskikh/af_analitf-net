@@ -65,15 +65,22 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (addresses.Length == 0) {
 				addresses = new[] { address };
 			}
-			screen.Settings.Value = new Settings(addresses);
+			var settings = new Settings(addresses);
+			shell.CurrentAddress = address;
+			shell.Addresses = addresses.ToList();
+
+			screen.Settings.Value = settings;
 			screen.User = user;
 			screen.Address = address;
 			screen.Parent = shell;
 			screen.Addresses = addresses;
-			ScreenExtensions.TryActivate(screen);
+			Open(screen);
 			shell.ActiveItem = screen;
-			shell.CurrentAddress = address;
-			shell.Addresses = addresses.ToList();
+		}
+
+		protected void Open(BaseScreen screen)
+		{
+			ScreenExtensions.TryActivate(screen);
 		}
 
 		protected void Close(object model)
