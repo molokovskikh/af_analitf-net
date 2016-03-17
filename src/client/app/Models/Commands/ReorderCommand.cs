@@ -18,8 +18,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public override void Execute()
 		{
 			var order = Session.Load<T>(id);
-			var orders = Session.Query<Order>().Where(o => o.Address == order.Address
-				&& !o.Frozen)
+			var orders = Session.Query<Order>().Where(o => o.Address == order.Address && !o.Frozen)
 				.ToArray()
 				.Where(o => o != order)
 				.ToArray();
@@ -28,7 +27,8 @@ namespace AnalitF.Net.Client.Models.Commands
 			var regionIds = prices.Select(o => o.Id.RegionId).ToArray();
 			var productIds = order.Lines.Select(l => l.ProductId).ToArray();
 			var offers = Offer.Orderable(Session.Query<Offer>())
-				.Where(o => priceIds.Contains(o.Price.Id.PriceId)
+				.Where(o => !o.Junk
+					&& priceIds.Contains(o.Price.Id.PriceId)
 					&& regionIds.Contains(o.Price.Id.RegionId)
 					&& productIds.Contains(o.ProductId))
 				.ToArray();

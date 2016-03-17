@@ -2,6 +2,7 @@
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.NHibernate;
 using Common.Tools;
@@ -33,17 +34,17 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			});
 			cmd.Execute();
 
-			Assert.AreEqual(String.Format(@"адрес доставки {0}
-    прайс-лист {1}
-        {2} - {3}: имеется различие в цене препарата (старая цена: {4:C}; новая цена: {5:C})
-", address.Name, offer.Price.Name, offer.ProductSynonym, offer.ProducerSynonym, oldCost, offer.Cost), cmd.Result);
+			Assert.AreEqual(
+				$@"адрес доставки {address.Name}
+    прайс-лист {offer.Price.Name}
+        {offer.ProductSynonym} - {offer.ProducerSynonym}: имеется различие в цене препарата (старая цена: {oldCost:C}; новая цена: {offer.Cost:C})
+", cmd.Result);
 			var orders = session.Query<Order>().ToArray();
 			Assert.AreEqual(1, orders.Length);
 			order = orders[0];
 			var line = order.Lines[0];
 			Assert.AreEqual(LineResultStatus.CostChanged, line.SendResult);
-			var message = String.Format("имеется различие в цене препарата (старая цена: {0:C}; новая цена: {1:C})",
-				oldCost, offer.Cost);
+			var message = $"имеется различие в цене препарата (старая цена: {oldCost:C}; новая цена: {offer.Cost:C})";
 			Assert.AreEqual(message, line.LongSendError);
 		}
 
@@ -79,9 +80,10 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			var cmd = InitCmd(new UnfreezeCommand<Order>(order.Id) { Restore = true });
 			cmd.Execute();
 			var text = (string)cmd.Result;
-			var message = String.Format(@"адрес доставки {0}
-    прайс-лист {1} - Заказ был заморожен, т.к. прайс-листа нет в обзоре
-", address.Name, price.Name);
+			var message =
+				$@"адрес доставки {address.Name}
+    прайс-лист {price.Name} - Заказ был заморожен, т.к. прайс-листа нет в обзоре
+";
 			Assert.AreEqual(message, text);
 		}
 
@@ -92,17 +94,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.DeleteEach<Order>();
 
 			var offer = session.Query<Offer>().First();
-			var maxId = session.Query<Price>().ToArray().Max(p => p.Id.PriceId);
-			var price = new Price("Тест") {
-				RegionName = "Воронеж",
-				Id = {
-					PriceId = maxId + 10,
-					RegionId = offer.Price.Id.RegionId
-				},
-				RegionId = offer.Price.Id.RegionId
-			};
-			session.Save(price);
-			session.Flush();
+			var price = CreatePrice(offer);
 			var order = new Order(price, address) {
 				Frozen = true
 			};
@@ -117,8 +109,58 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			var cmd = InitCmd(new UnfreezeCommand<Order>(order.Id));
 			cmd.Execute();
 			var text = (string)cmd.Result;
-			var message = String.Format("Заказ №{0} невозможно \"разморозить\", т.к. прайс-листа Тест - Воронеж нет в обзоре\r\n", order.Id);
+			var message = $"Заказ №{order.Id} невозможно \"разморозить\", т.к. прайс-листа Тест - Воронеж нет в обзоре\r\n";
 			Assert.AreEqual(message, text);
+		}
+
+		private Price CreatePrice(Offer offer)
+		{
+			var maxId = session.Query<Price>().ToArray().Max(p => p.Id.PriceId);
+			var price = new Price("Тест") {
+				RegionName = "Воронеж",
+				Id = {
+					PriceId = maxId + 10,
+					RegionId = offer.Price.Id.RegionId
+				},
+				RegionId = offer.Price.Id.RegionId
+			};
+			session.Save(price);
+			session.Flush();
+			return price;
+		}
+
+		[Test]
+		public void Ignore_junk_on_reorder()
+		{
+			restore = true;
+			session.DeleteEach<Order>();
+			var offer = session.Query<Offer>().First(x => x.RequestRatio == null);
+			var offer1 = session.Query<Offer>().First(x => x.ProductId != offer.ProductId);
+			var order = MakeOrder(offer);
+			var priceDst = CreatePrice(offer);
+			var random = new Random();
+			var newOffer = new Offer(priceDst, offer, 253);
+			newOffer.Id.OfferId += (ulong)random.Next();
+			session.Save(newOffer);
+
+			newOffer = new Offer(priceDst, offer, 30);
+			newOffer.Junk = true;
+			newOffer.Id.OfferId += (ulong)random.Next();
+			session.Save(newOffer);
+
+			newOffer = new Offer(priceDst, offer1, 879);
+			newOffer.Id.OfferId += (ulong)random.Next();
+			session.Save(newOffer);
+			MakeOrder(newOffer);
+
+			var cmd = InitCmd(new ReorderCommand<Order>(order.Id));
+			cmd.Execute();
+
+			var orders = session.Query<Order>().ToList();
+			Assert.AreEqual(1, orders.Count);
+			var result = orders[0];
+			Assert.AreEqual(priceDst, result.Price);
+			Assert.AreEqual(253, result.Lines[1].Cost);
 		}
 	}
 }

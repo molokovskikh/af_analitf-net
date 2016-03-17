@@ -233,17 +233,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return sentOrder;
 		}
 
-		protected Order MakeOrder(Offer offer = null, Address toAddress = null)
-		{
-			offer = offer ?? session.Query<Offer>().First(x => x.RequestRatio == null);
-			var order = new Order(offer.Price, toAddress ?? address);
-			order.TryOrder(offer, 1);
-			offer.OrderLine = order.Lines[0];
-			session.Save(order);
-			session.Flush();
-			return order;
-		}
-
 		protected void Deactivate(Screen model)
 		{
 			ScreenExtensions.TryDeactivate(model, false);
