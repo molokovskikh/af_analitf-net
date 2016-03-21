@@ -65,7 +65,8 @@ namespace AnalitF.Net.Client.Views
 			DataContextChanged += (sender, args) => {
 				var model = (ShellViewModel)DataContext;
 				model.Settings.Where(x => x != null).Subscribe(x => {
-					if (x.EditAddresses)
+					//если шаблон задан не нужно его переопределять это приведет к ошибкам
+					if (x.EditAddresses && Addresses.ItemTemplateSelector == null)
 						Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
 					else
 						Addresses.ItemTemplateSelector = null;
