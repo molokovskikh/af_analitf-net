@@ -36,6 +36,10 @@
 				<TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}" />
 			</StackPanel>
 		</DataTemplate>
+
+		<DataTemplate x:Key="AddressTemplate2">
+			<TextBlock Text="{Binding Name}" />
+		</DataTemplate>
 	</Window.Resources>
 
 	<Grid>

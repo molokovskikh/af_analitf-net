@@ -21,6 +21,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
+using VerticalAlignment = System.Windows.VerticalAlignment;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -37,8 +38,26 @@ namespace AnalitF.Net.Client.Views
 		{
 			var parent = ((FrameworkElement)container).TemplatedParent;
 			if (parent is ComboBox)
-				return null;
+				return (DataTemplate)window.FindResource("AddressTemplate2");
 			return (DataTemplate)window.FindResource("AddressTemplate");
+		}
+	}
+
+	public class AddressTemplateSelector2 : DataTemplateSelector
+	{
+		Window window;
+
+		public AddressTemplateSelector2(Window window)
+		{
+			this.window = window;
+		}
+
+		public override DataTemplate SelectTemplate(object item, DependencyObject container)
+		{
+			var parent = ((FrameworkElement)container).TemplatedParent;
+			if (parent is ComboBox)
+				return (DataTemplate)window.FindResource("AddressTemplate2");
+			return (DataTemplate)window.FindResource("AddressTemplate2");
 		}
 	}
 
@@ -52,7 +71,7 @@ namespace AnalitF.Net.Client.Views
 		public ShellView()
 		{
 			InitializeComponent();
-			Addresses.DisplayMemberPath = "Name";
+			Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);
 			notificationTimer.Tick += UpdateNot;
 			Loaded += (sender, args) => {
 				//для тестов
@@ -68,13 +87,11 @@ namespace AnalitF.Net.Client.Views
 					//если шаблон задан не нужно его переопределять это приведет к ошибкам
 					if (x.EditAddresses) {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector)) {
-							Addresses.DisplayMemberPath = null;
 							Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
 						}
 					} else {
-						if (Addresses.ItemTemplateSelector is AddressTemplateSelector) {
-							Addresses.ItemTemplateSelector = null;
-							Addresses.DisplayMemberPath = "Name";
+						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector2)) {
+							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);
 						}
 					}
 				});
