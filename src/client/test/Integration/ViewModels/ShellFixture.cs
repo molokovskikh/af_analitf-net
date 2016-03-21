@@ -251,12 +251,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Reload_settings()
 		{
 			restore = true;
-			var settingsModel = Init<SettingsViewModel>();
-			settingsModel.Settings.Value.OpenRejects = !settingsModel.Settings.Value.OpenRejects;
-			var messages = manager.MessageOpened.Collect();
-			var results = settingsModel.Save().ToList();
-			Assert.IsEmpty(messages.Implode());
-			Close(settingsModel);
+			SettingsViewModel settingsModel = null;
+			manager.DialogOpened.OfType<SettingsViewModel>().Subscribe(x => {
+				settingsModel = x;
+				x.Settings.Value.OpenRejects = !x.Settings.Value.OpenRejects;
+				var messages = manager.MessageOpened.Collect();
+				var results = x.Save().ToList();
+				Assert.IsEmpty(messages.Implode());
+				Close(x);
+			});
+			shell.ShowSettings();
 
 			scheduler.AdvanceByMs(1000);
 			Assert.AreEqual(settingsModel.Settings.Value.OpenRejects,

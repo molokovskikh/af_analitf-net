@@ -18,5 +18,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(Address);
 			Address.Value += " " + Address.Id;
 		}
+
+		public override void Rollback(ISession session)
+		{
+			session.Delete(Address);
+		}
 	}
 }
