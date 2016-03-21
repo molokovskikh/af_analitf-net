@@ -906,7 +906,7 @@ namespace AnalitF.Net.Client.ViewModels
 			bool checkSettings = true)
 		{
 			//могут измениться настройки адресов, нужно сохранить изменения
-			session.Flush();
+			session?.Flush();
 			if (checkSettings && !CheckSettings())
 				return Enumerable.Empty<IResult>();
 
