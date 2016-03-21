@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Views
 		public ShellView()
 		{
 			InitializeComponent();
-			Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
+			Addresses.DisplayMemberPath = "Name";
 			notificationTimer.Tick += UpdateNot;
 			Loaded += (sender, args) => {
 				//для тестов
@@ -66,10 +66,17 @@ namespace AnalitF.Net.Client.Views
 				var model = (ShellViewModel)DataContext;
 				model.Settings.Where(x => x != null).Subscribe(x => {
 					//если шаблон задан не нужно его переопределять это приведет к ошибкам
-					if (x.EditAddresses && Addresses.ItemTemplateSelector == null)
-						Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
-					else
-						Addresses.ItemTemplateSelector = null;
+					if (x.EditAddresses) {
+						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector)) {
+							Addresses.DisplayMemberPath = null;
+							Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
+						}
+					} else {
+						if (Addresses.ItemTemplateSelector is AddressTemplateSelector) {
+							Addresses.ItemTemplateSelector = null;
+							Addresses.DisplayMemberPath = "Name";
+						}
+					}
 				});
 			};
 
