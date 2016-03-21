@@ -1,16 +1,22 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.ComponentModel;
 using NHibernate;
+using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
-	public class LocalAddress
+	[Description("Создает адрес доставки на сервере")]
+	public class CreateAddress : ServerFixture
 	{
-		public void Execute(ISession session)
+		public TestAddress Address;
+
+		public override void Execute(ISession session)
 		{
-			var address = new Address("Тестовый адрес");
-			session.Save(address);
-			address.Name += " " + address.Id;
-			session.Save(address);
+			var user = User(session);
+
+			Address = user.Client.CreateAddress();
+			user.AvaliableAddresses.Add(Address);
+			session.Save(Address);
+			Address.Value += " " + Address.Id;
 		}
 	}
 }

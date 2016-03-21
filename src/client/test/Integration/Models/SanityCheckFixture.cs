@@ -86,5 +86,14 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			var settings = session.Query<Settings>().First();
 			Assert.AreEqual(1, settings.Markups.Count(x => x.Type == MarkupType.Nds18));
 		}
+
+		[Test]
+		public void Sanity_check_invalid_data()
+		{
+			var id = address.Id + new Random().Next();
+			session.CreateSQLQuery("delete from Addresses").ExecuteUpdate();
+			session.CreateSQLQuery("insert into Addresses(Id) values(:id)").SetParameter("id", id).ExecuteUpdate();
+			check.Check();
+		}
 	}
 }

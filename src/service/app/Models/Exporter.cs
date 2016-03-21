@@ -156,6 +156,7 @@ namespace AnalitF.Net.Service.Models
 		public Address BatchAddress;
 		public List<UpdateData> Result = new List<UpdateData>();
 		public List<ExternalRawFile> External = new List<ExternalRawFile>();
+		public Address[] Addresses;
 
 		public Exporter(ISession session, Config.Config config, RequestLog job)
 		{
@@ -179,6 +180,7 @@ namespace AnalitF.Net.Service.Models
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
+			Addresses = user.AvaliableAddresses.Intersect(Addresses ?? user.AvaliableAddresses.ToArray()).ToArray();
 		}
 
 		//Все даты передаются в UTC!
@@ -1488,7 +1490,7 @@ where a.MailId in ({ids.Implode()})";
 				.SetParameter("userId", user.Id)
 				.ExecuteUpdate();
 
-			var addresses = user.AvaliableAddresses.Select(a => (uint?)a.Id).ToArray();
+			var addresses = Addresses.Select(a => (uint?)a.Id).ToArray();
 			var prices = session.Query<ActivePrice>().Select(p => p.Id).ToArray();
 			var orders = session.Query<Order>()
 				.Where(o => !o.Deleted
@@ -1600,7 +1602,7 @@ group by ol.RowId";
 			var condition = new StringBuilder("where oh.Deleted = 0");
 			if (existOrderIds.Length > 0) {
 				condition.Append(" and oh.RowId not in (");
-				condition.Append(String.Join(", ", existOrderIds));
+				condition.Append(existOrderIds.Implode());
 				condition.Append(") ");
 			}
 			condition.Append(" and oh.AddressId in (");

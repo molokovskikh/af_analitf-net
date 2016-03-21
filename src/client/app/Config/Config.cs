@@ -181,7 +181,7 @@ namespace AnalitF.Net.Client.Config
 			return builder.Uri;
 		}
 
-		public Uri SyncUrl(string key, DateTime? lastSync)
+		public Uri SyncUrl(string key, DateTime? lastSync, IEnumerable<Address> addresses)
 		{
 			var queryString = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("reset", "true"),
@@ -190,6 +190,8 @@ namespace AnalitF.Net.Client.Config
 
 			if (lastSync != null)
 				queryString.Add(new KeyValuePair<string, string>("lastSync", lastSync.Value.ToString("O")));
+			if (addresses != null)
+				queryString.Add(new KeyValuePair<string, string>("addressIds", String.Join(",", addresses.Select(x => x.Id))));
 
 			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
 				Query = BuildQueryString(queryString)
@@ -205,7 +207,7 @@ namespace AnalitF.Net.Client.Config
 					stringBuilder.Append('&');
 				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Key));
 				stringBuilder.Append('=');
-				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value));
+				stringBuilder.Append(Uri.EscapeDataString(keyValuePair.Value ?? ""));
 			}
 			return stringBuilder.ToString();
 		}

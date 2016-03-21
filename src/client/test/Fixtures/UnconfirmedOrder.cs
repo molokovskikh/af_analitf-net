@@ -14,6 +14,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	{
 		private uint priceId;
 		public TestOrder Order;
+		public TestAddress Address;
+		public bool Clean = false;
 
 		public UnconfirmedOrder()
 		{
@@ -31,9 +33,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var user2 = client.CreateUser(session);
 			user2.AvaliableAddresses.AddEach(client.Addresses);
 			user.AllowDownloadUnconfirmedOrders = true;
-			session.CreateSQLQuery("delete from Orders.OrdersHead where Submited = 0 and ClientCode = :clientId")
-				.SetParameter("clientId", user.Client.Id)
-				.ExecuteUpdate();
+			if (Clean)
+				session.CreateSQLQuery("delete from Orders.OrdersHead where Submited = 0 and ClientCode = :clientId")
+					.SetParameter("clientId", user.Client.Id)
+					.ExecuteUpdate();
 			session.CreateSQLQuery("insert into Customers.UserPrices(PriceId, RegionId, UserId) " +
 				"select PriceId, RegionId, :target " +
 				"from Customers.UserPrices " +
@@ -51,6 +54,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				Submited = false,
 				Processed = false
 			};
+			if (Address != null)
+				Order.Address = Address;
 			//уцененные препараты не восстанавливаются
 			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
 			Order.AddItem(offer, 1);

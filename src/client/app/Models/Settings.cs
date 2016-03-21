@@ -135,6 +135,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool WarnIfOrderedYesterday { get; set; }
 		public virtual bool UseSupplierPriceWithNdsForMarkup { get; set; }
 		public virtual bool CanViewOffersByCatalogName { get; set; }
+		public virtual bool EditAddresses { get; set; }
 		public virtual bool GroupByProduct { get; set; }
 		public virtual bool ShowPriceName { get; set; }
 		public virtual uint TrackRejectChangedDays { get; set; }

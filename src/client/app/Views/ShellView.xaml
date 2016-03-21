@@ -29,6 +29,15 @@
 			CommandParameter="ShowMnn" />
 	</Window.InputBindings>
 
+	<Window.Resources>
+		<DataTemplate x:Key="AddressTemplate">
+			<StackPanel Orientation="Horizontal">
+				<CheckBox VerticalAlignment="Center" IsChecked="{Binding Config.IsActive}" />
+				<TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}" />
+			</StackPanel>
+		</DataTemplate>
+	</Window.Resources>
+
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -250,7 +259,7 @@
 
 			<StackPanel>
 				<TextBlock>Адрес заказа:</TextBlock>
-				<ComboBox x:Name="Addresses" DisplayMemberPath="Name" />
+				<ComboBox x:Name="Addresses" />
 			</StackPanel>
 		</controls:ToolbarPanel>
 

@@ -14,7 +14,12 @@ namespace AnalitF.Net.Service.Controllers
 {
 	public class MainController : JobController
 	{
-		public HttpResponseMessage Get(bool reset = false, string data = null, DateTime? lastSync = null)
+		public HttpResponseMessage Get(bool reset = false,
+			string data = null,
+			DateTime? lastSync = null,
+			//перечень активных адресов доставки через запятую
+			//для экспорта неподтвержденных заявок
+			string addressIds = null)
 		{
 			var updateType = data ?? GetType().Name;
 			RequestLog existsJob = null;
@@ -46,6 +51,9 @@ namespace AnalitF.Net.Service.Controllers
 				existsJob.StartJob(Session,
 					(session, job) => {
 						using (var exporter = new Exporter(session, Config, job)) {
+							exporter.Addresses = addressIds?.Split(',')
+							.Select(x => session.Load<Address>(Convert.ToUInt32(x)))
+							.ToArray();
 							if (data.Match("Waybills"))
 								exporter.ExportDocs();
 							else

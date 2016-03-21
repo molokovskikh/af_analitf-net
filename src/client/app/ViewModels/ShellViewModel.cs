@@ -175,16 +175,6 @@ namespace AnalitF.Net.Client.ViewModels
 				PendingDownloads.Remove(l);
 			}));
 			CloseDisposable.Add(Env.Bus.Listen<Stat>().Subscribe(e => Stat.Value = new Stat(e, Stat.Value)));
-			CloseDisposable.Add(Env.Bus.Listen<Settings>()
-				.ObserveOn(Env.UiScheduler)
-				.Select(_ => {
-					//на странице настроек могут быть удалены наценки по этому мы не можем делать refresh
-					//делаем Evict что бы избавиться от кеша
-					//и затем перезагружаем данные
-					session.Evict(Settings.Value);
-					return session.Query<Settings>().First();
-				})
-				.Subscribe(Settings));
 
 			Schedules.Select(_ =>
 				Schedules.Value.Count == 0
@@ -431,6 +421,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
+			var addressConfigs = session.Query<AddressConfig>().ToArray();
+			Addresses.Each(x => x.Config = addressConfigs.FirstOrDefault(y => y.Address == x));
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
@@ -671,7 +663,6 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
 				yield break;
 			User.Value.LastSync = null;
-			session.Flush();
 			foreach (var result in Sync(new UpdateCommand())) {
 					yield return result;
 			}
@@ -914,6 +905,8 @@ namespace AnalitF.Net.Client.ViewModels
 			Func<RemoteCommand, UpdateResult> func,
 			bool checkSettings = true)
 		{
+			//могут измениться настройки адресов, нужно сохранить изменения
+			session.Flush();
 			if (checkSettings && !CheckSettings())
 				return Enumerable.Empty<IResult>();
 

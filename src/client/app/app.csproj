@@ -253,6 +253,7 @@
     <Compile Include="Helpers\WinApi.cs" />
     <Compile Include="Helpers\WpfHelper.cs" />
     <Compile Include="Models\Address.cs" />
+    <Compile Include="Models\AddressConfig.cs" />
     <Compile Include="Models\Attachment.cs" />
     <Compile Include="Models\AwaitedItem.cs" />
     <Compile Include="Models\BaseOffer.cs" />

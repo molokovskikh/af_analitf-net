@@ -24,6 +24,24 @@ using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.Views
 {
+	public class AddressTemplateSelector : DataTemplateSelector
+	{
+		Window window;
+
+		public AddressTemplateSelector(Window window)
+		{
+			this.window = window;
+		}
+
+		public override DataTemplate SelectTemplate(object item, DependencyObject container)
+		{
+			var parent = ((FrameworkElement)container).TemplatedParent;
+			if (parent is ComboBox)
+				return null;
+			return (DataTemplate)window.FindResource("AddressTemplate");
+		}
+	}
+
 	public partial class ShellView : Window
 	{
 		private object originalContent;
@@ -34,6 +52,7 @@ namespace AnalitF.Net.Client.Views
 		public ShellView()
 		{
 			InitializeComponent();
+			Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
 			notificationTimer.Tick += UpdateNot;
 			Loaded += (sender, args) => {
 				//для тестов
@@ -41,6 +60,16 @@ namespace AnalitF.Net.Client.Views
 				button.SetValue(AutomationProperties.AutomationIdProperty, "Update");
 				originalContent = data.Content;
 				((ShellViewModel)DataContext).Notifications.Subscribe(n => Append(n));
+			};
+
+			DataContextChanged += (sender, args) => {
+				var model = (ShellViewModel)DataContext;
+				model.Settings.Where(x => x != null).Subscribe(x => {
+					if (x.EditAddresses)
+						Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
+					else
+						Addresses.ItemTemplateSelector = null;
+				});
 			};
 
 			EventManager.RegisterClassHandler(typeof(ShellView), Hyperlink.RequestNavigateEvent,

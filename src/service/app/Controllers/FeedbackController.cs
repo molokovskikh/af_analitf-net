@@ -20,8 +20,8 @@ namespace AnalitF.Net.Service.Controllers
 		public HttpResponseMessage Post(FeedbackMessage message)
 		{
 			var mail = new MailMessage();
-			mail.From = new MailAddress("afmail@analit.net", String.Format("Код пользователя {0} код клиента {1} [{2}]",
-				CurrentUser.Id, CurrentUser.Client.Id, CurrentUser.Client.Name));
+			mail.From = new MailAddress("afmail@analit.net",
+				$"Код пользователя {CurrentUser.Id} код клиента {CurrentUser.Client.Id} [{CurrentUser.Client.Name}]");
 			if (message.IsBilling)
 				mail.To.Add(new MailAddress(Config.BillingMail));
 			else if (message.IsOffice)

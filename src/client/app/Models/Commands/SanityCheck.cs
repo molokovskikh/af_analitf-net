@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				foreach (var address in addresses.Except(new [] { mainAddress }))
 					settings.CopyMarkups(mainAddress, address);
-					//если ничего восстановить не удалось тогда берем значения по умолчанию
+				//если ничего восстановить не удалось тогда берем значения по умолчанию
 				foreach (var address in addresses) {
 					if (settings.Markups.Count(x => x.Address == address) == 0)
 						MarkupConfig.Defaults(address).Each(settings.AddMarkup);
@@ -125,6 +125,10 @@ namespace AnalitF.Net.Client.Models.Commands
 							Type = MarkupType.Nds18,
 						}));
 				}
+
+				var addressConfigs = session.Query<AddressConfig>().ToArray();
+				session.DeleteEach(addressConfigs.Where(x => x.Address == null));
+				session.SaveEach(addresses.Except(addressConfigs.Select(x => x.Address)).Select(x => new AddressConfig(x)));
 
 				//если есть адреса то должен быть и пользователь
 				//если только база не была поломана

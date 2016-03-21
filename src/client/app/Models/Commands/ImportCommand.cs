@@ -105,6 +105,11 @@ from MarkupConfigs m
 left join Addresses a on a.Id = m.AddressId
 where a.Id is null;
 
+delete s
+from AddressConfigs s
+left join Addresses a on a.Id = s.AddressId
+where a.Id is null;
+
 -- очищаем ожидаемые позиции если товар был удален
 delete i
 from AwaitedItems i

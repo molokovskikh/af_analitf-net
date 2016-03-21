@@ -80,6 +80,26 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Do_not_load_order_on_inactive_address()
+		{
+			localSession.DeleteEach<Order>();
+			var createAddress = new CreateAddress();
+			Fixture(createAddress);
+			Run(new UpdateCommand());
+			Fixture(new UnconfirmedOrder());
+			Fixture(new UnconfirmedOrder {
+				Address = createAddress.Address,
+				Clean = false
+			});
+			var config = localSession.Query<AddressConfig>().First(x => x.Address.Id == createAddress.Address.Id);
+			Assert.IsTrue(config.IsActive);
+			config.IsActive = false;
+			Run(new UpdateCommand());
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(1, orders.Length);
+		}
+
+		[Test]
 		public void Send_orders()
 		{
 			localSession.DeleteEach<SentOrder>();

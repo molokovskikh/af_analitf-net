@@ -118,7 +118,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 					IgnoreOrders = true,
 				};
-				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
+				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else if (SyncData.Match("OrderHistory")) {
@@ -128,7 +128,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
 					IgnoreWaybills = true,
 				};
-				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
+				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
 			}
 			else {
@@ -139,10 +139,11 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (syncData.Match("Waybills")) {
 					updateType = "загрузка накладных";
 				}
-				var url = Config.SyncUrl(syncData, lastSync);
+				var addresses = Session.Query<AddressConfig>().Where(x => x.IsActive).Select(x => x.Address);
+				var url = Config.SyncUrl(syncData, lastSync, addresses);
 				SendPrices(Client, settings, Token);
 				var request = Client.GetAsync(url, Token);
-				Log.InfoFormat("Запрос обновления, тип обновления '{0}'", updateType);
+				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
 
@@ -156,8 +157,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				string[] files;
 				using (response) {
 					var task = Download(response, cleaner);
-					task.ContinueWith(x =>
-					{
+					task.ContinueWith(x => {
 						//нам не интересны ошибки которые возникли здесь
 						//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
 						//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу

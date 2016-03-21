@@ -149,11 +149,11 @@
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
-    <Compile Include="Fixtures\CreateAddress.cs" />
+    <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
     <Compile Include="Fixtures\CreateSchedule.cs" />
-    <Compile Include="Fixtures\CreateServerAddress.cs" />
+    <Compile Include="Fixtures\CreateAddress.cs" />
     <Compile Include="Fixtures\CreateDelayOfPayment.cs" />
     <Compile Include="Fixtures\Diadok.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />

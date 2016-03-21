@@ -59,6 +59,9 @@ namespace AnalitF.Net.Client.Models
 		[IgnoreDataMember, Ignore]
 		public virtual IList<uint> YesterdayOrderedProductIds { get; set; }
 
+		[IgnoreDataMember, Ignore]
+		public virtual AddressConfig Config { get; set; }
+
 		public override string ToString()
 		{
 			return $"{Id} {Name}";
