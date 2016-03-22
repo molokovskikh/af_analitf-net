@@ -51,17 +51,16 @@ namespace AnalitF.Net.Service.Config
 
 		public string GetUpdatePath(AnalitfNetData data, RequestLog job)
 		{
-			//клиентское приложение передает некорректную информацию
-			//var channel = data.BinUpdateChannel?.ToLower();
-			//if (channel?.StartsWith("migration") == true) {
-			//	channel = channel.ToLower().Replace("migration-", "").Replace("migration", "");
-			//}
-			//if (job.Branch == "master")
-			//	return Path.Combine(UpdatePath,
-			//		String.IsNullOrEmpty(channel) ? "rtm" : channel);
-			//else if (job.Branch == "migration")
-			//	return Path.Combine(UpdatePath,
-			//		String.IsNullOrEmpty(channel) || channel == "rtm" ? "migration" : "migration-" + channel);
+			var channel = data.BinUpdateChannel?.ToLower();
+			if (channel?.StartsWith("migration") == true) {
+				channel = channel.ToLower().Replace("migration-", "").Replace("migration", "");
+			}
+			if (job.Branch == "master")
+				return Path.Combine(UpdatePath,
+					String.IsNullOrEmpty(channel) ? "rtm" : channel);
+			else if (job.Branch == "migration")
+				return Path.Combine(UpdatePath,
+					String.IsNullOrEmpty(channel) || channel == "rtm" ? "migration" : "migration-" + channel);
 
 			return Path.Combine(UpdatePath,
 				String.IsNullOrEmpty(data.BinUpdateChannel) ? "rtm" : data.BinUpdateChannel);
