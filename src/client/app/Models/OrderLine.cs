@@ -88,28 +88,16 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint? OldQuantity { get; set;  }
 
 		[Style("MixedNewCost", "MixedOldCost")]
-		public virtual bool IsCostChanged
-		{
-			get { return (SendResult & LineResultStatus.CostChanged) > 0; }
-		}
+		public virtual bool IsCostChanged => (SendResult & LineResultStatus.CostChanged) > 0;
 
 		[Style("MixedNewCost", "MixedOldCost")]
-		public virtual bool IsCostIncreased
-		{
-			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost > OldCost; }
-		}
+		public virtual bool IsCostIncreased => (SendResult & LineResultStatus.CostChanged) > 0 && NewCost > OldCost;
 
 		[Style("MixedNewCost", "MixedOldCost")]
-		public virtual bool IsCostDecreased
-		{
-			get { return (SendResult & LineResultStatus.CostChanged) > 0 && NewCost < OldCost; }
-		}
+		public virtual bool IsCostDecreased => (SendResult & LineResultStatus.CostChanged) > 0 && NewCost < OldCost;
 
 		[Style("NewQuantity", "OldQuantity")]
-		public virtual bool IsQuantityChanged
-		{
-			get { return (SendResult & LineResultStatus.QuantityChanged) > 0; }
-		}
+		public virtual bool IsQuantityChanged => (SendResult & LineResultStatus.QuantityChanged) > 0;
 
 		[Style("ProductSynonym", Context = "Correction")]
 		public virtual bool IsRejected
@@ -122,23 +110,14 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Style("Order.AddressName")]
-		public virtual bool IsCurrentAddress
-		{
-			get { return Order.IsCurrentAddress; }
-		}
+		public virtual bool IsCurrentAddress => Order.IsCurrentAddress;
 
 		[Style("Sum", Description = "Корректировка по цене и/или по количеству", Context = "CorrectionEnabled")]
-		public virtual bool IsSendError
-		{
-			get { return SendResult != LineResultStatus.OK; }
-		}
+		public virtual bool IsSendError => SendResult != LineResultStatus.OK;
 
 		//заглушка что бы работало смешение цветов от IsSendError
 		[Style("Sum")]
-		public virtual bool SelectCount
-		{
-			get { return !IsSendError; }
-		}
+		public virtual bool SelectCount => !IsSendError;
 
 		public virtual string Comment
 		{
@@ -168,27 +147,18 @@ namespace AnalitF.Net.Client.Models
 		/// <summary>
 		/// сумма по строке без отсрочки платежа, нужно для вычислений
 		/// </summary>
-		public virtual decimal Sum
-		{
-			get { return Count * Cost; }
-		}
+		public virtual decimal Sum => Count * Cost;
 
 		/// <summary>
 		/// сумма по строке с отсрочкой платежа, нужно для отображения в предложениях
 		/// </summary>
-		public virtual decimal ResultSum
-		{
-			get { return Count * ResultCost; }
-		}
+		public virtual decimal ResultSum => Count * ResultCost;
 
 		/// <summary>
 		/// сумма по строке с отсрочкой платежа или без в зависимости от настройки Отображать реальную цену поставщика
 		/// нужно для отображения в заказах
 		/// </summary>
-		public virtual decimal MixedSum
-		{
-			get { return Count * MixedCost; }
-		}
+		public virtual decimal MixedSum => Count * MixedCost;
 
 		public override decimal GetResultCost()
 		{
@@ -232,19 +202,14 @@ namespace AnalitF.Net.Client.Models
 
 			string error = null;
 			if (Count % SafeRequestRatio != 0) {
-				error = String.Format("Поставщиком определена кратность по заказываемой позиции.\r\nВведенное значение \"{0}\" не кратно установленному значению \"{1}\"",
-					Count,
-					RequestRatio);
+				error =
+					$"Поставщиком определена кратность по заказываемой позиции.\r\nВведенное значение \"{Count}\" не кратно установленному значению \"{RequestRatio}\"";
 			}
 			else if (MinOrderSum != null && Sum < MinOrderSum) {
-				error = String.Format("Сумма заказа \"{0}\" меньше минимальной сумме заказа \"{1}\" по данной позиции!",
-					Sum,
-					MinOrderSum);
+				error = $"Сумма заказа \"{Sum}\" меньше минимальной сумме заказа \"{MinOrderSum}\" по данной позиции!";
 			}
 			else if (MinOrderCount != null && Count < MinOrderCount) {
-				error = String.Format("'Заказанное количество \"{0}\" меньше минимального количества \"{1}\" по данной позиции!'",
-					Count,
-					MinOrderCount);
+				error = $"'Заказанное количество \"{Count}\" меньше минимального количества \"{MinOrderCount}\" по данной позиции!'";
 			}
 
 			if (!String.IsNullOrEmpty(error)) {
@@ -310,18 +275,10 @@ namespace AnalitF.Net.Client.Models
 			Order.RemoveLine(this);
 
 			if (rest > 0) {
-				if (rest == Count) {
-					log.AppendLine(String.Format("{0} : {1} ; Предложений не найдено",
-						order.Price.Name,
-						this));
-				}
-				else {
-					log.AppendLine(String.Format("{0} : {1} ; Уменьшено заказное количество {2} вместо {3}",
-						Order.Price.Name,
-						this,
-						Count - rest,
-						Count));
-				}
+				if (rest == Count)
+					log.AppendLine($"{order.Price.Name} : {this} ; Предложений не найдено");
+				else
+					log.AppendLine($"{Order.Price.Name} : {this} ; Уменьшено заказное количество {Count - rest} вместо {Count}");
 			}
 		}
 
@@ -358,21 +315,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void HumanizeSendError()
 		{
-			if (SendResult == LineResultStatus.CostChanged) {
+			if (SendResult == LineResultStatus.CostChanged)
 				SendError = "имеется различие в цене препарата";
-			}
-			else if (SendResult == LineResultStatus.QuantityChanged) {
+			else if (SendResult == LineResultStatus.QuantityChanged)
 				SendError = "доступное количество препарата в прайс-листе меньше заказанного ранее";
-			}
-			else if (SendResult == (LineResultStatus.QuantityChanged | LineResultStatus.CostChanged)) {
+			else if (SendResult == (LineResultStatus.QuantityChanged | LineResultStatus.CostChanged))
 				SendError = "имеются различия с прайс-листом в цене и количестве заказанного препарата";
-			}
-			else if (SendResult == LineResultStatus.NoOffers) {
+			else if (SendResult == LineResultStatus.NoOffers)
 				SendError = "предложение отсутствует";
-			}
-			else if (SendResult == LineResultStatus.CountReduced) {
-				SendError = "Уменьшено заказное количество";
-			}
+			else if (SendResult == LineResultStatus.CountReduced)
+				SendError = "уменьшено заказное количество";
+			else if (SendResult == LineResultStatus.CountChanged)
+				SendError = "изменилось заказное количество";
 			else {
 				SendError = "";
 			}
@@ -380,14 +334,14 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return String.Format("{0} - {1}", ProductSynonym, ProducerSynonym);
+			return $"{ProductSynonym} - {ProducerSynonym}";
 		}
 
 		public virtual string ToString(string format, IFormatProvider formatProvider)
 		{
 			switch (format) {
 				case "r":
-					return String.Join(" ", ToString() + ":", LongSendError);
+					return $"{this}: {LongSendError}";
 				default:
 					return ToString();
 			}
@@ -402,14 +356,13 @@ namespace AnalitF.Net.Client.Models
 					return "";
 				var datum = new List<string>();
 				if (IsCostChanged)
-					datum.Add(String.Format("старая цена: {0:C}", MixedOldCost));
-				if (IsQuantityChanged)
-					datum.Add(String.Format("старый заказ: {0:C}", OldQuantity));
+					datum.Add($"старая цена: {MixedOldCost:C}");
+				if ((SendResult & LineResultStatus.CountChanged) > 0 || IsQuantityChanged)
+					datum.Add($"старый заказ: {OldQuantity}");
 				if (IsCostChanged)
-					datum.Add(String.Format("новая цена: {0:C}", MixedNewCost));
-				if (IsQuantityChanged)
-					datum.Add(String.Format("текущий заказ: {0:C}", NewQuantity));
-
+					datum.Add($"новая цена: {MixedNewCost:C}");
+				if ((SendResult & LineResultStatus.CountChanged) > 0 || IsQuantityChanged)
+					datum.Add($"текущий заказ: {NewQuantity}");
 				var data = "";
 				if (datum.Count > 0)
 					data = "(" + datum.Implode("; ") + ")";
@@ -440,7 +393,7 @@ namespace AnalitF.Net.Client.Models
 					foreach (var orderLine in group) {
 						builder
 							.Append(currentOffset)
-							.AppendLine(String.Format("{0:r}", orderLine));
+							.AppendLine($"{orderLine:r}");
 					}
 				}
 			}
@@ -474,7 +427,7 @@ namespace AnalitF.Net.Client.Models
 					foreach (var orderLine in order.Lines.Where(l => l.SendResult != LineResultStatus.OK)) {
 						builder
 							.Append(currentOffset)
-							.AppendLine(String.Format("{0:r}", orderLine));
+							.AppendLine($"{orderLine:r}");
 					}
 				}
 			}

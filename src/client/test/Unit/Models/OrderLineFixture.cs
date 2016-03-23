@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AnalitF.Net.Client.Models;
 using NUnit.Framework;
 
@@ -9,11 +10,12 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 	{
 		private OrderLine line;
 		private Order order;
+		private Price price;
 
 		[SetUp]
 		public void Setup()
 		{
-			var price = new Price("АМП (Основной)");
+			price = new Price("АМП (Основной)");
 			order = new Order(price, new Address("Тестовый адрес"));
 			var offer = new Offer(price, 100) {
 				ProductSynonym = "ЭХИНАЦЕЯ ТРАВА пачка 50г (18%)",
@@ -74,6 +76,24 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual("прайс-лист АМП (Основной)\r\n" +
 				"    ЭХИНАЦЕЯ ТРАВА пачка 50г (18%) - Камелия-ЛТ ООО: имеется различие в цене препарата" +
 				" (старая цена: 100,00р.; новая цена: 150,00р.)\r\n", report);
+		}
+
+		[Test]
+		public void Format_quantity()
+		{
+			order = new Order(price, new Address("Тестовый адрес"));
+			var offer = new Offer(price, 100) {
+				ProductSynonym = "ЭХИНАЦЕЯ ТРАВА пачка 50г (18%)",
+				ProducerSynonym = "Камелия-ЛТ ООО",
+			};
+			line = order.TryOrder(offer, 10);
+			line.SendResult |= LineResultStatus.CountChanged;
+			line.NewQuantity = line.Count;
+			line.OldQuantity = 1;
+			line.HumanizeSendError();
+
+			var expected = @"ЭХИНАЦЕЯ ТРАВА пачка 50г (18%) - Камелия-ЛТ ООО: изменилось заказное количество (старый заказ: 1; текущий заказ: 10)";
+			Assert.AreEqual(expected, line.ToString("r", null));
 		}
 
 		[Test]

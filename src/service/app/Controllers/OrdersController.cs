@@ -126,8 +126,8 @@ where l.RequestId = :id;")
 							}
 							catch(OrderException e) {
 								//если здесь произошла ошибка значит есть проблема в клиентском приложении и нужно узнать об этом
-								Log.Error(String.Format("Не удалось сформировать заявку по позиции {0}", offer.Id), e);
-								throw new OrderException(String.Format("Не удалось сформировать заявку по позиции {0}", offer.Id), e);
+								Log.Error($"Не удалось сформировать заявку по позиции {offer.Id}", e);
+								throw new OrderException($"Не удалось сформировать заявку по позиции {offer.Id}", e);
 							}
 						}
 						if (order.OrderItems.Count > 0) {
@@ -135,7 +135,7 @@ where l.RequestId = :id;")
 						}
 					}
 					catch(OrderException e) {
-						Log.Warn(String.Format("Не удалось принять заказ {0}", clientOrder.ClientOrderId), e);
+						Log.Warn($"Не удалось принять заказ {clientOrder.ClientOrderId}", e);
 						errors.Add(new OrderResult(clientOrder.ClientOrderId, "Отправка заказов запрещена"));
 					}
 				}
@@ -282,14 +282,10 @@ where l.RequestId = :id;")
 					var result = controller.ProcessOrder();
 					if (result != null) {
 						var message = result.Type == MinReqStatus.ErrorType.MinReq
-							? String.Format("Поставщик отказал в приеме заказа." +
-								" Сумма заказа меньше минимально допустимой." +
-								" Минимальный заказ {0:0.00} заказано {1:0.00}.",
-								result.MinReq, order.CalculateSum())
-							: String.Format("Поставщик отказал в приеме дозаказа." +
-								" Сумма дозаказа меньше минимально допустимой." +
-								" Минимальный дозаказ {0:0.00} заказано {1:0.00}.",
-								result.MinReordering, order.CalculateSum());
+							? "Поставщик отказал в приеме заказа." + " Сумма заказа меньше минимально допустимой." +
+								$" Минимальный заказ {result.MinReq:0.00} заказано {order.CalculateSum():0.00}."
+							: "Поставщик отказал в приеме дозаказа." + " Сумма дозаказа меньше минимально допустимой." +
+								$" Минимальный дозаказ {result.MinReordering:0.00} заказано {order.CalculateSum():0.00}.";
 						errors.Add(new OrderResult(order.ClientOrderId, message));
 						orders.Remove(order);
 					}

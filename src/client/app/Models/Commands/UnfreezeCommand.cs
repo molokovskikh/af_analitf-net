@@ -194,7 +194,7 @@ namespace AnalitF.Net.Client.Models.Commands
 							line.HumanizeSendError();
 						}
 						if (line.Count != sourceLine.Count) {
-							line.SendResult |= LineResultStatus.QuantityChanged;
+							line.SendResult |= LineResultStatus.CountChanged;
 							line.NewQuantity = line.Count;
 							line.OldQuantity = sourceLine.Count;
 							line.HumanizeSendError();
@@ -221,15 +221,14 @@ namespace AnalitF.Net.Client.Models.Commands
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{order.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym} ; Предложений не найдено");
-				}
-				else {
+						$"{order.Price.Name} : {sourceLine} ; Предложений не найдено");
+				} else {
 					if (ShouldCalculateStatus(sourceLine)) {
 						((OrderLine)sourceLine).SendResult = LineResultStatus.CountReduced;
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{sourceOrder.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym}" +
+						$"{sourceOrder.Price.Name} : {sourceLine}" +
 							$" ; Уменьшено заказное количество {sourceLine.Count - rest} вместо {sourceLine.Count}");
 				}
 			}
