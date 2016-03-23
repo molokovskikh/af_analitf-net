@@ -357,7 +357,7 @@
 			</StatusBarItem>
 
 			<StatusBarItem>
-				<Button Name="ShowJournal" Padding="3, 2, 3, 2" ClipToBounds="True" IsEnabled="{Binding IsDataLoaded.Value}">
+				<Button Name="ShowJournal" Padding="3, 2, 3, 2" ClipToBounds="True" IsEnabled="{Binding IsDataLoaded.Value}" ToolTip="Журнал загрузок">
 					<StackPanel Orientation="Horizontal">
 						<Path Data="{StaticResource IconDownload}" Stretch="Uniform" Height="15" Fill="Black">
 							<Path.RenderTransform>
