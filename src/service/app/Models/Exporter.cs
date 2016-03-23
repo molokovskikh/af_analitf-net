@@ -508,7 +508,7 @@ where
 	products.CatalogId,
 	pr.Name as Producer,
 	mx.Cost as MaxProducerCost,
-	core.VitallyImportant as VitallyImportant,
+	core.VitallyImportant or catalog.VitallyImportant as VitallyImportant,
 	s.Synonym as ProductSynonym,
 	sfc.Synonym as ProducerSynonym,
 	if(k.Id is null or k.Date < at.PriceDate, ct.Cost, ifnull(ca.Cost, ct.Cost)) as Cost,
