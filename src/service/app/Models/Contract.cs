@@ -104,7 +104,6 @@ namespace AnalitF.Net.Client.Models
 		QuantityChanged = 2,
 		NoOffers = 4,
 		CountReduced = 8,
-		CountChanged = 16
 	}
 
 	public enum OrderResultStatus

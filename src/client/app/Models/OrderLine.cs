@@ -325,11 +325,8 @@ namespace AnalitF.Net.Client.Models
 				SendError = "предложение отсутствует";
 			else if (SendResult == LineResultStatus.CountReduced)
 				SendError = "уменьшено заказное количество";
-			else if (SendResult == LineResultStatus.CountChanged)
-				SendError = "изменилось заказное количество";
-			else {
+			else
 				SendError = "";
-			}
 		}
 
 		public override string ToString()
@@ -357,11 +354,11 @@ namespace AnalitF.Net.Client.Models
 				var datum = new List<string>();
 				if (IsCostChanged)
 					datum.Add($"старая цена: {MixedOldCost:C}");
-				if ((SendResult & LineResultStatus.CountChanged) > 0 || IsQuantityChanged)
+				if (IsQuantityChanged)
 					datum.Add($"старый заказ: {OldQuantity}");
 				if (IsCostChanged)
 					datum.Add($"новая цена: {MixedNewCost:C}");
-				if ((SendResult & LineResultStatus.CountChanged) > 0 || IsQuantityChanged)
+				if (IsQuantityChanged)
 					datum.Add($"текущий заказ: {NewQuantity}");
 				var data = "";
 				if (datum.Count > 0)

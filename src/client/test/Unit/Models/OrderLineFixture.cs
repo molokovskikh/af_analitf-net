@@ -87,12 +87,12 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				ProducerSynonym = "Камелия-ЛТ ООО",
 			};
 			line = order.TryOrder(offer, 10);
-			line.SendResult |= LineResultStatus.CountChanged;
-			line.NewQuantity = line.Count;
-			line.OldQuantity = 1;
+			line.SendResult |= LineResultStatus.QuantityChanged;
+			line.NewQuantity = 1;
+			line.OldQuantity = 10;
 			line.HumanizeSendError();
 
-			var expected = @"ЭХИНАЦЕЯ ТРАВА пачка 50г (18%) - Камелия-ЛТ ООО: изменилось заказное количество (старый заказ: 1; текущий заказ: 10)";
+			var expected = @"ЭХИНАЦЕЯ ТРАВА пачка 50г (18%) - Камелия-ЛТ ООО: доступное количество препарата в прайс-листе меньше заказанного ранее (старый заказ: 10; текущий заказ: 1)";
 			Assert.AreEqual(expected, line.ToString("r", null));
 		}
 

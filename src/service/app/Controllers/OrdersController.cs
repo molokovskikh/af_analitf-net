@@ -180,11 +180,9 @@ where l.RequestId = :id;")
 				if (order == null)
 					continue;
 				var price = session.Get<PriceList>(order.PriceId);
-				log.Error += String.Format("Заказ {0} на сумму {1} на поставщика {2} был отклонен по причине: {3}",
-					result.ClientOrderId,
-					order.Items.Sum(x => x.Count * x.Cost),
-					price != null ? price.Supplier.Name : "",
-					result.Error);
+				var sum = order.Items.Sum(x => x.Count * x.Cost);
+				log.Error += $"Заказ {result.ClientOrderId} на сумму {sum} на поставщика" +
+					$" {price?.Supplier?.Name} был отклонен по причине: {result.Error}";
 			}
 
 			//в результате удаления дублей для одного клиентского заказа может быть сформировано два результата
@@ -296,18 +294,18 @@ where l.RequestId = :id;")
 			var rejectedOrders = checker.Check(orders);
 			orders.RemoveEach(rejectedOrders.Keys);
 			errors = errors.Concat(rejectedOrders.Keys
-				.Select(o => new OrderResult(o.ClientOrderId, String.Format("Сумма заказов в этом" +
-					" месяце по Вашему предприятию превысила установленный лимит." +
-					" Лимит заказа на поставщика {0} - {1:0.00}", o.PriceList.Supplier.Name, rejectedOrders[o]))))
+				.Select(o => new OrderResult(o.ClientOrderId,
+					"Сумма заказов в этом" + " месяце по Вашему предприятию превысила установленный лимит." +
+						$" Лимит заказа на поставщика {o.PriceList.Supplier.Name} - {rejectedOrders[o]:0.00}")))
 				.ToList();
 
 
 			var rejectedByLimit = Address.CheckLimits(session, orders);
 			orders.RemoveEach(rejectedByLimit.Select(r => r.Item1));
 			errors = errors.Concat(rejectedByLimit
-				.Select(r => new OrderResult(r.Item1.ClientOrderId, String.Format("Сумма заказов " +
-					"по Вашему предприятию превысила установленный лимит." +
-					" Лимит заказа на поставщика {0} - {1:0.00}", r.Item1.PriceList.Supplier.Name, r.Item2))))
+				.Select(r => new OrderResult(r.Item1.ClientOrderId,
+					"Сумма заказов " + "по Вашему предприятию превысила установленный лимит." +
+						$" Лимит заказа на поставщика {r.Item1.PriceList.Supplier.Name} - {r.Item2:0.00}")))
 				.ToList();
 
 			if (user.UseAdjustmentOrders && !force) {

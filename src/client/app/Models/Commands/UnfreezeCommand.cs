@@ -74,6 +74,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public Order Unfreeze(IOrder sourceOrder, Address addressToOverride, ISession session, StringBuilder log)
 		{
+			var action = GuesAction(sourceOrder);
 			if (!sourceOrder.IsAddressExists()) {
 				if (ShouldCalculateStatus(sourceOrder)) {
 					var order = (Order)sourceOrder;
@@ -83,7 +84,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						: "Адрес доставки больше не доступен";
 				}
 				log.AppendLine($"Заказ №{sourceOrder.DisplayId} невозможно" +
-					$" {GuesAction(sourceOrder)}, т.к. адрес доставки больше не доступен.");
+					$" {action}, т.к. адрес доставки больше не доступен.");
 				return null;
 			}
 
@@ -94,7 +95,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
 				}
 				log.AppendLine($"Заказ №{sourceOrder.DisplayId} невозможно" +
-						$" {GuesAction(sourceOrder)}, т.к. прайс-листа нет в обзоре.");
+						$" {action}, т.к. прайс-листа нет в обзоре.");
 				return null;
 			}
 			var address = addressToOverride ?? sourceOrder.Address;
@@ -117,7 +118,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			var anyOffer = session.Query<Offer>().Any(o => o.Price == sourceOrder.Price);
 			if (!anyOffer) {
 				if (ShouldCalculateStatus(sourceOrder)) {
-					var order = ((Order)sourceOrder);
+					var order = (Order)sourceOrder;
 					order.SendResult = OrderResultStatus.Reject;
 					order.SendError = Restore ? "Заказ был заморожен, т.к. прайс-листа нет в обзоре" : "Прайс-листа нет в обзоре";
 				}
@@ -125,7 +126,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					sourceOrder.DisplayId,
 					sourceOrder.Price.Name,
 					sourceOrder.Price.RegionName,
-					GuesAction(sourceOrder)));
+					action));
 				return null;
 			}
 
@@ -191,12 +192,6 @@ namespace AnalitF.Net.Client.Models.Commands
 							line.SendResult |= LineResultStatus.CostChanged;
 							line.NewCost = line.Cost;
 							line.OldCost = sourceLine.Cost;
-							line.HumanizeSendError();
-						}
-						if (line.Count != sourceLine.Count) {
-							line.SendResult |= LineResultStatus.CountChanged;
-							line.NewQuantity = line.Count;
-							line.OldQuantity = sourceLine.Count;
 							line.HumanizeSendError();
 						}
 					}
