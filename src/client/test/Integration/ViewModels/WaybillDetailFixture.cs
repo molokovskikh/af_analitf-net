@@ -37,7 +37,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(2, model.Lines.Value.Count);
 		}
 
-		[Test]
+        [Test]
+        public void RetailMarkupInRubles_waybillLines()
+        {
+            var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();         
+            Assert.AreEqual(40m,waybillLine.RetailMarkupInRubles);
+        }
+
+        [Test]
 		public void Recalculate_waybill()
 		{
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();

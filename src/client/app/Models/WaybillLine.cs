@@ -154,7 +154,16 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual decimal? RetailCost
+        public virtual decimal? RetailMarkupInRubles
+        {
+            get {
+                if(RetailCost != null && SupplierCost != null)
+                return RetailCost - SupplierCost;
+                return null;             
+            }
+        }
+
+        public virtual decimal? RetailCost
 		{
 			get { return _retailCost; }
 			set

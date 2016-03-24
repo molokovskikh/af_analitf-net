@@ -209,7 +209,8 @@ namespace AnalitF.Net.Client.ViewModels
 				"НДС пос-ка, руб",
 				"Отпуск. цена пос-ка с НДС, руб",
 				"Розн. торг. надб. %",
-				"Розн. цена за ед., руб",
+                "Розн. торг. надб. руб",
+                "Розн. цена за ед., руб",
 				"Кол-во",
 				"Розн. сумма, руб"
 			};
@@ -226,6 +227,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
+                l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum
@@ -277,6 +279,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"НДС пос-ка, руб",
 				"Отпуск. цена пос-ка с НДС, руб",
 				"Розн. торг. надб. %",
+                "Розн. торг. надб. руб",
 				"Розн. цена за ед., руб",
 				"Кол-во",
 				"Розн. сумма, руб"
@@ -294,6 +297,7 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Nds,
 				l.SupplierCost,
 				l.RetailMarkup,
+                l.RetailMarkupInRubles,
 				l.RetailCost,
 				l.Quantity,
 				l.RetailSum
