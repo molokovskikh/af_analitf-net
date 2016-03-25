@@ -269,9 +269,19 @@
 			</StackPanel>
 		</controls:ToolbarPanel>
 
-		<TabControl Name="Items" Grid.Row="2" DisplayMemberPath="DisplayName">
+		<TabControl Name="Items" Grid.Row="2">
+			<TabControl.ItemTemplate>
+				<DataTemplate>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
+						<Button Focusable="False" cal:Message.Attach="CloseActive" ToolTip="Закрыть" Style="{StaticResource Borderless}">
+							<Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
+								StrokeThickness="1" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
+						</Button>
+					</StackPanel>
+				</DataTemplate>
+			</TabControl.ItemTemplate>
 		</TabControl>
-		<!--<ContentControl Grid.Row="2" x:Name="ActiveItem" />-->
 
 		<StatusBar Grid.Row="3">
 			<StatusBar.ItemsPanel>
