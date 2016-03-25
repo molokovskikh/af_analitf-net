@@ -285,6 +285,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		public void CloseActive()
+		{
+			var item = ActiveItem;
+			if (item != null) {
+				DeactivateItem(item, true);
+				Items.Remove(item);
+			}
+		}
+
 		public override void CanClose(Action<bool> callback)
 		{
 			if (Config.Quiet) {

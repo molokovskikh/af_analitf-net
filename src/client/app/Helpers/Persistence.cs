@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Helpers
 				DefaultValue = value.Value,
 				Key = key,
 				Getter = () => value.Value,
-				Setter = v => value.Value = (T)v,
+				Setter = v => value.Value = (T)ViewPersister.ConvertJsonValue(v, typeof(T)),
 			};
 		}
 	}
@@ -64,23 +64,30 @@ namespace AnalitF.Net.Client.Helpers
 				if (!model.Shell.PersistentContext.ContainsKey(key))
 					return;
 				var value = model.Shell.PersistentContext[key];
-				if (prop.IsValidType(value)) {
+				value = ConvertJsonValue(value, prop.PropertyType);
+				if (value != null)
 					property.Key.SetValue(prop, value);
-				} else if (value is JObject) {
-					property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
-				} else {
-					if (value != null) {
-						var converter = TypeDescriptor.GetConverter(prop.PropertyType);
-						if (converter.CanConvertFrom(value.GetType())) {
-							property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
-							continue;
-						}
-					}
-#if DEBUG
-					throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
-#endif
-				}
 			}
+		}
+
+		public static object ConvertJsonValue(object value, Type targetType)
+		{
+			if (value == null)
+				return null;
+			if (targetType.IsInstanceOfType(value))
+				return value;
+			if (value is JObject)
+				return ((JObject)value).ToObject(targetType);
+			var converter = TypeDescriptor.GetConverter(targetType);
+			if (converter.CanConvertFrom(value.GetType())) {
+				return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+			}
+
+#if DEBUG
+			throw new Exception($"Не удалось преобразовать значение '{value}' в тип {targetType}");
+#else
+			return null;
+#endif
 		}
 
 		public void Save()

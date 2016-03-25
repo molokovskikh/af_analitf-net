@@ -7,50 +7,44 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 {
 	public class Navigator : IDisposable
 	{
-		private ConductorBaseWithActiveItem<IScreen> conductor;
+		private Conductor<IScreen>.Collection.OneActive conductor;
 		private Stack<IScreen> navigationStack = new Stack<IScreen>();
 
 		public IScreen DefaultScreen;
 
-		public Navigator(Conductor<IScreen> conductor)
+		public Navigator(Conductor<IScreen>.Collection.OneActive conductor)
 		{
 			this.conductor = conductor;
 		}
 
-		public IEnumerable<IScreen> NavigationStack
-		{
-			get { return navigationStack; }
-		}
+		public IEnumerable<IScreen> NavigationStack => navigationStack;
 
 		public void Navigate(IScreen item)
 		{
-			HideDefault();
+			//HideDefault();
 
-			if (conductor.ActiveItem != null) {
+			//if (conductor.ActiveItem != null) {
+			//	navigationStack.Push(conductor.ActiveItem);
+			//	conductor.DeactivateItem(conductor.ActiveItem, false);
+			//}
+			if (conductor.ActiveItem != null)
 				navigationStack.Push(conductor.ActiveItem);
-				conductor.DeactivateItem(conductor.ActiveItem, false);
-			}
-
 			conductor.ActivateItem(item);
-		}
-
-		private void HideDefault()
-		{
-			if (conductor.ActiveItem != null && conductor.ActiveItem == DefaultScreen)
-				conductor.DeactivateItem(conductor.ActiveItem, false);
 		}
 
 		public void ResetNavigation()
 		{
-			while (navigationStack.Count > 0) {
-				var screen = navigationStack.Pop();
-				CloseAndDispose(screen);
-			}
+			navigationStack.Clear();
+			//NavigationStack.cle
+			//while (navigationStack.Count > 0) {
+			//	var screen = navigationStack.Pop();
+			//	CloseAndDispose(screen);
+			//}
 
-			if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
-				conductor.ActiveItem.TryClose();
-			if (conductor.ActiveItem == null)
-				conductor.ActiveItem = DefaultScreen;
+			//if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
+			//	conductor.ActiveItem.TryClose();
+			//if (conductor.ActiveItem == null)
+			//	conductor.ActiveItem = DefaultScreen;
 		}
 
 		public void NavigateAndReset(params IScreen[] views)
@@ -59,11 +53,11 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				return;
 
 			ResetNavigation();
-			HideDefault();
 
 			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
 			foreach (var screen in chain) {
 				navigationStack.Push(screen);
+				conductor.Items.Add(screen);
 			}
 			conductor.ActivateItem(views.Last());
 		}
@@ -75,36 +69,40 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void NavigateRoot(IScreen screen)
 		{
-			if (screen == null)
-				return;
+			//if (screen == null)
+			//	return;
 
-			if (ReferenceEquals(screen, conductor.ActiveItem))
-				return;
+			//conductor.Items.Add(screen);
+			ResetNavigation();
+			conductor.ActivateItem(screen);
 
-			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType()) {
-				CloseAndDispose(screen);
-				return;
-			}
+			//if (ReferenceEquals(screen, conductor.ActiveItem))
+			//	return;
 
-			HideDefault();
+			//if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType()) {
+			//	CloseAndDispose(screen);
+			//	return;
+			//}
 
-			while (navigationStack.Count > 0) {
-				var closing = navigationStack.Pop();
-				if (closing.GetType() == screen.GetType()) {
-					if (!ReferenceEquals(screen, closing))
-						CloseAndDispose(screen);
-					screen = closing;
-					break;
-				}
-				CloseAndDispose(closing);
-			}
+			//HideDefault();
 
-			HideDefault();
-			conductor.ActiveItem?.TryClose();
-			HideDefault();
+			//while (navigationStack.Count > 0) {
+			//	var closing = navigationStack.Pop();
+			//	if (closing.GetType() == screen.GetType()) {
+			//		if (!ReferenceEquals(screen, closing))
+			//			CloseAndDispose(screen);
+			//		screen = closing;
+			//		break;
+			//	}
+			//	CloseAndDispose(closing);
+			//}
 
-			if (IsEmptyOrDefault())
-				conductor.ActivateItem(screen);
+			//HideDefault();
+			//conductor.ActiveItem?.TryClose();
+			//HideDefault();
+
+			//if (IsEmptyOrDefault())
+			//	conductor.ActivateItem(screen);
 		}
 
 		//если форма не была инициализирована то она и не будет закрыта
@@ -112,15 +110,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
 		public static void CloseAndDispose(IScreen screen)
 		{
-			screen.TryClose();
-			if (screen is IDisposable) {
-				((IDisposable)screen).Dispose();
-			}
-		}
-
-		private bool IsEmptyOrDefault()
-		{
-			return conductor.ActiveItem == null;
+			//screen.TryClose();
+			//if (screen is IDisposable) {
+			//	((IDisposable)screen).Dispose();
+			//}
 		}
 
 		public void NavigateBack()
@@ -133,9 +126,9 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Dispose()
 		{
-			foreach (var screen in NavigationStack.OfType<IDisposable>())
-				screen.Dispose();
-			navigationStack.Clear();
+			//foreach (var screen in NavigationStack.OfType<IDisposable>())
+			//	screen.Dispose();
+			//navigationStack.Clear();
 		}
 	}
 }

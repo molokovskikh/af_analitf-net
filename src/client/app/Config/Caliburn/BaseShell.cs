@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		bool IsSuccessfulActivated { get; }
 	}
 
-	public class BaseShell : Conductor<IScreen>
+	public class BaseShell : Conductor<IScreen>.Collection.OneActive
 	{
 		public Navigator Navigator;
 

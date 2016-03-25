@@ -27,6 +27,8 @@
 			CommandParameter="ShowOrders" />
 		<KeyBinding Gesture="CTRL+M" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="ShowMnn" />
+		<KeyBinding Gesture="CTRL+W" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="CloseActive" />
 	</Window.InputBindings>
 
 	<Window.Resources>
@@ -267,7 +269,9 @@
 			</StackPanel>
 		</controls:ToolbarPanel>
 
-		<ContentControl Grid.Row="2" x:Name="ActiveItem" />
+		<TabControl Name="Items" Grid.Row="2" DisplayMemberPath="DisplayName">
+		</TabControl>
+		<!--<ContentControl Grid.Row="2" x:Name="ActiveItem" />-->
 
 		<StatusBar Grid.Row="3">
 			<StatusBar.ItemsPanel>

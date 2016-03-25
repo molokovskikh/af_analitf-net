@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public Main(Config.Config config)
 		{
 			Config = config;
-			DisplayName = "";
+			DisplayName = "Новости";
 			InitFields();
 		}
 

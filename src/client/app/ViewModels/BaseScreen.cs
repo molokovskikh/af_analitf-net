@@ -315,9 +315,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public virtual void NavigateBackward()
 		{
-			var canClose = Shell == null || Shell.NavigationStack.Any();
-			if (canClose)
-				TryClose();
+			Shell?.Navigator?.NavigateBack();
 		}
 
 		//todo мы не должны пытаться сериализовать\десериализовать объекты из базы тк это не имеет смысла
