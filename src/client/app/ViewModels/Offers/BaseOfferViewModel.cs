@@ -56,14 +56,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(CurrentOrder);
 
 			CurrentOffer.Subscribe(_ => {
-				if (ResetAutoComment) {
-					AutoCommentText = CurrentOffer.Value != null && CurrentOffer.Value.OrderLine != null
-						? CurrentOffer.Value.OrderLine.Comment
-						: null;
-				}
+				if (ResetAutoComment)
+					AutoCommentText = CurrentOffer.Value?.OrderLine?.Comment;
 			});
 			CurrentOffer
-				.Select(_ => (List<SentOrderLine>)Cache[HistoryOrdersCacheKey()])
+				.Select(_ => (List<SentOrderLine>)Cache[HistoryOrdersCacheKey(Settings.Value, CurrentOffer.Value)])
 				.Subscribe(HistoryOrders);
 
 			Settings.Subscribe(_ => Calculate());
@@ -462,23 +459,28 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 
 		public List<SentOrderLine> LoadHistoryOrders(IStatelessSession session)
 		{
-			if (ActualAddress == null || CurrentOffer.Value == null)
-				return new List<SentOrderLine>();
+			return LoadOrderHistory(session, Cache, Settings.Value, CurrentOffer.Value, ActualAddress);
+		}
 
-			return Util.Cache(Cache, HistoryOrdersCacheKey(), k => {
+		public static List<SentOrderLine> LoadOrderHistory(IStatelessSession session, SimpleMRUCache cache,
+			Settings settings, BaseOffer offer, Address address)
+		{
+			if (offer == null || address == null)
+				return new List<SentOrderLine>();
+			return cache.Cache(HistoryOrdersCacheKey(settings, offer), k => {
 				IQueryable<SentOrderLine> query = session.Query<SentOrderLine>()
 					.OrderByDescending(o => o.Order.SentOn);
 				//ошибка в nhibernate, если .Where(o => o.Order.Address == Address)
 				//переместить в общий блок то первый
 				//where применяться не будет
-				var addressId = ActualAddress.Id;
-				if (Settings.Value.GroupByProduct) {
-					var productId = CurrentOffer.Value.ProductId;
+				var addressId = address.Id;
+				if (settings.GroupByProduct) {
+					var productId = offer.ProductId;
 					query = query.Where(o => o.ProductId == productId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
 				else {
-					var catalogId = CurrentOffer.Value.CatalogId;
+					var catalogId = offer.CatalogId;
 					query = query.Where(o => o.CatalogId == catalogId)
 						.Where(o => o.Order.Address.Id == addressId);
 				}
@@ -490,15 +492,15 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 			});
 		}
 
-		private object HistoryOrdersCacheKey()
+		private static object HistoryOrdersCacheKey(Settings settings, BaseOffer offer)
 		{
-			if (CurrentOffer.Value == null || ActualAddress == null)
+			if (offer == null)
 				return 0;
 
-			if (Settings.Value.GroupByProduct)
-				return CurrentOffer.Value.ProductId;
+			if (settings.GroupByProduct)
+				return offer.ProductId;
 			else
-				return CurrentOffer.Value.CatalogId;
+				return offer.CatalogId;
 		}
 
 		public void FillProducerFilter(IEnumerable<Offer> offers)

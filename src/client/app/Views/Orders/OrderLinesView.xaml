@@ -53,8 +53,6 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Name="OffersRow" MinHeight="30" />
 				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
 			<c:DataGrid2 Grid.Row="0" x:Name="Lines"
@@ -187,19 +185,55 @@
 
 			<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
-			<ContentControl x:Name="ProductInfo" Grid.Row="3" />
+			<Grid Grid.Row="3">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
 
-			<StackPanel Grid.Row="4">
-				<Label Padding="5, 2, 2, 0">Комментарий</Label>
-				<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
-			</StackPanel>
+				<Grid Grid.Row="0" Grid.RowSpan="3" Grid.Column="0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					<Label Grid.Row="0" Padding="5, 0, 5, 0">Предыдущие заказы</Label>
+					<c:DataGrid2 Grid.Row="1" x:Name="HistoryOrders">
+						<DataGrid.Columns>
+							<DataGridTextColumn Width="110*" Header="Прайс-лист"
+								Binding="{Binding Order.PriceName}" />
+							<DataGridTextColumn Width="102*" Header="Производитель"
+								Binding="{Binding ProducerSynonym}" />
+							<c:DataGridTextColumnEx Width="SizeToHeader"
+								Header="Срок годн."
+								Binding="{Binding Period}" TextAlignment="Center" />
+							<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}" />
+							<c:DataGridTextColumnEx Width="49" Header="Цена" Binding="{Binding ResultCost}" />
+							<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}" />
+							<c:DataGridTextColumnEx Width="50*" Header="Комментарий" Binding="{Binding Comment}"
+								Visibility="Collapsed" />
+						</DataGrid.Columns>
+					</c:DataGrid2>
+				</Grid>
 
-			<StackPanel Grid.Row="5" Visibility="{Binding OnlyWarningVisible.Value,
-				Converter={StaticResource BoolToCollapsed}}">
-				<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
-				<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
-				Style="{StaticResource ReadOnlyText}" />
-			</StackPanel>
+				<ContentControl x:Name="ProductInfo" Grid.Row="0" Grid.Column="1" />
+
+				<StackPanel Grid.Row="1" Grid.Column="1">
+					<Label Padding="5, 2, 2, 0">Комментарий</Label>
+					<TextBox Margin="3, 0, 0, 0" Name="CurrentLine_Value_Comment" />
+				</StackPanel>
+
+				<StackPanel Grid.Row="2" Grid.Column="1"
+					Visibility="{Binding OnlyWarningVisible.Value, Converter={StaticResource BoolToCollapsed}}">
+					<Label Padding="5, 2, 2, 0">Причина корректировки</Label>
+					<TextBox Padding="3, 0, 0, 0" Name="CurrentLine_Value_LongSendError"
+						Style="{StaticResource ReadOnlyText}" />
+				</StackPanel>
+			</Grid>
 		</Grid>
 
 		<Grid Visibility="{Binding IsSentSelected.Value, Converter={StaticResource BoolToCollapsed}}" Grid.Row="1">

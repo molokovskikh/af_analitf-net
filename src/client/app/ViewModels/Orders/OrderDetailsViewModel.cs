@@ -27,14 +27,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public OrderDetailsViewModel(IOrder order)
 		{
-			Order = new NotifyValue<IOrder>();
+			InitFields();
 			orderId = order.Id;
 			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
 
-			OnlyWarning = new NotifyValue<bool>();
 			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
-			CurrentLine = new NotifyValue<IOrderLine>();
 			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
@@ -71,6 +69,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public bool CanShowPrice => Order.Value.SafePrice != null && IsCurrentOrder;
 
+		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -91,6 +91,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				});
 
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
+			CurrentLine.OfType<BaseOffer>()
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
+				.Select(x => RxQuery(s => BaseOfferViewModel.LoadOrderHistory(s, Cache, Settings.Value, x, Address)))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(HistoryOrders, CloseCancellation.Token);
 		}
 
 		protected override void OnViewAttached(object view, object context)
@@ -138,9 +144,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			Source = new ObservableCollection<IOrderLine>(Order.Value.Lines.OrderBy(l => l.ProductSynonym));
 			Source.ObservableForProperty(c => c.Count)
 				.Where(e => e.Value == 0)
-				.Subscribe(_ => {
-					TryClose();
-				});
+				.Subscribe(_ => TryClose());
 
 			Lines.Recalculate();
 		}

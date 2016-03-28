@@ -40,8 +40,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			BeginEnabled = IsSentSelected.ToValue();
 			EndEnabled = IsSentSelected.ToValue();
 
-			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanPrint"));
-			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange("CanExport"));
+			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange(nameof(CanPrint)));
+			IsCurrentSelected.Subscribe(_ => NotifyOfPropertyChange(nameof(CanExport)));
 
 			Sum = new NotifyValue<decimal>(() => {
 				if (IsCurrentSelected)
@@ -265,7 +265,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			CurrentLine
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => { Update(); }, CloseCancellation.Token);
+				.Subscribe(_ => Update(), CloseCancellation.Token);
+			CurrentLine
+				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
+				.Select(x => RxQuery(s => LoadOrderHistory(s, Cache, Settings.Value, x, ActualAddress)))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(HistoryOrders, CloseCancellation.Token);
 		}
 
 		protected override void OnDeactivate(bool close)

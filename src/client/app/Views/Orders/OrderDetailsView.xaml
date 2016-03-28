@@ -125,7 +125,31 @@
 				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
 
-			<StackPanel Grid.Column="0">
+			<Grid Grid.Column="0">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Label Grid.Row="0" Padding="5, 0, 5, 0">Предыдущие заказы</Label>
+				<c:DataGrid2 Grid.Row="1" x:Name="HistoryOrders">
+					<DataGrid.Columns>
+						<DataGridTextColumn Width="110*" Header="Прайс-лист"
+								Binding="{Binding Order.PriceName}" />
+						<DataGridTextColumn Width="102*" Header="Производитель"
+								Binding="{Binding ProducerSynonym}" />
+						<c:DataGridTextColumnEx Width="SizeToHeader"
+								Header="Срок годн."
+								Binding="{Binding Period}" TextAlignment="Center" />
+						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}" />
+						<c:DataGridTextColumnEx Width="49" Header="Цена" Binding="{Binding ResultCost}" />
+						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}" />
+						<c:DataGridTextColumnEx Width="50*" Header="Комментарий" Binding="{Binding Comment}"
+								Visibility="Collapsed" />
+					</DataGrid.Columns>
+				</c:DataGrid2>
+			</Grid>
+
+			<StackPanel Grid.Column="1">
 				<ContentControl Name="ProductInfo" />
 
 				<StackPanel>
@@ -138,14 +162,11 @@
 					<TextBox Name="ErrorText" Padding="3, 0, 0, 0" Text="{Binding CurrentLine.Value.LongSendError, Mode=OneWay}"
 						Style="{StaticResource ReadOnlyText}" />
 				</StackPanel>
-			</StackPanel>
-
-			<DockPanel Grid.Column="1">
 				<Label DockPanel.Dock="Top">Сообщение поставщику</Label>
-				<TextBox MaxHeight="100" Name="Order_Comment"
+				<TextBox MaxHeight="100" Height="40" Name="Order_Comment"
 					Text="{Binding Order.Value.Comment}"
 					IsEnabled="{Binding IsCurrentOrder}" VerticalScrollBarVisibility="Auto" />
-			</DockPanel>
+			</StackPanel>
 		</Grid>
 
 		<ContentControl Grid.Row="5" Name="MatchedWaybills" />
