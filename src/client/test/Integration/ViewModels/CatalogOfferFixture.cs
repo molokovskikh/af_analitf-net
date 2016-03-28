@@ -29,7 +29,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			lazyModel = new Lazy<CatalogOfferViewModel>(() => Open(new CatalogOfferViewModel(catalog)));
 			catalog = session.Query<Catalog>()
-				.First(c => c.HaveOffers && session.Query<Offer>().Count(o => o.CatalogId == c.Id) >= 2);
+				.First(c => c.HaveOffers
+					&& session.Query<Offer>().Count(o => o.CatalogId == c.Id && !o.VitallyImportant) >= 2
+					&& !c.VitallyImportant);
 		}
 
 		[Test]
@@ -54,10 +56,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Calculate_retail_cost()
 		{
-			var splitCost = session.Query<Offer>()
-				.Where(o => o.CatalogId == catalog.Id && !o.VitallyImportant)
+			var offer = session.Query<Offer>()
+				.Where(o => o.CatalogId == catalog.Id)
 				.OrderBy(o => o.Cost)
-				.First().Cost;
+				.First();
+			var splitCost = offer.Cost;
 
 			settings.Markups.Clear();
 			//позиция не может быть жизненно важной тк мы не генерируем таких тестовых данных
@@ -291,8 +294,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Check_prev_order_count()
 		{
+			MakeSentOrder(session.Query<Offer>().First(x => !x.Junk && x.CatalogId == catalog.Id));
 			var offer = model.Offers.Value.First(o => !o.Junk);
-			MakeSentOrder(offer);
 
 			model.CurrentOffer.Value = offer;
 			model.CurrentOffer.Value.OrderCount = 51;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -64,6 +65,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var all = view.Descendants<CheckBox>().First(c => c.Name == "All");
 				Assert.That(all.Visibility, Is.EqualTo(Visibility.Visible));
 				all.IsChecked = true;
+				scheduler.Start();
 
 				var tabs = view.Descendants<TabControl>().First();
 				tabs.SelectedItem = tabs.Items[1];

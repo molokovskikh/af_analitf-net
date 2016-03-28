@@ -31,8 +31,8 @@
 			<DatePicker Style="{StaticResource FilterElement}" Name="Begin" />
 			<Label>по</Label>
 			<DatePicker Style="{StaticResource FilterElement}" Name="End" />
-			<ContentControl x:Name="AddressSelector" />
 			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
+			<ContentControl x:Name="AddressSelector" />
 		</StackPanel>
 
 		<TabControl Grid.Row="1" Grid.Column="0">
