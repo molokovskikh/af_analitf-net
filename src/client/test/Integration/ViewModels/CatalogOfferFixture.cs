@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Calculate_retail_cost()
 		{
 			var splitCost = session.Query<Offer>()
-				.Where(o => o.CatalogId == catalog.Id)
+				.Where(o => o.CatalogId == catalog.Id && !o.VitallyImportant)
 				.OrderBy(o => o.Cost)
 				.First().Cost;
 
