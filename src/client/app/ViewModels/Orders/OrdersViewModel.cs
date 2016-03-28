@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -36,6 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			DisplayName = "Заказы";
 
+			InitFields();
 			AddressSelector = new AddressSelector(this);
 			SelectedOrders = new List<Order>();
 			SelectedSentOrders = new List<SentOrder>();
@@ -101,21 +105,23 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public List<Address> AddressesToMove { get; set; }
 
 		public Address AddressToMove { get; set; }
+		public NotifyValue<List<Selectable<Price>>> Prices { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
 			AddressSelector.Init();
-			AddressSelector.FilterChanged.Subscribe(_ => Update(), CloseCancellation.Token);
+			AddressSelector.FilterChanged.Cast<object>()
+				.Merge(Prices.SelectMany(x => x?.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+					?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()))
+				.Merge(Prices.Where(x => x != null))
+				.Subscribe(_ => Update(), CloseCancellation.Token);
+			AddressesToMove = Addresses.Where(x => x != Address).ToList();
 
-			var addressId = (Address?.Id).GetValueOrDefault();
-			if (Session != null) {
-				AddressesToMove = Session.Query<Address>()
-					.Where(a => a.Id != addressId)
-					.OrderBy(a => a.Name)
-					.ToList();
-			}
+			RxQuery(s => s.Query<Price>().OrderBy(x => x.Name).Select(x => new Selectable<Price>(x)).ToList())
+				.ObserveOn(UiScheduler)
+				.Subscribe(Prices, CloseCancellation.Token);
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -126,16 +132,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public override void Update()
 		{
+			//до загрузки прайс-листов избегаем выбирать данные что бы не делать лишних запросов
+			if (Prices.Value == null)
+				return;
+			var priceIds = Prices.Value.Where(x => x.IsSelected).Select(x => x.Item.Id).ToArray();
 			if (IsSentSelected) {
 				var filterAddresses = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 				var begin = Begin.Value;
 				var end = End.Value.AddDays(1);
-				SentOrders = StatelessSession.Query<SentOrder>()
-					.Where(o => o.SentOn >= begin && o.SentOn < end
-						&& filterAddresses.Contains(o.Address.Id))
-					.OrderByDescending(o => o.SentOn)
+				var query = StatelessSession.Query<SentOrder>()
 					.Fetch(o => o.Price)
 					.Fetch(o => o.Address)
+					.Where(o => o.SentOn >= begin && o.SentOn < end
+						&& filterAddresses.Contains(o.Address.Id));
+				query = Util.Filter(query, o => o.Price.Id, Prices.Value);
+				SentOrders = query
+					.OrderByDescending(o => o.SentOn)
 					.Take(1000)
 					.ToObservableCollection();
 				SentOrders.Each(o => o.CalculateStyle(Address));
@@ -154,6 +166,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				//тк он перезагрузить объекты
 				var orders = AddressSelector.GetActiveFilter()
 					.SelectMany(a => a.Orders)
+					.Where(x => priceIds.Contains(x.SafePrice.Id))
 					.OrderBy(o => o.PriceName)
 					.ToList();
 				orders.Each(o => o.CalculateStyle(Address));

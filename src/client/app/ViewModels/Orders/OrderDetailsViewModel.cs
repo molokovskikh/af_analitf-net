@@ -86,9 +86,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 			editor = new Editor(OrderWarning, Manager, currentOrderLine, Lines.Cast<IList>().ToValue());
 			CurrentLine
-				.Subscribe(_ => {
-					ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value;
-				});
+				.Subscribe(_ => ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value);
 
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
 			CurrentLine.OfType<BaseOffer>()

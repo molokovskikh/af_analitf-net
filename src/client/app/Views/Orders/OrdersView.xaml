@@ -17,21 +17,22 @@
 
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition></ColumnDefinition>
-			<ColumnDefinition Width="Auto"></ColumnDefinition>
+			<ColumnDefinition />
+			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"></RowDefinition>
-			<RowDefinition></RowDefinition>
-			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource FilterPanel}">
 			<Label>Вывести за период с</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="Begin"></DatePicker>
+			<DatePicker Style="{StaticResource FilterElement}" Name="Begin" />
 			<Label>по</Label>
-			<DatePicker Style="{StaticResource FilterElement}" Name="End"></DatePicker>
+			<DatePicker Style="{StaticResource FilterElement}" Name="End" />
 			<ContentControl x:Name="AddressSelector" />
+			<c:PopupSelector VerticalAlignment="Center" Margin="0, 0, 4, 0" x:Name="Prices" ButtonContent="Прайс-листы" />
 		</StackPanel>
 
 		<TabControl Grid.Row="1" Grid.Column="0">
