@@ -12,6 +12,8 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
+using System.Collections.Generic;
+using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -37,14 +39,59 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(2, model.Lines.Value.Count);
 		}
 
-        [Test]
-        public void RetailMarkupInRubles_waybillLines()
-        {
-            var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();         
-            Assert.AreEqual(40m,waybillLine.RetailMarkupInRubles);
-        }
+		[Test]
+		public void RetailMarkupInRubles_waybillLines()
+		{
+			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
+			Assert.AreEqual(4m, waybillLine.RetailMarkupInRubles);
+		}
 
-        [Test]
+		[Test]
+		public void RegistryDocument_waybillLines()
+		{
+			IList<WaybillLine> waybillLines = waybill.Lines;
+
+			/* проверка надбавки в рублях в первой препарате */
+			Assert.AreEqual(4m, waybillLines[0].RetailMarkupInRubles);
+
+			var doc = new RegistryDocument(waybill, waybillLines);
+			var flowDoc = doc.Build();
+
+			List<TableCellCollection> listTableCellCollection = ((Table)flowDoc.Blocks.ToList().Where(x => x.GetType() == new Table().GetType()).First())
+				.RowGroups.Select(x => x.Rows).ToList()
+				.First().Select(x => x.Cells).ToList();
+
+			TableCellCollection tableCellCollection = listTableCellCollection[0];
+
+			/* проверка количества строк в таблице */
+			Assert.AreEqual(13, listTableCellCollection.Count());
+
+			/* проверяем названия столбцов */
+
+			var ValueCollumnName = new TextRange(tableCellCollection[0].ContentStart, tableCellCollection[0].ContentEnd).Text;
+			Assert.AreEqual("№ пп", ValueCollumnName);
+
+			ValueCollumnName = new TextRange(tableCellCollection[3].ContentStart, tableCellCollection[3].ContentEnd).Text;
+			Assert.AreEqual("Предприятие - изготовитель", ValueCollumnName);
+
+			ValueCollumnName = new TextRange(tableCellCollection[11].ContentStart, tableCellCollection[11].ContentEnd).Text;
+			Assert.AreEqual("Розн. торг. надб. руб", ValueCollumnName);
+
+			/* Розн. торг. надб. руб проверяем значение в первом препарате */
+
+			tableCellCollection = listTableCellCollection[2];
+
+			var ValueCell = new TextRange(tableCellCollection[14].ContentStart, tableCellCollection[14].ContentEnd).Text;
+			decimal? RetailMarkupInRubles = Convert.ToDecimal(ValueCell);
+			Assert.AreEqual(4m, RetailMarkupInRubles);
+
+
+			tableCellCollection = listTableCellCollection[3];
+			ValueCell = new TextRange(tableCellCollection[14].ContentStart, tableCellCollection[14].ContentEnd).Text;
+			Assert.AreEqual(String.Empty, ValueCell);
+		}
+
+		[Test]
 		public void Recalculate_waybill()
 		{
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
