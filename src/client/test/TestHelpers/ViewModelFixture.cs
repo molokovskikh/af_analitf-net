@@ -166,6 +166,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			Init(model);
 			shell.NavigateRoot(model);
+			//load async data
+			scheduler.Start();
 			return model;
 		}
 
