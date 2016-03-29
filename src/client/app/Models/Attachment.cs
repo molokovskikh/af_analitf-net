@@ -36,10 +36,10 @@ namespace AnalitF.Net.Client.Models
 			get
 			{
 				if (IsDownloaded)
-					return string.Format("{0} - {1}, нажмите что бы открыть", Name, Util.HumanizeSize(Size));
+					return $"{Name} - {Util.HumanizeSize(Size)}, нажмите что бы открыть";
 				if (IsDownloading)
-					return string.Format("{0} - {1}, нажмите для отмены", Name, Util.HumanizeSize(Size));
-				return string.Format("{0} - {1}, нажмите для загрузки", Name, Util.HumanizeSize(Size));
+					return $"{Name} - {Util.HumanizeSize(Size)}, нажмите для отмены";
+				return $"{Name} - {Util.HumanizeSize(Size)}, нажмите для загрузки";
 			}
 		}
 
