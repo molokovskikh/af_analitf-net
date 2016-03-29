@@ -53,6 +53,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				var user = ServerUser();
 				user.UseAdjustmentOrders = false;
 			}
+			session.Flush();
 		}
 
 		[Test]
