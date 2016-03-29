@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			session.DeleteEach<Order>();
 
-			var offer = session.Query<Offer>().First(x => x.Junk && x.RequestRatio == null);
+			var offer = session.Query<Offer>().First(x => !x.Junk && x.RequestRatio == null);
 			var address = session.Query<Address>().First();
 
 			Order = new Order(address, offer);
