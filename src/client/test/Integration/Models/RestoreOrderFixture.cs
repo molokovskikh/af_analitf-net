@@ -134,8 +134,8 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		{
 			restore = true;
 			session.DeleteEach<Order>();
-			var offer = session.Query<Offer>().First(x => x.RequestRatio == null);
-			var offer1 = session.Query<Offer>().First(x => x.ProductId != offer.ProductId);
+			var offer = session.Query<Offer>().First(x => x.RequestRatio == null && !x.Junk);
+			var offer1 = session.Query<Offer>().First(x => x.ProductId != offer.ProductId && x.RequestRatio == null);
 			var order = MakeOrder(offer);
 			var priceDst = CreatePrice(offer);
 			var random = new Random();

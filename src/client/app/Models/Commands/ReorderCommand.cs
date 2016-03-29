@@ -68,9 +68,7 @@ namespace AnalitF.Net.Client.Models.Commands
 							CalculateLog(log, srcLine, destLine);
 							destOrder.AddLine(destLine);
 
-							if (currentOrder != null)
-								currentOrder.RemoveLine((OrderLine)srcLine);
-
+							currentOrder?.RemoveLine((OrderLine)srcLine);
 							break;
 						}
 					}
@@ -80,8 +78,7 @@ namespace AnalitF.Net.Client.Models.Commands
 							CalculateLog(log, srcLine, existLine);
 							existLine.Count = requiredCount;
 
-							if (currentOrder != null)
-								currentOrder.RemoveLine((OrderLine)srcLine);
+							currentOrder?.RemoveLine((OrderLine)srcLine);
 							break;
 						}
 					}
@@ -114,22 +111,14 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			log.Append(prefix);
 			if (destLine == null) {
-				log.AppendLine(String.Format("{0} - {1} : {2} (старая цена: {3}; старый заказ: {4})",
-					srcLine.ProductSynonym,
-					srcLine.ProducerSynonym,
-					reason,
-					srcLine.Cost,
-					srcLine.Count));
+				log.AppendLine(
+					$"{srcLine.ProductSynonym} - {srcLine.ProducerSynonym} : {reason} (старая цена: {srcLine.Cost};" +
+						$" старый заказ: {srcLine.Count})");
 			}
 			else {
-				log.AppendLine(String.Format("{0} - {1} : {2} (старая цена: {3}; старый заказ: {4}; новая цена: {5}; новый заказ: {6})",
-					srcLine.ProductSynonym,
-					srcLine.ProducerSynonym,
-					reason,
-					srcLine.Cost,
-					srcLine.Count,
-					destLine.Cost,
-					destLine.Count));
+				log.AppendLine(
+					$"{srcLine.ProductSynonym} - {srcLine.ProducerSynonym} : {reason} (старая цена: {srcLine.Cost};" +
+						$" старый заказ: {srcLine.Count}; новая цена: {destLine.Cost}; новый заказ: {destLine.Count})");
 			}
 		}
 	}
