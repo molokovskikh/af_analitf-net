@@ -549,7 +549,7 @@ namespace AnalitF.Net.Client.ViewModels
 						Shell.Notifications.OnNext(notification);
 					},
 					e => {
-						SessionGaurd(loadable.Session, loadable, (s, a) => a.Error());
+						SessionGaurd(loadable.Session, loadable, (s, a) => a.Error(e));
 					},
 					() => {
 						//если loadable.IsDownloaded = true то значит запрос дал результаты

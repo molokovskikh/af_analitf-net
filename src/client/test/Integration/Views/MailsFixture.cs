@@ -196,6 +196,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.IsTrue(attachment.IsDownloading);
 			Assert.IsFalse(attachment.IsDownloaded);
 			attachment.Changed().Timeout(10.Second()).First(c => c.EventArgs.PropertyName == "IsDownloading");
+			Assert.IsNull(attachment.Exception);
 			Assert.IsFalse(attachment.IsError, attachment.ToString());
 			Assert.IsTrue(attachment.IsDownloaded, attachment.ToString());
 		}

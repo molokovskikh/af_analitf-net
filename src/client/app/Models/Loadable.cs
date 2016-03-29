@@ -30,10 +30,7 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual EntityEntry Entry { get; set; }
 
-		public virtual string ErrorDetails
-		{
-			get { return "Не удалось загрузить. Проверьте подключение к Интернет."; }
-		}
+		public virtual string ErrorDetails => "Не удалось загрузить. Проверьте подключение к Интернет.";
 
 		[Ignore]
 		public virtual bool IsDownloading
@@ -83,6 +80,9 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		[Ignore]
+		public virtual Exception Exception { get; set; }
+
 		public virtual bool IsError
 		{
 			get { return isError; }
@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.Models
 		public abstract JournalRecord UpdateLocalFile(string localFileName);
 		public abstract IEnumerable<string> GetFiles();
 
-		public virtual void Error()
+		public virtual void Error(Exception e)
 		{
 			IsError = true;
 			RequstCancellation.Dispose();
