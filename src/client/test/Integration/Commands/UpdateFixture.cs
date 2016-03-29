@@ -28,12 +28,14 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 	{
 		private bool restoreUser;
 		private bool revertToDefaults;
+		private uint userId;
 
 		[SetUp]
 		public void Setup()
 		{
 			revertToDefaults = false;
 			restoreUser = false;
+			userId = localSession.Query<User>().Select(x => x.Id).First();
 			DbHelper.RestoreData(localSession);
 		}
 
@@ -42,11 +44,10 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			if (restoreUser) {
 				session.Flush();
-				var user = localSession.Query<User>().First();
 				session.CreateSQLQuery("update Customers.Users set Login = Id;" +
 					"update Customers.Users set Login = :login where Id = :id")
 					.SetParameter("login", ServerFixture.DebugLogin())
-					.SetParameter("id", user.Id)
+					.SetParameter("id", userId)
 					.ExecuteUpdate();
 			}
 			else if (revertToDefaults) {
