@@ -262,8 +262,7 @@ namespace AnalitF.Net.Service.Models
 					log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 				}
 			});
-			if (Scheduler != null)
-				task.Start(Scheduler);
+			task.Start(Scheduler ?? TaskScheduler.Current);
 			return task;
 		}
 
@@ -287,10 +286,7 @@ namespace AnalitF.Net.Service.Models
 				if (x.IsFaulted)
 					log.Error("Ошибка при выполнении фоновой задачи", x.Exception);
 			});
-			if (Scheduler != null)
-				task.Start(Scheduler);
-			else
-				task.Start();
+			task.Start(Scheduler ?? TaskScheduler.Current);
 			return task;
 		}
 	}
