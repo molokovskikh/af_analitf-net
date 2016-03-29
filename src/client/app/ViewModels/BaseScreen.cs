@@ -80,7 +80,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		~QueueScheduler()
 		{
-			Dispatch();
+			Dispose();
 		}
 
 		public void Dispose()
