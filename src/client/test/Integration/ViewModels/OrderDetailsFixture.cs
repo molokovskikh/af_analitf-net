@@ -51,6 +51,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			MakeOrder();
 
 			shell.ShowOrders();
+			scheduler.Start();
 			var orders = (OrdersViewModel)shell.ActiveItem;
 			var order = orders.Orders.First();
 			orders.CurrentOrder = order;
@@ -84,6 +85,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = fixture.Order;
 
 			shell.ShowOrders();
+			scheduler.Start();
 			var orders = (OrdersViewModel)shell.ActiveItem;
 			orders.CurrentOrder = orders.Orders.First(o => o.Id == order.Id);
 			orders.EnterOrder();
