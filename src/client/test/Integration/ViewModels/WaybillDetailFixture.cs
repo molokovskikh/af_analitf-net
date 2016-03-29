@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[SetUp]
 		public void Setup()
 		{
+			autoStartScheduler = false;
 			waybill = Fixture<LocalWaybill>().Waybill;
 			model = Open(new WaybillDetails(waybill.Id));
 		}
@@ -150,7 +151,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Env.UiScheduler = ImmediateScheduler.Instance;
 			var downloaded = model.Download(model.Lines.Value.Cast<WaybillLine>().First(l => l.Id == line.Id)).ToArray();
 			Assert.AreEqual(0, downloaded.Length, downloaded.Implode());
-			Assert.AreEqual(String.Format("Файл 'Сертификаты для {0} серия {1}' загружен", line.Product, line.SerialNumber), WaitNotification());
+			Assert.AreEqual($"Файл 'Сертификаты для {line.Product} серия {line.SerialNumber}' загружен", WaitNotification());
 		}
 
 		[Test]

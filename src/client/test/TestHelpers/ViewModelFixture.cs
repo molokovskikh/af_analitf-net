@@ -80,6 +80,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected MessageBus bus;
 		protected Env Env;
 		protected IDictionary<string, object> DebugContext;
+		//в некоторых случаях зависает
+		protected bool autoStartScheduler = true;
 		private QueryCatcher catcher;
 
 		[SetUp]
@@ -166,8 +168,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			Init(model);
 			shell.NavigateRoot(model);
-			//load async data
-			scheduler.Start();
+			if (autoStartScheduler) {
+				//load async data
+				scheduler.Start();
+			}
 			return model;
 		}
 
