@@ -391,7 +391,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.Select(o => o.ProductId)
 				.Distinct()
 				.ToArray();
-			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId) && o.RequestRatio == null);
+			return localSession.Query<Offer>().First(o => !productIds.Contains(o.ProductId) && o.RequestRatio == null && !o.Junk);
 		}
 
 		private UpdateResult MakeBatch(string content)
