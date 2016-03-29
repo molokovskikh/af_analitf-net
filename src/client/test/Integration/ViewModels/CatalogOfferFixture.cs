@@ -294,8 +294,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Check_prev_order_count()
 		{
-			MakeSentOrder(session.Query<Offer>().First(x => !x.Junk && x.CatalogId == catalog.Id));
-			var offer = model.Offers.Value.First(o => !o.Junk);
+			var orderOffer = session.Query<Offer>().First(x => !x.Junk && x.CatalogId == catalog.Id);
+			MakeSentOrder(orderOffer);
+			var offer = model.Offers.Value.First(o => !o.Junk && o.ProductId == orderOffer.ProductId);
 
 			model.CurrentOffer.Value = offer;
 			model.CurrentOffer.Value.OrderCount = 51;
