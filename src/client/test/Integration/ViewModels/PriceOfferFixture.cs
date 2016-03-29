@@ -26,12 +26,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			price = session.Query<Price>().First(p => p.PositionCount > 0);
 			lazyModel = new Lazy<PriceOfferViewModel>(
-				() => {
-					var model = new PriceOfferViewModel(price.Id, false);
-					Open(model);
-					scheduler.Start();
-					return model;
-				});
+				() => Open(new PriceOfferViewModel(price.Id, false)));
 		}
 
 		[Test]
@@ -115,7 +110,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			session.DeleteEach<Order>();
 
-			model.CurrentOffer.Value.OrderCount = 1;
+			model.CurrentOffer.Value.OrderCount = model.CurrentOffer.Value.RequestRatio ?? 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
 

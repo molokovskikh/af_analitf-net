@@ -230,7 +230,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var offer = offers.First();
 			var order = new Order(offer.Price, address);
 			foreach (var offerToOrder in offers) {
-				order.TryOrder(offerToOrder, 1);
+				order.TryOrder(offerToOrder, offerToOrder.RequestRatio ?? 1);
 			}
 			var sentOrder = new SentOrder(order);
 			session.Save(sentOrder);

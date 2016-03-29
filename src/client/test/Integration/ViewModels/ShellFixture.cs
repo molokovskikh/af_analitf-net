@@ -316,7 +316,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//тк мы оперируем случайными данными то мы можем изменить OfferId заказанной позиции если
 			//все остальные атрибуты совпали а цена у нее ниже
 			Assert.That(correction.Offers.Value.Count, Is.GreaterThan(0));
-			var offer = correction.Offers.Value.First(o => o.Id == order.Lines[0].OfferId);
+			var offer = correction.Offers.Value.FirstOrDefault(o => o.Id == order.Lines[0].OfferId);
+			Assert.IsNotNull(offer);
 			Assert.AreEqual(1, offer.OrderCount,
 				String.Format("рассматриваемый offerId = {0}, существующие = {1}",
 					order.Lines[0].OfferId,
