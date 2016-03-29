@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 				if (!user.IsPreprocessOrders) {
 					var resultText = rejectedOrders.Implode(
-						o => String.Format("прайс-лист {0} - {1}", o.Price.Name, o.SendError),
+						o => $"прайс-лист {o.Price.Name} - {o.SendError}",
 						Environment.NewLine);
 					var text = new TextViewModel(resultText) {
 						Header = "Данные заказы НЕ ОТПРАВЛЕНЫ",

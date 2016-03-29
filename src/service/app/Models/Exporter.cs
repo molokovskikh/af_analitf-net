@@ -171,7 +171,7 @@ namespace AnalitF.Net.Service.Models
 			MaxProducerCostPriceId = config.MaxProducerCostPriceId;
 			MaxProducerCostCostId = config.MaxProducerCostCostId;
 
-			user = job.User;
+			user = session.Load<User>(job.User.Id);
 			data = session.Get<AnalitfNetData>(user.Id);
 			if (data == null) {
 				data = new AnalitfNetData(job);
@@ -180,12 +180,13 @@ namespace AnalitF.Net.Service.Models
 			userSettings = session.Load<UserSettings>(user.Id);
 			clientSettings = session.Load<ClientSettings>(user.Client.Id);
 			orderRules = session.Load<OrderRules>(user.Client.Id);
-			Addresses = user.AvaliableAddresses.Intersect(Addresses ?? user.AvaliableAddresses.ToArray()).ToArray();
+			Addresses = user.AvaliableAddresses.ToArray();
 		}
 
 		//Все даты передаются в UTC!
 		public void Export()
 		{
+			Addresses = user.AvaliableAddresses.Intersect(Addresses).ToArray();
 #if DEBUG
 			//на случай если были созданы тестовые данные нужно перечитать конфиг
 			Application.ReadDbConfig(Config);

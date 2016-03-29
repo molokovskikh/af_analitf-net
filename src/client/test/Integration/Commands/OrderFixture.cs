@@ -15,7 +15,6 @@ using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
-using NPOI.SS.Formula.Functions;
 using NUnit.Framework;
 using Test.Support;
 using Address = AnalitF.Net.Client.Models.Address;
@@ -43,9 +42,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.OfType<TextViewModel>()
 				.Select(t => t.Text)
 				.FirstOrDefault();
-			var expected = String.Format("прайс-лист {0} - Поставщик отказал в приеме заказа." +
-				" Сумма заказа меньше минимально допустимой." +
-				" Минимальный заказ {1:0.00} заказано {2:0.00}.", order.Price.Name, 1500, order.Sum);
+			var expected = $"прайс-лист {order.Price.Name} - Поставщик отказал в приеме заказа." +
+				" Сумма заказа меньше минимально допустимой." + $" Минимальный заказ {1500:0.00} заказано {order.Sum:0.00}.";
 			Assert.AreEqual(expected, text, results.Implode());
 		}
 
@@ -77,26 +75,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var log = session.Query<RequestLog>().OrderByDescending(x => x.Id).First();
 			//протоколируем номер заказа на клиенте и сервере
 			Assert.AreEqual($"Экспортированы неподтвержденные заявки: {fixture.Order.Id} -> {order.Id + 1}", log.Error);
-		}
-
-		[Test]
-		public void Do_not_load_order_on_inactive_address()
-		{
-			localSession.DeleteEach<Order>();
-			var createAddress = new CreateAddress();
-			Fixture(createAddress);
-			Run(new UpdateCommand());
-			Fixture(new UnconfirmedOrder());
-			Fixture(new UnconfirmedOrder {
-				Address = createAddress.Address,
-				Clean = false
-			});
-			var config = localSession.Query<AddressConfig>().First(x => x.Address.Id == createAddress.Address.Id);
-			Assert.IsTrue(config.IsActive);
-			config.IsActive = false;
-			Run(new UpdateCommand());
-			var orders = localSession.Query<Order>().ToArray();
-			Assert.AreEqual(1, orders.Length);
 		}
 
 		[Test]

@@ -23,7 +23,7 @@ using Test.Support;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
-	public class MixedFixture : IntegrationFixture
+	public class MixedFixture : IntegrationFixture2
 	{
 		private FixtureHelper fixtureHelper;
 

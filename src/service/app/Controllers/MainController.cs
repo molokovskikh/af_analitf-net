@@ -52,8 +52,9 @@ namespace AnalitF.Net.Service.Controllers
 					(session, job) => {
 						using (var exporter = new Exporter(session, Config, job)) {
 							exporter.Addresses = addressIds?.Split(',')
-							.Select(x => session.Load<Address>(Convert.ToUInt32(x)))
-							.ToArray();
+								.Select(x => session.Load<Address>(Convert.ToUInt32(x)))
+								.ToArray()
+								?? new Address[0];
 							if (data.Match("Waybills"))
 								exporter.ExportDocs();
 							else

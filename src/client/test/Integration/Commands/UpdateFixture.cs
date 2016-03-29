@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
@@ -15,14 +13,9 @@ using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
-using Ionic.Zip;
-using log4net;
-using log4net.Config;
 using NHibernate.Linq;
-using NHibernate.Tool.hbm2ddl;
 using NUnit.Framework;
 using Test.Support;
-using Test.Support.log4net;
 using Test.Support.Suppliers;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
@@ -47,7 +40,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[TearDown]
 		public void Teardown()
 		{
-			DbHelper.RestoreData(localSession);
 			if (restoreUser) {
 				session.Flush();
 				var user = localSession.Query<User>().First();
@@ -116,7 +108,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.That(price.PositionCount, Is.GreaterThan(0));
 			price.Active = false;
 			//данные хранятся с точностью до секунды, в тестах операция может быть выполнена за одну секунду тогда
-			//комманда будет думать что синхронизировать нечего
+			//команда будет думать что синхронизировать нечего
 			localSession.Refresh(settings);
 			settings.LastUpdate = settings.LastUpdate.Value.AddSeconds(-1);
 
@@ -567,6 +559,37 @@ update Addresses set Id =  2575 where Id = :addressId")
 			disposable.Add(cmd);
 			cmd.Configure(settings, clientConfig);
 			Assert.AreEqual(normalServerUrl, cmd.ConfigureHttp().ToString());
+		}
+
+		[Test]
+		public void Do_not_load_order_on_inactive_address()
+		{
+			var createAddress = new CreateAddress();
+			Fixture(createAddress);
+			Run(new UpdateCommand());
+			Fixture(new UnconfirmedOrder());
+			Fixture(new UnconfirmedOrder {
+				Address = createAddress.Address,
+				Clean = false
+			});
+			var config = localSession.Query<AddressConfig>().First(x => x.Address.Id == createAddress.Address.Id);
+			Assert.IsTrue(config.IsActive);
+			config.IsActive = false;
+			Run(new UpdateCommand());
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(1, orders.Length);
+		}
+
+		[Test]
+		public void Deactive_all_addresses()
+		{
+			Fixture(new UnconfirmedOrder());
+			var config = localSession.Query<AddressConfig>().First();
+			Assert.IsTrue(config.IsActive);
+			config.IsActive = false;
+			Run(new UpdateCommand());
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(0, orders.Length);
 		}
 	}
 }
