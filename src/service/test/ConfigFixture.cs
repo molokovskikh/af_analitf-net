@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace AnalitF.Net.Service.Test
 {
-	[TestFixture, Ignore("Временно отключен")]
+	[TestFixture]
 	public class ConfigFixture
 	{
 		[Test]

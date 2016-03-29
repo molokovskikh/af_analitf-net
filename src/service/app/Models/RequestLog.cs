@@ -262,7 +262,8 @@ namespace AnalitF.Net.Service.Models
 					log.Error($"Произошла ошибка при обработке запроса {jobId}", e);
 				}
 			});
-			task.Start();
+			if (Scheduler != null)
+				task.Start(Scheduler);
 			return task;
 		}
 

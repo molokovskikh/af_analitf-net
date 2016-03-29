@@ -86,8 +86,8 @@ namespace AnalitF.Net.Service.Controllers
 				//записываем информацию о запросе что бы в случае ошибки повторить попытку
 				var failsafe = Path.Combine(Config.FailsafePath, log.Id.ToString());
 				File.WriteAllText(failsafe, JsonConvert.SerializeObject(request));
-				Task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
-				if (Task.IsFaulted)
+				var task = RequestLog.RunTask(Session, x => Confirm(x, log.Id, Config, request));
+				if (task.IsFaulted)
 					return new HttpResponseMessage(HttpStatusCode.InternalServerError);
 			}
 

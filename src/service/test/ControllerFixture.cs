@@ -9,6 +9,7 @@ using Common.Models;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
+using Common.Tools.Threading;
 using NHibernate.Linq;
 using NUnit.Framework;
 using Newtonsoft.Json;
@@ -25,6 +26,7 @@ namespace AnalitF.Net.Service.Test
 		private Config.Config config;
 		private TestClient client;
 		private FileCleaner tmpFiles;
+		private ManualScheduler scheduler;
 
 		[SetUp]
 		public void Setup()
@@ -41,12 +43,15 @@ namespace AnalitF.Net.Service.Test
 				CurrentUser = user,
 				Config = config,
 			};
+			scheduler = new ManualScheduler();
+			RequestLog.Scheduler = scheduler;
 		}
 
 		[TearDown]
 		public void TearDown()
 		{
 			tmpFiles?.Dispose();
+			RequestLog.Scheduler = null;
 		}
 
 		[Test]
@@ -124,9 +129,8 @@ namespace AnalitF.Net.Service.Test
 		public void Process_request()
 		{
 			var job = new RequestLog(user, new Version());
-			var task = job.StartJob(session, (_, ___) => {});
-			task.Wait();
-
+			job.StartJob(session, (_, ___) => {});
+			scheduler.Run();
 			session.Refresh(job);
 			Assert.That(job.Error, Is.Null);
 			Assert.That(job.IsCompleted, Is.True);
@@ -137,11 +141,11 @@ namespace AnalitF.Net.Service.Test
 		public void Log_broken_job()
 		{
 			var job = new RequestLog(user, new Version());
-			var task = job.StartJob(session,
+			job.StartJob(session,
 				(jobSession, requestJob) => {
 					throw new Exception("Тестовое исключение");
 				});
-			task.Wait();
+			scheduler.Run();
 			session.Refresh(job);
 			Assert.That(job.Error, Is.Not.Null);
 			Assert.That(job.IsCompleted, Is.True);
@@ -253,7 +257,7 @@ namespace AnalitF.Net.Service.Test
 			var postResult = ordersController.Post(ToClientOrder(offer));
 			Assert.That(GetRequestId(postResult), Is.GreaterThan(0));
 
-			ordersController.Task.Wait();
+			scheduler.Run();
 			ordersController.Session.Clear();
 
 			var response = ordersController.Get();
@@ -273,10 +277,8 @@ namespace AnalitF.Net.Service.Test
 			var response = controller.Get(true);
 			Assert.AreEqual(HttpStatusCode.Accepted, response.StatusCode);
 			var log = session.Query<RequestLog>().First(r => r.User == user);
-			WaitHelper.WaitOrFail(30.Second(), () => {
-				session.Refresh(log);
-				return log.IsFaulted;
-			}, "Сломаный лог");
+			scheduler.Run();
+			session.Refresh(log);
 			Assert.IsTrue(log.IsCompleted);
 			Assert.IsTrue(log.IsFaulted);
 		}
@@ -400,7 +402,7 @@ namespace AnalitF.Net.Service.Test
 			};
 			var message = ordersController.Post(syncRequest);
 			var id = GetRequestId(message);
-			ordersController.Task.Wait();
+			scheduler.Run();
 			session.Refresh(session.Load<RequestLog>(id));
 			var results = new List<OrderResult>();
 			using (message = ordersController.Get())
