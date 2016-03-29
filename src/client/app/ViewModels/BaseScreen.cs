@@ -43,9 +43,10 @@ namespace AnalitF.Net.Client.ViewModels
 	/// нужен тк mysql требует что бы подключение к базе использовала таже нитка что и создала это подключение
 	/// иначе приложение будет падать
 	/// </summary>
-	public class QueueScheduler : TaskScheduler
+	public class QueueScheduler : TaskScheduler, IDisposable
 	{
 		private BlockingCollection<Task> tasks = new BlockingCollection<Task>(new ConcurrentQueue<Task>());
+		private CancellationTokenSource source = new CancellationTokenSource();
 
 		public QueueScheduler()
 		{
@@ -60,8 +61,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Dispatch()
 		{
-			while (true) {
-				foreach (var task in tasks.GetConsumingEnumerable()) {
+			while (!source.Token.IsCancellationRequested) {
+				foreach (var task in tasks.GetConsumingEnumerable(source.Token)) {
 					TryExecuteTask(task);
 				}
 			}
@@ -75,6 +76,17 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
 			return tasks;
+		}
+
+		~QueueScheduler()
+		{
+			Dispatch();
+		}
+
+		public void Dispose()
+		{
+			GC.SuppressFinalize(this);
+			source.Cancel();
 		}
 	}
 
