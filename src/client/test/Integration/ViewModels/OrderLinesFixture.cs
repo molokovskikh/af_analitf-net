@@ -149,7 +149,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.DeleteEach<SentOrder>();
 			var sendOrder = MakeSentOrder();
 			var catalogId = sendOrder.Lines[0].CatalogId;
-			MakeOrder(session.Query<Offer>().First(o => o.CatalogId != catalogId));
+			MakeOrder(session.Query<Offer>().First(o => o.CatalogId != catalogId && o.RequestRatio == null));
 
 			model.IsCurrentSelected.Value = false;
 			model.IsSentSelected.Value = true;

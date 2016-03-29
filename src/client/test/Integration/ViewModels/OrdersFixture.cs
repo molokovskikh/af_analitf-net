@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			restore = true;
 
 			session.DeleteEach<Order>();
-			var offer = session.Query<Offer>().First();
+			var offer = session.Query<Offer>().First(x => !x.Junk);
 			MakeOrder(MakeReordarable(offer));
 			var order = MakeOrder(offer);
 
@@ -147,7 +147,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			session.DeleteEach<Order>();
 			session.DeleteEach<SentOrder>();
-			var offer = session.Query<Offer>().First();
+			var offer = session.Query<Offer>().First(x => !x.Junk);
 			MakeSentOrder(MakeReordarable(offer));
 			MakeOrder(offer);
 
