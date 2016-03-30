@@ -24,16 +24,16 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 		private IScheduler scheduler;
 
 		//для регистрации editor в xaml
-		public static DependencyProperty EditorProperty = DependencyProperty.Register("Editor", typeof(Editor), typeof(Editable));
+		public static DependencyProperty EditorProperty = DependencyProperty.Register("Editor", typeof(IEditor), typeof(Editable));
 
-		public static void SetEditor(UIElement el, Editor value)
+		public static void SetEditor(UIElement el, IEditor value)
 		{
 			el.SetValue(EditorProperty, value);
 		}
 
-		public static Editor GetEditor(UIElement el)
+		public static IEditor GetEditor(UIElement el)
 		{
-			return (Editor)el.GetValue(EditorProperty);
+			return (IEditor)el.GetValue(EditorProperty);
 		}
 
 		public Editable(IScheduler scheduler = null)
@@ -90,8 +90,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 					var editor = GetEditor(grid);
 					if (editor != null) {
 						editor.Committed();
-					}
-					else {
+					} else {
 						ViewModelHelper.InvokeDataContext(grid, "OfferCommitted");
 					}
 				});
@@ -107,8 +106,7 @@ namespace AnalitF.Net.Client.Controls.Behaviors
 			var editor = GetEditor(dataGrid);
 			if (editor != null) {
 				editor.Updated();
-			}
-			else {
+			} else {
 				ViewModelHelper.InvokeDataContext(dataGrid, "OfferUpdated");
 			}
 		}

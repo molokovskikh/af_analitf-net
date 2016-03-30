@@ -11,7 +11,13 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class Editor : BaseNotify
+	public interface IEditor
+	{
+		void Updated();
+		void Committed();
+	}
+
+	public class Editor : BaseNotify, IEditor
 	{
 		private OrderLine lastEdit;
 		private InlineEditWarning warning;
@@ -29,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			this.manager = manager;
 			this.current = current;
 			this.lines = lines;
-			current.Subscribe(x => lastEditCountCandidate = x != null ?  x.Count : 0);
+			current.Subscribe(x => lastEditCountCandidate = x?.Count ?? 0);
 		}
 
 		private void ShowValidationError(List<Message> messages)
@@ -75,12 +81,10 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 					if (order.IsEmpty)
 						order.Address.Orders.Remove(order);
 				}
-				if (lines.Value != null)
-					lines.Value.Remove(orderLine);
+				lines.Value?.Remove(orderLine);
 			}
 
-			if (order != null)
-				order.UpdateStat();
+			order?.UpdateStat();
 		}
 
 		public void Delete()

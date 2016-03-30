@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using Newtonsoft.Json;
 
@@ -20,7 +21,7 @@ namespace AnalitF.Net.Client.Models
 		SplitByLimit = 0x40, //Разбито из-за лимита
 	}
 
-	public class BatchLineView : BaseNotify, IEditableObject
+	public class BatchLineView : BaseNotify, IEditableObject, IInlineEditable
 	{
 		private OrderLine orderLine;
 
@@ -57,60 +58,27 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual string Product
-		{
-			get
-			{
-				return OrderLine == null ? BatchLine.ProductSynonym : OrderLine.ProductSynonym;
-			}
-		}
+		public virtual string Product => OrderLine?.ProductSynonym ?? BatchLine.ProductSynonym;
 
-		public virtual string Producer
-		{
-			get
-			{
-				return OrderLine == null ? BatchLine.ProducerSynonym : OrderLine.ProducerSynonym;
-			}
-		}
+		public virtual string Producer => OrderLine?.ProducerSynonym ?? BatchLine.ProducerSynonym;
 
 		//для экспорта
-		public virtual uint Count
-		{
-			get
-			{
-				return OrderLine == null ? BatchLine.Quantity : OrderLine.Count;
-			}
-		}
+		public virtual uint Count => OrderLine?.Count ?? BatchLine.Quantity;
 
 		[Style(Description = "Не заказанные")]
-		public virtual bool IsNotOrdered
-		{
-			get { return BatchLine.Status.HasFlag(ItemToOrderStatus.NotOrdered); }
-		}
+		public virtual bool IsNotOrdered => BatchLine.Status.HasFlag(ItemToOrderStatus.NotOrdered);
 
 		[Style(Description = "Минимальная цена")]
-		public virtual bool IsMinCost
-		{
-			get { return BatchLine.Status.HasFlag(ItemToOrderStatus.MinimalCost); }
-		}
+		public virtual bool IsMinCost => BatchLine.Status.HasFlag(ItemToOrderStatus.MinimalCost);
 
 		[Style("Product", Description = "Присутствует в замороженных заказах")]
-		public virtual bool ExistsInFreezed
-		{
-			get { return BatchLine.ExistsInFreezed; }
-		}
+		public virtual bool ExistsInFreezed => BatchLine.ExistsInFreezed;
 
 		[Style(Description = "Лимит исчерпан")]
-		public virtual bool IsLimited
-		{
-			get { return IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.NotEnoughLimit); }
-		}
+		public virtual bool IsLimited => IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.NotEnoughLimit);
 
 		[Style(Description = "Ограничен лимитом")]
-		public virtual bool IsSplitByLimit
-		{
-			get { return !IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.SplitByLimit); }
-		}
+		public virtual bool IsSplitByLimit => !IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.SplitByLimit);
 
 		[Style("BatchLine.Address.Name")]
 		public virtual bool IsCurrentAddress { get; set; }
@@ -125,6 +93,12 @@ namespace AnalitF.Net.Client.Models
 
 		public void CancelEdit()
 		{
+		}
+
+		public uint Value
+		{
+			get { return BatchLine.Quantity; }
+			set { BatchLine.Quantity = value; }
 		}
 	}
 
@@ -211,44 +185,23 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual string Properties { get; set; }
 
-		public virtual string HasProducerLabel
-		{
-			get { return ProducerId == null ? "Нет" : "Да"; }
-		}
+		public virtual string HasProducerLabel => ProducerId == null ? "Нет" : "Да";
 
-		public virtual string HasOrderLineLabel
-		{
-			get { return  IsNotOrdered ? "Нет" : "Да"; }
-		}
+		public virtual string HasOrderLineLabel => IsNotOrdered ? "Нет" : "Да";
 
-		public virtual Dictionary<string, string> ParsedServiceFields
-		{
-			get { return lazyFields.Value; }
-		}
+		public virtual Dictionary<string, string> ParsedServiceFields => lazyFields.Value;
 
 		[Style(Description = "Не заказанные")]
-		public virtual bool IsNotOrdered
-		{
-			get { return Status.HasFlag(ItemToOrderStatus.NotOrdered); }
-		}
+		public virtual bool IsNotOrdered => Status.HasFlag(ItemToOrderStatus.NotOrdered);
 
 		[Style(Description = "Минимальная цена")]
-		public virtual bool IsMinCost
-		{
-			get { return Status.HasFlag(ItemToOrderStatus.MinimalCost); }
-		}
+		public virtual bool IsMinCost => Status.HasFlag(ItemToOrderStatus.MinimalCost);
 
 		[Style(Description = "Лимит исчерпан")]
-		public virtual bool IsLimited
-		{
-			get { return Status.HasFlag(ItemToOrderStatus.NotEnoughLimit); }
-		}
+		public virtual bool IsLimited => Status.HasFlag(ItemToOrderStatus.NotEnoughLimit);
 
 		[Style(Description = "Ограничен лимитом")]
-		public virtual bool IsSplitByLimit
-		{
-			get { return Status.HasFlag(ItemToOrderStatus.SplitByLimit); }
-		}
+		public virtual bool IsSplitByLimit => Status.HasFlag(ItemToOrderStatus.SplitByLimit);
 
 		[Style("ProductSynonym", Description = "Присутствует в замороженных заказах"), Ignore]
 		public virtual bool ExistsInFreezed { get; set; }

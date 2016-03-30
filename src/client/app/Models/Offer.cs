@@ -64,7 +64,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("OfferId: {0}, RegionId: {1}", OfferId, RegionId);
+			return $"OfferId: {OfferId}, RegionId: {RegionId}";
 		}
 	}
 

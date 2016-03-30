@@ -24,6 +24,28 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
+	public class ReportEditor : IEditor
+	{
+		private Batch batch;
+
+		public ReportEditor(Batch batch)
+		{
+			this.batch = batch;
+		}
+
+		public void Updated()
+		{
+			if (batch.CurrentReportLine.Value == null)
+				return;
+			if (batch.CurrentReportLine.Value.Value == 0)
+				batch.Delete();
+		}
+
+		public void Committed()
+		{
+		}
+	}
+
 	[DataContract]
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
@@ -100,10 +122,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			CanReload = Lines.CollectionChanged()
 				.Select(e => e.Sender as ObservableCollection<BatchLineView>)
 				.Select(v => CanUpload && v != null && v.Count > 0).ToValue();
-			WatchForUpdate(CurrentReportLine.Select(l => l == null ? null : l.BatchLine).ToValue());
+			WatchForUpdate(CurrentReportLine.Select(l => l?.BatchLine).ToValue());
 			ActivePrint = new NotifyValue<string>();
 			ActivePrint.Subscribe(ExcelExporter.ActiveProperty);
 			CurrentFilter.Subscribe(_ => SearchBehavior.ActiveSearchTerm.Value = "");
+			ReportEditor = new ReportEditor(this);
 		}
 
 		[DataMember]
@@ -134,10 +157,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public NotifyValue<bool> CanDelete { get; set; }
 
-		public bool CanUpload
-		{
-			get { return Address != null; }
-		}
+		public bool CanUpload => Address != null;
 
 		public bool CanPrint
 		{
@@ -148,6 +168,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					: User.CanPrint<Batch, BatchLine>();
 			}
 		}
+
+		public IEditor ReportEditor { get; set; }
 
 		protected override void OnViewAttached(object view, object context)
 		{
@@ -525,7 +547,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		public void ActivatePrint(string name)
 		{
 			ActivePrint.Value = name;
-			NotifyOfPropertyChange("CanPrint");
+			NotifyOfPropertyChange(nameof(CanPrint));
 		}
 
 		public void EnterReportLine()

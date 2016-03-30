@@ -64,6 +64,7 @@
 			cal:Message.Attach="[Event GotFocus] = [Action ActivatePrint('ReportLines')]"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}"
 			caliburn:NavBinder.Next="{x:Reference Offers}"
+			behaviors:Editable.Editor="{Binding ReportEditor}"
 			IsReadOnly="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding BatchLine.Address.Name}" Width="*"
