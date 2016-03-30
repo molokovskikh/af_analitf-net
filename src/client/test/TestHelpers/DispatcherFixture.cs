@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var el = activeWindow.FindName(name)
 				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
 			if (el == null)
-				throw new Exception(String.Format("Не могу найти кнопку '{0}'", name));
+				throw new Exception($"Не могу найти кнопку '{name}'");
 			if (el is SplitButton)
 				InternalClick(((SplitButton)el).Descendants<ButtonBase>().First());
 			else
@@ -182,7 +182,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			dispatcher.Invoke(() => {
 				var el = activeWindow.Descendants<FrameworkElement>().FirstOrDefault(e => e.Name == name);
 				if (el == null)
-					throw new Exception(String.Format("Могу найти элемент с именем '{0}' в окне {1}", name, activeWindow));
+					throw new Exception($"Могу найти элемент с именем '{name}' в окне {activeWindow}");
 				AssertInputable(el);
 				el.RaiseEvent(WpfTestHelper.TextArgs(text));
 			});
@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			view.Dispatcher.Invoke(() => {
 				var element = (UIElement)view.FindName(name);
 				if (element == null)
-					throw new Exception(String.Format("Не могу найти {0}", name));
+					throw new Exception($"Не могу найти {name}");
 				Input(element, key);
 			});
 		}
