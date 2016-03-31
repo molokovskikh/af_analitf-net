@@ -65,7 +65,7 @@ namespace vm
 			}
 
 			var target = Path.Combine(guestRoot, "setup.exe");
-			var copyTo = guestsession.CopyTo(setup, target, null);
+			var copyTo = guestsession.FileCopyToGuest(setup, target, null);
 			copyTo.WaitForCompletion(-1);
 			Assert.IsNull(copyTo.ErrorInfo, copyTo.ErrorInfo?.Text);
 
@@ -75,7 +75,7 @@ namespace vm
 
 			var log = Path.Combine(installRoot, "AnalitF.Net.Client.log");
 			File.Delete("log.txt");
-			var copyLog = guestsession.CopyFrom(log, Path.GetFullPath("log.txt"), null);
+			var copyLog = guestsession.FileCopyFromGuest(log, Path.GetFullPath("log.txt"), null);
 			copyLog.WaitForCompletion(-1);
 			Assert.IsNull(copyLog.ErrorInfo, copyLog.ErrorInfo?.Text);
 			var logText = File.ReadAllText("log.txt");
@@ -89,10 +89,11 @@ namespace vm
 
 			if (machine.SnapshotCount > 0) {
 				var snapshot = machine.FindSnapshot("origin");
-				session.Console.DeleteSnapshot(snapshot.Id).WaitForCompletion(-1);
+				machine.DeleteSnapshot(snapshot.Id).WaitForCompletion(-1);
 			}
 
-			session.Console.TakeSnapshot("origin", "чистое состояние").WaitForCompletion(-1);
+			string id;
+			machine.TakeSnapshot("origin", "чистое состояние", 1, out id).WaitForCompletion(-1);
 			session.UnlockMachine();
 		}
 
@@ -234,11 +235,12 @@ namespace vm
 			machine.LockMachine(session, LockType.LockType_Write);
 			try {
 				if (machine.SnapshotCount == 0) {
-					session.Console.TakeSnapshot("origin", "чистое состояние").WaitForCompletion(-1);
+					string id;
+					machine.TakeSnapshot("origin", "чистое состояние", 1, out id).WaitForCompletion(-1);
 				}
 				else {
 					var snapshot = machine.FindSnapshot("origin");
-					session.Console.RestoreSnapshot(snapshot).WaitForCompletion(-1);
+					machine.RestoreSnapshot(snapshot).WaitForCompletion(-1);
 				}
 			}
 			finally {
