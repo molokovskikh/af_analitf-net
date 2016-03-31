@@ -426,7 +426,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void WatchForUpdate(object sender, PropertyChangedEventArgs e)
 		{
-			StatelessSession.Update(sender);
+			StatelessSession?.Update(sender);
 		}
 
 		protected void WatchForUpdate<T>(NotifyValue<T> currentReject)

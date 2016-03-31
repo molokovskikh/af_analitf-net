@@ -309,6 +309,19 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual("", batch.SearchBehavior.ActiveSearchTerm.Value);
 		}
 
+		[Test]
+		public void Delete_line_on_zero_edit()
+		{
+			var line = MakeOrderLine();
+			Activate(batch, line.Order.Address);
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine(line) });
+			batch.CurrentReportLine.Value = batch.ReportLines.Value.First();
+			batch.SelectedReportLines.Add(batch.CurrentReportLine.Value);
+			batch.CurrentReportLine.Value.Value = 0;
+			batch.ReportEditor.Updated();
+			Assert.AreEqual(0, batch.ReportLines.Value.Count);
+		}
+
 		private void InitAddress(params Address[] addresses)
 		{
 			for(var i = 0; i < addresses.Length; i++) {
