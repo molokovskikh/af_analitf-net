@@ -429,10 +429,9 @@ namespace AnalitF.Net.Client.ViewModels
 			StatelessSession?.Update(sender);
 		}
 
-		protected void WatchForUpdate<T>(NotifyValue<T> currentReject)
+		protected void WatchForUpdate<T>(IObservable<T> value)
 		{
-			currentReject.ChangedValue()
-				.Subscribe(e => WatchForUpdate(e.Sender, e.EventArgs));
+			value.ChangedValue().Subscribe(x => StatelessSession?.Update(x.Sender));
 		}
 
 		public override string ToString()

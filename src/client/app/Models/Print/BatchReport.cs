@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			Header(string.Format("Текущий сводный заказ от {0}", address.Name));
+			Header($"Текущий сводный заказ от {address.Name}");
 			var headers = new[] {
 				new PrintColumn("Наименование", 232),
 				new PrintColumn("Производитель", 168),
@@ -36,13 +36,13 @@ namespace AnalitF.Net.Client.Models.Print
 				BuildRow(headers, rowGroup, new object[] {
 					line.Product,
 					line.Producer,
-					line.OrderLine != null ? line.OrderLine.Order.PriceName : null,
-					line.OrderLine != null ? (decimal?)line.OrderLine.MixedCost : null,
+					line.OrderLine?.Order.PriceName,
+					line.OrderLine?.MixedCost,
 					line.Count,
-					line.OrderLine != null ? (decimal?)line.OrderLine.MixedSum : null
+					line.OrderLine?.MixedSum
 				});
 				var tableRow = new TableRow();
-				tableRow.Cells.Add(Cell(line.BatchLine.Comment, 6));
+				tableRow.Cells.Add(Cell(line.Comment, 6));
 				rowGroup.Rows.Add(tableRow);
 			}
 

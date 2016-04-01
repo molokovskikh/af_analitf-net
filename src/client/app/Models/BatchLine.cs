@@ -25,6 +25,11 @@ namespace AnalitF.Net.Client.Models
 	{
 		private OrderLine orderLine;
 
+		public BatchLineView(OrderLine line)
+		{
+			OrderLine = line;
+		}
+
 		public BatchLineView(BatchLine batchline, OrderLine orderline)
 		{
 			BatchLine = batchline;
@@ -33,15 +38,9 @@ namespace AnalitF.Net.Client.Models
 				if (args.PropertyName == "Quantity")
 					OnPropertyChanged("Count");
 			};
-			if (OrderLine != null) {
-				OrderLine.PropertyChanged += (sender, args) => {
-					if (args.PropertyName == "Count")
-						OnPropertyChanged("Count");
-				};
-			}
 		}
 
-		public BatchLine BatchLine { get; private set; }
+		public BatchLine BatchLine { get; }
 
 		public OrderLine OrderLine
 		{
@@ -54,6 +53,12 @@ namespace AnalitF.Net.Client.Models
 				if (orderLine == value)
 					return;
 				orderLine = value;
+				if (value != null) {
+					value.PropertyChanged += (sender, args) => {
+						if (args.PropertyName == "Count")
+							OnPropertyChanged("Count");
+					};
+				}
 				OnPropertyChanged();
 			}
 		}
@@ -66,22 +71,36 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint Count => OrderLine?.Count ?? BatchLine.Quantity;
 
 		[Style(Description = "Не заказанные")]
-		public virtual bool IsNotOrdered => BatchLine.Status.HasFlag(ItemToOrderStatus.NotOrdered);
+		public virtual bool IsNotOrdered => BatchLine?.Status.HasFlag(ItemToOrderStatus.NotOrdered) == true;
 
 		[Style(Description = "Минимальная цена")]
-		public virtual bool IsMinCost => BatchLine.Status.HasFlag(ItemToOrderStatus.MinimalCost);
+		public virtual bool IsMinCost => BatchLine?.Status.HasFlag(ItemToOrderStatus.MinimalCost) == true;
 
 		[Style("Product", Description = "Присутствует в замороженных заказах")]
-		public virtual bool ExistsInFreezed => BatchLine.ExistsInFreezed;
+		public virtual bool ExistsInFreezed { get; set; }
 
 		[Style(Description = "Лимит исчерпан")]
-		public virtual bool IsLimited => IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.NotEnoughLimit);
+		public virtual bool IsLimited => IsNotOrdered && BatchLine?.Status.HasFlag(ItemToOrderStatus.NotEnoughLimit) == true;
 
 		[Style(Description = "Ограничен лимитом")]
-		public virtual bool IsSplitByLimit => !IsNotOrdered && BatchLine.Status.HasFlag(ItemToOrderStatus.SplitByLimit);
+		public virtual bool IsSplitByLimit => !IsNotOrdered && BatchLine?.Status.HasFlag(ItemToOrderStatus.SplitByLimit) == true;
 
 		[Style("BatchLine.Address.Name")]
 		public virtual bool IsCurrentAddress { get; set; }
+
+		public Address Address => BatchLine?.Address ?? OrderLine?.Order?.Address;
+		public uint? ProductId => BatchLine?.ProductId ?? OrderLine?.ProductId;
+		public uint? CatalogId => BatchLine?.CatalogId ?? OrderLine?.CatalogId;
+
+		public string Comment
+		{
+			get
+			{
+				if (BatchLine != null)
+					return BatchLine.Comment;
+				return "Заказано вручную";
+			}
+		}
 
 		public void BeginEdit()
 		{
@@ -97,8 +116,13 @@ namespace AnalitF.Net.Client.Models
 
 		public uint Value
 		{
-			get { return BatchLine.Quantity; }
-			set { BatchLine.Quantity = value; }
+			get { return BatchLine?.Quantity ?? 0; }
+			set
+			{
+				if (BatchLine == null)
+					return;
+				BatchLine.Quantity = value;
+			}
 		}
 	}
 
@@ -203,9 +227,6 @@ namespace AnalitF.Net.Client.Models
 		[Style(Description = "Ограничен лимитом")]
 		public virtual bool IsSplitByLimit => Status.HasFlag(ItemToOrderStatus.SplitByLimit);
 
-		[Style("ProductSynonym", Description = "Присутствует в замороженных заказах"), Ignore]
-		public virtual bool ExistsInFreezed { get; set; }
-
 		public override string ToString()
 		{
 			return String.Format("Comment: {0}, Status: {2}, ProductId: {1}, ProductSynonym: {3}",
@@ -218,9 +239,9 @@ namespace AnalitF.Net.Client.Models
 				.SelectMany(o => o.Lines)
 				.ToLookup(l => Tuple.Create(l.Order.Address.Id, l.ProductId));
 			foreach (var line in lines) {
-				var key = Tuple.Create(line.BatchLine.Address.Id, line.BatchLine.ProductId.GetValueOrDefault());
-				line.BatchLine.ExistsInFreezed = productids[key].FirstOrDefault() != null;
-				line.IsCurrentAddress = line.BatchLine.Address != null && selectedAddress.Id == line.BatchLine.Address.Id;
+				var key = Tuple.Create(line.Address.Id, line.ProductId.GetValueOrDefault());
+				line.ExistsInFreezed = productids[key].FirstOrDefault() != null;
+				line.IsCurrentAddress = line?.Address.Id == selectedAddress.Id;
 			}
 		}
 
