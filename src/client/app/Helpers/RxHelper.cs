@@ -48,10 +48,10 @@ namespace AnalitF.Net.Client.Helpers
 				.Select(e => ((NotifyValue<T>)e.Sender).Value);
 		}
 
-		public static IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue<T>(this NotifyValue<T> self)
+		public static IObservable<EventPattern<PropertyChangedEventArgs>> ChangedValue<T>(this IObservable<T> self)
 		{
-			return self.ObservableForProperty(v => v.Value)
-				.Select(v => v.Value as INotifyPropertyChanged)
+			return self
+				.Select(v => v as INotifyPropertyChanged)
 				.Select(v => v == null
 					? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()
 					: Observable.FromEventPattern<PropertyChangedEventArgs>(v, "PropertyChanged"))

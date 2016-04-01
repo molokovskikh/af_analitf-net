@@ -23,6 +23,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 	public class BatchFixture : BaseUnitFixture
 	{
 		private Batch batch;
+		private Offer offer;
 
 		[SetUp]
 		public void Setup()
@@ -149,7 +150,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 				}, null)
 			};
 			var writer = new StringWriter();
-			batch.ExportCsv(writer);
+			batch.ExportCsv(writer, batch.Lines.Value);
 			Assert.AreEqual("Наименование;Производитель;Прайс-лист;Цена;Заказ;Сумма;Комментарий;f1\r\n" +
 				"\"\";\"\";\"\";\"\";\"0\";\"\";\"\";\"f1-value\"\r\n", writer.ToString());
 		}
@@ -212,11 +213,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			InitAddress(address1, address2);
 			Activate(batch, address1, address2);
 
-			batch.Lines.Value.Add(new BatchLineView(new BatchLine { Address = address1 }, null));
-
 			var offer = new Offer(new Price("тест"), 50);
 			var line = address2.Order(offer, 5);
-			batch.Lines.Value.Add(new BatchLineView(new BatchLine(line), null));
+			batch.BuildLineViews(new List<BatchLine> { new BatchLine { Address = address1 }, new BatchLine(line) });
 
 			batch.CurrentReportLine.Value = batch.Lines.Value[1];
 			batch.Offers.Value = new List<Offer> {
@@ -227,12 +226,8 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 
 			batch.CurrentOffer.Value = batch.Offers.Value[0];
 			Assert.AreEqual(5, batch.CurrentOffer.Value.OrderCount);
-			batch.CurrentOffer.Value.OrderCount = 0;
-			batch.OfferUpdated();
-			batch.OfferCommitted();
-			batch.CurrentOffer.Value.OrderCount = 10;
-			batch.OfferUpdated();
-			batch.OfferCommitted();
+			Order(0);
+			Order(10);
 
 			Assert.AreEqual(0, address1.Orders.Count);
 			Assert.AreEqual(1, address2.Orders.Count);
@@ -275,9 +270,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			batch.Update();
 			batch.CurrentOffer.Value = batch.Offers.Value.First();
 			Assert.AreEqual(5, batch.CurrentOffer.Value.OrderCount);
-			batch.CurrentOffer.Value.OrderCount = 0;
-			batch.OfferUpdated();
-			batch.OfferCommitted();
+			Order(0);
 			Assert.AreEqual(0, batch.ReportLines.Value.Count);
 			Assert.AreEqual(0, batch.Lines.Value.Count);
 		}
@@ -322,6 +315,68 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual(0, batch.ReportLines.Value.Count);
 		}
 
+		[Test]
+		public void Show_report_for_manually_ordered_lines()
+		{
+			var line = MakeOrderLine();
+			Activate(batch, line.Order.Address);
+			batch.BuildLineViews(new List<BatchLine>());
+			Assert.AreEqual(1, batch.ReportLines.Value.Count);
+			var report = batch.ReportLines.Value[0];
+			Assert.IsTrue(report.IsCurrentAddress);
+			Assert.IsFalse(report.IsNotOrdered);
+			Assert.IsNull(report.BatchLine);
+			Assert.IsNotNull(report.OrderLine);
+		}
+
+		[Test]
+		public void Delete_report_line_on_delete_order_line()
+		{
+			var line = MakeOrderLine();
+			Activate(batch, line.Order.Address);
+			batch.BuildLineViews(new List<BatchLine>());
+
+			batch.CurrentReportLine.Value = batch.Lines.Value[0];
+			batch.Offers.Value = new List<Offer> {
+				offer,
+			};
+			batch.Update();
+			batch.CurrentOffer.Value = batch.Offers.Value.First();
+			Assert.AreEqual(1, batch.CurrentOffer.Value.OrderCount);
+			Order(0);
+			Assert.AreEqual(0, batch.ReportLines.Value.Count);
+			Assert.AreEqual(0, batch.Lines.Value.Count);
+		}
+
+		[Test]
+		public void Show_report_line_on_order()
+		{
+			var line = MakeOrderLine();
+			Activate(batch, line.Order.Address);
+			batch.BuildLineViews(new List<BatchLine>());
+
+			batch.CurrentReportLine.Value = batch.Lines.Value[0];
+			batch.Offers.Value = new List<Offer> {
+				offer,
+				new Offer(offer, 150)
+			};
+			batch.Update();
+			batch.CurrentOffer.Value = batch.Offers.Value.First(x => x.OrderCount == null);
+			Order(1);
+			Assert.AreEqual(2, batch.ReportLines.Value.Count);
+			Assert.AreEqual(2, batch.Lines.Value.Count);
+			Order(0);
+			Assert.AreEqual(1, batch.ReportLines.Value.Count);
+			Assert.AreEqual(1, batch.Lines.Value.Count);
+		}
+
+		private void Order(uint count)
+		{
+			batch.CurrentOffer.Value.OrderCount = count;
+			batch.OfferUpdated();
+			batch.OfferCommitted();
+		}
+
 		private void InitAddress(params Address[] addresses)
 		{
 			for(var i = 0; i < addresses.Length; i++) {
@@ -333,8 +388,10 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		{
 			var address = new Address("тест");
 			InitAddress(address);
-			var offer = new Offer(new Price("тест"), 100) {
-				ProductId = 105
+			offer = new Offer(new Price("тест"), 100) {
+				ProductSynonym = "Тестовый товар",
+				ProducerSynonym = "Тестовый производитель",
+				ProductId = 105,
 			};
 			return address.Order(offer, 1);
 		}

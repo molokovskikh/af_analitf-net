@@ -67,7 +67,7 @@
 			behaviors:Editable.Editor="{Binding ReportEditor}"
 			IsReadOnly="False">
 			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding BatchLine.Address.Name}" Width="*"
+				<c:DataGridTextColumnEx Header="Адрес заказа" Binding="{Binding Address.Name}" Width="*"
 					Visibility="Collapsed" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Заказано" Binding="{Binding BatchLine.HasOrderLineLabel}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Есть производитель" Binding="{Binding BatchLine.HasProducerLabel}" IsReadOnly="True" />
@@ -84,7 +84,7 @@
 				<c:DataGridTextColumnEx Header="Цена" Binding="{Binding OrderLine.ResultCost}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Заказ" Binding="{Binding OrderLine.Count}" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Сумма" Binding="{Binding OrderLine.MixedSum}" IsReadOnly="True" />
-				<c:DataGridTextColumnEx Header="Комментарий" Binding="{Binding BatchLine.Comment}" Width="*" IsReadOnly="True" />
+				<c:DataGridTextColumnEx Header="Комментарий" Binding="{Binding Comment}" Width="*" IsReadOnly="True" />
 				<c:DataGridTextColumnEx Header="Штрихкод" Binding="{Binding OrderLine.BarCode}" Width="*"
 					Visibility="Collapsed" IsReadOnly="True" />
 			</DataGrid.Columns>
@@ -190,7 +190,7 @@
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
-		<TextBox x:Name="CurrentReportLine_Value_BatchLine_Comment" Grid.Row="4" Grid.Column="1" Grid.RowSpan="2"
+		<TextBox x:Name="CurrentReportLine_Value_Comment" Grid.Row="4" Grid.Column="1" Grid.RowSpan="2"
 			Style="{StaticResource ReadOnlyText}" />
 
 		<StackPanel Grid.Row="6" Name="Legend" Grid.ColumnSpan="2" />
