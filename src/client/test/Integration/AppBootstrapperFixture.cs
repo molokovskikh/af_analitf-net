@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Test.Integration
 				repeat:
 				count++;
 				try {
-					Directory.Delete("test", true);
+					FileHelper2.DeleteDir("test");
 				}
 				catch(IOException e) {
 					Console.WriteLine("HResult = " + ((uint)e.HResult).ToString("x8"));

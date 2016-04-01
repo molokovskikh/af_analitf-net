@@ -128,7 +128,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Empty_update()
 		{
-			Directory.Delete(Path.Combine("acceptance", "data"), true);
+			FileHelper2.DeleteDir(Path.Combine("acceptance", "data"));
 
 			Activate();
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Commands
@@ -44,7 +45,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				foreach (var dir in dirs) {
 					try {
 						Token.ThrowIfCancellationRequested();
-						Directory.Delete(dir.Dst, true);
+						FileHelper2.DeleteDir(dir.Dst);
 						Directory.CreateDirectory(dir.Dst);
 						Reporter.Progress();
 					}
