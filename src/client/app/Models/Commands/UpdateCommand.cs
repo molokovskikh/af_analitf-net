@@ -180,8 +180,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
 					files.Sum(x => new FileInfo(x).Length), requestId);
 
-				if (Directory.Exists(Config.UpdateTmpDir))
-					Directory.Delete(Config.UpdateTmpDir, true);
+				FileHelper2.DeleteDir(Config.UpdateTmpDir);
 				Directory.CreateDirectory(Config.UpdateTmpDir);
 				foreach (var file in files) {
 					using (var zip = new ZipFile(file)) {
@@ -960,7 +959,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			ProcessAttachments(resultDirs);
 
 			if (Clean)
-				Directory.Delete(Config.UpdateTmpDir, true);
+				FileHelper2.DeleteDir(Config.UpdateTmpDir);
 
 			if (request != null)
 				WaitAndLog(Client.PutAsync("Main", request, Formatter), "Отправка лога импорта заявок");
@@ -1166,7 +1165,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		{
 			if (source.Clean) {
 				if (Directory.Exists(source.Dst)) {
-					Directory.Delete(source.Dst, true);
+					FileHelper2.DeleteDir(source.Dst);
 					Directory.CreateDirectory(source.Dst);
 				}
 			}

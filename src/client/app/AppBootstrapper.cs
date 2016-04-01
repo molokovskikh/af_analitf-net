@@ -260,20 +260,17 @@ namespace AnalitF.Net.Client
 						Directory.GetFiles(Config.BinUpdateDir, "*.log")
 							.Each(f => File.Move(f, FileHelper.Uniq(Path.Combine(Config.RootDir, Path.GetFileName(f)))));
 					}
+				} catch(Exception e) {
+					log.Warn(e);
 				}
-				catch(Exception) {}
 				if (!Config.Cmd.Match("import")) {
 					try {
-						Directory.Delete(Config.TmpDir, true);
+						FileHelper2.DeleteDir(Config.TmpDir);
 						Directory.CreateDirectory(Config.TmpDir);
+					} catch(Exception e) {
+						log.Warn(e);
 					}
-					catch(Exception) {}
 				}
-				//в одной из версий временные файлы складывались в корень, чистим мусор
-				try {
-					Directory.GetFiles(Config.RootDir, "*.xls").Each(f => File.Delete(f));
-				}
-				catch (Exception) {}
 			}
 			else {
 				Directory.CreateDirectory(Config.TmpDir);

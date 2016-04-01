@@ -8,15 +8,16 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using System.Windows.Automation;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
-using Common.Tools.Helpers;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
 using NUnit.Framework;
 using TestStack.White.InputDevices;
+using ProcessHelper = Common.Tools.Helpers.ProcessHelper;
 
 namespace test.release
 {
@@ -52,8 +53,7 @@ namespace test.release
 					return false;
 				}
 			}));
-			if (Directory.Exists(Path.Combine(root, "data")))
-				Directory.Delete(Path.Combine(root, "data"), true);
+			FileHelper2.DeleteDir(Path.Combine(root, "data"));
 		}
 
 		[Test]
