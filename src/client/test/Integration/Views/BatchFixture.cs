@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 				var col = DataGridHelper.FindColumn(grid, "Адрес заказа");
 				Assert.AreEqual(col.Visibility, Visibility.Visible);
-				var comment = view.Descendants<TextBox>().First(c => c.Name == "CurrentReportLine_Value_BatchLine_Comment");
+				var comment = view.Descendants<TextBox>().First(c => c.Name == "CurrentReportLine_Value_Comment");
 				Assert.AreEqual("test comment", comment.Text);
 
 				col = DataGridHelper.FindColumn(grid, "Кат.свойства");
