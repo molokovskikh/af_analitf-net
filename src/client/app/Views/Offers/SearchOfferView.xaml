@@ -58,14 +58,16 @@
 		</StackPanel>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="1">
-			<ComboBox x:Name="Producers"
-				Style="{StaticResource Filter}" DisplayMemberPath="Name">
-				<ComboBox.ItemsPanel>
-					<ItemsPanelTemplate>
-						<VirtualizingStackPanel Width="300" />
-					</ItemsPanelTemplate>
-				</ComboBox.ItemsPanel>
-			</ComboBox>
+			 <StackPanel  Orientation="Vertical">
+          <ComboBox x:Name="Producers" Style="{StaticResource Filter}" DisplayMemberPath="Name" Margin="0,10,0,0">
+            <ComboBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel Width="300" />
+              </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+          </ComboBox>
+          <CheckBox x:Name="CanSaveFilterProducer" Content="Не сбрасывать фильтр" Margin="0,5,0,0"/>
+        </StackPanel>
 			<Parts:AutoComment cal:Bind.ModelWithoutContext="{Binding}" />
 		</StackPanel>
 
