@@ -61,6 +61,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		public bool Clean = true;
 		public uint AddressId;
 		public string BatchFile;
+		public BatchMode BatchMode;
 
 		public UpdateCommand()
 		{
@@ -200,7 +201,11 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			var request = new BatchRequest(AddressId, settings.JunkPeriod, user?.LastSync);
 			if (String.IsNullOrEmpty(BatchFile)) {
-				request.BatchItems = StatelessSession.Query<BatchLine>().ToArray().Select(l => new BatchItem {
+				var lines = StatelessSession.Query<BatchLine>().ToArray();
+				if (BatchMode == BatchMode.ReloadUnordered) {
+					lines = lines.Where(x => x.IsNotOrdered).ToArray();
+				}
+				request.BatchItems = lines.Select(l => new BatchItem {
 					Code = l.Code,
 					CodeCr = l.CodeCr,
 					ProductName = l.ProductSynonym,
@@ -212,8 +217,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					BaseCost = l.BaseCost
 				}).ToList();
 				return new ObjectContent<BatchRequest>(request, Formatter);
-			}
-			else {
+			} else {
 				try {
 					var tmp = FileHelper.SelfDeleteTmpFile();
 					using (var zip = new ZipFile()) {
@@ -886,11 +890,20 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 				.Distinct()
 				.ToArray();
 			if (batchAddresses.Any()) {
-				Session.CreateSQLQuery("delete from BatchLines where AddressId in (:addressIds) and id <= :maxId")
-					.SetParameter("maxId", maxBatchLineId)
-					.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
-					.SetFlushMode(FlushMode.Always)
-					.ExecuteUpdate();
+				//если пользователь просит оставить не заказанное очищаем только то что было заказано
+				if (BatchMode == BatchMode.SaveUnordered) {
+					Session.CreateSQLQuery("delete from BatchLines where AddressId in (:addressIds) and id <= :maxId and Status & 1 > 0")
+						.SetParameter("maxId", maxBatchLineId)
+						.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
+						.SetFlushMode(FlushMode.Always)
+						.ExecuteUpdate();
+				} else {
+					Session.CreateSQLQuery("delete from BatchLines where AddressId in (:addressIds) and id <= :maxId")
+						.SetParameter("maxId", maxBatchLineId)
+						.SetParameterList("addressIds", batchAddresses.Select(a => a.Id).ToArray())
+						.SetFlushMode(FlushMode.Always)
+						.ExecuteUpdate();
+				}
 				Session.CreateSQLQuery("update OrderLines ol " +
 					"join Orders o on o.Id = ol.OrderId " +
 					"left join BatchLines b on b.ExportId = ol.ExportBatchLineId " +

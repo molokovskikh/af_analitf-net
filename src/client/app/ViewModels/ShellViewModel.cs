@@ -706,14 +706,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> Batch(string fileName = null)
+		public IEnumerable<IResult> Batch(string fileName = null, BatchMode mode = BatchMode.Normal)
 		{
 			if (currentAddress == null)
 				yield break;
 			var results = Sync(new UpdateCommand {
 				SyncData = "Batch",
 				BatchFile = fileName,
-				AddressId = currentAddress.Id
+				AddressId = currentAddress.Id,
+				BatchMode = mode
 			});
 			foreach (var result in results) {
 				yield return result;
