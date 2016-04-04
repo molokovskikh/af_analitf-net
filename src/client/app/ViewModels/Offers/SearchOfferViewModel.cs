@@ -82,6 +82,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 							term.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
 						query = Util.Filter(query, o => o.Price.Id, Prices);
 
+						ProducerFilterStateGet(query.ToList());
+
 						var producer = CurrentProducer.Value;
 						if (producer != null && producer.Id > 0) {
 							var id = producer.Id;
@@ -134,6 +136,12 @@ where match (ProductSynonym) against (:term in natural language mode)")
 				.AddJoin("p", "o.Price")
 				.SetParameter("term", term)
 				.List<Offer>();
+		}
+
+		public override void TryClose()
+		{
+			ProducerFilterStateSet();
+			base.TryClose();
 		}
 
 		private IList<Offer> SortOffers(IList<Offer> offers)
