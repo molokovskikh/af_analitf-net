@@ -370,7 +370,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(1, files.Length);
 			var order = localSession.Query<SentOrder>().First();
 			var expected = $@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена;Поставщик
-{externalLineId};{externalAddressId};{order.SentOn};{externalProductId};{order.Lines[0].ProductSynonym};;{order.Lines[0].ProducerSynonym};1;;;";
+{externalLineId};{externalAddressId};{order.SentOn};{externalProductId};{order.Lines[0].ProductSynonym};;{order.Lines[0].ProducerSynonym};1;;;{order.Price.Name}";
 			var lines = File.ReadAllText(files[0], Encoding.Default).TrimEnd();
 			Assert.AreEqual(expected, lines);
 		}
