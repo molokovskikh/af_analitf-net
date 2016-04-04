@@ -297,12 +297,17 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 
 				if (Session.IsChanged(Settings.Value, x => x.JunkPeriod))
-					yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
+					yield return new Models.Results.TaskResult(Query(s => DbMaintain.CalcJunk(s, Settings.Value)));
 
 				Session.FlushMode = FlushMode.Auto;
 				Settings.Value.ApplyChanges(Session);
 			}
 			TryClose();
+		}
+
+		public IResult ShowPriceTagConstructor()
+		{
+			return new DialogResult(new PriceTagConstructor());
 		}
 
 		protected override void Broadcast()

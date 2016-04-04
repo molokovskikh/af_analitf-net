@@ -461,48 +461,55 @@
 			<TabItem Header="Настройка печати ценников" Name="PriceTagSettings">
 				<StackPanel>
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_PriceTag_Type" />
-					<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Удалять непечатаемые элементы
-					</CheckBox>
-					<Label>Печатаемые элементы ценника</Label>
-					<CheckBox x:Name="Settings_PriceTag_PrintFullName"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Наименование клиента
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Наименование
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintCountry"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Страна
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintProducer"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Производитель
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Срок годности
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Номер накладной
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Поставщик
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Серия товара
-					</CheckBox>
-					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
-						Дата накладной
-					</CheckBox>
+
+					<StackPanel Name="PriceTagConfig">
+						<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Удалять непечатаемые элементы
+						</CheckBox>
+						<Label>Печатаемые элементы ценника</Label>
+						<CheckBox x:Name="Settings_PriceTag_PrintFullName"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Наименование клиента
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintProduct"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Наименование
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintCountry"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Страна
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintProducer"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Производитель
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Срок годности
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Номер накладной
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Поставщик
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Серия товара
+						</CheckBox>
+						<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
+							IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+							Дата накладной
+						</CheckBox>
+					</StackPanel>
+					<StackPanel Name="PriceTagConstructor">
+						<Button Name="ShowPriceTagConstructor">Редактировать</Button>
+						<ContentControl Name="Preview" />
+					</StackPanel>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Отладка" Name="DebugTab">

@@ -10,6 +10,7 @@ namespace AnalitF.Net.Client.Models
 		[Description("Малый размер")] Small,
 		[Description("Малый размер с большой ценой")] BigCost,
 		[Description("Малый размер с большой ценой №2")] BigCost2,
+		[Description("Конструктор")] Custom,
 	}
 
 	public class PriceTagSettings : BaseNotify
@@ -199,9 +200,7 @@ namespace AnalitF.Net.Client.Models
 
 		}
 
-		public bool IsConfigurable
-		{
-			get { return Type == PriceTagType.Normal; }
-		}
+		public bool IsConfigurable => Type == PriceTagType.Normal;
+		public bool IsConstructor => Type == PriceTagType.Custom;
 	}
 }

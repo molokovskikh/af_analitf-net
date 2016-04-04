@@ -33,10 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public bool IsAwaited { get; set; }
 		public bool IsDocsReceived { get; set; }
 
-		public bool IsMadeSenseToShow
-		{
-			get { return IsRejected || IsAwaited || IsDocsReceived; }
-		}
+		public bool IsMadeSenseToShow => IsRejected || IsAwaited || IsDocsReceived;
 
 		public void ShowNewDocs()
 		{

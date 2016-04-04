@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Mime;
 using System.Windows;
@@ -6,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.ViewModels;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -20,6 +23,16 @@ namespace AnalitF.Net.Client.Views
 #if !DEBUG
 			DebugTab.Visibility = Visibility.Collapsed;
 #endif
+
+			DataContextChanged += (sender, args) => {
+				var model = (SettingsViewModel)DataContext;
+
+				model.ObservableForProperty(x => x.Settings.Value.PriceTag.Type, skipInitial: false)
+					.Subscribe(x => {
+						PriceTagConfig.Visibility = x.Value == PriceTagType.Custom ? Visibility.Collapsed : Visibility.Visible;
+						PriceTagConstructor.Visibility = x.Value == PriceTagType.Custom ? Visibility.Visible : Visibility.Collapsed;
+					});
+			};
 		}
 	}
 }

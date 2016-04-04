@@ -53,10 +53,17 @@ namespace AnalitF.Net.Client.ViewModels
 #if DEBUG
 	public class RestoreData
 	{
-		public RestoreData(object[] args, string typeName)
+		public RestoreData()
 		{
-			Args = args;
-			TypeName = typeName;
+		}
+
+		public RestoreData(object screen)
+		{
+			if (screen is BaseScreen)
+				Args = ((BaseScreen)screen).GetRebuildArgs();
+			else
+				Args = new object[0];
+			TypeName = screen.GetType().FullName;
 		}
 
 		public string TypeName;
@@ -64,7 +71,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override string ToString()
 		{
-			return String.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
+			return string.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
 		}
 	}
 #endif
@@ -1063,6 +1070,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.NavigateAndReset(views);
 		}
 
+		public void ShowConstructor()
+		{
+			NavigateRoot(new PriceTagConstructor());
+		}
+
 		protected override void OnActivationProcessed(IScreen item, bool success)
 		{
 			var screen = item as BaseScreen;
@@ -1086,7 +1098,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			PersistentNavigationStack = NavigationStack
 				.Concat(new [] { ActiveItem })
-				.Select(s => new RestoreData(((BaseScreen)s).GetRebuildArgs(), s.GetType().FullName))
+				.Select(s => new RestoreData(s))
 				.ToList();
 			base.OnDeactivate(close);
 		}

@@ -639,7 +639,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
 		}
 
-		public Task TplQuery(Action<IStatelessSession> action)
+		public Task Query(Action<IStatelessSession> action)
 		{
 			var task = new Task(() => {
 				if (Env.Factory == null)
@@ -685,12 +685,19 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void InitFields()
 		{
-			var notifiable = GetType().GetProperties().Where(x => x.PropertyType.IsGenericType
+			var screen = this;
+			InitFields(screen);
+		}
+
+		public static void InitFields(object screen)
+		{
+			var notifiable = screen.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType
 				&& typeof(NotifyValue<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition())
 				&& x.CanWrite);
-			foreach (var propertyInfo in notifiable)
-				if (propertyInfo.GetValue(this, null) == null)
-					propertyInfo.SetValue(this, Activator.CreateInstance(propertyInfo.PropertyType), null);
+			foreach (var propertyInfo in notifiable) {
+				if (propertyInfo.GetValue(screen, null) == null)
+					propertyInfo.SetValue(screen, Activator.CreateInstance(propertyInfo.PropertyType), null);
+			}
 		}
 	}
 }

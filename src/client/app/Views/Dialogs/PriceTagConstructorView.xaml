@@ -1,0 +1,148 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.PriceTagConstructorView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dialogs="clr-namespace:AnalitF.Net.Client.Views.Dialogs">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<ToolBar Grid.Row="0">
+			<Button Name="Clear">Очистить</Button>
+			<Button Name="Delete">Удалить</Button>
+			<Button Name="Place">Расположить</Button>
+			<Button Name="Preview">Обновить</Button>
+			<Button Name="Save">Сохранить</Button>
+		</ToolBar>
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" MinWidth="200" />
+			</Grid.ColumnDefinitions>
+
+			<Grid Grid.Column="0">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Label Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Доступные элементы" />
+				<ListBox Grid.Row="1" Name="Items" ItemsSource="{Binding Fields}" DisplayMemberPath="Name" />
+			</Grid>
+
+			<Grid Grid.Column="1">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition />
+					<RowDefinition Height="Auto" />
+					<RowDefinition />
+				</Grid.RowDefinitions>
+				<Label HorizontalContentAlignment="Center" Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Схема ценника" />
+				<Border Grid.Row="1" BorderThickness="1" BorderBrush="Gray" Background="LightGray">
+					<dialogs:CanvasPanel Selected="{Binding Selected.Value}" Items="{Binding Items}" x:Name="Canvas" Margin="3, 5, 3, 5" />
+				</Border>
+				<Label HorizontalContentAlignment="Center" Grid.Row="2" FontWeight="Bold" FontSize="16" Content="Предварительный просмотр" />
+				<ContentControl Grid.Row="3" Content="{Binding PreviewContent.Value}" />
+			</Grid>
+
+			<StackPanel Grid.Column="2" Margin="3, 5, 3, 5" FocusManager.IsFocusScope="True">
+				<TextBlock FontWeight="Bold" FontSize="16" Text="Размер ценника" Margin="0, 5, 0, 5"/>
+
+				<Label>Ширина (см)</Label>
+				<TextBox Name="Width" />
+				<Label>Высота (см)</Label>
+				<TextBox Name="Height" />
+
+				<TextBlock FontWeight="Bold" FontSize="16" Text="Текущий элемент" Margin="0, 5, 0, 5"/>
+				<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="14" Text="{Binding Name}" Margin="0, 5, 0, 5"/>
+
+				<TextBlock Visibility="{Binding IsTextVisible, Converter={StaticResource BoolToCollapsed}}">Подпись</TextBlock>
+				<TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+					Visibility="{Binding IsTextVisible, Converter={StaticResource BoolToCollapsed}}" />
+
+				<TextBlock>На отдельной строке</TextBlock>
+				<CheckBox IsChecked="{Binding IsNewLine}" />
+
+				<TextBlock>Выравнивание</TextBlock>
+				<ComboBox IsEditable="False"
+					SelectedValue="{Binding TextAlignment, UpdateSourceTrigger=PropertyChanged}"
+					SelectedValuePath="Value"
+					DisplayMemberPath="Key"
+					ItemsSource="{Binding Alignments}"
+					Focusable="False" />
+
+				<TextBlock>Переносить</TextBlock>
+				<CheckBox IsChecked="{Binding Wrap}" />
+
+				<TextBlock>Размер шрифта</TextBlock>
+				<TextBox Text="{Binding FontSize, UpdateSourceTrigger=PropertyChanged}" />
+
+				<TextBlock>Шрифт</TextBlock>
+				<StackPanel Orientation="Horizontal">
+					<ToggleButton FontSize="16" FontWeight="Bold" IsChecked="{Binding Bold}">A</ToggleButton>
+					<ToggleButton FontSize="16" FontStyle="Italic" IsChecked="{Binding Italic}">A</ToggleButton>
+					<ToggleButton FontSize="16" IsChecked="{Binding Underline}">
+						<TextBlock TextDecorations="Underline">A</TextBlock>
+					</ToggleButton>
+				</StackPanel>
+
+				<TextBlock>Обрамление</TextBlock>
+
+				<TextBlock>Ширина</TextBlock>
+				<TextBox Text="{Binding BorderThickness, UpdateSourceTrigger=PropertyChanged}" />
+
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<ToggleButton IsChecked="{Binding LeftBorder, UpdateSourceTrigger=PropertyChanged}"
+						Grid.Row="1" Grid.Column="0">Слева</ToggleButton>
+					<ToggleButton IsChecked="{Binding RightBorder, UpdateSourceTrigger=PropertyChanged}"
+						Grid.Row="1" Grid.Column="2">Справа</ToggleButton>
+					<ToggleButton IsChecked="{Binding TopBorder, UpdateSourceTrigger=PropertyChanged}"
+						Grid.Row="0" Grid.Column="1">Сверху</ToggleButton>
+					<ToggleButton IsChecked="{Binding BottomBorder, UpdateSourceTrigger=PropertyChanged}"
+						Grid.Row="2" Grid.Column="1">Снизу</ToggleButton>
+				</Grid>
+
+				<TextBlock>Отступы</TextBlock>
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<StackPanel Grid.Row="1" Grid.Column="0">
+						<TextBlock>Слева</TextBlock>
+						<TextBox Width="30" Text="{Binding LeftMargin, UpdateSourceTrigger=PropertyChanged}" />
+					</StackPanel>
+					<StackPanel Grid.Row="1" Grid.Column="2">
+						<TextBlock>Справа</TextBlock>
+						<TextBox Width="30" Text="{Binding RightMargin, UpdateSourceTrigger=PropertyChanged}" />
+					</StackPanel>
+					<StackPanel Grid.Row="0" Grid.Column="1">
+						<TextBlock>Сверху</TextBlock>
+						<TextBox Width="30" Text="{Binding TopMargin, UpdateSourceTrigger=PropertyChanged}" />
+					</StackPanel>
+					<StackPanel Grid.Row="2" Grid.Column="1">
+						<TextBlock>Снизу</TextBlock>
+						<TextBox Width="30" Text="{Binding BottomMargin, UpdateSourceTrigger=PropertyChanged}" />
+					</StackPanel>
+				</Grid>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</UserControl>
