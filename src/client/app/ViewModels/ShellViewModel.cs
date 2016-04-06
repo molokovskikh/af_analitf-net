@@ -713,14 +713,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> Batch(string fileName = null)
+		public IEnumerable<IResult> Batch(string fileName = null, BatchMode mode = BatchMode.Normal)
 		{
 			if (currentAddress == null)
 				yield break;
 			var results = Sync(new UpdateCommand {
 				SyncData = "Batch",
 				BatchFile = fileName,
-				AddressId = currentAddress.Id
+				AddressId = currentAddress.Id,
+				BatchMode = mode
 			});
 			foreach (var result in results) {
 				yield return result;
@@ -1068,11 +1069,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public void NavigateAndReset(params IScreen[] views)
 		{
 			Navigator.NavigateAndReset(views);
-		}
-
-		public void ShowConstructor()
-		{
-			NavigateRoot(new PriceTagConstructor());
 		}
 
 		protected override void OnActivationProcessed(IScreen item, bool success)

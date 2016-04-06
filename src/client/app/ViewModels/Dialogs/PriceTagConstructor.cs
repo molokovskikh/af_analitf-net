@@ -7,44 +7,27 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Views.Dialogs;
-using Caliburn.Micro;
 using Common.Tools;
-using NHibernate.Linq;
 using Dapper;
+using Dapper.Contrib.Extensions;
+using NHibernate.Linq;
 using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class PriceTagConstructor : BaseScreen
 	{
-			private Dictionary<string, string> dataMap = new Dictionary<string, string> {
-				{"Цена", "221,03"},
-				{"Наименование клиента", "Здоровая Аптека"},
-				{"Наименование", "Доксазозин 4мг таб. Х30 (R)"},
-				{"Страна", "РОССИЯ"},
-				{"Производитель", "Нью-Фарм Инк./Вектор-Медика ЗАО, РОССИЯ"},
-				{"Срок годности", "01.05.2017"},
-				{"Номер накладной", "6578"},
-				{"Поставщик", "Катрен"},
-				{"Серия товара", "21012"},
-				{"Дата накладной", DateTime.Today.ToShortDateString() },
-			};
-
 		public PriceTagConstructor()
 		{
-			InitFields(this);
+			InitFields();
+			DisplayName = "Редактор ценника";
 			Alignments = new[] {
 				new KeyValuePair<string, TextAlignment>("По левому краю", TextAlignment.Left),
 				new KeyValuePair<string, TextAlignment>("По центру", TextAlignment.Center),
 				new KeyValuePair<string, TextAlignment>("По правому краю", TextAlignment.Right),
 			};
-			Width.Value = 5;
-			Height.Value = 5;
 			Fields = PriceTagItem.Items();
 
 			Items = new ObservableCollection<PriceTagItem>();
@@ -56,16 +39,20 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				foreach (var property in typeof(PriceTagItem).GetProperties())
 					OnPropertyChanged(property.Name);
 			});
-			Width.Skip(1).Merge(Height.Skip(1)).Subscribe(_ => Preview());
+			Tag.ChangedValue().Subscribe(x => Preview());
+			Tag.Subscribe(x => {
+				Items.Clear();
+				Items.AddEach(Tag.Value?.Items ?? Enumerable.Empty<PriceTagItem>());
+			});
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			RxQuery(s => s.Query<PriceTagItem>().OrderBy(x => x.Position).ToArray())
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
 				.ObserveOn(UiScheduler)
-				.Subscribe(x => Items.AddEach(x));
+				.Subscribe(Tag);
 		}
 
 		public string Text
@@ -293,8 +280,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public string Name => SelectedItem.Value?.Name;
 
-		public NotifyValue<double> Width { get; set; }
-		public NotifyValue<double> Height { get; set; }
+		public NotifyValue<PriceTag> Tag { get; set; }
 		public NotifyValue<Border> PreviewContent { get; set; }
 		public PriceTagItem[] Fields { get; set; }
 		public ObservableCollection<PriceTagItem> Items { get; set; }
@@ -303,52 +289,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void Preview()
 		{
-			var panel = new StaticCanvasPanel();
-			foreach (var src in Items) {
-				var dstText = new TextBlock {
-					Text = dataMap.GetValueOrDefault(src.Name, src.Text),
-					FontSize = src.FontSize,
-					TextAlignment = src.TextAlignment,
-					TextWrapping = src.Wrap ? TextWrapping.Wrap : TextWrapping.NoWrap,
-					FontWeight = src.Bold ? FontWeights.Bold : FontWeights.Normal,
-					FontStyle = src.Italic ? FontStyles.Italic : FontStyles.Normal,
-					TextDecorations = src.Underline ? TextDecorations.Underline : null,
-					Margin = new Thickness(src.LeftMargin, src.TopMargin, src.RightMargin, src.BottomMargin),
-				};
-				var dst = new Border {
-					BorderThickness = new Thickness(src.LeftBorder ? src.BorderThickness : 0,
-						src.TopBorder ? src.BorderThickness : 0,
-						src.RightBorder ? src.BorderThickness : 0,
-						src.BottomBorder ? src.BorderThickness : 0),
-					BorderBrush = Brushes.Black,
-					Child = dstText,
-				};
-				CanvasPanel.SetIsNewLine(dst, src.IsNewLine);
-				panel.Children.Add(dst);
-			}
-			PreviewContent.Value = new Border {
-				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0.5),
-				Child = panel,
-				Margin = new Thickness(2),
-				Width = CmToPx(Width.Value),
-				Height = CmToPx(Height.Value),
-			};
-		}
-
-		public double PxToMm(double value)
-		{
-			return value * 10 * 2.54 / 96d;
-		}
-
-		public double MmToPx(double value)
-		{
-			return value / 10 / 2.54 * 96d;
-		}
-
-		private double CmToPx(double value)
-		{
-			return value / 2.54 * 96d;
+			if (Tag.Value == null)
+				return;
+			PreviewContent.Value = PriceTag.Preview(Tag.Value.Width, Tag.Value.Height, Items);
 		}
 
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -359,21 +302,22 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public void Save()
 		{
 			Query(s => {
+				if (Tag.Value.Id == 0)
+					s.Connection.Insert(Tag.Value);
+				else
+					s.Connection.Update(Tag.Value);
 				var dbItems = s.Query<PriceTagItem>().ToArray();
 				for(var i = 0; i < Items.Count; i++) {
 					var item = Items[i];
 					item.Position = i;
 					if (item.Id == 0) {
-						s.Insert(item);
+						s.Connection.Insert(item);
 					}  else {
-						try {
-							s.Update(item);
-						} catch(StaleStateException) {
-						}
+						s.Connection.Update(item);
 					}
 				}
 				foreach (var item in dbItems.Where(x => Items.All(y => x.Id != y.Id)))
-					s.Delete(item);
+					s.Connection.Delete(item);
 			}).Wait();
 		}
 
@@ -382,11 +326,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			Items.Clear();
 		}
 
-		public void Place()
+		public void Reset()
 		{
-			Items.Clear();
-			foreach (var field in Fields)
-				Items.Add(new PriceTagItem(field.Name));
+			Tag.Value = PriceTag.Default();
 		}
 
 		public void Delete()

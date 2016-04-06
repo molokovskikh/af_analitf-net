@@ -216,6 +216,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (region != Consts.AllRegionLabel) {
 				offers = offers.Where(o => o.Price.RegionName == region);
 			}
+
+			ProducerFilterStateGet(offers.ToList());
+
 			var producer = CurrentProducer.Value;
 			if (producer != null && producer.Id > 0) {
 				var id = producer.Id;
@@ -283,6 +286,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			args.Handled = true;
 			catalog.SearchText = text;
 			TryClose();
+		}
+
+		public override void TryClose()
+		{
+			ProducerFilterStateSet();
+			base.TryClose();
 		}
 
 #if DEBUG

@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			};
 			waybill.AddLine(line);
 			waybill.Calculate(settings);
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
 			Assert.IsNotNull(doc);
 		}
 
@@ -120,7 +120,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				waybill.AddLine(line);
 			}
 			waybill.Calculate(settings);
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Pages.Count);
 

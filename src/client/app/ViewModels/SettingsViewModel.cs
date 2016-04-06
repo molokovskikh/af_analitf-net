@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -13,6 +14,7 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
+using Dapper;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -143,6 +145,7 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+		public NotifyValue<FrameworkElement> Preview { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -150,6 +153,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 			MarkupAddress.Value = Address;
 			CurrentAddress = Address;
+			LoadPriceTagPreview();
+		}
+
+		private void LoadPriceTagPreview()
+		{
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => Preview.Value = x.Preview());
 		}
 
 		private static string Mask(string password1)
@@ -305,9 +316,10 @@ namespace AnalitF.Net.Client.ViewModels
 			TryClose();
 		}
 
-		public IResult ShowPriceTagConstructor()
+		public IEnumerable<IResult> ShowPriceTagConstructor()
 		{
-			return new DialogResult(new PriceTagConstructor());
+			yield return new DialogResult(new PriceTagConstructor(), fullScreen: true);
+			LoadPriceTagPreview();
 		}
 
 		protected override void Broadcast()

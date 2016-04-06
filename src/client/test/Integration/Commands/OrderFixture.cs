@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
@@ -358,8 +359,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			session.Transaction.Commit();
 			Fixture(fixture);
 
-			var batch = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
-{0};{1};{2};{3};{4};;;1;;", externalLineId, externalAddressId, DateTime.Now, externalProductId, offer.ProductSynonym);
+			var batch = $@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена
+{externalLineId};{externalAddressId};{DateTime.Now};{externalProductId};{offer.ProductSynonym};;;1;;";
 
 			Assert.AreEqual(UpdateResult.OK, MakeBatch(batch));
 			Assert.AreEqual(1, localSession.Query<Order>().Count(), localSession.Query<BatchLine>().Implode());
@@ -368,13 +369,44 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var files = Directory.GetFiles(ordersPath);
 			Assert.AreEqual(1, files.Length);
 			var order = localSession.Query<SentOrder>().First();
-			var expected = String.Format(@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена;Поставщик
-{0};{1};{2};{3};{4};;{5};1;;;{6}", externalLineId, externalAddressId, order.SentOn, externalProductId,
-				order.Lines[0].ProductSynonym,
-				order.Lines[0].ProducerSynonym,
-				order.Price.Name);
+			var expected = $@"Номер;Аптека;Дата;Код;Товар;ЗаводШК;Производитель;Количество;Приоритет;Цена;Поставщик
+{externalLineId};{externalAddressId};{order.SentOn};{externalProductId};{order.Lines[0].ProductSynonym};;{order.Lines[0].ProducerSynonym};1;;;{order.Price.Name}";
 			var lines = File.ReadAllText(files[0], Encoding.Default).TrimEnd();
 			Assert.AreEqual(expected, lines);
+		}
+
+		[Test]
+		public void Save_unordered()
+		{
+			localSession.DeleteEach<BatchLine>();
+			localSession.DeleteEach<Order>();
+
+			Fixture(new SmartOrder {
+				ProductIds = new[] {
+					SafeSmartOrderProductId()
+				}
+			});
+			//код 1 есть будет заказана
+			//кода 2 нет по этому позиция будет не заказана
+			MakeBatch("1|1\r\n2|5");
+
+			var lines = localSession.Query<BatchLine>().ToList();
+			Assert.AreEqual(2, lines.Count);
+			Assert.IsTrue(lines.First(x => x.Code == "2").IsNotOrdered);
+
+			//должны удалить заказанную позицию
+			Run(new UpdateCommand {
+				SyncData = "Batch",
+				AddressId = localSession.Query<Address>().First().Id,
+				BatchMode = BatchMode.SaveUnordered,
+				BatchFile = TempFile("batch.txt", "2|5")
+			});
+			lines = localSession.Query<BatchLine>().ToList();
+			Assert.AreEqual(2, lines.Count);
+			Assert.IsTrue(lines[0].IsNotOrdered);
+			Assert.AreEqual("2", lines[0].Code);
+			Assert.IsTrue(lines[1].IsNotOrdered);
+			Assert.AreEqual("2", lines[1].Code);
 		}
 
 		//для автозаказа нам нужна такая позиция которой нет в прайсе с минимальной ценой заказа
@@ -396,10 +428,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 		private UpdateResult MakeBatch(string content)
 		{
-			var filename = TempFile("batch.txt", content);
 			return Run(new UpdateCommand {
 				SyncData = "Batch",
-				BatchFile = filename,
+				BatchFile = TempFile("batch.txt", content),
 				AddressId = localSession.Query<Address>().First().Id
 			});
 		}

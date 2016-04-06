@@ -507,8 +507,8 @@
 						</CheckBox>
 					</StackPanel>
 					<StackPanel Name="PriceTagConstructor">
-						<Button Name="ShowPriceTagConstructor">Редактировать</Button>
-						<ContentControl Name="Preview" />
+						<Button Margin="0, 20, 0, 20" Name="ShowPriceTagConstructor">Редактировать</Button>
+						<ContentControl Content="{Binding Preview.Value}" />
 					</StackPanel>
 				</StackPanel>
 			</TabItem>

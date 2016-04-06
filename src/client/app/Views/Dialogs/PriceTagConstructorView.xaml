@@ -9,9 +9,9 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
+			<Button Name="Reset">Сбросить</Button>
 			<Button Name="Clear">Очистить</Button>
 			<Button Name="Delete">Удалить</Button>
-			<Button Name="Place">Расположить</Button>
 			<Button Name="Preview">Обновить</Button>
 			<Button Name="Save">Сохранить</Button>
 		</ToolBar>
@@ -50,9 +50,9 @@
 				<TextBlock FontWeight="Bold" FontSize="16" Text="Размер ценника" Margin="0, 5, 0, 5"/>
 
 				<Label>Ширина (см)</Label>
-				<TextBox Name="Width" />
+				<TextBox Name="Tag_Width" />
 				<Label>Высота (см)</Label>
-				<TextBox Name="Height" />
+				<TextBox Name="Tag_Height" />
 
 				<TextBlock FontWeight="Bold" FontSize="16" Text="Текущий элемент" Margin="0, 5, 0, 5"/>
 				<TextBlock TextWrapping="Wrap" FontWeight="Bold" FontSize="14" Text="{Binding Name}" Margin="0, 5, 0, 5"/>
