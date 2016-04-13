@@ -71,7 +71,7 @@ namespace AnalitF.Net.Service.Controllers
 						exporter.Orders = orders;
 						exporter.BatchItems = batchItems;
 						exporter.BatchAddress = batchAddress;
-						exporter.ExportAll();
+						exporter.ExportDb();
 						exporter.Compress(job.OutputFile(Config));
 					}
 				}

@@ -68,7 +68,7 @@ namespace AnalitF.Net.Service.Test
 			requestLog.ClientToken = Guid.NewGuid().ToString();
 			var settings = session.Load<UserSettings>(user.Id);
 			settings.CheckClientToken = true;
-			exporter.ExportAll();
+			exporter.ExportDb();
 		}
 
 		[Test]
@@ -130,7 +130,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			InitAd();
 
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var files = ListResult();
 
 			Assert.That(files, Does.Contain("ads/2block.gif"));
@@ -313,7 +313,7 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			client.Users[0].CleanPrices(session, supplier);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var offers = ParseData("offers");
 			var offerData = offers.First();
 			var id = Convert.ToUInt64(offerData[0]);
@@ -338,13 +338,13 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var ids = ParseData("offers").Select(l => Convert.ToUInt64(l[0])).ToArray();
 			Assert.IsTrue(ids.Contains(supplier.Prices[0].Core[0].Id), ids.Implode());
 			var priceData = ParseData("prices").First(d => Convert.ToUInt32(d[0]) == supplier.Prices[0].Id);
@@ -368,7 +368,7 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			client.MaintainIntersection(session);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			var id = supplier.Prices[0].Core[0].Id;
@@ -381,7 +381,7 @@ namespace AnalitF.Net.Service.Test
 			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
-			exporter.ExportAll();
+			exporter.ExportDb();
 			offers = ParseData("offers").ToArray();
 			offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
 			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
@@ -398,7 +398,7 @@ namespace AnalitF.Net.Service.Test
 				session.Save(new TestMailSendLog(user, mail));
 			}
 			session.CreateSQLQuery("delete from Logs.PendingMailLogs").ExecuteUpdate();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			Assert.AreEqual(1, session.Query<PendingMailLog>().Count());
 		}
 
@@ -466,7 +466,7 @@ namespace AnalitF.Net.Service.Test
 			//для подготовки данных нужна транзакция
 			if (!session.Transaction.IsActive)
 				session.BeginTransaction();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var memory = new MemoryStream();
 			exporter.Compress(memory);
 			memory.Position = 0;
@@ -495,7 +495,7 @@ namespace AnalitF.Net.Service.Test
 
 		private void ExportCompressed()
 		{
-			exporter.ExportAll();
+			exporter.ExportDb();
 			file = exporter.Compress(file);
 		}
 	}
