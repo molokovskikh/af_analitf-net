@@ -12,11 +12,6 @@ namespace AnalitF.Net.Service.Config
 			//если настройка не задана отдаем файлы любого размера
 			MaxReclameFileSize = long.MaxValue;
 
-			if (!Directory.Exists(this.ProducerPromotionsPath))
-			{
-				System.IO.Directory.CreateDirectory(this.ProducerPromotionsPath);
-			}
-
 		}
 
 		public string Environment { get; set; }
