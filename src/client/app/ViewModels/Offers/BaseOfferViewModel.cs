@@ -349,7 +349,7 @@ from SentOrderLines l
 join SentOrders o on o.Id = l.OrderId
 where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
 group by l.ProductId")
-					.SetParameter("begin", DateTime.Today.AddDays(-1))
+					.SetParameter("begin", DateTime.Today.AddDays(-Settings.Value.CountDayForWarnOrdered))
 					.SetParameter("end", DateTime.Today)
 					.SetParameter("addressId", addressId)
 					.List<object>()

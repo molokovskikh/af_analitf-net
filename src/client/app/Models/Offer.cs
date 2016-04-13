@@ -312,7 +312,7 @@ namespace AnalitF.Net.Client.Models
 			}
 			if (address.YesterdayOrderedProductIds != null
 				&& address.YesterdayOrderedProductIds.Contains(ProductId)) {
-				result.Add(Message.Warning("Препарат был заказан вчера."));
+				result.Add(Message.Warning("Препарат был заказан в течении последних " + settings.CountDayForWarnOrdered + " дней"));
 			}
 
 			if (PrevOrderAvgCount != null && OrderCount > PrevOrderAvgCount * settings.OverCountWarningFactor) {

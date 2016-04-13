@@ -358,7 +358,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(2, orders[0].Lines.Count);
 		}
 
-		[Test]
+		/*[Test]
 		public void Warn_on_yesterday_orders()
 		{
 			Assert.IsTrue(settings.WarnIfOrderedYesterday);
@@ -373,6 +373,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.OfferUpdated();
 			model.OfferCommitted();
 			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Препарат был заказан вчера."));
+		}*/
+		[Test]
+		public void Warn_on_lastday_orders()
+		{
+			Assert.IsTrue(settings.WarnIfOrderedYesterday);
+			var order = MakeSentOrder(session.Query<Offer>().First(o => !o.Junk));
+			order.SentOn = DateTime.Now.AddDays(-5);
+			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
+
+			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
+			model.CurrentOffer.Value = model.Offers.Value.First(o => o.ProductId == order.Lines[0].ProductId && !o.Junk);
+			scheduler.Start();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			model.OfferCommitted();
+			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Препарат был заказан " + 5 + " дней назад."));
 		}
 	}
 }

@@ -314,5 +314,5 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return CustomStyle.Edit(style);
 		}
-	}
+    }
 }

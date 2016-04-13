@@ -307,7 +307,7 @@
 						<StackPanel>
 							<StackPanel Orientation="Horizontal">
 								<Label>Удалять отправленные заказы старше</Label>
-								<TextBox Name="Settings_DeleteOrdersOlderThan"></TextBox>
+								<TextBox Name="Settings_DeleteOrdersOlderThan" Height="25"></TextBox>
 								<Label>дней</Label>
 							</StackPanel>
 							<CheckBox x:Name="Settings_ConfirmDeleteOldOrders">
@@ -384,9 +384,14 @@
 							Управлять адресами доставки
 						</CheckBox>
 						<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
-						<CheckBox x:Name="Settings_WarnIfOrderedYesterday">Предупреждать, если товар был заказан вчера</CheckBox>
-
-						<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
+                        
+						<StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="Settings_WarnIfOrderedYesterday" Content="Предупреждать, если товар был заказан"/>
+                            <TextBox x:Name="Settings_CountDayForWarnOrdered"/>
+                            <!--<ComboBox x:Name="Settings_CountDayForWarnOrdered"/>-->
+                            <Label>дней назад</Label>
+                        </StackPanel>
+                        <Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
 						<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
 
 						<Label>Включить в основную группу поставщиков начиная с:</Label>
