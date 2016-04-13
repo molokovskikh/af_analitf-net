@@ -71,6 +71,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public CatalogViewModel ParentModel { get; }
 
 		public PromotionPopup Promotions { get; set; }
+		public ProducerPromotionPopup ProducerPromotions { get; set; }
 
 		public QuickSearch<CatalogName> CatalogNamesSearch { get; }
 		public QuickSearch<Catalog> CatalogsSearch { get; }
@@ -126,6 +127,9 @@ namespace AnalitF.Net.Client.ViewModels
 				CurrentCatalogName.Value = CurrentCatalogName.Value
 					?? (CatalogNames.Value ?? Enumerable.Empty<CatalogName>()).FirstOrDefault();
 			});
+
+			ProducerPromotions = new ProducerPromotionPopup(Shell.Config, CurrentCatalogName, RxQuery, Env);
+
 		}
 
 		protected override void OnActivate()
@@ -288,6 +292,7 @@ namespace AnalitF.Net.Client.ViewModels
 				activeItemType = typeof(CatalogName);
 				CurrentItem.Value = CurrentCatalogName.Value;
 				Promotions.Hide();
+				ProducerPromotions.Hide();
 			}
 		}
 	}

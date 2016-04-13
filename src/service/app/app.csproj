@@ -115,6 +115,7 @@
     <Compile Include="Models\PendingLimit.cs" />
     <Compile Include="Models\PendingMailLog.cs" />
     <Compile Include="Models\PendingOrderLog.cs" />
+    <Compile Include="Models\ProducerPromotion.cs" />
     <Compile Include="Models\Promotion.cs" />
     <Compile Include="Models\RequestLog.cs" />
     <Compile Include="Models\UserPrice.cs" />

@@ -327,6 +327,20 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Load_ProducerPromotions()
+		{
+			var fixture = Fixture<CreateProducerPromotion>();
+			Run(new UpdateCommand());
+
+			Assert.That(localSession.Query<Client.Models.ProducerPromotion>().Count(), Is.GreaterThan(0));
+
+			var producerPromotion = localSession.Get<Client.Models.ProducerPromotion>(fixture.ProducerPromotion.Id);
+			producerPromotion.Init(clientConfig);
+
+			Assert.AreEqual("Тестовая промоакция производителя", producerPromotion.Name);		
+		}
+
+		[Test]
 		public void Load_delay_of_payment()
 		{
 			Fixture<CreateDelayOfPayment>();
