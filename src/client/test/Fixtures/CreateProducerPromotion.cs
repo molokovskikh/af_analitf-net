@@ -4,6 +4,7 @@ using System.ComponentModel;
 using NHibernate;
 using NHibernate.Linq;
 using Test.Support;
+using System.Collections.Generic;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -40,17 +41,17 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		private TestProducerPromotion GetProducerPromotion(ISession session, TestUser user)
 		{
-			var suppliers = user.GetActivePricesNaked(session).Take(5).Select(x => x.Price.Supplier);
-			var products = session.Query<TestCatalogProduct>().ToList().Where(x => x.Name.Contains("П")).OrderByDescending(x => x.Name).Take(5).ToArray();
+			var suppliers = user.GetActivePricesNaked(session).Take(5).Select(x => x.Price.Supplier).ToList();
+			var product = session.Query<TestCore>().ToList().Skip(3).First().Product.CatalogProduct;
 			var producer = session.Query<TestProducer>().First();
 
 			TestProducerPromotion testProducerPromotion = new TestProducerPromotion()
 			{
 				Name = "Тестовая промоакция производителя",
 				Annotation = "Аннотация тестовой акции производителя",
-				Catalogs = products.ToList(),
-				Suppliers = suppliers.ToList(),
+				Suppliers = suppliers,
 				Producer = producer,
+				Catalogs = new List<TestCatalogProduct>() { product }.ToList(),
 				Enabled = 1,
 				Status = 1,
 				AgencyDisabled = 1,
