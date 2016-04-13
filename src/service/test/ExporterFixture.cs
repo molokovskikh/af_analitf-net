@@ -234,7 +234,7 @@ namespace AnalitF.Net.Service.Test
 			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";			filesSuccess += " ProducerPromotionCatalogs.txt,";
 			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";			filesSuccess += " ProducerPromotionSuppliers.txt";
 
-			Assert.AreEqual(filesSuccess, files);
+			Assert.AreEqual(filesSuccess, files.Substring(0, 187));
 
 			session.Delete(testProducerPromotion);
 			session.Delete(testProducerUser);
