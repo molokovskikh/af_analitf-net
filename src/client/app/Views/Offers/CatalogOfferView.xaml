@@ -199,7 +199,10 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<ContentControl x:Name="Promotions" Grid.Row="1" />
+			<StackPanel Orientation="Vertical" Grid.Row="1">
+				<ContentControl x:Name="Promotions" />
+				<ContentControl x:Name="ProducerPromotions" />
+			</StackPanel>
 		</Grid>
 
 		<Parts:ProductInfoView Grid.Row="2" cal:Bind.ModelWithoutContext="{Binding}" />

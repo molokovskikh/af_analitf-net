@@ -92,5 +92,32 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				.SetParameter("destinationType", "1")
 				.ExecuteUpdate();
 		}
+
+		public static TestProducerPromotion CreateProducerPromotion(ISession session, TestUser user)
+		{
+			var suppliers = user.GetActivePricesNaked(session).Take(5).Select(x=>x.Price.Supplier);
+			var products = session.Query<TestCatalogProduct>().ToList().Where(x=>x.Name.Contains("П")).OrderByDescending(x => x.Name).Take(5).ToArray();
+			var producer = session.Query<TestProducer>().First();
+
+			TestProducerPromotion testProducerPromotion = new TestProducerPromotion()
+			{
+				Name = "TestPromotion",
+				Annotation = "Test Producer Promotion OFF 25%",
+				Catalogs = products.ToList(),
+				Suppliers = suppliers.ToList(),
+				Producer = producer,
+				Enabled = 1,
+				Status = 1,
+				AgencyDisabled =1,
+				Begin = DateTime.Now.AddMonths(-1),
+				End = DateTime.Now.AddMonths(1),
+				RegionMask = 0,
+				UpdateTime = DateTime.Now
+			};
+
+			return testProducerPromotion;
+		}
+
+
 	}
 }
