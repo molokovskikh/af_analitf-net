@@ -2,11 +2,15 @@
 
 set -o errexit
 
-git submodule update --init
+if [ "`whoami`" != "tester"  ]; then
+	git submodule update --init
+fi;
 bake prepare
 msbuild.exe /nologo /verbosity:quiet src/*.sln
-bake db:setup
-bake db:local:seed
+if [ "`whoami`" != "tester"  ]; then
+	bake db:setup
+	bake db:local:seed
+fi
 mkdir src/data || :
 mkdir src/data/update || :
 mkdir src/data/result || :
