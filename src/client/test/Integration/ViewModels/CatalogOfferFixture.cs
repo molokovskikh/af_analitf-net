@@ -372,7 +372,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
-			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Препарат был заказан " + settings.CountDayForWarnOrdered + " дней назад."));
+			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Товар был заказан за последние " + settings.CountDayForWarnOrdered + " дней"));
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool IsCredentialsChanged;
 
-		public List<int> Numbers { get; set; }
+		public List<int> LastDayForWarnOrdered { get; set; }
 
 		public SettingsViewModel()
 		{
@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(x => !x.Value)
 				.Subscribe(IsWaybillDirEnabled);
 
-			Numbers = new List<int>() {1,2,3,4,5,6,7};
+			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
         }
 
 		public bool HaveAddresses { get; set; }
