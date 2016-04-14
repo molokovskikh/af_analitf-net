@@ -363,7 +363,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			Assert.IsTrue(settings.WarnIfOrderedYesterday);
 			var order = MakeSentOrder(session.Query<Offer>().First(o => !o.Junk));
-			order.SentOn = DateTime.Now.AddDays(settings.CountDayForWarnOrdered);
+			order.SentOn = DateTime.Now.AddDays(-settings.CountDayForWarnOrdered);
 			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
