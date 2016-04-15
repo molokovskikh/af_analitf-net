@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			});
 			manager = StubWindowManager(lazyshell);
 			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
-			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
+			if (debugTest.Match(TestContext.CurrentContext.Test.Name) || true) {
 				appender = new MemoryAppender();
 				var sql = new QueryCatcher();
 				sql.Appender = appender;
@@ -126,10 +126,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (appender != null) {
 				var events = appender.GetEvents();
 				foreach (var loggingEvent in events) {
-					if (loggingEvent.LoggerName == "NHibernate.SQL")
+					if (loggingEvent.LoggerName == "NHibernate.SQL") {
 						Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(loggingEvent.MessageObject.ToString())));
-					else
+					} else {
 						Console.WriteLine(loggingEvent.MessageObject);
+						Console.WriteLine(loggingEvent.ExceptionObject);
+					}
 				}
 				appender = null;
 				var repository = (Hierarchy)LogManager.GetRepository();
