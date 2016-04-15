@@ -127,6 +127,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual void Error(Exception e)
 		{
 			IsError = true;
+			Exception = e;
 			RequstCancellation.Dispose();
 		}
 
