@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Filter_by_producer_SavingState()
 		{
-			//проверяем отсутствие флагов до сохранения фильтра 
+			//проверяем отсутствие флагов до сохранения фильтра
 			Assert.That(model.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(model.CurrentProducer.Value.Id, Is.EqualTo(0));
 			//выставляем флаг "сохранения фильтра"
@@ -68,6 +68,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			//устанавливаем фильтрацию по одному поставщику
 			model.CurrentProducer.Value = model.Producers.Value[1];
+			scheduler.AdvanceByMs(1000);
 			Assert.That(model.Offers.Value.Count, Is.LessThan(maxCount));
 			//закрываем форму
 			model.TryClose();
@@ -87,7 +88,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(modelNew.Offers.Value.Count, Is.EqualTo(maxCount));
 			//закрываем форму
 			modelNew.TryClose();
-			//проверяем наличие флагов после сохранения фильтра 
+			//проверяем наличие флагов после сохранения фильтра
 			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(modelNew.CurrentProducer.Value.Id, Is.EqualTo(0));
 		}
