@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
@@ -83,6 +84,8 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual Product MarkUpProductForCatalog { get; set; }
+
 		public virtual string Period { get; set; }
 		public virtual DateTime? Exp { get; set; }
 		public virtual string SerialNumber { get; set; }
@@ -111,6 +114,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual string EAN13 { get; set; }
 
 		public virtual bool Edited { get; set; }
+		[IgnoreDataMember, Ignore]
+		public virtual bool SpecialMarkUp { get; set; }
 
 		public virtual IList<CertificateFile> CertificateFiles { get; set; }
 
@@ -404,6 +409,8 @@ namespace AnalitF.Net.Client.Models
 			var markupType = ActualVitallyImportant ? MarkupType.VitallyImportant : MarkupType.Over;
 			if (Nds == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost.GetValueOrDefault() == 0))
 				markupType = MarkupType.Nds18;
+			if (SpecialMarkUp)
+				markupType = MarkupType.Special;
 			return markupType;
 		}
 
@@ -484,7 +491,7 @@ namespace AnalitF.Net.Client.Models
 				foreach (var property in typeof(WaybillLine).GetProperties()) {
 					OnPropertyChanged(property.Name);
 				}
-				Waybill.Calculate(Waybill.Settings);
+				Waybill.Calculate(Waybill.Settings, new List<SpecialMarkupCatalog>());
 			}
 		}
 

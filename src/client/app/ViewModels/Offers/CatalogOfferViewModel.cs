@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -37,9 +39,17 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			GroupByProduct = new NotifyValue<bool>(Settings.Value.GroupByProduct);
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
-			RetailMarkup = new NotifyValue<decimal>(true,
-				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
-				Settings);
+
+			RetailMarkup = new NotifyValue<decimal>(true, () => {
+				SpecialMarkupCatalogs = Shell != null ? Shell.SpecialMarkupCatalogs : new List<SpecialMarkupCatalog>();
+				if (CurrentOffer.HasValue)
+					CurrentOffer.Value.SpecialMarkUp = SpecialMarkupCatalogs.Any(s => CurrentOffer != null
+					                                                                  && CurrentOffer.HasValue &&
+					                                                                  s.CatalogId == CurrentOffer.Value.CatalogId);
+				var resultDec = MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address);
+				return resultDec;
+			}, Settings);
+
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
 				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
 				.ToValue();
@@ -52,6 +62,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(_ => Update());
 
 			CurrentOffer.Subscribe(_ => {
+				SpecialMarkupCatalogs = Shell != null ? Shell.SpecialMarkupCatalogs : new List<SpecialMarkupCatalog>();
+				if (CurrentOffer.HasValue)
+					CurrentOffer.Value.SpecialMarkUp = SpecialMarkupCatalogs.Any(s => CurrentOffer != null
+					                                                                  && CurrentOffer.HasValue &&
+					                                                                  s.CatalogId == CurrentOffer.Value.CatalogId);
 				RetailMarkup.Recalculate();
 			});
 			Persist(HideJunk, "HideJunk");
@@ -93,6 +108,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public bool IsFilterByCatalogName => filterCatalogName != null;
 
 		public string[] Filters { get; set; }
+
+		public List<SpecialMarkupCatalog> SpecialMarkupCatalogs { get; set; }
 
 		public NotifyValue<bool> HideJunk { get; set; }
 		public NotifyValue<string> CurrentFilter { get; set; }

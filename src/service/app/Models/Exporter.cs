@@ -472,6 +472,10 @@ where
 				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
 			});
 
+
+			sql = @" select Id, CatalogId from Catalogs.Products";
+			Export(Result, sql, "Products", true);
+
 			//для выборки данных используется кеш оптимизированных цен
 			//кеш нужен что бы все пользователи одного клиента имели одинаковый набор цен
 			//кеш перестраивается на основании даты прайс-листа, при выборке проверяется дата

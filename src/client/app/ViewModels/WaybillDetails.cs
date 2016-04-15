@@ -22,12 +22,12 @@ namespace AnalitF.Net.Client.ViewModels
 		private uint id;
 
 		//для восстановления состояния
-		public WaybillDetails(long id)
-			: this((uint)id)
+		public WaybillDetails(long id, List<SpecialMarkupCatalog> specialMarkupCatalogs)
+			: this((uint)id, specialMarkupCatalogs)
 		{
 		}
 
-		public WaybillDetails(uint id)
+		public WaybillDetails(uint id, List<SpecialMarkupCatalog> specialMarkupCatalogs)
 		{
 			DisplayName = "Детализация накладной";
 			this.id = id;
@@ -38,7 +38,8 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentOrderLine = new NotifyValue<SentOrderLine>();
 			Lines = new NotifyValue<ListCollectionView>();
 
-			Rounding.Changed()
+			SpecialMarkupCatalogs = specialMarkupCatalogs;
+      Rounding.Changed()
 				.Merge(Settings.Changed())
 				.Subscribe(v => Calculate());
 			CurrentTax.Subscribe(v => {
@@ -112,7 +113,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null)
 				return;
 			Settings.Value.Rounding = Rounding.Value;
-			Waybill.Calculate(Settings.Value);
+			Waybill.Calculate(Settings.Value, SpecialMarkupCatalogs);
 		}
 
 		protected override void OnInitialize()

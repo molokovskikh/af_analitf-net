@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -191,7 +192,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var line = Calculate(Line());
 			Assert.AreEqual(557, waybill.RetailSum);
 			line.RetailCost = 60;
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
 			Assert.AreEqual(600, waybill.RetailSum);
 		}
 
@@ -277,7 +278,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		[Test]
 		public void Calculate_fields_for_user_created_waybill()
 		{
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
 			waybill.IsCreatedByUser = true;
 			var line = new WaybillLine();
 			waybill.AddLine(line);
@@ -342,7 +343,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 				VitallyImportant = true,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
 			Assert.AreEqual(20, line.RetailMarkup);
 			Assert.AreEqual(22.81, line.RealRetailMarkup);
 			Assert.AreEqual(36.21, line.RetailCost);
@@ -399,7 +400,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(5000, line.RetailCost);
 			Assert.AreEqual(250.14, line.RetailMarkup);
 
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
 			Assert.AreEqual(5000, line.RetailCost);
 		}
 
@@ -483,7 +484,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			waybill.WaybillSettings = waybillSettings;
 			waybill.Lines.Add(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
 			return line;
 		}
 	}

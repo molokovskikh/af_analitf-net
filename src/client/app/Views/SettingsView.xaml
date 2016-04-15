@@ -176,8 +176,143 @@
 						<CheckBox x:Name="OverwriteNds18Markups" Content="Применить ко всем адресам(точкам) доставки"/>
 					</StackPanel>
 				</Grid>
-			</TabItem>
-			<TabItem Header="Накладные" Name="WaybillTab">
+      </TabItem>
+      <TabItem Header="Специальные наценки">
+        <Grid>
+          <TabControl SelectedValue="SpecialMarkupsTab">
+            <TabItem Header="Настройки" Name="SpecialMarkupsTab" IsEnabled="{Binding HaveAddresses}">
+              <Grid>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="53*" />
+                  <ColumnDefinition Width="237*"/>
+                  <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource Select}" MinWidth="100"
+						SelectedItem="{Binding MarkupAddress.Value}"
+						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+
+                <DataGrid x:Name="SpecialMarkups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
+						cal:Message.Attach="[Event InitializingNewItem] = [Action NewSpecialMarkup($eventArgs)]" Grid.ColumnSpan="2">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Width="*"
+								Header="Левая граница"
+								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+                    <DataGridTextColumn Width="*"
+								Header="Правая граница"
+								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+                    <DataGridTextColumn Width="*" Header="Наценка(%)"
+								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+                    <DataGridTextColumn Width="*" Header="Макс.наценка(%)"
+								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+                    <DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
+								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+                  </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                  <Button Margin="3" CommandTarget="{x:Reference SpecialMarkups}" Command="ApplicationCommands.Delete">
+                    Удалить
+                  </Button>
+
+                  <Label Margin="3" Height="13" Width="30" Background="Red"
+							HorizontalAlignment="Left" />
+                  <TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
+                  <Label Margin="3" Height="13" Width="30" Background="#808000"
+							HorizontalAlignment="Left" />
+                  <TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
+                  <Label Margin="3" Height="13" Width="30" Background="#800000"
+							HorizontalAlignment="Left" />
+                  <TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="3">
+                  <CheckBox x:Name="OverwriteSpecialMarkups" Content="Применить ко всем адресам(точкам) доставки"/>
+                </StackPanel>
+              </Grid>
+
+            </TabItem>
+            <TabItem Header="Список " IsEnabled="{Binding HaveAddresses}"
+	                   HorizontalAlignment="Right" Width="60">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="1*" />
+                  <ColumnDefinition Width="70" />
+                  <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                  <StackPanel Style="{StaticResource FilterPanel}" Orientation="Vertical" Margin="2,4,1,4">
+                    <TextBox x:Name="SpecialMarkupSearchText"
+					                   Text="{Binding SpecialMarkupSearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+					                     Margin="0" />
+                  </StackPanel>
+                  <StackPanel Style="{StaticResource FilterPanel}" Margin="0,0,1,4">
+                    <CheckBox x:Name="SpecialMarkupSearchEverywhere" FontSize="11" Margin="4,0,0,0"
+					                    Style="{StaticResource FilterCheckBoxSmall}" Focusable="False" Content="Отображать весь каталог"/>
+
+                    <CheckBox x:Name="SpecialMarkupSearchInStartOfString" FontSize="11" Margin="8,0,0,0"
+					                    Style="{StaticResource FilterCheckBoxSmall}" Focusable="False" Content="Искать в начале слова"/>
+                  </StackPanel>
+                  <ProgressBar IsIndeterminate="True" Height="16"
+			Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
+                  <DataGrid x:Name="SpecialMarkupItems" SelectionMode="Single" IsReadOnly="True" CanUserSortColumns="False"
+				                    SelectedItem="{Binding SpecialMarkupItemCurrent.Value, UpdateSourceTrigger=PropertyChanged}" Height="351">
+                    <DataGrid.Columns>
+                      <DataGridTextColumn Header="Название" Binding="{Binding Name}"  Width="152">
+                        <DataGridTextColumn.CellStyle>
+                          <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="{Binding Name}" />
+                          </Style>
+                        </DataGridTextColumn.CellStyle>
+                      </DataGridTextColumn>
+                      <DataGridTextColumn Header="Форма выпуска" Binding="{Binding Form}" Width="152">
+                        <DataGridTextColumn.CellStyle>
+                          <Style TargetType="DataGridCell">
+                            <Setter Property="ToolTip" Value="{Binding Form}" />
+                          </Style>
+                        </DataGridTextColumn.CellStyle>
+                      </DataGridTextColumn>
+                    </DataGrid.Columns>
+                  </DataGrid>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                  <Button Margin="0,160,0,0" Content="добавить" Width="60" FontSize="11" x:Name="SpecialMarkupCheck" />
+                  <Button Margin="0,10,0,0" Content="убрать" Width="60" FontSize="11" x:Name="SpecialMarkupUncheck" />
+                </StackPanel>
+                <DataGrid x:Name="SpecialMarkupItemsChecked" Grid.Column="2" SelectionMode="Single" IsReadOnly="True"
+			                    CanUserSortColumns="False"
+			                    SelectedItem="{Binding SpecialMarkupItemsCheckedCurrent.Value, UpdateSourceTrigger=PropertyChanged}">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}"  Width="152">
+                      <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                          <Setter Property="ToolTip" Value="{Binding Name}" />
+                        </Style>
+                      </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Форма выпуска" Binding="{Binding Form}" Width="152">
+                      <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                          <Setter Property="ToolTip" Value="{Binding Form}" />
+                        </Style>
+                      </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                  </DataGrid.Columns>
+                </DataGrid>
+              </Grid>
+            </TabItem>
+          </TabControl>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Накладные" Name="WaybillTab">
 				<StackPanel>
 					<Label ToolTip="Округлить розничную цену путем уменьшения до цены кратной">
 						Округлять:

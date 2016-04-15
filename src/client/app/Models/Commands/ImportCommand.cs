@@ -119,7 +119,8 @@ where c.Id is null;")
 
 			Configure(new SanityCheck()).Check();
 			var settings = Session.Query<Settings>().First();
-			if (IsImported<SentOrder>()) {
+			var specialMarkUps = Session.Query<SpecialMarkupCatalog>().ToList();
+      if (IsImported<SentOrder>()) {
 				Log.Info("Пересчет отправленных заявок");
 				Session.CreateSQLQuery(@"
 update SentOrderLines l
@@ -150,7 +151,7 @@ where o.Sum = 0;")
 					.OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
 				(s, x) => {
 					foreach (var id in x) {
-						s.Load<Waybill>(id).Calculate(settings);
+						s.Load<Waybill>(id).Calculate(settings, specialMarkUps);
 					}
 				});
 
@@ -167,7 +168,7 @@ set IsNew = 1;")
 				//не вычисляем такие накладные тк всего скорее они ни кому не нужны
 				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0 && !w.IsMigrated).ToList();
 				foreach (var waybill in newWaybills)
-					waybill.Calculate(settings);
+					waybill.Calculate(settings, specialMarkUps);
 			}
 			if (IsImported<Offer>()) {
 				Log.Info("Очистка каталога");

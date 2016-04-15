@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using NPOI.SS.Formula.Functions;
 
@@ -8,6 +9,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public Catalog()
 		{
+	//		ProductList = new List<Product>();
 		}
 
 		public Catalog(string name)

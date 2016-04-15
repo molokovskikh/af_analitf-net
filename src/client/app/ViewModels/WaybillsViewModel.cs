@@ -190,8 +190,10 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			if (waybill.DocType.GetValueOrDefault(DocType.Waybill) == DocType.Reject)
 				Shell.Navigate(new OrderRejectDetails(waybill.Id));
-			else
-				Shell.Navigate(new WaybillDetails(waybill.Id));
+			else {
+				RxQuery(s => s.Query<SpecialMarkupCatalog>().ToList())
+				.Subscribe(s => { Shell.Navigate(new WaybillDetails(waybill.Id, s)); });
+			}
 		}
 
 		public void SearchLine()

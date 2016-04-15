@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,7 +35,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			var waybill = Fixture<LocalWaybill>().Waybill;
 			WpfTestHelper.WithWindow2(async w => {
-				var model = new WaybillDetails(waybill.Id);
+				var model = new WaybillDetails(waybill.Id, new List<SpecialMarkupCatalog>());
 				var view = (WaybillDetailsView)Bind(model);
 				w.Content = view;
 
@@ -62,7 +63,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			session.Save(waybill);
 
 			WpfTestHelper.WithWindow2(async w => {
-				var model = new WaybillDetails(waybill.Id);
+				var model = new WaybillDetails(waybill.Id, new List<SpecialMarkupCatalog>());
 				var view = (WaybillDetailsView)Bind(model);
 				w.Content = view;
 

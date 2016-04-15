@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.Collections.Generic;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
@@ -12,7 +13,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Save_round_settings_per_session()
 		{
-			var model = new WaybillDetails(1);
+			var model = new WaybillDetails(1, new List<SpecialMarkupCatalog>());
 			model.Waybill = new Waybill(model.Address, new Supplier());
 			Activate(model);
 
@@ -23,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			ScreenExtensions.TryDeactivate(model, false);
 			Assert.IsFalse(model.IsActive);
 
-			model = new WaybillDetails(1);
+			model = new WaybillDetails(1, new List<SpecialMarkupCatalog>());
 			model.Waybill = new Waybill(model.Address, new Supplier());
 			Activate(model);
 			Assert.AreEqual(Rounding.None, model.Rounding.Value);

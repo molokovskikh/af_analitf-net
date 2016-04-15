@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				_vitallyImportant = value;
-				Calculate(Settings);
+				Calculate(Settings, SpecialMarkupCatalogs);
 				OnPropertyChanged();
 			}
 		}
@@ -180,6 +180,9 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual Settings Settings { get; set; }
 
+		[Ignore]
+		public virtual List<SpecialMarkupCatalog> SpecialMarkupCatalogs { get; set; }
+
 		[Style("AddressName"), Ignore]
 		public virtual bool IsCurrentAddress { get; set; }
 
@@ -188,12 +191,13 @@ namespace AnalitF.Net.Client.Models
 			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
-		public virtual void Calculate(Settings settings)
+		public virtual void Calculate(Settings settings, List<SpecialMarkupCatalog> specialMarkupCatalogs)
 		{
 			if (settings == null)
 				return;
 			Settings = settings;
-			WaybillSettings = settings.Waybills
+			SpecialMarkupCatalogs = specialMarkupCatalogs;
+      WaybillSettings = settings.Waybills
 				.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null
 					&& s.BelongsToAddress.Id == Address.Id)
@@ -202,6 +206,10 @@ namespace AnalitF.Net.Client.Models
 			//специальный механизм должен отработать только один раз
 			var isMigrated = IsMigrated && Sum == 0;
 			foreach (var waybillLine in Lines) {
+				waybillLine.SpecialMarkUp = specialMarkupCatalogs.Any(s => waybillLine.MarkUpProductForCatalog != null
+				                                                           &&
+				                                                           s.CatalogId ==
+				                                                           waybillLine.MarkUpProductForCatalog.CatalogId);
 				if (isMigrated)
 					waybillLine.CalculateForMigrated(Settings);
 				else
@@ -241,14 +249,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			line.Waybill = null;
 			Lines.Remove(line);
-			Calculate(Settings);
+			Calculate(Settings, SpecialMarkupCatalogs);
 		}
 
 		public virtual void AddLine(WaybillLine line)
 		{
 			line.Waybill = this;
 			Lines.Add(line);
-			Calculate(Settings);
+			Calculate(Settings, SpecialMarkupCatalogs);
 		}
 
 		public virtual string this[string columnName]

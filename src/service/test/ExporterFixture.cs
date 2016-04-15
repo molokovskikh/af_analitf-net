@@ -210,6 +210,14 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Export_products()
+		{
+			exporter.Export();
+			var files = ListResult();
+			Assert.AreEqual(files.IndexOf("Products.meta.txt") != -1 && files.IndexOf("Products.txt") != -1, true  );
+		}
+
+    [Test]
 		public void Do_not_export_waybill_files()
 		{
 			user.SendWaybills = false;

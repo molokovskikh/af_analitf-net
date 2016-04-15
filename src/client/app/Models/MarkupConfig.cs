@@ -12,7 +12,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		Over,
 		VitallyImportant,
-		Nds18
+		Nds18,
+		Special
 	}
 
 	public class MarkupConfig : BaseNotify
@@ -145,6 +146,9 @@ namespace AnalitF.Net.Client.Models
 				type = MarkupType.Nds18;
 			else if (offer.VitallyImportant)
 				type = MarkupType.VitallyImportant;
+			if (offer.SpecialMarkUp)
+				type = MarkupType.Special;
+
 			var cost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
 			var config = Calculate(markups, type, cost, address);
@@ -155,11 +159,12 @@ namespace AnalitF.Net.Client.Models
 
 		public static MarkupConfig Calculate(IEnumerable<MarkupConfig> markups, MarkupType type, decimal cost, Address address)
 		{
+			markups = markups.OrderBy(s => s.Begin).ToList();
 			foreach (var markup in markups) {
 				if (markup.Type == type
-					&& markup.Address.Id == address.Id
-					&& cost > markup.Begin
-					&& cost <= markup.End)
+				    && markup.Address.Id == address.Id
+				    && cost > markup.Begin
+				    && cost <= markup.End)
 					return markup;
 			}
 			return null;

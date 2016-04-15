@@ -153,6 +153,101 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			});
 
+			//| связи для функционала специальных наценок |-->
+
+			mapper.Class<WaybillLine>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpProductForCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(Product));
+					c.Column("ProductId");
+				});
+			});
+
+
+			mapper.Class<Offer>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpProductForCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(Product));
+					c.Column("ProductId");
+				});
+			});
+			mapper.Class<Offer>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(SpecialMarkupCatalog));
+					c.ForeignKey("CatalogId");
+					c.Column("CatalogId");
+				});
+			});
+			mapper.Class<OrderLine>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpProductForCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(Product));
+					c.Column("ProductId");
+				});
+			});
+			mapper.Class<OrderLine>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(SpecialMarkupCatalog));
+					c.ForeignKey("CatalogId");
+					c.Column("CatalogId");
+				});
+			});
+
+			mapper.Class<SentOrderLine>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpProductForCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(Product));
+					c.Column("ProductId");
+				});
+			});
+			mapper.Class<SentOrderLine>(m =>
+			{
+				m.ManyToOne(o => o.MarkUpCatalog, c =>
+				{
+					c.Fetch(FetchKind.Join);
+					c.Insert(false);
+					c.Update(false);
+					c.Lazy(LazyRelation.NoLazy);
+					c.Class(typeof(SpecialMarkupCatalog));
+					c.ForeignKey("CatalogId");
+					c.Column("CatalogId");
+				});
+			});
+
+			// <--| связи для функционала специальных наценок |
+
 			mapper.Class<Price>(m => {
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
@@ -202,7 +297,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
 			});
-
 			mapper.Class<Address>(m => m.Bag(o => o.Orders, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
@@ -236,7 +330,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
-
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 				if (type == typeof(RegulatorRegistry)) {

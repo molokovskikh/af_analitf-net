@@ -136,8 +136,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (CurrentLine.Value == null)
 				return;
-
-			Shell.Navigate(new WaybillDetails(CurrentLine.Value.Waybill.Id));
+			RxQuery(s => s.Query<SpecialMarkupCatalog>().ToList())
+				.Subscribe(s => { Shell.Navigate(new WaybillDetails(CurrentLine.Value.Waybill.Id, s)); });
 		}
 	}
 }

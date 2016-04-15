@@ -89,6 +89,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
+		[DataMember]
+		public List<SpecialMarkupCatalog> SpecialMarkupCatalogs = new List<SpecialMarkupCatalog>();
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -96,6 +98,8 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
+
+
 
 		//не верь решарперу
 		public ShellViewModel()

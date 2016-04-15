@@ -8,6 +8,7 @@ using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
 using NPOI.SS.Formula.Functions;
+using NPOI.Util;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -36,7 +37,11 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint ProductId { get; set; }
 
+		public virtual Product MarkUpProductForCatalog { get; set; }
+
 		public virtual uint CatalogId { get; set; }
+
+		public virtual SpecialMarkupCatalog MarkUpCatalog { get; set; }
 
 		[JsonProperty("SynonymCode")]
 		public virtual uint ProductSynonymId { get; set; }
@@ -122,6 +127,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual string BarCode { get; set; }
 
 		public virtual string Properties { get; set; }
+		[IgnoreDataMember, Ignore]
+		public virtual bool SpecialMarkUp { get; set; }
 
 		/// <summary>
 		/// цена поставщика
@@ -161,6 +168,9 @@ namespace AnalitF.Net.Client.Models
 		{
 			Configure(user);
 			var cost =  HideCost ? GetResultCost() : Cost;
+			SpecialMarkUp = MarkUpProductForCatalog != null && MarkUpCatalog != null &&
+			                MarkUpProductForCatalog.CatalogId == MarkUpCatalog.CatalogId;
+
 			var markup = MarkupConfig.Calculate(markups, this, user, address);
 			RetailCost = Math.Round(cost * (1 + markup / 100), 2);
 		}
