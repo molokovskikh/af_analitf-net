@@ -74,6 +74,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	[Apartment(ApartmentState.STA)]
 	public class ViewModelFixture : DbFixture
 	{
+		private MemoryAppender appender;
 		protected WindowManager manager;
 		protected TestScheduler scheduler;
 		protected Lazy<ShellViewModel> lazyshell;
@@ -82,12 +83,11 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected IDictionary<string, object> DebugContext;
 		//в некоторых случаях зависает
 		protected bool autoStartScheduler = true;
-		private QueryCatcher catcher;
 
 		[SetUp]
 		public void BaseFixtureSetup()
 		{
-			catcher = null;
+			appender = null;
 			DebugContext = new Dictionary<string, object>();
 			ProcessHelper.UnitTesting = true;
 			ProcessHelper.ExecutedProcesses.Clear();
@@ -110,19 +110,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			manager = StubWindowManager(lazyshell);
 			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
 			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
-				catcher = new QueryCatcher();
-				catcher.Appender = new MemoryAppender();
-				catcher.Start();
+				appender = new MemoryAppender();
+				var sql = new QueryCatcher();
+				sql.Appender = appender;
+				sql.Start();
+				var app = new QueryCatcher("AnalitF");
+				app.Appender = appender;
+				app.Start();
 			}
 		}
 
 		[TearDown]
 		public void BaseFixtureTearDown()
 		{
-			if (catcher != null) {
-				var events = ((MemoryAppender)catcher.Appender).GetEvents();
+			if (appender != null) {
+				var events = appender.GetEvents();
 				events.Each(e => Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(e.MessageObject.ToString()))));
-				catcher = null;
+				appender = null;
 				var repository = (Hierarchy)LogManager.GetRepository();
 				repository.ResetConfiguration();
 				XmlConfigurator.Configure();

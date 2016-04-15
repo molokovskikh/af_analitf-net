@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return $"Id: {Id}, Name: {Name}";
+			return $"Id: {Id}, Name: {Name}, IsDownloaded = {IsDownloaded}, IsError = {IsError}, IsDownloading = {IsDownloading}";
 		}
 	}
 }
