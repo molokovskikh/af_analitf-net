@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var sql = new QueryCatcher();
 				sql.Appender = appender;
 				sql.Start();
-				var app = new QueryCatcher("AnalitF");
+				var app = new QueryCatcher("AnalitF.Net.Client");
 				app.Appender = appender;
 				app.Start();
 			}
@@ -125,7 +125,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			if (appender != null) {
 				var events = appender.GetEvents();
-				events.Each(e => Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(e.MessageObject.ToString()))));
+				foreach (var loggingEvent in events) {
+					if (loggingEvent.LoggerName == "NHibernate.SQL")
+						Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(loggingEvent.MessageObject.ToString())));
+					else
+						Console.WriteLine(loggingEvent.MessageObject);
+				}
 				appender = null;
 				var repository = (Hierarchy)LogManager.GetRepository();
 				repository.ResetConfiguration();
