@@ -77,6 +77,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				Price.Value = StatelessSession.Get<Price>(priceId);
 			if (Promotions != null)
 				Promotions.FilterBySupplierId = Price.Value.SupplierId;
+			if (ProducerPromotions != null)
+				ProducerPromotions.FilterByProducerId = CurrentProducer.Value.Id;
 
 			RxQuery(s => {
 					return s.Query<Offer>().Where(o => o.Price.Id == priceId)

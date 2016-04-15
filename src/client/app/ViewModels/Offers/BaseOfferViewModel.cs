@@ -68,6 +68,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public PromotionPopup Promotions { get; set; }
 
+		public ProducerPromotionPopup ProducerPromotions { get; set; }
+
 		public InlineEditWarning OrderWarning { get; set; }
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
@@ -125,6 +127,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Promotions = new PromotionPopup(Shell.Config,
 				CurrentCatalog.Select(x => x?.Name),
 				RxQuery, Env);
+
+			ProducerPromotions = new ProducerPromotionPopup(Shell.Config,
+				CurrentCatalog.Select(x => x?.Name),
+				RxQuery, Env);
+
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
