@@ -77,10 +77,10 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllText("var/update/rtm/version.txt", "1.2");
 			File.WriteAllBytes("var/update/rtm/analitf.net.client.exe", new byte[] { 0x00 });
 
-			ExportCompressed();
+			ExportBin();
 			var files = ZipHelper.lsZip(file);
 
-			Assert.That(exporter.External[0].Filename, Does.EndWith(@"var\cache\ext-rtm.zip"));
+			Assert.That(exporter.External.Implode(), Does.EndWith(@"var\cache\ext-rtm.zip"));
 			var extFiles = ZipHelper.lsZip(exporter.External[0].Filename).Implode();
 			Assert.That(extFiles, Does.Contain("update/analitf.net.client.exe"));
 			Assert.That(files.Implode(), Does.Not.Contains("update/analitf.net.client.exe"));
@@ -93,9 +93,9 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllBytes("var/update/rtm/analitf.net.client.exe", new byte[] { 0x00 });
 			File.WriteAllBytes("var/update/delta-1.1-1.2.zip", new byte[] { 0x00 });
 
-			ExportCompressed();
+			ExportBin();
 
-			Assert.That(exporter.External[0].Filename, Does.EndWith(@"var\update\delta-1.1-1.2.zip"));
+			Assert.That(exporter.External.Implode(), Does.EndWith(@"var\update\delta-1.1-1.2.zip"));
 		}
 
 		[Test]
@@ -491,6 +491,12 @@ namespace AnalitF.Net.Service.Test
 			session.Save(sendLog);
 			waybill.Log.CreateFile(FixtureSetup.Config.DocsPath, "waybill content");
 			return waybill;
+		}
+
+		private void ExportBin()
+		{
+			Assert.IsTrue(exporter.ExportBin());
+			file = exporter.Compress(file);
 		}
 
 		private void ExportCompressed()

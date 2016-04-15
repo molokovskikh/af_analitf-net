@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Filter_by_producer_SavingState()
 		{
-			//проверяем отсутствие флагов до сохранения фильтра 
+			//проверяем отсутствие флагов до сохранения фильтра
 			Assert.That(model.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(model.CurrentProducer.Value.Id, Is.EqualTo(0));
 			//выставляем флаг "сохранения фильтра"
@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(modelNew.Offers.Value.Count, Is.EqualTo(maxCount));
 			//закрываем форму
 			modelNew.TryClose();
-			//проверяем наличие флагов после сохранения фильтра 
+			//проверяем наличие флагов после сохранения фильтра
 			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(false));
 			Assert.That(modelNew.CurrentProducer.Value.Id, Is.EqualTo(0));
 		}
@@ -333,6 +333,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Check_prev_order_count()
 		{
+			catalog = session.Query<Catalog>()
+				.First(c => c.HaveOffers
+					&& session.Query<Offer>().Count(o => o.CatalogId == c.Id && !o.VitallyImportant && !o.Junk) >= 2
+					&& !c.VitallyImportant
+					&& !c.Narcotic && !c.Toxic && !c.Combined && !c.Other);
 			var orderOffer = session.Query<Offer>().First(x => !x.Junk && x.CatalogId == catalog.Id);
 			MakeSentOrder(orderOffer);
 			var offer = model.Offers.Value.First(o => !o.Junk && o.ProductId == orderOffer.ProductId);
