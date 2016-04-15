@@ -68,6 +68,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			//устанавливаем фильтрацию по одному поставщику
 			model.CurrentProducer.Value = model.Producers.Value[1];
+			scheduler.AdvanceByMs(1000);
 			Assert.That(model.Offers.Value.Count, Is.LessThan(maxCount));
 			//закрываем форму
 			model.TryClose();
