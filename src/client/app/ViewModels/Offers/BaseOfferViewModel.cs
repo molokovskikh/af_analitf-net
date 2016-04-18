@@ -348,8 +348,7 @@ where c.Id = ?";
 				CalculateDiff(offers);
 
 			CalculateRetailCost(offers);
-
-			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrderedProductIds == null) {
+			if (Settings.Value.WarnIfOrderedYesterday) {
 				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId
 from SentOrderLines l

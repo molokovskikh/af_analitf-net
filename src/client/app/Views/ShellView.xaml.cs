@@ -83,22 +83,15 @@ namespace AnalitF.Net.Client.Views
 
 			DataContextChanged += (sender, args) => {
 				var model = (ShellViewModel)DataContext;
-				var checkAllItem = (ComboBoxItem)this.FindName("CheckAllItem");
 				model.Settings.Where(x => x != null).Subscribe(x => {
 					//если шаблон задан не нужно его переопределять это приведет к ошибкам
 					if (x.EditAddresses) {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector)) {
 							Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
 						}
-						if (checkAllItem != null) {
-							checkAllItem.Visibility = Visibility.Visible;
-						}
 					} else {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector2)) {
 							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);
-						}
-						if (checkAllItem != null) {
-							checkAllItem.Visibility = Visibility.Collapsed;
 						}
 					}
 				});

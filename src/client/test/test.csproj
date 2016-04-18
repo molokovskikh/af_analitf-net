@@ -149,11 +149,8 @@
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
-<<<<<<< HEAD
     <Compile Include="Fixtures\CreateOrder.cs" />
-=======
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />
->>>>>>> 02f3e6689c1e25e81aeaa487a57882d852c196f8
     <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
