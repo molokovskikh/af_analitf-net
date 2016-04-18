@@ -127,7 +127,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var events = appender.GetEvents();
 				foreach (var loggingEvent in events) {
 					if (loggingEvent.LoggerName == "NHibernate.SQL") {
-						Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(loggingEvent.MessageObject.ToString())));
+						try {
+							Console.WriteLine(new BasicFormatter().Format(SqlProcessor.ExtractArguments(loggingEvent.MessageObject.ToString())));
+						}
+						catch(Exception) {
+							Console.WriteLine(loggingEvent.MessageObject.ToString());
+						}
 					} else {
 						Console.WriteLine(loggingEvent.MessageObject);
 						Console.WriteLine(loggingEvent.ExceptionObject);
