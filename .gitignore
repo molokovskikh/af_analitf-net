@@ -12,3 +12,4 @@ TestResult.xml
 *.gen.*
 scripts/guard/
 .vs
+*.DotSettings

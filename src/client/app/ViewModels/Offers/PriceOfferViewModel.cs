@@ -117,6 +117,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (filter == filters[1]) {
 				items = items.Where(o => o.OrderCount > 0);
 			}
+
+			ProducerFilterStateGet(items.ToList());
+
 			if (CurrentProducer.Value != null && CurrentProducer.Value.Id > 0) {
 				var id = CurrentProducer.Value.Id;
 				items = items.Where(o => o.ProducerId == id);
@@ -181,6 +184,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (CurrentFilter.Value == filters[1]) {
 				Filter();
 			}
+		}
+
+		public override void TryClose()
+		{
+			ProducerFilterStateSet();
+			base.TryClose();
 		}
 
 		public override void OfferUpdated()

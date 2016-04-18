@@ -531,11 +531,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(p => loadable.Progress =  p.EventArgs.ProgressPercentage / 100d);
 			disposable.Add(progress);
 
+			Log.Debug($"Загрузка {loadable}");
 			var download = result.Item2
 				.ObserveOn(Scheduler)
 				.SelectMany(s => Extract(s, urn => loadable.GetLocalFilename(urn, Shell.Config)).ToObservable())
 				.ObserveOn(UiScheduler)
 				.Subscribe(name => {
+						Log.Debug($"Успешно загружен {loadable}");
 						var notification = "";
 						SessionGaurd(loadable.Session, loadable, (s, a) => {
 							var record = a.UpdateLocalFile(name);
@@ -548,6 +550,7 @@ namespace AnalitF.Net.Client.ViewModels
 						Shell.Notifications.OnNext(notification);
 					},
 					e => {
+						Log.Debug($"Ошибка во время загрузки {loadable}", e);
 						SessionGaurd(loadable.Session, loadable, (s, a) => a.Error(e));
 					},
 					() => {
