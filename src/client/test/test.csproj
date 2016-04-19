@@ -150,7 +150,6 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateOrder.cs" />
-    <Compile Include="Fixtures\CreateProducerPromotion.cs" />
     <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
@@ -166,7 +165,6 @@
     <Compile Include="Fixtures\MakeOrder.cs" />
     <Compile Include="Fixtures\CreatePromotion.cs" />
     <Compile Include="Fixtures\MatchedWaybill.cs" />
-    <Compile Include="Fixtures\ProducerLocalPromotion.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
     <Compile Include="Fixtures\RegulatorRegistry.cs" />
     <Compile Include="Fixtures\Reject.cs" />

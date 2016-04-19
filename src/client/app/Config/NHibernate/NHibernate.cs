@@ -153,24 +153,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			});
 
-			mapper.Class<ProducerPromotion>(m => {
-				m.Bag(o => o.Catalogs, c => {
-					c.Table("ProducerPromotionCatalogs");
-					c.Key(km => km.Column("PromotionId"));
-				}, cm => {
-					cm.ManyToMany(km => km.Column("CatalogId"));
-				});
-			});
-
-			mapper.Class<ProducerPromotion>(m => {
-				m.Bag(o => o.Suppliers, c => {
-					c.Table("ProducerPromotionSuppliers");
-					c.Key(km => km.Column("PromotionId"));
-				}, cm => {
-					cm.ManyToMany(km => km.Column("SupplierId"));
-				});
-			});
-
 			mapper.Class<Price>(m => {
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));

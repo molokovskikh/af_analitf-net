@@ -171,23 +171,6 @@ namespace AnalitF.Net.Client.Config
 			}
 		}
 
-		public string MapToFileProducerPromo(object entity)
-		{
-			try
-			{
-				var clazz = NHibernateUtil.GetClass(entity);
-				var root = Path.Combine(RootDir, clazz.Name.Pluralize());
-				root = root.Replace(@".\", @"\").ToString();
-				var id = Util.GetValue(entity, "PromoFileId");
-				return Directory.GetFiles(root, id + ".*").FirstOrDefault();
-			}
-			catch (DirectoryNotFoundException)
-			{
-				return null;
-			}
-
-		}
-
 		public Uri WaitUrl(Uri url, string key)
 		{
 			var builder = new UriBuilder(url) {
@@ -239,7 +222,6 @@ namespace AnalitF.Net.Client.Config
 				new ResultDir("rejects", settings, this),
 				new ResultDir("attachments", settings, this),
 				new ResultDir("promotions", settings, this),
-				new ResultDir("producerpromotions",settings, this)
 			};
 		}
 

@@ -265,7 +265,6 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
-    <Compile Include="Models\ProducerPromotion.cs" />
     <Compile Include="Models\Sbis\SbisApi.cs" />
     <Compile Include="Models\Commands\ImportCommand.cs" />
     <Compile Include="Models\Commands\RepairDb.cs" />
@@ -395,7 +394,6 @@
     <Compile Include="ViewModels\Parts\InlineEditWarning.cs" />
     <Compile Include="ViewModels\Parts\MatchedWaybills.cs" />
     <Compile Include="ViewModels\Parts\Navigator.cs" />
-    <Compile Include="ViewModels\Parts\ProducerPromotionPopup.cs" />
     <Compile Include="ViewModels\Parts\ProductInfo.cs" />
     <Compile Include="ViewModels\Parts\PromotionPopup.cs" />
     <Compile Include="ViewModels\Parts\QuickSearch.cs" />
@@ -495,9 +493,6 @@
     </Compile>
     <Compile Include="Views\Parts\MatchedWaybills.xaml.cs">
       <DependentUpon>MatchedWaybills.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Parts\ProducerPromotionPopup.xaml.cs">
-      <DependentUpon>ProducerPromotionPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Parts\PromotionPopup.xaml.cs">
       <DependentUpon>PromotionPopup.xaml</DependentUpon>
@@ -729,10 +724,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Parts\MatchedWaybills.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Parts\ProducerPromotionPopup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

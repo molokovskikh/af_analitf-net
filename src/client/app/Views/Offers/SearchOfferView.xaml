@@ -142,10 +142,7 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-				<ContentControl x:Name="Promotions" />
-				<ContentControl x:Name="ProducerPromotions" />
-			</StackPanel>
+			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
 
 		<ProgressBar Grid.Row="2" IsIndeterminate="True"

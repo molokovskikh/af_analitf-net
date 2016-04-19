@@ -210,37 +210,6 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
-		public void Export_ProducerPromotions()
-		{
-			var testUser = session.Load<TestUser>(user.Id);
-
-			var testProducerUser = new TestProducerUser()
-			{
-				Login = "Тестовый пользователь производителя",
-				TypeUser = 0
-			};
-
-			session.Save(testProducerUser);
-
-			var testProducerPromotion = DataMother.CreateProducerPromotion(session, testUser);
-			testProducerPromotion.ProducerUserId = testProducerUser.Id;
-			session.Save(testProducerPromotion);
-
-			exporter.ExportProducerPromotions();
-
-			var files = ListResult();
-
-			string filesSuccess = "ProducerPromotions.meta.txt,";			filesSuccess += " ProducerPromotions.txt,";
-			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";			filesSuccess += " ProducerPromotionCatalogs.txt,";
-			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";			filesSuccess += " ProducerPromotionSuppliers.txt";
-
-			Assert.AreEqual(filesSuccess, files.Substring(0, 187));
-
-			session.Delete(testProducerPromotion);
-			session.Delete(testProducerUser);
-		}
-
-		[Test]
 		public void Do_not_export_waybill_files()
 		{
 			user.SendWaybills = false;

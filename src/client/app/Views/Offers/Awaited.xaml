@@ -126,9 +126,7 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1">
-				<ContentControl x:Name="Promotions" />
-			</StackPanel>
+			<ContentControl x:Name="Promotions" Grid.Row="1" />
 		</Grid>
 
 		<StackPanel Grid.Row="4" Grid.ColumnSpan="2" Name="Legend" />

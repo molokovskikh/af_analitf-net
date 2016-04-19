@@ -549,52 +549,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public void ProducerPromotion()
-		{
-			session.DeleteEach<ProducerPromotion>();
-			var fixture = new LocalProducerPromotion("assets/Валемидин.JPG");
-
-			Fixture(fixture);
-
-			Start();
-
-			Click("ShowCatalog");
-
-			OpenOffers(fixture.ProducerPromotion.Catalogs.First());
-
-			dispatcher.Invoke(() => {
-				scheduler.AdvanceByMs(500);
-			});
-
-			WaitIdle();
-
-			dispatcher.Invoke(() => {
-				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
-				Assert.IsTrue(producerPromotions.IsVisible);
-				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
-
-				var presenter = producerPromotions.Descendants<ContentPresenter>()
-					.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
-
-				var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
-				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
-			});
-
-			WaitWindow(fixture.ProducerPromotion.DisplayName);
-			dispatcher.Invoke(() => {
-
-				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
-
-				var image = viewer.Document.Descendants<Image>().First();
-
-				Assert.IsNotNull(image);
-
-				Assert.That(image.Source.Height, Is.GreaterThan(0));
-
-			});
-		}
-
-		[Test]
 		public void Promotion()
 		{
 			session.DeleteEach<Promotion>();

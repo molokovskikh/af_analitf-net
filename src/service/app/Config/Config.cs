@@ -11,7 +11,6 @@ namespace AnalitF.Net.Service.Config
 		{
 			//если настройка не задана отдаем файлы любого размера
 			MaxReclameFileSize = long.MaxValue;
-
 		}
 
 		public string Environment { get; set; }
@@ -27,7 +26,6 @@ namespace AnalitF.Net.Service.Config
 		public string CachePath { get; set; }
 		public string AttachmentsPath { get; set; }
 		public string PromotionsPath { get; set; }
-		public string ProducerPromotionsPath { get; set; }
 		public string CertificatesPath { get; set; }
 		public string PerUserUpdatePath { get; set; }
 		public string FailsafePath { get; set; }

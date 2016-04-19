@@ -51,14 +51,12 @@ namespace AnalitF.Net.Client.Models.Commands
 				var messages = ExecuteMaintainsQuery($"REPAIR TABLE {table} EXTENDED");
 				var result = Parse(messages);
 				results.Add(result);
-				if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok)
-				{
+				if (result == RepairStatus.NumberOfRowsChanged || result == RepairStatus.Ok) {
 					result = Parse(ExecuteMaintainsQuery($"OPTIMIZE TABLE {table}"));
 					results.Add(result);
 				}
 				results.Add(result);
-				if (result == RepairStatus.Fail)
-				{
+				if (result == RepairStatus.Fail) {
 					Log.ErrorFormat("Таблица {0} не может быть восстановлена.", table);
 					Log.Error($"DROP TABLE IF EXISTS {table}");
 					StatelessSession
