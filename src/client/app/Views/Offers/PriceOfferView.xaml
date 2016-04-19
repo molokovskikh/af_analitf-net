@@ -78,7 +78,7 @@
 			</StackPanel>
 		</DockPanel>
 
-		<c:DataGrid2 Grid.Row="2" x:Name="Offers"
+    <c:DataGrid2 Grid.Row="2" x:Name="Offers" ColumnHeaderStyle="{StaticResource ColumnHeaderBlackLine}"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="26*" Header="Код" Binding="{Binding Code}" />
