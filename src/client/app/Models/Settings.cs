@@ -113,6 +113,7 @@ namespace AnalitF.Net.Client.Models
 			Rounding = Rounding.To0_10;
 			DiffCalcMode = DiffCalcMode.MinCost;
 			WarnIfOrderedYesterday = true;
+			CountDayForWarnOrdered = 1;
 			UseSupplierPriceWithNdsForMarkup = false;
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
@@ -140,6 +141,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual bool ShowPriceName { get; set; }
 		public virtual uint TrackRejectChangedDays { get; set; }
 		public virtual int BaseFromCategory { get; set; }
+
+		public virtual int CountDayForWarnOrdered { get; set; }
 
 		public virtual decimal OverCountWarningFactor { get; set; }
 

@@ -310,9 +310,10 @@ namespace AnalitF.Net.Client.Models
 			if (address.Orders.Where(o => o.Frozen).SelectMany(o => o.Lines).Any(l => l.ProductId == ProductId)) {
 				result.Add(Message.Warning("Товар присутствует в замороженных заказах."));
 			}
-			if (address.YesterdayOrderedProductIds != null
+
+			if (settings.WarnIfOrderedYesterday && address.YesterdayOrderedProductIds != null
 				&& address.YesterdayOrderedProductIds.Contains(ProductId)) {
-				result.Add(Message.Warning("Препарат был заказан вчера."));
+				result.Add(Message.Warning("Товар был заказан за последние " + settings.CountDayForWarnOrdered + " дней"));
 			}
 
 			if (PrevOrderAvgCount != null && OrderCount > PrevOrderAvgCount * settings.OverCountWarningFactor) {

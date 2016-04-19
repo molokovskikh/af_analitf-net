@@ -33,6 +33,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public bool IsCredentialsChanged;
 
+		public List<int> LastDayForWarnOrdered { get; set; }
+
 		public SettingsViewModel()
 		{
 			InitFields();
@@ -79,7 +81,9 @@ namespace AnalitF.Net.Client.ViewModels
 			Settings.Value.ObservableForProperty(x => x.GroupWaybillsBySupplier, skipInitial: false)
 				.Select(x => !x.Value)
 				.Subscribe(IsWaybillDirEnabled);
-		}
+
+			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
+        }
 
 		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
@@ -314,5 +318,5 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return CustomStyle.Edit(style);
 		}
-	}
+    }
 }
