@@ -146,7 +146,7 @@ namespace AnalitF.Net.Client.Helpers
 				{ "IsCostIncreased",
 					new DataTrigger {
 						Setters = {
-							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(239, 82, 117)))
+							new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0xEF, 0x52, 0x75)))
 						}
 					}
 				},
