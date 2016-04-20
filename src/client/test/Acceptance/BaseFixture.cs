@@ -272,11 +272,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Keyboard.Instance.Enter(text);
 		}
 
-		protected void WaitMessage(string message)
+		protected void WaitMessage(string message, string button = "ОК")
 		{
 			var window = WaitDialog("АналитФАРМАЦИЯ: Внимание");
 			Assert.AreEqual(message, AutomationHelper.ToText(window));
-			ClickByName("ОК", window);
+			ClickByName(button, window);
 		}
 
 		protected void AssertUpdate(string result)

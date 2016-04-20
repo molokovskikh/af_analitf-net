@@ -45,7 +45,7 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string, src as string):
 	root = Globals.UpdateDeployRoot
@@ -512,8 +512,8 @@ task "iis:clean":
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
 
 task "db:local:seed":
 	Bash("rym -f Rymfile.service fixture execute SampleData")
