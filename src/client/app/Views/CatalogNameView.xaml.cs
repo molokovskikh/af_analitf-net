@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
@@ -14,6 +15,7 @@ namespace AnalitF.Net.Client.Views
 
 			SizeChanged += (sender, args) => {
 				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
+				this.MaxHeight = Window.GetWindow(this).ActualHeight*0.7;
 			};
 
 			Catalogs.KeyDown += (sender, args) => {
