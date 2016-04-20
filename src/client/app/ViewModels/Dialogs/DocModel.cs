@@ -28,12 +28,13 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			var doc = new FlowDocument();
 			doc.FontSize = 12;
+			doc.FontFamily = new FontFamily("Arial");
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			//мы должны оставить место для "шапки" и "подвала"
 			paginator.PageSize = new Size(paginator.PageSize.Width - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right,
 				paginator.PageSize.Height - WrapDocumentPaginator.Margins.Bottom - WrapDocumentPaginator.Margins.Top);
 
-			doc.Blocks.Add(new Paragraph(new Bold(new Run("Предложения по данным позициям из заказа отсутствуют") { FontSize = 16 })));
+			doc.Blocks.Add(new Paragraph(new Bold(new Run("Предложения по данным позициям из заказа отсутствуют") { FontSize = 16})));
 			foreach (var line in Text.Split(new [] { Environment.NewLine }, StringSplitOptions.None)) {
 				doc.Blocks.Add(new Paragraph(new Run(line)) { Margin = new Thickness(0)});
 			}
