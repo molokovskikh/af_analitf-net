@@ -63,13 +63,14 @@ namespace test.release
 			Install(setupBin);
 
 			Activate();
-			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
+			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные", "ОК");
 
 			Type("Settings_UserName", testUserName);
 			Type("Password", testPassword);
 
 			var dialog = WaitDialog("Настройка");
 			Click("Save", dialog);
+			WaitMessage("База данных программы не заполнена. Выполнить обновление?", "НЕТ");
 
 			WaitIdle();
 			Click("Update", MainWindow);
@@ -87,7 +88,7 @@ namespace test.release
 			Install(prev);
 
 			Activate();
-			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
+			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные", "ОК");
 			Assert.That(AutomationHelper.ToText(MainWindow), Does.Contain(prevVersion.ToString()));
 
 			Type("Settings_UserName", testUserName);
@@ -95,6 +96,7 @@ namespace test.release
 
 			var dialog = WaitDialog("Настройка");
 			Click("Save", dialog);
+			WaitMessage("База данных программы не заполнена. Выполнить обновление?", "НЕТ");
 
 			WaitIdle();
 			Click("Update", MainWindow);
