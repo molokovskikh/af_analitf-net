@@ -163,6 +163,7 @@
 	<Style TargetType="{x:Type DataGrid}">
 		<Setter Property="AutoGenerateColumns" Value="False" />
 		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+		<Setter Property="MinHeight" Value="100"/>
 	</Style>
 
 	<Style TargetType="{x:Type Controls:DataGrid2}">
@@ -171,6 +172,7 @@
 		<Setter Property="CanUserDeleteRows" Value="False" />
 		<Setter Property="AutoGenerateColumns" Value="False" />
 		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+		<Setter Property="MinHeight" Value="100"/>
 	</Style>
 
 	<Style TargetType="ComboBox" x:Key="Select">
