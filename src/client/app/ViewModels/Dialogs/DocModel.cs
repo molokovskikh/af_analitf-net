@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		{
 			var doc = new FlowDocument();
 			doc.FontSize = 12;
-			doc.FontFamily = new FontFamily("Arial");
+			doc.FontFamily = SystemFonts.MessageFontFamily;
 			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
 			//мы должны оставить место для "шапки" и "подвала"
 			paginator.PageSize = new Size(paginator.PageSize.Width - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right,
