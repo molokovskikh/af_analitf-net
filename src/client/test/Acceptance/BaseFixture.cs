@@ -303,9 +303,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected AutomationElement WaitDialog(string name, TimeSpan timeout)
 		{
 			var observable = Opened.Take(1).PublishLast();
-			using (observable.Connect()) {
+			using (observable.Connect())
 				return AutomationHelper.FindWindow(name, Process.Id) ?? observable.Timeout(timeout).First();
-			}
 		}
 
 		protected AutomationElement WaitDialog(string name)

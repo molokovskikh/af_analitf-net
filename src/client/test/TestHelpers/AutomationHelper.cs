@@ -135,13 +135,14 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		{
 			foreach (var handle in Win32.GetWindows()) {
 				try {
-					var window = AutomationElement.FromHandle(handle);
-					if ((int)window.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) == pid) {
+					uint windowPid;
+					Win32.GetWindowThreadProcessId(handle, out windowPid);
+					if (windowPid == pid) {
 						var text = new StringBuilder(Win32.GetWindowTextLength(handle) + 1);
 						Win32.GetWindowText(handle, text, text.Capacity);
 						var title = text.ToString().Trim('{', '}');
 						if (title.Equals(name, StringComparison.CurrentCultureIgnoreCase))
-							return window;
+							return AutomationElement.FromHandle(handle);
 					}
 				} catch(ElementNotAvailableException e) {
 					//окно закрылось

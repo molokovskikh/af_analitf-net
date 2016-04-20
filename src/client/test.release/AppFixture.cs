@@ -63,7 +63,7 @@ namespace test.release
 			Install(setupBin);
 
 			Activate();
-			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные", "ОК");
+			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");
 
 			Type("Settings_UserName", testUserName);
 			Type("Password", testPassword);
