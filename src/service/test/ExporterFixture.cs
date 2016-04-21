@@ -230,9 +230,12 @@ namespace AnalitF.Net.Service.Test
 
 			var files = ListResult();
 
-			string filesSuccess = "ProducerPromotions.meta.txt,";			filesSuccess += " ProducerPromotions.txt,";
-			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";			filesSuccess += " ProducerPromotionCatalogs.txt,";
-			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";			filesSuccess += " ProducerPromotionSuppliers.txt";
+			string filesSuccess = "ProducerPromotions.meta.txt,";
+			filesSuccess += " ProducerPromotions.txt,";
+			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";
+			filesSuccess += " ProducerPromotionCatalogs.txt,";
+			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";
+			filesSuccess += " ProducerPromotionSuppliers.txt";
 
 			Assert.AreEqual(filesSuccess, files.Substring(0, 187));
 

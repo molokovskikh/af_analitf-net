@@ -11,7 +11,6 @@ namespace AnalitF.Net.Service.Config
 		{
 			//если настройка не задана отдаем файлы любого размера
 			MaxReclameFileSize = long.MaxValue;
-
 		}
 
 		public string Environment { get; set; }
