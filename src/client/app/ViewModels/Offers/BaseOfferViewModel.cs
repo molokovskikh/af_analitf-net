@@ -64,6 +64,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(HistoryOrders);
 
 			Settings.Subscribe(_ => Calculate());
+
+			SessionValue(CanSaveFilterProducer, "CanSaveFilterProducer");
+			SessionValue(CurrentFilterProducer, "CurrentFilterProducer");
 		}
 
 		public PromotionPopup Promotions { get; set; }
@@ -90,6 +93,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public NotifyValue<bool> CanShowCatalogWithMnnFilter { get; set; }
 
 		public NotifyValue<bool> CanShowDescription { get; set; }
+
+		public NotifyValue<bool> CanSaveFilterProducer { get; set; }
+
+		public NotifyValue<Producer> CurrentFilterProducer { get; set; }
+
+		protected bool ProducerFilterIsUsed { get; set; }
 
 		//фактический адрес доставки для которого нужно формировать заявки
 		protected Address ActualAddress => CurrentElementAddress ?? Address;
@@ -251,6 +260,29 @@ where c.Id = ?";
 			});
 		}
 
+		public void ProducerFilterStateGet(List<Offer> offerList)
+		{
+			var currentFilterProducerId = CurrentFilterProducer.HasValue ? CurrentFilterProducer.Value.Id : 0;
+			if (!ProducerFilterIsUsed && CanSaveFilterProducer.Value &&
+			    offerList.Any(d => d.ProducerId.HasValue && d.ProducerId.Value == currentFilterProducerId)) {
+				CurrentProducer.Value = CurrentFilterProducer.Value;
+				ProducerFilterIsUsed = true;
+			}
+			if (CanSaveFilterProducer.Value &&
+			    ((offerList.Count > 0 &&
+			      offerList.Any(d => d.ProducerId.HasValue && d.ProducerId.Value == currentFilterProducerId)) ||
+			     (offerList.Count == 0 && currentFilterProducerId == 0))
+				) {
+				ProducerFilterIsUsed = true;
+			}
+		}
+
+		public void ProducerFilterStateSet()
+		{
+			if (CanSaveFilterProducer.Value && (CurrentProducer.Value.Id != 0 || CurrentProducer.Value.Id == 0 && ProducerFilterIsUsed))
+				CurrentFilterProducer.Value = CurrentProducer.Value;
+		}
+
 		public void ShowCatalog()
 		{
 			if (CurrentCatalog.Value == null)
@@ -348,15 +380,14 @@ where c.Id = ?";
 				CalculateDiff(offers);
 
 			CalculateRetailCost(offers);
-
-			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrderedProductIds == null) {
+			if (Settings.Value.WarnIfOrderedYesterday) {
 				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId
 from SentOrderLines l
 join SentOrders o on o.Id = l.OrderId
 where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
 group by l.ProductId")
-					.SetParameter("begin", DateTime.Today.AddDays(-1))
+					.SetParameter("begin", DateTime.Today.AddDays(-Settings.Value.CountDayForWarnOrdered))
 					.SetParameter("end", DateTime.Today)
 					.SetParameter("addressId", addressId)
 					.List<object>()

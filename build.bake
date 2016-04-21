@@ -45,7 +45,7 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string, src as string):
 	root = Globals.UpdateDeployRoot
@@ -444,10 +444,11 @@ task "test:binary":
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit3-console --labels=all --stoponerror --verbose --full --test test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
-		CopyUpdateBin("beta", "output/updater/")
-		CopyUpdateBin("migration-beta", "output/migration-update/")
-		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'beta'")
-		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration-beta'")
+		targetChannel = Configuration.Maybe.targetChannel or "beta"
+		CopyUpdateBin(targetChannel, "output/updater/")
+		CopyUpdateBin("migration-$targetChannel", "output/migration-update/")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = '$targetChannel'")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration-$targetChannel'")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'alpha'")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
@@ -512,8 +513,8 @@ task "iis:clean":
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
 
 task "db:local:seed":
 	Bash("rym -f Rymfile.service fixture execute SampleData")

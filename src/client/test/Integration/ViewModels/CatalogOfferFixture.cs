@@ -53,6 +53,46 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.Offers.Value.Count, Is.LessThan(count));
 		}
 
+		[Test, Ignore("Нестабильный")]
+		public void Filter_by_producer_SavingState()
+		{
+			//проверяем отсутствие флагов до сохранения фильтра
+			Assert.That(model.CanSaveFilterProducer.Value, Is.EqualTo(false));
+			Assert.That(model.CurrentProducer.Value.Id, Is.EqualTo(0));
+			//выставляем флаг "сохранения фильтра"
+			model.CanSaveFilterProducer.Value = true;
+			model.Filter();
+			//проверяем количемтво выводимых записей при не заполненном фильтре
+			var maxCount = model.Offers.Value.Count;
+			Assert.That(model.Offers.Value.Count, Is.EqualTo(maxCount));
+
+			//устанавливаем фильтрацию по одному поставщику
+			model.CurrentProducer.Value = model.Producers.Value[1];
+			scheduler.AdvanceByMs(1000);
+			Assert.That(model.Offers.Value.Count, Is.LessThan(maxCount));
+			//закрываем форму
+			model.TryClose();
+			Close(model);
+			var modelNew = Open(new CatalogOfferViewModel(catalog));
+			modelNew.Filter();
+			//проверяем наличие флагов после сохранения фильтра
+			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(true));
+			Assert.That(modelNew.CurrentProducer.Value.Id, Is.Not.EqualTo(0));
+			Assert.That(modelNew.Offers.Value.Count, Is.LessThan(maxCount));
+
+			//убираем флаг "сохранения фильтра"
+			modelNew.CanSaveFilterProducer.Value = false;
+			modelNew.CurrentProducer.Value = modelNew.Producers.Value.FirstOrDefault(s => s.Id == 0);
+			modelNew.Filter();
+			//проверяем количемтво выводимых записей при заполненном фильтре на новой форме
+			Assert.That(modelNew.Offers.Value.Count, Is.EqualTo(maxCount));
+			//закрываем форму
+			modelNew.TryClose();
+			//проверяем наличие флагов после сохранения фильтра
+			Assert.That(modelNew.CanSaveFilterProducer.Value, Is.EqualTo(false));
+			Assert.That(modelNew.CurrentProducer.Value.Id, Is.EqualTo(0));
+		}
+
 		[Test]
 		public void Calculate_retail_cost()
 		{
@@ -294,6 +334,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Check_prev_order_count()
 		{
+			catalog = session.Query<Catalog>()
+				.First(c => c.HaveOffers
+					&& session.Query<Offer>().Count(o => o.CatalogId == c.Id && !o.VitallyImportant && !o.Junk) >= 2
+					&& !c.VitallyImportant
+					&& !c.Narcotic && !c.Toxic && !c.Combined && !c.Other);
 			var orderOffer = session.Query<Offer>().First(x => !x.Junk && x.CatalogId == catalog.Id);
 			MakeSentOrder(orderOffer);
 			var offer = model.Offers.Value.First(o => !o.Junk && o.ProductId == orderOffer.ProductId);
@@ -359,11 +404,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Warn_on_yesterday_orders()
+		public void Warn_on_lastday_orders()
 		{
 			Assert.IsTrue(settings.WarnIfOrderedYesterday);
 			var order = MakeSentOrder(session.Query<Offer>().First(o => !o.Junk));
-			order.SentOn = DateTime.Now.AddDays(-1);
+			order.SentOn = DateTime.Now.AddDays(-settings.CountDayForWarnOrdered);
 			catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
@@ -372,7 +417,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();
-			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo("Препарат был заказан вчера."));
+			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
 		}
 	}
 }

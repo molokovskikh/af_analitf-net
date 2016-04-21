@@ -2,8 +2,11 @@
 
 set -o errexit
 
+git submodule update --init
 bake prepare
 msbuild.exe /nologo /verbosity:quiet src/*.sln
+bake db:setup
+bake db:local:seed
 mkdir src/data || :
 mkdir src/data/update || :
 mkdir src/data/result || :

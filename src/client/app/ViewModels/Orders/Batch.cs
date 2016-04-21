@@ -48,6 +48,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		}
 	}
 
+	public enum BatchMode
+	{
+		Normal,
+		SaveUnordered,
+		ReloadUnordered,
+	}
+
 	[DataContract]
 	public class Batch : BaseOfferViewModel, IPrintable
 	{
@@ -337,7 +344,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			return Shell.Batch();
 		}
 
+		public IEnumerable<IResult> ReloadUnordered()
+		{
+			return Shell.Batch(mode: BatchMode.ReloadUnordered);
+		}
+
+		public IEnumerable<IResult> UploadAndSaveUnordered()
+		{
+			return InnerUpload(BatchMode.SaveUnordered);
+		}
+
 		public IEnumerable<IResult> Upload()
+		{
+			return InnerUpload(BatchMode.Normal);
+		}
+
+		private IEnumerable<IResult> InnerUpload(BatchMode mode)
 		{
 			if (!CanUpload)
 				yield break;
@@ -353,7 +375,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				dialog.Dialog.InitialDirectory = lastUsedDir;
 			yield return dialog;
 			lastUsedDir = Path.GetDirectoryName(dialog.Dialog.FileName) ?? lastUsedDir;
-			foreach (var result in Shell.Batch(dialog.Dialog.FileName)) {
+			foreach (var result in Shell.Batch(dialog.Dialog.FileName, mode)) {
 				yield return result;
 			}
 		}

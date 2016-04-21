@@ -229,7 +229,7 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return String.Format("Comment: {0}, Status: {2}, ProductId: {1}, ProductSynonym: {3}",
+			return string.Format("Comment: {0}, Status: {2}, ProductId: {1}, ProductSynonym: {3}",
 				Comment, ProductId, Status, ProductSynonym);
 		}
 

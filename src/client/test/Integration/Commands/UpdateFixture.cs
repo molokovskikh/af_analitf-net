@@ -168,18 +168,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
-
-			var updateCommand = new UpdateCommand();
-			var result = Run(updateCommand);
-			Assert.That(result, Is.EqualTo(UpdateResult.UpdatePending));
-
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			var command1 = new UpdateCommand();
-			command1.Configure(settings, clientConfig);
-			command1.Process(() => {
-				command1.Import();
-				return UpdateResult.OK;
-			});
+
+			//сначала будут загружены только бинарники
+			Assert.AreEqual(UpdateResult.UpdatePending, Run(new UpdateCommand()));
+
+			//теперь только данные
+			Assert.AreEqual(UpdateResult.OK, Run(new UpdateCommand {
+				SyncData = "NoBin"
+			}));
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 		}
 

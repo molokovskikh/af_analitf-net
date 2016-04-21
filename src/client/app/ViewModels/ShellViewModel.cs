@@ -266,8 +266,15 @@ namespace AnalitF.Net.Client.ViewModels
 		public override IEnumerable<IResult> OnViewReady()
 		{
 			Env.Bus.SendMessage("Startup");
-			if (Config.Cmd.Match("import"))
-				return Import();
+			if (Config.Cmd.Match("import")) {
+				//флаг import говорит что мы обновились на новую версию
+				//но обновление может быть не выполнено
+				//если мы просто запросим обновление то мы будем ходить в бесконечном цикле
+				//что бы избежать этого говорим серверу что проверять обновление версии не следует
+				return Sync(new UpdateCommand {
+					SyncData = "NoBin"
+				});
+			}
 			if (Config.Cmd.Match("migrate"))
 				return Migrate();
 			if (Config.Cmd.Match("start-check")) {
@@ -706,14 +713,15 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IEnumerable<IResult> Batch(string fileName = null)
+		public IEnumerable<IResult> Batch(string fileName = null, BatchMode mode = BatchMode.Normal)
 		{
 			if (currentAddress == null)
 				yield break;
 			var results = Sync(new UpdateCommand {
 				SyncData = "Batch",
 				BatchFile = fileName,
-				AddressId = currentAddress.Id
+				AddressId = currentAddress.Id,
+				BatchMode = mode
 			});
 			foreach (var result in results) {
 				yield return result;
@@ -761,15 +769,6 @@ namespace AnalitF.Net.Client.ViewModels
 						((UpdateCommand)c).Migrate();
 						return UpdateResult.OK;
 					}), checkSettings: false);
-		}
-
-		private IEnumerable<IResult> Import()
-		{
-			using (var command = new UpdateCommand())
-				return Sync(command, c => c.Process(() => {
-						((UpdateCommand)c).Import();
-						return UpdateResult.OK;
-					}));
 		}
 
 		public void CheckDb()

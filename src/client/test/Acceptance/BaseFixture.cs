@@ -272,11 +272,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			Keyboard.Instance.Enter(text);
 		}
 
-		protected void WaitMessage(string message)
+		protected void WaitMessage(string message, string button = "ОК")
 		{
 			var window = WaitDialog("АналитФАРМАЦИЯ: Внимание");
 			Assert.AreEqual(message, AutomationHelper.ToText(window));
-			ClickByName("ОК", window);
+			ClickByName(button, window);
 		}
 
 		protected void AssertUpdate(string result)
@@ -303,9 +303,8 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected AutomationElement WaitDialog(string name, TimeSpan timeout)
 		{
 			var observable = Opened.Take(1).PublishLast();
-			using (observable.Connect()) {
+			using (observable.Connect())
 				return AutomationHelper.FindWindow(name, Process.Id) ?? observable.Timeout(timeout).First();
-			}
 		}
 
 		protected AutomationElement WaitDialog(string name)

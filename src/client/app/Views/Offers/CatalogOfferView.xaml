@@ -124,6 +124,8 @@
 				</ComboBox>
 				<ComboBox Grid.Row="1" Grid.Column="3" Style="{StaticResource Filter}"
 					x:Name="Regions" />
+				<CheckBox x:Name="CanSaveFilterProducer" Grid.Row="1" Grid.Column="0"
+					Style="{StaticResource FilterElement}" Focusable="False" Content="Не сбрасывать фильтр" Margin="-1,6,5,10"/>
 			</Grid>
 		</DockPanel>
 

@@ -2148,10 +2148,9 @@ where r.DownloadId in (:ids)")
 			job.MultipartContent = JsonConvert.SerializeObject(multiparts);
 		}
 
-		public void ExportAll()
+		public void ExportDb()
 		{
 			Export();
-			ExportBin();
 			ExportAds();
 		}
 
@@ -2237,23 +2236,19 @@ where r.DownloadId in (:ids)")
 			scanned.Scan(dir, true);
 		}
 
-		//todo текущая логика обновления ошибочна, если мы знаем что нужно сформировать обновление
-		//то данные должен готовить сервис той же версии что и бинарники которые передаются
-		//иначе может получиться ситуация когда приложение ожидает что в обновлении будут поля а по факту их не буде
-		//тк обновление приготовлено старой версией сервиса
-		private void ExportBin()
+		public bool ExportBin()
 		{
 			var updateDir = Config.GetUpdatePath(data, job);
 			var file = Path.Combine(updateDir, "version.txt");
 			if (!File.Exists(file))
 			{
 				log.DebugFormat("Не найден файл версии {0}", Path.GetFullPath(file));
-				return;
+				return false;
 			}
 
 			var updateVersion = Version.Parse(File.ReadAllText(file));
 			if (updateVersion <= job.Version)
-				return;
+				return false;
 
 			if (!String.IsNullOrEmpty(job.ErrorDescription))
 				job.ErrorDescription += Environment.NewLine;
@@ -2269,6 +2264,7 @@ where r.DownloadId in (:ids)")
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
 				AddDir(Result, perUserUpdate, "update");
+			return true;
 		}
 
 		public void Dispose()

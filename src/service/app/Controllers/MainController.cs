@@ -55,10 +55,15 @@ namespace AnalitF.Net.Service.Controllers
 								.Select(x => session.Load<Address>(Convert.ToUInt32(x)))
 								.ToArray()
 								?? new Address[0];
-							if (data.Match("Waybills"))
+							if (data.Match("Waybills")) {
 								exporter.ExportDocs();
-							else
-								exporter.ExportAll();
+							} else {
+								//если есть обновление исполняемых файлов то готовить данные нет смысла
+								//тк схема данных могла измениться и клиент все равно будет загружать кумулятивное
+								//после обновления бинарных файлов
+								if (data.Match("NoBin") || !exporter.ExportBin())
+									exporter.ExportDb();
+							}
 							//все данные выгружены завершаем транзакцию
 							session.Transaction.Commit();
 							exporter.Compress(job.OutputFile(Config));

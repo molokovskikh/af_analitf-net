@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -129,12 +130,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Close_form_while_download()
 		{
-			Env.RequestDelay = 0.1.Second();
+			Env.Barrier = new Barrier(2);
 			var attachment = Download();
 			scheduler.AdvanceByMs(100);
 			Click("ShowMain");
 			Click("ShowMails");
 			var localAttachment = SelectByAttachmentId(attachment.Id);
+			//что бы избежать конкуренции
+			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
 			WaitDownloaded(localAttachment);
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -222,6 +225,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			var att = session.Query<Attachment>().First(a => a.Name == "отказ.txt");
 			att.IsDownloaded = false;
+			att.IsError = false;
+			att.IsDownloading = false;
 
 			Start();
 			Env.Scheduler = new MixedScheduler(scheduler, new DispatcherScheduler(dispatcher));
