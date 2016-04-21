@@ -262,16 +262,26 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
+		protected void GoToErrorTab(string errorKey)
+		{
+			switch (errorKey) {
+				case "JunkPeriod": SelectedTab.Value = "ViewSettingsTab";
+					break;
+				default:	SelectedTab.Value = errorKey + "MarkupsTab";
+					break;
+			}
+		}
+
 		public IEnumerable<IResult> Save()
 		{
 			UpdateMarkups();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
-			if (!String.IsNullOrEmpty(error)) {
+			if (error.Count > 0) {
 				if (Session != null)
 					Session.FlushMode = FlushMode.Never;
-				Manager.Warning(error);
-				yield return MessageResult.Warn(error);
+				GoToErrorTab(error.First()[0]);
+				yield return MessageResult.Warn(error.First()[1]);
 				yield break;
 			}
 
