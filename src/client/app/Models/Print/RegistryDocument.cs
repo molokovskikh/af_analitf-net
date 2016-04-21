@@ -141,7 +141,7 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("НДС пост-ка, руб", 40),
 				new PrintColumn("Отпуск. цена пост-ка с НДС, руб", 56),
 				new PrintColumn("Розн. торг. надб. %", 33),
-                new PrintColumn("Розн. торг. надб. руб",56),
+				new PrintColumn("Розн. торг. надб. руб",56),
 				new PrintColumn("Розн. цена. за ед., руб", 56),
 				new PrintColumn("Кол-во", 36),
 				new PrintColumn("Розн. сумма, руб", 56),

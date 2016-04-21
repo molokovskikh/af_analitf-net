@@ -147,6 +147,7 @@ namespace AnalitF.Net.Service.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string DocsPath = "";
+		public string DateTimeNow = DateTime.Now.ToString("yyyy.MM.dd");
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -1083,6 +1084,7 @@ where PublicationDate < curdate() + interval 1 day
 			}
 
 			ExportPromotions();
+			ExportProducerPromotions();
 			ExportMails();
 			ExportDocs();
 			ExportOrders();
@@ -1194,6 +1196,59 @@ where sp.Status = 1";
 						continue;
 					Result.Add(UpdateData.FromFile(promotion.GetArchiveName(local), local));
 				}
+			}
+		}
+
+		public void ExportProducerPromotions()
+		{
+			var sql = @"select pr.Id, pr.ProducerId, pr.Name, pr.Annotation, pr.PromoFileId, pr.RegionMask
+									from ProducerInterface.Promotions pr
+									where pr.Begin <= ?DT AND pr.Enabled = 1 AND pr.Status = 1";
+
+			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTimeNow });
+
+			sql = @"select Promo.Id PromotionId, PromoGrug.DrugId CatalogId from ProducerInterface.promotions Promo
+							left join ProducerInterface.promotionToDrug PromoGrug ON Promo.Id = PromoGrug.PromotionId
+							Where Promo.Enabled = 1 AND Promo.`Status` = 1 AND Promo.Begin <= ?DT";
+
+			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTimeNow });
+
+			sql = @"select PR.Id PromotionId, PTS.SupplierId SupplierId
+							from ProducerInterface.Promotions PR
+							RIGHT JOIN ProducerInterface.promotionstosupplier PTS ON PTS.PromotionId = PR.Id";
+
+			Export(Result, sql, "ProducerPromotionSuppliers", truncate: true);
+
+			// Получаем список ID актуальных файлов в БД привязанных к промоакциям производителей
+
+			var ids = session
+				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
+				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
+
+			ProducerPromotion producerPromotion = new ProducerPromotion();
+
+			foreach (var FileId in ids)
+			{
+				producerPromotion.Id = FileId;
+				sql = String.Format(@"select ImageName from ProducerInterface.MediaFiles Where Id = {0}", FileId);
+				producerPromotion.Type = session.CreateSQLQuery(sql).List<string>().First().Split(new Char[] { '.' }).Last();
+				var local = producerPromotion.GetFilename(Config);
+
+				// Экспортируем файлы из БД если ранее они не скачивались
+
+				if (!System.IO.File.Exists(local))
+				{
+					var Query = session.CreateSQLQuery("select ImageFile from ProducerInterface.MediaFiles Where Id=:FileId");
+					Query.SetParameter("FileId", FileId);
+					byte[] FileBytes = (byte[])Query.UniqueResult();
+
+					using (System.IO.FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
+					{
+						SW.Write(FileBytes, 0, FileBytes.Length);
+					}
+				}
+
+				Result.Add(UpdateData.FromFile(producerPromotion.GetArchiveName(local), local));
 			}
 		}
 

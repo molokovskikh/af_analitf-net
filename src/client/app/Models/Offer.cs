@@ -313,7 +313,8 @@ namespace AnalitF.Net.Client.Models
 
 			if (settings.WarnIfOrderedYesterday && address.YesterdayOrderedProductIds != null
 				&& address.YesterdayOrderedProductIds.Contains(ProductId)) {
-				result.Add(Message.Warning("Товар был заказан за последние " + settings.CountDayForWarnOrdered + " дней"));
+
+				result.Add(Message.Warning(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
 			}
 
 			if (PrevOrderAvgCount != null && OrderCount > PrevOrderAvgCount * settings.OverCountWarningFactor) {
