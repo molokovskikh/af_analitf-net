@@ -1254,6 +1254,8 @@ where sp.Status = 1";
 
 			Export(Result, sql, "ProducerPromotionSuppliers", truncate: true);
 
+			// Получаем список ID актуальных файлов в БД привязанных к промоакциям производителей
+
 			var ids = session
 				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
 				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
