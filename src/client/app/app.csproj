@@ -46,13 +46,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
-    <Reference Include="Devart.Data">
+    <Reference Include="Devart.Data, Version=5.0.792.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.MySql">
+    <Reference Include="Devart.Data.MySql, Version=7.8.333.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.MySql.dll</HintPath>
     </Reference>
     <Reference Include="DiadocApi">
       <SpecificVersion>False</SpecificVersion>
@@ -933,7 +933,6 @@
     <Resource Include="Assets\images\price-tag-log.png" />
     <Resource Include="Assets\images\splash.png" />
     <Resource Include="Assets\images\Question.ico" />
-    <EmbeddedResource Include="exe.licenses" />
     <Content Include="..\..\..\lib\libmysqld\libmysqld.dll">
       <Link>libmysqld.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -44,13 +44,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Castle.Core.3.2.2\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data">
+    <Reference Include="Devart.Data, Version=5.0.792.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.MySql">
+    <Reference Include="Devart.Data.MySql, Version=7.8.333.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.MySql.dll</HintPath>
     </Reference>
     <Reference Include="DiadocApi">
       <SpecificVersion>False</SpecificVersion>
@@ -347,9 +347,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="Properties\licenses.config">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -357,9 +354,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="dll.licenses" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />
