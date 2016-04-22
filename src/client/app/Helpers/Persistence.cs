@@ -85,11 +85,11 @@ namespace AnalitF.Net.Client.Helpers
 	#endif
 					}
 				}
-			} catch(Exception) {
+			} catch(Exception e) {
 #if DEBUG
 				throw;
 #else
-				log.Error("Не удалось восстановить настройки", e)
+				log.Error("Не удалось восстановить настройки", e);
 #endif
 			}
 		}
