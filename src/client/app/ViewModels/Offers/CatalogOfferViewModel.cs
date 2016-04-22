@@ -40,15 +40,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			GroupByProduct = new NotifyValue<bool>(Settings.Value.GroupByProduct);
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 
-			RetailMarkup = new NotifyValue<decimal>(true, () => {
-				SpecialMarkupCatalogs = Shell != null ? Shell.SpecialMarkupCatalogs : new List<SpecialMarkupCatalog>();
-				if (CurrentOffer.HasValue)
-					CurrentOffer.Value.SpecialMarkUp = SpecialMarkupCatalogs.Any(s => CurrentOffer != null
-					                                                                  && CurrentOffer.HasValue &&
-					                                                                  s.CatalogId == CurrentOffer.Value.CatalogId);
-				var resultDec = MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address);
-				return resultDec;
-			}, Settings);
+			RetailMarkup = new NotifyValue<decimal>(true,
+				() => MarkupConfig.Calculate(Settings.Value.Markups, Shell?.SpecialMarkupCatalogs, CurrentOffer.Value, User, Address),
+				Settings);
 
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
 				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
@@ -61,14 +55,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(HideJunk.Select(v => (object)v).Skip(1))
 				.Subscribe(_ => Update());
 
-			CurrentOffer.Subscribe(_ => {
-				SpecialMarkupCatalogs = Shell != null ? Shell.SpecialMarkupCatalogs : new List<SpecialMarkupCatalog>();
-				if (CurrentOffer.HasValue)
-					CurrentOffer.Value.SpecialMarkUp = SpecialMarkupCatalogs.Any(s => CurrentOffer != null
-					                                                                  && CurrentOffer.HasValue &&
-					                                                                  s.CatalogId == CurrentOffer.Value.CatalogId);
-				RetailMarkup.Recalculate();
-			});
+			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
 			Persist(HideJunk, "HideJunk");
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");

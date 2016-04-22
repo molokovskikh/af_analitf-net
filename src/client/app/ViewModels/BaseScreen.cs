@@ -158,7 +158,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Address[] Addresses { get; set; }
 		public User User { get; set; }
 		public NotifyValue<Settings> Settings { get; set; }
-		public List<SpecialMarkupCatalog> SpecialMarkupCatalogs { get; set; }
 		public bool IsSuccessfulActivated { get; protected set; }
 		public NotifyValue<bool> CanExport { get; set; }
 
@@ -172,11 +171,8 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnInitialize()
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
-			if (Shell != null) {
+			if (Shell != null)
 				Address = Addresses.FirstOrDefault(x => x.Id == Shell.CurrentAddress?.Id);
-						RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToList())
-				.Subscribe(s => { Shell.SpecialMarkupCatalogs = s; });
-			}
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)

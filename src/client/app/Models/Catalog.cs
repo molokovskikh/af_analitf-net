@@ -9,7 +9,6 @@ namespace AnalitF.Net.Client.Models
 	{
 		public Catalog()
 		{
-	//		ProductList = new List<Product>();
 		}
 
 		public Catalog(string name)

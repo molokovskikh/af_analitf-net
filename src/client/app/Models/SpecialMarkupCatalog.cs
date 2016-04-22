@@ -10,9 +10,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint CatalogId { get; set; }
 
-		public virtual string Name { get; set; }
-
-		public virtual string Form { get; set; }
-
+		public virtual uint ProductId { get; set; }
 	}
 }

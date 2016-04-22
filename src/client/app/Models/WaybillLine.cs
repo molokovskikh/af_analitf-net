@@ -84,8 +84,6 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		public virtual Product MarkUpProductForCatalog { get; set; }
-
 		public virtual string Period { get; set; }
 		public virtual DateTime? Exp { get; set; }
 		public virtual string SerialNumber { get; set; }
@@ -491,7 +489,7 @@ namespace AnalitF.Net.Client.Models
 				foreach (var property in typeof(WaybillLine).GetProperties()) {
 					OnPropertyChanged(property.Name);
 				}
-				Waybill.Calculate(Waybill.Settings, new List<SpecialMarkupCatalog>());
+				Waybill.Recalculate();
 			}
 		}
 

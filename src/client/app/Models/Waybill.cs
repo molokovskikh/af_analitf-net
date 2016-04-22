@@ -130,7 +130,7 @@ namespace AnalitF.Net.Client.Models
 					return;
 
 				_vitallyImportant = value;
-				Calculate(Settings, SpecialMarkupCatalogs);
+				Recalculate();
 				OnPropertyChanged();
 			}
 		}
@@ -180,9 +180,6 @@ namespace AnalitF.Net.Client.Models
 		[Ignore]
 		public virtual Settings Settings { get; set; }
 
-		[Ignore]
-		public virtual List<SpecialMarkupCatalog> SpecialMarkupCatalogs { get; set; }
-
 		[Style("AddressName"), Ignore]
 		public virtual bool IsCurrentAddress { get; set; }
 
@@ -191,32 +188,31 @@ namespace AnalitF.Net.Client.Models
 			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
-		public virtual void Calculate(Settings settings, List<SpecialMarkupCatalog> specialMarkupCatalogs)
+		public virtual void Calculate(Settings settings, List<SpecialMarkupCatalog> specialMarkupProducts)
 		{
-			if (settings == null)
-				return;
 			Settings = settings;
-			SpecialMarkupCatalogs = specialMarkupCatalogs;
-      WaybillSettings = settings.Waybills
-				.FirstOrDefault(s => s.BelongsToAddress != null
+			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null
 					&& s.BelongsToAddress.Id == Address.Id)
 				?? WaybillSettings;
-
 			//специальный механизм должен отработать только один раз
+			foreach (var line in Lines)
+				line.SpecialMarkUp = specialMarkupProducts.Any(x => x.ProductId == line.ProductId);
+
+			Recalculate();
+		}
+
+		public void Recalculate()
+		{
 			var isMigrated = IsMigrated && Sum == 0;
-			foreach (var waybillLine in Lines) {
-				waybillLine.SpecialMarkUp = specialMarkupCatalogs.Any(s => waybillLine.MarkUpProductForCatalog != null
-				                                                           &&
-				                                                           s.CatalogId ==
-				                                                           waybillLine.MarkUpProductForCatalog.CatalogId);
+			foreach (var line in Lines) {
 				if (isMigrated)
-					waybillLine.CalculateForMigrated(Settings);
+					line.CalculateForMigrated(Settings);
 				else
-					waybillLine.Calculate(Settings);
+					line.Calculate(Settings);
 			}
 
-			Sum = Lines.Sum(l => l.SupplierCost * l.Quantity).GetValueOrDefault();
+			Sum = Lines.Sum(l => l.SupplierCost*l.Quantity).GetValueOrDefault();
 			CalculateRetailSum();
 		}
 
@@ -249,14 +245,14 @@ namespace AnalitF.Net.Client.Models
 		{
 			line.Waybill = null;
 			Lines.Remove(line);
-			Calculate(Settings, SpecialMarkupCatalogs);
+			Recalculate();
 		}
 
 		public virtual void AddLine(WaybillLine line)
 		{
 			line.Waybill = this;
 			Lines.Add(line);
-			Calculate(Settings, SpecialMarkupCatalogs);
+			Recalculate();
 		}
 
 		public virtual string this[string columnName]

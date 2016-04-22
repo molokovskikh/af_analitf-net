@@ -119,8 +119,7 @@ where c.Id is null;")
 
 			Configure(new SanityCheck()).Check();
 			var settings = Session.Query<Settings>().First();
-			var specialMarkUps = Session.Query<SpecialMarkupCatalog>().ToList();
-      if (IsImported<SentOrder>()) {
+			if (IsImported<SentOrder>()) {
 				Log.Info("Пересчет отправленных заявок");
 				Session.CreateSQLQuery(@"
 update SentOrderLines l
@@ -146,6 +145,7 @@ where o.Sum = 0;")
 			//иначе nhibernate попробует выбрать поставщика и получить null тк база не будет заполнена
 			//при сохранении накладной он запишет Null в поле supplierid
 			Log.Info("Пересчет перенесенных накладных");
+			var specialMarkUps = StatelessSession.Query<SpecialMarkupCatalog>().ToList();
 			ProcessBatch(
 				Session.Query<Waybill>().Where(w => w.Sum == 0 && w.IsMigrated)
 					.OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
