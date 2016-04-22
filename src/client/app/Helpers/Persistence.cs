@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views.Orders;
+using log4net;
 using Newtonsoft.Json.Linq;
 
 namespace AnalitF.Net.Client.Helpers
@@ -35,6 +36,8 @@ namespace AnalitF.Net.Client.Helpers
 
 	public class ViewPersister
 	{
+		private static ILog log = LogManager.GetLogger(typeof(ViewPersister));
+
 		public Dictionary<DependencyObject, DependencyProperty> persistable =
 			new Dictionary<DependencyObject, DependencyProperty>();
 		private UserControl view;
@@ -58,28 +61,36 @@ namespace AnalitF.Net.Client.Helpers
 			var model = view.DataContext as BaseScreen;
 			if (model == null)
 				return;
-			foreach (var property in persistable) {
-				var prop = property.Value;
-				var key = GetKey(property);
-				if (!model.Shell.PersistentContext.ContainsKey(key))
-					return;
-				var value = model.Shell.PersistentContext[key];
-				if (prop.IsValidType(value)) {
-					property.Key.SetValue(prop, value);
-				} else if (value is JObject) {
-					property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
-				} else {
-					if (value != null) {
-						var converter = TypeDescriptor.GetConverter(prop.PropertyType);
-						if (converter.CanConvertFrom(value.GetType())) {
-							property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
-							continue;
+			try {
+				foreach (var property in persistable) {
+					var prop = property.Value;
+					var key = GetKey(property);
+					if (!model.Shell.PersistentContext.ContainsKey(key))
+						return;
+					var value = model.Shell.PersistentContext[key];
+					if (prop.IsValidType(value)) {
+						property.Key.SetValue(prop, value);
+					} else if (value is JObject) {
+						property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
+					} else {
+						if (value != null) {
+							var converter = TypeDescriptor.GetConverter(prop.PropertyType);
+							if (converter.CanConvertFrom(value.GetType())) {
+								property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
+								continue;
+							}
 						}
+	#if DEBUG
+						throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
+	#endif
 					}
-#if DEBUG
-					throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
-#endif
 				}
+			} catch(Exception) {
+#if DEBUG
+				throw;
+#else
+				log.Error("Не удалось восстановить настройки", e)
+#endif
 			}
 		}
 
