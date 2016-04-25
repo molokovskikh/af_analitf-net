@@ -291,19 +291,6 @@ task "build:client:merged", ["build:client:bin"]:
 	Rm("$root/AnalitF.Net.Client.pdb")
 	Cp("src/client/app/App.migration.config", "$name.config")
 
-	#из-за изменения имени сборки нужно сгенерировать лицензию заново
-	outputAssembly = AssemblyDefinition.ReadAssembly(name)
-	resources = outputAssembly.MainModule.Resources
-	spec = "${output}/license"
-	File.WriteAllText(spec, "Devart.Data.MySql.MySqlConnection, AnalitF.Net.Client")
-	lc = "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.6 Tools\\lc.exe"
-	Sh("\"\"${lc}\"\" /target:${name} /complist:${spec} /i:${name}")
-	Rm(spec)
-	compiledLicense = "${name}.licenses"
-	resources.Add(EmbeddedResource("${projectName}.exe.licenses", ManifestResourceAttributes.Public, File.ReadAllBytes(compiledLicense)))
-	Rm(compiledLicense)
-
-	outputAssembly.Write(name)
 	SignDir(root)
 
 task "build:setup", ["build:client:merged"]:
