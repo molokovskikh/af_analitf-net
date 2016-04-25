@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.Models
 
 			foreach (var property in properties.OrderBy(p => p.Item1)) {
 				document.Blocks.Add(new Paragraph(new Run(property.Item2) { FontWeight = FontWeights.Bold }));
-				document.Blocks.Add(new Paragraph(new Run(property.Item3)));
+				document.Blocks.Add(new Paragraph(new Run(property.Item3) { FontSize = 12 }));
 			}
 
 			return document;
