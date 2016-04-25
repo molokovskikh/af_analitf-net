@@ -38,12 +38,14 @@
 					Width="*"
 					Header="Наименование"
 					Binding="{Binding Name}"
-					HighlightStyle="{StaticResource DataGridHighlight}" />
+					HighlightStyle="{StaticResource DataGridHighlight}"
+					CanUserSort="False" />
 				<c:SearchableDataGridColumn
 					Width="*"
 					Header="Формы выпуска"
 					Binding="{Binding Form}"
-					HighlightStyle="{StaticResource DataGridHighlight}" />
+					HighlightStyle="{StaticResource DataGridHighlight}"
+					CanUserSort="False" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
 
