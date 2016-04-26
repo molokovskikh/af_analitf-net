@@ -391,7 +391,11 @@
 									SelectedItem="{Binding Settings.Value.CountDayForWarnOrdered}"/>
 							<Label Margin="0" Content="дней назад"/>
 						</StackPanel>
-                        <Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
+
+            <Label>Режим работы с препаратами ПКУ:</Label>
+            <ComboBox Style="{StaticResource Select}" x:Name="Settings_ModePKU" />
+
+            <Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
 						<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
 
 						<Label>Включить в основную группу поставщиков начиная с:</Label>
