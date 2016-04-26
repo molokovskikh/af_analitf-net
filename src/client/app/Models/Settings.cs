@@ -33,6 +33,13 @@ namespace AnalitF.Net.Client.Models
 		[Description("От минимальной цены в основных поставщиках")] MinBaseCost,
 	}
 
+	public enum ModePKU
+	{
+		[Description("Не реагировать на препараты ПКУ")] Resolve,
+		[Description("Предупреждать о заказе препаратов ПКУ")] Warning,
+		[Description("Запретить заказ препаратов ПКУ")] Deny,
+	}
+
 	public enum Taxation
 	{
 		[Description("ЕНВД")] Envd,
@@ -129,6 +136,7 @@ namespace AnalitF.Net.Client.Models
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
 			Waybills = new List<WaybillSettings>();
+			ModePKU = ModePKU.Warning;
 		}
 
 		public virtual int Id { get; set; }
@@ -151,6 +159,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal MaxOverCostOnRestoreOrder { get; set; }
 
 		public virtual DiffCalcMode DiffCalcMode { get; set; }
+
+		public virtual ModePKU ModePKU { get; set; }
 
 		public virtual string UserName
 		{
