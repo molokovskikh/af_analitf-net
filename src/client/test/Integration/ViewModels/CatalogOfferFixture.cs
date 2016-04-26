@@ -419,5 +419,35 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.OfferCommitted();
 			Assert.That(model.OrderWarning.OrderWarning, Is.EqualTo(Util.HumanizeDaysAgo(settings.CountDayForWarnOrdered)));
 		}
+
+		[Test]
+		public void Mode_PKU_warning()
+		{
+			var price = new Price("test1");
+			model.Offers.Value = new List<Offer> {
+				new Offer(price, 100) {
+					Id = {
+						OfferId = 1
+					},
+					CatalogId = 52
+				},
+			};
+			model.CurrentCatalog.Value = new Catalog {
+				Id = 52,
+				Toxic = true,
+			};
+			model.CurrentOffer.Value = model.Offers.Value.First();
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.OfferUpdated();
+			if (settings.ModePKU == ModePKU.Warning) {
+				Assert.AreEqual("Вы заказываете препарат, подлежащий предметно-количественному учету и относящийся к ПКУ:Сильнодействующие. и ядовитые",
+				model.OrderWarning.OrderWarning);
+			}
+			if (settings.ModePKU == ModePKU.Deny) {
+				Assert.AreEqual("Заказ препаратов ПКУ запрещен. Для изменения режима заказа препаратов ПКУ," +
+						" перейдите в Настройки во вкладку Визуализация и снимите запрет на заказ препаратов ПКУ",
+				model.OrderWarning.OrderWarning);
+			}
+		}
 	}
 }
