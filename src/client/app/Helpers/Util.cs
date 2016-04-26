@@ -286,5 +286,16 @@ namespace AnalitF.Net.Client.Helpers
 				});
 			});
 		}
+
+		public static string HumanizeDaysAgo(int days)
+		{
+			if (days == 1)
+				return "Товар был заказан вчера.";
+			if (days > 1 && days < 5)
+				return "Товар был заказан за последние " + days + " дня";
+			if (days >= 5)
+				return "Товар был заказан за последние " + days + " дней";
+			return "";
+		}
 	}
 }

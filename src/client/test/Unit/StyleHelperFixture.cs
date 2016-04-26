@@ -28,17 +28,6 @@ namespace AnalitF.Net.Client.Test.Unit
 		}
 
 		[Test]
-		public void b()
-		{
-			Build(typeof(BatchLineView));
-			var style = (Style)resource["BatchLineViewBatchLine.Address.NameCell"];
-			Assert.IsNotNull(style);
-			var trigger = style.Triggers.OfType<DataTrigger>()
-				.FirstOrDefault(t => t.Setters.OfType<Setter>().Any(s => s.Property == Control.FontWeightProperty));
-			Assert.IsNotNull(trigger, "текущий адрес доставки выделяется жирным");
-		}
-
-		[Test]
 		public void Build_style()
 		{
 			Build(typeof(WaybillLine));

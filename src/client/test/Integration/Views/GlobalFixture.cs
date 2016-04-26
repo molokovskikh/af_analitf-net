@@ -330,13 +330,17 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
 				if (line.IsCostDecreased) {
 					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
-					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
-					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
+					//#FFCBF6D5 - смешанный активный
+					//#FFCDEAB9 - смешанный неактивный
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCBF6D5").Or.EqualTo("#FFB8FF71").Or.EqualTo("#FFCDEAB9"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCBF6D5").Or.EqualTo("#FFB8FF71").Or.EqualTo("#FFCDEAB9"));
 				}
 				else {
 					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
-					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
-					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
+					//#FFE1C5D6 - смешанный активный
+					//#FFE3B4BA - смешанный неактивный
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFE1C5D6").Or.EqualTo("#FFE3B4BA"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFEF5275").Or.EqualTo("#FFE1C5D6").Or.EqualTo("#FFE3B4BA"));
 				}
 			});
 

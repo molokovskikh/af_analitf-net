@@ -202,7 +202,7 @@
 						<RowDefinition Height="*" />
 					</Grid.RowDefinitions>
 					<Label Grid.Row="0" Padding="5, 0, 5, 0">Предыдущие заказы</Label>
-					<c:DataGrid2 Grid.Row="1" x:Name="HistoryOrders">
+					<c:DataGrid2 Grid.Row="1" x:Name="HistoryOrders" Height="150">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="110*" Header="Прайс-лист"
 								Binding="{Binding Order.PriceName}" />

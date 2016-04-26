@@ -67,8 +67,7 @@ namespace AnalitF.Net.Service.Models
 
 		public static ExternalRawFile FromDir(string name, string dir)
 		{
-			return new ExternalRawFile
-			{
+			return new ExternalRawFile {
 				Name = name,
 				Dir = dir
 			};
@@ -76,8 +75,7 @@ namespace AnalitF.Net.Service.Models
 
 		public static ExternalRawFile FromFile(string filename)
 		{
-			return new ExternalRawFile
-			{
+			return new ExternalRawFile {
 				Filename = filename
 			};
 		}
@@ -101,8 +99,7 @@ namespace AnalitF.Net.Service.Models
 
 		public static UpdateData FromFile(string archivename, string filename)
 		{
-			return new UpdateData(archivename)
-			{
+			return new UpdateData(archivename) {
 				LocalFileName = filename
 			};
 		}
@@ -177,8 +174,7 @@ namespace AnalitF.Net.Service.Models
 
 			user = session.Load<User>(job.User.Id);
 			data = session.Get<AnalitfNetData>(user.Id);
-			if (data == null)
-			{
+			if (data == null) {
 				data = new AnalitfNetData(job);
 				session.Save(data);
 			}
@@ -198,8 +194,7 @@ namespace AnalitF.Net.Service.Models
 #endif
 
 			if (userSettings.CheckClientToken
-				&& !String.IsNullOrEmpty(job.ClientToken))
-			{
+				&& !String.IsNullOrEmpty(job.ClientToken)) {
 				if (String.IsNullOrEmpty(data.ClientTokenV2))
 					data.ClientTokenV2 = job.ClientToken;
 				else if (data.ClientTokenV2 != job.ClientToken)
@@ -215,8 +210,7 @@ namespace AnalitF.Net.Service.Models
 				data.Reset();
 
 			data.ClientVersion = job.Version;
-			if (job.LastSync != data.LastUpdateAt)
-			{
+			if (job.LastSync != data.LastUpdateAt) {
 				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
 					" последние обновление на клиента {0}" +
 					" последнее обновление на сервере {1}" +
@@ -261,8 +255,7 @@ where r.UserId = :userId and ap.Fresh = 1;")
 
 			string sql;
 
-			if (clientSettings.AllowAnalitFSchedule)
-			{
+			if (clientSettings.AllowAnalitFSchedule) {
 				//клиент хранит время обновления как TimeSpan
 				//в базе это преобразуется в TimeSpan.Ticks
 				//tick - это 100 наносекунд те 10^7
@@ -284,8 +277,7 @@ and s.Enable = 1";
 				Export(Result, "Schedules", new[] { "Id", "UpdateAt" }, Enumerable.Empty<object[]>());
 			}
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select Id,
 	Product,
@@ -402,8 +394,7 @@ from Customers.Users u
 	join Customers.Clients c on c.Id = u.ClientId
 	join UserSettings.RetClientsSet rcs on rcs.ClientCode = c.Id
 where u.Id = ?userId";
-			Export(Result, sql, "Users", truncate: true, parameters: new
-			{
+			Export(Result, sql, "Users", truncate: true, parameters: new {
 				userId = user.Id,
 				supportPhone = HtmlToText(rawPhone),
 				supportHours = HtmlToText(rawHours),
@@ -448,8 +439,7 @@ where pc.CostCode = :costId")
 				.SetParameter("costId", MaxProducerCostCostId)
 				.List<DateTime?>()
 				.FirstOrDefault();
-			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt)
-			{
+			if (maxProducerCostDate.GetValueOrDefault() >= data.LastUpdateAt) {
 				sql = @"select * from Usersettings.MaxProducerCosts";
 				Export(Result, sql, "MaxProducerCosts", truncate: true);
 			}
@@ -478,8 +468,7 @@ from (Usersettings.DelayOfPayments d, UserSettings.Prices p)
 	join UserSettings.SupplierIntersection si on si.Id = pi.SupplierIntersectionId and si.SupplierID = p.FirmCode
 where
 	si.ClientId = ?clientId";
-			Export(Result, sql, "DelayOfPayments", truncate: true, parameters: new
-			{
+			Export(Result, sql, "DelayOfPayments", truncate: true, parameters: new {
 				clientId = clientSettings.Id,
 				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
 			});
@@ -546,12 +535,9 @@ left join farm.CachedCostKeys k on k.PriceId = ct.PriceCode and k.RegionId = ct.
 			var cmd = new MySqlCommand(sql, (MySqlConnection)session.Connection);
 			cmd.Parameters.AddWithValue("userId", user.Id);
 			cmd.Parameters.AddWithValue("clientCode", user.Client.Id);
-			using (var reader = cmd.ExecuteReader())
-			{
-				while (reader.Read())
-				{
-					offers.Add(new Offer3
-					{
+			using(var reader = cmd.ExecuteReader()) {
+				while (reader.Read()) {
+					offers.Add(new Offer3 {
 						OfferId = reader.GetUInt64(0),
 						RegionId = reader.GetUInt64(1),
 						PriceId = reader.GetUInt32(2),
@@ -726,8 +712,7 @@ from (Usersettings.Prices p, Customers.Users u)
 where u.Id = ?userId";
 			Export(Result, sql, "prices", truncate: true, parameters: new { userId = user.Id });
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select
 	Id,
@@ -826,8 +811,7 @@ where l.LogTime >= ?lastSync and l.Operation = 2";
 				Export(Result, sql, "ProductDescriptions", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select Id, Mnn as Name
 from Catalogs.Mnn m";
@@ -845,8 +829,7 @@ where m.UpdateTime > ?lastSync";
 				Export(Result, sql, "mnns", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select cn.Id,
 	cn.Name,
@@ -914,8 +897,7 @@ group by cn.Id";
 				Export(Result, sql, "catalognames", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select
 	c.Id,
@@ -955,8 +937,7 @@ where c.UpdateTime > ?lastSync";
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select p.Id, p.Name
 from Catalogs.Producers p";
@@ -983,8 +964,7 @@ where pd.PriceCode = :priceId;")
 				.SetParameter("priceId", Config.RegulatorRegistryPriceId)
 				.List<DateTime?>()
 				.FirstOrDefault();
-			if (cumulative || data.LastUpdateAt < lastFormalization)
-			{
+			if (cumulative || data.LastUpdateAt < lastFormalization) {
 				sql = @"
 select c.Id,
 	c.Code as DrugID,
@@ -1007,8 +987,7 @@ where c.PriceCode = ?priceId and c.CodeFirmCr is not null";
 			var lastDataUpdate = ((MySqlConnection)session.Connection)
 				.Read<DateTime>("select Max(LastUpdate) from Reports.Drugs")
 				.FirstOrDefault();
-			if (lastDataUpdate > data.LastUpdateAt)
-			{
+			if (lastDataUpdate > data.LastUpdateAt) {
 				sql = @"
 select DrugId,
   TradeNmR,
@@ -1045,8 +1024,7 @@ from Reports.Drugs";
 			lastDataUpdate = ((MySqlConnection)session.Connection)
 				.Read<DateTime>("select Max(LastUpdate) from Documents.BarCodes")
 				.FirstOrDefault();
-			if (lastDataUpdate > data.LastUpdateAt)
-			{
+			if (lastDataUpdate > data.LastUpdateAt) {
 				sql = @"
 select Id, BarCode as Value
 from Documents.BarCodes
@@ -1055,8 +1033,7 @@ where BarCode <> ''";
 			}
 
 			IList<object[]> newses = new List<object[]>();
-			if (cumulative)
-			{
+			if (cumulative) {
 				sql = @"
 select Id, PublicationDate, Header
 from Usersettings.News
@@ -1099,11 +1076,9 @@ where PublicationDate < curdate() + interval 1 day
 				+ "{0}"
 				+ "<body>"
 				+ "</html>";
-			foreach (var news in newses)
-			{
+			foreach (var news in newses) {
 				var name = news[0] + ".html";
-				Result.Add(new UpdateData("newses/" + name)
-				{
+				Result.Add(new UpdateData("newses/" + name) {
 					Content = String.Format(template, news[1])
 				});
 			}
@@ -1114,24 +1089,19 @@ where PublicationDate < curdate() + interval 1 day
 			ExportDocs();
 			ExportOrders();
 			//выбираем sql запросы которые будут выполнены на клиенте что бы в случае аварии починить базу клиента
-			try
-			{
-				if (Directory.Exists(Config.PerUserSqlPath))
-				{
+			try {
+				if (Directory.Exists(Config.PerUserSqlPath)) {
 					var content = Directory.GetFiles(Config.PerUserSqlPath, job.User.Id + ".*")
 						.SelectMany(f => File.ReadLines(f))
 						.Implode(Environment.NewLine);
-					if (!String.IsNullOrEmpty(content))
-					{
-						Result.Add(new UpdateData("cmds")
-						{
+					if (!String.IsNullOrEmpty(content)) {
+						Result.Add(new UpdateData("cmds") {
 							Content = content
 						});
 					}
 				}
 			}
-			catch (Exception e)
-			{
+			catch(Exception e) {
 				log.Error("Не удалось выбрать дополнительные sql команды", e);
 			}
 		}
@@ -1140,14 +1110,12 @@ where PublicationDate < curdate() + interval 1 day
 		{
 			if (String.IsNullOrEmpty(value))
 				return "";
-			try
-			{
+			try {
 				var doc = new HtmlDocument();
 				doc.LoadHtml(value);
 				return HtmlEntity.DeEntitize(doc.DocumentNode.InnerText);
 			}
-			catch (Exception e)
-			{
+			catch(Exception e) {
 				log.Error($"Ошибка при преобразовании значения {value}", e);
 				return "";
 			}
@@ -1187,8 +1155,7 @@ where c0.PriceCode = :priceId and cc.PC_CostCode = :costId;";
 
 		private void ExportPromotions()
 		{
-			if (!clientSettings.ShowAdvertising)
-			{
+			if (!clientSettings.ShowAdvertising) {
 				Export(Result, "PromotionCatalogs", new[] { "CatalogId", "PromotionId" }, Enumerable.Empty<object[]>());
 				Export(Result, "Promotions", new[] { "Id" }, Enumerable.Empty<object[]>());
 				return;
@@ -1222,10 +1189,8 @@ where sp.Status = 1";
 			Export(Result, sql, "PromotionCatalogs", truncate: true);
 
 			var promotions = session.Query<Promotion>().Where(p => ids.Contains(p.Id)).ToArray();
-			if (Directory.Exists(Config.PromotionsPath))
-			{
-				foreach (var promotion in promotions)
-				{
+			if (Directory.Exists(Config.PromotionsPath)) {
+				foreach (var promotion in promotions) {
 					var local = promotion.GetFilename(Config);
 					if (String.IsNullOrEmpty(local))
 						continue;
@@ -1254,9 +1219,11 @@ where sp.Status = 1";
 
 			Export(Result, sql, "ProducerPromotionSuppliers", truncate: true);
 
-			sql = string.Format(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= {0} AND PromoFileId IS NOT NULL", DateTimeNow);
+			// Получаем список ID актуальных файлов в БД привязанных к промоакциям производителей
 
-			var ids = session.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= '" + DateTimeNow + "' AND PromoFileId IS NOT NULL").List<int>();
+			var ids = session
+				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
+				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
 
 			ProducerPromotion producerPromotion = new ProducerPromotion();
 
@@ -1351,20 +1318,17 @@ where a.MailId in ({ids.Implode()})";
 
 		private void CachedExport(List<UpdateData> result, string sql, string tag)
 		{
-			if (Config == null)
-			{
+			if (Config == null) {
 				Export(result, sql, tag, truncate: true);
 				return;
 			}
 
 			var cacheData = Path.Combine(Config.CachePath, tag + ".txt");
 			var cacheMeta = Path.Combine(Config.CachePath, tag + ".meta.txt");
-			if (IsCacheStale(cacheData))
-			{
+			if (IsCacheStale(cacheData)) {
 				Export(result, sql, tag, truncate: true);
 				//если другая нитка успела обновить кеш раньше
-				if (IsCacheStale(tag))
-				{
+				if (IsCacheStale(tag)) {
 					var data = result.First(r => r.ArchiveFileName == tag + ".txt");
 					//если мы оперируем с удаленной шарой то там файл появится с задержкой
 					FileHelper.Persistent<FileNotFoundException>(() => File.Copy(data.LocalFileName, cacheData, true));
@@ -1385,8 +1349,7 @@ where a.MailId in ({ids.Implode()})";
 
 		private void ExportOrders()
 		{
-			if (Orders != null)
-			{
+			if (Orders != null) {
 				Export(Result, "Orders",
 					new[] {
 						"ExportId",
@@ -1445,9 +1408,9 @@ where a.MailId in ({ids.Implode()})";
 					.ToLookup(r => (uint?)Convert.ToUInt32(r["Id"]), r => Tuple.Create(r["CatalogId"], r["Properties"]));
 
 				var orderbatchLookup = (from batch in (BatchItems ?? new List<OrderBatchItem>())
-																where batch.Item != null
-																from line in batch.Item.OrderItems
-																select Tuple.Create(batch, line))
+					where batch.Item != null
+					from line in batch.Item.OrderItems
+					select Tuple.Create(batch, line))
 					.ToLookup(t => t.Item2, t => t.Item1);
 				Export(Result, "OrderLines",
 					new[] {
@@ -1530,8 +1493,7 @@ where a.MailId in ({ids.Implode()})";
 							i.Junk,
 						}), truncate: false);
 
-				if (BatchItems != null)
-				{
+				if (BatchItems != null) {
 					Export(Result, "BatchLines",
 						new[] {
 							"ExportId",
@@ -1596,10 +1558,8 @@ where a.MailId in ({ids.Implode()})";
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
 
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
-			foreach (var @group in groups)
-			{
-				foreach (var order in group)
-				{
+			foreach (var @group in groups) {
+				foreach (var order in group) {
 					session.Save(new PendingOrderLog(order, user, group.First().RowId));
 				}
 			}
@@ -1696,8 +1656,7 @@ group by ol.RowId";
 
 			CreateMaxProducerCosts();
 			var condition = new StringBuilder("where oh.Deleted = 0");
-			if (existOrderIds.Length > 0)
-			{
+			if (existOrderIds.Length > 0) {
 				condition.Append(" and oh.RowId not in (");
 				condition.Append(existOrderIds.Implode());
 				condition.Append(") ");
@@ -1782,8 +1741,7 @@ group by ol.RowId";
 				.Take(1000)
 				.ToArray();
 
-			if (logs.Length == 0)
-			{
+			if (logs.Length == 0) {
 				//мы должны передать LoadedDocuments что бы клиент очистил таблицу
 				Export(Result,
 					"LoadedDocuments",
@@ -1792,15 +1750,13 @@ group by ol.RowId";
 				return;
 			}
 
-			foreach (var log in logs)
-			{
+			foreach (var log in logs) {
 				log.Committed = false;
 				log.FileDelivered = false;
 				log.DocumentDelivered = false;
 			}
 
-			foreach (var doc in logs)
-			{
+			foreach (var doc in logs) {
 				if (doc.Document.DocumentType == DocType.Waybills && !user.SendWaybills)
 					continue;
 				if (doc.Document.DocumentType == DocType.Rejects && !user.SendRejects)
@@ -1809,27 +1765,23 @@ group by ol.RowId";
 				//накладную
 				if (doc.Document.IsFake)
 					continue;
-				try
-				{
+				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
 						doc.Document.AddressId.ToString(),
 						type);
-					if (!Directory.Exists(path))
-					{
+					if (!Directory.Exists(path)) {
 						log.Warn($"Директория для загрузки документов не существует {path}");
 						continue;
 					}
 					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
-					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f)))
-					{
+					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f))) {
 						LocalFileName = f
 					}));
 					if (files.Length > 0)
 						doc.FileDelivered = true;
 				}
-				catch (Exception e)
-				{
+				catch(Exception e) {
 					log.Warn("Ошибка при экспорте файлов накладных", e);
 				}
 			}
@@ -1992,8 +1944,7 @@ where r.DownloadId in (:ids)")
 			data.Add(BuildMeta(name, truncate, meta));
 			data.Add(new UpdateData(name + ".txt") { LocalFileName = filename });
 			cleaner.Watch(filename);
-			using (var file = new StreamWriter(File.Create(filename), Encoding.GetEncoding(1251)))
-			{
+			using(var file = new StreamWriter(File.Create(filename), Encoding.GetEncoding(1251))) {
 				MySqlHelper.Export(exportData, file);
 			}
 		}
@@ -2042,8 +1993,7 @@ where r.DownloadId in (:ids)")
 		public string Compress(string file)
 		{
 			file = Path.GetFullPath(Path.Combine(ResultPath, file));
-			using (var stream = File.Create(file))
-			{
+			using(var stream = File.Create(file)) {
 				var watch = new Stopwatch();
 				watch.Start();
 				Compress(stream);
@@ -2059,18 +2009,15 @@ where r.DownloadId in (:ids)")
 			if (!String.IsNullOrEmpty(Config.InjectedFault))
 				throw new Exception(Config.InjectedFault);
 
-			using (var zip = ZipFile.Create(stream))
-			{
+			using (var zip = ZipFile.Create(stream)) {
 				((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 
 				zip.BeginUpdate();
-				foreach (var tuple in Result)
-				{
+				foreach (var tuple in Result) {
 					var filename = tuple.LocalFileName;
 					//экспортировать пустые файлы важно тк пустой файл приведет к тому что таблица будет очищена
 					//например в случае если последний адрес доставки был отключен
-					if (String.IsNullOrEmpty(filename))
-					{
+					if (String.IsNullOrEmpty(filename)) {
 						var content = new MemoryDataSource(new MemoryStream(Encoding.UTF8.GetBytes(tuple.Content)));
 						zip.Add(content, tuple.ArchiveFileName);
 					}
@@ -2080,8 +2027,7 @@ where r.DownloadId in (:ids)")
 								() => File.Exists(filename),
 								$"Не найден файл для экспорта {filename}");
 
-						if (File.Exists(filename))
-						{
+						if (File.Exists(filename)) {
 							//будь бдителен если в текущей директории существует файл с именем как tuple.ArchiveFileName то будет заархивирован он а не
 							//filename System.Exception : ICSharpCode.SharpZipLib.Zip.ZipException: Entry size/stream size mismatch
 							if (File.Exists(tuple.ArchiveFileName))
@@ -2101,22 +2047,19 @@ where r.DownloadId in (:ids)")
 				zip.CommitUpdate();
 			}
 
-			foreach (var raw in External.Where(x => String.IsNullOrEmpty(x.Filename)))
-			{
+			foreach (var raw in External.Where(x => String.IsNullOrEmpty(x.Filename))) {
 				var key = "ext-" + Path.GetFileName(raw.Dir) + ".zip";
 				var cacheFile = Path.Combine(Config.CachePath, key);
 				var files = new DirectoryInfo(raw.Dir).EnumerateFiles();
 				if (!files.Any())
 					continue;
-				if (new FileInfo(cacheFile).LastWriteTime > files.Select(x => x.LastWriteTime).Max())
-				{
+				if (new FileInfo(cacheFile).LastWriteTime > files.Select(x => x.LastWriteTime).Max()) {
 					raw.Filename = cacheFile;
 					continue;
 				}
 
 				var tmp = cleaner.TmpFile();
-				using (var zip = ZipFile.Create(tmp))
-				{
+				using (var zip = ZipFile.Create(tmp)) {
 					((ZipEntryFactory)zip.EntryFactory).IsUnicodeText = true;
 					zip.BeginUpdate();
 					var dir = raw.Dir;
@@ -2125,8 +2068,7 @@ where r.DownloadId in (:ids)")
 					transform.TrimPrefix = dir;
 
 					var scanned = new FileSystemScanner(".+");
-					scanned.ProcessFile += (sender, args) =>
-					{
+					scanned.ProcessFile += (sender, args) => {
 						if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
 							return;
 						if (name != "")
@@ -2169,21 +2111,18 @@ where r.DownloadId in (:ids)")
 
 		public void ExportAds()
 		{
-			if (!clientSettings.ShowAdvertising)
-			{
+			if (!clientSettings.ShowAdvertising) {
 				//нужно подать сигнал клиенту что он должен очистить папку с рекламой
 				Result.Add(new UpdateData("ads/delete.me") { Content = "" });
 				return;
 			}
-			if (!Directory.Exists(AdsPath))
-			{
+			if (!Directory.Exists(AdsPath)) {
 				log.WarnFormat("Директория рекламы не найдена '{0}'", AdsPath);
 				return;
 			}
 			var template = $"_{user.Client.RegionCode}";
 			var dir = Directory.GetDirectories(AdsPath).FirstOrDefault(d => d.EndsWith(template));
-			if (String.IsNullOrEmpty(dir))
-			{
+			if (String.IsNullOrEmpty(dir)) {
 				log.WarnFormat("Директория рекламы не найдена по маске '{0}' в '{1}'", template, AdsPath);
 				return;
 			}
@@ -2193,8 +2132,7 @@ where r.DownloadId in (:ids)")
 					&& RoundToSeconds(f.LastWriteTime) > data.LastReclameUpdateAt.GetValueOrDefault()
 					&& f.Length < Config.MaxReclameFileSize)
 				.ToArray();
-			if (files.Length == 0)
-			{
+			if (files.Length == 0) {
 				data.LastPendingReclameUpdateAt = null;
 				return;
 			}
@@ -2220,14 +2158,12 @@ where r.DownloadId in (:ids)")
 			transform.TrimPrefix = dir;
 
 			var scanned = new FileSystemScanner(".+");
-			scanned.ProcessFile += (sender, args) =>
-			{
+			scanned.ProcessFile += (sender, args) => {
 				if (new FileInfo(args.Name).Attributes.HasFlag(FileAttributes.Hidden))
 					return;
 				if (name != "")
 					name = name + "/";
-				zip.Add(new UpdateData(name + transform.TransformFile(args.Name))
-				{
+				zip.Add(new UpdateData(name + transform.TransformFile(args.Name)) {
 					LocalFileName = args.Name
 				});
 			};
@@ -2238,8 +2174,7 @@ where r.DownloadId in (:ids)")
 		{
 			var updateDir = Config.GetUpdatePath(data, job);
 			var file = Path.Combine(updateDir, "version.txt");
-			if (!File.Exists(file))
-			{
+			if (!File.Exists(file)) {
 				log.DebugFormat("Не найден файл версии {0}", Path.GetFullPath(file));
 				return false;
 			}
