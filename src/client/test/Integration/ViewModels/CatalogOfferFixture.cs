@@ -421,7 +421,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void ModePKUWarning()
+		public void Mode_PKU_warning()
 		{
 			var price = new Price("test1");
 			model.Offers.Value = new List<Offer> {
