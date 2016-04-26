@@ -15,7 +15,6 @@ namespace AnalitF.Net.Client.Views
 
 			SizeChanged += (sender, args) => {
 				CatalogNamesColumn.MaxWidth = args.NewSize.Width / 2;
-				this.MaxHeight = Window.GetWindow(this).ActualHeight*0.7;
 			};
 
 			Catalogs.KeyDown += (sender, args) => {

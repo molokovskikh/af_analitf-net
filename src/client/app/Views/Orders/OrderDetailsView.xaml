@@ -75,7 +75,7 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid2 Grid.Row="2" x:Name="Lines"
+		<c:DataGrid2Main Grid.Row="2" x:Name="Lines"
 			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
@@ -113,7 +113,7 @@
 					CellStyle="{StaticResource CountColumn}"
 					TextAlignment="Right" />
 			</DataGrid.Columns>
-		</c:DataGrid2>
+		</c:DataGrid2Main>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 

@@ -28,7 +28,7 @@
 
 		<c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
-			SelectionMode="Single">
+			SelectionMode="Single" VerticalAlignment="Top">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="*"
 					Header="Наименование"
