@@ -487,13 +487,17 @@ namespace AnalitF.Net.Client.Models
 			Validate();
 		}
 
-		public virtual string Validate(bool validateMarkups = true)
+		public virtual List<string[]> Validate(bool validateMarkups = true)
 		{
-			if (JunkPeriod < 6)
-				return "Срок уценки не может быть менее 6 месяцев";
-
-			if (validateMarkups)
+			if (JunkPeriod < 6) {
+				var error = new List<string[]>();
+				error.Add( new string[] { "JunkPeriod", "Срок уценки не может быть менее 6 месяцев" });
+				return error;
+			}
+			if (validateMarkups) {
 				return MarkupConfig.Validate(Markups);
+			}
+
 			return null;
 		}
 

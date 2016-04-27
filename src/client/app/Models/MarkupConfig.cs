@@ -5,6 +5,7 @@ using System.Linq;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -176,10 +177,10 @@ namespace AnalitF.Net.Client.Models
 			};
 		}
 
-		public static string Validate(IEnumerable<MarkupConfig> source)
+		public static List<string[]> Validate(IEnumerable<MarkupConfig> source)
 		{
 			var groups = source.GroupBy(c => new { c.Type, c.Address?.Id });
-			var errors = new List<string>();
+			var errors = new List<string[]>();
 			foreach (var markups in groups) {
 				var data = markups.OrderBy(m => m.Begin).ToArray();
 				markups.Each(x => {
@@ -196,19 +197,19 @@ namespace AnalitF.Net.Client.Models
 					markup.BeginOverlap = prev.End > markup.Begin;
 					markup.HaveGap = prev.End < markup.Begin;
 					if (markup.Markup > markup.MaxMarkup) {
-						errors.Add("Максимальная наценка меньше наценки.");
+						errors.Add(new string[]{ markup.Type.ToString(), "Максимальная наценка меньше наценки." });
+					}
+
+					if (markup.BeginOverlap || markup.EndLessThanBegin || markup.HaveGap) {
+						errors.Add(new string[]{ markup.Type.ToString(), "Некорректно введены границы цен." });
 					}
 					prev = markup;
-				}
-
-				if (data.Any(m => m.BeginOverlap || m.EndLessThanBegin || m.HaveGap)) {
-					errors.Add("Некорректно введены границы цен.");
 				}
 			}
 			var ranges = source.Where(m => m.Type == MarkupType.VitallyImportant).Select(m => m.Begin);
 			if (ranges.Intersect(new decimal[] { 0, 50, 500 }).Count() < 3)
-				errors.Add("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].");
-			return errors.FirstOrDefault();
+				errors.Add(new string[] { MarkupType.VitallyImportant.ToString(), "Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000]." });
+			return errors;
 		}
 
 		public override string ToString()
