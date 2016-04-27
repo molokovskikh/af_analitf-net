@@ -62,5 +62,30 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			var results = model.Save().ToList();
 			Assert.AreEqual(0, results.Count, results.Implode());
 		}
+
+		[Test]
+		public void Go_to_tab_with_error_validation()
+		{
+			var addresses = new[] {
+				new Address("Тестовый адрес 1"),
+			};
+			var settings = new Settings(addresses);
+			Env.Current.Settings = settings;
+			Env.Current.Addresses = addresses.ToList();
+
+			var model = new SettingsViewModel();
+			model.Address = addresses[0];
+
+			//Очищаем все наценки, в результате должны получить ошибку валидации
+			//"Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000]." для типа MarkupType.VitallyImportant
+			settings.Markups.Clear();
+
+			Open(model);
+
+			model.SelectedTab.Value = "AdditionSettingsTab";
+			model.Save().ToList();
+
+			Assert.AreEqual("VitallyImportantMarkupsTab", model.SelectedTab.Value);
+		}
 	}
 }
