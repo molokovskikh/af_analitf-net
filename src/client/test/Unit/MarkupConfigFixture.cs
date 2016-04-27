@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				new MarkupConfig(address, 0, 100, 20),
 				new MarkupConfig(address, 80, 200, 20)
 			};
-			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups));
+			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups)[0][1]);
 			Assert.That(markups[1].BeginOverlap, Is.True);
 		}
 
@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Test.Unit
 				new MarkupConfig(address, 50, 500, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant),
 			};
-			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups));
+			Assert.AreEqual("Некорректно введены границы цен.", MarkupConfig.Validate(markups)[0][1]);
 
 			markups[1].Begin = 100;
 			Assert.IsNull(MarkupConfig.Validate(markups));
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var settings = new Settings(address);
 			settings.Markups[2].End = 100;
-			Assert.AreEqual("Некорректно введены границы цен.", settings.Validate());
+			Assert.AreEqual("Некорректно введены границы цен.", settings.Validate()[0][1]);
 		}
 
 		[Test]
@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Test.Unit
 		{
 			var settings = new Settings(address);
 			settings.Markups.RemoveEach(settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant));
-			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate());
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate()[0][1]);
 		}
 
 		[Test]
@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.Test.Unit
 			var markups = settings.Markups.Where(m => m.Type == MarkupType.VitallyImportant).OrderBy(m => m.Begin).ToArray();
 			markups[0].End = 40;
 			markups[1].Begin = 40;
-			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate());
+			Assert.AreEqual("Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000].", settings.Validate()[0][1]);
 		}
 
 		[Test]

@@ -277,12 +277,14 @@ namespace AnalitF.Net.Client.ViewModels
 			UpdateMarkups();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
-			if (error.Count > 0) {
-				if (Session != null)
-					Session.FlushMode = FlushMode.Never;
-				GoToErrorTab(error.First()[0]);
-				yield return MessageResult.Warn(error.First()[1]);
-				yield break;
+			if(error != null){ 
+				if (error.Count > 0) {
+					if (Session != null)
+						Session.FlushMode = FlushMode.Never;
+					GoToErrorTab(error.First()[0]);
+					yield return MessageResult.Warn(error.First()[1]);
+					yield break;
+				}
 			}
 
 			if (passwordUpdated)
