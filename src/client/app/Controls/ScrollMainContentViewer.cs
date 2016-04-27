@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using System.Linq.Expressions;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 using Xceed.Wpf.Toolkit.Core.Converters;
 
 namespace AnalitF.Net.Client.Controls
@@ -30,7 +32,6 @@ namespace AnalitF.Net.Client.Controls
 
 	public class ScrollMainContentViewer: ScrollViewer
 	{
-		protected readonly Window BaseWindow;
 		protected readonly double ScrollActivateHeigth = 600;
 		public new ScrollBarVisibility VerticalScrollBarVisibility {
 			get
@@ -53,8 +54,7 @@ namespace AnalitF.Net.Client.Controls
 		public ScrollMainContentViewer()
 		{
 			ScrollBarVisibilityChanged += OnScrollBarVisibilityChanged;
-			BaseWindow = Application.Current.MainWindow;
-			BaseWindow.SizeChanged += OnSizeChanged;
+			SizeChanged += OnSizeChanged;
 			GotFocus += OnGetFocus;
 		}
 
@@ -86,7 +86,7 @@ namespace AnalitF.Net.Client.Controls
 
 		protected virtual void OnSizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			VerticalScrollBarVisibility = (BaseWindow.ActualHeight <= ScrollActivateHeigth)
+			VerticalScrollBarVisibility = (ActualHeight <= ScrollActivateHeigth)
 				? ScrollBarVisibility.Auto
 				: ScrollBarVisibility.Disabled;
 		}
@@ -97,16 +97,17 @@ namespace AnalitF.Net.Client.Controls
 			Type grid2Type = typeof(DataGrid2);
 			Type gridType = typeof(DataGrid);
 
-			var controls = FindControlsByType(new Type[] {grid2MainType, grid2Type, gridType});
+			var controls = WpfHelper.Children(this, new List<Type> {grid2MainType, grid2Type, gridType}); //FindControlsByType(new Type[] {grid2MainType, grid2Type, gridType});
 
 			if (!hideScrollBar) {
 				ScrollToVerticalOffset(0);
 			}
 
-			foreach (Control control in controls) {
+			foreach (var dependecyObj in controls) {
 
-				if (control == null) continue;
-				if (control.GetType() == grid2MainType) {
+				if (dependecyObj == null) continue;
+				if (dependecyObj.GetType() == grid2MainType) {
+					var control = dependecyObj as Control;
 					if (!hideScrollBar) {
 						control.Height = control.MaxHeight = control.MinHeight = ActualHeight*0.7;
 					} else {
@@ -116,42 +117,14 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 
-				if (control.GetType() == grid2Type ||
-					control.GetType() == gridType) {
+				if (dependecyObj.GetType() == grid2Type ||
+					dependecyObj.GetType() == gridType) {
+					var control = dependecyObj as Control;
 					if (!hideScrollBar) {
 						control.MaxHeight = ActualHeight*0.5;
 					} else {
 						control.MaxHeight = double.PositiveInfinity;
 					}
-				}
-			}
-
-		}
-
-		private List<Control> FindControlsByType(Type[] t)
-		{
-			List<Control> list = new List<Control>();
-
-			RecurciveSearchControls(ref list, t.ToList() , this);
-
-			return list;
-		}
-
-		private void RecurciveSearchControls(ref List<Control> controls, List<Type> t, DependencyObject control)
-		{
-			int childrenCount = VisualTreeHelper.GetChildrenCount(control);
-
-			for (int i = 0; i < childrenCount; i++) {
-
-				DependencyObject currentChildControl = VisualTreeHelper.GetChild(control, i);
-
-				if (t.IndexOf(currentChildControl.GetType()) > -1) {
-
-				}
-				controls.Add(currentChildControl as Control);
-
-				if (VisualTreeHelper.GetChildrenCount(currentChildControl) > 0) {
-					RecurciveSearchControls(ref controls, t, currentChildControl);
 				}
 			}
 
