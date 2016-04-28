@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -45,7 +46,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				//для отчета по жизененно важным
 				EAN13 = "4606915000379",
 			});
-			Waybill.Calculate(settings);
+			Waybill.Calculate(settings, new List<uint>());
 			session.Save(Waybill);
 			session.Flush();
 		}

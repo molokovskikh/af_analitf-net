@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
@@ -37,9 +39,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			GroupByProduct = new NotifyValue<bool>(Settings.Value.GroupByProduct);
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
+
 			RetailMarkup = new NotifyValue<decimal>(true,
 				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
+
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
 				(o, m) => NullableHelper.Round(o?.ResultCost * (1 + m / 100), 2))
 				.ToValue();
@@ -51,9 +55,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(HideJunk.Select(v => (object)v).Skip(1))
 				.Subscribe(_ => Update());
 
-			CurrentOffer.Subscribe(_ => {
-				RetailMarkup.Recalculate();
-			});
+			CurrentOffer.Subscribe(_ => RetailMarkup.Recalculate());
 			Persist(HideJunk, "HideJunk");
 			Persist(GroupByProduct, "GroupByProduct");
 			SessionValue(CurrentRegion, "CurrentRegion");

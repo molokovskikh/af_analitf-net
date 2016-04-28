@@ -473,6 +473,7 @@ where
 				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
 			});
 
+
 			//для выборки данных используется кеш оптимизированных цен
 			//кеш нужен что бы все пользователи одного клиента имели одинаковый набор цен
 			//кеш перестраивается на основании даты прайс-листа, при выборке проверяется дата
@@ -935,6 +936,20 @@ from Catalogs.Catalog c
 	join Catalogs.CatalogForms cf on cf.Id = c.FormId
 where c.UpdateTime > ?lastSync";
 				Export(Result, sql, "catalogs", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
+
+			if (cumulative) {
+				sql = @"
+select Id, CatalogId, Hidden
+from Catalogs.Products
+where Hidden = 0";
+				CachedExport(Result, sql, "Products");
+			} else {
+				sql = @"
+select Id, CatalogId, Hidden
+from Catalogs.Products
+where Hidden = 0 and UpdateTime > ?lastSync";
+				Export(Result, sql, "Products", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
 			}
 
 			if (cumulative) {

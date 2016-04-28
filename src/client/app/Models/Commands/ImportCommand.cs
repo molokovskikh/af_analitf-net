@@ -114,6 +114,11 @@ where a.Id is null;
 delete i
 from AwaitedItems i
 left join Catalogs c on c.Id = i.CatalogId
+where c.Id is null;
+
+delete s
+from SpecialMarkupCatalog s
+left join Catalog c on c.Id = s.CatalogId
 where c.Id is null;")
 				.ExecuteUpdate();
 
@@ -145,13 +150,13 @@ where o.Sum = 0;")
 			//иначе nhibernate попробует выбрать поставщика и получить null тк база не будет заполнена
 			//при сохранении накладной он запишет Null в поле supplierid
 			Log.Info("Пересчет перенесенных накладных");
+			var products = SpecialMarkupCatalog.Load(StatelessSession.Connection);
 			ProcessBatch(
-				Session.Query<Waybill>().Where(w => w.Sum == 0 && w.IsMigrated)
+				Session.Query<Waybill>().Where(w => w.Sum == 0)
 					.OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
 				(s, x) => {
-					foreach (var id in x) {
-						s.Load<Waybill>(id).Calculate(settings);
-					}
+					foreach (var id in x)
+						s.Load<Waybill>(id).Calculate(settings, products);
 				});
 
 			if (Session.Query<LoadedDocument>().Any()) {
@@ -162,12 +167,6 @@ update Waybills w
 	join LoadedDocuments d on d.Id = w.Id
 set IsNew = 1;")
 					.ExecuteUpdate();
-
-				//перенесенных накладных может быть много и их пересчет займет много времени
-				//не вычисляем такие накладные тк всего скорее они ни кому не нужны
-				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0 && !w.IsMigrated).ToList();
-				foreach (var waybill in newWaybills)
-					waybill.Calculate(settings);
 			}
 			if (IsImported<Offer>()) {
 				Log.Info("Очистка каталога");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
@@ -222,7 +223,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				SupplierCost = orderLine.Cost,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings);
+			waybill.Calculate(settings, new List<uint>());
 			session.Save(waybill);
 			session.Save(new WaybillOrder(line.Id, orderLine.ServerId.Value));
 		}
