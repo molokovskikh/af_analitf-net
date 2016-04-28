@@ -209,6 +209,11 @@ namespace AnalitF.Net.Client.Models
 			var ranges = source.Where(m => m.Type == MarkupType.VitallyImportant).Select(m => m.Begin);
 			if (ranges.Intersect(new decimal[] { 0, 50, 500 }).Count() < 3)
 				errors.Add(new string[] { MarkupType.VitallyImportant.ToString(), "Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000]." });
+
+			if (errors.Count == 0) {
+				errors = null;
+			}
+
 			return errors;
 		}
 

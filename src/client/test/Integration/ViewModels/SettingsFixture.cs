@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Address = address
 			});
 			var results = model.Save().ToList();
-			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
+			Assert.AreEqual("Некорректно введены границы цен.", (results[0] as MessageResult).Message);
 
 			Reset();
 			var all = session.Query<MarkupConfig>().ToList();

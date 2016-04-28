@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			model.Address = addresses[0];
 
 			//Очищаем все наценки, в результате должны получить ошибку валидации
-			//"Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000]." для типа MarkupType.VitallyImportant
+			// "Не заданы обязательные интервалы границ цен: [0, 50], [50, 500], [500, 1000000]." для типа MarkupType.VitallyImportant
 			settings.Markups.Clear();
 
 			Open(model);
