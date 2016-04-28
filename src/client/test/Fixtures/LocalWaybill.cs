@@ -46,7 +46,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				//для отчета по жизененно важным
 				EAN13 = "4606915000379",
 			});
-			Waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
+			Waybill.Calculate(settings, new List<uint>());
 			session.Save(Waybill);
 			session.Flush();
 		}

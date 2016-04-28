@@ -188,7 +188,7 @@ namespace AnalitF.Net.Client.Models
 			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
-		public virtual void Calculate(Settings settings, List<SpecialMarkupCatalog> specialMarkupProducts)
+		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
 			Settings = settings;
 			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
@@ -197,12 +197,12 @@ namespace AnalitF.Net.Client.Models
 				?? WaybillSettings;
 			//специальный механизм должен отработать только один раз
 			foreach (var line in Lines)
-				line.SpecialMarkUp = specialMarkupProducts.Any(x => x.ProductId == line.ProductId);
+				line.SpecialMarkUp = specialMarkupProducts.Contains(line.ProductId.GetValueOrDefault());
 
 			Recalculate();
 		}
 
-		public void Recalculate()
+		public virtual void Recalculate()
 		{
 			var isMigrated = IsMigrated && Sum == 0;
 			foreach (var line in Lines) {

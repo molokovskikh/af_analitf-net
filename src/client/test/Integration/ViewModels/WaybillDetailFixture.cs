@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			autoStartScheduler = false;
 			waybill = Fixture<LocalWaybill>().Waybill;
-			model = Open(new WaybillDetails(waybill.Id, new List<SpecialMarkupCatalog>()));
+			model = Open(new WaybillDetails(waybill.Id));
 		}
 
 		[Test]
@@ -142,7 +142,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var waybillId = line.Waybill.Log.Id;
 
 			var updateResults = shell.Update().ToArray();
-			model = Open(new WaybillDetails(waybillId, new List<SpecialMarkupCatalog>()));
+			model = Open(new WaybillDetails(waybillId));
 			Assert.AreEqual(2, updateResults.Length,
 				"должны были получить результат открытия файла накладной и оповещение о новой накладной {0}", updateResults.Implode());
 			Assert.IsInstanceOf<DialogResult>(updateResults[0]);
@@ -166,7 +166,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsNotNull(results.Current);
 			Close(model);
 
-			model = Open(new WaybillDetails(waybill.Id, new List<SpecialMarkupCatalog>()));
+			model = Open(new WaybillDetails(waybill.Id));
 			results = model.PrintRegistry().GetEnumerator();
 			Assert.IsTrue(results.MoveNext());
 			target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;

@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Offers;
-using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.Tools;
-using Devart.Data.MySql;
+using Dapper;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
@@ -34,15 +27,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		[Style(Description = "Предложения отсутствуют")]
 		public virtual bool DoNotHaveOffers => !HaveOffers;
-
-		public CatalogDisplayItem(uint id, string name, string form, bool haveOffers, bool vitallyImportant)
-		{
-			CatalogId = id;
-			Name = name;
-			Form = form;
-			HaveOffers = haveOffers;
-			VitallyImportant = vitallyImportant;
-		}
 
 		//перегрузка Equals и GetHashCode
 		//нужна что бы DataGrid сохранял выделенную позицию после обновления данных
@@ -146,36 +130,21 @@ namespace AnalitF.Net.Client.ViewModels
 			//мы не можем использовать nhibernate для выборки данных тк объем данных слишком велик
 			//выборка может достигать 10**5 записей
 			var connection = session.Connection;
-			var command = connection.CreateCommand();
 			var conditions = new List<string>();
 
 			if (ParentModel.FiltredMnn != null) {
 				conditions.Add("cn.MnnId = @mnnId");
-				var parameter = command.CreateParameter();
-				parameter.ParameterName = "@mnnId";
-				parameter.Value = ParentModel.FiltredMnn.Id;
-				command.Parameters.Add(parameter);
 			}
-
 			if (!string.IsNullOrEmpty(SearchBehavior.ActiveSearchTerm.Value)) {
 				conditions.Add("(cn.Name like @term or c.Form like @term)");
-				var parameter = command.CreateParameter();
-				parameter.ParameterName = "@term";
-				parameter.Value = SearchBehavior.ActiveSearchTerm.Value;
-				parameter.Direction = ParameterDirection.Input;
-				parameter.Value = "%" + SearchBehavior.ActiveSearchTerm.Value + "%";
-				command.Parameters.Add(parameter);
 			}
-
 			if (!ParentModel.ShowWithoutOffers) {
 				conditions.Add("c.HaveOffers = 1");
 			}
-
 			var filterType = ParentModel.CurrentFilter?.FilterType;
 			if (ParentModel.CurrentFilter == ParentModel.Filters[1]) {
 				conditions.Add("c.VitallyImportant = 1");
 			}
-
 			if (ParentModel.CurrentFilter == ParentModel.Filters[2]) {
 				conditions.Add("c.MandatoryList = 1");
 			}
@@ -198,25 +167,15 @@ namespace AnalitF.Net.Client.ViewModels
 				conditions.Add("c.Other = 1");
 			}
 
-			command.CommandText = "select c.Id, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant"
+			var sql = "select c.Id as CatalogId, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant"
 				+ " from Catalogs c"
 				+ " join CatalogNames cn on cn.Id = c.NameId"
 				+ (conditions.Count > 0 ? " where " + conditions.Implode(" and ") : "")
 				+ " order by cn.Name, c.Form";
-			var items = new List<CatalogDisplayItem>();
-			using (var reader = command.ExecuteReader()) {
-				while (reader.Read()) {
-					if (CloseCancellation.Token.IsCancellationRequested)
-						return Enumerable.Empty<CatalogDisplayItem>().ToList();
-					items.Add(new CatalogDisplayItem(
-						(uint)reader.GetInt32(0),
-						reader.GetString(1),
-						reader.GetString(2),
-						reader.GetBoolean(3),
-						reader.GetBoolean(4)));
-				}
-			}
-			return items;
+			return connection.Query<CatalogDisplayItem>(sql, new {
+				mnnId = ParentModel.FiltredMnn?.Id,
+				term = "%" + SearchBehavior.ActiveSearchTerm.Value + "%"
+			}).ToList();
 		}
 
 

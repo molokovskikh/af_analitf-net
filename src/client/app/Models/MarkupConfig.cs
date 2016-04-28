@@ -146,28 +146,21 @@ namespace AnalitF.Net.Client.Models
 				type = MarkupType.Nds18;
 			else if (offer.VitallyImportant)
 				type = MarkupType.VitallyImportant;
-			if (offer.SpecialMarkUp)
+			if (offer.IsSpecialMarkup)
 				type = MarkupType.Special;
 
 			var cost = user.IsDelayOfPaymentEnabled && !user.ShowSupplierCost ? offer.GetResultCost() : offer.Cost;
 
-			var config = Calculate(markups, type, cost, address);
-			if (config == null)
-				return 0;
-			return config.Markup;
+			return (Calculate(markups, type, cost, address)?.Markup).GetValueOrDefault();
 		}
 
 		public static MarkupConfig Calculate(IEnumerable<MarkupConfig> markups, MarkupType type, decimal cost, Address address)
 		{
-			markups = markups.OrderBy(s => s.Begin).ToList();
-			foreach (var markup in markups) {
-				if (markup.Type == type
-				    && markup.Address.Id == address.Id
-				    && cost > markup.Begin
-				    && cost <= markup.End)
-					return markup;
-			}
-			return null;
+			return markups.OrderBy(s => s.Begin)
+				.FirstOrDefault(x => x.Type == type
+					&& x.Address.Id == address.Id
+					&& cost > x.Begin
+					&& cost <= x.End);
 		}
 
 		public static IEnumerable<MarkupConfig> Defaults(Address address)
@@ -177,7 +170,8 @@ namespace AnalitF.Net.Client.Models
 				new MarkupConfig(address, 0, 10000, 20, MarkupType.Nds18),
 				new MarkupConfig(address, 0, 50, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 50, 500, 20, MarkupType.VitallyImportant),
-				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant)
+				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant),
+				new MarkupConfig(address, 0, 10000, 20, MarkupType.Special),
 			};
 		}
 

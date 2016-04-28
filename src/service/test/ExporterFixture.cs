@@ -210,14 +210,6 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
-		public void Export_products()
-		{
-			exporter.Export();
-			var files = ListResult();
-			Assert.AreEqual(files.IndexOf("Products.meta.txt") != -1 && files.IndexOf("Products.txt") != -1, true  );
-		}
-
-    [Test]
 		public void Do_not_export_waybill_files()
 		{
 			user.SendWaybills = false;
@@ -238,7 +230,7 @@ namespace AnalitF.Net.Service.Test
 			InitAd();
 			var result = ReadResult();
 			var zeros = new [] {
-				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt"
+				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt", "Products.txt"
 			};
 			foreach (var zero in zeros) {
 				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));

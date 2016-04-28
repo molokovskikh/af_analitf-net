@@ -90,7 +90,6 @@ namespace AnalitF.Net.Client.ViewModels
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
 		[DataMember]
-		public List<SpecialMarkupCatalog> SpecialMarkupCatalogs = new List<SpecialMarkupCatalog>();
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -98,8 +97,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
-
-
 
 		//не верь решарперу
 		public ShellViewModel()
@@ -109,6 +106,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel(Config.Config config)
 		{
+			SpecialMarkupProducts = new NotifyValue<uint[]>();
 			this.config = config;
 			CloseDisposable.Add(CancelDisposable);
 			DisplayName = "АналитФАРМАЦИЯ";
@@ -219,6 +217,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public ObservableCollection<Loadable> PendingDownloads { get; set; }
 
 		public NotifyValue<Settings> Settings { get; set; }
+		public NotifyValue<uint[]> SpecialMarkupProducts { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }
 		public NotifyValue<bool> IsDataLoaded { get; set; }
@@ -420,8 +419,6 @@ namespace AnalitF.Net.Client.ViewModels
 			//строка Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			//сбросит его
 			var addressId = CurrentAddress?.Id;
-			NewMailsCount.Value = statelessSession.Query<Mail>().Count(m => m.IsNew);
-			NewDocsCount.Value = statelessSession.Query<Waybill>().Count(m => m.IsNew);
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -430,7 +427,16 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
-			Schedules.Value = session.Query<Schedule>().ToList();
+
+			Env.RxQuery(x => x.Query<Schedule>().ToList())
+				.Subscribe(Schedules);
+			Env.RxQuery(x => x.Query<Mail>().Count(m => m.IsNew))
+				.Subscribe(NewMailsCount);
+			Env.RxQuery(x => x.Query<Waybill>().Count(m => m.IsNew))
+				.Subscribe(NewDocsCount);
+			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
+				.Subscribe(SpecialMarkupProducts);
+
 			defaultItem.Reload();
 		}
 
@@ -558,6 +564,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (session != null) {
 				session.Evict(Settings.Value);
 				Settings.Value = session.Query<Settings>().First();
+				Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
+					.Subscribe(SpecialMarkupProducts);
 			}
 			return model.IsCredentialsChanged;
 		}

@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			GroupByProduct.Subscribe(_ => Offers.Value = Sort(Offers.Value));
 
 			RetailMarkup = new NotifyValue<decimal>(true,
-				() => MarkupConfig.Calculate(Settings.Value.Markups, Shell?.SpecialMarkupCatalogs, CurrentOffer.Value, User, Address),
+				() => MarkupConfig.Calculate(Settings.Value.Markups, CurrentOffer.Value, User, Address),
 				Settings);
 
 			RetailCost = CurrentOffer.CombineLatest(RetailMarkup,
@@ -95,8 +95,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		public bool IsFilterByCatalogName => filterCatalogName != null;
 
 		public string[] Filters { get; set; }
-
-		public List<SpecialMarkupCatalog> SpecialMarkupCatalogs { get; set; }
 
 		public NotifyValue<bool> HideJunk { get; set; }
 		public NotifyValue<string> CurrentFilter { get; set; }

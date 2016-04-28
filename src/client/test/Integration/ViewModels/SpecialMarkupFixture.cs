@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Shell = shell;
 			model.Address = AddressList[1];
 			Open(model);
-			Assert.Greater(model.SpecialMarkupItems.Value.Count, 0);
+			Assert.Greater(model.Products.Value.Count, 0);
 			Assert.AreEqual(1, model.SpecialMarkups.Value.Count);
 			Assert.AreEqual(true, model.SpecialMarkups.Value.Any(s => s.Type == MarkupType.Special && s.End == 10000));
 			model.Save().ToList();
@@ -100,13 +100,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Address = AddressList[1];
 			Open(model);
 			// выделяем препарат, добавляем его в список маркерованных "Специальной наценкой"
-			model.SpecialMarkupItemCurrent.Value = model.SpecialMarkupItems.Value.FirstOrDefault();
+			model.CurrentProduct.Value = model.Products.Value.FirstOrDefault();
 			model.SpecialMarkupCheck();
-			Assert.AreEqual(1, model.SpecialMarkupItemsChecked.Value.Count);
+			Assert.AreEqual(1, model.SpecialMarkupProducts.Value.Count);
 			// выделяем препарат, удаляем его из списка маркерованных "Специальной наценкой"
-			model.SpecialMarkupItemsCheckedCurrent.Value = model.SpecialMarkupItemsChecked.Value.FirstOrDefault();
+			model.CurrentSpecialMarkupProduct.Value = model.SpecialMarkupProducts.Value.FirstOrDefault();
 			model.SpecialMarkupUncheck();
-			Assert.AreEqual(0, model.SpecialMarkupItemsChecked.Value.Count);
+			Assert.AreEqual(0, model.SpecialMarkupProducts.Value.Count);
 		}
 
 		[Test]
@@ -134,10 +134,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			for (int i = 0; i < 10; i++) {
 				// заполняем список маркерованных "Специальной наценкой" препаратов
-				model.SpecialMarkupItemCurrent.Value = model.SpecialMarkupItems.Value.Skip(i).FirstOrDefault();
+				model.CurrentProduct.Value = model.Products.Value.Skip(i).FirstOrDefault();
 				model.SpecialMarkupCheck();
 				//создаем связи отмеченного каталога со спецификациями
-				var catalog = session.Query<Catalog>().FirstOrDefault(s => s.Id == model.SpecialMarkupItemCurrent.Value.CatalogId);
+				var catalog = session.Query<Catalog>().FirstOrDefault(s => s.Id == model.CurrentProduct.Value.CatalogId);
 
 				var product = productsList[i];
 			//	product.Catalog = catalog;
@@ -174,17 +174,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			}
 			model.Save().ToList();
       session.Refresh(waybill);
-			shell.SpecialMarkupCatalogs = session.Query<SpecialMarkupCatalog>().ToList();
-			waybill.Calculate(settings,shell.SpecialMarkupCatalogs);
+			waybill.Calculate(settings,shell.SpecialMarkupProducts.Value);
 			session.Update(waybill);
 			session.Flush();
 			session.Refresh(waybill);
 
 			// всего должно быть маркеровано 10 препаратов
-			Assert.AreEqual(10, model.SpecialMarkupItemsChecked.Value.Count);
+			Assert.AreEqual(10, model.SpecialMarkupProducts.Value.Count);
 
 			// при пересчете маркер "Специальной наценки" не должен влиять на стоимость, т.к. не указаны его свойства
-			WaybillDetails waybillModel = Open(new WaybillDetails(waybill.Id, shell.SpecialMarkupCatalogs));
+			WaybillDetails waybillModel = Open(new WaybillDetails(waybill.Id));
 			var waybillLine = waybillModel.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(null, waybillLine.RetailCost);
 			Close(waybillModel);
@@ -209,12 +208,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			// проверяем, вероно ли отражаются свойства маркера на цене препаратов
 			session.Refresh(waybill);
 
-			waybill.Calculate(settings, shell.SpecialMarkupCatalogs);
+			waybill.Calculate(settings, shell.SpecialMarkupProducts.Value);
 			session.Save(waybill);
 			session.Flush();
 
 			//обновляем форму накладной, проверяем наценку
-			waybillModel = Open(new WaybillDetails(waybill.Id, shell.SpecialMarkupCatalogs));
+			waybillModel = Open(new WaybillDetails(waybill.Id));
 			waybillLine = waybillModel.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(30.8M, waybillLine.RetailCost);
 		}
@@ -258,13 +257,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//добавляем помечаем интересующие каталоги маркером "Спецальной наценки"
 			for (int i = 0; i < model.Offers.Value.Count; i++) {
 				settingsView.SpecialMarkupSearchText.Value = model.Offers.Value[i].ProductSynonym.Substring(0, 4);
-				settingsView.SpecialMarkupItems.Value = settingsView.SpecialMarkupListSearch(session.SessionFactory.OpenStatelessSession());
-				settingsView.SpecialMarkupItemCurrent.Value = settingsView.SpecialMarkupItems.Value.First(s => s.CatalogId == model.Offers.Value[i].CatalogId);
+				settingsView.Products.Value = settingsView.SearchProduct(session.SessionFactory.OpenStatelessSession());
+				settingsView.CurrentProduct.Value = settingsView.Products.Value.First(s => s.CatalogId == model.Offers.Value[i].CatalogId);
 				settingsView.SpecialMarkupCheck();
 			}
 			settingsView.Save().ToList();
 			session.Flush();
-			shell.SpecialMarkupCatalogs = session.Query<SpecialMarkupCatalog>().ToList();
 			Close(model);
 			//обновляем форму предложения, проверяем наценки
 			model = new CatalogOfferViewModel(catalog);

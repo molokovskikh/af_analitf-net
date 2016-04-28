@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -136,8 +136,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (CurrentLine.Value == null)
 				return;
-			RxQuery(s => s.Query<SpecialMarkupCatalog>().ToList())
-				.Subscribe(s => { Shell.Navigate(new WaybillDetails(CurrentLine.Value.Waybill.Id, s)); });
+			Shell.Navigate(new WaybillDetails(CurrentLine.Value.Waybill.Id));
 		}
 	}
 }

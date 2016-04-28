@@ -108,22 +108,14 @@ namespace AnalitF.Net.Client.Models.Commands
 
 				var addresses = session.Query<Address>().ToList();
 				var mainAddress = addresses.FirstOrDefault();
-				if (mainAddress != null) {
-					if (settings.Markups.All(x => x.Address == null))
-						settings.Markups.Each(x => x.Address = mainAddress);
-				}
 				foreach (var address in addresses.Except(new [] { mainAddress }))
 					settings.CopyMarkups(mainAddress, address);
 				//если ничего восстановить не удалось тогда берем значения по умолчанию
 				foreach (var address in addresses) {
-					if (settings.Markups.Count(x => x.Address == address) == 0)
-						MarkupConfig.Defaults(address).Each(settings.AddMarkup);
-				}
-				if (settings.Markups.Count(x => x.Type == MarkupType.Nds18) == 0) {
-					settings.Markups.AddEach(settings.Markups.Where(x => x.Type == MarkupType.Over)
-						.Select(x => new MarkupConfig(x, x.Address) {
-							Type = MarkupType.Nds18,
-						}));
+					foreach (MarkupType type in Enum.GetValues(typeof(MarkupType))) {
+						if (settings.Markups.Count(x => x.Address == address && x.Type == type) == 0)
+							MarkupConfig.Defaults(address).Where(x => x.Type == type).Each(settings.AddMarkup);
+					}
 				}
 
 				var addressConfigs = session.Query<AddressConfig>().ToArray();

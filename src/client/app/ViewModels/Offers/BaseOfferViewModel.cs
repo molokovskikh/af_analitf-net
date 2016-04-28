@@ -394,7 +394,7 @@ group by l.ProductId")
 
 		private void CalculateRetailCost(IEnumerable<Offer> offers)
 		{
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User, Address));
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address));
 		}
 
 		private void CalculateDiff(IEnumerable<Offer> offers)

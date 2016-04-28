@@ -223,7 +223,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				SupplierCost = orderLine.Cost,
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings, new List<SpecialMarkupCatalog>());
+			waybill.Calculate(settings, new List<uint>());
 			session.Save(waybill);
 			session.Save(new WaybillOrder(line.Id, orderLine.ServerId.Value));
 		}

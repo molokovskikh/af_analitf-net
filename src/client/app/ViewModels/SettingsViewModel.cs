@@ -1,25 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
+using Dapper;
 using NHibernate;
 using NHibernate.Linq;
 using ReactiveUI;
-using System.Data;
-using Dapper;
-using NHibernate.Util;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -86,17 +83,16 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(SpecialMarkupSearchInStartOfString.Select(v => (object)v))
 				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
 				.Do(_ => IsLoading.Value = true)
-				.Select(_ => RxQuery(SpecialMarkupListSearch))
+				.Select(_ => RxQuery(SearchProduct))
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
-				.Subscribe(SpecialMarkupItems, CloseCancellation.Token);
+				.Subscribe(Products, CloseCancellation.Token);
 
 
-			SpecialMarkupItemsChecked.Value = new List<SpecialMarkupCatalog>();
-			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToList())
+			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToObservableCollection())
 				.ObserveOn(UiScheduler)
-				.Subscribe(x => { SpecialMarkupItemsChecked.Value = x; });
+				.Subscribe(SpecialMarkupProducts);
 
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
 				SelectedTab.Value = "LoginTab";
@@ -162,72 +158,60 @@ namespace AnalitF.Net.Client.ViewModels
 		public SearchBehavior SearchBehavior { get; set; }
 
 
-		public NotifyValue<List<CatalogDisplayItem>> SpecialMarkupItems { get; set; }
-		public NotifyValue<CatalogDisplayItem> SpecialMarkupItemCurrent { get; set; }
+		public NotifyValue<List<CatalogDisplayItem>> Products { get; set; }
+		public NotifyValue<CatalogDisplayItem> CurrentProduct { get; set; }
 
-		public NotifyValue<List<SpecialMarkupCatalog>> SpecialMarkupItemsChecked { get; set; }
-		public NotifyValue<SpecialMarkupCatalog> SpecialMarkupItemsCheckedCurrent { get; set; }
+		public NotifyValue<ObservableCollection<SpecialMarkupCatalog>> SpecialMarkupProducts { get; set; }
+		public NotifyValue<SpecialMarkupCatalog> CurrentSpecialMarkupProduct { get; set; }
 
-		public List<CatalogDisplayItem> SpecialMarkupListSearch(IStatelessSession session)
+		public List<CatalogDisplayItem> SearchProduct(IStatelessSession session)
 		{
-			var itemsToReturn = new List<CatalogDisplayItem>();
 			var conditions = new List<string>();
 			//Если введен текст поиска
 			if (!string.IsNullOrEmpty(SpecialMarkupSearchText.Value))
-				conditions.Add(" (cn.Name like :term or c.Form like :term) ");
+				conditions.Add("(cn.Name like @term or c.Form like @term) ");
 			//Если ищем везде
 			if (!SpecialMarkupSearchEverywhere)
-				conditions.Add(" c.HaveOffers = 1 ");
+				conditions.Add("c.HaveOffers = 1 ");
 			//Формируем блок условия
-			var whereBlock = (conditions.Count > 0 ? " where " + conditions.Implode(" and ") : "");
-			var query = session.CreateSQLQuery("select c.Id, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant from Catalogs c "
-			                                   + $"join CatalogNames cn on cn.Id = c.NameId {whereBlock} order by cn.Name, c.Form limit 300");
-			if (!string.IsNullOrEmpty(SpecialMarkupSearchText.Value))
-				query.SetParameter
-					("term", (SpecialMarkupSearchInStartOfString ? "" : "%") + SpecialMarkupSearchText.Value + "%");
-			var rawList = query.List<object[]>().ToList();
-			itemsToReturn.AddRange(rawList.Select(s => new CatalogDisplayItem(Convert.ToUInt32(s[0]), (string)s[1]
-				, (string)s[2], Convert.ToBoolean(s[3]), Convert.ToBoolean(s[4]))));
-			return itemsToReturn;
+			var where = conditions.Count > 0 ? " where " + conditions.Implode(" and ") : "";
+			var sql = $@"select c.Id as CatalogId, cn.Name, c.Form, c.HaveOffers, c.VitallyImportant
+from Catalogs c
+	join CatalogNames cn on cn.Id = c.NameId
+{where}
+order by cn.Name, c.Form
+limit 300";
+			return session.Connection
+				.Query<CatalogDisplayItem>(sql, new { term = "%" + SpecialMarkupSearchText.Value + "%" })
+				.ToList();
 		}
 
 		public void SpecialMarkupCheck()
 		{
-			if (SpecialMarkupItemCurrent.HasValue &&
-			    !SpecialMarkupItemsChecked.Value.Any(s => s.CatalogId == SpecialMarkupItemCurrent.Value.CatalogId)) {
-				var newItem = new SpecialMarkupCatalog()
-				{
-					CatalogId = SpecialMarkupItemCurrent.Value.CatalogId,
-					Name = SpecialMarkupItemCurrent.Value.Name,
-					Form = SpecialMarkupItemCurrent.Value.Form
-				};
-				Session.FlushMode = FlushMode.Never;
-				var smList = SpecialMarkupItemsChecked.Value;
-				smList.Add(newItem);
-				smList = smList.OrderByDescending(s => s.Name).ToList();
-				SpecialMarkupItemsChecked.Value = smList;
-			}
+			if (CurrentProduct.Value == null)
+				return;
+			if (SpecialMarkupProducts.Value.Any(x => x.CatalogId == CurrentProduct.Value.CatalogId))
+				return;
+			SpecialMarkupProducts.Value.Add(new SpecialMarkupCatalog(CurrentProduct.Value));
 		}
 
 		public void SpecialMarkupUncheck()
 		{
-			if (SpecialMarkupItemsCheckedCurrent.HasValue) {
-				Session.FlushMode = FlushMode.Never;
-				var smList = SpecialMarkupItemsChecked.Value.Where(s => s.Id != SpecialMarkupItemsCheckedCurrent.Value.Id).ToList();
-				SpecialMarkupItemsChecked.Value = smList;
-			}
+			if (CurrentSpecialMarkupProduct.Value == null)
+				return;
+			SpecialMarkupProducts.Value.Remove(CurrentSpecialMarkupProduct.Value);
 		}
 
 		private void SynchronizeSpecialMarkUps()
 		{
 			var currentList = Session.Query<SpecialMarkupCatalog>().ToList();
-			for (int i = 0; i < SpecialMarkupItemsChecked.Value.Count; i++) {
-				if (!currentList.Any(s => s.CatalogId == SpecialMarkupItemsChecked.Value[i].CatalogId)) {
-					Session.Save(SpecialMarkupItemsChecked.Value[i]);
+			for (int i = 0; i < SpecialMarkupProducts.Value.Count; i++) {
+				if (!currentList.Any(s => s.CatalogId == SpecialMarkupProducts.Value[i].CatalogId)) {
+					Session.Save(SpecialMarkupProducts.Value[i]);
 				}
 			}
 			for (int i = 0; i < currentList.Count; i++) {
-				if (!SpecialMarkupItemsChecked.Value.Any(s => s.CatalogId == currentList[i].CatalogId)) {
+				if (!SpecialMarkupProducts.Value.Any(s => s.CatalogId == currentList[i].CatalogId)) {
 					var itemToDelete = Session.Query<SpecialMarkupCatalog>().FirstOrDefault(s => s.CatalogId == currentList[i].CatalogId);
 					if (itemToDelete!=null) {
 						Session.Delete(itemToDelete);
@@ -256,14 +240,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			MarkupAddress.Value = Address;
 			CurrentAddress = Address;
-
-			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToList())
-				.ObserveOn(UiScheduler)
-				.Subscribe(x => { SpecialMarkupItemsChecked.Value = x; });
-
-			SpecialMarkupSearchEverywhere.Value = SpecialMarkupSearchEverywhere.HasValue && SpecialMarkupSearchEverywhere.Value;
-			SpecialMarkupSearchInStartOfString.Value = !SpecialMarkupSearchInStartOfString.HasValue ||
-			                                           SpecialMarkupSearchInStartOfString.Value;
 		}
 
 		private static string Mask(string password1)
@@ -283,28 +259,28 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void NewVitallyImportantMarkup(InitializingNewItemEventArgs e)
 		{
-			var markup = ((MarkupConfig) e.NewItem);
+			var markup = (MarkupConfig) e.NewItem;
 			markup.Type = MarkupType.VitallyImportant;
 			markup.Address = MarkupAddress.Value;
 		}
 
 		public void NewNds18Markup(InitializingNewItemEventArgs e)
 		{
-			var markup = ((MarkupConfig) e.NewItem);
+			var markup = (MarkupConfig) e.NewItem;
 			markup.Type = MarkupType.Nds18;
 			markup.Address = MarkupAddress.Value;
 		}
 
 		public void NewSpecialMarkup(InitializingNewItemEventArgs e)
 		{
-			var markup = ((MarkupConfig) e.NewItem);
+			var markup = (MarkupConfig) e.NewItem;
 			markup.Type = MarkupType.Special;
 			markup.Address = MarkupAddress.Value;
 		}
 
 		public void NewMarkup(InitializingNewItemEventArgs e)
 		{
-			var markup = ((MarkupConfig) e.NewItem);
+			var markup = (MarkupConfig) e.NewItem;
 			markup.Address = MarkupAddress.Value;
 		}
 
@@ -406,7 +382,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (Session != null) {
 				IsCredentialsChanged = Session.IsChanged(Settings.Value, s => s.Password)
-				                       || Session.IsChanged(Settings.Value, s => s.UserName);
+					|| Session.IsChanged(Settings.Value, s => s.UserName);
 				if (Session.IsChanged(Settings.Value, s => s.GroupWaybillsBySupplier)
 				    && Settings.Value.GroupWaybillsBySupplier) {
 					foreach (var dirMap in DirMaps) {
