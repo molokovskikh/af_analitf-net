@@ -108,6 +108,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var fixture = Fixture<LocalWaybill>();
 			FileHelper.InitDir(settings.MapPath("Reports"));
+			model.CurrentWaybill.Value = model.Waybills.Value.First(x => x.Id == fixture.Waybill.Id);
 			var result = model.VitallyImportantReport().GetEnumerator();
 			var task = Next<TaskResult>(result);
 			task.Task.Start();
@@ -115,7 +116,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var open = Next<OpenResult>(result);
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
 			Assert.That(open.Filename, Does.Contain("Росздравнадзор"));
-			//дожна быть строка заголовка и как миниму одна строка данных
+			//должна быть строка заголовка и как минимум одна строка данных
 			var text = File.ReadAllText(open.Filename);
 			Assert.That(text.Length, Is.GreaterThan(1));
 			//в 11 колонке будет vendorid
