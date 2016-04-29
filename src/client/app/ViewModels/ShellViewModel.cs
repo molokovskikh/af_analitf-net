@@ -272,6 +272,15 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
+				//если в папке с обновлением есть данные то мы должны их импортировать
+				//что бы не потерять накладные
+				if (Directory.Exists(Config.BinUpdateDir) && Directory.GetFiles(Config.BinUpdateDir, "*.meta.txt").Length > 0) {
+					using (var command = new UpdateCommand())
+						return Sync(command, c => c.Process(() => {
+							((UpdateCommand)c).Import();
+							return UpdateResult.OK;
+					}));
+				}
 				//флаг import говорит что мы обновились на новую версию
 				//но обновление может быть не выполнено
 				//если мы просто запросим обновление то мы будем ходить в бесконечном цикле
