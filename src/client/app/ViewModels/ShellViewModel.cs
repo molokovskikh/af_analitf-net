@@ -30,8 +30,10 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -1155,14 +1157,36 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public T GetPersistedValue<T>(string key, T defaultValue)
 		{
-			var result = PersistentContext.GetValueOrDefault(key, defaultValue);
-			if (result is T) {
-				return (T)result;
+			return (T)ViewPersister.ConvertJsonValue(PersistentContext.GetValueOrDefault(key, defaultValue), typeof(T));
+		}
+
+		public void Deserialize(StreamReader stream)
+		{
+			IsNotifying = false;
+			try {
+				var serializer = new JsonSerializer {
+					ContractResolver = new NHibernateResolver()
+				};
+				serializer.Populate(stream, this);
+			} finally {
+				IsNotifying = true;
 			}
-			if (result is JObject) {
-				return ((JObject)result).ToObject<T>();
+		}
+
+		public void Serialize(StreamWriter stream)
+		{
+			IsNotifying = false;
+			try {
+				var serializer = new JsonSerializer {
+					ContractResolver = new NHibernateResolver(),
+#if DEBUG
+					Formatting = Formatting.Indented
+#endif
+				};
+				serializer.Serialize(stream, this);
+			} finally {
+				IsNotifying = true;
 			}
-			return defaultValue;
 		}
 	}
 }
