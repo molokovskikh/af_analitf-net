@@ -106,7 +106,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel(Config.Config config)
 		{
-			SpecialMarkupProducts = new NotifyValue<uint[]>();
+			SpecialMarkupProducts = new NotifyValue<uint[]>(new uint[0]);
 			this.config = config;
 			CloseDisposable.Add(CancelDisposable);
 			DisplayName = "АналитФАРМАЦИЯ";
