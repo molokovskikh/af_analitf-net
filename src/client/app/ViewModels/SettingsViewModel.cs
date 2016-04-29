@@ -208,6 +208,8 @@ limit 300";
 
 		private void SynchronizeSpecialMarkUps()
 		{
+			if (SpecialMarkupProducts.Value == null)
+				return;
 			var currentList = Session.Query<SpecialMarkupCatalog>().ToList();
 			for (int i = 0; i < SpecialMarkupProducts.Value.Count; i++) {
 				if (!currentList.Any(s => s.CatalogId == SpecialMarkupProducts.Value[i].CatalogId)) {
@@ -376,7 +378,7 @@ limit 300";
 			UpdateMarkups();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
-			if(error != null){ 
+			if(error != null){
 				if (error.Count > 0) {
 					if (Session != null)
 						Session.FlushMode = FlushMode.Never;
