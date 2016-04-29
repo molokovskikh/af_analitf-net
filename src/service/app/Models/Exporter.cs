@@ -1854,10 +1854,11 @@ from Logs.Document_logs d
 where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
 	db.ProductId,
+	p.CatalogId,
 	db.Product,
 	db.ProducerId,
 	db.Producer,
@@ -1884,17 +1885,18 @@ select db.Id,
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
-where d.RowId in ({0})
-group by dh.Id, db.Id", ids);
+				left join Catalogs.Products p on p.Id = db.ProductId
+where d.RowId in ({ids})
+group by dh.Id, db.Id";
 			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select DocumentLineId, OrderLineId
 from Documents.WaybillOrders wo
 	join Documents.DocumentBodies db on db.Id = wo.DocumentLineId
 		join Documents.DocumentHeaders dh on db.DocumentId = dh.Id
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
-where d.RowId in ({0})", ids);
+where d.RowId in ({ids})";
 			Export(Result, sql, "WaybillOrders", truncate: false);
 
 			var documentExported = session.CreateSQLQuery(@"
@@ -1906,13 +1908,13 @@ where dh.DownloadId in (:ids)")
 			logs.Where(l => documentExported.Contains(l.Document.Id))
 				.Each(l => l.DocumentDelivered = true);
 
-			sql = String.Format(@"
+			sql = $@"
 select Id, convert_tz(WriteTime, @@session.time_zone,'+00:00') as WriteTime, DownloadId, SupplierId
 from Documents.RejectHeaders r
-where r.DownloadId in ({0})", ids);
+where r.DownloadId in ({ids})";
 			Export(Result, sql, "OrderRejects", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select l.Id,
 	l.Product,
 	l.ProductId,
@@ -1925,7 +1927,7 @@ select l.Id,
 from Documents.RejectHeaders r
 	join Documents.RejectLines l on l.Headerid = r.Id
 		left join Catalogs.Products p on p.Id = l.ProductId
-where r.DownloadId in ({0})", ids);
+where r.DownloadId in ({ids})";
 			Export(Result, sql, "OrderRejectLines", truncate: false, parameters: new { userId = user.Id });
 
 			documentExported = session.CreateSQLQuery(@"

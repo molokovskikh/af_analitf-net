@@ -204,6 +204,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Recalculate()
 		{
+			if (Settings == null)
+				return;
 			var isMigrated = IsMigrated && Sum == 0;
 			foreach (var line in Lines) {
 				if (isMigrated)
