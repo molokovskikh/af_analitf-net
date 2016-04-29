@@ -118,7 +118,7 @@ where c.Id is null;
 
 delete s
 from SpecialMarkupCatalogs s
-left join Catalog c on c.Id = s.CatalogId
+left join Catalogs c on c.Id = s.CatalogId
 where c.Id is null;")
 				.ExecuteUpdate();
 

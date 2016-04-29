@@ -105,7 +105,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
-        }
+		}
 
 		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }

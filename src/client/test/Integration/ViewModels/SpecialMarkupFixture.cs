@@ -78,26 +78,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void SpecialMarkup_CatalodsCheck()
+		public void Settings()
 		{
-			// подготовка данных
-			var specialMurkupCatalog = session.Query<SpecialMarkupCatalog>().ToList();
-			session.DeleteEach(specialMurkupCatalog);
-			session.Flush();
-			var address = session.Query<Address>().First();
-			var settings = session.Query<Settings>().First();
-			settings.Markups.RemoveEach(settings.Markups.Where(s => s.Type == MarkupType.Special).ToList());
-			// открываем форму настроек
 			var model = new SettingsViewModel();
-			model.Shell = shell;
-			model.Address = AddressList[1];
 			Open(model);
-			// выделяем препарат, добавляем его в список маркерованных "Специальной наценкой"
-			model.CurrentProduct.Value = model.Products.Value.FirstOrDefault();
+			//выделяем препарат, добавляем его в список маркерованных "Специальной наценкой"
+			model.CurrentProduct.Value = model.Products.Value.First();
 			model.SpecialMarkupCheck();
 			Assert.AreEqual(1, model.SpecialMarkupProducts.Value.Count);
-			// выделяем препарат, удаляем его из списка маркерованных "Специальной наценкой"
-			model.CurrentSpecialMarkupProduct.Value = model.SpecialMarkupProducts.Value.FirstOrDefault();
+			//выделяем препарат, удаляем его из списка маркерованных "Специальной наценкой"
+			model.CurrentSpecialMarkupProduct.Value = model.SpecialMarkupProducts.Value.First();
 			model.SpecialMarkupUncheck();
 			Assert.AreEqual(0, model.SpecialMarkupProducts.Value.Count);
 		}
