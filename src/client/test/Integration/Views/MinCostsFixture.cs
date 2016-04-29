@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				await view.WaitLoaded();
 				var grid = (Grid)view.FindName("MainGrid");
 				var row = grid.RowDefinitions[Grid.GetRow((UIElement)view.FindName("Costs"))];
-				row.Height = new GridLength(row.ActualHeight + 5, GridUnitType.Pixel);
+				row.Height = new GridLength(row.ActualHeight - 5, GridUnitType.Pixel);
 				height = row.Height;
 
 				diff = model.Diff.Value = model.Diff.Value + 1;
