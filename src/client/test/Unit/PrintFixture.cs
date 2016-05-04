@@ -155,6 +155,11 @@ namespace AnalitF.Net.Client.Test.Unit
 			}
 		}
 
+		public static void SaveToPng(FrameworkElement el, string file)
+		{
+			SaveToPng(el, file, new Size(el.ActualWidth, el.ActualHeight));
+		}
+
 		public static void SaveToPng(UIElement visual, string file, Size size)
 		{
 			visual.Measure(size);

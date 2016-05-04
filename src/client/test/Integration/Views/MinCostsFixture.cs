@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Spliter_settings()
 		{
-			var height = new GridLength();
+			var expected = new GridLength();
 			int diff;
 			WpfTestHelper.WithWindow2(async w => {
 				var model = new MinCosts();
@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var grid = (Grid)view.FindName("MainGrid");
 				var row = grid.RowDefinitions[Grid.GetRow((UIElement)view.FindName("Costs"))];
 				row.Height = new GridLength(row.ActualHeight - 5, GridUnitType.Pixel);
-				height = row.Height;
+				expected = row.Height;
 
 				diff = model.Diff.Value = model.Diff.Value + 1;
 				Close(model);
@@ -43,7 +43,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				w.Content = view;
 				var grid = (Grid)view.FindName("MainGrid");
 				await view.WaitLoaded();
-				Assert.AreEqual(height, grid.RowDefinitions[Grid.GetRow((UIElement)view.FindName("Costs"))].Height);
+				var actual = grid.RowDefinitions[Grid.GetRow((UIElement)view.FindName("Costs"))].Height;
+				Assert.AreEqual(expected.GridUnitType, actual.GridUnitType);
+				Assert.AreEqual(expected.Value, actual.Value, 0.001);
 			});
 		}
 	}
