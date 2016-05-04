@@ -13,6 +13,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
@@ -224,6 +225,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(results.MoveNext());
 			target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
 			Assert.AreEqual("Член комитета №1", target.CommitteeMember1);
+		}
+
+		[Test]
+		public void Export_waybill_to_excel()
+		{
+			var result = model.ExportWaybill();
+			Assert.IsInstanceOf(typeof(OpenResult), result);
+			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
 	}
 }

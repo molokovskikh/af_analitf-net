@@ -174,4 +174,24 @@ namespace AnalitF.Net.Client.Helpers
 			}
 		}
 	}
+
+	public class NumberToRubleWords
+	{
+		public string Convert(decimal value)
+		{
+			return Convert(decimal.ToDouble(value));
+		}
+
+		public string Convert(double value)
+		{
+			var banknoteN = Math.Truncate(value);
+			var coins = (Math.Round(value - banknoteN, 2, MidpointRounding.AwayFromZero) * 100).ToString();
+			var banknoteS = Humanizer.NumberToWordsExtension.ToWords(System.Convert.ToInt32(banknoteN),
+				(new CultureInfo("ru-Ru")));
+
+			coins = coins.Length > 1 ? coins : coins + "0";
+
+			return $"{banknoteS} руб. {coins} коп.";
+		}
+	}
 }
