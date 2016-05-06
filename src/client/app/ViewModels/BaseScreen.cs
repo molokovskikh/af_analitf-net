@@ -126,7 +126,7 @@ namespace AnalitF.Net.Client.ViewModels
 		/// использовать только через RxQuery,
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
 		/// </summary>
-		private static IStatelessSession backgroundSession;
+		public static IStatelessSession BackgroundSession;
 
 		public BaseScreen()
 		{
@@ -630,10 +630,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task<T>(() => {
 				if (Env.Factory == null)
 					return default(T);
-				if (backgroundSession == null)
-					backgroundSession = Env.Factory.OpenStatelessSession();
-				lock (backgroundSession)
-					return @select(backgroundSession);
+				if (BackgroundSession == null)
+					BackgroundSession = Env.Factory.OpenStatelessSession();
+				lock (BackgroundSession)
+					return @select(BackgroundSession);
 			}, CloseCancellation.Token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
@@ -647,10 +647,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var task = new Task(() => {
 				if (Env.Factory == null)
 					return;
-				if (backgroundSession == null)
-					backgroundSession = Env.Factory.OpenStatelessSession();
-				lock (backgroundSession)
-					action(backgroundSession);
+				if (BackgroundSession == null)
+					BackgroundSession = Env.Factory.OpenStatelessSession();
+				lock (BackgroundSession)
+					action(BackgroundSession);
 			}, CloseCancellation.Token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)

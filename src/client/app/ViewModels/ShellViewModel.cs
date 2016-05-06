@@ -30,8 +30,10 @@ using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NHibernate;
 using NHibernate.Linq;
@@ -89,6 +91,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
+		[DataMember]
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -105,6 +108,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel(Config.Config config)
 		{
+			SpecialMarkupProducts = new NotifyValue<uint[]>(new uint[0]);
 			this.config = config;
 			CloseDisposable.Add(CancelDisposable);
 			DisplayName = "АналитФАРМАЦИЯ";
@@ -215,6 +219,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public ObservableCollection<Loadable> PendingDownloads { get; set; }
 
 		public NotifyValue<Settings> Settings { get; set; }
+		public NotifyValue<uint[]> SpecialMarkupProducts { get; set; }
 		public NotifyValue<User> User { get; set; }
 		public NotifyValue<Stat> Stat { get; set; }
 		public NotifyValue<bool> IsDataLoaded { get; set; }
@@ -267,6 +272,15 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Env.Bus.SendMessage("Startup");
 			if (Config.Cmd.Match("import")) {
+				//если в папке с обновлением есть данные то мы должны их импортировать
+				//что бы не потерять накладные
+				if (Directory.Exists(Config.BinUpdateDir) && Directory.GetFiles(Config.BinUpdateDir, "*.meta.txt").Length > 0) {
+					using (var command = new UpdateCommand())
+						return Sync(command, c => c.Process(() => {
+							((UpdateCommand)c).Import();
+							return UpdateResult.OK;
+					}));
+				}
 				//флаг import говорит что мы обновились на новую версию
 				//но обновление может быть не выполнено
 				//если мы просто запросим обновление то мы будем ходить в бесконечном цикле
@@ -423,8 +437,6 @@ namespace AnalitF.Net.Client.ViewModels
 			//строка Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			//сбросит его
 			var addressId = CurrentAddress?.Id;
-			NewMailsCount.Value = statelessSession.Query<Mail>().Count(m => m.IsNew);
-			NewDocsCount.Value = statelessSession.Query<Waybill>().Count(m => m.IsNew);
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
@@ -433,7 +445,16 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentAddress = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
-			Schedules.Value = session.Query<Schedule>().ToList();
+
+			Env.RxQuery(x => x.Query<Schedule>().ToList())
+				.Subscribe(Schedules);
+			Env.RxQuery(x => x.Query<Mail>().Count(m => m.IsNew))
+				.Subscribe(NewMailsCount);
+			Env.RxQuery(x => x.Query<Waybill>().Count(m => m.IsNew))
+				.Subscribe(NewDocsCount);
+			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
+				.Subscribe(SpecialMarkupProducts);
+
 			defaultItem.Reload();
 		}
 
@@ -561,6 +582,8 @@ namespace AnalitF.Net.Client.ViewModels
 			if (session != null) {
 				session.Evict(Settings.Value);
 				Settings.Value = session.Query<Settings>().First();
+				Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
+					.Subscribe(SpecialMarkupProducts);
 			}
 			return model.IsCredentialsChanged;
 		}
@@ -1143,14 +1166,36 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public T GetPersistedValue<T>(string key, T defaultValue)
 		{
-			var result = PersistentContext.GetValueOrDefault(key, defaultValue);
-			if (result is T) {
-				return (T)result;
+			return (T)ViewPersister.ConvertJsonValue(PersistentContext.GetValueOrDefault(key, defaultValue), typeof(T));
+		}
+
+		public void Deserialize(StreamReader stream)
+		{
+			IsNotifying = false;
+			try {
+				var serializer = new JsonSerializer {
+					ContractResolver = new NHibernateResolver()
+				};
+				serializer.Populate(stream, this);
+			} finally {
+				IsNotifying = true;
 			}
-			if (result is JObject) {
-				return ((JObject)result).ToObject<T>();
+		}
+
+		public void Serialize(StreamWriter stream)
+		{
+			IsNotifying = false;
+			try {
+				var serializer = new JsonSerializer {
+					ContractResolver = new NHibernateResolver(),
+#if DEBUG
+					Formatting = Formatting.Indented
+#endif
+				};
+				serializer.Serialize(stream, this);
+			} finally {
+				IsNotifying = true;
 			}
-			return defaultValue;
 		}
 	}
 }

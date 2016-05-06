@@ -72,9 +72,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (dispatcher != null) {
 				if (DbHelper.IsTestFail() && IsCI()
 					&& activeWindow != null) {
-					var filename = Path.GetFullPath(FileHelper.StringToFileName(TestContext.CurrentContext.Test.FullName) + ".png");
 					dispatcher.Invoke(() => {
-						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
+						PrintFixture.SaveToPng(activeWindow, DbHelper.FailDir("screen.png"));
 					});
 				}
 				dispatcher.Invoke(() => {

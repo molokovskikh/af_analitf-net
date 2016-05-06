@@ -1,4 +1,5 @@
-﻿using AnalitF.Net.Client.Models;
+﻿using System.Collections.Generic;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
