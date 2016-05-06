@@ -239,7 +239,7 @@
 							Binding="{Binding Period}" TextAlignment="Center" />
 						<c:DataGridTextColumnEx Width="38*" Header="Заказ" Binding="{Binding Count}" />
 						<c:DataGridTextColumnEx Width="49" Header="Цена" Binding="{Binding ResultCost}" />
-						<c:DataGridTextColumnEx Width="68*" Header="Дата" Binding="{Binding Order.SentOn}" />
+						<c:DataGridTextColumnEx Width="68" Header="Дата" Binding="{Binding Order.SentOn}" />
 						<c:DataGridTextColumnEx Width="50*" Header="Комментарий" Binding="{Binding Comment}"
 							Visibility="Collapsed" />
 					</DataGrid.Columns>

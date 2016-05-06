@@ -32,7 +32,10 @@ namespace AnalitF.Net.Client.Models
 			//состояние не нужно сохранять
 			if (Name != "Адрес заказа")
 				Visible = column.Visibility;
-			Width = column.Width;
+			if (column.Width.IsStar) 
+				Width = column.Width;
+			else 
+				Width = column.ActualWidth;
 			//-1 будет в том случае если таблица еще не отображалась
 			//в этом случае надо использовать индекс колонки
 			if (column.DisplayIndex != -1)
