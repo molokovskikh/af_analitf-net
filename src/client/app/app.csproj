@@ -211,10 +211,10 @@
     <Compile Include="Controls\Behaviors\Watermark.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
-    <Compile Include="Controls\DataGrid2Main.cs" />
+    <Compile Include="Controls\MainControllerWrap.cs" />
     <Compile Include="Controls\LegendPanel.cs" />
     <Compile Include="Controls\Preview.cs" />
-    <Compile Include="Controls\ScrollMainContentViewer.cs" />
+    <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />

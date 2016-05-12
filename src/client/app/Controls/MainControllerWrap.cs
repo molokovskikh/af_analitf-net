@@ -6,7 +6,6 @@ using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.Controls
 {
-	class DataGrid2Main: DataGrid2
-	{
-	}
+	class MainControllerWrap:ContentControl
+	{ }
 }

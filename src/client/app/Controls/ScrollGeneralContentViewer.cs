@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Controls
 		}
 	}
 
-	public class ScrollMainContentViewer: ScrollViewer
+	public class ScrollGeneralContentViewer: ScrollViewer
 	{
 		protected readonly double ScrollActivateHeigth = 600;
 		public new ScrollBarVisibility VerticalScrollBarVisibility {
@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client.Controls
 		protected delegate void ScrollBarVisibilityEventHandler(ScrollBarVisibilityChangedEventArgs e);
 		protected event ScrollBarVisibilityEventHandler ScrollBarVisibilityChanged;
 
-		public ScrollMainContentViewer()
+		public ScrollGeneralContentViewer()
 		{
 			ScrollBarVisibilityChanged += OnScrollBarVisibilityChanged;
 			SizeChanged += OnSizeChanged;
@@ -93,11 +93,11 @@ namespace AnalitF.Net.Client.Controls
 
 		private void OptimizateGridsForVScrolling(bool hideScrollBar)
 		{
-			Type grid2MainType = typeof(DataGrid2Main);
 			Type grid2Type = typeof(DataGrid2);
 			Type gridType = typeof(DataGrid);
+			Type textBox = typeof (TextBox);
 
-			var controls = WpfHelper.Children(this, new List<Type> {grid2MainType, grid2Type, gridType}); //FindControlsByType(new Type[] {grid2MainType, grid2Type, gridType});
+			var controls = WpfHelper.Children(this, new List<Type> {grid2Type, gridType, textBox});
 
 			if (!hideScrollBar) {
 				ScrollToVerticalOffset(0);
@@ -106,24 +106,37 @@ namespace AnalitF.Net.Client.Controls
 			foreach (var dependecyObj in controls) {
 
 				if (dependecyObj == null) continue;
-				if (dependecyObj.GetType() == grid2MainType) {
-					var control = dependecyObj as Control;
+
+				var control = dependecyObj as Control;
+
+				if (dependecyObj.GetType() == grid2Type ||
+					dependecyObj.GetType() == gridType) {
+
 					if (!hideScrollBar) {
-						control.Height = control.MaxHeight = control.MinHeight = ActualHeight*0.7;
+						if (WpfHelper.Parent(control).GetType() == typeof(MainControllerWrap))
+						{
+							control.Height = control.MaxHeight = control.MinHeight = ActualHeight * 0.7;
+							continue;
+						}
+						control.MaxHeight = ActualHeight*0.5;
 					} else {
-						control.Height = double.NaN;
-						control.MinHeight = 0;
+						if (WpfHelper.Parent(control).GetType() == typeof (MainControllerWrap)) {
+							control.Height = double.NaN;
+							control.MinHeight = 0;
+							control.MaxHeight = double.PositiveInfinity;
+							continue;
+						}
 						control.MaxHeight = double.PositiveInfinity;
 					}
 				}
 
-				if (dependecyObj.GetType() == grid2Type ||
-					dependecyObj.GetType() == gridType) {
-					var control = dependecyObj as Control;
+				if (dependecyObj.GetType() == textBox) {
 					if (!hideScrollBar) {
-						control.MaxHeight = ActualHeight*0.5;
+						control.MaxHeight = ActualHeight*0.4;
 					} else {
-						control.MaxHeight = double.PositiveInfinity;
+						{
+							control.MaxHeight = double.PositiveInfinity;
+						}
 					}
 				}
 			}

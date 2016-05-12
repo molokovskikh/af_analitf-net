@@ -267,7 +267,7 @@
 			</StackPanel>
 		</controls:ToolbarPanel>
 
-		<controls:ScrollMainContentViewer  Grid.Row="2" x:Name="ActiveItem"/>
+		<controls:ScrollGeneralContentViewer  Grid.Row="2" x:Name="ActiveItem"/>
 
 		<StatusBar Grid.Row="3">
 			<StatusBar.ItemsPanel>
