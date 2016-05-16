@@ -41,6 +41,7 @@ where w.{field} > ?
 	and w.AddressId in ({AddressIds.Implode()})
 	and l.Quantity is not null
 	and l.ProducerCost is not null
+	and l.producerCost > 0
 	and l.SupplierCost is not null
 	and s.VendorID is not null
 group by l.EAN13
@@ -60,7 +61,7 @@ from WaybillLines l
 			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251))) {
 				writer.WriteLine("DrugID;Segment;Year;Month;Series;TotDrugQn;MnfPrice;PrcPrice;RtlPrice;Funds;VendorID;Remark;SrcOrg");
 				foreach (var row in StatelessSession.Connection.Query(sql)) {
-					var producerCost = row.ProducerCost == null ? 0 : Convert.ToDecimal(row.ProducerCost);
+					var producerCost = Convert.ToDecimal(row.ProducerCost);
 					var supplierCost = Convert.ToDecimal(row.SupplierCost);
 					var nds = row.NDS == null ? 10 : Convert.ToDecimal(row.NDS);
 

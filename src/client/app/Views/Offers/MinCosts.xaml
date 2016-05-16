@@ -29,9 +29,9 @@
 	<Grid Name="MainGrid">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="*" />
+			<RowDefinition Name="CostsRow" Height="*" />
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="3*" />
+			<RowDefinition Name="OffersRow" Height="3*" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>

@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Newtonsoft.Json;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Models
 {
@@ -157,9 +155,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual BuyingMatrixStatus BuyingMatrixType { get; set; }
 
-		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups, User user, Address address)
+		[Ignore]
+		public virtual bool IsSpecialMarkup { get; set; }
+
+		public virtual void CalculateRetailCost(IEnumerable<MarkupConfig> markups,
+			IList<uint> specialMarkupProducts,
+			User user, Address address)
 		{
 			Configure(user);
+			IsSpecialMarkup = specialMarkupProducts.Contains(ProductId);
 			var cost =  HideCost ? GetResultCost() : Cost;
 			var markup = MarkupConfig.Calculate(markups, this, user, address);
 			RetailCost = Math.Round(cost * (1 + markup / 100), 2);

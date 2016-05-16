@@ -1,9 +1,9 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.SettingsView"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:cal="http://www.caliburnproject.org"
-	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
-	Height="550" Width="700">
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+             Height="550" Width="700">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />
@@ -18,52 +18,53 @@
 						<ColumnDefinition Width="100" />
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
-					<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
 						<RowDefinition />
 						<RowDefinition Height="Auto" />
 					</Grid.RowDefinitions>
 
 					<ComboBox Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource Select}" MinWidth="100"
-						SelectedItem="{Binding MarkupAddress.Value}"
-						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+					          SelectedItem="{Binding MarkupAddress.Value}"
+					          ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+
 
 					<DataGrid x:Name="VitallyImportantMarkups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
-						cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
+					          cal:Message.Attach="[Event InitializingNewItem] = [Action NewVitallyImportantMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
-								Header="Левая граница"
-								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Левая граница"
+							                    Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
-								Header="Правая граница"
-								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Правая граница"
+							                    Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 					<StackPanel Grid.Column="1" Grid.Row="1">
 						<Button Margin="3" CommandTarget="{x:Reference VitallyImportantMarkups}"
-							Command="ApplicationCommands.Delete">
+						        Command="ApplicationCommands.Delete">
 							Удалить
 						</Button>
 
 						<Label Margin="3" Height="13" Width="30" Background="Red"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#808000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#800000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
 					</StackPanel>
 					<StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
 						<CheckBox x:Name="Settings_UseSupplierPriceWithNdsForMarkup"
-							Content="Использовать цену завода с НДС при определении ценового диапозона"/>
-						<CheckBox x:Name="OverwriteVitallyImportant" Content="Применить ко всем адресам(точкам) доставки"/>
+						          Content="Использовать цену завода с НДС при определении ценового диапозона" />
+						<CheckBox x:Name="OverwriteVitallyImportant" Content="Применить ко всем адресам(точкам) доставки" />
 					</StackPanel>
 				</Grid>
 			</TabItem>
@@ -80,24 +81,24 @@
 					</Grid.ColumnDefinitions>
 
 					<ComboBox Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource Select}" MinWidth="100"
-						SelectedItem="{Binding MarkupAddress.Value}"
-						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+					          SelectedItem="{Binding MarkupAddress.Value}"
+					          ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
 
 					<DataGrid x:Name="Markups" Grid.Row="1" Grid.Column="0" CanUserSortColumns="False"
-						cal:Message.Attach="[Event InitializingNewItem] = [Action NewMarkup($eventArgs)]">
+					          cal:Message.Attach="[Event InitializingNewItem] = [Action NewMarkup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
-								Header="Левая граница"
-								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Левая граница"
+							                    Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
-								Header="Правая граница"
-								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Правая граница"
+							                    Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 
@@ -107,18 +108,18 @@
 						</Button>
 
 						<Label Margin="3" Height="13" Width="30" Background="Red"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#808000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#800000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
 					</StackPanel>
 
 					<StackPanel Grid.Row="2" Grid.ColumnSpan="2">
-						<CheckBox x:Name="OverwriteMarkups" Content="Применить ко всем адресам(точкам) доставки"/>
+						<CheckBox x:Name="OverwriteMarkups" Content="Применить ко всем адресам(точкам) доставки" />
 					</StackPanel>
 				</Grid>
 			</TabItem>
@@ -135,24 +136,24 @@
 					</Grid.ColumnDefinitions>
 
 					<ComboBox Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource Select}" MinWidth="100"
-						SelectedItem="{Binding MarkupAddress.Value}"
-						ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+					          SelectedItem="{Binding MarkupAddress.Value}"
+					          ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
 
 					<DataGrid x:Name="Nds18Markups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
-						cal:Message.Attach="[Event InitializingNewItem] = [Action NewNds18Markup($eventArgs)]">
+					          cal:Message.Attach="[Event InitializingNewItem] = [Action NewNds18Markup($eventArgs)]">
 						<DataGrid.Columns>
 							<DataGridTextColumn Width="*"
-								Header="Левая граница"
-								Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Левая граница"
+							                    Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*"
-								Header="Правая граница"
-								Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Header="Правая граница"
+							                    Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Наценка(%)"
-								Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
-								Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 							<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
-								Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+							                    Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
 						</DataGrid.Columns>
 					</DataGrid>
 
@@ -162,43 +163,178 @@
 						</Button>
 
 						<Label Margin="3" Height="13" Width="30" Background="Red"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#808000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
 						<Label Margin="3" Height="13" Width="30" Background="#800000"
-							HorizontalAlignment="Left" />
+						       HorizontalAlignment="Left" />
 						<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
 					</StackPanel>
 
 					<StackPanel Grid.Row="2" Grid.ColumnSpan="2">
-						<CheckBox x:Name="OverwriteNds18Markups" Content="Применить ко всем адресам(точкам) доставки"/>
+						<CheckBox x:Name="OverwriteNds18Markups" Content="Применить ко всем адресам(точкам) доставки" />
 					</StackPanel>
 				</Grid>
 			</TabItem>
+			<TabItem Header="Специальные наценки">
+				<Grid>
+					<TabControl SelectedValue="SpecialMarkupsTab">
+						<TabItem Header="Настройки" Name="SpecialMarkupsTab" IsEnabled="{Binding HaveAddresses}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto" />
+									<RowDefinition Height="*" />
+									<RowDefinition Height="Auto" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="53*" />
+									<ColumnDefinition Width="237*" />
+									<ColumnDefinition Width="100" />
+								</Grid.ColumnDefinitions>
+
+								<ComboBox Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource Select}" MinWidth="100"
+								          SelectedItem="{Binding MarkupAddress.Value}"
+								          ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" />
+
+								<DataGrid x:Name="SpecialMarkups" Grid.Column="0" Grid.Row="1" CanUserSortColumns="False"
+								          cal:Message.Attach="[Event InitializingNewItem] = [Action NewSpecialMarkup($eventArgs)]"
+								          Grid.ColumnSpan="2">
+									<DataGrid.Columns>
+										<DataGridTextColumn Width="*"
+										                    Header="Левая граница"
+										                    Binding="{Binding Begin, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+										<DataGridTextColumn Width="*"
+										                    Header="Правая граница"
+										                    Binding="{Binding End, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+										<DataGridTextColumn Width="*" Header="Наценка(%)"
+										                    Binding="{Binding Markup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+										<DataGridTextColumn Width="*" Header="Макс.наценка(%)"
+										                    Binding="{Binding MaxMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+										<DataGridTextColumn Width="*" Header="Макс.наценка.опт.звена(%)"
+										                    Binding="{Binding MaxSupplierMarkup, Converter={StaticResource InputConverter}, ValidatesOnExceptions=True}" />
+									</DataGrid.Columns>
+								</DataGrid>
+
+								<StackPanel Grid.Row="1" Grid.Column="2">
+									<Button Margin="3" CommandTarget="{x:Reference SpecialMarkups}" Command="ApplicationCommands.Delete">
+										Удалить
+									</Button>
+
+									<Label Margin="3" Height="13" Width="30" Background="Red"
+									       HorizontalAlignment="Left" />
+									<TextBlock Margin="3" TextWrapping="Wrap">Левая граница меньше правой.</TextBlock>
+									<Label Margin="3" Height="13" Width="30" Background="#808000"
+									       HorizontalAlignment="Left" />
+									<TextBlock Margin="3" TextWrapping="Wrap">Интервалы пересекаются с друг другом.</TextBlock>
+									<Label Margin="3" Height="13" Width="30" Background="#800000"
+									       HorizontalAlignment="Left" />
+									<TextBlock Margin="3" TextWrapping="Wrap">Имеется разрыв между интервалами.</TextBlock>
+								</StackPanel>
+
+								<StackPanel Grid.Row="2" Grid.ColumnSpan="3">
+									<CheckBox x:Name="OverwriteSpecialMarkups" Content="Применить ко всем адресам(точкам) доставки" />
+								</StackPanel>
+							</Grid>
+
+						</TabItem>
+						<TabItem Header="Список " IsEnabled="{Binding HaveAddresses}"
+						         HorizontalAlignment="Right" Width="60">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="1*" />
+									<ColumnDefinition Width="70" />
+									<ColumnDefinition Width="1*" />
+								</Grid.ColumnDefinitions>
+
+								<StackPanel Grid.Column="0" Orientation="Vertical">
+									<StackPanel Style="{StaticResource FilterPanel}" Orientation="Vertical" Margin="2,4,1,4">
+										<TextBox x:Name="SpecialMarkupSearchText"
+										         Text="{Binding SpecialMarkupSearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+										         Margin="0" />
+									</StackPanel>
+									<StackPanel Style="{StaticResource FilterPanel}" Margin="0,0,1,4">
+										<CheckBox x:Name="SpecialMarkupSearchEverywhere" FontSize="11" Margin="4,0,0,0"
+										          Style="{StaticResource FilterCheckBoxSmall}" Focusable="False" Content="Отображать весь каталог" />
+
+										<CheckBox x:Name="SpecialMarkupSearchInStartOfString" FontSize="11" Margin="8,0,0,0"
+										          Style="{StaticResource FilterCheckBoxSmall}" Focusable="False" Content="Искать в начале слова" />
+									</StackPanel>
+									<ProgressBar IsIndeterminate="True" Height="16"
+									             Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
+
+									<DataGrid x:Name="Products" SelectionMode="Single" IsReadOnly="True" CanUserSortColumns="False" Height="351">
+										<DataGrid.Columns>
+											<DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="152">
+												<DataGridTextColumn.CellStyle>
+													<Style TargetType="DataGridCell">
+														<Setter Property="ToolTip" Value="{Binding Name}" />
+													</Style>
+												</DataGridTextColumn.CellStyle>
+											</DataGridTextColumn>
+											<DataGridTextColumn Header="Форма выпуска" Binding="{Binding Form}" Width="152">
+												<DataGridTextColumn.CellStyle>
+													<Style TargetType="DataGridCell">
+														<Setter Property="ToolTip" Value="{Binding Form}" />
+													</Style>
+												</DataGridTextColumn.CellStyle>
+											</DataGridTextColumn>
+										</DataGrid.Columns>
+									</DataGrid>
+								</StackPanel>
+								<StackPanel Grid.Column="1" Orientation="Vertical">
+									<Button Margin="0,160,0,0" Content="добавить" Width="60" FontSize="11" x:Name="SpecialMarkupCheck" />
+									<Button Margin="0,10,0,0" Content="убрать" Width="60" FontSize="11" x:Name="SpecialMarkupUncheck" />
+								</StackPanel>
+								<DataGrid x:Name="SpecialMarkupProducts" Grid.Column="2" SelectionMode="Single"
+								          IsReadOnly="True"
+								          CanUserSortColumns="False">
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="152">
+											<DataGridTextColumn.CellStyle>
+												<Style TargetType="DataGridCell">
+													<Setter Property="ToolTip" Value="{Binding Name}" />
+												</Style>
+											</DataGridTextColumn.CellStyle>
+										</DataGridTextColumn>
+										<DataGridTextColumn Header="Форма выпуска" Binding="{Binding Form}" Width="152">
+											<DataGridTextColumn.CellStyle>
+												<Style TargetType="DataGridCell">
+													<Setter Property="ToolTip" Value="{Binding Form}" />
+												</Style>
+											</DataGridTextColumn.CellStyle>
+										</DataGridTextColumn>
+									</DataGrid.Columns>
+								</DataGrid>
+							</Grid>
+						</TabItem>
+					</TabControl>
+				</Grid>
+			</TabItem>
+
 			<TabItem Header="Накладные" Name="WaybillTab">
 				<StackPanel>
 					<Label ToolTip="Округлить розничную цену путем уменьшения до цены кратной">
 						Округлять:
 					</Label>
 					<ComboBox ToolTip="Округлить розничную цену путем уменьшения до цены кратной"
-						Style="{StaticResource Select}" x:Name="Settings_Value_Rounding" />
+					          Style="{StaticResource Select}" x:Name="Settings_Value_Rounding" />
 
 					<Label>Адрес заказа:</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="Addresses" DisplayMemberPath="Name" />
 
 					<Label>Наименование:</Label>
-					<TextBox x:Name="CurrentWaybillSettings_Value_Name"></TextBox>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Name" />
 
 					<Label>Адрес:</Label>
-					<TextBox x:Name="CurrentWaybillSettings_Value_Address"></TextBox>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Address" />
 
 					<Label>Заведующая:</Label>
-					<TextBox x:Name="CurrentWaybillSettings_Value_Director"></TextBox>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Director" />
 
 					<Label>Бухгалтер:</Label>
-					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant"></TextBox>
+					<TextBox x:Name="CurrentWaybillSettings_Value_Accountant" />
 
 					<Label>Способ налогообложения:</Label>
 					<ComboBox Style="{StaticResource Select}" x:Name="CurrentWaybillSettings_Value_Taxation" />
@@ -213,7 +349,7 @@
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройки поставщиков" Name="DirMapTab"
-				Visibility="{Binding Settings.Value.GroupWaybillsBySupplier,
+			         Visibility="{Binding Settings.Value.GroupWaybillsBySupplier,
 					Converter={StaticResource BoolToCollapsed}}">
 				<StackPanel>
 					<Label>Поставщик</Label>
@@ -221,18 +357,18 @@
 					<Label>Папка для оригинальных накладных</Label>
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition></ColumnDefinition>
-							<ColumnDefinition Width="Auto"></ColumnDefinition>
+							<ColumnDefinition />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<TextBox Grid.Column="0" Name="CurrentDirMap_Value_Dir"></TextBox>
+						<TextBox Grid.Column="0" Name="CurrentDirMap_Value_Dir" />
 						<Button Grid.Column="1" Name="SelectDir">...</Button>
 					</Grid>
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Настройка легенды" Name="ColorsTab">
 				<ListBox Name="Styles"
-					HorizontalContentAlignment="Stretch"
-					cal:Message.Attach="[Event MouseDoubleClick] = [Action EditColor($this.SelectedItem)]">
+				         HorizontalContentAlignment="Stretch"
+				         cal:Message.Attach="[Event MouseDoubleClick] = [Action EditColor($this.SelectedItem)]">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<TextBlock
@@ -251,8 +387,8 @@
 						Устанавливать удаленное соединение
 					</CheckBox>
 					<ComboBox Style="{StaticResource Select}"
-						ItemsSource="{Binding Settings.Value.RasConnections}"
-						SelectedItem="{Binding Settings.Value.RasConnection}" />
+					          ItemsSource="{Binding Settings.Value.RasConnections}"
+					          SelectedItem="{Binding Settings.Value.RasConnection}" />
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Авторизация" Name="LoginTab">
@@ -270,8 +406,8 @@
 					<CheckBox Name="Settings_UseProxy">Соединяться через прокси-сервер</CheckBox>
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition Width="50"/>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="50" />
 						</Grid.ColumnDefinitions>
 						<StackPanel Grid.Column="0">
 							<Label>Адрес</Label>
@@ -279,7 +415,8 @@
 						</StackPanel>
 						<StackPanel Grid.Column="1">
 							<Label>Порт</Label>
-							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}" Text="{Binding Path=Settings.Value.ProxyPort, Converter={StaticResource NullableConverter}}"  />
+							<TextBox IsEnabled="{Binding Settings.Value.UseProxy}"
+							         Text="{Binding Path=Settings.Value.ProxyPort, Converter={StaticResource NullableConverter}}" />
 						</StackPanel>
 					</Grid>
 					<Grid>
@@ -294,7 +431,7 @@
 						<StackPanel Grid.Column="1">
 							<Label>Пароль</Label>
 							<PasswordBox IsEnabled="{Binding Settings.Value.UseProxy}" x:Name="Settings_ProxyPassword"
-								caliburn:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
+							             caliburn:ContentElementBinder.Password="{Binding Settings.Value.ProxyPassword,
 									Mode=TwoWay,
 									UpdateSourceTrigger=PropertyChanged}" />
 						</StackPanel>
@@ -307,7 +444,7 @@
 						<StackPanel>
 							<StackPanel Orientation="Horizontal">
 								<Label>Удалять отправленные заказы старше</Label>
-								<TextBox Name="Settings_DeleteOrdersOlderThan" Height="25"></TextBox>
+								<TextBox Name="Settings_DeleteOrdersOlderThan" Height="25" />
 								<Label>дней</Label>
 							</StackPanel>
 							<CheckBox x:Name="Settings_ConfirmDeleteOldOrders">
@@ -316,7 +453,7 @@
 
 							<StackPanel Orientation="Horizontal">
 								<Label>Удалять накладные старше</Label>
-								<TextBox Name="Settings_DeleteWaybillsOlderThan"></TextBox>
+								<TextBox Name="Settings_DeleteWaybillsOlderThan" />
 								<Label>дней</Label>
 							</StackPanel>
 							<CheckBox x:Name="Settings_ConfirmDeleteOldWaybills">
@@ -348,8 +485,8 @@
 					<Label>Папка для сохранения накладных:</Label>
 					<Grid IsEnabled="{Binding IsWaybillDirEnabled.Value}">
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition></ColumnDefinition>
-							<ColumnDefinition Width="Auto"></ColumnDefinition>
+							<ColumnDefinition />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
 						<TextBox Grid.Column="0" Name="Settings_WaybillDir" />
 						<Button Grid.Column="1" Name="SelectWaybillDir">...</Button>
@@ -358,8 +495,8 @@
 					<Label>Папка для сохранения отказов:</Label>
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition></ColumnDefinition>
-							<ColumnDefinition Width="Auto"></ColumnDefinition>
+							<ColumnDefinition />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
 						<TextBox Name="Settings_RejectDir" />
 						<Button Grid.Column="1" Name="SelectRejectDir">...</Button>
@@ -368,8 +505,8 @@
 					<Label>Папка для сохранения отчетов:</Label>
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition></ColumnDefinition>
-							<ColumnDefinition Width="Auto"></ColumnDefinition>
+							<ColumnDefinition />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
 						<TextBox Name="Settings_ReportDir" />
 						<Button Grid.Column="1" Name="SelectReportDir">...</Button>
@@ -380,32 +517,33 @@
 				<ScrollViewer CanContentScroll="False" VerticalScrollBarVisibility="Auto">
 					<StackPanel>
 						<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
-						<CheckBox x:Name="Settings_EditAddresses" ToolTip="При включении опции на панели выбора адреса доставки будут отображены флаги активных адресов, для активных адресов будет производиться загрузка заявок">
+						<CheckBox x:Name="Settings_EditAddresses"
+						          ToolTip="При включении опции на панели выбора адреса доставки будут отображены флаги активных адресов, для активных адресов будет производиться загрузка заявок">
 							Управлять адресами доставки
 						</CheckBox>
 						<CheckBox x:Name="Settings_GroupByProduct">Группировать по свойствам</CheckBox>
 
 						<StackPanel Orientation="Horizontal">
 							<CheckBox x:Name="Settings_WarnIfOrderedYesterday" Content="Предупреждать, если товар был заказан " VerticalContentAlignment="Center"/>
-                            <ComboBox ItemsSource="{Binding LastDayForWarnOrdered}"
+								<ComboBox ItemsSource="{Binding LastDayForWarnOrdered}"
 									SelectedItem="{Binding Settings.Value.CountDayForWarnOrdered}"/>
 							<Label Margin="0" Content="дней назад"/>
 						</StackPanel>
 
-            <Label>Режим работы с препаратами ПКУ:</Label>
-            <ComboBox Style="{StaticResource Select}" x:Name="Settings_ModePKU" />
+						<Label>Режим работы с препаратами ПКУ:</Label>
+						<ComboBox Style="{StaticResource Select}" x:Name="Settings_ModePKU" />
 
-            <Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
-						<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder"></TextBox>
+						<Label>Допустимый процент изменения цены при восстановлении заказа:</Label>
+						<TextBox x:Name="Settings_MaxOverCostOnRestoreOrder" />
 
 						<Label>Включить в основную группу поставщиков начиная с:</Label>
-						<TextBox x:Name="Settings_BaseFromCategory"></TextBox>
+						<TextBox x:Name="Settings_BaseFromCategory" />
 
 						<Label>Предупреждать о превышении средней цены закупки на (%):</Label>
-						<TextBox x:Name="Settings_OverCostWarningPercent"></TextBox>
+						<TextBox x:Name="Settings_OverCostWarningPercent" />
 
 						<Label>Предупреждать о превышении среднего количества по предыд. заказам в (раз):</Label>
-						<TextBox x:Name="Settings_OverCountWarningFactor"></TextBox>
+						<TextBox x:Name="Settings_OverCountWarningFactor" />
 
 						<Label>Расчет разницы в таблице предложений:</Label>
 						<ComboBox Style="{StaticResource Select}" x:Name="Settings_DiffCalcMode" />
@@ -414,7 +552,7 @@
 						<CheckBox x:Name="Settings_HighlightUnmatchedOrderLines">Выделять цветом недопоставленные позиции заказов</CheckBox>
 
 						<Label>Показывать список изменений в забраковке за (дни):</Label>
-						<TextBox x:Name="Settings_TrackRejectChangedDays"></TextBox>
+						<TextBox x:Name="Settings_TrackRejectChangedDays" />
 
 						<Label>Считать уценкой если срок годности менее (месяцы):</Label>
 						<TextBox x:Name="Settings_JunkPeriod" />
@@ -425,44 +563,44 @@
 				<StackPanel>
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_RackingMap_Size" />
 					<CheckBox x:Name="Settings_RackingMap_HideNotPrinted"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Удалять непечатаемые элементы
 					</CheckBox>
 					<Label>Печатаемые элементы стеллажной карты</Label>
 					<CheckBox x:Name="Settings_RackingMap_PrintProduct"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Наименование
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintProducer"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Производитель
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintSerialNumber"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Серия товара
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintPeriod"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Срок годности
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintQuantity"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Количество
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintSupplier"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Поставщик
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintCertificates"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Номер сертификата
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintDocumentDate"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Дата поступления
 					</CheckBox>
 					<CheckBox x:Name="Settings_RackingMap_PrintRetailCost"
-						IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.RackingMap.IsConfigurable}">
 						Цена
 					</CheckBox>
 				</StackPanel>
@@ -472,44 +610,44 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Settings_PriceTag_Type" />
 					<CheckBox x:Name="Settings_PriceTag_PrintEmpty">Печать "пустых" ценников</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_HideNotPrinted"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Удалять непечатаемые элементы
 					</CheckBox>
 					<Label>Печатаемые элементы ценника</Label>
 					<CheckBox x:Name="Settings_PriceTag_PrintFullName"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Наименование клиента
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProduct"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Наименование
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintCountry"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Страна
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProducer"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Производитель
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintPeriod"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Срок годности
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintProviderDocumentId"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Номер накладной
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSupplier"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Поставщик
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintSerialNumber"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Серия товара
 					</CheckBox>
 					<CheckBox x:Name="Settings_PriceTag_PrintDocumentDate"
-						IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
+					          IsEnabled="{Binding Settings.Value.PriceTag.IsConfigurable}">
 						Дата накладной
 					</CheckBox>
 				</StackPanel>
@@ -530,8 +668,8 @@
 					<TextBox Name="DiadokPassword" />
 					<Label>Сертификат для подписи</Label>
 					<ComboBox Style="{StaticResource Select}"
-						ItemsSource="{Binding Settings.Value.DiadokCerts}"
-						SelectedItem="{Binding Settings.Value.DiadokCert}" />
+					          ItemsSource="{Binding Settings.Value.DiadokCerts}"
+					          SelectedItem="{Binding Settings.Value.DiadokCert}" />
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Сбис" Name="SbisTab">
@@ -542,8 +680,8 @@
 					<TextBox Name="SbisPassword" />
 					<Label>Сертификат для подписи</Label>
 					<ComboBox Style="{StaticResource Select}"
-						ItemsSource="{Binding Settings.Value.DiadokCerts}"
-						SelectedItem="{Binding Settings.Value.SbisCert}" />
+					          ItemsSource="{Binding Settings.Value.DiadokCerts}"
+					          SelectedItem="{Binding Settings.Value.SbisCert}" />
 				</StackPanel>
 			</TabItem>
 		</TabControl>

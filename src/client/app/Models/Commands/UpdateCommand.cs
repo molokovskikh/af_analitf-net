@@ -865,7 +865,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			}
 		}
 
-		private void Import()
+		public void Import()
 		{
 #if !DEBUG
 			//при переходе со старой версии файла может не быть

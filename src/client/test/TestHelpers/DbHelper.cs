@@ -96,6 +96,13 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			}
 		}
 
+		public static string FailDir(string file)
+		{
+			var root = "fail-test-data";
+			Directory.CreateDirectory(root);
+			return Path.Combine(root, FileHelper.StringToPath(TestContext.CurrentContext.Test.FullName), file);
+		}
+
 		public static bool IsTestFail()
 		{
 			return TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed;
