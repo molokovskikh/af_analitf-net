@@ -385,7 +385,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-						DbMaintain.UpdateLeaders(session, Settings.Value);
+						DbMaintain.UpdateLeaders(Settings.Value);
 						session.Flush();
 						return Enumerable.Empty<IResult>();
 					});
@@ -540,6 +540,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMinCosts()
 		{
+			if (AppBootstrapper.LeaderCalculationWasStart)
+			{
+				MessageResult.Warn("Идет расчет минимальных цен. Минимальные цены можно будет посмотреть после окончания расчета, это может занять какое-то время. Пожалуйста, подождите и повторно откройте \"Минимальные цены\"")
+					.Execute(new ActionExecutionContext());
+				return;
+			}
 			NavigateRoot(new Offers.MinCosts());
 		}
 

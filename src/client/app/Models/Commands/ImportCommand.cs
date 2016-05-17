@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Mapping;
@@ -195,7 +196,8 @@ set m.HaveOffers = 1,
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
 				Log.Info("Пересчет лидеров");
-				DbMaintain.UpdateLeaders(Session, settings);
+				Task task = new Task(() => {DbMaintain.UpdateLeaders(settings);});
+				task.Start();
 				Log.Info("Пересчет уценки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
