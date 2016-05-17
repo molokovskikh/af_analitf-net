@@ -54,6 +54,10 @@
     <ApplicationIcon>mainicon_original.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Tools, Version=1.0.6.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Common.Tools\Common.Tools\bin\debug\Common.Tools.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
@@ -101,12 +105,6 @@
     <None Include="App.release.config" />
     <AppDesigner Include="Properties\" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
-      <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
-      <Name>Common.Tools</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

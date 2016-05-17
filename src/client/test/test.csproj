@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="msbuild.gen.props" Condition="Exists('msbuild.gen.props')" />
   <PropertyGroup>
@@ -266,6 +266,7 @@
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
+    <Compile Include="Unit\Models\WaybillTotalFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
@@ -314,7 +315,7 @@
   <ItemGroup>
     <ProjectReference Include="..\app\app.csproj">
       <Project>{5878740B-360A-4942-8902-926907209616}</Project>
-      <Name>client</Name>
+      <Name>app</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\service\test\test.csproj">
       <Project>{E12BC78F-C2CC-46E1-AF67-B62D8ACD96F8}</Project>
@@ -322,7 +323,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\service\app\app.csproj">
       <Project>{B38A237B-0BF4-4FD0-941D-E3640A3058EE}</Project>
-      <Name>service</Name>
+      <Name>app</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common.Models\Common.Models\Common.Models.csproj">
       <Project>{80C9F352-5EED-41B2-989A-6628BCAF4D36}</Project>
