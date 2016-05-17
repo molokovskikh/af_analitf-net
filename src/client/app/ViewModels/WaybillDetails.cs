@@ -116,12 +116,14 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null)
 				return;
 			Settings.Value.Rounding = Rounding.Value;
-			Waybill.Calculate(Settings.Value);
+			Waybill.Calculate(Settings.Value, Shell?.SpecialMarkupProducts.Value);
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			Shell.SpecialMarkupProducts.Subscribe(_ => Calculate());
 
 			if (Session == null)
 				return;

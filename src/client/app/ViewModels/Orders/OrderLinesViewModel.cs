@@ -213,7 +213,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					lines.Each(l => {
 						l.Order.CalculateStyle(Address);
 						if (l.Order.IsAddressExists())
-							l.CalculateRetailCost(Settings.Value.Markups, User, l.Order.Address);
+							l.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, l.Order.Address);
 					});
 					return lines;
 				})
@@ -306,7 +306,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			foreach (var line in Lines.Value) {
 				if (line.Order.IsAddressExists())
-					line.CalculateRetailCost(Settings.Value.Markups, User, line.Order.Address);
+					line.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, line.Order.Address);
 			}
 		}
 

@@ -46,7 +46,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//не должно быть потерянных записей
 			Assert.AreEqual(model.Markups.Value.Count
 				+ model.VitallyImportantMarkups.Value.Count
-				+ model.Nds18Markups.Value.Count, all.Count);
+				+ model.Nds18Markups.Value.Count
+				+ model.SpecialMarkups.Value.Count, all.Count);
 		}
 
 		[Test]

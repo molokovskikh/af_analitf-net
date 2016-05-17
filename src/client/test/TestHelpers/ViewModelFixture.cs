@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			});
 			manager = StubWindowManager(lazyshell);
 			var debugTest = Environment.GetEnvironmentVariable("DEBUG_TEST");
-			if (debugTest.Match(TestContext.CurrentContext.Test.Name) || true) {
+			if (debugTest.Match(TestContext.CurrentContext.Test.Name)) {
 				appender = new MemoryAppender();
 				var sql = new QueryCatcher();
 				sql.Appender = appender;

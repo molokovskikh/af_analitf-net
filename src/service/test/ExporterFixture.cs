@@ -264,7 +264,7 @@ namespace AnalitF.Net.Service.Test
 			InitAd();
 			var result = ReadResult();
 			var zeros = new [] {
-				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt"
+				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt", "Products.txt"
 			};
 			foreach (var zero in zeros) {
 				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));

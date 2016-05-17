@@ -218,6 +218,7 @@
     <Compile Include="Integration\ViewModels\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModels\ShellFixture.cs" />
+    <Compile Include="Integration\ViewModels\SpecialMarkupFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillsFixture.cs" />
@@ -232,6 +233,7 @@
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\GlobalFixture.cs" />
     <Compile Include="Integration\Views\MailsFixture.cs" />
+    <Compile Include="Integration\Views\MinCostsFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
