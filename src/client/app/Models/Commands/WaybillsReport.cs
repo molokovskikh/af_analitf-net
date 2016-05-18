@@ -174,11 +174,21 @@ group by r.DrugID")
 			var begin = new DateTime(year, 1, 1);
 			var rows = StatelessSession.CreateSQLQuery(@"
 select
+BarCode,
+Total,
+sum(SupplierCost) / 1000 SupplierCost,
+sum(RetailCost) / 1000 RetailCost,
+sum(ProducerCost) / 1000 ProducerCost,
+RegistryCost,
+Planned,
+Margin
+from
+(select
 	b.Value as BarCode,
 	sum(l.Quantity) / 1000 Total,
-	round(avg(l.SupplierCost),2) / 1000 SupplierCost,
-	round(avg(l.RetailCost),2) / 1000 RetailCost,
-	round(avg(producercost),2) / 1000 ProducerCost,
+	round(l.SupplierCost * l.Quantity, 2) SupplierCost,
+	round(l.RetailCost * l.Quantity, 2) RetailCost,
+	round(producercost  * l.Quantity,2) ProducerCost,
 	min(if(registrycost = 0, null, registrycost)) RegistryCost,
 	sum(quantity) / 1000 Planned,
 	(round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2)) / 1000 as Margin
@@ -186,7 +196,8 @@ from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
 	join BarCodes b on b.Value = l.EAN13
 where b.Value = l.EAN13 and w.DocumentDate > :begin and w.DocumentDate < :end
-group by b.Value;")
+group by l.id) as sub
+group by BarCode;")
 				.SetParameter("begin", begin)
 				.SetParameter("end", end)
 				.List();
@@ -208,7 +219,11 @@ group by b.Value;")
 				reportRow = sheet.CreateRow(i + 1);
 				var row = ((object[])rows[i]);
 				for (var j = 0; j < row.Length; j++) {
-					reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
+					if (j == 0) {
+						reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
+						continue;
+					}
+					reportRow.CreateCell(j).SetCellValue(Convert.ToDouble(row[j]));
 				}
 			}
 			using(var stream = File.Create(Result))
