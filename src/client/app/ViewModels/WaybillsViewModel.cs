@@ -61,6 +61,8 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
+
+
 		}
 
     public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -134,6 +136,7 @@ namespace AnalitF.Net.Client.ViewModels
 				waybill.DeleteFiles(Settings.Value);
 				Waybills.Value.Remove(waybill);
 				StatelessSession.Delete(waybill);
+				Waybills.Refresh();
 			}
 		}
 
@@ -253,7 +256,7 @@ namespace AnalitF.Net.Client.ViewModels
 				query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
 			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
 				query = query.Where(w => w.DocType == DocType.Reject);
-            
+
 			var docs = query
 				.OrderByDescending(w => w.WriteTime)
 				.Fetch(w => w.Supplier)

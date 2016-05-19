@@ -46,18 +46,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro" />
-    <Reference Include="Common.MySql, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Common.MySql\Common.MySql\bin\debug\Common.MySql.dll</HintPath>
-    </Reference>
-    <Reference Include="Common.NHibernate, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Common.MySql\Common.NHibernate\bin\debug\Common.NHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="Common.Tools, Version=1.0.6.10, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Common.Tools\Common.Tools\bin\debug\Common.Tools.dll</HintPath>
-    </Reference>
     <Reference Include="Devart.Data, Version=5.0.792.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\lib\mysql-driver\Devart.Data.dll</HintPath>
@@ -903,6 +891,18 @@
     <Resource Include="Assets\images\Download_32.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common.MySql\Common.MySql\Common.MySql.csproj">
+      <Project>{8a680813-c83b-497a-85e6-e8f07b7d7650}</Project>
+      <Name>Common.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common.MySql\Common.NHibernate\Common.NHibernate.csproj">
+      <Project>{8be188ca-a0d9-4609-ab2e-ab8edf849fe0}</Project>
+      <Name>Common.NHibernate</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
+      <Project>{72afcfe8-c9e9-45fa-9698-bee896a517a3}</Project>
+      <Name>Common.Tools</Name>
+    </ProjectReference>
     <ProjectReference Condition="$(DefineConstants.Contains('DEBUG'))" Include="..\..\Test.Support\Test.Support\Test.Support.csproj">
       <Project>{A215E837-1208-49E3-AF93-A9612223122C}</Project>
       <Name>Test.Support</Name>

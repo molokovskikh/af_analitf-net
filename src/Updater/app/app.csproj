@@ -54,10 +54,6 @@
     <ApplicationIcon>mainicon_original.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Common.Tools, Version=1.0.6.10, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Common.Tools\Common.Tools\bin\debug\Common.Tools.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
@@ -130,6 +126,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="mainicon_original.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
+      <Project>{72afcfe8-c9e9-45fa-9698-bee896a517a3}</Project>
+      <Name>Common.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
