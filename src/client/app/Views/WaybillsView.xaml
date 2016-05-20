@@ -5,6 +5,7 @@
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+	xmlns:cal ="http://www.caliburnproject.org"
 	behaviors:Focusable.DefaultFocus="{x:Reference Waybills}">
 
 	<i:Interaction.Behaviors>
@@ -75,6 +76,18 @@
 
 					<TextBlock Style="{StaticResource HeaderTextBlock}">Отчет по розничным надбавкам к ценам на ЖНВЛП за год</TextBlock>
 					<Button Name="WaybillMarkupReport" HorizontalAlignment="Left">Сформировать</Button>
+					<Popup Name="WaybillMurkupReportPopup" StaysOpen="True" Placement="Mouse" Width="400"
+               PopupAnimation="Scroll" AllowsTransparency="True">
+						<Border BorderBrush="LightBlue" BorderThickness="2" Background="White">
+							<StackPanel>
+								<TextBlock Margin="10" TextWrapping="Wrap">
+                    Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?
+								</TextBlock>
+								<Button Name="UseNds" MaxWidth="100" cal:Message.Attach="UseNds()" TextBlock.TextAlignment="Center" MaxHeight="25"> Да</Button>
+								<Button Name="DontUseNds" MaxWidth="100" cal:Message.Attach="DontUseNds()" TextBlock.TextAlignment="Center" MaxHeight="25">Нет</Button>
+							</StackPanel>
+						</Border>
+					</Popup>
 				</StackPanel>
 			</c:PopupButton>
 		</WrapPanel>

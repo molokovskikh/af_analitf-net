@@ -124,5 +124,31 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//в тестовых данных VendorId == Id
 			Assert.AreEqual(vendorId, fixture.Waybill.Supplier.Id.ToString());
 		}
+
+		[Test]
+		public void Waybil_markup_report()
+		{
+			FileHelper.InitDir(settings.MapPath("Reports"));
+
+			var result = model.UseNds().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var openWithNds = Next<OpenResult>(result);
+
+			result = model.UseNds().GetEnumerator();
+			task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var openWithoutNds = Next<OpenResult>(result);
+
+			Assert.IsTrue(File.Exists(openWithNds.Filename), openWithNds.Filename);
+			Assert.That(openWithNds.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));
+			Assert.That(File.ReadAllText(openWithNds.Filename).Length, Is.GreaterThan(1));
+
+			Assert.IsTrue(File.Exists(openWithoutNds.Filename), openWithoutNds.Filename);
+			Assert.That(openWithoutNds.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));
+			Assert.That(File.ReadAllText(openWithoutNds.Filename).Length, Is.GreaterThan(1));
+		}
 	}
 }

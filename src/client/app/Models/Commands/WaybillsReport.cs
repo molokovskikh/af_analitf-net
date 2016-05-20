@@ -166,19 +166,29 @@ group by r.DrugID")
 
 	public class WaybillMarkupReport : DbCommand<string>
 	{
+		public bool withNds = false;
+
 		public override void Execute()
 		{
 			//отчет всегда готовится за предыдущий год
 			var end = new DateTime(DateTime.Today.Year, 1, 1);
 			var year = DateTime.Today.Year - 1;
 			var begin = new DateTime(year, 1, 1);
-			var rows = StatelessSession.CreateSQLQuery(@"
+			var subrows = "sum(SupplierCost) / 1000 {0} SupplierCost, sum(RetailCost) / 1000 {0} RetailCost, sum(ProducerCost) / 1000 {0} ProducerCost";
+			if (withNds)
+			{
+				subrows = string.Format(subrows, "* 1.1");
+			}
+			else
+			{
+				subrows = string.Format(subrows, "");
+			}
+
+			var rows = StatelessSession.CreateSQLQuery($@"
 select
 BarCode,
 Total,
-sum(SupplierCost) / 1000 SupplierCost,
-sum(RetailCost) / 1000 RetailCost,
-sum(ProducerCost) / 1000 ProducerCost,
+{subrows},
 RegistryCost,
 Planned,
 Margin
@@ -215,12 +225,19 @@ group by BarCode;")
 			reportRow.CreateCell(5).SetCellValue("ПредельнаяЦенаПроизв");
 			reportRow.CreateCell(6).SetCellValue("КоличествоПлан");
 			reportRow.CreateCell(7).SetCellValue("ВаловаяПрибыльПлан");
-			for(var i = 0; i < rows.Count; i++) {
+
+			var converter = new SlashNumber();
+			for (var i = 0; i < rows.Count; i++) {
 				reportRow = sheet.CreateRow(i + 1);
 				var row = ((object[])rows[i]);
 				for (var j = 0; j < row.Length; j++) {
 					if (j == 0) {
 						reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
+						continue;
+					}
+					if(j > 1 && j < 5)
+					{
+						reportRow.CreateCell(j).SetCellValue(converter.Convert(Convert.ToDouble(row[j]), 5));
 						continue;
 					}
 					reportRow.CreateCell(j).SetCellValue(Convert.ToDouble(row[j]));

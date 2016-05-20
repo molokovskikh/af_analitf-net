@@ -277,9 +277,23 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
-		public IEnumerable<IResult> WaybillMarkupReport()
+		public void WaybillMarkupReport()
+		{
+			(this.GetView() as AnalitF.Net.Client.Views.WaybillsView).WaybillMurkupReportPopup.IsOpen = true;
+		}
+
+		public IEnumerable<IResult> UseNds()
 		{
 			var commnand = new WaybillMarkupReport();
+			commnand.withNds = true;
+			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
+			yield return new OpenResult(commnand.Result);
+		}
+
+		public IEnumerable<IResult> DontUseNds()
+		{
+			var commnand = new WaybillMarkupReport();
+			commnand.withNds = false;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}
