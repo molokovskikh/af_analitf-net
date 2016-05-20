@@ -130,13 +130,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			FileHelper.InitDir(settings.MapPath("Reports"));
 
-			var result = model.UseNds().GetEnumerator();
+			var result = model.WaybillMarkupReport().GetEnumerator();
 			var task = Next<TaskResult>(result);
 			task.Task.Start();
 			task.Task.Wait();
 			var openWithNds = Next<OpenResult>(result);
 
-			result = model.UseNds().GetEnumerator();
+			result = model.WaybillMarkupReport().GetEnumerator();
 			task = Next<TaskResult>(result);
 			task.Task.Start();
 			task.Task.Wait();

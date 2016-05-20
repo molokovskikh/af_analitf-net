@@ -277,26 +277,17 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
-		public void WaybillMarkupReport()
+		public IEnumerable<IResult> WaybillMarkupReport()
 		{
-			(this.GetView() as AnalitF.Net.Client.Views.WaybillsView).WaybillMurkupReportPopup.IsOpen = true;
-		}
-
-		public IEnumerable<IResult> UseNds()
-		{
+			var userAnswer = System.Windows.MessageBox.Show("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?", 
+				"Отчет по розничным надбавкам к ценам на ЖНВЛП за год", 
+				System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
 			var commnand = new WaybillMarkupReport();
+			commnand.withNds = userAnswer == System.Windows.MessageBoxResult.Yes;
 			commnand.withNds = true;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
-		}
-
-		public IEnumerable<IResult> DontUseNds()
-		{
-			var commnand = new WaybillMarkupReport();
-			commnand.withNds = false;
-			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
-			yield return new OpenResult(commnand.Result);
-		}
+		}		
 
 		public bool CanPrint => true;
 
