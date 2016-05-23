@@ -197,6 +197,11 @@ namespace AnalitF.Net.Client.Helpers
 
 	public class SlashNumber
 	{
+		public decimal Convert(decimal value, int memberCount)
+		{
+			return (decimal)(Convert((double)value, memberCount));
+		}
+
 		public double Convert(double value, int membersCount)
 		{
 			var integralPart = Math.Truncate(value).ToString();

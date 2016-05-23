@@ -184,33 +184,34 @@ group by r.DrugID")
 				subrows = string.Format(subrows, "");
 			}
 
-			var rows = StatelessSession.CreateSQLQuery($@"
+			var query = StatelessSession.CreateSQLQuery($@"
 select
 BarCode,
-Total,
+sum(Total) Total,
 {subrows},
-RegistryCost,
-Planned,
-Margin
+min(if(registrycost = 0, null, registrycost)) RegistryCost,
+sum(Planned) Planned,
+(round(avg(RetailCostM),2) - round(avg(SupplierCostM),2)) / 1000 as Margin
 from
 (select
 	b.Value as BarCode,
-	sum(l.Quantity) / 1000 Total,
+	l.Quantity / 1000 Total,
 	round(l.SupplierCost * l.Quantity, 2) SupplierCost,
 	round(l.RetailCost * l.Quantity, 2) RetailCost,
 	round(producercost  * l.Quantity,2) ProducerCost,
-	min(if(registrycost = 0, null, registrycost)) RegistryCost,
-	sum(quantity) / 1000 Planned,
-	(round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2)) / 1000 as Margin
+	RegistryCost,
+	quantity / 1000 Planned,
+	RetailCost RetailCostM,
+  SupplierCost SupplierCostM
 from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
 	join BarCodes b on b.Value = l.EAN13
 where b.Value = l.EAN13 and w.DocumentDate > :begin and w.DocumentDate < :end
 group by l.id) as sub
-group by BarCode;")
-				.SetParameter("begin", begin)
-				.SetParameter("end", end)
-				.List();
+group by BarCode;");
+			query.SetParameter("begin", begin);
+			query.SetParameter("end", end);
+			var rows =	query.List();
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.InitAndMap("Reports");
 			Result = Path.Combine(dir, FileHelper.StringToFileName($"Надб-ЖНВЛС-{year}.xls"));

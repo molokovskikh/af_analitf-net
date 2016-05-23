@@ -277,14 +277,20 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
-		public IEnumerable<IResult> WaybillMarkupReport()
+		public IEnumerable<IResult> WaybillMarkupReport(bool dontUseDialog = false, bool withNds = true)
 		{
-			var userAnswer = System.Windows.MessageBox.Show("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?", 
-				"Отчет по розничным надбавкам к ценам на ЖНВЛП за год", 
-				System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
 			var commnand = new WaybillMarkupReport();
-			commnand.withNds = userAnswer == System.Windows.MessageBoxResult.Yes;
-			commnand.withNds = true;
+			if(!dontUseDialog)
+			{ 
+				var userAnswer = System.Windows.MessageBox.Show("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?", 
+				"Отчет по розничным надбавкам к ценам на ЖНВЛП за год", 
+				System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);			
+				commnand.withNds = userAnswer == System.Windows.MessageBoxResult.Yes;
+			}
+			else
+			{
+				commnand.withNds = withNds;
+			}
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}		
