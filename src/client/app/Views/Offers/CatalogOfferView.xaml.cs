@@ -7,7 +7,6 @@ using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
-using System.Windows.Input;
 using AnalitF.Net.Client.ViewModels.Offers;
 
 namespace AnalitF.Net.Client.Views.Offers
@@ -18,10 +17,6 @@ namespace AnalitF.Net.Client.Views.Offers
 		{
 			InitializeComponent();
 			var grid = Offers;
-
-			grid.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
-				Commands.DoInvokeViewModel,
-				Commands.CanInvokeViewModel));
 
 			Conventions.ConfigureDataGrid(grid, typeof(Offer));
 			new Editable().Attach(grid);
