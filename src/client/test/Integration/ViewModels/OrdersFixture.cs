@@ -359,6 +359,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
 
+		[Test]
 		private void Load_disabled_order()
 		{
 			session.DeleteEach<Order>();
