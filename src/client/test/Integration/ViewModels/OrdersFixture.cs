@@ -358,5 +358,19 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
+
+		private void Load_disabled_order()
+		{
+			session.DeleteEach<Order>();
+			var newAddress = new Address { Name = "Тестовый адрес доставки" };
+			session.Save(newAddress);
+			var order = MakeOrder();
+			order.Price = null;
+			shell.CurrentAddress = newAddress;
+			model.AddressSelector.All.Value = false;
+			Assert.That(model.Orders.Count, Is.EqualTo(0));
+			model.AddressSelector.All.Value = true;
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+		}
 	}
 }
