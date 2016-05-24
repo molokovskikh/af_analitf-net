@@ -333,17 +333,20 @@ where c.Id = ?";
 			}
 			LastEditOffer.Value = offer;
 			ApplyStat(LoadStat(StatelessSession));
+			if (CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
+				if (Settings.Value.ModePKU == ModePKU.Deny) {
+					offer.OrderCount = null;
+					ShowValidationError(new List<Common.Tools.Message>() {Message.Warning("Заказ препаратов ПКУ запрещен. Для изменения режима заказа препаратов ПКУ," +
+						" перейдите в Настройки во вкладку Визуализация и снимите запрет на заказ препаратов ПКУ") });
+					return;
+				}
+			}
 			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
 			if (offer.OrderLine != null && CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
 				if (Settings.Value.ModePKU == ModePKU.Warning) {
 					messages.Add(Message.Warning("Вы заказываете препарат, подлежащий" +
 					$" предметно-количественному учету и относящийся к {CurrentCatalog.Value.PKU}"));
-				}
-				if (Settings.Value.ModePKU == ModePKU.Deny) {
-					messages.Add(Message.Warning("Заказ препаратов ПКУ запрещен. Для изменения режима заказа препаратов ПКУ," +
-						" перейдите в Настройки во вкладку Визуализация и снимите запрет на заказ препаратов ПКУ"));
-					offer.OrderCount = null;
 				}
 			}
 			ShowValidationError(messages);
