@@ -360,17 +360,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		private void Load_disabled_order()
+		public void Load_disabled_order()
 		{
 			session.DeleteEach<Order>();
-			var newAddress = new Address { Name = "Тестовый адрес доставки" };
-			session.Save(newAddress);
 			var order = MakeOrder();
+			model.Update();
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			order.Price = null;
-			shell.CurrentAddress = newAddress;
-			model.AddressSelector.All.Value = false;
-			Assert.That(model.Orders.Count, Is.EqualTo(0));
-			model.AddressSelector.All.Value = true;
+			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
 	}
