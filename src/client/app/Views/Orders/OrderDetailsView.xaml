@@ -75,8 +75,9 @@
 			</Grid>
 		</StackPanel>
 
-		<c:DataGrid2 Grid.Row="2" x:Name="Lines"
-			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]">
+		<c:MainControllerWrap Grid.Row="2">
+		<c:DataGrid2 x:Name="Lines"
+			cal:Message.Attach="[Event TextInput] = [Action Search($eventargs)]" AutoGenerateColumns="False">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="97*" Header="Наименование" Binding="{Binding ProductSynonym}" />
 				<c:DataGridTextColumnEx Width="156*" Header="Производитель" Binding="{Binding ProducerSynonym}" />
@@ -114,6 +115,7 @@
 					TextAlignment="Right" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
+		</c:MainControllerWrap>
 
 		<ContentControl x:Name="OrderWarning" Grid.Row="2" />
 
