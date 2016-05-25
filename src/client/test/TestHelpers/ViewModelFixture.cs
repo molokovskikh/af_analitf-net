@@ -255,17 +255,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return sentOrder;
 		}
 
-		protected Order MakeOrder(params Offer[] offers)
-		{
-			offers = offers.DefaultIfEmpty(session.Query<Offer>().First(x => x.RequestRatio == null)).ToArray();
-			var offer = offers.First();
-			var order = new Order(offer.Price, address);
-
-			session.Save(order);
-			session.Flush();
-			return order;
-		}
-
 		protected void Deactivate(Screen model)
 		{
 			ScreenExtensions.TryDeactivate(model, false);
