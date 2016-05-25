@@ -619,6 +619,27 @@ namespace AnalitF.Net.Client.ViewModels
 				NavigateRoot(new OrdersViewModel());
 		}
 
+		public void FreezeOldOrder()
+		{
+			if (session == null) return;
+
+			using (var tx = session.BeginTransaction())
+			{
+				var orderQuery = session.Query<Order>()
+					.Where(o => o.CreatedOn < DateTime.Now.AddDays(-7) && o.Frozen != true);
+
+				if (!orderQuery.Any()) return;
+
+				foreach (var order in orderQuery)
+					order.Frozen = true;
+
+				tx.Commit();
+			}
+
+			windowManager.Notify("В архиве заказов обнаружены заказы," +
+													 $" сделанные более 1 недели назад. Данные заказы были заморожены.");
+		}
+
 		public bool CanShowBatch => Settings.Value.LastUpdate != null;
 
 		public void ShowBatch()
@@ -988,6 +1009,7 @@ namespace AnalitF.Net.Client.ViewModels
 					}
 					results = command.Results.ToArray();
 				});
+			FreezeOldOrder();
 			return results;
 		}
 
