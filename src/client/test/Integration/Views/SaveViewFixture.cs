@@ -108,5 +108,17 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			((IViewAware)model).AttachView(view);
 			Assert.AreEqual(351, column.Width.Value);
 		}
+
+		[Test]
+		public void Restore_column_width()
+		{
+			var grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
+			grid.Columns[4].Width = 125;
+
+			Close(model);
+			InitView();
+			grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
+			Assert.AreEqual(grid.Columns[4].Width, 125);
+		}
 	}
 }
