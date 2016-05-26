@@ -160,5 +160,34 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.AreEqual("Вы заказываете препарат, подлежащий предметно-количественному учету и относящийся к ПКУ:Сильнодействующие. и ядовитые",
 				model.OrderWarning.OrderWarning);
 		}
+
+		[Test]
+		public void Delete_value_confirm()
+		{
+			var stat = bus.Listen<Stat>().ToValue();
+			model.Offers.Value = new List<Offer> {
+				new Offer(new Price("test1"), 100) {
+					Id = {
+						OfferId = 1
+					},
+					BuyingMatrixType = BuyingMatrixStatus.Warning
+				},
+				new Offer(new Price("test2"), 150) {
+					Id = {
+						OfferId = 2
+					}
+				}
+			};
+			manager.DefaultQuestsionResult = MessageBoxResult.Yes;
+			model.CurrentOffer.Value = model.Offers.Value[0];
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.Delete();
+			Assert.AreEqual(null, model.CurrentOffer.Value.OrderCount);
+			manager.DefaultQuestsionResult = MessageBoxResult.No;
+			model.CurrentOffer.Value = model.Offers.Value[0];
+			model.CurrentOffer.Value.OrderCount = 1;
+			model.Delete();
+			Assert.AreEqual(1, model.CurrentOffer.Value.OrderCount);
+		}
 	}
 }
