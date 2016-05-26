@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Views.Offers;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
@@ -295,7 +296,13 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			ProducerFilterStateSet();
 			base.TryClose();
 		}
-
+		public void Delete()
+		{
+			if (Manager.Question("Удалить значение?") != MessageBoxResult.Yes)
+				return;
+			CurrentOffer.Value.OrderCount = null;
+			CurrentOffer.Value.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
+		}
 #if DEBUG
 		public override object[] GetRebuildArgs()
 		{
