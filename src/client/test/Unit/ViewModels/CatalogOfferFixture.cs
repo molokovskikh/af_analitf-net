@@ -182,11 +182,13 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			model.CurrentOffer.Value = model.Offers.Value[0];
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.Delete();
+			model.OfferUpdated();
 			Assert.AreEqual(null, model.CurrentOffer.Value.OrderCount);
 			manager.DefaultQuestsionResult = MessageBoxResult.No;
 			model.CurrentOffer.Value = model.Offers.Value[0];
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.Delete();
+			model.OfferUpdated();
 			Assert.AreEqual(1, model.CurrentOffer.Value.OrderCount);
 		}
 	}
