@@ -239,24 +239,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Freeze_old_orders()
-		{
-			session.DeleteEach(session.Query<Order>());
-			var order = MakeOrder();
-			order.CreatedOn = order.CreatedOn.AddDays(-10);
-			session.Save(order);
-			session.Flush();
-
-			shell.FreezeOldOrder();
-
-			session.Evict(order);
-			var reloaded = session.Get<Order>(order.Id);
-			Assert.IsTrue(reloaded.Frozen);
-			Assert.AreEqual("В архиве заказов обнаружены заказы, сделанные более 1 недели назад. Данные заказы были заморожены.",
-				manager.MessageBoxes.Implode());
-		}
-
-		[Test]
 		public void Execute_command_results()
 		{
 			stub.Results.Add(new OpenResult("test.txt"));
