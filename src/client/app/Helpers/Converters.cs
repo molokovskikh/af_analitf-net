@@ -41,14 +41,19 @@ namespace AnalitF.Net.Client.Helpers
 	public class LambdaConverter<T> : IValueConverter
 	{
 		private Func<T, object> @select;
+		private Func<object, T> converter;
 
-		public LambdaConverter(Func<T, object> select)
+		public LambdaConverter(Func<T, object> select, Func<object,T> specificConverter = null )
 		{
 			this.select = select;
+			converter = specificConverter;
 		}
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
+			if (converter != null) {
+				return @select(converter(value));
+			}
 			return @select((T)value);
 		}
 

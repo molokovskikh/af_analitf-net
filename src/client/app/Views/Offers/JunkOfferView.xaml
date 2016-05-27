@@ -33,7 +33,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<c:DataGrid2 x:Name="Offers" Grid.Row="0">
+		<c:DataGrid2 x:Name="Offers" Grid.Row="0" VerticalAlignment="Top">
 			<DataGrid.Columns>
 				<c:DataGridTextColumnEx Width="174*" Header="Название"
 					Binding="{Binding ProductSynonym}" />

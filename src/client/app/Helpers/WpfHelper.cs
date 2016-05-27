@@ -299,5 +299,26 @@ namespace AnalitF.Net.Client.Helpers
 				Converter = new LambdaConverter<T>(convert)
 			});
 		}
+
+		public static IEnumerable<DependencyObject> Children(DependencyObject element, List<Type> childTypes)
+		{
+			int childrenCount = VisualTreeHelper.GetChildrenCount(element);
+			for (int i = 0; i < childrenCount; i++) {
+
+				var currentElement = VisualTreeHelper.GetChild(element, i);
+
+				if (childTypes.IndexOf(currentElement.GetType()) > -1) {
+					yield return currentElement;
+				}
+
+				if (VisualTreeHelper.GetChildrenCount(currentElement) > 0) {
+
+					foreach (var child in Children(currentElement, childTypes)) {
+						yield return child;
+					}
+				}
+			}
+		}
+
 	}
 }

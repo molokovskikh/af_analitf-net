@@ -9,64 +9,64 @@
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference CatalogNames}">
 
-	<i:Interaction.Behaviors>
-		<behaviors:Focusable />
-	</i:Interaction.Behaviors>
+    <i:Interaction.Behaviors>
+        <behaviors:Focusable />
+    </i:Interaction.Behaviors>
 
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Name="CatalogNamesColumn" MinWidth="50" Width="300" />
-			<ColumnDefinition Width="Auto" />
-			<ColumnDefinition MinWidth="50" />
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
-			<RowDefinition />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-		</Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Name="CatalogNamesColumn" MinWidth="50" Width="300" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition MinWidth="50" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-		<c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
+        <c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
-			SelectionMode="Single">
-			<DataGrid.Columns>
-				<DataGridTextColumn Width="*"
+			SelectionMode="Single" VerticalAlignment="Top">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="*"
 					Header="Наименование"
 					Binding="{Binding Name}" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
+            </DataGrid.Columns>
+        </c:DataGrid2>
 
-		<ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
+        <ContentControl x:Name="CatalogNamesSearch" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" />
 
-		<GridSplitter Grid.Row="1"
+        <GridSplitter Grid.Row="1"
 			Grid.Column="1"
 			HorizontalAlignment="Center"
 			VerticalAlignment="Stretch"
 			ShowsPreview="True"
 			Width="5" />
 
-		<c:DataGrid2 Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
+        <c:DataGrid2 Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]"
 			SelectionMode="Single">
-			<DataGrid.Columns>
-				<DataGridTextColumn Width="*"
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="*"
 					Header="Форма выпуска"
 					Binding="{Binding Form}" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
+            </DataGrid.Columns>
+        </c:DataGrid2>
 
-		<Grid Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="1*"/>
-				<RowDefinition Height="1*" />
-			</Grid.RowDefinitions>
-			<ContentControl Name="Promotions" Width="auto" Grid.Row="0" HorizontalAlignment="Stretch"/>
-			<ContentControl x:Name="ProducerPromotions"  Width="auto" Grid.Row="1" HorizontalAlignment="Stretch"/>
-		</Grid>
-		
-		<ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2"
+        <Grid Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <ContentControl Name="Promotions" Width="auto" Grid.Row="0" HorizontalAlignment="Stretch"/>
+            <ContentControl x:Name="ProducerPromotions"  Width="auto" Grid.Row="1" HorizontalAlignment="Stretch"/>
+        </Grid>
+
+        <ContentControl x:Name="CatalogsSearch" Grid.Row="1" Grid.Column="2"
 			caliburn:QuickSearchBehavior.GridRef="{x:Reference Catalogs}" />
-		<Parts:CatalogPanel Grid.Row="2" Grid.Column="2"
+        <Parts:CatalogPanel Grid.Row="2" Grid.Column="2"
 			cal:Bind.ModelWithoutContext="{Binding}" DataContext="{Binding ParentModel}" />
-	</Grid>
+    </Grid>
 </UserControl>

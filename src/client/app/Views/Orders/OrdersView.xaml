@@ -44,7 +44,7 @@
 					</Grid.RowDefinitions>
 
 					<c:DataGrid2 x:Name="Orders" Grid.Row="0" IsReadOnly="False" CanUserDeleteRows="True"
-						ShowAddressColumn="{Binding AddressSelector.All.Value}">
+						ShowAddressColumn="{Binding AddressSelector.All.Value}" VerticalAlignment="Top">
 						<DataGrid.Columns>
 							<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
 								Visibility="Collapsed"
@@ -94,7 +94,7 @@
 			</TabItem>
 			<TabItem Header="Отправленные" IsSelected="{Binding IsSentSelected.Value}">
 				<c:DataGrid2 x:Name="SentOrders" CanUserDeleteRows="True"
-					ShowAddressColumn="{Binding AddressSelector.All.Value}">
+					ShowAddressColumn="{Binding AddressSelector.All.Value}" VerticalAlignment="Top">
 					<DataGrid.Columns>
 						<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа" Binding="{Binding AddressName}"
 							Visibility="Collapsed" />
