@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
+using WindowManager = AnalitF.Net.Client.Config.Caliburn.WindowManager;
 using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
@@ -277,20 +278,12 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new OpenResult(commnand.Result);
 		}
 
-		public IEnumerable<IResult> WaybillMarkupReport(bool dontUseDialog = false, bool withNds = true)
+		public IEnumerable<IResult> WaybillMarkupReport()
 		{
 			var commnand = new WaybillMarkupReport();
-			if(!dontUseDialog)
-			{ 
-				var userAnswer = System.Windows.MessageBox.Show("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?", 
-				"Отчет по розничным надбавкам к ценам на ЖНВЛП за год", 
-				System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);			
-				commnand.withNds = userAnswer == System.Windows.MessageBoxResult.Yes;
-			}
-			else
-			{
-				commnand.withNds = withNds;
-			}
+			var wManager = (WindowManager)IoC.Get<IWindowManager>();
+			commnand.withNds = wManager.ShowMessageBox("Фактическую стоимость ЖНВЛП, в ценах производителя, за отчетный период (Столбец R) рассчитать с учетом НДС ?",
+				"Отчет по розничным надбавкам к ценам на ЖВНЛП за год", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
 		}		
