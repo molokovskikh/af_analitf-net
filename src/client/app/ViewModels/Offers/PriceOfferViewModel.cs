@@ -56,15 +56,12 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
 				.Subscribe(_ => Filter());
 			if (AppBootstrapper.LeaderCalculationWasStart) {
-				AppBootstrapper.LeaderCalculationWasStartChanged += OnLeaderCalculationWasStartChanged;
+				AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) => {
+					OnActivate();
+				};
 				MessageResult.Warn("Идет расчет прайс-лидеров. Прайс-лидеры и минимальные цены отобразятся после окончания расчета, это может занять какое-то время.")
 					.Execute(new ActionExecutionContext());
 			}
-		}
-
-		private void OnLeaderCalculationWasStartChanged(object sender, EventArgs eventArgs)
-		{
-			OnActivate();
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }

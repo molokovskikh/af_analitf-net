@@ -385,7 +385,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-						DbMaintain.UpdateLeaders(Settings.Value);
+						DbMaintain.UpdateLeaders();
 						session.Flush();
 						return Enumerable.Empty<IResult>();
 					});
@@ -456,6 +456,16 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(SpecialMarkupProducts);
 
 			defaultItem.Reload();
+			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
+			{
+				if(AppBootstrapper.LeaderCalculationWasStart == true
+				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
+				{
+					return;
+				}
+				Settings.Value.LastLeaderCalculation = DateTime.Today;
+				session.Update(Settings.Value);
+			};
 		}
 
 		protected void UpdateDisplayName()
