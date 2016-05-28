@@ -334,7 +334,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var producerPromotion = localSession.Get<Client.Models.ProducerPromotion>(fixture.ProducerPromotion.Id);
 			producerPromotion.Init(clientConfig);
 
-			Assert.AreEqual("Тестовая промоакция производителя", producerPromotion.Name);		
+			Assert.AreEqual("Тестовая промоакция производителя", producerPromotion.Name);
 		}
 
 		[Test]
@@ -342,12 +342,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
-
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
-			localSession.Refresh(settings);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 
