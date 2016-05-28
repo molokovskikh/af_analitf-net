@@ -166,61 +166,65 @@ insert into BarCodes (value) values ('first_test_bar');
 				RetailCost = 315,
 				ProducerCost = 300,
 				RegistryCost = 300,
-			};			
+			};
+
+			disposable.Add(Disposable.Create(() =>
+			{
+				var disposableSession = session;
+				if (!session.IsOpen)
+				{
+					disposableSession = session.SessionFactory.OpenSession();
+				}
+				disposableSession.CreateSQLQuery($@"
+				delete from waybilllines where EAN13 = 'first_test_bar';
+				delete from BarCodes where value = 'first_test_bar';				
+				").ExecuteUpdate();
+				disposableSession.Delete(waybill);
+				if (!disposableSession.Equals(session))
+				{
+					disposableSession.Close();
+				}
+			}));
+
 			session.Save(waybill);
 			session.Save(waybillLineOne);
 			session.Save(waybillLineTwo);
 
-			try
-			{
 			FileHelper.InitDir(settings.MapPath("Reports"));
 
-				manager.DefaultQuestsionResult = exceptResult;
+			manager.DefaultQuestsionResult = exceptResult;
 
-				var result = model.WaybillMarkupReport().GetEnumerator();
-				var task = Next<TaskResult>(result);
-				task.Task.Start();
-				task.Task.Wait();
-				var openWithNds = Next<OpenResult>(result);
+			var result = model.WaybillMarkupReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
 
-				Assert.IsTrue(File.Exists(openWithNds.Filename), openWithNds.Filename);
-				Assert.That(openWithNds.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));				
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));				
 
-				var stream = new MemoryStream(File.ReadAllBytes(openWithNds.Filename));
-				var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(stream);
-				stream.Close();
-				var sheet = workbook[0];
+			var stream = new MemoryStream(File.ReadAllBytes(open.Filename));
+			var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(stream);
+			stream.Close();
+			var sheet = workbook[0];
 
-				var enumenator = sheet.GetRowEnumerator();			
-				while (enumenator.MoveNext())
-				{
-					var currentRow = (NPOI.HSSF.UserModel.HSSFRow)enumenator.Current;
-					Assert.IsTrue(currentRow.Cells.Count > 0);
-					if (currentRow.Cells[0].ToString() == "first_test_bar")
-					{
-						break;
-					}
-				}								
-				var inExcel = (enumenator.Current as NPOI.HSSF.UserModel.HSSFRow).Cells.ToArray();
-				checkClauclate(inExcel, waybillLineOne, waybillLineTwo, (decimal)k);			
-			}
-			catch (Exception exc)
-			{				
-				throw exc;
-			}
-			finally
+			var enumenator = sheet.GetRowEnumerator();			
+			while (enumenator.MoveNext())
 			{
-				session.CreateSQLQuery($@"
-delete from waybilllines where EAN13 = 'first_test_bar';
-delete from BarCodes where value = 'first_test_bar';
-delete from Waybills where id = {waybill.Id}
-").ExecuteUpdate();
-			}		
-		}		
+				var currentRow = (NPOI.HSSF.UserModel.HSSFRow)enumenator.Current;
+				Assert.IsTrue(currentRow.Cells.Count > 0);
+				if (currentRow.Cells[0].ToString() == "first_test_bar")
+				{
+					break;
+				}
+			}
 
-		private void checkClauclate(NPOI.SS.UserModel.ICell[] inExcel, WaybillLine waybillLineOne, WaybillLine waybillLineTwo, decimal k)
-		{		
+			Assert.IsNotNull(enumenator.Current);
+										
+			var inExcel = (enumenator.Current as NPOI.HSSF.UserModel.HSSFRow).Cells.ToArray();
+
 			var slasher = new Helpers.SlashNumber();
+
 			Assert.AreEqual("first_test_bar", inExcel[0].ToString());
 
 			Assert.AreEqual((decimal)(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000,
@@ -229,10 +233,10 @@ delete from Waybills where id = {waybill.Id}
 			Assert.AreEqual((waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * (decimal)k,
 				Convert.ToDecimal(inExcel[2].ToString()));
 
-			Assert.AreEqual((waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * (decimal)k, 
+			Assert.AreEqual((waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * (decimal)k,
 				Convert.ToDecimal(inExcel[3].ToString()));
 
-			Assert.AreEqual(slasher.Convert(((decimal)(waybillLineOne.Quantity * waybillLineOne.ProducerCost) 
+			Assert.AreEqual(slasher.Convert(((decimal)(waybillLineOne.Quantity * waybillLineOne.ProducerCost)
 				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * (decimal)k, 5),
 				Convert.ToDecimal(inExcel[4].ToString()));
 
@@ -241,8 +245,8 @@ delete from Waybills where id = {waybill.Id}
 			Assert.AreEqual((decimal)(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000, Convert.ToDecimal(inExcel[6].ToString()));
 
 			Assert.AreEqual((Math.Round((decimal)(waybillLineOne.RetailCost + waybillLineTwo.RetailCost) / 2, 2) -
-					 Math.Round((decimal)(waybillLineOne.SupplierCost + waybillLineTwo.SupplierCost) / 2, 2)) / 1000,
-					 Convert.ToDecimal(inExcel[7].ToString()));			
-		}
+						Math.Round((decimal)(waybillLineOne.SupplierCost + waybillLineTwo.SupplierCost) / 2, 2)) / 1000,
+						Convert.ToDecimal(inExcel[7].ToString()));			
+		}		
 	}
 }
