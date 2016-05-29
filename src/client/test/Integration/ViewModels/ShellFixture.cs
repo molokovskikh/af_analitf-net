@@ -391,6 +391,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Save(delay);
 			session.Flush();
 
+			var eventFired = false;
+			var timeout = DateTime.Now.AddMinutes(5);
+			var timeFireMoment = DateTime.Now.AddMinutes(7);
+			AppBootstrapper.LeaderCalculationWasStartChanged += (s, e) =>
+			{
+				eventFired = true;
+				timeFireMoment = DateTime.Now;
+			};
+
 			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
 			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
 			Close(shell);
@@ -399,6 +408,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Refresh(offer.Price);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
+
+			while(!eventFired)
+			{
+				if(DateTime.Now >= timeout)
+				{
+					break;
+				}
+				Thread.Sleep(TimeSpan.FromSeconds(5));
+			}
+
+			Assert.Less(timeFireMoment, timeout, "Время расчета лидеров привысило 5 минут");
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
