@@ -12,8 +12,12 @@ namespace AnalitF.Net.Client.Models.Commands
 		public static void UpdateLeaders()
 		{
 			var statelessSession = AppBootstrapper.NHibernate.Factory.OpenSession();
-			var trancate = statelessSession.BeginTransaction();
+			var trancate = statelessSession.BeginTransaction();						
 			AppBootstrapper.LeaderCalculationWasStart = true;
+			var timeout = DateTime.Now.AddMinutes(10);
+
+			while (DateTime.Now < timeout) {
+			}
 			try {		
 				statelessSession.CreateSQLQuery(@"
 update Prices p
