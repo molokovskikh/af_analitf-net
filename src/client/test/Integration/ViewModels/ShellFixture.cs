@@ -392,8 +392,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 
 			var eventFired = false;
-			var timeout = DateTime.Now.AddMinutes(5);
-			var timeFireMoment = DateTime.Now.AddMinutes(7);
+			var timeout = DateTime.Now.AddMinutes(10);
+			var timeFireMoment = DateTime.Now.AddMinutes(17);
 			AppBootstrapper.LeaderCalculationWasStartChanged += (s, e) =>
 			{
 				eventFired = true;
@@ -418,7 +418,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Thread.Sleep(TimeSpan.FromSeconds(5));
 			}
 
-			Assert.Less(timeFireMoment, timeout, "Время расчета лидеров привысило 5 минут");
+			Assert.Less(timeFireMoment, timeout, "Время расчета лидеров привысило 10 минут");
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
