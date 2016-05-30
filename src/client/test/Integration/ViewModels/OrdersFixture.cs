@@ -358,5 +358,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
 		}
+
+		[Test]
+		public void Load_disabled_order()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			model.Update();
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			order.Price = null;
+			model.Update();
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+		}
 	}
 }
