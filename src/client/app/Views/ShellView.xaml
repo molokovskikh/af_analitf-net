@@ -259,6 +259,10 @@
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
+			<Button Name="ShowInventory">
+				Склад
+			</Button>
+
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<StackPanel>
