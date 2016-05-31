@@ -463,12 +463,7 @@ namespace AnalitF.Net.Client.ViewModels
 					return;
 				}
 				Settings.Value.LastLeaderCalculation = DateTime.Today;
-				//session.Flush();
-				session.Refresh(Settings.Value);
-				if(Settings.Value.LastLeaderCalculation != DateTime.Today)
-				{
-					AppBootstrapper.LeaderCalculationWasStart = true;
-				}
+				session.Flush();
 			};
 		}
 
