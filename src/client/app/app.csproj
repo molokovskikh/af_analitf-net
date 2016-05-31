@@ -266,6 +266,7 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
@@ -365,7 +366,10 @@
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
+    <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\Main.cs" />
+    <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
+    <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\Stocks.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -488,6 +492,12 @@
     </Compile>
     <Compile Include="Views\Inventory\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
+      <DependentUpon>ReceivingDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReceivingOrders.xaml.cs">
+      <DependentUpon>ReceivingOrders.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Stocks.xaml.cs">
       <DependentUpon>Stocks.xaml</DependentUpon>
@@ -723,6 +733,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReceivingDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReceivingOrders.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

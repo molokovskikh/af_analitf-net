@@ -12,10 +12,11 @@
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
-			<Button Content="Остатки" />
+			<Button Content="Остатки" Name="Stocks" />
 			<Button Content="Обороты" />
+			<Separator />
 			<Button Content="Списания" />
-			<Button Content="Оприходования" />
+			<Button Content="Приемка" Name="ReceivingOrders" />
 			<Button Content="Перемещения" />
 			<Button Content="Инвентаризация" />
 		</ToolBar>

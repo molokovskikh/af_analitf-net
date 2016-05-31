@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.Stocks"
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.ReceivingDetails"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,13 +8,24 @@
 	mc:Ignorable="d"
 	d:DesignHeight="300" d:DesignWidth="300">
 	<Grid>
-		<controls:DataGrid2 x:Name="Items">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<Label FontWeight="Bold" Grid.Column="0">Номер:</Label>
+			<Label FontWeight="Bold" Grid.Column="1" Name="Header_Id" />
+		</Grid>
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>

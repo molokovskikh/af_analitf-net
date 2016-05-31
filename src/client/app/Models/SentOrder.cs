@@ -151,6 +151,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual ulong ServerId { get; set; }
 
+		public virtual uint? ReceivingOrderId { get; set; }
+
 		public virtual string PersonalComment
 		{
 			get { return personalComment; }

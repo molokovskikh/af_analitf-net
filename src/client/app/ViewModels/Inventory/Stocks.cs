@@ -7,21 +7,15 @@ using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	public class Stocks : BaseScreen
+	public class Stocks : BaseScreen2
 	{
-		public Stocks()
-		{
-			InitFields();
-		}
-
 		public NotifyValue<List<Stock>> Items { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			RxQuery(x => x.Query<Stock>().ToList())
-				.ObserveOn(UiScheduler)
+			RxQuery(x => x.Query<Stock>().OrderBy(y => y.Product).ToList())
 				.Subscribe(Items);
 		}
 	}

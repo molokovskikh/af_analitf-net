@@ -7,6 +7,7 @@ using System.Net.Http.Formatting;
 using System.Text;
 using System.Windows.Forms.VisualStyles;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels;
@@ -81,6 +82,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			Session.SaveEach(sentOrders);
 			Session.DeleteEach(acceptedOrders);
+
+			ReceivingOrder.Stock(Session, sentOrders);
 
 			Progress.OnNext(new Progress("Отправка заказов", 100, 100));
 
