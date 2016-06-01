@@ -256,6 +256,7 @@ namespace AnalitF.Net.Client.ViewModels
 			styleForGrid.WrapText = true;
 			styleForGrid.Alignment = HorizontalAlignment.Center;
 			styleForGrid.VerticalAlignment = VerticalAlignment.Center;
+			var maxWidthCollection = new Dictionary<int, int>();
 
 			for (int y = startTableRow; y < afterItemsPosition[0] - 1; y++) {
 				for (int x = 0; x < afterItemsPosition[1]; x++) {
@@ -265,9 +266,20 @@ namespace AnalitF.Net.Client.ViewModels
 					if (cellI == null) {
 						cellI = rowI.CreateCell(x);
 					} else {
-						var width = 256 * cellI.ToString().Length;
-						width = width < 256*5 ? 256*5 : width;
-						sheet.SetColumnWidth(x, width);
+						if(y > startTableRow)
+						{
+							var width = 256 * cellI.ToString().Length;
+							width = width < 256*5 ? 256*5 : width;
+							if(!maxWidthCollection.ContainsKey(x))
+							{
+								maxWidthCollection.Add(x, width);
+							}
+							if(width > maxWidthCollection[x])
+							{
+								maxWidthCollection[x] = width;
+							}
+							sheet.SetColumnWidth(x, maxWidthCollection[x]);
+						}
 					}
 					cellI.CellStyle = styleForGrid;
 				}

@@ -194,7 +194,7 @@ task "deploy:client", ["build:setup"]:
 		MkDir(root)
 		version = File.ReadAllText("output/setup/version.txt")
 		dst = Path.Combine(root, "AnalitF.Net-$version.exe")
-		Cp("output/setup/setup.exe", dst, true)
+		Cp("output/setup/afsetup.exe", dst, true)
 	if Globals.Maybe.PackageRoot:
 		ImpersonateIfNeeded(Globals):
 			root = Globals.PackageRoot
@@ -214,7 +214,7 @@ task "build:client:package", ["build:client:merged", "build:setup"]:
 	RmDir("output/package", true)
 	MkDir("output/package")
 	MkDir("output/package/tools")
-	Cp("output/setup/setup.exe", "output/package/tools/analitf.net.setup.exe", true)
+	Cp("output/setup/afsetup.exe", "output/package/tools/analitf.net.setup.exe", true)
 	Cp(FileSet("**.*", BaseDirectory: output), "output/package/tools/", true)
 	spec = "output/package/analitf.net.nuspec"
 	Cp("assets/package.nuspec", spec)
@@ -298,10 +298,10 @@ task "build:setup", ["build:client:merged"]:
 	if Globals.Environment != @Production:
 		arg = "--quiet"
 	Bash("./scripts/wix.sh $arg")
-	Sh("insignia -ib output/setup/setup.exe -o output/setup/engine.exe")
+	Sh("insignia -ib output/setup/afsetup.exe -o output/setup/engine.exe")
 	SignFileLocal("output/setup/engine.exe")
-	Sh("insignia -ab output/setup/engine.exe output/setup/setup.exe -o output/setup/setup.exe")
-	SignFileLocal("output/setup/setup.exe")
+	Sh("insignia -ab output/setup/engine.exe output/setup/afsetup.exe -o output/setup/afsetup.exe")
+	SignFileLocal("output/setup/afsetup.exe")
 
 task "setup:preprocess":
 	proj = "src/client/app/app.csproj"
