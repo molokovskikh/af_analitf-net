@@ -113,12 +113,15 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		public void Restore_column_width()
 		{
 			var grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
-			grid.Columns[4].Width = 125;
+			grid.Columns[0].Width = new DataGridLength(15);
+			grid.Columns[1].Width = new DataGridLength(15);
+			grid.Columns[2].Width = new DataGridLength(15);
+			var saveWidth = grid.Columns[4].ActualWidth;
 
 			Close(model);
 			InitView();
 			grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
-			Assert.AreEqual(125, grid.Columns[4].Width);
+			Assert.AreEqual(saveWidth, grid.Columns[4].Width.Value);
 		}
 	}
 }
