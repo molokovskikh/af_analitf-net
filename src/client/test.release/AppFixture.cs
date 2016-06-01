@@ -56,6 +56,30 @@ namespace test.release
 			FileHelper2.DeleteDir(Path.Combine(root, "data"));
 		}
 
+		protected override void OnActivated(object sender, AutomationEventArgs e)
+		{
+			var el = (AutomationElement)sender;
+			if (FilterByProcess
+				&& !Process.HasExited
+				&& el.Current.ProcessId != Process.Id)
+				return;
+
+			var currentId = el.ToShortText();
+			if (lastId == currentId)
+				return;
+			lastId = currentId;
+
+			Opened.OnNext(el);
+		}
+
+		protected override void Activate()
+		{
+			Process = StartProcess(Bin);
+			using (Opened.Take(1).Subscribe(x => MainWindow = x))
+				WaitMainWindow();
+			WaitIdle();
+		}
+
 		[Test]
 		public void Update_db()
 		{

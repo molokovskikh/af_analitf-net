@@ -447,6 +447,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Assert.AreEqual("Заказ препаратов ПКУ запрещен. Для изменения режима заказа препаратов ПКУ," +
 						" перейдите в Настройки во вкладку Визуализация и снимите запрет на заказ препаратов ПКУ",
 				model.OrderWarning.OrderWarning);
+				Assert.AreEqual(null, model.CurrentOffer.Value.OrderCount);
 			}
 		}
 	}

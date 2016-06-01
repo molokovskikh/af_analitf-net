@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 {
 	public class BaseFixture
 	{
-		private string lastId;
+		protected string lastId;
 		protected bool IsDebug;
 		protected string Bin;
 
@@ -148,12 +148,12 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			launchButton.Invoke();
 		}
 
-		private void OnActivated(object sender, AutomationEventArgs e)
+		protected virtual void OnActivated(object sender, AutomationEventArgs e)
 		{
 			var el = (AutomationElement)sender;
 			if (FilterByProcess
 				&& !Process.HasExited
-				&& (int)el.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty) != Process.Id)
+				&& el.Current.ProcessId != Process.Id)
 				return;
 
 			var currentId = el.ToShortText();
@@ -206,7 +206,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			return FindById(name, MainWindow);
 		}
 
-		protected void Activate()
+		protected virtual void Activate()
 		{
 			var debugPipe = Guid.NewGuid().ToString();
 			var pipe = new NamedPipeServerStream(debugPipe, PipeDirection.InOut);
