@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Open();
 			Input("Term", subject);
-			scheduler.AdvanceByMs(1000);
+			dispatcher.Invoke(() => scheduler.AdvanceByMs(1000));
 			WaitIdle();
 			AssertItemsCount("Items", 1);
 		}
@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			//проверяем что анимация загрузки завершилась в случае отмены
-			scheduler.Start();
+			dispatcher.Invoke(() => scheduler.Start());
 			//даем возможность начать анимацию
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -133,9 +133,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			Env.Barrier = new Barrier(2);
 			var attachment = Download();
-			scheduler.AdvanceByMs(100);
+			dispatcher.Invoke(() => scheduler.AdvanceByMs(100));
 			Click("ShowMain");
-			Click("ShowMails");
+			ShowMails();
 			var localAttachment = SelectByAttachmentId(attachment.Id);
 			//что бы избежать конкуренции
 			Assert.IsTrue(Env.Barrier.SignalAndWait(10.Second()), "не удалось дождаться загрузки");
@@ -146,6 +146,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var button = attachments.Descendants<Button>().First();
 				Assert.AreEqual("downloaded", button.Tag);
 			});
+		}
+
+		private void ShowMails()
+		{
+			Click("ShowMails");
+			activeTab = (UserControl)((Screen)shell.ActiveItem).GetView();
 		}
 
 		[Test]
@@ -231,8 +237,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Start();
 			Env.Scheduler = new MixedScheduler(scheduler, new DispatcherScheduler(dispatcher));
-			Click("ShowMails");
-			activeTab = (UserControl)((Screen)shell.ActiveItem).GetView();
+			ShowMails();
 			return att;
 		}
 
@@ -259,8 +264,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		private void Open()
 		{
 			Start();
-			Click("ShowMails");
-			activeTab = (UserControl)((Screen)shell.ActiveItem).GetView();
+			ShowMails();
 		}
 
 		private void AssertItemsCount(string name, int count)

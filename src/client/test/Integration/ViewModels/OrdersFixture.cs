@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(shell.CanSendOrders.Value, Is.True);
 
 			scheduler.AdvanceByMs(5000);
-			Assert.That(shell.CanSendOrders, Is.False);
+			Assert.That(shell.CanSendOrders.Value, Is.False);
 		}
 
 		[Test]
@@ -103,7 +103,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Freeze();
 
 			scheduler.AdvanceByMs(1000);
-			Assert.That(shell.CanSendOrders, Is.False);
+			Assert.That(shell.CanSendOrders.Value, Is.False);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 

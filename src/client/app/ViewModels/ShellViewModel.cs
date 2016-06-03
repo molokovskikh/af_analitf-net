@@ -16,6 +16,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config;
@@ -1131,6 +1132,14 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 
+			var view = GetView();
+			if (view != null) {
+				foreach (var item in ((ShellView)view).Items.Items) {
+					var el = ((ShellView)view).Items.ItemContainerGenerator.ContainerFromItem(item) as Control;
+					if (el != null)
+						el.Template = null;
+				}
+			}
 			if (Items.Count > 0) {
 				var items = Items.ToArray();
 				Items.Clear();
