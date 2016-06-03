@@ -1131,15 +1131,11 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 
-			if (Navigator != null) {
-				Navigator.Dispose();
-				Navigator = null;
-			}
-
-			if (ActiveItem is IDisposable) {
-				var item = ((IDisposable)ActiveItem);
+			if (Items.Count > 0) {
+				var items = Items.ToArray();
+				Items.Clear();
 				ActiveItem = null;
-				item.Dispose();
+				items.OfType<IDisposable>().Each(x => x.Dispose());
 			}
 
 			if (session != null) {

@@ -9,7 +9,7 @@ using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class Navigator : IDisposable
+	public class Navigator
 	{
 		private Conductor<IScreen>.Collection.OneActive conductor;
 		private List<IScreen> navigationStack = new List<IScreen>();
@@ -56,11 +56,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.ActivateItem(navigationStack[0]);
 				navigationStack.RemoveAt(0);
 			}
-		}
-
-		public void Dispose()
-		{
-			navigationStack.Clear();
 		}
 
 		public void CloseActive()
