@@ -170,8 +170,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			settings.Password = "123";
 			session.Flush();
 			shell.Reload();
+			scheduler.Start();
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
 			var canClose = false;
 			shell.CanClose(b => canClose = b);
 
@@ -448,6 +448,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			order.Send = false;
 
+			Assert.AreEqual(0, shell.Stat.Value.ReadyForSendOrdersCount);
+			scheduler.Start();
 			Assert.AreEqual(1, shell.Stat.Value.ReadyForSendOrdersCount);
 			session.Refresh(order);
 			Assert.IsTrue(order.Send);
