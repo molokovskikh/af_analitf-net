@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				addresses = new[] { address };
 			}
 			var settings = new Settings(addresses);
-			shell.CurrentAddress = address;
+			shell.CurrentAddress.Value = address;
 			shell.Addresses = addresses.ToList();
 
 			screen.Settings.Value = settings;
@@ -78,9 +78,9 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			shell.ActiveItem = screen;
 		}
 
-		protected void Open(BaseScreen screen)
+		protected void Open(object model)
 		{
-			ScreenExtensions.TryActivate(screen);
+			ScreenExtensions.TryActivate(model);
 		}
 
 		protected void Close(object model)

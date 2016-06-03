@@ -226,7 +226,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var newAddress = new Address { Name = "Тестовый адрес доставки" };
 			session.Save(newAddress);
 			MakeOrder();
-			shell.CurrentAddress = newAddress;
+			shell.CurrentAddress.Value = newAddress;
 
 			Assert.That(model.Orders.Count, Is.EqualTo(0));
 			model.AddressSelector.All.Value = true;

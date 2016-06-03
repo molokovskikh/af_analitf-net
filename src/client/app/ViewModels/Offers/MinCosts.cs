@@ -48,6 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Costs = Diff.Skip(1).Throttle(Consts.TextInputLoadTimeout, UiScheduler).Select(v => (object)v)
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(SearchBehavior.ActiveSearchTerm)
+				.Merge(DbReloadToken)
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(Load))
 				.Switch()

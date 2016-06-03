@@ -80,9 +80,9 @@ namespace AnalitF.Net.Client.Config
 
 		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
+			if (Factory == null)
+				return Observable.Empty<T>();
 			var task = new Task<T>(() => {
-				if (Factory == null)
-					return default(T);
 				if (BaseScreen.BackgroundSession == null)
 					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
 					return @select(BaseScreen.BackgroundSession);

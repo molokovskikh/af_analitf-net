@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			ExecuteFixture(new CreateMail(), session);
 
-			DataMother.News(session);
+			DataMother.CreateNews(session);
 
 			SimpleFixture.InnerCreateOrderReject(session,
 				Tuple.Create(session.Query<TestProduct>().First(p => !p.Hidden).FullName, 0u, 10u),

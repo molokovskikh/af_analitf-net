@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			shell.ShowPrice();
 			var prices = (PriceViewModel)shell.ActiveItem;
-			prices.CurrentPrice.Value = prices.Prices.First(p => p.PositionCount > 0);
+			prices.CurrentPrice.Value = prices.Prices.Value.First(p => p.PositionCount > 0);
 			prices.EnterPrice();
 			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem,
 				prices.CurrentPrice.Value.Id + manager.MessageBoxes.Implode());
@@ -322,15 +322,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				String.Format("рассматриваемый offerId = {0}, существующие = {1}",
 					order.Lines[0].OfferId,
 					session.Query<OrderLine>().Implode(l => $"offerId = {l.OfferId}, ошибка = {l.SendError}")));
-		}
-
-		[Test]
-		public void Show_default_item()
-		{
-			var current = shell.ActiveItem;
-			Assert.IsInstanceOf<Main>(current);
-			shell.ResetNavigation();
-			Assert.AreEqual(current, shell.ActiveItem);
 		}
 
 		[Test]

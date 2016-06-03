@@ -11,28 +11,7 @@ namespace AnalitF.Net.Client.Test.Integration
 	public class BaseScreenFixture : ViewModelFixture
 	{
 		[Test]
-		public void Close_screen_if_navigation_chain_not_empty()
-		{
-			var parent = new BaseScreen { DisplayName = "Каталог" };
-			ScreenExtensions.TryActivate(parent);
-			parent.NavigateBackward();
-
-			parent.Shell = shell;
-			shell.ActivateItem(parent);
-			Assert.That(shell.ActiveItem, Is.EqualTo(parent));
-			parent.NavigateBackward();
-			Assert.That(shell.ActiveItem, Is.EqualTo(parent));
-
-			var child = new BaseScreen { DisplayName = "Предложения" };
-			shell.Navigate(child);
-			Assert.That(shell.ActiveItem, Is.EqualTo(child));
-			child.NavigateBackward();
-			Assert.That(shell.ActiveItem, Is.EqualTo(parent));
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
-		}
-
-		[Test]
-		public void Reactivate_view()
+		public void Open_new_item()
 		{
 			shell.ShowCatalog();
 			var catalog = ((CatalogViewModel)shell.ActiveItem);
@@ -44,7 +23,8 @@ namespace AnalitF.Net.Client.Test.Integration
 
 			shell.ShowCatalog();
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
-			Assert.That(shell.ActiveItem, Is.EqualTo(catalog));
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+			Assert.AreNotEqual(shell.ActiveItem, catalog);
 		}
 
 		[Test]
@@ -52,7 +32,7 @@ namespace AnalitF.Net.Client.Test.Integration
 		{
 			shell.ShowPrice();
 			var price = (PriceViewModel)shell.ActiveItem;
-			price.CurrentPrice.Value = price.Prices.FirstOrDefault();
+			price.CurrentPrice.Value = price.Prices.Value.FirstOrDefault();
 			price.EnterPrice();
 			Assert.That(shell.ActiveItem, Is.InstanceOf<PriceOfferViewModel>());
 			shell.ShowCatalog();

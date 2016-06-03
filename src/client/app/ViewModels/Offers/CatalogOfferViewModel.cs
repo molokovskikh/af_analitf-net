@@ -114,6 +114,10 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
+			Bus.Listen<string>("db")
+				.Where(m => m == "Reload")
+				.Subscribe(_ => CatalogOffers?.Clear(), CloseCancellation.Token);
+
 			Offers.Select(v => {
 					v = v ?? new List<Offer>();
 					if (IsFilterByCatalogName) {
