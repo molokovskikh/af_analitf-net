@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Orders[0].Send = false;
 
 			shell.UpdateStat();
-			Assert.That(shell.CanSendOrders, Is.True);
+			Assert.That(shell.CanSendOrders.Value, Is.True);
 
 			scheduler.AdvanceByMs(5000);
 			Assert.That(shell.CanSendOrders, Is.False);
@@ -96,7 +96,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			PrepareCurrent();
 
 			shell.UpdateStat();
-			Assert.That(shell.CanSendOrders, Is.True);
+			Assert.That(shell.CanSendOrders.Value, Is.True);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 
 			Assert.True(model.CanFreeze);
