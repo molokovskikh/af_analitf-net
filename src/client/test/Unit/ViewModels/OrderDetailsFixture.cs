@@ -35,10 +35,12 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			manager.DefaultQuestsionResult = MessageBoxResult.No;
 			model.CurrentLine.Value = model.Lines.Value[0];
 			model.Delete();
+			model.OfferUpdated();
 			Assert.AreEqual(1, model.Lines.Value.Count);
 			manager.DefaultQuestsionResult = MessageBoxResult.Yes;
 			model.CurrentLine.Value = model.Lines.Value[0];
 			model.Delete();
+			model.OfferUpdated();
 			Assert.AreEqual(0, model.Lines.Value.Count);
 		}
 	}
