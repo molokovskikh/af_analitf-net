@@ -11,6 +11,7 @@ using Common.NHibernate;
 using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI;
+using System.Windows;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -43,6 +44,22 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			session.Clear();
 			Assert.IsNull(session.Get<Order>(order.Id));
+		}
+
+		[Test]
+		public void Delete_line_confirm()
+		{
+			var order = MakeOrder();
+			var model = Open(new OrderDetailsViewModel(order));
+
+			manager.DefaultQuestsionResult = MessageBoxResult.No;
+			model.CurrentLine.Value = model.Lines.Value.First();
+			model.Delete();
+			Assert.AreEqual(1, model.Lines.Value.Count);
+			manager.DefaultQuestsionResult = MessageBoxResult.Yes;
+			model.CurrentLine.Value = model.Lines.Value.First();
+			model.Delete();
+			Assert.AreEqual(0, model.Lines.Value.Count);
 		}
 
 		[Test]

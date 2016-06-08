@@ -182,8 +182,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public void Delete()
 		{
-			if (!Confirm("Удалить выбранные заявки?"))
-				return;
 			editor.Delete();
 		}
 

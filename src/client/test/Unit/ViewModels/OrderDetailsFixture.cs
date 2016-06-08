@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Orders;
@@ -22,26 +23,6 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			user.Permissions.Add(new Permission("ECOO"));
 			model = new OrderDetailsViewModel(order);
 			Assert.IsTrue(model.CanExport.Value);
-		}
-
-		[Test]
-		public void Delete_line_confirm()
-		{
-			var price = new Price("тестовый");
-			var order = new Order(new Address("тестовый"), new Offer(price, 150) {
-				RequestRatio = 15
-			}, 15);
-			var model = new OrderDetailsViewModel(order);
-			manager.DefaultQuestsionResult = MessageBoxResult.No;
-			model.CurrentLine.Value = model.Lines.Value[0];
-			model.Delete();
-			model.OfferUpdated();
-			Assert.AreEqual(1, model.Lines.Value.Count);
-			manager.DefaultQuestsionResult = MessageBoxResult.Yes;
-			model.CurrentLine.Value = model.Lines.Value[0];
-			model.Delete();
-			model.OfferUpdated();
-			Assert.AreEqual(0, model.Lines.Value.Count);
 		}
 	}
 }
