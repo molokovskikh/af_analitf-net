@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Orders;
 using NUnit.Framework;
-using System.Windows;
 using Address = AnalitF.Net.Client.Models.Address;
 
 namespace AnalitF.Net.Client.Test.Unit.ViewModels
