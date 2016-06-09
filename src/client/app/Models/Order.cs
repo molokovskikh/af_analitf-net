@@ -214,6 +214,8 @@ namespace AnalitF.Net.Client.Models
 				return new Price {
 					Id = Price.Id,
 					CostFactor = 1,
+					Name = "Неактивный прайс-лист",
+					RegionName = "Inforoom"
 				};
 			}
 		}
