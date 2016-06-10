@@ -215,7 +215,8 @@ namespace AnalitF.Net.Client.Models
 					Id = Price.Id,
 					CostFactor = 1,
 					Name = "Неактивный прайс-лист",
-					RegionName = "Inforoom"
+					RegionName = "Inforoom",
+					PriceName = "Неактивный прайс-лист"
 				};
 			}
 		}
