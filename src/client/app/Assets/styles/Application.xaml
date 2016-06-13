@@ -46,7 +46,7 @@
 		<Setter Property="BorderBrush" Value="White" />
 	</Style>
 
-	<Style x:Key="ButtonInsideComboBoxPopup" TargetType="Button">
+	<Style x:Key="ButtonInsideComboBoxPopup" TargetType="Control">
 		<Setter Property="VerticalAlignment" Value="Center" />
 		<Setter Property="HorizontalAlignment" Value="Center" />
 		<Setter Property="Background" Value="Transparent" />

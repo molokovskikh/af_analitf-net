@@ -224,42 +224,29 @@ namespace AnalitF.Net.Client.Views
 					if (x.EditAddresses) {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector)) {
 							Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
-						}
+						}						
+												
 					} else {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector2)) {
-							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);
-						}
+							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);							
+						}						
+					}
+
+					if (model.Addresses.Count == 0)
+					{
+						model.PropertyChanged += (sender_, e) =>
+						{
+							if (e.PropertyName == nameof(model.Addresses))
+							{
+								reloadAddresses(model, x.EditAddresses);
+							}							
+						};
+					}
+					else
+					{
+						reloadAddresses(model, x.EditAddresses);
 					}
 				});
-
-				if(Addresses.ItemTemplateSelector is AddressTemplateSelector)
-				{
-					return;
-				}
-
-				model.PropertyChanged += (sender_, e) =>
-				{
-					if (e.PropertyName == nameof(model.Addresses))
-					{
-						Addresses.ItemsSource = null;
-						Addresses.Items.Clear();
-
-						var addressesProxy = new List<AddressProxy>();
-
-						foreach (var address in model.Addresses)
-						{
-							addressesProxy.Add(new AddressProxy(address));
-						}
-
-						Addresses.Items.Add(new AddressButton("Выбрать все", AddressButton.Behaviors.SelectAll, addressesProxy));
-						Addresses.Items.Add(new AddressButton("Сбросить все", AddressButton.Behaviors.DeselectAll, addressesProxy));
-
-						foreach (var addressProxy in addressesProxy)
-						{
-							Addresses.Items.Add(addressProxy);
-						}
-					}
-				};
 			};
 
 			EventManager.RegisterClassHandler(typeof(ShellView), Hyperlink.RequestNavigateEvent,
@@ -281,6 +268,32 @@ namespace AnalitF.Net.Client.Views
 			DebugErrorHolder.Content = null;
 			DebugSqlHolder.Content = null;
 #endif
+		}
+
+		private void reloadAddresses(ShellViewModel model, bool manageAddresses)
+		{
+			Addresses.ItemsSource = null;
+			Addresses.Items.Clear();			
+
+			var addressesProxy = new List<AddressProxy>();
+
+			foreach (var address in model.Addresses)
+			{
+				addressesProxy.Add(new AddressProxy(address));
+			}
+
+			if (manageAddresses)
+			{
+				Addresses.Items.Add(new AddressButton("Выбрать все", AddressButton.Behaviors.SelectAll, addressesProxy));
+				Addresses.Items.Add(new AddressButton("Сбросить все", AddressButton.Behaviors.DeselectAll, addressesProxy));
+			}			
+
+			foreach (var addressProxy in addressesProxy)
+			{
+				Addresses.Items.Add(addressProxy);
+			}
+
+			Addresses.SelectedItem = (addressesProxy.FirstOrDefault(a => a.Id == model.CurrentAddress?.Id));
 		}
 
 		private void UpdateNot(object sender, EventArgs e)
