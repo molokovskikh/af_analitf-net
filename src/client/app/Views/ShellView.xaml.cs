@@ -22,6 +22,9 @@ using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using Common.Tools.Calendar;
 using VerticalAlignment = System.Windows.VerticalAlignment;
+using System.Globalization;
+using AnalitF.Net.Client.Models;
+using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -61,6 +64,139 @@ namespace AnalitF.Net.Client.Views
 		}
 	}
 
+	public class AddressVisiblityConverterPositive : IValueConverter
+	{
+		object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value.GetType() != typeof(AddressProxy))
+			{
+				return Visibility.Collapsed;
+			}
+			return Visibility.Visible;
+		}
+
+		object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return Binding.DoNothing;
+		}
+	}
+
+	public class AddressVisiblityConverterNegative : IValueConverter
+	{
+		object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			if (value.GetType() == typeof(AddressProxy))
+			{
+				return Visibility.Collapsed;
+			}
+			return Visibility.Visible;
+		}
+
+		object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return Binding.DoNothing;
+		}
+	}
+
+	public class AddressButton
+	{
+		public enum Behaviors
+		{
+			SelectAll = 0,
+			DeselectAll = 1
+		};
+
+		public string Name { get; set; }
+		private Behaviors Behavior;
+		private IEnumerable<AddressProxy> _addresses;
+
+		/*
+		 * Заглушка, чтобы избежать ошибок при байдинге
+		 */
+		public bool IsSelected { get; set; }
+
+		public AddressButton(string caption, Behaviors behavior, IEnumerable<AddressProxy> addresses)
+		{
+			Name = caption;
+			this.Behavior = behavior;
+			this._addresses = addresses;
+		}
+
+		public void Click()
+		{
+			foreach (var item in _addresses)
+				{
+				switch (Behavior)
+				{
+					case Behaviors.SelectAll:
+						item.IsSelected = true;
+						break;
+					case Behaviors.DeselectAll:
+						item.IsSelected = false;
+						break;
+				}
+			}
+		}
+	}
+
+	public class AddressProxy : Address, INotifyPropertyChanged
+	{
+		private Address _address;
+
+		public bool IsSelected
+		{
+			get
+			{
+				if(_address.Config == null)
+				{
+					return false;
+				}
+
+				return _address.Config.IsActive;
+			}
+			set
+			{
+				if (_address.Config == null)
+				{
+					return;
+				}
+
+				_address.Config.IsActive = value;
+
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+			}
+		}
+
+		public AddressProxy(Address address)
+		{
+			_address = address;
+			BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+			var properties = address.GetType().GetProperties(bindingFlags);
+			foreach(var property in properties)
+			{
+				if(property.GetSetMethod() == null)
+				{
+					continue;
+				}
+				property.SetValue(this, property.GetValue(address, null), null);
+			}
+
+			var fields = address.GetType().GetFields(bindingFlags);
+			foreach(var field  in fields)
+			{
+				field.SetValue(this, field.GetValue(address));
+			}
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		/*
+	 * Заглушка, чтобы избежать ошибок при байдинге
+	 */
+		public void Click() { }
+	}
+
+
 	public partial class ShellView : Window
 	{
 		private object originalContent;
@@ -95,6 +231,35 @@ namespace AnalitF.Net.Client.Views
 						}
 					}
 				});
+
+				if(Addresses.ItemTemplateSelector is AddressTemplateSelector)
+				{
+					return;
+				}
+
+				model.PropertyChanged += (sender_, e) =>
+				{
+					if (e.PropertyName == nameof(model.Addresses))
+					{
+						Addresses.ItemsSource = null;
+						Addresses.Items.Clear();
+
+						var addressesProxy = new List<AddressProxy>();
+
+						foreach (var address in model.Addresses)
+						{
+							addressesProxy.Add(new AddressProxy(address));
+						}
+
+						Addresses.Items.Add(new AddressButton("Выбрать все", AddressButton.Behaviors.SelectAll, addressesProxy));
+						Addresses.Items.Add(new AddressButton("Сбросить все", AddressButton.Behaviors.DeselectAll, addressesProxy));
+
+						foreach (var addressProxy in addressesProxy)
+						{
+							Addresses.Items.Add(addressProxy);
+						}
+					}
+				};
 			};
 
 			EventManager.RegisterClassHandler(typeof(ShellView), Hyperlink.RequestNavigateEvent,
