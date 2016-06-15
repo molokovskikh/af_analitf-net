@@ -490,6 +490,7 @@ task "promote:to:rtm":
 	CopyUpdateBin("migration", Path.Combine(root, "migration-beta"))
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'rtm'")
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration'")
+	SendReleaseNotification(Globals, "Обновление AnalitF.net", "Версия $version передана всем клиентам")
 	print "Версия $version установлена в канал $dstChannel"
 
 task "iis:clean":
