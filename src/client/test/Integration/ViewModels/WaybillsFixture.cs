@@ -129,23 +129,23 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Waybill_mark_report_with_NDS()
 		{
-			waybillMarkupReport(System.Windows.MessageBoxResult.Yes, 1.1);
+			WaybillMarkupReport(System.Windows.MessageBoxResult.Yes, 1.1);
 		}
 
 		[Test]
 		public void Waybill_mark_report_without_NDS()
 		{
-			waybillMarkupReport(System.Windows.MessageBoxResult.No, 1);
+			WaybillMarkupReport(System.Windows.MessageBoxResult.No, 1);
 		}
 
-		protected void waybillMarkupReport(System.Windows.MessageBoxResult exceptResult, double k)
-		{			
+		protected void WaybillMarkupReport(System.Windows.MessageBoxResult exceptResult, double k)
+		{
 			session.CreateSQLQuery(@"
 insert into BarCodes (value) values ('first_test_bar');
 ").ExecuteUpdate();
 			var waybill = new Waybill()
 			{
-				DocumentDate = DateTime.Parse($"03.03.{DateTime.Now.Year - 1}"),					
+				DocumentDate = DateTime.Parse($"03.03.{DateTime.Now.Year - 1}"),
 			};
 
 			var waybillLineOne = new WaybillLine(waybill)
@@ -156,7 +156,7 @@ insert into BarCodes (value) values ('first_test_bar');
 				RetailCost = 305,
 				ProducerCost = (decimal)290.155,
 				RegistryCost = 290,
-			};			
+			};
 
 			var waybillLineTwo = new WaybillLine(waybill)
 			{
@@ -177,7 +177,7 @@ insert into BarCodes (value) values ('first_test_bar');
 				}
 				disposableSession.CreateSQLQuery($@"
 				delete from waybilllines where EAN13 = 'first_test_bar';
-				delete from BarCodes where value = 'first_test_bar';				
+				delete from BarCodes where value = 'first_test_bar';
 				").ExecuteUpdate();
 				disposableSession.Delete(waybill);
 				if (!disposableSession.Equals(session))
@@ -201,14 +201,14 @@ insert into BarCodes (value) values ('first_test_bar');
 			var open = Next<OpenResult>(result);
 
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-			Assert.That(open.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));				
+			Assert.That(open.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));
 
 			var stream = new MemoryStream(File.ReadAllBytes(open.Filename));
 			var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(stream);
 			stream.Close();
 			var sheet = workbook[0];
 
-			var enumenator = sheet.GetRowEnumerator();			
+			var enumenator = sheet.GetRowEnumerator();
 			while (enumenator.MoveNext())
 			{
 				var currentRow = (NPOI.HSSF.UserModel.HSSFRow)enumenator.Current;
@@ -220,33 +220,52 @@ insert into BarCodes (value) values ('first_test_bar');
 			}
 
 			Assert.IsNotNull(enumenator.Current);
-										
-			var inExcel = (enumenator.Current as NPOI.HSSF.UserModel.HSSFRow).Cells.ToArray();
 
-			var slasher = new Helpers.SlashNumber();
+			var inExcel = (enumenator.Current as NPOI.HSSF.UserModel.HSSFRow).Cells.ToArray();
 
 			Assert.AreEqual("first_test_bar", inExcel[0].ToString());
 
-			Assert.AreEqual((decimal)(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000,
-				Convert.ToDecimal(inExcel[1].ToString()));
+			Assert.AreEqual((decimal)0.005,
+				Convert.ToDecimal(inExcel[1].ToString()), "(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000 = 0.005");
 
-			Assert.AreEqual((waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * (decimal)k,
-				Convert.ToDecimal(inExcel[2].ToString()));
+			if(k == 1.1)
+			{
+				Assert.AreEqual((decimal)1.683,
+				Convert.ToDecimal(inExcel[2].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * {k} = 1.683");
 
-			Assert.AreEqual((waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * (decimal)k,
-				Convert.ToDecimal(inExcel[3].ToString()));
+				Assert.AreEqual((decimal)1.7105,
+				Convert.ToDecimal(inExcel[3].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * {k} = 1.7105");
 
-			Assert.AreEqual(slasher.Convert(((decimal)(waybillLineOne.Quantity * waybillLineOne.ProducerCost)
-				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * (decimal)k, 5),
-				Convert.ToDecimal(inExcel[4].ToString()));
+				Assert.AreEqual((decimal)1.162834,
+				Convert.ToDecimal(inExcel[4].ToString()), $@"Helpers.SlashNumber().Convert((waybillLineOne.Quantity * waybillLineOne.ProducerCost)
+				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * {k}, 5) = 1.62834");
+			}
 
-			Assert.AreEqual(Math.Min((decimal)waybillLineOne.RegistryCost, (decimal)waybillLineTwo.RegistryCost), Convert.ToDecimal(inExcel[5].ToString()));
+			if (k == 1.0)
+			{
+				Assert.AreEqual((decimal)1.53,
+				Convert.ToDecimal(inExcel[2].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * {k} = 1.53");
 
-			Assert.AreEqual((decimal)(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000, Convert.ToDecimal(inExcel[6].ToString()));
+				Assert.AreEqual((decimal)1.555,
+				Convert.ToDecimal(inExcel[3].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * {k} = 1.555");
 
-			Assert.AreEqual((Math.Round((decimal)(waybillLineOne.RetailCost + waybillLineTwo.RetailCost) / 2, 2) -
-						Math.Round((decimal)(waybillLineOne.SupplierCost + waybillLineTwo.SupplierCost) / 2, 2)) / 1000,
-						Convert.ToDecimal(inExcel[7].ToString()));			
-		}		
+				Assert.AreEqual((decimal)1.48031,
+				Convert.ToDecimal(inExcel[4].ToString()), $@"Helpers.SlashNumber().Convert((waybillLineOne.Quantity * waybillLineOne.ProducerCost)
+				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * {k}, 5) = 1.48031");
+			}
+
+
+
+
+
+
+			Assert.AreEqual((decimal)290.0, Convert.ToDecimal(inExcel[5].ToString()), "Math.Min((decimal)waybillLineOne.RegistryCost, (decimal)waybillLineTwo.RegistryCost) = 290.0");
+
+			Assert.AreEqual((decimal)0.005, Convert.ToDecimal(inExcel[6].ToString()), "(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000 = 0.005");
+
+			Assert.AreEqual((decimal)0.005,
+						Convert.ToDecimal(inExcel[7].ToString()), @"(Math.Round((decimal)(waybillLineOne.RetailCost + waybillLineTwo.RetailCost) / 2, 2) -
+						Math.Round((decimal)(waybillLineOne.SupplierCost + waybillLineTwo.SupplierCost) / 2, 2)) / 1000 = 0.005");
+		}
 	}
 }
