@@ -110,6 +110,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				offer = offer ?? SafeOffer();
 				var order = new Order(offer.Price, address);
 				order.TryOrder(offer, 1);
+				order.DisplayId = order.Id;
 				//что бы сервер не считал завки дублями нужно генерировать разные коды
 				order.Lines[0].CodeCr = order.CreatedOn.AddSeconds(random.Next(-15, 15)).ToString();
 				localSession.Save(order);
