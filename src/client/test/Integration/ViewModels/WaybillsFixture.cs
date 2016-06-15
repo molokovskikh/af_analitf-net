@@ -236,7 +236,7 @@ insert into BarCodes (value) values ('first_test_bar');
 				Assert.AreEqual((decimal)1.7105,
 				Convert.ToDecimal(inExcel[3].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * {k} = 1.7105");
 
-				Assert.AreEqual((decimal)1.162834,
+				Assert.AreEqual((decimal)1.62834,
 				Convert.ToDecimal(inExcel[4].ToString()), $@"Helpers.SlashNumber().Convert((waybillLineOne.Quantity * waybillLineOne.ProducerCost)
 				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * {k}, 5) = 1.62834");
 			}
