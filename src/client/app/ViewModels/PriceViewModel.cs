@@ -22,18 +22,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public PriceViewModel()
 		{
 			DisplayName = "Прайс-листы фирм";
-			CurrentPrice = new NotifyValue<Price>();
-			ShowLeaders = new NotifyValue<bool>();
-			Prices = new List<Price>();
+			InitFields();
+			Prices.Value = new List<Price>();
 			QuickSearch = new QuickSearch<Price>(UiScheduler,
-				t => Prices.FirstOrDefault(p => p.Name.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
+				t => Prices.Value.FirstOrDefault(p => p.Name.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentPrice);
 		}
 
 		public QuickSearch<Price> QuickSearch { get; set; }
 
 		[Export]
-		public List<Price> Prices { get; set; }
+		public NotifyValue<List<Price>> Prices { get; set; }
 
 		[DataMember]
 		public NotifyValue<Price> CurrentPrice { get; set; }
@@ -45,8 +44,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (OpenSinglePrice) {
 				OpenSinglePrice = false;
-				if (Prices.Count == 1 && Prices[0].PositionCount > 0) {
-					CurrentPrice.Value = Prices.FirstOrDefault();
+				if (Prices.Value.Count == 1 && Prices.Value[0].PositionCount > 0) {
+					CurrentPrice.Value = Prices.Value.FirstOrDefault();
 					EnterPrice();
 				}
 			}
@@ -73,10 +72,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(TimeSpan.FromMilliseconds(1000), UiScheduler)
 				.Subscribe(_ => ResultsSink.OnNext(MessageResult.Warn("Изменение настроек прайс-листов будет применено при следующем обновлении.")), CloseCancellation.Token);
 
-			Prices = prices;
+			Prices.Value = prices;
 			if (CurrentPrice.Value != null) {
-				CurrentPrice.Value = Prices.Where(p => p.Id == CurrentPrice.Value.Id)
-					.DefaultIfEmpty(Prices.FirstOrDefault())
+				CurrentPrice.Value = Prices.Value.Where(p => p.Id == CurrentPrice.Value.Id)
+					.DefaultIfEmpty(Prices.Value.FirstOrDefault())
 					.First();
 			}
 		}

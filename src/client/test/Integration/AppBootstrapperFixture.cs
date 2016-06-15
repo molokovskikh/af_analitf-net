@@ -60,16 +60,16 @@ namespace AnalitF.Net.Client.Test.Integration
 			session.Save(new Address("Тестовый адрес доставки"));
 
 			StartShell();
-			var currentAddress = shell.Addresses.First(a => a.Id != shell.CurrentAddress.Id);
-			shell.CurrentAddress = currentAddress;
+			var currentAddress = shell.Addresses.First(a => a.Id != shell.CurrentAddress.Value.Id);
+			shell.CurrentAddress.Value = currentAddress;
 
 			app.Serialize();
-			var savedAddressId = shell.CurrentAddress.Id;
+			var savedAddressId = shell.CurrentAddress.Value.Id;
 
 			app = CreateBootstrapper();
 			StartShell();
-			Assert.AreEqual(savedAddressId, shell.CurrentAddress.Id);
-			Assert.True(shell.Addresses.Contains(shell.CurrentAddress));
+			Assert.AreEqual(savedAddressId, shell.CurrentAddress.Value.Id);
+			Assert.True(shell.Addresses.Contains(shell.CurrentAddress.Value));
 		}
 
 		[Test]

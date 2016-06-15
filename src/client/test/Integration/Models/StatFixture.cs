@@ -15,7 +15,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		{
 			session.DeleteEach<Order>();
 			var address = session.Query<Address>().First();
-			var stat = Stat.Update(session, address);
+			var stat = Stat.Update(stateless, address);
 			Assert.AreEqual(0, stat.OrdersCount);
 		}
 

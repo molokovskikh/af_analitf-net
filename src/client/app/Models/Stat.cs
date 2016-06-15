@@ -44,15 +44,11 @@ namespace AnalitF.Net.Client.Models
 
 		public override string ToString()
 		{
-			return string.Format("OrdersCount: {0}, OrderLinesCount: {1}, Sum: {2}, WeeklySum: {3}, MonthlySum: {4}",
-				OrdersCount,
-				OrderLinesCount,
-				Sum,
-				WeeklySum,
-				MonthlySum);
+			return
+				$"OrdersCount: {OrdersCount}, OrderLinesCount: {OrderLinesCount}, Sum: {Sum}, WeeklySum: {WeeklySum}, MonthlySum: {MonthlySum}";
 		}
 
-		public static Stat Update(ISession session, Address value)
+		public static Stat Update(IStatelessSession session, Address value)
 		{
 			if (value == null) {
 				return new Stat();
