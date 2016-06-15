@@ -435,15 +435,14 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			});
 		}
 		[Test]
-		public void Check_DislayId()
+		public void Check_DisplayId()
 		{
 			localSession.DeleteEach<Order>();
 			var order = MakeOrder();
-			var id = order.DisplayId;
+			var displayId = order.DisplayId;
 			Run(new UpdateCommand());
 			var orders = localSession.Query<Order>().ToArray();
-			Assert.AreEqual(2, orders.Length);
-			var loaded = orders.First(x => x.Id != order.Id);
+			Assert.AreEqual(displayId, orders.First().DisplayId);
 		}
 	}
 }
