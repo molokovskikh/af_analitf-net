@@ -89,11 +89,14 @@ namespace AnalitF.Net.Client.Models.Commands
 			Reporter.StageCount(4);
 			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			var sendLogsTask = Download();
-			if (result == UpdateResult.UpdatePending)
-				return result;
-			Import();
-			Log.InfoFormat("Обновление завершено успешно");
+			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
+				Log.InfoFormat("Получено обновление приложения");
+				result = UpdateResult.UpdatePending;
+			} else {
+				Import();
+			}
 			WaitAndLog(sendLogsTask, "Отправка логов");
+			Log.InfoFormat("Обновление завершено успешно");
 			return result;
 		}
 
@@ -190,10 +193,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}//using (var cleaner = new FileCleaner())
 
-			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
-				Log.InfoFormat("Получено обновление приложения");
-				result = UpdateResult.UpdatePending;
-			}
 			return sendLogsTask;
 		}
 
