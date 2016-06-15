@@ -274,7 +274,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
 				//что бы не потерять накладные
-				if (Directory.Exists(Config.BinUpdateDir) && Directory.GetFiles(Config.BinUpdateDir, "*.meta.txt").Length > 0) {
+				if (Directory.Exists(Config.UpdateTmpDir) && Directory.GetFiles(Config.UpdateTmpDir, "*.meta.txt").Length > 0) {
 					using (var command = new UpdateCommand())
 						return Sync(command, c => c.Process(() => {
 							((UpdateCommand)c).Import();
