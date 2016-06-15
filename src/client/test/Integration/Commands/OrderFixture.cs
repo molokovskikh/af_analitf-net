@@ -434,5 +434,16 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				AddressId = localSession.Query<Address>().First().Id
 			});
 		}
+		[Test]
+		public void Check_DislayId()
+		{
+			localSession.DeleteEach<Order>();
+			var order = MakeOrder();
+			var id = order.DisplayId;
+			Run(new UpdateCommand());
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(2, orders.Length);
+			var loaded = orders.First(x => x.Id != order.Id);
+		}
 	}
 }
