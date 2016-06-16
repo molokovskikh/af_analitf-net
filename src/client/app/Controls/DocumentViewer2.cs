@@ -5,21 +5,14 @@ using System.Linq;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Documents.Serialization;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Xps;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
-using Common.Tools;
-using System.Windows.Xps.Packaging;
-using System.Windows.Media.Imaging;
-using AnalitF.Net.Client.Models.Print;
-using NHibernate.Util;
+
 using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
 
