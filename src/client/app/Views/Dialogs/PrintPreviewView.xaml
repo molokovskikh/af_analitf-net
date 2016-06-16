@@ -36,37 +36,58 @@
                   <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <ToolBar ToolBarTray.IsLocked="True"
-										 Height="44"
+										 Height="46"
                      KeyboardNavigation.TabNavigation="Continue">
 
-                  <Button Command="ApplicationCommands.Print" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="ApplicationCommands.Print"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Печать (CTRL+P)">
                     <Image Source="/assets/images/printer.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
-                  <Button Command="ApplicationCommands.Copy" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="ApplicationCommands.Copy"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Копировать (CTRL+C)">
                     <Image Source="/assets/images/copy.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
                   <Separator />
-                  <Button Command="NavigationCommands.IncreaseZoom" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="NavigationCommands.IncreaseZoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Увеличить размер содержимого (CTRL +)">
                     <Image Source="/assets/images/zoom_in.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
-                  <Button Command="NavigationCommands.DecreaseZoom" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="NavigationCommands.DecreaseZoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Уменьшить размер содержимого (CTRL -)">
                     <Image Source="/assets/images/zoom_out.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
                   <Separator />
-                  <Button Command="NavigationCommands.Zoom" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="100.0">
+                  <Button Command="NavigationCommands.Zoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="100.0"
+													ToolTip="100% (CTRL + 1)">
                     <Image Source="/assets/images/doc_size.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
-                  <Button Command="{x:Static controls:DocumentViewer2.FitToWidthCommand}" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToWidthCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="По ширине страницы (CTRL + 2)">
                     <Image Source="/assets/images/doc_width.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
-                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="1">
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="1"
+													ToolTip="Страница целиком (CTRL + 3)">
                     <Image Source="/assets/images/doc.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
-                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" CommandParameter="2" >
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="2"
+													ToolTip="Две страницы (CTRL + 4)">
                     <Image Source="/assets/images/doc_two_pages.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
                   <Separator />
-                  <Button Command="{x:Static controls:CustomDocPreviewCommands.SaveToRtfCommand}" CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                  <Button Command="{x:Static controls:CustomDocPreviewCommands.SaveToRtfCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Сохранить в файл (CTRL + S)">
                     <Image Source="/assets/images/file_save_as.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
 
