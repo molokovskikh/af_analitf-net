@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,9 +9,19 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Documents.Serialization;
 using System.Windows.Input;
+using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Xps;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Results;
-using log4net;
+using Caliburn.Micro;
+using Common.Tools;
+using System.Windows.Xps.Packaging;
+using System.Windows.Media.Imaging;
+using AnalitF.Net.Client.Models.Print;
+using NHibernate.Util;
+using ILog = log4net.ILog;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -53,6 +65,11 @@ namespace AnalitF.Net.Client.Controls
 		}
 	}
 
+	public static class CustomDocPreviewCommands
+	{
+		public static RoutedUICommand SaveToRtfCommand { get; } = new RoutedUICommand("Сохранить отчет в файл", "savetortf", typeof(CustomDocPreviewCommands));
+	}
+
 	public class DocumentViewer2 : DocumentViewer
 	{
 		private ILog log = LogManager.GetLogger(typeof(DocumentViewer2));
@@ -76,6 +93,11 @@ namespace AnalitF.Net.Client.Controls
 
 		static DocumentViewer2()
 		{
+			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
+				new CommandBinding(CustomDocPreviewCommands.SaveToRtfCommand, Execute, CanExecute));
+			CommandManager.RegisterClassInputBinding(typeof(DocumentViewer2),
+				new InputBinding(CustomDocPreviewCommands.SaveToRtfCommand, new KeyGesture(Key.S, ModifierKeys.Control)));
+
 			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
 				new CommandBinding(ApplicationCommands.Print, Execute, CanExecute));
 			CommandManager.RegisterClassInputBinding(typeof(DocumentViewer2),
@@ -110,6 +132,74 @@ namespace AnalitF.Net.Client.Controls
 				doc.OnPrintCommand();
 			else if (e.Command == ApplicationCommands.CancelPrint)
 				doc.OnCancelPrintCommand();
+			else if (e.Command == CustomDocPreviewCommands.SaveToRtfCommand)
+				doc.SaveToRtfFileCommand();
+		}
+
+		protected void SaveToRtfFileCommand()
+		{
+			var printDoc = PrintResult.Docs.First().Value;
+
+			if (printDoc == null)
+				return;
+
+			var result = new SaveFileResult(new[]
+			{
+				Tuple.Create("Файл RTF (*.rtf)", ".rtf"),
+			});
+
+			result.Execute(new ActionExecutionContext());
+
+			if (result.Dialog.FilterIndex == 1)
+			{
+				var magicRtfLandscape = @"{\*\pgdsctbl
+{\pgdsc0\pgdscuse195\lndscpsxn\pgwsxn16838\pghsxn11906\marglsxn1134\margrsxn567\margtsxn567\margbsxn567\pgdscnxt0}}
+\formshade{\*\pgdscno0}\landscape\paperh11906\paperw16838\margl1134\margr567\margt567\margb567\sectd\sbknone\sectunlocked1\lndscpsxn\pgndec\pgwsxn16838\pghsxn11906\marglsxn1134\margrsxn567\margtsxn567\margbsxn567\ftnbj\ftnstart1\ftnrstcont\ftnnar\aenddoc\aftnrstcont\aftnstart1\aftnnrlc";
+				using(var writer = result.Writer())
+				{
+					var ms = new MemoryStream();
+
+					var bd = printDoc.Item2;
+					var baseFd = bd.Build();
+
+					foreach (Block block in baseFd.Blocks)
+					{
+						if (block is Table)
+						{//что бы в таблице rtf прорисовывались все линии
+							Table table = block as Table;
+							foreach (var rowGroup in table.RowGroups)
+							{
+								foreach (var currentRow in rowGroup.Rows)
+								{
+									foreach (var cell in currentRow.Cells)
+									{
+										cell.BorderThickness = new Thickness(1, 1, 1, 1);
+										cell.BorderBrush = Brushes.Black;
+									}
+								}
+							}
+						}
+					}
+
+					TextRange text = new TextRange(baseFd.ContentStart, baseFd.ContentEnd);
+					text.Save(ms, DataFormats.Rtf);
+
+					var rtfString = System.Text.Encoding.Default.GetString(ms.ToArray());
+
+					if (Orientation == PageOrientation.Landscape)
+					{
+						var langPos = rtfString.IndexOf(@"{\lang", StringComparison.Ordinal);
+						if (langPos != -1)
+						{
+							rtfString = rtfString.Insert(langPos, magicRtfLandscape);
+						}
+					}
+
+					writer.WriteLine(rtfString);
+					writer.Flush();
+					writer.Close();
+				}
+			}
 		}
 
 		protected override void OnPrintCommand()
@@ -152,6 +242,7 @@ namespace AnalitF.Net.Client.Controls
 			}
 			else
 				_writer.WriteAsync(Document.DocumentPaginator);
+
 		}
 
 		private void Cancelled(object sender, WritingCancelledEventArgs e)
