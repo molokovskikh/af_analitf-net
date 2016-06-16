@@ -219,6 +219,7 @@
     <Compile Include="Integration\ViewModels\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModels\ShellFixture.cs" />
     <Compile Include="Integration\ViewModels\SpecialMarkupFixture.cs" />
+    <Compile Include="Integration\ViewModels\StocksFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillsFixture.cs" />
@@ -266,6 +267,8 @@
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
+    <Compile Include="Unit\Models\StockFixture.cs" />
+    <Compile Include="Unit\Models\StockTotalFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
     <Compile Include="Unit\Models\WaybillTotalFixture.cs" />
@@ -310,6 +313,7 @@
     <Compile Include="Unit\ViewModels\SelfCloseFixture.cs" />
     <Compile Include="Unit\ViewModels\SettingsFixture.cs" />
     <Compile Include="Unit\ViewModels\ShellFixture.cs" />
+    <Compile Include="Unit\ViewModels\StocksFixture.cs" />
     <Compile Include="Unit\ViewModels\TextDocModelFixture.cs" />
     <Compile Include="Unit\ViewModels\WaybillDetailsFixture.cs" />
     <Compile Include="Unit\ViewModels\WaybillsFixture.cs" />
