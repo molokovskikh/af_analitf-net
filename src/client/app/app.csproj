@@ -957,6 +957,15 @@
     </Content>
     <Resource Include="Assets\images\diadok.png" />
     <Resource Include="Assets\images\sbis.png" />
+    <Resource Include="Assets\images\file_save_as.ico" />
+    <Resource Include="Assets\images\doc_two_pages.ico" />
+    <Resource Include="Assets\images\doc.ico" />
+    <Resource Include="Assets\images\doc_width.ico" />
+    <Resource Include="Assets\images\doc_size.ico" />
+    <Resource Include="Assets\images\zoom_out.ico" />
+    <Resource Include="Assets\images\zoom_in.ico" />
+    <Resource Include="Assets\images\copy.ico" />
+    <Resource Include="Assets\images\printer.ico" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
