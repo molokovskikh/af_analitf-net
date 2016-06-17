@@ -369,6 +369,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			order.Price = null;
 			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			Assert.AreNotEqual(model.Orders.First().Price.Name, null);
 			session.DeleteEach<Order>();
 		}
 	}
