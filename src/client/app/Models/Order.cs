@@ -58,7 +58,6 @@ namespace AnalitF.Net.Client.Models
 		public Order()
 		{
 			Lines = new List<OrderLine>();
-			DisplayId = Id;
 		}
 
 		public Order(Price price, Address address)
