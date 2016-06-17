@@ -85,7 +85,7 @@
                     <Image Source="/assets/images/doc_two_pages.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
                   </Button>
                   <Separator />
-                  <Button Command="{x:Static controls:CustomDocPreviewCommands.SaveToRtfCommand}"
+                  <Button Command="{x:Static controls:CustomDocPreviewCommands.SaveToFileCommand}"
 													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
 													ToolTip="Сохранить в файл (CTRL + S)">
                     <Image Source="/assets/images/file_save_as.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>

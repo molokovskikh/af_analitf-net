@@ -9,12 +9,16 @@ using System.Windows.Documents;
 using System.Windows.Documents.Serialization;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Xps;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
 using ILog = log4net.ILog;
 using LogManager = log4net.LogManager;
+
+
 
 namespace AnalitF.Net.Client.Controls
 {
@@ -60,7 +64,7 @@ namespace AnalitF.Net.Client.Controls
 
 	public static class CustomDocPreviewCommands
 	{
-		public static RoutedUICommand SaveToRtfCommand { get; } = new RoutedUICommand("Сохранить отчет в файл", "savetortf", typeof(CustomDocPreviewCommands));
+		public static RoutedUICommand SaveToFileCommand { get; } = new RoutedUICommand("Сохранить отчет в файл", "savetortf", typeof(CustomDocPreviewCommands));
 	}
 
 	public class DocumentViewer2 : DocumentViewer
@@ -87,9 +91,9 @@ namespace AnalitF.Net.Client.Controls
 		static DocumentViewer2()
 		{
 			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
-				new CommandBinding(CustomDocPreviewCommands.SaveToRtfCommand, Execute, CanExecute));
+				new CommandBinding(CustomDocPreviewCommands.SaveToFileCommand, Execute, CanExecute));
 			CommandManager.RegisterClassInputBinding(typeof(DocumentViewer2),
-				new InputBinding(CustomDocPreviewCommands.SaveToRtfCommand, new KeyGesture(Key.S, ModifierKeys.Control)));
+				new InputBinding(CustomDocPreviewCommands.SaveToFileCommand, new KeyGesture(Key.S, ModifierKeys.Control)));
 
 			CommandManager.RegisterClassCommandBinding(typeof(DocumentViewer2),
 				new CommandBinding(ApplicationCommands.Print, Execute, CanExecute));
@@ -108,7 +112,7 @@ namespace AnalitF.Net.Client.Controls
 		private static void CanExecute(object sender, CanExecuteRoutedEventArgs e)
 		{
 			var doc = sender as DocumentViewer2;
-			if (e.Command == ApplicationCommands.Print) {
+			if (e.Command == ApplicationCommands.Print || e.Command == CustomDocPreviewCommands.SaveToFileCommand) {
 				e.CanExecute = doc.Document != null && doc._writer == null;
 				e.Handled = true;
 			}
@@ -125,72 +129,69 @@ namespace AnalitF.Net.Client.Controls
 				doc.OnPrintCommand();
 			else if (e.Command == ApplicationCommands.CancelPrint)
 				doc.OnCancelPrintCommand();
-			else if (e.Command == CustomDocPreviewCommands.SaveToRtfCommand)
-				doc.SaveToRtfFileCommand();
+			else if (e.Command == CustomDocPreviewCommands.SaveToFileCommand)
+				doc.SaveToFileCommand();
 		}
 
-		protected void SaveToRtfFileCommand()
+		protected void SaveToFileCommand()
 		{
 			var printDoc = PrintResult.Docs.First().Value;
 
 			if (printDoc == null)
 				return;
 
+			var bd = printDoc.Item2;
+			var baseFd = bd.Build();
+
+			foreach (Block block in baseFd.Blocks)
+			{
+				if (block is Table)
+				{//что бы в таблице rtf прорисовывались все линии
+					Table table = block as Table;
+					foreach (var rowGroup in table.RowGroups)
+					{
+						foreach (var currentRow in rowGroup.Rows)
+						{
+							foreach (var cell in currentRow.Cells)
+							{
+								cell.BorderThickness = new Thickness(1, 1, 1, 1);
+								cell.BorderBrush = Brushes.Black;
+							}
+						}
+					}
+				}
+			}
+
 			var result = new SaveFileResult(new[]
 			{
 				Tuple.Create("Файл RTF (*.rtf)", ".rtf"),
+				Tuple.Create("Файл PNG (*.png)", ".png"),
 			});
 
 			result.Execute(new ActionExecutionContext());
 
 			if (result.Dialog.FilterIndex == 1)
 			{
-				var magicRtfLandscape = @"{\*\pgdsctbl
-{\pgdsc0\pgdscuse195\lndscpsxn\pgwsxn16838\pghsxn11906\marglsxn1134\margrsxn567\margtsxn567\margbsxn567\pgdscnxt0}}
-\formshade{\*\pgdscno0}\landscape\paperh11906\paperw16838\margl1134\margr567\margt567\margb567\sectd\sbknone\sectunlocked1\lndscpsxn\pgndec\pgwsxn16838\pghsxn11906\marglsxn1134\margrsxn567\margtsxn567\margbsxn567\ftnbj\ftnstart1\ftnrstcont\ftnnar\aenddoc\aftnrstcont\aftnstart1\aftnnrlc";
 				using(var writer = result.Writer())
 				{
-					var ms = new MemoryStream();
-
-					var bd = printDoc.Item2;
-					var baseFd = bd.Build();
-
-					foreach (Block block in baseFd.Blocks)
-					{
-						if (block is Table)
-						{//что бы в таблице rtf прорисовывались все линии
-							Table table = block as Table;
-							foreach (var rowGroup in table.RowGroups)
-							{
-								foreach (var currentRow in rowGroup.Rows)
-								{
-									foreach (var cell in currentRow.Cells)
-									{
-										cell.BorderThickness = new Thickness(1, 1, 1, 1);
-										cell.BorderBrush = Brushes.Black;
-									}
-								}
-							}
-						}
-					}
-
-					TextRange text = new TextRange(baseFd.ContentStart, baseFd.ContentEnd);
-					text.Save(ms, DataFormats.Rtf);
-
-					var rtfString = System.Text.Encoding.Default.GetString(ms.ToArray());
-
-					if (Orientation == PageOrientation.Landscape)
-					{
-						var langPos = rtfString.IndexOf(@"{\lang", StringComparison.Ordinal);
-						if (langPos != -1)
-						{
-							rtfString = rtfString.Insert(langPos, magicRtfLandscape);
-						}
-					}
-
+					var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
 					writer.WriteLine(rtfString);
 					writer.Flush();
 					writer.Close();
+				}
+			}
+			if (result.Dialog.FilterIndex == 2)
+			{
+				DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
+
+				RenderTargetBitmap bitmap = PrintHelper.ToBitmap(dp);
+				BitmapFrame bmf = BitmapFrame.Create(bitmap);
+				var enc = new PngBitmapEncoder();
+				enc.Frames.Add(bmf);
+
+				using (var fs = File.OpenWrite(result.Dialog.FileName))
+				{
+					enc.Save(fs);
 				}
 			}
 		}
