@@ -25,6 +25,7 @@ using VerticalAlignment = System.Windows.VerticalAlignment;
 using System.Globalization;
 using AnalitF.Net.Client.Models;
 using System.ComponentModel;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -203,6 +204,7 @@ namespace AnalitF.Net.Client.Views
 		private bool isNotifing;
 		private Queue<string> pending = new Queue<string>();
 		private DispatcherTimer notificationTimer = new DispatcherTimer();
+		private AddressProxy _lastSelectedAddress;
 
 		public ShellView()
 		{
@@ -217,6 +219,17 @@ namespace AnalitF.Net.Client.Views
 				((ShellViewModel)DataContext).Notifications.Subscribe(n => Append(n));
 			};
 
+			Addresses.SelectionChanged += (sender, e) =>
+			{
+				if (Addresses.SelectedItem is AddressButton)
+				{
+					Addresses.SelectedItem = _lastSelectedAddress;
+					return;
+				}
+				_lastSelectedAddress = (Addresses.SelectedItem == null) ?_lastSelectedAddress :
+					Addresses.SelectedItem as AddressProxy;
+			};
+
 			DataContextChanged += (sender, args) => {
 				var model = (ShellViewModel)DataContext;
 				model.Settings.Where(x => x != null).Subscribe(x => {
@@ -224,12 +237,12 @@ namespace AnalitF.Net.Client.Views
 					if (x.EditAddresses) {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector)) {
 							Addresses.ItemTemplateSelector = new AddressTemplateSelector(this);
-						}						
-												
+						}
+
 					} else {
 						if (!(Addresses.ItemTemplateSelector is AddressTemplateSelector2)) {
-							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);							
-						}						
+							Addresses.ItemTemplateSelector = new AddressTemplateSelector2(this);
+						}
 					}
 
 					if (model.Addresses.Count == 0)
@@ -239,7 +252,7 @@ namespace AnalitF.Net.Client.Views
 							if (e.PropertyName == nameof(model.Addresses))
 							{
 								reloadAddresses(model, x.EditAddresses);
-							}							
+							}
 						};
 					}
 					else
@@ -273,27 +286,42 @@ namespace AnalitF.Net.Client.Views
 		private void reloadAddresses(ShellViewModel model, bool manageAddresses)
 		{
 			Addresses.ItemsSource = null;
-			Addresses.Items.Clear();			
+
+			Addresses.Items.Clear();
 
 			var addressesProxy = new List<AddressProxy>();
 
-			foreach (var address in model.Addresses)
-			{
-				addressesProxy.Add(new AddressProxy(address));
-			}
+			model.Addresses.ForEach(x => addressesProxy.Add(new AddressProxy(x)));
+
+			var itemsSource = new List<object>();
 
 			if (manageAddresses)
 			{
-				Addresses.Items.Add(new AddressButton("Выбрать все", AddressButton.Behaviors.SelectAll, addressesProxy));
-				Addresses.Items.Add(new AddressButton("Сбросить все", AddressButton.Behaviors.DeselectAll, addressesProxy));
-			}			
-
-			foreach (var addressProxy in addressesProxy)
-			{
-				Addresses.Items.Add(addressProxy);
+				itemsSource.Add(new AddressButton("Выбрать все", AddressButton.Behaviors.SelectAll, addressesProxy));
+				itemsSource.Add(new AddressButton("Сбросить все", AddressButton.Behaviors.DeselectAll, addressesProxy));
 			}
 
-			Addresses.SelectedItem = (addressesProxy.FirstOrDefault(a => a.Id == model.CurrentAddress?.Id));
+			itemsSource.AddRange(addressesProxy);
+
+			Addresses.ItemsSource = itemsSource;
+
+			var index = itemsSource.IndexOf(itemsSource.FirstOrDefault(a =>
+			{
+				if (!(a is AddressProxy))
+				{
+					return false;
+				}
+
+				if ((a as AddressProxy).Id == _lastSelectedAddress?.Id ||
+						(a as AddressProxy).Id == model.CurrentAddress?.Id)
+				{
+					return true;
+				}
+
+					return false;
+			}));
+
+			Addresses.SelectedIndex = index;
 		}
 
 		private void UpdateNot(object sender, EventArgs e)
