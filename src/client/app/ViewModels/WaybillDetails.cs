@@ -156,6 +156,7 @@ namespace AnalitF.Net.Client.ViewModels
 				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
 				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
 			}
+
 		}
 
 		public IResult PrintRackingMap()
