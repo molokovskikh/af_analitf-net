@@ -81,7 +81,7 @@
 			</c:PopupButton>
 		</WrapPanel>
 
-        <c:DataGrid2 x:Name="Waybills" Grid.Row="1" 
+        <c:DataGrid2 x:Name="Waybills" Grid.Row="1"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
             <DataGrid.Columns>
                 <c:DataGridTextColumnEx x:Name="clmnAddressName" Width="65*" Header="Адрес заказа"
@@ -109,7 +109,7 @@
             </DataGrid.Columns>
         </c:DataGrid2>
 
-        <c:DataGrid2 x:Name="DgWaybillsTotal" ItemsSource="{Binding WaybillsTotal}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0" 
+        <c:DataGrid2 x:Name="DgWaybillsTotal" ItemsSource="{Binding WaybillsTotal}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0"
                      ShowAddressColumn="{Binding AddressSelector.All.Value}">
             <DataGrid.Columns>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnAddressName}, Path=ActualWidth}"
@@ -120,7 +120,7 @@
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnWriteTime}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnType}, Path=ActualWidth}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSupplierName}, Path=ActualWidth}"/>
-                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold" 
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
                                         Binding="{Binding TotalSum}"/>
                 <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnRetailSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
                                         Binding="{Binding TotalRetailSum}"/>
