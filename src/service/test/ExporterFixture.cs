@@ -118,7 +118,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_news()
 		{
-			DataMother.News(session);
+			DataMother.CreateNews(session);
 
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);

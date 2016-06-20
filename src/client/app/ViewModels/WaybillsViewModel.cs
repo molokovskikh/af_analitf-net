@@ -19,6 +19,7 @@ using Common.Tools.Calendar;
 using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using System.Collections.Specialized;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -42,6 +43,11 @@ namespace AnalitF.Net.Client.ViewModels
 			DisplayName = "Документы";
 			SelectedWaybills = new List<Waybill>();
 			Waybills = new NotifyValue<ObservableCollection<Waybill>>();
+
+			Waybills.PropertyChanged += Waybills_PropertyChanged;
+			WaybillsTotal = new ObservableCollection<WaybillTotal>();
+			WaybillsTotal.Add(new WaybillTotal { TotalSum = 0.0m, TotalRetailSum = 0.0m });
+
 			CurrentWaybill = new NotifyValue<Waybill>();
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
@@ -53,14 +59,26 @@ namespace AnalitF.Net.Client.ViewModels
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
 			};
+
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
+
+
 		}
+
+    public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+	    if (Waybills.Value == null || WaybillsTotal.Count != 1) return;
+
+	    WaybillsTotal.First().TotalSum = Waybills.Value.Sum(s => s.Sum);
+	    WaybillsTotal.First().TotalRetailSum = Waybills.Value.Sum(s => s.RetailSum);
+    }
 
 		public IList<Selectable<Supplier>> Suppliers { get; set; }
 
 		[Export]
 		public NotifyValue<ObservableCollection<Waybill>> Waybills { get; set; }
+		public ObservableCollection<WaybillTotal> WaybillsTotal { get; set; }
 		public NotifyValue<Waybill> CurrentWaybill { get; set; }
 		public List<Waybill> SelectedWaybills { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -119,6 +137,7 @@ namespace AnalitF.Net.Client.ViewModels
 				waybill.DeleteFiles(Settings.Value);
 				Waybills.Value.Remove(waybill);
 				StatelessSession.Delete(waybill);
+				Waybills.Refresh();
 			}
 		}
 

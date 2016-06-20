@@ -211,8 +211,10 @@
     <Compile Include="Controls\Behaviors\Watermark.cs" />
     <Compile Include="Controls\ContextMenuOnClick.cs" />
     <Compile Include="Controls\DataGrid2.cs" />
+    <Compile Include="Controls\MainControllerWrap.cs" />
     <Compile Include="Controls\LegendPanel.cs" />
     <Compile Include="Controls\Preview.cs" />
+    <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
@@ -348,6 +350,7 @@
     <Compile Include="Models\Waybill.cs" />
     <Compile Include="Models\WaybillLine.cs" />
     <Compile Include="Models\WaybillOrder.cs" />
+    <Compile Include="Models\WaybillTotal.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Config\Caliburn\Conventions.cs" />
@@ -891,15 +894,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common.MySql\Common.MySql\Common.MySql.csproj">
-      <Project>{8A680813-C83B-497A-85E6-E8F07B7D7650}</Project>
+      <Project>{8a680813-c83b-497a-85e6-e8f07b7d7650}</Project>
       <Name>Common.MySql</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common.MySql\Common.NHibernate\Common.NHibernate.csproj">
-      <Project>{8BE188CA-A0D9-4609-AB2E-AB8EDF849FE0}</Project>
+      <Project>{8be188ca-a0d9-4609-ab2e-ab8edf849fe0}</Project>
       <Name>Common.NHibernate</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
-      <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
+      <Project>{72afcfe8-c9e9-45fa-9698-bee896a517a3}</Project>
       <Name>Common.Tools</Name>
     </ProjectReference>
     <ProjectReference Condition="$(DefineConstants.Contains('DEBUG'))" Include="..\..\Test.Support\Test.Support\Test.Support.csproj">
@@ -954,6 +957,15 @@
     </Content>
     <Resource Include="Assets\images\diadok.png" />
     <Resource Include="Assets\images\sbis.png" />
+    <Resource Include="Assets\images\file_save_as.ico" />
+    <Resource Include="Assets\images\doc_two_pages.ico" />
+    <Resource Include="Assets\images\doc.ico" />
+    <Resource Include="Assets\images\doc_width.ico" />
+    <Resource Include="Assets\images\doc_size.ico" />
+    <Resource Include="Assets\images\zoom_out.ico" />
+    <Resource Include="Assets\images\zoom_in.ico" />
+    <Resource Include="Assets\images\copy.ico" />
+    <Resource Include="Assets\images\printer.ico" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

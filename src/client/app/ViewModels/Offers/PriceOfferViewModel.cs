@@ -36,8 +36,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			//между формами можно передавать только примитивные объекты
 			this.priceId = priceId;
 
-			Price = new NotifyValue<Price>();
 			DisplayName = "Заявка поставщику";
+			Price = new NotifyValue<Price>();
+			IsLoading = new NotifyValue<bool>();
 
 			Filters = filters;
 			CurrentFilter = new NotifyValue<string>(filters[0]);
@@ -47,9 +48,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			//по идее это не нужно тк обо всем должен позаботится сборщик мусора
 			//но если не удалить подписку будет утечка памяти
 			OnCloseDisposable.Add(this.ObservableForProperty(m => m.Price.Value.Order)
-				.Subscribe(_ => NotifyOfPropertyChange("CanDeleteOrder")));
+				.Subscribe(_ => NotifyOfPropertyChange(nameof(CanDeleteOrder))));
 			SearchBehavior = new SearchBehavior(this);
-			IsLoading = new NotifyValue<bool>(true);
 
 			CurrentProducer.Cast<object>()
 				.Merge(CurrentFilter.Cast<object>())
@@ -69,23 +69,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public bool CanPrint => User.CanPrint<PriceOfferDocument>();
 
-		protected override void OnActivate()
+		protected override void OnInitialize()
 		{
-			base.OnActivate();
+			base.OnInitialize();
 
-			if (StatelessSession != null)
-				Price.Value = StatelessSession.Get<Price>(priceId);
-			if (Promotions != null)
-				Promotions.FilterBySupplierId = Price.Value.SupplierId;
-			if (ProducerPromotions != null)
-				ProducerPromotions.FilterByProducerId = CurrentProducer.Value.Id;
+			Price.Value = StatelessSession?.Get<Price>(priceId);
+			Promotions.FilterBySupplierId = Price?.Value?.SupplierId;
+			ProducerPromotions.FilterByProducerId = CurrentProducer.Value.Id;
 
-			RxQuery(s => {
-					return s.Query<Offer>().Where(o => o.Price.Id == priceId)
-						.Fetch(o => o.Price)
-						.Fetch(o => o.LeaderPrice)
-						.ToList();
-				})
+			DbReloadToken
+				.Do(_ => IsLoading.Value = true)
+				.SelectMany(_ => RxQuery(s => s.Query<Offer>().Where(o => o.Price.Id == priceId)
+					.Fetch(o => o.Price)
+					.Fetch(o => o.LeaderPrice)
+					.ToList()))
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(BindOffers, CloseCancellation);
 		}

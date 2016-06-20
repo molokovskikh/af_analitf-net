@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			QuickSearch = new QuickSearch<Offer>(UiScheduler,
 				t => Offers.Value.FirstOrDefault(o => o.ProductSynonym.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentOffer);
-			IsLoading = new NotifyValue<bool>(true);
+			IsLoading = new NotifyValue<bool>();
 		}
 
 		public QuickSearch<Offer> QuickSearch { get; }
@@ -28,13 +28,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			RxQuery(s => {
-					return s.Query<Offer>()
-						.Where(o => o.Junk)
-						.OrderBy(o => o.ProductSynonym)
-						.Fetch(o => o.Price)
-						.ToList();
-				})
+			DbReloadToken
+				.Do(_ => IsLoading.Value = true)
+				.SelectMany(_ => RxQuery(s => s.Query<Offer>()
+					.Where(o => o.Junk)
+					.OrderBy(o => o.ProductSynonym)
+					.Fetch(o => o.Price)
+					.ToList()
+				))
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(o => {
 					Calculate(o);

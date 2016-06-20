@@ -59,18 +59,21 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
-			RxQuery(s => new [] { EmptyProducer }
+			DbReloadToken
+				.SelectMany(_ => RxQuery(s => new [] { EmptyProducer }
 					.Concat(s.Query<Producer>()
 						.OrderBy(p => p.Name)
 						.ToList())
-					.ToList())
+					.ToList()))
 				.ObserveOn(UiScheduler)
 				.Subscribe(Producers);
+
 			SearchBehavior.ActiveSearchTerm.Cast<object>()
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyBase.Changed())
 				.Merge(CurrentProducer.Changed())
 				.Merge(HideJunk.Changed())
+				.Merge(DbReloadToken)
 				.Select(v => {
 					var term = SearchBehavior.ActiveSearchTerm.Value;
 					if (String.IsNullOrEmpty(term))
@@ -112,8 +115,9 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			//используется в случае если нужно найти предложения по позиции отказа
 			if (!String.IsNullOrEmpty(initTerm)) {
-				IsLoading.Value = true;
-				RxQuery(s => QueryByFullText(s, initTerm))
+				DbReloadToken
+					.Do(_ => IsLoading.Value = true)
+					.SelectMany(_ => RxQuery(s => QueryByFullText(s, initTerm)))
 					.ObserveOn(UiScheduler)
 					.Do(v => {
 						LoadOrderItems(v);

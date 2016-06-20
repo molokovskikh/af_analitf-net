@@ -89,11 +89,14 @@ namespace AnalitF.Net.Client.Models.Commands
 			Reporter.StageCount(4);
 			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
 			var sendLogsTask = Download();
-			if (result == UpdateResult.UpdatePending)
-				return result;
-			Import();
-			Log.InfoFormat("Обновление завершено успешно");
+			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
+				Log.InfoFormat("Получено обновление приложения");
+				result = UpdateResult.UpdatePending;
+			} else {
+				Import();
+			}
 			WaitAndLog(sendLogsTask, "Отправка логов");
+			Log.InfoFormat("Обновление завершено успешно");
 			return result;
 		}
 
@@ -190,10 +193,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 			}//using (var cleaner = new FileCleaner())
 
-			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
-				Log.InfoFormat("Получено обновление приложения");
-				result = UpdateResult.UpdatePending;
-			}
 			return sendLogsTask;
 		}
 
@@ -1107,6 +1106,18 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.Fetch(o => o.Address)
 				.Fetch(o => o.Price)
 				.ToArray();
+
+			var orderQuery = orders
+				.Where(o => o.CreatedOn < DateTime.Now.AddDays(-7) && o.Frozen != true).ToArray();
+
+			if (orderQuery.Any())
+			{
+				foreach (var order in orderQuery)
+					order.Frozen = true;
+
+				Results.Add(new MessageResult("В архиве заказов обнаружены заказы," +
+					$" сделанные более 1 недели назад. Данные заказы были заморожены."));
+			}
 
 			var ordersToRestore = orders.Where(o => !o.Frozen).ToArray();
 

@@ -149,6 +149,7 @@
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
+    <Compile Include="Fixtures\CreateNews.cs" />
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />
     <Compile Include="Fixtures\CreateOrder.cs" />
     <Compile Include="Fixtures\LocalAddress.cs" />
@@ -268,6 +269,7 @@
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
+    <Compile Include="Unit\Models\WaybillTotalFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />

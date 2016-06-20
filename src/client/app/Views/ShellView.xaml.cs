@@ -97,6 +97,13 @@ namespace AnalitF.Net.Client.Views
 				});
 			};
 
+			KeyDown += (sender, args) => {
+				if ((args.KeyboardDevice.IsKeyDown(Key.RightCtrl) || args.KeyboardDevice.IsKeyDown(Key.LeftCtrl))
+					&& args.Key >= Key.D1 && args.Key <= Key.D9) {
+					((ShellViewModel)DataContext).ActivateItemAt(args.Key - Key.D1);
+				}
+			};
+
 			EventManager.RegisterClassHandler(typeof(ShellView), Hyperlink.RequestNavigateEvent,
 				new RoutedEventHandler(
 					(sender, args) => {

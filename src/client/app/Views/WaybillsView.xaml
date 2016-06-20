@@ -4,10 +4,11 @@
 	xmlns:c="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"	
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
+             xmlns:conv="clr-namespace:AnalitF.Net.Client.Helpers"
 	behaviors:Focusable.DefaultFocus="{x:Reference Waybills}">
 
-	<i:Interaction.Behaviors>
+    <i:Interaction.Behaviors>
 		<behaviors:Focusable />
 	</i:Interaction.Behaviors>
 
@@ -19,6 +20,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
+      <RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
@@ -79,34 +81,51 @@
 			</c:PopupButton>
 		</WrapPanel>
 
-		<c:DataGrid2 x:Name="Waybills" Grid.Row="1"
+        <c:DataGrid2 x:Name="Waybills" Grid.Row="1"
 			ShowAddressColumn="{Binding AddressSelector.All.Value}">
-			<DataGrid.Columns>
-				<c:DataGridTextColumnEx Width="65*" Header="Адрес заказа"
+            <DataGrid.Columns>
+                <c:DataGridTextColumnEx x:Name="clmnAddressName" Width="65*" Header="Адрес заказа"
 					Binding="{Binding AddressName}"
 					Visibility="Collapsed" />
-				<c:DataGridTextColumnEx Width="64*" Header="№"
+                <c:DataGridTextColumnEx x:Name="clmnId" Width="64*" Header="№"
 					Binding="{Binding Id}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="64*" Header="№ поставщика"
+                <c:DataGridTextColumnEx x:Name="clmnProviderDocumentId" Width="64*" Header="№ поставщика"
 					Binding="{Binding ProviderDocumentId}" />
-				<c:DataGridTextColumnEx Width="150*" Header="Дата документа"
+                <c:DataGridTextColumnEx x:Name="clmnDocumentDate" Width="150*" Header="Дата документа"
 					Binding="{Binding DocumentDate}" />
-				<c:DataGridTextColumnEx Width="64*" Header="Дата получения документа"
+                <c:DataGridTextColumnEx x:Name="clmnWriteTime" Width="64*" Header="Дата получения документа"
 					Binding="{Binding WriteTime}" />
-				<c:DataGridTextColumnEx Width="100*" Header="Тип документа"
+                <c:DataGridTextColumnEx x:Name="clmnType" Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
-				<c:DataGridTextColumnEx Width="64*" Header="Поставщик"
+                <c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="64*" Header="Поставщик"
 					Binding="{Binding SupplierName}" />
-				<c:DataGridTextColumnEx Width="64*" Header="Сумма опт"
+                <c:DataGridTextColumnEx x:Name="clmnSum" Width="64*" Header="Сумма опт"
 					Binding="{Binding Sum}"
 					TextAlignment="Right" />
-				<c:DataGridTextColumnEx Width="64*" Header="Сумма розница"
+                <c:DataGridTextColumnEx x:Name="clmnRetailSum" Width="64*" Header="Сумма розница"
 					Binding="{Binding RetailSum}"
 					TextAlignment="Right" />
-			</DataGrid.Columns>
-		</c:DataGrid2>
+            </DataGrid.Columns>
+        </c:DataGrid2>
 
-		<StackPanel Grid.Row="2" Name="Legend" />
+        <c:DataGrid2 x:Name="DgWaybillsTotal" ItemsSource="{Binding WaybillsTotal}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0"
+                     ShowAddressColumn="{Binding AddressSelector.All.Value}">
+            <DataGrid.Columns>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnAddressName}, Path=ActualWidth}"
+                                        Header="Адрес заказа" Visibility="Collapsed"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnId}, Path=ActualWidth}" />
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnProviderDocumentId}, Path=ActualWidth}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnDocumentDate}, Path=ActualWidth}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnWriteTime}, Path=ActualWidth}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnType}, Path=ActualWidth}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSupplierName}, Path=ActualWidth}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
+                                        Binding="{Binding TotalSum}"/>
+                <c:DataGridTextColumnEx Width="{Binding Source={x:Reference clmnRetailSum}, Path=ActualWidth}" TextAlignment="Right" FontWeight="Bold"
+                                        Binding="{Binding TotalRetailSum}"/>
+            </DataGrid.Columns>
+        </c:DataGrid2>
+        <StackPanel Grid.Row="3" Name="Legend" />
 	</Grid>
 </UserControl>
