@@ -86,7 +86,8 @@ namespace AnalitF.Net.Client.Controls
 
 		protected virtual void OnSizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			VerticalScrollBarVisibility = (ActualHeight <= ScrollActivateHeigth)
+			var window = Window.GetWindow(this);
+			VerticalScrollBarVisibility = (window.ActualHeight <= ScrollActivateHeigth)
 				? ScrollBarVisibility.Auto
 				: ScrollBarVisibility.Disabled;
 		}
@@ -115,7 +116,7 @@ namespace AnalitF.Net.Client.Controls
 					if (!hideScrollBar) {
 						if (WpfHelper.Parent(control).GetType() == typeof(MainControllerWrap))
 						{
-							control.Height = control.MaxHeight = control.MinHeight = ActualHeight * 0.7;
+							control.Height = control.MaxHeight = control.MinHeight = ActualHeight * 0.75;
 							continue;
 						}
 						control.MaxHeight = ActualHeight*0.5;
