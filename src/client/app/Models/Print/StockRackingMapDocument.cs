@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			Func<Stock, FrameworkElement> map = Normal;
 
-			return FixedDocumentHelper.BuildFixedLandscapeDoc(_stocks, l => Border(map(l), 0.5), 0.5);
+			return FixedDocumentHelper.BuildFixedDoc(_stocks, l => Border(map(l), 0.5), 0.5);
 		}
 
 		private FrameworkElement Normal(Stock line)
