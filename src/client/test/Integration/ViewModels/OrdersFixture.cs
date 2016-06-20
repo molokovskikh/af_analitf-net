@@ -84,10 +84,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.Orders[0].Send = false;
 
 			shell.UpdateStat();
-			Assert.That(shell.CanSendOrders, Is.True);
+			Assert.That(shell.CanSendOrders.Value, Is.True);
 
 			scheduler.AdvanceByMs(5000);
-			Assert.That(shell.CanSendOrders, Is.False);
+			Assert.That(shell.CanSendOrders.Value, Is.False);
 		}
 
 		[Test]
@@ -96,14 +96,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			PrepareCurrent();
 
 			shell.UpdateStat();
-			Assert.That(shell.CanSendOrders, Is.True);
+			Assert.That(shell.CanSendOrders.Value, Is.True);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(1));
 
 			Assert.True(model.CanFreeze);
 			model.Freeze();
 
 			scheduler.AdvanceByMs(1000);
-			Assert.That(shell.CanSendOrders, Is.False);
+			Assert.That(shell.CanSendOrders.Value, Is.False);
 			Assert.That(shell.Stat.Value.OrdersCount, Is.EqualTo(0));
 		}
 
@@ -226,7 +226,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var newAddress = new Address { Name = "Тестовый адрес доставки" };
 			session.Save(newAddress);
 			MakeOrder();
-			shell.CurrentAddress = newAddress;
+			shell.CurrentAddress.Value = newAddress;
 
 			Assert.That(model.Orders.Count, Is.EqualTo(0));
 			model.AddressSelector.All.Value = true;
@@ -357,6 +357,20 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.IsSentSelected.Value = true;
 			model.CurrentSentOrder = model.SentOrders.First();
 			model.SelectedSentOrders.Add(model.CurrentSentOrder);
+		}
+
+		[Test]
+		public void Load_disabled_order()
+		{
+			session.DeleteEach<Order>();
+			var order = MakeOrder();
+			model.Update();
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			order.Price = null;
+			model.Update();
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			Assert.AreNotEqual(model.Orders.First().Price.Name, null);
+			session.DeleteEach<Order>();
 		}
 	}
 }

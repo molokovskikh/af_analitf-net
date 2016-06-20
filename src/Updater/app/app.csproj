@@ -103,12 +103,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
-      <Project>{72AFCFE8-C9E9-45FA-9698-BEE896A517A3}</Project>
-      <Name>Common.Tools</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -132,6 +126,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="mainicon_original.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common.Tools\Common.Tools\Common.Tools.csproj">
+      <Project>{72afcfe8-c9e9-45fa-9698-bee896a517a3}</Project>
+      <Name>Common.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

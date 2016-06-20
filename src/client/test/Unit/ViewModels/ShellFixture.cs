@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
+using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -173,10 +174,10 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		[Test]
 		public void Do_not_warn_on_not_send_orders()
 		{
-			shell.CurrentAddress = new Address("тест");
-			var line = shell.CurrentAddress.Order(new Offer(new Price("тест"), 50), 1);
+			shell.CurrentAddress.Value = new Address("тест");
+			var line = shell.CurrentAddress.Value.Order(new Offer(new Price("тест"), 50), 1);
 			line.Order.Send = false;
-			bus.SendMessage(new Stat(shell.CurrentAddress));
+			bus.SendMessage(new Stat(shell.CurrentAddress.Value));
 			scheduler.Start();
 			shell.TryClose();
 			Assert.AreEqual("", manager.MessageBoxes.Implode());
@@ -187,8 +188,8 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		{
 			var cmds = cmd.Collect();
 
-			shell.CurrentAddress = new Address("тест");
-			shell.Addresses.Add(shell.CurrentAddress);
+			shell.CurrentAddress.Value = new Address("тест");
+			shell.Addresses.Add(shell.CurrentAddress.Value);
 			shell.Settings.Value.LastUpdate = DateTime.Now;
 			shell.Settings.Value.UserName = "test";
 			shell.Settings.Value.Password = "password";
@@ -200,16 +201,25 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		}
 
 		[Test]
-		public void Close_current_on_address_change()
+		public void Reload_data_on_address_changed()
 		{
-			shell.CurrentAddress = new Address("тест");
-			shell.Addresses = new List<Address> { shell.CurrentAddress, new Address("тест") };
+			Env.Current.Addresses = new List<Address> {
+				new Address("тест") {
+					Id = 1
+				},
+				new Address("тест1") {
+					Id = 2
+				}
+			};
+			shell.Addresses = Env.Current.Addresses;
+			shell.CurrentAddress.Value = Env.Current.Addresses[0];
 			shell.ShowPrice();
 			Assert.IsInstanceOf<PriceViewModel>(shell.ActiveItem);
-			shell.CurrentAddress = shell.Addresses[1];
+			Open(shell.ActiveItem);
+			shell.CurrentAddress.Value = shell.Addresses[1];
 
-			Assert.IsInstanceOf<Main>(shell.ActiveItem);
-			Assert.That(shell.NavigationStack, Is.Empty);
+			Assert.IsInstanceOf<PriceViewModel>(shell.ActiveItem);
+			Assert.AreEqual("тест1", ((PriceViewModel)shell.ActiveItem).Address.Name);
 		}
 
 		[Test]
@@ -235,7 +245,7 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 		}
 
 		[Test]
-		public void Before_sync_close_active_items()
+		public void Reload_data_on_update()
 		{
 			shell.Settings.Value.UserName = "test";
 			shell.Settings.Value.Password = "password";
@@ -243,8 +253,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			shell.ShowCatalog();
 			shell.Update();
 
-			Assert.IsInstanceOf<Main>(shell.ActiveItem);
-			Assert.AreEqual(0, shell.NavigationStack.Count());
+			var reloads =  ((CatalogViewModel)shell.ActiveItem).DbReloadToken.Collect();
+			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
+			Assert.AreEqual(1, reloads.Count);
 		}
 	}
 }

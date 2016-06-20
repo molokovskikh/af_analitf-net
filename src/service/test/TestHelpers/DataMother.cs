@@ -82,7 +82,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			return waybill;
 		}
 
-		public static void News(ISession session)
+		public static void CreateNews(ISession session)
 		{
 			session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
 				+ " values(:publicationDate, :header, :body, :destinationType)")

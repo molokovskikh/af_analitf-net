@@ -81,3 +81,7 @@ http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/IE6_WinXP.zip
 Учетные данные для тестирования сбис
 покупатель - покупатель123
 поставщик - поставщик123
+
+MSI
+
+В случае проблем с установщиком неудаляемые записи из msi поможем исправил msizap T <{ProductCode}>

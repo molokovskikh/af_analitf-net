@@ -166,7 +166,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				//тк он перезагрузить объекты
 				var orders = AddressSelector.GetActiveFilter()
 					.SelectMany(a => a.Orders)
-					.Where(x => priceIds.Contains(x.SafePrice.Id))
+					.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
 					.OrderBy(o => o.PriceName)
 					.ToList();
 				orders.Each(o => o.CalculateStyle(Address));
@@ -178,6 +178,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
+		}
+
+		private bool IsSelectedAllPrices()
+		{
+			if(Prices.Value.Where(x => x.IsSelected).ToArray().Length == Prices.Value.Count)
+				return true;
+			return false;
 		}
 
 		private void RebuildSessionIfNeeded()

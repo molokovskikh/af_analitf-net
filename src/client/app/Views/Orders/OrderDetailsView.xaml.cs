@@ -5,6 +5,8 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.ViewModels.Orders;
+using System.Windows.Input;
+using AnalitF.Net.Client.Config.Caliburn;
 
 namespace AnalitF.Net.Client.Views.Orders
 {
@@ -25,6 +27,10 @@ namespace AnalitF.Net.Client.Views.Orders
 						Lines.Columns.Remove(DataGridHelper.FindColumn(Lines, "Эффективность"));
 				}
 			};
+
+			Lines.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
 
 			DataGridHelper.CalculateColumnWidths(Lines);
 			new Editable().Attach(Lines);

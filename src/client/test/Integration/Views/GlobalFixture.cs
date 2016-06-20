@@ -703,8 +703,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Start();
 
-			SystemTime.Now = () => DateTime.Now.AddMinutes(20);
-			scheduler.AdvanceByMs(30000);
+			dispatcher.Invoke(() => {
+				SystemTime.Now = () => DateTime.Now.AddMinutes(20);
+				scheduler.AdvanceByMs(30000);
+			});
 
 			AsyncClick("Update");
 			WaitMessageBox("Обновление завершено успешно.");

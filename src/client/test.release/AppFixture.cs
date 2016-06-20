@@ -56,6 +56,30 @@ namespace test.release
 			FileHelper2.DeleteDir(Path.Combine(root, "data"));
 		}
 
+		protected override void OnActivated(object sender, AutomationEventArgs e)
+		{
+			var el = (AutomationElement)sender;
+			if (FilterByProcess
+				&& !Process.HasExited
+				&& el.Current.ProcessId != Process.Id)
+				return;
+
+			var currentId = el.ToShortText();
+			if (lastId == currentId)
+				return;
+			lastId = currentId;
+
+			Opened.OnNext(el);
+		}
+
+		protected override void Activate()
+		{
+			Process = StartProcess(Bin);
+			using (Opened.Take(1).Subscribe(x => MainWindow = x))
+				WaitMainWindow();
+			WaitIdle();
+		}
+
 		[Test]
 		public void Update_db()
 		{
@@ -100,13 +124,18 @@ namespace test.release
 
 			WaitIdle();
 			Click("Update", MainWindow);
-			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
+				AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
+
 
 			FilterByProcess = false;
 			var update = Opened.Timeout(Timeout).First();
-			AssertText(update, "Внимание! Происходит обновление программы.");
+			try {
+				AssertText(update, "Внимание! Происходит обновление программы.");
+			} catch (ElementNotAvailableException) {
+				//предполагаем что окно закрылось быстрее чем смог считаться данные и обновление прошло успешно
+			}
 
-			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(15.Second()).First();
+			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(30.Second()).First();
 			AssertText(update, "Производится обмен данными");
 			Process = Process.GetProcessById(update.GetProcessId());
 			FilterByProcess = true;

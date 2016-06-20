@@ -248,6 +248,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Freeze_old_orders()
+		{
+			var order = MakeOrderClean();
+			order.CreatedOn = order.CreatedOn.AddDays(-10);
+			localSession.Save(order);
+
+			var cmd = new UpdateCommand();
+			Run(cmd);
+
+			var text = cmd.Results.OfType<MessageResult>().First().Message;
+
+			localSession.Clear();
+			order = localSession.Load<Order>(order.Id);
+
+			Assert.IsTrue(order.Frozen);
+			Assert.That(text, Does.Contain("В архиве заказов обнаружены заказы, сделанные более 1 недели назад. Данные заказы были заморожены."));
+		}
+
+		[Test]
 		public void Make_order_correction()
 		{
 			revertToDefaults = true;

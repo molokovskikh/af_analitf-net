@@ -16,6 +16,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config;
@@ -75,14 +76,10 @@ namespace AnalitF.Net.Client.ViewModels
 	public class ShellViewModel : BaseShell, IDisposable
 	{
 		private WindowManager windowManager;
-		private Config.Config config;
 		private ISession session;
 		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
 		private List<Address> addresses = new List<Address>();
-		private Address currentAddress;
-
-		private Main defaultItem;
 
 		[DataMember]
 		public Dictionary<string, List<ColumnSettings>> ViewSettings = new Dictionary<string, List<ColumnSettings>>();
@@ -108,29 +105,23 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public ShellViewModel(Config.Config config)
 		{
-			SpecialMarkupProducts = new NotifyValue<uint[]>(new uint[0]);
-			this.config = config;
-			CloseDisposable.Add(CancelDisposable);
 			DisplayName = "АналитФАРМАЦИЯ";
-			defaultItem = new Main(Config);
-			Navigator.DefaultScreen = defaultItem;
+			BaseScreen.InitFields(this);
+			SpecialMarkupProducts.Value = new uint[0];
+			Stat.Value = new Stat();
+			Config = config;
+			CloseDisposable.Add(CancelDisposable);
+			PendingDownloads = new ObservableCollection<Loadable>();
 
 #if DEBUG
 			if (!Env.IsUnitTesting)
 				Debug = new Debug();
 #endif
 
-			Stat = new NotifyValue<Stat>(new Stat());
-			User = new NotifyValue<User>();
-			Settings = new NotifyValue<Settings>();
-			IsDataLoaded = Settings
-				.Select(v => v != null && v.LastUpdate != null)
-				.ToValue();
+			Settings
+				.Select(v => v?.LastUpdate != null)
+				.Subscribe(IsDataLoaded);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
-			NewMailsCount = new NotifyValue<int>();
-			NewDocsCount = new NotifyValue<int>();
-			PendingDownloads = new ObservableCollection<Loadable>();
-			Instances = new NotifyValue<string[]>();
 
 			if (Env.Factory != null) {
 				session = Env.Factory.OpenSession();
@@ -142,12 +133,21 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(User.Cast<object>())
 				.Subscribe(_ => UpdateDisplayName());
 
-			this.ObservableForProperty(m => (object)m.Stat.Value)
-				.Merge(this.ObservableForProperty(m => (object)m.CurrentAddress))
-				.Subscribe(_ => NotifyOfPropertyChange(nameof(CanSendOrders)));
+			Stat.CombineLatest(CurrentAddress, (x, y) => x?.ReadyForSendOrdersCount > 0 && y != null)
+				.Subscribe(CanSendOrders);
 
-			this.ObservableForProperty(m => m.CurrentAddress)
-				.Subscribe(e => UpdateStat());
+			CurrentAddress.Subscribe(_ => {
+				UpdateStat();
+				//текущий адрес может измениться как при выборе пользователем
+				//так и после обновления когда мы перезагрузим данные
+				//если ActiveItem?.IsActive == false значит перезагрузка происходит из-за обновления данных
+				//в этом случае не нужно обновлять форму это выполнит код обработки обновления
+				if (ActiveItem?.IsActive == true) {
+					ActiveItem?.Deactivate(false);
+					Env.Bus.SendMessage("Changed", "db");
+					ActiveItem?.Activate();
+				}
+			});
 
 			this.ObservableForProperty(m => m.Settings.Value)
 				.Subscribe(_ => {
@@ -206,15 +206,7 @@ namespace AnalitF.Net.Client.ViewModels
 			CanPrintPreview = CanPrint.ToValue();
 		}
 
-		public Config.Config Config
-		{
-			get { return config; }
-			set
-			{
-				config = value;
-				defaultItem.Config = value;
-			}
-		}
+		public Config.Config Config { get; set; }
 
 		public ObservableCollection<Loadable> PendingDownloads { get; set; }
 
@@ -240,21 +232,11 @@ namespace AnalitF.Net.Client.ViewModels
 		}
 
 		[DataMember]
-		public Address CurrentAddress
-		{
-			get { return currentAddress; }
-			set
-			{
-				currentAddress = value;
-				ResetNavigation();
-				NotifyOfPropertyChange(nameof(CurrentAddress));
-			}
-		}
+		public NotifyValue<Address> CurrentAddress { get; set; }
 
 		protected override void OnInitialize()
 		{
-			if (statelessSession != null)
-				statelessSession.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate();
+			Env.RxQuery(x => x.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate());
 			Instances.Value = new string[0];
 			if (Directory.Exists(Config.Opt)) {
 				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
@@ -265,7 +247,7 @@ namespace AnalitF.Net.Client.ViewModels
 		protected override void OnActivate()
 		{
 			base.OnActivate();
-			Navigator.Activate();
+			ShowMain();
 		}
 
 		public override IEnumerable<IResult> OnViewReady()
@@ -274,7 +256,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
 				//что бы не потерять накладные
-				if (Directory.Exists(Config.BinUpdateDir) && Directory.GetFiles(Config.BinUpdateDir, "*.meta.txt").Length > 0) {
+				if (Directory.Exists(Config.UpdateTmpDir) && Directory.GetFiles(Config.UpdateTmpDir, "*.meta.txt").Length > 0) {
 					using (var command = new UpdateCommand())
 						return Sync(command, c => c.Process(() => {
 							((UpdateCommand)c).Import();
@@ -300,10 +282,15 @@ namespace AnalitF.Net.Client.ViewModels
 				if ((Config.Cmd ?? "").StartsWith("batch=")) {
 					//вызов Batch должен происходить только после операций в startcheck
 					//тк startcheck может изменить данные а batch эти изменения не увидит
-					results = results.Concat(LazyHelper.Create(() => Batch(config.Cmd.Remove(0, 6))));
+					results = results.Concat(LazyHelper.Create(() => Batch(Config.Cmd.Remove(0, 6))));
 				}
 				return results;
 			}
+		}
+
+		public void CloseActive()
+		{
+			Navigator.CloseActive();
 		}
 
 		public override void CanClose(Action<bool> callback)
@@ -357,10 +344,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void UpdateStat()
 		{
-			if (session == null)
-				return;
-
-			Stat.Value = Models.Stat.Update(session, CurrentAddress);
+			Env.RxQuery(x => Models.Stat.Update(x, CurrentAddress.Value))
+				.ObserveOn(Env.UiScheduler)
+				.Subscribe(Stat);
 		}
 
 		public IEnumerable<IResult> StartCheck()
@@ -435,13 +421,13 @@ namespace AnalitF.Net.Client.ViewModels
 			//нужно сохранить идентификатор выбранного адреса доставки тк
 			//строка Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			//сбросит его
-			var addressId = CurrentAddress?.Id;
+			var addressId = CurrentAddress.Value?.Id;
 			Settings.Value = session.Query<Settings>().First();
 			User.Value = session.Query<User>().FirstOrDefault();
 			Addresses = session.Query<Address>().OrderBy(a => a.Name).ToList();
 			var addressConfigs = session.Query<AddressConfig>().ToArray();
 			Addresses.Each(x => x.Config = addressConfigs.FirstOrDefault(y => y.Address == x));
-			CurrentAddress = Addresses.Where(a => a.Id == addressId)
+			CurrentAddress.Value = Addresses.Where(a => a.Id == addressId)
 				.DefaultIfEmpty(Addresses.FirstOrDefault())
 				.FirstOrDefault();
 
@@ -454,7 +440,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
 
-			defaultItem.Reload();
 			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
 			{
 				if(AppBootstrapper.LeaderCalculationWasStart == true
@@ -465,6 +450,11 @@ namespace AnalitF.Net.Client.ViewModels
 				Settings.Value.LastLeaderCalculation = DateTime.Today;
 				session.Flush();
 			};
+			//изменились заявки
+			Env.Bus.SendMessage("Changed", "db");
+			//изменилась база данных
+			Env.Bus.SendMessage("Reload", "db");
+			ActiveItem?.Activate();
 		}
 
 		protected void UpdateDisplayName()
@@ -656,7 +646,7 @@ namespace AnalitF.Net.Client.ViewModels
 			var address = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId)
 				.Select(x => addresses.FirstOrDefault(y => y.Id == x))
 				.FirstOrDefault(x => x != null);
-			CurrentAddress = address ?? CurrentAddress;
+			CurrentAddress.Value = address ?? CurrentAddress.Value;
 
 			var model = new WaybillsViewModel();
 			model.RejectFilter.Value = RejectFilter.Changed;
@@ -671,7 +661,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMain()
 		{
-			NavigateRoot(defaultItem);
+			NavigateRoot(new Main());
 		}
 
 		public void ShowMails()
@@ -753,12 +743,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Batch(string fileName = null, BatchMode mode = BatchMode.Normal)
 		{
-			if (currentAddress == null)
+			if (CurrentAddress.Value == null)
 				yield break;
 			var results = Sync(new UpdateCommand {
 				SyncData = "Batch",
 				BatchFile = fileName,
-				AddressId = currentAddress.Id,
+				AddressId = CurrentAddress.Value.Id,
 				BatchMode = mode
 			});
 			foreach (var result in results) {
@@ -767,7 +757,7 @@ namespace AnalitF.Net.Client.ViewModels
 			ShowBatch();
 		}
 
-		public bool CanSendOrders => Stat.Value.ReadyForSendOrdersCount > 0 && CurrentAddress != null;
+		public NotifyValue<bool> CanSendOrders { get; set; }
 
 		//для "горячей" клавиши
 		public IEnumerable<IResult> SendOrders()
@@ -783,8 +773,9 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
 
-			//перед проверкой нам нужно закрыть все формы что бы сохранить изменения
-			ResetNavigation();
+
+			//сохраняем изменения на активной форме
+			ActiveItem?.Deactivate(false);
 			var warningOrders = statelessSession.Query<Order>()
 				.Fetch(o => o.Price)
 				.Fetch(o => o.MinOrderSum)
@@ -798,6 +789,10 @@ namespace AnalitF.Net.Client.ViewModels
 			var results = Sync(new SendOrders(CurrentAddress, force));
 			foreach (var result in results)
 				yield return result;
+			//говорим форме что изменились данные
+			Env.Bus.SendMessage("Changed", "db");
+			//говорим форме что пора перезагрузить данные
+			ActiveItem?.Activate();
 		}
 
 		public IEnumerable<IResult> Migrate()
@@ -980,7 +975,7 @@ namespace AnalitF.Net.Client.ViewModels
 			RunTask(wait,
 				t => {
 					//настраивать команду нужно каждый раз тк учетные данные могут быть изменены в RunTask
-					command.Configure(Settings.Value, config, t.Token);
+					command.Configure(Settings.Value, Config, t.Token);
 					return func(command);
 				},
 				t => {
@@ -1021,7 +1016,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private void RunTask<T>(WaitViewModel viewModel, Func<CancellationTokenSource, T> func,
 			Action<Task<T>> success = null)
 		{
-			ResetNavigation();
+			ActiveItem?.Deactivate(false);
 
 			bool done;
 			int count = 0;
@@ -1090,14 +1085,15 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.Navigate(item);
 		}
 
-		public void ResetNavigation()
-		{
-			Navigator.ResetNavigation();
-		}
-
 		public void NavigateAndReset(params IScreen[] views)
 		{
 			Navigator.NavigateAndReset(views);
+		}
+
+		public void ActivateItemAt(int index)
+		{
+			if (index < Items.Count)
+				ActiveItem = Items[index];
 		}
 
 		protected override void OnActivationProcessed(IScreen item, bool success)
@@ -1151,15 +1147,19 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 
-			if (Navigator != null) {
-				Navigator.Dispose();
-				Navigator = null;
+			var view = GetView();
+			if (view != null) {
+				foreach (var item in ((ShellView)view).Items.Items) {
+					var el = ((ShellView)view).Items.ItemContainerGenerator.ContainerFromItem(item) as Control;
+					if (el != null)
+						el.Template = null;
+				}
 			}
-
-			if (ActiveItem is IDisposable) {
-				var item = ((IDisposable)ActiveItem);
+			if (Items.Count > 0) {
+				var items = Items.ToArray();
+				Items.Clear();
 				ActiveItem = null;
-				item.Dispose();
+				items.OfType<IDisposable>().Each(x => x.Dispose());
 			}
 
 			if (session != null) {
@@ -1172,10 +1172,6 @@ namespace AnalitF.Net.Client.ViewModels
 				statelessSession = null;
 			}
 
-			if (defaultItem != null) {
-				defaultItem.Dispose();
-				defaultItem = null;
-			}
 			CloseDisposable.Dispose();
 		}
 

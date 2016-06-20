@@ -173,6 +173,9 @@ namespace AnalitF.Net.Client.Test.Unit
 			bmp.Render(visual);
 			var enc = new PngBitmapEncoder();
 			enc.Frames.Add(BitmapFrame.Create(bmp));
+			var dir = Path.GetDirectoryName(file);
+			if (!String.IsNullOrEmpty(dir))
+				Directory.CreateDirectory(dir);
 			using (var f = File.OpenWrite(file))
 				enc.Save(f);
 		}

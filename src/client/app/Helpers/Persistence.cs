@@ -52,7 +52,7 @@ namespace AnalitF.Net.Client.Helpers
 
 		public void Track(DependencyObject o, DependencyProperty property)
 		{
-			persistable.Add(o, property);
+			persistable[o] = property;
 		}
 
 		public void Restore()
@@ -92,10 +92,10 @@ namespace AnalitF.Net.Client.Helpers
 				return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
 			converter = TypeDescriptor.GetConverter(value.GetType());
 			if (converter.CanConvertTo(targetType))
-				return converter.ConvertTo(value, targetType);
+				return converter.ConvertTo(null, CultureInfo.InvariantCulture, value, targetType);
 
 #if DEBUG
-			throw new Exception($"Не удалось преобразовать значение '{value}' типа {value.GetType()} в тип {targetType}");
+			throw new Exception($"Не удалось преобразовать значение '{value}' типа '{value.GetType()}' в тип {targetType}");
 #else
 			return null;
 #endif
