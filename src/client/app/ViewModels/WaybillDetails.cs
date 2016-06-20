@@ -151,11 +151,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
+
 			if (Waybill.IsCreatedByUser)
 			{
 				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
 				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
 			}
+
 		}
 
 		public IResult PrintRackingMap()
