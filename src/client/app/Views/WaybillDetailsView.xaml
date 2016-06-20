@@ -113,7 +113,8 @@
 		<StackPanel Grid.Row="3" Style="{StaticResource FilterPanel}"
 			Visibility="{Binding Waybill.IsCreatedByUser, Converter={StaticResource BoolToCollapsed}}">
 			<Button Style="{StaticResource FilterElement}"
-				Command="ApplicationCommands.Delete">Удалить строку</Button>
+				Command="ApplicationCommands.Delete"
+				ToolTip="Удалить строку (Del)">Удалить строку</Button>
 		</StackPanel>
 
 		<Border Grid.Row="2" BorderThickness="1" BorderBrush="Black" HorizontalAlignment="Center" VerticalAlignment="Center"
