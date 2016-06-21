@@ -2,14 +2,20 @@
 using System.Threading;
 using Common.Tools;
 using NHibernate;
+using ReactiveUI;
+using LogManager = log4net.LogManager;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
 	public class DbMaintain
 	{
-		public static void UpdateLeaders(ISession statelessSession, Settings settings)
+		public static void UpdateLeaders()
 		{
-			statelessSession.CreateSQLQuery(@"
+			var statelessSession = AppBootstrapper.NHibernate.Factory.OpenSession();
+			var trancate = statelessSession.BeginTransaction();						
+			AppBootstrapper.LeaderCalculationWasStart = true;			
+			try {		
+				statelessSession.CreateSQLQuery(@"
 update Prices p
 	join DelayOfPayments d on d.PriceId = p.PriceId and p.RegionId = d.RegionId and d.DayOfWeek = :dayOfWeek
 set p.CostFactor = ifnull(1 + d.OtherDelay / 100, 1),
@@ -75,9 +81,16 @@ set m.NextCost = n.NextCost,
 
 drop temporary table NextMinCosts;
 drop temporary table Leaders;")
-				.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
-				.ExecuteUpdate();
-			settings.LastLeaderCalculation = DateTime.Today;
+					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
+					.ExecuteUpdate();
+				trancate.Commit();				
+			} catch (Exception exc) {
+				trancate.Rollback();
+				LogManager.GetLogger(typeof (DbMaintain)).Warn($"Не удалось вычислить лидеров во время импорта данных {DateTime.Now}", exc);
+			} finally {
+				AppBootstrapper.LeaderCalculationWasStart = false;
+				statelessSession.Close();
+			}
 		}
 
 		public static void CalcJunk(IStatelessSession session, Settings settings)

@@ -371,8 +371,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-						DbMaintain.UpdateLeaders(session, Settings.Value);
-						session.Flush();
+						DbMaintain.UpdateLeaders();
 						return Enumerable.Empty<IResult>();
 					});
 			}
@@ -441,6 +440,16 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
 
+			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
+			{
+				if(AppBootstrapper.LeaderCalculationWasStart == true
+				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
+				{
+					return;
+				}
+				Settings.Value.LastLeaderCalculation = DateTime.Today;
+				session.Flush();
+			};
 			//изменились заявки
 			Env.Bus.SendMessage("Changed", "db");
 			//изменилась база данных
@@ -530,6 +539,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMinCosts()
 		{
+			if (AppBootstrapper.LeaderCalculationWasStart)
+			{
+				MessageResult.Warn("Идет расчет минимальных цен. Минимальные цены можно будет посмотреть после окончания расчета, это может занять какое-то время. Пожалуйста, подождите и повторно откройте \"Минимальные цены\"")
+					.Execute(new ActionExecutionContext());
+				return;
+			}
 			NavigateRoot(new Offers.MinCosts());
 		}
 
