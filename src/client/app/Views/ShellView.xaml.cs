@@ -320,7 +320,7 @@ namespace AnalitF.Net.Client.Views
 				}
 
 				if ((a as AddressProxy).Id == _lastSelectedAddress?.Id ||
-						(a as AddressProxy).Id == model.CurrentAddress?.Id)
+						(a as AddressProxy).Id == model.CurrentAddress.Value?.Id)
 				{
 					return true;
 				}
