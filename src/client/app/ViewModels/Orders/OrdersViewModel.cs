@@ -176,7 +176,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					ChangeTrackingEnabled = true
 				};
 
-				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
+				if (orders.Count > 0)
+					Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}
 
