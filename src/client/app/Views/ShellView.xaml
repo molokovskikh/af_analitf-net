@@ -32,10 +32,16 @@
 	</Window.InputBindings>
 
 	<Window.Resources>
+		<views:AddressVisiblityConverterPositive x:Key="addressVisiblityConverterPositive"/>
+		<views:AddressVisiblityConverterNegative x:Key="addressVisiblityConverterNegative"/>
 		<DataTemplate x:Key="AddressTemplate">
 			<StackPanel Orientation="Horizontal">
-				<CheckBox VerticalAlignment="Center" IsChecked="{Binding Config.IsActive}" />
-                <TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}" />
+				<CheckBox VerticalAlignment="Center" IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+									Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterPositive}}"/>
+                <TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}" 
+													 Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterPositive}}"/>
+				<Button Content="{Binding Path=Name}"  Style="{StaticResource ButtonInsideComboBoxPopup}" Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterNegative}}" 
+                                cal:Message.Attach="[Event Click] = [Click()]"/>
 			</StackPanel>
 		</DataTemplate>
 
@@ -265,7 +271,7 @@
 
 			<StackPanel>
 				<TextBlock>Адрес заказа:</TextBlock>
-				<ComboBox x:Name="Addresses"/>
+				<ComboBox x:Name="Addresses" />
 			</StackPanel>
 		</controls:ToolbarPanel>
 
