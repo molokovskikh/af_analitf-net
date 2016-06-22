@@ -17,11 +17,11 @@ namespace AnalitF.Net.Client.Models.Print
 	class StockRackingMapDocument
 	{
 		private IList<Stock> _stocks;
-		private ISession _session;
+		private IList<ReceivingOrder> _receivingOrders;
 
-		public StockRackingMapDocument(ISession session, IList<Stock> stocks)
+		public StockRackingMapDocument(IList<ReceivingOrder> receivingOrders, IList<Stock> stocks)
 		{
-			_session = session;
+			_receivingOrders = receivingOrders;
 			_stocks = stocks;
 		}
 
@@ -79,7 +79,7 @@ namespace AnalitF.Net.Client.Models.Print
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				FontSize = 10,
-				Text = "Поставщик " + GetReceivingOrder(_session, line.ReceivingOrderId).Supplier.FullName,
+				Text = "Поставщик " + GetSupplierName(_receivingOrders, line.ReceivingOrderId),
 				Margin = new Thickness(2, 32, 0, 0),
 				Padding = new Thickness(0)
 			};
@@ -345,9 +345,9 @@ namespace AnalitF.Net.Client.Models.Print
 			return border;
 		}
 
-		public ReceivingOrder GetReceivingOrder(ISession session, uint? id)
+		public string GetSupplierName(IList<ReceivingOrder> receivingOrders, uint? id)
 		{
-			return session.Get<ReceivingOrder>(id);
+			return id == null ? "" : receivingOrders.First(r => r.Id == id).Supplier.FullName;
 		}
 	}
 }

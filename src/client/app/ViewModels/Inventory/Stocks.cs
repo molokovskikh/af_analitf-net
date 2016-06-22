@@ -154,10 +154,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult PrintStockRackingMaps()
 		{
+			var receivingOrders = Session.Query<ReceivingOrder>().ToList();
+
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Постелажная карта",
-				Document = new StockRackingMapDocument(Session, Items.Value.ToList()).Build()
+				Document = new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build()
 			}, fullScreen: true);
 		}
 

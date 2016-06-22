@@ -299,6 +299,7 @@ namespace AnalitF.Net.Client.Models
 				//у нас могут быть заказы без прайс листов
 				//ловим исключения для таких заказов
 				try {
+					if (p == null) return;
 					p.WeeklyOrderSum = weeklyStat.Where(s => s.Item1 == p.Id)
 						.Select(s => (decimal?)s.Item2).FirstOrDefault();
 					p.MonthlyOrderSum = monthlyStat.Where(s => s.Item1 == p.Id)
