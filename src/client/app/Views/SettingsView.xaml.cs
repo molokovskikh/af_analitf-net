@@ -33,6 +33,17 @@ namespace AnalitF.Net.Client.Views
 						PriceTagConstructor.Visibility = x.Value == PriceTagType.Custom ? Visibility.Visible : Visibility.Collapsed;
 					});
 			};
+
+			Settings_PriceTag_Type.SelectionChanged += (sender, e) =>
+			{
+				if ((PriceTagType)((ValueDescription)(sender as ComboBox).SelectedItem).Value == PriceTagType.Custom)
+				{
+					(sender as ComboBox).ToolTip = @"Конструктор для редактирования ценников, с учетом нужных размеров и необходимых опций. Для создания нового ценника нажмите Редактировать.";
+					return; ;
+				}
+
+				(sender as ComboBox).ToolTip = null;
+			};
 		}
 	}
 }

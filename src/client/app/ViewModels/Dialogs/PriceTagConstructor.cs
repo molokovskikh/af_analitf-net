@@ -319,6 +319,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				foreach (var item in dbItems.Where(x => Items.All(y => x.Id != y.Id)))
 					s.Connection.Delete(item);
 			}).Wait();
+			TryClose();
 		}
 
 		public void Clear()

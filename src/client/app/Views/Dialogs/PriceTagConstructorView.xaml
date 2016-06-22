@@ -9,9 +9,9 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
-			<Button Name="Reset">Сбросить</Button>
-			<Button Name="Clear">Очистить</Button>
-			<Button Name="Delete">Удалить</Button>
+			<Button Name="Reset" ToolTip="Вернуть исходные настройки">Вернуть исходные</Button>
+			<Button Name="Clear" ToolTip="Удалить все на Схеме ценника">Очистить</Button>
+			<Button Name="Delete" ToolTip="Удалить выделенный элемент">Удалить</Button>
 			<Button Name="Preview">Обновить</Button>
 			<Button Name="Save">Сохранить</Button>
 		</ToolBar>
@@ -28,7 +28,8 @@
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
 				<Label Grid.Row="0" FontWeight="Bold" FontSize="16" Content="Доступные элементы" />
-				<ListBox Grid.Row="1" Name="Items" ItemsSource="{Binding Fields}" DisplayMemberPath="Name" />
+				<ListBox Grid.Row="1" Name="Items" ItemsSource="{Binding Fields}" DisplayMemberPath="Name"
+								 ToolTip="Для добавления -выделенный элемент перетащите мышкой на поле Схема ценника"/>
 			</Grid>
 
 			<Grid Grid.Column="1">

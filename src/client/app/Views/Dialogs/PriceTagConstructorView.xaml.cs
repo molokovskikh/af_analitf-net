@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Views.Dialogs
 			Items.MouseMove += (sender, args) => {
 				if (Items.SelectedItem != null && Mouse.PrimaryDevice.LeftButton == MouseButtonState.Pressed) {
 					var el = CanvasPanel.ToBlock(new PriceTagItem((PriceTagItem)Items.SelectedItem));
-					DragDrop.DoDragDrop(Items, new DataObject(el), DragDropEffects.All);
+					DragDrop.DoDragDrop(Items, new DataObject(typeof(FrameworkElement), el), DragDropEffects.All);
 				}
 			};
 			Canvas.MouseMove += (sender, args) => {
