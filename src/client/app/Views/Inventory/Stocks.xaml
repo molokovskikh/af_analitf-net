@@ -4,17 +4,60 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	mc:Ignorable="d"
 	d:DesignHeight="300" d:DesignWidth="300">
 	<Grid>
-		<controls:DataGrid2 x:Name="Items">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<WrapPanel Style="{StaticResource FilterWrapPanel}" >
+			<Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Постелажная карта</Button>
+			<Button Name="PrintStock" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товарные запасы</Button>
+			<Button Name="PrintStockLimit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности</Button>
+			<Button Name="PrintStockLimitMonth" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности менее 1 месяца</Button>
+			<Button Name="PrintStockPriceTags" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Ценники</Button>
+			<Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Список в Excel</Button>
+		</WrapPanel>
+		<controls:DataGrid2 x:Name="Items" Grid.Row="1">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding Status}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnOrder" Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Count}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding Cost}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailCost" Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSum" Header="Сумма закупки" Binding="{Binding Sum}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSumWithNds" Header="Сумма закупки с НДС" Binding="{Binding SumWithNds}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnRetailSum" Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCountDelivery" Header="Кол-во поставки" Binding="{Binding CountDelivery}" Width="*" TextAlignment="Right" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<controls:DataGrid2 x:Name="DgItemsTotal" ItemsSource="{Binding ItemsTotal}" Grid.Row="2" HeadersVisibility="Row" Margin="0 5 0 0"
+												HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnBarcode}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProduct}, Path=ActualWidth}"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnProducer}, Path=ActualWidth}"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnStatus}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnOrder}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding Total}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCount}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalCount}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCost}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnRetailCost}, Path=ActualWidth}" />
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSum}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalSum}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnSumWithNds}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalSumWithNds}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnRetailSum}, Path=ActualWidth}"
+																			 FontWeight="Bold" Binding="{Binding TotalRetailSum}" TextAlignment="Right"/>
+				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCountDelivery}, Path=ActualWidth}" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>

@@ -268,6 +268,11 @@
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
+    <Compile Include="Models\Inventory\StockTotal.cs" />
+    <Compile Include="Models\Print\StockDocument.cs" />
+    <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
+    <Compile Include="Models\Print\StockPriceTagDocument.cs" />
+    <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -363,8 +368,10 @@
     <Compile Include="ViewModels\Diadok\Revocation.cs" />
     <Compile Include="ViewModels\Diadok\Resolution.cs" />
     <Compile Include="ViewModels\Diadok\Sign.cs" />
+    <Compile Include="ViewModels\Dialogs\EditStock.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
+    <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\Main.cs" />
@@ -466,6 +473,9 @@
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\EditStock.xaml.cs">
+      <DependentUpon>EditStock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\GridConfig.xaml.cs">
       <DependentUpon>GridConfig.xaml</DependentUpon>
     </Compile>
@@ -474,6 +484,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PostUpdate.xaml.cs">
       <DependentUpon>PostUpdate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\SelectStockPeriod.xaml.cs">
+      <DependentUpon>SelectStockPeriod.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -700,6 +713,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\EditStock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\GridConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -709,6 +726,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\SelectStockPeriod.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

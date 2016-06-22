@@ -1,4 +1,7 @@
 ﻿using NPOI.SS.Formula.Functions;
+using AnalitF.Net.Client.Helpers;
+using NHibernate;
+using System;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -16,9 +19,76 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? ReceivingOrderId { get; set; }
 
+		public virtual string Barcode { get; set; }
+		public virtual string ProductСode { get; set; }
+		public virtual string AnalogCode { get; set; }
+		public virtual string ProducerBarcode { get; set; }
+		public virtual string AltBarcode { get; set; }
+		public virtual string AnalogGroup { get; set; }
+		public virtual string Country { get; set; }
+		public virtual string Unit { get; set; }
 		public virtual string Product { get; set; }
+		public virtual string ProductKind { get; set; }
+		public virtual string FarmGroup { get; set; }
+		public virtual string Mnn { get; set; }
+		public virtual string Brand { get; set; }
+		public virtual string UserCategory { get; set; }
+		public virtual string Category { get; set; }
+		public virtual string RegionCert { get; set; }
+		public virtual string Certificate { get; set; }
 		public virtual string Producer { get; set; }
-		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Count { get; set; }
+		public virtual decimal Cost { get; set; }
+		public virtual decimal RetailCost { get; set; }
+		public virtual decimal ProducerCost { get; set; }
+		public virtual decimal Nds { get; set; }
+		public virtual double NdsPers { get; set; }
+		public virtual double NpPers { get; set; }
+		public virtual decimal Excise { get; set; }
+		public virtual decimal CostWithNds { get { return Cost + Nds + Excise; } }
+
+		public virtual decimal RetailMarkup
+		{
+			get
+			{
+				if (Cost != 0)
+					return ((RetailCost - Cost) * 100) / Cost;
+				return 0;
+			}
+		}
+
+		public virtual decimal LowCost { get; set; }
+		public virtual decimal LowMarkup
+		{
+			get
+			{
+				if (Cost != 0)
+					return ((LowCost - Cost) * 100) / Cost;
+				return 0;
+			}
+		}
+
+		public virtual decimal OptCost { get; set; }
+		public virtual decimal OptMarkup
+		{
+			get
+			{
+				if (Cost != 0)
+					return ((OptCost - Cost) * 100) / Cost;
+				return 0;
+			}
+		}
+
+		public virtual string Seria { get; set; }
+
+		public virtual decimal Sum { get { return Count * Cost; } }
+		public virtual decimal SumWithNds { get; set; }
+		public virtual decimal RetailSum { get { return Count * RetailCost; } }
+		public virtual uint CountDelivery { get; set; }
+		public virtual string Vmn { get; set; }
+		public virtual string Gtd { get; set; }
+		public virtual string Period { get; set; }
+		public virtual string DocumentDate { get; set; }
+		public virtual string WaybillNumber { get; set; }
 	}
 }

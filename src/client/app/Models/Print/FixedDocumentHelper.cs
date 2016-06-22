@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -30,6 +31,29 @@ namespace AnalitF.Net.Client.Models.Print
 					Child = panel,
 				};
 				label.Measure(pageSize);
+				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
+					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
+				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
+				page.Child.Children.Add(border);
+				document.Pages.Add(page);
+			}
+			return document;
+		}
+
+		public static FixedDocument BuildFixedDoc(IList<Stock> lines, Func<Stock, FrameworkElement> map, double borderThickness)
+		{
+			var document = new FixedDocument();
+			var left = lines.Count;
+			while (left > 0)
+			{
+				var panel = new StackPanel();
+				var page = new PageContent();
+				page.Child = new FixedPage();
+				var border = new Border
+				{
+					Margin = new Thickness(25),
+					Child = panel,
+				};
 				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
 					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
 				panel.Children.Add(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));

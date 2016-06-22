@@ -61,8 +61,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
-
-
 		}
 
     public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)

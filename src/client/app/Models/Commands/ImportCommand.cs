@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}},
 				{"SentOrders", new [] {
 					//локальные поля
-					"Id", "LinesCount", "Sum", "PersonalComment"
+					"Id", "LinesCount", "Sum", "PersonalComment", "ReceivingOrderId"
 				}}
 			};
 
