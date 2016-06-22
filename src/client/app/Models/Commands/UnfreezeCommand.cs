@@ -187,7 +187,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
-					line.Order.DisplayId = oldDisplayId;
+					line.Order.KeepId = oldDisplayId;
 					if (ShouldCalculateStatus(line)) {
 						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;

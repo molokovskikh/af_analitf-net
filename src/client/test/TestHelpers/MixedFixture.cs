@@ -113,7 +113,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//что бы сервер не считал завки дублями нужно генерировать разные коды
 				order.Lines[0].CodeCr = order.CreatedOn.AddSeconds(random.Next(-15, 15)).ToString();
 				localSession.Save(order);
-				order.DisplayId = order.Id;
 				return order;
 			}
 		}
