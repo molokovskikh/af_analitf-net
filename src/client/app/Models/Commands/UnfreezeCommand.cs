@@ -181,8 +181,13 @@ namespace AnalitF.Net.Client.Models.Commands
 					break;
 
 				uint ordered;
+				var oldDisplayId = sourceOrder.DisplayId;
+				if (oldDisplayId == 0) {
+					oldDisplayId = sourceOrder.Id;
+				}
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
+					line.Order.KeepId = oldDisplayId;
 					if (ShouldCalculateStatus(line)) {
 						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;

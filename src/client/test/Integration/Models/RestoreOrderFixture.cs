@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			var cmd = InitCmd(new UnfreezeCommand<Order>(order.Id));
 			cmd.Execute();
 			var text = (string)cmd.Result;
-			var message = $"Заказ №{order.Id} невозможно \"разморозить\", т.к. прайс-листа Тест - Воронеж нет в обзоре\r\n";
+			var message = $"Заказ №{order.DisplayId} невозможно \"разморозить\", т.к. прайс-листа Тест - Воронеж нет в обзоре\r\n";
 			Assert.AreEqual(message, text);
 		}
 

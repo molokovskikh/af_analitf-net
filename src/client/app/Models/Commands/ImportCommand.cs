@@ -326,6 +326,13 @@ where p.IsSynced = 1 or p.PriceId is null;";
 				})
 					.ToArray();
 			}
+			if (dbTable.Name.Match("Orders")) {
+				ignored = ignored.Concat(new[] {
+					"DisplayId",
+					"KeepId"
+				})
+					.ToArray();
+			}
 
 			ignored = ignored.Concat(ignoredColumns.GetValueOrDefault(dbTable.Name, new string[0])).ToArray();
 			var columnsToCheck = tableColumns.Except(ignored, StringComparer.OrdinalIgnoreCase).ToArray();

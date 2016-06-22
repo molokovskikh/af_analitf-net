@@ -78,7 +78,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId => Id;
+		public virtual uint? KeepId { get; set; }
+
+		public virtual uint DisplayId => KeepId ?? Id;
 
 		public virtual uint? ExportId { get; set; }
 
