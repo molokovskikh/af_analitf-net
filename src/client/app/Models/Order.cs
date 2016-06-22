@@ -54,7 +54,6 @@ namespace AnalitF.Net.Client.Models
 		private int linesCount;
 		private bool send;
 		private bool frozen;
-		private uint displayId;
 
 		public Order()
 		{
@@ -79,17 +78,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId
-		{
-			get
-			{
-				if (displayId == 0) {
-					displayId = Id;
-				}
-				return displayId;
-			}
-			set { displayId = value; }
-		}
+		public virtual uint? KeepId { get; set; }
+
+		public virtual uint DisplayId => KeepId ?? Id;
 
 		public virtual uint? ExportId { get; set; }
 
