@@ -22,6 +22,7 @@ using Caliburn.Micro;
 using Common.Tools;
 using Common.Tools.Calendar;
 using NHibernate.Linq;
+using NHibernate.Proxy;
 using ReactiveUI;
 using Address = AnalitF.Net.Client.Models.Address;
 
@@ -164,12 +165,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 				//этот вызов должен быть после RebuildSessionIfNeeded
 				//тк он перезагрузить объекты
-				var orders = AddressSelector.GetActiveFilter()
+				var orders = new List<Order>();
+				if (AddressSelector.All) {
+					orders = Session.Query<Order>().ToList()
+						.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
+						.OrderBy(o => o.PriceName)
+						.ToList();
+				}
+				else {
+				orders = AddressSelector.GetActiveFilter()
 					.SelectMany(a => a.Orders)
 					.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
 					.OrderBy(o => o.PriceName)
 					.ToList();
-				orders.Each(o => o.CalculateStyle(Address));
+					orders.Each(o => o.CalculateStyle(Address));
+				}
+
 				if (CurrentOrder != null)
 					CurrentOrder = orders.FirstOrDefault(x => x.Id == CurrentOrder.Id);
 				Orders = new ReactiveCollection<Order>(orders) {
@@ -316,7 +327,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				$" прайс-лист: {order.SafePrice?.Name}" +
 				$" позиций: {order.LinesCount}");
 			Session.Delete(order);
-			if (order.Address != null) {
+			if (order.Address != null && !order.Address.IsProxy()) {
 				order.Address.Orders.Remove(order);
 			}
 			Orders.Remove(order);
