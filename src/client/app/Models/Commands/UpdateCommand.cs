@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Handlers;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,6 +57,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		private uint requestId;
 		private bool reportProgress;
 		private int downloadedBytes;
+		private int offset;
 
 		public Func<Exception, ErrorResolution> ErrorSolver = x => ErrorResolution.Fail;
 		public bool Clean = true;
@@ -146,7 +148,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var addresses = Session.Query<AddressConfig>().Where(x => x.IsActive).Select(x => x.Address);
 				var url = Config.SyncUrl(syncData, lastSync, addresses);
 				SendPrices(Client, settings, Token);
-				var request = Client.GetAsync(url, Token);
+				var request = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
 				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
 			}
@@ -160,7 +162,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			using (var cleaner = new FileCleaner()) {
 				string[] files;
 				using (response) {
-					var task = Download(response, cleaner);
+					var task = DownloadContent(response, cleaner);
 					task.ContinueWith(x => {
 						//нам не интересны ошибки которые возникли здесь
 						//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
@@ -1284,7 +1286,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				.ToList();
 		}
 
-		private async Task<string[]> Download(HttpResponseMessage response, FileCleaner cleaner)
+		private async Task<string[]> DownloadContent(HttpResponseMessage response, FileCleaner cleaner)
 		{
 			reportProgress = true;
 			try {
@@ -1297,13 +1299,42 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				}
 				else {
 					var filename = cleaner.RandomFile(Config.TmpDir);
+					var maxErrorCount = 10;
+					var errorCount = 0;
 					using (var file = File.Create(filename)) {
-						await response.Content.CopyToAsync(file);
+						while (true) {
+							downloadedBytes = 0;
+							offset = (int)file.Position;
+							try {
+								if (errorCount > 0) {
+									await TaskEx.Delay(TimeSpan.FromMilliseconds(200));
+									response.Dispose();
+									Client.Dispose();
+
+									Client = Settings.GetHttpClient(Config, ref HttpProgress, ref Handler);
+									Disposable.Add(Client);
+									HttpProgress.HttpReceiveProgress += ReceiveProgress;
+
+									var request = new HttpRequestMessage(HttpMethod.Get, $"Main?Id={requestId}");
+									request.Headers.Range = new RangeHeaderValue(file.Position, null);
+									response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+									response.EnsureSuccessStatusCode();
+								}
+								await response.Content.CopyToAsync(file);
+								break;
+							} catch(Exception e) {
+								errorCount++;
+								if (errorCount > maxErrorCount)
+									throw;
+								Log.Warn($"Ошибка при загрузки данных, попытка {errorCount}/{maxErrorCount} буду пытаться докачивать {file.Position}", e);
+							}
+						}
 						return new []{ filename };
 					}
 				}
 			} finally {
 				reportProgress = false;
+				response.Dispose();
 			}
 		}
 
@@ -1313,7 +1344,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				//Здесь мы получаем передано всего и нам нужно вычислить сколько передали после последнего уведомления
 				var bytes = args.BytesTransferred - downloadedBytes;
 				downloadedBytes = args.BytesTransferred;
-				Reporter.Progress(bytes, inBytes: true);
+				Reporter.Progress(offset + bytes, inBytes: true);
 			}
 		}
 

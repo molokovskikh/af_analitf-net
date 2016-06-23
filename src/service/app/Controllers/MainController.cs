@@ -19,8 +19,12 @@ namespace AnalitF.Net.Service.Controllers
 			DateTime? lastSync = null,
 			//перечень активных адресов доставки через запятую
 			//для экспорта неподтвержденных заявок
-			string addressIds = null)
+			string addressIds = null,
+			uint? id = null)
 		{
+			if (id != null)
+				return Session.Load<RequestLog>(id.Value).ToResult(Request, Config);
+
 			var updateType = data ?? GetType().Name;
 			RequestLog existsJob = null;
 			//если это новый запрос то пытаемся найти уже подготовленные данные которые не протухли или в процессе
@@ -71,7 +75,7 @@ namespace AnalitF.Net.Service.Controllers
 					});
 			}
 
-			return existsJob.ToResult(Config);
+			return existsJob.ToResult(Request, Config);
 		}
 
 		public HttpResponseMessage Put(ConfirmRequest request)

@@ -439,8 +439,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			if (attachment == null)
 				return;
 			var dir = FileHelper.MakeRooted("diadok");
-			await Util.Run(() => Directory.CreateDirectory(dir));
-			attachment.LocalFilename = await Util.Run(() => Directory.GetFiles(dir, $"{attachment.Entity.EntityId}.*").FirstOrDefault());
+			await TaskEx.Run(() => Directory.CreateDirectory(dir));
+			attachment.LocalFilename = await TaskEx.Run(() => Directory.GetFiles(dir, $"{attachment.Entity.EntityId}.*").FirstOrDefault());
 		}
 
 		public NotifyValue<string> Total { get; set; }
@@ -634,7 +634,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public IEnumerable<IResult> PrintItem()
 		{
-			var task = Util.Run(() => LoadPrintPdf(CurrentItem.Value));
+			var task = TaskEx.Run(() => LoadPrintPdf(CurrentItem.Value));
 			yield return new TaskResult(task);
 			var file = task.Result;
 			using (var pdf = PdfDocument.Load(file)) {
@@ -657,7 +657,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Manager.ShowFixedDialog(dialog);
 			if (dialog.Success) {
 				var current = CurrentItem.Value;
-				var message = await Util.Run(() => api.GetMessage(token, box.BoxId, current.Message.MessageId));
+				var message = await TaskEx.Run(() => api.GetMessage(token, box.BoxId, current.Message.MessageId));
 				var index = items.IndexOf(current);
 				Entity prev = null;
 				if (index > 1)

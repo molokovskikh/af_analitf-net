@@ -20,7 +20,7 @@ namespace AnalitF.Net.Service.Controllers
 			var existsJob = TryFindJob(GetType().Name);
 			if (existsJob == null)
 				return new HttpResponseMessage(HttpStatusCode.Accepted);
-			return existsJob.ToResult(Config);
+			return existsJob.ToResult(Request, Config);
 		}
 	}
 
@@ -52,7 +52,7 @@ namespace AnalitF.Net.Service.Controllers
 		{
 			var existsJob = new RequestLog(CurrentUser, Request, GetType().Name);
 			existsJob.StartJob(Session, (x, y) => cmd(x, Config, y));
-			return existsJob.ToResult(Config);
+			return existsJob.ToResult(Request, Config);
 		}
 	}
 }
