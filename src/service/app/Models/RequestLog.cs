@@ -145,7 +145,7 @@ namespace AnalitF.Net.Service.Models
 			return Path.Combine(config.ResultPath, Id.ToString());
 		}
 
-		public virtual HttpContent GetResult(Config.Config config)
+		public virtual HttpContent GetResult(HttpRequestMessage request, Config.Config config)
 		{
 			if (IsFaulted)
 				throw new Exception("Обработка запроса завершилась ошибкой");
@@ -156,14 +156,19 @@ namespace AnalitF.Net.Service.Models
 				foreach (var file in JsonConvert.DeserializeObject<string[]>(MultipartContent))
 					multipart.Add(new StreamContent(File.OpenRead(FileHelper.MakeRooted(file))));
 				content = multipart;
+			} else {
+				var fileStream = File.OpenRead(OutputFile(config));
+				var fronRange = request.Headers.Range?.Ranges.FirstOrDefault()?.From;
+				if (fronRange != null)
+					fileStream.Position = fronRange.Value;
+				content = new StreamContent(fileStream);
 			}
-			content = content ?? new StreamContent(File.OpenRead(OutputFile(config)));
 			if (UpdateType.Match("OrdersController"))
 				content.Headers.Add("Content-Type", "application/json");
 			return content;
 		}
 
-		public virtual HttpResponseMessage ToResult(Config.Config config)
+		public virtual HttpResponseMessage ToResult(HttpRequestMessage request, Config.Config config)
 		{
 			if (!IsCompleted) {
 				return new HttpResponseMessage(HttpStatusCode.Accepted) {
@@ -193,7 +198,7 @@ namespace AnalitF.Net.Service.Models
 
 			return new HttpResponseMessage(HttpStatusCode.OK) {
 				Headers = { { "Request-Id", Id.ToString() } },
-				Content = GetResult(config)
+				Content = GetResult(request, config)
 			};
 		}
 
