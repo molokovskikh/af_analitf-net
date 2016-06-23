@@ -1326,7 +1326,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 								errorCount++;
 								if (errorCount > maxErrorCount)
 									throw;
-								Log.Warn($"Ошибка при загрузки данных, попытка {errorCount}/{maxErrorCount} буду пытаться докачивать {file.Position}", e);
+								Log.Warn($"Ошибка при загрузки данных, попытка {errorCount}/{maxErrorCount} буду пытаться докачивать, загружено байт {file.Position}", e);
 							}
 						}
 						return new []{ filename };
