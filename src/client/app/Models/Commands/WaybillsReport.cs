@@ -43,6 +43,8 @@ where w.{field} > ?
 	and l.ProducerCost is not null
 	and l.producerCost > 0
 	and l.SupplierCost is not null
+	and l.RetailCost is not null
+	and l.RetailCost > 0
 	and s.VendorID is not null
 group by l.EAN13
 ;";
