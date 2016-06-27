@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.ViewModels;
 using AnalitF.Net.Client.Views.Orders;
+using log4net;
 using Newtonsoft.Json.Linq;
 
 namespace AnalitF.Net.Client.Helpers
@@ -28,7 +29,7 @@ namespace AnalitF.Net.Client.Helpers
 				DefaultValue = value.Value,
 				Key = key,
 				Getter = () => value.Value,
-				Setter = v => value.Value = (T)v,
+				Setter = v => value.Value = (T)ViewPersister.ConvertJsonValue(v, typeof(T)),
 			};
 		}
 	}
@@ -38,6 +39,7 @@ namespace AnalitF.Net.Client.Helpers
 		public Dictionary<DependencyObject, DependencyProperty> persistable =
 			new Dictionary<DependencyObject, DependencyProperty>();
 		private UserControl view;
+		private static ILog log = LogManager.GetLogger(typeof(ViewPersister));
 
 		public ViewPersister(UserControl view)
 		{
@@ -50,37 +52,53 @@ namespace AnalitF.Net.Client.Helpers
 
 		public void Track(DependencyObject o, DependencyProperty property)
 		{
-			persistable.Add(o, property);
+			persistable[o] = property;
 		}
 
 		public void Restore()
 		{
-			var model = view.DataContext as BaseScreen;
-			if (model == null)
-				return;
-			foreach (var property in persistable) {
-				var prop = property.Value;
-				var key = GetKey(property);
-				if (!model.Shell.PersistentContext.ContainsKey(key))
+			try {
+				var model = view.DataContext as BaseScreen;
+				if (model == null)
 					return;
-				var value = model.Shell.PersistentContext[key];
-				if (prop.IsValidType(value)) {
-					property.Key.SetValue(prop, value);
-				} else if (value is JObject) {
-					property.Key.SetValue(prop, ((JObject)value).ToObject(prop.PropertyType));
-				} else {
-					if (value != null) {
-						var converter = TypeDescriptor.GetConverter(prop.PropertyType);
-						if (converter.CanConvertFrom(value.GetType())) {
-							property.Key.SetValue(prop, converter.ConvertFrom(null, CultureInfo.InvariantCulture, value));
-							continue;
-						}
-					}
-#if DEBUG
-					throw new Exception($"Не удалось преобразовать значение '{value}' в тип {prop.PropertyType}");
-#endif
+				foreach (var property in persistable) {
+					var prop = property.Value;
+					var key = GetKey(property);
+					if (!model.Shell.PersistentContext.ContainsKey(key))
+						return;
+					var value = model.Shell.PersistentContext[key];
+					value = ConvertJsonValue(value, prop.PropertyType);
+					if (value != null)
+						property.Key.SetValue(prop, value);
 				}
+			} catch(Exception e) {
+#if DEBUG
+				throw;
+#endif
+				log.Error("Не удалось восстановить состояние", e);
 			}
+		}
+
+		public static object ConvertJsonValue(object value, Type targetType)
+		{
+			if (value == null)
+				return null;
+			if (targetType.IsInstanceOfType(value))
+				return value;
+			if (value is JObject)
+				return ((JObject)value).ToObject(targetType);
+			var converter = TypeDescriptor.GetConverter(targetType);
+			if (converter.CanConvertFrom(value.GetType()))
+				return converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+			converter = TypeDescriptor.GetConverter(value.GetType());
+			if (converter.CanConvertTo(targetType))
+				return converter.ConvertTo(null, CultureInfo.InvariantCulture, value, targetType);
+
+#if DEBUG
+			throw new Exception($"Не удалось преобразовать значение '{value}' типа '{value.GetType()}' в тип {targetType}");
+#else
+			return null;
+#endif
 		}
 
 		public void Save()

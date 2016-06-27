@@ -77,5 +77,21 @@ namespace AnalitF.Net.Client.Config
 				}));
 			return result;
 		}
+
+		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		{
+			if (Factory == null)
+				return Observable.Empty<T>();
+			var task = new Task<T>(() => {
+				if (BaseScreen.BackgroundSession == null)
+					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
+					return @select(BaseScreen.BackgroundSession);
+			});
+			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(QueryScheduler);
+			//игнорируем отмену задачи, она произойдет если закрыли форму
+			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
+		}
 	}
 }

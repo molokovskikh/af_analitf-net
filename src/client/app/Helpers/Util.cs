@@ -213,20 +213,6 @@ namespace AnalitF.Net.Client.Helpers
 			return value != null ? value.Value.ToString("0.00") : "";
 		}
 
-		public static Task<T> Run<T>(Func<T> func)
-		{
-			var task = new Task<T>(func);
-			task.Start();
-			return task;
-		}
-
-		public static Task Run(Action action)
-		{
-			var task = new Task(action);
-			task.Start();
-			return task;
-		}
-
 		public static Dictionary<string, string> ParseSubject(X509Certificate2 c)
 		{
 			List<Char> accum = new List<char>();
@@ -285,6 +271,17 @@ namespace AnalitF.Net.Client.Helpers
 					x.File = files.GetValueOrDefault(x);
 				});
 			});
+		}
+
+		public static string HumanizeDaysAgo(int days)
+		{
+			if (days == 1)
+				return "Товар был заказан вчера.";
+			if (days > 1 && days < 5)
+				return "Товар был заказан за последние " + days + " дня";
+			if (days >= 5)
+				return "Товар был заказан за последние " + days + " дней";
+			return "";
 		}
 	}
 }

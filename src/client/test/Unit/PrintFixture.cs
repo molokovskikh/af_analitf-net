@@ -98,8 +98,10 @@ namespace AnalitF.Net.Client.Test.Unit
 				Quantity = 1
 			};
 			waybill.AddLine(line);
-			waybill.Calculate(settings);
+
+			waybill.Calculate(settings, new List<uint>());
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+
 			Assert.IsNotNull(doc);
 		}
 
@@ -119,8 +121,10 @@ namespace AnalitF.Net.Client.Test.Unit
 				};
 				waybill.AddLine(line);
 			}
-			waybill.Calculate(settings);
+
+			waybill.Calculate(settings, new List<uint>());
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Pages.Count);
 
@@ -155,6 +159,11 @@ namespace AnalitF.Net.Client.Test.Unit
 			}
 		}
 
+		public static void SaveToPng(FrameworkElement el, string file)
+		{
+			SaveToPng(el, file, new Size(el.ActualWidth, el.ActualHeight));
+		}
+
 		public static void SaveToPng(UIElement visual, string file, Size size)
 		{
 			visual.Measure(size);
@@ -168,6 +177,9 @@ namespace AnalitF.Net.Client.Test.Unit
 			bmp.Render(visual);
 			var enc = new PngBitmapEncoder();
 			enc.Frames.Add(BitmapFrame.Create(bmp));
+			var dir = Path.GetDirectoryName(file);
+			if (!String.IsNullOrEmpty(dir))
+				Directory.CreateDirectory(dir);
 			using (var f = File.OpenWrite(file))
 				enc.Save(f);
 		}

@@ -16,16 +16,17 @@ namespace AnalitF.Net.Client.Views
 		public WaybillsView()
 		{
 			InitializeComponent();
+
 			ApplyStyles();
 
 			Waybills.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
 				Commands.DoInvokeViewModel,
 				Commands.CanInvokeViewModel));
-		}
+        }
 
 		public void ApplyStyles()
 		{
-			StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
-		}
-	}
+            StyleHelper.ApplyStyles(typeof(Waybill), Waybills, Application.Current.Resources, Legend);
+        }
+    }
 }

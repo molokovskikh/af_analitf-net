@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Parts.ProducerPromotionPopup"
+          	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+						xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Center"
+						BorderBrush="#FF6A6A6A"
+						Background="#FFFBFBFB"
+						BorderThickness="1"
+						Padding="4" Margin="25,5,25,5"
+						Visibility="{Binding Visible.Value, Converter={StaticResource BoolToHidden}}">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0, 0, 10, 0">
+			Сегодня проводятся Акции, производители:
+			<!--По препарату <Run Name="Name_Value_Name" /> проводятся акции-->
+		</TextBlock>
+		<Button Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Name="Hide">Закрыть</Button>
+		<ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="ProducerPromotions" Margin="0, 10, 0, 0"
+			BorderThickness="0"
+			Background="Transparent"
+			HorizontalContentAlignment="Stretch">
+			<ItemsControl.ItemTemplate>
+				<DataTemplate>
+					<Grid Margin="0, 0, 5, 5">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Producer.Name}"
+							VerticalAlignment="Center"
+							Margin="0, 0, 10, 0"
+							FontWeight="Bold" />
+						<TextBlock Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+							<Hyperlink Click="Open">
+								<Run Text="{Binding Name}" />
+							</Hyperlink>
+						</TextBlock>
+						<TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Annotation}" TextWrapping="Wrap" />
+					</Grid>
+				</DataTemplate>
+			</ItemsControl.ItemTemplate>
+		</ListBox>
+	</Grid>
+</UserControl>

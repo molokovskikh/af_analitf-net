@@ -33,6 +33,13 @@ namespace AnalitF.Net.Client.Models
 		[Description("От минимальной цены в основных поставщиках")] MinBaseCost,
 	}
 
+	public enum ModePKU
+	{
+		[Description("Не реагировать на препараты ПКУ")] Resolve,
+		[Description("Предупреждать о заказе препаратов ПКУ")] Warning,
+		[Description("Запретить заказ препаратов ПКУ")] Deny,
+	}
+
 	public enum Taxation
 	{
 		[Description("ЕНВД")] Envd,
@@ -113,6 +120,7 @@ namespace AnalitF.Net.Client.Models
 			Rounding = Rounding.To0_10;
 			DiffCalcMode = DiffCalcMode.MinCost;
 			WarnIfOrderedYesterday = true;
+			CountDayForWarnOrdered = 1;
 			UseSupplierPriceWithNdsForMarkup = false;
 			OverCountWarningFactor = 5;
 			OverCostWarningPercent = 5;
@@ -128,6 +136,7 @@ namespace AnalitF.Net.Client.Models
 			PriceTag = new PriceTagSettings();
 			Markups = new List<MarkupConfig>();
 			Waybills = new List<WaybillSettings>();
+			ModePKU = ModePKU.Warning;
 		}
 
 		public virtual int Id { get; set; }
@@ -141,6 +150,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual uint TrackRejectChangedDays { get; set; }
 		public virtual int BaseFromCategory { get; set; }
 
+		public virtual int CountDayForWarnOrdered { get; set; }
+
 		public virtual decimal OverCountWarningFactor { get; set; }
 
 		public virtual decimal OverCostWarningPercent { get; set; }
@@ -148,6 +159,8 @@ namespace AnalitF.Net.Client.Models
 		public virtual decimal MaxOverCostOnRestoreOrder { get; set; }
 
 		public virtual DiffCalcMode DiffCalcMode { get; set; }
+
+		public virtual ModePKU ModePKU { get; set; }
 
 		public virtual string UserName
 		{
@@ -474,13 +487,17 @@ namespace AnalitF.Net.Client.Models
 			Validate();
 		}
 
-		public virtual string Validate(bool validateMarkups = true)
+		public virtual List<string[]> Validate(bool validateMarkups = true)
 		{
-			if (JunkPeriod < 6)
-				return "Срок уценки не может быть менее 6 месяцев";
-
-			if (validateMarkups)
+			if (JunkPeriod < 6) {
+				var error = new List<string[]>();
+				error.Add( new string[] { "JunkPeriod", "Срок уценки не может быть менее 6 месяцев" });
+				return error;
+			}
+			if (validateMarkups) {
 				return MarkupConfig.Validate(Markups);
+			}
+
 			return null;
 		}
 

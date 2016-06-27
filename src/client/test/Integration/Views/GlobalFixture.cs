@@ -330,13 +330,17 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var newcost = cells.First(x => ((Binding)((DataGridBoundColumn)x.Column).Binding).Path.Path == "MixedNewCost");
 				if (line.IsCostDecreased) {
 					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
-					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
-					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFB8FF71"));
+					//#FFCBF6D5 - смешанный активный
+					//#FFCDEAB9 - смешанный неактивный
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCBF6D5").Or.EqualTo("#FFB8FF71").Or.EqualTo("#FFCDEAB9"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFCBF6D5").Or.EqualTo("#FFB8FF71").Or.EqualTo("#FFCDEAB9"));
 				}
 				else {
 					//цвет может быть смешанный если строка выбрана или не смешанный если строка не выбрана
-					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
-					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFE3B4BA").Or.EqualTo("#FFEF5275"));
+					//#FFE1C5D6 - смешанный активный
+					//#FFE3B4BA - смешанный неактивный
+					Assert.That(oldcost.Background.ToString(), Is.EqualTo("#FFCDEAB9").Or.EqualTo("#FFE1C5D6").Or.EqualTo("#FFE3B4BA"));
+					Assert.That(newcost.Background.ToString(), Is.EqualTo("#FFEF5275").Or.EqualTo("#FFE1C5D6").Or.EqualTo("#FFE3B4BA"));
 				}
 			});
 
@@ -549,6 +553,52 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
+		public void ProducerPromotion()
+		{
+			session.DeleteEach<ProducerPromotion>();
+			var fixture = new LocalProducerPromotion("assets/Валемидин.JPG");
+
+			Fixture(fixture);
+
+			Start();
+
+			Click("ShowCatalog");
+
+			OpenOffers(fixture.ProducerPromotion.Catalogs.First());
+
+			dispatcher.Invoke(() => {
+				scheduler.AdvanceByMs(500);
+			});
+
+			WaitIdle();
+
+			dispatcher.Invoke(() => {
+				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
+				Assert.IsTrue(producerPromotions.IsVisible);
+				Assert.That(producerPromotions.AsText(), Does.Contain(fixture.ProducerPromotion.Name));
+
+				var presenter = producerPromotions.Descendants<ContentPresenter>()
+					.First(x => x.DataContext is ProducerPromotion && ((ProducerPromotion)x.DataContext).Id == fixture.ProducerPromotion.Id);
+
+				var link = presenter.Descendants<TextBlock>().SelectMany(x => x.Inlines).OfType<Hyperlink>().First();
+				dispatcher.BeginInvoke(new Action(() => InternalClick(link)));
+			});
+
+			WaitWindow(fixture.ProducerPromotion.DisplayName);
+			dispatcher.Invoke(() => {
+
+				var viewer = activeWindow.Descendants<FlowDocumentScrollViewer>().First();
+
+				var image = viewer.Document.Descendants<Image>().First();
+
+				Assert.IsNotNull(image);
+
+				Assert.That(image.Source.Height, Is.GreaterThan(0));
+
+			});
+		}
+
+		[Test]
 		public void Promotion()
 		{
 			session.DeleteEach<Promotion>();
@@ -653,8 +703,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Start();
 
-			SystemTime.Now = () => DateTime.Now.AddMinutes(20);
-			scheduler.AdvanceByMs(30000);
+			dispatcher.Invoke(() => {
+				SystemTime.Now = () => DateTime.Now.AddMinutes(20);
+				scheduler.AdvanceByMs(30000);
+			});
 
 			AsyncClick("Update");
 			WaitMessageBox("Обновление завершено успешно.");

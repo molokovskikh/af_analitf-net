@@ -13,9 +13,9 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
 			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
 			var waybill = new TestWaybill(log);
-			var products = session.Query<TestProduct>().Take(32).ToArray();
+			var products = session.Query<TestProduct>().Where(x => !x.Hidden).Take(32).ToArray();
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Азарга капли глазные 5мл Фл.-кап. Х1",
+				Product = products[0].FullName,
 				CatalogProduct = products[0],
 				Certificates = "РОСС BE.ФМ11.Д06711",
 				CertificatesDate = "01.16.2013",
@@ -31,7 +31,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				NDSAmount = 53.62m,
 			});
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Доксазозин 4мг таб. Х30 (R)",
+				Product = products[1].FullName,
 				CatalogProduct = products[1],
 				Certificates = "РОСС RU.ФМ08.Д38737",
 				Period = "01.05.2017",
@@ -51,7 +51,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				EAN13 = "4605635002748",
 			});
 			waybill.Lines.Add(new TestWaybillLine(waybill) {
-				Product = "Доксазозин 4мг таб. Х30 (R)",
+				Product = products[1].FullName,
 				CatalogProduct = products[1],
 				Certificates = "РОСС RU.ФМ08.Д38737",
 				Period = "01.05.2017",
@@ -73,7 +73,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			});
 			for (var i = 0; i < 30; i++)
 				waybill.Lines.Add(new TestWaybillLine(waybill) {
-					Product = "Доксазозин 4мг таб. Х30 (R)",
+					Product = products[i + 1].FullName,
 					CatalogProduct = products[i + 1],
 					Certificates = "РОСС RU.ФМ08.Д38737",
 					Period = "01.05.2017",
@@ -82,7 +82,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 			return waybill;
 		}
 
-		public static void News(ISession session)
+		public static void CreateNews(ISession session)
 		{
 			session.CreateSQLQuery("insert into Usersettings.News(PublicationDate, Header, Body, DestinationType)"
 				+ " values(:publicationDate, :header, :body, :destinationType)")
@@ -92,5 +92,35 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 				.SetParameter("destinationType", "1")
 				.ExecuteUpdate();
 		}
+
+		public static TestProducerPromotion CreateProducerPromotion(ISession session, TestUser user)
+		{
+			var suppliers = user.GetActivePricesNaked(session).Take(5).Select(x=>x.Price.Supplier);
+			var products = session.Query<TestCatalogProduct>().ToList()
+											.Where(x=>x.Name.Contains("П"))
+											.OrderByDescending(x => x.Name)
+											.Take(5).ToArray();
+			var producer = session.Query<TestProducer>().First();
+
+			TestProducerPromotion testProducerPromotion = new TestProducerPromotion()
+			{
+				Name = "TestPromotion",
+				Annotation = "Test Producer Promotion OFF 25%",
+				Catalogs = products.ToList(),
+				Suppliers = suppliers.ToList(),
+				Producer = producer,
+				Enabled = 1,
+				Status = 1,
+				AgencyDisabled =1,
+				Begin = DateTime.Now.AddMonths(-1),
+				End = DateTime.Now.AddMonths(1),
+				RegionMask = 0,
+				UpdateTime = DateTime.Now
+			};
+
+			return testProducerPromotion;
+		}
+
+
 	}
 }

@@ -29,9 +29,9 @@
 	<Grid Name="MainGrid">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="*" />
+			<RowDefinition Name="CostsRow" Height="*" />
 			<RowDefinition Height="Auto" />
-			<RowDefinition Height="3*" />
+			<RowDefinition Name="OffersRow" Height="3*" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
@@ -144,7 +144,10 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<ContentControl x:Name="Promotions" Grid.Row="1" />
+			<StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+				<ContentControl x:Name="Promotions" />
+				<ContentControl x:Name="ProducerPromotions" />
+			</StackPanel>
 		</Grid>
 
 		<Image Grid.Row="4" Height="125"

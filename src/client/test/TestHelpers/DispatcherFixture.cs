@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 	{
 		protected Dispatcher dispatcher;
 		protected Window activeWindow;
+		protected UserControl activeTab;
 		protected List<Window> windows;
 		protected List<Exception> exceptions;
 
@@ -45,6 +46,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			dispatcher = null;
 			shell.Config.Quiet = true;
 			shell.ViewModelSettings.Clear();
+
 
 			manager.UnitTesting = false;
 			manager.SkipApp = true;
@@ -72,9 +74,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			if (dispatcher != null) {
 				if (DbHelper.IsTestFail() && IsCI()
 					&& activeWindow != null) {
-					var filename = Path.GetFullPath(FileHelper.StringToFileName(TestContext.CurrentContext.Test.FullName) + ".png");
 					dispatcher.Invoke(() => {
-						PrintFixture.SaveToPng(activeWindow, filename, new Size(activeWindow.Width, activeWindow.Height));
+						PrintFixture.SaveToPng(activeWindow, DbHelper.FailDir("screen.png"));
 					});
 				}
 				dispatcher.Invoke(() => {
@@ -270,6 +271,16 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			await loaded.WaitAsync();
 			WaitIdle();
+		}
+
+		public T ByName<T>(DependencyObject root, string name) where T : FrameworkElement
+		{
+			return root.Descendants<T>().First(c => c.Name == name);
+		}
+
+		public T ByName<T>(string name) where T : FrameworkElement
+		{
+			return ByName<T>(activeTab, name);
 		}
 	}
 }

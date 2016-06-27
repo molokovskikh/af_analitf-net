@@ -81,7 +81,7 @@
 		</StackPanel>
 		</DockPanel>
 
-		<c:DataGrid2 Grid.Row="2" x:Name="Offers"
+    <c:DataGrid2 Grid.Row="2" x:Name="Offers"
 			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="26*" Header="Код" Binding="{Binding Code}" />
@@ -147,7 +147,10 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<ContentControl x:Name="OrderWarning" Grid.Row="0" />
-			<ContentControl x:Name="Promotions" Grid.Row="1" />
+			<StackPanel Orientation="Vertical" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+				<ContentControl x:Name="Promotions" />
+				<ContentControl x:Name="ProducerPromotions" />
+			</StackPanel>
 		</Grid>
 
 		<ProgressBar Grid.Row="2" IsIndeterminate="True"

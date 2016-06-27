@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using AnalitF.Net.Client.Models;
@@ -13,6 +14,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
@@ -37,7 +39,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Все, Нет значения, 10", model.Taxes.Implode(t => t.Name));
 			Assert.AreEqual("Все", model.CurrentTax.Value.Name);
 			model.CurrentTax.Value = model.Taxes.First(t => t.Value == 10);
-			Assert.AreEqual(2, model.Lines.Value.Count);
+			Assert.AreEqual(3, model.Lines.Value.Count);
 		}
 
 		[Test]
@@ -65,7 +67,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			TableCellCollection tableCellCollection = listTableCellCollection[0];
 
 			/* проверка количества строк в таблице */
-			Assert.AreEqual(13, listTableCellCollection.Count());
+			Assert.AreEqual(14, listTableCellCollection.Count());
 
 			/* проверяем названия столбцов */
 
@@ -179,7 +181,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			model.Lines.Value.AddNewItem(waybillLine);
-			Assert.AreEqual(12, model.Waybill.Lines.Count);
+			Assert.AreEqual(13, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 
@@ -224,6 +226,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsTrue(results.MoveNext());
 			target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
 			Assert.AreEqual("Член комитета №1", target.CommitteeMember1);
+		}
+
+		[Test]
+		public void Export_waybill_to_excel()
+		{
+			var result = model.ExportWaybill();
+			Assert.IsInstanceOf(typeof(OpenResult), result);
+			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
 	}
 }

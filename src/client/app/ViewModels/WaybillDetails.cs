@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -15,6 +16,9 @@ using Caliburn.Micro;
 using Common.Tools;
 using Dapper;
 using NHibernate.Linq;
+using NPOI.SS.UserModel;
+using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
+using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -81,7 +85,6 @@ namespace AnalitF.Net.Client.ViewModels
 					return new List<SentOrderLine>();
 				})
 				.ToValue(CloseCancellation);
-
 			EmptyLabelVisibility = OrderLines
 				.Select(v => v == null || v.Count == 0 ? Visibility.Visible : Visibility.Collapsed)
 				.ToValue();
@@ -114,12 +117,14 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Waybill == null)
 				return;
 			Settings.Value.Rounding = Rounding.Value;
-			Waybill.Calculate(Settings.Value);
+			Waybill.Calculate(Settings.Value, Shell?.SpecialMarkupProducts.Value);
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			Shell.SpecialMarkupProducts.Subscribe(_ => Calculate());
 
 			if (Session == null)
 				return;
@@ -150,6 +155,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 				.Subscribe(x => priceTag = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
+			if (Waybill.IsCreatedByUser)
+			{
+				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
+				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
+			}
 		}
 
 		public IResult PrintRackingMap()
@@ -204,7 +214,9 @@ namespace AnalitF.Net.Client.ViewModels
 			var columns = new[] {
 				"№ пп",
 				"Наименование и краткая характеристика товара",
-				"Серия товара Сертификат",
+				"",
+				"Серия товара",
+				"Сертификат",
 				"Срок годности",
 				"Производитель",
 				"Цена без НДС, руб",
@@ -222,7 +234,9 @@ namespace AnalitF.Net.Client.ViewModels
 			var items = PrintableLines().Select((l, i) => new object[] {
 				i + 1,
 				l.Product,
-				$"{l.SerialNumber} {l.Certificates}",
+				$"{(l.ActualVitallyImportant ? "ЖВ" : "") }",
+				l.SerialNumber,
+				l.Certificates,
 				l.Period,
 				l.Producer,
 				l.ProducerCost,
@@ -237,35 +251,101 @@ namespace AnalitF.Net.Client.ViewModels
 				l.Quantity,
 				l.RetailSum
 			});
-			var book = ExcelExporter.ExportTable(columns, items, 8);
+
+			int startTableRow = 8;
+			var book = ExcelExporter.ExportTable(columns, items, startTableRow);
 			var sheet = book.GetSheetAt(0);
-			sheet.CreateRow(1).CreateCell(6).SetCellValue(
+			int[] afterItemsPosition = new int[] { items.Count() + startTableRow + 2, columns.Length };
+			var styleForGrid = book.CreateCellStyle();
+
+			styleForGrid.BorderBottom = BorderStyle.Thin;
+			styleForGrid.BorderLeft = BorderStyle.Thin;
+			styleForGrid.BorderRight = BorderStyle.Thin;
+			styleForGrid.BorderTop = BorderStyle.Thin;
+			styleForGrid.WrapText = true;
+			styleForGrid.Alignment = HorizontalAlignment.Center;
+			styleForGrid.VerticalAlignment = VerticalAlignment.Center;
+			var maxWidthCollection = new Dictionary<int, int>();
+
+			for (int y = startTableRow; y < afterItemsPosition[0] - 1; y++) {
+				for (int x = 0; x < afterItemsPosition[1]; x++) {
+					var rowI = sheet.GetRow(y);
+					var cellI = rowI.GetCell(x);
+
+					if (cellI == null) {
+						cellI = rowI.CreateCell(x);
+					} else {
+						if(y > startTableRow)
+						{
+							var width = 256 * cellI.ToString().Length;
+							width = width < 256*5 ? 256*5 : width;
+							if(!maxWidthCollection.ContainsKey(x))
+							{
+								maxWidthCollection.Add(x, width);
+							}
+							if(width > maxWidthCollection[x])
+							{
+								maxWidthCollection[x] = width;
+							}
+							sheet.SetColumnWidth(x, maxWidthCollection[x]);
+						}
+					}
+					cellI.CellStyle = styleForGrid;
+				}
+			}
+
+			sheet.CreateRow(1).CreateCell(7).SetCellValue(
 				$"Наименование организации: Сотрудник {Waybill.WaybillSettings.FullName}");
+
 			var row = sheet.CreateRow(2);
-			row.CreateCell(3).SetCellValue("Отдел:");
-			row.CreateCell(4).SetCellValue("_______________________________________");
+			row.CreateCell(4).SetCellValue("Отдел:_______________________________________");
 
 			row = sheet.CreateRow(3);
-			row.CreateCell(0).SetCellValue("Требование №");
-			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Накладная №");
-			row.CreateCell(6).SetCellValue("_______________________");
+			row.CreateCell(1).SetCellValue("Требование №");
+			row.CreateCell(6)
+				.SetCellValue($"Накладная №{ (Waybill.ProviderDocumentId?.Length > 0 ? Waybill.ProviderDocumentId :  "_______________________")} {Waybill.SupplierName}");
 
 			row = sheet.CreateRow(4);
 			row.CreateCell(1).SetCellValue("от \"___\"_________________20___г");
-			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(7).SetCellValue($"от {Waybill.DocumentDate.ToLongDateString()}");
 
 			row = sheet.CreateRow(5);
-			row.CreateCell(0).SetCellValue("Кому: Аптечный пункт");
-			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Через кого");
-			row.CreateCell(6).SetCellValue("_______________________");
+			row.CreateCell(1).SetCellValue("Кому: Аптечный пункт");
+			row.CreateCell(6).SetCellValue("Через кого");
+			row.CreateCell(7).SetCellValue("_______________________");
 
 			row = sheet.CreateRow(6);
-			row.CreateCell(0).SetCellValue("Основание отпуска");
-			row.CreateCell(1).SetCellValue("_______________________");
-			row.CreateCell(5).SetCellValue("Доверенность №_____");
-			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(1).SetCellValue("Основание отпуска_______________________");
+			row.CreateCell(6).SetCellValue("Доверенность №_____");
+			row.CreateCell(7).SetCellValue("от \"___\"_________________20___г");
+
+			NumberToRubleWords converter = new NumberToRubleWords();
+
+			row = sheet.CreateRow(afterItemsPosition[0]);
+			row.CreateCell(1).SetCellValue($"Продажная сумма {converter.Convert(Waybill.RetailSum)}");
+			row.CreateCell(afterItemsPosition[1] - 1).SetCellValue(decimal.ToDouble(Waybill.RetailSum));
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 2);
+			row.CreateCell(1).SetCellValue($"Сумма поставки {converter.Convert(Waybill.Sum)}");
+			row.CreateCell(afterItemsPosition[1] - 1).SetCellValue(decimal.ToDouble(Waybill.Sum));
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 6);
+			row.CreateCell(1).SetCellValue("Затребовал:  ");
+			row.CreateCell(5).SetCellValue("Отпустил: Сдал (выдал)________________");
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 8);
+			row.CreateCell(5).SetCellValue("Получил:Принял(получил)______________");
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 9);
+			row.CreateCell(1).SetCellValue("место печати       подпись     _________________");
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 10);
+			row.CreateCell(5).SetCellValue("Получил:Принял(получил)______________");
+
+			row = sheet.CreateRow(afterItemsPosition[0] + 12);
+			row.CreateCell(1).SetCellValue("\" ____\" _______________20__г");
+			row.CreateCell(5).SetCellValue("Главный (старший)бухгалтер ________________");
+
 			return ExcelExporter.Export(book);
 		}
 

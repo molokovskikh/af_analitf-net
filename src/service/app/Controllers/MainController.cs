@@ -19,8 +19,12 @@ namespace AnalitF.Net.Service.Controllers
 			DateTime? lastSync = null,
 			//перечень активных адресов доставки через запятую
 			//для экспорта неподтвержденных заявок
-			string addressIds = null)
+			string addressIds = null,
+			uint? id = null)
 		{
+			if (id != null)
+				return Session.Load<RequestLog>(id.Value).ToResult(Request, Config);
+
 			var updateType = data ?? GetType().Name;
 			RequestLog existsJob = null;
 			//если это новый запрос то пытаемся найти уже подготовленные данные которые не протухли или в процессе
@@ -55,10 +59,15 @@ namespace AnalitF.Net.Service.Controllers
 								.Select(x => session.Load<Address>(Convert.ToUInt32(x)))
 								.ToArray()
 								?? new Address[0];
-							if (data.Match("Waybills"))
+							if (data.Match("Waybills")) {
 								exporter.ExportDocs();
-							else
-								exporter.ExportAll();
+							} else {
+								//если есть обновление исполняемых файлов то готовить данные нет смысла
+								//тк схема данных могла измениться и клиент все равно будет загружать кумулятивное
+								//после обновления бинарных файлов
+								if (data.Match("NoBin") || !exporter.ExportBin())
+									exporter.ExportDb();
+							}
 							//все данные выгружены завершаем транзакцию
 							session.Transaction.Commit();
 							exporter.Compress(job.OutputFile(Config));
@@ -66,7 +75,7 @@ namespace AnalitF.Net.Service.Controllers
 					});
 			}
 
-			return existsJob.ToResult(Config);
+			return existsJob.ToResult(Request, Config);
 		}
 
 		public HttpResponseMessage Put(ConfirmRequest request)

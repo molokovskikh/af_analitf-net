@@ -41,14 +41,19 @@ namespace AnalitF.Net.Client.Helpers
 	public class LambdaConverter<T> : IValueConverter
 	{
 		private Func<T, object> @select;
+		private Func<object, T> converter;
 
-		public LambdaConverter(Func<T, object> select)
+		public LambdaConverter(Func<T, object> select, Func<object,T> specificConverter = null )
 		{
 			this.select = select;
+			converter = specificConverter;
 		}
 
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
+			if (converter != null) {
+				return @select(converter(value));
+			}
 			return @select((T)value);
 		}
 
@@ -172,6 +177,47 @@ namespace AnalitF.Net.Client.Helpers
 			catch(FormatException) {
 				return System.Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
 			}
+		}
+	}
+
+	public class NumberToRubleWords
+	{
+		public string Convert(decimal value)
+		{
+			return Convert(decimal.ToDouble(value));
+		}
+
+		public string Convert(double value)
+		{
+			var banknoteN = Math.Truncate(value);
+			var coins = (Math.Round(value - banknoteN, 2, MidpointRounding.AwayFromZero) * 100).ToString();
+			var banknoteS = Humanizer.NumberToWordsExtension.ToWords(System.Convert.ToInt32(banknoteN),
+				(new CultureInfo("ru-Ru")));
+
+			coins = coins.Length > 1 ? coins : coins + "0";
+
+			return $"{banknoteS} руб. {coins} коп.";
+		}
+	}
+
+	public class SlashNumber
+	{
+		public decimal Convert(decimal value, int memberCount)
+		{
+			return (decimal)(Convert((double)value, memberCount));
+		}
+
+		public double Convert(double value, int membersCount)
+		{
+			var integralPart = Math.Truncate(value).ToString();
+			var roundValue = value.ToString().Remove(0, integralPart.Length + 1);
+			if(roundValue.Length > membersCount)
+			{
+				var deleteLength = roundValue.Length - membersCount;
+				roundValue = roundValue.Remove(membersCount, deleteLength);
+			}
+
+			return System.Convert.ToDouble($"{integralPart},{roundValue}");
 		}
 	}
 }

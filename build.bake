@@ -45,7 +45,7 @@ def RegisterApp(iishost as object, sitename as string, path as string, fspath as
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg -FilePath $script -ArgumentList $path,$sitename,$fspath,$pool $psArgs").Execute()
 
 def CopyUpdateBin(channel as string, src as string):
 	root = Globals.UpdateDeployRoot
@@ -291,19 +291,6 @@ task "build:client:merged", ["build:client:bin"]:
 	Rm("$root/AnalitF.Net.Client.pdb")
 	Cp("src/client/app/App.migration.config", "$name.config")
 
-	#из-за изменения имени сборки нужно сгенерировать лицензию заново
-	outputAssembly = AssemblyDefinition.ReadAssembly(name)
-	resources = outputAssembly.MainModule.Resources
-	spec = "${output}/license"
-	File.WriteAllText(spec, "Devart.Data.MySql.MySqlConnection, AnalitF.Net.Client")
-	lc = "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.6 Tools\\lc.exe"
-	Sh("\"\"${lc}\"\" /target:${name} /complist:${spec} /i:${name}")
-	Rm(spec)
-	compiledLicense = "${name}.licenses"
-	resources.Add(EmbeddedResource("${projectName}.exe.licenses", ManifestResourceAttributes.Public, File.ReadAllBytes(compiledLicense)))
-	Rm(compiledLicense)
-
-	outputAssembly.Write(name)
 	SignDir(root)
 
 task "build:setup", ["build:client:merged"]:
@@ -311,10 +298,11 @@ task "build:setup", ["build:client:merged"]:
 	if Globals.Environment != @Production:
 		arg = "--quiet"
 	Bash("./scripts/wix.sh $arg")
-	Sh("insignia -ib output/setup/setup.exe -o output/setup/engine.exe")
+	Sh("insignia -ib output/setup/afsetup.exe -o output/setup/engine.exe")
 	SignFileLocal("output/setup/engine.exe")
-	Sh("insignia -ab output/setup/engine.exe output/setup/setup.exe -o output/setup/setup.exe")
-	SignFileLocal("output/setup/setup.exe")
+	Sh("insignia -ab output/setup/engine.exe output/setup/afsetup.exe -o output/setup/afsetup.exe")
+	SignFileLocal("output/setup/afsetup.exe")
+	Mv("output/setup/afsetup.exe", "output/setup/setup.exe")
 
 task "setup:preprocess":
 	proj = "src/client/app/app.csproj"
@@ -444,10 +432,11 @@ task "test:binary":
 				Thread.Sleep(1000)
 		Db.Execute("update Customers.AnalitFNetDatas set BinUpdateChannel = 'alpha' where UserId = $testId")
 		Sh("nunit3-console --labels=all --stoponerror --verbose --full --test test.release.AppFixture ./src/client/test.release/bin/Debug/test.release.dll")
-		CopyUpdateBin("beta", "output/updater/")
-		CopyUpdateBin("migration-beta", "output/migration-update/")
-		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'beta'")
-		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration-beta'")
+		targetChannel = Configuration.Maybe.targetChannel or "beta"
+		CopyUpdateBin(targetChannel, "output/updater/")
+		CopyUpdateBin("migration-$targetChannel", "output/migration-update/")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = '$targetChannel'")
+		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration-$targetChannel'")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'alpha'")
 	except:
 		print "Похоже что есть проблемы с релизом, автоматическое обновление отключено, исправь ошибки и повтори релиз, возможно следует удалить тег релиза"
@@ -501,6 +490,7 @@ task "promote:to:rtm":
 	CopyUpdateBin("migration", Path.Combine(root, "migration-beta"))
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'rtm'")
 	Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration'")
+	SendReleaseNotification(Globals, "Обновление AnalitF.net", "Версия $version передана всем клиентам")
 	print "Версия $version установлена в канал $dstChannel"
 
 task "iis:clean":
@@ -512,8 +502,8 @@ task "iis:clean":
 	if Globals.Environment == @Production:
 		user, password = AskCredentials("user for $hostsArg:")
 		psArgs = "-Credential (New-Object PsCredential('$user', (convertto-securestring '$password' -asplaintext -force)))"
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
-	Exec("powershell", "Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename Analitf.Net.Proxy}").Execute()
+	Exec("powershell", "-NoProfile -ExecutionPolicy Bypass -Command Invoke-Command -ComputerName $hostsArg $psArgs -ScriptBlock {Remove-WebApplication -site $sitename AnalitF.Net.Service-0.9.7.35}").Execute()
 
 task "db:local:seed":
 	Bash("rym -f Rymfile.service fixture execute SampleData")

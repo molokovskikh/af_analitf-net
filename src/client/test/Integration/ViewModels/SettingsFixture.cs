@@ -38,7 +38,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Address = address
 			});
 			var results = model.Save().ToList();
-			Assert.AreEqual("Некорректно введены границы цен.", manager.MessageBoxes.Implode());
+			Assert.AreEqual("Некорректно введены границы цен.", (results[0] as MessageResult).Message);
 
 			Reset();
 			var all = session.Query<MarkupConfig>().ToList();
@@ -46,7 +46,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			//не должно быть потерянных записей
 			Assert.AreEqual(model.Markups.Value.Count
 				+ model.VitallyImportantMarkups.Value.Count
-				+ model.Nds18Markups.Value.Count, all.Count);
+				+ model.Nds18Markups.Value.Count
+				+ model.SpecialMarkups.Value.Count, all.Count);
 		}
 
 		[Test]

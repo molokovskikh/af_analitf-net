@@ -90,7 +90,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			shell.ShowPrice();
 			var prices = (PriceViewModel)shell.ActiveItem;
-			prices.CurrentPrice.Value = prices.Prices.First(p => p.PositionCount > 0);
+			prices.CurrentPrice.Value = prices.Prices.Value.First(p => p.PositionCount > 0);
 			prices.EnterPrice();
 			Assert.IsInstanceOf<PriceOfferViewModel>(shell.ActiveItem,
 				prices.CurrentPrice.Value.Id + manager.MessageBoxes.Implode());
@@ -170,8 +170,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			settings.Password = "123";
 			session.Flush();
 			shell.Reload();
+			scheduler.Start();
 
-			shell.NotifyOfPropertyChange("CurrentAddress");
 			var canClose = false;
 			shell.CanClose(b => canClose = b);
 
@@ -325,15 +325,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Show_default_item()
-		{
-			var current = shell.ActiveItem;
-			Assert.IsInstanceOf<Main>(current);
-			shell.ResetNavigation();
-			Assert.AreEqual(current, shell.ActiveItem);
-		}
-
-		[Test]
 		public void Activate_view()
 		{
 			shell.ShowCatalog();
@@ -399,10 +390,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Refresh(offer.Price);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
+
+			Assert.IsFalse(AppBootstrapper.LeaderCalculationWasStart);
 			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
+			Assert.IsNotNull(minCost.Diff, minCost.ToString());
 			Assert.That(minCost.Diff, Is.GreaterThan(0), minCost.ToString());
 		}
 
@@ -456,6 +450,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			order.Send = false;
 
+			Assert.AreEqual(0, shell.Stat.Value.ReadyForSendOrdersCount);
+			scheduler.Start();
 			Assert.AreEqual(1, shell.Stat.Value.ReadyForSendOrdersCount);
 			session.Refresh(order);
 			Assert.IsTrue(order.Send);

@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Mapping;
@@ -114,6 +115,11 @@ where a.Id is null;
 delete i
 from AwaitedItems i
 left join Catalogs c on c.Id = i.CatalogId
+where c.Id is null;
+
+delete s
+from SpecialMarkupCatalogs s
+left join Catalogs c on c.Id = s.CatalogId
 where c.Id is null;")
 				.ExecuteUpdate();
 
@@ -145,13 +151,13 @@ where o.Sum = 0;")
 			//иначе nhibernate попробует выбрать поставщика и получить null тк база не будет заполнена
 			//при сохранении накладной он запишет Null в поле supplierid
 			Log.Info("Пересчет перенесенных накладных");
+			var products = SpecialMarkupCatalog.Load(StatelessSession.Connection);
 			ProcessBatch(
-				Session.Query<Waybill>().Where(w => w.Sum == 0 && w.IsMigrated)
+				Session.Query<Waybill>().Where(w => w.Sum == 0)
 					.OrderByDescending(x => x.WriteTime).Take(100).Select(x => x.Id).ToArray(),
 				(s, x) => {
-					foreach (var id in x) {
-						s.Load<Waybill>(id).Calculate(settings);
-					}
+					foreach (var id in x)
+						s.Load<Waybill>(id).Calculate(settings, products);
 				});
 
 			if (Session.Query<LoadedDocument>().Any()) {
@@ -162,12 +168,6 @@ update Waybills w
 	join LoadedDocuments d on d.Id = w.Id
 set IsNew = 1;")
 					.ExecuteUpdate();
-
-				//перенесенных накладных может быть много и их пересчет займет много времени
-				//не вычисляем такие накладные тк всего скорее они ни кому не нужны
-				var newWaybills = Session.Query<Waybill>().Where(w => w.Sum == 0 && !w.IsMigrated).ToList();
-				foreach (var waybill in newWaybills)
-					waybill.Calculate(settings);
 			}
 			if (IsImported<Offer>()) {
 				Log.Info("Очистка каталога");
@@ -196,7 +196,8 @@ set m.HaveOffers = 1,
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
 				Log.Info("Пересчет лидеров");
-				DbMaintain.UpdateLeaders(Session, settings);
+				Task task = new Task(() => {DbMaintain.UpdateLeaders();});
+				task.Start();
 				Log.Info("Пересчет уценки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
@@ -322,6 +323,13 @@ where p.IsSynced = 1 or p.PriceId is null;";
 				ignored = ignored.Concat(new[] {
 					//локальные поля
 					"LocalFilename", "IsError", "IsDownloaded"
+				})
+					.ToArray();
+			}
+			if (dbTable.Name.Match("Orders")) {
+				ignored = ignored.Concat(new[] {
+					"DisplayId",
+					"KeepId"
 				})
 					.ToArray();
 			}

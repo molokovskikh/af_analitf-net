@@ -71,6 +71,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 		public PromotionPopup Promotions { get; set; }
 
+		public ProducerPromotionPopup ProducerPromotions { get; set; }
+
 		public InlineEditWarning OrderWarning { get; set; }
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
@@ -134,6 +136,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			Promotions = new PromotionPopup(Shell.Config,
 				CurrentCatalog.Select(x => x?.Name),
 				RxQuery, Env);
+
+			ProducerPromotions = new ProducerPromotionPopup(Shell.Config,
+				CurrentCatalog.Select(x => x?.Name),
+				RxQuery, Env);
+
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
@@ -326,11 +333,21 @@ where c.Id = ?";
 			}
 			LastEditOffer.Value = offer;
 			ApplyStat(LoadStat(StatelessSession));
+			if (CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
+				if (Settings.Value.ModePKU == ModePKU.Deny) {
+					offer.OrderCount = null;
+					ShowValidationError(new List<Common.Tools.Message>() {Message.Warning("Заказ препаратов ПКУ запрещен. Для изменения режима заказа препаратов ПКУ," +
+						" перейдите в Настройки во вкладку Визуализация и снимите запрет на заказ препаратов ПКУ") });
+					return;
+				}
+			}
 			var messages = offer.UpdateOrderLine(ActualAddress, Settings.Value, Confirm, AutoCommentText);
 			//CurrentCatalog загружается асинхронно, и загруженное значение может не соотвествовать текущему предложению
 			if (offer.OrderLine != null && CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
-				messages.Add(Message.Warning("Вы заказываете препарат, подлежащий" +
+				if (Settings.Value.ModePKU == ModePKU.Warning) {
+					messages.Add(Message.Warning("Вы заказываете препарат, подлежащий" +
 					$" предметно-количественному учету и относящийся к {CurrentCatalog.Value.PKU}"));
+				}
 			}
 			ShowValidationError(messages);
 		}
@@ -373,15 +390,14 @@ where c.Id = ?";
 				CalculateDiff(offers);
 
 			CalculateRetailCost(offers);
-
-			if (Settings.Value.WarnIfOrderedYesterday && Address.YesterdayOrderedProductIds == null) {
+			if (Settings.Value.WarnIfOrderedYesterday) {
 				var addressId = Address.Id;
 				RxQuery(s => s.CreateSQLQuery(@"select ProductId
 from SentOrderLines l
 join SentOrders o on o.Id = l.OrderId
 where o.SentOn > :begin and o.SentOn < :end and o.AddressId = :addressId
 group by l.ProductId")
-					.SetParameter("begin", DateTime.Today.AddDays(-1))
+					.SetParameter("begin", DateTime.Today.AddDays(-Settings.Value.CountDayForWarnOrdered))
 					.SetParameter("end", DateTime.Today)
 					.SetParameter("addressId", addressId)
 					.List<object>()
@@ -394,7 +410,7 @@ group by l.ProductId")
 
 		private void CalculateRetailCost(IEnumerable<Offer> offers)
 		{
-			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, User, Address));
+			offers.Each(o => o.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, Address));
 		}
 
 		private void CalculateDiff(IEnumerable<Offer> offers)

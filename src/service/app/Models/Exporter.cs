@@ -147,6 +147,7 @@ namespace AnalitF.Net.Service.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string DocsPath = "";
+		public string DateTimeNow = DateTime.Now.ToString("yyyy.MM.dd");
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -471,6 +472,7 @@ where
 				clientId = clientSettings.Id,
 				delayOfPaymentEnabled = clientSettings.AllowDelayOfPayment
 			});
+
 
 			//для выборки данных используется кеш оптимизированных цен
 			//кеш нужен что бы все пользователи одного клиента имели одинаковый набор цен
@@ -938,6 +940,20 @@ where c.UpdateTime > ?lastSync";
 
 			if (cumulative) {
 				sql = @"
+select Id, CatalogId, Hidden
+from Catalogs.Products
+where Hidden = 0";
+				CachedExport(Result, sql, "Products");
+			} else {
+				sql = @"
+select Id, CatalogId, Hidden
+from Catalogs.Products
+where Hidden = 0 and UpdateTime > ?lastSync";
+				Export(Result, sql, "Products", truncate: false, parameters: new { lastSync = data.LastUpdateAt });
+			}
+
+			if (cumulative) {
+				sql = @"
 select p.Id, p.Name
 from Catalogs.Producers p";
 				CachedExport(Result, sql, "producers");
@@ -1083,6 +1099,7 @@ where PublicationDate < curdate() + interval 1 day
 			}
 
 			ExportPromotions();
+			ExportProducerPromotions();
 			ExportMails();
 			ExportDocs();
 			ExportOrders();
@@ -1194,6 +1211,59 @@ where sp.Status = 1";
 						continue;
 					Result.Add(UpdateData.FromFile(promotion.GetArchiveName(local), local));
 				}
+			}
+		}
+
+		public void ExportProducerPromotions()
+		{
+			var sql = @"select pr.Id, pr.ProducerId, pr.Name, pr.Annotation, pr.PromoFileId, pr.RegionMask
+									from ProducerInterface.Promotions pr
+									where pr.Begin <= ?DT AND pr.Enabled = 1 AND pr.Status = 1";
+
+			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTimeNow });
+
+			sql = @"select Promo.Id PromotionId, PromoGrug.DrugId CatalogId from ProducerInterface.promotions Promo
+							left join ProducerInterface.promotionToDrug PromoGrug ON Promo.Id = PromoGrug.PromotionId
+							Where Promo.Enabled = 1 AND Promo.`Status` = 1 AND Promo.Begin <= ?DT";
+
+			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTimeNow });
+
+			sql = @"select PR.Id PromotionId, PTS.SupplierId SupplierId
+							from ProducerInterface.Promotions PR
+							RIGHT JOIN ProducerInterface.promotionstosupplier PTS ON PTS.PromotionId = PR.Id";
+
+			Export(Result, sql, "ProducerPromotionSuppliers", truncate: true);
+
+			// Получаем список ID актуальных файлов в БД привязанных к промоакциям производителей
+
+			var ids = session
+				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
+				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
+
+			ProducerPromotion producerPromotion = new ProducerPromotion();
+
+			foreach (var FileId in ids)
+			{
+				producerPromotion.Id = FileId;
+				sql = String.Format(@"select ImageName from ProducerInterface.MediaFiles Where Id = {0}", FileId);
+				producerPromotion.Type = session.CreateSQLQuery(sql).List<string>().First().Split(new Char[] { '.' }).Last();
+				var local = producerPromotion.GetFilename(Config);
+
+				// Экспортируем файлы из БД если ранее они не скачивались
+
+				if (!System.IO.File.Exists(local))
+				{
+					var Query = session.CreateSQLQuery("select ImageFile from ProducerInterface.MediaFiles Where Id=:FileId");
+					Query.SetParameter("FileId", FileId);
+					byte[] FileBytes = (byte[])Query.UniqueResult();
+
+					using (System.IO.FileStream SW = new FileStream(local, FileMode.OpenOrCreate))
+					{
+						SW.Write(FileBytes, 0, FileBytes.Length);
+					}
+				}
+
+				Result.Add(UpdateData.FromFile(producerPromotion.GetArchiveName(local), local));
 			}
 		}
 
@@ -1784,10 +1854,11 @@ from Logs.Document_logs d
 where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
 	db.ProductId,
+	p.CatalogId,
 	db.Product,
 	db.ProducerId,
 	db.Producer,
@@ -1814,17 +1885,18 @@ select db.Id,
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
-where d.RowId in ({0})
-group by dh.Id, db.Id", ids);
+				left join Catalogs.Products p on p.Id = db.ProductId
+where d.RowId in ({ids})
+group by dh.Id, db.Id";
 			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select DocumentLineId, OrderLineId
 from Documents.WaybillOrders wo
 	join Documents.DocumentBodies db on db.Id = wo.DocumentLineId
 		join Documents.DocumentHeaders dh on db.DocumentId = dh.Id
 			join Logs.Document_logs d on dh.DownloadId = d.RowId
-where d.RowId in ({0})", ids);
+where d.RowId in ({ids})";
 			Export(Result, sql, "WaybillOrders", truncate: false);
 
 			var documentExported = session.CreateSQLQuery(@"
@@ -1836,13 +1908,13 @@ where dh.DownloadId in (:ids)")
 			logs.Where(l => documentExported.Contains(l.Document.Id))
 				.Each(l => l.DocumentDelivered = true);
 
-			sql = String.Format(@"
+			sql = $@"
 select Id, convert_tz(WriteTime, @@session.time_zone,'+00:00') as WriteTime, DownloadId, SupplierId
 from Documents.RejectHeaders r
-where r.DownloadId in ({0})", ids);
+where r.DownloadId in ({ids})";
 			Export(Result, sql, "OrderRejects", truncate: false, parameters: new { userId = user.Id });
 
-			sql = String.Format(@"
+			sql = $@"
 select l.Id,
 	l.Product,
 	l.ProductId,
@@ -1855,7 +1927,7 @@ select l.Id,
 from Documents.RejectHeaders r
 	join Documents.RejectLines l on l.Headerid = r.Id
 		left join Catalogs.Products p on p.Id = l.ProductId
-where r.DownloadId in ({0})", ids);
+where r.DownloadId in ({ids})";
 			Export(Result, sql, "OrderRejectLines", truncate: false, parameters: new { userId = user.Id });
 
 			documentExported = session.CreateSQLQuery(@"
@@ -2030,13 +2102,13 @@ where r.DownloadId in (:ids)")
 
 			//на разных серверах абсолютные пути могут отличаться но относительные будут совпадать
 			var multiparts = External.Select(x => FileHelper.RelativeTo(x.Filename, Path.GetFullPath(FileHelper.MakeRooted(@".\")))).ToArray();
-			job.MultipartContent = JsonConvert.SerializeObject(multiparts);
+			if (multiparts.Length > 0)
+				job.MultipartContent = JsonConvert.SerializeObject(multiparts);
 		}
 
-		public void ExportAll()
+		public void ExportDb()
 		{
 			Export();
-			ExportBin();
 			ExportAds();
 		}
 
@@ -2116,22 +2188,18 @@ where r.DownloadId in (:ids)")
 			scanned.Scan(dir, true);
 		}
 
-		//todo текущая логика обновления ошибочна, если мы знаем что нужно сформировать обновление
-		//то данные должен готовить сервис той же версии что и бинарники которые передаются
-		//иначе может получиться ситуация когда приложение ожидает что в обновлении будут поля а по факту их не буде
-		//тк обновление приготовлено старой версией сервиса
-		private void ExportBin()
+		public bool ExportBin()
 		{
 			var updateDir = Config.GetUpdatePath(data, job);
 			var file = Path.Combine(updateDir, "version.txt");
 			if (!File.Exists(file)) {
 				log.DebugFormat("Не найден файл версии {0}", Path.GetFullPath(file));
-				return;
+				return false;
 			}
 
 			var updateVersion = Version.Parse(File.ReadAllText(file));
 			if (updateVersion <= job.Version)
-				return;
+				return false;
 
 			if (!String.IsNullOrEmpty(job.ErrorDescription))
 				job.ErrorDescription += Environment.NewLine;
@@ -2147,6 +2215,7 @@ where r.DownloadId in (:ids)")
 			var perUserUpdate = Path.Combine(Config.PerUserUpdatePath, user.Id.ToString());
 			if (File.Exists(perUserUpdate))
 				AddDir(Result, perUserUpdate, "update");
+			return true;
 		}
 
 		public void Dispose()

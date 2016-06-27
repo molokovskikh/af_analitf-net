@@ -38,8 +38,9 @@
 			</TextBlock>
 		</StackPanel>
 
-		<c:DataGrid2 Grid.Row="1" Grid.Column="0" x:Name="Prices"
-			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}">
+		<c:MainControllerWrap Grid.Row="1" Grid.Column="0">
+		<c:DataGrid2  x:Name="Prices"
+			IsReadOnly="{Binding User.IsPriceEditDisabled, FallbackValue=true}" VerticalAlignment="Top">
 			<DataGrid.Columns>
 				<DataGridTextColumn Width="75*"
 					Header="Прайс-лист"
@@ -67,6 +68,7 @@
 					Binding="{Binding MonthlyOrderSum}" IsReadOnly="True" />
 			</DataGrid.Columns>
 		</c:DataGrid2>
+		</c:MainControllerWrap>
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" />
 

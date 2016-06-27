@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Net;
 using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using Diadoc.Api;
 using Diadoc.Api.Cryptography;
+using Diadoc.Api.Http;
 using Diadoc.Api.Proto.Events;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
@@ -44,7 +46,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			try {
 				IsEnabled.Value = false;
-				await Util.Run(() => action(Payload.Token));
+				await TaskEx.Run(() => action(Payload.Token));
 				Success = true;
 				TryClose();
 			} catch(Exception e) {
@@ -114,7 +116,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				sign.SignWithTestSignature = true;
 			patch.AddSignature(sign);
 
-			await Async(x => Payload.Api.PostMessagePatch(x, patch));
+			try {
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
+				Log.Info($"Документ {patch.MessageId} успешно подписан");
+			} catch (HttpClientException e) {
+				if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+					Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
+					Manager.Warning("Документ уже был подписан другим пользователем.");
+				} else {
+					throw;
+				}
+			}
 		}
 	}
 }

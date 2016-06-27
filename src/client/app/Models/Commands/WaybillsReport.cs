@@ -41,6 +41,7 @@ where w.{field} > ?
 	and w.AddressId in ({AddressIds.Implode()})
 	and l.Quantity is not null
 	and l.ProducerCost is not null
+	and l.producerCost > 0
 	and l.SupplierCost is not null
 	and s.VendorID is not null
 group by l.EAN13
@@ -60,7 +61,7 @@ from WaybillLines l
 			using (var writer = new StreamWriter(stream, Encoding.GetEncoding(1251))) {
 				writer.WriteLine("DrugID;Segment;Year;Month;Series;TotDrugQn;MnfPrice;PrcPrice;RtlPrice;Funds;VendorID;Remark;SrcOrg");
 				foreach (var row in StatelessSession.Connection.Query(sql)) {
-					var producerCost = row.ProducerCost == null ? 0 : Convert.ToDecimal(row.ProducerCost);
+					var producerCost = Convert.ToDecimal(row.ProducerCost);
 					var supplierCost = Convert.ToDecimal(row.SupplierCost);
 					var nds = row.NDS == null ? 10 : Convert.ToDecimal(row.NDS);
 
@@ -165,30 +166,52 @@ group by r.DrugID")
 
 	public class WaybillMarkupReport : DbCommand<string>
 	{
+		public bool withNds = false;
+
 		public override void Execute()
 		{
 			//отчет всегда готовится за предыдущий год
 			var end = new DateTime(DateTime.Today.Year, 1, 1);
 			var year = DateTime.Today.Year - 1;
 			var begin = new DateTime(year, 1, 1);
-			var rows = StatelessSession.CreateSQLQuery(@"
+			var subrows = "sum(SupplierCost) / 1000 {0} SupplierCost, sum(RetailCost) / 1000 {0} RetailCost, sum(ProducerCost) / 1000 {0} ProducerCost";
+			if (withNds)
+			{
+				subrows = string.Format(subrows, "* 1.1");
+			}
+			else
+			{
+				subrows = string.Format(subrows, "");
+			}
+
+			var query = StatelessSession.CreateSQLQuery($@"
 select
+BarCode,
+sum(Total) Total,
+{subrows},
+min(if(registrycost = 0, null, registrycost)) RegistryCost,
+sum(Planned) Planned,
+(round(avg(RetailCostM),2) - round(avg(SupplierCostM),2)) / 1000 as Margin
+from
+(select
 	b.Value as BarCode,
-	sum(l.Quantity) / 1000 Total,
-	round(avg(l.SupplierCost),2) / 1000 SupplierCost,
-	round(avg(l.RetailCost),2) / 1000 RetailCost,
-	round(avg(producercost),2) / 1000 ProducerCost,
-	min(if(registrycost = 0, null, registrycost)) RegistryCost,
-	sum(quantity) / 1000 Planned,
-	(round(avg(l.RetailCost),2) - round(avg(l.SupplierCost),2)) / 1000 as Margin
+	l.Quantity / 1000 Total,
+	round(l.SupplierCost * l.Quantity, 2) SupplierCost,
+	round(l.RetailCost * l.Quantity, 2) RetailCost,
+	round(producercost  * l.Quantity,2) ProducerCost,
+	RegistryCost,
+	quantity / 1000 Planned,
+	RetailCost RetailCostM,
+  SupplierCost SupplierCostM
 from WaybillLines l
 		join Waybills w on w.Id = l.WaybillId
 	join BarCodes b on b.Value = l.EAN13
 where b.Value = l.EAN13 and w.DocumentDate > :begin and w.DocumentDate < :end
-group by b.Value;")
-				.SetParameter("begin", begin)
-				.SetParameter("end", end)
-				.List();
+group by l.id) as sub
+group by BarCode;");
+			query.SetParameter("begin", begin);
+			query.SetParameter("end", end);
+			var rows =	query.List();
 			var settings = Session.Query<Settings>().First();
 			var dir = settings.InitAndMap("Reports");
 			Result = Path.Combine(dir, FileHelper.StringToFileName($"Надб-ЖНВЛС-{year}.xls"));
@@ -203,11 +226,22 @@ group by b.Value;")
 			reportRow.CreateCell(5).SetCellValue("ПредельнаяЦенаПроизв");
 			reportRow.CreateCell(6).SetCellValue("КоличествоПлан");
 			reportRow.CreateCell(7).SetCellValue("ВаловаяПрибыльПлан");
-			for(var i = 0; i < rows.Count; i++) {
+
+			var converter = new SlashNumber();
+			for (var i = 0; i < rows.Count; i++) {
 				reportRow = sheet.CreateRow(i + 1);
 				var row = ((object[])rows[i]);
 				for (var j = 0; j < row.Length; j++) {
-					reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
+					if (j == 0) {
+						reportRow.CreateCell(j).SetCellValue(row[j]?.ToString());
+						continue;
+					}
+					if(j > 1 && j < 5)
+					{
+						reportRow.CreateCell(j).SetCellValue(converter.Convert(Convert.ToDouble(row[j]), 5));
+						continue;
+					}
+					reportRow.CreateCell(j).SetCellValue(Convert.ToDouble(row[j]));
 				}
 			}
 			using(var stream = File.Create(Result))

@@ -176,6 +176,10 @@ namespace Dapper
             {
                 paramReader(cmd, parameters);
             }
+	        foreach (IDataParameter parameter in cmd.Parameters) {
+						if (!parameter.ParameterName.StartsWith("@"))
+							parameter.ParameterName = "@" + parameter.ParameterName;
+	        }
             return cmd;
         }
 

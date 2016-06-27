@@ -44,13 +44,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\packages\Castle.Core.3.2.2\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data">
+    <Reference Include="Devart.Data, Version=5.0.792.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Devart.Data.MySql">
+    <Reference Include="Devart.Data.MySql, Version=7.8.333.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
+      <HintPath>..\..\..\lib\mysql-driver\Devart.Data.MySql.dll</HintPath>
     </Reference>
     <Reference Include="DiadocApi">
       <SpecificVersion>False</SpecificVersion>
@@ -149,6 +149,9 @@
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
+    <Compile Include="Fixtures\CreateNews.cs" />
+    <Compile Include="Fixtures\CreateProducerPromotion.cs" />
+    <Compile Include="Fixtures\CreateOrder.cs" />
     <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
@@ -164,6 +167,7 @@
     <Compile Include="Fixtures\MakeOrder.cs" />
     <Compile Include="Fixtures\CreatePromotion.cs" />
     <Compile Include="Fixtures\MatchedWaybill.cs" />
+    <Compile Include="Fixtures\ProducerLocalPromotion.cs" />
     <Compile Include="Fixtures\RandCost.cs" />
     <Compile Include="Fixtures\RegulatorRegistry.cs" />
     <Compile Include="Fixtures\Reject.cs" />
@@ -215,6 +219,7 @@
     <Compile Include="Integration\ViewModels\SearchOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\SettingsFixture.cs" />
     <Compile Include="Integration\ViewModels\ShellFixture.cs" />
+    <Compile Include="Integration\ViewModels\SpecialMarkupFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillDetailFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillLineSearchFixture.cs" />
     <Compile Include="Integration\ViewModels\WaybillsFixture.cs" />
@@ -229,6 +234,7 @@
     <Compile Include="Integration\Views\ExportFixture.cs" />
     <Compile Include="Integration\Views\GlobalFixture.cs" />
     <Compile Include="Integration\Views\MailsFixture.cs" />
+    <Compile Include="Integration\Views\MinCostsFixture.cs" />
     <Compile Include="Integration\Views\OrderLinesFixture.cs" />
     <Compile Include="Integration\Views\OrdersFixture.cs" />
     <Compile Include="Integration\Views\PricesViewFixture.cs" />
@@ -263,6 +269,7 @@
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
+    <Compile Include="Unit\Models\WaybillTotalFixture.cs" />
     <Compile Include="Unit\NavigatorFixture.cs" />
     <Compile Include="Unit\CollectionHelperFixture.cs" />
     <Compile Include="Unit\DebugPipeFixture.cs" />
@@ -346,9 +353,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <EmbeddedResource Include="Properties\licenses.config">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -356,9 +360,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="dll.licenses" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />

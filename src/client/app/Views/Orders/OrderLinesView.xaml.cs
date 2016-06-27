@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -29,6 +31,10 @@ namespace AnalitF.Net.Client.Views.Orders
 				Persister.Track(OrdersGrid.RowDefinitions[Grid.GetRow(Lines)], RowDefinition.HeightProperty);
 				Persister.Restore();
 			};
+
+			Lines.CommandBindings.Add(new CommandBinding(DataGrid.DeleteCommand,
+				Commands.DoInvokeViewModel,
+				Commands.CanInvokeViewModel));
 
 			DataGridHelper.CalculateColumnWidths(Lines);
 			DataGridHelper.CalculateColumnWidths(SentLines);

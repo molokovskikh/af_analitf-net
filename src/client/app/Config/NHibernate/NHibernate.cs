@@ -153,6 +153,24 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				});
 			});
 
+			mapper.Class<ProducerPromotion>(m => {
+				m.Bag(o => o.Catalogs, c => {
+					c.Table("ProducerPromotionCatalogs");
+					c.Key(km => km.Column("PromotionId"));
+				}, cm => {
+					cm.ManyToMany(km => km.Column("CatalogId"));
+				});
+			});
+
+			mapper.Class<ProducerPromotion>(m => {
+				m.Bag(o => o.Suppliers, c => {
+					c.Table("ProducerPromotionSuppliers");
+					c.Key(km => km.Column("PromotionId"));
+				}, cm => {
+					cm.ManyToMany(km => km.Column("SupplierId"));
+				});
+			});
+
 			mapper.Class<Price>(m => {
 				m.ComponentAsId(c => c.Id);
 				m.Property(p => p.ContactInfo, c => c.Length(10000));
@@ -202,7 +220,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 				});
 			});
-
 			mapper.Class<Address>(m => m.Bag(o => o.Orders, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 				c.Inverse(true);
@@ -236,7 +253,6 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
-
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 				if (type == typeof(RegulatorRegistry)) {

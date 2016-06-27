@@ -28,7 +28,7 @@
 			<CheckBox Name="ShowWithoutOffers" Style="{StaticResource FilterCheckBox}">Отображать весь каталог</CheckBox>
 		</StackPanel>
 		<c:DataGrid2 Grid.Row="1" x:Name="Mnns"
-			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
+			c:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}" VerticalAlignment="Top">
 			<DataGrid.Columns>
 				<c:SearchableDataGridColumn
 					HighlightStyle="{StaticResource DataGridHighlight}"

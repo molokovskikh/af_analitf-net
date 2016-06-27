@@ -68,7 +68,7 @@ namespace AnalitF.Net.Service.Test
 			requestLog.ClientToken = Guid.NewGuid().ToString();
 			var settings = session.Load<UserSettings>(user.Id);
 			settings.CheckClientToken = true;
-			exporter.ExportAll();
+			exporter.ExportDb();
 		}
 
 		[Test]
@@ -77,10 +77,10 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllText("var/update/rtm/version.txt", "1.2");
 			File.WriteAllBytes("var/update/rtm/analitf.net.client.exe", new byte[] { 0x00 });
 
-			ExportCompressed();
+			ExportBin();
 			var files = ZipHelper.lsZip(file);
 
-			Assert.That(exporter.External[0].Filename, Does.EndWith(@"var\cache\ext-rtm.zip"));
+			Assert.That(exporter.External.Implode(), Does.EndWith(@"var\cache\ext-rtm.zip"));
 			var extFiles = ZipHelper.lsZip(exporter.External[0].Filename).Implode();
 			Assert.That(extFiles, Does.Contain("update/analitf.net.client.exe"));
 			Assert.That(files.Implode(), Does.Not.Contains("update/analitf.net.client.exe"));
@@ -93,9 +93,9 @@ namespace AnalitF.Net.Service.Test
 			File.WriteAllBytes("var/update/rtm/analitf.net.client.exe", new byte[] { 0x00 });
 			File.WriteAllBytes("var/update/delta-1.1-1.2.zip", new byte[] { 0x00 });
 
-			ExportCompressed();
+			ExportBin();
 
-			Assert.That(exporter.External[0].Filename, Does.EndWith(@"var\update\delta-1.1-1.2.zip"));
+			Assert.That(exporter.External.Implode(), Does.EndWith(@"var\update\delta-1.1-1.2.zip"));
 		}
 
 		[Test]
@@ -118,7 +118,7 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Export_news()
 		{
-			DataMother.News(session);
+			DataMother.CreateNews(session);
 
 			ExportCompressed();
 			var files = ZipHelper.lsZip(file);
@@ -130,7 +130,7 @@ namespace AnalitF.Net.Service.Test
 		{
 			InitAd();
 
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var files = ListResult();
 
 			Assert.That(files, Does.Contain("ads/2block.gif"));
@@ -210,6 +210,40 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
+		public void Export_ProducerPromotions()
+		{
+			var testUser = session.Load<TestUser>(user.Id);
+
+			var testProducerUser = new TestProducerUser()
+			{
+				Login = "Тестовый пользователь производителя",
+				TypeUser = 0
+			};
+
+			session.Save(testProducerUser);
+
+			var testProducerPromotion = DataMother.CreateProducerPromotion(session, testUser);
+			testProducerPromotion.ProducerUserId = testProducerUser.Id;
+			session.Save(testProducerPromotion);
+
+			exporter.ExportProducerPromotions();
+
+			var files = ListResult();
+
+			string filesSuccess = "ProducerPromotions.meta.txt,";
+			filesSuccess += " ProducerPromotions.txt,";
+			filesSuccess += " ProducerPromotionCatalogs.meta.txt,";
+			filesSuccess += " ProducerPromotionCatalogs.txt,";
+			filesSuccess += " ProducerPromotionSuppliers.meta.txt,";
+			filesSuccess += " ProducerPromotionSuppliers.txt";
+
+			Assert.AreEqual(filesSuccess, files.Substring(0, 187));
+
+			session.Delete(testProducerPromotion);
+			session.Delete(testProducerUser);
+		}
+
+		[Test]
 		public void Do_not_export_waybill_files()
 		{
 			user.SendWaybills = false;
@@ -230,7 +264,7 @@ namespace AnalitF.Net.Service.Test
 			InitAd();
 			var result = ReadResult();
 			var zeros = new [] {
-				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt"
+				"catalogs.txt", "catalognames.txt", "offers.txt", "rejects.txt", "RegulatorRegistry.txt", "Products.txt"
 			};
 			foreach (var zero in zeros) {
 				var entry = result.FirstOrDefault(r => r.FileName.Match(zero));
@@ -313,7 +347,7 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			client.Users[0].CleanPrices(session, supplier);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var offers = ParseData("offers");
 			var offerData = offers.First();
 			var id = Convert.ToUInt64(offerData[0]);
@@ -338,13 +372,13 @@ namespace AnalitF.Net.Service.Test
 			client.MaintainIntersection(session);
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var ids = ParseData("offers").Select(l => Convert.ToUInt64(l[0])).ToArray();
 			Assert.IsTrue(ids.Contains(supplier.Prices[0].Core[0].Id), ids.Implode());
 			var priceData = ParseData("prices").First(d => Convert.ToUInt32(d[0]) == supplier.Prices[0].Id);
@@ -368,7 +402,7 @@ namespace AnalitF.Net.Service.Test
 			client.Users[0].CleanPrices(session, supplier, supplier2);
 			client.MaintainIntersection(session);
 			session.Flush();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
 			var id = supplier.Prices[0].Core[0].Id;
@@ -381,7 +415,7 @@ namespace AnalitF.Net.Service.Test
 			supplier2.InvalidateCache(session, user.Id);
 
 			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
-			exporter.ExportAll();
+			exporter.ExportDb();
 			offers = ParseData("offers").ToArray();
 			offer = offers.First(x => Convert.ToUInt64(x[0]) == id);
 			Assert.AreEqual(120, Convert.ToDecimal(GetColumnValue("Offers", "Cost", offer), CultureInfo.InvariantCulture));
@@ -398,7 +432,7 @@ namespace AnalitF.Net.Service.Test
 				session.Save(new TestMailSendLog(user, mail));
 			}
 			session.CreateSQLQuery("delete from Logs.PendingMailLogs").ExecuteUpdate();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			Assert.AreEqual(1, session.Query<PendingMailLog>().Count());
 		}
 
@@ -466,7 +500,7 @@ namespace AnalitF.Net.Service.Test
 			//для подготовки данных нужна транзакция
 			if (!session.Transaction.IsActive)
 				session.BeginTransaction();
-			exporter.ExportAll();
+			exporter.ExportDb();
 			var memory = new MemoryStream();
 			exporter.Compress(memory);
 			memory.Position = 0;
@@ -493,9 +527,15 @@ namespace AnalitF.Net.Service.Test
 			return waybill;
 		}
 
+		private void ExportBin()
+		{
+			Assert.IsTrue(exporter.ExportBin());
+			file = exporter.Compress(file);
+		}
+
 		private void ExportCompressed()
 		{
-			exporter.ExportAll();
+			exporter.ExportDb();
 			file = exporter.Compress(file);
 		}
 	}

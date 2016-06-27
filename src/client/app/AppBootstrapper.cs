@@ -50,6 +50,19 @@ namespace AnalitF.Net.Client
 
 		public ShellViewModel Shell;
 
+		public static event EventHandler LeaderCalculationWasStartChanged;
+
+		private static bool _leaderCalculationWasStart = false;
+		public static bool LeaderCalculationWasStart
+		{
+			get { return _leaderCalculationWasStart; }
+			set
+			{
+				_leaderCalculationWasStart = value;
+				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
+			}
+		}
+
 		public static Config.Caliburn.Caliburn Caliburn;
 		public static Config.NHibernate.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();
@@ -146,15 +159,8 @@ namespace AnalitF.Net.Client
 				if (String.IsNullOrEmpty(Config.SettingsPath))
 					return;
 
-				using(var stream = new StreamWriter(Config.SettingsPath)) {
-					var serializer = new JsonSerializer {
-						ContractResolver = new NHibernateResolver(),
-#if DEBUG
-						Formatting = Formatting.Indented
-#endif
-					};
-					serializer.Serialize(stream, Shell);
-				}
+				using(var stream = new StreamWriter(Config.SettingsPath))
+					Shell.Serialize(stream);
 			}
 			catch (Exception e) {
 				log.Error("Не удалось сохранить настройки", e);
@@ -168,19 +174,11 @@ namespace AnalitF.Net.Client
 				if (!File.Exists(Config.SettingsPath))
 					return;
 
-				Shell.IsNotifying = false;
-				using(var stream = new StreamReader(Config.SettingsPath)) {
-					var serializer = new JsonSerializer {
-						ContractResolver = new NHibernateResolver()
-					};
-					serializer.Populate(stream, Shell);
-				}
+				using(var stream = new StreamReader(Config.SettingsPath))
+					Shell.Deserialize(stream);
 			}
 			catch(Exception e) {
 				log.Error("Не удалось прочитать настройки", e);
-			}
-			finally {
-				Shell.IsNotifying = true;
 			}
 		}
 

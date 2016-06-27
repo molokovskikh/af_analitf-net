@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.ServiceModel;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
@@ -168,18 +169,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
-
-			var updateCommand = new UpdateCommand();
-			var result = Run(updateCommand);
-			Assert.That(result, Is.EqualTo(UpdateResult.UpdatePending));
-
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
-			var command1 = new UpdateCommand();
-			command1.Configure(settings, clientConfig);
-			command1.Process(() => {
-				command1.Import();
-				return UpdateResult.OK;
-			});
+
+			//сначала будут загружены только бинарники
+			Assert.AreEqual(UpdateResult.UpdatePending, Run(new UpdateCommand()));
+
+			//теперь только данные
+			Assert.AreEqual(UpdateResult.OK, Run(new UpdateCommand {
+				SyncData = "NoBin"
+			}));
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 		}
 
@@ -248,6 +246,25 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(2, orders.Count);
 			var newOrder = orders.First(o => o.Id != order.Id);
 			Assert.AreEqual(1, newOrder.Lines.Count);
+		}
+
+		[Test]
+		public void Freeze_old_orders()
+		{
+			var order = MakeOrderClean();
+			order.CreatedOn = order.CreatedOn.AddDays(-10);
+			localSession.Save(order);
+
+			var cmd = new UpdateCommand();
+			Run(cmd);
+
+			var text = cmd.Results.OfType<MessageResult>().First().Message;
+
+			localSession.Clear();
+			order = localSession.Load<Order>(order.Id);
+
+			Assert.IsTrue(order.Frozen);
+			Assert.That(text, Does.Contain("В архиве заказов обнаружены заказы, сделанные более 1 недели назад. Данные заказы были заморожены."));
 		}
 
 		[Test]
@@ -327,16 +344,27 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Load_ProducerPromotions()
+		{
+			var fixture = Fixture<CreateProducerPromotion>();
+			Run(new UpdateCommand());
+
+			Assert.That(localSession.Query<Client.Models.ProducerPromotion>().Count(), Is.GreaterThan(0));
+
+			var producerPromotion = localSession.Get<Client.Models.ProducerPromotion>(fixture.ProducerPromotion.Id);
+			producerPromotion.Init(clientConfig);
+
+			Assert.AreEqual("Тестовая промоакция производителя", producerPromotion.Name);
+		}
+
+		[Test]
 		public void Load_delay_of_payment()
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
-
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
-			localSession.Refresh(settings);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 
@@ -548,14 +576,13 @@ update Addresses set Id =  2575 where Id = :addressId")
 			var emptyServerUrl = String.Format("http://localhost:{0}", new Random().Next(10000, 20000));
 			var cfg = new HttpSelfHostConfiguration(emptyServerUrl);
 			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+			cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
 			var server = new HttpSelfHostServer(cfg);
 			disposable.Add(server);
 			server.OpenAsync().Wait();
 
 			clientConfig = clientConfig.Clone();
-			var normalServerUrl = new UriBuilder(clientConfig.BaseUrl) {
-				Host = "127.0.0.1"
-			}.ToString();
+			var normalServerUrl = clientConfig.BaseUrl;
 			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
 			var cmd = new UpdateCommand();
 			disposable.Add(cmd);

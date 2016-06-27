@@ -10,6 +10,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
+using System.Reactive.Disposables;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -108,6 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var fixture = Fixture<LocalWaybill>();
 			FileHelper.InitDir(settings.MapPath("Reports"));
+			model.CurrentWaybill.Value = model.Waybills.Value.First(x => x.Id == fixture.Waybill.Id);
 			var result = model.VitallyImportantReport().GetEnumerator();
 			var task = Next<TaskResult>(result);
 			task.Task.Start();
@@ -115,13 +117,155 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var open = Next<OpenResult>(result);
 			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
 			Assert.That(open.Filename, Does.Contain("Росздравнадзор"));
-			//дожна быть строка заголовка и как миниму одна строка данных
+			//должна быть строка заголовка и как минимум одна строка данных
 			var text = File.ReadAllText(open.Filename);
 			Assert.That(text.Length, Is.GreaterThan(1));
 			//в 11 колонке будет vendorid
 			var vendorId = text.Split(new [] { Environment.NewLine }, StringSplitOptions.None)[1].Split(';')[10];
 			//в тестовых данных VendorId == Id
 			Assert.AreEqual(vendorId, fixture.Waybill.Supplier.Id.ToString());
+		}
+
+		[Test]
+		public void Waybill_mark_report_with_NDS()
+		{
+			WaybillMarkupReport(System.Windows.MessageBoxResult.Yes, 1.1);
+		}
+
+		[Test]
+		public void Waybill_mark_report_without_NDS()
+		{
+			WaybillMarkupReport(System.Windows.MessageBoxResult.No, 1);
+		}
+
+		protected void WaybillMarkupReport(System.Windows.MessageBoxResult exceptResult, double k)
+		{
+			session.CreateSQLQuery(@"
+insert into BarCodes (value) values ('first_test_bar');
+").ExecuteUpdate();
+			var waybill = new Waybill()
+			{
+				DocumentDate = DateTime.Parse($"03.03.{DateTime.Now.Year - 1}"),
+			};
+
+			var waybillLineOne = new WaybillLine(waybill)
+			{
+				EAN13 = "first_test_bar",
+				Quantity = 2,
+				SupplierCost = 300,
+				RetailCost = 305,
+				ProducerCost = (decimal)290.155,
+				RegistryCost = 290,
+			};
+
+			var waybillLineTwo = new WaybillLine(waybill)
+			{
+				EAN13 = "first_test_bar",
+				Quantity = 3,
+				SupplierCost = 310,
+				RetailCost = 315,
+				ProducerCost = 300,
+				RegistryCost = 300,
+			};
+
+			disposable.Add(Disposable.Create(() =>
+			{
+				var disposableSession = session;
+				if (!session.IsOpen)
+				{
+					disposableSession = session.SessionFactory.OpenSession();
+				}
+				disposableSession.CreateSQLQuery($@"
+				delete from waybilllines where EAN13 = 'first_test_bar';
+				delete from BarCodes where value = 'first_test_bar';
+				").ExecuteUpdate();
+				disposableSession.Delete(waybill);
+				if (!disposableSession.Equals(session))
+				{
+					disposableSession.Close();
+				}
+			}));
+
+			session.Save(waybill);
+			session.Save(waybillLineOne);
+			session.Save(waybillLineTwo);
+
+			FileHelper.InitDir(settings.MapPath("Reports"));
+
+			manager.DefaultQuestsionResult = exceptResult;
+
+			var result = model.WaybillMarkupReport().GetEnumerator();
+			var task = Next<TaskResult>(result);
+			task.Task.Start();
+			task.Task.Wait();
+			var open = Next<OpenResult>(result);
+
+			Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+			Assert.That(open.Filename, Does.Contain($"ЖНВЛС-{ DateTime.Today.Year - 1}"));
+
+			var stream = new MemoryStream(File.ReadAllBytes(open.Filename));
+			var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(stream);
+			stream.Close();
+			var sheet = workbook[0];
+
+			var enumenator = sheet.GetRowEnumerator();
+			while (enumenator.MoveNext())
+			{
+				var currentRow = (NPOI.HSSF.UserModel.HSSFRow)enumenator.Current;
+				Assert.IsTrue(currentRow.Cells.Count > 0);
+				if (currentRow.Cells[0].ToString() == "first_test_bar")
+				{
+					break;
+				}
+			}
+
+			Assert.IsNotNull(enumenator.Current);
+
+			var inExcel = (enumenator.Current as NPOI.HSSF.UserModel.HSSFRow).Cells.ToArray();
+
+			Assert.AreEqual("first_test_bar", inExcel[0].ToString());
+
+			Assert.AreEqual((decimal)0.005,
+				Convert.ToDecimal(inExcel[1].ToString()), "(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000 = 0.005");
+
+			if(k == 1.1)
+			{
+				Assert.AreEqual((decimal)1.683,
+				Convert.ToDecimal(inExcel[2].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * {k} = 1.683");
+
+				Assert.AreEqual((decimal)1.7105,
+				Convert.ToDecimal(inExcel[3].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * {k} = 1.7105");
+
+				Assert.AreEqual((decimal)1.62834,
+				Convert.ToDecimal(inExcel[4].ToString()), $@"Helpers.SlashNumber().Convert((waybillLineOne.Quantity * waybillLineOne.ProducerCost)
+				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * {k}, 5) = 1.62834");
+			}
+
+			if (k == 1.0)
+			{
+				Assert.AreEqual((decimal)1.53,
+				Convert.ToDecimal(inExcel[2].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.SupplierCost + waybillLineTwo.Quantity * waybillLineTwo.SupplierCost) / 1000 * {k} = 1.53");
+
+				Assert.AreEqual((decimal)1.555,
+				Convert.ToDecimal(inExcel[3].ToString()), $"(waybillLineOne.Quantity * waybillLineOne.RetailCost + waybillLineTwo.Quantity * waybillLineTwo.RetailCost) / 1000 * {k} = 1.555");
+
+				Assert.AreEqual((decimal)1.48031,
+				Convert.ToDecimal(inExcel[4].ToString()), $@"Helpers.SlashNumber().Convert((waybillLineOne.Quantity * waybillLineOne.ProducerCost)
+				+ Math.Round((decimal)(waybillLineTwo.Quantity * waybillLineTwo.ProducerCost), 2)) / 1000 * {k}, 5) = 1.48031");
+			}
+
+
+
+
+
+
+			Assert.AreEqual((decimal)290.0, Convert.ToDecimal(inExcel[5].ToString()), "Math.Min((decimal)waybillLineOne.RegistryCost, (decimal)waybillLineTwo.RegistryCost) = 290.0");
+
+			Assert.AreEqual((decimal)0.005, Convert.ToDecimal(inExcel[6].ToString()), "(waybillLineOne.Quantity + waybillLineTwo.Quantity) / 1000 = 0.005");
+
+			Assert.AreEqual((decimal)0.005,
+						Convert.ToDecimal(inExcel[7].ToString()), @"(Math.Round((decimal)(waybillLineOne.RetailCost + waybillLineTwo.RetailCost) / 2, 2) -
+						Math.Round((decimal)(waybillLineOne.SupplierCost + waybillLineTwo.SupplierCost) / 2, 2)) / 1000 = 0.005");
 		}
 	}
 }

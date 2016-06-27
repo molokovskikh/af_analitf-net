@@ -194,6 +194,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			if (line == null)
 				return;
+			grid.HorizontalScrollBarVisibility =  ScrollBarVisibility.Auto;
 			foreach (var pair in line.ParsedServiceFields.Where(k => k.Key != "ReportData")) {
 				var key = pair.Key;
 				//todo - хорошо бы вычислять ширину колонок, но непонятно как
@@ -205,7 +206,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					Width = width,
 					Header = key,
 					Binding = new Binding(".") {
-						Converter = new LambdaConverter<BatchLine>(l => l.ParsedServiceFields.GetValueOrDefault(key))
+						Converter = new LambdaConverter<BatchLine>(l => l?.ParsedServiceFields.GetValueOrDefault(key),
+							o => {
+								return (o as BatchLineView).BatchLine;
+							})
 					}
 				});
 			}
