@@ -29,7 +29,7 @@
 
 			<c:DataGrid2  x:Name="CatalogNames" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
-			SelectionMode="Single" VerticalAlignment="Top" VerticalScrollBarVisibility="Disabled">
+			SelectionMode="Single" VerticalAlignment="Top" HorizontalScrollBarVisibility="Disabled">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*"
 					Header="Наименование"
