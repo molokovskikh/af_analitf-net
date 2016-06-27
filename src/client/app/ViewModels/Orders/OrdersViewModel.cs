@@ -166,9 +166,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				//этот вызов должен быть после RebuildSessionIfNeeded
 				//тк он перезагрузить объекты
 				var orders = new List<Order>();
-				if (AddressSelector.All) {
+				if (IsSelectedAllAddress()) {
 					orders = Session.Query<Order>().ToList()
-						.Where(x => priceIds.Contains(x.SafePrice.Id) || IsSelectedAllPrices())
+						.Where(x => priceIds.Contains(x.Price.Id) || IsSelectedAllPrices())
 						.OrderBy(o => o.PriceName)
 						.ToList();
 				}
@@ -194,6 +194,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private bool IsSelectedAllPrices()
 		{
 			if(Prices.Value.Where(x => x.IsSelected).ToArray().Length == Prices.Value.Count)
+				return true;
+			return false;
+		}
+		private bool IsSelectedAllAddress()
+		{
+			if(AddressSelector.Addresses.Where(x => x.IsSelected).ToArray().Length == AddressSelector.Addresses.Count)
 				return true;
 			return false;
 		}
