@@ -166,7 +166,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				//этот вызов должен быть после RebuildSessionIfNeeded
 				//тк он перезагрузить объекты
 				var orders = new List<Order>();
-				if (IsSelectedAllAddress()) {
+				if (IsSelectedAllAddress() || AddressSelector.All) {
 					orders = Session.Query<Order>().ToList()
 						.Where(x => priceIds.Contains(x.Price.Id) || IsSelectedAllPrices())
 						.OrderBy(o => o.PriceName)
