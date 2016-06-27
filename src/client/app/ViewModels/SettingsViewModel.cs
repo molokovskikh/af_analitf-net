@@ -4,11 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-<<<<<<< HEAD
-using System.Threading.Tasks;
 using System.Windows;
-=======
->>>>>>> master
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
