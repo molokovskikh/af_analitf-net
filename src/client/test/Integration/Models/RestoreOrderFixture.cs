@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.Save(order);
 
 			var checkResult = $"{order.Price.Name} : {offer.ProductSynonym} - {offer.ProducerSynonym}" +
-							$" ; Уменьшено заказное количество {order.Lines[0].Count - rest} вместо {order.Lines[0].Count}\r\n";
+							$" ; Уменьшено заказное количество {rest} вместо {order.Lines[0].Count}\r\n";
 
 			var sent = new SentOrder(order);
 			session.Save(sent);
