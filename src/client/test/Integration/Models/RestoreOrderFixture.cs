@@ -49,6 +49,55 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 		}
 
 		[Test]
+		public void Restore_order_items_NoOffers_Error()
+		{
+			session.DeleteEach<Order>();
+
+			var offer = session.Query<Offer>().First(o => !session.Query<Offer>().Any(x => x.Price == o.Price
+				&& x.ProductId == o.ProductId && x.Id.OfferId != o.Id.OfferId && x.Quantity.Length > 2));
+
+			var order = new Order(address, offer, (uint)offer.SortQuantity);
+			session.Save(order);
+
+			var checkResult = $"{order.Price.Name} : {offer.ProductSynonym} - {offer.ProducerSynonym} ; Предложений не найдено\r\n";
+
+			var sent = new SentOrder(order);
+			session.Save(sent);
+			session.Flush();
+
+			var cmd = InitCmd(new UnfreezeCommand<SentOrder>(sent.Id));
+			cmd.Execute();
+
+			Assert.AreEqual((string)cmd.Result, checkResult);
+		}
+
+		[Test]
+		public void Restore_order_items_NotEnougth_Error()
+		{
+			session.DeleteEach<Order>();
+
+			var offer = session.Query<Offer>().First(o => !session.Query<Offer>().Any(x => x.Price == o.Price
+				&& x.ProductId == o.ProductId && x.Id.OfferId != o.Id.OfferId && x.Quantity.Length > 2));
+
+			uint rest = 1;
+
+			var order = new Order(address, offer, (uint)offer.SortQuantity - rest);
+			session.Save(order);
+
+			var checkResult = $"{order.Price.Name} : {offer.ProductSynonym} - {offer.ProducerSynonym}" +
+							$" ; Уменьшено заказное количество {order.Lines[0].Count - rest} вместо {order.Lines[0].Count}\r\n";
+
+			var sent = new SentOrder(order);
+			session.Save(sent);
+			session.Flush();
+
+			var cmd = InitCmd(new UnfreezeCommand<SentOrder>(sent.Id));
+			cmd.Execute();
+
+			Assert.AreEqual((string)cmd.Result, checkResult);
+		}
+
+		[Test]
 		public void Message_on_restore_order_without_price()
 		{
 			restore = true;
