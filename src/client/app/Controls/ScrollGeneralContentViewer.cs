@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using System.Linq.Expressions;
+using System.Windows.Input;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Xceed.Wpf.Toolkit.Core.Converters;
@@ -56,9 +57,10 @@ namespace AnalitF.Net.Client.Controls
 			ScrollBarVisibilityChanged += OnScrollBarVisibilityChanged;
 			SizeChanged += OnSizeChanged;
 			GotFocus += OnGetFocus;
+			Focusable = false;
 		}
 
-		private void OnGetFocus(object sender, EventArgs e)
+		private void OnGetFocus(object sender, RoutedEventArgs e)
 		{
 			if (VerticalScrollBarVisibility == ScrollBarVisibility.Disabled)
 			{
@@ -67,6 +69,11 @@ namespace AnalitF.Net.Client.Controls
 			else
 			{
 				OptimizateGridsForVScrolling(false);
+			}
+
+			if (e.Source is Control)
+			{
+
 			}
 		}
 
