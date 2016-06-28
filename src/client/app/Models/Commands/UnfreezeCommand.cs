@@ -221,14 +221,14 @@ namespace AnalitF.Net.Client.Models.Commands
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{order.Price.Name} : {sourceLine} ; Предложений не найдено");
+						$"{order.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym} ; Предложений не найдено");
 				} else {
 					if (ShouldCalculateStatus(sourceLine)) {
 						((OrderLine)sourceLine).SendResult = LineResultStatus.CountReduced;
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{sourceOrder.Price.Name} : {sourceLine}" +
+						$"{sourceOrder.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym}" +
 							$" ; Уменьшено заказное количество {sourceLine.Count - rest} вместо {sourceLine.Count}");
 				}
 			}
