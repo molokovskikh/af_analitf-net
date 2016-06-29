@@ -385,7 +385,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var evenFired = false;
 			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) => 
 			{
-				evenFired = true;
+				evenFired = !AppBootstrapper.LeaderCalculationWasStart;
 			};			
 
 			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
@@ -397,7 +397,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				Thread.Sleep(120000);				
 			}
 
-			Assert.IsTrue(evenFired, "Событие AppBootstrapper.LeaderCalculationWasStartChanged не произошло, без него не будет созранено значение settings.LastLeaderCalculation");
+			Assert.IsTrue(evenFired, "Событие AppBootstrapper.LeaderCalculationWasStartChanged не произошло, без него не будет сохранено значение settings.LastLeaderCalculation");
 
 			session.Refresh(offer);
 			session.Refresh(offer.Price);
