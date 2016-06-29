@@ -51,7 +51,7 @@ namespace AnalitF.Net.Client
 
 		public static event EventHandler LeaderCalculationWasStartChanged;
 
-		private static bool _leaderCalculationWasStart = false;
+		private static bool _leaderCalculationWasStart;
 		public static bool LeaderCalculationWasStart
 		{
 			get { return _leaderCalculationWasStart; }
@@ -77,6 +77,7 @@ namespace AnalitF.Net.Client
 		{
 			FailFast = !useApplication;
 			InitViewLocator();
+			LeaderCalculationWasStartChanged += (sender, e) => { };
 		}
 
 		public static void InitViewLocator()
