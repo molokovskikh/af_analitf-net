@@ -12,9 +12,9 @@ namespace AnalitF.Net.Client.Models.Commands
 		public static void UpdateLeaders()
 		{
 			var statelessSession = AppBootstrapper.NHibernate.Factory.OpenSession();
-			var trancate = statelessSession.BeginTransaction();						
-			AppBootstrapper.LeaderCalculationWasStart = true;			
-			try {		
+			var trancate = statelessSession.BeginTransaction();
+			AppBootstrapper.LeaderCalculationWasStart = true;
+			try {
 				statelessSession.CreateSQLQuery(@"
 update Prices p
 	join DelayOfPayments d on d.PriceId = p.PriceId and p.RegionId = d.RegionId and d.DayOfWeek = :dayOfWeek
@@ -83,7 +83,8 @@ drop temporary table NextMinCosts;
 drop temporary table Leaders;")
 					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
 					.ExecuteUpdate();
-				trancate.Commit();				
+				trancate.Commit();
+				AppBootstrapper.LeaderCalculationWasStart = false;
 			} catch (Exception exc) {
 				trancate.Rollback();
 				LogManager.GetLogger(typeof (DbMaintain)).Warn($"Не удалось вычислить лидеров во время импорта данных {DateTime.Now}", exc);
