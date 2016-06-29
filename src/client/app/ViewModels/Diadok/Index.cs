@@ -378,7 +378,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentItem.Select(x => (x?.CanSign()).GetValueOrDefault())
 				.Subscribe(CanRequestSign);
 			CurrentItem.Select(x => x != null &&
-				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata != null && x.Entity.DocumentInfo.NonformalizedDocumentMetadata.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
+				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
 					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone))
 				.Subscribe(CanRevoke);
 
