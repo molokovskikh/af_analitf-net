@@ -84,7 +84,6 @@ drop temporary table Leaders;")
 					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
 					.ExecuteUpdate();
 				trancate.Commit();
-				AppBootstrapper.LeaderCalculationWasStart = false;
 			} catch (Exception exc) {
 				trancate.Rollback();
 				LogManager.GetLogger(typeof (DbMaintain)).Warn($"Не удалось вычислить лидеров во время импорта данных {DateTime.Now}", exc);

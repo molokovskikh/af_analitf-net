@@ -58,6 +58,12 @@ namespace AnalitF.Net.Client
 			set
 			{
 				_leaderCalculationWasStart = value;
+#if DEBUG
+				if (LeaderCalculationWasStartChanged == null)
+				{
+					LeaderCalculationWasStartChanged += (sender, e) => { };
+				}
+#endif
 				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
 			}
 		}
@@ -77,7 +83,6 @@ namespace AnalitF.Net.Client
 		{
 			FailFast = !useApplication;
 			InitViewLocator();
-			LeaderCalculationWasStartChanged += (sender, e) => { };
 		}
 
 		public static void InitViewLocator()
