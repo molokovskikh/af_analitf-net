@@ -23,7 +23,7 @@
 						<DataTrigger.Setters>
 							<Setter Property="BorderBrush" Value="#EAEAEA" />
 							<Setter Property="BorderThickness" Value="0, 1, 0, 0" />
-							<Setter Property="Margin" Value="0, 10, 0, 0" />
+							<Setter Property="Margin" Value="0, 5, 0, 5" />
 						</DataTrigger.Setters>
 					</DataTrigger>
 				</Style.Triggers>
@@ -69,6 +69,7 @@
 
 			<ListView Grid.Row="1"
 				ItemsSource="{Binding Items.Value}"
+				SelectionMode="Single"
 				SelectedItem="{Binding CurrentItem.Value}"
 				Visibility="{Binding IsLoaded.Value, Converter={StaticResource BoolToHidden}}"
 				ItemContainerStyle="{StaticResource ItemStyle}">
@@ -155,11 +156,24 @@
 					Margin="10, 0, 0, 0"
 					BorderThickness="0"
 					HorizontalContentAlignment="Stretch"
+					SelectionMode="Single"
 					ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 					<controls:ListView2.ItemTemplate>
 						<DataTemplate>
-							<Grid>
-								<Grid.RowDefinitions>
+              <Grid>
+                <Grid.ToolTip>
+                  <StackPanel Background="#FFFFFF">
+                    <TextBlock Text="{Binding Description}" FontSize="14" />
+                    <TextBlock Text="{Binding Date}" FontSize="12" Foreground="#a6a6a6" />
+                    <TextBlock Padding="5"
+									Margin="10, 5, 5, 5"
+									Text="{Binding Comment}"
+									Visibility="{Binding HasComment, Converter={StaticResource BoolToCollapsed}}"
+									Background="#e4f0d7"
+									HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Grid.ToolTip>
+                <Grid.RowDefinitions>
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />

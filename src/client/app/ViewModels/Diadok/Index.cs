@@ -280,11 +280,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.Resolution) {
-					items.Add(new AttachmentHistory {
-						Description = $"{entity.ResolutionInfo.Author} отказал в согласовании документа",
+					if (entity.ResolutionInfo.ResolutionType == ResolutionType.Approve) {
+						items.Add(new AttachmentHistory {
+						Description = $"{entity.ResolutionInfo.Author} согласовал документ",
 						Comment = Encoding.UTF8.GetString(entity.Content?.Data ?? new byte[0]),
 						Date = entity.CreationTime.ToLocalTime()
 					});
+					} else if (entity.ResolutionInfo.ResolutionType == ResolutionType.Disapprove) {
+						items.Add(new AttachmentHistory {
+							Description = $"{entity.ResolutionInfo.Author} отказал в согласовании документа",
+							Comment = Encoding.UTF8.GetString(entity.Content?.Data ?? new byte[0]),
+							Date = entity.CreationTime.ToLocalTime()
+						});
+					}
 				} else if (entity.AttachmentType == AttachmentType.ResolutionRequestDenial) {
 					items.Add(new AttachmentHistory {
 						Description = $"{entity.ResolutionRequestDenialInfo.Author} отказал в запросе подписи сотруднику",
@@ -370,7 +378,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentItem.Select(x => (x?.CanSign()).GetValueOrDefault())
 				.Subscribe(CanRequestSign);
 			CurrentItem.Select(x => x != null &&
-				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
+				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata != null && x.Entity.DocumentInfo.NonformalizedDocumentMetadata.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
 					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone))
 				.Subscribe(CanRevoke);
 

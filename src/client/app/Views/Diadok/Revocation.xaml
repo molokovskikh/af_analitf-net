@@ -14,7 +14,7 @@
 
 			<Label Grid.Row="0" FontSize="18">Аннулирование документа</Label>
 			<Label Grid.Row="2">Комментарий к аннулированию</Label>
-			<TextBox Grid.Row="3" />
+			<TextBox Grid.Row="3" Name="Comment"/>
 
 			<StackPanel Orientation="Horizontal" Grid.Row="4">
 				<Button Margin="3" Name="Save">Подписать и отправить контрагенту</Button>

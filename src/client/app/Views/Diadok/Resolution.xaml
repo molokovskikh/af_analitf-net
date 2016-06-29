@@ -15,7 +15,7 @@
 			<Label Grid.Row="0" FontSize="18" Name="Header" />
 			<Label Grid.Row="1" Name="Clarification" />
 			<Label Grid.Row="2">Комментарий</Label>
-			<TextBox Grid.Row="3" />
+			<TextBox Grid.Row="3" Name="Comment"/>
 
 			<StackPanel Orientation="Horizontal" Grid.Row="4">
 				<Button Margin="3" Name="Save" Content="{Binding ActionName.Value}" />

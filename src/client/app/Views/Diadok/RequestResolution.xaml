@@ -23,7 +23,7 @@
 		<Label Grid.Row="2" Grid.Column="0">Сотрудник</Label>
 		<ComboBox Grid.Row="2" Grid.Column="1" Name="Users" DisplayMemberPath="Name" />
 		<Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">Комментарий</Label>
-		<TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"></TextBox>
+    <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Name="Comment"></TextBox>
 
 		<StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0">
 			<Button Margin="3" Name="Save">Передать</Button>
