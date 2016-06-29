@@ -23,7 +23,7 @@
 						<DataTrigger.Setters>
 							<Setter Property="BorderBrush" Value="#EAEAEA" />
 							<Setter Property="BorderThickness" Value="0, 1, 0, 0" />
-							<Setter Property="Margin" Value="0, 5, 0, 5" />
+							<Setter Property="Margin" Value="0, 10, 0, 0" />
 						</DataTrigger.Setters>
 					</DataTrigger>
 				</Style.Triggers>
