@@ -1162,6 +1162,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			orders.Each(o => {
 				o.ResetStatus();
 				o.Frozen = true;
+				o.SavePriceInfo();
 			});
 			var command = new UnfreezeCommand<Order>(ordersToRestore.Select(o => o.Id).ToArray());
 			command.Restore = true;

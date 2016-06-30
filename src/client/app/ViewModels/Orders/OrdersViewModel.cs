@@ -170,12 +170,12 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.OrderBy(o => o.PriceName)
 					.ToList();
 				orders.Each(o => o.CalculateStyle(Address));
+				//orders.Each(o => o.CalculatePrice(Session.Query<Price>().ToList()));
 				if (CurrentOrder != null)
 					CurrentOrder = orders.FirstOrDefault(x => x.Id == CurrentOrder.Id);
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};
-
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}
