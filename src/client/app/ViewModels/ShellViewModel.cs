@@ -256,7 +256,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Config.Cmd.Match("import")) {
 				//если в папке с обновлением есть данные то мы должны их импортировать
 				//что бы не потерять накладные
-				if (Directory.Exists(Config.BinUpdateDir) && Directory.GetFiles(Config.BinUpdateDir, "*.meta.txt").Length > 0) {
+				if (Directory.Exists(Config.UpdateTmpDir) && Directory.GetFiles(Config.UpdateTmpDir, "*.meta.txt").Length > 0) {
 					using (var command = new UpdateCommand())
 						return Sync(command, c => c.Process(() => {
 							((UpdateCommand)c).Import();
@@ -371,8 +371,7 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
-						DbMaintain.UpdateLeaders(session, Settings.Value);
-						session.Flush();
+						DbMaintain.UpdateLeaders();
 						return Enumerable.Empty<IResult>();
 					});
 			}
@@ -441,6 +440,16 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
 
+			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
+			{
+				if(AppBootstrapper.LeaderCalculationWasStart == true
+				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
+				{
+					return;
+				}
+				Settings.Value.LastLeaderCalculation = DateTime.Today;
+				session.Flush();
+			};
 			//изменились заявки
 			Env.Bus.SendMessage("Changed", "db");
 			//изменилась база данных
@@ -530,6 +539,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMinCosts()
 		{
+			if (AppBootstrapper.LeaderCalculationWasStart)
+			{
+				MessageResult.Warn("Идет расчет минимальных цен. Минимальные цены можно будет посмотреть после окончания расчета, это может занять какое-то время. Пожалуйста, подождите и повторно откройте \"Минимальные цены\"")
+					.Execute(new ActionExecutionContext());
+				return;
+			}
 			NavigateRoot(new Offers.MinCosts());
 		}
 
@@ -1036,8 +1051,8 @@ namespace AnalitF.Net.Client.ViewModels
 				} else if (task.IsFaulted) {
 					log.Debug($"Ошибка при выполнении задачи {viewModel.DisplayName}", task.Exception);
 					var baseException = task.Exception.GetBaseException();
-					if (ErrorHelper.IsCancalled(baseException)) {
-						log.Warn($"Отменена задача {viewModel.DisplayName}");
+					if (viewModel.Cancellation.IsCancellationRequested) {
+						log.Warn($"Отменена задача {viewModel.DisplayName} пользователем");
 						return;
 					}
 

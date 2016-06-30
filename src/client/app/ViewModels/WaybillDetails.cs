@@ -83,7 +83,6 @@ namespace AnalitF.Net.Client.ViewModels
 					return new List<SentOrderLine>();
 				})
 				.ToValue(CloseCancellation);
-
 			EmptyLabelVisibility = OrderLines
 				.Select(v => v == null || v.Count == 0 ? Visibility.Visible : Visibility.Collapsed)
 				.ToValue();
@@ -151,6 +150,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
+			if (Waybill.IsCreatedByUser)
+			{
+				EmptyLabelVisibility = EmptyLabelVisibility.Select(s => Visibility.Collapsed).ToValue();
+				OrderDetailsVisibility = OrderDetailsVisibility.Select(s => Visibility.Collapsed).ToValue();
+			}
 		}
 
 		public IResult PrintRackingMap()

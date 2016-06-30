@@ -2102,7 +2102,8 @@ where r.DownloadId in (:ids)")
 
 			//на разных серверах абсолютные пути могут отличаться но относительные будут совпадать
 			var multiparts = External.Select(x => FileHelper.RelativeTo(x.Filename, Path.GetFullPath(FileHelper.MakeRooted(@".\")))).ToArray();
-			job.MultipartContent = JsonConvert.SerializeObject(multiparts);
+			if (multiparts.Length > 0)
+				job.MultipartContent = JsonConvert.SerializeObject(multiparts);
 		}
 
 		public void ExportDb()

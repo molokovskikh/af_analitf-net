@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.ServiceModel;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Models;
@@ -361,12 +362,9 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
-
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
-			localSession.Refresh(settings);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 
@@ -578,14 +576,13 @@ update Addresses set Id =  2575 where Id = :addressId")
 			var emptyServerUrl = String.Format("http://localhost:{0}", new Random().Next(10000, 20000));
 			var cfg = new HttpSelfHostConfiguration(emptyServerUrl);
 			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+			cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
 			var server = new HttpSelfHostServer(cfg);
 			disposable.Add(server);
 			server.OpenAsync().Wait();
 
 			clientConfig = clientConfig.Clone();
-			var normalServerUrl = new UriBuilder(clientConfig.BaseUrl) {
-				Host = "127.0.0.1"
-			}.ToString();
+			var normalServerUrl = clientConfig.BaseUrl;
 			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
 			var cmd = new UpdateCommand();
 			disposable.Add(cmd);

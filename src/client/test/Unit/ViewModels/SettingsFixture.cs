@@ -47,9 +47,9 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			model.Save().ToArray();
 
 			var result = settings.Markups.Where(x => x.Type == MarkupType.Nds18 && x.Address == addresses[1]).Implode();
-			Assert.AreEqual("Nds18: 0 - 10000 20%", result);
+			Assert.AreEqual("Nds18: 0 - 1000000 20%", result);
 			result = settings.Markups.Where(x => x.Type == MarkupType.Nds18 && x.Address == addresses[0]).Implode();
-			Assert.AreEqual("Nds18: 0 - 10000 20%", result);
+			Assert.AreEqual("Nds18: 0 - 1000000 20%", result);
 		}
 
 		[Test]

@@ -46,7 +46,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			try {
 				IsEnabled.Value = false;
-				await Util.Run(() => action(Payload.Token));
+				await TaskEx.Run(() => action(Payload.Token));
 				Success = true;
 				TryClose();
 			} catch(Exception e) {

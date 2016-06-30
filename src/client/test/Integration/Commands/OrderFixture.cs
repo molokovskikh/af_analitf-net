@@ -434,5 +434,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				AddressId = localSession.Query<Address>().First().Id
 			});
 		}
+		[Test]
+		public void Check_DisplayId()
+		{
+			localSession.DeleteEach<Order>();
+			var order = MakeOrder();
+			var displayId = order.DisplayId;
+			Run(new UpdateCommand());
+			var orders = localSession.Query<Order>().ToArray();
+			Assert.AreEqual(displayId, orders.First().DisplayId);
+		}
 	}
 }
