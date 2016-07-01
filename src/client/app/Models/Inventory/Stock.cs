@@ -2,13 +2,14 @@
 using AnalitF.Net.Client.Helpers;
 using NHibernate;
 using System;
+using System.ComponentModel;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
 	public enum StockStatus
 	{
-		Available,
-		Reciving,
+		[Description("Доступен")] Available,
+		[Description("В пути")] InTransit,
 	}
 
 	public class Stock
@@ -46,6 +47,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
 		public virtual decimal CostWithNds { get { return Cost + Nds + Excise; } }
+
+		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
 		public virtual decimal RetailMarkup
 		{

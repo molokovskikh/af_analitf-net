@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate;
@@ -33,6 +34,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum { get; set; }
 		public virtual int LineCount { get; set; }
 
+		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
+
 		public static void Stock(ISession session, User user, Settings settings, SentOrder[] orders)
 		{
 			foreach (var order in orders) {
@@ -50,9 +53,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 						Product = x.ProductSynonym,
 						Producer = x.ProducerSynonym,
 						Count = x.Count,
-						ReceivingOrderId = receiving.Id,
 						Cost = x.Cost,
 						RetailCost = x.RetailCost.GetValueOrDefault(),
+						Status = StockStatus.InTransit
 					})
 					.ToArray();
 				receiving.LineCount = lines.Length;
@@ -60,6 +63,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				receiving.RetailSum = lines.Sum(x => x.RetailCost);
 				session.Save(receiving);
 				order.ReceivingOrderId = receiving.Id;
+				lines.Each(x => x.ReceivingOrderId = receiving.Id);
 				session.SaveEach(lines);
 			}
 		}

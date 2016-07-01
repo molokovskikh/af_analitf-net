@@ -14,6 +14,23 @@
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
 			<Button Name="Create">Создать</Button>
+			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+				</StackPanel>
+			</GroupBox>
+			<controls:PopupSelector VerticalAlignment="Center" x:Name="Suppliers"
+				ButtonContent="Поставщики"
+				Member="Item.FullName" />
+			<controls:PopupSelector VerticalAlignment="Center" x:Name="AddressesFilter"
+				ButtonContent="Адреса"
+				Member="Item.Name" />
+			<controls:PopupSelector VerticalAlignment="Center" x:Name="Statuses"
+				ButtonContent="Статус"
+				Member="Item.Name" />
 		</ToolBar>
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
@@ -23,17 +40,17 @@
 				<controls:DataGridTextColumnEx Header="Номер заказа" Binding="{Binding OrderId}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата заказа" Binding="{Binding OrderDate}" Width="*" />
 
-				<controls:DataGridTextColumnEx Header="Номер заказа" Binding="{Binding WaybillId}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата заказа" Binding="{Binding WaybillDate}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Номер накладной" Binding="{Binding WaybillId}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата накладной" Binding="{Binding WaybillDate}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="План. дата" Binding="{Binding DueDate}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding Sum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Число строк" Binding="{Binding LinesCount}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Число строк" Binding="{Binding LineCount}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>

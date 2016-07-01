@@ -27,7 +27,7 @@
 				<controls:DataGridTextColumnEx x:Name="ClmnBarcode" Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
-				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding Status}" Width="*" />
+				<controls:DataGridTextColumnEx x:Name="ClmnStatus" Header="Статус" Binding="{Binding StatusName}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnOrder" Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Count}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding Cost}" Width="*" TextAlignment="Right" />
