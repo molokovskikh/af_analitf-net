@@ -180,13 +180,11 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.ToList();
 					orders.Each(o => o.CalculateStyle(Address));
 				}
-
 				if (CurrentOrder != null)
 					CurrentOrder = orders.FirstOrDefault(x => x.Id == CurrentOrder.Id);
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};
-
 				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
 			}
 		}

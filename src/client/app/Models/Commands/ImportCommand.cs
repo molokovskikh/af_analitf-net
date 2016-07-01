@@ -327,7 +327,9 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			if (dbTable.Name.Match("Orders")) {
 				ignored = ignored.Concat(new[] {
 					"DisplayId",
-					"KeepId"
+					"KeepId",
+					"SavePriceName",
+					"SaveRegionName"
 				})
 					.ToArray();
 			}
