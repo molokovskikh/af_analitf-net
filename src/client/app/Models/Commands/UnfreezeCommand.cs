@@ -181,8 +181,13 @@ namespace AnalitF.Net.Client.Models.Commands
 					break;
 
 				uint ordered;
+				var oldDisplayId = sourceOrder.DisplayId;
+				if (oldDisplayId == 0) {
+					oldDisplayId = sourceOrder.Id;
+				}
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
+					line.Order.KeepId = oldDisplayId;
 					if (ShouldCalculateStatus(line)) {
 						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;
@@ -216,14 +221,14 @@ namespace AnalitF.Net.Client.Models.Commands
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{order.Price.Name} : {sourceLine} ; Предложений не найдено");
+						$"{order.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym} ; Предложений не найдено");
 				} else {
 					if (ShouldCalculateStatus(sourceLine)) {
 						((OrderLine)sourceLine).SendResult = LineResultStatus.CountReduced;
 						((OrderLine)sourceLine).HumanizeSendError();
 					}
 					log.AppendLine(
-						$"{sourceOrder.Price.Name} : {sourceLine}" +
+						$"{sourceOrder.Price.Name} : {sourceLine.ProductSynonym} - {sourceLine.ProducerSynonym}" +
 							$" ; Уменьшено заказное количество {sourceLine.Count - rest} вместо {sourceLine.Count}");
 				}
 			}

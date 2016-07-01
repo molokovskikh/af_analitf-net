@@ -78,7 +78,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId => Id;
+		public virtual uint? KeepId { get; set; }
+
+		public virtual uint DisplayId => KeepId ?? Id;
 
 		public virtual uint? ExportId { get; set; }
 
@@ -212,7 +214,11 @@ namespace AnalitF.Net.Client.Models
 				if (IsPriceExists())
 					return Price;
 				return new Price {
-					Id = Price?.Id
+					Id = Price.Id,
+					CostFactor = 1,
+					Name = "Неактивный прайс-лист",
+					RegionName = "Inforoom",
+					PriceName = "Неактивный прайс-лист"
 				};
 			}
 		}

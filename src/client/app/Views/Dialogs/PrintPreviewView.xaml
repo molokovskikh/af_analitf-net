@@ -1,21 +1,129 @@
 ﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.PrintPreviewView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:Controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
 	xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
 	xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
 	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	behaviors:Focusable.DefaultFocus="{x:Reference Document}">
 
-	<i:Interaction.Behaviors>
-		<behaviors:Focusable />
-	</i:Interaction.Behaviors>
+  <i:Interaction.Behaviors>
+    <behaviors:Focusable />
+  </i:Interaction.Behaviors>
 
-	<UserControl.InputBindings>
-		<KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="TryClose" />
-	</UserControl.InputBindings>
+  <Control.Resources>
+    <Style x:Key="{x:Type controls:DocumentViewer2}"
+       TargetType="{x:Type controls:DocumentViewer2}">
+      <Setter Property="Foreground"
+          Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
+      <Setter Property="Background"
+          Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+      <Setter Property="FocusVisualStyle"
+          Value="{x:Null}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="{x:Type controls:DocumentViewer2}">
+            <Border BorderThickness="{TemplateBinding BorderThickness}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                Focusable="False">
+              <Grid KeyboardNavigation.TabNavigation="Local">
+                <Grid.Background>
+                  <SolidColorBrush Color="{DynamicResource ControlLightColor}" />
+                </Grid.Background>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ToolBar ToolBarTray.IsLocked="True"
+										 Height="46"
+                     KeyboardNavigation.TabNavigation="Continue">
 
-	<Grid>
-		<Controls:DocumentViewer2 x:Name="Document" Orientation="{Binding Orientation}"/>
-	</Grid>
+                  <Button Command="ApplicationCommands.Print"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Печать (CTRL+P)">
+                    <Image Source="/assets/images/printer.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Button Command="ApplicationCommands.Copy"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Копировать (CTRL+C)">
+                    <Image Source="/assets/images/copy.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Separator />
+                  <Button Command="NavigationCommands.IncreaseZoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Увеличить размер содержимого (CTRL +)">
+                    <Image Source="/assets/images/zoom_in.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Button Command="NavigationCommands.DecreaseZoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Уменьшить размер содержимого (CTRL -)">
+                    <Image Source="/assets/images/zoom_out.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Separator />
+                  <Button Command="NavigationCommands.Zoom"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="100.0"
+													ToolTip="100% (CTRL + 1)">
+                    <Image Source="/assets/images/doc_size.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToWidthCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="По ширине страницы (CTRL + 2)">
+                    <Image Source="/assets/images/doc_width.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="1"
+													ToolTip="Страница целиком (CTRL + 3)">
+                    <Image Source="/assets/images/doc.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Button Command="{x:Static controls:DocumentViewer2.FitToMaxPagesAcrossCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													CommandParameter="2"
+													ToolTip="Две страницы (CTRL + 4)">
+                    <Image Source="/assets/images/doc_two_pages.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+                  <Separator />
+                  <Button Command="{x:Static controls:CustomDocPreviewCommands.SaveToFileCommand}"
+													CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+													ToolTip="Сохранить в файл (CTRL + S)">
+                    <Image Source="/assets/images/file_save_as.ico" Style="{StaticResource ButtonImage}" Height="32" MaxHeight="32" Stretch="Fill"/>
+                  </Button>
+
+                </ToolBar>
+
+                <ScrollViewer Grid.Row="1"
+                          CanContentScroll="true"
+                          HorizontalScrollBarVisibility="Auto"
+                          x:Name="PART_ContentHost"
+                          IsTabStop="true">
+                  <ScrollViewer.Background>
+                    <LinearGradientBrush EndPoint="0.5,1"
+                                     StartPoint="0.5,0">
+                      <GradientStop Color="{DynamicResource ControlLightColor}"
+                                Offset="0" />
+                      <GradientStop Color="{DynamicResource ControlMediumColor}"
+                                Offset="1" />
+                    </LinearGradientBrush>
+                  </ScrollViewer.Background>
+                </ScrollViewer>
+
+                <ContentControl Grid.Row="2"
+                            x:Name="PART_FindToolBarHost"/>
+              </Grid>
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Control.Resources>
+
+  <UserControl.InputBindings>
+    <KeyBinding Gesture="ESCAPE" Command="caliburn:Commands.InvokeViewModel" CommandParameter="TryClose" />
+  </UserControl.InputBindings>
+
+  <Grid>
+    <controls:DocumentViewer2 x:Name="Document" Orientation="{Binding Orientation}"/>
+  </Grid>
 </UserControl>

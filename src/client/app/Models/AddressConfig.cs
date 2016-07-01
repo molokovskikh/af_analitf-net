@@ -1,4 +1,6 @@
-﻿namespace AnalitF.Net.Client.Models
+﻿using Caliburn.Micro;
+
+namespace AnalitF.Net.Client.Models
 {
 	public class AddressConfig
 	{

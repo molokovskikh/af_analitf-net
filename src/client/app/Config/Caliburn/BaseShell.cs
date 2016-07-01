@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		bool IsSuccessfulActivated { get; }
 	}
 
-	public class BaseShell : Conductor<IScreen>
+	public class BaseShell : Conductor<IScreen>.Collection.OneActive
 	{
 		public Navigator Navigator;
 
@@ -127,24 +127,24 @@ namespace AnalitF.Net.Client.Config.Caliburn
 		}
 #endif
 
-		public override void DeactivateItem(IScreen item, bool close)
-		{
-			if (item == null)
-				return;
-			CloseStrategy.Execute(new[] { item }, (canClose, closable) => {
-				if (!canClose)
-					return;
-				if (item.Equals(ActiveItem))
-					ChangeActiveItem(null, close);
-				else
-					ScreenExtensions.TryDeactivate(item, close);
-			});
+		//public override void DeactivateItem(IScreen item, bool close)
+		//{
+		//	if (item == null)
+		//		return;
+		//	CloseStrategy.Execute(new[] { item }, (canClose, closable) => {
+		//		if (!canClose)
+		//			return;
+		//		if (item.Equals(ActiveItem))
+		//			ChangeActiveItem(null, close);
+		//		else
+		//			ScreenExtensions.TryDeactivate(item, close);
+		//	});
 
-			if (close) {
-				if (ActiveItem == null) {
-					Navigator.NavigateBack();
-				}
-			}
-		}
+		//	if (close) {
+		//		if (ActiveItem == null) {
+		//			Navigator.NavigateBack();
+		//		}
+		//	}
+		//}
 	}
 }

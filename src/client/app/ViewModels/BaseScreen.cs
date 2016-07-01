@@ -95,6 +95,7 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<PersistedValue> persisted = new List<PersistedValue>();
 		private List<PersistedValue> session = new List<PersistedValue>();
 		private bool clearSession;
+		private bool reload;
 
 		protected bool UpdateOnActivate = true;
 		//Флаг отвечает за обновление данных на форме после активации
@@ -122,6 +123,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
+		public NotifyValue<object> DbReloadToken = new NotifyValue<object>();
 		/// <summary>
 		/// использовать только через RxQuery,
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
@@ -172,7 +174,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			Shell = Shell ?? Parent as ShellViewModel;
 			if (Shell != null)
-				Address = Addresses.FirstOrDefault(x => x.Id == Shell.CurrentAddress?.Id);
+				Address = Addresses.FirstOrDefault(x => x.Id == Shell.CurrentAddress.Value?.Id);
 
 			OnCloseDisposable.Add(Bus.Listen<Settings>()
 				.ObserveOn(UiScheduler)
@@ -197,6 +199,13 @@ namespace AnalitF.Net.Client.ViewModels
 					clearSession = true;
 					if (!Readonly)
 						UpdateOnActivate = true;
+				}, CloseCancellation.Token);
+			Bus.Listen<string>("db")
+				.Where(m => m == "Reload")
+				.Subscribe(_ => {
+					reload = true;
+					clearSession = true;
+					UpdateOnActivate = true;
 				}, CloseCancellation.Token);
 
 			Restore();
@@ -250,7 +259,7 @@ namespace AnalitF.Net.Client.ViewModels
 					?? new Settings());
 			Addresses = Session?.Query<Address>()?.OrderBy(x => x.Name).ToArray()
 				?? Env.Addresses?.ToArray() ?? new Address[0];
-			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress?.Id);
+			Address = Addresses.FirstOrDefault(x => x.Id == Shell?.CurrentAddress.Value?.Id);
 		}
 
 		protected override void OnActivate()
@@ -266,6 +275,10 @@ namespace AnalitF.Net.Client.ViewModels
 			if (UpdateOnActivate) {
 				Update();
 				UpdateOnActivate = false;
+			}
+			if (reload) {
+				DbReloadToken.OnNext(new object());
+				reload = false;
 			}
 		}
 
@@ -327,9 +340,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public virtual void NavigateBackward()
 		{
-			var canClose = Shell == null || Shell.NavigationStack.Any();
-			if (canClose)
-				TryClose();
+			Shell?.Navigator?.NavigateBack();
 		}
 
 		//todo мы не должны пытаться сериализовать\десериализовать объекты из базы тк это не имеет смысла
@@ -688,12 +699,17 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected void InitFields()
 		{
-			var notifiable = GetType().GetProperties().Where(x => x.PropertyType.IsGenericType
-				&& typeof(NotifyValue<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition())
+			InitFields(this);
+		}
+
+		public static void InitFields(object screen)
+		{
+			var notifiable = screen.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType
+				&& typeof (NotifyValue<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition())
 				&& x.CanWrite);
 			foreach (var propertyInfo in notifiable)
-				if (propertyInfo.GetValue(this, null) == null)
-					propertyInfo.SetValue(this, Activator.CreateInstance(propertyInfo.PropertyType), null);
+				if (propertyInfo.GetValue(screen, null) == null)
+					propertyInfo.SetValue(screen, Activator.CreateInstance(propertyInfo.PropertyType), null);
 		}
 	}
 }

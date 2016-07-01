@@ -199,4 +199,25 @@ namespace AnalitF.Net.Client.Helpers
 			return $"{banknoteS} руб. {coins} коп.";
 		}
 	}
+
+	public class SlashNumber
+	{
+		public decimal Convert(decimal value, int memberCount)
+		{
+			return (decimal)(Convert((double)value, memberCount));
+		}
+
+		public double Convert(double value, int membersCount)
+		{
+			var integralPart = Math.Truncate(value).ToString();
+			var roundValue = value.ToString().Remove(0, integralPart.Length + 1);
+			if(roundValue.Length > membersCount)
+			{
+				var deleteLength = roundValue.Length - membersCount;
+				roundValue = roundValue.Remove(membersCount, deleteLength);
+			}
+
+			return System.Convert.ToDouble($"{integralPart},{roundValue}");
+		}
+	}
 }

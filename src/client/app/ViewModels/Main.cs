@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Media.Imaging;
@@ -14,12 +12,9 @@ namespace AnalitF.Net.Client.ViewModels
 {
 	public class Main : BaseScreen
 	{
-		public Config.Config Config;
-
-		public Main(Config.Config config)
+		public Main()
 		{
-			Config = config;
-			DisplayName = "";
+			DisplayName = "Новости";
 			InitFields();
 		}
 
@@ -27,13 +22,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<List<News>> Newses { get; set; }
 		public NotifyValue<BitmapImage> Ad { get; set; }
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-			Reload();
-		}
-
-		public void Reload()
+		public override void Update()
 		{
 			RxQuery(s => s.Query<User>().FetchMany(x => x.Permissions).FirstOrDefault())
 				.ObserveOn(UiScheduler)
@@ -46,11 +35,11 @@ namespace AnalitF.Net.Client.ViewModels
 			RxQuery(s => s.Query<News>().OrderByDescending(n => n.PublicationDate).ToList())
 				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
-					x.Each(y => y.Init(Config));
+					x.Each(y => y.Init(Shell.Config));
 					Newses.Value = x;
 				});
 
-			Ad.Value = Config.LoadAd("index.gif");
+			Ad.Value = Shell.Config.LoadAd("index.gif");
 		}
 	}
 }

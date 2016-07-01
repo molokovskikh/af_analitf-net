@@ -283,7 +283,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Can_not_make_order_if_current_address_is_null()
 		{
-			shell.CurrentAddress = null;
+			shell.CurrentAddress.Value = null;
 			model.CurrentOffer.Value.OrderCount = 1;
 			model.OfferUpdated();
 			model.OfferCommitted();

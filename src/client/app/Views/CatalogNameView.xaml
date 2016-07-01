@@ -26,9 +26,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <c:DataGrid2 Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" x:Name="CatalogNames"
+
+			<c:DataGrid2  x:Name="CatalogNames" Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
 			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalogName]"
-			SelectionMode="Single" VerticalAlignment="Top">
+			SelectionMode="Single" VerticalAlignment="Top" HorizontalScrollBarVisibility="Disabled">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*"
 					Header="Наименование"
@@ -45,17 +46,19 @@
 			ShowsPreview="True"
 			Width="5" />
 
-        <c:DataGrid2 Grid.Row="1" Grid.Column="2" x:Name="Catalogs"
-			cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]"
-			SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="*"
-					Header="Форма выпуска"
-					Binding="{Binding Form}" />
-            </DataGrid.Columns>
-        </c:DataGrid2>
+			<c:DataGrid2  x:Name="Catalogs"  Grid.Row="1" Grid.Column="2"
+				cal:Message.Attach="[Event GotFocus] = [Action ActivateCatalog]"
+				SelectionMode="Single" VerticalAlignment="Top" >
+				<DataGrid.Columns>
+					<DataGridTextColumn Width="*"
+						Header="Форма выпуска"
+						Binding="{Binding Form}" />
+				</DataGrid.Columns>
+			</c:DataGrid2>
 
-        <Grid Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch"  VerticalAlignment="Center">
+
+
+		<Grid Grid.Column="2" Grid.Row="2" HorizontalAlignment="Stretch"  VerticalAlignment="Top">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="1*" />

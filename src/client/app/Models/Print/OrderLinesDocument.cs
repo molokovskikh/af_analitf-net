@@ -22,14 +22,14 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			var address = ((ShellViewModel)model.Parent).CurrentAddress;
 			if (model.IsCurrentSelected) {
-				var text = $"Текущий сводный заказ от {address?.Name}";
+				var text = $"Текущий сводный заказ от {address.Value?.Name}";
 				doc.Blocks.Add(new Paragraph(new Run(text)) {
 					FontWeight = FontWeights.Bold,
 					FontSize = 16
 				});
 			}
 			else {
-				Header($"Отправленный сводный заказ {address?.Name}");
+				Header($"Отправленный сводный заказ {address.Value?.Name}");
 				Header($"Период: {model.Begin.Value:d} - {model.End.Value:d}");
 			}
 			var headers = new[] {

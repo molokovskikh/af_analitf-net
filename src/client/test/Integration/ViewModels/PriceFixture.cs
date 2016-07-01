@@ -19,8 +19,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var offer = session.Query<Offer>().First();
 			MakeOrder(offer);
 
-			Assert.That(model.Prices.First(p => p.Id == offer.Price.Id).Order, Is.Not.Null);
-			Assert.That(model.Prices[0].MinOrderSum, Is.Not.Null);
+			Assert.That(model.Prices.Value.First(p => p.Id == offer.Price.Id).Order, Is.Not.Null);
+			Assert.That(model.Prices.Value[0].MinOrderSum, Is.Not.Null);
 		}
 
 		[Test]
@@ -44,7 +44,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var offer = session.Query<Offer>().First();
 			MakeSentOrder(offer);
 
-			var price = model.Prices.First(p => p.Id == offer.Price.Id);
+			var price = model.Prices.Value.First(p => p.Id == offer.Price.Id);
 			Assert.That(price.WeeklyOrderSum, Is.GreaterThan(0));
 			Assert.That(price.MonthlyOrderSum, Is.GreaterThan(0));
 		}
@@ -52,13 +52,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Save_current_price()
 		{
-			var price = model.Prices[1];
+			var price = model.Prices.Value[1];
 			model.CurrentPrice.Value = price;
 			Close(model);
 
 			var model2 = Open(new PriceViewModel());
 			Assert.That(model2.CurrentPrice.Value.Id, Is.EqualTo(price.Id));
-			var persistedPrice = model2.Prices.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
+			var persistedPrice = model2.Prices.Value.FirstOrDefault(p => p.Id == model.CurrentPrice.Value.Id);
 			Assert.That(model2.CurrentPrice.Value, Is.EqualTo(persistedPrice));
 		}
 
@@ -76,7 +76,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Activate(model);
 
-			var price = model.Prices.First(p => p.Id == offer.Price.Id);
+			var price = model.Prices.Value.First(p => p.Id == offer.Price.Id);
 			Assert.That(price.Order, Is.Not.Null);
 		}
 	}
