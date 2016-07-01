@@ -195,9 +195,6 @@ set m.HaveOffers = 1,
 	c.HaveOffers = 1;
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
-				Log.Info("Пересчет лидеров");
-				Task task = new Task(() => {DbMaintain.UpdateLeaders();});
-				task.Start();
 				Log.Info("Пересчет уценки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}

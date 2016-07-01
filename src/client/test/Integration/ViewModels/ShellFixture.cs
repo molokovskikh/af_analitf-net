@@ -359,7 +359,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		[Test]
 		public void Recalculate_leaders_on_start()
-		{						
+		{
 			restore = true;
 			settings.LastUpdate = DateTime.Now;
 			settings.LastLeaderCalculation = DateTime.Today.AddDays(-1);
@@ -382,35 +382,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Save(delay);
 			session.Flush();
 
-			var evenFired = false;
-			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) => 
-			{
-				evenFired = !AppBootstrapper.LeaderCalculationWasStart;
-			};			
-
 			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
 			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
 			Close(shell);
-
-			if (!evenFired)
-			{
-				Thread.Sleep(120000);				
-			}
-
-			Assert.IsTrue(evenFired, "Событие AppBootstrapper.LeaderCalculationWasStartChanged не произошло, без него не будет сохранено значение settings.LastLeaderCalculation");
 
 			session.Refresh(offer);
 			session.Refresh(offer.Price);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
-			
+			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
+
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.Diff, minCost.ToString());
 			Assert.That(minCost.Diff, Is.GreaterThan(0), minCost.ToString());
-			Assert.IsFalse(AppBootstrapper.LeaderCalculationWasStart);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
 		}
 
 		[Test]

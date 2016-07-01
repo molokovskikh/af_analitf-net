@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate;
 using ReactiveUI;
@@ -13,7 +14,6 @@ namespace AnalitF.Net.Client.Models.Commands
 		{
 			var statelessSession = AppBootstrapper.NHibernate.Factory.OpenSession();
 			var trancate = statelessSession.BeginTransaction();
-			AppBootstrapper.LeaderCalculationWasStart = true;
 			try {
 				statelessSession.CreateSQLQuery(@"
 update Prices p
@@ -80,7 +80,8 @@ set m.NextCost = n.NextCost,
 	m.Diff = round((n.NextCost / m.Cost - 1) * 100, 2);
 
 drop temporary table NextMinCosts;
-drop temporary table Leaders;")
+drop temporary table Leaders;
+")
 					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
 					.ExecuteUpdate();
 				trancate.Commit();
@@ -88,10 +89,10 @@ drop temporary table Leaders;")
 				trancate.Rollback();
 				LogManager.GetLogger(typeof (DbMaintain)).Warn($"Не удалось вычислить лидеров во время импорта данных {DateTime.Now}", exc);
 			} finally {
-				AppBootstrapper.LeaderCalculationWasStart = false;
 				statelessSession.Close();
 			}
 		}
+
 
 		public static void CalcJunk(IStatelessSession session, Settings settings)
 		{

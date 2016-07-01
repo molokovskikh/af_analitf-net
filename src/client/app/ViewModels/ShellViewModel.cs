@@ -97,6 +97,19 @@ namespace AnalitF.Net.Client.ViewModels
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
 
+		public event EventHandler LeaderCalculationWasStartChanged;
+
+		private bool _leaderCalculationWasStart;
+		public  bool LeaderCalculationWasStart
+		{
+			get { return _leaderCalculationWasStart; }
+			set
+			{
+				_leaderCalculationWasStart = value;
+				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
+			}
+		}
+
 		//не верь решарперу
 		public ShellViewModel()
 			: this(new Config.Config())
@@ -204,6 +217,17 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 			CanPrintPreview = CanPrint.ToValue();
+
+			LeaderCalculationWasStartChanged += (sender, e) =>
+			{
+				if (LeaderCalculationWasStart == true
+				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
+				{
+					return;
+				}
+				Settings.Value.LastLeaderCalculation = DateTime.Today;
+				session.Flush();
+			};
 		}
 
 		public Config.Config Config { get; set; }
@@ -371,7 +395,9 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
+						LeaderCalculationWasStart = true;
 						DbMaintain.UpdateLeaders();
+						LeaderCalculationWasStart = false;
 						return Enumerable.Empty<IResult>();
 					});
 			}
@@ -439,17 +465,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(NewDocsCount);
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
-
-			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
-			{
-				if(AppBootstrapper.LeaderCalculationWasStart == true
-				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
-				{
-					return;
-				}
-				Settings.Value.LastLeaderCalculation = DateTime.Today;
-				session.Flush();
-			};
 			//изменились заявки
 			Env.Bus.SendMessage("Changed", "db");
 			//изменилась база данных
@@ -539,7 +554,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMinCosts()
 		{
-			if (AppBootstrapper.LeaderCalculationWasStart)
+			if (LeaderCalculationWasStart)
 			{
 				MessageResult.Warn("Идет расчет минимальных цен. Минимальные цены можно будет посмотреть после окончания расчета, это может занять какое-то время. Пожалуйста, подождите и повторно откройте \"Минимальные цены\"")
 					.Execute(new ActionExecutionContext());
@@ -723,6 +738,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Update()
 		{
+			TaskEx.Run(() => {
+				DbMaintain.UpdateLeaders();
+				LeaderCalculationWasStart = true;
+			}).ContinueWith(t => {
+				LeaderCalculationWasStart = false;
+			}, TaskScheduler.FromCurrentSynchronizationContext());
 			return Sync(new UpdateCommand());
 		}
 
