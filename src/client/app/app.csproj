@@ -1022,6 +1022,7 @@
     <Resource Include="Assets\images\zoom_in.ico" />
     <Resource Include="Assets\images\copy.ico" />
     <Resource Include="Assets\images\printer.ico" />
+    <Resource Include="Assets\images\Stocks_32.ico" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

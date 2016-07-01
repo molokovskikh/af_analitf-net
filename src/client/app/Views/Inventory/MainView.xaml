@@ -12,13 +12,14 @@
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
-			<Button Content="Остатки" Name="Stocks" />
-			<Button Content="Обороты" />
-			<Separator />
-			<Button Content="Списания" />
-			<Button Content="Приемка" Name="ReceivingOrders" />
-			<Button Content="Перемещения" />
-			<Button Content="Инвентаризация" />
+			<Menu>
+				<MenuItem Header="Документы">
+					<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
+				</MenuItem>
+				<MenuItem Header="Отчеты">
+					<MenuItem Header="Товарные запасы" Name="Stocks" />
+				</MenuItem>
+			</Menu>
 		</ToolBar>
 		<ContentControl Grid.Row="1" Name="ActiveItem" />
 	</Grid>

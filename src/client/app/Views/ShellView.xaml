@@ -267,8 +267,9 @@
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
-			<Button Name="ShowInventory">
-				Склад
+			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/Stocks_32.ico"
+						Style="{StaticResource ButtonImage}" />
 			</Button>
 
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />

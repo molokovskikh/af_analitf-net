@@ -6,6 +6,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public Main()
 		{
+			DisplayName = "Склад";
 		}
 
 		protected override void OnInitialize()

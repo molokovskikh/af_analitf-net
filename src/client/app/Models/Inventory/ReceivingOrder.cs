@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using Common.NHibernate;
+using Common.Tools;
 using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
@@ -17,31 +18,49 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		public virtual uint Id { get; set; }
 		public virtual Supplier Supplier { get; set; }
-		public virtual DateTime OrderDate { get; set; }
 		public virtual DateTime? DueDate { get; set; }
 		public virtual DateTime? CloseDate { get; set; }
-		public virtual decimal Sum { get; set; }
+		public virtual Address Address { get; set; }
 		public virtual ReceiveStatus Status { get; set; }
-		public virtual uint OrderId { get; set; }
 
-		public static void Stock(ISession session, SentOrder[] orders)
+		public virtual ulong? OrderId { get; set; }
+		public virtual DateTime? OrderDate { get; set; }
+
+		public virtual uint? WaybillId { get; set; }
+		public virtual DateTime? WaybillDate { get; set; }
+
+		public virtual decimal Sum { get; set; }
+		public virtual decimal RetailSum { get; set; }
+		public virtual int LineCount { get; set; }
+
+		public static void Stock(ISession session, User user, Settings settings, SentOrder[] orders)
 		{
 			foreach (var order in orders) {
 				var receiving = new ReceivingOrder {
 					Supplier = session.Load<Supplier>(order.Price.SupplierId),
 					OrderDate = order.SentOn,
+					OrderId = order.ServerId,
 					DueDate = DateTime.Now.AddDays(1),
 					Status = ReceiveStatus.InProgress,
-					Sum = order.Sum
+					Address = order.Address,
 				};
+
+				order.Lines.Each(x => x.CalculateRetailCost(settings.Markups, Enumerable.Empty<uint>().ToList(), user, order.Address));
+				var lines = order.Lines.Select(x => new Stock {
+						Product = x.ProductSynonym,
+						Producer = x.ProducerSynonym,
+						Count = x.Count,
+						ReceivingOrderId = receiving.Id,
+						Cost = x.Cost,
+						RetailCost = x.RetailCost.GetValueOrDefault(),
+					})
+					.ToArray();
+				receiving.LineCount = lines.Length;
+				receiving.Sum = lines.Sum(x => x.Sum);
+				receiving.RetailSum = lines.Sum(x => x.RetailCost);
 				session.Save(receiving);
 				order.ReceivingOrderId = receiving.Id;
-				session.SaveEach(order.Lines.Select(x => new Stock {
-					Product = x.ProductSynonym,
-					Producer = x.ProducerSynonym,
-					Count = x.Count,
-					ReceivingOrderId = receiving.Id
-				}));
+				session.SaveEach(lines);
 			}
 		}
 	}

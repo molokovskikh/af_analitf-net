@@ -23,7 +23,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			RxQuery(x => x.Query<ReceivingOrder>().Fetch(y => y.Supplier).OrderBy(y => y.OrderDate).ToList())
+			RxQuery(x => x.Query<ReceivingOrder>().Fetch(y => y.Supplier).OrderByDescending(y => y.OrderDate).ToList())
 				.Subscribe(Items);
 		}
 

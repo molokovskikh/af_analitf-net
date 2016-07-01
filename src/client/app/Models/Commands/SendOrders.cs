@@ -83,12 +83,12 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.SaveEach(sentOrders);
 			Session.DeleteEach(acceptedOrders);
 
-			ReceivingOrder.Stock(Session, sentOrders);
-
 			Progress.OnNext(new Progress("Отправка заказов", 100, 100));
 
 			var settings = Session.Query<Settings>().First();
 			var user = Session.Query<User>().First();
+
+			ReceivingOrder.Stock(Session, user, settings, sentOrders);
 			if (rejectedOrders.Any()) {
 				//если мы получили заказ без номера заказа с сервера значит он не принят
 				//тк включена опция предзаказа и есть проблемы с другими заказами
