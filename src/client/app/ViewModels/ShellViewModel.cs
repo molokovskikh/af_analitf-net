@@ -217,17 +217,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 			CanPrintPreview = CanPrint.ToValue();
-
-			LeaderCalculationWasStartChanged += (sender, e) =>
-			{
-				if (LeaderCalculationWasStart == true
-				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
-				{
-					return;
-				}
-				Settings.Value.LastLeaderCalculation = DateTime.Today;
-				session.Flush();
-			};
 		}
 
 		public Config.Config Config { get; set; }

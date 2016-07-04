@@ -81,8 +81,11 @@ set m.NextCost = n.NextCost,
 
 drop temporary table NextMinCosts;
 drop temporary table Leaders;
+
+update Settings set  LastLeaderCalculation = :today
 ")
 					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
+					.SetParameter("today", DateTime.Today)
 					.ExecuteUpdate();
 				trancate.Commit();
 			} catch (Exception exc) {

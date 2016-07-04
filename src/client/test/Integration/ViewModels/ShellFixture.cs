@@ -390,7 +390,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Refresh(offer.Price);
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
+			Assert.AreEqual(DateTime.Today.Date, settings.LastLeaderCalculation.Date);
 
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
