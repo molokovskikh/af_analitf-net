@@ -52,30 +52,30 @@ namespace AnalitF.Net.Client.Models.Inventory
 			get
 			{
 				if (Cost != 0)
-					return ((RetailCost - Cost) * 100) / Cost;
+					return Math.Round(((RetailCost - Cost) * 100) / Cost, 2);
 				return 0;
 			}
 		}
 
-		public virtual decimal LowCost { get; set; }
-		public virtual decimal LowMarkup
+		public virtual decimal? LowCost { get; set; }
+		public virtual decimal? LowMarkup
 		{
 			get
 			{
-				if (Cost != 0)
-					return ((LowCost - Cost) * 100) / Cost;
-				return 0;
+				if (Cost != 0 && LowCost != null)
+					return Math.Round((((LowCost - Cost) * 100) / Cost).Value, 2);
+				return null;
 			}
 		}
 
-		public virtual decimal OptCost { get; set; }
-		public virtual decimal OptMarkup
+		public virtual decimal? OptCost { get; set; }
+		public virtual decimal? OptMarkup
 		{
 			get
 			{
-				if (Cost != 0)
-					return ((OptCost - Cost) * 100) / Cost;
-				return 0;
+				if (Cost != 0 && OptCost != null)
+					return Math.Round((((OptCost - Cost) * 100) / Cost).Value, 2);
+				return null;
 			}
 		}
 
