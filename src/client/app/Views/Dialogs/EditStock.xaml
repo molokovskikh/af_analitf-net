@@ -17,43 +17,43 @@
 			</Grid.RowDefinitions>
 			<Grid>
 				<Label Content="Штрих-код" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_Barcode" Width="120" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Barcode" Width="120" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Код товара" Margin="125 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_ProductСode" Width="120" Margin="125 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_ProductСode" Width="120" Margin="125 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Код аналога" Margin="250 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_AnalogCode" Width="120" Margin="250 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_AnalogCode" Width="120" Margin="250 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Штрих-код произ-ля" Margin="375 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_ProducerBarcode" Width="120" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_ProducerBarcode" Width="120" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Альтернат. штрих-код" Margin="500 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_AltBarcode" Width="120" Margin="500 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_AltBarcode" Width="120" Margin="500 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="1">
 				<Label Content="Название товара" HorizontalAlignment="Left" VerticalAlignment="Top" Width="370" FontSize="10"/>
-				<TextBox Name="Stock_Product" Width="370" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Product" Width="370" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Фирма-производитель" Margin="375 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_Producer" Width="245" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Producer" Width="245" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="2">
 				<Label Content="Группа аналогов" HorizontalAlignment="Left" VerticalAlignment="Top" Width="370" FontSize="10"/>
-				<TextBox Name="Stock_AnalogGroup" Width="370" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_AnalogGroup" Width="370" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Страна" Margin="375 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-				<TextBox Name="Stock_Country" Width="180" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Country" Width="180" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Ед. изм." Margin="560 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" FontSize="10"/>
-				<TextBox Name="Stock_Unit" Width="60" Margin="560 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Unit" Width="60" Margin="560 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="3">
 				<Label Content="Вид товара" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_ProductKind" Width="182.5" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_ProductKind" Width="182.5" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Фарм. группа" Margin="187.5 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_FarmGroup" Width="182.5" Margin="187.5 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_FarmGroup" Width="182.5" Margin="187.5 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="МНН" Margin="375 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
-				<TextBox Name="Stock_Mnn" Width="245" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Mnn" Width="245" Margin="375 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="4">
 				<Label Content="Брэнд" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_Brand" Width="205" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Brand" Width="205" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Потребительская категория" Margin="210 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_UserCategory" Width="185" Margin="210 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_UserCategory" Width="185" Margin="210 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Региональный сертификат" Margin="400 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
 				<TextBox Name="Stock_RegionCert" Width="165" Margin="400 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 			</Grid>
@@ -67,7 +67,7 @@
 				<Label Content="Акциз" Margin="315 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Name="Stock_Excise" Width="80" Margin="315 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 				<Label Content="Цена закупки с НДС" Margin="400 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
-				<TextBox Name="Stock_CostWithNds" Width="100" Margin="400 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_CostWithNds" Width="100" Margin="400 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="НДС %" Margin="505 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Name="Stock_NdsPers" Width="60" Margin="505 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" />
 				<Label Content="НП %" Margin="570 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
@@ -75,19 +75,19 @@
 			</Grid>
 			<Grid Row="6">
 				<Label Content="Наценка % розн." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_RetailMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_RetailMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Цена розничная" Margin="105 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_RetailCost" Width="100" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_RetailCost" Width="100" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Категория" Margin="210 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
-				<TextBox Name="Stock_Category" Width="120" Margin="210 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Category" Width="120" Margin="210 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Сертификат" Margin="335 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Name="Stock_Certificate" Width="165" Margin="335 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 				<Label Content="ВМН" Margin="505 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_Vmn" Width="60" Margin="505 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Vmn" Width="60" Margin="505 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="7">
 				<Label Content="Наценка % льгот." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_LowMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_LowMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Цена льготная" Margin="105 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Name="Stock_LowCost" Width="100" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 				<Label Content="Серия" Margin="210 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
@@ -97,23 +97,21 @@
 			</Grid>
 			<Grid Row="8">
 				<Label Content="Наценка % опт." HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_OptMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_OptMarkup" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<Label Content="Цена оптовая" Margin="105 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Name="Stock_OptCost" Width="100" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 				<Label Content="ГТД" Margin="210 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
 				<TextBox Name="Stock_Gtd" Width="120" Margin="210 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 				<Label Content="Дата прихода" Margin="335 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_DocumentDate" Width="100" Margin="335 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_DocumentDate" Width="100" Margin="335 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 			</Grid>
 			<Grid Row="9">
 				<Label Content="Кол-во в отделе" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_Count" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+				<TextBox Name="Stock_Count" Width="100" Margin="0 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				<!--<Label Content="Делитель" Margin="105 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
 				<TextBox Width="60" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
 				<Label Content="Кол-во разд." Margin="170 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top"  FontSize="10"/>
 				<TextBox Width="100" Margin="170 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>-->
-				<Label Content="Накладная №" Margin="105 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="10"/>
-				<TextBox Name="Stock_WaybillNumber" Width="100" Margin="105 23 0 0" HorizontalAlignment="Left" VerticalAlignment="Top" />
 			</Grid>
 		</Grid>
 		<StackPanel Orientation="Horizontal" Margin="0, 0, 0, 10" VerticalAlignment="Bottom">
