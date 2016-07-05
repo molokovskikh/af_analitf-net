@@ -250,6 +250,7 @@
     <Compile Include="Helpers\ShellFile.cs" />
     <Compile Include="Helpers\SqlMapper.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
+    <Compile Include="Helpers\XmlHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
     <Compile Include="Helpers\WinApi.cs" />

@@ -35,7 +35,10 @@ using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using PdfiumViewer;
 using ReactiveUI;
 using DialogResult = System.Windows.Forms.DialogResult;
+using DocumentType = Diadoc.Api.Com.DocumentType;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
+using Diadoc.Api.Proto.Invoicing;
+using System.Xml.XPath;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -112,9 +115,41 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.ResolutionStatus?.Type),
 				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus),
 			};
+
 			var status = desc.Where(x => !String.IsNullOrEmpty(x)).Implode();
-			if (String.IsNullOrEmpty(status))
+			if (String.IsNullOrEmpty(status)) {
 				status = "Получен";
+				switch (Entity.DocumentInfo.Type) {
+						case DocumentType.Invoice: {
+							switch (Entity.DocumentInfo.InvoiceMetadata.Status) {
+								case Diadoc.Api.Com.InvoiceStatus.InboundNotFinished: {
+										status = "Входящий документооборот не завершен";
+									}
+									break;
+								case Diadoc.Api.Com.InvoiceStatus.InboundFinished: {
+										status = "Документооборот завершен";
+									}
+									break;
+							}
+							switch(Entity.DocumentInfo.RevocationStatus)
+							{
+								case RevocationStatus.RequestsMyRevocation: {
+										status = "Запрошено аннулирование";
+									}
+									break;
+								case RevocationStatus.RevocationAccepted: {
+										status = "Аннулирован";
+									}
+									break;
+							}
+						}
+						break;
+						case DocumentType.Torg12: {
+
+						}
+						break;
+				}
+			}
 			return status;
 		}
 
@@ -230,6 +265,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public DateTime Date { get; set; }
 		public string Comment { get; set; }
 		public bool HasComment => !String.IsNullOrEmpty(Comment);
+		public bool IsChecked { get { return true;} set { } }
 
 		public static List<AttachmentHistory> Collect(DisplayItem item)
 		{
@@ -303,6 +339,41 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					//todo комментарий содержится внутри xml в Content
 					items.Add(new AttachmentHistory {
 						Description = "Отказано в подписании документа",
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				} else if (entity.AttachmentType == AttachmentType.InvoiceConfirmation) {
+					items.Add(new AttachmentHistory {
+						Description = $"{message.ToTitle}, документ получен",
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				} else if (entity.AttachmentType == AttachmentType.InvoiceReceipt) {
+					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var fnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Имя");
+					var snval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Фамилия");
+					var pnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Отчество");
+					var sn = snval;
+					var fn = fnval.Length > 0 ? fnval[0].ToString() : "";
+					var pn = pnval.Length > 0 ? pnval[0].ToString() : "";
+					var fio = $"{sn} {fn}.{pn}.";
+					items.Add(new AttachmentHistory {
+						Description = $"{fio} подписал и отправил извещение о получении",
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				}
+				else if (entity.AttachmentType == AttachmentType.RevocationRequest) {
+					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
+					var fnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Имя");
+					var snval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Фамилия");
+					var pnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Отчество");
+					var sn = snval;
+					var fn = fnval.Length > 0 ? fnval[0].ToString() : "";
+					var pn = pnval.Length > 0 ? pnval[0].ToString() : "";
+					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
+					var fio = $"{sn} {fn}.{pn}.";
+					items.Add(new AttachmentHistory {
+						Description = $"{orgName}, {fio} подписал и отправил соглашение об аннулировании",
+						Comment = comment,
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				}
@@ -545,11 +616,13 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SortDirection = "Descending",
 						AfterIndexKey = key
 					});
+
 					var items = docs.Documents.Select(x => x.MessageId).Distinct()
 						.AsParallel()
 						.Select(x => api.GetMessage(token, box.BoxId, x))
 						.OrderByDescending(x => x.Timestamp)
 						.ToObservableCollection();
+
 					return Tuple.Create(items,
 						$"Загружено {docs.Documents.Count} из {docs.TotalCount}",
 						docs.Documents.LastOrDefault()?.IndexKey,
@@ -686,7 +759,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Api = api,
 				BoxId = box.BoxId,
 				Token = token,
-				Entity = CurrentItem.Value.Entity
+				Entity = CurrentItem.Value.Entity,
+				Message = CurrentItem.Value.Message
 			};
 			return payload;
 		}

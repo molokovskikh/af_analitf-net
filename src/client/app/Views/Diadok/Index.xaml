@@ -75,11 +75,11 @@
 				ItemContainerStyle="{StaticResource ItemStyle}">
 				<ListView.View>
 					<GridView>
-						<GridViewColumn Header="Отправитель" DisplayMemberBinding="{Binding Sender}" />
-						<GridViewColumn Header="Документ" DisplayMemberBinding="{Binding FileName}" />
-						<GridViewColumn Header="Статус" DisplayMemberBinding="{Binding Status}" />
-						<GridViewColumn Header="Подразделение" DisplayMemberBinding="{Binding Department}" />
-						<GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" />
+						<GridViewColumn Header="Отправитель" DisplayMemberBinding="{Binding Sender}" Width="100" />
+            <GridViewColumn Header="Документ" DisplayMemberBinding="{Binding FileName}" Width="100.2" />
+            <GridViewColumn Header="Статус" DisplayMemberBinding="{Binding Status}" Width="100.2" />
+            <GridViewColumn Header="Подразделение" DisplayMemberBinding="{Binding Department}" Width="100.2"/>
+            <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" Width="100.2"/>
 					</GridView>
 				</ListView.View>
 			</ListView>
