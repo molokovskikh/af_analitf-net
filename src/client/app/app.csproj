@@ -266,6 +266,8 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\ReceivingDetail.cs" />
+    <Compile Include="Models\Inventory\ReceivingLine.cs" />
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
@@ -374,6 +376,7 @@
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
+    <Compile Include="ViewModels\Inventory\InventoryAction.cs" />
     <Compile Include="ViewModels\Inventory\Main.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
@@ -502,6 +505,9 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\InventoryAction.xaml.cs">
+      <DependentUpon>InventoryAction.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
@@ -750,6 +756,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Feedback.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\InventoryAction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

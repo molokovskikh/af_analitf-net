@@ -410,6 +410,25 @@ namespace AnalitF.Net.Client.ViewModels
 			IsRejectVisible.Value = false;
 		}
 
+		public IEnumerable<IResult> Stock()
+		{
+			var action = new Inventory.InventoryAction();
+			yield return new DialogResult(action);
+			if (action.New) {
+				var screen = new Inventory.Main();
+				screen.NewReceivingOrder(Waybill.Id);
+				Shell.NavigateRoot(screen);
+			} else {
+				var selectOrder = new Inventory.ReceivingOrders();
+				yield return new DialogResult(selectOrder);
+				if (selectOrder.CurrentItem.Value == null)
+					yield break;
+				var screen = new Inventory.Main();
+				screen.OpenReceivingOrder(selectOrder.CurrentItem.Value.Id, Waybill.Id);
+				Shell.NavigateRoot(screen);
+			}
+		}
+
 #if DEBUG
 		public override object[] GetRebuildArgs()
 		{

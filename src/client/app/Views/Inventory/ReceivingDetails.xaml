@@ -10,17 +10,62 @@
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
 			<RowDefinition />
 		</Grid.RowDefinitions>
-		<Grid Grid.Row="0">
+		<ToolBar Grid.Row="0">
+			<Button Name="Save">Сохранить</Button>
+			<Button Name="AddLine">Добавить строку</Button>
+			<Button Name="DeleteLine">Удалить строку</Button>
+			<Button Name="EditLine">Редактировать строку</Button>
+			<Button Name="Receive">Принять</Button>
+		</ToolBar>
+		<Grid Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<Label FontWeight="Bold" Grid.Column="0">Номер:</Label>
-			<Label FontWeight="Bold" Grid.Column="1" Name="Header_Id" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="0">№:</Label>
+			<Label FontWeight="Bold" Grid.Row="0" Grid.Column="1" Name="Header_Id" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="2">Дата:</Label>
+			<Label FontWeight="Bold" Grid.Row="0" Grid.Column="3" Name="Header_Date" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Поставщик:</Label>
+			<Label FontWeight="Bold" Grid.Row="0" Grid.Column="5" Name="Header_Supplier_Name" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Накладная №:</Label>
+			<Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_WaybillId" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Накладная дата:</Label>
+			<Label FontWeight="Bold" Grid.Row="0" Grid.Column="9" Name="Header_WaybillDate" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Адрес:</Label>
+			<Label FontWeight="Bold" Grid.Row="1" Grid.Column="1" Name="Header_Address_Name" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="2">Заказ №:</Label>
+			<Label FontWeight="Bold" Grid.Row="1" Grid.Column="3" Name="Header_OrderId" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="4">Заказ дата:</Label>
+			<Label FontWeight="Bold" Grid.Row="1" Grid.Column="5" Name="Header_OrderDate" />
+			<Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">Статус:</Label>
+			<Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Header_StatusName" />
 		</Grid>
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
+		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<controls:DataGrid2 Grid.Row="3" x:Name="Details">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />

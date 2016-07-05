@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -31,6 +33,17 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return new Main {
 				ActiveItem = new ReceivingDetails(receivingOrderId.Value)
 			};
+		}
+
+		public void NewReceivingOrder(uint waybillId)
+		{
+			var details = ReceivingDetails.FromWaybill(waybillId);
+			ActiveItem = details;
+		}
+
+		public void OpenReceivingOrder(uint id, uint waybillId)
+		{
+			ActiveItem = new ReceivingDetails(id);
 		}
 	}
 }

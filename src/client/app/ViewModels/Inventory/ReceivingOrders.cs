@@ -13,9 +13,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		private Main main;
 
-		public ReceivingOrders(Main main)
+		public ReceivingOrders()
 		{
-			this.main = main;
 			Statuses = new [] {
 				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.New)),
 				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.Closed)),
@@ -23,6 +22,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
+		}
+
+		public ReceivingOrders(Main main)
+			: this()
+		{
+			this.main = main;
 		}
 
 		public NotifyValue<List<ReceivingOrder>> Items { get; set; }

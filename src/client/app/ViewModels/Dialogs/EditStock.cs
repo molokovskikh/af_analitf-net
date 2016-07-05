@@ -1,27 +1,29 @@
-﻿using AnalitF.Net.Client.Helpers;
+﻿using System;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Inventory;
-using NHibernate.Linq;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Web.UI.WebControls;
-using System.Windows.Controls;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class EditStock : BaseScreen2, ICancelable
 	{
-		public EditStock(uint id)
-		{
-			Stock = Session.Get<Stock>(id);
+		private uint id;
 
+		public EditStock()
+		{
 			DisplayName = "Информация о товаре";
 			WasCancelled = true;
+		}
+
+		public EditStock(Stock stock)
+		{
+			Stock = stock;
+		}
+
+		public EditStock(uint id)
+			: this()
+		{
+			Stock = Session.Get<Stock>(id);
 		}
 
 		public bool WasCancelled { get; private set; }
@@ -35,7 +37,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public void Close()
 		{
-			Session.Refresh(Stock);
+			if (id > 0)
+				Session.Refresh(Stock);
 			TryClose();
 		}
 	}

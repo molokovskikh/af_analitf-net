@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Devart.Common;
 using NHibernate;
 using NHibernate.Engine;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class NHHelper
+	public static class NHHelper
 	{
 		public static EntityEntry Reassociate(ISession session, object entity, EntityEntry entry)
 		{
@@ -38,6 +40,14 @@ namespace AnalitF.Net.Client.Helpers
 				notFound = true;
 			}
 			return !notFound;
+		}
+
+		public static void SaveEach<T>(this IStatelessSession session, IEnumerable<T> items)
+		{
+			var toSave = items.ToArray();
+			foreach (var item in toSave) {
+				session.Insert(item);
+			}
 		}
 	}
 }
