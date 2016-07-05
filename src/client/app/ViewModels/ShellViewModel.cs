@@ -454,6 +454,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(NewDocsCount);
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
+
 			//изменились заявки
 			Env.Bus.SendMessage("Changed", "db");
 			//изменилась база данных
@@ -549,6 +550,7 @@ namespace AnalitF.Net.Client.ViewModels
 					.Execute(new ActionExecutionContext());
 				return;
 			}
+
 			NavigateRoot(new Offers.MinCosts());
 		}
 

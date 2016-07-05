@@ -3,8 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate;
-using ReactiveUI;
-using LogManager = log4net.LogManager;
+using log4net;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
