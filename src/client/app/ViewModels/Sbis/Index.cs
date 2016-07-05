@@ -436,7 +436,7 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 				var file = await client.GetAsync(attachment.Файл.Ссылка);
 				file.EnsureSuccessStatusCode();
 				var content = await file.Content.ReadAsByteArrayAsync();
-				var signature = await Util.Run(() => crypt.Sign(content, cert.RawData));
+				var signature = await TaskEx.Run(() => crypt.Sign(content, cert.RawData));
 				signs.Add(new Attach {
 					Идентификатор = attachment.Идентификатор,
 					Подпись = new[] { new FileRef(signature) }
@@ -463,7 +463,7 @@ namespace AnalitF.Net.Client.ViewModels.Sbis
 
 		public IEnumerable<IResult> PrintItem()
 		{
-			var task = Util.Run(async () => await LoadPrintPdf(CurrentItem.Value));
+			var task = TaskEx.Run<Task<string>>(async () => await LoadPrintPdf(CurrentItem.Value));
 			yield return new TaskResult(task);
 			var file = task.Result.Result;
 			using (var pdf = PdfDocument.Load(file)) {

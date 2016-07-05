@@ -68,6 +68,7 @@ namespace AnalitF.Net.Client.Models
 			Price = price;
 			CreatedOn = DateTime.Now;
 			MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price.Id == Price.Id);
+			SavePriceInfo();
 		}
 
 		public Order(Address address, Offer offer, uint count = 1)
@@ -78,7 +79,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint Id { get; set; }
 
-		public virtual uint DisplayId => Id;
+		public virtual uint? KeepId { get; set; }
+
+		public virtual uint DisplayId => KeepId ?? Id;
 
 		public virtual uint? ExportId { get; set; }
 
@@ -88,6 +91,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual Price Price { get; set; }
 
+		public virtual string SavePriceName { get; set; }
+
+		public virtual string SaveRegionName { get; set; }
 		/// <summary>
 		/// заявки отмеченные этим флагом не участвуют в механизме восстановления заявок
 		/// предполагается что эта заявка априори актуальная и ее не нужно восстанавливать
@@ -214,9 +220,8 @@ namespace AnalitF.Net.Client.Models
 				return new Price {
 					Id = Price.Id,
 					CostFactor = 1,
-					Name = "Неактивный прайс-лист",
-					RegionName = "Inforoom",
-					PriceName = "Неактивный прайс-лист"
+					Name  = SavePriceName,
+					RegionName = SaveRegionName
 				};
 			}
 		}
@@ -238,6 +243,14 @@ namespace AnalitF.Net.Client.Models
 			SendError = "";
 			SendResult = OrderResultStatus.OK;
 			Lines.Each(l => l.Apply(null));
+		}
+
+		public virtual void SavePriceInfo()
+		{
+			if(!IsPriceExists())
+				return;
+			SavePriceName = Price.Name;
+			SaveRegionName = Price.RegionName;
 		}
 
 		public virtual void UpdateStat()

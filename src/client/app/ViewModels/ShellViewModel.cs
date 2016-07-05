@@ -1036,8 +1036,8 @@ namespace AnalitF.Net.Client.ViewModels
 				} else if (task.IsFaulted) {
 					log.Debug($"Ошибка при выполнении задачи {viewModel.DisplayName}", task.Exception);
 					var baseException = task.Exception.GetBaseException();
-					if (ErrorHelper.IsCancalled(baseException)) {
-						log.Warn($"Отменена задача {viewModel.DisplayName}");
+					if (viewModel.Cancellation.IsCancellationRequested) {
+						log.Warn($"Отменена задача {viewModel.DisplayName} пользователем");
 						return;
 					}
 

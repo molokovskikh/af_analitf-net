@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async void LoadData()
 		{
-			var orgs = await Util.Run(() => Payload.Api.GetMyOrganizations(Payload.Token).Organizations);
+			var orgs = await TaskEx.Run(() => Payload.Api.GetMyOrganizations(Payload.Token).Organizations);
 			var departments = orgs.SelectMany(x => x.Departments).OrderBy(x => x.Name).ToList();
 			departments.Insert(0, new Department {
 				Name = "Головное подразделение"
@@ -48,8 +48,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Departments.Value = departments.ToArray();
 			CurrentDepartment.Value = departments.FirstOrDefault();
 
-			var me = await Util.Run(() => Payload.Api.GetMyUser(Payload.Token));
-			var users = await Util.Run(() => orgs.SelectMany(x => Payload.Api.GetOrganizationUsers(Payload.Token, x.OrgId).Users)
+			var me = await TaskEx.Run(() => Payload.Api.GetMyUser(Payload.Token));
+			var users = await TaskEx.Run(() => orgs.SelectMany(x => Payload.Api.GetOrganizationUsers(Payload.Token, x.OrgId).Users)
 				.OrderBy(x => x.Name).Where(x => x.Id != me.Id).ToList());
 			users.Insert(0, new OrganizationUser {
 				Name =  type == ResolutionRequestType.ApprovementRequest

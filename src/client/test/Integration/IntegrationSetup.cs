@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
@@ -125,7 +126,9 @@ namespace AnalitF.Net.Client.Test.Integration
 			if (cfg == null) {
 				cfg = new HttpSelfHostConfiguration(url);
 				cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+				cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
 				serviceConfig = Application.InitApp(cfg);
+				serviceConfig.UpdateLifeTime = TimeSpan.FromDays(1);
 			}
 
 			server = new HttpSelfHostServer(cfg);

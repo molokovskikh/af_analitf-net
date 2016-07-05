@@ -167,8 +167,8 @@ namespace AnalitF.Net.Client.Models
 		public static IEnumerable<MarkupConfig> Defaults(Address address)
 		{
 			return new[] {
-				new MarkupConfig(address, 0, 10000, 20),
-				new MarkupConfig(address, 0, 10000, 20, MarkupType.Nds18),
+				new MarkupConfig(address, 0, 1000000, 20),
+				new MarkupConfig(address, 0, 1000000, 20, MarkupType.Nds18),
 				new MarkupConfig(address, 0, 50, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 50, 500, 20, MarkupType.VitallyImportant),
 				new MarkupConfig(address, 500, 1000000, 20, MarkupType.VitallyImportant),
