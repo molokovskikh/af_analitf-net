@@ -11,7 +11,7 @@ namespace AnalitF.Net.Service.Test.TestHelpers
 		public static TestWaybill CreateWaybill(ISession session, TestUser user)
 		{
 			var supplier = user.GetActivePricesNaked(session).First().Price.Supplier;
-			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[1], "");
+			var log = new TestDocumentLog(supplier, user.AvaliableAddresses[0], "");
 			var waybill = new TestWaybill(log);
 			var products = session.Query<TestProduct>().Where(x => !x.Hidden).Take(32).ToArray();
 			waybill.Lines.Add(new TestWaybillLine(waybill) {

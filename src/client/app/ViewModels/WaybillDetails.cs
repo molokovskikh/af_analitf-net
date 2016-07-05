@@ -132,14 +132,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Calculate();
 
 			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());
-
-			Waybill.Lines.OrderBy(l => l.Product).ToList().Each(l => {
-				
-				System.Diagnostics.Debug.WriteLine($" WaybillId:{l.Waybill.Id} sid:{l.Waybill.Supplier.Id} dEAN:{l.EAN13}");
-			});
-
-
-
 			Taxes = new List<ValueDescription<int?>> {
 				new ValueDescription<int?>("Все", -1),
 			};
