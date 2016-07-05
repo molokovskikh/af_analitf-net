@@ -40,6 +40,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			ProductInfo = new ProductInfo(this, CurrentOffer);
 			Doc.Value = Session.Query<OrderReject>().First(r => r.DownloadId == id);
+			if (Doc.Value.Supplier == null) {
+				//Doc.Value.Supplier = new Supplier();
+				var a = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
+				//Doc.Value.Supplier.Name = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
+			}
 			Lines.Value = Doc.Value.Lines.OrderBy(l => l.Product).ToList();
 
 			CurrentLine
