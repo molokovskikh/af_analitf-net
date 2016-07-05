@@ -216,7 +216,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
-			CanPrintPreview = CanPrint.ToValue();
+				CanPrintPreview = CanPrint.ToValue();
 		}
 
 		public Config.Config Config { get; set; }
@@ -732,7 +732,9 @@ namespace AnalitF.Net.Client.ViewModels
 				LeaderCalculationWasStart = true;
 			}).ContinueWith(t => {
 				LeaderCalculationWasStart = false;
-			}, TaskScheduler.FromCurrentSynchronizationContext());
+			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
+			TaskScheduler.FromCurrentSynchronizationContext());
+
 			return Sync(new UpdateCommand());
 		}
 

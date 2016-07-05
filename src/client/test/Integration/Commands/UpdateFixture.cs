@@ -67,6 +67,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			var command = new UpdateCommand();
 			Run(command);
+			DbMaintain.UpdateLeaders();
+
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 			Assert.That(localSession.Query<Offer>().Count(x => x.BarCode != null), Is.GreaterThan(0));
@@ -78,6 +80,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.Where(g => g.Count() > 1)
 				.Select(g => g.Key)
 				.First();
+
 			var minCostCount = localSession.Query<MinCost>().Count();
 			Assert.That(minCostCount, Is.GreaterThan(0));
 			var cost = localSession.Query<MinCost>().First(m => m.ProductId == productId);

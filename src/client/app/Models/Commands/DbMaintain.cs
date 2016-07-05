@@ -12,10 +12,10 @@ namespace AnalitF.Net.Client.Models.Commands
 	{
 		public static void UpdateLeaders()
 		{
-			var statelessSession = AppBootstrapper.NHibernate.Factory.OpenSession();
-			var trancate = statelessSession.BeginTransaction();
+			var statelessSession = AppBootstrapper.NHibernate?.Factory.OpenSession();
+			var trancate = statelessSession?.BeginTransaction();
 			try {
-				statelessSession.CreateSQLQuery(@"
+				statelessSession?.CreateSQLQuery(@"
 update Prices p
 	join DelayOfPayments d on d.PriceId = p.PriceId and p.RegionId = d.RegionId and d.DayOfWeek = :dayOfWeek
 set p.CostFactor = ifnull(1 + d.OtherDelay / 100, 1),
@@ -87,12 +87,12 @@ update Settings set  LastLeaderCalculation = :today
 					.SetParameter("dayOfWeek", DateTime.Today.DayOfWeek)
 					.SetParameter("today", DateTime.Today)
 					.ExecuteUpdate();
-				trancate.Commit();
+				trancate?.Commit();
 			} catch (Exception exc) {
-				trancate.Rollback();
+				trancate?.Rollback();
 				LogManager.GetLogger(typeof (DbMaintain)).Warn($"Не удалось вычислить лидеров во время импорта данных {DateTime.Now}", exc);
 			} finally {
-				statelessSession.Close();
+				statelessSession?.Close();
 			}
 		}
 
