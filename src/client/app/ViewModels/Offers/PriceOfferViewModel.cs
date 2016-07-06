@@ -73,6 +73,18 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			base.OnInitialize();
 
+			if (Shell.LeaderCalculationWasStart)
+			{
+				Shell.PropertyChanged += (sender, e) => {
+					if (e.PropertyName == nameof(Shell.LeaderCalculationWasStart))
+					{
+						OnActivate();
+					}
+				};
+				MessageResult.Warn("Идет расчет прайс-лидеров. Прайс-лидеры и минимальные цены отобразятся после окончания расчета, это может занять какое-то время.")
+					.Execute(new ActionExecutionContext());
+			}
+
 			Price.Value = StatelessSession?.Get<Price>(priceId);
 			Promotions.FilterBySupplierId = Price?.Value?.SupplierId;
 			ProducerPromotions.FilterByProducerId = CurrentProducer.Value.Id;
