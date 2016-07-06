@@ -75,8 +75,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			if (Shell.LeaderCalculationWasStart)
 			{
-				Shell.LeaderCalculationWasStartChanged += (sender, e) => {
-					OnActivate();
+				Shell.PropertyChanged += (sender, e) => {
+					if (e.PropertyName == nameof(Shell.LeaderCalculationWasStart))
+					{
+						OnActivate();
+					}
 				};
 				MessageResult.Warn("Идет расчет прайс-лидеров. Прайс-лидеры и минимальные цены отобразятся после окончания расчета, это может занять какое-то время.")
 					.Execute(new ActionExecutionContext());

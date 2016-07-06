@@ -96,9 +96,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
-
-		public event EventHandler LeaderCalculationWasStartChanged;
-
+	
 		private bool _leaderCalculationWasStart;
 		public  bool LeaderCalculationWasStart
 		{
@@ -106,7 +104,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_leaderCalculationWasStart = value;
-				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
+				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));			
 			}
 		}
 
@@ -181,6 +179,7 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
+										
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -729,9 +728,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Update()
 		{
+			LeaderCalculationWasStart = true;
 			TaskEx.Run(() => {
-				DbMaintain.UpdateLeaders();
-				LeaderCalculationWasStart = true;
+				DbMaintain.UpdateLeaders();				
 			}).ContinueWith(t => {
 				LeaderCalculationWasStart = false;
 			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
