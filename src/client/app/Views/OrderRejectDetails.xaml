@@ -58,7 +58,7 @@
 				<Label Grid.Row="1" Grid.Column="1" Name="Lines_Value_Count" FontWeight="Bold" />
 
 				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
-				<Label Grid.Row="1" Grid.Column="3" Name="Doc_Supplier_Name" FontWeight="Bold" />
+				<Label Grid.Row="1" Grid.Column="3" Name="DisplaySupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 

@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<OrderRejectLine> CurrentLine { get; set; }
 		public NotifyValue<List<OrderRejectLine>> Lines { get; set; }
 		public NotifyValue<OrderReject> Doc { get; set; }
+		public string DisplaySupplierName { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -40,11 +41,11 @@ namespace AnalitF.Net.Client.ViewModels
 
 			ProductInfo = new ProductInfo(this, CurrentOffer);
 			Doc.Value = Session.Query<OrderReject>().First(r => r.DownloadId == id);
-			if (Doc.Value.Supplier == null) {
-				//Doc.Value.Supplier = new Supplier();
-				var a = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
-				//Doc.Value.Supplier.Name = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
-			}
+			if (Doc.Value.Supplier == null)
+				DisplaySupplierName = Session.Query<Waybill>().First(r => r.Id == id).UserSupplierName;
+			else
+				DisplaySupplierName = Doc.Value.Supplier.FullName;
+
 			Lines.Value = Doc.Value.Lines.OrderBy(l => l.Product).ToList();
 
 			CurrentLine
