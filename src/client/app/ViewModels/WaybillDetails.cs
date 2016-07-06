@@ -157,20 +157,19 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IResult PrintRackingMap()
+		public IEnumerable<IResult> PrintRackingMap()
 		{
+			/*
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
 				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}, fullScreen: true);
+			}, fullScreen: true);*/
+			return Preview("Стеллажная карта", new RackingMapDocument(Waybill, PrintableLines(), Settings.Value));
 		}
 
-		public IResult PrintPriceTags()
+		public IEnumerable<IResult> PrintPriceTags()
 		{
-			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Ценники",
-				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}, fullScreen: true);
+			return Preview("Ценники", new PriceTagDocument(Waybill, PrintableLines(), Settings.Value));
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
