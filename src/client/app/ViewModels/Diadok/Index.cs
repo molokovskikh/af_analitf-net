@@ -39,6 +39,7 @@ using DocumentType = Diadoc.Api.Com.DocumentType;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using Diadoc.Api.Proto.Invoicing;
 using System.Xml.XPath;
+using DocumentFlow = Diadoc.Api.Proto.Docflow;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -133,12 +134,16 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							}
 							switch(Entity.DocumentInfo.RevocationStatus)
 							{
-								case RevocationStatus.RequestsMyRevocation: {
-										status = "Запрошено аннулирование";
+								case RevocationStatus.RevocationIsRequestedByMe: {
+										status = "Ожидается аннулирование";
 									}
 									break;
 								case RevocationStatus.RevocationAccepted: {
 										status = "Аннулирован";
+									}
+									break;
+								case RevocationStatus.RequestsMyRevocation: {
+										status = "Требудется аннулирование";
 									}
 									break;
 							}
@@ -369,11 +374,52 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					var sn = snval;
 					var fn = fnval.Length > 0 ? fnval[0].ToString() : "";
 					var pn = pnval.Length > 0 ? pnval[0].ToString() : "";
-					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 					var fio = $"{sn} {fn}.{pn}.";
+					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 					items.Add(new AttachmentHistory {
 						Description = $"{orgName}, {fio} подписал и отправил соглашение об аннулировании",
 						Comment = comment,
+						Date = entity.CreationTime.ToLocalTime()
+					});
+					if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationAccepted) {
+						var entityaccept = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
+						orgName = xml.GetValue("Файл/Документ/НапрПредАн/ЮЛ/@НаимОрг");
+						items.Add(new AttachmentHistory {
+							Description = $"{orgName}, аннулировал документ",
+							Date = entityaccept.CreationTime.ToLocalTime()
+						});
+					}
+					else if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected) {
+						var entityreject = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
+						xml = new XMLDocHelper(entityreject.Content.Data);
+						orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
+						fnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Имя");
+						snval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Фамилия");
+						pnval = xml.GetValue("Файл/Документ/Подписант/ФИО/@Отчество");
+						sn = snval;
+						fn = fnval.Length > 0 ? fnval[0].ToString() : "";
+						pn = pnval.Length > 0 ? pnval[0].ToString() : "";
+						fio = $"{sn} {fn}.{pn}.";
+						comment = xml.GetValue("Файл/Документ/НапрПредАн/ТекстУведУточ");
+						items.Add(new AttachmentHistory {
+							Description = $"{orgName}, {fio} отказал в аннулировании документа",
+							Comment = comment,
+							Date = entityreject.CreationTime.ToLocalTime()
+						});
+					}
+				}
+				else if(entity.AttachmentType == AttachmentType.XmlTorg12BuyerTitle) {
+					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var fnval = xml.GetValue("Файл/Документ/Подписант/ЮЛ/ФИО/@Имя");
+					var snval = xml.GetValue("Файл/Документ/Подписант/ЮЛ/ФИО/@Фамилия");
+					var pnval = xml.GetValue("Файл/Документ/Подписант/ЮЛ/ФИО/@Отчество");
+					var sn = snval;
+					var fn = fnval.Length > 0 ? fnval[0].ToString() : "";
+					var pn = pnval.Length > 0 ? pnval[0].ToString() : "";
+
+					var fio = $"{sn} {fn}.{pn}.";
+					items.Add(new AttachmentHistory {
+						Description = $"{fio} подписал документ и завершил документооборот",
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				}
@@ -449,8 +495,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentItem.Select(x => (x?.CanSign()).GetValueOrDefault())
 				.Subscribe(CanRequestSign);
 			CurrentItem.Select(x => x != null &&
-				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
-					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone))
+				!((x.Entity.DocumentInfo.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
+					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone) && x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected))
 				.Subscribe(CanRevoke);
 
 			Filename.Select(x => x != null)
