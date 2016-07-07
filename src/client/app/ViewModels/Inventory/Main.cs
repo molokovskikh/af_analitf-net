@@ -34,16 +34,5 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				ActiveItem = new ReceivingDetails(receivingOrderId.Value)
 			};
 		}
-
-		public void NewReceivingOrder(uint waybillId)
-		{
-			var details = ReceivingDetails.FromWaybill(waybillId);
-			ActiveItem = details;
-		}
-
-		public void OpenReceivingOrder(uint id, uint waybillId)
-		{
-			ActiveItem = new ReceivingDetails(id);
-		}
 	}
 }

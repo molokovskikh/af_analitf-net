@@ -266,7 +266,6 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
-    <Compile Include="Models\Inventory\ReceivingDetail.cs" />
     <Compile Include="Models\Inventory\ReceivingLine.cs" />
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
@@ -447,6 +446,9 @@
     </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ConfirmQuantity.xaml.cs">
+      <DependentUpon>ConfirmQuantity.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
@@ -680,6 +682,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CatalogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ConfirmQuantity.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -36,6 +36,8 @@ namespace AnalitF.Net.Client.Models
 		private bool _print;
 		private Waybill _waybill;
 		private bool isCertificateNotFound;
+		private bool _isReadyForStock;
+		private int _quantityToReceive;
 
 		public WaybillLine()
 		{
@@ -230,6 +232,46 @@ namespace AnalitF.Net.Client.Models
 
 		[Ignore]
 		public virtual bool IsMigration { get; set; }
+
+		[Ignore]
+		public virtual bool SkipRequest { get; set; }
+		[Ignore]
+		public virtual bool IsReadyForStock
+		{
+			get { return _isReadyForStock; }
+			set
+			{
+				if (_isReadyForStock == value)
+					return;
+				_isReadyForStock = value;
+				OnPropertyChanged();
+				OnPropertyChanged(nameof(IsFullyStocked));
+				OnPropertyChanged(nameof(IsPartialyStocked));
+			}
+		}
+
+		[Ignore]
+		public virtual int QuantityToReceive
+		{
+			get { return _quantityToReceive; }
+			set
+			{
+				if (_quantityToReceive == value)
+					return;
+				_quantityToReceive = value;
+				OnPropertyChanged();
+				OnPropertyChanged(nameof(IsFullyStocked));
+				OnPropertyChanged(nameof(IsPartialyStocked));
+			}
+		}
+
+		[Style(Description = "Полностью оприходовано")]
+		public virtual bool IsFullyStocked => IsReadyForStock && Quantity > 0 && Quantity == QuantityToReceive + ReceivedQuantity;
+
+		[Style(Description = "Частично оприходовано")]
+		public virtual bool IsPartialyStocked => IsReadyForStock && Quantity > 0 && Quantity > QuantityToReceive + ReceivedQuantity;
+
+		public virtual int ReceivedQuantity { get; set; }
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
@@ -505,6 +547,15 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void CancelEdit()
 		{
+		}
+
+		public virtual void Receive(int quantity)
+		{
+			SkipRequest = true;
+			quantity = Math.Min(quantity, Quantity.GetValueOrDefault() - ReceivedQuantity);
+			QuantityToReceive = quantity;
+			IsReadyForStock = QuantityToReceive > 0;
+			SkipRequest = false;
 		}
 	}
 }

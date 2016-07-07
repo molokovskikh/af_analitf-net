@@ -14,6 +14,8 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using Common.NHibernate;
+using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -174,6 +176,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var stocks = Items.Value.Where(s => !String.IsNullOrEmpty(s.Period)).ToList();
 			yield return new DialogResult(new SelectStockPeriod(stocks, Name));
+		}
+
+		public static void StockWaybill(ISession session, Waybill waybill)
+		{
+			var order = new ReceivingOrder(waybill);
+			if (order.Lines.Count > 0)
+				session.Save(order);
+			session.SaveEach(order.ToStocks());
 		}
 	}
 }

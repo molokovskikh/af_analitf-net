@@ -54,11 +54,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Subscribe(Items);
 		}
 
-		public void Create()
-		{
-			throw new NotImplementedException();
-		}
-
 		public void EnterItem()
 		{
 			if (CurrentItem.Value == null)

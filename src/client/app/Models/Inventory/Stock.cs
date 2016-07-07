@@ -26,8 +26,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string AnalogGroup { get; set; }
 		public virtual string Country { get; set; }
 		public virtual string Unit { get; set; }
+
 		public virtual string Product { get; set; }
+		public virtual uint? ProductId { get; set; }
 		public virtual string ProductKind { get; set; }
+
 		public virtual string FarmGroup { get; set; }
 		public virtual string Mnn { get; set; }
 		public virtual string Brand { get; set; }
@@ -36,6 +39,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string RegionCert { get; set; }
 		public virtual string Certificate { get; set; }
 		public virtual string Producer { get; set; }
+		public virtual uint? ProducerId { get; set; }
 		public virtual decimal Count { get; set; }
 		public virtual decimal Cost { get; set; }
 		public virtual decimal RetailCost { get; set; }

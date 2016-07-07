@@ -13,7 +13,6 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
-			<Button Name="Create">Создать</Button>
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
@@ -27,9 +26,6 @@
 				Member="Item.FullName" />
 			<controls:PopupSelector VerticalAlignment="Center" x:Name="AddressesFilter"
 				ButtonContent="Адреса"
-				Member="Item.Name" />
-			<controls:PopupSelector VerticalAlignment="Center" x:Name="Statuses"
-				ButtonContent="Статус"
 				Member="Item.Name" />
 		</ToolBar>
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">

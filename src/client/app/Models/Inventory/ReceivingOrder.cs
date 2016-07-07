@@ -19,6 +19,33 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class ReceivingOrder
 	{
+		public ReceivingOrder()
+		{
+			Lines = new List<ReceivingLine>();
+		}
+
+		public ReceivingOrder(Waybill waybill)
+			: this()
+		{
+			Date = DateTime.Now;
+			Supplier = waybill.Supplier;
+			Address = waybill.Address;
+			Status = ReceiveStatus.Closed;
+			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
+			foreach (var line in lines) {
+				Lines.Add(new ReceivingLine {
+						Product = line.Product,
+						ProductId = line.ProductId,
+						Producer = line.Producer,
+						ProducerId = line.ProductId,
+						Quantity = line.QuantityToReceive,
+						Cost = line.SupplierCost.GetValueOrDefault(),
+						RetailCost = line.RetailCost.GetValueOrDefault(),
+				});
+				line.ReceivedQuantity += line.QuantityToReceive;
+			}
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Supplier Supplier { get; set; }
@@ -37,63 +64,29 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum { get; set; }
 		public virtual int LineCount { get; set; }
 
+		public virtual IList<ReceivingLine> Lines { get; set; }
+
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
-
-		public static void Stock(ISession session, User user, Settings settings, SentOrder[] orders)
-		{
-			foreach (var order in orders) {
-				var receiving = new ReceivingOrder {
-					Date = DateTime.Now,
-					Supplier = session.Load<Supplier>(order.Price.SupplierId),
-					OrderDate = order.SentOn,
-					OrderId = order.ServerId,
-					DueDate = DateTime.Now.AddDays(1),
-					Address = order.Address,
-				};
-
-				order.Lines.Each(x => x.CalculateRetailCost(settings.Markups, Enumerable.Empty<uint>().ToList(), user, order.Address));
-				var lines = order.Lines.Select(x => new ReceivingLine {
-						Product = x.ProductSynonym,
-						Producer = x.ProducerSynonym,
-						Count = x.Count,
-						Cost = x.Cost,
-						RetailCost = x.RetailCost.GetValueOrDefault(),
-					})
-					.ToArray();
-				foreach (var line in lines)
-					line.UpdateStatus();
-				receiving.UpdateStat(lines);
-				session.Save(receiving);
-				order.ReceivingOrderId = receiving.Id;
-				lines.Each(x => x.ReceivingOrderId = receiving.Id);
-				session.SaveEach(lines);
-			}
-		}
 
 		public virtual void UpdateStat(IEnumerable<ReceivingLine> lines)
 		{
 			LineCount = lines.Count();
 			Sum = lines.Sum(x => x.Sum);
 			RetailSum = lines.Sum(x => x.RetailCost);
-			if (lines.Any(x => x.Status == ReceivingLineStatus.New))
-				Status = ReceiveStatus.New;
-			else if (lines.Any(x => x.Status == ReceivingLineStatus.Closed))
-				Status = ReceiveStatus.Closed;
-			else
-				Status = ReceiveStatus.InProgress;
+			Status = ReceiveStatus.Closed;
 		}
 
-		public virtual List<Stock> Receive(IList<ReceivingLine> lines)
+		public virtual Stock[] ToStocks()
 		{
-			var stocks = lines.SelectMany(x => x.Details)
-				.Where(x => x.Status == DetailStatus.New)
-				.Select(x => x.ToStock())
-				.ToList();
-
-			foreach (var line in lines)
-				line.UpdateStatus();
-			UpdateStat(lines);
-			return stocks;
+			return Lines.Select(x => new Stock {
+				Product = x.Product,
+				ProductId = x.ProductId,
+				Producer = x.Producer,
+				ProducerId = x.ProductId,
+				Count = x.Quantity,
+				Cost = x.Cost,
+				RetailCost = x.RetailCost,
+			}).ToArray();
 		}
 	}
 }
