@@ -109,7 +109,7 @@
 				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold" />
 
 				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_SupplierName" FontWeight="Bold" />
+        <Label Grid.Row="0" Grid.Column="5" Name="Waybill_UserSupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 
