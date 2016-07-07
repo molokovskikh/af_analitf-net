@@ -52,16 +52,17 @@ namespace AnalitF.Net.Client.Models.Print
 				};
 				panel.Children.Add(label);
 				var border = new Border {
-					Margin = new Thickness(25)
+					Margin = new Thickness(35)
 				};
-
-				//document.Blocks.Add(new BlockUIContainer(border));
-
-				document.Blocks.Add(new BlockUIContainer(panel));
+				var section = new Section();
+				section.BreakPageBefore = true;
 				label.Measure(pageSize);
 				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
 					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
-				document.Blocks.Add(new BlockUIContainer(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness)));
+				var grid = new BlockUIContainer(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
+				section.Blocks.Add(new BlockUIContainer(panel));
+				section.Blocks.Add(grid);
+				document.Blocks.Add(section);
 			}
 			return document;
 		}
