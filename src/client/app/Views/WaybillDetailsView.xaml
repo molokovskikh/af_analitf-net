@@ -48,7 +48,6 @@
 					<ColumnDefinition></ColumnDefinition>
 					<ColumnDefinition></ColumnDefinition>
 					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
           <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
@@ -76,7 +75,7 @@
                 <Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
 									Накладная на внутреннее перемещение
                 </Button>
-        <Button Grid.Column="4" Grid.Row="0" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
+        <Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
           Накладная в Excel
         </Button>
       </Grid>
