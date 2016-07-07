@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Все, Нет значения, 10", model.Taxes.Implode(t => t.Name));
 			Assert.AreEqual("Все", model.CurrentTax.Value.Name);
 			model.CurrentTax.Value = model.Taxes.First(t => t.Value == 10);
-			Assert.AreEqual(3, model.Lines.Value.Count);
+			Assert.AreEqual(4, model.Lines.Value.Count);
 		}
 
 		[Test]
@@ -67,7 +67,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			TableCellCollection tableCellCollection = listTableCellCollection[0];
 
 			/* проверка количества строк в таблице */
-			Assert.AreEqual(14, listTableCellCollection.Count());
+			Assert.AreEqual(15, listTableCellCollection.Count());
 
 			/* проверяем названия столбцов */
 
@@ -181,7 +181,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			model.Lines.Value.AddNewItem(waybillLine);
-			Assert.AreEqual(13, model.Waybill.Lines.Count);
+			Assert.AreEqual(14, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 
