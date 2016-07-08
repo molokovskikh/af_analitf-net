@@ -1881,7 +1881,9 @@ select db.Id,
 	str_to_date(db.Period, '%d.%m.%Y') as Exp,
 	db.Certificates,
 	db.EAN13,
-	db.CountryCode
+	db.CountryCode,
+	db.RetailCost as ServerRetailCost,
+	db.RetailCostMarkup as ServerRetailMarkup
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
