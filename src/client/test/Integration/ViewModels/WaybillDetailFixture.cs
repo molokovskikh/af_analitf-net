@@ -13,7 +13,6 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Documents;
 

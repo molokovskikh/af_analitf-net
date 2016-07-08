@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public async Task Open_catalog_on_quick_search()
 		{
-			Start();
+			StartWait();
 
 			//открытие окна на весь экран нужно что бы отображалось максимальное количество элементов
 			activeWindow.Dispatcher.Invoke(() => {
@@ -95,7 +95,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				.First(n => n.HaveOffers && n.Name.StartsWith("б"))
 				.Name.Slice(3).ToLower();
 
-			Start();
+			StartWait();
 			Click("ShowCatalog");
 
 			var catalog = await ViewLoaded<CatalogViewModel>();
@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			session.DeleteEach<Order>();
 
-			Start();
+			StartWait();
 
 			Click("ShowCatalog");
 			var catalog = await ViewLoaded<CatalogViewModel>();
@@ -162,7 +162,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var source = order.Lines.OrderBy(l => l.ProductSynonym).ToArray();
 			var term = source[1].ProductSynonym.ToLower().Except(source[0].ProductSynonym.ToLower()).First().ToString();
 
-			Start();
+			StartWait();
 			Click("ShowOrderLines");
 			var lines = await ViewLoaded<OrderLinesViewModel>();
 			WaitIdle();
@@ -188,7 +188,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			restore = true;
 			Fixture<LocalAddress>();
 
-			Start();
+			StartWait();
 			Click("ShowOrderLines");
 			var lines = await ViewLoaded<OrderLinesViewModel>();
 			Assert.IsFalse(lines.AddressSelector.All.Value);
@@ -235,7 +235,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			Fixture(new LocalWaybill());
 
-			Start();
+			StartWait();
 			Click("ShowWaybills");
 			Input("Waybills", Key.Enter);
 			WaitIdle();
@@ -263,7 +263,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			user.IsPreprocessOrders = true;
 			Fixture<CorrectOrder>();
 
-			Start();
+			StartWait();
 			Click("ShowOrders");
 			Input("Orders", Key.Enter);
 			WaitIdle();
@@ -292,7 +292,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			session.DeleteEach<Order>();
 			var order = MakeOrder();
-			Start();
+			StartWait();
 			Click("ShowOrders");
 			Input("Orders", Key.Enter);
 			WaitIdle();
@@ -316,7 +316,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			MakeOrder();
 			Fixture<RandCost>();
 
-			Start();
+			StartWait();
 			AsyncClick("Update");
 
 			WaitMessageBox("Обновление завершено успешно.");
@@ -351,7 +351,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Open_prices()
 		{
-			Start();
+			StartWait();
 
 			Click("ShowPrice");
 			dispatcher.Invoke(() => {
@@ -366,7 +366,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Show_price_offers()
 		{
-			Start();
+			StartWait();
 			Click("ShowPrice");
 			uint expectedCount = 0;
 			dispatcher.Invoke(() => {
@@ -394,7 +394,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				.Where(m => m.Success)
 				.Select(m => m.Captures[0].Value)
 				.First();
-			Start();
+			StartWait();
 			Click("SearchOffers");
 
 			var search = (SearchOfferViewModel)shell.ActiveItem;
@@ -416,7 +416,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var catalog = session.Load<Catalog>(order.Lines[0].CatalogId);
 			DebugContext.Add("CatalogId", catalog.Id);
 
-			Start();
+			StartWait();
 			Click("ShowCatalog");
 			var catalogModel = (CatalogViewModel)shell.ActiveItem;
 			var viewModel = (CatalogNameViewModel)catalogModel.ActiveItem;
@@ -444,7 +444,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Dynamic_recalculate_markup_validation()
 		{
-			Start();
+			StartWait();
 			AsyncClick("ShowSettings");
 			dispatcher.Invoke(() => {
 				var content = (FrameworkElement)activeWindow.Content;
@@ -463,7 +463,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Update_catalog_info()
 		{
-			Start();
+			StartWait();
 			Click("ShowCatalog");
 
 			var catalogModel = (CatalogViewModel)shell.ActiveItem;
@@ -484,7 +484,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		public void Warn_on_waybill_reject()
 		{
 			Fixture<RejectedWaybill>();
-			Start();
+			StartWait();
 			AsyncClick("Update");
 
 			WaitWindow("АналитФАРМАЦИЯ: Внимание");
@@ -533,7 +533,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Fixture<LocalDelayOfPayment>();
 			var waitWindowAsync = manager.WindowOpened.Where(w => w.AsText().Contains("Пересчет отсрочки платежа")).Replay();
 			disposable.Add(waitWindowAsync.Connect());
-			Start();
+			StartWait();
 
 			var waitWindow = waitWindowAsync.Timeout(10.Second()).First();
 			Assert.That(waitWindow.AsText(), Does.Contain("Пересчет отсрочки платежа"));
@@ -560,7 +560,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Fixture(fixture);
 
-			Start();
+			StartWait();
 
 			Click("ShowCatalog");
 
@@ -605,7 +605,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var fixture = new LocalPromotion("assets/Валемидин.JPG");
 			Fixture(fixture);
 
-			Start();
+			StartWait();
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
 			dispatcher.Invoke(() => {
@@ -645,7 +645,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			//что бы избежать сообщения о ожидаемых позициях
 			session.DeleteEach<AwaitedItem>();
 
-			Start();
+			StartWait();
 			Click("ShowBatch");
 
 			manager.OsDialog.OfType<OpenFileDialog>().Take(1)
@@ -666,7 +666,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		public void Open_sent_orders()
 		{
 			var order = MakeSentOrder();
-			Start();
+			StartWait();
 			Click("ShowOrders");
 
 			WaitIdle();
@@ -701,7 +701,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			};
 			Fixture(fixture);
 
-			Start();
+			StartWait();
 
 			SystemTime.Now = () => DateTime.Now.AddMinutes(20);
 			scheduler.AdvanceByMs(30000);
@@ -727,7 +727,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Send_feedback()
 		{
-			Start();
+			StartWait();
 			OpenMenu("Сервис");
 			WaitIdle();
 			AsyncClickMenu("Отправить письмо в АналитФармация");
@@ -744,7 +744,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			MakeOrder();
 			var junkOrder = MakeOrder(session.Query<Offer>().First(o => o.Junk));
 
-			Start();
+			StartWait();
 			dispatcher.Invoke(() => {
 				session.DeleteEach<CustomStyle>();
 				var styles = StyleHelper.GetDefaultStyles();
@@ -795,7 +795,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			MakeOrder();
 			Fixture<RandCost>();
 
-			Start();
+			StartWait();
 			AsyncClick("Update");
 
 			WaitWindow("АналитФАРМАЦИЯ: Внимание", "появились препараты, которые включены Вами в список ожидаемых позиций");
@@ -810,7 +810,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		public void Print_waybill()
 		{
 			Fixture<LocalWaybill>();
-			Start();
+			StartWait();
 			Click("ShowWaybills");
 
 			Input("Waybills", Key.Return);
@@ -824,7 +824,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public async Task Create_waybill()
 		{
-			Start();
+			await Start();
 			Click("ShowWaybills");
 			AsyncClick("Create");
 			WaitWindow("Создание накладной");
@@ -876,7 +876,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 					.Flat(i => i.Items.OfType<MenuItem>())
 					.FirstOrDefault(i => header.Equals(i.Header));
 				if (el == null)
-					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", header, activeWindow));
+					throw new Exception($"Не могу найти пункт меню с заголовком '{header}' в окне {activeWindow}");
 				AssertInputable(el);
 
 				//черная магия - когда IsSubmenuOpen = true
@@ -903,7 +903,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 					.Flat(i => i.Items.OfType<MenuItem>())
 					.FirstOrDefault(i => header.Equals(i.Header));
 				if (el == null)
-					throw new Exception(String.Format("Не могу найти пункт меню с заголовком '{0}' в окне {1}", header, activeWindow));
+					throw new Exception($"Не могу найти пункт меню с заголовком '{header}' в окне {activeWindow}");
 				AssertInputable(el);
 				el.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, el));
 			}));
@@ -941,11 +941,11 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 					window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
 				}
 				if (window == IntPtr.Zero)
-					throw new Exception(String.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
+					throw new Exception(string.Format("Не удалось найти окно '{0}'", "АналитФАРМАЦИЯ: Информация"));
 				WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
 			}
 			catch(TimeoutException e) {
-				throw new Exception(String.Format("Не удалось дождаться {0}, окно {1}", message, activeWindow.AsText()), e);
+				throw new Exception($"Не удалось дождаться {message}, окно {activeWindow.AsText()}", e);
 			}
 		}
 
@@ -1052,8 +1052,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		private async Task<T> ViewLoaded<T>()
 		{
 			if (!SpinWait.SpinUntil(() => shell.ActiveItem is T, 10.Second()))
-				throw new Exception(String.Format("Не удалось дождаться модели {0} текущая модель {1}", typeof(T),
-					shell.ActiveItem == null ? "null" : shell.ActiveItem.GetType().ToString()));
+				throw new Exception(
+					$"Не удалось дождаться модели {typeof (T)} текущая модель {shell.ActiveItem?.GetType().ToString() ?? "null"}");
 
 			await ViewLoaded((BaseScreen)shell.ActiveItem);
 			return (T)shell.ActiveItem;

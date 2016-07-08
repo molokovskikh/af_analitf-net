@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels
 					Newses.Value = x;
 				});
 
-			Ad.Value = Config.LoadAd("index.gif");
+			Ad.Value = Shell.Config.LoadAd("index.gif");
 		}
 	}
 }

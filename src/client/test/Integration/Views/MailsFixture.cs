@@ -228,7 +228,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			att.IsError = false;
 			att.IsDownloading = false;
 
-			Start();
+			StartWait();
 			Env.Scheduler = new MixedScheduler(scheduler, new DispatcherScheduler(dispatcher));
 			Click("ShowMails");
 			return att;
@@ -261,7 +261,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 		private void Open()
 		{
-			Start();
+			StartWait();
 			Click("ShowMails");
 		}
 
