@@ -122,12 +122,13 @@ namespace AnalitF.Net.Client.Test.Unit
 			waybill.Calculate(settings, new List<uint>());
 			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
 			Assert.IsNotNull(doc);
-			Assert.AreEqual(2, doc.Pages.Count);
-
-			var page1 = doc.Pages[0].Child;
-			Assert.AreEqual(24, page1.Descendants<Grid>().First().Children.Count);
-			var page2 = doc.Pages[1].Child;
-			Assert.AreEqual(1, page2.Descendants<Grid>().First().Children.Count);
+			Assert.AreEqual(2, doc.Blocks.Count);
+			var page1 = doc.Blocks.FirstBlock as Section;
+			Assert.IsNotNull(page1);
+			Assert.AreEqual(2, page1.Blocks.Count);
+			var page2 = doc.Blocks.LastBlock as Section;
+			Assert.IsNotNull(page2);
+			Assert.AreEqual(2, page2.Blocks.Count);
 		}
 
 		private static List<Offer> Offers()
