@@ -13,7 +13,7 @@ using NHibernate.Mapping;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PriceTagDocument
+	public class PriceTagDocument: BaseDocument
 	{
 		private IDictionary<string, object> properties;
 
@@ -81,7 +81,7 @@ namespace AnalitF.Net.Client.Models.Print
 			this.lines = lines;
 		}
 
-		public FixedDocument Build()
+		protected override void BuildDoc()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
 			Func<WaybillLine, FrameworkElement> map = Normal;
@@ -93,7 +93,7 @@ namespace AnalitF.Net.Client.Models.Print
 			else if (settings.PriceTag.Type == PriceTagType.BigCost2)
 				map = Big2;
 
-			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
+			doc = FixedDocumentHelper.BuildFlowDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
 		}
 
 		private string FormatCost(WaybillLine line)
