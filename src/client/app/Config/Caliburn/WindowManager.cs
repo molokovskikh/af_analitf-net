@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
+using AnalitF.Net.Client.ViewModels;
 using Caliburn.Micro;
 using DialogResult = System.Windows.Forms.DialogResult;
 
@@ -200,7 +201,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 		public void Warning(string text)
 		{
-			ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание",
+			ShowMessageBox(text, Consts.WarningTitle,
 				MessageBoxButton.OK,
 				MessageBoxImage.Warning);
 		}
@@ -221,7 +222,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 		public MessageBoxResult Question(string text)
 		{
-			return ShowMessageBox(text, "АналитФАРМАЦИЯ: Внимание",
+			return ShowMessageBox(text, Consts.WarningTitle,
 				MessageBoxButton.YesNo,
 				MessageBoxImage.Warning);
 		}

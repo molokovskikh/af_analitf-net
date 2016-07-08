@@ -158,16 +158,16 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-        public virtual decimal? RetailMarkupInRubles
-        {
-            get {
-                if(RetailCost != null && SupplierCost != null)
-                return RetailCost - SupplierCost;
-                return null;
-            }
-        }
+		public virtual decimal? RetailMarkupInRubles
+		{
+				get {
+						if(RetailCost != null && SupplierCost != null)
+						return RetailCost - SupplierCost;
+						return null;
+				}
+		}
 
-        public virtual decimal? RetailCost
+		public virtual decimal? RetailCost
 		{
 			get { return _retailCost; }
 			set
@@ -179,10 +179,13 @@ namespace AnalitF.Net.Client.Models
 				_retailCost = value;
 				RecalculateMarkups(RetailCost);
 				Waybill.CalculateRetailSum();
-				OnPropertyChanged("RetailSum");
+				OnPropertyChanged(nameof(RetailSum));
 				OnPropertyChanged();
 			}
 		}
+
+		public virtual decimal? ServerRetailCost { get; set; }
+		public virtual decimal? ServerRetailMarkup { get; set; }
 
 		public virtual uint? RejectId { get; set; }
 
@@ -349,19 +352,25 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings)
 		{
+			if (ServerRetailCost != null) {
+				RetailCost = ServerRetailCost;
+				if (ServerRetailMarkup != null) {
+					_retailMarkup = ServerRetailMarkup;
+					_realRetailMarkup = ServerRetailMarkup;
+				} else {
+					UpdateMarkups(ServerRetailMarkup);
+				}
+				NotifyRetailCostChanged();
+				return;
+			}
+
 			if (!IsCalculable()) {
 				_retailCost = null;
 				_retailMarkup = null;
 				_realRetailMarkup = null;
 				_maxSupplierMarkup = null;
 				MaxRetailMarkup = null;
-				OnPropertyChanged("RetailCost");
-				OnPropertyChanged("RetailSum");
-				OnPropertyChanged("RetailMarkup");
-				OnPropertyChanged("RealRetailMarkup");
-				OnPropertyChanged("IsMarkupInvalid");
-				OnPropertyChanged("IsMarkupToBig");
-				OnPropertyChanged("IsSupplierPriceMarkupInvalid");
+				NotifyRetailCostChanged();
 				return;
 			}
 
@@ -402,14 +411,19 @@ namespace AnalitF.Net.Client.Models
 			//применялась в расчетах
 			//наверное правильно всегда округлять до меньшего но analitf делает не так, делаем тоже что analitf
 			UpdateMarkups(rawCost);
-			OnPropertyChanged("RetailCost");
-			OnPropertyChanged("RetailSum");
-			OnPropertyChanged("RetailMarkup");
-			OnPropertyChanged("RealRetailMarkup");
-			OnPropertyChanged("IsMarkupInvalid");
+			NotifyRetailCostChanged();
+		}
+
+		private void NotifyRetailCostChanged()
+		{
+			OnPropertyChanged(nameof(RetailCost));
+			OnPropertyChanged(nameof(RetailSum));
+			OnPropertyChanged(nameof(RetailMarkup));
+			OnPropertyChanged(nameof(RealRetailMarkup));
+			OnPropertyChanged(nameof(IsMarkupInvalid));
 			//после пересчета состояние флагов валидации могло измениться
-			OnPropertyChanged("IsMarkupToBig");
-			OnPropertyChanged("IsSupplierPriceMarkupInvalid");
+			OnPropertyChanged(nameof(IsMarkupToBig));
+			OnPropertyChanged(nameof(IsSupplierPriceMarkupInvalid));
 		}
 
 		private MarkupType GetMarkupType()
@@ -427,13 +441,12 @@ namespace AnalitF.Net.Client.Models
 			if (!IsCalculable())
 				return;
 
-			var retailCost = cost;
 			if (GetMarkupType() == MarkupType.VitallyImportant)
-				_retailMarkup = NullableHelper.Round((retailCost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
+				_retailMarkup = NullableHelper.Round((cost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
 			else
-				_retailMarkup = NullableHelper.Round((retailCost - SupplierCost) / (SupplierCostWithoutNds * TaxFactor) * 100, 2);
+				_retailMarkup = NullableHelper.Round((cost - SupplierCost) / (SupplierCostWithoutNds * TaxFactor) * 100, 2);
 
-			_realRetailMarkup = NullableHelper.Round((retailCost - SupplierCost) / SupplierCost * 100, 2);
+			_realRetailMarkup = NullableHelper.Round((cost - SupplierCost) / SupplierCost * 100, 2);
 		}
 
 		private bool IsCalculable()
