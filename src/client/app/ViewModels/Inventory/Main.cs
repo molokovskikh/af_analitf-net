@@ -23,6 +23,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ActiveItem = new Stocks();
 		}
 
+		public void CheckDefectSeries()
+		{
+			ActiveItem = new CheckDefectSeries();
+		}
+
 		public void ReceivingOrders()
 		{
 			ActiveItem = new ReceivingOrders(this);

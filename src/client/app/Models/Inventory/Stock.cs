@@ -10,6 +10,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("В пути")] InTransit,
 	}
 
+	public enum RejectStatus
+	{
+		[Description("Нет")]
+		NoRejected,
+		[Description("Возможно")]
+		Rejected,
+		[Description("Брак")]
+		ForceRejected,
+		[Description("Нет")]
+		ForceNoRejected,
+	}
+
 	public class Stock
 	{
 		public virtual uint Id { get; set; }
@@ -95,5 +107,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Period { get; set; }
 		public virtual string DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
+
+		public virtual uint? RejectId { get; set; }
+
+		public virtual RejectStatus RejectStatus { get; set; }
+
+		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
+
 	}
 }

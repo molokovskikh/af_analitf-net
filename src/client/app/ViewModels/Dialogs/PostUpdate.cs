@@ -21,6 +21,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				"Обнаружены следующие события:";
 				if (IsRejected)
 					text += "\r\n  - обнаружены препараты, предписанные к изъятию, в имеющихся у Вас электронных накладных";
+				if (IsRejectedStock)
+					text += "\r\n  - обнаружены препараты, предписанные к изъятию, в имеющихся у Вас складских запасах";
 				if (IsAwaited)
 					text += "\r\n  - появились препараты, которые включены Вами в список ожидаемых позиций";
 				if (IsDocsReceived)
@@ -32,6 +34,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public bool IsRejected { get; set; }
 		public bool IsAwaited { get; set; }
 		public bool IsDocsReceived { get; set; }
+		public bool IsRejectedStock { get; set; }
 
 		public bool IsMadeSenseToShow
 		{
