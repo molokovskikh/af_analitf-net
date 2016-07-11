@@ -277,6 +277,16 @@ namespace AnalitF.Net.Client.Views
 					}
 				}
 			}
+			grid.BeginningEdit += (sender, args) => {
+				var line = args.Row.DataContext as WaybillLine;
+				if (line == null)
+					return;
+				if (line.ServerRetailCost != null) {
+					MessageBox.Show(Application.Current.MainWindow, "Редактирование розничной цены запрещено поставщиком",
+						Consts.WarningTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+					args.Cancel = true;
+				}
+			};
 
 			MainGrid.Children.Add(lines);
 

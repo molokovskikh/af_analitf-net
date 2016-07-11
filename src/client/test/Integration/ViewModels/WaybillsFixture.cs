@@ -92,6 +92,28 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Display_supplier_name()
+		{
+			var result = model.Create().GetEnumerator();
+			Assert.IsTrue(result.MoveNext());
+			var dialog = ((CreateWaybill)((DialogResult)result.Current).Model);
+			var supplier = CreateSupplier();
+			dialog.Waybill = new Waybill(new Address("Тестовый адрес"), supplier);
+			Assert.AreEqual(dialog.Waybill.SupplierName,supplier.FullName);
+			result.MoveNext();
+			dialog.Waybill.Supplier = null;
+			Assert.AreEqual(dialog.Waybill.SupplierName,supplier.FullName);
+		}
+
+		public Supplier CreateSupplier()
+		{
+			var supplier = new Supplier();
+			supplier.Name = "Тестовый поставщик";
+			supplier.FullName = "Тестовый поставщик 1";
+			return supplier;
+		}
+
+		[Test]
 		public void Waybill_report()
 		{
 			FileHelper.InitDir(settings.MapPath("Reports"));

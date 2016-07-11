@@ -13,7 +13,6 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Documents;
 
@@ -39,7 +38,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual("Все, Нет значения, 10", model.Taxes.Implode(t => t.Name));
 			Assert.AreEqual("Все", model.CurrentTax.Value.Name);
 			model.CurrentTax.Value = model.Taxes.First(t => t.Value == 10);
-			Assert.AreEqual(3, model.Lines.Value.Count);
+			Assert.AreEqual(4, model.Lines.Value.Count);
 		}
 
 		[Test]
@@ -67,7 +66,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			TableCellCollection tableCellCollection = listTableCellCollection[0];
 
 			/* проверка количества строк в таблице */
-			Assert.AreEqual(14, listTableCellCollection.Count());
+			Assert.AreEqual(15, listTableCellCollection.Count());
 
 			/* проверяем названия столбцов */
 
@@ -143,7 +142,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_racking_map()
 		{
-			var result = (DialogResult)model.PrintRackingMap();
+			var result = (DialogResult)model.PrintRackingMap().First();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview);
 		}
@@ -151,9 +150,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_price_tags()
 		{
-			var result = (DialogResult)model.PrintPriceTags();
+			var result = (DialogResult)model.PrintPriceTags().First();
 			var preview = ((PrintPreviewViewModel)result.Model);
-			Assert.IsNotNull(preview);
+			Assert.IsNotNull(preview.Document);
 		}
 
 		[Test]
@@ -181,7 +180,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			waybill.IsCreatedByUser = true;
 			var waybillLine = new WaybillLine();
 			model.Lines.Value.AddNewItem(waybillLine);
-			Assert.AreEqual(13, model.Waybill.Lines.Count);
+			Assert.AreEqual(14, model.Waybill.Lines.Count);
 			Assert.AreEqual(waybillLine.Waybill.Id, model.Waybill.Id);
 		}
 
@@ -235,5 +234,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf(typeof(OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
+
+		[Test]
+ 		public void Export_waybill_to_excel_restored_ver()
+ 		{
+ 			var result = model.RestoredExportWaybill();
+ 			Assert.IsInstanceOf(typeof(OpenResult), result);
+ 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
+ 		}
 	}
 }

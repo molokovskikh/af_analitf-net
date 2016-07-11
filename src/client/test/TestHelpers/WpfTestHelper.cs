@@ -123,13 +123,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var started = new ManualResetEventSlim();
 			var errors = new List<Exception>();
 			var thread = new Thread(() => {
-				Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
-				Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) => {
-					errors.Add(args.Exception);
-				};
-				Dispatcher.CurrentDispatcher.BeginInvoke(action);
-				Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
-				Dispatcher.Run();
+				try {
+					Application.ResourceAssembly = typeof(ShellViewModel).Assembly;
+					Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) => {
+						errors.Add(args.Exception);
+					};
+					Dispatcher.CurrentDispatcher.BeginInvoke(action);
+					Dispatcher.CurrentDispatcher.BeginInvoke(new Action(started.Set));
+					Dispatcher.Run();
+				} catch(Exception e) {
+					errors.Add(e);
+				}
 			});
 
 			thread.SetApartmentState(ApartmentState.STA);
@@ -137,7 +141,10 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			thread.Start();
 			if (!started.Wait(10.Second()))
 				throw new AggregateException("Не удалось дождаться запуска, что то сломалось подключай дебагер и смотри", errors);
-			return Dispatcher.FromThread(thread);
+			var dispatcher = Dispatcher.FromThread(thread);
+			if (dispatcher == null)
+				throw new AggregateException("Не удалось дождаться запуска, что то сломалось подключай дебагер и смотри", errors);
+			return dispatcher;
 		}
 
 		public static TextCompositionEventArgs TextArgs(string text)

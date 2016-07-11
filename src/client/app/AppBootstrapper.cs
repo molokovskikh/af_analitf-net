@@ -50,19 +50,6 @@ namespace AnalitF.Net.Client
 
 		public ShellViewModel Shell;
 
-		public static event EventHandler LeaderCalculationWasStartChanged;
-
-		private static bool _leaderCalculationWasStart = false;
-		public static bool LeaderCalculationWasStart
-		{
-			get { return _leaderCalculationWasStart; }
-			set
-			{
-				_leaderCalculationWasStart = value;
-				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
-			}
-		}
-
 		public static Config.Caliburn.Caliburn Caliburn;
 		public static Config.NHibernate.NHibernate NHibernate;
 		public Config.Config Config = new Config.Config();

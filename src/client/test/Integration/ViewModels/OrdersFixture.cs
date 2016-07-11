@@ -366,10 +366,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
-			order.Price = null;
+			var priceName = order.Price.Name;
+			var regionName = order.Price.RegionName;
+			order.Price.Active = false;
 			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.AreNotEqual(model.Orders.First().Price.Name, null);
+			Assert.AreEqual(order.Price.Name, priceName);
+			Assert.AreEqual(order.Price.RegionName, regionName);
 			session.DeleteEach<Order>();
 		}
 

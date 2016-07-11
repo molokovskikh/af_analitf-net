@@ -269,6 +269,7 @@ namespace AnalitF.Net.Client.Config
 					bi.BeginInit();
 					bi.StreamSource = new MemoryStream(File.ReadAllBytes(x));
 					bi.EndInit();
+					bi.Freeze();
 					return bi;
 				} catch(Exception e) {
 					log.Error($"Не удалось загрузить изображение {x}", e);
