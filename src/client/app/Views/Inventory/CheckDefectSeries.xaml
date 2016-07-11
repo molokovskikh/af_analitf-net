@@ -22,16 +22,13 @@
 			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>
-					<RadioButton GroupName="Source" Name="IsRejected" Margin="5">Возможно</RadioButton>
-					<RadioButton GroupName="Source" Name="IsForceRejected" Margin="5">Брак</RadioButton>
+					<RadioButton GroupName="Source" Name="IsPerhaps" Margin="5">Возможно</RadioButton>
+					<RadioButton GroupName="Source" Name="IsDefective" Margin="5">Брак</RadioButton>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Header="Дата письма" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
-					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
 					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
-					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
-					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
 				</StackPanel>
 			</GroupBox>
 		</WrapPanel>

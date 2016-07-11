@@ -185,7 +185,6 @@
     <Compile Include="Integration\BaseScreenFixture.cs" />
     <Compile Include="Integration\BinderFixture.cs" />
     <Compile Include="Integration\Commands\ImportFixture.cs" />
-    <Compile Include="Integration\Commands\StockFixture.cs" />
     <Compile Include="Integration\Commands\WaybillsFixture.cs" />
     <Compile Include="Integration\Models\RestoreOrderFixture.cs" />
     <Compile Include="Integration\Commands\OrderFixture.cs" />

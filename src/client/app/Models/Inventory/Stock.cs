@@ -12,14 +12,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public enum RejectStatus
 	{
-		[Description("Нет")]
-		NoRejected,
+		[Description("Неизвестно")]
+		Unknown,
 		[Description("Возможно")]
-		Rejected,
+		Perhaps,
 		[Description("Брак")]
-		ForceRejected,
+		Defective,
 		[Description("Нет")]
-		ForceNoRejected,
+		NotDefective,
 	}
 
 	public class Stock
@@ -107,8 +107,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Period { get; set; }
 		public virtual string DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
-
-		public virtual uint? RejectId { get; set; }
 
 		public virtual RejectStatus RejectStatus { get; set; }
 

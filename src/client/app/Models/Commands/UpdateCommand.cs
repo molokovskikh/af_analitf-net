@@ -922,7 +922,6 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			var postUpdate = new PostUpdate();
 			Log.Info("Вычисление забраковки");
 			postUpdate.IsRejected = CalculateRejects(settings);
-			postUpdate.IsRejectedStock = CalculateRejectsStock(settings);
 			Log.Info("Вычисление ожидаемых");
 			postUpdate.IsAwaited = offersImported && CalculateAwaited();
 				//в режиме получения документов мы не должны предлагать а должны просто открывать
@@ -1084,60 +1083,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			}
 			Session.CreateSQLQuery("delete from Rejects where Canceled = 1")
 				.ExecuteUpdate();
-
-			return exists;
-		}
-
-		public bool CalculateRejectsStock(Settings settings)
-		{
-			// забраковка по идентификаторам производителя, продукта и серии
-			var exists = Session.CreateSQLQuery(@"update (Stocks as s, Rejects r)
-																						set s.RejectId = r.Id, s.RejectStatus = 1
-																						where s.RejectId is null
-																						and s.RejectStatus = 0
-																						and r.Canceled = 0
-																						and s.ProducerId = r.ProducerId
-																						and s.ProductId = r.ProductId
-																						and s.Seria = r.Series
-																						and s.ProducerId is not null
-																						and s.ProductId is not null
-																						and s.Seria is not null")
-				.SetFlushMode(FlushMode.Always)
-				.ExecuteUpdate() > 0;
-
-			// забраковка по идентификатору продукта и серии, если производитель не указан
-			exists |= Session.CreateSQLQuery(@"update (Stocks as s, Rejects r)
-																					set s.RejectId = r.Id, s.RejectStatus = 1
-																					where s.RejectId is null
-																					and s.RejectStatus = 0
-																					and r.Canceled = 0
-																					and s.ProductId = r.ProductId
-																					and s.Seria = r.Series
-																					and (s.ProducerId is null or r.ProducerId is null)
-																					and s.ProductId is not null
-																					and s.Seria is not null")
-				.ExecuteUpdate() > 0;
-
-			// забраковка по наименованию продукта и серии, если идентификатор продукта не указан
-			exists |= Session.CreateSQLQuery(@"update (Stocks as s, Rejects r) 
-																					set s.RejectId = r.Id, s.RejectStatus = 1
-																					where s.RejectId is null
-																					and s.RejectStatus = 0
-																					and r.Canceled = 0
-																					and s.Product = r.Product
-																					and s.Seria = r.Series
-																					and s.ProductId is null
-																					and s.Product is not null
-																					and s.Seria is not null")
-				.ExecuteUpdate() > 0;
-
-			// разбраковка
-			exists |= Session.CreateSQLQuery(@"update Stocks as s
-																				join Rejects r on r.Id = s.RejectId
-																				set s.RejectStatus = 0, s.RejectId = null
-																				where s.RejectId is not null
-																				and r.Canceled = 1")
-				.ExecuteUpdate() > 0;
 
 			return exists;
 		}

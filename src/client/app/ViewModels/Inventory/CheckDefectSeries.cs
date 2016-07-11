@@ -14,6 +14,9 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using NHibernate.Mapping;
+using MySql.Data.MySqlClient;
+using Common.MySql;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -22,10 +25,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<List<Stock>> Items { get; set; }
 		public NotifyValue<Stock> CurrentItem { get; set; }
 		public NotifyValue<bool> IsAll { get; set; }
-		public NotifyValue<bool> IsRejected { get; set; }
-		public NotifyValue<bool> IsForceRejected { get; set; }
+		public NotifyValue<bool> IsPerhaps { get; set; }
+		public NotifyValue<bool> IsDefective { get; set; }
 		public NotifyValue<DateTime?> Begin { get; set; }
-		public NotifyValue<DateTime?> End { get; set; }
+
+		public List<Tuple<uint,uint>> Link { get; set; } 
 
 		private string Name;
 
@@ -35,23 +39,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Name = User?.FullName ?? "";
 
 			IsAll = new NotifyValue<bool>(true);
-			IsRejected = new NotifyValue<bool>();
-			IsForceRejected = new NotifyValue<bool>();
+			IsPerhaps = new NotifyValue<bool>();
+			IsDefective = new NotifyValue<bool>();
 			Begin = new NotifyValue<DateTime?>();
-			End = new NotifyValue<DateTime?>();
+
+			Link = CalcLinks();
+			UpdateStatus();
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			RxQuery(x => x.Query<Stock>().OrderBy(y => y.Product).ToList())
-				.Subscribe(Items);
+			//RxQuery(x => x.Query<Stock>().OrderBy(y => y.Product).ToList())
+			//	.Subscribe(Items);
 
 			var subscription = Begin.Changed()
-				.Merge(End.Changed())
-				.Merge(IsRejected.Changed())
-				.Merge(IsForceRejected.Changed())
+				.Merge(IsPerhaps.Changed())
+				.Merge(IsDefective.Changed())
 				.Subscribe(_ => Update());
 			OnCloseDisposable.Add(subscription);
 		}
@@ -60,7 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var stock = CurrentItem.Value;
 			if (stock != null)
-				yield return new DialogResult(new EditDefectSeries(stock.Id));
+				yield return new DialogResult(new EditDefectSeries(stock, Link));
 
 			Session.Refresh(stock);
 			Update();
@@ -78,25 +83,30 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
-			var query = StatelessSession.Query<Stock>();
-
-			if (IsRejected)
-				query = query.Where(x => x.RejectStatus == RejectStatus.Rejected);
-			else if (IsForceRejected)
-				query = query.Where(x => x.RejectStatus == RejectStatus.ForceRejected);
-
-			if (Begin.HasValue && Begin.Value.HasValue) {
-				var rejectUpLetters = StatelessSession.Query<Reject>().Where(x => x.LetterDate >= Begin.Value.Value).Select(x => x.Id).ToList();
-				query = query.Where(x => x.RejectId.HasValue && rejectUpLetters.Contains(x.RejectId.Value));
-			}
-			if (End.HasValue && End.Value.HasValue)
+			var ids = Link.Select(x => x.Item1).Distinct().ToList();
+			var items = StatelessSession.Query<Stock>().OrderBy(y => y.Product).ToList();
+			foreach (var item in items)
 			{
-				var end = End.Value.Value.AddDays(1);
-				var rejectDownLetters = StatelessSession.Query<Reject>().Where(x => x.LetterDate <= end).Select(x => x.Id).ToList();
-				query = query.Where(x => x.RejectId.HasValue && rejectDownLetters.Contains(x.RejectId.Value));
+				if (item.RejectStatus == RejectStatus.Unknown && ids.Contains(item.Id))
+					item.RejectStatus = RejectStatus.Perhaps;
 			}
 
-			Items.Value = query.OrderBy(y => y.Product).ToList();
+			if (IsPerhaps)
+				items = items.Where(x => x.RejectStatus == RejectStatus.Perhaps).ToList();
+			else if (IsDefective)
+				items = items.Where(x => x.RejectStatus == RejectStatus.Defective).ToList();
+
+			if (Begin.HasValue && Begin.Value.HasValue)
+			{
+				var rejects = StatelessSession.Query<Reject>()
+					.Where(x => !x.Canceled && x.LetterDate >= Begin.Value.Value && x.LetterDate < Begin.Value.Value.AddDays(1))
+					.Select(x => x.Id)
+					.ToList();
+				var filteredIds = Link.Where(x => rejects.Contains(x.Item2)).Select(x => x.Item1).ToList();
+				items = items.Where(x => filteredIds.Contains(x.Id)).ToList();
+			}
+
+			Items.Value = items;
 		}
 
 		public IResult ExportExcel()
@@ -143,5 +153,64 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 
+
+		private List<Tuple<uint, uint>> CalcLinks()
+		{
+			var result = Session
+			.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId
+												from Stocks s
+												join Rejects r on s.ProducerId = r.ProducerId and s.ProductId = r.ProductId and s.Seria = r.Series
+												where r.Canceled = 0 
+												and s.ProducerId is not null 
+												and s.ProductId is not null
+												and s.Seria is not null
+												union all
+												select s.Id as StockId, r.Id as RejectId
+												from Stocks s
+												join Rejects r on s.ProductId = r.ProductId and s.Seria = r.Series
+												where r.Canceled = 0 
+												and (s.ProducerId is null or r.ProducerId is null)
+												and s.ProductId is not null
+												and s.Seria is not null
+												union all
+												select s.Id as StockId, r.Id as RejectId
+												from Stocks s
+												join Rejects r on s.Product = r.Product and s.Seria = r.Series
+												where r.Canceled = 0 
+												and s.ProductId is null
+												and s.Product is not null
+												and s.Seria is not null")
+			.List<object[]>()
+			.Select(x => Tuple.Create(Convert.ToUInt32(x[0]), Convert.ToUInt32(x[1])))
+			.Distinct()
+			.ToList();
+
+			return result;
+
+
+			//// по идентификаторам производителя, продукта и серии
+			//var set1 = (from reject in StatelessSession.Query<Reject>()
+			//					 join stock in StatelessSession.Query<Stock>() 
+			//					 on reject.ProducerId equals stock.ProducerId
+			//					 where reject.Canceled == false 
+			//					 && reject.ProductId == stock.ProductId
+			//					 && reject.Series == stock.Seria
+			//					 && stock.ProducerId.HasValue
+			//					 && stock.ProductId.HasValue
+			//					 && stock.Seria != null
+			//					 select Tuple.Create(reject.Id, stock.Id)).ToList();
+			//r.AddRange(set1);
+
+		}
+
+		private void UpdateStatus()
+		{
+			Session.CreateSQLQuery(@"update Stocks set RejectStatus = 0 where RejectStatus = 1").ExecuteUpdate();
+
+			//var ids = Link.Select(x => x.Item1).Distinct().Implode(x => x);
+			//Session.CreateSQLQuery("update Stocks set RejectStatus = 1 where RejectStatus = 0 and Id in (:ids)")
+			//.SetParameter("ids", ids)
+			//.ExecuteUpdate();
+		}
 	}
 }
