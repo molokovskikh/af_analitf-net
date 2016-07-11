@@ -249,6 +249,7 @@
     <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="Helpers\ShellFile.cs" />
     <Compile Include="Helpers\SqlMapper.cs" />
+    <Compile Include="Helpers\SqlMapperExtensions.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
@@ -266,6 +267,7 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\PriceTag.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -363,6 +365,7 @@
     <Compile Include="ViewModels\Diadok\Sign.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
+    <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -453,6 +456,7 @@
     <Compile Include="Views\Diadok\Sign.xaml.cs">
       <DependentUpon>Sign.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\CanvasPanel.cs" />
     <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
       <DependentUpon>CreateWaybill.xaml</DependentUpon>
     </Compile>
@@ -467,6 +471,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PostUpdate.xaml.cs">
       <DependentUpon>PostUpdate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
+      <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -690,6 +697,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
