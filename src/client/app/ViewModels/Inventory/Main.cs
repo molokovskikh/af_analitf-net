@@ -1,6 +1,7 @@
 ﻿using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using Caliburn.Micro;
+using System.Windows;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -26,6 +27,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void ReceivingOrders()
 		{
 			ActiveItem = new ReceivingOrders(this);
+		}
+
+		public void Checks()
+		{
+			ActiveItem = new Checks(this);
 		}
 
 		public static IScreen Navigate(uint? receivingOrderId)
