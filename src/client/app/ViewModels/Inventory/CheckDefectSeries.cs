@@ -44,7 +44,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Begin = new NotifyValue<DateTime?>();
 
 			Link = CalcLinks();
-			UpdateStatus();
 		}
 
 		protected override void OnInitialize()
@@ -186,31 +185,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			.ToList();
 
 			return result;
-
-
-			//// по идентификаторам производителя, продукта и серии
-			//var set1 = (from reject in StatelessSession.Query<Reject>()
-			//					 join stock in StatelessSession.Query<Stock>() 
-			//					 on reject.ProducerId equals stock.ProducerId
-			//					 where reject.Canceled == false 
-			//					 && reject.ProductId == stock.ProductId
-			//					 && reject.Series == stock.Seria
-			//					 && stock.ProducerId.HasValue
-			//					 && stock.ProductId.HasValue
-			//					 && stock.Seria != null
-			//					 select Tuple.Create(reject.Id, stock.Id)).ToList();
-			//r.AddRange(set1);
-
-		}
-
-		private void UpdateStatus()
-		{
-			Session.CreateSQLQuery(@"update Stocks set RejectStatus = 0 where RejectStatus = 1").ExecuteUpdate();
-
-			//var ids = Link.Select(x => x.Item1).Distinct().Implode(x => x);
-			//Session.CreateSQLQuery("update Stocks set RejectStatus = 1 where RejectStatus = 0 and Id in (:ids)")
-			//.SetParameter("ids", ids)
-			//.ExecuteUpdate();
 		}
 	}
 }
