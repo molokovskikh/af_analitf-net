@@ -200,6 +200,8 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsFullyStocked", Background("#25BC37") },
+				{ "IsPartialyStocked", Background("#94BA99") },
 			};
 		}
 

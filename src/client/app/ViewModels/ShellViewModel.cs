@@ -578,6 +578,11 @@ namespace AnalitF.Net.Client.ViewModels
 			return model.IsCredentialsChanged;
 		}
 
+		public void ShowInventory()
+		{
+			NavigateRoot(new Inventory.Main());
+		}
+
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
 
 		public void ShowOrderLines()

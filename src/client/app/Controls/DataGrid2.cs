@@ -177,7 +177,6 @@ namespace AnalitF.Net.Client.Controls
 			column.Visibility = (bool)e.NewValue ? Visibility.Visible : Visibility.Collapsed;
 		}
 
-
 		protected override void OnSorting(DataGridSortingEventArgs eventArgs)
 		{
 			base.OnSorting(eventArgs);

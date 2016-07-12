@@ -636,7 +636,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return new DialogResult(new GridConfig(grid));
 		}
 
-		public IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
+		public virtual IObservable<T> RxQuery<T>(Func<IStatelessSession, T> select)
 		{
 			var task = new Task<T>(() => {
 				if (Env.Factory == null)

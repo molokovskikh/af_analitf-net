@@ -62,8 +62,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
-
-
 		}
 
     public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -305,7 +303,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"Отчет по розничным надбавкам к ценам на ЖВНЛП за год", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
-		}		
+		}
 
 		public bool CanPrint => true;
 

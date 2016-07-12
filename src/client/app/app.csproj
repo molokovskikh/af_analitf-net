@@ -266,6 +266,14 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\ReceivingLine.cs" />
+    <Compile Include="Models\Inventory\ReceivingOrder.cs" />
+    <Compile Include="Models\Inventory\Stock.cs" />
+    <Compile Include="Models\Inventory\StockTotal.cs" />
+    <Compile Include="Models\Print\StockDocument.cs" />
+    <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
+    <Compile Include="Models\Print\StockPriceTagDocument.cs" />
+    <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -361,9 +369,17 @@
     <Compile Include="ViewModels\Diadok\Revocation.cs" />
     <Compile Include="ViewModels\Diadok\Resolution.cs" />
     <Compile Include="ViewModels\Diadok\Sign.cs" />
+    <Compile Include="ViewModels\Dialogs\EditStock.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
+    <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
+    <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
+    <Compile Include="ViewModels\Inventory\InventoryAction.cs" />
+    <Compile Include="ViewModels\Inventory\Main.cs" />
+    <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
+    <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
+    <Compile Include="ViewModels\Inventory\Stocks.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
@@ -431,6 +447,9 @@
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ConfirmQuantity.xaml.cs">
+      <DependentUpon>ConfirmQuantity.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Debug.xaml.cs">
       <DependentUpon>Debug.xaml</DependentUpon>
     </Compile>
@@ -459,6 +478,9 @@
     <Compile Include="Views\Dialogs\DocModel.xaml.cs">
       <DependentUpon>DocModel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\EditStock.xaml.cs">
+      <DependentUpon>EditStock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\GridConfig.xaml.cs">
       <DependentUpon>GridConfig.xaml</DependentUpon>
     </Compile>
@@ -467,6 +489,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\PostUpdate.xaml.cs">
       <DependentUpon>PostUpdate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\SelectStockPeriod.xaml.cs">
+      <DependentUpon>SelectStockPeriod.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -482,6 +507,21 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\InventoryAction.xaml.cs">
+      <DependentUpon>InventoryAction.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
+      <DependentUpon>ReceivingDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReceivingOrders.xaml.cs">
+      <DependentUpon>ReceivingOrders.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Stocks.xaml.cs">
+      <DependentUpon>Stocks.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\AddAwaited.xaml.cs">
       <DependentUpon>AddAwaited.xaml</DependentUpon>
@@ -645,6 +685,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ConfirmQuantity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Debug.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -681,6 +725,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Dialogs\EditStock.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\GridConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -690,6 +738,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\SelectStockPeriod.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -710,6 +762,26 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Feedback.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\InventoryAction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\MainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReceivingDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReceivingOrders.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Stocks.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -966,6 +1038,7 @@
     <Resource Include="Assets\images\zoom_in.ico" />
     <Resource Include="Assets\images\copy.ico" />
     <Resource Include="Assets\images\printer.ico" />
+    <Resource Include="Assets\images\Stocks_32.ico" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

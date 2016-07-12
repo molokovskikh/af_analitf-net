@@ -13,6 +13,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
 using NPOI.SS.UserModel;
@@ -21,6 +22,25 @@ using VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment;
 
 namespace AnalitF.Net.Client.ViewModels
 {
+	public class ConfirmQuantity : Screen, ICancelable
+	{
+		public ConfirmQuantity(WaybillLine line)
+		{
+			DisplayName = "Подтвердите количество";
+			Quantity = line.Quantity.GetValueOrDefault() - line.ReceivedQuantity;
+			WasCancelled = true;
+		}
+
+		public int Quantity { get; set; }
+		public bool WasCancelled { get; set; }
+
+		public void OK()
+		{
+			WasCancelled = false;
+			TryClose();
+		}
+	}
+
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
@@ -129,7 +149,30 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill = Session.Load<Waybill>(id);
 
+			Waybill.Lines.Each(x => x.Receive(x.Quantity.GetValueOrDefault()));
 			Calculate();
+			Waybill.Lines.Select(x => x.Changed().Where(y => y.EventArgs.PropertyName == "IsReadyForStock"))
+				.Merge()
+				.Subscribe(x => {
+					var line = (WaybillLine)x.Sender;
+					if (line.SkipRequest)
+						return;
+					if (line.IsReadyForStock) {
+						var confirmQuantity = new ConfirmQuantity(line);
+						var dialog = new DialogResult(confirmQuantity);
+						dialog.Completed += (sender, args) => {
+							if (confirmQuantity.WasCancelled || confirmQuantity.Quantity <= 0) {
+								line.Receive(0);
+								return;
+							}
+							line.Receive(confirmQuantity.Quantity);
+						};
+						ResultsSink.OnNext(dialog);
+					} else {
+						line.Receive(0);
+					}
+				});
+
 
 			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());
 			Taxes = new List<ValueDescription<int?>> {
@@ -482,6 +525,41 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsRejectVisible.Value = false;
 		}
+
+		public void Stock()
+		{
+			Inventory.Stocks.StockWaybill(Session, Waybill);
+			Manager.Notify("Накладная оприходована");
+		}
+
+		public IEnumerable<IResult> EnterLine()
+		{
+			var line = CurrentLine.Value as WaybillLine;
+			if (line == null)
+				yield break;
+			var quantity = new ConfirmQuantity(line);
+			yield return new DialogResult(quantity);
+			line.Receive(quantity.Quantity);
+		}
+
+		//public IEnumerable<IResult> Stock()
+		//{
+		//	var action = new Inventory.InventoryAction();
+		//	yield return new DialogResult(action);
+		//	if (action.New) {
+		//		var screen = new Inventory.Main();
+		//		screen.NewReceivingOrder(Waybill.Id);
+		//		Shell.NavigateRoot(screen);
+		//	} else {
+		//		var selectOrder = new Inventory.ReceivingOrders();
+		//		yield return new DialogResult(selectOrder);
+		//		if (selectOrder.CurrentItem.Value == null)
+		//			yield break;
+		//		var screen = new Inventory.Main();
+		//		screen.OpenReceivingOrder(selectOrder.CurrentItem.Value.Id, Waybill.Id);
+		//		Shell.NavigateRoot(screen);
+		//	}
+		//}
 
 #if DEBUG
 		public override object[] GetRebuildArgs()

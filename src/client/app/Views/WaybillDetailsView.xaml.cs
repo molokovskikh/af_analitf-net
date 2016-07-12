@@ -79,25 +79,6 @@ namespace AnalitF.Net.Client.Views
 			};
 			lines.IsReadOnly = false;
 			lines.Name = "Lines";
-			var check = new CheckBox {
-				IsChecked = true,
-				Focusable = false,
-				VerticalAlignment = VerticalAlignment.Center,
-				Name = "CheckAllPrint"
-			};
-			var textBlock = new TextBlock {
-				Text = "Печатать"
-			};
-			var header = new StackPanel {
-				Orientation = Orientation.Horizontal,
-				Children = { check, textBlock }
-			};
-			check.Checked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
-			};
-			check.Unchecked += (sender, args) => {
-				lines.Items.OfType<WaybillLine>().Each(l => l.Print = check.IsChecked.GetValueOrDefault());
-			};
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Наименование",
 				Binding = new Binding("Product"),
@@ -114,23 +95,21 @@ namespace AnalitF.Net.Client.Views
 				Binding = new Binding("Country"),
 				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
 			});
-			var printColumn = new CustomDataGridColumn {
-				Header = header,
-				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
-				SortMemberPath = "Print",
-				Generator = (c, i) => {
-					var el = new CheckBox {
-						VerticalAlignment = VerticalAlignment.Center,
-						HorizontalAlignment = HorizontalAlignment.Center
-					};
-					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding("Print") {
-						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+			lines.Columns.Add(CheckBoxColumn("Печатать", "Print",
+				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x)));
+			var column = CheckBoxColumn("Оприходовать", "IsReadyForStock",
+				x => {
+					lines.Items.OfType<WaybillLine>().Each(l => {
+						l.Receive(x ? l.Quantity.GetValueOrDefault() : 0);
 					});
-					return el;
-				}
-			};
-			DataGridHelper.SetColumnDisplayName(printColumn, "Печатать");
-			lines.Columns.Add(printColumn);
+				});
+			lines.Columns.Add(column);
+			lines.Columns.Add(new DataGridTextColumnEx {
+				Header = "Оприходовано",
+				Binding = new Binding("ReceivedQuantity"),
+				SortMemberPath = "ReceivedQuantity",
+				Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+			});
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Срок годности",
 				Binding = new Binding("Period"),
@@ -258,6 +237,7 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Реальная наценка");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная цена");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Заказ");
+			DataGridHelper.CalculateColumnWidth(grid, "00000", "Оприходовано");
 			DataGridHelper.CalculateColumnWidth(grid, "00000.00", "Розничная сумма");
 			DataGridHelper.CalculateColumnWidth(grid, "0000000000000", "Штрихкод");
 
@@ -283,6 +263,47 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Цена");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Заказ");
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
+		}
+
+		private DataGridColumn CheckBoxColumn(string header, string member, Action<bool> checkAll)
+		{
+			var column = new CustomDataGridColumn {
+				Header = CheckAllHeader(header, checkAll),
+				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
+				SortMemberPath = member,
+				Generator = (c, i) => {
+					var el = new CheckBox {
+						VerticalAlignment = VerticalAlignment.Center,
+						HorizontalAlignment = HorizontalAlignment.Center
+					};
+					BindingOperations.SetBinding(el, CheckBox.IsCheckedProperty, new Binding(member) {
+						UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+					});
+					return el;
+				}
+			};
+			DataGridHelper.SetColumnDisplayName(column, header);
+			return column;
+		}
+
+		private StackPanel CheckAllHeader(string name, Action<bool> checkAll)
+		{
+			var check = new CheckBox {
+				IsChecked = true,
+				Focusable = false,
+				VerticalAlignment = VerticalAlignment.Center,
+				Name = "CheckAllPrint"
+			};
+			var textBlock = new TextBlock {
+				Text = name
+			};
+			var header = new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = {check, textBlock}
+			};
+			check.Checked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
+			check.Unchecked += (sender, args) => checkAll(check.IsChecked.GetValueOrDefault());
+			return header;
 		}
 
 		public void ApplyStyles()

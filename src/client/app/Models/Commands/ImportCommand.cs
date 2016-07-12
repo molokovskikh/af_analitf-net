@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//вычисляемые поля, поиск забраковки
 					"IsRejectCanceled", "IsRejectNew", "RejectId",
 					//вычисления розничной цены
-					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost",
+					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost", "ReceivedQuantity"
 				}},
 				{"Mails",new [] {
 					//локальные поля
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}},
 				{"SentOrders", new [] {
 					//локальные поля
-					"Id", "LinesCount", "Sum", "PersonalComment"
+					"Id", "LinesCount", "Sum", "PersonalComment", "ReceivingOrderId"
 				}}
 			};
 

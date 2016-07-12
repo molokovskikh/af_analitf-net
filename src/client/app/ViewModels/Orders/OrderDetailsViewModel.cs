@@ -200,5 +200,10 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			OfferCommitted();
 			base.TryClose();
 		}
+
+		public void OpenReceivingOrder()
+		{
+			Shell.NavigateRoot(Inventory.Main.Navigate(((SentOrder)Order).ReceivingOrderId));
+		}
 	}
 }

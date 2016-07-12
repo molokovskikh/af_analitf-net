@@ -43,43 +43,44 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Taxes" DisplayMemberPath="Name" />
 				</StackPanel>
 			</StackPanel>
-			<Grid Margin="4, 0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
+      <Grid Margin="4, 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
           <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-				<Grid.RowDefinitions>
-					<RowDefinition></RowDefinition>
-					<RowDefinition></RowDefinition>
-				</Grid.RowDefinitions>
-				<Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
-					Печать ценников
-				</Button>
-				<Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
-					Печать реестра
-				</Button>
-				<Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
-					Печать накладной
-				</Button>
-				<Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">
-					Печать счет-фактуры
-				</Button>
-				<Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
-					Стеллажная карта
-				</Button>
-				<Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
-					Реестр в Excel
-				</Button>
-                <Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
-									Накладная на внутреннее перемещение
-                </Button>
-        <Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
-          Накладная в Excel
+        <Grid.RowDefinitions>
+          <RowDefinition></RowDefinition>
+          <RowDefinition></RowDefinition>
+          <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Button Grid.Column="0" Grid.Row="0" Name="PrintPriceTags" Style="{StaticResource FilterElement}">
+          Печать ценников
+        </Button>
+        <Button Grid.Column="0" Grid.Row="1" Name="PrintRegistry" Style="{StaticResource FilterElement}">
+          Печать реестра
+        </Button>
+        <Button Grid.Column="1" Grid.Row="0" Name="PrintWaybill" Style="{StaticResource FilterElement}">
+          Печать накладной
+        </Button>
+        <Button Grid.Column="1" Grid.Row="1" Name="PrintInvoice" Style="{StaticResource FilterElement}">
+          Печать счет-фактуры
+        </Button>
+        <Button Grid.Column="2" Grid.Row="0" Name="PrintRackingMap" Style="{StaticResource FilterElement}">
+          Стеллажная карта
+        </Button>
+        <Button Grid.Column="2" Grid.Row="1" Name="ExportRegistry" Style="{StaticResource FilterElement}">
+          Реестр в Excel
+        </Button>
+        <Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
+          Накладная на внутреннее перемещение
+        </Button>
+        <Button Grid.Column="0" Grid.Row="2" Name="Stock" Style="{StaticResource FilterElement}">
+          Оприходовать
         </Button>
       </Grid>
-		</StackPanel>
+    </StackPanel>
 
 		<StackPanel Grid.Row="1" Style="{StaticResource FilterPanel}">
 			<Grid>
@@ -96,19 +97,19 @@
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
-				<Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Накладная №:</Label>
+				<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource DetailsLabel}">Накладная №:</Label>
 				<Label Grid.Row="0" Grid.Column="1" Name="Waybill_Id" FontWeight="Bold" />
 
-				<Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">№ поставщика:</Label>
+				<Label Grid.Row="1" Grid.Column="0" Style="{StaticResource DetailsLabel}">№ поставщика:</Label>
 				<Label Grid.Row="1" Grid.Column="1" Name="Waybill_ProviderDocumentId" FontWeight="Bold" />
 
-				<Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">от:</Label>
+				<Label Grid.Row="0" Grid.Column="2" Style="{StaticResource DetailsLabel}">от:</Label>
 				<Label Grid.Row="0" Grid.Column="3" Name="Waybill_DocumentDate" FontWeight="Bold" />
 
-				<Label Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" FontWeight="Bold">Позиций:</Label>
+				<Label Grid.Row="1" Grid.Column="2" Style="{StaticResource DetailsLabel}">Позиций:</Label>
 				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold" />
 
-				<Label Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right" FontWeight="Bold">поставщик:</Label>
+				<Label Grid.Row="0" Grid.Column="4" Style="{StaticResource DetailsLabel}">поставщик:</Label>
 				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_SupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>

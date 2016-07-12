@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Reports;
 using Common.MySql;
 using Common.Tools;
@@ -201,6 +202,12 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				m.Bag(o => o.Lines, c => {
 					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
 					c.Inverse(true);
+				});
+			});
+			mapper.Class<ReceivingOrder>(m => {
+				m.Bag(o => o.Lines, c => {
+					c.Cascade(Cascade.DeleteOrphans | Cascade.All);
+					c.Inverse(false);
 				});
 			});
 			mapper.Class<Waybill>(m => {

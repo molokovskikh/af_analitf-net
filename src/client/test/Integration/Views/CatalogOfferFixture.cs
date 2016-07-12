@@ -17,6 +17,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
+using AnalitF.Net.Client.ViewModels.Inventory;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -68,7 +69,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test(Description = "Часто в результате переименований view теряется, ищем подобные ошибки")]
 		public void Check_view_binding()
 		{
-			var ignore = new[] { typeof(BaseShell), typeof(BaseScreen) };
+			var ignore = new[] { typeof(BaseShell), typeof(BaseScreen), typeof(BaseScreen2) };
 			var viewModels = typeof(AppBootstrapper).Assembly.GetTypes()
 				.Where(t => !t.IsAbstract && !t.IsInterface && typeof(IScreen).IsAssignableFrom(t) && !ignore.Contains(t));
 			foreach (var type in viewModels) {
