@@ -17,6 +17,5 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum => Quantity * Cost;
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }
-		public virtual uint CheckId { get; set; }
 	}
 }

@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						.FirstOrDefault(y => y.Id == id))
 					.Subscribe(Header);
 				RxQuery(x => {
-						return x.Query<CheckLine>().Where(y => y.CheckId == id)
+						return x.Query<CheckLine>()
 							.ToList()
 							.ToObservableCollection();
 					})
