@@ -24,6 +24,14 @@
     </ToolBar>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items">
       <DataGrid.Columns>
+        <controls:DataGridTextColumnEx Header="ИД" Binding="{Binding Id}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Отдел" Binding="{Binding Department}" Width="*" />
+        <controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding DiscontSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding Sum}" Width="*" />
       </DataGrid.Columns>
     </controls:DataGrid2>
   </Grid>

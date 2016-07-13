@@ -22,22 +22,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			this.id = id;
 		}
 
-		public NotifyValue<ReceivingOrder> Header { get; set; }
-		public NotifyValue<ReceivingLine> CurrentLine { get; set; }
-		public NotifyValue<ObservableCollection<ReceivingLine>> Lines { get; set; }
+		public NotifyValue<Check> Header { get; set; }
+		public NotifyValue<CheckLine> CurrentLine { get; set; }
+		public NotifyValue<ObservableCollection<CheckLine>> Lines { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
 			if (Header.Value == null) {
-				RxQuery(x => x.Query<ReceivingOrder>()
-						.Fetch(y => y.Supplier)
-						.Fetch(y => y.Address)
+				RxQuery(x => x.Query<Check>()
 						.FirstOrDefault(y => y.Id == id))
 					.Subscribe(Header);
 				RxQuery(x => {
-						return x.Query<ReceivingLine>().Where(y => y.ReceivingOrderId == id).OrderBy(y => y.Product)
+						return x.Query<CheckLine>().Where(y => y.CheckId == id)
 							.ToList()
 							.ToObservableCollection();
 					})

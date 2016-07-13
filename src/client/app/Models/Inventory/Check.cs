@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Discont { get; set; }
 		public virtual uint Change { get; set; }
 		public virtual bool Cancelled { get; set; }
-		public virtual decimal Sum => RetailSum - DiscontSum;
+		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal DiscontSum  { get; set; }
 

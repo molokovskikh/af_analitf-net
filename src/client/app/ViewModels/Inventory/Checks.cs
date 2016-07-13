@@ -27,6 +27,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
+		public NotifyValue<List<Check>> Items { get; set; }
+		public NotifyValue<Check> CurrentItem { get; set; }
 
 		protected override void OnInitialize()
 		{

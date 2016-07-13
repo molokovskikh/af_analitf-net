@@ -266,6 +266,8 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\Check.cs" />
+    <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\ReceivingLine.cs" />
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
