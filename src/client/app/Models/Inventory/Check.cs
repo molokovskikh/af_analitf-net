@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+
+namespace AnalitF.Net.Client.Models.Inventory
+{
+	public enum CheckType
+	{
+		[Description("Продажа покупателю")] SaleBuyer,
+	}
+	public enum PaymentType
+	{
+		[Description("Наличный рубль")] Cash,
+	}
+	public enum SaleType
+	{
+		[Description("Полная стоимость")] FullCost,
+	}
+	class Check
+	{
+		public Check()
+		{
+			Lines = new List<CheckLine>();
+		}
+
+		public virtual IList<CheckLine> Lines { get; set; }
+
+		public virtual uint Id { get; set; }
+		public virtual CheckType CheckType { get; set; }
+		public virtual uint Number { get; set; }
+		public virtual DateTime Date { get; set; }
+		public virtual DateTime ChangeOpening { get; set; }
+
+		//Вероятно стоит заменить строки на соответствующие классы
+		public virtual string Clerk { get; set; }
+		public virtual string Department { get; set; }
+
+		public virtual uint KKM { get; set; }
+		public virtual PaymentType PaymentType { get; set; }
+		public virtual SaleType SaleType { get; set; }
+		public virtual uint Discont { get; set; }
+		public virtual uint Change { get; set; }
+		public virtual bool Cancelled { get; set; }
+		public virtual decimal Sum => RetailSum - DiscontSum;
+		public virtual decimal RetailSum { get; set; }
+		public virtual decimal DiscontSum  { get; set; }
+
+		//Эти поля были пустыми
+		public virtual string SaleCheck { get; set; }
+		public virtual string DiscountCard { get; set; }
+		public virtual string Recipe { get; set; }
+		public virtual string Agent { get; set; }
+
+	}
+}
