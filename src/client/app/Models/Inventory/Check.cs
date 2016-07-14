@@ -14,6 +14,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		[Description("Наличный рубль")] Cash,
 	}
+	public enum Status
+	{
+		[Description("Закрыт")] Closed,
+		[Description("Открыт")] Open,
+	}
 	public enum SaleType
 	{
 		[Description("Полная стоимость")] FullCost,
@@ -32,6 +37,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Number { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime ChangeOpening { get; set; }
+		public virtual Status Status { get; set; }
 
 		//Вероятно стоит заменить строки на соответствующие классы
 		public virtual string Clerk { get; set; }
@@ -41,7 +47,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual PaymentType PaymentType { get; set; }
 		public virtual SaleType SaleType { get; set; }
 		public virtual uint Discont { get; set; }
-		public virtual uint Change { get; set; }
+		public virtual uint ChangeId { get; set; }
+		public virtual uint ChangeNumber { get; set; }
 		public virtual bool Cancelled { get; set; }
 		public virtual decimal Sum { get; set; }
 		public virtual decimal RetailSum { get; set; }
