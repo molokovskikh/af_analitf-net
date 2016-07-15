@@ -13,6 +13,11 @@ using Diadoc.Api.Http;
 using Diadoc.Api.Proto.Documents;
 using Diadoc.Api.Proto.Events;
 using Diadoc.Api.Proto.Invoicing;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Security.Cryptography.X509Certificates;
+using System.Windows.Media;
+using System.Globalization;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -39,13 +44,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			};
 		}
 
-		public MessagePatchToPost PatchInvoice(ReceiptAttachment receipattachment)
+		public MessagePatchToPost Patch(params ReceiptAttachment[] receipattachments)
 		{
-			return new MessagePatchToPost {
+			var msg = new MessagePatchToPost {
 				BoxId = BoxId,
-				MessageId = Entity.DocumentInfo.MessageId,
-				Receipts  = { receipattachment }
+				MessageId = Entity.DocumentInfo.MessageId
 			};
+			msg.Receipts.AddRange(receipattachments);
+			return msg;
 		}
 
 		public Entity Entity { get; set; }
@@ -55,35 +61,47 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 	public abstract class DiadokAction : BaseScreen
 	{
-		public bool Success;
+		public NotifyValue<bool> isDone { get; set;}
 
 		public DiadokAction(ActionPayload payload)
 		{
+			isDone = new NotifyValue<bool>(false);
 			InitFields();
 			Payload = payload;
+			ShortFileName = $"{Payload.Entity.FileName.Substring(0, 25)}...{Payload.Entity.FileName.Substring(Payload.Entity.FileName.Length - 25)}";
 			IsEnabled.Value = true;
+			Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 		}
 
+		public X509Certificate2 Cert { get; protected set;}
 		public NotifyValue<bool> IsEnabled { get; set; }
 		public ActionPayload Payload { get; set; }
+		public string ShortFileName { get; set; }
+
+		protected void BeginAction()
+		{
+			IsEnabled.Value = false;
+		}
+
+		protected void EndAction()
+		{
+			IsEnabled.Value = true;
+			isDone.Value = true;
+			TryClose();
+		}
 
 		public async Task Async(Action<string> action)
 		{
 			try {
-				IsEnabled.Value = false;
 				await TaskEx.Run(() => action(Payload.Token));
-				Success = true;
-				TryClose();
 			} catch(Exception e) {
 				Log.Error($"Не удалось обновить документ {Payload.Entity.EntityId}", e);
 				Manager.Error(ErrorHelper.TranslateException(e)
 					?? "Не удалось выполнить операцию, попробуйте повторить позднее.");
-			} finally {
-				IsEnabled.Value = true;
 			}
 		}
 
-		protected bool TrySign(SignedContent content)
+		public bool TrySign(SignedContent content)
 		{
 			if (Settings.Value.DebugUseTestSign) {
 				content.SignWithTestSignature = true;
@@ -106,8 +124,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				return true;
 
 			try {
-				var cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
-				sign = new WinApiCrypt().Sign(content, cert.RawData);
+				sign = new WinApiCrypt().Sign(content, Cert.RawData);
 			}
 			catch (Win32Exception e) {
 				Log.Error($"Ошибка при подписании документа {Payload.Entity.EntityId}", e);
@@ -123,203 +140,367 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		}
 	}
 
+	public class FormValidation: ValidationRule
+	{
+		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+		{
+			// Редактор XAML почему то передает в value массив, а CLR передает модель
+			try
+			{
+				BindingGroup bindingGroup = (BindingGroup)value;
+				Sign model = bindingGroup.Items[0] as Sign;
+
+				string error = "Заполнены не все обязательные поля:";
+
+				if(!string.IsNullOrEmpty(model.ACPTFirstName) ||
+					!string.IsNullOrEmpty(model.ACPTSurename) ||
+					!string.IsNullOrEmpty(model.ACPTPatronimic) ||
+					!string.IsNullOrEmpty(model.ACPTJobTitle)
+					)
+				{
+					if(string.IsNullOrEmpty(model.ACPTSurename))
+						error += "\nФамилия";
+					if(string.IsNullOrEmpty(model.ACPTFirstName))
+						error += "\nИмя";
+					return new ValidationResult(false, error);
+				}
+
+				if (!string.IsNullOrEmpty(model.ATRNum) ||
+						model.ATRDate != DateTime.MinValue ||
+						!string.IsNullOrEmpty(model.ATROrganization) ||
+						!string.IsNullOrEmpty(model.ATRFirstName) ||
+						!string.IsNullOrEmpty(model.ATRSurename) ||
+						!string.IsNullOrEmpty(model.ATRPatronymic) ||
+						!string.IsNullOrEmpty(model.ATRAddInfo))
+				{
+					if(string.IsNullOrEmpty(model.ATRNum))
+						error += "\nНомер";
+					if(model.ATRDate == DateTime.MinValue)
+						error += "\nДата";
+					return new ValidationResult(false, error);
+				}
+
+			}
+			catch (Exception ex)
+			{
+				return new ValidationResult(false, "Заполнены не все обязательные поля.");
+			}
+
+			return ValidationResult.ValidResult;
+		}
+	}
+
 	public class Sign : DiadokAction
 	{
 		public Sign(ActionPayload payload)
 			: base(payload)
 		{
+			Torg12TitleVisible = Payload.Entity.AttachmentType == AttachmentType.XmlTorg12;
+
+			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
+
+			SignerFirstName = certFields["CN"];
+			SignerSureName = certFields["CN"];
+			SignerPatronimic = certFields["CN"];
+			SignerINN = "9656279962";//certFields["CN"];
+
+			RCVFIO.Value = $"{SignerSureName} {SignerFirstName} {SignerPatronimic}";
+			RCVJobTitle.Value = certFields["CN"];
+			RCVDate.Value = DateTime.Now;
+
+			LikeReciever.Subscribe(x => {
+				if(x)
+				{
+					ACPTFirstName.Value = SignerFirstName;
+					ACPTSurename.Value = SignerSureName;
+					ACPTPatronimic.Value = SignerPatronimic;
+					ACPTJobTitle.Value = RCVJobTitle.Value;
+				}
+			});
+
+			ByAttorney.Subscribe(x => {
+				if(!x)
+				{
+					ATRNum.Value = "";
+					ATROrganization.Value = "";
+					ATRSurename.Value = "";
+					ATRFirstName.Value = "";
+					ATRPatronymic.Value = "";
+					ATRAddInfo.Value = "";
+				}
+			});
+
+		}
+
+		public bool Torg12TitleVisible { get;set;}
+
+		string SignerFirstName;
+		string SignerSureName;
+		string SignerPatronimic;
+		string SignerINN;
+
+		public NotifyValue<string> RCVFIO { get; set;}
+		public NotifyValue<string> RCVJobTitle { get; set;}
+		public NotifyValue<DateTime> RCVDate { get; set;}
+
+		public NotifyValue<bool> LikeReciever { get; set;}
+		public NotifyValue<string> ACPTSurename { get; set;}
+		public NotifyValue<string> ACPTFirstName { get; set;}
+		public NotifyValue<string> ACPTPatronimic { get; set;}
+		public NotifyValue<string> ACPTJobTitle { get; set;}
+
+		public NotifyValue<bool> ByAttorney { get; set;}
+		public NotifyValue<string> ATRNum { get; set;}
+		public NotifyValue<DateTime> ATRDate { get; set;}
+		public NotifyValue<string> ATROrganization { get; set;}
+		public NotifyValue<string> ATRSurename { get; set;}
+		public NotifyValue<string> ATRFirstName { get; set;}
+		public NotifyValue<string> ATRPatronymic { get; set;}
+		public NotifyValue<string> ATRAddInfo { get; set;}
+
+		public NotifyValue<string> Comment { get; set;}
+
+		Official GetRevicedOfficial()
+		{// тоже что и SignerDetails
+			Official ret = new Official();
+			ret.FirstName = SignerFirstName;
+			ret.Surname = SignerSureName;
+			ret.Patronymic = SignerPatronimic;
+			ret.JobTitle = RCVJobTitle;
+			return ret;
+		}
+
+		Official GetAcceptetOfficial()
+		{
+			Official ret = null;
+			if(!string.IsNullOrEmpty(ACPTFirstName) && !string.IsNullOrEmpty(ACPTSurename))
+			{
+				ret = new Official();
+				ret.FirstName = ACPTFirstName;
+				ret.Surname = ACPTSurename;
+				ret.Patronymic = ACPTPatronimic;
+				ret.JobTitle = ACPTJobTitle;
+				return ret;
+			}
+			return ret;
+		}
+
+		Signer GetSigner()
+		{
+			Signer sg = new Signer();
+			sg.SignerCertificate = Cert.RawData;
+			sg.SignerCertificateThumbprint = Cert.Thumbprint;
+			sg.SignerDetails = GetSignerDetails();
+			return sg;
+		}
+
+		SignerDetails GetSignerDetails()
+		{
+			SignerDetails ret = new SignerDetails();
+			ret.FirstName = SignerFirstName;
+			ret.Surname = SignerSureName;
+			ret.Patronymic = SignerPatronimic;
+			ret.JobTitle = RCVJobTitle;
+			ret.Inn = SignerINN;
+			return ret;
+		}
+
+		Attorney GetAttorney()
+		{
+			if(!string.IsNullOrEmpty(ATRNum) && ATRDate.Value != DateTime.MinValue)
+			{
+				Attorney ret = new Attorney();
+				ret.Number = ATRNum;
+				ret.Date = ATRDate.Value.ToString("dd.MM.yyyy");
+				ret.IssuerOrganizationName = ATROrganization;
+				ret.IssuerPerson = new Official();
+				ret.IssuerPerson.FirstName = ATRSurename;
+				ret.IssuerPerson.Surname = ATRSurename;
+				ret.IssuerPerson.Patronymic = ATRPatronymic;
+				ret.IssuerPerson.JobTitle = ATRAddInfo;
+				return ret;
+			}
+			return null;
+		}
+
+		Entity GetDateConfirmationStep7(Message msg)
+		{
+			Entity invoice = msg.Entities.FirstOrDefault(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
+			Entity invoiceReciept = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoice?.EntityId && i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceReceipt);
+			Entity invoiceRecieptConfirmation = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoiceReciept?.EntityId && i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
+			return invoiceRecieptConfirmation;
 		}
 
 		public async Task Save()
 		{
+			BeginAction();
 
-			Signer sg = new Signer();
-
-
-
-				Official off1 = new Official();// {"Misha", "Specialist", "Gennadevich", "Shunko" },
-				off1.FirstName = "Misha";
-				off1.JobTitle = "Specialist";
-				off1.Patronymic = "Gennadevich";
-				off1.Surname = "Shunko";
-
-				Official off2 = new Official();// {"Misha", "Specialist", "Gennadevich", "Shunko" },
-				off2.FirstName = "Misha1";
-				off2.JobTitle = "Specialist1";
-				off2.Patronymic = "Gennadevich1";
-				off2.Surname = "Shunko1";
-
-				Official off3 = new Official();// {"Misha", "Specialist", "Gennadevich", "Shunko" },
-				off3.FirstName = "Misha2";
-				off3.JobTitle = "Specialist2";
-				off3.Patronymic = "Gennadevich2";
-				off3.Surname = "Shunko2";
-
-				Official off4 = new Official();// {"Misha", "Specialist", "Gennadevich", "Shunko" },
-				off4.FirstName = "Misha3";
-				off4.JobTitle = "Specialist3";
-				off4.Patronymic = "Gennadevich3";
-				off4.Surname = "Shunko3";
-
-
-
-				Attorney addi = new Attorney();
-				addi.Date = System.DateTime.Now.ToShortDateString();
-				addi.IssuerAdditionalInfo = "step1";
-				addi.IssuerOrganizationName = "step2";
-				addi.Number = "3";
-				addi.RecipientAdditionalInfo = "step4";
-				addi.IssuerPerson = off1;
-				addi.RecipientPerson = off2;
-
-				sg.SignerCertificate = new byte[] {1,2,3};
-				sg.SignerCertificateThumbprint = "asfkjaksfjaskfjaf";
-				sg.SignerDetails = new SignerDetails();
-				sg.SignerDetails.FirstName = "Misha";
-				sg.SignerDetails.Inn = "9697899845";
-				sg.SignerDetails.JobTitle = "Specialist";
-				sg.SignerDetails.Patronymic = "Gennadevich";
-				sg.SignerDetails.SoleProprietorRegistrationCertificate = "a ksbfajhbsf jahf as";
-				sg.SignerDetails.Surname = "Shunko";
-
-			if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12) {
-
-				var inf =  new Torg12BuyerTitleInfo {
-					AcceptedBy = off3,
-					AdditionalInfo = "addinfo",
-					Attorney = addi,
-					ReceivedBy = off4,
-					ShipmentReceiptDate = DateTime.Now.ToShortDateString(),
-					Signer = sg
-					};
-
-				GeneratedFile torg12XmlForBuyer = Payload.Api.GenerateTorg12XmlForBuyer(
-					Payload.Token,
-					inf,
-					Payload.BoxId,
-					Payload.Entity.DocumentInfo.MessageId,
-					Payload.Entity.DocumentInfo.EntityId);
-
-				MessagePatchToPost patch = null;
-
-				ReceiptAttachment receipt = new ReceiptAttachment {
-					ParentEntityId = Payload.Entity.DocumentInfo.EntityId,
-					SignedContent = new SignedContent
-					{
-						Content = torg12XmlForBuyer.Content,
-						Signature = new byte[0],
-						SignWithTestSignature = true
-					}
-				};
-				patch = Payload.PatchTorg12(receipt);
-				try {
-					await Async(x => Payload.Api.PostMessagePatch(x, patch));
-					Log.Info($"Документ {patch.MessageId} успешно подписан");
-					} catch (HttpClientException e) {
-					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-						Manager.Warning("Документ уже был подписан другим пользователем.");
-					} else {
-						throw;
-					}
-				}
-			}
-			else
+			try
 			{
-				MessagePatchToPost patch = null;
-				try {
-					Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
-					GeneratedFile invoiceReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
-						Payload.Token,
-						Payload.BoxId,
-						Payload.Entity.DocumentInfo.MessageId,
-						invoice.EntityId,
-						sg);
-					ReceiptAttachment receipt = new ReceiptAttachment {
-						ParentEntityId = invoice.EntityId,
-						SignedContent = new SignedContent
-						{
-							Content = invoiceReceipt.Content,
-							Signature = new byte[0],
-							SignWithTestSignature = true
-						}
-					};
-					patch = Payload.Patch();
-					patch.AddReceipt(receipt);
-					await Async(x => Payload.Api.PostMessagePatch(x, patch));
-					Log.Info($"Документ {patch.MessageId} успешно подписан");
-				}
-				catch (HttpClientException e) {
-					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-						Manager.Warning("Документ уже был подписан другим пользователем.");
-					} else {
-						throw;
-					}
-				}
+				Signer signer = GetSigner();
 
-				try {
-					Entity invoiceConfirmation = Payload.Message.Entities.OrderBy(x => x.CreationTime).First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
-					GeneratedFile invoiceConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
-						Payload.Token,
-						Payload.BoxId,
-						Payload.Entity.DocumentInfo.MessageId,
-						invoiceConfirmation.EntityId,
-						sg);
-					ReceiptAttachment receipt = new ReceiptAttachment {
-						ParentEntityId = invoiceConfirmation.EntityId,
-						SignedContent = new SignedContent
-						{
-							Content = invoiceConfirmationReceipt.Content,
-							Signature = new byte[0],
-							SignWithTestSignature = true
-						}
-					};
-					patch = Payload.Patch();
-					patch.AddReceipt(receipt);
-					await Async(x => Payload.Api.PostMessagePatch(x, patch));
-					Log.Info($"Документ {patch.MessageId} успешно подписан");
-				}
-				catch (HttpClientException e) {
-					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-						Manager.Warning("Документ уже был подписан другим пользователем.");
-					} else {
-						throw;
-					}
-				}
+				if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
+				{
+					Official recived = GetRevicedOfficial();
+					Official accepted = GetAcceptetOfficial();
+					Attorney attorney = GetAttorney();
 
-				try {
-					var message = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
-					Entity invoiceDateConfirmation = message.Entities.OrderBy(x => x.CreationTime).Last(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
-					GeneratedFile invoiceConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
+					var inf =  new Torg12BuyerTitleInfo() {
+						ReceivedBy = recived, //лицо, получившее груз signer
+						AcceptedBy = accepted,//лицо, принявшее груз
+						Attorney = attorney,
+						AdditionalInfo = Comment,
+						ShipmentReceiptDate = RCVDate.Value.ToString("dd.MM.yyyy"),
+						Signer = signer
+						};
+
+					GeneratedFile torg12XmlForBuyer = await TaskEx.Run(() => Payload.Api.GenerateTorg12XmlForBuyer(
 						Payload.Token,
+						inf,
 						Payload.BoxId,
 						Payload.Entity.DocumentInfo.MessageId,
-						invoiceDateConfirmation.EntityId,
-						sg);
+						Payload.Entity.DocumentInfo.EntityId));
+
+					MessagePatchToPost patch = null;
+
+					SignedContent signContent = new SignedContent();
+					signContent.Content = torg12XmlForBuyer.Content;
+					if(TrySign(signContent) == false)
+						throw new Exception();
+
 					ReceiptAttachment receipt = new ReceiptAttachment {
-						ParentEntityId = invoiceDateConfirmation.EntityId,
-						SignedContent = new SignedContent
-						{
-							Content = invoiceConfirmationReceipt.Content,
-							Signature = new byte[0],
-							SignWithTestSignature = true
-						}
+						ParentEntityId = Payload.Entity.DocumentInfo.EntityId,
+						SignedContent = signContent
 					};
-					patch = Payload.Patch();
-					patch.AddReceipt(receipt);
-					await Async(x => Payload.Api.PostMessagePatch(x, patch));
-					Log.Info($"Документ {patch.MessageId} успешно подписан");
-				}
-				catch (HttpClientException e) {
-					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-						Manager.Warning("Документ уже был подписан другим пользователем.");
-					} else {
-						throw;
+					patch = Payload.PatchTorg12(receipt);
+					try {
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Log.Info($"Документ {patch.MessageId} успешно подписан");
+						} catch (HttpClientException e) {
+						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+							Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
+							Manager.Warning("Документ уже был подписан другим пользователем.");
+						} else {
+							throw;
+						}
 					}
 				}
+				else
+				{
+					MessagePatchToPost patch = null;
+					try
+					{
+						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
+						GeneratedFile invoiceReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							Payload.Token,
+							Payload.BoxId,
+							Payload.Entity.DocumentInfo.MessageId,
+							invoice.EntityId,
+							signer));
+
+						SignedContent signContentInvoiceReciept = new SignedContent();
+						signContentInvoiceReciept.Content = invoiceReceipt.Content;
+						if(TrySign(signContentInvoiceReciept) == false)
+							throw new Exception();
+
+						ReceiptAttachment receiptInvoice = new ReceiptAttachment {
+							ParentEntityId = invoice.EntityId,
+							SignedContent = signContentInvoiceReciept
+						};
+
+						Entity invoiceConfirmation = Payload.Message.Entities.OrderBy(x => x.CreationTime).First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
+						GeneratedFile invoiceConfirmationReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							Payload.Token,
+							Payload.BoxId,
+							Payload.Entity.DocumentInfo.MessageId,
+							invoiceConfirmation.EntityId,
+							signer));
+
+						SignedContent signContentInvoiceConfirmationReciept = new SignedContent();
+						signContentInvoiceConfirmationReciept.Content = invoiceReceipt.Content;
+
+						if (TrySign(signContentInvoiceConfirmationReciept) == false)
+							throw new Exception();
+
+						ReceiptAttachment invoiceConfirmationreceipt = new ReceiptAttachment {
+							ParentEntityId = invoiceConfirmation.EntityId,
+							SignedContent = signContentInvoiceConfirmationReciept
+						};
+
+						patch = Payload.Patch(receiptInvoice, invoiceConfirmationreceipt);
+
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Log.Info($"Документ {patch.MessageId} receiptInvoice, invoiceConfirmationreceipt отправлены");
+
+						Entity invoiceDateConfirmation = await TaskEx.Run(() =>
+						{
+							Message msg = null;
+							Entity dateConfirm = null;
+							int breaker = 0;
+							do
+							{
+								System.Threading.Thread.Sleep(1000);
+								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
+								dateConfirm = GetDateConfirmationStep7(msg);
+								breaker++;
+							}
+							while (dateConfirm ==null && breaker < 10);
+							if(dateConfirm == null)
+								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
+							return dateConfirm;
+						});
+
+						GeneratedFile invoiceOperConfirmationReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							Payload.Token,
+							Payload.BoxId,
+							Payload.Entity.DocumentInfo.MessageId,
+							invoiceDateConfirmation.EntityId,
+							signer));
+
+						SignedContent signContentOperInvoiceConfrmReciept = new SignedContent();
+						signContentOperInvoiceConfrmReciept.Content = invoiceOperConfirmationReceipt.Content;
+
+						if (TrySign(signContentOperInvoiceConfrmReciept) == false)
+							throw new Exception();
+
+						ReceiptAttachment receipt = new ReceiptAttachment {
+							ParentEntityId = invoiceDateConfirmation.EntityId,
+							SignedContent = signContentOperInvoiceConfrmReciept
+						};
+						patch = Payload.Patch(receipt);
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
+
+						await TaskEx.Run(() =>
+						{
+							Message msg = null;
+							int breaker = 0;
+							do
+							{
+								System.Threading.Thread.Sleep(500);
+								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
+								breaker++;
+							} while(breaker<10 && msg.Entities.First().DocumentInfo.InvoiceMetadata.Status != Diadoc.Api.Com.InvoiceStatus.InboundFinished);
+							if(breaker >= 10)
+								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
+							return msg;
+						});
+					}
+					catch (HttpClientException e) {
+						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+							Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
+							Manager.Warning("Документ уже был подписан другим пользователем.");
+						} else {
+							throw;
+						}
+					}
+				}
+			}catch(Exception)
+			{
+			}
+			finally
+			{
+				EndAction();
 			}
 		}
 	}

@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async Task Save()
 		{
+			BeginAction();
 			var patch = Payload.Patch();
 			patch.AddResolution(new ResolutionAttachment {
 				InitialDocumentId = Payload.Entity.EntityId,
@@ -37,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ResolutionType = type
 			});
 			await Async(x => Payload.Api.PostMessagePatch(x, patch));
+			EndAction();
 		}
 	}
 }

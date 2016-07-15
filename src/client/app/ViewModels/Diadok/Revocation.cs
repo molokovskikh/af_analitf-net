@@ -17,58 +17,64 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> Comment { get; set; }
 
+		Signer GetSigner()
+		{
+			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
+
+			Signer ret = new Signer();
+			ret.SignerDetails = new SignerDetails();
+			ret.SignerCertificate = Cert.RawData;
+			ret.SignerCertificateThumbprint = Cert.Thumbprint;
+			ret.SignerDetails.FirstName = certFields["CN"];
+			ret.SignerDetails.Surname = certFields["CN"];
+			ret.SignerDetails.Patronymic = certFields["CN"];
+			ret.SignerDetails.JobTitle = certFields["CN"];
+			ret.SignerDetails.Inn = "9656279962";//certFields["CN"];
+			return ret;
+		}
+
 		public async Task Save()
 		{
-			var patch = Payload.Patch();
+			try
+			{
+				BeginAction();
+				var patch = Payload.Patch();
 
-			Signer sg = new Signer();
+				RevocationRequestInfo revinfo = new RevocationRequestInfo();
+				revinfo.Comment = Comment.Value;
+				revinfo.Signer = GetSigner();
 
-			sg.SignerCertificate = new byte[] {1,2,3};
-			sg.SignerCertificateThumbprint = "asfkjaksfjaskfjaf";
-			sg.SignerDetails = new SignerDetails();
-			sg.SignerDetails.FirstName = "Misha";
-			sg.SignerDetails.Inn = "9697899845";
-			sg.SignerDetails.JobTitle = "Specialist";
-			sg.SignerDetails.Patronymic = "Gennadevich";
-			sg.SignerDetails.SoleProprietorRegistrationCertificate = "a ksbfajhbsf jahf as";
-			sg.SignerDetails.Surname = "Shunko";
+				var document = Payload.Message.Entities.First();
 
-			RevocationRequestInfo revinfo = new RevocationRequestInfo();
-			revinfo.Comment = Comment.Value;
-			revinfo.Signer = sg;
+				GeneratedFile revocationXml = Payload.Api.GenerateRevocationRequestXml(
+					Payload.Token,
+					Payload.BoxId,
+					Payload.Message.MessageId,
+					document.EntityId,
+					revinfo);
 
-			int skip = 0;
-			var entt = Payload.Message.Entities.Skip(skip).First();
+				SignedContent revocSignContent = new SignedContent();
+				revocSignContent.Content = revocationXml.Content;
 
-			GeneratedFile revocationXml = Payload.Api.GenerateRevocationRequestXml(
-				Payload.Token,
-				Payload.BoxId,
-				Payload.Message.MessageId,
-				entt.EntityId,
-				revinfo
-				);
-			RevocationRequestAttachment revattch = new RevocationRequestAttachment();
-			revattch.ParentEntityId = entt.EntityId;
-			revattch.SignedContent = new SignedContent();
+				if(!TrySign(revocSignContent))
+					throw new Exception();
 
-			if(revocationXml.Content.Length > (500 * 1024 * 1000)) {
-				var fileid = Payload.Api.UploadFileToShelf(Payload.Token, revocationXml.Content);
-				revattch.SignedContent.NameOnShelf = fileid;
-				byte[] sign;
-				TrySign(revocationXml.Content, out sign);
-				var filesignid = Payload.Api.UploadFileToShelf(Payload.Token, sign);
-				revattch.SignedContent.SignatureNameOnShelf = filesignid;
+				RevocationRequestAttachment revattch = new RevocationRequestAttachment();
+				revattch.ParentEntityId = document.EntityId;
+				revattch.SignedContent = revocSignContent;
+
+				patch.AddRevocationRequestAttachment(revattch);
+
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 			}
-			else {
-				revattch.SignedContent.Content = revocationXml.Content;
-				revattch.SignedContent.Signature = new byte[] { 1,2,3};
+			catch(Exception)
+			{
+			}
+			finally
+			{
+				EndAction();
 			}
 
-			revattch.SignedContent.SignWithTestSignature = true;
-
-			patch.AddRevocationRequestAttachment(revattch);
-
-			await Async(x => Payload.Api.PostMessagePatch(x, patch));
 		}
 	}
 }

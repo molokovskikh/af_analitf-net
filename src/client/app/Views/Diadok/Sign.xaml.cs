@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,15 @@ namespace AnalitF.Net.Client.Views.Diadok
 		public Sign()
 		{
 			InitializeComponent();
+			Save.Click += Save_Click;
+		}
+
+		private void Save_Click(object sender, RoutedEventArgs e)
+		{
+			if(!AcceptedData.BindingGroup.CommitEdit())
+				throw new ArgumentException();
+			if(ByAttorney.IsChecked == true && !ByAttorneyData.BindingGroup.CommitEdit())
+				throw new ArgumentException();
 		}
 	}
 }

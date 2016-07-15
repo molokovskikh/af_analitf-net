@@ -14,9 +14,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async Task Save()
 		{
+			BeginAction();
 			await Async(x => Payload.Api.Delete(x, Payload.BoxId,
 				Payload.Entity.DocumentInfo.MessageId,
 				Payload.Entity.EntityId));
+			EndAction();
 		}
 	}
 }

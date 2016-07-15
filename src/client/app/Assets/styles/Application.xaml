@@ -22,7 +22,15 @@
 		</Style.Triggers>
 	</Style>
 
-	<Style x:Key="HorizontalSplitter" TargetType="GridSplitter">
+  <Style x:Key="ValidationToolTip" TargetType="{x:Type Grid}">
+    <Style.Triggers>
+      <Trigger Property="Validation.HasError" Value="True">
+        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="HorizontalSplitter" TargetType="GridSplitter">
 		<Setter Property="HorizontalAlignment" Value="Stretch" />
 		<Setter Property="VerticalAlignment" Value="Center" />
 		<Setter Property="ShowsPreview" Value="True" />

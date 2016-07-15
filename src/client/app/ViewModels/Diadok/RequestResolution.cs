@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async Task Save()
 		{
+			BeginAction();
 			var patch = Payload.Patch();
 			var attachment = new ResolutionRequestAttachment {
 				Comment = Comment.Value,
@@ -75,6 +76,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					?? "00000000-0000-0000-0000-000000000000";
 			patch.AddResolutionRequestAttachment(attachment);
 			await Async(x => Payload.Api.PostMessagePatch(x, patch));
+			EndAction();
 		}
 	}
 }
