@@ -6,15 +6,17 @@ using System.Collections.Generic;
 using AnalitF.Net.Client.Models;
 using NHibernate.Linq;
 using System.Linq;
+using AnalitF.Net.Client.Helpers;
+using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Dialogs
 {
 	public class EditDefectSeries : BaseScreen2, ICancelable
 	{
-		private uint id;
 		public bool WasCancelled { get; private set; }
 		public Stock Stock { get; set; }
-		public IEnumerable<Reject> Rejects { get; set; }
+		List<Tuple<uint, uint>> Link { get; set; }
+		public NotifyValue<IEnumerable<Reject>> Rejects { get; set; }
 
 		public EditDefectSeries()
 		{
@@ -25,12 +27,19 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public EditDefectSeries(Stock stock, List<Tuple<uint, uint>> link)
 		{
 			Stock = stock;
-			Rejects = GetRejectsByStock(stock, link);
+			Link = link;
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+			RxQuery(GetRejectsByStock).Subscribe(Rejects);
 		}
 
 		public void Ok()
 		{
 			Stock.RejectStatus = RejectStatus.Defective;
+			StatelessSession.Update(Stock);
 			WasCancelled = false;
 			TryClose();
 		}
@@ -38,21 +47,20 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		public void Not()
 		{
 			Stock.RejectStatus = RejectStatus.NotDefective;
+			StatelessSession.Update(Stock);
 			WasCancelled = false;
 			TryClose();
 		}
 
 		public void Close()
 		{
-			if (id > 0)
-				Session.Refresh(Stock);
 			TryClose();
 		}
 
-		private IEnumerable<Reject> GetRejectsByStock(Stock stock, List<Tuple<uint, uint>> link)
+		private IEnumerable<Reject> GetRejectsByStock(IStatelessSession session)
 		{
-			var rejectIds = link.Where(x => x.Item1 == stock.Id).Select(x => x.Item2).ToList();
-			return StatelessSession.Query<Reject>().Where(x => rejectIds.Contains(x.Id)).ToList();
+			var rejectIds = Link.Where(x => x.Item1 == Stock.Id).Select(x => x.Item2).ToList();
+			return session.Query<Reject>().Where(x => rejectIds.Contains(x.Id)).ToList();
 		}
 	}
 }

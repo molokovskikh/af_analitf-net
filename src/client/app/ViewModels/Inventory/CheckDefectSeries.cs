@@ -17,6 +17,7 @@ using System;
 using NHibernate.Mapping;
 using MySql.Data.MySqlClient;
 using Common.MySql;
+using NHibernate;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -27,37 +28,34 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> IsAll { get; set; }
 		public NotifyValue<bool> IsPerhaps { get; set; }
 		public NotifyValue<bool> IsDefective { get; set; }
-		public NotifyValue<DateTime?> Begin { get; set; }
-
-		public List<Tuple<uint,uint>> Link { get; set; } 
+		public NotifyValue<DateTime> Begin { get; set; }
+		public NotifyValue<DateTime> End { get; set; }
+		public NotifyValue<List<Tuple<uint,uint>>> Link { get; set; }
 
 		private string Name;
 
 		public CheckDefectSeries()
 		{
-			CurrentItem = new NotifyValue<Stock>();
 			Name = User?.FullName ?? "";
-
 			IsAll = new NotifyValue<bool>(true);
-			IsPerhaps = new NotifyValue<bool>();
-			IsDefective = new NotifyValue<bool>();
-			Begin = new NotifyValue<DateTime?>();
-
-			Link = CalcLinks();
+			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3));
+			End = new NotifyValue<DateTime>(DateTime.Today);
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			RxQuery(CalcLinks).Subscribe(Link);
 
-			//RxQuery(x => x.Query<Stock>().OrderBy(y => y.Product).ToList())
-			//	.Subscribe(Items);
-
-			var subscription = Begin.Changed()
+			Link.Changed()
+				.Merge(Begin.Changed())
+				.Merge(End.Changed())
 				.Merge(IsPerhaps.Changed())
 				.Merge(IsDefective.Changed())
-				.Subscribe(_ => Update());
-			OnCloseDisposable.Add(subscription);
+				.Select(_ => RxQuery(LoadItems))
+				.Switch()
+				.ObserveOn(UiScheduler)
+				.Subscribe(Items);
 		}
 
 		public IEnumerable<IResult> EnterItems()
@@ -65,9 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var stock = CurrentItem.Value;
 			if (stock != null)
 				yield return new DialogResult(new EditDefectSeries(stock, Link));
-
-			Session.Refresh(stock);
-			Update();
+			Begin.Refresh();
 		}
 
 		public IEnumerable<IResult> DisplayItem()
@@ -75,15 +71,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var stock = CurrentItem.Value;
 			if (stock != null)
 				yield return new DialogResult(new EditStock(stock.Id));
-
-			Session.Refresh(stock);
-			Update();
+			Begin.Refresh();
 		}
 
-		public override void Update()
+		public List<Stock> LoadItems(IStatelessSession session)
 		{
-			var ids = Link.Select(x => x.Item1).Distinct().ToList();
-			var items = StatelessSession.Query<Stock>().OrderBy(y => y.Product).ToList();
+			// для всех с неизвестным статусом, что попали в Link, устанавливается статус Возможно, но не сохраняется в базе
+			var ids = Link.Value.Select(x => x.Item1).Distinct().ToList();
+			var items = session.Query<Stock>().OrderBy(y => y.Product).ToList();
 			foreach (var item in items)
 			{
 				if (item.RejectStatus == RejectStatus.Unknown && ids.Contains(item.Id))
@@ -95,22 +90,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			else if (IsDefective)
 				items = items.Where(x => x.RejectStatus == RejectStatus.Defective).ToList();
 
-			if (Begin.HasValue && Begin.Value.HasValue)
-			{
-				var rejects = StatelessSession.Query<Reject>()
-					.Where(x => !x.Canceled && x.LetterDate >= Begin.Value.Value && x.LetterDate < Begin.Value.Value.AddDays(1))
-					.Select(x => x.Id)
-					.ToList();
-				var filteredIds = Link.Where(x => rejects.Contains(x.Item2)).Select(x => x.Item1).ToList();
-				items = items.Where(x => filteredIds.Contains(x.Id)).ToList();
-			}
+			var rejects = session.Query<Reject>()
+				.Where(x => !x.Canceled && x.LetterDate >= Begin.Value && x.LetterDate < End.Value.AddDays(1))
+				.Select(x => x.Id)
+				.ToList();
+			var filteredIds = Link.Value.Where(x => rejects.Contains(x.Item2)).Select(x => x.Item1).ToList();
+			items = items.Where(x => filteredIds.Contains(x.Id)).ToList();
 
-			Items.Value = items;
+			return items;
 		}
 
 		public IResult ExportExcel()
 		{
-			var columns = new[] {"Штрих-код",
+			var columns = new[] {"Штрих -код",
 				"Товар",
 				"Производитель",
 				"Серия",
@@ -153,7 +145,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		}
 
 
-		private List<Tuple<uint, uint>> CalcLinks()
+		private List<Tuple<uint, uint>> CalcLinks(IStatelessSession session)
 		{
 			var result = Session
 			.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId

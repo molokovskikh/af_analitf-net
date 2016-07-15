@@ -28,7 +28,10 @@
 			</GroupBox>
 			<GroupBox Header="Дата письма" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
-					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+					<Label>с</Label>
+					<DatePicker Name="Begin" VerticalAlignment="Center"/>
+					<Label>по</Label>
+					<DatePicker Name="End" VerticalAlignment="Center"/>
 				</StackPanel>
 			</GroupBox>
 		</WrapPanel>
