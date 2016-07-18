@@ -30,8 +30,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<CheckLine>();
 		}
 
-		public virtual IList<CheckLine> Lines { get; set; }
-
 		public virtual uint Id { get; set; }
 		public virtual CheckType CheckType { get; set; }
 		public virtual uint Number { get; set; }
@@ -39,9 +37,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime ChangeOpening { get; set; }
 		public virtual Status Status { get; set; }
 
-		//Вероятно стоит заменить строки на соответствующие классы
-		public virtual string Clerk { get; set; }
-		public virtual string Department { get; set; }
+		public virtual string Clerk { get; set; } //Пока пусть будет строка
+		public virtual Address Department { get; set; }
 
 		public virtual uint KKM { get; set; }
 		public virtual PaymentType PaymentType { get; set; }
@@ -60,5 +57,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Recipe { get; set; }
 		public virtual string Agent { get; set; }
 
+		public virtual IList<CheckLine> Lines { get; set; }
 	}
 }

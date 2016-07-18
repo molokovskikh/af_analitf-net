@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	class CheckLine
+	public class CheckLine
 	{
-		public virtual uint Number { get; set; }
+		public virtual uint Id { get; set; }
 		public virtual uint Barcode { get; set; }
 		public virtual uint? ProductId { get; set; }
 		public virtual string ProductName { get; set; }
@@ -17,5 +20,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal RetailSum => Quantity * Cost;
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }
+		public virtual uint CheckId { get; set; }
 	}
 }

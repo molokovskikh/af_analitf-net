@@ -36,7 +36,7 @@
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Дата чека</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="5" Name="Header_Date" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Отдел</Label>
-      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Department" />
+      <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Department_Name" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Статус</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="9" Name="Header_Status" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Смена ИД</Label>
