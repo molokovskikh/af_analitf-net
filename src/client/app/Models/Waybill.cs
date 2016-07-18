@@ -112,6 +112,9 @@ namespace AnalitF.Net.Client.Models
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }
 
+		[Style(Description = "Накладная с розничной ценой, установленной поставщиком")]
+		public virtual bool IsRetailCostFixed { get; set; }
+
 		[Style]
 		public virtual bool IsNew { get; set; }
 

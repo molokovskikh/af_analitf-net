@@ -28,7 +28,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//сертификаты
 					"IsError", "IsDownloaded", "IsCertificateNotFound",
 					//вычисляемые поля, поиск забраковки
-					"IsRejectCanceled", "IsRejectNew", "RejectId",
+					"IsRejectCanceled", "IsRejectNew", "RejectId", "IsRetailCostFixed",
 					//вычисления розничной цены
 					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost",
 				}},
@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				{"Waybills", new [] {
 					//вычисления розничной цены
 					"Sum", "RetailSum", "TaxSum", "UserSupplierName", "IsCreatedByUser", "IsRejectChanged", "IsNew", "Error",
-					"IsMigrated"
+					"IsMigrated", "IsRetailCostFixed"
 				}},
 				{"Orders", new [] {
 					//локальные поля

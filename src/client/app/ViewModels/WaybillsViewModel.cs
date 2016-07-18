@@ -221,6 +221,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+
 			//скорбная песнь: при переходе на форму сводный заказ
 			//wpf обновит состояние флага IsFilterByDocumentDate
 			//когда эта форма уже закрыта
@@ -305,7 +306,7 @@ namespace AnalitF.Net.Client.ViewModels
 				"Отчет по розничным надбавкам к ценам на ЖВНЛП за год", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes;
 			yield return new Models.Results.TaskResult(commnand.ToTask(Shell.Config));
 			yield return new OpenResult(commnand.Result);
-		}		
+		}
 
 		public bool CanPrint => true;
 
