@@ -1008,13 +1008,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 
 		public void SetIsRetailCostFixed()
 		{
-			Session.CreateSQLQuery(@"update Waybills
-															set IsRetailCostFixed = 1
-															where Id in (
-																select WaybillId
-																from WaybillLines
-																where ServerRetailCost is not null
-															);")
+			Session.CreateSQLQuery(@"update Waybills set IsRetailCostFixed = 1 where Id in " +
+				"(select WaybillId from WaybillLines where ServerRetailCost is not null)")
 				.ExecuteUpdate();
 		}
 

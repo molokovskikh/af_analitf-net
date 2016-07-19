@@ -221,7 +221,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
-
 			//скорбная песнь: при переходе на форму сводный заказ
 			//wpf обновит состояние флага IsFilterByDocumentDate
 			//когда эта форма уже закрыта
