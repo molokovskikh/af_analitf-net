@@ -1822,7 +1822,8 @@ select d.RowId as Id,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
-	if(d.PreserveFilename, d.FileName, null) as Filename
+	if(d.PreserveFilename, d.FileName, null) as Filename,
+	exists(select * from Documents.DocumentBodies db where db.DocumentId = dh.Id and db.RetailCost is not null) as IsRetailCostFixed
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 		left join Documents.InvoiceHeaders i on i.Id = dh.Id
@@ -1848,7 +1849,8 @@ select d.RowId as Id,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
 	null as InvoiceDate,
-	if(d.PreserveFilename, d.FileName, null) as Filename
+	if(d.PreserveFilename, d.FileName, null) as Filename,
+	0 as IsRetailCostFixed
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);

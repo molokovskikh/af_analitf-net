@@ -178,35 +178,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
-		public void Mark_waybill_IsRetailCostFixed()
-		{
-			var waybill = new Waybill(address, localSession.Query<Supplier>().First());
-			waybill.AddLine(new WaybillLine(waybill)
-			{
-				Product = "Аспирин",
-				ServerRetailCost = 600,
-				ServerRetailMarkup = 5,
-				SupplierCostWithoutNds = 536.17m,
-				SupplierCost = 589.79m,
-				Quantity = 1,
-				Amount = 589.79m,
-				Nds = 10,
-				NdsAmount = 53.62m
-			});
-			localSession.Save(waybill);
-
-			var cmd = new UpdateCommand();
-			cmd.Session = localSession;
-			cmd.SetIsRetailCostFixed();
-
-			localSession.Refresh(waybill);
-			Assert.IsTrue(waybill.IsRetailCostFixed);
-			var line = waybill.Lines[0];
-			localSession.Refresh(line);
-			Assert.IsTrue(line.IsRetailCostFixed);
-		}
-
-		[Test]
 		public void Export_waybill_preserve_file_name()
 		{
 			var fixture = Fixture<CreateWaybill>();

@@ -920,8 +920,6 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			var ordersImported = imports.Contains("orders", StringComparer.OrdinalIgnoreCase);
 
 			var postUpdate = new PostUpdate();
-			Log.Info("Вычисление накладных с розничной ценой, установленной поставщиком");
-			SetIsRetailCostFixed();
 			Log.Info("Вычисление забраковки");
 			postUpdate.IsRejected = CalculateRejects(settings);
 			Log.Info("Вычисление ожидаемых");
@@ -1004,13 +1002,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 				Session.Save(attachment.UpdateLocalFile(Path.GetFullPath(filename)));
 				Session.Save(attachment);
 			}
-		}
-
-		public void SetIsRetailCostFixed()
-		{
-			Session.CreateSQLQuery(@"update Waybills set IsRetailCostFixed = 1 where Id in " +
-				"(select WaybillId from WaybillLines where ServerRetailCost is not null)")
-				.ExecuteUpdate();
 		}
 
 		public bool CalculateRejects(Settings settings)
