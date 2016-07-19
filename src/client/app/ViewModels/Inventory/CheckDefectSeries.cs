@@ -79,8 +79,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			// для всех с неизвестным статусом, что попали в Link, устанавливается статус Возможно, но не сохраняется в базе
 			var ids = Link.Value.Select(x => x.Item1).Distinct().ToList();
 			var items = session.Query<Stock>().OrderBy(y => y.Product).ToList();
-			foreach (var item in items)
-			{
+			foreach (var item in items) {
 				if (item.RejectStatus == RejectStatus.Unknown && ids.Contains(item.Id))
 					item.RejectStatus = RejectStatus.Perhaps;
 			}
@@ -125,7 +124,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			});
 
 			ExcelExporter.WriteRows(sheet, rows, row);
-
 			return ExcelExporter.Export(book);
 		}
 
@@ -137,8 +135,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
 			var docSettings = doc.Settings;
-			if (docSettings != null)
-			{
+			if (docSettings != null) {
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
@@ -147,30 +144,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private List<Tuple<uint, uint>> CalcLinks(IStatelessSession session)
 		{
-			var result = Session
-			.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId
-												from Stocks s
-												join Rejects r on s.ProducerId = r.ProducerId and s.ProductId = r.ProductId and s.Seria = r.Series
-												where r.Canceled = 0 
-												and s.ProducerId is not null 
-												and s.ProductId is not null
-												and s.Seria is not null
-												union all
-												select s.Id as StockId, r.Id as RejectId
-												from Stocks s
-												join Rejects r on s.ProductId = r.ProductId and s.Seria = r.Series
-												where r.Canceled = 0 
-												and (s.ProducerId is null or r.ProducerId is null)
-												and s.ProductId is not null
-												and s.Seria is not null
-												union all
-												select s.Id as StockId, r.Id as RejectId
-												from Stocks s
-												join Rejects r on s.Product = r.Product and s.Seria = r.Series
-												where r.Canceled = 0 
-												and s.ProductId is null
-												and s.Product is not null
-												and s.Seria is not null")
+			var result = Session.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId " +
+				"from Stocks s " +
+				" join Rejects r on s.ProducerId = r.ProducerId and s.ProductId = r.ProductId and s.Seria = r.Series " +
+				"where r.Canceled = 0 " +
+				" and s.ProducerId is not null " +
+				" and s.ProductId is not null " +
+				" and s.Seria is not null " +
+				"union all " +
+				"select s.Id as StockId, r.Id as RejectId " +
+				"from Stocks s " +
+				" join Rejects r on s.ProductId = r.ProductId and s.Seria = r.Series " +
+				"where r.Canceled = 0 " +
+				" and (s.ProducerId is null or r.ProducerId is null) " +
+				" and s.ProductId is not null " +
+				" and s.Seria is not null " +
+				"union all " +
+				"select s.Id as StockId, r.Id as RejectId " +
+				"from Stocks s " +
+				" join Rejects r on s.Product = r.Product and s.Seria = r.Series " +
+				"where r.Canceled = 0 " +
+				" and s.ProductId is null " +
+				" and s.Product is not null " +
+				" and s.Seria is not null")
 			.List<object[]>()
 			.Select(x => Tuple.Create(Convert.ToUInt32(x[0]), Convert.ToUInt32(x[1])))
 			.Distinct()
