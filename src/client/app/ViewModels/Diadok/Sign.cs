@@ -18,6 +18,7 @@ using System.Windows.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Windows.Media;
 using System.Globalization;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -71,20 +72,90 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			ShortFileName = $"{Payload.Entity.FileName.Substring(0, 25)}...{Payload.Entity.FileName.Substring(Payload.Entity.FileName.Length - 25)}";
 			IsEnabled.Value = true;
 			Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
+			LastPatchStamp = DateTime.MinValue;
+
+			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
+			try
+			{
+				var namefp = certFields["G"].Split(' ');
+				SignerFirstName = namefp[0];
+				SignerSureName = certFields["SN"];
+				SignerPatronimic = namefp[1];
+				if(!string.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
+					SignerINN = Settings.Value.DebugDiadokSignerINN;
+				else
+				{
+					if(certFields.Keys.Contains("OID.1.2.643.3.131.1.1"))
+						SignerINN = certFields["OID.1.2.643.3.131.1.1"];
+					if(certFields.Keys.Contains("ИНН"))
+						SignerINN = certFields["ИНН"];
+					if(string.IsNullOrEmpty(SignerINN))
+						throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
+				}
+			}
+			catch(Exception exept)
+			{
+				Manager.Error("Ошибка сертификата.");
+				Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
+				throw;
+			}
 		}
+
+		public string SignerFirstName { get; set;}
+		public string SignerSureName { get; set;}
+		public string SignerPatronimic { get; set;}
+		public string SignerINN { get;set;}
 
 		public X509Certificate2 Cert { get; protected set;}
 		public NotifyValue<bool> IsEnabled { get; set; }
 		public ActionPayload Payload { get; set; }
 		public string ShortFileName { get; set; }
+		public DateTime LastPatchStamp { get; set;}
+
+		public bool ReqRevocationSign
+		{
+			get
+			{
+				return Payload.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation;
+			}
+		}
+
+		public Signer GetSigner()
+		{
+			Signer ret = new Signer();
+			ret.SignerDetails = new SignerDetails();
+			ret.SignerCertificate = Cert.RawData;
+			ret.SignerCertificateThumbprint = Cert.Thumbprint;
+			ret.SignerDetails.FirstName = SignerFirstName;
+			ret.SignerDetails.Surname = SignerSureName;
+			ret.SignerDetails.Patronymic = SignerPatronimic;
+			ret.SignerDetails.JobTitle = Settings.Value.DiadokSignerJobTitle;
+			ret.SignerDetails.Inn = SignerINN;
+			return ret;
+		}
 
 		protected void BeginAction()
 		{
 			IsEnabled.Value = false;
 		}
 
-		protected void EndAction()
+		protected async Task EndAction()
 		{
+			await TaskEx.Run(() =>
+			{
+				Message msg = null;
+				int breaker = 0;
+				do
+				{
+					msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
+					if(LastPatchStamp != msg.LastPatchTimestamp)
+						break;
+					else
+						System.Threading.Thread.Sleep(1000);
+					breaker++;
+				} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
+				return msg;
+			});
 			IsEnabled.Value = true;
 			isDone.Value = true;
 			TryClose();
@@ -107,13 +178,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				content.SignWithTestSignature = true;
 				return true;
 			}
-			byte[] data;
 			byte[] sign;
 			var result = TrySign(content.Content, out sign);
 			if(result)
-			{
 				content.Signature = sign;
-			}
+
 			return result;
 		}
 
@@ -151,42 +220,62 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Sign model = bindingGroup.Items[0] as Sign;
 
 				string error = "Заполнены не все обязательные поля:";
+				string fields = "";
 
-				if(!string.IsNullOrEmpty(model.ACPTFirstName) ||
+				if(bindingGroup.Name == "AcceptedValidation")
+				{
+					if(model.ByAttorney || !string.IsNullOrEmpty(model.ACPTFirstName) ||
 					!string.IsNullOrEmpty(model.ACPTSurename) ||
 					!string.IsNullOrEmpty(model.ACPTPatronimic) ||
 					!string.IsNullOrEmpty(model.ACPTJobTitle)
 					)
+					{
+						if(string.IsNullOrEmpty(model.ACPTSurename))
+							fields += "\nФамилия";
+						if(string.IsNullOrEmpty(model.ACPTFirstName))
+							fields += "\nИмя";
+					}
+				}
+				if(bindingGroup.Name == "AttorneyValidation")
 				{
-					if(string.IsNullOrEmpty(model.ACPTSurename))
-						error += "\nФамилия";
-					if(string.IsNullOrEmpty(model.ACPTFirstName))
-						error += "\nИмя";
-					return new ValidationResult(false, error);
+					if (!string.IsNullOrEmpty(model.ATRNum) ||
+							model.ATRDate != DateTime.MinValue ||
+							!string.IsNullOrEmpty(model.ATROrganization) ||
+							!string.IsNullOrEmpty(model.ATRFirstName) ||
+							!string.IsNullOrEmpty(model.ATRSurename) ||
+							!string.IsNullOrEmpty(model.ATRPatronymic) ||
+							!string.IsNullOrEmpty(model.ATRAddInfo))
+					{
+						if(string.IsNullOrEmpty(model.ATRNum))
+							fields += "\nНомер";
+						if(model.ATRDate == DateTime.MinValue)
+							fields += "\nДата";
+
+						if(!string.IsNullOrEmpty(model.ATRFirstName) ||
+							!string.IsNullOrEmpty(model.ATRSurename) ||
+							!string.IsNullOrEmpty(model.ATRPatronymic))
+						{
+							if(string.IsNullOrEmpty(model.ATRFirstName))
+								fields += "\nИмя";
+							if(string.IsNullOrEmpty(model.ATRSurename))
+								fields += "\nФамилия";
+							if(string.IsNullOrEmpty(model.ATRPatronymic))
+								fields += "\nОтчество";
+						}
+					}
+					else if(model.ByAttorney)
+						fields += "\nНомер\nДата\nИмя\nФамилия\nОтчество";
 				}
 
-				if (!string.IsNullOrEmpty(model.ATRNum) ||
-						model.ATRDate != DateTime.MinValue ||
-						!string.IsNullOrEmpty(model.ATROrganization) ||
-						!string.IsNullOrEmpty(model.ATRFirstName) ||
-						!string.IsNullOrEmpty(model.ATRSurename) ||
-						!string.IsNullOrEmpty(model.ATRPatronymic) ||
-						!string.IsNullOrEmpty(model.ATRAddInfo))
-				{
-					if(string.IsNullOrEmpty(model.ATRNum))
-						error += "\nНомер";
-					if(model.ATRDate == DateTime.MinValue)
-						error += "\nДата";
-					return new ValidationResult(false, error);
-				}
+				if(string.IsNullOrEmpty(fields))
+					return ValidationResult.ValidResult;
 
+				return new ValidationResult(false, error + fields);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				return new ValidationResult(false, "Заполнены не все обязательные поля.");
 			}
-
-			return ValidationResult.ValidResult;
 		}
 	}
 
@@ -195,18 +284,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public Sign(ActionPayload payload)
 			: base(payload)
 		{
-			Torg12TitleVisible = Payload.Entity.AttachmentType == AttachmentType.XmlTorg12;
-
-			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
-
-			SignerFirstName = certFields["CN"];
-			SignerSureName = certFields["CN"];
-			SignerPatronimic = certFields["CN"];
-			SignerINN = "9656279962";//certFields["CN"];
+			Torg12TitleVisible = Payload.Entity.AttachmentType == AttachmentType.XmlTorg12 && !ReqRevocationSign;
 
 			RCVFIO.Value = $"{SignerSureName} {SignerFirstName} {SignerPatronimic}";
-			RCVJobTitle.Value = certFields["CN"];
+			RCVJobTitle.Value = Settings.Value.DiadokSignerJobTitle;
 			RCVDate.Value = DateTime.Now;
+			ATRDate.Value = DateTime.Now;
 
 			LikeReciever.Subscribe(x => {
 				if(x)
@@ -230,19 +313,73 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				}
 			});
 
+			CurrentAutoSave = new NotifyValue<SignTorg12Autosave>();
+
+			CurrentAutoSave.Subscribe(x =>
+			{
+				if(x != null)
+				{
+					RCVJobTitle.Value = x.SignerJobTitle;
+
+					if(x.LikeReciever)
+					{
+						LikeReciever.Value = true;
+					}
+					else
+					{
+						ACPTFirstName.Value = x.ACPTFirstName;
+						ACPTSurename.Value = x.ACPTSurename;
+						ACPTPatronimic.Value = x.ACPTPatronimic;
+						ACPTJobTitle.Value = x.ACPTJobTitle;
+					}
+
+					if(x.ByAttorney)
+					{
+						ByAttorney.Value = true;
+						ATRNum.Value = x.ATRNum;
+						ATRDate.Value = x.ATRDate;
+						ATROrganization.Value = x.ATROrganization;
+						ATRSurename.Value = x.ATRSurename;
+						ATRFirstName.Value = x.ATRFirstName;
+						ATRPatronymic.Value = x.ATRPatronymic;
+						ATRAddInfo.Value = x.ATRAddInfo;
+					}
+					else
+					{
+						ByAttorney.Value = false;
+						ATRNum.Value = "";
+						ATRDate.Value = DateTime.MinValue;
+						ATROrganization.Value = "";
+						ATRSurename.Value ="";
+						ATRFirstName.Value = "";
+						ATRPatronymic.Value = "";
+						ATRAddInfo.Value = "";
+					}
+
+					Comment.Value = x.Comment;
+				}
+			});
+
+			Comment.Subscribe(x => {
+				if(!string.IsNullOrEmpty(x))
+					CommentVisibility.Value = true;
+			});
+		}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+			SavedData.Value = Session.Query<SignTorg12Autosave>().OrderByDescending(o => o.CreationDate).ToList();
 		}
 
 		public bool Torg12TitleVisible { get;set;}
-
-		string SignerFirstName;
-		string SignerSureName;
-		string SignerPatronimic;
-		string SignerINN;
 
 		public NotifyValue<string> RCVFIO { get; set;}
 		public NotifyValue<string> RCVJobTitle { get; set;}
 		public NotifyValue<DateTime> RCVDate { get; set;}
 
+		public NotifyValue<SignTorg12Autosave> CurrentAutoSave { get;set;}
+		public NotifyValue<List<SignTorg12Autosave>> SavedData { get; set;}
 		public NotifyValue<bool> LikeReciever { get; set;}
 		public NotifyValue<string> ACPTSurename { get; set;}
 		public NotifyValue<string> ACPTFirstName { get; set;}
@@ -258,6 +395,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public NotifyValue<string> ATRPatronymic { get; set;}
 		public NotifyValue<string> ATRAddInfo { get; set;}
 
+		public NotifyValue<bool> SaveData { get; set;}
+		const int autosave_max = 10;
+		public NotifyValue<bool> CommentVisibility { get; set;}
 		public NotifyValue<string> Comment { get; set;}
 
 		Official GetRevicedOfficial()
@@ -285,26 +425,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			return ret;
 		}
 
-		Signer GetSigner()
-		{
-			Signer sg = new Signer();
-			sg.SignerCertificate = Cert.RawData;
-			sg.SignerCertificateThumbprint = Cert.Thumbprint;
-			sg.SignerDetails = GetSignerDetails();
-			return sg;
-		}
-
-		SignerDetails GetSignerDetails()
-		{
-			SignerDetails ret = new SignerDetails();
-			ret.FirstName = SignerFirstName;
-			ret.Surname = SignerSureName;
-			ret.Patronymic = SignerPatronimic;
-			ret.JobTitle = RCVJobTitle;
-			ret.Inn = SignerINN;
-			return ret;
-		}
-
 		Attorney GetAttorney()
 		{
 			if(!string.IsNullOrEmpty(ATRNum) && ATRDate.Value != DateTime.MinValue)
@@ -313,11 +433,16 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ret.Number = ATRNum;
 				ret.Date = ATRDate.Value.ToString("dd.MM.yyyy");
 				ret.IssuerOrganizationName = ATROrganization;
-				ret.IssuerPerson = new Official();
-				ret.IssuerPerson.FirstName = ATRSurename;
-				ret.IssuerPerson.Surname = ATRSurename;
-				ret.IssuerPerson.Patronymic = ATRPatronymic;
-				ret.IssuerPerson.JobTitle = ATRAddInfo;
+				if(!string.IsNullOrEmpty(ATRFirstName.Value) &&
+					!string.IsNullOrEmpty(ATRSurename.Value) &&
+					!string.IsNullOrEmpty(ATRPatronymic.Value))
+				{
+					ret.IssuerPerson = new Official();
+					ret.IssuerPerson.FirstName = ATRFirstName;
+					ret.IssuerPerson.Surname = ATRSurename;
+					ret.IssuerPerson.Patronymic = ATRPatronymic;
+					ret.IssuerPerson.JobTitle = ATRAddInfo;
+				}
 				return ret;
 			}
 			return null;
@@ -335,60 +460,100 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			BeginAction();
 
+			MessagePatchToPost patch = null;
+			Signer signer = GetSigner();
 			try
 			{
-				Signer signer = GetSigner();
-
-				if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
+				if(ReqRevocationSign)
 				{
-					Official recived = GetRevicedOfficial();
-					Official accepted = GetAcceptetOfficial();
-					Attorney attorney = GetAttorney();
-
-					var inf =  new Torg12BuyerTitleInfo() {
-						ReceivedBy = recived, //лицо, получившее груз signer
-						AcceptedBy = accepted,//лицо, принявшее груз
-						Attorney = attorney,
-						AdditionalInfo = Comment,
-						ShipmentReceiptDate = RCVDate.Value.ToString("dd.MM.yyyy"),
-						Signer = signer
-						};
-
-					GeneratedFile torg12XmlForBuyer = await TaskEx.Run(() => Payload.Api.GenerateTorg12XmlForBuyer(
-						Payload.Token,
-						inf,
-						Payload.BoxId,
-						Payload.Entity.DocumentInfo.MessageId,
-						Payload.Entity.DocumentInfo.EntityId));
-
-					MessagePatchToPost patch = null;
-
-					SignedContent signContent = new SignedContent();
-					signContent.Content = torg12XmlForBuyer.Content;
-					if(TrySign(signContent) == false)
+					Entity revocReq = Payload.Message.Entities.FirstOrDefault(x => x.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.RevocationRequest);
+					patch = Payload.Patch();
+					DocumentSignature acceptSignature = new DocumentSignature();
+					acceptSignature.IsApprovementSignature = true;
+					acceptSignature.ParentEntityId = revocReq.EntityId;
+					byte[] sign = null;
+					if(!TrySign(revocReq.Content.Data, out sign))
 						throw new Exception();
-
-					ReceiptAttachment receipt = new ReceiptAttachment {
-						ParentEntityId = Payload.Entity.DocumentInfo.EntityId,
-						SignedContent = signContent
-					};
-					patch = Payload.PatchTorg12(receipt);
-					try {
-						await Async(x => Payload.Api.PostMessagePatch(x, patch));
-						Log.Info($"Документ {patch.MessageId} успешно подписан");
-						} catch (HttpClientException e) {
-						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-							Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-							Manager.Warning("Документ уже был подписан другим пользователем.");
-						} else {
-							throw;
-						}
+					if (Settings.Value.DebugUseTestSign) {
+						acceptSignature.SignWithTestSignature = true;
 					}
+					acceptSignature.Signature = sign;
+					patch.AddSignature(acceptSignature);
+					LastPatchStamp = Payload.Message.LastPatchTimestamp;
+					await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				}
 				else
 				{
-					MessagePatchToPost patch = null;
-					try
+					if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
+					{
+						if(SaveData.Value)
+						{
+							SignTorg12Autosave autosave = new SignTorg12Autosave();
+							autosave.SignerJobTitle = RCVJobTitle.Value;
+							if(LikeReciever.Value)
+							{
+								 autosave.LikeReciever = true;
+							}
+							else
+							{
+								autosave.ACPTFirstName = ACPTFirstName.Value;
+								autosave.ACPTSurename = ACPTSurename.Value;
+								autosave.ACPTPatronimic = ACPTPatronimic.Value;
+								autosave.ACPTJobTitle = ACPTJobTitle.Value;
+							}
+							if(ByAttorney.Value)
+							{
+								autosave.ByAttorney = true;
+								autosave.ATRNum = ATRNum.Value;
+								autosave.ATRDate = ATRDate.Value;
+								autosave.ATROrganization = ATROrganization.Value;
+								autosave.ATRSurename = ATRSurename.Value;
+								autosave.ATRFirstName = ATRFirstName.Value;
+								autosave.ATRPatronymic = ATRPatronymic.Value;
+								autosave.ATRAddInfo = ATRAddInfo.Value;
+							}
+							autosave.Comment = Comment.Value;
+							Session.Save(autosave);
+							for(int i = autosave_max - 1; i < SavedData.Value.Count; i++)
+							{
+								Session.Delete(SavedData.Value[i]);
+							}
+						}
+						Official recived = GetRevicedOfficial();
+						Official accepted = GetAcceptetOfficial();
+						Attorney attorney = GetAttorney();
+
+						var inf =  new Torg12BuyerTitleInfo() {
+							ReceivedBy = recived, //лицо, получившее груз signer
+							AcceptedBy = accepted,//лицо, принявшее груз
+							Attorney = attorney,
+							AdditionalInfo = Comment,
+							ShipmentReceiptDate = RCVDate.Value.ToString("dd.MM.yyyy"),
+							Signer = signer
+							};
+
+						GeneratedFile torg12XmlForBuyer = await TaskEx.Run(() => Payload.Api.GenerateTorg12XmlForBuyer(
+							Payload.Token,
+							inf,
+							Payload.BoxId,
+							Payload.Entity.DocumentInfo.MessageId,
+							Payload.Entity.DocumentInfo.EntityId));
+
+						SignedContent signContent = new SignedContent();
+						signContent.Content = torg12XmlForBuyer.Content;
+						if(TrySign(signContent) == false)
+							throw new Exception();
+
+						ReceiptAttachment receipt = new ReceiptAttachment {
+							ParentEntityId = Payload.Entity.DocumentInfo.EntityId,
+							SignedContent = signContent
+						};
+						patch = Payload.PatchTorg12(receipt);
+						LastPatchStamp = Payload.Message.LastPatchTimestamp;
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Log.Info($"Документ {patch.MessageId} успешно подписан");
+					}
+					else
 					{
 						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
 						GeneratedFile invoiceReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
@@ -447,6 +612,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							while (dateConfirm ==null && breaker < 10);
 							if(dateConfirm == null)
 								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
+							LastPatchStamp = msg.LastPatchTimestamp;
 							return dateConfirm;
 						});
 
@@ -470,37 +636,25 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						patch = Payload.Patch(receipt);
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
-
-						await TaskEx.Run(() =>
-						{
-							Message msg = null;
-							int breaker = 0;
-							do
-							{
-								System.Threading.Thread.Sleep(500);
-								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
-								breaker++;
-							} while(breaker<10 && msg.Entities.First().DocumentInfo.InvoiceMetadata.Status != Diadoc.Api.Com.InvoiceStatus.InboundFinished);
-							if(breaker >= 10)
-								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
-							return msg;
-						});
-					}
-					catch (HttpClientException e) {
-						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-							Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-							Manager.Warning("Документ уже был подписан другим пользователем.");
-						} else {
-							throw;
-						}
 					}
 				}
-			}catch(Exception)
+			}
+			catch(TimeoutException)
 			{
+				Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
+			}
+			catch (HttpClientException e)
+			{
+				if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+					Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
+					Manager.Warning("Документ уже был подписан другим пользователем.");
+				} else {
+					throw;
+				}
 			}
 			finally
 			{
-				EndAction();
+				await EndAction();
 			}
 		}
 	}

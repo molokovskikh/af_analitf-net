@@ -31,6 +31,7 @@ using Message = Diadoc.Api.Proto.Events.Message;
 using ResolutionRequestType = Diadoc.Api.Proto.Events.ResolutionRequestType;
 using ResolutionStatusType = Diadoc.Api.Proto.Documents.ResolutionStatusType;
 using ResolutionType = Diadoc.Api.Proto.Events.ResolutionType;
+using BilateralDocumentStatus = Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus;
 using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using PdfiumViewer;
 using ReactiveUI;
@@ -113,55 +114,51 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public string GetStatus()
 		{
-			var desc = new List<string> {
-				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.ResolutionStatus?.Type),
-				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus),
-			};
-
-			var status = desc.Where(x => !String.IsNullOrEmpty(x)).Implode();
-			if (String.IsNullOrEmpty(status)) {
-				status = "Получен";
-				switch (Entity.DocumentInfo.Type) {
-						case DocumentType.Invoice: {
-							switch (Entity.DocumentInfo.InvoiceMetadata.Status) {
-								case Diadoc.Api.Com.InvoiceStatus.InboundNotFinished: {
-										status = "Входящий документооборот не завершен";
-									}
-									break;
-								case Diadoc.Api.Com.InvoiceStatus.InboundFinished: {
-										status = "Документооборот завершен";
-									}
-									break;
-							}
-							switch(Entity.DocumentInfo.RevocationStatus)
-							{
-								case RevocationStatus.RevocationIsRequestedByMe: {
-										status = "Ожидается аннулирование";
-									}
-									break;
-								case RevocationStatus.RevocationAccepted: {
-										status = "Аннулирован";
-									}
-									break;
-								case RevocationStatus.RequestsMyRevocation: {
-										status = "Требудется аннулирование";
-									}
-									break;
-							}
-						}
+			var status = "Получен";
+			switch (Entity.DocumentInfo.Type) {
+				case DocumentType.Invoice: {
+					switch (Entity.DocumentInfo.InvoiceMetadata.Status) {
+						case Diadoc.Api.Com.InvoiceStatus.InboundNotFinished:
+							status = "Требуется подписать извещение";
 						break;
-						case DocumentType.Torg12: {
-							switch(Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus) {
-								case Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus.InboundRecipientSignatureRequestRejected: {
-										status = "В подписи отказано";
-									}
-									break;
-							}
-
-						}
+						case Diadoc.Api.Com.InvoiceStatus.InboundFinished:
+							status = "Документооборот завершен";
 						break;
+					}
 				}
+				break;
+				case DocumentType.XmlTorg12: {
+					switch(Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus) {
+						case BilateralDocumentStatus.InboundWithRecipientSignature:
+							status = "Подписан";
+						break;
+						case BilateralDocumentStatus.InboundWaitingForRecipientSignature:
+							status = "Требуется подпись";
+						break;
+						case BilateralDocumentStatus.InboundRecipientSignatureRequestRejected:
+							status = "В подписи отказано";
+						break;
+					}
+				}
+				break;
 			}
+			switch (Entity.DocumentInfo.DocumentRevocationStatus) {
+				case Diadoc.Api.Com.RevocationStatus.RevocationRejected:
+					status += ". Отказано в аннулировании";
+				break;
+			}
+			switch(Entity.DocumentInfo.RevocationStatus) {
+				case RevocationStatus.RevocationIsRequestedByMe:
+					status = "Ожидается аннулирование";
+				break;
+				case RevocationStatus.RevocationAccepted:
+					status = "Аннулирован";
+				break;
+				case RevocationStatus.RequestsMyRevocation:
+					status = "Требуется аннулирование";
+				break;
+			}
+
 			return status;
 		}
 
@@ -177,6 +174,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected &&
 				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RequestsMyRevocation)
 				return false;
+			if(Entity.DocumentInfo.XmlTorg12Metadata?.Status == Diadoc.Api.Com.BilateralDocumentStatus.InboundWithRecipientSignature)
+				return false;
+			if(Entity.DocumentInfo.InvoiceMetadata?.Status == Diadoc.Api.Com.InvoiceStatus.InboundFinished)
+				return false;
+
 			return true;
 		}
 

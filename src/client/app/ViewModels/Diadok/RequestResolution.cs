@@ -8,6 +8,7 @@ using Diadoc.Api;
 using Diadoc.Api.Cryptography;
 using Diadoc.Api.Proto;
 using Diadoc.Api.Proto.Events;
+using Diadoc.Api.Http;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -62,21 +63,33 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async Task Save()
 		{
-			BeginAction();
-			var patch = Payload.Patch();
-			var attachment = new ResolutionRequestAttachment {
-				Comment = Comment.Value,
-				Type = type,
-				InitialDocumentId = Payload.Entity.EntityId,
-			};
-			if (CurrentUser.Value.Id != null)
-				attachment.TargetUserId = CurrentUser.Value.Id;
-			else
-				attachment.TargetDepartmentId = CurrentDepartment.Value?.DepartmentId
-					?? "00000000-0000-0000-0000-000000000000";
-			patch.AddResolutionRequestAttachment(attachment);
-			await Async(x => Payload.Api.PostMessagePatch(x, patch));
-			EndAction();
+			try
+			{
+				BeginAction();
+				LastPatchStamp = Payload.Message.LastPatchTimestamp;
+				var patch = Payload.Patch();
+				var attachment = new ResolutionRequestAttachment {
+					Comment = Comment.Value,
+					Type = type,
+					InitialDocumentId = Payload.Entity.EntityId,
+				};
+				if (CurrentUser.Value.Id != null)
+					attachment.TargetUserId = CurrentUser.Value.Id;
+				else
+					attachment.TargetDepartmentId = CurrentDepartment.Value?.DepartmentId
+						?? "00000000-0000-0000-0000-000000000000";
+				patch.AddResolutionRequestAttachment(attachment);
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
+			}
+			catch(HttpClientException e)
+			{
+				Log.Warn($"Ошибка:", e);
+				Manager.Error(e.AdditionalMessage);
+			}
+			finally
+			{
+				await EndAction();
+			}
 		}
 	}
 }

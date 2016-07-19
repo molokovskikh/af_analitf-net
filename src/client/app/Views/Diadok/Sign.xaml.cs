@@ -29,9 +29,9 @@ namespace AnalitF.Net.Client.Views.Diadok
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
 			if(!AcceptedData.BindingGroup.CommitEdit())
-				throw new ArgumentException();
+				e.Handled = true;
 			if(ByAttorney.IsChecked == true && !ByAttorneyData.BindingGroup.CommitEdit())
-				throw new ArgumentException();
+				e.Handled = true;
 		}
 	}
 }

@@ -333,6 +333,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string DiadokUsername { get; set;}
 		public virtual string DiadokPassword { get; set; }
 		public virtual string DiadokCert { get; set; }
+		public virtual string DiadokSignerJobTitle { get; set; }
 
 		public virtual string[] DiadokCerts
 		{
@@ -376,6 +377,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
 		public virtual bool DebugUseTestSign { get; set; }
+		public virtual string DebugDiadokSignerINN { get; set; }
 
 		/// <summary>
 		/// Количество месяцев до истечения срока годности когда препараты будут отмечаться как уцененные

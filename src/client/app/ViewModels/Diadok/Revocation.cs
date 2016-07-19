@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using Diadoc.Api.Proto.Events;
 using Diadoc.Api.Proto.Invoicing;
+using Diadoc.Api.Http;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -16,22 +17,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		}
 
 		public NotifyValue<string> Comment { get; set; }
-
-		Signer GetSigner()
-		{
-			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
-
-			Signer ret = new Signer();
-			ret.SignerDetails = new SignerDetails();
-			ret.SignerCertificate = Cert.RawData;
-			ret.SignerCertificateThumbprint = Cert.Thumbprint;
-			ret.SignerDetails.FirstName = certFields["CN"];
-			ret.SignerDetails.Surname = certFields["CN"];
-			ret.SignerDetails.Patronymic = certFields["CN"];
-			ret.SignerDetails.JobTitle = certFields["CN"];
-			ret.SignerDetails.Inn = "9656279962";//certFields["CN"];
-			return ret;
-		}
 
 		public async Task Save()
 		{
@@ -64,17 +49,18 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				revattch.SignedContent = revocSignContent;
 
 				patch.AddRevocationRequestAttachment(revattch);
-
+				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 			}
-			catch(Exception)
+			catch(HttpClientException e)
 			{
+				Log.Warn($"Ошибка:", e);
+				Manager.Error(e.AdditionalMessage);
 			}
 			finally
 			{
-				EndAction();
+				await EndAction();
 			}
-
 		}
 	}
 }

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using Diadoc.Api.Proto.Events;
 using System.Linq;
+using Diadoc.Api.Proto.Invoicing;
+using Diadoc.Api.Http;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -22,14 +24,23 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			{
 				BeginAction();
 				var patch = Payload.Patch();
-				var operation = Payload.Entity.DocumentInfo.RevocationStatus;
-				if(operation == Diadoc.Api.Proto.Documents.RevocationStatus.RequestsMyRevocation)
+
+				if(ReqRevocationSign)
 				{
 					Entity revocreq = Payload.Message.Entities.FirstOrDefault(x => x.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.RevocationRequest);
+					SignatureRejectionInfo signrejinfo = new SignatureRejectionInfo();
+					signrejinfo.Signer = GetSigner();
+					signrejinfo.ErrorMessage = Comment.Value;
+					GeneratedFile revocRejectSign= await TaskEx.Run(() => Payload.Api.GenerateSignatureRejectionXml(
+						Payload.Token,
+						Payload.BoxId,
+						Payload.Message.MessageId,
+						revocreq.EntityId,
+						signrejinfo));
 					XmlSignatureRejectionAttachment signrejattch = new XmlSignatureRejectionAttachment();
-					signrejattch.ParentEntityId = Payload.Entity.EntityId;
+					signrejattch.ParentEntityId = revocreq.EntityId;
 					SignedContent signcontent = new SignedContent();
-					signcontent.Content = revocreq.Content.Data;
+					signcontent.Content = revocRejectSign.Content;
 					if (!TrySign(signcontent))
 						throw new Exception();
 					signrejattch.SignedContent = signcontent;
@@ -51,15 +62,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SignedContent = content
 					});
 				}
-
+				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 			}
-			catch(Exception ex)
+			catch(HttpClientException e)
 			{
+				Log.Warn($"Ошибка:", e);
+				Manager.Error(e.AdditionalMessage);
 			}
 			finally
 			{
-				EndAction();
+				await EndAction();
 			}
 		}
 	}

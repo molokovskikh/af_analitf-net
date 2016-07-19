@@ -5,7 +5,9 @@
 	x:Class="AnalitF.Net.Client.Views.Diadok.Sign"
 	xmlns:local="clr-namespace:AnalitF.Net.Client.ViewModels.Diadok"
 	IsEnabled="{Binding IsEnabled.Value}"
-	MinWidth="300">
+	MinWidth="300"
+	MaxWidth="600"
+	MaxHeight="600">
   <ScrollViewer CanContentScroll="true" VerticalScrollBarVisibility="Auto">
     <Grid>
       <Grid.RowDefinitions>
@@ -38,6 +40,16 @@
           </Grid>
           <Expander Header="Груз принял">
             <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Label Content="Автозаполнение:"/>
+                <Controls:ComboBox2 SelectedItem="{Binding CurrentAutoSave.Value, UpdateSourceTrigger=PropertyChanged}" x:Name="SavedData" DisplayMemberPath="DisplayName" MaxWidth="400" Width="370">
+                  <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                  </ComboBox.ItemsPanel>
+                </Controls:ComboBox2>
+              </StackPanel>
               <CheckBox Name="LikeReciever" Content="Совпадает с получателем"/>
               <StackPanel>
                 <StackPanel IsEnabled="{Binding LikeReciever.Value, Converter={StaticResource BoolInvert}}">
@@ -99,9 +111,9 @@
                       </Grid.RowDefinitions>
                       <Label Content="Доверенность №:" Grid.Row="0" Grid.Column="0"/>
                       <TextBox Name="ATRNum" Text="{Binding ATRNum.Value,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}"  Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,0,2"/>
-											<Label Content="от" Grid.Row="0" Grid.Column="2"/>
-                      <DatePicker Name="ATRDateCtrl" Grid.Row="0" Grid.Column="3" SelectedDate="{Binding ATRDate.Value,Mode=OneWayToSource,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}" Margin="0,2,79,2"/>
-											<Label Content="Доверенность выдал:" Grid.Row="1" Grid.ColumnSpan="4"/>
+                      <Label Content="от" Grid.Row="0" Grid.Column="2"/>
+                      <DatePicker Name="ATRDateCtrl" Grid.Row="0" Grid.Column="3" SelectedDate="{Binding ATRDate.Value,Mode=TwoWay,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}" Margin="0,2,79,2"/>
+                      <Label Content="Доверенность выдал:" Grid.Row="1" Grid.ColumnSpan="4"/>
                       <Label Content="Организация:" Grid.Row="2" Grid.Column="0"/>
                       <TextBox Name="ATROrganization" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
                       <Label Content="Фамилия:" Grid.Row="3" Grid.Column="0"/>
@@ -118,11 +130,12 @@
               </StackPanel>
             </StackPanel>
           </Expander>
-          <Expander Header="Добавить комментарий">
+          <Expander Header="Добавить комментарий" IsExpanded="{Binding CommentVisibility.Value}">
             <StackPanel>
               <TextBox Name="Comment" FontSize="16" Margin="0,2,0,2"/>
             </StackPanel>
           </Expander>
+          <CheckBox Name="SaveData" Content="Сохранить введенные данные"/>
         </StackPanel>
       </StackPanel>
       <StackPanel Grid.Row="1">
