@@ -81,7 +81,6 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.IsTrue(style.IsBackground);
 			Assert.AreEqual("#FFFA9BFA", style.Background);
 			Assert.AreEqual("Black", style.Foreground);
-			Assert.AreEqual("Розничная цена: редактирование запрещено поставщиком", style.Description);
 
 			StyleHelper.BuildStyles(appResource);
 			var grid = new DataGrid();
