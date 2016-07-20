@@ -214,6 +214,7 @@
     <Compile Include="Integration\ViewModels\OrdersFixture.cs" />
     <Compile Include="Integration\ViewModels\PriceFixture.cs" />
     <Compile Include="Integration\ViewModels\PriceOfferFixture.cs" />
+    <Compile Include="Integration\ViewModels\CheckDefectSeriesFixture.cs" />
     <Compile Include="Integration\ViewModels\RejectsFixture.cs" />
     <Compile Include="Integration\ViewModels\SaveViewModelFixture.cs" />
     <Compile Include="Integration\ViewModels\SearchOfferFixture.cs" />

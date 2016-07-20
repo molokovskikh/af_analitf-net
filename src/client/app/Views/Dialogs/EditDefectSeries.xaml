@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Dialogs.EditDefectSeries"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls">
+	<StackPanel VerticalAlignment="Top">
+		<StackPanel Margin="5" Orientation="Horizontal">
+			<Label Content="Страна" Width="150"/>
+			<TextBox Name="Stock_Country" Width="400" HorizontalAlignment="Left" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+		</StackPanel>
+		<StackPanel Margin="5" Orientation="Horizontal">
+			<Label Content="Производитель" Width="150"/>
+			<TextBox Name="Stock_Producer" Width="400" HorizontalAlignment="Left" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+		</StackPanel>
+		<StackPanel Margin="5" Orientation="Horizontal">
+			<Label Content="Название товара" Width="150"/>
+			<TextBox Name="Stock_Product" Width="400" HorizontalAlignment="Left" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+		</StackPanel>
+		<StackPanel Margin="5" Orientation="Horizontal">
+			<Label Content="Серия" Width="150"/>
+			<TextBox Name="Stock_Seria" Width="400" HorizontalAlignment="Left" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+		</StackPanel>
+		<StackPanel Margin="5" CanVerticallyScroll="True">
+			<controls:DataGrid2 x:Name="Rejects" Width="800">
+				<DataGrid.Columns>
+					<controls:DataGridTextColumnEx x:Name="ClmnSeries" Header="Серия" Binding="{Binding Series}" Width="*" />
+					<controls:DataGridTextColumnEx x:Name="ClmnProduct" Header="Товар" Binding="{Binding Product}" Width="*" />
+					<controls:DataGridTextColumnEx x:Name="ClmnProducer" Header="Производитель" Binding="{Binding Producer}" Width="*" />
+					<controls:DataGridTextColumnEx x:Name="ClmnFrom" Header="Письмо" Binding="{Binding From}" Width="*" />
+					<controls:DataGridTextColumnEx x:Name="CauseRejectsName" Header="Причина" Binding="{Binding CauseRejects}" Width="*" />
+				</DataGrid.Columns>
+			</controls:DataGrid2>
+		</StackPanel>
+		<StackPanel Margin="5" Orientation="Horizontal">
+			<Button Name="Ok" Margin="4">Подтвердить брак</Button>
+			<Button Name="Not" Margin="4">Отклонить брак</Button>
+			<Button Name="Close" Margin="4">Отмена</Button>
+		</StackPanel>
+	</StackPanel>
+</UserControl>
