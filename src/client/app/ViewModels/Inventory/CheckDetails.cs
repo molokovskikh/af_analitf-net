@@ -29,6 +29,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			if (Header.Value == null)
+			{
+				RxQuery(x => x.Query<Check>()
+					.FirstOrDefault(y => y.Id == id))
+					.Subscribe(Header);
+				RxQuery(x =>
+				{
+					return x.Query<CheckLine>().Where(y => y.CheckId == id).OrderBy(y => y.ProductId)
+						.ToList()
+						.ToObservableCollection();
+				})
+					.Subscribe(Lines);
+			}
 		}
 	}
 }

@@ -10,10 +10,12 @@
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
-    <Grid Grid.Row="1">
+    <Grid Grid.Row="0">
       <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
@@ -47,7 +49,7 @@
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="5" Name="Header_ChangeOpening" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">ККМ</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Header_KKM" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">Аннулирован</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="8">Аннулирован</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Cancelled" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="0">Тип отпуска</Label>
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="1" Name="Header_SaleType" />
@@ -59,14 +61,14 @@
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="7" Name="Header_DiscountCard" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="0">Кассир</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="1" Name="Header_Clerk" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Рецепт №</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="2">Рецепт №</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="3" Name="Header_Recipe" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Чек продажи</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="4">Чек продажи</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="5" Name="Header_SaleCheck" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Агент</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="7" Name="Header_Agent" />
     </Grid>
-    <controls:DataGrid2 Grid.Row="2" x:Name="Lines">
+    <controls:DataGrid2 Grid.Row="1" x:Name="Lines">
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
         <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />

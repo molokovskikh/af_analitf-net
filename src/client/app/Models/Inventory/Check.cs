@@ -23,11 +23,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		[Description("Полная стоимость")] FullCost,
 	}
-	class Check
+	public class Check
 	{
 		public Check()
 		{
 			Lines = new List<CheckLine>();
+		}
+
+		public Check(uint number)
+		{
+			Lines = new List<CheckLine>();
+			Number = number;
+			Id = Number;
 		}
 
 		public virtual uint Id { get; set; }
@@ -58,5 +65,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Agent { get; set; }
 
 		public virtual IList<CheckLine> Lines { get; set; }
+
+		public virtual Stock[] ToStocks()
+		{
+			return Lines.Select(x => new Stock {
+				ProductId = x.ProductId,
+				ProducerId = x.ProductId,
+				Count = x.Quantity,
+				Cost = x.Cost,
+				RetailCost = x.RetailCost,
+			}).ToArray();
+		}
 	}
 }

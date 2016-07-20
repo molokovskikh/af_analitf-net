@@ -33,6 +33,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			RxQuery(x => x.Query<Check>()
+					.OrderByDescending(y => y.Date).ToList())
+				.Subscribe(Items);
+		}
+		public void EnterItem()
+		{
+			if (CurrentItem.Value == null)
+				return;
+			main.ActiveItem = new CheckDetails(CurrentItem.Value.Id);
 		}
 	}
 }
