@@ -1823,10 +1823,11 @@ select d.RowId as Id,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	exists(select * from Documents.DocumentBodies db where db.DocumentId = dh.Id and db.RetailCost is not null) as IsRetailCostFixed
+	IFNULL(SUM(db.RetailCost),0) > 0 as IsRetailCostFixed
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
-		left join Documents.InvoiceHeaders i on i.Id = dh.Id
+	left join Documents.DocumentBodies db on db.DocumentId = dh.Id
+	left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id
 union
