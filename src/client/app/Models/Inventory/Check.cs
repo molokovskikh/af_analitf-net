@@ -34,7 +34,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			Lines = new List<CheckLine>();
 			Number = number;
-			Id = Number;
 		}
 
 		public virtual uint Id { get; set; }

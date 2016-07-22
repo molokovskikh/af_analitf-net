@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -17,6 +18,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
+			Items = new NotifyValue<IList<Check>>(new List<Check>());
 		}
 
 		public Checks(Main main)
@@ -27,21 +29,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
-		public NotifyValue<List<Check>> Items { get; set; }
+		public NotifyValue<IList<Check>> Items { get; set; }
 		public NotifyValue<Check> CurrentItem { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			RxQuery(x => x.Query<Check>()
-					.OrderByDescending(y => y.Date).ToList())
-				.Subscribe(Items);
+			TempFillItemsList();
 		}
 		public void EnterItem()
 		{
 			if (CurrentItem.Value == null)
 				return;
-			main.ActiveItem = new CheckDetails(CurrentItem.Value.Id);
+			main.ActiveItem = new CheckDetails(CurrentItem.Value);
+		}
+
+		private void TempFillItemsList()
+		{
+			Items.Value.Add(new Check(0));
 		}
 	}
 }
