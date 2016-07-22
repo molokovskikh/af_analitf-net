@@ -7,10 +7,12 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
+using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.Models.Print;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	class Checks : BaseScreen2
+	class Checks : BaseScreen2, IPrintable
 	{
 		private Main main;
 
@@ -47,6 +49,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private void TempFillItemsList()
 		{
 			Items.Value.Add(new Check(0));
+		}
+
+		public bool CanPrint => true;
+
+		public PrintResult Print()
+		{
+			IEnumerable<BaseDocument> docs;
+			docs = Items.Value.Select(o => new CheckDocument(o));
+			return new PrintResult(DisplayName, docs);
 		}
 	}
 }
