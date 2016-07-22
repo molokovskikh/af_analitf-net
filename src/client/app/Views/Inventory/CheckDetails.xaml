@@ -31,41 +31,41 @@
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="0">Тип чека</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="0">Тип чека:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="1" Name="Header_CheckType" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="2">№ чека</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="2">№ чека:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="3" Name="Header_Number" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Дата чека</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="4">Дата чека:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="5" Name="Header_Date" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Отдел</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="6">Отдел:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="7" Name="Header_Department_Name" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Статус</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="0" Grid.Column="8">Статус:</Label>
       <Label FontWeight="Bold" Grid.Row="0" Grid.Column="9" Name="Header_Status" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Смена ИД</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="0">Смена ИД:</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="1" Name="Header_ChangeId" />
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="2">Смена №:</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="3" Name="Header_ChangeNumber" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="4">Открытие</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="4">Открытие:</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="5" Name="Header_ChangeOpening" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">ККМ</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="6">ККМ:</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Header_KKM" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="8">Аннулирован</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="1" Grid.Column="8">Аннулирован:</Label>
       <Label FontWeight="Bold" Grid.Row="1" Grid.Column="7" Name="Cancelled" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="0">Тип отпуска</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="0">Тип отпуска:</Label>
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="1" Name="Header_SaleType" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="2">Скидка</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="2">Скидка:</Label>
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="3" Name="Header_Discont" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="4">Способ оплаты</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="4">Способ оплаты:</Label>
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="5" Name="Header_PaymentType" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="6">Дисконтная карта</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="2" Grid.Column="6">Дисконтная карта:</Label>
       <Label FontWeight="Bold" Grid.Row="2" Grid.Column="7" Name="Header_DiscountCard" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="0">Кассир</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="0">Кассир:</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="1" Name="Header_Clerk" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="2">Рецепт №</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="2">Рецепт №:</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="3" Name="Header_Recipe" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="4">Чек продажи</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="4">Чек продажи:</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="5" Name="Header_SaleCheck" />
-      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Агент</Label>
+      <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Агент:</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="7" Name="Header_Agent" />
     </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Lines">
