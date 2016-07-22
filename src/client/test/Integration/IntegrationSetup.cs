@@ -51,6 +51,8 @@ namespace AnalitF.Net.Client.Test.Integration
 
 			Directory.CreateDirectory("var");
 
+			clientConfig.DiadokApiKey = "Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec";
+			clientConfig.DiadokUrl = "https://diadoc-api.kontur.ru";
 			clientConfig.BaseUrl = new Uri(String.Format("http://localhost:{0}", new Random().Next(10000, 20000)));
 			clientConfig.RootDir = @"var\client";
 			clientConfig.RequestInterval = 1.Second();

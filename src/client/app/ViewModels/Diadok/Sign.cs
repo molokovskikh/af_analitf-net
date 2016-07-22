@@ -73,8 +73,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = true;
 			Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 			LastPatchStamp = DateTime.MinValue;
-
-			var certFields = Cert.Subject.Split(',').Select(s => s.Split('=')).ToDictionary(p => p[0].Trim(), p => p[1].Trim());
+			var certFields = X509Helper.ParseSubject(Cert.Subject);
 			try
 			{
 				var namefp = certFields["G"].Split(' ');

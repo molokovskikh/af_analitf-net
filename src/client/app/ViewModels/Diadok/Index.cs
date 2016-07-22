@@ -669,7 +669,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						$"Загружено {docs.Documents.Count} из {docs.TotalCount}",
 						docs.Documents.LastOrDefault()?.IndexKey,
 						api.GetMyOrganizations(token));
-				})
+				}, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false, _ => IsLoading.Value = false)
 				.Subscribe(x => {
@@ -727,6 +727,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Items.Value.Remove(current);
 				}
 			});
+		}
+
+		public void DeleteAll()
+		{
+			for(int i = 0; i < items.Count; i++)
+			{
+				api.Delete(token, box.BoxId, items[i].Entity.DocumentInfo.MessageId, items[i].Entity.EntityId);
+			}
 		}
 
 		public IEnumerable<IResult> Save()
