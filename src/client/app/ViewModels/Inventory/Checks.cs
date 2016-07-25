@@ -50,7 +50,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void TempFillItemsList()
 		{
-			Items.Value.Add(new Check(0));
+			var check = new Check(0);
+			check.Lines = new List<CheckLine>();
+			check.Lines.Add(new CheckLine());
+			Items.Value.Add(check);
 		}
 
 		public IEnumerable<IResult> PrintChecks()

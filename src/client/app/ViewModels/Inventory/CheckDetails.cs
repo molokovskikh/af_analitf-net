@@ -6,6 +6,10 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using System.Collections.Generic;
+using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -32,6 +36,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 			Lines.Value = Header.Value.Lines;
+		}
+		public IEnumerable<IResult> PrintCheckDetails()
+		{
+			return Preview("Чеки", new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null)
+			{
+				yield return new DialogResult(new SimpleSettings(docSettings));
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 	}
 }

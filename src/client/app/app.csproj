@@ -272,6 +272,7 @@
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
     <Compile Include="Models\Inventory\StockTotal.cs" />
+    <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />
     <Compile Include="Models\Print\StockDocument.cs" />
     <Compile Include="Models\Print\StockLimitMonthDocument.cs" />

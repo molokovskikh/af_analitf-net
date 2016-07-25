@@ -11,6 +11,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <Grid Grid.Row="0">
       <Grid.RowDefinitions>
@@ -68,7 +69,10 @@
       <Label Style="{StaticResource DetailsLabel}" Grid.Row="3" Grid.Column="6">Агент:</Label>
       <Label FontWeight="Bold" Grid.Row="3" Grid.Column="7" Name="Header_Agent" />
     </Grid>
-    <controls:DataGrid2 Grid.Row="1" x:Name="Lines">
+    <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="1">
+      <Button Name="PrintCheckDetails" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать</Button>
+    </WrapPanel>
+    <controls:DataGrid2 Grid.Row="2" x:Name="Lines">
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
         <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
