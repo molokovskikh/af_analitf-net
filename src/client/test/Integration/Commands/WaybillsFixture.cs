@@ -176,12 +176,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			localSession.Refresh(line);
 			Assert.IsTrue(line.IsRejectNew);
 			Assert.AreEqual(reject.Id, line.RejectId, line.Id.ToString());
-
-			var indexcntobj = localSession.CreateSQLQuery("select count(1) from information_schema.statistics " +
-				"where table_name = 'WaybillLines' " +
-				"and index_name = 'SerialProductIdProducerId'").UniqueResult();
-			int indexcnt = indexcntobj != null ? Int32.Parse(indexcntobj.ToString()) : -1;
-			Assert.AreEqual(indexcnt, 3);
 		}
 
 		[Test]

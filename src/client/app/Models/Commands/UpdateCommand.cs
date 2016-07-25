@@ -1013,17 +1013,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			//а попадут в базу после commit
 			//те изменения из сессии перетрут состояние флагов
 
-			// #51646 Проблемы обновления АF.NET
-			var indexcntobj = Session.CreateSQLQuery("select count(1) from information_schema.statistics " +
-				"where table_name = 'WaybillLines' " +
-				"and index_name = 'SerialProductIdProducerId'").UniqueResult();
-			int indexcnt = indexcntobj != null ? Int32.Parse(indexcntobj.ToString()) : -1;
-			if (indexcnt == 0)
-			{
-				Session.CreateSQLQuery("alter table WaybillLines add index SerialProductIdProducerId (SerialNumber, ProductId, ProducerId)")
-					.ExecuteUpdate();
-			}
-
 			//сопоставляем с учетом продукта и производителя
 			var begin = DateTime.Today.AddDays(-settings.TrackRejectChangedDays);
 			var exists =  Session.CreateSQLQuery("update (WaybillLines as l, Rejects r) " +
