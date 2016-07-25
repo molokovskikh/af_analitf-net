@@ -41,6 +41,20 @@
         <controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
         <controls:DataGridTextColumnEx Header="Отдел" Binding="{Binding Department}" Width="*" />
         <controls:DataGridTextColumnEx Header="ККМ" Binding="{Binding KKM}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Тип чека" Binding="{Binding CheckType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Открытие смены" Binding="{Binding ChangeOpening}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Кассир" Binding="{Binding Clerk}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Тип оплаты" Binding="{Binding PaymentType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Тип продажи" Binding="{Binding SaleType}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Скидка" Binding="{Binding Discont}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="ИД смены" Binding="{Binding ChangeId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Номер смены" Binding="{Binding ChangeNumber}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Аннулирован" Binding="{Binding Cancelled}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Чек продажи" Binding="{Binding SaleCheck}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Дисконтная карта" Binding="{Binding DiscountCard}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Рецепт" Binding="{Binding Recipe}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Агент" Binding="{Binding Agent}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
         <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding DiscontSum}" Width="*" />
         <controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding Sum}" Width="*" />
