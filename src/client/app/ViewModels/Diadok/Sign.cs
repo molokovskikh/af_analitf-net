@@ -19,6 +19,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Windows.Media;
 using System.Globalization;
 using NHibernate.Linq;
+using System.Threading;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -151,9 +152,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = false;
 		}
 
-		protected async Task EndAction()
+		protected void EndAction()
 		{
-			await TaskEx.Run(() =>
 			{
 				Message msg = null;
 				int breaker = 0;
@@ -163,25 +163,13 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					if(LastPatchStamp != msg.LastPatchTimestamp)
 						break;
 					else
-						System.Threading.Thread.Sleep(1000);
+						Thread.Sleep(1000);
 					breaker++;
 				} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
-				return msg;
-			});
+			}
 			IsEnabled.Value = true;
 			isDone.Value = true;
 			TryClose();
-		}
-
-		public async Task Async(Action<string> action)
-		{
-			try {
-				await TaskEx.Run(() => action(Payload.Token));
-			} catch(Exception e) {
-				Log.Error($"Не удалось обновить документ {Payload.Entity.EntityId}", e);
-				Manager.Error(ErrorHelper.TranslateException(e)
-					?? "Не удалось выполнить операцию, попробуйте повторить позднее.");
-			}
 		}
 
 		public bool TrySign(SignedContent content)
@@ -468,7 +456,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			return invoiceRecieptConfirmation;
 		}
 
-		public async Task Save()
+		public void Save()
 		{
 			BeginAction();
 
@@ -492,7 +480,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					acceptSignature.Signature = sign;
 					patch.AddSignature(acceptSignature);
 					LastPatchStamp = Payload.Message.LastPatchTimestamp;
-					await Async(x => Payload.Api.PostMessagePatch(x, patch));
+					Payload.Api.PostMessagePatch(Payload.Token, patch);
 				}
 				else
 				{
@@ -544,12 +532,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							Signer = signer
 							};
 
-						GeneratedFile torg12XmlForBuyer = await TaskEx.Run(() => Payload.Api.GenerateTorg12XmlForBuyer(
+						GeneratedFile torg12XmlForBuyer = Payload.Api.GenerateTorg12XmlForBuyer(
 							Payload.Token,
 							inf,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
-							Payload.Entity.DocumentInfo.EntityId));
+							Payload.Entity.DocumentInfo.EntityId);
 
 						SignedContent signContent = new SignedContent();
 						signContent.Content = torg12XmlForBuyer.Content;
@@ -562,18 +550,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						};
 						patch = Payload.PatchTorg12(receipt);
 						LastPatchStamp = Payload.Message.LastPatchTimestamp;
-						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Payload.Api.PostMessagePatch(Payload.Token, patch);
 						Log.Info($"Документ {patch.MessageId} успешно подписан");
 					}
 					else
 					{
 						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
-						GeneratedFile invoiceReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+
+						GeneratedFile invoiceReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
 							Payload.Token,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoice.EntityId,
-							signer));
+							signer);
 
 						SignedContent signContentInvoiceReciept = new SignedContent();
 						signContentInvoiceReciept.Content = invoiceReceipt.Content;
@@ -586,12 +575,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						};
 
 						Entity invoiceConfirmation = Payload.Message.Entities.OrderBy(x => x.CreationTime).First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
-						GeneratedFile invoiceConfirmationReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+						GeneratedFile invoiceConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
 							Payload.Token,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoiceConfirmation.EntityId,
-							signer));
+							signer);
 
 						SignedContent signContentInvoiceConfirmationReciept = new SignedContent();
 						signContentInvoiceConfirmationReciept.Content = invoiceReceipt.Content;
@@ -606,17 +595,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 						patch = Payload.Patch(receiptInvoice, invoiceConfirmationreceipt);
 
-						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Payload.Api.PostMessagePatch(Payload.Token, patch);
 						Log.Info($"Документ {patch.MessageId} receiptInvoice, invoiceConfirmationreceipt отправлены");
 
-						Entity invoiceDateConfirmation = await TaskEx.Run(() =>
+						Entity invoiceDateConfirmation = null;
 						{
 							Message msg = null;
 							Entity dateConfirm = null;
 							int breaker = 0;
 							do
 							{
-								System.Threading.Thread.Sleep(1000);
+								Thread.Sleep(1000);
 								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
 								dateConfirm = GetDateConfirmationStep7(msg);
 								breaker++;
@@ -625,15 +614,15 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							if(dateConfirm == null)
 								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
 							LastPatchStamp = msg.LastPatchTimestamp;
-							return dateConfirm;
-						});
+							invoiceDateConfirmation = dateConfirm;
+						}
 
-						GeneratedFile invoiceOperConfirmationReceipt = await TaskEx.Run(() => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+						GeneratedFile invoiceOperConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
 							Payload.Token,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoiceDateConfirmation.EntityId,
-							signer));
+							signer);
 
 						SignedContent signContentOperInvoiceConfrmReciept = new SignedContent();
 						signContentOperInvoiceConfrmReciept.Content = invoiceOperConfirmationReceipt.Content;
@@ -646,7 +635,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							SignedContent = signContentOperInvoiceConfrmReciept
 						};
 						patch = Payload.Patch(receipt);
-						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+						Payload.Api.PostMessagePatch(Payload.Token, patch);
 						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
 					}
 				}
@@ -666,7 +655,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 			finally
 			{
-				await EndAction();
+				EndAction();
 			}
 		}
 	}

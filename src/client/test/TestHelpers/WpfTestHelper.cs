@@ -139,7 +139,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			thread.SetApartmentState(ApartmentState.STA);
 			thread.IsBackground = true;
 			thread.Start();
-			if (!started.Wait(100.Second()))
+			if (!started.Wait(10.Second()))
 				throw new AggregateException("Не удалось дождаться запуска, что то сломалось подключай дебагер и смотри", errors);
 			var dispatcher = Dispatcher.FromThread(thread);
 			if (dispatcher == null)

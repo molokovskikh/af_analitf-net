@@ -19,7 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public NotifyValue<string> Comment { get; set; }
 
 		public async Task Save()
-		{
+		{/*
 			try
 			{
 				BeginAction();
@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			finally
 			{
 				await EndAction();
-			}
+			} */
 		}
 	}
 }

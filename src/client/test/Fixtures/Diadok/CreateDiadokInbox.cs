@@ -69,15 +69,17 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			msg.XmlTorg12SellerTitles.Clear();
 			// два инвойса
+			Thread.Sleep(TimeSpan.FromSeconds(10));
 			api.PostMessage(token, msg);
-			Thread.Sleep(TimeSpan.FromSeconds(5));
+			Thread.Sleep(TimeSpan.FromSeconds(10));
 			api.PostMessage(token, msg);
 
 			msg.Invoices.Clear();
 			msg.AddXmlTorg12SellerTitle(att12);
 			// две накладных
+			Thread.Sleep(TimeSpan.FromSeconds(10));
 			api.PostMessage(token, msg);
-			Thread.Sleep(TimeSpan.FromSeconds(5));
+			Thread.Sleep(TimeSpan.FromSeconds(10));
 			api.PostMessage(token, msg);
 		}
 
