@@ -73,30 +73,43 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = true;
 			Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 			LastPatchStamp = DateTime.MinValue;
-			var certFields = X509Helper.ParseSubject(Cert.Subject);
-			try
+			if(Settings.Value.DebugUseTestSign)
 			{
-				var namefp = certFields["G"].Split(' ');
-				SignerFirstName = namefp[0];
-				SignerSureName = certFields["SN"];
-				SignerPatronimic = namefp[1];
-				if(!string.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
-					SignerINN = Settings.Value.DebugDiadokSignerINN;
-				else
-				{
-					if(certFields.Keys.Contains("OID.1.2.643.3.131.1.1"))
-						SignerINN = certFields["OID.1.2.643.3.131.1.1"];
-					if(certFields.Keys.Contains("ИНН"))
-						SignerINN = certFields["ИНН"];
-					if(string.IsNullOrEmpty(SignerINN))
-						throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
-				}
+				SignerFirstName = "Иван";
+				SignerSureName = "Иванович";
+				SignerPatronimic = "Иванов";
+				SignerINN = "9656279962";
 			}
-			catch(Exception exept)
-			{
-				Manager.Error("Ошибка сертификата.");
-				Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
-				throw;
+			else {
+				var certFields = X509Helper.ParseSubject(Cert.Subject);
+				try
+				{
+					var namefp = certFields["G"].Split(' ');
+					SignerFirstName = namefp[0];
+					SignerSureName = certFields["SN"];
+					SignerPatronimic = namefp[1];
+					if(!string.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
+						SignerINN = Settings.Value.DebugDiadokSignerINN;
+					else
+					{
+						if(certFields.Keys.Contains("OID.1.2.643.3.131.1.1"))
+							SignerINN = certFields["OID.1.2.643.3.131.1.1"];
+						if(certFields.Keys.Contains("ИНН"))
+							SignerINN = certFields["ИНН"];
+				#if DEBUG
+						if(SignerINN.Length > 10)
+							SignerINN = SignerINN.Substring(2);
+				#endif
+						if(string.IsNullOrEmpty(SignerINN))
+							throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
+					}
+				}
+				catch(Exception exept)
+				{
+					Manager.Error("Ошибка сертификата.");
+					Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
+					throw;
+				}
 			}
 		}
 
