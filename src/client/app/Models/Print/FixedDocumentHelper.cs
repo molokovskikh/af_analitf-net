@@ -39,6 +39,34 @@ namespace AnalitF.Net.Client.Models.Print
 			return document;
 		}
 
+		public static FlowDocument BuildFlowDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
+		{
+			var document = new FlowDocument();
+			var left = lines.Count;
+			while (left > 0) {
+				var panel = new StackPanel();
+				var label = new Label {
+					Padding = new Thickness(0, 5, 0, 5),
+					Content = $"{waybill.ProviderDocumentId} {settings.FullName}",
+					FontFamily = new FontFamily("Arial"),
+				};
+				panel.Children.Add(label);
+				var border = new Border {
+					Margin = new Thickness(35)
+				};
+				var section = new Section();
+				section.BreakPageBefore = true;
+				label.Measure(pageSize);
+				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
+					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
+				var grid = new BlockUIContainer(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
+				section.Blocks.Add(new BlockUIContainer(panel));
+				section.Blocks.Add(grid);
+				document.Blocks.Add(section);
+			}
+			return document;
+		}
+
 		public static FrameworkElement BuildMapGrid(Func<int, FrameworkElement> map, int count, Size size, ref int left, double borderThickness)
 		{
 			var panel = new Grid();

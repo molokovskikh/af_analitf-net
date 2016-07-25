@@ -26,6 +26,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Helpers;
+using Dapper.Contrib.Extensions;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
@@ -48,19 +49,6 @@ namespace AnalitF.Net.Client
 #endif
 
 		public ShellViewModel Shell;
-
-		public static event EventHandler LeaderCalculationWasStartChanged;
-
-		private static bool _leaderCalculationWasStart = false;
-		public static bool LeaderCalculationWasStart
-		{
-			get { return _leaderCalculationWasStart; }
-			set
-			{
-				_leaderCalculationWasStart = value;
-				LeaderCalculationWasStartChanged?.Invoke(null, new EventArgs());
-			}
-		}
 
 		public static Config.Caliburn.Caliburn Caliburn;
 		public static Config.NHibernate.NHibernate NHibernate;
@@ -330,6 +318,7 @@ namespace AnalitF.Net.Client
 			if (NHibernate != null)
 				return;
 
+			SqlMapperExtensions.GetDatabaseType = x => "mysqlconnection";
 			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
 

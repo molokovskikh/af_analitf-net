@@ -28,5 +28,21 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			scheduler.Start();
 			Assert.That(model.Offers.Value.Count, Is.GreaterThan(0));
 		}
+
+		[Test]
+		public void Display_supplier_name()
+		{
+			var id = session.Query<Waybill>().First(w => w.DocType == DocType.Reject).Id;
+			var model = new Client.ViewModels.OrderRejectDetails(id);
+			Open(model);
+			model.CurrentLine.Value = model.Lines.Value.Skip(1).First(l => l.ProductId == null
+				&& l.Product == "ПАПАВЕРИНА ГИДРОХЛОРИД супп. 20 мг N10");
+			scheduler.Start();
+			var saveSupplierName = model.Doc.Value.Supplier.FullName;
+			model.Doc.Value.Supplier = null;
+			Close(model);
+			Open(model);
+			Assert.AreEqual(model.DisplaySupplierName, saveSupplierName);
+		}
 	}
 }

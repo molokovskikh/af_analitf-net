@@ -16,5 +16,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public static TimeSpan ScrollLoadTimeout = TimeSpan.FromMilliseconds(100);
 		//задержка перед загрузкой данных при вводе текста в поле
 		public static TimeSpan TextInputLoadTimeout = TimeSpan.FromMilliseconds(300);
+		public const string WarningTitle = "АналитФАРМАЦИЯ: Внимание";
 	}
 }

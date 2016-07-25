@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
+using Dapper;
 using NHibernate.Linq;
 using NPOI.SS.UserModel;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
+		private PriceTag priceTag;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -149,6 +151,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => priceTag = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
 			{
@@ -157,20 +162,19 @@ namespace AnalitF.Net.Client.ViewModels
 			}
 		}
 
-		public IResult PrintRackingMap()
+		public IEnumerable<IResult> PrintRackingMap()
 		{
+			/*
 			return new DialogResult(new PrintPreviewViewModel {
 				DisplayName = "Стеллажная карта",
 				Document = new RackingMapDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}, fullScreen: true);
+			}, fullScreen: true);*/
+			return Preview("Стеллажная карта", new RackingMapDocument(Waybill, PrintableLines(), Settings.Value));
 		}
 
-		public IResult PrintPriceTags()
+		public IEnumerable<IResult> PrintPriceTags()
 		{
-			return new DialogResult(new PrintPreviewViewModel {
-				DisplayName = "Ценники",
-				Document = new PriceTagDocument(Waybill, PrintableLines(), Settings.Value).Build()
-			}, fullScreen: true);
+			return Preview("Ценники", new PriceTagDocument(Waybill, PrintableLines(), Settings.Value, priceTag));
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
@@ -340,6 +344,79 @@ namespace AnalitF.Net.Client.ViewModels
 			row = sheet.CreateRow(afterItemsPosition[0] + 12);
 			row.CreateCell(1).SetCellValue("\" ____\" _______________20__г");
 			row.CreateCell(5).SetCellValue("Главный (старший)бухгалтер ________________");
+
+			return ExcelExporter.Export(book);
+		}
+
+		public IResult RestoredExportWaybill()
+		{
+			var columns = new[] {
+				"№ пп",
+				"Наименование и краткая характеристика товара",
+				"Серия товара Сертификат",
+				"Срок годности",
+				"Производитель",
+				"Цена без НДС, руб",
+				"Затребован.колич.",
+				"Опт. надб. %",
+				"Отпуск. цена пос-ка без НДС, руб",
+				"НДС пос-ка, руб",
+				"Отпуск. цена пос-ка с НДС, руб",
+				"Розн. торг. надб. %",
+                "Розн. торг. надб. руб",
+                "Розн. цена за ед., руб",
+				"Кол-во",
+				"Розн. сумма, руб"
+			};
+			var items = PrintableLines().Select((l, i) => new object[] {
+				i + 1,
+				l.Product,
+				$"{l.SerialNumber} {l.Certificates}",
+				l.Period,
+				l.Producer,
+				l.ProducerCost,
+				l.Quantity,
+				l.SupplierPriceMarkup,
+				l.SupplierCostWithoutNds,
+				l.Nds,
+				l.SupplierCost,
+				l.RetailMarkup,
+                l.RetailMarkupInRubles,
+				l.RetailCost,
+				l.Quantity,
+				l.RetailSum
+			});
+			var book = ExcelExporter.ExportTable(columns, items, 8);
+
+			var sheet = book.GetSheetAt(0);
+			sheet.CreateRow(1).CreateCell(6).SetCellValue(
+				$"Наименование организации: Сотрудник {Waybill.WaybillSettings.FullName}");
+
+			var row = sheet.CreateRow(2);
+			row.CreateCell(3).SetCellValue("Отдел:");
+			row.CreateCell(4).SetCellValue("_______________________________________");
+
+			row = sheet.CreateRow(3);
+			row.CreateCell(0).SetCellValue("Требование №");
+ 			row.CreateCell(1).SetCellValue("_______________________");
+ 			row.CreateCell(5).SetCellValue("Накладная №");
+ 			row.CreateCell(6).SetCellValue("_______________________");
+
+			row = sheet.CreateRow(4);
+			row.CreateCell(1).SetCellValue("от \"___\"_________________20___г");
+			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
+
+			row = sheet.CreateRow(5);
+			row.CreateCell(0).SetCellValue("Кому: Аптечный пункт");
+ 			row.CreateCell(1).SetCellValue("_______________________");
+ 			row.CreateCell(5).SetCellValue("Через кого");
+ 			row.CreateCell(6).SetCellValue("_______________________");
+
+			row = sheet.CreateRow(6);
+			row.CreateCell(0).SetCellValue("Основание отпуска");
+ 			row.CreateCell(1).SetCellValue("_______________________");
+ 			row.CreateCell(5).SetCellValue("Доверенность №_____");
+ 			row.CreateCell(6).SetCellValue("от \"___\"_________________20___г");
 
 			return ExcelExporter.Export(book);
 		}

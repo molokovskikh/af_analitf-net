@@ -55,13 +55,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Merge(CurrentFilter.Cast<object>())
 				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
 				.Subscribe(_ => Filter());
-			if (AppBootstrapper.LeaderCalculationWasStart) {
-				AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) => {
-					OnActivate();
-				};
-				MessageResult.Warn("Идет расчет прайс-лидеров. Прайс-лидеры и минимальные цены отобразятся после окончания расчета, это может занять какое-то время.")
-					.Execute(new ActionExecutionContext());
-			}
 		}
 
 		public SearchBehavior SearchBehavior { get; set; }
@@ -79,6 +72,18 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			if (Shell.LeaderCalculationWasStart)
+			{
+				Shell.PropertyChanged += (sender, e) => {
+					if (e.PropertyName == nameof(Shell.LeaderCalculationWasStart))
+					{
+						OnActivate();
+					}
+				};
+				MessageResult.Warn("Идет расчет прайс-лидеров. Прайс-лидеры и минимальные цены отобразятся после окончания расчета, это может занять какое-то время.")
+					.Execute(new ActionExecutionContext());
+			}
 
 			Price.Value = StatelessSession?.Get<Price>(priceId);
 			Promotions.FilterBySupplierId = Price?.Value?.SupplierId;

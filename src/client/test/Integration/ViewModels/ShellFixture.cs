@@ -367,7 +367,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			session.DeleteEach<DelayOfPayment>();
 			var offer = session.Query<Offer>()
-				.First(o => o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId && !o.VitallyImportant && !o.Junk);
+				.First(o => (o.LeaderPrice.Id.PriceId != o.Price.Id.PriceId || o.LeaderPrice == null) && !o.VitallyImportant && !o.Junk);
 			//в прайс-листе может быть несколько предложений нам нужно выбрать самое дешевое
 			offer = session.Query<Offer>()
 				.Where(o => o.Price == offer.Price && o.ProductId == offer.ProductId && !o.VitallyImportant && !o.Junk)
@@ -391,8 +391,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.AreEqual(offer.Price, offer.LeaderPrice, offer.Id.ToString());
 			session.Refresh(settings);
 
-			Assert.IsFalse(AppBootstrapper.LeaderCalculationWasStart);
-			Assert.AreEqual(DateTime.Today, settings.LastLeaderCalculation);
+			Assert.AreEqual(DateTime.Today.Date, settings.LastLeaderCalculation.Date);
+
 			var minCost = session.Query<MinCost>().First(m => m.ProductId == offer.ProductId);
 			Assert.AreEqual(offer.ResultCost, minCost.Cost, offer.Id.ToString());
 			Assert.IsNotNull(minCost.NextCost, offer.Id.ToString());
