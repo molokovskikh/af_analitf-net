@@ -73,6 +73,17 @@
         <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
         <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
         <controls:DataGridTextColumnEx Header="Название" Binding="{Binding ProductName}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding ProducerId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Код товара" Binding="{Binding ProductId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Форма товара" Binding="{Binding ProductKind}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Тип товара" Binding="{Binding PKU}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Делитель" Binding="{Binding Divider}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма наценки" Binding="{Binding MarkupSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма с НДС" Binding="{Binding NDSSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Сумма с НП" Binding="{Binding NPSum}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="НДС%" Binding="{Binding NDS}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="НП%" Binding="{Binding NP}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Номер партии" Binding="{Binding PartyNumber}" Width="*" />
         <controls:DataGridTextColumnEx Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
         <controls:DataGridTextColumnEx Header="Цена" Binding="{Binding Cost}" Width="*" />
         <controls:DataGridTextColumnEx Header="Количество" Binding="{Binding Quantity}" Width="*" />

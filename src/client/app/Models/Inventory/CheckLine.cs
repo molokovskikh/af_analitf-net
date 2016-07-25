@@ -22,6 +22,39 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }
 		public virtual uint CheckId { get; set; }
+		public virtual uint? ProductKind { get; set; }
+		public virtual string PKU
+		{
+			get
+			{
+				if (Narcotic)
+					return "ПКУ:Наркотические и психотропные";
+				if (Toxic)
+					return "ПКУ:Сильнодействующие. и ядовитые";
+				if (Combined)
+					return "ПКУ:Комбинированные";
+				if (Other)
+					return "ПКУ:Иные лек.средства";
+				return null;
+			}
+		}
+		public virtual uint? Divider { get; set; }
+		public virtual decimal MarkupSum { get; set; }
+		public virtual decimal NDSSum { get; set; }
+		public virtual decimal NPSum { get; set; }
+		public virtual uint? NDS { get; set; }
+		public virtual uint? NP { get; set; }
+		public virtual decimal PartyNumber { get; set; }
+
+
+
+		public virtual bool Narcotic { get; set; }
+		public virtual bool Toxic { get; set; }
+		public virtual bool Combined { get; set; }
+		public virtual bool Other { get; set; }
+		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
+
+
 
 		public virtual void CopyToStock(Stock stock)
 		{
