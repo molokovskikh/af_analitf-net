@@ -67,12 +67,5 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
-
-		public PrintResult Print()
-		{
-			IEnumerable<BaseDocument> docs;
-			docs = Items.Value.Select(o => new CheckDocument(o));
-			return new PrintResult(DisplayName, docs);
-		}
 	}
 }
