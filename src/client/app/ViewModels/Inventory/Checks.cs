@@ -9,10 +9,12 @@ using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.ViewModels.Dialogs;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	class Checks : BaseScreen2, IPrintable
+	class Checks : BaseScreen2
 	{
 		private Main main;
 
@@ -51,7 +53,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Items.Value.Add(new Check(0));
 		}
 
-		public bool CanPrint => true;
+		public IEnumerable<IResult> PrintChecks()
+		{
+			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null)
+			{
+				yield return new DialogResult(new SimpleSettings(docSettings));
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
 
 		public PrintResult Print()
 		{

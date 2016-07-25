@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		public Check Check;
 		public IList<CheckLine> Lines;
+		private Check[] _checks;
 
 		public CheckDocument(Check check, IList<CheckLine> lines)
 		{
@@ -24,6 +25,11 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			Check = check;
 			Lines = check.Lines.ToArray();
+		}
+
+		public CheckDocument(Check[] checks)
+		{
+			_checks = checks;
 		}
 
 		protected override void BuildDoc()

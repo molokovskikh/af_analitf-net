@@ -13,6 +13,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Id { get; set; }
 		public virtual uint Barcode { get; set; }
 		public virtual uint? ProductId { get; set; }
+		public virtual uint? ProducerId { get; set; }
 		public virtual string ProductName { get; set; }
 		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Cost { get; set; }

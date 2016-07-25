@@ -12,16 +12,28 @@
       <RowDefinition Height="Auto" />
       <RowDefinition />
     </Grid.RowDefinitions>
-    <ToolBar Grid.Row="0">
-      <GroupBox Header="За период" Style="{StaticResource FilterElement}">
-        <StackPanel Orientation="Horizontal">
-          <Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
-          <DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
-          <Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
-          <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
-        </StackPanel>
-      </GroupBox>
-    </ToolBar>
+    <Grid Grid.Row="0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="0" Grid.Column="1">
+        <Button Name="PrintChecks" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать чеков</Button>
+      </WrapPanel>
+      <ToolBar Grid.Row="0" Grid.Column="0">
+        <GroupBox Header="За период" Style="{StaticResource FilterElement}">
+          <StackPanel Orientation="Horizontal">
+            <Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+            <DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+            <Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+            <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+          </StackPanel>
+        </GroupBox>
+      </ToolBar>
+    </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items">
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="ИД" Binding="{Binding Id}" Width="*" />

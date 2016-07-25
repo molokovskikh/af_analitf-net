@@ -69,7 +69,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			return Lines.Select(x => new Stock {
 				ProductId = x.ProductId,
-				ProducerId = x.ProductId,
+				ProducerId = x.ProducerId,
 				Count = x.Quantity,
 				Cost = x.Cost,
 				RetailCost = x.RetailCost,
