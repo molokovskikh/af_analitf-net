@@ -77,13 +77,15 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 
-			int outboxCount = 0;
-			int inboxCount = 0;
+			int outboxCount = -34523521;
+			int inboxCount = -235643532;
 
-			dispatcher.Invoke(() => outboxCount = ddkIndex.Items.Value.Count);
 			inboxCount = diadokDatas.GetMessages().Item1.Count;
-
-			Assert.AreEqual(inboxCount, outboxCount);
+			dispatcher.Invoke(() =>
+			{
+				outboxCount = ddkIndex.Items.Value.Count;
+				Assert.AreEqual(inboxCount, outboxCount);
+			});
 		}
 
 		[Test]
@@ -107,8 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Click("Save");
 
 			Wait();
-			Thread.Sleep(TimeSpan.FromSeconds(3));
-			Wait();
+
 			//подписываем Инвойс
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == Diadoc.Api.Com.DocumentType.Invoice);
@@ -120,20 +121,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Click("Save");
 
 			Wait();
-			dispatcher.Invoke(() => ddkIndex.Reload());
-			Wait();
 
 			bool signtorg12ok = false;
 			dispatcher.Invoke(() => {
 				signtorg12ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id).Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
+				Assert.AreEqual(signtorg12ok, true);
 			});
-			Assert.AreEqual(signtorg12ok, true);
 
 			bool signinvoice = false;
 			dispatcher.Invoke(() => {
 				signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid).Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
+				Assert.AreEqual(signinvoice, true);
 			});
-			Assert.AreEqual(signinvoice, true);
 
 		}
 
