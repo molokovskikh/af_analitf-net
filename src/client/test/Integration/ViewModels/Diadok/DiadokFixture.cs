@@ -87,7 +87,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Wait();
 
-			for(int i = 0; i < ddkIndex.Items.Value.Count; i++)
+			for(int i = 0; i < 1; i++)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First();
@@ -102,20 +102,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 
-			bool signok = false;
-			for(int i = 0; i < ddkIndex.Items.Value.Count; i++)
-			{
-				if(ddkIndex.Items.Value.First().Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.XmlTorg12)
-				{
-					signok &= ddkIndex.Items.Value.First().Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus.InboundWithRecipientSignature;
-				}
-				else if(ddkIndex.Items.Value.First().Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Invoice)
-				{
-					signok &= ddkIndex.Items.Value.First().Entity.DocumentInfo.InvoiceMetadata.Status == Diadoc.Api.Com.InvoiceStatus.InboundFinished;
-				}
-				else
-					signok &= false;
-			}
+			bool signok = ddkIndex.Items.Value.Skip(0).First().Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus.InboundWithRecipientSignature;
 
 			Assert.AreEqual(signok, true);
 		}
