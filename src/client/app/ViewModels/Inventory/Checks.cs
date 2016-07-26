@@ -10,6 +10,7 @@ using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels.Dialogs;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -22,7 +23,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
+			ChangeDate.Value = DateTime.Today;
+			SearchBehavior = new SearchBehavior(this);
 			Items = new NotifyValue<IList<Check>>(new List<Check>());
+			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
 		}
 
 		public Checks(Main main)
@@ -33,13 +37,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
+		public NotifyValue<DateTime> ChangeDate { get; set; }
+		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<IList<Check>> Items { get; set; }
 		public NotifyValue<Check> CurrentItem { get; set; }
+		public NotifyValue<IList<Selectable<Address>>> AddressesFilter { get; set; }
+		public NotifyValue<IList<Selectable<string>>> KKMFilter { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			TempFillItemsList();
+			RxQuery(x => x.Query<Address>().OrderBy(y => y.Name).ToArray().Select(y => new Selectable<Address>(y)).ToList())
+				.Subscribe(AddressesFilter);
+			SampleData();
 		}
 		public void EnterItem()
 		{
@@ -48,12 +58,30 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			main.ActiveItem = new CheckDetails(CurrentItem.Value);
 		}
 
-		private void TempFillItemsList()
+		private IList<Check> TempFillItemsList()
 		{
+			var checks = new List<Check>();
 			var check = new Check(0);
 			check.Lines = new List<CheckLine>();
 			check.Lines.Add(new CheckLine());
-			Items.Value.Add(check);
+			checks.Add(check);
+			return checks;
+		}
+
+		private void SampleData()
+		{
+			Items.Value = TempFillItemsList();
+			KKMFilter.Value.Add(new Selectable<string>("1(0000000)"));
+		}
+
+		public void Filter()
+		{
+			IEnumerable<Check> items = Items.Value;
+			var term = SearchBehavior.ActiveSearchTerm.Value;
+			if (!String.IsNullOrEmpty(term)) {
+				items = items.Where(o => o.ChangeNumber.ToString() == term);
+			}
+			Items.Value = items.OrderBy(o => o.ChangeNumber).ToList();
 		}
 
 		public IEnumerable<IResult> PrintChecks()

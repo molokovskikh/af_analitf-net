@@ -5,6 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
 	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	xmlns:caliburn="clr-namespace:AnalitF.Net.Client.Config.Caliburn"
 	mc:Ignorable="d"
 	d:DesignHeight="300" d:DesignWidth="300">
   <Grid>
@@ -32,6 +33,19 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
+        <controls:PopupSelector VerticalAlignment="Center" x:Name="AddressesFilter"
+				ButtonContent="Адреса"
+				Member="Item.Name" />
+        <controls:PopupSelector VerticalAlignment="Center" x:Name="KKMFilter"
+				ButtonContent="ККМ"
+				Member="Item" />
+        <Label VerticalAlignment="Center" Padding="5,0,5,0">Номер смены:</Label>
+        <TextBox x:Name="SearchText"
+				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
+				Style="{StaticResource SearchText}"
+				caliburn:SearchBinder.Grid="Items" Width="30" />
+        <Label VerticalAlignment="Center" Padding="5,0,5,0">Дата смены:</Label>
+        <DatePicker Name="ChangeDate" VerticalAlignment="Center"></DatePicker>
       </ToolBar>
     </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items">
