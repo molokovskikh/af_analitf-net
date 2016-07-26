@@ -12,6 +12,7 @@ using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
+using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -97,6 +98,39 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				yield return new DialogResult(new SimpleSettings(docSettings));
 			}
 			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
+		}
+
+		public IResult ExportExcel()
+		{
+			var columns = new[] {"№ чека",
+				"Дата",
+				"ККМ",
+				"Отдел",
+				"Аннулирован",
+				"Сумма розничная",
+				"Сумма скидки",
+				"Сумма с учетом скидки"};
+
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var row = 0;
+
+			ExcelExporter.WriteRow(sheet, columns, row++);
+
+			var rows = Items.Value.Select((o, i) => new object[] {
+				o.Number,
+				o.Date,
+				o.KKM,
+				o.Department,
+				o.Cancelled,
+				o.RetailSum,
+				o.DiscontSum,
+				o.Sum,
+			});
+
+			ExcelExporter.WriteRows(sheet, rows, row);
+
+			return ExcelExporter.Export(book);
 		}
 	}
 }
