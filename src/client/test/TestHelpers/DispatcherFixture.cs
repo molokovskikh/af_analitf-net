@@ -25,6 +25,8 @@ using ReactiveUI;
 using Xceed.Wpf.Toolkit;
 using Action = System.Action;
 using Hyperlink = System.Windows.Documents.Hyperlink;
+using System.Reactive.Linq;
+using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -290,6 +292,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public T ByName<T>(string name) where T : FrameworkElement
 		{
 			return ByName<T>(activeTab, name);
+		}
+
+		protected void WaitWindow(string title, string body = null)
+		{
+			var found = false;
+			dispatcher.Invoke(() => {
+				found = activeWindow.Title == title;
+			});
+			if (found)
+				return;
+			var opened = manager.WindowOpened.Timeout(30.Second()).First();
+			opened.Dispatcher.Invoke(() => {
+				var text = opened.AsText();
+				Assert.AreEqual(title, opened.Title, text);
+				if (!String.IsNullOrEmpty(body))
+					Assert.That(text, Does.Contain(body), text);
+			});
 		}
 	}
 }

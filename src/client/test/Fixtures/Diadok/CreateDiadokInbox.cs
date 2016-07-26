@@ -15,6 +15,7 @@ using Diadoc.Api.Proto;
 using System.Collections.Generic;
 using Diadoc.Api.Proto.Documents;
 using System.Threading;
+using AnalitF.Net.Client.ViewModels.Diadok;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -24,7 +25,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			api = new DiadocApi(/*ConfigurationManager.AppSettings["DiadokApi"]*/"Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec",
 				"https://diadoc-api.kontur.ru", new WinApiCrypt());
-			token = api.Authenticate("c963977@mvrht.com", "222852");
+			token = api.Authenticate(ddk.ch_login, ddk.ch_passwd);
 
 			Box box = box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
 

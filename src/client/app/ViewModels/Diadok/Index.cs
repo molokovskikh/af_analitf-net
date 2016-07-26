@@ -696,24 +696,24 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 		}
 
-		public void RequestSign()
+		public async Task RequestSign()
 		{
-			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
+			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
 		}
 
-		public void RequestResolution()
+		public async Task RequestResolution()
 		{
-			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
+			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
 		}
 
-		public void Approve()
+		public async Task Approve()
 		{
-			ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
+			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
 		}
 
-		public void Disapprove()
+		public async Task Disapprove()
 		{
-			ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
+			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
 		}
 
 		public void Delete()
@@ -750,19 +750,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			yield return new OpenResult(Filename.Value);
 		}
 
-		public void Revoke()
+		public async Task Revoke()
 		{
-			ProcessAction(new Revocation(GetPayload()));
+			await ProcessAction(new Revocation(GetPayload()));
 		}
 
-		public void Reject()
+		public async Task Reject()
 		{
-			ProcessAction(new Reject(GetPayload()));
+			await ProcessAction(new Reject(GetPayload()));
 		}
 
-		public void Sign()
+		public async Task Sign()
 		{
-			ProcessAction(new Sign(GetPayload()));
+			await ProcessAction(new Sign(GetPayload()));
 		}
 
 		public IEnumerable<IResult> PrintItem()
@@ -785,13 +785,24 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		private void ProcessAction(DiadokAction dialog)
+		private async Task ProcessAction(DiadokAction dialog)
 		{
 			Manager.ShowFixedDialog(dialog);
-			dialog.isDone.Subscribe(x => {
-				if(x)
-					Reload();
-			});
+			if (dialog.isDone) {
+				var current = CurrentItem.Value;
+				var message = await TaskEx.Run(() => api.GetMessage(token, box.BoxId, current.Message.MessageId));
+				var index = items.IndexOf(current);
+				Entity prev = null;
+				if (index > 1)
+					prev = items[index - 1].Entity;
+
+				var item = new DisplayItem(message,
+					message.Entities.First(x => x.EntityId == current.Entity.EntityId),
+					prev, orgs);
+				items[index] = item;
+				Items.Value[Items.Value.IndexOf(current)] = item;
+				CurrentItem.Value = item;
+			}
 		}
 
 		private ActionPayload GetPayload()

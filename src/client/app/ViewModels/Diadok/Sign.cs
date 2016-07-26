@@ -23,6 +23,31 @@ using System.Threading;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
+	public static class ddk
+	{
+		// I
+		public static string ie_login = "f816686@mvrht.com";
+		public static string ie_passwd = "A123456";
+		public static string ie_boxid = "92c4c6b0948d4252b2b81c2b5730b5d1@diadoc.ru";
+		public static string ie_inn = "9698754923";
+
+		public static string ch_login = "pdh23916@zasod.com";
+		public static string ch_passwd = "A123456";
+		public static string ch_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
+		public static string ch_inn = "9656351023";
+
+		/*
+		// II
+		public static string ie_login = "c963832@mvrht.com";
+		public static string ie_passwd = "222852";
+		public static string ie_boxid = "35e8de1b915c4f5eb9df37c98af2b0af@diadoc.ru";
+
+		public static string ch_login = "c963977@mvrht.com";
+		public static string ch_passwd = "222852";
+		public static string ch_boxid = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
+		*/
+	}
+
 	public class ActionPayload
 	{
 		public DiadocApi Api;
@@ -72,16 +97,16 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Payload = payload;
 			ShortFileName = $"{Payload.Entity.FileName.Substring(0, 25)}...{Payload.Entity.FileName.Substring(Payload.Entity.FileName.Length - 25)}";
 			IsEnabled.Value = true;
-			Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 			LastPatchStamp = DateTime.MinValue;
 			if(Settings.Value.DebugUseTestSign)
 			{
 				SignerFirstName = "Иван";
 				SignerSureName = "Иванович";
 				SignerPatronimic = "Иванов";
-				SignerINN = "9656279962";
+				SignerINN = ddk.ie_inn;
 			}
 			else {
+				Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 				var certFields = X509Helper.ParseSubject(Cert.Subject);
 				try
 				{
@@ -137,13 +162,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			Signer ret = new Signer();
 			ret.SignerDetails = new SignerDetails();
-			ret.SignerCertificate = Cert.RawData;
-			ret.SignerCertificateThumbprint = Cert.Thumbprint;
-			ret.SignerDetails.FirstName = SignerFirstName;
-			ret.SignerDetails.Surname = SignerSureName;
-			ret.SignerDetails.Patronymic = SignerPatronimic;
-			ret.SignerDetails.JobTitle = Settings.Value.DiadokSignerJobTitle;
-			ret.SignerDetails.Inn = SignerINN;
+			if(Settings.Value.DebugUseTestSign)
+			{
+				ret.SignerCertificate = new byte[1];
+				ret.SignerCertificateThumbprint = "0987654321ABCDE";
+				ret.SignerDetails.FirstName = "Иван";
+				ret.SignerDetails.Surname = "Иванович";
+				ret.SignerDetails.Patronymic = "Иванов";
+				ret.SignerDetails.JobTitle = "Должность";
+				ret.SignerDetails.Inn = ddk.ie_inn;
+			}
+			else
+			{
+				ret.SignerCertificate = Cert.RawData;
+				ret.SignerCertificateThumbprint = Cert.Thumbprint;
+				ret.SignerDetails.FirstName = SignerFirstName;
+				ret.SignerDetails.Surname = SignerSureName;
+				ret.SignerDetails.Patronymic = SignerPatronimic;
+				ret.SignerDetails.JobTitle = Settings.Value.DiadokSignerJobTitle;
+				ret.SignerDetails.Inn = SignerINN;
+			}
+
 			return ret;
 		}
 

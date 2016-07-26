@@ -36,8 +36,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Env.Settings = session.Query<Settings>().First();
 
 			Env.Settings.DiadokSignerJobTitle = "Signer";
-			Env.Settings.DiadokUsername = "c963832@mvrht.com";
-			Env.Settings.DiadokPassword = "222852";
+			Env.Settings.DiadokUsername = ddk.ie_login;
+			Env.Settings.DiadokPassword = ddk.ie_passwd;
 			Env.Settings.DiadokCert = "Тестовая организация №5627996 - UC Test (Qualified)";
 			Env.Settings.DebugUseTestSign = true;
 
@@ -103,8 +103,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == Diadoc.Api.Com.DocumentType.XmlTorg12);
 				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
+
 			Wait();
 			AsyncClick("Sign");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
 			Wait();
 			Click("Save");
 
@@ -118,10 +121,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 			AsyncClick("Sign");
 			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
 			Click("Save");
 
 			Wait();
 			Thread.Sleep(TimeSpan.FromSeconds(3));
+			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 
 			dispatcher.Invoke(() => {
@@ -133,6 +139,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				var signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid).Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
 				Assert.IsTrue(signinvoice);
 			});
+
+			Wait();
 
 		}
 

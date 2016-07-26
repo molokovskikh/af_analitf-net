@@ -48,8 +48,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}
 		}
 
-		public static string Sender_BoxId = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
-		public static string Receiver_BoxId = "35e8de1b915c4f5eb9df37c98af2b0af@diadoc.ru";
+		public static string Sender_BoxId = ddk.ch_boxid;
+		public static string Receiver_BoxId = ddk.ie_boxid;
 
 		public static string Torg12Xml = @"<?xml version=""1.0"" encoding=""windows-1251""?>
 <Файл ИдФайл=""DP_OTORG12_2BM-9656279962-965601000-201607080606080987674_2BM-9667029241-966701000-201607080608586286217_20160720_8a43b8a2-0c3a-4d78-b536-1d2403ccbb2b"" ВерсПрог=""Diadoc 1.0"" ВерсФорм=""5.01"">
