@@ -121,6 +121,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Click("Save");
 
 			Wait();
+			Thread.Sleep(TimeSpan.FromSeconds(3));
+			Wait();
 
 			bool signtorg12ok = false;
 			dispatcher.Invoke(() => {
