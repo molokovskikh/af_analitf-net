@@ -124,16 +124,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Thread.Sleep(TimeSpan.FromSeconds(3));
 			Wait();
 
-			bool signtorg12ok = false;
 			dispatcher.Invoke(() => {
-				signtorg12ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id).Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
-				Assert.AreEqual(signtorg12ok, true);
+				var signtorg12ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id).Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
+				Assert.IsTrue(signtorg12ok);
 			});
 
-			bool signinvoice = false;
 			dispatcher.Invoke(() => {
-				signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid).Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
-				Assert.AreEqual(signinvoice, true);
+				var signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid).Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
+				Assert.IsTrue(signinvoice);
 			});
 
 		}
