@@ -7,127 +7,73 @@ using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.Windows.Interop;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Xceed.Wpf.Toolkit.Core.Converters;
 
 namespace AnalitF.Net.Client.Controls
 {
-
-	public class ScrollBarVisibilityChangedEventArgs : EventArgs
-	{
-		public enum ScrollBarTypes { Verical, Horizontal}
-
-		public readonly ScrollBarVisibility OldValue;
-		public readonly ScrollBarVisibility NewValue;
-		public readonly ScrollBarTypes ScrollBarType;
-
-		public ScrollBarVisibilityChangedEventArgs(ScrollBarTypes scrollBarType, ScrollBarVisibility oldValue, ScrollBarVisibility newValue)
-		{
-			OldValue = oldValue;
-			NewValue = newValue;
-			ScrollBarType = scrollBarType;
-		}
-	}
-
 	public class ScrollGeneralContentViewer: ScrollViewer
 	{
 		protected readonly double ScrollActivateHeigth = 600;
-		public new ScrollBarVisibility VerticalScrollBarVisibility {
-			get
-			{
-				return base.VerticalScrollBarVisibility;
-			}
-			set
-			{
-				ScrollBarVisibilityChanged(new ScrollBarVisibilityChangedEventArgs(
-					ScrollBarVisibilityChangedEventArgs.ScrollBarTypes.Verical,  VerticalScrollBarVisibility, value
-					));
-
-				base.VerticalScrollBarVisibility = value;
-			}
-		}
-
-		protected delegate void ScrollBarVisibilityEventHandler(ScrollBarVisibilityChangedEventArgs e);
-		protected event ScrollBarVisibilityEventHandler ScrollBarVisibilityChanged;
+		public bool IsScrolling {get ; private set;}
 
 		public ScrollGeneralContentViewer()
 		{
-			ScrollBarVisibilityChanged += OnScrollBarVisibilityChanged;
-			SizeChanged += OnSizeChanged;
-			GotFocus += OnGetFocus;
+			SizeChanged += (sender, e) => { OptimizateContentForVScrolling(); };
+			GotFocus += (sender, e) => {
+				OptimizateContentForVScrolling();
+			};
 			Focusable = false;
 		}
 
-		private void OnGetFocus(object sender, RoutedEventArgs e)
-		{
-			if (VerticalScrollBarVisibility == ScrollBarVisibility.Disabled)
-			{
-				OptimizateGridsForVScrolling(true);
-			}
-			else
-			{
-				OptimizateGridsForVScrolling(false);
-			}
-
-			if (e.Source is Control)
-			{
-
-			}
-		}
-
-		protected virtual void OnScrollBarVisibilityChanged(ScrollBarVisibilityChangedEventArgs e)
-		{
-			if (e.ScrollBarType != ScrollBarVisibilityChangedEventArgs.ScrollBarTypes.Verical ||
-				e.NewValue == e.OldValue) {
-				return;
-			}
-
-			if (e.NewValue == ScrollBarVisibility.Disabled) {
-				OptimizateGridsForVScrolling(true);
-			} else {
-				OptimizateGridsForVScrolling(false);
-			}
-		}
-
-		protected virtual void OnSizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			var window = Window.GetWindow(this);
-			VerticalScrollBarVisibility = (window.ActualHeight <= ScrollActivateHeigth)
-				? ScrollBarVisibility.Auto
-				: ScrollBarVisibility.Disabled;
-		}
-
-		private void OptimizateGridsForVScrolling(bool hideScrollBar)
+		private void OptimizateContentForVScrolling()
 		{
 			Type grid2Type = typeof(DataGrid2);
 			Type gridType = typeof(DataGrid);
 			Type textBox = typeof (TextBox);
+			Type mainControllerWrap = typeof (MainControllerWrap);
 
-			var controls = WpfHelper.Children(this, new List<Type> {grid2Type, gridType, textBox});
+			var controls = WpfHelper.Children(this, new List<Type> {grid2Type, gridType, textBox, mainControllerWrap}).ToList();
 
-			if (!hideScrollBar) {
+			var hideScrollBar = !(controls.Any(c => c.GetType() == mainControllerWrap) && getWindowHeigth() <= ScrollActivateHeigth);
+			VerticalScrollBarVisibility = hideScrollBar ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
+
+			if (hideScrollBar == !IsScrolling)
+			{
+				return;
+			}
+
+			if (!hideScrollBar)
+			{
 				ScrollToVerticalOffset(0);
 			}
 
 			foreach (var dependecyObj in controls) {
 
-				if (dependecyObj == null) continue;
-
 				var control = dependecyObj as Control;
 
-				if (dependecyObj.GetType() == grid2Type ||
-					dependecyObj.GetType() == gridType) {
+				if (control == null)
+				{
+					continue;
+				}
 
+				if (control.GetType() == grid2Type ||
+					control.GetType() == gridType) {
+					var a = control.Name;
 					if (!hideScrollBar) {
+						(control as DataGrid).HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
 						if (WpfHelper.Parent(control).GetType() == typeof(MainControllerWrap))
 						{
-							control.Height = control.MaxHeight = control.MinHeight = ActualHeight * 0.75;
+							control.Height = control.MaxHeight = control.MinHeight = ActualHeight * 0.65;
 							continue;
 						}
-						control.MaxHeight = ActualHeight*0.5;
+						control.MaxHeight = control.Height = ActualHeight*0.5;
 					} else {
+						(control as DataGrid).HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
 						if (WpfHelper.Parent(control).GetType() == typeof (MainControllerWrap)) {
 							control.Height = double.NaN;
 							control.MinHeight = 0;
@@ -138,7 +84,7 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 
-				if (dependecyObj.GetType() == textBox) {
+				if (control.GetType() == textBox) {
 					if (!hideScrollBar) {
 						control.MaxHeight = ActualHeight*0.4;
 					} else {
@@ -148,7 +94,16 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 			}
+			IsScrolling = !hideScrollBar;
+		}
 
+		private int getWindowHeigth()
+		{
+			var rect = new WinApi.RECT();
+			IntPtr windowHandle = new WindowInteropHelper(Window.GetWindow(this)).Handle;
+			WinApi.GetWindowRect(new HandleRef(this, windowHandle), out rect);
+
+			return rect.Bottom - rect.Top;
 		}
 	}
 }

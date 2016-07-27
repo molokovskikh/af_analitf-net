@@ -54,8 +54,8 @@
 				<RowDefinition Name="OffersRow" MinHeight="30" />
 				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
-
-			<c:DataGrid2 Grid.Row="0" x:Name="Lines"
+			<c:MainControllerWrap  Grid.Row="0">
+			<c:DataGrid2 x:Name="Lines"
 				ShowAddressColumn="{Binding AddressSelector.All.Value}"
 				behaviors:Editable.Editor="{Binding Editor}"
 				caliburn:NavBinder.Next="{x:Reference Offers}">
@@ -118,6 +118,7 @@
 					CellStyle="{StaticResource CountColumn}" />
 				</DataGrid.Columns>
 			</c:DataGrid2>
+			</c:MainControllerWrap>
 
 			<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
