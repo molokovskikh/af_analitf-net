@@ -65,6 +65,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var check = new Check(0);
 			check.Lines = new List<CheckLine>();
 			check.Lines.Add(new CheckLine());
+			check.CheckType = CheckType.CheckReturn;
 			checks.Add(check);
 			return checks;
 		}
@@ -88,6 +89,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> PrintChecks()
 		{
 			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
+		}
+
+		public IEnumerable<IResult> PrintReturnAct()
+		{
+			return Preview("Чеки", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)

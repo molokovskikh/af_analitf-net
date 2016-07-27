@@ -24,6 +24,7 @@
       <WrapPanel Style="{StaticResource FilterWrapPanel}" Grid.Row="0" Grid.Column="1">
         <Button Name="PrintChecks" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Печать чеков</Button>
         <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Экспорт</Button>
+        <Button Name="PrintReturnAct" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Акт возврата</Button>
       </WrapPanel>
       <ToolBar Grid.Row="0" Grid.Column="0">
         <GroupBox Header="За период" Style="{StaticResource FilterElement}">

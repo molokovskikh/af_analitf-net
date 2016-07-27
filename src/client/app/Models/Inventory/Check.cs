@@ -9,6 +9,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 	public enum CheckType
 	{
 		[Description("Продажа покупателю")] SaleBuyer,
+		[Description("Возврат по чеку")] CheckReturn,
 	}
 	public enum PaymentType
 	{
