@@ -18,8 +18,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> Comment { get; set; }
 
-		public async Task Save()
-		{/*
+		public void Save()
+		{
 			try
 			{
 				BeginAction();
@@ -31,12 +31,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					SignatureRejectionInfo signrejinfo = new SignatureRejectionInfo();
 					signrejinfo.Signer = GetSigner();
 					signrejinfo.ErrorMessage = Comment.Value;
-					GeneratedFile revocRejectSign= await TaskEx.Run(() => Payload.Api.GenerateSignatureRejectionXml(
+					GeneratedFile revocRejectSign = Payload.Api.GenerateSignatureRejectionXml(
 						Payload.Token,
 						Payload.BoxId,
 						Payload.Message.MessageId,
 						revocreq.EntityId,
-						signrejinfo));
+						signrejinfo);
 					XmlSignatureRejectionAttachment signrejattch = new XmlSignatureRejectionAttachment();
 					signrejattch.ParentEntityId = revocreq.EntityId;
 					SignedContent signcontent = new SignedContent();
@@ -63,17 +63,22 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					});
 				}
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				await Async(x => Payload.Api.PostMessagePatch(x, patch));
+				Payload.Api.PostMessagePatch(Payload.Token, patch);
+				EndAction();
 			}
-			catch(HttpClientException e)
+			catch(Exception exception)
 			{
-				Log.Warn($"Ошибка:", e);
-				Manager.Error(e.AdditionalMessage);
+				EndAction(false);
+				if(exception is HttpClientException)
+				{
+					var e = exception as HttpClientException;
+					Log.Warn($"Ошибка:", e);
+					Manager.Error(e.AdditionalMessage);
+				}
+				else
+					throw;
 			}
-			finally
-			{
-				await EndAction();
-			} */
+			TryClose();
 		}
 	}
 }

@@ -25,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 {
 	public static class ddk
 	{
+		/*
 		// I
 		public static string ie_login = "f816686@mvrht.com";
 		public static string ie_passwd = "A123456";
@@ -35,17 +36,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public static string ch_passwd = "A123456";
 		public static string ch_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
 		public static string ch_inn = "9656351023";
+		*/
 
-		/*
 		// II
 		public static string ie_login = "c963832@mvrht.com";
 		public static string ie_passwd = "222852";
 		public static string ie_boxid = "35e8de1b915c4f5eb9df37c98af2b0af@diadoc.ru";
+		public static string ie_inn = "9656279962";
 
 		public static string ch_login = "c963977@mvrht.com";
 		public static string ch_passwd = "222852";
 		public static string ch_boxid = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
-		*/
+		public static string ch_inn = "9667029241";
+
 	}
 
 	public class ActionPayload
@@ -88,11 +91,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 	public abstract class DiadokAction : BaseScreen
 	{
-		public NotifyValue<bool> isDone { get; set;}
+		public bool Success;
 
 		public DiadokAction(ActionPayload payload)
 		{
-			isDone = new NotifyValue<bool>(false);
+			Success = false;
 			InitFields();
 			Payload = payload;
 			ShortFileName = $"{Payload.Entity.FileName.Substring(0, 25)}...{Payload.Entity.FileName.Substring(Payload.Entity.FileName.Length - 25)}";
@@ -191,8 +194,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = false;
 		}
 
-		protected void EndAction()
+		protected void EndAction(bool waitupdate = true)
 		{
+			if(waitupdate)
 			{
 				Message msg = null;
 				int breaker = 0;
@@ -205,11 +209,13 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Thread.Sleep(1000);
 					breaker++;
 				} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
+				Result = msg;
 			}
 			IsEnabled.Value = true;
-			isDone.Value = true;
-			TryClose();
+			Success = true;
 		}
+
+		public Message Result { get; set;}
 
 		public bool TrySign(SignedContent content)
 		{
@@ -678,24 +684,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
 					}
 				}
-			}
-			catch(TimeoutException)
-			{
-				Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
-			}
-			catch (HttpClientException e)
-			{
-				if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-					Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-					Manager.Warning("Документ уже был подписан другим пользователем.");
-				} else {
-					throw;
-				}
-			}
-			finally
-			{
 				EndAction();
 			}
+			catch(Exception exception)
+			{
+				EndAction(false);
+				if(exception is TimeoutException)
+				{
+					Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
+				}
+				else if (exception is HttpClientException)
+				{
+					var e = exception as HttpClientException;
+					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
+						Manager.Warning("Документ уже был подписан другим пользователем.");
+					}
+				}
+				else
+					throw;
+			}
+			TryClose();
 		}
 	}
 }

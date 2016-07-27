@@ -18,8 +18,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> Comment { get; set; }
 
-		public async Task Save()
-		{ /*
+		public void Save()
+		{
 			try
 			{
 				BeginAction();
@@ -29,13 +29,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				revinfo.Comment = Comment.Value;
 				revinfo.Signer = GetSigner();
 
-				var document = Payload.Message.Entities.First();
-
 				GeneratedFile revocationXml = Payload.Api.GenerateRevocationRequestXml(
 					Payload.Token,
 					Payload.BoxId,
 					Payload.Message.MessageId,
-					document.EntityId,
+					Payload.Entity.EntityId,
 					revinfo);
 
 				SignedContent revocSignContent = new SignedContent();
@@ -45,22 +43,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					throw new Exception();
 
 				RevocationRequestAttachment revattch = new RevocationRequestAttachment();
-				revattch.ParentEntityId = document.EntityId;
+				revattch.ParentEntityId = Payload.Entity.EntityId;
 				revattch.SignedContent = revocSignContent;
 
 				patch.AddRevocationRequestAttachment(revattch);
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				await Async(x => Payload.Api.PostMessagePatch(x, patch));
-			}
-			catch(HttpClientException e)
-			{
-				Log.Warn($"Ошибка:", e);
-				Manager.Error(e.AdditionalMessage);
-			}
-			finally
-			{
+				Payload.Api.PostMessagePatch(Payload.Token, patch);
 				EndAction();
-			} */
+			}
+			catch(Exception exception)
+			{
+				EndAction(false);
+				if(exception is HttpClientException)
+				{
+					var e = exception as HttpClientException;
+					Log.Warn($"Ошибка:", e);
+					Manager.Error(e.AdditionalMessage);
+				}
+				else
+					throw;
+			}
+			TryClose();
 		}
 	}
 }

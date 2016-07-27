@@ -16,6 +16,10 @@ using System.Collections.Generic;
 using Diadoc.Api.Proto.Documents;
 using System.Threading;
 using AnalitF.Net.Client.ViewModels.Diadok;
+using Diadoc.Api.Com;
+using DocumentType = Diadoc.Api.Com.DocumentType;
+using RevocationStatus = Diadoc.Api.Proto.Documents.RevocationStatus;
+using AttachmentType = Diadoc.Api.Proto.Events.AttachmentType;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
@@ -27,8 +31,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				"https://diadoc-api.kontur.ru", new WinApiCrypt());
 			token = api.Authenticate(ddk.ch_login, ddk.ch_passwd);
 
-			Box box = box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
-
+			box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
+			signers = new List<Signer>();
 			var msgs = GetMessages();
 			for(int i = 0; i < msgs.Item1.Count(); i++)
 			{
@@ -43,45 +47,100 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			byte[] content = Encoding.GetEncoding(1251).GetBytes(DiadokFixtureData.InvoiceXml);
 			byte[] sign = null;
 			InvoiceInfo ii = api.ParseInvoiceXml(content);
+			signers.Add(ii.Signer);
 			GeneratedFile iiFile = api.GenerateInvoiceXml(token, ii);
 			sii.SignedContent = new SignedContent();
 			sii.SignedContent.SignWithTestSignature = true;
 			sii.SignedContent.Content = iiFile.Content;
 			sii.SignedContent.Signature = sign;
-			msg.FromBoxId = DiadokFixtureData.Sender_BoxId;
-			msg.ToBoxId = DiadokFixtureData.Receiver_BoxId;
 
+			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
 			msg.Invoices.Add(sii);
 
 			XmlDocumentAttachment att12 = new XmlDocumentAttachment();
 			content = Encoding.GetEncoding(1251).GetBytes(DiadokFixtureData.Torg12Xml);
 			Torg12SellerTitleInfo tsti12 = api.ParseTorg12SellerTitleXml(content);
+			signers.Add(tsti12.Signer);
 			iiFile = api.GenerateTorg12XmlForSeller(token, tsti12, true);
 			att12.SignedContent = new SignedContent();
 			att12.SignedContent.SignWithTestSignature = true;
 			att12.SignedContent.Content = iiFile.Content;
 			att12.SignedContent.Signature = sign;
+			
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
+
 			msg.FromBoxId = DiadokFixtureData.Sender_BoxId;
 			msg.ToBoxId = DiadokFixtureData.Receiver_BoxId;
-
-			msg.AddXmlTorg12SellerTitle(att12);
 			// пакет из двух
 			api.PostMessage(token, msg);
 
-			msg.XmlTorg12SellerTitles.Clear();
-			// два инвойса
-			Thread.Sleep(TimeSpan.FromSeconds(10));
-			api.PostMessage(token, msg);
-			Thread.Sleep(TimeSpan.FromSeconds(10));
-			api.PostMessage(token, msg);
+			Thread.Sleep(TimeSpan.FromSeconds(3));
 
 			msg.Invoices.Clear();
+			msg.XmlTorg12SellerTitles.Clear();
+			// инвойс
+			msg.Invoices.Add(sii);
+			api.PostMessage(token, msg);
+
+			Thread.Sleep(TimeSpan.FromSeconds(3));
+
+			msg.Invoices.Clear();
+			msg.XmlTorg12SellerTitles.Clear();
+			//  накладная
 			msg.AddXmlTorg12SellerTitle(att12);
-			// две накладных
-			Thread.Sleep(TimeSpan.FromSeconds(10));
 			api.PostMessage(token, msg);
-			Thread.Sleep(TimeSpan.FromSeconds(10));
-			api.PostMessage(token, msg);
+			/*
+			Thread.Sleep(30000);
+
+			var messages = GetMessages();
+			
+			var torg12 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 && 
+			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralDocumentStatus.InboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
+
+			var invoice = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice && 
+			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished &&
+			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
+
+			Revocation(torg12);
+			Revocation(invoice);
+			*/
+		}
+
+		public void Revocation(Message revocation)
+		{
+			MessagePatchToPost patch = new MessagePatchToPost();
+			RevocationRequestInfo revinfo = new RevocationRequestInfo();
+			revinfo.Comment = "АННУЛИРОВНИЕ";
+			revinfo.Signer = signers.First();
+
+			var document = revocation.Entities.First();
+
+			GeneratedFile revocationXml = api.GenerateRevocationRequestXml(
+				token,
+				ddk.ie_boxid,
+				revocation.MessageId,
+				document.EntityId,
+				revinfo);
+
+			SignedContent revocSignContent = new SignedContent();
+			revocSignContent.Content = revocationXml.Content;
+			revocSignContent.SignWithTestSignature = true;
+
+			RevocationRequestAttachment revattch = new RevocationRequestAttachment();
+			revattch.ParentEntityId = document.EntityId;
+			revattch.SignedContent = revocSignContent;
+
+			patch.AddRevocationRequestAttachment(revattch);
+
+			api.PostMessagePatch(token, patch);
 		}
 
 		public Tuple<List<Document>, List<Message>> GetMessages()
@@ -94,13 +153,14 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				BoxId = box.BoxId,
 				SortDirection = "Descending"
 			}).Documents.ToList();
-			var msgs = docs.Select(x => x.MessageId).Select(x => api.GetMessage(token, box.BoxId, x))
+			var msgs = docs.Select(x => new { x.MessageId , x.EntityId}).Select(x => api.GetMessage(token, box.BoxId, x.MessageId, x.EntityId))
 				.OrderByDescending(x => x.Timestamp).ToList();
 			return Tuple.Create(docs, msgs);
 		}
 
 		DiadocApi api;
 		string token;
-
+		Box box;
+		List<Signer> signers;
 	}
 }

@@ -170,15 +170,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			if (Entity.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundWithRecipientSignature
 				|| Entity.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected)
 				return false;
-			if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone &&
-				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected &&
+			if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone)
+			{
+				if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected &&
 				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RequestsMyRevocation)
 				return false;
-			if(Entity.DocumentInfo.XmlTorg12Metadata?.Status == Diadoc.Api.Com.BilateralDocumentStatus.InboundWithRecipientSignature)
-				return false;
-			if(Entity.DocumentInfo.InvoiceMetadata?.Status == Diadoc.Api.Com.InvoiceStatus.InboundFinished)
-				return false;
-
+			}
+			else
+			{
+				if(Entity.DocumentInfo.XmlTorg12Metadata?.Status == Diadoc.Api.Com.BilateralDocumentStatus.InboundWithRecipientSignature)
+					return false;
+				if(Entity.DocumentInfo.InvoiceMetadata?.Status == Diadoc.Api.Com.InvoiceStatus.InboundFinished)
+					return false;
+			}
 			return true;
 		}
 
@@ -720,13 +724,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			var dialog = new Delete(GetPayload());
 			Manager.ShowFixedDialog(dialog);
-			dialog.isDone.Subscribe(x => {
-				if(x) {
+			if(dialog.Success)
+			{
 				var current = CurrentItem.Value;
 				items.Remove(CurrentItem);
 				Items.Value.Remove(current);
-				}
-			});
+			}
 		}
 
 		public void DeleteAll()
@@ -788,9 +791,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		private async Task ProcessAction(DiadokAction dialog)
 		{
 			Manager.ShowFixedDialog(dialog);
-			if (dialog.isDone) {
+			if (dialog.Result != null) {
 				var current = CurrentItem.Value;
-				var message = await TaskEx.Run(() => api.GetMessage(token, box.BoxId, current.Message.MessageId));
+				var message = dialog.Result;
 				var index = items.IndexOf(current);
 				Entity prev = null;
 				if (index > 1)

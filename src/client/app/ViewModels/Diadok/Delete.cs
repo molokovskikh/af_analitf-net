@@ -13,26 +13,28 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 		}
 
-		public async Task Save()
+		public void Save()
 		{
-			/*
 			try
 			{
 				BeginAction();
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				await Async(x => Payload.Api.Delete(x, Payload.BoxId,
-					Payload.Entity.DocumentInfo.MessageId,
-					Payload.Entity.EntityId));
+				Payload.Api.Delete(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
+				EndAction();
 			}
-			catch(HttpClientException e)
+			catch(Exception exception)
 			{
-				Log.Warn($"Ошибка:", e);
-				Manager.Error(e.AdditionalMessage);
+				EndAction(false);
+				if(exception is HttpClientException)
+				{
+					var e = exception as HttpClientException;
+					Log.Warn($"Ошибка:", e);
+					Manager.Error(e.AdditionalMessage);
+				}
+				else
+					throw;
 			}
-			finally
-			{
-				await EndAction();
-			}*/
+			TryClose();
 		}
 	}
 }

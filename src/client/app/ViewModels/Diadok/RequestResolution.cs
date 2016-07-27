@@ -61,8 +61,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentUser.Value = users.FirstOrDefault();
 		}
 
-		public async Task Save()
-		{ /*
+		public void Save()
+		{
 			try
 			{
 				BeginAction();
@@ -79,17 +79,22 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					attachment.TargetDepartmentId = CurrentDepartment.Value?.DepartmentId
 						?? "00000000-0000-0000-0000-000000000000";
 				patch.AddResolutionRequestAttachment(attachment);
-				await Async(x => Payload.Api.PostMessagePatch(x, patch));
-			}
-			catch(HttpClientException e)
-			{
-				Log.Warn($"Ошибка:", e);
-				Manager.Error(e.AdditionalMessage);
-			}
-			finally
-			{
+				Payload.Api.PostMessagePatch(Payload.Token, patch);
 				EndAction();
-			} */
+			}
+			catch(Exception exception)
+			{
+				EndAction(false);
+				if(exception is HttpClientException)
+				{
+					var e = exception as HttpClientException;
+					Log.Warn($"Ошибка:", e);
+					Manager.Error(e.AdditionalMessage);
+				}
+				else
+					throw;
+			}
+			TryClose();
 		}
 	}
 }
