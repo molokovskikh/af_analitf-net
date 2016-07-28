@@ -31,12 +31,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Lines = new List<CheckLine>();
 		}
 
-		public Check(uint number)
-		{
-			Lines = new List<CheckLine>();
-			Number = number;
-		}
-
 		public virtual uint Id { get; set; }
 		public virtual CheckType CheckType { get; set; }
 		public virtual uint Number { get; set; }
@@ -47,7 +41,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Clerk { get; set; } //Пока пусть будет строка
 		public virtual Address Department { get; set; }
 
-		public virtual uint KKM { get; set; }
+		public virtual string KKM { get; set; }
 		public virtual PaymentType PaymentType { get; set; }
 		public virtual SaleType SaleType { get; set; }
 		public virtual uint Discont { get; set; }

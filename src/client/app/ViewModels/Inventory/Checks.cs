@@ -62,9 +62,42 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		private IList<Check> TempFillItemsList()
 		{
 			var checks = new List<Check>();
-			var check = new Check(0);
-			check.Lines = new List<CheckLine>();
-			check.Lines.Add(new CheckLine());
+			var check = new Check
+			{
+				Lines = new List<CheckLine>(),
+				Id = 0,
+				CheckType = CheckType.CheckReturn,
+				Number = 100,
+				Date = DateTime.Today.AddDays(-7),
+				ChangeOpening = DateTime.Today.AddDays(-7),
+				Status = Status.Open,
+				Clerk = "Тестовый кассир",
+				Department = Session.Query<Address>().First(),
+				KKM = "1(0000000)",
+				PaymentType = PaymentType.Cash,
+				SaleType = SaleType.FullCost,
+				Discont = 10,
+				ChangeId = 0,
+				ChangeNumber = 42,
+				Cancelled = false,
+				Sum = 100,
+				RetailSum = 110,
+				DiscontSum = 10,
+			};
+			check.Lines.Add(new CheckLine
+			{
+				Id = 0,
+				Barcode = 124,
+				ProductId = 10,
+				ProducerId = 12,
+				ProductName = "Тестовый продукт",
+				RetailCost = 110,
+				Cost = 100,
+				Quantity = 1,
+				DiscontSum = 10,
+				CheckId = 0,
+				ProductKind = 1,
+			});
 			check.CheckType = CheckType.CheckReturn;
 			checks.Add(check);
 			return checks;
