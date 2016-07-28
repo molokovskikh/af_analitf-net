@@ -25,70 +25,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var waybill= new Waybill();
-			/*
-			var headerTable = new Grid {
-				HorizontalAlignment = HorizontalAlignment.Center,
-				Children = {
-					new Label {
-						FontFamily = new FontFamily("Arial"),
-						FontSize = 14,
-						FontWeight = FontWeights.Bold,
-						Content = string.Format("СЧЕТ-ФАКТУРА № {0} от {1:d}", waybill.InvoiceId, waybill.InvoiceDate)
-					},
-					new Label {
-						FontFamily = new FontFamily("Arial"),
-						FontSize = 14,
-						FontWeight = FontWeights.Bold,
-						Content = "(1)"
-					},
-					new Label {
-						FontFamily = new FontFamily("Arial"),
-						FontSize = 14,
-						FontWeight = FontWeights.Bold,
-						Content = "ИСПРАВЛЕНИЕ № __________ от \" ___ \" ______________"
-					},
-					new Label {
-						FontFamily = new FontFamily("Arial"),
-						FontSize = 14,
-						FontWeight = FontWeights.Bold,
-						Content = "(1а)",
-					}
-				}
-			};
-			headerTable.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			headerTable.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			headerTable.RowDefinitions.Add(new RowDefinition());
-			headerTable.RowDefinitions.Add(new RowDefinition());
-
-			headerTable.Children[0].SetValue(Grid.RowProperty, 0);
-			headerTable.Children[0].SetValue(Grid.ColumnProperty, 0);
-
-			headerTable.Children[1].SetValue(Grid.RowProperty, 0);
-			headerTable.Children[1].SetValue(Grid.ColumnProperty, 1);
-
-			headerTable.Children[2].SetValue(Grid.RowProperty, 1);
-			headerTable.Children[2].SetValue(Grid.ColumnProperty, 0);
-
-			headerTable.Children[3].SetValue(Grid.RowProperty, 1);
-			headerTable.Children[3].SetValue(Grid.ColumnProperty, 1);
-
-			doc.Blocks.Add(new BlockUIContainer(headerTable));
-
-			
-
-			HeaderLine("Продавец", waybill.Seller == null ? "" : waybill.Seller.Name, "2");
-			HeaderLine("Адрес продавца", waybill.Seller == null ? "" : waybill.Seller.Address, "2а");
-			HeaderLine("ИНН/КПП", String.Format("{0}/{1}", waybill.Seller == null ? "" : waybill.Seller.Inn, waybill.Seller == null ? "" : waybill.Seller.Kpp), "2б");
-			HeaderLine("Грузоотправитель и его адрес", waybill.ShipperNameAndAddress, "3");
-			HeaderLine("Грузополучатель и его адрес", waybill.ConsigneeNameAndAddress, "4");
-			HeaderLine("К платежно-расчетному документу №_______________ от _______________", "", "5");
-			HeaderLine("Покупатель", waybill.Buyer == null ? "" : waybill.Buyer.Name, "6");
-			HeaderLine("Адрес покупателя", waybill.Buyer == null ? "" : waybill.Buyer.Address, "6а");
-			HeaderLine("ИНН/КПП покупателя", String.Format("{0}/{1}", waybill.Buyer == null ? "" : waybill.Buyer.Inn, waybill.Buyer == null ? "" : waybill.Buyer.Kpp), "6б");
-			HeaderLine("Валюта: наименование, код", "российский рубль, код 643", "7");
-			*/
-			
 			doc.Blocks.Add(new BlockUIContainer(HeaderTable(0)));
 			doc.Blocks.Add(new BlockUIContainer(new Label
 			{
@@ -100,11 +36,11 @@ namespace AnalitF.Net.Client.Models.Print
 			var headers = new[]
 			{
 				new PrintColumn("№ по порядку", 60),
-				new PrintColumn("Отдел", 90),
-				new PrintColumn("Код бригады", 90),
-				new PrintColumn("№ чека", 120),
+				new PrintColumn("Отдел", 150),
+				new PrintColumn("Код бригады", 80),
+				new PrintColumn("№ чека", 60),
 				new PrintColumn("Сумма с уч. скидки", 80),
-				new PrintColumn("Должность, фамилия, и.о., лица, разрешившего возврат денег по чеку", 180),
+				new PrintColumn("Должность, фамилия, и.о., лица, разрешившего возврат денег по чеку", 260),
 			};
 
 			var rows = _checks.Select((o, i) => new object[]
@@ -118,7 +54,7 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 
 			var table = BuildTable(rows, headers);
-			var TotalSum = _checks.Sum(l => l.RetailSum);
+			var totalSum = _checks.Sum(l => l.RetailSum);
 			if (_checks.Length > 0) {
 				table.RowGroups[0].Rows.Add(new TableRow {
 					Cells = {
@@ -142,7 +78,7 @@ namespace AnalitF.Net.Client.Models.Print
 						}) {
 							Style = CellStyle,
 						},
-						new TableCell(new Paragraph(new Run(TotalSum.ToString())) {
+						new TableCell(new Paragraph(new Run(totalSum.ToString())) {
 							KeepTogether = true
 						}) {
 							Style = CellStyle,
@@ -157,26 +93,6 @@ namespace AnalitF.Net.Client.Models.Print
 					}
 				});
 			}
-			/*doc.Blocks.Add(new BlockUIContainer(SingBlock("Выдано покупателям (клиентам) по возвращенным ими кассовым чекам (по ошибочно пробитым чекам) согласно акту на сумму:"
-				,"(прописью)", 500)));
-			doc.Blocks.Add(new BlockUIContainer(new Label
-			{
-				Content = new TextBlock {
-					FontFamily = new FontFamily("Arial"),
-					FontSize = 12,
-					Text = text,
-					TextWrapping = TextWrapping.Wrap
-				},
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 12,
-				Content = "На указанную сумму следует уменьшить выручку кассы."
-			}));
-			doc.Blocks.Add(
-				new BlockUIContainer(
-					SingBlock(
-						"Перечисленные возвращенные покупателями (клиентами) чеки (ошибочно пробитые чеки) погашены и прилогаются к акту. Приложение:",
-						"", 500)));
-						*/
 			doc.Blocks.Add(new BlockUIContainer(new Label
 			{
 				FontFamily = new FontFamily("Arial"),
@@ -216,7 +132,7 @@ namespace AnalitF.Net.Client.Models.Print
 			));
 		}
 
-		
+
 
 		private static Grid HeaderTable(int code)
 		{
@@ -528,7 +444,7 @@ namespace AnalitF.Net.Client.Models.Print
 				HorizontalAlignment = HorizontalAlignment.Center,
 			});
 			grid.Cell(0, 2, new Label {
-				
+
 				BorderBrush = Brushes.Black,
 				Width = 350,
 				BorderThickness = new Thickness(0, 0, 0, 1),
@@ -598,58 +514,6 @@ namespace AnalitF.Net.Client.Models.Print
 				HorizontalAlignment = HorizontalAlignment.Center,
 			});
 			return grid;
-		}
-
-		private void HeaderLine(string label, string value, string id)
-		{
-			if (headerBlock == null) {
-				headerBlock = new BlockUIContainer();
-				headerBlock.Child = new Grid {
-					HorizontalAlignment = HorizontalAlignment.Left,
-					Margin = new Thickness(0, 10, 0, 10),
-					Width = 820,
-					ColumnDefinitions = {
-						new ColumnDefinition(),
-						new ColumnDefinition {
-							Width = GridLength.Auto
-						}
-					}
-				};
-				doc.Blocks.Add(headerBlock);
-			}
-			var grid = (Grid)headerBlock.Child;
-			grid.RowDefinitions.Add(new RowDefinition());
-			var inner = new Grid();
-			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			inner.ColumnDefinitions.Add(new ColumnDefinition());
-			var labelEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 12,
-				Content = label,
-			};
-			labelEl.SetValue(Grid.ColumnProperty, 0);
-			var valueEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 12,
-				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0, 0, 0, 1),
-				SnapsToDevicePixels = true,
-				Content = value,
-			};
-			valueEl.SetValue(Grid.ColumnProperty, 1);
-			inner.Children.Add(labelEl);
-			inner.Children.Add(valueEl);
-			inner.SetValue(Grid.ColumnProperty, 0);
-			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
-			grid.Children.Add(inner);
-			var idEl = new Label {
-				Content = "(" + id + ")",
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 12,
-			};
-			idEl.SetValue(Grid.ColumnProperty, 1);
-			idEl.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
-			grid.Children.Add(idEl);
 		}
 	}
 }
