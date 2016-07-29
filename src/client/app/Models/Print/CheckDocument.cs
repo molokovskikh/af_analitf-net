@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var rows = _checks.Select((o, i) => new object[]
 			{
 				o.Number,
-				o.Date,
+				o.Date.ToString("dd/M/yyyy"),
 				o.KKM,
 				o.Department,
 				o.Cancelled,

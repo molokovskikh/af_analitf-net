@@ -49,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Department,
 				o.ChangeNumber,
 				o.Number,
-				o.RetailSum,
+				o.Sum,
 				o.Agent,
 			});
 

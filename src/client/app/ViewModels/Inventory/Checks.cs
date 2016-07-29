@@ -28,10 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SearchBehavior = new SearchBehavior(this);
 			Items = new NotifyValue<IList<Check>>(new List<Check>());
 			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
-
-			Items.Cast<object>()
-				.Merge(SearchBehavior.ActiveSearchTerm.Cast<object>())
-				.Subscribe(_ => Filter());
 		}
 
 		public Checks(Main main)
@@ -84,9 +80,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				ChangeId = 0,
 				ChangeNumber = 42,
 				Cancelled = false,
-				Sum = 100,
-				RetailSum = 110,
-				DiscontSum = 10,
 			};
 			check.Lines.Add(new CheckLine
 			{

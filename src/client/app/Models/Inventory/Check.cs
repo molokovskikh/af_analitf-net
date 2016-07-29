@@ -48,9 +48,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint ChangeId { get; set; }
 		public virtual uint ChangeNumber { get; set; }
 		public virtual bool Cancelled { get; set; }
-		public virtual decimal Sum { get; set; }
-		public virtual decimal RetailSum { get; set; }
-		public virtual decimal DiscontSum  { get; set; }
+		public virtual decimal Sum => RetailSum - DiscontSum;
+		public virtual decimal RetailSum => Lines.Sum(l => l.RetailSum);
+		public virtual decimal DiscontSum => Lines.Sum(l => l.DiscontSum);
 
 		//Эти поля были пустыми
 		public virtual string SaleCheck { get; set; }
