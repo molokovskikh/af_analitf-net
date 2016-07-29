@@ -11,17 +11,24 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
-    /// <summary>
-    /// Interaction logic for Checks.xaml
-    /// </summary>
-    public partial class Checks : UserControl
-    {
-        public Checks()
-        {
-            InitializeComponent();
-        }
-    }
+	/// <summary>
+	/// Interaction logic for Checks.xaml
+	/// </summary>
+	public partial class Checks : UserControl
+	{
+		public Checks()
+		{
+			InitializeComponent();
+
+			SearchText.KeyDown += (sender, args) => {
+				if (args.Key == Key.Return) {
+					DataGridHelper.Focus(Items);
+				}
+			};
+		}
+	}
 }

@@ -50,7 +50,8 @@
         <DatePicker Name="ChangeDate" VerticalAlignment="Center"></DatePicker>
       </ToolBar>
     </Grid>
-    <controls:DataGrid2 Grid.Row="1" x:Name="Items">
+    <controls:DataGrid2 Grid.Row="1" x:Name="Items"
+			controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="ИД" Binding="{Binding Id}" Width="*" />
         <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
