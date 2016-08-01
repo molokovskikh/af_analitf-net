@@ -35,12 +35,10 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
-        <controls:PopupSelector VerticalAlignment="Center" x:Name="AddressesFilter"
-				ButtonContent="Адреса"
-				Member="Item.Name" />
         <controls:PopupSelector VerticalAlignment="Center" x:Name="KKMFilter"
 				ButtonContent="ККМ"
 				Member="Item" />
+        <ContentControl x:Name="AddressSelector" />
         <Label VerticalAlignment="Center" Padding="5,0,5,0">Номер смены:</Label>
         <TextBox x:Name="SearchText"
 				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"

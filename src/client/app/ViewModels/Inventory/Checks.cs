@@ -13,6 +13,9 @@ using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
+using System.ComponentModel;
+using System.Reactive;
+
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -28,6 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SearchBehavior = new SearchBehavior(this);
 			Items = new NotifyValue<IList<Check>>(new List<Check>());
 			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
+			AddressSelector = new AddressSelector(this);
 		}
 
 		public Checks(Main main)
@@ -42,21 +46,44 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public SearchBehavior SearchBehavior { get; set; }
 		public NotifyValue<IList<Check>> Items { get; set; }
 		public NotifyValue<Check> CurrentItem { get; set; }
-		public NotifyValue<IList<Selectable<Address>>> AddressesFilter { get; set; }
+		public AddressSelector AddressSelector { get; set; }
 		public NotifyValue<IList<Selectable<string>>> KKMFilter { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			RxQuery(x => x.Query<Address>().OrderBy(y => y.Name).ToArray().Select(y => new Selectable<Address>(y)).ToList())
-				.Subscribe(AddressesFilter);
+
+			AddressSelector.Init();
+			AddressSelector.FilterChanged.Cast<object>()
+				.Merge(KKMFilter.SelectMany(x => x?.Select(c => c.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+					?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()))
+				.Merge(KKMFilter.Where(x => x != null))
+				.Subscribe(_ => Update(), CloseCancellation.Token);
+
 			SampleData();
+			//Update();
 		}
 		public void EnterItem()
 		{
 			if (CurrentItem.Value == null)
 				return;
 			main.ActiveItem = new CheckDetails(CurrentItem.Value);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			AddressSelector.OnDeactivate();
+			base.OnDeactivate(close);
+		}
+
+		public override void Update()
+		{
+			if (KKMFilter.Value == null)
+				return;
+			var KKMs = KKMFilter.Value.Where(x => x.IsSelected).Select(x => x.Item).ToArray();
+			var checks = Items.Value;
+			var items = checks.Select(c => c).Where(c => KKMs.Contains(c.KKM)).ToList();
+			Items.Value = items;
 		}
 
 		private IList<Check> TempFillItemsList()
@@ -104,16 +131,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Items.Value = TempFillItemsList();
 			KKMFilter.Value.Add(new Selectable<string>("1(0000000)"));
-		}
-
-		public void Filter()
-		{
-			IEnumerable<Check> items = Items.Value;
-			var term = SearchBehavior.ActiveSearchTerm.Value;
-			if (!String.IsNullOrEmpty(term)) {
-				items = items.Where(o => o.ChangeNumber.ToString() == term);
-			}
-			Items.Value = items.OrderBy(o => o.ChangeNumber).ToList();
 		}
 
 		public IEnumerable<IResult> PrintChecks()
