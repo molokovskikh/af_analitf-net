@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -47,6 +48,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Discont { get; set; }
 		public virtual uint ChangeId { get; set; }
 		public virtual uint ChangeNumber { get; set; }
+		[Style(Description = "\"Аннулирован\"")]
 		public virtual bool Cancelled { get; set; }
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal RetailSum => Lines.Sum(l => l.RetailSum);

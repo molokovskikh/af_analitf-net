@@ -75,7 +75,6 @@
     </WrapPanel>
     <controls:DataGrid2 Grid.Row="2" x:Name="Lines">
       <DataGrid.Columns>
-        <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />
         <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
         <controls:DataGridTextColumnEx Header="Название" Binding="{Binding ProductName}" Width="*" />
         <controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding ProducerId}" Width="*" Visibility="Collapsed"/>

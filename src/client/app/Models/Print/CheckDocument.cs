@@ -28,9 +28,9 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("ККМ", 90),
 				new PrintColumn("Отдел", 120),
 				new PrintColumn("Аннулирован", 80),
-				new PrintColumn("розничная", 60),
-				new PrintColumn("скидки", 60),
-				new PrintColumn("с учетом скидки", 60),
+				new PrintColumn("розничная", 80),
+				new PrintColumn("скидки", 80),
+				new PrintColumn("с учетом скидки", 80),
 			};
 
 			var columnGrops = new[]
@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Number,
 				o.Date.ToString("dd/M/yyyy"),
 				o.KKM,
-				o.Department,
+				o.Department.Name,
 				o.Cancelled,
 				o.RetailSum,
 				o.DiscontSum,
