@@ -149,6 +149,18 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Import_waybill_with_RetailCost()
+		{
+			var fixture = Fixture<CreateWaybillWithServerCost>();
+			var retailCost = fixture.Waybill.Lines[0].RetailCost;
+			Assert.IsTrue(retailCost.HasValue && retailCost.Value > 0);
+
+			Run(new UpdateCommand());
+			var waybill = localSession.Query<Waybill>().Single(w => w.DocType == DocType.Waybill && w.Id == fixture.Document.Id);
+			Assert.IsTrue(waybill.IsRetailCostFixed);
+		}
+
+		[Test]
 		public void Mark_waybill_with_reject()
 		{
 			var reject = localSession.Query<Client.Models.Reject>().First();

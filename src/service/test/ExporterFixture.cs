@@ -325,16 +325,13 @@ namespace AnalitF.Net.Service.Test
 			user.SendWaybills = true;
 			var waybill = CreateWaybillWithFile();
 			waybill.Log.IsFake = true;
-			waybill.Lines[0].RetailCost = 600m;
 			session.Flush();
 
 			exporter.ExportDocs();
 			var files = ListResult();
 			Assert.That(files, Is.Not.StringContaining("Waybills/" + Path.GetFileName(waybill.Log.LocalFile)));
 			var result = exporter.Result.First(r => r.ArchiveFileName == "Waybills.txt");
-			var line = File.ReadLines(result.LocalFileName).First();
-			var isRetailCostFixed = line.Split('\t').Last();
-			Assert.AreEqual(isRetailCostFixed, "1");
+			Assert.That(new FileInfo(result.LocalFileName).Length, Is.GreaterThan(10), File.ReadAllText(result.LocalFileName));
 		}
 
 		[Test]

@@ -12,13 +12,17 @@ namespace AnalitF.Net.Client.Test.Fixtures
 	[Description("Создает накладную с розничной ценой, для тестирования функции транспорта розничной цены")]
 	public class CreateWaybillWithServerCost : ServerFixture
 	{
+		public TestDocumentLog Document;
+		public TestDocumentSendLog SendLog;
+		public TestWaybill Waybill;
+
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			var waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
+			Waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
 			var products = session.Query<TestProduct>().Where(x => !x.Hidden && x.CatalogProduct.Pharmacie).Take(1).ToArray();
-			waybill.Lines.Clear();
-			waybill.Lines.Add(new TestWaybillLine(waybill) {
+			Waybill.Lines.Clear();
+			Waybill.Lines.Add(new TestWaybillLine(Waybill) {
 				Product = products[0].FullName,
 				CatalogProduct = products[0],
 				Certificates = "РОСС BE.ФМ11.Д06711",
@@ -36,10 +40,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 				NDS = 10,
 				NDSAmount = 53.62m,
 			});
-			var document = waybill.Log;
-			session.Save(waybill);
-			var log = new TestDocumentSendLog(user, document);
-			session.Save(log);
+			Document = Waybill.Log;
+			session.Save(Waybill);
+			SendLog = new TestDocumentSendLog(user, Document);
+			session.Save(SendLog);
 		}
 	}
 
