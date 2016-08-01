@@ -48,6 +48,13 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			var result = session.CreateSQLQuery("show create table Settings")
 				.UniqueResult<object[]>();
 			Assert.That(result[1].ToString(), Does.Contain("`ProxyPort` int(11) DEFAULT NULL,"));
+
+			// #51646 Проблемы обновления АF.NET
+			var indexcntobj = session.CreateSQLQuery("select count(1) from information_schema.statistics " +
+			"where table_name = 'WaybillLines' " +
+				"and index_name = 'SerialProductIdProducerId'").UniqueResult();
+			int indexcnt = indexcntobj != null ? Int32.Parse(indexcntobj.ToString()) : -1;
+			Assert.AreEqual(indexcnt, 3);
 		}
 
 		[Test]
