@@ -74,6 +74,27 @@ namespace AnalitF.Net.Client.Test.Unit
 		}
 
 		[Test]
+		public void Legend_for_waybillLine()
+		{
+			var styles = StyleHelper.GetDefaultStyles();
+			var style = styles.First(s => s.Name == "IsRetailCostFixed");
+			Assert.IsTrue(style.IsBackground);
+			Assert.AreEqual("#FFFA9BFA", style.Background);
+			Assert.AreEqual("Black", style.Foreground);
+
+			StyleHelper.BuildStyles(appResource);
+			var grid = new DataGrid();
+			grid.Columns.Add(new DataGridTextColumn
+			{
+				Binding = new Binding("RetailCost")
+			});
+			Build(typeof(WaybillLine));
+			var legend = Legend(grid, typeof(WaybillLine));
+			Assert.AreEqual("Подсказка\r\nЗабракованная позиция\r\nНовая забракованная позиция\r\nНовая разбракованная позиция\r\nРозничная цена: не рассчитана\r\nРозничная цена: редактирование запрещено поставщиком", legend);
+		}
+
+
+		[Test]
 		public void Get_default_styles()
 		{
 			var styles = StyleHelper.GetDefaultStyles();
