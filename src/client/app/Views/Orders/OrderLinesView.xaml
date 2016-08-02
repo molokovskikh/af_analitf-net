@@ -55,6 +55,7 @@
 				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 			<c:MainControllerWrap  Grid.Row="0">
+				<Grid>
 			<c:DataGrid2 x:Name="Lines"
 				ShowAddressColumn="{Binding AddressSelector.All.Value}"
 				behaviors:Editable.Editor="{Binding Editor}"
@@ -118,12 +119,14 @@
 					CellStyle="{StaticResource CountColumn}" />
 				</DataGrid.Columns>
 			</c:DataGrid2>
-			</c:MainControllerWrap>
+			
 
-			<ContentControl x:Name="QuickSearch" Grid.Row="0" />
+		<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
-
-			<GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}" />
+			
+		</Grid>
+			</c:MainControllerWrap>
+		<GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}" />
 
 			<Expander Name="Expander" Grid.Row="2" Collapsed="ExpandedCollapsed" Expanded="ExpandedCollapsed"
 				IsExpanded="{Binding IsExpanded.Value}">
