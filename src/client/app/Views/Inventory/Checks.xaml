@@ -26,7 +26,7 @@
         <Button Name="ExportExcel" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Экспорт</Button>
         <Button Name="PrintReturnAct" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Акт возврата</Button>
       </WrapPanel>
-      <ToolBar Grid.Row="0" Grid.Column="0">
+      <StackPanel Grid.Row="0" Grid.Column="0" Style="{StaticResource FilterPanel}">
         <GroupBox Header="За период" Style="{StaticResource FilterElement}">
           <StackPanel Orientation="Horizontal">
             <Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
@@ -35,21 +35,13 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
-        <controls:PopupSelector VerticalAlignment="Center" x:Name="KKMFilter"
-				ButtonContent="ККМ"
+        <controls:PopupSelector VerticalAlignment="Center" x:Name="KKMFilter" ButtonContent="ККМ"
 				Member="Item" />
         <ContentControl x:Name="AddressSelector" />
-        <Label VerticalAlignment="Center" Padding="5,0,5,0">Номер смены:</Label>
-        <TextBox x:Name="SearchText"
-				Text="{Binding SearchBehavior.SearchText.Value, UpdateSourceTrigger=PropertyChanged}"
-				Style="{StaticResource SearchText}"
-				caliburn:SearchBinder.Grid="Items" Width="30" />
-        <Label VerticalAlignment="Center" Padding="5,0,5,0">Дата смены:</Label>
-        <DatePicker Name="ChangeDate" VerticalAlignment="Center"></DatePicker>
-      </ToolBar>
+      </StackPanel>
     </Grid>
     <controls:DataGrid2 Grid.Row="1" x:Name="Items"
-			controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
+			ShowAddressColumn="{Binding AddressSelector.All.Value}">
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="ИД" Binding="{Binding Id}" Width="*" />
         <controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Number}" Width="*" />

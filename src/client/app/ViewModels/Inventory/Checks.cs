@@ -15,6 +15,7 @@ using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
 using System.ComponentModel;
 using System.Reactive;
+using ReactiveUI;
 
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -61,7 +62,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 
 			SampleData();
-			//Update();
 		}
 		public void EnterItem()
 		{
@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			var KKMs = KKMFilter.Value.Where(x => x.IsSelected).Select(x => x.Item).ToArray();
 			var checks = Items.Value;
-			var items = checks.Select(c => c).Where(c => KKMs.Contains(c.KKM)).ToList();
+			var items = checks.Select(c => c).Where(c => KKMs.Contains(c.KKM) && c.Date <= End && c.Date >= Begin).ToList();
 			Items.Value = items;
 		}
 

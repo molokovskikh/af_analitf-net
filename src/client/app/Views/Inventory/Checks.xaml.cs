@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +16,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.ViewModels;
+using ReactiveUI;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -20,15 +28,10 @@ namespace AnalitF.Net.Client.Views.Inventory
 	/// </summary>
 	public partial class Checks : UserControl
 	{
+
 		public Checks()
 		{
 			InitializeComponent();
-
-			SearchText.KeyDown += (sender, args) => {
-				if (args.Key == Key.Return) {
-					DataGridHelper.Focus(Items);
-				}
-			};
 		}
 	}
 }
