@@ -27,6 +27,7 @@ using Action = System.Action;
 using Hyperlink = System.Windows.Documents.Hyperlink;
 using System.Reactive.Linq;
 using Common.Tools.Calendar;
+using System.Windows.Automation;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -158,6 +159,22 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected void AsyncClick(string name)
 		{
 			dispatcher.BeginInvoke(new Action(() => InternalClick(name)));
+			WaitIdle();
+		}
+
+		protected void AsyncClickSplit(string name, string header)
+		{
+			dispatcher.BeginInvoke(new Action(() =>
+			{
+				var el = activeWindow.FindName(name) ?? activeWindow.Descendants<SplitButton>().First(x => x.Name.Match(name));
+				if (el == null)
+					throw new Exception($"Не могу найти пункт меню с заголовком '{header}' в окне {activeWindow}");
+				var button = el as SplitButton;
+				AssertInputable(button);
+				var menuItem = (button.DropDownContent as ItemsControl).Descendants<MenuItem>().First(x => x.Header.ToString().Match(header));
+				button.IsOpen = true;
+				menuItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, menuItem));
+			}));
 			WaitIdle();
 		}
 
@@ -309,6 +326,30 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				if (!String.IsNullOrEmpty(body))
 					Assert.That(text, Does.Contain(body), text);
 			});
+		}
+
+		protected void CheckFailMessageBox()
+		{
+			var timeout = 30.Second();
+			if (IsCI())
+				timeout = 60.Second();
+
+			try {
+				var opened = manager.MessageOpened.Timeout(timeout).First();
+				var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+				for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
+					Thread.Sleep(20);
+					window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
+				}
+				if (window != IntPtr.Zero)
+				{
+					WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
+					throw new Exception($"Ошибка: {opened}");
+				}
+			}
+			catch(TimeoutException e) {
+
+			}
 		}
 	}
 }

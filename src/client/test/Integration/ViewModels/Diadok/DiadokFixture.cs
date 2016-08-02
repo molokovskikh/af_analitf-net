@@ -23,6 +23,8 @@ using RevocationStatus = Diadoc.Api.Proto.Documents.RevocationStatus;
 using DocumentType = Diadoc.Api.Com.DocumentType;
 using InvoiceDocumentStatus = Diadoc.Api.Proto.Documents.InvoiceDocument.InvoiceStatus;
 using AttachmentType = Diadoc.Api.Proto.Events.AttachmentType;
+using Diadoc.Api.Com;
+using Diadoc.Api.Proto.Events;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 using AnalitF.Net.Client.Helpers;
 using System.Text;
@@ -63,8 +65,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			Wait();
 			dispatcher.Invoke(() => ddkIndex.DeleteAll());
-			Wait();
-
+			Thread.Sleep(TimeSpan.FromSeconds(15)); 
 			diadokDatas = Fixture<CreateDiadokInbox>();
 		}
 
@@ -74,93 +75,101 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			{
 				dispatcher.Invoke(() => (ddkIndex.Scheduler as TestScheduler).AdvanceByMs(5000));
 				scheduler.AdvanceByMs(5000);
-				dispatcher.WaitIdle();
 				WaitIdle();
+				dispatcher.WaitIdle();
 			}
 		}
 
 		[Test]
-		public void TestA_Load_Inbox()
+		public void Diadoc_documents_test()
 		{
-			Thread.Sleep(TimeSpan.FromSeconds(30));
-			dispatcher.Invoke(() => ddkIndex.Reload());
-			Wait();
-
-			int outboxCount = -123;
-			int inboxCount = -456;
-
-			inboxCount = diadokDatas.GetMessages().Item1.Count;
-			dispatcher.Invoke(() =>
-			{
-				outboxCount = ddkIndex.Items.Value.Count;
-				Assert.AreEqual(inboxCount, outboxCount);
-			});
-		}
-
-		[Test]
-		public void Test_B_Sign_Inbox()
-		{
-			Thread.Sleep(TimeSpan.FromSeconds(30));
-			dispatcher.Invoke(() => ddkIndex.Reload());
 			
-			Sign_Inbox();
+			Thread.Sleep(TimeSpan.FromSeconds(30));
+			dispatcher.Invoke(() => ddkIndex.Reload());
+
+			Sign_Document();
 			RejectSign_InboxTorg12();
 			Revocation_Req();
 
 			var messages = diadokDatas.GetMessages();
 
-			var torg12 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 && 
+			Thread.Sleep(TimeSpan.FromSeconds(15));
+			diadokDatas.OutBoundInvoices(messages.Item2);
+			Thread.Sleep(TimeSpan.FromSeconds(30));
+
+			messages = diadokDatas.GetMessages();
+
+			var torg12_1 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
 			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).First();
+			var torg12_2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
+			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
 
-			var invoice = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice && 
+			var invoice_1 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
 			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
-			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).First();
+			var invoice_2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
+			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
 
-			diadokDatas.Revocation(torg12);
-			diadokDatas.Revocation(invoice);
+			diadokDatas.Revocation(torg12_1);
+			diadokDatas.Revocation(torg12_2);
+			diadokDatas.Revocation(invoice_1);
+			diadokDatas.Revocation(invoice_2);
 
 			Thread.Sleep(TimeSpan.FromSeconds(15));
 			dispatcher.Invoke(() => ddkIndex.Reload());
 
+			DenialRevocation_Document();
+			SignRevocation_Document();
+			Open_Document();
+			Save_Document();
+			Print_Document();
+			Agreement_SugApprove_Document();
+			Agreement_SugDenial_Document();
+			Sign_SugSign_Document();
+			Delete_Document();
 		}
 
-		void Sign_Inbox()
+		void Sign_Document()
 		{
 			Wait();
 
 			string torg12id = "";
 			string invoiceid = "";
-			//Подписываем ТОРГ12
-			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
-				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
-				var signtorg12ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id).Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
-				Assert.IsTrue(!signtorg12ok);
-			});
+			//Подписываем ТОРГ12 3 документа
+			for(int i = 0; i < 3; i++)
+			{
+				dispatcher.Invoke(() => {
+					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature);
+					torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				});
 
-			Wait();
-			AsyncClick("Sign");
-			Wait();
-			WaitWindow("АналитФАРМАЦИЯ");
-			Wait();
-			Click("Save");
-			Wait();
+				Wait();
+				AsyncClick("Sign");
+				Wait();
+				WaitWindow("АналитФАРМАЦИЯ");
+				Wait();
+				Click("Save");
+				Wait();
+			}
 
-			//подписываем Инвойс
-			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
-				invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
-				var signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid).Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
-				Assert.IsTrue(!signinvoice);
-			});
-			Wait();
-			AsyncClick("Sign");
-			Wait();
-			WaitWindow("АналитФАРМАЦИЯ");
-			Wait();
-			Click("Save");
-			Wait();
+			for(int i = 0; i < 3; i++)
+			{
+				//подписываем Инвойс
+				dispatcher.Invoke(() => {
+					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished);
+					invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				});
+				Wait();
+				AsyncClick("Sign");
+				Wait();
+				WaitWindow("АналитФАРМАЦИЯ");
+				Wait();
+				Click("Save");
+				Wait();
+			}
 
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
@@ -216,7 +225,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			// для подписаных и не подписаных
 			Wait();
-			
+
 			string torg12id = "";
 			string invoceid = "";
 			string comment = "АННУЛИРОВНИЕ";
@@ -239,7 +248,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			dispatcher.Invoke(() => {
 				var torg12item= ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
 				var commentEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id && x.AttachmentType == AttachmentType.RevocationRequest);
-				var xml = new XMLDocHelper(commentEntity.Content.Data);
+				var xml = new DiadocXMLHelper(commentEntity);
 				var comment1 = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, comment1);
 				var torg12revoc = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
@@ -265,16 +274,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			dispatcher.Invoke(() => {
 				var invoiceItem = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoceid);
 				var commentEntity = invoiceItem.Message.Entities.First(x => x.ParentEntityId == invoceid && x.AttachmentType == AttachmentType.RevocationRequest);
-				var xml = new XMLDocHelper(commentEntity.Content.Data);
+				var xml = new DiadocXMLHelper(commentEntity);
 				var comment1 = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, comment1);
 				var invoicerevoced = invoiceItem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
 				Assert.IsTrue(invoicerevoced);
 			});
+
 			Wait();
 		}
 
-		void RejectRevocation_Inbox()
+		void DenialRevocation_Document()
 		{
 			Wait();
 
@@ -299,10 +309,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			dispatcher.Invoke(() => {
 				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
-				var commentEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id && x.AttachmentType == AttachmentType.RevocationRequest);
-				var str = Encoding.Default.GetString(commentEntity.Content.Data);
-				str = str.Replace("xmlns=\"http://www.roseu.org/images/stories/roaming/amendment-request-v1.xsd\"","");
-				var xml = new XMLDocHelper(str);
+				var revReqEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id && x.AttachmentType == AttachmentType.RevocationRequest);
+				var commentEntity = torg12item.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId).OrderBy(x => x.CreationTime).Last();
+				var xml = new DiadocXMLHelper(commentEntity);
 				var comment1 = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, comment1);
 				var torg12RevocationRejected = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
@@ -328,10 +337,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			dispatcher.Invoke(() => {
 				var invoiceiditem = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
-				var commentEntity = invoiceiditem.Message.Entities.First(x => x.ParentEntityId == invoiceid && x.AttachmentType == AttachmentType.RevocationRequest);
-				var str = Encoding.Default.GetString(commentEntity.Content.Data);
-				str = str.Replace("xmlns=\"http://www.roseu.org/images/stories/roaming/amendment-request-v1.xsd\"","");
-				var xml = new XMLDocHelper(str);
+				var revReqEntity = invoiceiditem.Message.Entities.First(x => x.ParentEntityId == invoiceid && x.AttachmentType == AttachmentType.RevocationRequest);
+				var commentEntity = invoiceiditem.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId).OrderBy(x => x.CreationTime).Last();
+				var xml = new DiadocXMLHelper(commentEntity);
 				var comment1 = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, comment1);
 				var torg12rejected = invoiceiditem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
@@ -341,51 +349,441 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 		}
 
+		void SignRevocation_Document()
+		{
+			Wait();
+
+			var torg12id = "";
+			var invoiceid = "";
+			
+			//подписаный ТОРГ-12
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
+				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClick("Sign");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var torg12RevocationSigned = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationAccepted;
+				Assert.IsTrue(torg12RevocationSigned);
+			});
+
+			Wait();
+
+			//подписаный Инвойс
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
+				invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClick("Sign");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var invoiceiditem = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
+				var invoiceSigned = invoiceiditem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationAccepted;
+				Assert.IsTrue(invoiceSigned);
+			});
+
+			Wait();
+		}
+
 		void Open_Document()
 		{
 			Wait();
+
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
-				var result = ddkIndex.Open().GetEnumerator();
-				var open = Next<OpenResult>(result);
-				Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-				Assert.That(open.Filename, Does.Contain(@"<?xml version=""1.0"" encoding=""windows-1251""?>"));
 			});
 			Wait();
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
 				var result = ddkIndex.Open().GetEnumerator();
 				var open = Next<OpenResult>(result);
 				Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-				Assert.That(open.Filename, Does.Contain(@"<?xml version=""1.0"" encoding=""windows-1251""?>"));
+				var text = File.ReadAllText(open.Filename, Encoding.Default);
+				Assert.That(text, Does.Contain(@"<СвТНО НаимПервДок="));
 			});
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var result = ddkIndex.Open().GetEnumerator();
+				var open = Next<OpenResult>(result);
+				Assert.IsTrue(File.Exists(open.Filename), open.Filename);
+				var text = File.ReadAllText(open.Filename, Encoding.Default);
+				Assert.That(text, Does.Contain(@"<СвСчФакт НомерСчФ="));
+			});
+
 			Wait();
 		}
 
 		void Save_Document()
 		{
 			Wait();
+
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
-				var result = ddkIndex.Save().GetEnumerator();
-				var savefile = Next<SaveFileResult>(result);
-				var text = File.ReadAllText(savefile.Dialog.FileName, Encoding.Default);
-				Assert.That(text, Does.Contain(@"<СвТНО НаимПервДок=""Товарная накладная"" ОКУДПервДок=""0330212"" НомФорм=""ТОРГ-12"">"));
 			});
 			Wait();
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
 				var result = ddkIndex.Save().GetEnumerator();
 				var savefile = Next<SaveFileResult>(result);
+				savefile.Dialog.FilterIndex = 1;
+				var file = cleaner.RandomFile();
+				savefile.Dialog.FileName = file;
+				result.MoveNext();
 				var text = File.ReadAllText(savefile.Dialog.FileName, Encoding.Default);
-				Assert.That(text, Does.Contain(@"<СвСчФакт НомерСчФ=""1"" ДатаСчФ=""01.01.2011"" КодОКВ=""643"">"));
+				Assert.That(text, Does.Contain(@"<СвТНО НаимПервДок="));
 			});
 			Wait();
+
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var result = ddkIndex.Save().GetEnumerator();
+				var savefile = Next<SaveFileResult>(result);
+				savefile.Dialog.FilterIndex = 1;
+				var file = cleaner.RandomFile();
+				savefile.Dialog.FileName = file;
+				result.MoveNext();
+				var text = File.ReadAllText(savefile.Dialog.FileName, Encoding.Default);
+				Assert.That(text, Does.Contain(@"<СвСчФакт НомерСчФ="));
+			});
+
+			Wait();
+		}
+
+		void Print_Document()
+		{
+			Wait();
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var result = ddkIndex.PrintItem().GetEnumerator();
+				var task = Next<TaskResult>(result);
+				task.Task.Wait();
+				var taskResult = (task.Task as Task<string>).Result;
+				Assert.True(File.Exists(taskResult));
+				Assert.True(File.ReadAllBytes(taskResult).Length > 1024);
+			});
+
+			Wait();
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
+			});
+			dispatcher.Invoke(() => {
+				var result = ddkIndex.PrintItem().GetEnumerator();
+				var task = Next<TaskResult>(result);
+				task.Task.Wait();
+				var taskResult = (task.Task as Task<string>).Result;
+				Assert.True(File.Exists(taskResult));
+				Assert.True(File.ReadAllBytes(taskResult).Length > 1024);
+			});
+
+			Wait();
+		}
+
+		void Agreement_SugApprove_Document()
+		{
+			Wait();
+
+			string torg12id = "";
+			string invoiceid = "";
+			var comment = "НА СОГЛАСОВНИЕ";
+			var comment2 = "СОГЛАСОВНИЕ ПОДТВЕРЖДЕНИЕ";
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature &&
+				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
+				(f.Entity.DocumentInfo.ResolutionStatus == null ||
+				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
+				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "На согласование");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && 
+				f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished &&
+				(f.Entity.DocumentInfo.ResolutionStatus == null ||
+				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
+				invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "На согласование");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => ddkIndex.Reload());
+			Wait();
+
+			// проверяем статус и подтвержадем согласование торг12
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.ApprovementRequest);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment, commentData);
+				ddkIndex.CurrentItem.Value = item;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "Согласовать");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment2);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionInfo.ResolutionType == Diadoc.Api.Proto.Events.ResolutionType.Approve);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment2, commentData);
+			});
+
+			Wait();
+
+			// проверяем статус и подтвержадем согласование счет-фактуры
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.ApprovementRequest);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment, commentData);
+				ddkIndex.CurrentItem.Value = item;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "Согласовать");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment2);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionInfo.ResolutionType == Diadoc.Api.Proto.Events.ResolutionType.Approve);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment2, commentData);
+			});
+
+			Wait();
+		}
+
+		void Agreement_SugDenial_Document()
+		{
+			Wait();
+
+			string torg12id = "";
+			string invoiceid = "";
+			var comment = "НА СОГЛАСОВНИЕ";
+			var comment2 = "СОГЛАСОВНИЕ ОТКАЗ";
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature &&
+				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
+				(f.Entity.DocumentInfo.ResolutionStatus == null ||
+				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
+				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "На согласование");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && 
+				f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished &&
+				(f.Entity.DocumentInfo.ResolutionStatus == null ||
+				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
+				invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "На согласование");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => ddkIndex.Reload());
+			Wait();
+
+			// проверяем статус и подтвержадем согласование торг12
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.ApprovementRequest);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment, commentData);
+				ddkIndex.CurrentItem.Value = item;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "Отказать в согласовании");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment2);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionInfo.ResolutionType == Diadoc.Api.Proto.Events.ResolutionType.Disapprove);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment2, commentData);
+			});
+
+			Wait();
+
+			// проверяем статус и подтвержадем согласование счет-фактуры
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.ApprovementRequest);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment, commentData);
+				ddkIndex.CurrentItem.Value = item;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "Отказать в согласовании");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment", comment2);
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionInfo != null);
+				Assert.IsTrue(resreqEntt.ResolutionInfo.ResolutionType == Diadoc.Api.Proto.Events.ResolutionType.Disapprove);
+				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment2, commentData);
+			});
+
+			Wait();
+		}
+
+		void Sign_SugSign_Document()
+		{
+			Wait();
+
+			string torg12id = "";
+			var comment = "НА ПОДПИСЬ";
+
+			dispatcher.Invoke(() => {
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature &&
+				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
+				(f.Entity.DocumentInfo.ResolutionStatus == null ||
+				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
+				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+			});
+
+			Wait();
+			AsyncClickSplit("Agreement", "На подпись");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			InputActiveWindow("Comment",comment);
+			Wait();
+			Click("Save");
+			Wait();
+
+
+			// проверяем статус и подтвержадем подпись торг12
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null && e.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
+				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
+				var comment1 =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
+				Assert.AreEqual(comment, comment1);
+				ddkIndex.CurrentItem.Value = item;
+			});
+
+			Wait();
+			AsyncClick("Sign");
+			Wait();
+			WaitWindow("АналитФАРМАЦИЯ");
+			Wait();
+			Click("Save");
+			Wait();
+
+			dispatcher.Invoke(() => {
+				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				Assert.IsTrue(item.Entity.DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.InboundWithRecipientSignature);
+			});
+
+			Wait();
+
+			// счет фактура не может быть передана на подпись
 		}
 
 		void Delete_Document()
 		{
 			Wait();
+
 			var itemsCount = 0;
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
@@ -413,54 +811,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
 				var itemsCount1 = ddkIndex.Items.Value.Count();
 				Assert.AreEqual(itemsCount - 2, itemsCount1);
 			});
 
 			Wait();
 		}
-
-		void Print_Document()
-		{
-			Wait();
-			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12);
-				var result = ddkIndex.PrintItem().GetEnumerator();
-				var task = Next<TaskResult>(result);
-				task.Task.Start();
-				task.Task.Wait();
-				Assert.True(File.Exists(task.Task.Result));
-			});
-			Wait();
-			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice);
-				var result = ddkIndex.PrintItem().GetEnumerator();
-				var open = Next<OpenResult>(result);
-				Assert.IsTrue(File.Exists(open.Filename), open.Filename);
-				Assert.That(open.Filename, Does.Contain(@"<?xml version=""1.0"" encoding=""windows-1251""?>"));
-			});
-			Wait();
-		}
-
-		void Agreement_Sug_Document()
-		{
-
-		}
-
-		//Подпись
-		//Отказ
-		//Аннулирование
-		//А - подпись
-		//А - отказ
-		//Открыть
-		//Сохранить
-		//Удалить
-		//Распечатать
-		//Согласование
-		// На согласование
-		// На подпись
-		// Согласовать
-		// Отказать в согласовании
 	}
 }

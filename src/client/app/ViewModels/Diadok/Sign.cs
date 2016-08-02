@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 {
 	public static class ddk
 	{
-		/*
+	
 		// I
 		public static string ie_login = "f816686@mvrht.com";
 		public static string ie_passwd = "A123456";
@@ -36,8 +36,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public static string ch_passwd = "A123456";
 		public static string ch_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
 		public static string ch_inn = "9656351023";
-		*/
-
+		
+			/*
 		// II
 		public static string ie_login = "c963832@mvrht.com";
 		public static string ie_passwd = "222852";
@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public static string ch_passwd = "222852";
 		public static string ch_boxid = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
 		public static string ch_inn = "9667029241";
-
+		*/
 	}
 
 	public class ActionPayload
@@ -98,7 +98,20 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Success = false;
 			InitFields();
 			Payload = payload;
-			ShortFileName = $"{Payload.Entity.FileName.Substring(0, 25)}...{Payload.Entity.FileName.Substring(Payload.Entity.FileName.Length - 25)}";
+			
+			switch(payload.Entity.AttachmentType)
+			{ 
+				case AttachmentType.XmlTorg12:
+					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokTORG12Name(" , ");
+					break;
+				case AttachmentType.Invoice:
+					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokInvoiceName(" , ");
+					break;
+				default:
+					DocumentName = payload.Entity.FileName;
+					break;
+			}
+
 			IsEnabled.Value = true;
 			LastPatchStamp = DateTime.MinValue;
 			if(Settings.Value.DebugUseTestSign)
@@ -150,7 +163,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public X509Certificate2 Cert { get; protected set;}
 		public NotifyValue<bool> IsEnabled { get; set; }
 		public ActionPayload Payload { get; set; }
-		public string ShortFileName { get; set; }
+		public string DocumentName { get; set; }
 		public DateTime LastPatchStamp { get; set;}
 
 		public bool ReqRevocationSign
@@ -202,7 +215,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				int breaker = 0;
 				do
 				{
-					msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
+					msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
 					if(LastPatchStamp != msg.LastPatchTimestamp)
 						break;
 					else
@@ -651,7 +664,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							do
 							{
 								Thread.Sleep(1000);
-								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId);
+								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
 								dateConfirm = GetDateConfirmationStep7(msg);
 								breaker++;
 							}

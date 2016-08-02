@@ -32,6 +32,7 @@ using ResolutionRequestType = Diadoc.Api.Proto.Events.ResolutionRequestType;
 using ResolutionStatusType = Diadoc.Api.Proto.Documents.ResolutionStatusType;
 using ResolutionType = Diadoc.Api.Proto.Events.ResolutionType;
 using BilateralDocumentStatus = Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus;
+using DiadokUser = Diadoc.Api.Proto.User;
 using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using PdfiumViewer;
 using ReactiveUI;
@@ -57,7 +58,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			{ NonformalizedDocumentStatus.InboundWaitingForRecipientSignature, "Требуется подпись" },
 			{ NonformalizedDocumentStatus.InboundWithRecipientSignature, "Подписан" },
 		};
-
+		private string documentFilename;
 		private string localFilename;
 		public Entity Entity;
 		public Message Message;
@@ -72,10 +73,30 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				.FirstOrDefault(x => x.DepartmentId == entity.DocumentInfo.DepartmentId)?.Name
 					?? "Головное подразделение";
 			Date = entity.CreationTime.ToLocalTime();
+		
+			switch(entity.AttachmentType)
+			{ 
+				case AttachmentType.XmlTorg12:
+					documentFilename = new DiadocXMLHelper(entity).GetDiadokTORG12Name();
+					break;
+				case AttachmentType.Invoice:
+					documentFilename = new DiadocXMLHelper(entity).GetDiadokInvoiceName();
+					break;
+				default:
+					documentFilename = entity.FileName;
+					break;
+			}
 		}
 
 		public string Sender { get; set; }
 		public string FileName => Entity.FileName;
+		public string DocumentName
+		{
+			get
+			{
+				return documentFilename;
+			}
+		}
 		public string Status => GetStatus();
 		public bool IsGroup => !String.IsNullOrEmpty(Sender);
 		public string Department { get; set; }
@@ -147,6 +168,26 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					status += ". Отказано в аннулировании";
 				break;
 			}
+			if(Entity.DocumentInfo.ResolutionStatus != null)
+			{
+				switch (Entity.DocumentInfo.ResolutionStatus.StatusType) {
+					case Diadoc.Api.Com.ResolutionStatusType.ApprovementRequested:
+						status += ". На согласовании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.Approved:
+						status += ". Согласован";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.Disapproved:
+						status += ". Отказано в согласовании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.SignatureRequested:
+						status += ". На подписании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.SignatureDenied:
+						status += ". Отказано в подписании";
+					break;
+				}
+			}
 			switch(Entity.DocumentInfo.RevocationStatus) {
 				case RevocationStatus.RevocationIsRequestedByMe:
 					status = "Ожидается аннулирование";
@@ -169,27 +210,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				return false;
 			if (Entity.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundWithRecipientSignature
 				|| Entity.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected)
-				return false;
-			if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone)
-			{
-				if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected &&
-				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RequestsMyRevocation)
-				return false;
-			}
-			else
-			{
-				if(Entity.DocumentInfo.XmlTorg12Metadata?.Status == Diadoc.Api.Com.BilateralDocumentStatus.InboundWithRecipientSignature)
-					return false;
-				if(Entity.DocumentInfo.InvoiceMetadata?.Status == Diadoc.Api.Com.InvoiceStatus.InboundFinished)
-					return false;
-			}
-			return true;
-		}
-
-		public virtual bool CanRevoke()
-		{
-			if(Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone &&
-				Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationRejected)
 				return false;
 			return true;
 		}
@@ -366,9 +386,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.XmlSignatureRejection) {
-					//todo комментарий содержится внутри xml в Content
+					var xml = new DiadocXMLHelper(entity);
+					var fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
+					var comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 					items.Add(new AttachmentHistory {
-						Description = "Отказано в подписании документа",
+						Description = $"{fio} отказал в подписи документа",
+						Comment = comment,
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.InvoiceConfirmation) {
@@ -377,7 +400,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.InvoiceReceipt) {
-					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var xml = new DiadocXMLHelper(entity);
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 					items.Add(new AttachmentHistory {
 						Description = $"{fio} подписал и отправил извещение о получении",
@@ -385,7 +408,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					});
 				}
 				else if (entity.AttachmentType == AttachmentType.RevocationRequest) {
-					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var xml = new DiadocXMLHelper(entity);
 					var orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
@@ -404,9 +427,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 					else if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected) {
 						var entityreject = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
-						var str = Encoding.Default.GetString(entityreject.Content.Data);
-						str = str.Replace("xmlns=\"http://www.roseu.org/images/stories/roaming/amendment-request-v1.xsd\"","");
-						xml = new XMLDocHelper(str);
+						xml = new DiadocXMLHelper(entityreject);
 						orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
 						fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 						comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
@@ -418,7 +439,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 				}
 				else if(entity.AttachmentType == AttachmentType.XmlTorg12BuyerTitle) {
-					XMLDocHelper xml = new XMLDocHelper(entity.Content.Data);
+					var xml = new DiadocXMLHelper(entity);
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ЮЛ/ФИО/");
 					items.Add(new AttachmentHistory {
 						Description = $"{fio} подписал документ и завершил документооборот",
@@ -437,6 +458,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		private DiadocApi api;
 		private string token;
 		private Box box;
+		private DiadokUser user;
 		private string nextPage;
 		private List<string> pageIndexes = new List<string>();
 		private static string[] fileformats = {
@@ -467,7 +489,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						filename = Path.Combine(dir, x.Entity.EntityId + Path.GetExtension(x.Entity.FileName));
 						File.WriteAllBytes(filename, bytes);
 						return filename;
-					}).DefaultIfFail();
+					}, Scheduler).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
@@ -484,7 +506,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					if (fileformats.Contains(Path.GetExtension(x) ?? "", StringComparer.CurrentCultureIgnoreCase))
 						return Observable.Return(x);
 
-					return Observable.Start(() => LoadPrintPdf(attachment)).DefaultIfFail();
+					return Observable.Start(() => LoadPrintPdf(attachment), Scheduler).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
@@ -496,7 +518,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				.Subscribe(CanReject);
 			CurrentItem.Select(x => (x?.CanSign()).GetValueOrDefault())
 				.Subscribe(CanRequestSign);
-			CurrentItem.Select(x => (x?.CanRevoke()).GetValueOrDefault())
+			CurrentItem.Select(x => x != null &&
+			!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
+					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone))
 				.Subscribe(CanRevoke);
 
 			Filename.Select(x => x != null)
@@ -662,10 +686,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SortDirection = "Descending",
 						AfterIndexKey = key
 					});
-
-					var items = docs.Documents.Select(x => x.MessageId).Distinct()
+					user = api.GetMyUser(token);
+					var items = docs.Documents.Select(x => new { x.MessageId, x.EntityId}).Distinct()
 						.AsParallel()
-						.Select(x => api.GetMessage(token, box.BoxId, x))
+						.Select(x => api.GetMessage(token, box.BoxId, x.MessageId, x.EntityId))
 						.OrderByDescending(x => x.Timestamp)
 						.ToObservableCollection();
 

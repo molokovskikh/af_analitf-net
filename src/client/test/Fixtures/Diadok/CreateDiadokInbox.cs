@@ -59,6 +59,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			msg.Invoices.Add(sii);
 			msg.Invoices.Add(sii);
 			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
+			msg.Invoices.Add(sii);
 
 			XmlDocumentAttachment att12 = new XmlDocumentAttachment();
 			content = Encoding.GetEncoding(1251).GetBytes(DiadokFixtureData.Torg12Xml);
@@ -69,7 +72,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			att12.SignedContent.SignWithTestSignature = true;
 			att12.SignedContent.Content = iiFile.Content;
 			att12.SignedContent.Signature = sign;
-			
+
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
+			msg.AddXmlTorg12SellerTitle(att12);
 			msg.AddXmlTorg12SellerTitle(att12);
 			msg.AddXmlTorg12SellerTitle(att12);
 			msg.AddXmlTorg12SellerTitle(att12);
@@ -96,36 +102,26 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			//  накладная
 			msg.AddXmlTorg12SellerTitle(att12);
 			api.PostMessage(token, msg);
-			/*
-			Thread.Sleep(30000);
 
-			var messages = GetMessages();
-			
-			var torg12 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 && 
-			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralDocumentStatus.InboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
-
-			var invoice = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice && 
-			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished &&
-			x.Entities[0].DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone).First();
-
-			Revocation(torg12);
-			Revocation(invoice);
-			*/
 		}
 
 		public void Revocation(Message revocation)
 		{
-			MessagePatchToPost patch = new MessagePatchToPost();
 			RevocationRequestInfo revinfo = new RevocationRequestInfo();
 			revinfo.Comment = "АННУЛИРОВНИЕ";
 			revinfo.Signer = signers.First();
 
 			var document = revocation.Entities.First();
 
+			MessagePatchToPost patch = new MessagePatchToPost()
+			{
+				BoxId = box.BoxId,
+				MessageId = revocation.MessageId
+			};
+
 			GeneratedFile revocationXml = api.GenerateRevocationRequestXml(
 				token,
-				ddk.ie_boxid,
+				box.BoxId,
 				revocation.MessageId,
 				document.EntityId,
 				revinfo);
@@ -147,7 +143,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		{
 			if(string.IsNullOrEmpty(token))
 				throw new Exception("token");
-			Box box = box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
+			Box box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
+
 			var docs = api.GetDocuments(token, new DocumentsFilter {
 				FilterCategory = "Any.Outbound",
 				BoxId = box.BoxId,
@@ -155,7 +152,49 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}).Documents.ToList();
 			var msgs = docs.Select(x => new { x.MessageId , x.EntityId}).Select(x => api.GetMessage(token, box.BoxId, x.MessageId, x.EntityId))
 				.OrderByDescending(x => x.Timestamp).ToList();
+
 			return Tuple.Create(docs, msgs);
+		}
+
+		public void OutBoundInvoices(List<Message> msgs)
+		{
+			var invoicesReq = msgs.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice);
+
+			foreach(var msg in invoicesReq)
+			{
+				Entity invoice = msg.Entities.FirstOrDefault(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice &&
+				i.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+				if(invoice == null)
+					continue;
+				Entity invoiceReciept = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoice.EntityId &&
+				i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
+
+				GeneratedFile invoiceReceipt = api.GenerateInvoiceDocumentReceiptXml(
+					token,
+					box.BoxId,
+					invoice.DocumentInfo.MessageId,
+					invoiceReciept.EntityId,
+					signers.First());
+
+				SignedContent signContentInvoiceReciept = new SignedContent();
+				signContentInvoiceReciept.Content = invoiceReceipt.Content;
+				signContentInvoiceReciept.SignWithTestSignature = true;
+
+				ReceiptAttachment receiptInvoice = new ReceiptAttachment {
+					ParentEntityId = invoiceReciept.EntityId,
+					SignedContent = signContentInvoiceReciept
+				};
+
+				var patch = new MessagePatchToPost {
+					BoxId = box.BoxId,
+					MessageId = invoice.DocumentInfo.MessageId
+				};
+				patch.AddReceipt(receiptInvoice);
+
+				api.PostMessagePatch(token, patch);
+
+				Thread.Sleep(1000);
+			}
 		}
 
 		DiadocApi api;

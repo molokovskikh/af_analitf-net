@@ -77,7 +77,7 @@
 				<ListView.View>
 					<GridView>
 						<GridViewColumn Header="Отправитель" DisplayMemberBinding="{Binding Sender}"/>
-            <GridViewColumn Header="Документ" DisplayMemberBinding="{Binding FileName}"/>
+            <GridViewColumn Header="Документ" DisplayMemberBinding="{Binding DocumentName}"/>
             <GridViewColumn Header="Статус" DisplayMemberBinding="{Binding Status}"/>
             <GridViewColumn Header="Подразделение" DisplayMemberBinding="{Binding Department}"/>
             <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}"/>
@@ -117,7 +117,7 @@
 				<Button Style="{StaticResource ActionButton}" Name="Save">Сохранить</Button>
 				<Button Style="{StaticResource ActionButton}" Name="Delete">Удалить</Button>
 				<Button Style="{StaticResource ActionButton}" Name="PrintItem">Распечатать</Button>
-				<xctk:SplitButton VerticalAlignment="Center" Padding="8" Margin="5">
+				<xctk:SplitButton Name="Agreement"  VerticalAlignment="Center" Padding="8" Margin="5">
 					Согласование
 					<xctk:SplitButton.DropDownContent>
 						<ItemsControl>
