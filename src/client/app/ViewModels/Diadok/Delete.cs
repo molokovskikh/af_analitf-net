@@ -13,18 +13,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 		}
 
-		public void Save()
+		public async void Save()
 		{
 			try
 			{
 				BeginAction();
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				Payload.Api.Delete(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
+				await	Async(x => Payload.Api.Delete(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId));
 				EndAction();
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is HttpClientException)
 				{
 					var e = exception as HttpClientException;
@@ -34,7 +33,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }

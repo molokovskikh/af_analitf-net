@@ -32,7 +32,6 @@ using ResolutionRequestType = Diadoc.Api.Proto.Events.ResolutionRequestType;
 using ResolutionStatusType = Diadoc.Api.Proto.Documents.ResolutionStatusType;
 using ResolutionType = Diadoc.Api.Proto.Events.ResolutionType;
 using BilateralDocumentStatus = Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus;
-using DiadokUser = Diadoc.Api.Proto.User;
 using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using PdfiumViewer;
 using ReactiveUI;
@@ -135,7 +134,13 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public string GetStatus()
 		{
-			var status = "Получен";
+			var desc = new List<string> {
+				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.ResolutionStatus?.Type),
+				Descriptions.GetValueOrDefault(Entity?.DocumentInfo?.NonformalizedDocumentMetadata?.DocumentStatus),
+			};
+			var status = desc.Where(x => !String.IsNullOrEmpty(x)).Implode();
+			if (String.IsNullOrEmpty(status))
+				status = "Получен";
 			switch (Entity.DocumentInfo.Type) {
 				case DocumentType.Invoice: {
 					switch (Entity.DocumentInfo.InvoiceMetadata.Status) {
@@ -205,6 +210,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public virtual bool CanSign()
 		{
+			if (Entity.DocumentInfo?.RevocationStatus == RevocationStatus.RequestsMyRevocation)
+				return true;
 			if (Entity.DocumentInfo?.ResolutionStatus?.Type == ResolutionStatusType.ApprovementRequested
 				&& Entity.DocumentInfo?.ResolutionStatus?.Type == ResolutionStatusType.SignatureRequested)
 				return false;
@@ -458,7 +465,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		private DiadocApi api;
 		private string token;
 		private Box box;
-		private DiadokUser user;
 		private string nextPage;
 		private List<string> pageIndexes = new List<string>();
 		private static string[] fileformats = {
@@ -686,7 +692,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SortDirection = "Descending",
 						AfterIndexKey = key
 					});
-					user = api.GetMyUser(token);
 					var items = docs.Documents.Select(x => new { x.MessageId, x.EntityId}).Distinct()
 						.AsParallel()
 						.Select(x => api.GetMessage(token, box.BoxId, x.MessageId, x.EntityId))
@@ -829,6 +834,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				items[index] = item;
 				Items.Value[Items.Value.IndexOf(current)] = item;
 				CurrentItem.Value = item;
+			}
+			else
+			{
+				var a = 1;
 			}
 		}
 

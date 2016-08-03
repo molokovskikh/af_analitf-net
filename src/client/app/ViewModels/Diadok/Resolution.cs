@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public NotifyValue<string> Clarification { get; set; }
 		public NotifyValue<string> Comment { get; set; }
 
-		public void Save()
+		public async void Save()
 		{
 			try
 			{
@@ -42,12 +42,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					Comment = Comment.Value,
 					ResolutionType = type
 				});
-				Payload.Api.PostMessagePatch(Payload.Token, patch);
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is HttpClientException)
 				{
 					var e = exception as HttpClientException;
@@ -57,7 +56,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }

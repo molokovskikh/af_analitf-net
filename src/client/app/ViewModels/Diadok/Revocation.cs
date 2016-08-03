@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> Comment { get; set; }
 
-		public void Save()
+		public async void Save()
 		{
 			try
 			{
@@ -29,12 +29,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				revinfo.Comment = Comment.Value;
 				revinfo.Signer = GetSigner();
 
-				GeneratedFile revocationXml = Payload.Api.GenerateRevocationRequestXml(
-					Payload.Token,
+				GeneratedFile revocationXml = await Async((x) => Payload.Api.GenerateRevocationRequestXml(
+					x,
 					Payload.BoxId,
 					Payload.Message.MessageId,
 					Payload.Entity.EntityId,
-					revinfo);
+					revinfo));
 
 				SignedContent revocSignContent = new SignedContent();
 				revocSignContent.Content = revocationXml.Content;
@@ -48,12 +48,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 				patch.AddRevocationRequestAttachment(revattch);
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				Payload.Api.PostMessagePatch(Payload.Token, patch);
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is HttpClientException)
 				{
 					var e = exception as HttpClientException;
@@ -63,7 +62,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }

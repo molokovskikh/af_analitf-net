@@ -43,6 +43,23 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			CertEx cert = DiadokFixtureData.Cert;
 
+			NonformalizedAttachment nfa = new NonformalizedAttachment();
+			nfa.SignedContent = new SignedContent();
+			nfa.SignedContent.Content = Encoding.GetEncoding(1251).GetBytes("ТЕСТОВЫЙ НЕФОРМАЛИЗИРОВННЫЙ ДОКУМЕНТ");
+			nfa.SignedContent.SignWithTestSignature = true;
+			nfa.FileName = "НеформализированныйДокумент.txt";
+			nfa.NeedRecipientSignature = true;
+			nfa.DocumentDate = DateTime.UtcNow.ToString("dd.MM.yyyy");
+			nfa.DocumentNumber = DateTime.UtcNow.Millisecond.ToString();
+
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+			msg.NonformalizedDocuments.Add(nfa);
+
 			XmlDocumentAttachment sii = new XmlDocumentAttachment();
 			byte[] content = Encoding.GetEncoding(1251).GetBytes(DiadokFixtureData.InvoiceXml);
 			byte[] sign = null;
@@ -84,11 +101,12 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 			msg.FromBoxId = DiadokFixtureData.Sender_BoxId;
 			msg.ToBoxId = DiadokFixtureData.Receiver_BoxId;
-			// пакет из двух
+			// пакет из трех
 			api.PostMessage(token, msg);
 
 			Thread.Sleep(TimeSpan.FromSeconds(3));
 
+			msg.NonformalizedDocuments.Clear();
 			msg.Invoices.Clear();
 			msg.XmlTorg12SellerTitles.Clear();
 			// инвойс

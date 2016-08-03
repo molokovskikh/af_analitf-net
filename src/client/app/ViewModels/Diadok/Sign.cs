@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 {
 	public static class ddk
 	{
-	
+		/*
 		// I
 		public static string ie_login = "f816686@mvrht.com";
 		public static string ie_passwd = "A123456";
@@ -36,8 +36,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public static string ch_passwd = "A123456";
 		public static string ch_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
 		public static string ch_inn = "9656351023";
-		
-			/*
+		*/
+
 		// II
 		public static string ie_login = "c963832@mvrht.com";
 		public static string ie_passwd = "222852";
@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public static string ch_passwd = "222852";
 		public static string ch_boxid = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
 		public static string ch_inn = "9667029241";
-		*/
+
 	}
 
 	public class ActionPayload
@@ -98,9 +98,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Success = false;
 			InitFields();
 			Payload = payload;
-			
+
 			switch(payload.Entity.AttachmentType)
-			{ 
+			{
 				case AttachmentType.XmlTorg12:
 					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokTORG12Name(" , ");
 					break;
@@ -114,6 +114,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 			IsEnabled.Value = true;
 			LastPatchStamp = DateTime.MinValue;
+
 			if(Settings.Value.DebugUseTestSign)
 			{
 				SignerFirstName = "Иван";
@@ -155,6 +156,21 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
+		public Task<TResult> Async<TResult>(Func<string, TResult> action)
+		{
+			return Task<TResult>.Factory.StartNew(() => {return action(Payload.Token);},
+				CancellationToken.None,
+				TaskCreationOptions.None,
+				TaskScheduler.FromCurrentSynchronizationContext());
+		}
+
+		public Task Async(Action<string> action)
+		{
+			return Task.Factory.StartNew(() => action(Payload.Token),
+				CancellationToken.None,
+				TaskCreationOptions.None,
+				TaskScheduler.FromCurrentSynchronizationContext());
+		}
 		public string SignerFirstName { get; set;}
 		public string SignerSureName { get; set;}
 		public string SignerPatronimic { get; set;}
@@ -207,25 +223,28 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = false;
 		}
 
-		protected void EndAction(bool waitupdate = true)
+		protected async void EndAction(bool waitupdate = true)
 		{
 			if(waitupdate)
 			{
+				await Async((x) => {
 				Message msg = null;
 				int breaker = 0;
 				do
 				{
-					msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
+					msg = Payload.Api.GetMessage(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
 					if(LastPatchStamp != msg.LastPatchTimestamp)
 						break;
 					else
-						Thread.Sleep(1000);
+						TaskEx.Delay(1000).Wait();
 					breaker++;
 				} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
 				Result = msg;
+				});
 			}
 			IsEnabled.Value = true;
 			Success = true;
+			TryClose();
 		}
 
 		public Message Result { get; set;}
@@ -514,7 +533,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			return invoiceRecieptConfirmation;
 		}
 
-		public void Save()
+		public async void Save()
 		{
 			BeginAction();
 
@@ -538,11 +557,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					acceptSignature.Signature = sign;
 					patch.AddSignature(acceptSignature);
 					LastPatchStamp = Payload.Message.LastPatchTimestamp;
-					Payload.Api.PostMessagePatch(Payload.Token, patch);
+					await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				}
 				else
 				{
-					if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
+					if(Payload.Entity.AttachmentType == AttachmentType.Nonformalized)
+					{
+						patch = Payload.Patch();
+						byte[] sign = null;
+						if(TrySign(Payload.Entity.Content.Data, out sign) == false)
+							throw new Exception();
+						var signature = new DocumentSignature {
+							ParentEntityId = Payload.Entity.EntityId,
+							Signature = sign
+						};
+						if (Settings.Value.DebugUseTestSign)
+							signature.SignWithTestSignature = true;
+						patch.AddSignature(signature);
+						LastPatchStamp = Payload.Message.LastPatchTimestamp;
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
+					}
+					else if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
 					{
 						if(SaveData.Value)
 						{
@@ -590,12 +625,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							Signer = signer
 							};
 
-						GeneratedFile torg12XmlForBuyer = Payload.Api.GenerateTorg12XmlForBuyer(
-							Payload.Token,
+						GeneratedFile torg12XmlForBuyer = await Async((x) => Payload.Api.GenerateTorg12XmlForBuyer(
+							x,
 							inf,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
-							Payload.Entity.DocumentInfo.EntityId);
+							Payload.Entity.DocumentInfo.EntityId));
 
 						SignedContent signContent = new SignedContent();
 						signContent.Content = torg12XmlForBuyer.Content;
@@ -608,19 +643,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						};
 						patch = Payload.PatchTorg12(receipt);
 						LastPatchStamp = Payload.Message.LastPatchTimestamp;
-						Payload.Api.PostMessagePatch(Payload.Token, patch);
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} успешно подписан");
 					}
 					else
 					{
 						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
 
-						GeneratedFile invoiceReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
-							Payload.Token,
+						GeneratedFile invoiceReceipt = await Async((x) => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							x,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoice.EntityId,
-							signer);
+							signer));
 
 						SignedContent signContentInvoiceReciept = new SignedContent();
 						signContentInvoiceReciept.Content = invoiceReceipt.Content;
@@ -633,12 +668,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						};
 
 						Entity invoiceConfirmation = Payload.Message.Entities.OrderBy(x => x.CreationTime).First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
-						GeneratedFile invoiceConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
-							Payload.Token,
+						GeneratedFile invoiceConfirmationReceipt = await Async((x) => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							x,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoiceConfirmation.EntityId,
-							signer);
+							signer));
 
 						SignedContent signContentInvoiceConfirmationReciept = new SignedContent();
 						signContentInvoiceConfirmationReciept.Content = invoiceReceipt.Content;
@@ -653,34 +688,34 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 						patch = Payload.Patch(receiptInvoice, invoiceConfirmationreceipt);
 
-						Payload.Api.PostMessagePatch(Payload.Token, patch);
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} receiptInvoice, invoiceConfirmationreceipt отправлены");
 
-						Entity invoiceDateConfirmation = null;
+						Entity invoiceDateConfirmation = await Async((x) =>
 						{
 							Message msg = null;
 							Entity dateConfirm = null;
 							int breaker = 0;
 							do
 							{
-								Thread.Sleep(1000);
+								TaskEx.Delay(1000).Wait();
 								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
 								dateConfirm = GetDateConfirmationStep7(msg);
 								breaker++;
 							}
-							while (dateConfirm ==null && breaker < 10);
+							while (dateConfirm == null && breaker < 10);
 							if(dateConfirm == null)
 								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
 							LastPatchStamp = msg.LastPatchTimestamp;
-							invoiceDateConfirmation = dateConfirm;
-						}
+							return dateConfirm;
+						});
 
-						GeneratedFile invoiceOperConfirmationReceipt = Payload.Api.GenerateInvoiceDocumentReceiptXml(
-							Payload.Token,
+						GeneratedFile invoiceOperConfirmationReceipt = await Async((x) => Payload.Api.GenerateInvoiceDocumentReceiptXml(
+							x,
 							Payload.BoxId,
 							Payload.Entity.DocumentInfo.MessageId,
 							invoiceDateConfirmation.EntityId,
-							signer);
+							signer));
 
 						SignedContent signContentOperInvoiceConfrmReciept = new SignedContent();
 						signContentOperInvoiceConfrmReciept.Content = invoiceOperConfirmationReceipt.Content;
@@ -693,7 +728,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							SignedContent = signContentOperInvoiceConfrmReciept
 						};
 						patch = Payload.Patch(receipt);
-						Payload.Api.PostMessagePatch(Payload.Token, patch);
+						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
 					}
 				}
@@ -701,7 +736,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is TimeoutException)
 				{
 					Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
@@ -717,7 +751,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }

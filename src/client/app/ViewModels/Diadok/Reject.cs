@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> Comment { get; set; }
 
-		public void Save()
+		public async void Save()
 		{
 			try
 			{
@@ -31,12 +31,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					SignatureRejectionInfo signrejinfo = new SignatureRejectionInfo();
 					signrejinfo.Signer = GetSigner();
 					signrejinfo.ErrorMessage = Comment.Value;
-					GeneratedFile revocRejectSign = Payload.Api.GenerateSignatureRejectionXml(
-						Payload.Token,
+					GeneratedFile revocRejectSign = await Async((x) => Payload.Api.GenerateSignatureRejectionXml(
+						x,
 						Payload.BoxId,
 						Payload.Message.MessageId,
 						revocreq.EntityId,
-						signrejinfo);
+						signrejinfo));
 					XmlSignatureRejectionAttachment signrejattch = new XmlSignatureRejectionAttachment();
 					signrejattch.ParentEntityId = revocreq.EntityId;
 					SignedContent signcontent = new SignedContent();
@@ -63,12 +63,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					});
 				}
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
-				Payload.Api.PostMessagePatch(Payload.Token, patch);
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is HttpClientException)
 				{
 					var e = exception as HttpClientException;
@@ -78,7 +77,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }

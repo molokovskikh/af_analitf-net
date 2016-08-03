@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.Helpers
 			var summ = xml.GetValue("Файл/Документ/ТаблСчФакт/ВсегоОпл/@СтТовУчНалВсего");
 			var nds = xml.GetValue("Файл/Документ/ТаблСчФакт/ВсегоОпл/СумНалВсего/СумНДС");
 
-			return $"Счет-фактура №{num} от {date}{spliter}{summ} Руб. НДС: {nds} Руб.";
+			return $"Счет-фактура №{num} от {date}{spliter}{summ} НДС: {nds} ";
 		}
 	}
 }

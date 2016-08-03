@@ -19,6 +19,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public RequestResolution(ActionPayload payload, ResolutionRequestType type)
 			: base(payload)
 		{
+			IsEnabled.Value = false;
 			this.type = type;
 			if (type == ResolutionRequestType.ApprovementRequest)
 				Header.Value = "Передача на согласование";
@@ -41,16 +42,15 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async void LoadData()
 		{
-			var orgs = await TaskEx.Run(() => Payload.Api.GetMyOrganizations(Payload.Token).Organizations);
+			var orgs = await Async((x) => Payload.Api.GetMyOrganizations(x).Organizations);
 			var departments = orgs.SelectMany(x => x.Departments).OrderBy(x => x.Name).ToList();
 			departments.Insert(0, new Department {
 				Name = "Головное подразделение"
 			});
 			Departments.Value = departments.ToArray();
 			CurrentDepartment.Value = departments.FirstOrDefault();
-
-			var me = await TaskEx.Run(() => Payload.Api.GetMyUser(Payload.Token));
-			var users = await TaskEx.Run(() => orgs.SelectMany(x => Payload.Api.GetOrganizationUsers(Payload.Token, x.OrgId).Users)
+			var me = await Async((x) => Payload.Api.GetMyUser(x));
+			var users = await Async((s) => orgs.SelectMany(x => Payload.Api.GetOrganizationUsers(s, x.OrgId).Users)
 				.OrderBy(x => x.Name).Where(x => x.Id != me.Id).ToList());
 			users.Insert(0, new OrganizationUser {
 				Name =  type == ResolutionRequestType.ApprovementRequest
@@ -59,9 +59,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			});
 			Users.Value = users.ToArray();
 			CurrentUser.Value = users.FirstOrDefault();
+			IsEnabled.Value = true;
 		}
 
-		public void Save()
+		public async void Save()
 		{
 			try
 			{
@@ -79,12 +80,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					attachment.TargetDepartmentId = CurrentDepartment.Value?.DepartmentId
 						?? "00000000-0000-0000-0000-000000000000";
 				patch.AddResolutionRequestAttachment(attachment);
-				Payload.Api.PostMessagePatch(Payload.Token, patch);
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
 			catch(Exception exception)
 			{
-				EndAction(false);
 				if(exception is HttpClientException)
 				{
 					var e = exception as HttpClientException;
@@ -94,7 +94,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				else
 					throw;
 			}
-			TryClose();
 		}
 	}
 }
