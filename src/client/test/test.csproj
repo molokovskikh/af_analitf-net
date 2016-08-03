@@ -161,7 +161,6 @@
     <Compile Include="Fixtures\Diadok.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
-    <Compile Include="Fixtures\LocalCheck.cs" />
     <Compile Include="Fixtures\LocalDelayOfPayment.cs" />
     <Compile Include="Fixtures\LocalPromotion.cs" />
     <Compile Include="Fixtures\MailWithAttachment.cs" />
