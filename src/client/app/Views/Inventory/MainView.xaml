@@ -19,6 +19,7 @@
         </MenuItem>
 				<MenuItem Header="Отчеты">
 					<MenuItem Header="Товарные запасы" Name="Stocks" />
+					<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
 				</MenuItem>
 			</Menu>
 		</ToolBar>
