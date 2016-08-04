@@ -220,6 +220,9 @@ namespace AnalitF.Net.Client.Models
 			Description = "Розничная цена: не рассчитана")]
 		public virtual bool IsMarkupInvalid => RetailMarkup == null;
 
+		[Style("RetailCost", Description = "Розничная цена: редактирование запрещено поставщиком")]
+		public virtual bool IsRetailCostFixed => ServerRetailCost != null;
+
 		[Style("SupplierPriceMarkup", Description = "Торговая наценка оптовика: превышение наценки оптовика")]
 		public virtual bool IsSupplierPriceMarkupInvalid => SupplierPriceMarkup > _maxSupplierMarkup;
 

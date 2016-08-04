@@ -6,7 +6,6 @@ using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Tools;
 using NHibernate.Linq;
 using NUnit.Framework;
@@ -150,6 +149,18 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		}
 
 		[Test]
+		public void Import_waybill_with_RetailCost()
+		{
+			var fixture = Fixture<CreateWaybillWithServerCost>();
+			var retailCost = fixture.Waybill.Lines[0].RetailCost;
+			Assert.IsTrue(retailCost.HasValue && retailCost.Value > 0);
+
+			Run(new UpdateCommand());
+			var waybill = localSession.Query<Waybill>().Single(w => w.DocType == DocType.Waybill && w.Id == fixture.Document.Id);
+			Assert.IsTrue(waybill.IsRetailCostFixed);
+		}
+
+		[Test]
 		public void Mark_waybill_with_reject()
 		{
 			var reject = localSession.Query<Client.Models.Reject>().First();
@@ -194,5 +205,6 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			var waybill = localSession.Load<Waybill>(fixture.Waybill.Log.Id);
 			Assert.AreEqual(fixture.Waybill.Log.FileName, waybill.Filename);
 		}
+
 	}
 }
