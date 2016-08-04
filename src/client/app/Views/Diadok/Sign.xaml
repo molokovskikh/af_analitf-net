@@ -38,7 +38,7 @@
             <Label Content="Дата получения груза:" Grid.Row="2" Grid.Column="0"/>
             <DatePicker Name="RcvDate" Grid.Row="2" Grid.Column="1" Margin="0,2,275,2"/>
           </Grid>
-          <Expander Header="Груз принял" FontSize="14" Margin="0,5,0,5">
+          <Expander Header="Груз принял" IsExpanded="{Binding Detailed.Value}" FontSize="14" Margin="0,5,0,5">
             <StackPanel>
               <StackPanel Orientation="Horizontal">
                 <Label Content="Автозаполнение:"/>

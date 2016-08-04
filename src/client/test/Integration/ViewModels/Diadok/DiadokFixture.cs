@@ -47,6 +47,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			base.Setup();
 			StartWait();
 
+			dispatcher.Invoke(() =>
+			{ 
 			Env.Settings = session.Query<Settings>().First();
 
 			Env.Settings.DiadokSignerJobTitle = "Должность";
@@ -58,6 +60,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			session.Save(Env.Settings);
 			session.Flush();
+			});
 
 			Click("ShowExtDocs");
 

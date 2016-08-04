@@ -415,6 +415,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public NotifyValue<string> OperationName { get; set;}
 		public bool Torg12TitleVisible { get;set;}
+		public NotifyValue<bool> Detailed { get;set;}
 
 		public NotifyValue<string> RcvFIO { get; set;}
 		public NotifyValue<string> RcvJobTitle { get; set;}
@@ -455,7 +456,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		Official GetAcceptetOfficial()
 		{
 			Official ret = null;
-			if(!string.IsNullOrEmpty(AcptFirstName) && !string.IsNullOrEmpty(AcptSurename))
+			if(Detailed.Value && !string.IsNullOrEmpty(AcptFirstName) && !string.IsNullOrEmpty(AcptSurename))
 			{
 				ret = new Official();
 				ret.FirstName = AcptFirstName;
@@ -469,7 +470,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		Attorney GetAttorney()
 		{
-			if(!string.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
+			if(Detailed.Value && !string.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
 			{
 				Attorney ret = new Attorney();
 				ret.Number = AtrNum;
