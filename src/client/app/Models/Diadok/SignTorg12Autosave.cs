@@ -16,18 +16,18 @@ namespace AnalitF.Net.Client.Models
 		public virtual DateTime CreationDate { get; set; }
 		public virtual string SignerJobTitle { get; set; }
 		public virtual bool LikeReciever { get; set; }
-		public virtual string ACPTSurename { get; set; }
-		public virtual string ACPTFirstName { get; set; }
-		public virtual string ACPTPatronimic { get; set; }
-		public virtual string ACPTJobTitle { get; set; }
+		public virtual string AcptSurename { get; set; }
+		public virtual string AcptFirstName { get; set; }
+		public virtual string AcptPatronimic { get; set; }
+		public virtual string AcptJobTitle { get; set; }
 		public virtual bool ByAttorney { get; set; }
-		public virtual string ATRNum { get; set; }
-		public virtual DateTime ATRDate { get; set; }
-		public virtual string ATROrganization { get; set; }
-		public virtual string ATRSurename { get; set; }
-		public virtual string ATRFirstName { get; set; }
-		public virtual string ATRPatronymic { get; set; }
-		public virtual string ATRAddInfo { get; set; }
+		public virtual string AtrNum { get; set; }
+		public virtual DateTime AtrDate { get; set; }
+		public virtual string AtrOrganization { get; set; }
+		public virtual string AtrSurename { get; set; }
+		public virtual string AtrFirstName { get; set; }
+		public virtual string AtrPatronymic { get; set; }
+		public virtual string AtrAddInfo { get; set; }
 		public virtual string Comment { get; set; }
 
 		[IgnoreDataMember, Ignore]
@@ -37,17 +37,17 @@ namespace AnalitF.Net.Client.Models
 			{
 				if(LikeReciever)
 					if(ByAttorney)
-						return $"{SignerJobTitle}/Совпд. с получ./По довер./{ATRNum}/{ATRDate.ToString("dd.MM.yyyy")}/"+
-							$"{ATROrganization}/{ATRSurename}/{ATRFirstName}/{ATRPatronymic}/{ATRAddInfo}/{Comment}";
+						return $"{SignerJobTitle}/Совпд. с получ./По довер./{AtrNum}/{AtrDate.ToString("dd.MM.yyyy")}/"+
+							$"{AtrOrganization}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
 					else
 						return $"{SignerJobTitle}/Совпд. с получ./"+
 							$"{Comment}";
 				else
 					if(ByAttorney)
-						return $"{SignerJobTitle}/{ACPTSurename}/{ACPTFirstName}/{ACPTPatronimic}/По довер./{ATRNum}/{ATRDate.ToString("dd.MM.yyyy")}/"+
-							$"{ATROrganization}/{ATRSurename}/{ATRFirstName}/{ATRPatronymic}/{ATRAddInfo}/{Comment}";
+						return $"{SignerJobTitle}/{AcptSurename}/{AcptFirstName}/{AcptPatronimic}/По довер./{AtrNum}/{AtrDate.ToString("dd.MM.yyyy")}/"+
+							$"{AtrOrganization}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
 					else
-						return $"{SignerJobTitle}/{ACPTSurename}/{ACPTFirstName}/{ACPTPatronimic}/"+
+						return $"{SignerJobTitle}/{AcptSurename}/{AcptFirstName}/{AcptPatronimic}/"+
 							$"{Comment}";
 			}
 		}

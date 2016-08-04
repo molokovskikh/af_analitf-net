@@ -72,9 +72,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				.FirstOrDefault(x => x.DepartmentId == entity.DocumentInfo.DepartmentId)?.Name
 					?? "Головное подразделение";
 			Date = entity.CreationTime.ToLocalTime();
-		
+
 			switch(entity.AttachmentType)
-			{ 
+			{
 				case AttachmentType.XmlTorg12:
 					documentFilename = new DiadocXMLHelper(entity).GetDiadokTORG12Name();
 					break;
@@ -819,7 +819,15 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		private async Task ProcessAction(DiadokAction dialog)
 		{
-			Manager.ShowFixedDialog(dialog);
+			Dictionary<string, object> settings = null;
+			if((dialog as Sign)?.Torg12TitleVisible == true)
+			{
+				settings = new Dictionary<string, object>();
+				settings.Add("WindowStartupLocation", WindowStartupLocation.Manual);
+				settings.Add("Top", 0);
+				settings.Add("Left", (SystemParameters.FullPrimaryScreenWidth - 560)/2);
+			}
+			Manager.ShowFixedDialog(dialog, null, settings);
 			if (dialog.Result != null) {
 				var current = CurrentItem.Value;
 				var message = dialog.Result;

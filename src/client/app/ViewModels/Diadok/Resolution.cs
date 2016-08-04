@@ -53,8 +53,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					Log.Warn($"Ошибка:", e);
 					Manager.Error(e.AdditionalMessage);
 				}
-				else
-					throw;
+				EndAction(false);
 			}
 		}
 	}

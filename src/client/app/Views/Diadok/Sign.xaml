@@ -9,14 +9,14 @@
 	MaxWidth="600">
   <StackPanel>
     <ScrollViewer CanContentScroll="true" VerticalScrollBarVisibility="Auto" MaxHeight="600">
-    <Grid>
+    <Grid Margin="3">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
       <StackPanel Grid.Row="0">
-        <Label FontSize="18" Content="Подписание Документа"/>
+        <Label FontSize="18" Content="{Binding OperationName.Value}"/>
         <Label Content="{Binding DocumentName}" />
         <StackPanel Visibility="{Binding Torg12TitleVisible, Converter={StaticResource BoolToCollapsed}}">
           <Label Content="Чтобы подписать формализованную накладную, заполните дополнительные реквизиты."/>
@@ -32,13 +32,13 @@
               <RowDefinition/>
             </Grid.RowDefinitions>
             <Label Content="ФИО:" Grid.Row="0" Grid.Column="0"/>
-            <TextBox Name="RCVFIO" Style="{StaticResource ReadOnlyText}" ToolTip="Данные взяты из сертификата личной подписи." Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,120,2" />
+            <TextBox Name="RcvFIO" Style="{StaticResource ReadOnlyText}" ToolTip="Данные взяты из сертификата личной подписи." Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,120,2" />
             <Label Content="Должность:" Grid.Row="1" Grid.Column="0"/>
-            <TextBox Name="RCVJobTitle" Grid.Row="1" Grid.Column="1" FontSize="16"  Margin="0,2,185,2" />
+            <TextBox Name="RcvJobTitle" Grid.Row="1" Grid.Column="1" FontSize="16"  Margin="0,2,185,2" />
             <Label Content="Дата получения груза:" Grid.Row="2" Grid.Column="0"/>
-            <DatePicker Name="RCVDate" Grid.Row="2" Grid.Column="1" Margin="0,2,275,2"/>
+            <DatePicker Name="RcvDate" Grid.Row="2" Grid.Column="1" Margin="0,2,275,2"/>
           </Grid>
-          <Expander Header="Груз принял">
+          <Expander Header="Груз принял" FontSize="14" Margin="0,5,0,5">
             <StackPanel>
               <StackPanel Orientation="Horizontal">
                 <Label Content="Автозаполнение:"/>
@@ -50,7 +50,7 @@
                   </ComboBox.ItemsPanel>
                 </Controls:ComboBox2>
               </StackPanel>
-              <CheckBox Name="LikeReciever" Content="Совпадает с получателем"/>
+							<CheckBox Name="LikeReciever" Margin="0,10,0,0" Content="Совпадает с получателем"/>
               <StackPanel>
                 <StackPanel IsEnabled="{Binding LikeReciever.Value, Converter={StaticResource BoolInvert}}">
                   <Grid Name="AcceptedData" Style="{StaticResource ValidationToolTip}">
@@ -72,17 +72,17 @@
                       <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Label Content="Фамилия:" Grid.Row="0" Grid.Column="0"/>
-                    <TextBox Name="ACPTSurename" Text="{Binding ACPTSurename.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
+                    <TextBox Name="AcptSurename" Text="{Binding AcptSurename.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
                     <Label Content="Имя:" Grid.Row="1" Grid.Column="0"/>
-                    <TextBox Name="ACPTFirstName" Text="{Binding ACPTFirstName.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
+                    <TextBox Name="AcptFirstName" Text="{Binding AcptFirstName.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
                     <Label Content="Отчество:" Grid.Row="2" Grid.Column="0"/>
-                    <TextBox Name="ACPTPatronimic" Text="{Binding ACPTPatronimic.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="2" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
+                    <TextBox Name="AcptPatronimic" Text="{Binding AcptPatronimic.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="2" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
                     <Label Content="Должность:" Grid.Row="3" Grid.Column="0"/>
-                    <TextBox Name="ACPTJobTitle"  Text="{Binding ACPTJobTitle.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="3" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
+                    <TextBox Name="AcptJobTitle"  Text="{Binding AcptJobTitle.Value,BindingGroupName=AcceptedValidation,ValidatesOnDataErrors=True}" Grid.Row="3" Grid.Column="1" FontSize="16" Margin="0,2,154,2" />
                   </Grid>
                 </StackPanel>
                 <StackPanel>
-                  <CheckBox Name="ByAttorney" Content="По доверенности на принятие товарно-материальных ценностей"/>
+									<CheckBox Name="ByAttorney" Margin="0,10,0,0" Content="По доверенности на принятие товарно-материальных ценностей"/>
                   <StackPanel Visibility="{Binding ByAttorney.Value, Converter={StaticResource BoolToCollapsed}}">
                     <Grid Margin="0,0,120,0" Name="ByAttorneyData" Style="{StaticResource ValidationToolTip}">
                       <Grid.BindingGroup>
@@ -110,32 +110,32 @@
                         <RowDefinition/>
                       </Grid.RowDefinitions>
                       <Label Content="Доверенность №:" Grid.Row="0" Grid.Column="0"/>
-                      <TextBox Name="ATRNum" Text="{Binding ATRNum.Value,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}"  Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,0,2"/>
+                      <TextBox Name="AtrNum" Text="{Binding AtrNum.Value,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}"  Grid.Row="0" Grid.Column="1" FontSize="16" Margin="0,2,0,2"/>
                       <Label Content="от" Grid.Row="0" Grid.Column="2"/>
-                      <DatePicker Name="ATRDateCtrl" Grid.Row="0" Grid.Column="3" SelectedDate="{Binding ATRDate.Value,Mode=TwoWay,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}" Margin="0,2,79,2"/>
+                      <DatePicker Name="AtrDateCtrl" Grid.Row="0" Grid.Column="3" SelectedDate="{Binding AtrDate.Value,Mode=TwoWay,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}" Margin="0,2,79,2"/>
                       <Label Content="Доверенность выдал:" Grid.Row="1" Grid.ColumnSpan="4"/>
                       <Label Content="Организация:" Grid.Row="2" Grid.Column="0"/>
-                      <TextBox Name="ATROrganization" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <TextBox Name="AtrOrganization" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
                       <Label Content="Фамилия:" Grid.Row="3" Grid.Column="0"/>
-                      <TextBox Name="ATRSurename" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <TextBox Name="AtrSurename" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
                       <Label Content="Имя:" Grid.Row="4" Grid.Column="0"/>
-                      <TextBox Name="ATRFirstName" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <TextBox Name="AtrFirstName" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
                       <Label Content="Отчество:" Grid.Row="5" Grid.Column="0"/>
-                      <TextBox Name="ATRPatronymic" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <TextBox Name="AtrPatronymic" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
                       <Label Content="Доп. сведения:" Grid.Row="6" Grid.Column="0"/>
-                      <TextBox Name="ATRAddInfo" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,0,2"/>
+                      <TextBox Name="AtrAddInfo" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,0,2"/>
                     </Grid>
                   </StackPanel>
                 </StackPanel>
               </StackPanel>
             </StackPanel>
           </Expander>
-          <Expander Header="Добавить комментарий" IsExpanded="{Binding CommentVisibility.Value}">
+          <Expander Header="Добавить комментарий" FontSize="14"  Margin="0,5,0,5" IsExpanded="{Binding CommentVisibility.Value}">
             <StackPanel>
               <TextBox Name="Comment" FontSize="16" Margin="0,2,0,2"/>
             </StackPanel>
           </Expander>
-          <CheckBox Name="SaveData" Content="Сохранить введенные данные"/>
+            <CheckBox Name="SaveData" Margin="0,10,0,0" Content="Сохранить введенные данные"/>
         </StackPanel>
       </StackPanel>
       <StackPanel Grid.Row="1">
@@ -144,9 +144,9 @@
       </StackPanel>
     </Grid>
   </ScrollViewer>
-    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-      <Button Margin="3" Name="Save" Content="Подписать" Height="30" Width="92"/>
-    <Button Margin="3" Name="TryClose" Content="Отмена" Width="92"/>
-  </StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="3,10,0,10">
+      <Button Name="Save" Margin="0,0,10,0"  Content="Подписать" Height="30" Width="90"/>
+			<Button Name="TryClose" Content="Отмена" Width="90"/>
+		</StackPanel>
   </StackPanel>
 </UserControl>

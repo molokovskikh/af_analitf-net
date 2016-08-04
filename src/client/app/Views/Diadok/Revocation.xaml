@@ -16,9 +16,9 @@
 			<Label Grid.Row="2">Комментарий к аннулированию</Label>
 			<TextBox Grid.Row="3" Name="Comment"/>
 
-			<StackPanel Orientation="Horizontal" Grid.Row="4">
-				<Button Margin="3" Name="Save">Подписать и отправить контрагенту</Button>
-				<Button Margin="3" Name="TryClose">Отмена</Button>
+			<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="0,10,0,7">
+				<Button Name="Save" Margin="0,0,10,0" Height="30">Подписать и отправить контрагенту</Button>
+				<Button Name="TryClose" Width="90">Отмена</Button>
 			</StackPanel>
 		</Grid>
 </UserControl>

@@ -23,34 +23,6 @@ using System.Threading;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
-	public static class ddk
-	{
-		/*
-		// I
-		public static string ie_login = "f816686@mvrht.com";
-		public static string ie_passwd = "A123456";
-		public static string ie_boxid = "92c4c6b0948d4252b2b81c2b5730b5d1@diadoc.ru";
-		public static string ie_inn = "9698754923";
-
-		public static string ch_login = "pdh23916@zasod.com";
-		public static string ch_passwd = "A123456";
-		public static string ch_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
-		public static string ch_inn = "9656351023";
-		*/
-
-		// II
-		public static string ie_login = "c963832@mvrht.com";
-		public static string ie_passwd = "222852";
-		public static string ie_boxid = "35e8de1b915c4f5eb9df37c98af2b0af@diadoc.ru";
-		public static string ie_inn = "9656279962";
-
-		public static string ch_login = "c963977@mvrht.com";
-		public static string ch_passwd = "222852";
-		public static string ch_boxid = "b38475cbd7ed4f0b892d9f0fd6a8bb30@diadoc.ru";
-		public static string ch_inn = "9667029241";
-
-	}
-
 	public class ActionPayload
 	{
 		public DiadocApi Api;
@@ -120,7 +92,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				SignerFirstName = "Иван";
 				SignerSureName = "Иванович";
 				SignerPatronimic = "Иванов";
-				SignerINN = ddk.ie_inn;
+				SignerINN = Settings.Value.DebugDiadokSignerINN;
 			}
 			else {
 				Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
@@ -139,17 +111,13 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							SignerINN = certFields["OID.1.2.643.3.131.1.1"];
 						if(certFields.Keys.Contains("ИНН"))
 							SignerINN = certFields["ИНН"];
-				#if DEBUG
-						if(SignerINN.Length > 10)
-							SignerINN = SignerINN.Substring(2);
-				#endif
 						if(string.IsNullOrEmpty(SignerINN))
 							throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
 					}
 				}
 				catch(Exception exept)
 				{
-					Manager.Error("Ошибка сертификата.");
+					Manager.Error("Ошибка парсинга сертификата.");
 					Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
 					throw;
 				}
@@ -202,7 +170,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ret.SignerDetails.Surname = "Иванович";
 				ret.SignerDetails.Patronymic = "Иванов";
 				ret.SignerDetails.JobTitle = "Должность";
-				ret.SignerDetails.Inn = ddk.ie_inn;
+				ret.SignerDetails.Inn = Settings.Value.DebugDiadokSignerINN;
 			}
 			else
 			{
@@ -301,47 +269,38 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 				if(bindingGroup.Name == "AcceptedValidation")
 				{
-					if(model.ByAttorney || !string.IsNullOrEmpty(model.ACPTFirstName) ||
-					!string.IsNullOrEmpty(model.ACPTSurename) ||
-					!string.IsNullOrEmpty(model.ACPTPatronimic) ||
-					!string.IsNullOrEmpty(model.ACPTJobTitle)
-					)
+					if(!string.IsNullOrEmpty(model.AcptFirstName) ||
+					!string.IsNullOrEmpty(model.AcptSurename) ||
+					!string.IsNullOrEmpty(model.AcptPatronimic) ||
+					!string.IsNullOrEmpty(model.AcptJobTitle))
 					{
-						if(string.IsNullOrEmpty(model.ACPTSurename))
+						if(string.IsNullOrEmpty(model.AcptSurename))
 							fields += "\nФамилия";
-						if(string.IsNullOrEmpty(model.ACPTFirstName))
+						if(string.IsNullOrEmpty(model.AcptFirstName))
 							fields += "\nИмя";
 					}
 				}
 				if(bindingGroup.Name == "AttorneyValidation")
 				{
-					if (!string.IsNullOrEmpty(model.ATRNum) ||
-							model.ATRDate != DateTime.MinValue ||
-							!string.IsNullOrEmpty(model.ATROrganization) ||
-							!string.IsNullOrEmpty(model.ATRFirstName) ||
-							!string.IsNullOrEmpty(model.ATRSurename) ||
-							!string.IsNullOrEmpty(model.ATRPatronymic) ||
-							!string.IsNullOrEmpty(model.ATRAddInfo))
+					if (model.ByAttorney)
 					{
-						if(string.IsNullOrEmpty(model.ATRNum))
+						if(string.IsNullOrEmpty(model.AtrNum))
 							fields += "\nНомер";
-						if(model.ATRDate == DateTime.MinValue)
+						if(model.AtrDate.HasValue)
 							fields += "\nДата";
 
-						if(!string.IsNullOrEmpty(model.ATRFirstName) ||
-							!string.IsNullOrEmpty(model.ATRSurename) ||
-							!string.IsNullOrEmpty(model.ATRPatronymic))
+						if(!string.IsNullOrEmpty(model.AtrFirstName) ||
+							!string.IsNullOrEmpty(model.AtrSurename) ||
+							!string.IsNullOrEmpty(model.AtrPatronymic))
 						{
-							if(string.IsNullOrEmpty(model.ATRFirstName))
+							if(string.IsNullOrEmpty(model.AtrFirstName))
 								fields += "\nИмя";
-							if(string.IsNullOrEmpty(model.ATRSurename))
+							if(string.IsNullOrEmpty(model.AtrSurename))
 								fields += "\nФамилия";
-							if(string.IsNullOrEmpty(model.ATRPatronymic))
+							if(string.IsNullOrEmpty(model.AtrPatronymic))
 								fields += "\nОтчество";
 						}
 					}
-					else if(model.ByAttorney)
-						fields += "\nНомер\nДата\nИмя\nФамилия\nОтчество";
 				}
 
 				if(string.IsNullOrEmpty(fields))
@@ -361,32 +320,35 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public Sign(ActionPayload payload)
 			: base(payload)
 		{
+			if(ReqRevocationSign)
+				OperationName.Value = "Аннулирование документа";
+			else
+				OperationName.Value = "Подписание Документа";
 			Torg12TitleVisible = Payload.Entity.AttachmentType == AttachmentType.XmlTorg12 && !ReqRevocationSign;
 
-			RCVFIO.Value = $"{SignerSureName} {SignerFirstName} {SignerPatronimic}";
-			RCVJobTitle.Value = Settings.Value.DiadokSignerJobTitle;
-			RCVDate.Value = DateTime.Now;
-			ATRDate.Value = DateTime.Now;
+			RcvFIO.Value = $"{SignerSureName} {SignerFirstName} {SignerPatronimic}";
+			RcvJobTitle.Value = Settings.Value.DiadokSignerJobTitle;
+			RcvDate.Value = DateTime.Now;
 
 			LikeReciever.Subscribe(x => {
 				if(x)
 				{
-					ACPTFirstName.Value = SignerFirstName;
-					ACPTSurename.Value = SignerSureName;
-					ACPTPatronimic.Value = SignerPatronimic;
-					ACPTJobTitle.Value = RCVJobTitle.Value;
+					AcptFirstName.Value = SignerFirstName;
+					AcptSurename.Value = SignerSureName;
+					AcptPatronimic.Value = SignerPatronimic;
+					AcptJobTitle.Value = RcvJobTitle.Value;
 				}
 			});
 
 			ByAttorney.Subscribe(x => {
 				if(!x)
 				{
-					ATRNum.Value = "";
-					ATROrganization.Value = "";
-					ATRSurename.Value = "";
-					ATRFirstName.Value = "";
-					ATRPatronymic.Value = "";
-					ATRAddInfo.Value = "";
+					AtrNum.Value = "";
+					AtrOrganization.Value = "";
+					AtrSurename.Value = "";
+					AtrFirstName.Value = "";
+					AtrPatronymic.Value = "";
+					AtrAddInfo.Value = "";
 				}
 			});
 
@@ -396,7 +358,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			{
 				if(x != null)
 				{
-					RCVJobTitle.Value = x.SignerJobTitle;
+					RcvJobTitle.Value = x.SignerJobTitle;
 
 					if(x.LikeReciever)
 					{
@@ -404,33 +366,33 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 					else
 					{
-						ACPTFirstName.Value = x.ACPTFirstName;
-						ACPTSurename.Value = x.ACPTSurename;
-						ACPTPatronimic.Value = x.ACPTPatronimic;
-						ACPTJobTitle.Value = x.ACPTJobTitle;
+						AcptFirstName.Value = x.AcptFirstName;
+						AcptSurename.Value = x.AcptSurename;
+						AcptPatronimic.Value = x.AcptPatronimic;
+						AcptJobTitle.Value = x.AcptJobTitle;
 					}
 
 					if(x.ByAttorney)
 					{
 						ByAttorney.Value = true;
-						ATRNum.Value = x.ATRNum;
-						ATRDate.Value = x.ATRDate;
-						ATROrganization.Value = x.ATROrganization;
-						ATRSurename.Value = x.ATRSurename;
-						ATRFirstName.Value = x.ATRFirstName;
-						ATRPatronymic.Value = x.ATRPatronymic;
-						ATRAddInfo.Value = x.ATRAddInfo;
+						AtrNum.Value = x.AtrNum;
+						AtrDate.Value = x.AtrDate;
+						AtrOrganization.Value = x.AtrOrganization;
+						AtrSurename.Value = x.AtrSurename;
+						AtrFirstName.Value = x.AtrFirstName;
+						AtrPatronymic.Value = x.AtrPatronymic;
+						AtrAddInfo.Value = x.AtrAddInfo;
 					}
 					else
 					{
 						ByAttorney.Value = false;
-						ATRNum.Value = "";
-						ATRDate.Value = DateTime.MinValue;
-						ATROrganization.Value = "";
-						ATRSurename.Value ="";
-						ATRFirstName.Value = "";
-						ATRPatronymic.Value = "";
-						ATRAddInfo.Value = "";
+						AtrNum.Value = "";
+						AtrDate.Value = DateTime.MinValue;
+						AtrOrganization.Value = "";
+						AtrSurename.Value ="";
+						AtrFirstName.Value = "";
+						AtrPatronymic.Value = "";
+						AtrAddInfo.Value = "";
 					}
 
 					Comment.Value = x.Comment;
@@ -440,6 +402,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Comment.Subscribe(x => {
 				if(!string.IsNullOrEmpty(x))
 					CommentVisibility.Value = true;
+				else
+					CommentVisibility.Value = false;
 			});
 		}
 
@@ -449,28 +413,29 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			SavedData.Value = Session.Query<SignTorg12Autosave>().OrderByDescending(o => o.CreationDate).ToList();
 		}
 
+		public NotifyValue<string> OperationName { get; set;}
 		public bool Torg12TitleVisible { get;set;}
 
-		public NotifyValue<string> RCVFIO { get; set;}
-		public NotifyValue<string> RCVJobTitle { get; set;}
-		public NotifyValue<DateTime> RCVDate { get; set;}
+		public NotifyValue<string> RcvFIO { get; set;}
+		public NotifyValue<string> RcvJobTitle { get; set;}
+		public NotifyValue<DateTime> RcvDate { get; set;}
 
 		public NotifyValue<SignTorg12Autosave> CurrentAutoSave { get;set;}
 		public NotifyValue<List<SignTorg12Autosave>> SavedData { get; set;}
 		public NotifyValue<bool> LikeReciever { get; set;}
-		public NotifyValue<string> ACPTSurename { get; set;}
-		public NotifyValue<string> ACPTFirstName { get; set;}
-		public NotifyValue<string> ACPTPatronimic { get; set;}
-		public NotifyValue<string> ACPTJobTitle { get; set;}
+		public NotifyValue<string> AcptSurename { get; set;}
+		public NotifyValue<string> AcptFirstName { get; set;}
+		public NotifyValue<string> AcptPatronimic { get; set;}
+		public NotifyValue<string> AcptJobTitle { get; set;}
 
 		public NotifyValue<bool> ByAttorney { get; set;}
-		public NotifyValue<string> ATRNum { get; set;}
-		public NotifyValue<DateTime> ATRDate { get; set;}
-		public NotifyValue<string> ATROrganization { get; set;}
-		public NotifyValue<string> ATRSurename { get; set;}
-		public NotifyValue<string> ATRFirstName { get; set;}
-		public NotifyValue<string> ATRPatronymic { get; set;}
-		public NotifyValue<string> ATRAddInfo { get; set;}
+		public NotifyValue<string> AtrNum { get; set;}
+		public NotifyValue<DateTime?> AtrDate { get; set;}
+		public NotifyValue<string> AtrOrganization { get; set;}
+		public NotifyValue<string> AtrSurename { get; set;}
+		public NotifyValue<string> AtrFirstName { get; set;}
+		public NotifyValue<string> AtrPatronymic { get; set;}
+		public NotifyValue<string> AtrAddInfo { get; set;}
 
 		public NotifyValue<bool> SaveData { get; set;}
 		const int autosave_max = 10;
@@ -483,20 +448,20 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			ret.FirstName = SignerFirstName;
 			ret.Surname = SignerSureName;
 			ret.Patronymic = SignerPatronimic;
-			ret.JobTitle = RCVJobTitle;
+			ret.JobTitle = RcvJobTitle;
 			return ret;
 		}
 
 		Official GetAcceptetOfficial()
 		{
 			Official ret = null;
-			if(!string.IsNullOrEmpty(ACPTFirstName) && !string.IsNullOrEmpty(ACPTSurename))
+			if(!string.IsNullOrEmpty(AcptFirstName) && !string.IsNullOrEmpty(AcptSurename))
 			{
 				ret = new Official();
-				ret.FirstName = ACPTFirstName;
-				ret.Surname = ACPTSurename;
-				ret.Patronymic = ACPTPatronimic;
-				ret.JobTitle = ACPTJobTitle;
+				ret.FirstName = AcptFirstName;
+				ret.Surname = AcptSurename;
+				ret.Patronymic = AcptPatronimic;
+				ret.JobTitle = AcptJobTitle;
 				return ret;
 			}
 			return ret;
@@ -504,21 +469,21 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		Attorney GetAttorney()
 		{
-			if(!string.IsNullOrEmpty(ATRNum) && ATRDate.Value != DateTime.MinValue)
+			if(!string.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
 			{
 				Attorney ret = new Attorney();
-				ret.Number = ATRNum;
-				ret.Date = ATRDate.Value.ToString("dd.MM.yyyy");
-				ret.IssuerOrganizationName = ATROrganization;
-				if(!string.IsNullOrEmpty(ATRFirstName.Value) &&
-					!string.IsNullOrEmpty(ATRSurename.Value) &&
-					!string.IsNullOrEmpty(ATRPatronymic.Value))
+				ret.Number = AtrNum;
+				ret.Date = AtrDate.Value.Value.ToString("dd.MM.yyyy");
+				ret.IssuerOrganizationName = AtrOrganization;
+				if(!string.IsNullOrEmpty(AtrFirstName.Value) &&
+					!string.IsNullOrEmpty(AtrSurename.Value) &&
+					!string.IsNullOrEmpty(AtrPatronymic.Value))
 				{
 					ret.IssuerPerson = new Official();
-					ret.IssuerPerson.FirstName = ATRFirstName;
-					ret.IssuerPerson.Surname = ATRSurename;
-					ret.IssuerPerson.Patronymic = ATRPatronymic;
-					ret.IssuerPerson.JobTitle = ATRAddInfo;
+					ret.IssuerPerson.FirstName = AtrFirstName;
+					ret.IssuerPerson.Surname = AtrSurename;
+					ret.IssuerPerson.Patronymic = AtrPatronymic;
+					ret.IssuerPerson.JobTitle = AtrAddInfo;
 				}
 				return ret;
 			}
@@ -528,8 +493,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		Entity GetDateConfirmationStep7(Message msg)
 		{
 			Entity invoice = msg.Entities.FirstOrDefault(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
-			Entity invoiceReciept = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoice?.EntityId && i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceReceipt);
-			Entity invoiceRecieptConfirmation = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoiceReciept?.EntityId && i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
+			Entity invoiceReciept = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoice?.EntityId &&
+			i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceReceipt);
+			Entity invoiceRecieptConfirmation = msg.Entities.FirstOrDefault(i => i.ParentEntityId == invoiceReciept?.EntityId &&
+			i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.InvoiceConfirmation);
 			return invoiceRecieptConfirmation;
 		}
 
@@ -582,28 +549,28 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						if(SaveData.Value)
 						{
 							SignTorg12Autosave autosave = new SignTorg12Autosave();
-							autosave.SignerJobTitle = RCVJobTitle.Value;
+							autosave.SignerJobTitle = RcvJobTitle.Value;
 							if(LikeReciever.Value)
 							{
 								 autosave.LikeReciever = true;
 							}
 							else
 							{
-								autosave.ACPTFirstName = ACPTFirstName.Value;
-								autosave.ACPTSurename = ACPTSurename.Value;
-								autosave.ACPTPatronimic = ACPTPatronimic.Value;
-								autosave.ACPTJobTitle = ACPTJobTitle.Value;
+								autosave.AcptFirstName = AcptFirstName.Value;
+								autosave.AcptSurename = AcptSurename.Value;
+								autosave.AcptPatronimic = AcptPatronimic.Value;
+								autosave.AcptJobTitle = AcptJobTitle.Value;
 							}
 							if(ByAttorney.Value)
 							{
 								autosave.ByAttorney = true;
-								autosave.ATRNum = ATRNum.Value;
-								autosave.ATRDate = ATRDate.Value;
-								autosave.ATROrganization = ATROrganization.Value;
-								autosave.ATRSurename = ATRSurename.Value;
-								autosave.ATRFirstName = ATRFirstName.Value;
-								autosave.ATRPatronymic = ATRPatronymic.Value;
-								autosave.ATRAddInfo = ATRAddInfo.Value;
+								autosave.AtrNum = AtrNum.Value;
+								autosave.AtrDate = AtrDate.Value.Value;
+								autosave.AtrOrganization = AtrOrganization.Value;
+								autosave.AtrSurename = AtrSurename.Value;
+								autosave.AtrFirstName = AtrFirstName.Value;
+								autosave.AtrPatronymic = AtrPatronymic.Value;
+								autosave.AtrAddInfo = AtrAddInfo.Value;
 							}
 							autosave.Comment = Comment.Value;
 							Session.Save(autosave);
@@ -621,7 +588,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							AcceptedBy = accepted,//лицо, принявшее груз
 							Attorney = attorney,
 							AdditionalInfo = Comment,
-							ShipmentReceiptDate = RCVDate.Value.ToString("dd.MM.yyyy"),
+							ShipmentReceiptDate = RcvDate.Value.ToString("dd.MM.yyyy"),
 							Signer = signer
 							};
 
@@ -646,7 +613,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} успешно подписан");
 					}
-					else
+					else if (Payload.Entity.AttachmentType == AttachmentType.Invoice)
 					{
 						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
 
@@ -699,7 +666,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							do
 							{
 								TaskEx.Delay(1000).Wait();
-								msg = Payload.Api.GetMessage(Payload.Token, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
+								msg = Payload.Api.GetMessage(Payload.Token,
+									Payload.BoxId,
+									Payload.Entity.DocumentInfo.MessageId,
+									Payload.Entity.EntityId);
 								dateConfirm = GetDateConfirmationStep7(msg);
 								breaker++;
 							}
@@ -748,8 +718,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Manager.Warning("Документ уже был подписан другим пользователем.");
 					}
 				}
-				else
-					throw;
+				EndAction(false);
 			}
 		}
 	}

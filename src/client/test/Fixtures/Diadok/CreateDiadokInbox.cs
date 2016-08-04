@@ -25,11 +25,24 @@ namespace AnalitF.Net.Client.Test.Fixtures
 {
 	public class CreateDiadokInbox
 	{
+		public static class ddkConfig
+		{
+			public static string reciever_login = "f816686@mvrht.com";
+			public static string reciever_passwd = "A123456";
+			public static string reciever_boxid = "92c4c6b0948d4252b2b81c2b5730b5d1@diadoc.ru";
+			public static string reciever_inn = "9698754923";
+
+			public static string sender_login = "pdh23916@zasod.com";
+			public static string sender_passwd = "A123456";
+			public static string sender_boxid = "ebc25f997551449282541b8a6d1605c9@diadoc.ru";
+			public static string sender_inn = "9656351023";
+		}
+
 		public void Execute(ISession session)
 		{
 			api = new DiadocApi(/*ConfigurationManager.AppSettings["DiadokApi"]*/"Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec",
 				"https://diadoc-api.kontur.ru", new WinApiCrypt());
-			token = api.Authenticate(ddk.ch_login, ddk.ch_passwd);
+			token = api.Authenticate(ddkConfig.sender_login, ddkConfig.sender_passwd);
 
 			box = api.GetMyOrganizations(token).Organizations[0].Boxes[0];
 			signers = new List<Signer>();
@@ -40,8 +53,6 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			}
 
 			var msg = new MessageToPost();
-
-			CertEx cert = DiadokFixtureData.Cert;
 
 			NonformalizedAttachment nfa = new NonformalizedAttachment();
 			nfa.SignedContent = new SignedContent();
@@ -99,8 +110,8 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			msg.AddXmlTorg12SellerTitle(att12);
 			msg.AddXmlTorg12SellerTitle(att12);
 
-			msg.FromBoxId = DiadokFixtureData.Sender_BoxId;
-			msg.ToBoxId = DiadokFixtureData.Receiver_BoxId;
+			msg.FromBoxId = ddkConfig.sender_boxid;
+			msg.ToBoxId = ddkConfig.reciever_boxid;
 			// пакет из трех
 			api.PostMessage(token, msg);
 
