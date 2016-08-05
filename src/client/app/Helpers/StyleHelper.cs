@@ -200,6 +200,7 @@ namespace AnalitF.Net.Client.Helpers
 						}
 					}
 				},
+				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
 			};
 		}
 
