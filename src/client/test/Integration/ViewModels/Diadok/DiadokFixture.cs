@@ -47,9 +47,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			StartWait();
 
 			dispatcher.Invoke(() =>
-			{ 
+			{
 			Settings Settings = session.Query<Settings>().First();
-				
+
 			Settings.DiadokSignerJobTitle = "Должность";
 			Settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
 			Settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
@@ -59,11 +59,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Save(Settings);
 			session.Flush();
 			});
-			
+
 			Click("ShowExtDocs");
 
 			ddkIndex = shell.ActiveItem as Index;
-			
+
 			Wait();
 			dispatcher.Invoke(() => ddkIndex.DeleteAll());
 			Wait();
@@ -72,7 +72,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			diadokDatas = Fixture<CreateDiadokInbox>();
 		}
-		
+
 		void Wait()
 		{
 			if(ddkIndex != null)
@@ -427,8 +427,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			//неформализированный
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => 
-				f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f =>
+				f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
 				nonformid = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
@@ -444,7 +444,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			dispatcher.Invoke(() => {
 				var nonfitem = ddkIndex.Items.Value.First(e => e.Entity.EntityId == nonformid);
-				var revReqEntity = nonfitem.Message.Entities.First(x => x.ParentEntityId == nonformid && 
+				var revReqEntity = nonfitem.Message.Entities.First(x => x.ParentEntityId == nonformid &&
 				x.AttachmentType == AttachmentType.RevocationRequest);
 				var commentEntity = nonfitem.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
 				.OrderBy(x => x.CreationTime).Last();
@@ -528,7 +528,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var nonformid = "";
 			var torg12id = "";
 			var invoiceid = "";
-			
+
 			//подписаный ТОРГ-12
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
@@ -758,7 +758,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			// Неформализировнный
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized &&
 				f.Entity.DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -778,7 +778,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			// Тогр-12
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -797,7 +797,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 				f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
 				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
@@ -919,7 +919,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var comment2 = "СОГЛАСОВНИЕ ОТКАЗ";
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized &&
 				f.Entity.DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -938,7 +938,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -957,7 +957,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 				f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
 				f.Entity.DocumentInfo.ResolutionStatus?.StatusType == ResolutionStatusType.None));
@@ -1077,7 +1077,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var comment = "НА ПОДПИСЬ";
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
 				f.Entity.DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -1096,7 +1096,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Wait();
 
 			dispatcher.Invoke(() => {
-				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 && 
+				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.InboundWaitingForRecipientSignature &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone &&
 				(f.Entity.DocumentInfo.ResolutionStatus == null ||
@@ -1117,7 +1117,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			// проверяем статус и подтвержадем подпись неформализированный
 			dispatcher.Invoke(() => {
 				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == nonformid);
-				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null && 
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null &&
 				e.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
 				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
 				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
@@ -1143,7 +1143,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			// проверяем статус и подтвержадем подпись торг12
 			dispatcher.Invoke(() => {
 				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
-				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null && 
+				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null &&
 				e.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
 				Assert.IsTrue(resreqEntt.ResolutionRequestInfo.RequestType == Diadoc.Api.Proto.Events.ResolutionRequestType.SignatureRequest);
 				var commentData =  Encoding.UTF8.GetString(resreqEntt.Content?.Data ?? new byte[0]);
