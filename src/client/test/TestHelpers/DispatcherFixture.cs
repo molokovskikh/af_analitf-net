@@ -327,29 +327,5 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 					Assert.That(text, Does.Contain(body), text);
 			});
 		}
-
-		protected void CheckFailMessageBox()
-		{
-			var timeout = 30.Second();
-			if (IsCI())
-				timeout = 60.Second();
-
-			try {
-				var opened = manager.MessageOpened.Timeout(timeout).First();
-				var window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
-				for(var i = 0; window == IntPtr.Zero && i < 100; i++) {
-					Thread.Sleep(20);
-					window = WinApi.FindWindow(IntPtr.Zero, "АналитФАРМАЦИЯ: Информация");
-				}
-				if (window != IntPtr.Zero)
-				{
-					WinApi.SendMessage(window, WinApi.WM_CLOSE, 0, IntPtr.Zero);
-					throw new Exception($"Ошибка: {opened}");
-				}
-			}
-			catch(TimeoutException e) {
-
-			}
-		}
 	}
 }

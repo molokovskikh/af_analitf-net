@@ -48,18 +48,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			dispatcher.Invoke(() =>
 			{ 
-			Env.Settings = session.Query<Settings>().First();
+			Settings Settings = session.Query<Settings>().First();
 				
-			Env.Settings.DiadokSignerJobTitle = "Должность";
-			Env.Settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
-			Env.Settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
-			Env.Settings.DebugDiadokSignerINN = CreateDiadokInbox.ddkConfig.reciever_inn;
-			Env.Settings.DebugUseTestSign = true;
+			Settings.DiadokSignerJobTitle = "Должность";
+			Settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
+			Settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
+			Settings.DebugDiadokSignerINN = CreateDiadokInbox.ddkConfig.reciever_inn;
+			Settings.DebugUseTestSign = true;
 
-			session.Save(Env.Settings);
+			session.Save(Settings);
 			session.Flush();
 			});
-
+			
 			Click("ShowExtDocs");
 
 			ddkIndex = shell.ActiveItem as Index;
