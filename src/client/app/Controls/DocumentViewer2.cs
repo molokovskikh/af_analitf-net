@@ -170,28 +170,30 @@ namespace AnalitF.Net.Client.Controls
 
 			result.Execute(new ActionExecutionContext());
 
-			if (result.Dialog.FilterIndex == 1)
+			if(!String.IsNullOrEmpty(result.Dialog.FileName))
 			{
-				DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
-
-				RenderTargetBitmap bitmap = PrintHelper.ToBitmap(dp);
-				BitmapFrame bmf = BitmapFrame.Create(bitmap);
-				var enc = new PngBitmapEncoder();
-				enc.Frames.Add(bmf);
-
-				using (var fs = File.OpenWrite(result.Dialog.FileName))
+				if (result.Dialog.FilterIndex == 1)
 				{
-					enc.Save(fs);
+					DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
+					RenderTargetBitmap bitmap = PrintHelper.ToBitmap(dp);
+					BitmapFrame bmf = BitmapFrame.Create(bitmap);
+					var enc = new PngBitmapEncoder();
+					enc.Frames.Add(bmf);
+
+					using (var fs = File.OpenWrite(result.Dialog.FileName))
+					{
+						enc.Save(fs);
+					}
 				}
-			}
-			else if (result.Dialog.FilterIndex == 2)
-			{
-				using(var writer = result.Writer())
+				else if (result.Dialog.FilterIndex == 2)
 				{
-					var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
-					writer.WriteLine(rtfString);
-					writer.Flush();
-					writer.Close();
+					using(var writer = result.Writer())
+					{
+						var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
+						writer.WriteLine(rtfString);
+						writer.Flush();
+						writer.Close();
+					}
 				}
 			}
 		}

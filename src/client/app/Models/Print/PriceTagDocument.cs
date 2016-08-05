@@ -17,52 +17,57 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private IDictionary<string, object> properties;
 
+		static double pts(double val)
+		{
+			return val * 1.224d;
+		}
+
 		private Dictionary<string, Style> styles = new Dictionary<string, Style> {
 			{"Product", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 11d),
+					new Setter(TextBlock.FontSizeProperty, pts(11d)),
 					new Setter(TextBlock.FontWeightProperty, FontWeights.Bold),
-					new Setter(FrameworkElement.HeightProperty, 41d),
+					new Setter(FrameworkElement.HeightProperty, pts(41d)),
 					new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Underline),
 					new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap),
 					new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center),
-					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
+					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center),
 				}
 			}},
 			{"Cost", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 18d),
+					new Setter(TextBlock.FontSizeProperty, pts(22d)),
 					new Setter(TextBlock.FontWeightProperty, FontWeights.Bold),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"Country", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 10d),
+					new Setter(TextBlock.FontSizeProperty, pts(11d)),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"Producer", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 10d),
+					new Setter(TextBlock.FontSizeProperty, pts(11d)),
 					new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Right),
 				}
 			}},
 			{"Period", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 9d),
+					new Setter(TextBlock.FontSizeProperty, pts(10d)),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"SerialNumber", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 9d),
+					new Setter(TextBlock.FontSizeProperty, pts(10d)),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
 			{"ProviderDocumentId", new Style(typeof(TextBlock)) {
 				Setters = {
-					new Setter(TextBlock.FontSizeProperty, 9d),
+					new Setter(TextBlock.FontSizeProperty, pts(10d)),
 					new Setter(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Right),
 				}
 			}},
@@ -79,6 +84,16 @@ namespace AnalitF.Net.Client.Models.Print
 			this.waybillSettings = waybill.WaybillSettings;
 			this.settings = settings;
 			this.lines = lines;
+		}
+
+		protected override void Configure()
+		{
+			//отступы должны быть тк большинство принтеров требует их
+			doc.PagePadding = new Thickness(0, 0, 0, 0);
+			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+			//мы должны оставить место для "шапки" и "подвала"
+			paginator.PageSize = new Size(paginator.PageSize.Width,
+				paginator.PageSize.Height);
 		}
 
 		protected override void BuildDoc()
@@ -132,18 +147,18 @@ namespace AnalitF.Net.Client.Models.Print
 		private FrameworkElement Small(WaybillLine line)
 		{
 			var canvas = new Canvas {
-				Height = 106,
-				Width = 162,
+				Height = pts(106),
+				Width = pts(162),
 			};
 			var product = new TextBlock {
 				Text = line.Product,
-				FontSize = 11,
+				FontSize = pts(11),
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
 				TextAlignment = TextAlignment.Center,
-				Height = 37,
-				Width = 160
+				Height = pts(37),
+				Width = pts(160)
 			};
 			product.SetValue(Canvas.LeftProperty, 0d);
 			product.SetValue(Canvas.TopProperty, 0d);
@@ -151,88 +166,89 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var costLabel = new TextBlock {
 				Text = "Цена",
-				Width = 26,
-				FontSize = 9
+				Width = pts(26),
+				FontSize = pts(9)
 			};
-			costLabel.SetValue(Canvas.LeftProperty, 0d);
-			costLabel.SetValue(Canvas.TopProperty, 38d);
+			costLabel.SetValue(Canvas.LeftProperty, pts(0d));
+			costLabel.SetValue(Canvas.TopProperty, pts(38d));
 			canvas.Children.Add(costLabel);
 
 			var cost = new TextBlock {
 				Text = FormatCost(line),
-				Width = 133,
-				FontSize = 11,
+				Width = pts(133),
+				FontSize = pts(11),
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextAlignment = TextAlignment.Right,
 			};
-			cost.SetValue(Canvas.LeftProperty, 28d);
-			cost.SetValue(Canvas.TopProperty, 38d);
+			cost.SetValue(Canvas.LeftProperty, pts(28d));
+			cost.SetValue(Canvas.TopProperty, pts(38d));
 			canvas.Children.Add(cost);
 
 			var producerLabel = new TextBlock {
 				Text = "Произв.",
-				Width = 37,
-				FontSize = 9
+				Width = pts(37),
+				FontSize = pts(9)
 			};
 			producerLabel.SetValue(Canvas.LeftProperty, 0d);
-			producerLabel.SetValue(Canvas.TopProperty, 50d);
+			producerLabel.SetValue(Canvas.TopProperty, pts(50d));
 			canvas.Children.Add(producerLabel);
 			var country = new TextBlock {
 				Text = line.Country,
-				Width = 122,
-				FontSize = 9,
+				Width = pts(122),
+				FontSize = pts(9),
 				TextAlignment = TextAlignment.Right,
 			};
-			country.SetValue(Canvas.LeftProperty, 39d);
-			country.SetValue(Canvas.TopProperty, 50d);
+			country.SetValue(Canvas.LeftProperty, pts(39d));
+			country.SetValue(Canvas.TopProperty, pts(50d));
 			canvas.Children.Add(country);
 
 			var producer = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 9,
+				FontSize = pts(9),
 				Text = line.Producer,
-				Width = 160,
+				Width = pts(160),
 			};
 			producer.SetValue(Canvas.LeftProperty, 0d);
-			producer.SetValue(Canvas.TopProperty, 62d);
+			producer.SetValue(Canvas.TopProperty, pts(62d));
 			canvas.Children.Add(producer);
 
 			var periodLabel = new TextBlock {
 				Text = "Срок годности",
-				Width = 65,
-				FontSize = 9
+				Width = pts(65),
+				FontSize = pts(9)
 			};
 			periodLabel.SetValue(Canvas.LeftProperty, 0d);
-			periodLabel.SetValue(Canvas.TopProperty, 73d);
+			periodLabel.SetValue(Canvas.TopProperty, pts(73d));
 			canvas.Children.Add(periodLabel);
 			var period = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 9,
+				FontSize = pts(9),
 				Text = line.Period,
-				Width = 93,
+				Width = pts(93),
 			};
-			period.SetValue(Canvas.LeftProperty, 67d);
-			period.SetValue(Canvas.TopProperty, 73d);
+			period.SetValue(Canvas.LeftProperty, pts(67d));
+			period.SetValue(Canvas.TopProperty, pts(73d));
 			canvas.Children.Add(period);
 
 			var singLabel = new TextBlock {
+				HorizontalAlignment = HorizontalAlignment.Right,
 				Text = "Подпись",
-				Width = 160,
-				FontSize = 8
+				Width = pts(160),
+				FontSize = pts(9)
 			};
 			singLabel.SetValue(Canvas.LeftProperty, 0d);
-			singLabel.SetValue(Canvas.TopProperty, 84d);
+			singLabel.SetValue(Canvas.TopProperty, pts(84d));
 			canvas.Children.Add(singLabel);
 
 			var waybillDate = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 9,
+				FontSize = pts(9),
 				Text = line.Waybill.DocumentDate.ToShortDateString(),
-				Width = 100,
+				Width = pts(100),
 			};
-			waybillDate.SetValue(Canvas.LeftProperty, 46d);
-			waybillDate.SetValue(Canvas.TopProperty, 84d);
+			waybillDate.SetValue(Canvas.LeftProperty, pts(60d));
+			waybillDate.SetValue(Canvas.TopProperty, pts(84d));
 			canvas.Children.Add(waybillDate);
 
 			ApplyDefaults(canvas);
@@ -243,16 +259,16 @@ namespace AnalitF.Net.Client.Models.Print
 		public FrameworkElement Big(WaybillLine line)
 		{
 			var canvas = new Canvas {
-				Width = 162,
-				Height = 106,
+				Width = pts(162),
+				Height = pts(106),
 			};
 			var nameAndAddressLabel = new TextBlock {
 				Text = waybillSettings.FullName,
 				TextAlignment = TextAlignment.Center,
 				TextWrapping = TextWrapping.Wrap,
-				FontSize = 8,
-				Width = 162,
-				Height = 20
+				FontSize = pts(8),
+				Width = pts(162),
+				Height = pts(20)
 			};
 			nameAndAddressLabel.SetValue(Canvas.LeftProperty, 0d);
 			nameAndAddressLabel.SetValue(Canvas.TopProperty, 0d);
@@ -264,54 +280,54 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var product = new TextBlock {
 				Text = $"{line.Product}\n{line.Producer}",
-				FontSize = 11,
+				FontSize = pts(11),
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
 				TextAlignment = TextAlignment.Center,
-				Height = 37,
-				Width = 160
+				Height = pts(37),
+				Width = pts(160)
 			};
 			product.SetValue(Canvas.LeftProperty, 0d);
-			product.SetValue(Canvas.TopProperty, 21d);
+			product.SetValue(Canvas.TopProperty, pts(21d));
 			canvas.Children.Add(product);
 
 			var cost = new TextBlock {
 				Text = FormatCost(line),
-				Width = 112,
-				FontSize = 26,
+				Width = pts(112),
+				FontSize = pts(26),
 				FontWeight = FontWeights.Bold,
 				TextAlignment = TextAlignment.Right,
 				VerticalAlignment = VerticalAlignment.Bottom,
 			};
-			cost.SetValue(Canvas.LeftProperty, 49d);
-			cost.SetValue(Canvas.TopProperty, 78d);
+			cost.SetValue(Canvas.LeftProperty, pts(49d));
+			cost.SetValue(Canvas.TopProperty, pts(78d));
 			canvas.Children.Add(cost);
 
-			canvas.Add(0, 68, new TextBlock {
+			canvas.Add(0, pts(68), new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 8,
+				FontSize = pts(8),
 				Text = "Годен до",
-				Width = 49,
+				Width = pts(49),
 			});
 
-			canvas.Add(0, 76, new TextBlock {
+			canvas.Add(0, pts(76), new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 9,
+				FontSize = pts(9),
 				Text = line.Period,
-				Width = 49,
+				Width = pts(49),
 			});
 
-			canvas.Add(0, 86, new TextBlock {
-				FontSize = 8,
+			canvas.Add(0, pts(86), new TextBlock {
+				FontSize = pts(8),
 				Text = "Подпись",
-				Width = 49,
+				Width = pts(49),
 			});
 
-			canvas.Add(0, 94, new TextBlock {
-				FontSize = 9,
+			canvas.Add(0, pts(94), new TextBlock {
+				FontSize = pts(9),
 				Text = DateTime.Now.ToShortDateString(),
-				Width = 49,
+				Width = pts(49),
 			});
 
 			ApplyDefaults(canvas);
@@ -322,16 +338,16 @@ namespace AnalitF.Net.Client.Models.Print
 		public FrameworkElement Big2(WaybillLine line)
 		{
 			var canvas = new Canvas {
-				Width = 162,
-				Height = 106,
+				Width = pts(162),
+				Height = pts(106),
 			};
 
 			var nameAndAddressLabel = new TextBlock {
 				Text = waybillSettings.FullName,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 6,
-				Width = 162,
-				Height = 10
+				FontSize = pts(6),
+				Width = pts(162),
+				Height = pts(10)
 			};
 			nameAndAddressLabel.SetValue(Canvas.LeftProperty, 0d);
 			nameAndAddressLabel.SetValue(Canvas.TopProperty, 0d);
@@ -344,9 +360,9 @@ namespace AnalitF.Net.Client.Models.Print
 			var serialNumberLabel = new TextBlock {
 				Text = line.SerialNumber,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 6,
-				Width = 81,
-				Height = 10
+				FontSize = pts(6),
+				Width = pts(81),
+				Height = pts(10)
 			};
 			var serialNumberBorder = new Border {
 				BorderThickness = new Thickness(0, 0, 1, 1),
@@ -354,77 +370,77 @@ namespace AnalitF.Net.Client.Models.Print
 				Child = serialNumberLabel
 			};
 			serialNumberBorder.SetValue(Canvas.LeftProperty, 0d);
-			serialNumberBorder.SetValue(Canvas.TopProperty, 10d);
+			serialNumberBorder.SetValue(Canvas.TopProperty, pts(10d));
 			canvas.Children.Add(serialNumberBorder);
 
 			var supplierNameLabel = new TextBlock {
 				Text = line.Waybill.SupplierName,
 				TextAlignment = TextAlignment.Center,
-				FontSize = 6,
-				Width = 81,
-				Height = 10
+				FontSize = pts(6),
+				Width = pts(81),
+				Height = pts(10)
 			};
 			var supplierNameBorder = new Border {
 				BorderThickness = new Thickness(0, 0, 0, 1),
 				BorderBrush = Brushes.Black,
 				Child = supplierNameLabel
 			};
-			supplierNameBorder.SetValue(Canvas.LeftProperty, 81d);
-			supplierNameBorder.SetValue(Canvas.TopProperty, 10d);
+			supplierNameBorder.SetValue(Canvas.LeftProperty, pts(81d));
+			supplierNameBorder.SetValue(Canvas.TopProperty, pts(10d));
 			canvas.Children.Add(supplierNameBorder);
 
 			var product = new TextBlock {
 				Text = $"{line.Product}\n{line.Producer}",
-				FontSize = 11,
+				FontSize = pts(11),
 				FontWeight = FontWeights.Bold,
 				TextDecorations = TextDecorations.Underline,
 				TextWrapping = TextWrapping.Wrap,
 				TextAlignment = TextAlignment.Center,
-				Height = 54,
-				Width = 160
+				Height = pts(54),
+				Width = pts(160)
 			};
 			product.SetValue(Canvas.LeftProperty, 0d);
-			product.SetValue(Canvas.TopProperty, 20d);
+			product.SetValue(Canvas.TopProperty, pts(20d));
 			canvas.Children.Add(product);
 
 			var cost = new TextBlock {
 				Text = FormatCost(line),
-				Width = 112,
-				FontSize = 26,
+				Width = pts(112),
+				FontSize = pts(26),
 				FontWeight = FontWeights.Bold,
 				TextAlignment = TextAlignment.Right,
 				VerticalAlignment = VerticalAlignment.Bottom,
 			};
-			cost.SetValue(Canvas.LeftProperty, 49d);
-			cost.SetValue(Canvas.TopProperty, 78d);
+			cost.SetValue(Canvas.LeftProperty, pts(49d));
+			cost.SetValue(Canvas.TopProperty, pts(78d));
 			canvas.Children.Add(cost);
 
 			var periodLabel = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 8,
+				FontSize = pts(8),
 				Text = "Годен до",
-				Width = 49,
+				Width = pts(49),
 			};
 			periodLabel.SetValue(Canvas.LeftProperty, 0d);
-			periodLabel.SetValue(Canvas.TopProperty, 78d);
+			periodLabel.SetValue(Canvas.TopProperty, pts(78d));
 			canvas.Children.Add(periodLabel);
 			var period = new TextBlock {
 				TextAlignment = TextAlignment.Right,
-				FontSize = 9,
+				FontSize = pts(9),
 				Text = line.Period,
-				Width = 49,
+				Width = pts(49),
 			};
 			period.SetValue(Canvas.LeftProperty, 0d);
-			period.SetValue(Canvas.TopProperty, 86d);
+			period.SetValue(Canvas.TopProperty, pts(86d));
 			canvas.Children.Add(period);
 
 			var singLabel = new TextBlock {
-				FontSize = 8,
+				FontSize = pts(8),
 				Text = "Подпись",
-				Width = 49,
+				Width = pts(49),
 			};
 			singLabel.SetValue(Canvas.LeftProperty, 0d);
-			singLabel.SetValue(Canvas.TopProperty, 96d);
+			singLabel.SetValue(Canvas.TopProperty, pts(96d));
 			canvas.Children.Add(singLabel);
 
 			ApplyDefaults(canvas);
@@ -434,7 +450,7 @@ namespace AnalitF.Net.Client.Models.Print
 		private FrameworkElement Normal(WaybillLine line)
 		{
 			var panel = new StackPanel {
-				Width = 162,
+				Width = pts(162),
 				Margin = new Thickness(2)
 			};
 			if (!settings.PriceTag.HideNotPrinted || settings.PriceTag.PrintFullName) {
@@ -444,17 +460,17 @@ namespace AnalitF.Net.Client.Models.Print
 					BorderThickness = new Thickness(0, 0, 0, 0.5),
 					BorderBrush = Brushes.Black,
 					Child = new DockPanel {
-						Width = 162,
+						Width = pts(162),
 						Children = {
 							new Image {
-								Height = 20,
-								Width = 18,
+								Height = pts(20),
+								Width = pts(18),
 								Source = new BitmapImage(uri)
 							},
 							new TextBlock {
-								Height = 20,
+								Height = pts(20),
 								Text = settings.PriceTag.PrintFullName ? waybillSettings.FullName : "",
-								FontSize = 8,
+								FontSize = pts(8),
 								TextAlignment = TextAlignment.Center,
 								VerticalAlignment = VerticalAlignment.Center,
 								TextWrapping = TextWrapping.Wrap
@@ -473,24 +489,24 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var haveValue = settings.PriceTag.PrintSupplier || settings.PriceTag.PrintDocumentDate;
 			if (haveValue || !settings.PriceTag.HideNotPrinted) {
-				var value = String.Format("{0:d}{1}",
+				var value = String.Format("{0:d} {1}",
 					settings.PriceTag.PrintDocumentDate ? (DateTime?)line.Waybill.DocumentDate : null,
 					settings.PriceTag.PrintSupplier ? line.Waybill.SupplierName : "");
 
 				var label = new Label {
-					FontSize = 8,
+					FontSize = pts(8),
 					Content = value,
 					HorizontalContentAlignment = HorizontalAlignment.Right,
 					Margin = new Thickness(0),
 					Padding = new Thickness(0)
 				};
 				var dockPanel = new DockPanel {
-					Width = 162,
+					Width = pts(162),
 					Children = {
 						new Label {
 							VerticalAlignment = VerticalAlignment.Center,
 							Content = "Подпись",
-							FontSize = 8,
+							FontSize = pts(8),
 							Margin = new Thickness(0),
 							Padding = new Thickness(0),
 						},
@@ -530,12 +546,12 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 			if (!String.IsNullOrEmpty(name)) {
 				var dockPanel = new DockPanel {
-					Width = 162,
+					Width = pts(162),
 					Children = {
 						new Label {
 							VerticalAlignment = VerticalAlignment.Center,
 							Content = name,
-							FontSize = 9,
+							FontSize = pts(9),
 							Margin = new Thickness(0),
 							Padding = new Thickness(0),
 						},
