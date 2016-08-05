@@ -42,20 +42,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		Index ddkIndex;
 
 		[SetUp]
-		public new void Setup()
+		public void SetupDiadok()
 		{
-			base.Setup();
 			StartWait();
 
 			dispatcher.Invoke(() =>
 			{ 
 			Env.Settings = session.Query<Settings>().First();
-
+				
 			Env.Settings.DiadokSignerJobTitle = "Должность";
 			Env.Settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
 			Env.Settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
 			Env.Settings.DebugDiadokSignerINN = CreateDiadokInbox.ddkConfig.reciever_inn;
-			Env.Settings.DiadokCert = "Тестовая организация №5627996 - UC Test (Qualified)";
 			Env.Settings.DebugUseTestSign = true;
 
 			session.Save(Env.Settings);
