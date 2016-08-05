@@ -15,12 +15,11 @@ using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
 using System.ComponentModel;
 using System.Reactive;
-using ReactiveUI;
 
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	class Checks : BaseScreen2
+	public class Checks : BaseScreen2
 	{
 		private Main main;
 
@@ -61,7 +60,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(KKMFilter.Where(x => x != null))
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 
-			SampleData();
+			RxQuery(x => x.Query<Check>().ToList())
+				.Subscribe(Items);
 		}
 		public void EnterItem()
 		{
@@ -80,57 +80,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (KKMFilter.Value == null)
 				return;
-			var KKMs = KKMFilter.Value.Where(x => x.IsSelected).Select(x => x.Item).ToArray();
-			var checks = Items.Value;
-			var items = checks.Select(c => c).Where(c => KKMs.Contains(c.KKM) && c.Date <= End && c.Date >= Begin).ToList();
-			Items.Value = items;
-		}
-
-		private IList<Check> TempFillItemsList()
-		{
-			var checks = new List<Check>();
-			var check = new Check
-			{
-				Lines = new List<CheckLine>(),
-				Id = 0,
-				CheckType = CheckType.CheckReturn,
-				Number = 100,
-				Date = DateTime.Today.AddDays(-7),
-				ChangeOpening = DateTime.Today.AddDays(-7),
-				Status = Status.Open,
-				Clerk = "Тестовый кассир",
-				Department = Session.Query<Address>().First(),
-				KKM = "1(0000000)",
-				PaymentType = PaymentType.Cash,
-				SaleType = SaleType.FullCost,
-				Discont = 10,
-				ChangeId = 0,
-				ChangeNumber = 42,
-				Cancelled = false,
-			};
-			check.Lines.Add(new CheckLine
-			{
-				Id = 0,
-				Barcode = 124,
-				ProductId = 10,
-				ProducerId = 12,
-				ProductName = "Тестовый продукт",
-				RetailCost = 110,
-				Cost = 100,
-				Quantity = 1,
-				DiscontSum = 10,
-				CheckId = 0,
-				ProductKind = 1,
-			});
-			check.CheckType = CheckType.CheckReturn;
-			checks.Add(check);
-			return checks;
-		}
-
-		private void SampleData()
-		{
-			Items.Value = TempFillItemsList();
-			KKMFilter.Value.Add(new Selectable<string>("1(0000000)"));
+			var query = StatelessSession.Query<Check>();
+			Items.Value = query.ToList();
 		}
 
 		public IEnumerable<IResult> PrintChecks()

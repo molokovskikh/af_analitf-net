@@ -148,6 +148,7 @@
     <Compile Include="Acceptance\StartFixture.cs" />
     <Compile Include="Acceptance\UpdateFixture.cs" />
     <Compile Include="Acceptance\WindbgHelper.cs" />
+    <Compile Include="Integration\ViewModels\ChecksView.cs" />
     <Compile Include="Fixtures\CorrectOrder.cs" />
     <Compile Include="Fixtures\CreateNews.cs" />
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />

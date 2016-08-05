@@ -10,6 +10,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 {
 	public class CheckLine
 	{
+		public CheckLine()
+		{
+
+		}
+		public CheckLine(uint id)
+		{
+			CheckId = id;
+		}
+
 		public virtual uint Id { get; set; }
 		public virtual uint Barcode { get; set; }
 		public virtual uint? ProductId { get; set; }
