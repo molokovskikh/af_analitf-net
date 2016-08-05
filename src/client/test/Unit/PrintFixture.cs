@@ -125,10 +125,10 @@ namespace AnalitF.Net.Client.Test.Unit
 			Assert.AreEqual(2, doc.Blocks.Count);
 			var page1 = doc.Blocks.FirstBlock as Section;
 			Assert.IsNotNull(page1);
-			Assert.AreEqual(2, page1.Blocks.Count);
+			Assert.AreEqual(1, page1.Blocks.Count);
 			var page2 = doc.Blocks.LastBlock as Section;
 			Assert.IsNotNull(page2);
-			Assert.AreEqual(2, page2.Blocks.Count);
+			Assert.AreEqual(1, page2.Blocks.Count);
 		}
 
 		private static List<Offer> Offers()
