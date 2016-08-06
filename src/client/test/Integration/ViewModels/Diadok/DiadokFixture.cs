@@ -46,19 +46,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			StartWait();
 
-			dispatcher.Invoke(() =>
-			{
-			Settings Settings = session.Query<Settings>().First();
-
-			Settings.DiadokSignerJobTitle = "Должность";
-			Settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
-			Settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
-			Settings.DebugDiadokSignerINN = CreateDiadokInbox.ddkConfig.reciever_inn;
-			Settings.DebugUseTestSign = true;
-
-			session.Save(Settings);
-			session.Flush();
-			});
+			Fixture<DiadokSettings>();
 
 			Click("ShowExtDocs");
 
@@ -108,6 +96,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			// тесты диадок
 			Thread.Sleep(TimeSpan.FromSeconds(60));
 			dispatcher.Invoke(() => ddkIndex.Reload());
+			Wait();
 
 			Sign_Document();
 			RejectSign_InboxTorg12();
