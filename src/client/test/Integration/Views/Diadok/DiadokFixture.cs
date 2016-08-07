@@ -33,7 +33,7 @@ using AnalitF.Net.Client.Models.Results;
 using System.IO;
 using Common.Tools.Threading;
 
-namespace AnalitF.Net.Client.Test.Integration.ViewModels
+namespace AnalitF.Net.Client.Test.Integration.Views
 {
 	[TestFixture]
 	public class DiadokFixture : DispatcherFixture
@@ -42,14 +42,57 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		Index ddkIndex;
 
 		[SetUp]
-		public void SetupDiadok()
+		public void SetupData()
 		{
 			StartWait();
 
-			Fixture<DiadokSettings>();
-
+			var settings = session.Query<Settings>().First();
+			settings.DebugDiadokSignerINN  = CreateDiadokInbox.ddkConfig.reciever_inn;
+			settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
+			settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
+			settings.DebugUseTestSign = true;
+			settings.DiadokSignerJobTitle = "Специалист";
+			session.Save(settings);
+			session.Flush();
+			/*
+			AsyncClick("ShowSettings");
+			WaitIdle();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var tab = (TabItem)content.FindName("DebugTab");
+				tab.IsSelected = true;
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var ddkinn = (TextBox)content.FindName("Settings_DebugDiadokSignerINN");
+				ddkinn.Text = CreateDiadokInbox.ddkConfig.reciever_inn;
+				var ddktestsign = (CheckBox)content.FindName("Settings_DebugUseTestSign");
+				ddktestsign.IsChecked = true;
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var tab = (TabItem)content.FindName("DiadokTab");
+				tab.IsSelected = true;
+			});
+			Wait();
+			dispatcher.Invoke(() => {
+				var content = (FrameworkElement)activeWindow.Content;
+				var ddkuser = (TextBox)content.FindName("Settings_DiadokUsername");
+				ddkuser.Text = CreateDiadokInbox.ddkConfig.reciever_login;
+				var ddkpasswd = (TextBox)content.FindName("DiadokPassword");
+				ddkpasswd.Text = CreateDiadokInbox.ddkConfig.reciever_passwd;
+				var ddkjobtitle = (TextBox)content.FindName("Settings_DiadokSignerJobTitle");
+				ddkjobtitle.Text = "Специалист";
+			});
+			Wait();
+			Click("Save");
+			Wait();
+			*/
+			Wait();
 			Click("ShowExtDocs");
-
+			activeTab = (UserControl)((Screen)shell.ActiveItem).GetView();
 			ddkIndex = shell.ActiveItem as Index;
 
 			Wait();
@@ -66,7 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			if(ddkIndex != null)
 			{
 				dispatcher.Invoke(() => (ddkIndex.Scheduler as TestScheduler).AdvanceByMs(5000));
-				dispatcher.Invoke(() => scheduler.AdvanceByMs(5000));
+				scheduler.AdvanceByMs(5000);
 				WaitIdle();
 				dispatcher.WaitIdle();
 			}
@@ -93,7 +136,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsNotEmpty(SignerPatronimic);
 			Assert.IsNotEmpty(SignerINN);
 
-			// тесты диадок
+			// тесты диадок, ждем документы
 			Thread.Sleep(TimeSpan.FromSeconds(60));
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
@@ -150,6 +193,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Agreement_SugDenial_Document();
 			Sign_SugSign_Document();
 			Delete_Document();
+
+			Wait();
 		}
 
 		void Sign_Document()

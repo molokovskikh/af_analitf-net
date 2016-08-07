@@ -152,7 +152,6 @@
     <Compile Include="Fixtures\CreateNews.cs" />
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />
     <Compile Include="Fixtures\CreateOrder.cs" />
-    <Compile Include="Fixtures\Diadok\DiadokSettings.cs" />
     <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
@@ -205,7 +204,7 @@
     <Compile Include="Integration\ViewModels\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModels\CorrectionFixture.cs" />
     <Compile Include="Fixtures\Diadok\DiadokFixtureData.cs" />
-    <Compile Include="Integration\ViewModels\Diadok\DiadokFixture.cs" />
+    <Compile Include="Integration\Views\Diadok\DiadokFixture.cs" />
     <Compile Include="Integration\ViewModels\FeedbackFixture.cs" />
     <Compile Include="Integration\ViewModels\JunkOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\MailsFixture.cs" />

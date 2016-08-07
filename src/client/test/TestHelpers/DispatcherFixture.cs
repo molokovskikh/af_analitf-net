@@ -199,7 +199,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			element.RaiseEvent(WpfTestHelper.TextArgs(text));
 		}
 
-		protected void InputActiveWindow(string name, string text)
+		public void InputActiveWindow(string name, string text)
 		{
 			dispatcher.Invoke(() => {
 				var el = activeWindow.Descendants<FrameworkElement>().FirstOrDefault(e => e.Name == name);
