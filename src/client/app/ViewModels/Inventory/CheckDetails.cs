@@ -11,7 +11,7 @@ using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
-	class CheckDetails : BaseScreen2
+	public class CheckDetails : BaseScreen2
 	{
 		private uint id;
 

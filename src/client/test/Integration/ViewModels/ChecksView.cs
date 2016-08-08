@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	public class ChecksView : ViewModelFixture<Checks>
 	{
 		[Test]
-		public void Export_export()
+		public void Export_check()
 		{
 			var result = (OpenResult)model.ExportExcel();
 
@@ -93,7 +93,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			check.Lines.Add(checkLine);
 			Assert.AreEqual(1, model.Items.Value.Count);
 			check.Date = DateTime.Today.AddDays(7);
-			session.Update(check);
+			session.Save(check);
 			Assert.AreEqual(0, model.Items.Value.Count);
 
 
