@@ -10,6 +10,7 @@ using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
 using System.Collections.Generic;
 using System;
+using Common.NHibernate;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -42,15 +43,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
-		[Test]
-		public void LoadData()
+		private Check CreateCheck()
 		{
-			var address = session.Query<Address>().First();
-			var checks = new List<Check>();
-			var check = new Check
+			return new Check
 			{
-				Lines = new List<CheckLine>(),
-				Id = 0,
 				CheckType = CheckType.CheckReturn,
 				Number = 100,
 				Date = DateTime.Today.AddDays(-7),
@@ -66,9 +62,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ChangeNumber = 42,
 				Cancelled = false,
 			};
-			check.Lines.Add(new CheckLine
+		}
+
+		private CheckLine CreateCheckLine(Check check)
+		{
+			return new CheckLine(check.Id)
 			{
-				Id = 0,
 				Barcode = 124,
 				ProductId = 10,
 				ProducerId = 12,
@@ -79,10 +78,23 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				DiscontSum = 10,
 				CheckId = 0,
 				ProductKind = 1,
-			});
-			check.CheckType = CheckType.CheckReturn;
-			checks.Add(check);
+			};
+		}
+
+		[Test]
+		public void LoadData()
+		{
+			var address = session.Query<Address>().First();
+			session.DeleteEach<Check>();
+			var check = CreateCheck();
+			var checkLine = CreateCheckLine(check);
+			session.Save(check);
+			session.Save(checkLine);
+			check.Lines.Add(checkLine);
 			Assert.AreEqual(1, model.Items.Value.Count);
+			check.Date = DateTime.Today.AddDays(7);
+			session.Update(check);
+			Assert.AreEqual(0, model.Items.Value.Count);
 
 
 			/*var reject = session.Query<Reject>().First();
