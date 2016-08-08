@@ -374,6 +374,7 @@
     <Compile Include="ViewModels\Dialogs\EditStock.cs" />
     <Compile Include="ViewModels\Dialogs\GridConfig.cs" />
     <Compile Include="ViewModels\Diadok\Index.cs" />
+    <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
@@ -441,6 +442,10 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\ScannerConfig.xaml.cs">
+      <DependentUpon>ScannerConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\KeyboardHook.cs" />
     <Compile Include="Views\CatalogNameView.xaml.cs">
       <DependentUpon>CatalogNameView.xaml</DependentUpon>
     </Compile>
@@ -751,6 +756,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\PostUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\ScannerConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

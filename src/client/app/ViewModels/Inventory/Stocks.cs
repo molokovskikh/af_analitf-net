@@ -178,12 +178,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(new SelectStockPeriod(stocks, Name));
 		}
 
-		public static void StockWaybill(ISession session, Waybill waybill)
+		public static bool StockWaybill(ISession session, Waybill waybill)
 		{
 			var order = new ReceivingOrder(waybill);
+			if (order.Lines.Count == 0)
+				return false;
 			if (order.Lines.Count > 0)
 				session.Save(order);
 			session.SaveEach(order.ToStocks());
+			return true;
 		}
 	}
 }

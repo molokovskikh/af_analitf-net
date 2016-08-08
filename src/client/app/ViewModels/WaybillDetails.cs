@@ -455,8 +455,22 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Stock()
 		{
-			Inventory.Stocks.StockWaybill(Session, Waybill);
-			Manager.Notify("Накладная оприходована");
+			if (Inventory.Stocks.StockWaybill(Session, Waybill))
+				Manager.Notify("Накладная оприходована");
+			else
+				Manager.Warning("Выберете позиции что бы оприходовать");
+		}
+
+		public void HandleBarCode(string code)
+		{
+			if (string.IsNullOrWhiteSpace(code))
+				return;
+			var line = Waybill.Lines.FirstOrDefault(x => x.EAN13 == code);
+			if (line == null) {
+				Manager.Warning($"Товар с кодом {code} в накладной не найден");
+				return;
+			}
+			line.IsReadyForStock = true;
 		}
 
 		public IEnumerable<IResult> EnterLine()
@@ -468,25 +482,6 @@ namespace AnalitF.Net.Client.ViewModels
 			yield return new DialogResult(quantity);
 			line.Receive(quantity.Quantity);
 		}
-
-		//public IEnumerable<IResult> Stock()
-		//{
-		//	var action = new Inventory.InventoryAction();
-		//	yield return new DialogResult(action);
-		//	if (action.New) {
-		//		var screen = new Inventory.Main();
-		//		screen.NewReceivingOrder(Waybill.Id);
-		//		Shell.NavigateRoot(screen);
-		//	} else {
-		//		var selectOrder = new Inventory.ReceivingOrders();
-		//		yield return new DialogResult(selectOrder);
-		//		if (selectOrder.CurrentItem.Value == null)
-		//			yield break;
-		//		var screen = new Inventory.Main();
-		//		screen.OpenReceivingOrder(selectOrder.CurrentItem.Value.Id, Waybill.Id);
-		//		Shell.NavigateRoot(screen);
-		//	}
-		//}
 
 #if DEBUG
 		public override object[] GetRebuildArgs()

@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interactivity;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
@@ -14,6 +19,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
+using log4net.Repository.Hierarchy;
 using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Views
@@ -52,6 +58,9 @@ namespace AnalitF.Net.Client.Views
 	{
 		private DataGrid2 lines;
 		private WaybillDetails model;
+		private bool isBarcode;
+		private StringBuilder code = new StringBuilder();
+		private KeyboardHook hook;
 
 		public WaybillDetailsView(WaybillDetails model)
 		{
@@ -64,9 +73,40 @@ namespace AnalitF.Net.Client.Views
 			Init();
 		}
 
+		protected bool KeyboardInput(string key)
+		{
+			var model = (WaybillDetails)DataContext;
+			var settings = model.Settings.Value;
+			if (!isBarcode) {
+				if (key[0] == settings.BarCodePrefix) {
+					isBarcode = true;
+					return true;
+				}
+			} else if (key[0] == settings.BarCodeSufix) {
+				model.HandleBarCode(code.ToString());
+				isBarcode = false;
+				return true;
+			} else {
+				code.Append(key);
+				return true;
+			}
+			return false;
+		}
+
 		private void Init()
 		{
 			InitializeComponent();
+
+			Loaded += (sender, args) => {
+				hook = new KeyboardHook();
+				hook.KeyboardInput = KeyboardInput;
+				hook.AddHook(Window.GetWindow(this));
+			};
+
+			Unloaded += (sender, args) => {
+				hook?.Dispose();
+				hook = null;
+			};
 
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
@@ -96,13 +136,14 @@ namespace AnalitF.Net.Client.Views
 				Width = new DataGridLength(100, DataGridLengthUnitType.Star),
 			});
 			lines.Columns.Add(CheckBoxColumn("Печатать", "Print",
-				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x)));
+				x => lines.Items.OfType<WaybillLine>().Each(l => l.Print = x), true));
 			var column = CheckBoxColumn("Оприходовать", "IsReadyForStock",
 				x => {
 					lines.Items.OfType<WaybillLine>().Each(l => {
 						l.Receive(x ? l.Quantity.GetValueOrDefault() : 0);
 					});
-				});
+
+				}, false);
 			lines.Columns.Add(column);
 			lines.Columns.Add(new DataGridTextColumnEx {
 				Header = "Оприходовано",
@@ -265,10 +306,10 @@ namespace AnalitF.Net.Client.Views
 			DataGridHelper.CalculateColumnWidth(OrderLines, "00000.00", "Сумма");
 		}
 
-		private DataGridColumn CheckBoxColumn(string header, string member, Action<bool> checkAll)
+		private DataGridColumn CheckBoxColumn(string header, string member, Action<bool> checkAll, bool isChecked)
 		{
 			var column = new CustomDataGridColumn {
-				Header = CheckAllHeader(header, checkAll),
+				Header = CheckAllHeader(header, checkAll, isChecked),
 				Width = new DataGridLength(1, DataGridLengthUnitType.SizeToHeader),
 				SortMemberPath = member,
 				Generator = (c, i) => {
@@ -286,10 +327,10 @@ namespace AnalitF.Net.Client.Views
 			return column;
 		}
 
-		private StackPanel CheckAllHeader(string name, Action<bool> checkAll)
+		private StackPanel CheckAllHeader(string name, Action<bool> checkAll, bool isChecked)
 		{
 			var check = new CheckBox {
-				IsChecked = true,
+				IsChecked = isChecked,
 				Focusable = false,
 				VerticalAlignment = VerticalAlignment.Center,
 				Name = "CheckAllPrint"

@@ -684,6 +684,16 @@
 					          SelectedItem="{Binding Settings.Value.SbisCert}" />
 				</StackPanel>
 			</TabItem>
+
+			<TabItem Header="Сканер штрихкодов" Name="BarcodeScannerTab">
+				<StackPanel>
+					<Label>Код префикса</Label>
+					<TextBox Name="Settings_BarCodePrefix" />
+					<Label>Код суфикса</Label>
+					<TextBox Name="Settings_BarCodeSufix" />
+					<Button Name="ScannerConfig">Тест сканера</Button>
+				</StackPanel>
+			</TabItem>
 		</TabControl>
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

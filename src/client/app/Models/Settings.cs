@@ -387,6 +387,9 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual Rounding Rounding { get; set; }
 
+		public virtual int? BarCodePrefix { get; set; }
+		public virtual int? BarCodeSufix { get; set; }
+
 		public virtual IWebProxy GetProxy()
 		{
 			if (!UseProxy)
