@@ -54,42 +54,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			settings.DiadokSignerJobTitle = "Специалист";
 			session.Save(settings);
 			session.Flush();
-			/*
-			AsyncClick("ShowSettings");
-			WaitIdle();
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var tab = (TabItem)content.FindName("DebugTab");
-				tab.IsSelected = true;
-			});
-			Wait();
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var ddkinn = (TextBox)content.FindName("Settings_DebugDiadokSignerINN");
-				ddkinn.Text = CreateDiadokInbox.ddkConfig.reciever_inn;
-				var ddktestsign = (CheckBox)content.FindName("Settings_DebugUseTestSign");
-				ddktestsign.IsChecked = true;
-			});
-			Wait();
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var tab = (TabItem)content.FindName("DiadokTab");
-				tab.IsSelected = true;
-			});
-			Wait();
-			dispatcher.Invoke(() => {
-				var content = (FrameworkElement)activeWindow.Content;
-				var ddkuser = (TextBox)content.FindName("Settings_DiadokUsername");
-				ddkuser.Text = CreateDiadokInbox.ddkConfig.reciever_login;
-				var ddkpasswd = (TextBox)content.FindName("DiadokPassword");
-				ddkpasswd.Text = CreateDiadokInbox.ddkConfig.reciever_passwd;
-				var ddkjobtitle = (TextBox)content.FindName("Settings_DiadokSignerJobTitle");
-				ddkjobtitle.Text = "Специалист";
-			});
-			Wait();
-			Click("Save");
-			Wait();
-			*/
+
 			Wait();
 			Click("ShowExtDocs");
 			activeTab = (UserControl)((Screen)shell.ActiveItem).GetView();
@@ -136,14 +101,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Assert.IsNotEmpty(SignerPatronimic);
 			Assert.IsNotEmpty(SignerINN);
 
-			// тесты диадок, ждем документы
+			// тесты диадок
 			Thread.Sleep(TimeSpan.FromSeconds(60));
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 
 			Sign_Document();
-			RejectSign_InboxTorg12();
-			Revocation_Req();
+			RejectSign_Document();
+			Revocation_Req_Document();
 
 			var messages = diadokDatas.GetMessages();
 
@@ -285,7 +250,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 		}
 
-		void RejectSign_InboxTorg12()
+		void RejectSign_Document()
 		{
 			Wait();
 
@@ -293,7 +258,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var torg12id = "";
 			var comment = "ОТКАЗ";
 
-			//проверяем неформ документ ожидающий подписи
+			//неформализированный
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(
 					f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized &&
@@ -323,7 +288,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
-			//проверяем документ ожидающий подписи
+			//торг12
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(
 					f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
@@ -353,16 +318,15 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 		}
 
-		void Revocation_Req()
+		void Revocation_Req_Document()
 		{
-			// для подписаных и не подписаных
 			Wait();
 
 			var nonformid = "";
 			var torg12id = "";
 			var invoceid = "";
 			string comment = "АННУЛИРОВНИЕ";
-			//для подписаных
+
 			//неформ
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(
@@ -491,7 +455,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
-			//подписаный ТОРГ-12
+			//ТОРГ-12
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f =>
 				f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
@@ -523,7 +487,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
-			//подписаный Инвойс
+			//Инвойс
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
@@ -563,7 +527,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var torg12id = "";
 			var invoiceid = "";
 
-			//подписаный ТОРГ-12
+			//Неформализированный
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
@@ -586,7 +550,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
-			//подписаный ТОРГ-12
+			//ТОРГ-12
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
@@ -609,7 +573,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
-			//подписаный Инвойс
+			//Инвойс
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
@@ -830,6 +794,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("Save");
 			Wait();
 
+			// Инвойс
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 				f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished &&
@@ -1011,7 +976,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 
-			// проверяем статус и подтвержадем согласование неформализированный
+			// проверяем статус и отказ в согласовании неформализированный
 			dispatcher.Invoke(() => {
 				var item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == nonformid);
 				var resreqEntt = item.Message.Entities.First(e => e.ResolutionRequestInfo != null);

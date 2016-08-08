@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.Models
 		public virtual string AtrNum { get; set; }
 		public virtual DateTime AtrDate { get; set; }
 		public virtual string AtrOrganization { get; set; }
+		public virtual string AtrJobTitle { get; set; }
 		public virtual string AtrSurename { get; set; }
 		public virtual string AtrFirstName { get; set; }
 		public virtual string AtrPatronymic { get; set; }
@@ -38,14 +39,14 @@ namespace AnalitF.Net.Client.Models
 				if(LikeReciever)
 					if(ByAttorney)
 						return $"{SignerJobTitle}/Совпд. с получ./По довер./{AtrNum}/{AtrDate.ToString("dd.MM.yyyy")}/"+
-							$"{AtrOrganization}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
+							$"{AtrOrganization}/{AtrJobTitle}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
 					else
 						return $"{SignerJobTitle}/Совпд. с получ./"+
 							$"{Comment}";
 				else
 					if(ByAttorney)
 						return $"{SignerJobTitle}/{AcptSurename}/{AcptFirstName}/{AcptPatronimic}/По довер./{AtrNum}/{AtrDate.ToString("dd.MM.yyyy")}/"+
-							$"{AtrOrganization}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
+							$"{AtrOrganization}/{AtrJobTitle}/{AtrSurename}/{AtrFirstName}/{AtrPatronymic}/{AtrAddInfo}/{Comment}";
 					else
 						return $"{SignerJobTitle}/{AcptSurename}/{AcptFirstName}/{AcptPatronimic}/"+
 							$"{Comment}";

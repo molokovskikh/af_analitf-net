@@ -94,7 +94,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				SignerPatronimic = "Иванов";
 				SignerINN = Settings.Value.DebugDiadokSignerINN;
 			}
-			else {
+			else
+			{
 				Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 				var certFields = X509Helper.ParseSubject(Cert.Subject);
 				try
@@ -103,7 +104,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					SignerFirstName = namefp[0];
 					SignerSureName = certFields["SN"];
 					SignerPatronimic = namefp[1];
-					if(!string.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
+					if(!String.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
 						SignerINN = Settings.Value.DebugDiadokSignerINN;
 					else
 					{
@@ -111,7 +112,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							SignerINN = certFields["OID.1.2.643.3.131.1.1"];
 						if(certFields.Keys.Contains("ИНН"))
 							SignerINN = certFields["ИНН"];
-						if(string.IsNullOrEmpty(SignerINN))
+						if(String.IsNullOrEmpty(SignerINN))
 							throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
 					}
 				}
@@ -139,6 +140,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				TaskCreationOptions.None,
 				TaskScheduler.FromCurrentSynchronizationContext());
 		}
+
 		public string SignerFirstName { get; set;}
 		public string SignerSureName { get; set;}
 		public string SignerPatronimic { get; set;}
@@ -169,7 +171,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ret.SignerDetails.FirstName = "Иван";
 				ret.SignerDetails.Surname = "Иванович";
 				ret.SignerDetails.Patronymic = "Иванов";
-				ret.SignerDetails.JobTitle = "Должность";
+				ret.SignerDetails.JobTitle = "Специалист";
 				ret.SignerDetails.Inn = Settings.Value.DebugDiadokSignerINN;
 			}
 			else
@@ -196,18 +198,18 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			if(waitupdate)
 			{
 				await Async((x) => {
-				Message msg = null;
-				int breaker = 0;
-				do
-				{
-					msg = Payload.Api.GetMessage(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
-					if(LastPatchStamp != msg.LastPatchTimestamp)
-						break;
-					else
-						TaskEx.Delay(1000).Wait();
-					breaker++;
-				} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
-				Result = msg;
+					Message msg = null;
+					int breaker = 0;
+					do
+					{
+						msg = Payload.Api.GetMessage(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
+						if(LastPatchStamp != msg.LastPatchTimestamp)
+							break;
+						else
+							TaskEx.Delay(1000).Wait();
+						breaker++;
+					} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
+					Result = msg;
 				});
 			}
 			IsEnabled.Value = true;
@@ -269,14 +271,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 				if(bindingGroup.Name == "AcceptedValidation")
 				{
-					if(!string.IsNullOrEmpty(model.AcptFirstName) ||
-					!string.IsNullOrEmpty(model.AcptSurename) ||
-					!string.IsNullOrEmpty(model.AcptPatronimic) ||
-					!string.IsNullOrEmpty(model.AcptJobTitle))
+					if(!String.IsNullOrEmpty(model.AcptFirstName) ||
+					!String.IsNullOrEmpty(model.AcptSurename) ||
+					!String.IsNullOrEmpty(model.AcptPatronimic) ||
+					!String.IsNullOrEmpty(model.AcptJobTitle))
 					{
-						if(string.IsNullOrEmpty(model.AcptSurename))
+						if(String.IsNullOrEmpty(model.AcptSurename))
 							fields += "\nФамилия";
-						if(string.IsNullOrEmpty(model.AcptFirstName))
+						if(String.IsNullOrEmpty(model.AcptFirstName))
 							fields += "\nИмя";
 					}
 				}
@@ -284,26 +286,26 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				{
 					if (model.ByAttorney)
 					{
-						if(string.IsNullOrEmpty(model.AtrNum))
+						if(String.IsNullOrEmpty(model.AtrNum))
 							fields += "\nНомер";
-						if(model.AtrDate.HasValue)
+						if(!model.AtrDate.HasValue)
 							fields += "\nДата";
 
-						if(!string.IsNullOrEmpty(model.AtrFirstName) ||
-							!string.IsNullOrEmpty(model.AtrSurename) ||
-							!string.IsNullOrEmpty(model.AtrPatronymic))
+						if(!String.IsNullOrEmpty(model.AtrFirstName) ||
+							!String.IsNullOrEmpty(model.AtrSurename) ||
+							!String.IsNullOrEmpty(model.AtrPatronymic))
 						{
-							if(string.IsNullOrEmpty(model.AtrFirstName))
+							if(String.IsNullOrEmpty(model.AtrFirstName))
 								fields += "\nИмя";
-							if(string.IsNullOrEmpty(model.AtrSurename))
+							if(String.IsNullOrEmpty(model.AtrSurename))
 								fields += "\nФамилия";
-							if(string.IsNullOrEmpty(model.AtrPatronymic))
+							if(String.IsNullOrEmpty(model.AtrPatronymic))
 								fields += "\nОтчество";
 						}
 					}
 				}
 
-				if(string.IsNullOrEmpty(fields))
+				if(String.IsNullOrEmpty(fields))
 					return ValidationResult.ValidResult;
 
 				return new ValidationResult(false, error + fields);
@@ -378,6 +380,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						AtrNum.Value = x.AtrNum;
 						AtrDate.Value = x.AtrDate;
 						AtrOrganization.Value = x.AtrOrganization;
+						AtrJobTitle.Value = x.AtrJobTitle;
 						AtrSurename.Value = x.AtrSurename;
 						AtrFirstName.Value = x.AtrFirstName;
 						AtrPatronymic.Value = x.AtrPatronymic;
@@ -387,8 +390,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					{
 						ByAttorney.Value = false;
 						AtrNum.Value = "";
-						AtrDate.Value = DateTime.MinValue;
+						AtrDate.Value = null;
 						AtrOrganization.Value = "";
+						AtrJobTitle.Value = "";
 						AtrSurename.Value ="";
 						AtrFirstName.Value = "";
 						AtrPatronymic.Value = "";
@@ -400,7 +404,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			});
 
 			Comment.Subscribe(x => {
-				if(!string.IsNullOrEmpty(x))
+				if(!String.IsNullOrEmpty(x))
 					CommentVisibility.Value = true;
 				else
 					CommentVisibility.Value = false;
@@ -433,6 +437,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public NotifyValue<string> AtrNum { get; set;}
 		public NotifyValue<DateTime?> AtrDate { get; set;}
 		public NotifyValue<string> AtrOrganization { get; set;}
+		public NotifyValue<string> AtrJobTitle { get; set;}
 		public NotifyValue<string> AtrSurename { get; set;}
 		public NotifyValue<string> AtrFirstName { get; set;}
 		public NotifyValue<string> AtrPatronymic { get; set;}
@@ -456,7 +461,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		Official GetAcceptetOfficial()
 		{
 			Official ret = null;
-			if(Detailed.Value && !string.IsNullOrEmpty(AcptFirstName) && !string.IsNullOrEmpty(AcptSurename))
+			if(Detailed.Value && !String.IsNullOrEmpty(AcptFirstName) && !String.IsNullOrEmpty(AcptSurename))
 			{
 				ret = new Official();
 				ret.FirstName = AcptFirstName;
@@ -470,21 +475,23 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		Attorney GetAttorney()
 		{
-			if(Detailed.Value && !string.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
+			if(Detailed.Value && !String.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
 			{
 				Attorney ret = new Attorney();
 				ret.Number = AtrNum;
 				ret.Date = AtrDate.Value.Value.ToString("dd.MM.yyyy");
 				ret.IssuerOrganizationName = AtrOrganization;
-				if(!string.IsNullOrEmpty(AtrFirstName.Value) &&
-					!string.IsNullOrEmpty(AtrSurename.Value) &&
-					!string.IsNullOrEmpty(AtrPatronymic.Value))
+				
+				if(!String.IsNullOrEmpty(AtrFirstName.Value) &&
+					!String.IsNullOrEmpty(AtrSurename.Value) &&
+					!String.IsNullOrEmpty(AtrPatronymic.Value))
 				{
 					ret.IssuerPerson = new Official();
 					ret.IssuerPerson.FirstName = AtrFirstName;
 					ret.IssuerPerson.Surname = AtrSurename;
 					ret.IssuerPerson.Patronymic = AtrPatronymic;
-					ret.IssuerPerson.JobTitle = AtrAddInfo;
+					ret.IssuerPerson.JobTitle = AtrJobTitle;
+					ret.IssuerAdditionalInfo = AtrAddInfo;
 				}
 				return ret;
 			}
@@ -568,6 +575,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 								autosave.AtrNum = AtrNum.Value;
 								autosave.AtrDate = AtrDate.Value.Value;
 								autosave.AtrOrganization = AtrOrganization.Value;
+								autosave.AtrJobTitle = AtrJobTitle.Value;
 								autosave.AtrSurename = AtrSurename.Value;
 								autosave.AtrFirstName = AtrFirstName.Value;
 								autosave.AtrPatronymic = AtrPatronymic.Value;

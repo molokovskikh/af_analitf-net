@@ -114,16 +114,18 @@
                       <Label Content="от" Grid.Row="0" Grid.Column="2"/>
                       <DatePicker Name="AtrDateCtrl" Grid.Row="0" Grid.Column="3" SelectedDate="{Binding AtrDate.Value,Mode=TwoWay,BindingGroupName=AttorneyValidation,ValidatesOnDataErrors=True}" Margin="0,2,79,2"/>
                       <Label Content="Доверенность выдал:" Grid.Row="1" Grid.ColumnSpan="4"/>
-                      <Label Content="Организация:" Grid.Row="2" Grid.Column="0"/>
-                      <TextBox Name="AtrOrganization" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
-                      <Label Content="Фамилия:" Grid.Row="3" Grid.Column="0"/>
-                      <TextBox Name="AtrSurename" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
-                      <Label Content="Имя:" Grid.Row="4" Grid.Column="0"/>
-                      <TextBox Name="AtrFirstName" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
-                      <Label Content="Отчество:" Grid.Row="5" Grid.Column="0"/>
-                      <TextBox Name="AtrPatronymic" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
-                      <Label Content="Доп. сведения:" Grid.Row="6" Grid.Column="0"/>
-                      <TextBox Name="AtrAddInfo" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,0,2"/>
+											<Label Content="Организация:" Grid.Row="2" Grid.Column="0"/>
+											<TextBox Name="AtrOrganization" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+											<Label Content="Должность:" Grid.Row="3" Grid.Column="0"/>
+											<TextBox Name="AtrJobTitle" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+											<Label Content="Фамилия:" Grid.Row="4" Grid.Column="0"/>
+                      <TextBox Name="AtrSurename" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <Label Content="Имя:" Grid.Row="5" Grid.Column="0"/>
+                      <TextBox Name="AtrFirstName" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <Label Content="Отчество:" Grid.Row="6" Grid.Column="0"/>
+                      <TextBox Name="AtrPatronymic" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,35,2"/>
+                      <Label Content="Доп. сведения:" Grid.Row="7" Grid.Column="0"/>
+                      <TextBox Name="AtrAddInfo" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" FontSize="16" Margin="0,2,0,2"/>
                     </Grid>
                   </StackPanel>
                 </StackPanel>
@@ -145,8 +147,8 @@
     </Grid>
   </ScrollViewer>
     <StackPanel Orientation="Horizontal" Margin="3,10,0,10">
-      <Button Name="Save" Margin="0,0,10,0"  Content="Подписать" Height="30" Width="90"/>
-			<Button Name="TryClose" Content="Отмена" Width="90"/>
+      <Button Name="Save" Margin="0,0,10,0"  Padding="10,0,10,0" Content="Подписать" Height="30"/>
+      <Button Name="TryClose" Padding="10,0,10,0" Content="Отмена"/>
 		</StackPanel>
   </StackPanel>
 </UserControl>

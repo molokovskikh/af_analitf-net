@@ -26,8 +26,8 @@
     <TextBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Name="Comment"></TextBox>
 
     <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0" Margin="0,10,0,7">
-      <Button Name="Save" Margin="0,0,10,0" Width="90" Height="30">Передать</Button>
-      <Button Name="TryClose" Width="90">Отмена</Button>
+      <Button Name="Save" Padding="10,0,10,0" Margin="0,0,10,0" Height="30">Передать</Button>
+      <Button Name="TryClose" Padding="10,0,10,0">Отмена</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>
