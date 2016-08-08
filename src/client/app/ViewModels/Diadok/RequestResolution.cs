@@ -64,8 +64,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async void Save()
 		{
-			try
-			{
+			try {
 				BeginAction();
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				var patch = Payload.Patch();
@@ -83,10 +82,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
-			catch(Exception exception)
-			{
-				if(exception is HttpClientException)
-				{
+			catch(Exception exception) {
+				if(exception is HttpClientException) {
 					var e = exception as HttpClientException;
 					Log.Warn($"Ошибка:", e);
 					Manager.Error(e.AdditionalMessage);

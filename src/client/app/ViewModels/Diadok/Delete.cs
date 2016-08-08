@@ -15,17 +15,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async void Save()
 		{
-			try
-			{
+			try {
 				BeginAction();
 				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await	Async(x => Payload.Api.Delete(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId));
 				EndAction();
 			}
-			catch(Exception exception)
-			{
-				if(exception is HttpClientException)
-				{
+			catch(Exception exception) {
+				if(exception is HttpClientException) {
 					var e = exception as HttpClientException;
 					Log.Warn($"Ошибка:", e);
 					Manager.Error(e.AdditionalMessage);

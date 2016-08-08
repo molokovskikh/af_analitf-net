@@ -71,8 +71,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			InitFields();
 			Payload = payload;
 
-			switch(payload.Entity.AttachmentType)
-			{
+			switch(payload.Entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
 					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokTORG12Name(" , ");
 					break;
@@ -87,27 +86,23 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = true;
 			LastPatchStamp = DateTime.MinValue;
 
-			if(Settings.Value.DebugUseTestSign)
-			{
+			if(Settings.Value.DebugUseTestSign) {
 				SignerFirstName = "Иван";
 				SignerSureName = "Иванович";
 				SignerPatronimic = "Иванов";
 				SignerINN = Settings.Value.DebugDiadokSignerINN;
 			}
-			else
-			{
+			else {
 				Cert = Settings.Value.GetCert(Settings.Value.DiadokCert);
 				var certFields = X509Helper.ParseSubject(Cert.Subject);
-				try
-				{
+				try {
 					var namefp = certFields["G"].Split(' ');
 					SignerFirstName = namefp[0];
 					SignerSureName = certFields["SN"];
 					SignerPatronimic = namefp[1];
 					if(!String.IsNullOrEmpty(Settings.Value.DebugDiadokSignerINN))
 						SignerINN = Settings.Value.DebugDiadokSignerINN;
-					else
-					{
+					else {
 						if(certFields.Keys.Contains("OID.1.2.643.3.131.1.1"))
 							SignerINN = certFields["OID.1.2.643.3.131.1.1"];
 						if(certFields.Keys.Contains("ИНН"))
@@ -116,8 +111,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
 					}
 				}
-				catch(Exception exept)
-				{
+				catch(Exception exept) {
 					Manager.Error("Ошибка парсинга сертификата.");
 					Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
 					throw;
@@ -164,8 +158,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			Signer ret = new Signer();
 			ret.SignerDetails = new SignerDetails();
-			if(Settings.Value.DebugUseTestSign)
-			{
+			if(Settings.Value.DebugUseTestSign) {
 				ret.SignerCertificate = new byte[1];
 				ret.SignerCertificateThumbprint = "0987654321ABCDE";
 				ret.SignerDetails.FirstName = "Иван";
@@ -174,8 +167,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ret.SignerDetails.JobTitle = "Специалист";
 				ret.SignerDetails.Inn = Settings.Value.DebugDiadokSignerINN;
 			}
-			else
-			{
+			else {
 				ret.SignerCertificate = Cert.RawData;
 				ret.SignerCertificateThumbprint = Cert.Thumbprint;
 				ret.SignerDetails.FirstName = SignerFirstName;
@@ -195,13 +187,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		protected async void EndAction(bool waitupdate = true)
 		{
-			if(waitupdate)
-			{
+			if(waitupdate) {
 				await Async((x) => {
 					Message msg = null;
 					int breaker = 0;
-					do
-					{
+					do {
 						msg = Payload.Api.GetMessage(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId);
 						if(LastPatchStamp != msg.LastPatchTimestamp)
 							break;
@@ -261,29 +251,25 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
 		{
 			// Редактор XAML почему то передает в value массив, а CLR передает модель
-			try
-			{
+			try {
 				BindingGroup bindingGroup = (BindingGroup)value;
 				Sign model = bindingGroup.Items[0] as Sign;
 
 				string error = "Заполнены не все обязательные поля:";
 				string fields = "";
 
-				if(bindingGroup.Name == "AcceptedValidation")
-				{
+				if(bindingGroup.Name == "AcceptedValidation") {
 					if(!String.IsNullOrEmpty(model.AcptFirstName) ||
 					!String.IsNullOrEmpty(model.AcptSurename) ||
 					!String.IsNullOrEmpty(model.AcptPatronimic) ||
-					!String.IsNullOrEmpty(model.AcptJobTitle))
-					{
+					!String.IsNullOrEmpty(model.AcptJobTitle)) {
 						if(String.IsNullOrEmpty(model.AcptSurename))
 							fields += "\nФамилия";
 						if(String.IsNullOrEmpty(model.AcptFirstName))
 							fields += "\nИмя";
 					}
 				}
-				if(bindingGroup.Name == "AttorneyValidation")
-				{
+				if(bindingGroup.Name == "AttorneyValidation") {
 					if (model.ByAttorney)
 					{
 						if(String.IsNullOrEmpty(model.AtrNum))
@@ -310,8 +296,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 				return new ValidationResult(false, error + fields);
 			}
-			catch (Exception)
-			{
+			catch (Exception) {
 				return new ValidationResult(false, "Заполнены не все обязательные поля.");
 			}
 		}
@@ -333,8 +318,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			RcvDate.Value = DateTime.Now;
 
 			LikeReciever.Subscribe(x => {
-				if(x)
-				{
+				if(x) {
 					AcptFirstName.Value = SignerFirstName;
 					AcptSurename.Value = SignerSureName;
 					AcptPatronimic.Value = SignerPatronimic;
@@ -343,8 +327,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			});
 
 			ByAttorney.Subscribe(x => {
-				if(!x)
-				{
+				if(!x) {
 					AtrNum.Value = "";
 					AtrOrganization.Value = "";
 					AtrSurename.Value = "";
@@ -358,24 +341,18 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 			CurrentAutoSave.Subscribe(x =>
 			{
-				if(x != null)
-				{
+				if(x != null) {
 					RcvJobTitle.Value = x.SignerJobTitle;
-
-					if(x.LikeReciever)
-					{
+					if(x.LikeReciever) {
 						LikeReciever.Value = true;
 					}
-					else
-					{
+					else {
 						AcptFirstName.Value = x.AcptFirstName;
 						AcptSurename.Value = x.AcptSurename;
 						AcptPatronimic.Value = x.AcptPatronimic;
 						AcptJobTitle.Value = x.AcptJobTitle;
 					}
-
-					if(x.ByAttorney)
-					{
+					if(x.ByAttorney) {
 						ByAttorney.Value = true;
 						AtrNum.Value = x.AtrNum;
 						AtrDate.Value = x.AtrDate;
@@ -386,8 +363,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						AtrPatronymic.Value = x.AtrPatronymic;
 						AtrAddInfo.Value = x.AtrAddInfo;
 					}
-					else
-					{
+					else {
 						ByAttorney.Value = false;
 						AtrNum.Value = "";
 						AtrDate.Value = null;
@@ -398,7 +374,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						AtrPatronymic.Value = "";
 						AtrAddInfo.Value = "";
 					}
-
 					Comment.Value = x.Comment;
 				}
 			});
@@ -461,8 +436,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		Official GetAcceptetOfficial()
 		{
 			Official ret = null;
-			if(Detailed.Value && !String.IsNullOrEmpty(AcptFirstName) && !String.IsNullOrEmpty(AcptSurename))
-			{
+			if(Detailed.Value && !String.IsNullOrEmpty(AcptFirstName) && !String.IsNullOrEmpty(AcptSurename)) {
 				ret = new Official();
 				ret.FirstName = AcptFirstName;
 				ret.Surname = AcptSurename;
@@ -475,8 +449,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		Attorney GetAttorney()
 		{
-			if(Detailed.Value && !String.IsNullOrEmpty(AtrNum) && AtrDate.HasValue)
-			{
+			if(Detailed.Value && !String.IsNullOrEmpty(AtrNum) && AtrDate.HasValue) {
 				Attorney ret = new Attorney();
 				ret.Number = AtrNum;
 				ret.Date = AtrDate.Value.Value.ToString("dd.MM.yyyy");
@@ -484,8 +457,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				
 				if(!String.IsNullOrEmpty(AtrFirstName.Value) &&
 					!String.IsNullOrEmpty(AtrSurename.Value) &&
-					!String.IsNullOrEmpty(AtrPatronymic.Value))
-				{
+					!String.IsNullOrEmpty(AtrPatronymic.Value)) {
 					ret.IssuerPerson = new Official();
 					ret.IssuerPerson.FirstName = AtrFirstName;
 					ret.IssuerPerson.Surname = AtrSurename;
@@ -514,10 +486,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 			MessagePatchToPost patch = null;
 			Signer signer = GetSigner();
-			try
-			{
-				if(ReqRevocationSign)
-				{
+			try {
+				if(ReqRevocationSign) {
 					Entity revocReq = Payload.Message.Entities.FirstOrDefault(x => x.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.RevocationRequest);
 					patch = Payload.Patch();
 					DocumentSignature acceptSignature = new DocumentSignature();
@@ -534,10 +504,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				}
-				else
-				{
-					if(Payload.Entity.AttachmentType == AttachmentType.Nonformalized)
-					{
+				else {
+					if(Payload.Entity.AttachmentType == AttachmentType.Nonformalized) {
 						patch = Payload.Patch();
 						byte[] sign = null;
 						if(TrySign(Payload.Entity.Content.Data, out sign) == false)
@@ -552,25 +520,20 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						LastPatchStamp = Payload.Message.LastPatchTimestamp;
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 					}
-					else if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12)
-					{
-						if(SaveData.Value)
-						{
+					else if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12) {
+						if(SaveData.Value) {
 							SignTorg12Autosave autosave = new SignTorg12Autosave();
 							autosave.SignerJobTitle = RcvJobTitle.Value;
-							if(LikeReciever.Value)
-							{
+							if(LikeReciever.Value) {
 								 autosave.LikeReciever = true;
 							}
-							else
-							{
+							else {
 								autosave.AcptFirstName = AcptFirstName.Value;
 								autosave.AcptSurename = AcptSurename.Value;
 								autosave.AcptPatronimic = AcptPatronimic.Value;
 								autosave.AcptJobTitle = AcptJobTitle.Value;
 							}
-							if(ByAttorney.Value)
-							{
+							if(ByAttorney.Value) {
 								autosave.ByAttorney = true;
 								autosave.AtrNum = AtrNum.Value;
 								autosave.AtrDate = AtrDate.Value.Value;
@@ -583,8 +546,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							}
 							autosave.Comment = Comment.Value;
 							Session.Save(autosave);
-							for(int i = autosave_max - 1; i < SavedData.Value.Count; i++)
-							{
+							for(int i = autosave_max - 1; i < SavedData.Value.Count; i++) {
 								Session.Delete(SavedData.Value[i]);
 							}
 						}
@@ -622,8 +584,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} успешно подписан");
 					}
-					else if (Payload.Entity.AttachmentType == AttachmentType.Invoice)
-					{
+					else if (Payload.Entity.AttachmentType == AttachmentType.Invoice) {
 						Entity invoice = Payload.Message.Entities.First(i => i.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.Invoice);
 
 						GeneratedFile invoiceReceipt = await Async((x) => Payload.Api.GenerateInvoiceDocumentReceiptXml(
@@ -667,13 +628,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} receiptInvoice, invoiceConfirmationreceipt отправлены");
 
-						Entity invoiceDateConfirmation = await Async((x) =>
-						{
+						Entity invoiceDateConfirmation = await Async((x) => {
 							Message msg = null;
 							Entity dateConfirm = null;
 							int breaker = 0;
-							do
-							{
+							do {
 								TaskEx.Delay(1000).Wait();
 								msg = Payload.Api.GetMessage(Payload.Token,
 									Payload.BoxId,
@@ -713,14 +672,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				}
 				EndAction();
 			}
-			catch(Exception exception)
-			{
-				if(exception is TimeoutException)
-				{
+			catch(Exception exception) {
+				if(exception is TimeoutException) {
 					Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
 				}
-				else if (exception is HttpClientException)
-				{
+				else if (exception is HttpClientException) {
 					var e = exception as HttpClientException;
 					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
 						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);

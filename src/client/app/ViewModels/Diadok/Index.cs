@@ -73,8 +73,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					?? "Головное подразделение";
 			Date = entity.CreationTime.ToLocalTime();
 
-			switch(entity.AttachmentType)
-			{
+			switch(entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
 					documentFilename = new DiadocXMLHelper(entity).GetDiadokTORG12Name();
 					break;
@@ -173,8 +172,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					status += ". Отказано в аннулировании";
 				break;
 			}
-			if(Entity.DocumentInfo.ResolutionStatus != null)
-			{
+			if(Entity.DocumentInfo.ResolutionStatus != null) {
 				switch (Entity.DocumentInfo.ResolutionStatus.StatusType) {
 					case Diadoc.Api.Com.ResolutionStatusType.ApprovementRequested:
 						status += ". На согласовании";
@@ -753,8 +751,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			var dialog = new Delete(GetPayload());
 			Manager.ShowFixedDialog(dialog);
-			if(dialog.Success)
-			{
+			if(dialog.Success) {
 				var current = CurrentItem.Value;
 				items.Remove(CurrentItem);
 				Items.Value.Remove(current);
@@ -763,8 +760,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public void DeleteAll()
 		{
-			for(int i = 0; i < items.Count; i++)
-			{
+			for(int i = 0; i < items.Count; i++) {
 				api.Delete(token, box.BoxId, items[i].Entity.DocumentInfo.MessageId, items[i].Entity.EntityId);
 			}
 		}
@@ -820,8 +816,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		private async Task ProcessAction(DiadokAction dialog)
 		{
 			Dictionary<string, object> settings = null;
-			if((dialog as Sign)?.Torg12TitleVisible == true)
-			{
+			if((dialog as Sign)?.Torg12TitleVisible == true) {
 				settings = new Dictionary<string, object>();
 				settings.Add("WindowStartupLocation", WindowStartupLocation.Manual);
 				settings.Add("Top", 0);
@@ -843,8 +838,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Items.Value[Items.Value.IndexOf(current)] = item;
 				CurrentItem.Value = item;
 			}
-			else
-			{
+			else {
 				var a = 1;
 			}
 		}
