@@ -191,6 +191,17 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			return model;
 		}
 
+		protected T Navigate<T>(T model) where T : BaseScreen
+		{
+			Init(model);
+			shell.Navigate(model);
+			if (autoStartScheduler) {
+				//load async data
+				scheduler.Start();
+			}
+			return model;
+		}
+
 		protected T Init<T>() where T : BaseScreen, new()
 		{
 			return Init(new T());
@@ -265,6 +276,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			ScreenExtensions.TryDeactivate(model, true);
 			if (shell.ActiveItem == model)
 				shell.ActiveItem = null;
+			shell.Items.Remove((IScreen)model);
 		}
 
 		protected void Activate(object model)

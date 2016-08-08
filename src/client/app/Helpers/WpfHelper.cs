@@ -307,8 +307,10 @@ namespace AnalitF.Net.Client.Helpers
 
 				var currentElement = VisualTreeHelper.GetChild(element, i);
 
-				if(currentElement == null)
-					yield break;
+				if (currentElement == null)
+				{
+					continue;
+				}
 
 				if (childTypes.IndexOf(currentElement.GetType()) > -1) {
 					yield return currentElement;

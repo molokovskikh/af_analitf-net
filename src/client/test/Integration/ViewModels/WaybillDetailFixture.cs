@@ -196,7 +196,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var waybillId = line.Waybill.Log.Id;
 
 			var updateResults = shell.Update().ToArray();
-			model = Open(new WaybillDetails(waybillId));
+			model = Navigate(new WaybillDetails(waybillId));
 			Assert.AreEqual(2, updateResults.Length,
 				"должны были получить результат открытия файла накладной и оповещение о новой накладной {0}", updateResults.Implode());
 			Assert.IsInstanceOf<DialogResult>(updateResults[0]);
