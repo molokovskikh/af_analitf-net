@@ -140,7 +140,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			Env.Barrier = new Barrier(2);
 			var attachment = Download();
-			Close(attachment);
+			Close(model);
 			shell.ShowJournal();
 			var journal = (Journal)shell.ActiveItem;
 			var oldCount = journal.Items.Value.Count;
