@@ -1,20 +1,15 @@
-﻿using System.Linq;
-using AnalitF.Net.Client.Models;
-using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels.Diadok;
+﻿using System;
+using System.Text;
+using System.IO;
+using System.Linq;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
-using AnalitF.Net.Client.Test.Fixtures;
 using Caliburn.Micro;
 using System.Windows.Controls;
-using System.Reactive.Concurrency;
 using Microsoft.Reactive.Testing;
 using System.Threading.Tasks;
 using System.Threading;
-using System;
-using Common.Tools.Helpers;
-using System.Windows;
 using System.Security.Cryptography.X509Certificates;
 using BilateralDocumentStatus = Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus;
 using BilateralStatus = Diadoc.Api.Com.BilateralDocumentStatus;
@@ -25,13 +20,14 @@ using InvoiceDocumentStatus = Diadoc.Api.Proto.Documents.InvoiceDocument.Invoice
 using AttachmentType = Diadoc.Api.Proto.Events.AttachmentType;
 using NonformalizedStatus = Diadoc.Api.Proto.Documents.NonformalizedDocument.NonformalizedDocumentStatus;
 using Diadoc.Api.Com;
-using Diadoc.Api.Proto.Events;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
-using AnalitF.Net.Client.Helpers;
-using System.Text;
+using Common.Tools.Calendar;
 using AnalitF.Net.Client.Models.Results;
-using System.IO;
-using Common.Tools.Threading;
+using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Test.TestHelpers;
+using AnalitF.Net.Client.ViewModels.Diadok;
+using AnalitF.Net.Client.Test.Fixtures;
 
 namespace AnalitF.Net.Client.Test.Integration.Views
 {
@@ -62,13 +58,16 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			Wait();
 
+			var timeOut = 0;
 			var dataReady = false;
 			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
-			while(!dataReady) {
-				Thread.Sleep(TimeSpan.FromSeconds(20));
+			Wait();
+			while(!dataReady && timeOut < 10) {
+				Thread.Sleep(60.Second());
 				dispatcher.Invoke(() => ddkIndex.Reload());
 				Wait();
 				dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
+				timeOut++;
 			}
 
 			diadokDatas = Fixture<CreateDiadokInbox>();
@@ -79,7 +78,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			Wait();
 			dispatcher.Invoke(() => ddkIndex.DeleteAll());
-			Thread.Sleep(30);
+			Thread.Sleep(30.Second());
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
 		}
@@ -127,9 +126,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			var messages = diadokDatas.GetMessages();
 
-			Thread.Sleep(TimeSpan.FromSeconds(15));
+			Thread.Sleep(15.Second());
 			diadokDatas.OutBoundInvoices(messages.Item2);
-			Thread.Sleep(TimeSpan.FromSeconds(30));
+			Thread.Sleep(30.Second());
 
 			messages = diadokDatas.GetMessages();
 
@@ -161,7 +160,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			diadokDatas.Revocation(invoice_1);
 			diadokDatas.Revocation(invoice_2);
 
-			Thread.Sleep(TimeSpan.FromSeconds(15));
+			Thread.Sleep(15.Second());
 			dispatcher.Invoke(() => ddkIndex.Reload());
 
 			DenialRevocation_Document();
