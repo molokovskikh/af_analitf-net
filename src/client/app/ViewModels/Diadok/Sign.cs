@@ -121,18 +121,54 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public Task<TResult> Async<TResult>(Func<string, TResult> action)
 		{
-			return Task<TResult>.Factory.StartNew(() => {return action(Payload.Token);},
-				CancellationToken.None,
-				TaskCreationOptions.None,
-				TaskScheduler.FromCurrentSynchronizationContext());
+			return Task<TResult>.Factory.StartNew(() => {
+				try {
+					return action(Payload.Token);
+				}
+				catch(Exception exception) {
+					if(exception is TimeoutException) {
+						Log.Warn($"Превышено время ожидания ответа при обработке документа {Payload.Message.MessageId}", exception);
+						Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
+					}
+					else if (exception is HttpClientException) {
+						var e = exception as HttpClientException;
+						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+							Log.Warn($"Документ {Payload.Message.MessageId} был подписан ранее", e);
+							Manager.Warning("Документ уже был подписан другим пользователем.");
+						} else {
+							Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", e);
+							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
+						}
+					}
+					throw;
+				}
+			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		public Task Async(Action<string> action)
 		{
-			return Task.Factory.StartNew(() => action(Payload.Token),
-				CancellationToken.None,
-				TaskCreationOptions.None,
-				TaskScheduler.FromCurrentSynchronizationContext());
+			return Task.Factory.StartNew(() => {
+				try {
+					action(Payload.Token);
+				}
+				catch(Exception exception) {
+					if(exception is TimeoutException) {
+						Log.Warn($"Превышено время ожидания ответа при обработке документа {Payload.Message.MessageId}", exception);
+						Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
+					}
+					else if (exception is HttpClientException) {
+						var e = exception as HttpClientException;
+						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
+							Log.Warn($"Документ {Payload.Message.MessageId} был подписан ранее", e);
+							Manager.Warning("Документ уже был подписан другим пользователем.");
+						} else {
+							Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", e);
+							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
+						}
+					}
+					throw;
+				}
+			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		public string SignerFirstName { get; set;}
