@@ -377,7 +377,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var commentEntity = nonfoemitem.Message.Entities.First(
 					x => x.ParentEntityId == nonformid &&
 					x.AttachmentType == AttachmentType.RevocationRequest);
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, commentData);
 				var nonfrevoc = nonfoemitem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
@@ -404,7 +404,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var torg12Item= ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id);
 				var commentEntity = torg12Item.Message.Entities.First(x => x.ParentEntityId == torg12Id &&
 				x.AttachmentType == AttachmentType.RevocationRequest);
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, commentData);
 				var torg12Revoc = torg12Item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
@@ -432,7 +432,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var invoiceItem = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoceid);
 				var commentEntity = invoiceItem.Message.Entities.First(x => x.ParentEntityId == invoceid &&
 				x.AttachmentType == AttachmentType.RevocationRequest);
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, commentData);
 				var invoicerevoced = invoiceItem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
@@ -474,7 +474,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				x.AttachmentType == AttachmentType.RevocationRequest);
 				var commentEntity = nonfitem.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
 				.OrderBy(x => x.CreationTime).Last();
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, commentData);
 				var nonformRevocationRejected = nonfitem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
@@ -506,7 +506,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				x.AttachmentType == AttachmentType.RevocationRequest);
 				var commentEntity = torg12Item.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
 				.OrderBy(x => x.CreationTime).Last();
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, commentData);
 				var torg12RevocationRejected = torg12Item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
@@ -537,7 +537,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				x.AttachmentType == AttachmentType.RevocationRequest);
 				var commentEntity = invoiceiditem.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
 				.OrderBy(x => x.CreationTime).Last();
-				var xml = new DiadocXMLHelper(commentEntity);
+				var xml = new DiadocXmlHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, commentData);
 				var torg12Rejected = invoiceiditem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;

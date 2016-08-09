@@ -8,26 +8,26 @@ using Diadoc.Api.Proto.Events;
 
 namespace AnalitF.Net.Client.Helpers
 {
-	public class XMLDocHelper
+	public class XmlDocHelper
 	{
-		public XMLDocHelper(byte[] xmldocument)
+		public XmlDocHelper(byte[] xmldocument)
 		{
 			var str = Encoding.GetEncoding(1251).GetString(xmldocument);
 			var streader = new StringReader(str);
-			xmlDocument = new XPathDocument(streader);
-			xNavigator = xmlDocument.CreateNavigator();
+			XmlDocument = new XPathDocument(streader);
+			XNavigator = XmlDocument.CreateNavigator();
 		}
 
-		public XMLDocHelper(string xmldocument)
+		public XmlDocHelper(string xmldocument)
 		{
 			var streader = new StringReader(xmldocument);
-			xmlDocument = new XPathDocument(streader);
-			xNavigator = xmlDocument.CreateNavigator();
+			XmlDocument = new XPathDocument(streader);
+			XNavigator = XmlDocument.CreateNavigator();
 		}
 
 		public string GetValue(string xpath)
 		{
-			var node = xNavigator.Select(xpath);
+			var node = XNavigator.Select(xpath);
 			node.MoveNext();
 			return node.Current.Value;
 		}
@@ -45,22 +45,22 @@ namespace AnalitF.Net.Client.Helpers
 			return fio;
 		}
 
-		protected XPathDocument xmlDocument;
-		protected XPathNavigator xNavigator;
+		protected XPathDocument XmlDocument;
+		protected XPathNavigator XNavigator;
 	}
 
-	public class DiadocXMLHelper
+	public class DiadocXmlHelper
 	{
-		XMLDocHelper xml;
-		protected DiadocXMLHelper()
+		XmlDocHelper xml;
+		protected DiadocXmlHelper()
 		{
 		}
 
-		public DiadocXMLHelper(Entity entity)
+		public DiadocXmlHelper(Entity entity)
 		{
 			var str = Encoding.GetEncoding(1251).GetString(entity.Content.Data);
 			str = str.Replace("xmlns=\"http://www.roseu.org/images/stories/roaming/amendment-request-v1.xsd\"","");
-			xml = new XMLDocHelper(str);
+			xml = new XmlDocHelper(str);
 		}
 
 		public string GetValue(string xpath)

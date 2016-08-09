@@ -75,10 +75,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 			switch(entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
-					documentFilename = new DiadocXMLHelper(entity).GetDiadokTORG12Name();
+					documentFilename = new DiadocXmlHelper(entity).GetDiadokTORG12Name();
 					break;
 				case AttachmentType.Invoice:
-					documentFilename = new DiadocXMLHelper(entity).GetDiadokInvoiceName();
+					documentFilename = new DiadocXmlHelper(entity).GetDiadokInvoiceName();
 					break;
 				default:
 					documentFilename = entity.FileName;
@@ -391,7 +391,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.XmlSignatureRejection) {
-					var xml = new DiadocXMLHelper(entity);
+					var xml = new DiadocXmlHelper(entity);
 					var fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 					var comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 					items.Add(new AttachmentHistory {
@@ -405,7 +405,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.InvoiceReceipt) {
-					var xml = new DiadocXMLHelper(entity);
+					var xml = new DiadocXmlHelper(entity);
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 					items.Add(new AttachmentHistory {
 						Description = $"{fio} подписал и отправил извещение о получении",
@@ -413,7 +413,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					});
 				}
 				else if (entity.AttachmentType == AttachmentType.RevocationRequest) {
-					var xml = new DiadocXMLHelper(entity);
+					var xml = new DiadocXmlHelper(entity);
 					var orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
@@ -432,7 +432,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 					else if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected) {
 						var entityreject = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
-						xml = new DiadocXMLHelper(entityreject);
+						xml = new DiadocXmlHelper(entityreject);
 						orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
 						fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
 						comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
@@ -444,7 +444,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 				}
 				else if(entity.AttachmentType == AttachmentType.XmlTorg12BuyerTitle) {
-					var xml = new DiadocXMLHelper(entity);
+					var xml = new DiadocXmlHelper(entity);
 					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ЮЛ/ФИО/");
 					items.Add(new AttachmentHistory {
 						Description = $"{fio} подписал документ и завершил документооборот",

@@ -28,10 +28,12 @@ namespace AnalitF.Net.Client.Views.Diadok
 
 		private void Save_Click(object sender, RoutedEventArgs e)
 		{
-			if(!AcceptedData.BindingGroup.CommitEdit())
-				e.Handled = true;
-			if(ByAttorney.IsChecked == true && !ByAttorneyData.BindingGroup.CommitEdit())
-				e.Handled = true;
+			if (ProductReciver.IsExpanded) {
+				if(!AcceptedData.BindingGroup.CommitEdit())
+					e.Handled = true;
+				if(ByAttorney.IsChecked == true && !ByAttorneyData.BindingGroup.CommitEdit())
+					e.Handled = true;
+			}
 		}
 	}
 }

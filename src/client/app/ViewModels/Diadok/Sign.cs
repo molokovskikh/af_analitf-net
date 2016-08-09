@@ -73,10 +73,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 			switch(payload.Entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
-					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokTORG12Name(" , ");
+					DocumentName = new DiadocXmlHelper(payload.Entity).GetDiadokTORG12Name(" , ");
 					break;
 				case AttachmentType.Invoice:
-					DocumentName = new DiadocXMLHelper(payload.Entity).GetDiadokInvoiceName(" , ");
+					DocumentName = new DiadocXmlHelper(payload.Entity).GetDiadokInvoiceName(" , ");
 					break;
 				default:
 					DocumentName = payload.Entity.FileName;
@@ -454,7 +454,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				ret.Number = AtrNum;
 				ret.Date = AtrDate.Value.Value.ToString("dd.MM.yyyy");
 				ret.IssuerOrganizationName = AtrOrganization;
-				
+
 				if(!String.IsNullOrEmpty(AtrFirstName.Value) &&
 					!String.IsNullOrEmpty(AtrSurename.Value) &&
 					!String.IsNullOrEmpty(AtrPatronymic.Value)) {
