@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		Index ddkIndex;
 
 		[SetUp]
-		public void SetupData()
+		public void SetupTests()
 		{
 			StartWait();
 
@@ -61,12 +61,27 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			ddkIndex = shell.ActiveItem as Index;
 
 			Wait();
-			dispatcher.Invoke(() => ddkIndex.DeleteAll());
-			Wait();
 
-			Thread.Sleep(TimeSpan.FromSeconds(30));
+			var dataReady = false;
+			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
+			while(!dataReady) {
+				Thread.Sleep(TimeSpan.FromSeconds(20));
+				dispatcher.Invoke(() => ddkIndex.Reload());
+				Wait();
+				dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
+			}
 
 			diadokDatas = Fixture<CreateDiadokInbox>();
+		}
+
+		[TearDown]
+		void TearDownTests()
+		{
+			Wait();
+			dispatcher.Invoke(() => ddkIndex.DeleteAll());
+			Thread.Sleep(30);
+			dispatcher.Invoke(() => ddkIndex.Reload());
+			Wait();
 		}
 
 		void Wait()
