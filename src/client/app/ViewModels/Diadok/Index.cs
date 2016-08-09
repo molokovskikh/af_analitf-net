@@ -838,9 +838,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Items.Value[Items.Value.IndexOf(current)] = item;
 				CurrentItem.Value = item;
 			}
-			else {
-				var a = 1;
-			}
 		}
 
 		private ActionPayload GetPayload()

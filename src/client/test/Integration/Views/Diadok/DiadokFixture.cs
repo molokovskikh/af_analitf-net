@@ -34,21 +34,22 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 	[TestFixture]
 	public class DiadokFixture : DispatcherFixture
 	{
-		CreateDiadokInbox diadokDatas;
-		Index ddkIndex;
+		private CreateDiadokInbox diadokDatas;
+		private Index ddkIndex;
+		private bool testIgnored;
 
 		[SetUp]
 		public void SetupTests()
 		{
 			StartWait();
-
-			var settings = session.Query<Settings>().First();
-			settings.DebugDiadokSignerINN  = CreateDiadokInbox.ddkConfig.reciever_inn;
-			settings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
-			settings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
-			settings.DebugUseTestSign = true;
-			settings.DiadokSignerJobTitle = "Специалист";
-			session.Save(settings);
+			testIgnored = false;
+			var ddksettings = session.Query<Settings>().First();
+			ddksettings.DebugDiadokSignerINN  = CreateDiadokInbox.ddkConfig.reciever_inn;
+			ddksettings.DiadokUsername = CreateDiadokInbox.ddkConfig.reciever_login;
+			ddksettings.DiadokPassword = CreateDiadokInbox.ddkConfig.reciever_passwd;
+			ddksettings.DebugUseTestSign = true;
+			ddksettings.DiadokSignerJobTitle = "Специалист";
+			session.Save(ddksettings);
 			session.Flush();
 
 			Wait();
@@ -57,30 +58,16 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			ddkIndex = shell.ActiveItem as Index;
 
 			Wait();
-
-			var timeOut = 0;
-			var dataReady = false;
-			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
-			Wait();
-			while(!dataReady && timeOut < 10) {
-				Thread.Sleep(60.Second());
-				dispatcher.Invoke(() => ddkIndex.Reload());
-				Wait();
-				dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
-				timeOut++;
-			}
-
-			diadokDatas = Fixture<CreateDiadokInbox>();
 		}
 
 		[TearDown]
-		void TearDownTests()
+		public void TearDownTests()
 		{
+			if (!testIgnored) {
 			Wait();
 			dispatcher.Invoke(() => ddkIndex.DeleteAll());
-			Thread.Sleep(30.Second());
-			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
+			}
 		}
 
 		void Wait()
@@ -97,28 +84,55 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Diadoc_documents_test()
 		{
+			// Ждем пока завершится возможно уже начатый тест
+			var timeOut = 0;
+			var dataReady = false;
+			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
+			Wait();
+			while(!dataReady && timeOut < 10) {
+				Thread.Sleep(60.Second());
+				dispatcher.Invoke(() => ddkIndex.Reload());
+				Wait();
+				dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
+				timeOut++;
+			}
+
+			if (timeOut >= 10) {
+				testIgnored = true;
+				Assert.Ignore("Не удалось получить исходные данные, тест выполняется или не были удалены документы");
+			}
+
+			diadokDatas = Fixture<CreateDiadokInbox>();
+
 			//парсинг сертификата
 			X509Certificate2 cert = new X509Certificate2();
 			cert.Import(Convert.FromBase64String(DiadokFixtureData.CertBin));
 			var certFields = X509Helper.ParseSubject(cert.Subject);
 			var names = certFields["G"].Split(' ');
-			var SignerFirstName = names[0];
-			var SignerSureName = certFields["SN"];
-			var SignerPatronimic = names[1];
-			var SignerINN = "";
+			var signerFirstName = names[0];
+			var signerSureName = certFields["SN"];
+			var signerPatronimic = names[1];
+			var signerInn = "";
 			if(certFields.Keys.Contains("OID.1.2.643.3.131.1.1"))
-				SignerINN = certFields["OID.1.2.643.3.131.1.1"];
+				signerInn = certFields["OID.1.2.643.3.131.1.1"];
 			if(certFields.Keys.Contains("ИНН"))
-				SignerINN = certFields["ИНН"];
-			Assert.IsNotEmpty(SignerFirstName);
-			Assert.IsNotEmpty(SignerSureName);
-			Assert.IsNotEmpty(SignerPatronimic);
-			Assert.IsNotEmpty(SignerINN);
+				signerInn = certFields["ИНН"];
+			Assert.IsNotEmpty(signerFirstName);
+			Assert.IsNotEmpty(signerSureName);
+			Assert.IsNotEmpty(signerPatronimic);
+			Assert.IsNotEmpty(signerInn);
 
 			// тесты диадок
-			Thread.Sleep(TimeSpan.FromSeconds(60));
+			Thread.Sleep(60.Second());
 			dispatcher.Invoke(() => ddkIndex.Reload());
 			Wait();
+
+			var docsCount = 0;
+			dispatcher.Invoke(() => docsCount = ddkIndex.Items.Value.Count);
+			if (docsCount != 25) {
+				testIgnored = true;
+				Assert.Ignore("Не удалось получить исходные данные, тест выполняется или не были удалены документы");
+			}
 
 			Sign_Document();
 			RejectSign_Document();
@@ -132,33 +146,33 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			messages = diadokDatas.GetMessages();
 
-			var nonform_1 = messages.Item2.Where(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
+			var nonform1 = messages.Item2.First(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
 			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).First();
-			var nonform_2 = messages.Item2.Where(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+			var nonform2 = messages.Item2.Where(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
 			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
 			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
 
-			var torg12_1 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
+			var torg121 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
 			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).First();
-			var torg12_2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+			var torg122 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
 			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
 			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
 
-			var invoice_1 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
+			var invoice1 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
 			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).First();
-			var invoice_2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+			var invoice2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
 			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
 			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
 
-			diadokDatas.Revocation(nonform_1);
-			diadokDatas.Revocation(nonform_2);
-			diadokDatas.Revocation(torg12_1);
-			diadokDatas.Revocation(torg12_2);
-			diadokDatas.Revocation(invoice_1);
-			diadokDatas.Revocation(invoice_2);
+			diadokDatas.Revocation(nonform1);
+			diadokDatas.Revocation(nonform2);
+			diadokDatas.Revocation(torg121);
+			diadokDatas.Revocation(torg122);
+			diadokDatas.Revocation(invoice1);
+			diadokDatas.Revocation(invoice2);
 
 			Thread.Sleep(15.Second());
 			dispatcher.Invoke(() => ddkIndex.Reload());
@@ -180,12 +194,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		{
 			Wait();
 
-			string nonformid = "";
-			string torg12id = "";
-			string invoiceid = "";
+			var nonformid = "";
+			var torg12Id = "";
+			var invoiceid = "";
 
 			//Подписываем Неформализированный 3 документа
-			for(int i = 0; i < 3; i++)
+			for(var i = 0; i < 3; i++)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(
@@ -204,13 +218,13 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			}
 
 			//Подписываем ТОРГ12 3 документа
-			for(int i = 0; i < 3; i++)
+			for(var i = 0; i < 3; i++)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(
 						f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 						f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature);
-					torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+					torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 				});
 
 				Wait();
@@ -222,7 +236,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				Wait();
 			}
 
-			for(int i = 0; i < 3; i++)
+			for(var i = 0; i < 3; i++)
 			{
 				//подписываем Инвойс
 				dispatcher.Invoke(() => {
@@ -250,9 +264,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			});
 
 			dispatcher.Invoke(() => {
-				var signtorg12ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id)
+				var signtorg12Ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id)
 				.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
-				Assert.IsTrue(signtorg12ok);
+				Assert.IsTrue(signtorg12Ok);
 			});
 
 			dispatcher.Invoke(() => {
@@ -264,12 +278,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 		}
 
-		void RejectSign_Document()
+		private void RejectSign_Document()
 		{
 			Wait();
 
 			var nonformid = "";
-			var torg12id = "";
+			var torg12Id = "";
 			var comment = "ОТКАЗ";
 
 			//неформализированный
@@ -307,7 +321,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(
 					f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 					f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature);
-				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
 
 			Wait();
@@ -320,8 +334,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			dispatcher.Invoke(() => {
-				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
-				var commentEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id &&
+				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id);
+				var commentEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12Id &&
 				x.AttachmentType == AttachmentType.SignatureRequestRejection);
 				var commentData =  Encoding.UTF8.GetString(commentEntity.Content?.Data ?? new byte[0]);
 				Assert.AreEqual(comment, commentData);
@@ -337,7 +351,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			var nonformid = "";
-			var torg12id = "";
+			var torg12Id = "";
 			var invoceid = "";
 			string comment = "АННУЛИРОВНИЕ";
 
@@ -374,7 +388,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature);
-				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
 
 			Wait();
@@ -387,14 +401,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			dispatcher.Invoke(() => {
-				var torg12item= ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
-				var commentEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id &&
+				var torg12Item= ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id);
+				var commentEntity = torg12Item.Message.Entities.First(x => x.ParentEntityId == torg12Id &&
 				x.AttachmentType == AttachmentType.RevocationRequest);
 				var xml = new DiadocXMLHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
 				Assert.AreEqual(comment, commentData);
-				var torg12revoc = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
-				Assert.IsTrue(torg12revoc);
+				var torg12Revoc = torg12Item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationIsRequestedByMe;
+				Assert.IsTrue(torg12Revoc);
 			});
 			Wait();
 
@@ -433,7 +447,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			var nonformid = "";
-			var torg12id = "";
+			var torg12Id = "";
 			var invoiceid = "";
 			var comment = "ОТКАЗ АННУЛИРОВНИЯ";
 
@@ -474,7 +488,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f =>
 				f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
-				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
 
 			Wait();
@@ -487,15 +501,15 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			dispatcher.Invoke(() => {
-				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
-				var revReqEntity = torg12item.Message.Entities.First(x => x.ParentEntityId == torg12id &&
+				var torg12Item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id);
+				var revReqEntity = torg12Item.Message.Entities.First(x => x.ParentEntityId == torg12Id &&
 				x.AttachmentType == AttachmentType.RevocationRequest);
-				var commentEntity = torg12item.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
+				var commentEntity = torg12Item.Message.Entities.Where(x => x.ParentEntityId == revReqEntity.EntityId)
 				.OrderBy(x => x.CreationTime).Last();
 				var xml = new DiadocXMLHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, commentData);
-				var torg12RevocationRejected = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
+				var torg12RevocationRejected = torg12Item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
 				Assert.IsTrue(torg12RevocationRejected);
 			});
 
@@ -526,8 +540,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				var xml = new DiadocXMLHelper(commentEntity);
 				var commentData = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 				Assert.AreEqual(comment, commentData);
-				var torg12rejected = invoiceiditem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
-				Assert.IsTrue(torg12rejected);
+				var torg12Rejected = invoiceiditem.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected;
+				Assert.IsTrue(torg12Rejected);
 			});
 
 			Wait();
@@ -538,7 +552,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			var nonformid = "";
-			var torg12id = "";
+			var torg12Id = "";
 			var invoiceid = "";
 
 			//Неформализированный
@@ -568,7 +582,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First(f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 				f.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RequestsMyRevocation);
-				torg12id = ddkIndex.CurrentItem.Value.Entity.EntityId;
+				torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 			});
 
 			Wait();
@@ -580,7 +594,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Wait();
 
 			dispatcher.Invoke(() => {
-				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12id);
+				var torg12item = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id);
 				var torg12RevocationSigned = torg12item.Entity.DocumentInfo.RevocationStatus == RevocationStatus.RevocationAccepted;
 				Assert.IsTrue(torg12RevocationSigned);
 			});
