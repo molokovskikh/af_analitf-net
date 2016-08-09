@@ -26,15 +26,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Print_checks()
-		{
-			var results = model.PrintChecks().GetEnumerator();
-			var preview = Next<DialogResult>(results);
-
-			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
-		}
-
-		[Test]
 		public void Print_return_act()
 		{
 			var results = model.PrintReturnAct().GetEnumerator();
@@ -95,36 +86,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			check.Date = DateTime.Today.AddDays(7);
 			session.Save(check);
 			Assert.AreEqual(0, model.Items.Value.Count);
-
-
-			/*var reject = session.Query<Reject>().First();
-			var stock = new Stock()
-			{
-				Product = reject.Product,
-				Seria = reject.Series
-			};
-			session.Save(stock);
-			Assert.IsTrue(stock.RejectStatus == RejectStatus.Unknown);
-
-			model.Begin.Value = reject.LetterDate.AddDays(-1);
-			model.End.Value = reject.LetterDate.AddDays(1);
-			ForceInit();
-			// статус Возможно рассчитывается динамически и не сохраняется в базе
-			var tempStock = model.Items.Value.Single(x => x.Id == stock.Id);
-			Assert.IsTrue(tempStock.RejectStatus == RejectStatus.Perhaps);
-			Assert.IsTrue(stock.RejectStatus == RejectStatus.Unknown);
-
-			model.CurrentItem.Value = tempStock;
-
-			var seq = model.EnterItems().GetEnumerator();
-			seq.MoveNext();
-			var edit = ((EditDefectSeries)((DialogResult)seq.Current).Model);
-			edit.Ok();
-			seq.MoveNext();
-
-			// статусы Брак  и Не брак сохраняются в базе
-			session.Refresh(stock);
-			Assert.IsTrue(stock.RejectStatus == RejectStatus.Defective);*/
 		}
 	}
 }
