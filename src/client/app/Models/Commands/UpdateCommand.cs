@@ -89,7 +89,7 @@ namespace AnalitF.Net.Client.Models.Commands
 		protected override UpdateResult Execute()
 		{
 			Reporter.StageCount(4);
-			Client.BaseAddress = ConfigureHttp() ?? Client.BaseAddress;
+			Client.BaseAddress = ConfigureHttp();
 			var sendLogsTask = Download();
 			if (File.Exists(Path.Combine(Config.BinUpdateDir, "Updater.exe"))) {
 				Log.InfoFormat("Получено обновление приложения");
@@ -107,72 +107,88 @@ namespace AnalitF.Net.Client.Models.Commands
 			var logCaptured = new ManualResetEventSlim();
 			var sendLogsTask = SendLogs(Client, Token, logCaptured);
 			logCaptured.Wait(Token);
-			HttpResponseMessage response;
-			var updateType = "накопительное";
-			var user = Session.Query<User>().FirstOrDefault();
-			var settings = Session.Query<Settings>().First();
-			if (SyncData.Match("Batch")) {
-				updateType = "автозаказ";
-				SuccessMessage = "Автоматическая обработка дефектуры завершена.";
-				Log.Info($"Запрос обновления, тип обновления '{updateType}' файл '{BatchFile}'");
-				response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user, settings), Token), ref requestId);
-			}
-			else if (SyncData.Match("WaybillHistory")) {
-				SuccessMessage = "Загрузка истории документов завершена успешно.";
-				updateType = "загрузка истории заказов";
-				var data = new HistoryRequest {
-					WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
-					IgnoreOrders = true,
-				};
-				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
-				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
-			}
-			else if (SyncData.Match("OrderHistory")) {
-				SuccessMessage = "Загрузка истории заказов завершена успешно.";
-				updateType = "загрузка истории заказов";
-				var data = new HistoryRequest {
-					OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
-					IgnoreWaybills = true,
-				};
-				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
-				response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
-			}
-			else {
-				var lastSync = user?.LastSync;
-				if (lastSync == null) {
-					updateType = "кумулятивное";
-				}
-				if (syncData.Match("Waybills")) {
-					updateType = "загрузка накладных";
-				}
-				var addresses = Session.Query<AddressConfig>().Where(x => x.IsActive).Select(x => x.Address);
-				var url = Config.SyncUrl(syncData, lastSync, addresses);
-				SendPrices(Client, settings, Token);
-				var request = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
-				Log.Info($"Запрос обновления, тип обновления '{updateType}'");
-				response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
-			}
-
-			File.WriteAllText(Path.Combine(Config.TmpDir, "id"), requestId.ToString());
-			Log.Info($"Загрузка данных, идентификатор обновления {requestId}");
-			Reporter.Stage("Загрузка данных");
-
-			//для того что бы обеспечить возможность отмены запускаем загрузку с помощью async
-			//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
+			var errorCount = 0;
+			var maxErrorCount = 5;
 			using (var cleaner = new FileCleaner()) {
-				string[] files;
-				using (response) {
-					var task = DownloadContent(response, cleaner);
-					task.ContinueWith(x => {
-						//нам не интересны ошибки которые возникли здесь
-						//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
-						//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу
-						//но ловить ошибку надо тк иначе приложение будет завершено если оно выполняется на .net 4.0
-						if (x.IsFaulted)
-							Log.Debug("Ошибка при загрузке данных", x.Exception);
-					});
-					task.Wait(Token);
-					files = task.Result;
+				string[] files = null;
+				while (true) {
+					try {
+						if (errorCount > 0) {
+							ReconfigureHttp();
+						}
+						HttpResponseMessage response;
+						var updateType = "накопительное";
+						var user = Session.Query<User>().FirstOrDefault();
+						var settings = Session.Query<Settings>().First();
+						if (SyncData.Match("Batch")) {
+							updateType = "автозаказ";
+							SuccessMessage = "Автоматическая обработка дефектуры завершена.";
+							Log.Info($"Запрос обновления, тип обновления '{updateType}' файл '{BatchFile}'");
+							response = Wait("Batch", Client.PostAsync("Batch", GetBatchRequest(user, settings), Token), ref requestId);
+						}
+						else if (SyncData.Match("WaybillHistory")) {
+							SuccessMessage = "Загрузка истории документов завершена успешно.";
+							updateType = "загрузка истории заказов";
+							var data = new HistoryRequest {
+								WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
+								IgnoreOrders = true,
+							};
+							Log.Info($"Запрос обновления, тип обновления '{updateType}'");
+							response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
+						}
+						else if (SyncData.Match("OrderHistory")) {
+							SuccessMessage = "Загрузка истории заказов завершена успешно.";
+							updateType = "загрузка истории заказов";
+							var data = new HistoryRequest {
+								OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
+								IgnoreWaybills = true,
+							};
+							Log.Info($"Запрос обновления, тип обновления '{updateType}'");
+							response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
+						}
+						else {
+							var lastSync = user?.LastSync;
+							if (lastSync == null) {
+								updateType = "кумулятивное";
+							}
+							if (syncData.Match("Waybills")) {
+								updateType = "загрузка накладных";
+							}
+							var addresses = Session.Query<AddressConfig>().Where(x => x.IsActive).Select(x => x.Address);
+							var url = Config.SyncUrl(syncData, lastSync, addresses);
+							SendPrices(Client, settings, Token);
+							var request = Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, Token);
+							Log.Info($"Запрос обновления, тип обновления '{updateType}'");
+							response = Wait(Config.WaitUrl(url, syncData).ToString(), request, ref requestId);
+						}
+
+						File.WriteAllText(Path.Combine(Config.TmpDir, "id"), requestId.ToString());
+						Log.Info($"Загрузка данных, идентификатор обновления {requestId}");
+						Reporter.Stage("Загрузка данных");
+
+						//для того что бы обеспечить возможность отмены запускаем загрузку с помощью async
+						//освобождение ресурсов нужно что бы остановить загрузку в случае если пользователь нажал кнопку отмена
+						using (response) {
+							var task = DownloadContent(response, cleaner);
+							task.ContinueWith(x => {
+								//нам не интересны ошибки которые возникли здесь
+								//тк если эта ошибка в процессе загрузки она будет выброшена через Wait
+								//если это ошибка произошла после того как была вызвана отмена значит это попытка обращения к освобожденном ресурсу
+								//но ловить ошибку надо тк иначе приложение будет завершено если оно выполняется на .net 4.0
+								if (x.IsFaulted)
+									Log.Debug("Ошибка при загрузке данных", x.Exception);
+							});
+							task.Wait(Token);
+							files = task.Result;
+						}
+						break;
+					}
+					catch(Exception e) {
+						errorCount++;
+						if (errorCount > maxErrorCount)
+							throw;
+						Log.Error($"Запрос обновления завершился ошибкой, повторяю операцию, попытка {errorCount}/{maxErrorCount}", e);
+					}
 				}
 
 				//подтверждение обновления является критической операцией из-за функции загрузки заявок
@@ -186,7 +202,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				Log.InfoFormat("Обновление загружено, размер {0} идентификатор обновления {1}",
 					files.Sum(x => new FileInfo(x).Length), requestId);
 
-				FileHelper2.DeleteDir(Config.UpdateTmpDir);
+				FileHelper.DeleteDir(Config.UpdateTmpDir);
 				Directory.CreateDirectory(Config.UpdateTmpDir);
 				foreach (var file in files) {
 					using (var zip = new ZipFile(file)) {
@@ -973,7 +989,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			ProcessAttachments(resultDirs);
 
 			if (Clean)
-				FileHelper2.DeleteDir(Config.UpdateTmpDir);
+				FileHelper.DeleteDir(Config.UpdateTmpDir);
 
 			if (request != null)
 				WaitAndLog(Client.PutAsync("Main", request, Formatter), "Отправка лога импорта заявок");
@@ -1192,7 +1208,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 		{
 			if (source.Clean) {
 				if (Directory.Exists(source.Dst)) {
-					FileHelper2.DeleteDir(source.Dst);
+					FileHelper.DeleteDir(source.Dst);
 					Directory.CreateDirectory(source.Dst);
 				}
 			}
@@ -1322,7 +1338,7 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 									response.EnsureSuccessStatusCode();
 								}
 								await response.Content.CopyToAsync(file);
-								break;
+								return new []{ filename };
 							} catch(Exception e) {
 								errorCount++;
 								if (errorCount > maxErrorCount)
@@ -1330,7 +1346,6 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 								Log.Warn($"Ошибка при загрузки данных, попытка {errorCount}/{maxErrorCount} буду пытаться докачивать, загружено байт {file.Position}", e);
 							}
 						}
-						return new []{ filename };
 					}
 				}
 			} finally {

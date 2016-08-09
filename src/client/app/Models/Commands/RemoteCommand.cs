@@ -40,6 +40,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 	public abstract class RemoteCommand : BaseCommand
 	{
+		private Dictionary<string, int> errorMap = new Dictionary<string, int>();
+
 		protected ProgressMessageHandler HttpProgress;
 		protected JsonMediaTypeFormatter Formatter;
 		protected TimeSpan? RequestInterval;
@@ -125,15 +127,32 @@ namespace AnalitF.Net.Client.Models.Commands
 			Config = config;
 			Token = token;
 			Settings = value;
+			if (errorMap.Count == 0) {
+				if (!String.IsNullOrEmpty(Config.AltUri)) {
+					Config.AltUri.Split(',').Each(x => {
+						errorMap.Add(new Uri(x.Trim()).ToString(), 0);
+					});
+				} else {
+					errorMap.Add(Config.BaseUrl.ToString(), 0);
+				}
+			}
 			if (Client != null) {
 				Client.Dispose();
 				Disposable.Remove(Client);
 			}
 			if (HttpProgress != null) {
+				HttpProgress.Dispose();
+				Disposable.Remove(HttpProgress);
 				HttpProgress.HttpReceiveProgress -= ReceiveProgress;
+			}
+			if (Handler != null) {
+				Handler.Dispose();
+				Disposable.Remove(Handler);
 			}
 			Client = Settings.GetHttpClient(Config, ref HttpProgress, ref Handler);
 			Disposable.Add(Client);
+			Disposable.Add(HttpProgress);
+			Disposable.Add(Handler);
 			HttpProgress.HttpReceiveProgress += ReceiveProgress;
 		}
 
@@ -209,15 +228,16 @@ namespace AnalitF.Net.Client.Models.Commands
 		public Uri ConfigureHttp()
 		{
 			try {
-				var urls = Config.AltUri;
-				if (String.IsNullOrEmpty(urls))
-					return null;
+				if (errorMap.Count == 0)
+					return Client.BaseAddress;
 				ProgressMessageHandler progress = null;
 				HttpClientHandler handler = null;
 				//нужен еще один клиент тк BaseAddress после первого запроса менять нельзя
 				using (var client = Settings.GetHttpClient(Config, ref progress, ref handler)) {
-					Log.Info($"Поиск доступного хоста, выбор из {urls}");
-					var requests = urls.Split(',').Select(x => Tuple.Create(x, Check(client, x))).ToArray();
+					var minErrorCount = errorMap.Values.Min();
+					var urls = errorMap.Where(x => x.Value == minErrorCount).Select(x => x.Key).ToArray();
+					Log.Info($"Поиск доступного хоста, выбор из {urls.Implode()}");
+					var requests = urls.Select(x => Tuple.Create(x, Check(client, x))).ToArray();
 					Task.WaitAll(requests.Select(x => x.Item2).ToArray(), 10*1000, Token);
 
 					var responded = requests
@@ -244,7 +264,15 @@ namespace AnalitF.Net.Client.Models.Commands
 			catch(Exception e) {
 				Log.Error("Не удалось определить хост для обмена данными", e);
 			}
-			return null;
+			return Client.BaseAddress;
+		}
+
+		public void ReconfigureHttp()
+		{
+			//что бы изменить базовый адрес нужно пересоздать клиента
+			errorMap[Client.BaseAddress.ToString()] += 1;
+			Configure(Settings, Config, Token);
+			Client.BaseAddress = ConfigureHttp();
 		}
 	}
 }

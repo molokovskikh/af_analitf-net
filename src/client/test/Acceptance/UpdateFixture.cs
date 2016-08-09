@@ -1,23 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Web.Http.SelfHost;
 using System.Windows.Automation;
-using System.Windows.Forms.VisualStyles;
-using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Integration;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using Microsoft.Test.Input;
 using NUnit.Framework;
-using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
@@ -128,7 +120,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Empty_update()
 		{
-			FileHelper2.DeleteDir(Path.Combine("acceptance", "data"));
+			FileHelper.DeleteDir(Path.Combine("acceptance", "data"));
 
 			Activate();
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");

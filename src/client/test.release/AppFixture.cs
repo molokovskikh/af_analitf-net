@@ -53,7 +53,7 @@ namespace test.release
 					return false;
 				}
 			}));
-			FileHelper2.DeleteDir(Path.Combine(root, "data"));
+			FileHelper.DeleteDir(Path.Combine(root, "data"));
 		}
 
 		protected override void OnActivated(object sender, AutomationEventArgs e)
