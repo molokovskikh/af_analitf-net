@@ -78,9 +78,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
-			if (KKMFilter.Value == null)
-				return;
-			var query = StatelessSession.Query<Check>();
+			var query = StatelessSession.Query<Check>().Where(c => c.Date <= End && c.Date>= Begin);
 			Items.Value = query.ToList();
 		}
 

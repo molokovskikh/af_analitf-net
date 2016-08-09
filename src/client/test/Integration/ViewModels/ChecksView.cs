@@ -11,6 +11,7 @@ using NHibernate.Linq;
 using System.Collections.Generic;
 using System;
 using Common.NHibernate;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -86,6 +87,25 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			check.Date = DateTime.Today.AddDays(7);
 			session.Save(check);
 			Assert.AreEqual(0, model.Items.Value.Count);
+		}
+
+		[Test]
+		public void Filter_by_address()
+		{
+			session.DeleteEach(session.Query<Address>().Skip(1));
+
+			var newAddress = new Address("Тестовый адрес доставки");
+			session.Save(newAddress);
+			var offer = session.Query<Offer>().First();
+			MakeOrder(offer);
+			MakeOrder(offer, newAddress);
+
+			model.AddressSelector.All.Value = true;
+			Assert.That(model.Items.Value.Count, Is.EqualTo(2));
+			model.AddressSelector.Addresses[1].IsSelected = false;
+			Assert.That(model.Items.Value.Count, Is.EqualTo(2));
+			scheduler.AdvanceByMs(1000);
+			Assert.That(model.Items.Value.Count, Is.EqualTo(1));
 		}
 	}
 }
