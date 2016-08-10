@@ -132,7 +132,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					Config.AltUri.Split(',').Each(x => {
 						errorMap.Add(new Uri(x.Trim()).ToString(), 0);
 					});
-				} else {
+				} else if (Config.BaseUrl != null) {
 					errorMap.Add(Config.BaseUrl.ToString(), 0);
 				}
 			}
