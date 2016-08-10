@@ -140,6 +140,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
 						}
 					}
+					Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", exception);
 					throw;
 				}
 			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
@@ -166,7 +167,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
 						}
 					}
-					throw;
+					Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", exception);
 				}
 			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 		}
@@ -286,7 +287,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 	{
 		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
 		{
-			// Редактор XAML почему то передает в value массив, а CLR передает модель
+			// Редактор XAML передает в value массив, а CLR передает модель
 			try {
 				BindingGroup bindingGroup = (BindingGroup)value;
 				Sign model = bindingGroup.Items[0] as Sign;
@@ -295,10 +296,10 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				string fields = "";
 
 				if(bindingGroup.Name == "AcceptedValidation") {
-					if(!String.IsNullOrEmpty(model.AcptFirstName) ||
+					if(model.Detailed && (!String.IsNullOrEmpty(model.AcptFirstName) ||
 					!String.IsNullOrEmpty(model.AcptSurename) ||
 					!String.IsNullOrEmpty(model.AcptPatronimic) ||
-					!String.IsNullOrEmpty(model.AcptJobTitle)) {
+					!String.IsNullOrEmpty(model.AcptJobTitle))) {
 						if(String.IsNullOrEmpty(model.AcptSurename))
 							fields += "\nФамилия";
 						if(String.IsNullOrEmpty(model.AcptFirstName))
@@ -306,7 +307,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 				}
 				if(bindingGroup.Name == "AttorneyValidation") {
-					if (model.ByAttorney)
+					if (model.Detailed && model.ByAttorney)
 					{
 						if(String.IsNullOrEmpty(model.AtrNum))
 							fields += "\nНомер";
@@ -348,11 +349,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			else
 				OperationName.Value = "Подписание Документа";
 			Torg12TitleVisible = Payload.Entity.AttachmentType == AttachmentType.XmlTorg12 && !ReqRevocationSign;
-
 			RcvFIO.Value = $"{SignerSureName} {SignerFirstName} {SignerPatronimic}";
 			RcvJobTitle.Value = Settings.Value.DiadokSignerJobTitle;
 			RcvDate.Value = DateTime.Now;
-
 			LikeReciever.Subscribe(x => {
 				if(x) {
 					AcptFirstName.Value = SignerFirstName;
@@ -361,7 +360,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					AcptJobTitle.Value = RcvJobTitle.Value;
 				}
 			});
-
 			ByAttorney.Subscribe(x => {
 				if(!x) {
 					AtrNum.Value = "";
@@ -372,9 +370,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					AtrAddInfo.Value = "";
 				}
 			});
-
 			CurrentAutoSave = new NotifyValue<SignTorg12Autosave>();
-
 			CurrentAutoSave.Subscribe(x =>
 			{
 				if(x != null) {
@@ -413,7 +409,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					Comment.Value = x.Comment;
 				}
 			});
-
 			Comment.Subscribe(x => {
 				if(!String.IsNullOrEmpty(x))
 					CommentVisibility.Value = true;
