@@ -1202,9 +1202,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver()
-				};
+				var serializer = GetSerializer();
 				serializer.Populate(stream, this);
 			} finally {
 				IsNotifying = true;
@@ -1215,16 +1213,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver(),
-#if DEBUG
-					Formatting = Formatting.Indented
-#endif
-				};
+				var serializer = GetSerializer();
 				serializer.Serialize(stream, this);
 			} finally {
 				IsNotifying = true;
 			}
+		}
+
+		private static JsonSerializer GetSerializer()
+		{
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver(),
+#if DEBUG
+				Formatting = Formatting.Indented
+#endif
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			return serializer;
 		}
 	}
 }
