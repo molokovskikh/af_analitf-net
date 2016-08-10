@@ -29,7 +29,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			End.Value = DateTime.Today;
 			ChangeDate.Value = DateTime.Today;
 			SearchBehavior = new SearchBehavior(this);
-			Items = new NotifyValue<IList<Check>>(new List<Check>());
 			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
 			AddressSelector = new AddressSelector(this);
 		}
@@ -44,7 +43,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<DateTime> ChangeDate { get; set; }
 		public SearchBehavior SearchBehavior { get; set; }
-		public NotifyValue<IList<Check>> Items { get; set; }
+		public NotifyValue<List<Check>> Items { get; set; }
 		public NotifyValue<Check> CurrentItem { get; set; }
 		public AddressSelector AddressSelector { get; set; }
 		public NotifyValue<IList<Selectable<string>>> KKMFilter { get; set; }
@@ -78,17 +77,20 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
-			var query = StatelessSession.Query<Check>().Where(c => c.Date <= End && c.Date>= Begin);
+			var query = Session.Query<Check>().Where(c => c.Date <= End && c.Date >= Begin
+			                                              && AddressSelector.GetActiveFilter().Contains(c.Department));
 			Items.Value = query.ToList();
 		}
 
 		public IEnumerable<IResult> PrintChecks()
 		{
+			Update();
 			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintReturnAct()
 		{
+			Update();
 			return Preview("Чеки", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
@@ -104,6 +106,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult ExportExcel()
 		{
+			Update();
 			var columns = new[] {"№ чека",
 				"Дата",
 				"ККМ",
@@ -123,7 +126,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Number,
 				o.Date,
 				o.KKM,
-				o.Department,
+				o.Department.Name,
 				o.Cancelled,
 				o.RetailSum,
 				o.DiscontSum,

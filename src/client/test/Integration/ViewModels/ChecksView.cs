@@ -21,6 +21,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Export_check()
 		{
+			CreateCheck();
 			var result = (OpenResult)model.ExportExcel();
 
 			Assert.IsTrue(File.Exists(result.Filename));
@@ -29,7 +30,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_return_act()
 		{
+			CreateCheck();
 			var results = model.PrintReturnAct().GetEnumerator();
+			var preview = Next<DialogResult>(results);
+
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
+		public void Print_check()
+		{
+			CreateCheck();
+			var results = model.PrintChecks().GetEnumerator();
 			var preview = Next<DialogResult>(results);
 
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
@@ -37,7 +49,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 		private Check CreateCheck()
 		{
-			return new Check
+			session.DeleteEach<Check>();
+			var department = session.Query<Address>().First();
+			var check = new Check
 			{
 				CheckType = CheckType.CheckReturn,
 				Number = 100,
@@ -45,7 +59,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ChangeOpening = DateTime.Today.AddDays(-7),
 				Status = Status.Open,
 				Clerk = "Тестовый кассир",
-				Department = address,
+				Department = department,
 				KKM = "1(0000000)",
 				PaymentType = PaymentType.Cash,
 				SaleType = SaleType.FullCost,
@@ -54,6 +68,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 				ChangeNumber = 42,
 				Cancelled = false,
 			};
+			var checkLine = CreateCheckLine(check);
+			session.Save(check);
+			session.Save(checkLine);
+			check.Lines.Add(checkLine);
+			return check;
 		}
 
 		private CheckLine CreateCheckLine(Check check)
@@ -76,16 +95,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void LoadData()
 		{
-			var address = session.Query<Address>().First();
-			session.DeleteEach<Check>();
 			var check = CreateCheck();
-			var checkLine = CreateCheckLine(check);
-			session.Save(check);
-			session.Save(checkLine);
-			check.Lines.Add(checkLine);
 			Assert.AreEqual(1, model.Items.Value.Count);
-			check.Date = DateTime.Today.AddDays(7);
+			session.DeleteEach<Check>();
+			check.Date = DateTime.Today.AddDays(14);
 			session.Save(check);
+			model.Update();
 			Assert.AreEqual(0, model.Items.Value.Count);
 		}
 
@@ -93,19 +108,18 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Filter_by_address()
 		{
 			session.DeleteEach(session.Query<Address>().Skip(1));
-
 			var newAddress = new Address("Тестовый адрес доставки");
 			session.Save(newAddress);
-			var offer = session.Query<Offer>().First();
-			MakeOrder(offer);
-			MakeOrder(offer, newAddress);
-
+			var check = CreateCheck();
+			check.Department = newAddress;
 			model.AddressSelector.All.Value = true;
-			Assert.That(model.Items.Value.Count, Is.EqualTo(2));
-			model.AddressSelector.Addresses[1].IsSelected = false;
-			Assert.That(model.Items.Value.Count, Is.EqualTo(2));
-			scheduler.AdvanceByMs(1000);
 			Assert.That(model.Items.Value.Count, Is.EqualTo(1));
+			model.AddressSelector.All.Value = false;
+			shell.CurrentAddress.Value = newAddress;
+			Assert.That(model.Items.Value.Count, Is.EqualTo(1));
+			model.AddressSelector.All.Value = false;
+			shell.CurrentAddress.Value = null;
+			Assert.That(model.Items.Value.Count, Is.EqualTo(0));
 		}
 	}
 }

@@ -25,7 +25,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		[Description("Полная стоимость")] FullCost,
 	}
-	public class Check
+	public class Check:BaseNotify
 	{
 		public Check()
 		{
@@ -51,8 +51,30 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Style(Description = "\"Аннулирован\"")]
 		public virtual bool Cancelled { get; set; }
 		public virtual decimal Sum => RetailSum - DiscontSum;
-		public virtual decimal RetailSum => Lines.Sum(l => l.RetailSum);
-		public virtual decimal DiscontSum => Lines.Sum(l => l.DiscontSum);
+		private decimal retailSum;
+		public virtual decimal RetailSum
+		{
+			get { return retailSum; }
+			set
+			{
+				retailSum = value;
+				OnPropertyChanged();
+				OnPropertyChanged("IsInvalid");
+				OnPropertyChanged("IsOverLimit");
+			}
+		}
+		private decimal discontSum;
+		public virtual decimal DiscontSum
+		{
+			get { return discontSum; }
+			set
+			{
+				discontSum = value;
+				OnPropertyChanged();
+				OnPropertyChanged("IsInvalid");
+				OnPropertyChanged("IsOverLimit");
+			}
+		}
 
 		//Эти поля были пустыми
 		public virtual string SaleCheck { get; set; }
@@ -71,6 +93,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 				Cost = x.Cost,
 				RetailCost = x.RetailCost,
 			}).ToArray();
+		}
+
+		public virtual void UpdateStat()
+		{
+			RetailSum = Lines.Sum(l => l.RetailSum);
+			DiscontSum = Lines.Sum(l => l.DiscontSum);
 		}
 	}
 }
