@@ -95,7 +95,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
-		[DataMember]
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -186,7 +185,6 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
-
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -1204,9 +1202,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver()
-				};
+				var serializer = GetSerializer();
 				serializer.Populate(stream, this);
 			} finally {
 				IsNotifying = true;
@@ -1217,16 +1213,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver(),
-#if DEBUG
-					Formatting = Formatting.Indented
-#endif
-				};
+				var serializer = GetSerializer();
 				serializer.Serialize(stream, this);
 			} finally {
 				IsNotifying = true;
 			}
+		}
+
+		private static JsonSerializer GetSerializer()
+		{
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver(),
+#if DEBUG
+				Formatting = Formatting.Indented
+#endif
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			return serializer;
 		}
 	}
 }

@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			AssertText(update, "Производится обмен данными");
 			FilterByProcess = true;
 			Process = System.Diagnostics.Process.GetProcessById(update.GetProcessId());
-			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
+			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Children, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
 				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ - тестовый")));
 

@@ -124,8 +124,7 @@ namespace test.release
 
 			WaitIdle();
 			Click("Update", MainWindow);
-				AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
-
+			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
 
 			FilterByProcess = false;
 			var update = Opened.Timeout(Timeout).First();
@@ -139,9 +138,17 @@ namespace test.release
 			AssertText(update, "Производится обмен данными");
 			Process = Process.GetProcessById(update.GetProcessId());
 			FilterByProcess = true;
-			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
+			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Children, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
-				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ")));
+				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ - Новости")));
+			if (MainWindow == null) {
+				var windows = AutomationElement.RootElement.FindAll(TreeScope.Children, new AndCondition(
+					new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
+					new PropertyCondition(AutomationElement.IsWindowPatternAvailableProperty, true)))
+					.OfType<AutomationElement>()
+					.Implode(x => x.Current.Name);
+				Assert.Fail($"Не удалось найти главное окно с заголовком 'АналитФАРМАЦИЯ' у процесса {Process.Id} есть следующие окна {windows}");
+			}
 
 			var message = Opened.Timeout(UpdateTimeout).First();
 			AssertText(message, "Обновление завершено успешно.");
