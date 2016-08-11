@@ -16,6 +16,7 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate;
 using ReactiveUI;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -132,8 +133,19 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				var lookup = MatchedWaybills.GetLookUp(StatelessSession, sentLines);
 				sentLines.Each(l => l.Configure(User, lookup));
 			}
-			else {
+			// Текущие заказы
+			else
+			{
 				Order.Value.Lines.Each(l => l.Configure(User));
+				// #48323 Присутствует в замороженных заказах
+				var productInFrozenOrders = StatelessSession.Query<Order>()
+					.Where(x => x.Frozen)
+					.SelectMany(x => x.Lines)
+					.Select(x => x.ProductId)
+					.ToList();
+				Order.Value.Lines
+					.Where(x => productInFrozenOrders.Contains(x.ProductId))
+					.Each(x => ((OrderLine)x).InFrozenOrders = true);
 			}
 
 			if (CurrentLine.Value != null)

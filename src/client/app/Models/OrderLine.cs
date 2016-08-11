@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -114,6 +115,9 @@ namespace AnalitF.Net.Client.Models
 
 		[Style("Sum", Description = "Корректировка по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsSendError => SendResult != LineResultStatus.OK;
+
+		[Ignore, Style(Description = "Присутствует в замороженных заказах")]
+		public virtual bool InFrozenOrders { get; set; }
 
 		//заглушка что бы работало смешение цветов от IsSendError
 		[Style("Sum")]

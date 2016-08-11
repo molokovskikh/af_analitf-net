@@ -215,6 +215,16 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						if (l.Order.IsAddressExists())
 							l.CalculateRetailCost(Settings.Value.Markups, Shell?.SpecialMarkupProducts.Value, User, l.Order.Address);
 					});
+
+					// #48323 Присутствует в замороженных заказах
+					var productInFrozenOrders = Session.Query<Order>()
+						.Where(x => x.Frozen)
+						.SelectMany(x => x.Lines)
+						.Select(x => x.ProductId)
+						.ToList();
+					lines.Where(x => productInFrozenOrders.Contains(x.ProductId))
+						.Each(x => x.InFrozenOrders = true);
+
 					return lines;
 				})
 				.Subscribe(Lines, CloseCancellation.Token);
