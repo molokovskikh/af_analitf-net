@@ -59,7 +59,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static string ToShortText(this AutomationElement el)
 		{
-			return String.Format("{0} - {1}", el.GetRuntimeId().Implode(), el.GetName());
+			return $"{el.GetRuntimeId().Implode()} - {el.GetName()}";
 		}
 
 		public static void Dump(AutomationElement element)
@@ -74,7 +74,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var value = element.GetCurrentPropertyValue(p);
 				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName,
 					value is AutomationIdentifier ? ((AutomationIdentifier)value).ProgrammaticName : value,
-					value != null ? value.GetType().ToString() : "");
+					value?.GetType().ToString() ?? "");
 			}
 
 			Console.WriteLine("--patterns--");
@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			AutomationElement dialog = null;
 			AutomationElement input = null;
 			WaitHelper.WaitOrFail(10.Second(), () => {
-				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Descendants,
+				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Children,
 					new AndCondition(
 						new PropertyCondition(AutomationElement.NameProperty, "Открыть"),
 						new PropertyCondition(AutomationElement.ProcessIdProperty, pid),
