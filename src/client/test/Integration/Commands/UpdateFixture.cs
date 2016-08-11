@@ -590,11 +590,31 @@ update Addresses set Id =  2575 where Id = :addressId")
 
 			clientConfig = clientConfig.Clone();
 			var normalServerUrl = clientConfig.BaseUrl;
-			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
+			clientConfig.AltUri = emptyServerUrl + "," + normalServerUrl;
 			var cmd = new UpdateCommand();
 			disposable.Add(cmd);
 			cmd.Configure(settings, clientConfig);
 			Assert.AreEqual(normalServerUrl, cmd.ConfigureHttp().ToString());
+		}
+
+		[Test]
+		public void Reconfigure_host()
+		{
+			var normal = clientConfig.BaseUrl;
+			var broken = InitHelper.RandomPort();
+			clientConfig = clientConfig.Clone();
+			clientConfig.BaseUrl = broken;
+			clientConfig.AltUri = broken + "," + normal;
+
+			var init = InitHelper.InitService(broken, new Service.Config.Config {
+				RootPath = cleaner.RandomDir(),
+				Environment = "Development",
+				InjectedFault = "Test error"
+			}).Result;
+			disposable.Add(init.Item1);
+
+			var result = Run(new UpdateCommand());
+			Assert.AreEqual(result, UpdateResult.SilentOk);
 		}
 
 		[Test]

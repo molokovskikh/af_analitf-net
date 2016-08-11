@@ -1,43 +1,41 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
+using System.Web.Http.SelfHost;
 using System.Xml.Linq;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Integration;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using NUnit.Framework;
-using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
 	[SetUpFixture]
 	public class AccentanceSetup
 	{
-		public static IntegrationSetup integrationSetup;
+		private static HttpSelfHostServer server;
+		public static Service.Config.Config Config;
+		public static Uri Url;
 
 		[OneTimeSetUp]
 		public void Setup()
 		{
+			Assert.IsNull(server);
 			if (!Directory.Exists(IntegrationSetup.BackupDir))
 				return;
 			Prepare(@"..\..\..\app\bin\Debug", "acceptance");
 
-			var port = Generator.Random(ushort.MaxValue).First();
-			var url = String.Format("http://localhost:{0}/", port);
-
-			integrationSetup = new IntegrationSetup();
-			integrationSetup.InitWebServer(new Uri(url)).Wait();
-
-			Configure("acceptance", url);
+			Url = InitHelper.RandomPort();
+			var result = InitHelper.InitService(Url).Result;
+			server = result.Item1;
+			Config = result.Item2;
+			Configure("acceptance", Url.ToString());
 		}
 
 		[OneTimeTearDown]
 		public void Teardown()
 		{
-			if (integrationSetup != null && integrationSetup.server != null)
-				integrationSetup.server.Dispose();
+			server?.Dispose();
 		}
 
 		public static void Configure(string binDir, string uri)

@@ -252,6 +252,7 @@
     <Compile Include="TestHelpers\DbHelper.cs" />
     <Compile Include="TestHelpers\DispatcherFixture.cs" />
     <Compile Include="TestHelpers\BindingChecker.cs" />
+    <Compile Include="TestHelpers\InitHelper.cs" />
     <Compile Include="TestHelpers\MixedFixture.cs" />
     <Compile Include="TestHelpers\MixedScheduler.cs" />
     <Compile Include="TestHelpers\ViewModelFixture.cs" />
