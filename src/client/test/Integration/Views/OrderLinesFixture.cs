@@ -47,18 +47,21 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			var order = MakeOrder();
 			order.Frozen = true;
 			session.Flush();
+			var productId = order.Lines[0].ProductId;
 
 			// детализация текущего заказа
 			var model = new OrderDetailsViewModel(order);
 			var view = Bind(model);
 			var grid = view.Descendants<DataGrid>().First(g => g.Name == "Lines");
-			Assert.IsTrue(((OrderLine)grid.Items.CurrentItem).InFrozenOrders);
+			var item = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			Assert.IsTrue(item.InFrozenOrders);
 
 			// сводный заказ
 			var model2 = new OrderLinesViewModel();
 			var view2 = Bind(model2);
 			var grid2 = view2.Descendants<DataGrid>().First(g => g.Name == "Lines");
-			Assert.IsTrue(((OrderLine)grid.Items.CurrentItem).InFrozenOrders);
+			var item2 = grid.Items.Cast<OrderLine>().First(x => x.ProductId == productId);
+			Assert.IsTrue(item2.InFrozenOrders);
 		}
 	}
 }

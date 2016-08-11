@@ -137,6 +137,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			else
 			{
 				Order.Value.Lines.Each(l => l.Configure(User));
+
 				// #48323 Присутствует в замороженных заказах
 				var productInFrozenOrders = StatelessSession.Query<Order>()
 					.Where(x => x.Frozen)
@@ -144,8 +145,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					.Select(x => x.ProductId)
 					.ToList();
 				Order.Value.Lines
+					.Cast<OrderLine>()
 					.Where(x => productInFrozenOrders.Contains(x.ProductId))
-					.Each(x => ((OrderLine)x).InFrozenOrders = true);
+					.Each(x => x.InFrozenOrders = true);
 			}
 
 			if (CurrentLine.Value != null)
