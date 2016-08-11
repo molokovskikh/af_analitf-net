@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
+using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -18,12 +19,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public CheckDetails()
 		{
 			DisplayName = "Чек";
+			Lines = new NotifyValue<IList<CheckLine>>(new List<CheckLine>());
 		}
 
-		public CheckDetails(Check header)
+		public CheckDetails(uint id)
 			: this()
 		{
-			Header.Value = header;
+			this.id = id;
 		}
 
 		public NotifyValue<Check> Header { get; set; }
@@ -33,8 +35,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			Lines.Value = Header.Value.Lines;
+			if (Header.Value == null) {
+				RxQuery(x => x.Query<Check>()
+						.FirstOrDefault(y => y.Id == id))
+					.Subscribe(Header);
+				RxQuery(x => {
+						return x.Query<CheckLine>().Where(y => y.CheckId == id)
+							.ToList()
+							.ToObservableCollection();
+					})
+					.Subscribe(Lines);
+			}
 		}
+
 		public IEnumerable<IResult> PrintCheckDetails()
 		{
 			return Preview("Чеки", new CheckDetailsDocument(Lines.Value.ToArray(), Header.Value));
