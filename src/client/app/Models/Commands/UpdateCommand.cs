@@ -196,6 +196,15 @@ namespace AnalitF.Net.Client.Models.Commands
 					break;
 				}
 				catch(Exception e) {
+					if (e is RequestException) {
+						var requestException = (RequestException)e;
+						if (requestException.StatusCode == HttpStatusCode.Unauthorized)
+							throw;
+						if (requestException.StatusCode == HttpStatusCode.Forbidden)
+							throw;
+					}
+					if (e is EndUserError)
+						throw;
 					if (Token.IsCancellationRequested)
 						throw;
 					errorCount++;
