@@ -580,10 +580,11 @@ update Addresses set Id =  2575 where Id = :addressId")
 		[Test]
 		public void Select_host()
 		{
-			var emptyServerUrl = String.Format("http://localhost:{0}", new Random().Next(10000, 20000));
-			var cfg = new HttpSelfHostConfiguration(emptyServerUrl);
-			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-			cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
+			var emptyServerUrl = InitHelper.RandomPort();
+			var cfg = new HttpSelfHostConfiguration(emptyServerUrl) {
+				IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
+				HostNameComparisonMode = HostNameComparisonMode.Exact
+			};
 			var server = new HttpSelfHostServer(cfg);
 			disposable.Add(server);
 			server.OpenAsync().Wait();
@@ -614,7 +615,7 @@ update Addresses set Id =  2575 where Id = :addressId")
 			disposable.Add(init.Item1);
 
 			var result = Run(new UpdateCommand());
-			Assert.AreEqual(result, UpdateResult.SilentOk);
+			Assert.That(result, Is.EqualTo(UpdateResult.SilentOk).Or.EqualTo(UpdateResult.OK));
 		}
 
 		[Test]
