@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
 
-			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
+			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning, LinesFilter);
 			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
@@ -72,6 +72,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 
+		public NotifyValue<LinesFilter> LinesFilter { get; set; }
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -106,11 +108,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		private IList<IOrderLine> Filter()
 		{
-			if (OnlyWarning)
-				return Source
-					.OfType<OrderLine>().Where(l => l.SendResult != LineResultStatus.OK)
-					.OrderBy(l => l.ProducerSynonym)
-					.LinkTo(Source);
+			if (OnlyWarning || LinesFilter.Value == Orders.LinesFilter.InFrozenOrders) {
+				var query = Source.OfType<OrderLine>();
+				if (OnlyWarning)
+					query = query.Where(x => x.SendResult != LineResultStatus.OK);
+				if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)
+					query = query.Where(x => x.InFrozenOrders);
+				return query.OrderBy(l => l.ProducerSynonym).LinkTo(Source);
+			}
 
 			return Source;
 		}

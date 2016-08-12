@@ -17,9 +17,16 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
+using System.ComponentModel;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
+	public enum LinesFilter
+	{
+		[Description("Все")] All,
+		[Description("Позиции присутствуют в замороженных заказах")] InFrozenOrders
+	}
+
 	//todo при удалении строки в предложениях должна удаляться строка и в заказах
 	[DataContract]
 	public class OrderLinesViewModel : BaseOfferViewModel, IPrintable
@@ -132,6 +139,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public MatchedWaybills MatchedWaybills { get; set; }
 
+		public NotifyValue<LinesFilter> LinesFilter { get; set; }
+
 		public bool CanPrint
 		{
 			get
@@ -202,6 +211,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressSelector.FilterChanged
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyWarning.Select(v => (object)v))
+				.Merge(LinesFilter.Changed())
 				.Where(_ => IsCurrentSelected && Session != null)
 				.Select(_ => {
 					var lines = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
@@ -224,6 +234,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 						.ToList();
 					lines.Where(x => productInFrozenOrders.Contains(x.ProductId))
 						.Each(x => x.InFrozenOrders = true);
+					if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)
+						lines = lines.Where(x => x.InFrozenOrders).ToObservableCollection();
 
 					return lines;
 				})
