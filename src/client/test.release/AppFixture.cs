@@ -1,22 +1,16 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using System.Windows.Automation;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
-using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
 using NUnit.Framework;
-using TestStack.White.InputDevices;
 using ProcessHelper = Common.Tools.Helpers.ProcessHelper;
 
 namespace test.release
@@ -134,9 +128,9 @@ namespace test.release
 				//предполагаем что окно закрылось быстрее чем смог считаться данные и обновление прошло успешно
 			}
 
-			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(30.Second()).First();
+			update = Opened.Where(e => e.Current.Name == "Обмен данными").Timeout(30.Second()).First();
 			AssertText(update, "Производится обмен данными");
-			Process = Process.GetProcessById(update.GetProcessId());
+			Process = Process.GetProcessById(update.Current.ProcessId);
 			FilterByProcess = true;
 			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Children, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),

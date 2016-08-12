@@ -81,6 +81,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.Items.Remove(item);
 				conductor.DeactivateItem(item, true);
 				navigationStack.Remove(item);
+				(item as IDisposable)?.Dispose();
 			}
 		}
 	}

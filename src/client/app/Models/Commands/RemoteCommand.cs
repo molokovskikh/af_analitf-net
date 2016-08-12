@@ -255,7 +255,12 @@ namespace AnalitF.Net.Client.Models.Commands
 						Log.Info($"Нет ответа {cancelled.Implode(x => x.Item1)}");
 
 					if (responded.Length > 0) {
+						//для тестирования в тестах мы всегда должны брать первый из доступных
+#if DEBUG
+						var host = new Uri(responded[0].Item1);
+#else
 						var host = new Uri(responded[new Random().Next(responded.Length)].Item1);
+#endif
 						Log.Info($"Выбран для обмена данными {host}");
 						return host;
 					}
