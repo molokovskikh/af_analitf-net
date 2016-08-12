@@ -107,6 +107,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Filter_by_address()
 		{
+			restore = true;
 			session.DeleteEach(session.Query<Address>().Skip(1));
 			var newAddress = new Address("Тестовый адрес доставки");
 			session.Save(newAddress);
