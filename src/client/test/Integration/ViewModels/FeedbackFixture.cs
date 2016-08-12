@@ -59,7 +59,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Get_message_without_attachments()
 		{
-			Directory.GetFiles(".", "*.log").Each(File.Delete);
 			cleaner.Watch("test.log");
 			File.WriteAllText("test.log", "test");
 			trash.Add(feedback);

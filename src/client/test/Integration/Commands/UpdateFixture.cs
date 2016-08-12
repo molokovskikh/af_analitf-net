@@ -140,7 +140,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Send_logs()
 		{
-			File.WriteAllText(Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log"), "123");
+			var logfile = Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log");
+			File.WriteAllText(logfile, "123");
 
 			Run(new UpdateCommand());
 
@@ -151,6 +152,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.SetParameter("date", begin)
 				.UniqueResult<string>();
 			Assert.That(text, Is.EqualTo("123"));
+			Assert.IsFalse(File.Exists(logfile), $"Файл логов должен быть удален {logfile}");
 		}
 
 		[Test]

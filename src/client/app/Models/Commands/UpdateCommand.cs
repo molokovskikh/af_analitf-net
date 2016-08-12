@@ -1432,6 +1432,8 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 						zip.AddFile(logFile);
 					zip.Save(file);
 				}
+				foreach (var logFile in logs)
+					File.Delete(logFile);
 			}
 			return file;
 		}
