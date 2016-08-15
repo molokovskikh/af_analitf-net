@@ -25,6 +25,9 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
+			<StackPanel Orientation="Vertical" Margin="0,0,5,0" Width="200" VerticalAlignment="Center">
+				<ComboBox Style="{StaticResource Select}" x:Name="LinesFilter" />
+			</StackPanel>
 			<GroupBox Header="Источник" Margin="0, 0, 4, 0">
 				<StackPanel Orientation="Vertical">
 					<RadioButton GroupName="Source" Name="IsCurrentSelected">Выбирать из текущих</RadioButton>
@@ -119,11 +122,11 @@
 						CellStyle="{StaticResource CountColumn}" />
 				</DataGrid.Columns>
 			</c:DataGrid2>
-			
+
 
 		<ContentControl x:Name="QuickSearch" Grid.Row="0" />
 			<ContentControl x:Name="LinesOrderWarning" Grid.Row="0" />
-			
+
 		</Grid>
 			</c:MainControllerWrap>
 		<GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}" />
