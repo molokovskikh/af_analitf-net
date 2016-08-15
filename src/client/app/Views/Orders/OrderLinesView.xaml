@@ -25,8 +25,7 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Style="{StaticResource FilterPanel}" Grid.Row="0">
-			<StackPanel Orientation="Vertical" Margin="0,0,5,0" Width="200" VerticalAlignment="Top">
-				<Label>Показывать</Label>
+			<StackPanel Orientation="Vertical" Margin="0,0,5,0" Width="200" VerticalAlignment="Center">
 				<ComboBox Style="{StaticResource Select}" x:Name="LinesFilter" />
 			</StackPanel>
 			<GroupBox Header="Источник" Margin="0, 0, 4, 0">
