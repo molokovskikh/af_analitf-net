@@ -1,23 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Web.Http.SelfHost;
 using System.Windows.Automation;
-using System.Windows.Forms.VisualStyles;
-using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Test.Integration;
 using AnalitF.Net.Client.Test.TestHelpers;
-using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
 using Microsoft.Test.Input;
 using NUnit.Framework;
-using Test.Support;
 
 namespace AnalitF.Net.Client.Test.Acceptance
 {
@@ -27,8 +19,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[TearDown]
 		public void TearDown()
 		{
-			var serviceConfig = IntegrationSetup.serviceConfig;
-			Directory.GetFiles(serviceConfig.RtmUpdatePath).Each(File.Delete);
+			Directory.GetFiles(AccentanceSetup.Config.RtmUpdatePath).Each(File.Delete);
 		}
 
 		[Test]
@@ -50,12 +41,10 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Check_auto_update()
 		{
-			var serviceConfig = IntegrationSetup.serviceConfig;
-			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
-			DbHelper.CopyBin("acceptance", serviceConfig.RtmUpdatePath);
-			DbHelper.CopyBin(DbHelper.ProjectBin("updater"), serviceConfig.RtmUpdatePath);
-			AccentanceSetup.Configure("acceptance",
-				((HttpSelfHostConfiguration)AccentanceSetup.integrationSetup.server.Configuration).BaseAddress.ToString());
+			File.WriteAllText(Path.Combine(AccentanceSetup.Config.RtmUpdatePath, "version.txt"), "99.99.99.99");
+			DbHelper.CopyBin("acceptance", AccentanceSetup.Config.RtmUpdatePath);
+			DbHelper.CopyBin(DbHelper.ProjectBin("updater"), AccentanceSetup.Config.RtmUpdatePath);
+			AccentanceSetup.Configure("acceptance", AccentanceSetup.Url.ToString());
 
 			HandleDialogs();
 			Activate();
@@ -66,11 +55,11 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var update = Opened.Timeout(5.Second()).First();
 			AssertText(update, "Внимание! Происходит обновление программы.");
 
-			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(15.Second()).First();
+			update = Opened.Where(e => e.Current.Name == "Обмен данными").Timeout(15.Second()).First();
 			AssertText(update, "Производится обмен данными");
 			FilterByProcess = true;
-			Process = System.Diagnostics.Process.GetProcessById(update.GetProcessId());
-			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
+			Process = System.Diagnostics.Process.GetProcessById(update.Current.ProcessId);
+			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Children, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
 				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ - тестовый")));
 
@@ -119,7 +108,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 			//кнопка активируется с задержкой
 			WaitHelper.WaitOrFail(10.Second(),
-				() => FindById("SendOrders").IsEnabled(),
+				() => FindById("SendOrders").Current.IsEnabled,
 				"Не удалось дождаться активации кнопки отправки заказов");
 			Click("SendOrders");
 			AssertUpdate("Отправка заказов завершена успешно.");
@@ -128,7 +117,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		[Test]
 		public void Empty_update()
 		{
-			FileHelper2.DeleteDir(Path.Combine("acceptance", "data"));
+			FileHelper.DeleteDir(Path.Combine("acceptance", "data"));
 
 			Activate();
 			WaitMessage("Для начала работы с программой необходимо заполнить учетные данные");

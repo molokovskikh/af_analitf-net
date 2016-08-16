@@ -467,6 +467,21 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			Assert.AreEqual(37.96, line.RetailMarkup);
 		}
 
+		[Test]
+		public void Respect_server_retail_cost()
+		{
+			var line = new WaybillLine(waybill) {
+				SupplierCost = 251.20m,
+				SupplierCostWithoutNds = 228.36m,
+				Quantity = 1,
+				ServerRetailCost = 276.3m,
+				ServerRetailMarkup = 10,
+			};
+			Calculate(line);
+			Assert.AreEqual(276.3, line.RetailCost);
+			Assert.AreEqual(10, line.RetailMarkup);
+		}
+
 		private WaybillLine Line()
 		{
 			settings.Markups.First(x => x.Type == MarkupType.Nds18).Markup = 30;

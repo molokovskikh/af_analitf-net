@@ -3311,6 +3311,11 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
             {
                 cmd = command.SetupCommand(cnn, paramReader);
                 if (wasClosed) cnn.Open();
+								for(var i = 0; i < cmd.Parameters.Count; i++) {
+									var parameter = (IDataParameter)cmd.Parameters[i];
+									if (!parameter.ParameterName.StartsWith("@"))
+										parameter.ParameterName = "@" + parameter.ParameterName;
+								}
                 int result = cmd.ExecuteNonQuery();
                 command.OnCompleted();
                 return result;

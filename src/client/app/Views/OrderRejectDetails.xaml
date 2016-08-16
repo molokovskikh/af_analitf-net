@@ -61,16 +61,16 @@
 				<Label Grid.Row="1" Grid.Column="3" Name="DisplaySupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
-
-		<controls:DataGrid2 Grid.Row="1" x:Name="Lines" caliburn:NavBinder.Next="{x:Reference Offers}">
-			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Width="*" Header="Код" Binding="{Binding Code}" />
-				<controls:DataGridTextColumnEx Width="*" Header="Наименование" Binding="{Binding Product}" />
-				<controls:DataGridTextColumnEx Width="*" Header="Производитель" Binding="{Binding Producer}" />
-				<controls:DataGridTextColumnEx Width="*" Header="Количество" Binding="{Binding Count}" />
-			</DataGrid.Columns>
-		</controls:DataGrid2>
-
+		<controls:MainControllerWrap Grid.Row="1">
+			<controls:DataGrid2  x:Name="Lines" caliburn:NavBinder.Next="{x:Reference Offers}">
+				<DataGrid.Columns>
+					<controls:DataGridTextColumnEx Width="*" Header="Код" Binding="{Binding Code}" />
+					<controls:DataGridTextColumnEx Width="*" Header="Наименование" Binding="{Binding Product}" />
+					<controls:DataGridTextColumnEx Width="*" Header="Производитель" Binding="{Binding Producer}" />
+					<controls:DataGridTextColumnEx Width="*" Header="Количество" Binding="{Binding Count}" />
+				</DataGrid.Columns>
+			</controls:DataGrid2>
+		</controls:MainControllerWrap>
 		<ContentControl Grid.Row="2" x:Name="ProductInfo" />
 
 		<controls:DataGrid2 x:Name="Offers" Grid.Row="3"

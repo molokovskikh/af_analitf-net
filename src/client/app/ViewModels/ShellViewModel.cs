@@ -56,10 +56,17 @@ namespace AnalitF.Net.Client.ViewModels
 #if DEBUG
 	public class RestoreData
 	{
-		public RestoreData(object[] args, string typeName)
+		public RestoreData()
 		{
-			Args = args;
-			TypeName = typeName;
+		}
+
+		public RestoreData(object screen)
+		{
+			if (screen is BaseScreen)
+				Args = ((BaseScreen)screen).GetRebuildArgs();
+			else
+				Args = new object[0];
+			TypeName = screen.GetType().FullName;
 		}
 
 		public string TypeName;
@@ -67,7 +74,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override string ToString()
 		{
-			return String.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
+			return string.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
 		}
 	}
 #endif
@@ -88,7 +95,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
-		[DataMember]
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -96,7 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
-	
+
 		private bool _leaderCalculationWasStart;
 		public  bool LeaderCalculationWasStart
 		{
@@ -104,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_leaderCalculationWasStart = value;
-				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));			
+				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));
 			}
 		}
 
@@ -179,7 +185,6 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
-										
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -730,7 +735,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			LeaderCalculationWasStart = true;
 			TaskEx.Run(() => {
-				DbMaintain.UpdateLeaders();				
+				DbMaintain.UpdateLeaders();
 			}).ContinueWith(t => {
 				LeaderCalculationWasStart = false;
 			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
@@ -1132,7 +1137,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			PersistentNavigationStack = NavigationStack
 				.Concat(new [] { ActiveItem })
-				.Select(s => new RestoreData(((BaseScreen)s).GetRebuildArgs(), s.GetType().FullName))
+				.Select(s => new RestoreData(s))
 				.ToList();
 			base.OnDeactivate(close);
 		}
@@ -1197,9 +1202,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver()
-				};
+				var serializer = GetSerializer();
 				serializer.Populate(stream, this);
 			} finally {
 				IsNotifying = true;
@@ -1210,16 +1213,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver(),
-#if DEBUG
-					Formatting = Formatting.Indented
-#endif
-				};
+				var serializer = GetSerializer();
 				serializer.Serialize(stream, this);
 			} finally {
 				IsNotifying = true;
 			}
+		}
+
+		private static JsonSerializer GetSerializer()
+		{
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver(),
+#if DEBUG
+				Formatting = Formatting.Indented
+#endif
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			return serializer;
 		}
 	}
 }

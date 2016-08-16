@@ -224,6 +224,10 @@ namespace AnalitF.Net.Client.Models.Commands
 						}
 					}
 
+					// #51646 Проблемы обновления АF.NET
+					if (table.Name.Match("WaybillLines") && tableMeta.GetIndexMetadata("SerialProductIdProducerId") == null)
+						alters.Add("alter table WaybillLines add index SerialProductIdProducerId (SerialNumber, ProductId, ProducerId);");
+
 					if (table.Name.Match("Offers")){
 						if (tableMeta.GetIndexMetadata("ProductSynonym") == null) {
 							alters.Add("alter table Offers add fulltext (ProductSynonym);");

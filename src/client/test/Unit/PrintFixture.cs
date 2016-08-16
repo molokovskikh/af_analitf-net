@@ -98,8 +98,10 @@ namespace AnalitF.Net.Client.Test.Unit
 				Quantity = 1
 			};
 			waybill.AddLine(line);
+
 			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+
 			Assert.IsNotNull(doc);
 		}
 
@@ -119,8 +121,10 @@ namespace AnalitF.Net.Client.Test.Unit
 				};
 				waybill.AddLine(line);
 			}
+
 			waybill.Calculate(settings, new List<uint>());
-			var doc = new PriceTagDocument(waybill, waybill.Lines, settings).Build();
+			var doc = new PriceTagDocument(waybill, waybill.Lines, settings, null).Build();
+
 			Assert.IsNotNull(doc);
 			Assert.AreEqual(2, doc.Blocks.Count);
 			var page1 = doc.Blocks.FirstBlock as Section;

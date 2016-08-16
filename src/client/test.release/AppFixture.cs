@@ -1,22 +1,16 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using System.Windows.Automation;
-using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Test.Acceptance;
 using AnalitF.Net.Client.Test.TestHelpers;
 using Common.Tools;
 using Common.Tools.Calendar;
-using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
 using NUnit.Framework;
-using TestStack.White.InputDevices;
 using ProcessHelper = Common.Tools.Helpers.ProcessHelper;
 
 namespace test.release
@@ -53,7 +47,7 @@ namespace test.release
 					return false;
 				}
 			}));
-			FileHelper2.DeleteDir(Path.Combine(root, "data"));
+			FileHelper.DeleteDir(Path.Combine(root, "data"));
 		}
 
 		protected override void OnActivated(object sender, AutomationEventArgs e)
@@ -124,8 +118,7 @@ namespace test.release
 
 			WaitIdle();
 			Click("Update", MainWindow);
-				AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
-
+			AssertUpdate("Получена новая версия программы. Сейчас будет выполнено обновление.");
 
 			FilterByProcess = false;
 			var update = Opened.Timeout(Timeout).First();
@@ -135,13 +128,21 @@ namespace test.release
 				//предполагаем что окно закрылось быстрее чем смог считаться данные и обновление прошло успешно
 			}
 
-			update = Opened.Where(e => e.GetName() == "Обмен данными").Timeout(30.Second()).First();
+			update = Opened.Where(e => e.Current.Name == "Обмен данными").Timeout(30.Second()).First();
 			AssertText(update, "Производится обмен данными");
-			Process = Process.GetProcessById(update.GetProcessId());
+			Process = Process.GetProcessById(update.Current.ProcessId);
 			FilterByProcess = true;
-			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Descendants, new AndCondition(
+			MainWindow = AutomationElement.RootElement.FindFirst(TreeScope.Children, new AndCondition(
 				new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
-				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ")));
+				new PropertyCondition(AutomationElement.NameProperty, "АналитФАРМАЦИЯ - Новости")));
+			if (MainWindow == null) {
+				var windows = AutomationElement.RootElement.FindAll(TreeScope.Children, new AndCondition(
+					new PropertyCondition(AutomationElement.ProcessIdProperty, Process.Id),
+					new PropertyCondition(AutomationElement.IsWindowPatternAvailableProperty, true)))
+					.OfType<AutomationElement>()
+					.Implode(x => x.Current.Name);
+				Assert.Fail($"Не удалось найти главное окно с заголовком 'АналитФАРМАЦИЯ' у процесса {Process.Id} есть следующие окна {windows}");
+			}
 
 			var message = Opened.Timeout(UpdateTimeout).First();
 			AssertText(message, "Обновление завершено успешно.");

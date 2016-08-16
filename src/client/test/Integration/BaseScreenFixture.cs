@@ -24,7 +24,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			shell.ShowCatalog();
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(0));
 			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
-			Assert.AreNotEqual(shell.ActiveItem, catalog);
+			Assert.AreEqual(shell.ActiveItem, catalog);
 		}
 
 		[Test]

@@ -9,6 +9,44 @@ using Test.Support.Documents;
 
 namespace AnalitF.Net.Client.Test.Fixtures
 {
+	[Description("Создает накладную с розничной ценой, для тестирования функции транспорта розничной цены")]
+	public class CreateWaybillWithServerCost : ServerFixture
+	{
+		public TestDocumentLog Document;
+		public TestDocumentSendLog SendLog;
+		public TestWaybill Waybill;
+
+		public override void Execute(ISession session)
+		{
+			var user = User(session);
+			Waybill = Service.Test.TestHelpers.DataMother.CreateWaybill(session, user);
+			var products = session.Query<TestProduct>().Where(x => !x.Hidden && x.CatalogProduct.Pharmacie).Take(1).ToArray();
+			Waybill.Lines.Clear();
+			Waybill.Lines.Add(new TestWaybillLine(Waybill) {
+				Product = products[0].FullName,
+				CatalogProduct = products[0],
+				Certificates = "РОСС BE.ФМ11.Д06711",
+				CertificatesDate = "01.16.2013",
+				Period = "30.09.2014",
+				Producer = "Алкон-Куврер н.в. с.а.",
+				Country = "БЕЛЬГИЯ",
+				RetailCost = 600,
+				RetailCostMarkup = 5,
+				SupplierCostWithoutNDS = 536.17m,
+				SupplierCost = 589.79m,
+				Quantity = 1,
+				SerialNumber = "A 565",
+				Amount = 589.79m,
+				NDS = 10,
+				NDSAmount = 53.62m,
+			});
+			Document = Waybill.Log;
+			session.Save(Waybill);
+			SendLog = new TestDocumentSendLog(user, Document);
+			session.Save(SendLog);
+		}
+	}
+
 	[Description("Создает накладную для отчета Надб ЖНВЛС")]
 	public class CreateWaybillForReport : ServerFixture
 	{

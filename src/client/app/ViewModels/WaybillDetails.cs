@@ -14,6 +14,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using Common.Tools;
+using Dapper;
 using NHibernate.Linq;
 using NPOI.SS.UserModel;
 using HorizontalAlignment = NPOI.SS.UserModel.HorizontalAlignment;
@@ -24,6 +25,7 @@ namespace AnalitF.Net.Client.ViewModels
 	public class WaybillDetails : BaseScreen
 	{
 		private uint id;
+		private PriceTag priceTag;
 
 		//для восстановления состояния
 		public WaybillDetails(long id)
@@ -149,6 +151,9 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.ObserveOn(UiScheduler)
 				.ToValue(CloseCancellation);
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => priceTag = x);
 			IsRejectVisible = Reject.Select(r => r != null).ToValue();
 			if (Waybill.IsCreatedByUser)
 			{
@@ -169,7 +174,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> PrintPriceTags()
 		{
-			return Preview("Ценники", new PriceTagDocument(Waybill, PrintableLines(), Settings.Value));
+			return Preview("Ценники", new PriceTagDocument(Waybill, PrintableLines(), Settings.Value, priceTag));
 		}
 
 		public IEnumerable<IResult> PrintRegistry()
