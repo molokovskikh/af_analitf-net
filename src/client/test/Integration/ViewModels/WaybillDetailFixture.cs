@@ -235,5 +235,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf(typeof(OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
+
+		[Test]
+ 		public void Export_waybill_to_excel_restored_ver()
+ 		{
+ 			var result = model.RestoredExportWaybill();
+ 			Assert.IsInstanceOf(typeof(OpenResult), result);
+ 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
+ 		}
 	}
 }

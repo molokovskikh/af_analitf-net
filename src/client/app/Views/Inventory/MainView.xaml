@@ -15,7 +15,8 @@
 			<Menu>
 				<MenuItem Header="Документы">
 					<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
-				</MenuItem>
+          <MenuItem Header="Чеки" Name="Checks" />
+        </MenuItem>
 				<MenuItem Header="Отчеты">
 					<MenuItem Header="Товарные запасы" Name="Stocks" />
 					<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
