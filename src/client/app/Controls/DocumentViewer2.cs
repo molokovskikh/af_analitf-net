@@ -142,18 +142,13 @@ namespace AnalitF.Net.Client.Controls
 
 			var bd = printDoc.Item2;
 			var baseFd = bd.Build();
-
-			foreach (Block block in baseFd.Blocks)
-			{
-				if (block is Table)
-				{//что бы в таблице rtf прорисовывались все линии
+			foreach (Block block in baseFd.Blocks) {
+				if (block is Table) {
+					//что бы в таблице rtf прорисовывались все линии
 					Table table = block as Table;
-					foreach (var rowGroup in table.RowGroups)
-					{
-						foreach (var currentRow in rowGroup.Rows)
-						{
-							foreach (var cell in currentRow.Cells)
-							{
+					foreach (var rowGroup in table.RowGroups) {
+						foreach (var currentRow in rowGroup.Rows) {
+							foreach (var cell in currentRow.Cells) {
 								cell.BorderThickness = new Thickness(1, 1, 1, 1);
 								cell.BorderBrush = Brushes.Black;
 							}
@@ -161,34 +156,24 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 			}
-
-			var result = new SaveFileResult(new[]
-			{
+			var result = new SaveFileResult(new[] {
 				Tuple.Create("Файл PNG (*.png)", ".png"),
 				Tuple.Create("Файл RTF (*.rtf)", ".rtf")
 			});
-
 			result.Execute(new ActionExecutionContext());
-
-			if(!String.IsNullOrEmpty(result.Dialog.FileName))
-			{
-				if (result.Dialog.FilterIndex == 1)
-				{
+			if(result.Success) {
+				if (result.Dialog.FilterIndex == 1) {
 					DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
 					RenderTargetBitmap bitmap = PrintHelper.ToBitmap(dp);
 					BitmapFrame bmf = BitmapFrame.Create(bitmap);
 					var enc = new PngBitmapEncoder();
 					enc.Frames.Add(bmf);
-
-					using (var fs = File.OpenWrite(result.Dialog.FileName))
-					{
+					using (var fs = result.Stream()) {
 						enc.Save(fs);
 					}
 				}
-				else if (result.Dialog.FilterIndex == 2)
-				{
-					using(var writer = result.Writer())
-					{
+				else if (result.Dialog.FilterIndex == 2) {
+					using(var writer = result.Writer()) {
 						var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
 						writer.WriteLine(rtfString);
 						writer.Flush();

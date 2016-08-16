@@ -17,6 +17,7 @@ namespace AnalitF.Net.Client.Models.Results
 
 		public SaveFileDialog Dialog = new SaveFileDialog();
 		public WindowManager Manager;
+		public bool Success { get; set; }
 
 		public SaveFileResult(Tuple<string, string>[] formats, string filename = null)
 		{
@@ -43,6 +44,7 @@ namespace AnalitF.Net.Client.Models.Results
 				};
 				Completed(this, resultCompletionEventArgs);
 			}
+			Success = result.GetValueOrDefault();
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -58,6 +60,21 @@ namespace AnalitF.Net.Client.Models.Results
 		{
 			try {
 				return new StreamWriter(Dialog.FileName, false, Encoding.Default);
+			}
+			catch(UnauthorizedAccessException e) {
+				Manager.Error(e.Message);
+				throw;
+			}
+			catch(IOException e) {
+				Manager.Error(ErrorHelper.TranslateIO(e));
+				throw;
+			}
+		}
+
+		public FileStream Stream()
+		{
+			try {
+				return File.OpenWrite(Dialog.FileName);
 			}
 			catch(UnauthorizedAccessException e) {
 				Manager.Error(e.Message);
