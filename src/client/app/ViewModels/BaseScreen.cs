@@ -280,6 +280,7 @@ namespace AnalitF.Net.Client.ViewModels
 				DbReloadToken.OnNext(new object());
 				reload = false;
 			}
+			TableSettings.RestoreView(GetView());
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -317,9 +318,10 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (close) {
 				Save();
-				TableSettings.SaveView(GetView());
+				//TableSettings.SaveView(GetView());
 				Dispose();
 			}
+			TableSettings.SaveView(GetView());
 
 			if (broacast)
 				Broadcast();
