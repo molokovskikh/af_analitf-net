@@ -294,7 +294,7 @@
 			</TabControl.ItemTemplate>
 			<TabControl.ContentTemplate>
 				<DataTemplate>
-					<controls:ScrollGeneralContentViewer cal:View.Model="{TemplateBinding DataContext}" />
+					<ContentControl cal:View.Model="{TemplateBinding DataContext}" />
 				</DataTemplate>
 			</TabControl.ContentTemplate>
 		</TabControl>

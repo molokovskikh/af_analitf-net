@@ -139,8 +139,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Update_jounal_on_download_complete()
 		{
 			Env.Barrier = new Barrier(2);
-			var attachment = Download();
-			Close(attachment);
+			Download();
+			Close(model);
 			shell.ShowJournal();
 			var journal = (Journal)shell.ActiveItem;
 			var oldCount = journal.Items.Value.Count;

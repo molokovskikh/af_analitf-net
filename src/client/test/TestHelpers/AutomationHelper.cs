@@ -4,11 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows.Automation;
-using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using Common.Tools.Calendar;
 using Common.Tools.Helpers;
-using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -37,21 +35,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Console.WriteLine("-----------------------------");
 		}
 
-		public static string GetName(this AutomationElement e)
-		{
-			return (string)e.GetCurrentPropertyValue(AutomationElement.NameProperty);
-		}
-
-		public static int GetProcessId(this AutomationElement e)
-		{
-			return (int)e.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty);
-		}
-
-		public static bool IsEnabled(this AutomationElement e)
-		{
-			return (bool)e.GetCurrentPropertyValue(AutomationElement.IsEnabledProperty);
-		}
-
 		public static void Dump(AutomationElementCollection elements)
 		{
 			Dump((AutomationElementCollection)elements.Cast<AutomationElement>());
@@ -59,7 +42,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 		public static string ToShortText(this AutomationElement el)
 		{
-			return String.Format("{0} - {1}", el.GetRuntimeId().Implode(), el.GetName());
+			return $"{el.GetRuntimeId().Implode()} - {el.Current.Name}";
 		}
 
 		public static void Dump(AutomationElement element)
@@ -74,7 +57,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				var value = element.GetCurrentPropertyValue(p);
 				Console.WriteLine("{0} = {1} ({2})", p.ProgrammaticName,
 					value is AutomationIdentifier ? ((AutomationIdentifier)value).ProgrammaticName : value,
-					value != null ? value.GetType().ToString() : "");
+					value?.GetType().ToString() ?? "");
 			}
 
 			Console.WriteLine("--patterns--");
@@ -103,7 +86,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				return null;
 			return FindTextElements(window)
 				.Cast<AutomationElement>()
-				.Implode(e => e.GetName(), Environment.NewLine);
+				.Implode(e => e.Current.Name, Environment.NewLine);
 		}
 
 
@@ -114,7 +97,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			AutomationElement dialog = null;
 			AutomationElement input = null;
 			WaitHelper.WaitOrFail(10.Second(), () => {
-				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Descendants,
+				dialog = AutomationElement.RootElement.FindFirst(TreeScope.Children,
 					new AndCondition(
 						new PropertyCondition(AutomationElement.NameProperty, "Открыть"),
 						new PropertyCondition(AutomationElement.ProcessIdProperty, pid),

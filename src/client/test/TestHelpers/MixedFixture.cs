@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected CompositeDisposable disposable;
 
 		protected DateTime begin;
-		private FileCleaner cleaner;
+		protected FileCleaner cleaner;
 		private Random random;
 
 		[SetUp]

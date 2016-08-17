@@ -24,7 +24,13 @@ namespace AnalitF.Net.Client.Helpers
 	/// добавить подписку для вычисления
 	/// F1.CombineLatest(F2, (x, y) => x + y).Subscribe(F);
 	/// </summary>
-	public class NotifyValue<T> : BaseNotify, IObservable<T>, IObserver<T>
+
+	public interface IValue
+	{
+		object Value { get; set; }
+	}
+
+	public class NotifyValue<T> : BaseNotify, IObservable<T>, IObserver<T>, IValue
 	{
 		private static ILog log = LogManager.GetLogger(typeof(NotifyValue<>));
 
@@ -76,6 +82,12 @@ namespace AnalitF.Net.Client.Helpers
 		{
 			this.refreshSubject = refreshSubject;
 			observable.CatchSubscribe(v => Value = v, cancellation);
+		}
+
+		object IValue.Value
+		{
+			get { return this.value; }
+			set { this.value = (T)value; }
 		}
 
 		public T Value

@@ -1802,7 +1802,16 @@ group by ol.RowId";
 			}
 
 			var ids = logs.Select(d => d.Document.Id).Implode();
-			sql = String.Format(@"
+			sql = String.Format(@"drop temporary table if exists RetailCostFixed;
+create temporary table RetailCostFixed
+(Id int(10) unsigned, index using hash (Id))
+engine = memory
+select dh.Id, IFNULL(SUM(db.RetailCost),0) > 0 as IsRetailCostFixed
+from Documents.DocumentHeaders dh
+left join Documents.DocumentBodies db on db.DocumentId = dh.Id
+where dh.DownloadId in ({0})
+group by dh.Id;
+
 select d.RowId as Id,
 	dh.ProviderDocumentId,
 	convert_tz(now(), @@session.time_zone,'+00:00') as WriteTime,
@@ -1822,10 +1831,12 @@ select d.RowId as Id,
 	i.ShipperInfo as ShipperNameAndAddress,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
-	if(d.PreserveFilename, d.FileName, null) as Filename
+	if(d.PreserveFilename, d.FileName, null) as Filename,
+	rf.IsRetailCostFixed
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
-		left join Documents.InvoiceHeaders i on i.Id = dh.Id
+	join RetailCostFixed rf on rf.Id = dh.Id
+	left join Documents.InvoiceHeaders i on i.Id = dh.Id
 where d.RowId in ({0})
 group by dh.Id
 union
@@ -1848,11 +1859,13 @@ select d.RowId as Id,
 	null as ShipperNameAndAddress,
 	null as InvoiceId,
 	null as InvoiceDate,
-	if(d.PreserveFilename, d.FileName, null) as Filename
+	if(d.PreserveFilename, d.FileName, null) as Filename,
+	0 as IsRetailCostFixed
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
+			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
 
 			sql = $@"
 select db.Id,
@@ -1881,7 +1894,9 @@ select db.Id,
 	str_to_date(db.Period, '%d.%m.%Y') as Exp,
 	db.Certificates,
 	db.EAN13,
-	db.CountryCode
+	db.CountryCode,
+	db.RetailCost as ServerRetailCost,
+	db.RetailCostMarkup as ServerRetailMarkup
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id

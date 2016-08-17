@@ -46,7 +46,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		public void NavigateRoot(IScreen screen)
 		{
 			navigationStack.Clear();
-			conductor.ActivateItem(screen);
+			var same = conductor.Items.FirstOrDefault(x => x.GetType() == screen.GetType());
+			if (same != null) {
+				(screen as IDisposable)?.Dispose();
+				conductor.ActivateItem(same);
+			} else {
+				conductor.ActivateItem(screen);
+			}
 		}
 
 		public void NavigateBack()
@@ -75,6 +81,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				conductor.Items.Remove(item);
 				conductor.DeactivateItem(item, true);
 				navigationStack.Remove(item);
+				(item as IDisposable)?.Dispose();
 			}
 		}
 	}

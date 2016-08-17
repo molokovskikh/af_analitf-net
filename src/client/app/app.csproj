@@ -61,6 +61,10 @@
     <Reference Include="Humanizer">
       <HintPath>..\..\..\packages\Humanizer.1.36.0\lib\portable-win+net40+sl50+wp8+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Humanizer.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.165\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
     </Reference>
@@ -85,7 +89,26 @@
     <Reference Include="ndesk.options" />
     <Reference Include="newtonsoft.json" />
     <Reference Include="nhibernate" />
-    <Reference Include="npoi" />
+    <Reference Include="NPOI, Version=2.2.1.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NPOI.2.2.1\lib\net40\NPOI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.2.1.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NPOI.2.2.1\lib\net40\NPOI.OOXML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.2.1.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NPOI.2.2.1\lib\net40\NPOI.OpenXml4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.2.1.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\packages\NPOI.2.2.1\lib\net40\NPOI.OpenXmlFormats.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PdfiumViewer">
       <HintPath>..\..\..\packages\PdfiumViewer.2.7.0.0\lib\net20\PdfiumViewer.dll</HintPath>
       <Private>True</Private>
@@ -241,6 +264,7 @@
     <Compile Include="Helpers\DescriptionHelper.cs" />
     <Compile Include="Helpers\NHHelper.cs" />
     <Compile Include="Helpers\NotifyValue.cs" />
+    <Compile Include="Helpers\NotifyValueConvert.cs" />
     <Compile Include="Helpers\Persistence.cs" />
     <Compile Include="Helpers\RasHelper.cs" />
     <Compile Include="Helpers\RxHelper.cs" />
@@ -249,6 +273,7 @@
     <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="Helpers\ShellFile.cs" />
     <Compile Include="Helpers\SqlMapper.cs" />
+    <Compile Include="Helpers\SqlMapperExtensions.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
@@ -275,6 +300,7 @@
     <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
     <Compile Include="Models\Print\StockPriceTagDocument.cs" />
     <Compile Include="Models\Print\StockRackingMapDocument.cs" />
+    <Compile Include="Models\PriceTag.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -376,6 +402,7 @@
     <Compile Include="ViewModels\Diadok\Index.cs" />
     <Compile Include="ViewModels\Dialogs\ScannerConfig.cs" />
     <Compile Include="ViewModels\Dialogs\SelectStockPeriod.cs" />
+    <Compile Include="ViewModels\Dialogs\PriceTagConstructor.cs" />
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\InventoryAction.cs" />
@@ -480,6 +507,7 @@
     <Compile Include="Views\Diadok\Sign.xaml.cs">
       <DependentUpon>Sign.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Dialogs\CanvasPanel.cs" />
     <Compile Include="Views\Dialogs\CreateWaybill.xaml.cs">
       <DependentUpon>CreateWaybill.xaml</DependentUpon>
     </Compile>
@@ -503,6 +531,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\SelectStockPeriod.xaml.cs">
       <DependentUpon>SelectStockPeriod.xaml</DependentUpon>
+		</Compile>
+    <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
+      <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelfClose.xaml.cs">
       <DependentUpon>SelfClose.xaml</DependentUpon>
@@ -764,6 +795,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\SelectStockPeriod.xaml">
+			<SubType>Designer</SubType>
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

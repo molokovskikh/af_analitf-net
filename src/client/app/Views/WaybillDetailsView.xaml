@@ -48,8 +48,8 @@
 					<ColumnDefinition></ColumnDefinition>
 					<ColumnDefinition></ColumnDefinition>
 					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
-				</Grid.ColumnDefinitions>
+          <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
 					<RowDefinition></RowDefinition>
 					<RowDefinition></RowDefinition>
@@ -75,6 +75,9 @@
 				</Button>
 				<Button Grid.Column="3" Grid.Row="0" Name="ExportWaybill" Style="{StaticResource FilterElement}">
 					Накладная на внутреннее перемещение
+				</Button>
+				<Button Grid.Column="3" Grid.Row="1" Name="RestoredExportWaybill" Style="{StaticResource FilterElement}">
+					Накладная в Excel
 				</Button>
 				<Button Grid.Column="0" Grid.Row="2" Name="Stock" Style="{StaticResource FilterElement}">
 					Оприходовать
@@ -110,7 +113,7 @@
 				<Label Grid.Row="1" Grid.Column="3" Name="Lines_Value_Count" FontWeight="Bold" />
 
 				<Label Grid.Row="0" Grid.Column="4" Style="{StaticResource DetailsLabel}">поставщик:</Label>
-				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_SupplierName" FontWeight="Bold" />
+				<Label Grid.Row="0" Grid.Column="5" Name="Waybill_UserSupplierName" FontWeight="Bold" />
 			</Grid>
 		</StackPanel>
 

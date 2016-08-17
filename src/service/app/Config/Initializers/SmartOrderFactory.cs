@@ -2,10 +2,8 @@
 using Castle.Windsor;
 using Common.Models;
 using Common.Models.Repositories;
-using Common.MySql;
-using NHibernate.Mapping.Attributes;
+using NHibernate;
 using SmartOrderFactory;
-using SmartOrderFactory.Domain;
 using SmartOrderFactory.Repositories;
 using With = Common.MySql.With;
 
@@ -13,12 +11,12 @@ namespace AnalitF.Net.Service.Config.Initializers
 {
 	public class SmartOrderFactory
 	{
-		public void Init(NHibernate nhibernate)
+		public void Init(ISessionFactory factory)
 		{
 			With.DefaultConnectionStringName = "local";
 			IoC.Initialize(new WindsorContainer()
 				.Register(
-					Component.For<ISessionFactoryHolder>().Instance(new SessionFactoryHolder(nhibernate.Factory)),
+					Component.For<ISessionFactoryHolder>().Instance(new SessionFactoryHolder(factory)),
 					Component.For<RepositoryInterceptor>(),
 					Component.For(typeof(IRepository<>)).ImplementedBy(typeof(Repository<>)),
 					Component.For<IOrderFactoryRepository>().ImplementedBy<OrderFactoryRepository>(),

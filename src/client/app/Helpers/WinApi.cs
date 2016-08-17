@@ -11,6 +11,15 @@ namespace AnalitF.Net.Client.Helpers
 		public const int BN_CLICKED = 245;
 		public const int IDOK = 1;
 
+		[StructLayout(LayoutKind.Sequential)]
+		public struct RECT
+		{
+			public int Left;
+			public int Top;
+			public int Right;
+			public int Bottom;
+		}
+
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr FindWindow(IntPtr ZeroOnly, string lpWindowName);
 
@@ -40,5 +49,10 @@ namespace AnalitF.Net.Client.Helpers
 
 		[System.Runtime.InteropServices.DllImport("gdi32.dll")]
 		public static extern bool DeleteObject(IntPtr hObject);
+
+		[DllImport("user32.dll")]
+		public static extern bool GetWindowRect(HandleRef hWnd, out RECT lpRect);
+
+
 	}
 }

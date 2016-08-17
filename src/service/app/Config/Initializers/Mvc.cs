@@ -1,5 +1,4 @@
-﻿using System.Security.AccessControl;
-using System.Web.Http;
+﻿using System.Web.Http;
 using AnalitF.Net.Service.Filters;
 using Common.Web.Service.Filters;
 using NHibernate;
@@ -10,9 +9,9 @@ namespace AnalitF.Net.Service.Config.Initializers
 {
 	public class Mvc
 	{
-		public void Run(HttpConfiguration config, NHibernate nhibernate, Config appConfig)
+		public void Run(HttpConfiguration config, ISessionFactory factory, Config appConfig)
 		{
-			config.Properties[typeof(ISessionFactory)] = nhibernate.Factory;
+			config.Properties[typeof(ISessionFactory)] = factory;
 			config.Properties["config"] = appConfig;
 
 			var routes = config.Routes;

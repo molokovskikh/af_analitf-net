@@ -653,7 +653,7 @@ namespace AnalitF.Net.Client.ViewModels
 			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
 		}
 
-		public Task TplQuery(Action<IStatelessSession> action)
+		public Task Query(Action<IStatelessSession> action)
 		{
 			var task = new Task(() => {
 				if (Env.Factory == null)

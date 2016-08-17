@@ -164,23 +164,13 @@ namespace AnalitF.Net.Client.Controls
 
 			var result = new SaveFileResult(new[]
 			{
-				Tuple.Create("Файл RTF (*.rtf)", ".rtf"),
 				Tuple.Create("Файл PNG (*.png)", ".png"),
+				Tuple.Create("Файл RTF (*.rtf)", ".rtf")
 			});
 
 			result.Execute(new ActionExecutionContext());
 
 			if (result.Dialog.FilterIndex == 1)
-			{
-				using(var writer = result.Writer())
-				{
-					var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
-					writer.WriteLine(rtfString);
-					writer.Flush();
-					writer.Close();
-				}
-			}
-			if (result.Dialog.FilterIndex == 2)
 			{
 				DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
 
@@ -192,6 +182,16 @@ namespace AnalitF.Net.Client.Controls
 				using (var fs = File.OpenWrite(result.Dialog.FileName))
 				{
 					enc.Save(fs);
+				}
+			}
+			else if (result.Dialog.FilterIndex == 2)
+			{
+				using(var writer = result.Writer())
+				{
+					var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
+					writer.WriteLine(rtfString);
+					writer.Flush();
+					writer.Close();
 				}
 			}
 		}

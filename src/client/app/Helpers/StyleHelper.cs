@@ -202,6 +202,7 @@ namespace AnalitF.Net.Client.Helpers
 				},
 				{ "IsFullyStocked", Background("#25BC37") },
 				{ "IsPartialyStocked", Background("#94BA99") },
+				{ "IsRetailCostFixed", Background(Color.FromRgb(250, 155, 250)) },
 			};
 		}
 

@@ -26,6 +26,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Helpers;
+using Dapper.Contrib.Extensions;
 using Newtonsoft.Json;
 using NHibernate;
 using NHibernate.Linq;
@@ -250,7 +251,7 @@ namespace AnalitF.Net.Client
 				}
 				if (!Config.Cmd.Match("import")) {
 					try {
-						FileHelper2.DeleteDir(Config.TmpDir);
+						FileHelper.DeleteDir(Config.TmpDir);
 						Directory.CreateDirectory(Config.TmpDir);
 					} catch(Exception e) {
 						log.Warn(e);
@@ -317,6 +318,7 @@ namespace AnalitF.Net.Client
 			if (NHibernate != null)
 				return;
 
+			SqlMapperExtensions.GetDatabaseType = x => "mysqlconnection";
 			NHibernate = new Config.NHibernate.NHibernate();
 			NHibernate.Init();
 

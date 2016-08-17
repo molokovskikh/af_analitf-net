@@ -24,19 +24,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			app = CreateBootstrapper();
 			FileHelper.InitDir("test");
 			disposable.Add(Disposable.Create(() => {
-				var count = 0;
-				repeat:
-				count++;
-				try {
-					FileHelper2.DeleteDir("test");
-				}
-				catch(IOException e) {
-					Console.WriteLine("HResult = " + ((uint)e.HResult).ToString("x8"));
-					//System.IO.IOException : Папка не пуста
-					if ((uint)e.HResult == 0x80070091 && count < 4)
-						goto repeat;
-					throw;
-				}
+				FileHelper.Persistent(() => FileHelper.DeleteDir("test"));
 			}));
 		}
 
@@ -102,10 +90,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			app.InitShell();
 		}
 
-		protected override ShellViewModel shell
-		{
-			get { return app.Shell; }
-		}
+		protected override ShellViewModel shell => app.Shell;
 
 		private AppBootstrapper CreateBootstrapper()
 		{
