@@ -43,11 +43,11 @@
 					<ComboBox Style="{StaticResource Select}" x:Name="Taxes" DisplayMemberPath="Name" />
 				</StackPanel>
 			</StackPanel>
-			<Grid Margin="4, 0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
-					<ColumnDefinition></ColumnDefinition>
+      <Grid Margin="4, 0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
+          <ColumnDefinition></ColumnDefinition>
           <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>

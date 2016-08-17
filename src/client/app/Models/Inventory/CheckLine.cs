@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
+
+namespace AnalitF.Net.Client.Models.Inventory
+{
+	public class CheckLine
+	{
+		public CheckLine()
+		{
+
+		}
+		public CheckLine(uint id)
+		{
+			CheckId = id;
+		}
+
+		public virtual uint Id { get; set; }
+		public virtual uint Barcode { get; set; }
+		public virtual uint? ProductId { get; set; }
+		public virtual uint? ProducerId { get; set; }
+		public virtual string ProductName { get; set; }
+		public virtual decimal RetailCost { get; set; }
+		public virtual decimal Cost { get; set; }
+		public virtual decimal Quantity { get; set; }
+		public virtual decimal RetailSum => Quantity * RetailCost;
+		public virtual decimal Sum => RetailSum - DiscontSum;
+		public virtual decimal DiscontSum  { get; set; }
+		public virtual uint CheckId { get; set; }
+		public virtual uint? ProductKind { get; set; }
+		public virtual string PKU
+		{
+			get
+			{
+				if (Narcotic)
+					return "ПКУ:Наркотические и психотропные";
+				if (Toxic)
+					return "ПКУ:Сильнодействующие. и ядовитые";
+				if (Combined)
+					return "ПКУ:Комбинированные";
+				if (Other)
+					return "ПКУ:Иные лек.средства";
+				return null;
+			}
+		}
+		public virtual uint? Divider { get; set; }
+		public virtual decimal MarkupSum { get; set; }
+		public virtual decimal NDSSum { get; set; }
+		public virtual decimal NPSum { get; set; }
+		public virtual uint? NDS { get; set; }
+		public virtual uint? NP { get; set; }
+		public virtual decimal PartyNumber { get; set; }
+
+
+
+		public virtual bool Narcotic { get; set; }
+		public virtual bool Toxic { get; set; }
+		public virtual bool Combined { get; set; }
+		public virtual bool Other { get; set; }
+		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
+
+
+
+		public virtual void CopyToStock(Stock stock)
+		{
+			Copy(this, stock);
+		}
+
+		public virtual void CopyFromStock(Stock stock)
+		{
+			Copy(stock, this);
+		}
+
+		private static void Copy(object srcItem, object dstItem)
+		{
+			var srcProps = srcItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite);
+			var dstProps = dstItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).ToDictionary(x => x.Name);
+			foreach (var srcProp in srcProps) {
+				var dstProp = dstProps.GetValueOrDefault(srcProp.Name);
+				dstProp?.SetValue(dstItem, srcProp.GetValue(srcItem, null), null);
+			}
+		}
+	}
+}
