@@ -318,7 +318,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (close) {
 				Save();
-				//TableSettings.SaveView(GetView());
 				Dispose();
 			}
 			TableSettings.SaveView(GetView());
