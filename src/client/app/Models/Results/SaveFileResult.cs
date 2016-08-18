@@ -18,6 +18,10 @@ namespace AnalitF.Net.Client.Models.Results
 		public SaveFileDialog Dialog = new SaveFileDialog();
 		public WindowManager Manager;
 		public bool Success { get; set; }
+		public string Directory { get; set; }
+		public string FullFileName { get; set; }
+		public string FileName { get; set; }
+		public string FileExtension { get; set; }
 
 		public SaveFileResult(Tuple<string, string>[] formats, string filename = null)
 		{
@@ -45,6 +49,12 @@ namespace AnalitF.Net.Client.Models.Results
 				Completed(this, resultCompletionEventArgs);
 			}
 			Success = result.GetValueOrDefault();
+			if (Success) {
+				Directory = Path.GetDirectoryName(Dialog.FileName);
+				FullFileName = Path.GetFileName(Dialog.FileName);
+				FileName = Path.GetFileNameWithoutExtension(Dialog.FileName);
+				FileExtension = Path.GetExtension(Dialog.FileName);
+			}
 		}
 
 		public event EventHandler<ResultCompletionEventArgs> Completed;
@@ -71,10 +81,10 @@ namespace AnalitF.Net.Client.Models.Results
 			}
 		}
 
-		public FileStream Stream()
+		public FileStream Stream(string uniqator="")
 		{
 			try {
-				return File.OpenWrite(Dialog.FileName);
+				return File.OpenWrite($"{Directory}\\{FileName}{uniqator}{FileExtension}");
 			}
 			catch(UnauthorizedAccessException e) {
 				Manager.Error(e.Message);

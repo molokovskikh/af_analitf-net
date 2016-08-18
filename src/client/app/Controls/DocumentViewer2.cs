@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Xps;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Print;
 using Caliburn.Micro;
 
 using ILog = log4net.ILog;
@@ -79,6 +80,7 @@ namespace AnalitF.Net.Client.Controls
 		/// и отправляем на печать его
 		/// </summary>
 		public PrintResult PrintResult;
+		public bool Busy { get; protected set; }
 
 		public static DependencyProperty OrientationProperty
 			= DependencyProperty.RegisterAttached("Orientation",
@@ -139,7 +141,7 @@ namespace AnalitF.Net.Client.Controls
 
 			if (printDoc == null)
 				return;
-
+			Busy = true;
 			var bd = printDoc.Item2;
 			var baseFd = bd.Build();
 			foreach (Block block in baseFd.Blocks) {
@@ -149,7 +151,7 @@ namespace AnalitF.Net.Client.Controls
 					foreach (var rowGroup in table.RowGroups) {
 						foreach (var currentRow in rowGroup.Rows) {
 							foreach (var cell in currentRow.Cells) {
-								cell.BorderThickness = new Thickness(1, 1, 1, 1);
+								cell.BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5);
 								cell.BorderBrush = Brushes.Black;
 							}
 						}
@@ -163,14 +165,18 @@ namespace AnalitF.Net.Client.Controls
 			result.Execute(new ActionExecutionContext());
 			if(result.Success) {
 				if (result.Dialog.FilterIndex == 1) {
-					DocumentPaginator dp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0));
-					RenderTargetBitmap bitmap = PrintHelper.ToBitmap(dp);
-					BitmapFrame bmf = BitmapFrame.Create(bitmap);
-					var enc = new PngBitmapEncoder();
-					enc.Frames.Add(bmf);
-					using (var fs = result.Stream()) {
-						enc.Save(fs);
+					var wdp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
+					//bool contentOnly = bd is PriceTagDocument ;//|| bd is RegistryDocument;
+					var bitmaps = PrintHelper.ToBitmap(wdp, true);
+					for (int i = 0; i < bitmaps.Count; i++) {
+						BitmapFrame bmf = BitmapFrame.Create(bitmaps[i]);
+						var enc = new PngBitmapEncoder();
+						enc.Frames.Add(bmf);
+						using (var fs = result.Stream($"_{i+1}")) {
+							enc.Save(fs);
+						}
 					}
+
 				}
 				else if (result.Dialog.FilterIndex == 2) {
 					using(var writer = result.Writer()) {
@@ -181,6 +187,7 @@ namespace AnalitF.Net.Client.Controls
 					}
 				}
 			}
+			Busy = false;
 		}
 
 		protected override void OnPrintCommand()

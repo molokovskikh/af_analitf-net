@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Printing;
 using System.Windows;
 using System.Windows.Documents;
@@ -56,74 +58,75 @@ namespace AnalitF.Net.Client.Helpers
 			return rtfString;
 		}
 
-		public static RenderTargetBitmap ToBitmap(DocumentPaginator dp)
+		public static List<RenderTargetBitmap> ToBitmap(WrapDocumentPaginator dp, bool contentOnly)
 		{
-			var cv = new ContainerVisual();
-
-			double offsetHeight = 0;
+			var ret = new List<RenderTargetBitmap>();
 
 			for (var i = 0; i < dp.PageCount; i++)
 			{
-				DocumentPage p = dp.GetPage(i);
-				ContainerVisual v = p.Visual as ContainerVisual;
-				v.Transform = new TranslateTransform(0, offsetHeight);
-				offsetHeight += p.Size.Height;
-				cv.Children.Add(v);
+				var page = dp.GetPage(i);
+				var pagevisual = page.Visual as ContainerVisual;
+				if (pagevisual == null)
+					continue;
+				var pageFullSize = page.Size;
+				if (contentOnly) {
+					var pageContentRect = dp.GetRealContentRect(i);
+					pageFullSize = pageContentRect.Size;
+					pagevisual.Offset = new Vector(-pageContentRect.Location.X, -pageContentRect.Location.Y);
+				}
+
+				var renderBitmap =
+						new RenderTargetBitmap(
+						(int)pageFullSize.Width,
+						(int)pageFullSize.Height,
+						96d,
+						96d,
+						PixelFormats.Pbgra32
+				);
+
+				renderBitmap.Render(pagevisual);
+
+				var dWidth = (int)pageFullSize.Width;
+				var dHeight = (int)pageFullSize.Height;
+				var dStride = dWidth * 4;
+
+				byte[] pixels = new byte[dHeight * dStride];
+
+				for (var j = 0; j < pixels.Length; j++)
+				{
+						pixels[j] = 0xFF;
+				}
+
+				var bg = BitmapSource.Create(
+						dWidth,
+						dHeight,
+						96,
+						96,
+						PixelFormats.Pbgra32,
+						null,
+						pixels,
+						dStride
+				);
+				var dv = new DrawingVisual();
+				var dc = dv.RenderOpen();
+				dc.DrawImage(bg, new Rect(0,0, dWidth, dHeight));
+				dc.DrawImage(renderBitmap, new Rect(0,0, dWidth, dHeight));
+				dc.Close();
+
+				var resultBitmap =
+						new RenderTargetBitmap(
+						(int)dWidth,
+						(int)dHeight,
+						96d,
+						96d,
+						PixelFormats.Pbgra32
+				);
+
+				resultBitmap.Render(dv);
+				ret.Add(resultBitmap);
 			}
 
-			Size pageFullSize = new Size(dp.PageSize.Width, dp.PageSize.Height * dp.PageCount);
-
-			var renderBitmap =
-					new RenderTargetBitmap(
-					(int)pageFullSize.Width,
-					(int)pageFullSize.Height,
-					96d,
-					96d,
-					PixelFormats.Pbgra32
-			);
-
-			renderBitmap.Render(cv);
-
-			int dWidth = (int)pageFullSize.Width;
-			int dHeight = (int)pageFullSize.Height;
-			int dStride = dWidth * 4;
-
-			byte[] pixels = new byte[dHeight * dStride];
-
-			for (int i = 0; i < pixels.Length; i++)
-			{
-					pixels[i] = 0xFF;
-			}
-
-			var bg = BitmapSource.Create(
-					dWidth,
-					dHeight,
-					96,
-					96,
-					PixelFormats.Pbgra32,
-					null,
-					pixels,
-					dStride
-			);
-
-			DrawingVisual dv = new DrawingVisual();
-			DrawingContext dc = dv.RenderOpen();
-			dc.DrawImage(bg, new Rect(0,0, dWidth, dHeight));
-			dc.DrawImage(renderBitmap, new Rect(0,0, dWidth, dHeight));
-			dc.Close();
-
-			var resultBitmap =
-					new RenderTargetBitmap(
-					(int)dWidth,
-					(int)dHeight,
-					96d,
-					96d,
-					PixelFormats.Pbgra32
-			);
-
-			resultBitmap.Render(dv);
-
-			return resultBitmap;
+			return ret;
 		}
 	}
 }
