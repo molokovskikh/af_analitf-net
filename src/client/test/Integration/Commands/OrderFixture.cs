@@ -435,7 +435,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			});
 		}
 		[Test]
-		public void Check_DisplayId()
+		public void Check_DisplayId_update()
 		{
 			localSession.DeleteEach<Order>();
 			var order = MakeOrder();
@@ -443,6 +443,95 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(new UpdateCommand());
 			var orders = localSession.Query<Order>().ToArray();
 			Assert.AreEqual(displayId, orders.First().DisplayId);
+		}
+
+		[Test]
+		public void Check_DisplayId()
+		{
+			localSession.DeleteEach<Order>();
+			var prices = localSession.Query<Price>().ToArray();
+			var maxId = prices.Max(p => p.Id.PriceId);
+			var price = new Price("test1") {
+				RegionName = prices[0].RegionName,
+				Id = {
+					PriceId = maxId + 10,
+					RegionId = prices[0].Id.RegionId
+				},
+				RegionId = prices[0].Id.RegionId
+			};
+			localSession.Save(price);
+			var address = new Address("Тестовый адрес доставки");
+			var offer = new Offer(price, 100) {
+				Id = new OfferComposedId(4, price.Id.PriceId),
+				ProductId = 1
+			};
+			localSession.Save(address);
+			localSession.Save(offer);
+			var price1 = new Price("test2") {
+				RegionName = prices[0].RegionName,
+				Id = {
+					PriceId = maxId + 11,
+					RegionId = prices[0].Id.RegionId
+				},
+				RegionId = prices[0].Id.RegionId
+			};
+			var price2 = new Price("test3") {
+				RegionName = prices[0].RegionName,
+				Id = {
+					PriceId = maxId + 12,
+					RegionId = prices[0].Id.RegionId
+				},
+				RegionId = prices[0].Id.RegionId
+			};
+			localSession.Save(price1);
+			localSession.Save(price2);
+			var order = new Order(price, address);
+			order.TryOrder(offer, 10);
+			localSession.Save(order);
+
+			var order1 = new Order(price1, address);
+			var order2 = new Order(price2, address);
+
+			var offer1 = new Offer(price1, 100) { ProductId = 1 };
+			localSession.Save(offer1);
+			order1.TryOrder(offer1, 10);
+			var offer2 = new Offer(price2, 150) { ProductId = 1 };
+			localSession.Save(offer2);
+			order2.TryOrder(offer2, 1);
+			localSession.Save(order1);
+			localSession.Save(order2);
+			var log = new StringBuilder();
+			var orders = new Order[] {order1, order2};
+			ReorderCommand<Order>.Reorder(order, orders, new[] { offer1, offer2 }, log);
+			Assert.That(order.Lines.Count, Is.EqualTo(0));
+			Assert.That(orders[0].Lines.Count, Is.EqualTo(1));
+			Assert.That(orders[0].Lines[0].Count, Is.EqualTo(20));
+
+
+			/*var price = new Price("test1");
+			var address = new Address("Тестовый адрес доставки");
+			var offer = new Offer(price, 100) {
+				Id = new OfferComposedId(4, price.Id.PriceId),
+				ProductId = 1
+			};
+			localSession.Save(price);
+			localSession.Save(address);
+			localSession.Save(offer);
+			var order = new Order(price, address);
+			order.TryOrder(offer, 1);
+			localSession.Save(order);
+			var displayId = order.DisplayId;
+			var frozen = new Order(price, address) {
+				Frozen = true,
+				Send = false
+			};
+			frozen.TryOrder(offer, 1);
+			localSession.Save(frozen);
+			Run(new UpdateCommand());
+			frozen.Lines[0].Merge(order, new[] { offer }, new StringBuilder());
+			Assert.AreEqual(displayId, order.DisplayId);
+			Assert.That(order.Lines[0].Count, Is.EqualTo(2));
+			Assert.That(frozen.Lines.Count, Is.EqualTo(0));*/
 		}
 	}
 }
