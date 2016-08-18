@@ -310,6 +310,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.CloseActive();
 		}
 
+		public void CloseScreen(IScreen item)
+		{
+			Navigator.CloseScreen(item);
+		}
+
 		public override void CanClose(Action<bool> callback)
 		{
 			if (Config.Quiet) {
