@@ -275,7 +275,7 @@
 			</StackPanel>
 		</controls:ToolbarPanel>
 
-		<TabControl Name="Items" Grid.Row="2">
+		<TabControl Name="Items" Grid.Row="2" Background="White">
 			<TabControl.ItemTemplate>
 				<DataTemplate>
 					<StackPanel Orientation="Horizontal">

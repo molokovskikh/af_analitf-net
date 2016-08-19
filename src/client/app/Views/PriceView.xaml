@@ -70,7 +70,7 @@
 		</c:DataGrid2>
 		</c:MainControllerWrap>
 
-		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" />
+		<ContentControl x:Name="QuickSearch" Grid.Row="1" Grid.Column="0" caliburn:QuickSearchBehavior.GridRef="{x:Reference Prices}"/>
 
 		<Grid Grid.Row="1" Grid.Column="1">
 			<Grid.RowDefinitions>
