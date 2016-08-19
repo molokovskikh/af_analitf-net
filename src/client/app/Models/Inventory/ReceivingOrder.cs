@@ -34,15 +34,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			WaybillId = waybill.Id;
 			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
 			foreach (var line in lines) {
-				Lines.Add(new ReceivingLine {
-						Product = line.Product,
-						ProductId = line.ProductId,
-						Producer = line.Producer,
-						ProducerId = line.ProductId,
-						Quantity = line.QuantityToReceive,
-						Cost = line.SupplierCost.GetValueOrDefault(),
-						RetailCost = line.RetailCost.GetValueOrDefault(),
-				});
+				Lines.Add(new ReceivingLine(line));
 				line.ReceivedQuantity += line.QuantityToReceive;
 			}
 
@@ -78,7 +70,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				Producer = x.Producer,
 				ProducerId = x.ProductId,
 				Count = x.Quantity,
-				Cost = x.Cost,
+				Cost = x.SupplierCost.GetValueOrDefault(),
 				RetailCost = x.RetailCost,
 			}).ToArray();
 		}
