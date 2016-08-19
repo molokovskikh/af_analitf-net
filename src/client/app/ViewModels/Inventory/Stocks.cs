@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public Stocks()
 		{
+			DisplayName = "Товарные запасы";
 			Items.PropertyChanged += Items_PropertyChanged;
 			CurrentItem = new NotifyValue<Stock>();
 			ItemsTotal = new ObservableCollection<StockTotal>();
@@ -187,6 +188,21 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				session.Save(order);
 			session.SaveEach(order.ToStocks());
 			return true;
+		}
+
+		public void CheckDefectSeries()
+		{
+			Shell.Navigate(new CheckDefectSeries());
+		}
+
+		public void ReceivingOrders()
+		{
+			Shell.Navigate(new ReceivingOrders());
+		}
+
+		public void Checks()
+		{
+			Shell.Navigate(new Checks());
 		}
 	}
 }

@@ -11,10 +11,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class ReceivingOrders : BaseScreen2
 	{
-		private Main main;
-
 		public ReceivingOrders()
 		{
+			DisplayName = "Приход от поставщика";
 			Statuses = new [] {
 				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.New)),
 				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.Closed)),
@@ -22,12 +21,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			};
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
-		}
-
-		public ReceivingOrders(Main main)
-			: this()
-		{
-			this.main = main;
 		}
 
 		public NotifyValue<List<ReceivingOrder>> Items { get; set; }
@@ -58,7 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (CurrentItem.Value == null)
 				return;
-			main.ActiveItem = new ReceivingDetails(CurrentItem.Value.Id);
+			Shell.Navigate(new ReceivingDetails(CurrentItem.Value.Id));
 		}
 	}
 }

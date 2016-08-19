@@ -605,7 +605,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowInventory()
 		{
-			NavigateRoot(new Inventory.Main());
+			NavigateRoot(new Inventory.Stocks());
 		}
 
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;

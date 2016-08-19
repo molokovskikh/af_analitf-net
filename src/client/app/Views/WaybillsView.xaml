@@ -8,7 +8,7 @@
              xmlns:conv="clr-namespace:AnalitF.Net.Client.Helpers"
 	behaviors:Focusable.DefaultFocus="{x:Reference Waybills}">
 
-    <i:Interaction.Behaviors>
+	<i:Interaction.Behaviors>
 		<behaviors:Focusable />
 	</i:Interaction.Behaviors>
 

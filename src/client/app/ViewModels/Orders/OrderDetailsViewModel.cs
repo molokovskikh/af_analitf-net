@@ -11,6 +11,7 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Inventory;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
@@ -203,7 +204,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public void OpenReceivingOrder()
 		{
-			Shell.NavigateRoot(Inventory.Main.Navigate(((SentOrder)Order).ReceivingOrderId));
+			Shell.Navigate(new ReceivingDetails(((SentOrder)Order).ReceivingOrderId.Value));
 		}
 	}
 }

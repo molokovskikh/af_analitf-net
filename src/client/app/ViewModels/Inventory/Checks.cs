@@ -66,7 +66,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (CurrentItem.Value == null)
 				return;
-			main.ActiveItem = new CheckDetails(CurrentItem.Value.Id);
+			Shell.Navigate(new CheckDetails(CurrentItem.Value.Id));
 		}
 
 		protected override void OnDeactivate(bool close)

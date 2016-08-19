@@ -412,8 +412,6 @@
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
     <Compile Include="ViewModels\Inventory\Checks.cs" />
-    <Compile Include="ViewModels\Inventory\InventoryAction.cs" />
-    <Compile Include="ViewModels\Inventory\Main.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
@@ -562,12 +560,6 @@
     </Compile>
     <Compile Include="Views\Inventory\Checks.xaml.cs">
       <DependentUpon>Checks.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\InventoryAction.xaml.cs">
-      <DependentUpon>InventoryAction.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Inventory\MainView.xaml.cs">
-      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
       <DependentUpon>ReceivingDetails.xaml</DependentUpon>
@@ -840,14 +832,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\Checks.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Inventory\InventoryAction.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Inventory\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
