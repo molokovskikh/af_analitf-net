@@ -28,10 +28,12 @@ namespace AnalitF.Net.Client.ViewModels
 		public ConfirmQuantity(WaybillLine line)
 		{
 			DisplayName = "Подтвердите количество";
+			Line = line;
 			Quantity = line.Quantity.GetValueOrDefault() - line.ReceivedQuantity;
 			WasCancelled = true;
 		}
 
+		public WaybillLine Line { get; }
 		public int Quantity { get; set; }
 		public bool WasCancelled { get; set; }
 
@@ -546,17 +548,8 @@ namespace AnalitF.Net.Client.ViewModels
 				Manager.Warning($"Товар с кодом {code} в накладной не найден");
 				return;
 			}
+			CurrentLine.Value = line;
 			line.IsReadyForStock = true;
-		}
-
-		public IEnumerable<IResult> EnterLine()
-		{
-			var line = CurrentLine.Value as WaybillLine;
-			if (line == null)
-				yield break;
-			var quantity = new ConfirmQuantity(line);
-			yield return new DialogResult(quantity);
-			line.Receive(quantity.Quantity);
 		}
 
 #if DEBUG

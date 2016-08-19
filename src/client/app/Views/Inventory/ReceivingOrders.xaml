@@ -10,6 +10,7 @@
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
 		<ToolBar Grid.Row="0">
@@ -28,21 +29,16 @@
 				ButtonContent="Адреса"
 				Member="Item.Name" />
 		</ToolBar>
-		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
+		<controls:DataGrid2 Grid.Row="2" x:Name="Items">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Поставщик" Binding="{Binding Supplier.Name}" Width="*" />
-
-				<controls:DataGridTextColumnEx Header="Номер заказа" Binding="{Binding OrderId}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата заказа" Binding="{Binding OrderDate}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Номер накладной" Binding="{Binding WaybillId}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата накладной" Binding="{Binding WaybillDate}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
-				<controls:DataGridTextColumnEx Header="План. дата" Binding="{Binding DueDate}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding Sum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />

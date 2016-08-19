@@ -30,7 +30,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Date = DateTime.Now;
 			Supplier = waybill.Supplier;
 			Address = waybill.Address;
-			Status = ReceiveStatus.Closed;
+			WaybillDate = waybill.DocumentDate;
+			WaybillId = waybill.Id;
 			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
 			foreach (var line in lines) {
 				Lines.Add(new ReceivingLine {
@@ -44,18 +45,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 				});
 				line.ReceivedQuantity += line.QuantityToReceive;
 			}
+
+			UpdateStat(Lines);
 		}
 
 		public virtual uint Id { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Supplier Supplier { get; set; }
-		public virtual DateTime? DueDate { get; set; }
-		public virtual DateTime? CloseDate { get; set; }
 		public virtual Address Address { get; set; }
-		public virtual ReceiveStatus Status { get; set; }
-
-		public virtual ulong? OrderId { get; set; }
-		public virtual DateTime? OrderDate { get; set; }
 
 		public virtual uint? WaybillId { get; set; }
 		public virtual DateTime? WaybillDate { get; set; }
@@ -66,14 +63,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual IList<ReceivingLine> Lines { get; set; }
 
-		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
-
 		public virtual void UpdateStat(IEnumerable<ReceivingLine> lines)
 		{
 			LineCount = lines.Count();
 			Sum = lines.Sum(x => x.Sum);
 			RetailSum = lines.Sum(x => x.RetailCost);
-			Status = ReceiveStatus.Closed;
 		}
 
 		public virtual Stock[] ToStocks()

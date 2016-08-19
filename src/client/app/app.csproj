@@ -538,7 +538,7 @@
     </Compile>
     <Compile Include="Views\Dialogs\SelectStockPeriod.xaml.cs">
       <DependentUpon>SelectStockPeriod.xaml</DependentUpon>
-		</Compile>
+    </Compile>
     <Compile Include="Views\Dialogs\PriceTagConstructorView.xaml.cs">
       <DependentUpon>PriceTagConstructorView.xaml</DependentUpon>
     </Compile>
@@ -808,10 +808,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\SelectStockPeriod.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\PriceTagConstructorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1040,7 +1040,9 @@
     </None>
     <None Include="App.test.config" />
     <None Include="Assets\shaders\compile.sh" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <Resource Include="Assets\shaders\grayscale.ps" />
   </ItemGroup>
   <ItemGroup>

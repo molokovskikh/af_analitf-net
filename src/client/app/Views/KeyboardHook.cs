@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace AnalitF.Net.Client.Views
@@ -59,11 +60,18 @@ namespace AnalitF.Net.Client.Views
 		{
 			switch (msg) {
 				case WM_KEYDOWN:
-					if (ProcessKeyDown(msg, wParam, lParam)) {
+					//if (ProcessKeyDown(msg, wParam, lParam)) {
 						MSG message;
-						PeekMessage(out message, IntPtr.Zero, WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE);
-					}
+						Console.WriteLine(PeekMessage(out message, IntPtr.Zero, WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE));
+						handled = true;
+					//}
 					break;
+				case WM_KEYUP: {
+					//MSG message;
+					//PeekMessage(out message, IntPtr.Zero, WM_KEYUP, WM_KEYUP, PM_REMOVE);
+					handled = true;
+					break;
+				}
 			}
 			return IntPtr.Zero;
 		}
@@ -101,6 +109,7 @@ namespace AnalitF.Net.Client.Views
 
 		private const int RIDI_DEVICENAME = 0x20000007;
 
+		private const int WM_KEYUP = 0x0101;
 		private const int WM_KEYDOWN = 0x0100;
 		private const int WM_SYSKEYDOWN = 0x0104;
 		private const int WM_INPUT = 0x00FF;
@@ -228,5 +237,36 @@ namespace AnalitF.Net.Client.Views
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool PeekMessage(out MSG lpmsg, IntPtr hwnd, uint wMsgFilterMin, uint wMsgFilterMax,
 			uint wRemoveMsg);
+
+		const uint MAPVK_VK_TO_VSC = 0x00;
+		const uint MAPVK_VSC_TO_VK = 0x01;
+		const uint MAPVK_VK_TO_CHAR = 0x02;
+		const uint MAPVK_VSC_TO_VK_EX = 0x03;
+		const uint MAPVK_VK_TO_VSC_EX = 0x04;
+
+		[DllImport("user32.dll")]
+		static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+		public static string KeyToUnicode(Key key)
+		{
+			var mLocalBuffer = IntPtr.Zero;
+			var mKeyboardState = IntPtr.Zero;
+			try {
+				mKeyboardState = Marshal.AllocHGlobal(256);
+				mLocalBuffer = Marshal.AllocHGlobal(129);
+				var vkey = (uint)KeyInterop.VirtualKeyFromKey(key);
+				var scanCode = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
+				if (GetKeyboardState(mKeyboardState)) {
+					var output = ToUnicode(vkey, scanCode, mKeyboardState, mLocalBuffer, 64, 0);
+					return Marshal.PtrToStringUni(mLocalBuffer, output);
+				}
+				return null;
+			} finally {
+				if (mLocalBuffer != IntPtr.Zero)
+					Marshal.FreeHGlobal(mLocalBuffer);
+				if (mKeyboardState != IntPtr.Zero)
+					Marshal.FreeHGlobal(mKeyboardState);
+			}
+		}
 	}
 }

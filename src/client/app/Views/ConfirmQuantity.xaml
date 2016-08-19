@@ -13,13 +13,15 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
-		<TextBox Grid.Row="0" Grid.ColumnSpan="2" Name="Quantity" />
-		<Button Grid.Row="1" Grid.Column="0" Margin="3" Padding="3" Name="OK">OK</Button>
-		<Button Grid.Row="1" Grid.Column="1" Margin="3" Padding="3" Name="TryClose">Отмена</Button>
+		<Label Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="0" Name="Line_Product" />
+		<TextBox Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0" Name="Quantity" />
+		<Button Grid.Row="2" Grid.Column="0" Margin="3" Padding="3" Name="OK">OK</Button>
+		<Button Grid.Row="2" Grid.Column="1" Margin="3" Padding="3" Name="TryClose">Отмена</Button>
 	</Grid>
 </UserControl>

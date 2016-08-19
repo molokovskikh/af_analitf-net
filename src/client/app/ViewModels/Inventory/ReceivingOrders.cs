@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			RxQuery(x => x.Query<ReceivingOrder>()
 					.Fetch(y => y.Supplier)
 					.Fetch(y => y.Address)
-					.OrderByDescending(y => y.OrderDate).ToList())
+					.OrderByDescending(y => y.Date).ToList())
 				.Subscribe(Items);
 		}
 

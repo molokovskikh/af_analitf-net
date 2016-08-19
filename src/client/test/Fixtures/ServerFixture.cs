@@ -20,7 +20,10 @@ namespace AnalitF.Net.Client.Test.Fixtures
 
 		public static TestUser User(ISession session)
 		{
-			return session.Query<TestUser>().First(u => u.Login == DebugLogin());
+			var user = session.Query<TestUser>().FirstOrDefault(u => u.Login == DebugLogin());
+			if (user == null)
+				throw new Exception($"Пользователь {DebugLogin()} для тестирования не найден, выполни rym -f Rymfile.service fixture SampleData для создания тестовых данных");
+			return user;
 		}
 
 		public static string DebugLogin()

@@ -60,7 +60,6 @@ namespace AnalitF.Net.Client.Views
 		private WaybillDetails model;
 		private bool isBarcode;
 		private StringBuilder code = new StringBuilder();
-		private KeyboardHook hook;
 
 		public WaybillDetailsView(WaybillDetails model)
 		{
@@ -75,6 +74,8 @@ namespace AnalitF.Net.Client.Views
 
 		protected bool KeyboardInput(string key)
 		{
+			if (string.IsNullOrEmpty(key))
+				return false;
 			var model = (WaybillDetails)DataContext;
 			var settings = model.Settings.Value;
 			if (!isBarcode) {
@@ -84,6 +85,7 @@ namespace AnalitF.Net.Client.Views
 				}
 			} else if (key[0] == settings.BarCodeSufix) {
 				model.HandleBarCode(code.ToString());
+				code.Clear();
 				isBarcode = false;
 				return true;
 			} else {
@@ -97,15 +99,8 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 
-			Loaded += (sender, args) => {
-				hook = new KeyboardHook();
-				hook.KeyboardInput = KeyboardInput;
-				hook.AddHook(Window.GetWindow(this));
-			};
-
-			Unloaded += (sender, args) => {
-				hook?.Dispose();
-				hook = null;
+			PreviewKeyDown += (sender, args) => {
+				args.Handled = KeyboardInput(KeyboardHook.KeyToUnicode(args.Key));
 			};
 
 			//борьба за производительность

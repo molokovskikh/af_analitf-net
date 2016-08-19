@@ -8,9 +8,8 @@ namespace AnalitF.Net.Client.Views.Dialogs
 {
 	public partial class ScannerConfig : UserControl
 	{
-		private KeyboardHook hook;
-
 		public ViewModels.Dialogs.ScannerConfig Model => (ViewModels.Dialogs.ScannerConfig)DataContext;
+
 		private DispatcherTimer timer = new DispatcherTimer {
 			Interval = TimeSpan.FromMilliseconds(200)
 		};
@@ -18,30 +17,24 @@ namespace AnalitF.Net.Client.Views.Dialogs
 		public ScannerConfig()
 		{
 			InitializeComponent();
+			Focusable = true;
+			Loaded += (sender, args) => {
+				Focus();
+			};
 
 			var buffer = new List<string>();
+			timer.Start();
 			timer.Tick += (sender, args) => {
 				if (buffer.Count > 0) {
 					Model.Input(buffer);
 					buffer.Clear();
 				}
 			};
-			Loaded += (sender, args) => {
-				timer.Start();
-				hook = new KeyboardHook();
-				hook.KeyboardInput += x => {
-					buffer.Add(x);
-					timer.Stop();
-					timer.Start();
-					return true;
-				};
-				hook.AddHook(Window.GetWindow(this));
-			};
-
-			Unloaded += (sender, args) => {
+			PreviewKeyDown += (sender, args) => {
 				timer.Stop();
-				hook?.Dispose();
-				hook = null;
+				timer.Start();
+				buffer.Add(KeyboardHook.KeyToUnicode(args.Key));
+				args.Handled = true;
 			};
 		}
 	}

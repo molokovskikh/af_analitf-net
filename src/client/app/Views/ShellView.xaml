@@ -257,6 +257,11 @@
 				</Grid>
 			</Button>
 
+			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/Stocks_32.ico"
+						Style="{StaticResource ButtonImage}" />
+			</Button>
+
 			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Home 2_32.ico"
 						Style="{StaticResource ButtonImage}" />
@@ -264,11 +269,6 @@
 
 			<Button x:Name="ShowSettings" ToolTip="Конфигурация" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Control Panel 2_32.ico"
-						Style="{StaticResource ButtonImage}" />
-			</Button>
-
-			<Button Name="ShowInventory" ToolTip="Склад" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
-				<Image Source="/assets/images/Stocks_32.ico"
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
