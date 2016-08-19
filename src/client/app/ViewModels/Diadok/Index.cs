@@ -760,9 +760,16 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public void DeleteAll()
 		{
-			for(int i = 0; i < items.Count; i++) {
-				api.Delete(token, box.BoxId, items[i].Entity.DocumentInfo.MessageId, items[i].Entity.EntityId);
-			}
+			Task.Factory.StartNew(() => {
+				try {
+					foreach (DisplayItem t in items) {
+						api.Delete(token, box.BoxId, t.Entity.DocumentInfo.MessageId, t.Entity.EntityId);
+					}
+				}
+				catch(Exception exception) {
+					Log.Warn($"Ошибка ", exception);
+				}
+			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		public IEnumerable<IResult> Save()

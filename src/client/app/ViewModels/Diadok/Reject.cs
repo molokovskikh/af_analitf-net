@@ -60,7 +60,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SignedContent = content
 					});
 				}
-				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}

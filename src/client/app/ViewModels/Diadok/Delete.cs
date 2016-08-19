@@ -17,7 +17,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			try {
 				BeginAction();
-				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await	Async(x => Payload.Api.Delete(x, Payload.BoxId, Payload.Entity.DocumentInfo.MessageId, Payload.Entity.EntityId));
 				EndAction();
 			}

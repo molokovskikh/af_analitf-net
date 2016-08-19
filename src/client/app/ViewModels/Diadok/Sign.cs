@@ -20,6 +20,7 @@ using System.Windows.Media;
 using System.Globalization;
 using NHibernate.Linq;
 using System.Threading;
+using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -70,7 +71,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Success = false;
 			InitFields();
 			Payload = payload;
-
 			switch(payload.Entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
 					DocumentName = new DiadocXmlHelper(payload.Entity).GetDiadokTORG12Name(" , ");
@@ -84,7 +84,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 
 			IsEnabled.Value = true;
-			LastPatchStamp = DateTime.MinValue;
 
 			if(Settings.Value.DebugUseTestSign) {
 				SignerFirstName = "Иван";
@@ -112,9 +111,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 				}
 				catch(Exception exept) {
-					Manager.Error("Ошибка парсинга сертификата.");
 					Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
-					throw;
 				}
 			}
 		}
@@ -123,6 +120,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			return Task<TResult>.Factory.StartNew(() => {
 				try {
+					TaskEx.Delay(5.Second());
+					throw new Exception();
+					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					return action(Payload.Token);
 				}
 				catch(Exception exception) {
@@ -150,6 +150,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			return Task.Factory.StartNew(() => {
 				try {
+					TaskEx.Delay(5.Second());
+					throw new Exception();
+					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					action(Payload.Token);
 				}
 				catch(Exception exception) {
@@ -240,7 +243,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 			}
 			IsEnabled.Value = true;
-			Success = true;
+			Success = Result != null;
 			TryClose();
 		}
 
@@ -532,7 +535,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 					acceptSignature.Signature = sign;
 					patch.AddSignature(acceptSignature);
-					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				}
 				else {
@@ -548,7 +550,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						if (Settings.Value.DebugUseTestSign)
 							signature.SignWithTestSignature = true;
 						patch.AddSignature(signature);
-						LastPatchStamp = Payload.Message.LastPatchTimestamp;
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 					}
 					else if (Payload.Entity.AttachmentType == AttachmentType.XmlTorg12) {
@@ -611,7 +612,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							SignedContent = signContent
 						};
 						patch = Payload.PatchTorg12(receipt);
-						LastPatchStamp = Payload.Message.LastPatchTimestamp;
 						await Async(x => Payload.Api.PostMessagePatch(x, patch));
 						Log.Info($"Документ {patch.MessageId} успешно подписан");
 					}
@@ -675,7 +675,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							while (dateConfirm == null && breaker < 10);
 							if(dateConfirm == null)
 								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
-							LastPatchStamp = msg.LastPatchTimestamp;
 							return dateConfirm;
 						});
 

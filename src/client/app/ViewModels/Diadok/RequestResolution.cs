@@ -66,7 +66,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			try {
 				BeginAction();
-				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				var patch = Payload.Patch();
 				var attachment = new ResolutionRequestAttachment {
 					Comment = Comment.Value,

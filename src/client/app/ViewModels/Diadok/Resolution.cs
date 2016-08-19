@@ -35,7 +35,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			try
 			{
 				BeginAction();
-				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				var patch = Payload.Patch();
 				patch.AddResolution(new ResolutionAttachment {
 					InitialDocumentId = Payload.Entity.EntityId,

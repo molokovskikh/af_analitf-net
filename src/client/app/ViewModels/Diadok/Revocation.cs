@@ -46,7 +46,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				revattch.SignedContent = revocSignContent;
 
 				patch.AddRevocationRequestAttachment(revattch);
-				LastPatchStamp = Payload.Message.LastPatchTimestamp;
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
