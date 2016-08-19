@@ -98,6 +98,8 @@ namespace AnalitF.Net.Client.Models
 		private string _proxyUserName;
 		private string _proxyPassword;
 		private string _proxyHost;
+		private int? _barCodePrefix;
+		private int? _barCodeSufix;
 
 		public Settings(int token = 0, params Address[] addresses)
 			: this(addresses)
@@ -387,8 +389,29 @@ namespace AnalitF.Net.Client.Models
 		/// </summary>
 		public virtual Rounding Rounding { get; set; }
 
-		public virtual int? BarCodePrefix { get; set; }
-		public virtual int? BarCodeSufix { get; set; }
+		public virtual int? BarCodePrefix
+		{
+			get { return _barCodePrefix; }
+			set
+			{
+				if (_barCodePrefix != value) {
+					_barCodePrefix = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		public virtual int? BarCodeSufix
+		{
+			get { return _barCodeSufix; }
+			set
+			{
+				if (_barCodeSufix != value) {
+					_barCodeSufix = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		public virtual IWebProxy GetProxy()
 		{
@@ -401,7 +424,6 @@ namespace AnalitF.Net.Client.Models
 				proxy.Credentials = new NetworkCredential(ProxyUserName?.Trim(), ProxyPassword?.Trim());
 			return proxy;
 		}
-
 
 		/// <param name="name">
 		/// доступные значения - Waybills, Docs, Rejects, Orders, Reports

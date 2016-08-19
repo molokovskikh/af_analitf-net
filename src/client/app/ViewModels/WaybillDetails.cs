@@ -151,7 +151,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Waybill = Session.Load<Waybill>(id);
 
-			Waybill.Lines.Each(x => x.Receive(x.Quantity.GetValueOrDefault()));
 			Calculate();
 			Waybill.Lines.Select(x => x.Changed().Where(y => y.EventArgs.PropertyName == "IsReadyForStock"))
 				.Merge()

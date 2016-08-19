@@ -19,10 +19,6 @@ namespace AnalitF.Net.Client.Views
 			mLocalBuffer = Marshal.AllocHGlobal(129);
 		}
 
-		/// <summary>
-		///   Add this KeyboardHook to a window
-		/// </summary>
-		/// <param name="window">The window to add to</param>
 		public void AddHook(Window window)
 		{
 			if (window == null)
@@ -36,36 +32,13 @@ namespace AnalitF.Net.Client.Views
 				throw new ApplicationException("Failed to receive window source");
 
 			mHwndSource.AddHook(WndProc);
-
-			var rid = new RAWINPUTDEVICE[1];
-
-			rid[0].usUsagePage = 0x01;
-			rid[0].usUsage = 0x06;
-			rid[0].dwFlags = RIDEV_INPUTSINK;
-			rid[0].hwndTarget = hwnd;
-
-			if (!RegisterRawInputDevices(rid, (uint) rid.Length, (uint) Marshal.SizeOf(rid[0])))
-				throw new ApplicationException("Failed to register raw input device(s).");
 		}
 
-		/// <summary>
-		///   Remove this keyboard hook from window (if it is added)
-		/// </summary>
 		public void RemoveHook()
 		{
 			if (mHwndSource == null)
-				return; // not an error
-
-			var rid = new RAWINPUTDEVICE[1];
-
-			rid[0].usUsagePage = 0x01;
-			rid[0].usUsage = 0x06;
-			rid[0].dwFlags = 0x00000001;
-			rid[0].hwndTarget = IntPtr.Zero;
-
-			RegisterRawInputDevices(rid, (uint) rid.Length, (uint) Marshal.SizeOf(rid[0]));
+				return;
 			mHwndSource.RemoveHook(WndProc);
-			mHwndSource.Dispose();
 			mHwndSource = null;
 		}
 
@@ -85,8 +58,8 @@ namespace AnalitF.Net.Client.Views
 		private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
 		{
 			switch (msg) {
-				case WM_INPUT:
-					if (ProcessInputCommand(lParam)) {
+				case WM_KEYDOWN:
+					if (ProcessKeyDown(msg, wParam, lParam)) {
 						MSG message;
 						PeekMessage(out message, IntPtr.Zero, WM_KEYDOWN, WM_KEYDOWN, PM_REMOVE);
 					}
@@ -95,59 +68,18 @@ namespace AnalitF.Net.Client.Views
 			return IntPtr.Zero;
 		}
 
-		/// <summary>
-		///   Processes WM_INPUT messages to retrieve information about any
-		///   keyboard events that occur.
-		/// </summary>
-		/// <param name="lParam">The WM_INPUT message to process.</param>
-		private bool ProcessInputCommand(IntPtr lParam)
+		public bool ProcessKeyDown(int message, IntPtr wParam, IntPtr lParam)
 		{
-			uint dwSize = 0;
-
-			try {
-				// First call to GetRawInputData sets the value of dwSize
-				// dwSize can then be used to allocate the appropriate amount of memory,
-				// storing the pointer in "buffer".
-				GetRawInputData(lParam, RID_INPUT, IntPtr.Zero, ref dwSize, (uint) Marshal.SizeOf(typeof (RAWINPUTHEADER)));
-
-				var buffer = Marshal.AllocHGlobal((int) dwSize);
-				try {
-					// Check that buffer points to something, and if so,
-					// call GetRawInputData again to fill the allocated memory
-					// with information about the input
-					if (buffer != IntPtr.Zero &&
-						GetRawInputData(lParam, RID_INPUT, buffer, ref dwSize, (uint) Marshal.SizeOf(typeof (RAWINPUTHEADER))) == dwSize) {
-						// Store the message information in "raw", then check
-						// that the input comes from a keyboard device before
-						// processing it to raise an appropriate KeyPressed event.
-
-						var raw = (RAWINPUT) Marshal.PtrToStructure(buffer, typeof (RAWINPUT));
-
-						if (raw.header.dwType != RIM_TYPEKEYBOARD)
-							return false;
-						if (raw.keyboard.Message != WM_KEYDOWN && raw.keyboard.Message != WM_SYSKEYDOWN)
-							return false;
-
-						// On most keyboards, "extended" keys such as the arrow or page
-						// keys return two codes - the key's own code, and an "extended key" flag, which
-						// translates to 255. This flag isn't useful to us, so it can be
-						// disregarded.
-						if (raw.keyboard.VKey > VK_LAST_KEY)
-							return false;
-						if (GetKeyboardState(mKeyboardState)) {
-							var output = ToUnicode(raw.keyboard.VKey, raw.keyboard.MakeCode, mKeyboardState, mLocalBuffer, 64, 0);
-							if (output > 0) {
-								var scannedText = Marshal.PtrToStringUni(mLocalBuffer, output);
-								return KeyboardInput?.Invoke(scannedText) ?? false;
-							}
-						}
-						return false;
-					}
-				} finally {
-					Marshal.FreeHGlobal(buffer);
+			var vkey = (uint)wParam;
+			var scanCode = (uint)lParam & 0xFF0000;
+			if (vkey > VK_LAST_KEY)
+				return false;
+			if (GetKeyboardState(mKeyboardState)) {
+				var output = ToUnicode(vkey, scanCode, mKeyboardState, mLocalBuffer, 64, 0);
+				if (output > 0) {
+					var scannedText = Marshal.PtrToStringUni(mLocalBuffer, output);
+					return KeyboardInput?.Invoke(scannedText) ?? false;
 				}
-			} catch (Exception) {
-
 			}
 			return false;
 		}

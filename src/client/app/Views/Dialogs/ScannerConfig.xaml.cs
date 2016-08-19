@@ -1,48 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace AnalitF.Net.Client.Views.Dialogs
 {
-	/// <summary>
-	/// Interaction logic for ScannerConfig.xaml
-	/// </summary>
 	public partial class ScannerConfig : UserControl
 	{
 		private KeyboardHook hook;
+
+		public ViewModels.Dialogs.ScannerConfig Model => (ViewModels.Dialogs.ScannerConfig)DataContext;
+		private DispatcherTimer timer = new DispatcherTimer {
+			Interval = TimeSpan.FromMilliseconds(200)
+		};
 
 		public ScannerConfig()
 		{
 			InitializeComponent();
 
+			var buffer = new List<string>();
+			timer.Tick += (sender, args) => {
+				if (buffer.Count > 0) {
+					Model.Input(buffer);
+					buffer.Clear();
+				}
+			};
 			Loaded += (sender, args) => {
-				var subject = new Subject<string>();
+				timer.Start();
 				hook = new KeyboardHook();
 				hook.KeyboardInput += x => {
-					subject.OnNext(x);
+					buffer.Add(x);
+					timer.Stop();
+					timer.Start();
 					return true;
 				};
-				subject.Select(x => x[0] < 32 ? $"[{(int)x[0]}]"  : x)
-					.Buffer(TimeSpan.FromMilliseconds(400), DispatcherScheduler.Current)
-					.Where(x => x.Count > 0)
-					.Subscribe(x => Code.Content = String.Concat(x));
 				hook.AddHook(Window.GetWindow(this));
 			};
 
 			Unloaded += (sender, args) => {
+				timer.Stop();
 				hook?.Dispose();
 				hook = null;
 			};
