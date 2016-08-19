@@ -707,7 +707,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
 				yield break;
-			User.Value.LastSync = null;
+			if (User.Value != null)
+				User.Value.LastSync = null;
 			foreach (var result in Sync(new UpdateCommand())) {
 					yield return result;
 			}
