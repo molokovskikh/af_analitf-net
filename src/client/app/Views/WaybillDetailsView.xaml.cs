@@ -100,7 +100,7 @@ namespace AnalitF.Net.Client.Views
 			InitializeComponent();
 
 			PreviewKeyDown += (sender, args) => {
-				args.Handled = KeyboardInput(KeyboardHook.KeyToUnicode(args.Key));
+				args.Handled = KeyboardInput(KeyboardHelper.KeyToUnicode(args.Key));
 			};
 
 			//борьба за производительность

@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace AnalitF.Net.Client.Views
+namespace AnalitF.Net.Client.Helpers
 {
-	public class KeyboardHook
+	public class KeyboardHelper
 	{
 		private const int RIDEV_INPUTSINK = 0x00000100;
 		private const int RIDEV_REMOVE = 0x00000001;

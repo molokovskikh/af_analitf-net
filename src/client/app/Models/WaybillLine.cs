@@ -272,10 +272,10 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Style(Description = "Полностью оприходовано")]
-		public virtual bool IsFullyStocked => IsReadyForStock && Quantity > 0 && Quantity == QuantityToReceive + ReceivedQuantity;
+		public virtual bool IsFullyStocked => Quantity > 0 && Quantity == ReceivedQuantity;
 
 		[Style(Description = "Частично оприходовано")]
-		public virtual bool IsPartialyStocked => IsReadyForStock && Quantity > 0 && Quantity > QuantityToReceive + ReceivedQuantity;
+		public virtual bool IsPartialyStocked => ReceivedQuantity > 0 && Quantity > 0 && Quantity > ReceivedQuantity;
 
 		public virtual int ReceivedQuantity { get; set; }
 

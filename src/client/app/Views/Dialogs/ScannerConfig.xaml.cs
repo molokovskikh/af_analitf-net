@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Views.Dialogs
 {
@@ -33,7 +34,7 @@ namespace AnalitF.Net.Client.Views.Dialogs
 			PreviewKeyDown += (sender, args) => {
 				timer.Stop();
 				timer.Start();
-				buffer.Add(KeyboardHook.KeyToUnicode(args.Key));
+				buffer.Add(KeyboardHelper.KeyToUnicode(args.Key));
 				args.Handled = true;
 			};
 		}
