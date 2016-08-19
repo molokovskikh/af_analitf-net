@@ -280,7 +280,7 @@
 				<DataTemplate>
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-						<Button Focusable="False" cal:Message.Attach="CloseActive" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
+						<Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
 							<Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
 								StrokeThickness="1" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
 						</Button>
