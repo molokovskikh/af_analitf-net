@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Printing;
+using System.Threading;
 using System.Windows;
 using System.Windows.Documents;
 using AnalitF.Net.Client.Controls;
@@ -12,6 +14,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 	public class PrintPreviewViewModel : Screen
 	{
 		private PrintResult result;
+		private DocumentViewer2 documentViewer;
 
 		public PrintPreviewViewModel()
 		{
@@ -35,10 +38,17 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		protected override void OnViewAttached(object view, object context)
 		{
 			base.OnViewAttached(view, context);
-
-			var v = ((DependencyObject)view).Descendants<DocumentViewer2>().First();
+			documentViewer = ((DependencyObject)view).Descendants<DocumentViewer2>().First();
 			//нужно для реализации функционала выбора страниц печати, подробней смотри комментарий к полю
-			v.PrintResult = result;
+			documentViewer.PrintResult = result;
+		}
+
+		public override void CanClose(Action<bool> callback)
+		{
+			if (documentViewer.Busy) {
+				return;
+			}
+			callback(!documentViewer.Busy);
 		}
 	}
 }

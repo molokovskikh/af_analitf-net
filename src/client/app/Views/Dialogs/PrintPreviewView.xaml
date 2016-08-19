@@ -125,6 +125,5 @@
 
   <Grid>
     <controls:DocumentViewer2 x:Name="Document" Orientation="{Binding Orientation}"/>
-    <ProgressBar IsIndeterminate="True" Height="16" Visibility="{Binding IsLoading.Value, Converter={StaticResource BoolToHidden}}" />
   </Grid>
 </UserControl>

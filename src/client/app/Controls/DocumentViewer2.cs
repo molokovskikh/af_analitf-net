@@ -138,56 +138,69 @@ namespace AnalitF.Net.Client.Controls
 		protected void SaveToFileCommand()
 		{
 			var printDoc = PrintResult.Docs.First().Value;
-
 			if (printDoc == null)
-				return;
-			Busy = true;
-			var bd = printDoc.Item2;
-			var baseFd = bd.Build();
-			foreach (Block block in baseFd.Blocks) {
-				if (block is Table) {
-					//что бы в таблице rtf прорисовывались все линии
-					Table table = block as Table;
-					foreach (var rowGroup in table.RowGroups) {
-						foreach (var currentRow in rowGroup.Rows) {
-							foreach (var cell in currentRow.Cells) {
-								cell.BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5);
-								cell.BorderBrush = Brushes.Black;
+				return ;
+			try {
+				Busy = true;
+				var bd = printDoc.Item2;
+				var baseFd = bd.Build();
+				foreach (Block block in baseFd.Blocks) {
+					if (block is Table) {
+						//что бы в таблице rtf прорисовывались все линии
+						Table table = block as Table;
+						foreach (var rowGroup in table.RowGroups) {
+							foreach (var currentRow in rowGroup.Rows) {
+								foreach (var cell in currentRow.Cells) {
+									cell.BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5);
+									cell.BorderBrush = Brushes.Black;
+								}
 							}
 						}
 					}
 				}
-			}
-			var result = new SaveFileResult(new[] {
-				Tuple.Create("Файл PNG (*.png)", ".png"),
-				Tuple.Create("Файл RTF (*.rtf)", ".rtf")
-			});
-			result.Execute(new ActionExecutionContext());
-			if(result.Success) {
-				if (result.Dialog.FilterIndex == 1) {
-					var wdp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
-					//bool contentOnly = bd is PriceTagDocument ;//|| bd is RegistryDocument;
-					var bitmaps = PrintHelper.ToBitmap(wdp, true);
-					for (int i = 0; i < bitmaps.Count; i++) {
-						BitmapFrame bmf = BitmapFrame.Create(bitmaps[i]);
-						var enc = new PngBitmapEncoder();
-						enc.Frames.Add(bmf);
-						using (var fs = result.Stream($"_{i+1}")) {
-							enc.Save(fs);
+				var result = new SaveFileResult(new[] {
+					Tuple.Create("Файл PNG (*.png)", ".png"),
+					Tuple.Create("Файл PNG (страница) (*.png)", ".png"),
+					Tuple.Create("Файл RTF (*.rtf)", ".rtf")
+				});
+				result.Execute(new ActionExecutionContext());
+				if (result.Success) {
+					if (result.Dialog.FilterIndex == 1) {
+						var wdp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
+						var bitmaps = PrintHelper.ToBitmap(wdp, true);
+						for (int i = 0; i < bitmaps.Count; i++) {
+							BitmapFrame bmf = BitmapFrame.Create(bitmaps[i]);
+							var enc = new PngBitmapEncoder();
+							enc.Frames.Add(bmf);
+							using (var fs = result.Stream($"_{i + 1}")) {
+								enc.Save(fs);
+							}
+						}
+					} else if (result.Dialog.FilterIndex == 2) {
+						var wdp = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
+						var bitmaps = PrintHelper.ToBitmap(wdp, false);
+						for (int i = 0; i < bitmaps.Count; i++) {
+							BitmapFrame bmf = BitmapFrame.Create(bitmaps[i]);
+							var enc = new PngBitmapEncoder();
+							enc.Frames.Add(bmf);
+							using (var fs = result.Stream($"_{i + 1}")) {
+								enc.Save(fs);
+							}
+						}
+					} else if (result.Dialog.FilterIndex == 3) {
+						using (var writer = result.Writer()) {
+							var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
+							writer.WriteLine(rtfString);
+							writer.Flush();
+							writer.Close();
 						}
 					}
-
 				}
-				else if (result.Dialog.FilterIndex == 2) {
-					using(var writer = result.Writer()) {
-						var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
-						writer.WriteLine(rtfString);
-						writer.Flush();
-						writer.Close();
-					}
-				}
+			} catch (Exception) {
+				throw;
+			} finally {
+				Busy = false;
 			}
-			Busy = false;
 		}
 
 		protected override void OnPrintCommand()
