@@ -758,9 +758,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		public void DeleteAll()
+		public async void DeleteAll()
 		{
-			Task.Factory.StartNew(() => {
+			await Task.Factory.StartNew(() => {
 				try {
 					foreach (DisplayItem t in items) {
 						api.Delete(token, box.BoxId, t.Entity.DocumentInfo.MessageId, t.Entity.EntityId);

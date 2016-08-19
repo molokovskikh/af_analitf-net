@@ -20,7 +20,6 @@ using System.Windows.Media;
 using System.Globalization;
 using NHibernate.Linq;
 using System.Threading;
-using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -71,6 +70,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			Success = false;
 			InitFields();
 			Payload = payload;
+
 			switch(payload.Entity.AttachmentType) {
 				case AttachmentType.XmlTorg12:
 					DocumentName = new DiadocXmlHelper(payload.Entity).GetDiadokTORG12Name(" , ");
@@ -120,8 +120,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			return Task<TResult>.Factory.StartNew(() => {
 				try {
-					TaskEx.Delay(5.Second());
-					throw new Exception();
 					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					return action(Payload.Token);
 				}
@@ -150,8 +148,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			return Task.Factory.StartNew(() => {
 				try {
-					TaskEx.Delay(5.Second());
-					throw new Exception();
 					LastPatchStamp = Payload.Message.LastPatchTimestamp;
 					action(Payload.Token);
 				}
@@ -243,7 +239,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 			}
 			IsEnabled.Value = true;
-			Success = Result != null;
+			Success = true;
 			TryClose();
 		}
 
@@ -675,6 +671,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							while (dateConfirm == null && breaker < 10);
 							if(dateConfirm == null)
 								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
+							LastPatchStamp = msg.LastPatchTimestamp;
 							return dateConfirm;
 						});
 
