@@ -262,6 +262,11 @@
 						Style="{StaticResource ButtonImage}" />
 			</Button>
 
+			<Button Name="ShowFrontend" ToolTip="Касса" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/cash.png"
+						Style="{StaticResource ButtonImage}" />
+			</Button>
+
 			<Button x:Name="ShowMain" ToolTip="На главную страницу" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
 				<Image Source="/assets/images/Home 2_32.ico"
 						Style="{StaticResource ButtonImage}" />

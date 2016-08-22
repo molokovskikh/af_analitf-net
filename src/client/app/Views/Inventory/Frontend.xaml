@@ -1,0 +1,108 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.Frontend"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+	xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+	mc:Ignorable="d"
+	d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<Style x:Key="SmallHeader" TargetType="Label">
+			<Setter Property="FontSize" Value="20" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="BorderBrush" Value="Black" />
+			<Setter Property="Background" Value="#D3D3D3" />
+		</Style>
+
+		<Style x:Key="LineHeader" TargetType="Label" BasedOn="{StaticResource SmallHeader}">
+			<Setter Property="Background" Value="#D2E2FF" />
+		</Style>
+
+		<Style x:Key="SmallValue" TargetType="Label">
+			<Setter Property="FontSize" Value="20" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="BorderBrush" Value="Black" />
+			<Setter Property="MinHeight" Value="36" />
+		</Style>
+
+		<Style x:Key="BigHeader" TargetType="Label">
+			<Setter Property="FontSize" Value="30" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="MinHeight" Value="40" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="BorderBrush" Value="Black" />
+		</Style>
+
+		<Style x:Key="Input" TargetType="TextBox">
+			<Setter Property="FontSize" Value="30" />
+			<Setter Property="FontWeight" Value="Bold" />
+			<Setter Property="MinHeight" Value="40" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Right" />
+		</Style>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+		<Label Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="Operation" />
+		<Label Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallHeader}">Последняя операция</Label>
+		<Label Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallValue}" Name="LastOperation"></Label>
+		<Label Grid.Row="2" Grid.Column="0" Style="{StaticResource LineHeader}">Наименование товара</Label>
+		<Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Name="CurrentProduct" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LineHeader}">Код</Label>
+		<Label Grid.Row="3" Grid.Column="1" Style="{StaticResource LineHeader}">Количество</Label>
+		<Label Grid.Row="3" Grid.Column="2" Style="{StaticResource LineHeader}">Цена</Label>
+		<Label Grid.Row="3" Grid.Column="3" Style="{StaticResource LineHeader}">Скидка</Label>
+		<Label Grid.Row="3" Grid.Column="4" Style="{StaticResource LineHeader}">Итого</Label>
+		<Label Grid.Row="4" Grid.Column="0" Name="CurrentCode" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="1" Name="CurrentQuantity" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="2" Name="CurrentCost" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="3" Name="CurrentDiscount" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="4" Name="CurrentSum" Style="{StaticResource SmallValue}" />
+		<controls:DataGrid2 Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" x:Name="Lines" FontSize="20">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding Cost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding Sum}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+		<Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="5">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Label Grid.Row="0" Grid.Column="0" Style="{StaticResource SmallHeader}">Итого скидка</Label>
+			<Label Grid.Row="0" Grid.Column="1" Style="{StaticResource SmallHeader}">К оплате</Label>
+			<Label Grid.Row="0" Grid.Column="2" Style="{StaticResource SmallHeader}">Сдача</Label>
+			<Label Grid.Row="1" Grid.Column="0" Name="Discount" Style="{StaticResource BigHeader}" />
+			<Label Grid.Row="1" Grid.Column="1" Name="Sum" Style="{StaticResource BigHeader}" />
+			<Label Grid.Row="1" Grid.Column="2" Name="Change" Style="{StaticResource BigHeader}" />
+			<TextBox Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Name="Input" Style="{StaticResource Input}" />
+			<Label Grid.Row="2" Grid.Column="2" Style="{StaticResource LineHeader}">кол-во</Label>
+			<Label Grid.Row="3" Grid.Column="2" Name="Quantity" Style="{StaticResource SmallValue}"></Label>
+		</Grid>
+	</Grid>
+</UserControl>

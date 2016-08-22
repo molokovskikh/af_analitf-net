@@ -608,6 +608,11 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new Inventory.Stocks());
 		}
 
+		public void ShowFrontend()
+		{
+			NavigateRoot(new Inventory.Frontend());
+		}
+
 		public bool CanShowOrderLines => Settings.Value.LastUpdate != null;
 
 		public void ShowOrderLines()

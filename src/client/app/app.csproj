@@ -413,6 +413,7 @@
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
     <Compile Include="ViewModels\Inventory\Checks.cs" />
+    <Compile Include="ViewModels\Inventory\Frontend.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
@@ -560,6 +561,9 @@
     </Compile>
     <Compile Include="Views\Inventory\Checks.xaml.cs">
       <DependentUpon>Checks.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Frontend.xaml.cs">
+      <DependentUpon>Frontend.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
       <DependentUpon>ReceivingDetails.xaml</DependentUpon>
@@ -835,6 +839,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\Frontend.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Inventory\ReceivingDetails.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -1107,6 +1115,7 @@
     <Resource Include="Assets\images\copy.ico" />
     <Resource Include="Assets\images\printer.ico" />
     <Resource Include="Assets\images\Stocks_32.ico" />
+    <Resource Include="Assets\images\cash.png" />
     <Content Include="Assets\shaders\grayscale.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
