@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Views.Inventory
@@ -17,6 +19,14 @@ namespace AnalitF.Net.Client.Views.Inventory
 			Loaded += (sender, args) => {
 				Input.Focus();
 			};
+
+			DataContextChanged += (sender, args) => {
+				if (Model == null)
+					return;
+				var handler = new BarcodeHandler(this, Model.Settings);
+				handler.Barcode.Subscribe(x => Model.BarcodeScanned(x));
+			};
+
 			PreviewKeyDown += (sender, args) => {
 				IEnumerable<IResult> results = null;
 				if (args.Key == Key.Multiply) {

@@ -34,7 +34,9 @@ namespace AnalitF.Net.Client.Views.Dialogs
 			PreviewKeyDown += (sender, args) => {
 				timer.Stop();
 				timer.Start();
-				buffer.Add(KeyboardHelper.KeyToUnicode(args.Key));
+				var text = KeyboardHelper.KeyToUnicode(args.Key);
+				if (text?.Length > 0)
+					buffer.Add(text);
 				args.Handled = true;
 			};
 		}

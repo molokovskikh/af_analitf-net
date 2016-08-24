@@ -44,6 +44,19 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<CheckLine> CurrentLine { get; set; }
 		public ReactiveCollection<CheckLine> Lines { get; set; }
 
+		private void Message(string text)
+		{
+			LastOperation.Value = text;
+			HasError.Value = false;
+		}
+
+		private void Error(string message)
+		{
+			HasError.Value = true;
+			Input.Value = null;
+			LastOperation.Value = message;
+		}
+
 		public void UpdateQuantity()
 		{
 			var value = NullableConvert.ToUInt32(Input.Value);
@@ -66,17 +79,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(StockQuery().FirstOrDefault(x => x.ProductId == id), "Код товара");
 		}
 
-		private void Message(string text)
+		public void BarcodeScanned(string barcode)
 		{
-			LastOperation.Value = text;
-			HasError.Value = false;
-		}
-
-		private void Error(string message)
-		{
-			HasError.Value = true;
-			Input.Value = null;
-			LastOperation.Value = message;
+			if (Quantity.Value == null) {
+				Quantity.Value = 1;
+			}
+			if (String.IsNullOrEmpty(barcode)) {
+				Error("Ошибка ввода штрих-кода");
+				return;
+			}
+			UpdateProduct(StockQuery().FirstOrDefault(x => x.Barcode == barcode), "Штрих код");
 		}
 
 		public void SearchByBarcode()

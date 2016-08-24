@@ -546,7 +546,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			var line = Waybill.Lines.FirstOrDefault(x => x.EAN13 == code);
 			if (line == null) {
-				Manager.Warning($"Товар с кодом {code} в накладной не найден");
+				Manager.Warning($"Товар с кодом '{code}' в накладной не найден");
 				return;
 			}
 			CurrentLine.Value = line;

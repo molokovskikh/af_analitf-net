@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -58,8 +59,6 @@ namespace AnalitF.Net.Client.Views
 	{
 		private DataGrid2 lines;
 		private WaybillDetails model;
-		private bool isBarcode;
-		private StringBuilder code = new StringBuilder();
 
 		public WaybillDetailsView(WaybillDetails model)
 		{
@@ -72,36 +71,12 @@ namespace AnalitF.Net.Client.Views
 			Init();
 		}
 
-		protected bool KeyboardInput(string key)
-		{
-			if (string.IsNullOrEmpty(key))
-				return false;
-			var model = (WaybillDetails)DataContext;
-			var settings = model.Settings.Value;
-			if (!isBarcode) {
-				if (key[0] == settings.BarCodePrefix) {
-					isBarcode = true;
-					return true;
-				}
-			} else if (key[0] == settings.BarCodeSufix) {
-				model.HandleBarCode(code.ToString());
-				code.Clear();
-				isBarcode = false;
-				return true;
-			} else {
-				code.Append(key);
-				return true;
-			}
-			return false;
-		}
-
 		private void Init()
 		{
 			InitializeComponent();
 
-			PreviewKeyDown += (sender, args) => {
-				args.Handled = KeyboardInput(KeyboardHelper.KeyToUnicode(args.Key));
-			};
+			var handler = new BarcodeHandler(this, model.Settings);
+			handler.Barcode.Subscribe(x => model.HandleBarCode(x));
 
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
