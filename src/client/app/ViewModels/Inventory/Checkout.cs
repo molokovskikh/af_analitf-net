@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			WasCancelled = true;
 			Change = new NotifyValue<decimal?>();
 			Amount = new NotifyValue<decimal?>(sum);
-			Amount.Select(x => Sum - x).Subscribe(Change);
+			Amount.Select(x => x - Sum).Subscribe(Change);
 			DisplayName = "Введите сумму оплаты";
 		}
 

@@ -24,6 +24,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					Discount.Value = null;
 					Sum.Value = null;
 				} else {
+					Change.Value = null;
 					Status.Value = "Открыт чек продажи";
 					Sum.Value = Lines.Sum(x => x.RetailSum);
 					Discount.Value = Lines.Sum(x => x.DiscontSum);
@@ -32,6 +33,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Status.Value = "Готов к работе";
 		}
 
+		public NotifyValue<bool> HasError { get; set; }
 		public NotifyValue<string> Status { get; set; }
 		public NotifyValue<decimal?> Discount { get; set; }
 		public NotifyValue<decimal?> Sum { get; set; }
@@ -50,7 +52,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			}
 			Input.Value = null;
-			LastOperation.Value = "Ввод количества";
+			Message("Ввод количества");
 			Quantity.Value = value.Value;
 		}
 
@@ -64,8 +66,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			UpdateProduct(StatelessSession.Query<Stock>().FirstOrDefault(x => x.ProductId == id), "Код товара");
 		}
 
+		private void Message(string text)
+		{
+			LastOperation.Value = text;
+			HasError.Value = false;
+		}
+
 		private void Error(string message)
 		{
+			HasError.Value = true;
 			Input.Value = null;
 			LastOperation.Value = message;
 		}
@@ -90,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				return;
 			}
 			Input.Value = null;
-			LastOperation.Value = operation;
+			Message(operation);
 			Lines.Add(new CheckLine(stock, Quantity.Value.Value));
 			Quantity.Value = null;
 		}
@@ -103,12 +112,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var checkout = new Checkout(Sum.Value.Value);
 			yield return new DialogResult(checkout);
 			Change.Value = checkout.Change.Value;
-			Input.Value = $"Сдача {checkout.Change}";
 			var check = new Check(Address, Lines);
 			Session.Save(check);
 			Session.Flush();
 			Session.Clear();
 			Lines.Clear();
+			Message("Оплата наличными");
 			Status.Value = "Готов к работе";
 		}
 	}

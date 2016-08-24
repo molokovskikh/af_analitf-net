@@ -51,6 +51,35 @@
 			<Setter Property="VerticalContentAlignment" Value="Center" />
 			<Setter Property="HorizontalContentAlignment" Value="Right" />
 		</Style>
+
+		<Style x:Key="LastOperation" BasedOn="{StaticResource SmallValue}" TargetType="Label">
+			<Style.Triggers>
+				<DataTrigger Binding="{Binding HasError.Value}" Value="True">
+					<DataTrigger.EnterActions>
+						<BeginStoryboard Name="BeginStory">
+							<Storyboard>
+								<ColorAnimation
+									Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+									From="#00FFFFFF" To="Red" Duration="0:0:1" />
+								<ColorAnimation
+									Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+									From="Black" To="White" Duration="0:0:1" />
+								<ColorAnimation
+									Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+									BeginTime="0:0:10" From="Red" To="#00FFFFFF" Duration="0:0:5" />
+								<ColorAnimation
+									Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+									BeginTime="0:0:10" From="White" To="Red" Duration="0:0:5" />
+							</Storyboard>
+						</BeginStoryboard>
+					</DataTrigger.EnterActions>
+					<DataTrigger.ExitActions>
+						<RemoveStoryboard BeginStoryboardName="BeginStory" />
+					</DataTrigger.ExitActions>
+				</DataTrigger>
+			</Style.Triggers>
+		</Style>
+
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -70,8 +99,10 @@
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
 		<Label Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="Status"  Style="{StaticResource Status}" />
-		<Label Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallHeader}">Последняя операция</Label>
-		<Label Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallValue}" Name="LastOperation"></Label>
+		<Label Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallHeader}">
+			Последняя операция
+		</Label>
+		<Label Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource LastOperation}" Name="LastOperation"></Label>
 		<Label Grid.Row="2" Grid.Column="0" Style="{StaticResource LineHeader}">Наименование товара</Label>
 		<Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Name="CurrentLine_Product" Style="{StaticResource SmallValue}" />
 		<Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LineHeader}">Код</Label>
