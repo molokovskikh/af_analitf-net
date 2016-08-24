@@ -14,11 +14,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public ReceivingOrders()
 		{
 			DisplayName = "Приход от поставщика";
-			Statuses = new [] {
-				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.New)),
-				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.Closed)),
-				new Selectable<ValueDescription>(new ValueDescription(ReceiveStatus.InProgress)),
-			};
 			Begin.Value = DateTime.Today.AddDays(-7);
 			End.Value = DateTime.Today;
 		}
@@ -27,7 +22,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<ReceivingOrder> CurrentItem { get; set; }
 		public NotifyValue<IList<Selectable<Supplier>>> Suppliers { get; set; }
 		public NotifyValue<IList<Selectable<Address>>> AddressesFilter { get; set; }
-		public IList<Selectable<ValueDescription>> Statuses { get; set; }
 		public NotifyValue<DateTime> Begin { get; set; }
 		public NotifyValue<DateTime> End { get; set; }
 

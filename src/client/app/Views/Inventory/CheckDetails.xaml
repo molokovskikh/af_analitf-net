@@ -77,7 +77,7 @@
       <DataGrid.Columns>
         <controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
         <controls:DataGridTextColumnEx Header="Название" Binding="{Binding Product}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding ProducerId}" Width="*" Visibility="Collapsed"/>
+        <controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx Header="Код товара" Binding="{Binding ProductId}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx Header="Форма товара" Binding="{Binding ProductKind}" Width="*" Visibility="Collapsed"/>
         <controls:DataGridTextColumnEx Header="Тип товара" Binding="{Binding PKU}" Width="*" Visibility="Collapsed"/>
@@ -92,8 +92,8 @@
         <controls:DataGridTextColumnEx Header="Цена" Binding="{Binding Cost}" Width="*" />
         <controls:DataGridTextColumnEx Header="Количество" Binding="{Binding Quantity}" Width="*" />
         <controls:DataGridTextColumnEx Header="Розничная сумма" Binding="{Binding RetailSum}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding Sum}" Width="*" />
-        <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding DiscontSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма скидки" Binding="{Binding DiscontSum}" Width="*" />
+        <controls:DataGridTextColumnEx Header="Сумма с учетом скидки" Binding="{Binding Sum}" Width="*" />
       </DataGrid.Columns>
     </controls:DataGrid2>
   </Grid>

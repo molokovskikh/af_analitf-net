@@ -45,7 +45,7 @@
 		<controls:DataGrid2 Grid.Row="2" x:Name="Items">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding CloseDate}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Поставщик" Binding="{Binding Supplier.Name}" Width="*" />
 
 				<controls:DataGridTextColumnEx Header="Номер накладной" Binding="{Binding WaybillId}" Width="*" />

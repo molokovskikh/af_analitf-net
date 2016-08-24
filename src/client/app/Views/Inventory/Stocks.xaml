@@ -18,10 +18,10 @@
 		<Menu Grid.Row="0">
 			<MenuItem Header="Документы">
 				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
-				<MenuItem Header="Чеки" Name="Checks" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
+				<MenuItem Header="Чеки" Name="Checks" />
 			</MenuItem>
 		</Menu>
 		<WrapPanel Grid.Row="1" Style="{StaticResource FilterWrapPanel}" >

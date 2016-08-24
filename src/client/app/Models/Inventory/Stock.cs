@@ -22,7 +22,16 @@ namespace AnalitF.Net.Client.Models.Inventory
 		NotDefective,
 	}
 
-	public class Stock
+	public class BaseStock
+	{
+		public virtual string Barcode { get; set; }
+		public virtual string Product { get; set; }
+		public virtual uint? ProductId { get; set; }
+		public virtual string Producer { get; set; }
+		public virtual uint? ProducerId { get; set; }
+	}
+
+	public class Stock : BaseStock
 	{
 		public virtual uint Id { get; set; }
 
@@ -30,7 +39,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint? ReceivingOrderId { get; set; }
 
-		public virtual string Barcode { get; set; }
 		public virtual string AnalogCode { get; set; }
 		public virtual string ProducerBarcode { get; set; }
 		public virtual string AltBarcode { get; set; }
@@ -38,8 +46,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Country { get; set; }
 		public virtual string Unit { get; set; }
 
-		public virtual string Product { get; set; }
-		public virtual uint? ProductId { get; set; }
 		public virtual string ProductKind { get; set; }
 
 		public virtual string FarmGroup { get; set; }
@@ -49,8 +55,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
 		public virtual string Certificate { get; set; }
-		public virtual string Producer { get; set; }
-		public virtual uint? ProducerId { get; set; }
 		public virtual decimal Count { get; set; }
 		public virtual decimal Cost { get; set; }
 		public virtual decimal RetailCost { get; set; }
