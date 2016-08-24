@@ -187,6 +187,7 @@ namespace AnalitF.Net.Client.Models.Print
 				list.Add(PageContentRect[pageNum]);
 			if (FooterContentRect.ContainsKey(pageNum))
 				list.Add(FooterContentRect[pageNum]);
+
 			var pt = new Point {
 				X = list.Min(r => r.X),
 				Y = list.Min(r => r.Y)

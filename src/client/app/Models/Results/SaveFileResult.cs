@@ -84,7 +84,9 @@ namespace AnalitF.Net.Client.Models.Results
 		public FileStream Stream(string uniqator="")
 		{
 			try {
-				return File.OpenWrite($"{Directory}\\{FileName}{uniqator}{FileExtension}");
+				var filename = $"{FileName}{uniqator}{FileExtension}";
+				var path = Path.Combine(Directory, filename);
+				return File.OpenWrite(path);
 			}
 			catch(UnauthorizedAccessException e) {
 				Manager.Error(e.Message);

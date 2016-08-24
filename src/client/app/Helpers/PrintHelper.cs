@@ -58,75 +58,71 @@ namespace AnalitF.Net.Client.Helpers
 			return rtfString;
 		}
 
-		public static List<RenderTargetBitmap> ToBitmap(WrapDocumentPaginator dp, bool contentOnly)
+		public static RenderTargetBitmap ToBitmap(WrapDocumentPaginator dp, int pageNum, bool contentOnly)
 		{
-			var ret = new List<RenderTargetBitmap>();
+			var page = dp.GetPage(pageNum);
+			var pagevisual = page.Visual as ContainerVisual;
+			if (pagevisual == null)
+				throw new ArgumentException("Нет такой страницы");
+			var pageFullSize = page.Size;
+			if (contentOnly) {
 
-			for (var i = 0; i < dp.PageCount; i++)
-			{
-				var page = dp.GetPage(i);
-				var pagevisual = page.Visual as ContainerVisual;
-				if (pagevisual == null)
-					continue;
-				var pageFullSize = page.Size;
-				if (contentOnly) {
-					var pageContentRect = dp.GetRealContentRect(i);
-					pageFullSize = pageContentRect.Size;
-					pagevisual.Offset = new Vector(-pageContentRect.Location.X, -pageContentRect.Location.Y);
-				}
+				ContainerVisual header;
 
-				var renderBitmap =
-						new RenderTargetBitmap(
-						(int)pageFullSize.Width,
-						(int)pageFullSize.Height,
-						96d,
-						96d,
-						PixelFormats.Pbgra32
-				);
+				var pageContentRect = dp.GetRealContentRect(pageNum);
 
-				renderBitmap.Render(pagevisual);
-
-				var dWidth = (int)pageFullSize.Width;
-				var dHeight = (int)pageFullSize.Height;
-				var dStride = dWidth * 4;
-
-				byte[] pixels = new byte[dHeight * dStride];
-
-				for (var j = 0; j < pixels.Length; j++)
-				{
-						pixels[j] = 0xFF;
-				}
-
-				var bg = BitmapSource.Create(
-						dWidth,
-						dHeight,
-						96,
-						96,
-						PixelFormats.Pbgra32,
-						null,
-						pixels,
-						dStride
-				);
-				var dv = new DrawingVisual();
-				var dc = dv.RenderOpen();
-				dc.DrawImage(bg, new Rect(0,0, dWidth, dHeight));
-				dc.DrawImage(renderBitmap, new Rect(0,0, dWidth, dHeight));
-				dc.Close();
-
-				var resultBitmap =
-						new RenderTargetBitmap(
-						(int)dWidth,
-						(int)dHeight,
-						96d,
-						96d,
-						PixelFormats.Pbgra32
-				);
-
-				resultBitmap.Render(dv);
-				ret.Add(resultBitmap);
+				pageFullSize = pageContentRect.Size;
+				pagevisual.Offset = new Vector(-pageContentRect.Location.X, -pageContentRect.Location.Y);
 			}
 
-			return ret;
+			var renderBitmap =
+					new RenderTargetBitmap(
+					(int)pageFullSize.Width,
+					(int)pageFullSize.Height,
+					96d,
+					96d,
+					PixelFormats.Pbgra32
+			);
+
+			renderBitmap.Render(pagevisual);
+
+			var dWidth = (int)pageFullSize.Width;
+			var dHeight = (int)pageFullSize.Height;
+			var dStride = dWidth * 4;
+
+			byte[] pixels = new byte[dHeight * dStride];
+
+			for (var j = 0; j < pixels.Length; j++)
+			{
+					pixels[j] = 0xFF;
+			}
+
+			var bg = BitmapSource.Create(
+					dWidth,
+					dHeight,
+					96,
+					96,
+					PixelFormats.Pbgra32,
+					null,
+					pixels,
+					dStride
+			);
+			var dv = new DrawingVisual();
+			var dc = dv.RenderOpen();
+			dc.DrawImage(bg, new Rect(0,0, dWidth, dHeight));
+			dc.DrawImage(renderBitmap, new Rect(0,0, dWidth, dHeight));
+			dc.Close();
+
+			var resultBitmap =
+					new RenderTargetBitmap(
+					(int)dWidth,
+					(int)dHeight,
+					96d,
+					96d,
+					PixelFormats.Pbgra32
+			);
+			resultBitmap.Render(dv);
+			return resultBitmap;
 		}
 	}
 }

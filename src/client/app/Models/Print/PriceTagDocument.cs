@@ -119,7 +119,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public override FrameworkContentElement GetFooter(int page, int pageCount)
 		{
-			return null;
 			var footer = "Электронная почта: farm@analit.net, интернет: http://www.analit.net/";
 			return new Paragraph(new Run(footer)) {
 				FontFamily = new FontFamily("Arial"),

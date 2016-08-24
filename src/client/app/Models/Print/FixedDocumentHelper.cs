@@ -41,69 +41,20 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public static FlowDocument BuildFlowDoc(Waybill waybill, IList<WaybillLine> lines, WaybillSettings settings, Func<WaybillLine, FrameworkElement> map, double borderThickness)
 		{
-			//, out List<Size> contentSize)
-			//contentSize = new List<Size>();
-			var canvasSize = new Size(10000, 10000);
 			var document = new FlowDocument();
 			document.PagePadding = new Thickness(0,0,0,0);
 			var left = lines.Count;
 			while (left > 0) {
-
+				var border = new Border {
+					Margin = new Thickness(1)
+				};
 				var section = new Section();
 				section.BreakPageBefore = true;
-
-				var leftSize = new Size(pageSize.Width,pageSize.Height);
-
-				var footerElement = new Border {
-					Child = new TextBlock(new Run($"{waybill.SupplierName}, {waybill.AddressName}"))
-				};
-				var footer = new BlockUIContainer(footerElement);
-				var gridElement = BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness);
-				var grid = new BlockUIContainer(gridElement);
-
-				footerElement.Measure(canvasSize);
-				gridElement.Measure(canvasSize);
-				double currWidth = gridElement.DesiredSize.Width;
-				if (currWidth < footerElement.DesiredSize.Width)
-					currWidth = pageSize.Width;
-				var currPageSize = new Size(currWidth, footerElement.DesiredSize.Height + gridElement.DesiredSize.Height);
-				//contentSize.Add(currPageSize);
-
-				document.MinPageWidth = currPageSize.Width;
-				document.MinPageHeight = currPageSize.Height;
-
+				var leftSize = new Size(pageSize.Width - border.Margin.Left - border.Margin.Right,
+					pageSize.Height - border.DesiredSize.Height - border.Margin.Top - border.Margin.Bottom);
+				var grid = new BlockUIContainer(BuildMapGrid(i => map(lines[i]), lines.Count, leftSize, ref left, borderThickness));
+				section.Blocks.Add(grid);
 				document.Blocks.Add(section);
-
-				var table = new Table {
-					FontFamily = new FontFamily("Arial"),
-					FontSize = 10,
-					Columns = {
-						new TableColumn {
-							Width = GridLength.Auto
-						}
-					},
-					RowGroups = {
-						new TableRowGroup {
-							Rows = {
-								new TableRow {
-									Cells = {
-										new TableCell(footer) {
-											TextAlignment = TextAlignment.Left,
-										}
-									}
-								},
-								new TableRow {
-									Cells = {
-										new TableCell(grid) {
-											TextAlignment = TextAlignment.Left,
-										}
-									}
-								}
-							}
-						}
-					}
-				};
-				section.Blocks.Add(table);
 			}
 			return document;
 		}
