@@ -63,7 +63,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода кода");
 				return;
 			}
-			UpdateProduct(StatelessSession.Query<Stock>().FirstOrDefault(x => x.ProductId == id), "Код товара");
+			UpdateProduct(StockQuery().FirstOrDefault(x => x.ProductId == id), "Код товара");
 		}
 
 		private void Message(string text)
@@ -85,7 +85,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода штрих-кода");
 				return;
 			}
-			UpdateProduct(StatelessSession.Query<Stock>().FirstOrDefault(x => x.Barcode == Input.Value), "Штрих код");
+			UpdateProduct(StockQuery().FirstOrDefault(x => x.Barcode == Input.Value), "Штрих код");
+		}
+
+		private IQueryable<Stock> StockQuery()
+		{
+			return StatelessSession.Query<Stock>().Where(x => x.Address == Address);
 		}
 
 		private void UpdateProduct(Stock stock, string operation)
@@ -112,13 +117,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var checkout = new Checkout(Sum.Value.Value);
 			yield return new DialogResult(checkout);
 			Change.Value = checkout.Change.Value;
-			var check = new Check(Address, Lines);
-			Session.Save(check);
-			Session.Flush();
-			Session.Clear();
+
+			using (var trx = StatelessSession.BeginTransaction()) {
+				var check = new Check(Address, Lines);
+				StatelessSession.Insert(check);
+				Lines.Each(x => x.CheckId = check.Id);
+				StatelessSession.InsertEach(Lines);
+				trx.Commit();
+			}
 			Lines.Clear();
 			Message("Оплата наличными");
 			Status.Value = "Готов к работе";
+		}
+
+		public IEnumerable<IResult> SearchByTerm()
+		{
+			if (Quantity.Value == null) {
+				Error("Введите количество");
+				yield break;
+			}
+			var model = new StockSearch(Input.Value);
+			yield return new DialogResult(model);
+			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
 	}
 }

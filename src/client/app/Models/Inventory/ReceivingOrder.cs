@@ -64,16 +64,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual Stock[] ToStocks()
 		{
-			return Lines.Select(x => new Stock {
-				Product = x.Product,
-				ProductId = x.ProductId,
-				Producer = x.Producer,
-				ProducerId = x.ProductId,
-				Count = x.Quantity,
-				Cost = x.SupplierCost.GetValueOrDefault(),
-				RetailCost = x.RetailCost,
-				Barcode = x.BarCode
-			}).ToArray();
+			return Lines.Select(x => new Stock(this, x)).ToArray();
 		}
 
 		public static bool StockWaybill(ISession session, Waybill waybill)

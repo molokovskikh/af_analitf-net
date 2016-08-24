@@ -24,6 +24,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Model.SearchByProductId();
 				} else if (args.Key == Key.F3) {
 					Model.SearchByBarcode();
+				} else if (args.Key == Key.F6) {
+					Coroutine.BeginExecute(Model.SearchByTerm().GetEnumerator(), new ActionExecutionContext { View = this });
 				} else if (args.Key == Key.Enter) {
 					Coroutine.BeginExecute(Model.Checkout().GetEnumerator(), new ActionExecutionContext { View = this });
 				}

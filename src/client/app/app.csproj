@@ -418,6 +418,7 @@
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
+    <Compile Include="ViewModels\Inventory\SearchStock.cs" />
     <Compile Include="ViewModels\Inventory\Stocks.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
@@ -580,6 +581,9 @@
     </Compile>
     <Compile Include="Views\Inventory\Stocks.xaml.cs">
       <DependentUpon>Stocks.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\StockSearch.xaml.cs">
+      <DependentUpon>StockSearch.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\AddAwaited.xaml.cs">
       <DependentUpon>AddAwaited.xaml</DependentUpon>
@@ -864,6 +868,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\Stocks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\StockSearch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -33,8 +33,21 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class Stock : BaseStock
 	{
+		public Stock()
+		{
+		}
+
+		public Stock(ReceivingOrder order, ReceivingLine line)
+		{
+			Address = order.Address;
+			Count = line.Quantity;
+			Cost = line.SupplierCost.GetValueOrDefault();
+			line.CopyToStock(this);
+		}
+
 		public virtual uint Id { get; set; }
 
+		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
 
 		public virtual uint? ReceivingOrderId { get; set; }
@@ -59,11 +72,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal Cost { get; set; }
 		public virtual decimal RetailCost { get; set; }
 		public virtual decimal ProducerCost { get; set; }
-		public virtual decimal Nds { get; set; }
+		public virtual int? Nds { get; set; }
+		public virtual decimal? NdsAmount { get; set; }
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
-		public virtual decimal CostWithNds => Cost + Nds + Excise;
+		public virtual decimal CostWithNds => Cost + NdsAmount.GetValueOrDefault() + Excise;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 

@@ -4,7 +4,7 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
-	public class ReceivingLine
+	public class ReceivingLine : BaseStock
 	{
 		public ReceivingLine()
 		{
@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplierPriceMarkup = line.SupplierPriceMarkup;
 			SupplierCostWithoutNds = line.SupplierCostWithoutNds;
 			Nds = line.Nds;
-			BarCode = line.EAN13;
+			Barcode = line.EAN13;
 
 			Quantity = line.QuantityToReceive;
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
@@ -39,11 +39,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual string Product { get; set; }
-		public virtual uint? ProductId { get; set; }
 		public virtual uint? CatalogId { get; set; }
-		public virtual string Producer { get; set; }
-		public virtual uint? ProducerId { get; set; }
 
 		public virtual string CountryCode { get; set; }
 		public virtual string Country { get; set; }
@@ -67,7 +63,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal? SupplierCost { get; set; }
 
 		public virtual int? Nds { get; set; }
-		public virtual string BarCode { get; set; }
 
 		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Quantity { get; set; }
