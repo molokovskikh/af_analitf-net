@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Caliburn.Micro;
@@ -17,17 +18,24 @@ namespace AnalitF.Net.Client.Views.Inventory
 				Input.Focus();
 			};
 			PreviewKeyDown += (sender, args) => {
+				IEnumerable<IResult> results = null;
 				if (args.Key == Key.Multiply) {
 					Model.UpdateQuantity();
 					args.Handled = true;
+				} else if (args.Key == Key.F1) {
+					results = Model.Help();
 				} else if (args.Key == Key.F2) {
 					Model.SearchByProductId();
 				} else if (args.Key == Key.F3) {
 					Model.SearchByBarcode();
 				} else if (args.Key == Key.F6) {
-					Coroutine.BeginExecute(Model.SearchByTerm().GetEnumerator(), new ActionExecutionContext { View = this });
+					results = Model.SearchByTerm();
 				} else if (args.Key == Key.Enter) {
-					Coroutine.BeginExecute(Model.Checkout().GetEnumerator(), new ActionExecutionContext { View = this });
+					results = Model.Checkout();
+				}
+				if (results != null) {
+					Coroutine.BeginExecute(results.GetEnumerator(), new ActionExecutionContext { View = this });
+					args.Handled = true;
 				}
 			};
 		}

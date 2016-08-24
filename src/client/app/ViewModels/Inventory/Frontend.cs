@@ -140,5 +140,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			yield return new DialogResult(model);
 			UpdateProduct(model.CurrentItem, "Поиск товара");
 		}
+
+		public IEnumerable<IResult> Help()
+		{
+			yield return new DialogResult(new Help());
+		}
 	}
 }

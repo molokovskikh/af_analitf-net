@@ -44,7 +44,7 @@
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items" controls:SearchableDataGridColumn.SearchTerm="{Binding SearchBehavior.ActiveSearchTerm.Value}">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Код" Binding="{Binding ProductId}" Width="*" />
-				<controls:SearchableDataGridColumn Header="Наименование" Binding="{Binding Product}" Width="*" />
+				<controls:SearchableDataGridColumn HighlightStyle="{StaticResource DataGridHighlight}" Header="Наименование" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Count}" Width="*" />
