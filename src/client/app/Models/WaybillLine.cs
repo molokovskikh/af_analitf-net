@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.Models
 		private bool isCertificateNotFound;
 		private bool _isReadyForStock;
 		private int _quantityToReceive;
+		private int _receivedQuantity;
 
 		public WaybillLine()
 		{
@@ -277,7 +278,17 @@ namespace AnalitF.Net.Client.Models
 		[Style(Description = "Частично оприходовано")]
 		public virtual bool IsPartialyStocked => ReceivedQuantity > 0 && Quantity > 0 && Quantity > ReceivedQuantity;
 
-		public virtual int ReceivedQuantity { get; set; }
+		public virtual int ReceivedQuantity
+		{
+			get { return _receivedQuantity; }
+			set
+			{
+				if (_receivedQuantity != value) {
+					_receivedQuantity = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 

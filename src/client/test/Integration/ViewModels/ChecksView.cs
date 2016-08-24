@@ -54,7 +54,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var check = new Check
 			{
 				CheckType = CheckType.CheckReturn,
-				Number = 100,
 				Date = DateTime.Today.AddDays(-7),
 				ChangeOpening = DateTime.Today.AddDays(-7),
 				Status = Status.Open,
@@ -79,10 +78,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			return new CheckLine(check.Id)
 			{
-				Barcode = 124,
+				Barcode = "124",
 				ProductId = 10,
 				ProducerId = 12,
-				ProductName = "Тестовый продукт",
+				Product = "Тестовый продукт",
 				RetailCost = 110,
 				Cost = 100,
 				Quantity = 1,

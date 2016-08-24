@@ -21,7 +21,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var text = $"Чек {_header.Number}";
+			var text = $"Чек {_header.Id}";
 				doc.Blocks.Add(new Paragraph(new Run(text)) {
 					FontWeight = FontWeights.Bold,
 					FontSize = 16,
@@ -53,7 +53,7 @@ namespace AnalitF.Net.Client.Models.Print
 			{
 				o.Id,
 				o.Barcode,
-				o.ProductName,
+				o.Product,
 				o.Quantity,
 				o.RetailCost,
 				o.RetailSum,

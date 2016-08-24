@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Media;
 using AnalitF.Net.Client.Models.Inventory;
-using AnalitF.Net.Client.ViewModels;
 
 namespace AnalitF.Net.Client.Models.Print
 {
 	public class CheckDocument : BaseDocument
 	{
-
 		private Check[] _checks;
 
 		public CheckDocument(Check[] checks)
@@ -40,13 +34,13 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var rows = _checks.Select((o, i) => new object[]
 			{
-				o.Number,
+				o.Id,
 				o.Date.ToString("dd/M/yyyy"),
 				o.KKM,
 				o.Department.Name,
 				o.Cancelled,
 				o.RetailSum,
-				o.DiscontSum,
+				o.DiscountSum,
 				o.Sum,
 			});
 

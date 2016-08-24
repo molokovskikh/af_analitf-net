@@ -35,17 +35,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-			if (Header.Value == null) {
-				RxQuery(x => x.Query<Check>()
-						.FirstOrDefault(y => y.Id == id))
-					.Subscribe(Header);
-				RxQuery(x => {
-						return x.Query<CheckLine>().Where(y => y.CheckId == id)
-							.ToList()
-							.ToObservableCollection();
-					})
-					.Subscribe(Lines);
-			}
+			RxQuery(s => s.Query<Check>()
+					.Fetch(x => x.Department)
+					.FirstOrDefault(y => y.Id == id))
+				.Subscribe(Header);
+			RxQuery(x => {
+					return x.Query<CheckLine>().Where(y => y.CheckId == id)
+						.ToList()
+						.ToObservableCollection();
+				})
+				.Subscribe(Lines);
 		}
 
 		public IEnumerable<IResult> PrintCheckDetails()
@@ -65,14 +64,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult ExportExcel()
 		{
-			var columns = new[] {"№",
+			var columns = new[] {
+				"№",
 				"Штрих-код",
 				"Название товара",
 				"Количество",
 				"Цена розничная",
 				"Сумма розничная",
 				"Сумма скидки",
-				"Сумма с учетом скидки"};
+				"Сумма с учетом скидки"
+			};
 
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");
@@ -83,7 +84,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var rows = Lines.Value.Select((o, i) => new object[] {
 				o.Id,
 				o.Barcode,
-				o.ProductName,
+				o.Product,
 				o.Quantity,
 				o.RetailCost,
 				o.RetailSum,

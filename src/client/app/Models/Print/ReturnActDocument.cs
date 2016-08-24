@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Id,
 				o.Department,
 				o.ChangeNumber,
-				o.Number,
+				o.Id,
 				o.Sum,
 				o.Agent,
 			});

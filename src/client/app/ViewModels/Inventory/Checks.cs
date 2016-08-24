@@ -16,13 +16,10 @@ using NPOI.HSSF.UserModel;
 using System.ComponentModel;
 using System.Reactive;
 
-
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class Checks : BaseScreen2
 	{
-		private Main main;
-
 		public Checks()
 		{
 			Begin.Value = DateTime.Today.AddDays(-7);
@@ -31,12 +28,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			SearchBehavior = new SearchBehavior(this);
 			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
 			AddressSelector = new AddressSelector(this);
-		}
-
-		public Checks(Main main)
-			: this()
-		{
-			this.main = main;
+			DisplayName = "Чеки";
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -54,14 +46,21 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Cast<object>()
-				.Merge(KKMFilter.SelectMany(x => x?.Select(c => c.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+				.Merge(KKMFilter.SelectMany(x => x?.Select(c => c.Changed()).Merge()
 					?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()))
 				.Merge(KKMFilter.Where(x => x != null))
-				.Subscribe(_ => Update(), CloseCancellation.Token);
-
-			RxQuery(x => x.Query<Check>().ToList())
+				.Merge(Begin.Select(x => (object)x))
+				.Merge(End.Select(x => (object)x))
+				.Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+				.SelectMany(_ => RxQuery(s => s.Query<Check>()
+					.Where(c => c.Date <= End.Value.AddDays(1) && c.Date >= Begin.Value
+						&& AddressSelector.GetActiveFilter().Contains(c.Department))
+					.OrderByDescending(x => x.Date)
+					.Fetch(x => x.Department)
+					.ToList()))
 				.Subscribe(Items);
 		}
+
 		public void EnterItem()
 		{
 			if (CurrentItem.Value == null)
@@ -75,22 +74,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnDeactivate(close);
 		}
 
-		public override void Update()
-		{
-			var query = Session.Query<Check>().Where(c => c.Date <= End && c.Date >= Begin
-			                                              && AddressSelector.GetActiveFilter().Contains(c.Department));
-			Items.Value = query.ToList();
-		}
-
 		public IEnumerable<IResult> PrintChecks()
 		{
-			Update();
 			return Preview("Чеки", new CheckDocument(Items.Value.ToArray()));
 		}
 
 		public IEnumerable<IResult> PrintReturnAct()
 		{
-			Update();
 			return Preview("Чеки", new ReturnActDocument(Items.Value.Where(x => x.CheckType == CheckType.CheckReturn).ToArray()));
 		}
 
@@ -107,14 +97,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IResult ExportExcel()
 		{
 			Update();
-			var columns = new[] {"№ чека",
+			var columns = new[] {
+				"№ чека",
 				"Дата",
 				"ККМ",
 				"Отдел",
 				"Аннулирован",
 				"Сумма розничная",
 				"Сумма скидки",
-				"Сумма с учетом скидки"};
+				"Сумма с учетом скидки"
+			};
 
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");
@@ -123,13 +115,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			ExcelExporter.WriteRow(sheet, columns, row++);
 
 			var rows = Items.Value.Select((o, i) => new object[] {
-				o.Number,
+				o.Id,
 				o.Date,
 				o.KKM,
 				o.Department.Name,
 				o.Cancelled,
 				o.RetailSum,
-				o.DiscontSum,
+				o.DiscountSum,
 				o.Sum,
 			});
 

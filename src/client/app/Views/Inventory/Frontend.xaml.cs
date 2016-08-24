@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.Views.Inventory
 {
@@ -12,14 +13,21 @@ namespace AnalitF.Net.Client.Views.Inventory
 		{
 			InitializeComponent();
 
+			Loaded += (sender, args) => {
+				Input.Focus();
+			};
 			PreviewKeyDown += (sender, args) => {
 				if (args.Key == Key.Multiply) {
 					Model.UpdateQuantity();
+					args.Handled = true;
+				} else if (args.Key == Key.F2) {
+					Model.SearchByProductId();
+				} else if (args.Key == Key.F3) {
+					Model.SearchByBarcode();
+				} else if (args.Key == Key.Enter) {
+					Coroutine.BeginExecute(Model.Checkout().GetEnumerator(), new ActionExecutionContext { View = this });
 				}
 			};
-			//Input.TextInput += (sender, args) => {
-			//	if (args.)
-			//};
 		}
 	}
 }

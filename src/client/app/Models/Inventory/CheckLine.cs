@@ -14,16 +14,23 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 
 		}
+
 		public CheckLine(uint id)
 		{
 			CheckId = id;
 		}
 
+		public CheckLine(Stock stock, uint quantity)
+		{
+			CopyFromStock(stock);
+			Quantity = quantity;
+		}
+
 		public virtual uint Id { get; set; }
-		public virtual uint Barcode { get; set; }
+		public virtual string Barcode { get; set; }
 		public virtual uint? ProductId { get; set; }
 		public virtual uint? ProducerId { get; set; }
-		public virtual string ProductName { get; set; }
+		public virtual string Product { get; set; }
 		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Cost { get; set; }
 		public virtual decimal Quantity { get; set; }
@@ -55,15 +62,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint? NP { get; set; }
 		public virtual decimal PartyNumber { get; set; }
 
-
-
 		public virtual bool Narcotic { get; set; }
 		public virtual bool Toxic { get; set; }
 		public virtual bool Combined { get; set; }
 		public virtual bool Other { get; set; }
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
-
-
 
 		public virtual void CopyToStock(Stock stock)
 		{

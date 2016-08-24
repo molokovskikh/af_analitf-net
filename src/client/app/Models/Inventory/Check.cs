@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -12,21 +13,39 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Продажа покупателю")] SaleBuyer,
 		[Description("Возврат по чеку")] CheckReturn,
 	}
+
 	public enum PaymentType
 	{
 		[Description("Наличный рубль")] Cash,
 	}
+
 	public enum Status
 	{
 		[Description("Закрыт")] Closed,
 		[Description("Открыт")] Open,
 	}
+
 	public enum SaleType
 	{
 		[Description("Полная стоимость")] FullCost,
 	}
-	public class Check:BaseNotify
+
+	public class Check : BaseNotify
 	{
+		public Check(Address address, IEnumerable<CheckLine> lines)
+			: this()
+		{
+			CheckType = CheckType.SaleBuyer;
+			Date = DateTime.Now;
+			ChangeOpening = DateTime.Today;
+			Status = Status.Closed;
+			Department = address;
+			PaymentType = PaymentType.Cash;
+			SaleType = SaleType.FullCost;
+			Lines.AddEach(lines);
+			UpdateStat();
+		}
+
 		public Check()
 		{
 			Lines = new List<CheckLine>();
@@ -34,7 +53,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual uint Id { get; set; }
 		public virtual CheckType CheckType { get; set; }
-		public virtual uint Number { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual DateTime ChangeOpening { get; set; }
 		public virtual Status Status { get; set; }
@@ -50,31 +68,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint ChangeNumber { get; set; }
 		[Style(Description = "\"Аннулирован\"")]
 		public virtual bool Cancelled { get; set; }
-		public virtual decimal Sum => RetailSum - DiscontSum;
-		private decimal retailSum;
-		public virtual decimal RetailSum
-		{
-			get { return retailSum; }
-			set
-			{
-				retailSum = value;
-				OnPropertyChanged();
-				OnPropertyChanged("IsInvalid");
-				OnPropertyChanged("IsOverLimit");
-			}
-		}
-		private decimal discontSum;
-		public virtual decimal DiscontSum
-		{
-			get { return discontSum; }
-			set
-			{
-				discontSum = value;
-				OnPropertyChanged();
-				OnPropertyChanged("IsInvalid");
-				OnPropertyChanged("IsOverLimit");
-			}
-		}
+
+		public virtual decimal Sum => RetailSum - DiscountSum;
+		public virtual decimal RetailSum { get; set; }
+		public virtual decimal DiscountSum { get; set; }
+		public virtual decimal SupplySum { get; set; }
 
 		//Эти поля были пустыми
 		public virtual string SaleCheck { get; set; }
@@ -84,21 +82,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual IList<CheckLine> Lines { get; set; }
 
-		public virtual Stock[] ToStocks()
-		{
-			return Lines.Select(x => new Stock {
-				ProductId = x.ProductId,
-				ProducerId = x.ProducerId,
-				Count = x.Quantity,
-				Cost = x.Cost,
-				RetailCost = x.RetailCost,
-			}).ToArray();
-		}
-
 		public virtual void UpdateStat()
 		{
 			RetailSum = Lines.Sum(l => l.RetailSum);
-			DiscontSum = Lines.Sum(l => l.DiscontSum);
+			DiscountSum = Lines.Sum(l => l.DiscontSum);
+			SupplySum = Lines.Sum(x => x.Cost);
 		}
 	}
 }

@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Data;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
@@ -533,7 +534,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void Stock()
 		{
-			if (Inventory.Stocks.StockWaybill(Session, Waybill))
+			if (ReceivingOrder.StockWaybill(Session, Waybill))
 				Manager.Notify("Накладная оприходована");
 			else
 				Manager.Warning("Выберете позиции что бы оприходовать");

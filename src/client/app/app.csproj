@@ -412,6 +412,7 @@
     <Compile Include="ViewModels\Feedback.cs" />
     <Compile Include="ViewModels\Inventory\BaseScreen2.cs" />
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
+    <Compile Include="ViewModels\Inventory\Checkout.cs" />
     <Compile Include="ViewModels\Inventory\Checks.cs" />
     <Compile Include="ViewModels\Inventory\Frontend.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
@@ -558,6 +559,9 @@
     </Compile>
     <Compile Include="Views\Inventory\CheckDetails.xaml.cs">
       <DependentUpon>CheckDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\Checkout.xaml.cs">
+      <DependentUpon>Checkout.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\Checks.xaml.cs">
       <DependentUpon>Checks.xaml</DependentUpon>
@@ -832,6 +836,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\CheckDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\Checkout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

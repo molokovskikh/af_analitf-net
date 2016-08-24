@@ -31,7 +31,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint? ReceivingOrderId { get; set; }
 
 		public virtual string Barcode { get; set; }
-		public virtual string ProductСode { get; set; }
 		public virtual string AnalogCode { get; set; }
 		public virtual string ProducerBarcode { get; set; }
 		public virtual string AltBarcode { get; set; }
@@ -60,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
-		public virtual decimal CostWithNds { get { return Cost + Nds + Excise; } }
+		public virtual decimal CostWithNds => Cost + Nds + Excise;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
@@ -98,9 +97,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string Seria { get; set; }
 
-		public virtual decimal Sum { get { return Count * Cost; } }
+		public virtual decimal Sum => Count * Cost;
 		public virtual decimal SumWithNds { get; set; }
-		public virtual decimal RetailSum { get { return Count * RetailCost; } }
+		public virtual decimal RetailSum => Count * RetailCost;
 		public virtual uint CountDelivery { get; set; }
 		public virtual string Vmn { get; set; }
 		public virtual string Gtd { get; set; }

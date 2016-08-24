@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.Helpers
 			return !notFound;
 		}
 
-		public static void SaveEach<T>(this IStatelessSession session, IEnumerable<T> items)
+		public static void InsertEach<T>(this IStatelessSession session, IEnumerable<T> items)
 		{
 			var toSave = items.ToArray();
 			foreach (var item in toSave) {

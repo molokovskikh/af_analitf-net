@@ -55,7 +55,7 @@ namespace AnalitF.Net.Client.Models.Print
 
 			var rows = _stocks.Select((o, i) => new object[] {
 				i + 1,
-				o.ProductСode,
+				o.ProductId,
 				o.Product,
 				o.Seria,
 				o.Producer,

@@ -15,6 +15,16 @@
 			<Setter Property="Background" Value="#D3D3D3" />
 		</Style>
 
+		<Style x:Key="Status" TargetType="Label">
+			<Setter Property="FontSize" Value="20" />
+			<Setter Property="BorderThickness" Value="1" />
+			<Setter Property="BorderBrush" Value="Black" />
+			<Setter Property="MinHeight" Value="36" />
+			<Setter Property="Foreground" Value="#2A27FE" />
+			<Setter Property="VerticalContentAlignment" Value="Center" />
+			<Setter Property="HorizontalContentAlignment" Value="Center" />
+		</Style>
+
 		<Style x:Key="LineHeader" TargetType="Label" BasedOn="{StaticResource SmallHeader}">
 			<Setter Property="Background" Value="#D2E2FF" />
 		</Style>
@@ -23,13 +33,13 @@
 			<Setter Property="FontSize" Value="20" />
 			<Setter Property="BorderThickness" Value="1" />
 			<Setter Property="BorderBrush" Value="Black" />
-			<Setter Property="MinHeight" Value="36" />
+			<Setter Property="MinHeight" Value="40" />
 		</Style>
 
 		<Style x:Key="BigHeader" TargetType="Label">
 			<Setter Property="FontSize" Value="30" />
 			<Setter Property="FontWeight" Value="Bold" />
-			<Setter Property="MinHeight" Value="40" />
+			<Setter Property="MinHeight" Value="52" />
 			<Setter Property="BorderThickness" Value="1" />
 			<Setter Property="BorderBrush" Value="Black" />
 		</Style>
@@ -59,27 +69,27 @@
 			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>
-		<Label Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="Operation" />
+		<Label Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Name="Status"  Style="{StaticResource Status}" />
 		<Label Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallHeader}">Последняя операция</Label>
 		<Label Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Style="{StaticResource SmallValue}" Name="LastOperation"></Label>
 		<Label Grid.Row="2" Grid.Column="0" Style="{StaticResource LineHeader}">Наименование товара</Label>
-		<Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Name="CurrentProduct" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Name="CurrentLine_Product" Style="{StaticResource SmallValue}" />
 		<Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LineHeader}">Код</Label>
 		<Label Grid.Row="3" Grid.Column="1" Style="{StaticResource LineHeader}">Количество</Label>
 		<Label Grid.Row="3" Grid.Column="2" Style="{StaticResource LineHeader}">Цена</Label>
 		<Label Grid.Row="3" Grid.Column="3" Style="{StaticResource LineHeader}">Скидка</Label>
 		<Label Grid.Row="3" Grid.Column="4" Style="{StaticResource LineHeader}">Итого</Label>
-		<Label Grid.Row="4" Grid.Column="0" Name="CurrentCode" Style="{StaticResource SmallValue}" />
-		<Label Grid.Row="4" Grid.Column="1" Name="CurrentQuantity" Style="{StaticResource SmallValue}" />
-		<Label Grid.Row="4" Grid.Column="2" Name="CurrentCost" Style="{StaticResource SmallValue}" />
-		<Label Grid.Row="4" Grid.Column="3" Name="CurrentDiscount" Style="{StaticResource SmallValue}" />
-		<Label Grid.Row="4" Grid.Column="4" Name="CurrentSum" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="0" Name="CurrentLine_ProductId" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="1" Name="CurrentLine_Quantity" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="2" Name="CurrentLine_RetailCost" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="3" Name="CurrentLine_DiscontSum" Style="{StaticResource SmallValue}" />
+		<Label Grid.Row="4" Grid.Column="4" Name="CurrentLine_RetailSum" Style="{StaticResource SmallValue}" />
 		<controls:DataGrid2 Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" x:Name="Lines" FontSize="20">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Наименование" Binding="{Binding Product}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding Cost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding Sum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма" Binding="{Binding RetailSum}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 		<Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="5">
@@ -102,7 +112,7 @@
 			<Label Grid.Row="1" Grid.Column="2" Name="Change" Style="{StaticResource BigHeader}" />
 			<TextBox Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Name="Input" Style="{StaticResource Input}" />
 			<Label Grid.Row="2" Grid.Column="2" Style="{StaticResource LineHeader}">кол-во</Label>
-			<Label Grid.Row="3" Grid.Column="2" Name="Quantity" Style="{StaticResource SmallValue}"></Label>
+			<Label Grid.Row="3" Grid.Column="2" Name="Quantity" Style="{StaticResource SmallValue}" />
 		</Grid>
 	</Grid>
 </UserControl>

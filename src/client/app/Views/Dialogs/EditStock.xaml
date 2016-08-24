@@ -22,7 +22,7 @@
 				</StackPanel>
 				<StackPanel Margin="5 0 0 0">
 					<Label Content="Код товара" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>
-					<TextBox Name="Stock_ProductСode" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
+					<TextBox Name="Stock_ProductId" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"/>
 				</StackPanel>
 				<StackPanel Margin="5 0 0 0">
 					<Label Content="Код аналога" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" FontSize="10"/>

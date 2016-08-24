@@ -72,7 +72,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 				Count = x.Quantity,
 				Cost = x.SupplierCost.GetValueOrDefault(),
 				RetailCost = x.RetailCost,
+				Barcode = x.BarCode
 			}).ToArray();
+		}
+
+		public static bool StockWaybill(ISession session, Waybill waybill)
+		{
+			var order = new ReceivingOrder(waybill);
+			if (order.Lines.Count == 0)
+				return false;
+			if (order.Lines.Count > 0)
+				session.Save(order);
+			session.SaveEach(order.ToStocks());
+			return true;
 		}
 	}
 }
