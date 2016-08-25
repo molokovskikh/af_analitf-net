@@ -22,7 +22,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		NotDefective,
 	}
 
-	public class BaseStock
+	public class BaseStock : BaseNotify
 	{
 		public virtual string Barcode { get; set; }
 		public virtual string Product { get; set; }

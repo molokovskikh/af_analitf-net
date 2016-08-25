@@ -10,6 +10,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 {
 	public class CheckLine : BaseStock
 	{
+		private decimal _quantity;
+
 		public CheckLine()
 		{
 
@@ -29,7 +31,19 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Id { get; set; }
 		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Cost { get; set; }
-		public virtual decimal Quantity { get; set; }
+
+		public virtual decimal Quantity
+		{
+			get { return _quantity; }
+			set
+			{
+				if (_quantity != value) {
+					_quantity = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public virtual decimal RetailSum => Quantity * RetailCost;
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }

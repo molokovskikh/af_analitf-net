@@ -46,8 +46,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void Message(string text)
 		{
-			LastOperation.Value = text;
 			HasError.Value = false;
+			Input.Value = null;
+			LastOperation.Value = text;
 		}
 
 		private void Error(string message)
@@ -57,6 +58,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			LastOperation.Value = message;
 		}
 
+		public void Cancel()
+		{
+			if (!Confirm("Отменить чек?"))
+				return;
+			Message("Отмена чека");
+			Reset();
+		}
+
 		public void UpdateQuantity()
 		{
 			var value = NullableConvert.ToUInt32(Input.Value);
@@ -64,7 +73,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Ошибка ввода количества");
 				return;
 			}
-			Input.Value = null;
+
+			if (CurrentLine.Value == null) {
+				Error("Строка не выбрана");
+				return;
+			}
+
+			CurrentLine.Value.Quantity = value.Value;
+			Message("Ввод количества");
+		}
+
+		public void InputQuantity()
+		{
+			var value = NullableConvert.ToUInt32(Input.Value);
+			if (value == null) {
+				Error("Ошибка ввода количества");
+				return;
+			}
+
 			Message("Ввод количества");
 			Quantity.Value = value.Value;
 		}
@@ -117,7 +143,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			Input.Value = null;
 			Message(operation);
-			Lines.Add(new CheckLine(stock, Quantity.Value.Value));
+			var line = new CheckLine(stock, Quantity.Value.Value);
+			Lines.Add(line);
+			CurrentLine.Value = line;
 			Quantity.Value = null;
 		}
 
@@ -137,9 +165,15 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				StatelessSession.InsertEach(Lines);
 				trx.Commit();
 			}
-			Lines.Clear();
 			Message("Оплата наличными");
+			Reset();
+		}
+
+		private void Reset()
+		{
+			Lines.Clear();
 			Status.Value = "Готов к работе";
+			Quantity.Value = null;
 		}
 
 		public IEnumerable<IResult> SearchByTerm()

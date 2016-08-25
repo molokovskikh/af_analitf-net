@@ -27,10 +27,16 @@ namespace AnalitF.Net.Client.Views.Inventory
 				handler.Barcode.Subscribe(x => Model.BarcodeScanned(x));
 			};
 
-			PreviewKeyDown += (sender, args) => {
+			Keyboard.AddPreviewKeyDownHandler(this, (sender, args) => {
 				IEnumerable<IResult> results = null;
 				if (args.Key == Key.Multiply) {
+					Model.InputQuantity();
+					args.Handled = true;
+				} else if (args.Key == Key.Q && ((Keyboard.Modifiers & ModifierKeys.Control) != 0)) {
 					Model.UpdateQuantity();
+					args.Handled = true;
+				} else if (args.Key == Key.System && args.SystemKey == Key.Delete && ((Keyboard.Modifiers & ModifierKeys.Alt) != 0)) {
+					Model.Cancel();
 					args.Handled = true;
 				} else if (args.Key == Key.F1) {
 					results = Model.Help();
@@ -47,7 +53,7 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Coroutine.BeginExecute(results.GetEnumerator(), new ActionExecutionContext { View = this });
 					args.Handled = true;
 				}
-			};
+			});
 		}
 	}
 }
