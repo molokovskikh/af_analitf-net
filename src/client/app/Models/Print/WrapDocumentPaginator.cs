@@ -64,9 +64,6 @@ namespace AnalitF.Net.Client.Models.Print
 					Margins.Left,
 					Margins.Top)
 			};
-			//var pageRect = GetContainerRect(originalVisual);
-		//	pageRect.Offset(Margins.Left, Margins.Top);
-			//PageContentRect.Add(pageNumber, pageRect);
 			pageVisual.Children.Add(originalVisual);
 
 			visual.Children.Add(pageVisual);
@@ -78,9 +75,6 @@ namespace AnalitF.Net.Client.Models.Print
 				};
 				headerContainer.Children.Add(header);
 				visual.Children.Add(headerContainer);
-				//var headerRect = GetContainerRect(header);
-			//	headerRect.Offset(Margins.Left, 0);
-			//	HeaderContentRect.Add(pageNumber, headerRect);
 			}
 
 			var footer = Footer(pageNumber);
@@ -90,9 +84,6 @@ namespace AnalitF.Net.Client.Models.Print
 				};
 				footerContainer.Children.Add(footer);
 				visual.Children.Add(footerContainer);
-			//	var footerRect = GetContainerRect(footer);
-			//	footerRect.Offset(Margins.Left, PageSize.Height - Margins.Bottom);
-			//	FooterContentRect.Add(pageNumber, footerRect);
 			}
 
 			var documentPage = new DocumentPage(visual,
