@@ -14,7 +14,7 @@ using Table = System.Windows.Documents.Table;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PriceTagDocument: BaseDocument
+	public class PriceTagDocument
 	{
 		private IDictionary<string, object> properties;
 
@@ -83,19 +83,8 @@ namespace AnalitF.Net.Client.Models.Print
 			this.lines = lines;
 			this.priceTag = priceTag;
 		}
-
-		protected override void Configure()
-		{
-			//отступы должны быть тк большинство принтеров требует их
-			doc.PagePadding = new Thickness(0, 0, 0, 0);
-
-			var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
-			//мы должны оставить место для "шапки" и "подвала"
-			paginator.PageSize = new Size(paginator.PageSize.Width - WrapDocumentPaginator.Margins.Left - WrapDocumentPaginator.Margins.Right,
-				paginator.PageSize.Height - WrapDocumentPaginator.Margins.Bottom - WrapDocumentPaginator.Margins.Top);
-		}
-
-		protected override void BuildDoc()
+		 
+		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
 			Func<WaybillLine, FrameworkElement> map = Normal;
@@ -109,21 +98,7 @@ namespace AnalitF.Net.Client.Models.Print
 			else if (settings.PriceTag.Type == PriceTagType.Custom)
 				map = x => priceTag.ToElement(x);
 
-			doc = FixedDocumentHelper.BuildFlowDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
-		}
-
-		public override FrameworkContentElement GetHeader(int page, int pageCount)
-		{
-			return null;
-		}
-
-		public override FrameworkContentElement GetFooter(int page, int pageCount)
-		{
-			var footer = "Электронная почта: farm@analit.net, интернет: http://www.analit.net/";
-			return new Paragraph(new Run(footer)) {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 10,
-			};
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
 		}
 
 		private string FormatCost(WaybillLine line)

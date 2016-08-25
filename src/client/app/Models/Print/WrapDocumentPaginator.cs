@@ -64,9 +64,9 @@ namespace AnalitF.Net.Client.Models.Print
 					Margins.Left,
 					Margins.Top)
 			};
-			var pageRect = GetContainerRect(originalVisual);
-			pageRect.Offset(Margins.Left, Margins.Top);
-			PageContentRect.Add(pageNumber, pageRect);
+			//var pageRect = GetContainerRect(originalVisual);
+		//	pageRect.Offset(Margins.Left, Margins.Top);
+			//PageContentRect.Add(pageNumber, pageRect);
 			pageVisual.Children.Add(originalVisual);
 
 			visual.Children.Add(pageVisual);
@@ -78,9 +78,9 @@ namespace AnalitF.Net.Client.Models.Print
 				};
 				headerContainer.Children.Add(header);
 				visual.Children.Add(headerContainer);
-				var headerRect = GetContainerRect(header);
-				headerRect.Offset(Margins.Left, 0);
-				HeaderContentRect.Add(pageNumber, headerRect);
+				//var headerRect = GetContainerRect(header);
+			//	headerRect.Offset(Margins.Left, 0);
+			//	HeaderContentRect.Add(pageNumber, headerRect);
 			}
 
 			var footer = Footer(pageNumber);
@@ -90,9 +90,9 @@ namespace AnalitF.Net.Client.Models.Print
 				};
 				footerContainer.Children.Add(footer);
 				visual.Children.Add(footerContainer);
-				var footerRect = GetContainerRect(footer);
-				footerRect.Offset(Margins.Left, PageSize.Height - Margins.Bottom);
-				FooterContentRect.Add(pageNumber, footerRect);
+			//	var footerRect = GetContainerRect(footer);
+			//	footerRect.Offset(Margins.Left, PageSize.Height - Margins.Bottom);
+			//	FooterContentRect.Add(pageNumber, footerRect);
 			}
 
 			var documentPage = new DocumentPage(visual,
@@ -139,63 +139,6 @@ namespace AnalitF.Net.Client.Models.Print
 			paginator.PageSize = ContentSize();
 			var page = paginator.GetPage(0);
 			return page.Visual;
-		}
-
-		private Rect GetContainerRect(Visual container)
-		{
-			var visualcontainer = container as ContainerVisual;
-			if (visualcontainer == null)
-				return new Rect();
-			var pt = new Point();
-			var size = new Size();
-			var padding = new Point();
-			if (visualcontainer.Children.Count == 0)
-				return new Rect();
-			var firstElement = (visualcontainer.Children[0] as ContainerVisual);
-			if (firstElement == null)
-				return new Rect();
-			size.Width = firstElement.DescendantBounds.Width;
-			size.Height = firstElement.DescendantBounds.Height;
-			padding.X = firstElement.DescendantBounds.X;
-			padding.Y = firstElement.DescendantBounds.Y;
-			for(var i = 1; i < visualcontainer.Children.Count; i++) {
-				var elCont = visualcontainer.Children[i] as ContainerVisual;
-				if (elCont == null)
-					continue;
-				var rectBoundary = elCont.DescendantBounds;
-				if ((rectBoundary.Width + rectBoundary.Left) > size.Width)
-					size.Width += (rectBoundary.Width + rectBoundary.Left) - size.Width;
-				if ((rectBoundary.Height + rectBoundary.Top) > size.Height)
-					size.Height += (rectBoundary.Height + rectBoundary.Top) - size.Height;
-				if (elCont.DescendantBounds.X > 0 && elCont.DescendantBounds.X < padding.X)
-					padding.X = elCont.DescendantBounds.X;
-				if (elCont.DescendantBounds.Y > 0 && elCont.DescendantBounds.Y < padding.Y)
-					padding.Y = elCont.DescendantBounds.Y;
-			}
-			size.Height += 2;
-			size.Width += 2;
-			pt = new Point((visualcontainer.DescendantBounds.Left + padding.X), (visualcontainer.DescendantBounds.Top + padding.Y));
-			return new Rect(pt, size);
-		}
-
-		public Rect GetRealContentRect(int pageNum)
-		{
-			var list = new List<Rect>();
-			if (HeaderContentRect.ContainsKey(pageNum))
-				list.Add(HeaderContentRect[pageNum]);
-			if (PageContentRect.ContainsKey(pageNum))
-				list.Add(PageContentRect[pageNum]);
-			if (FooterContentRect.ContainsKey(pageNum))
-				list.Add(FooterContentRect[pageNum]);
-
-			var pt = new Point {
-				X = list.Min(r => r.X),
-				Y = list.Min(r => r.Y)
-			};
-			var maxWidth = list.Max(r => (r.X + r.Width));
-			var maxHeight = list.Max(r => (r.Y + r.Height));
-			var size = new Size(maxWidth - pt.X, maxHeight - pt.Y);
-			return new Rect(pt, size);
 		}
 
 		public override bool IsPageCountValid => paginator.IsPageCountValid;

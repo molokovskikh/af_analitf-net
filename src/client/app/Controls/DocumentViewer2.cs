@@ -138,48 +138,51 @@ namespace AnalitF.Net.Client.Controls
 
 		protected void SaveToFileCommand()
 		{
-			var printDoc = PrintResult.Docs.First().Value;
-			if (printDoc == null)
-				return ;
-			var bd = printDoc.Item2;
-			var baseFd = bd.Build();
-			/*
-			foreach (Block block in baseFd.Blocks) {
-				if (block is Table) {
-					//что бы в таблице rtf прорисовывались все линии
-					Table table = block as Table;
-					foreach (var rowGroup in table.RowGroups) {
-						foreach (var currentRow in rowGroup.Rows) {
-							foreach (var cell in currentRow.Cells) {
-								cell.BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5);
-								cell.BorderBrush = Brushes.Black;
+			if (PrintResult == null) {
+				var result = new SaveFileResult(new[] {
+					Tuple.Create("Файл PNG (*.png)", ".png")
+				});
+				result.Execute(new ActionExecutionContext());
+				if (result.Success) {
+					if (result.Dialog.FilterIndex == 1) {
+						var paginator = Document.DocumentPaginator;
+						for (int i = 0; i < paginator.PageCount; i++) {
+							var bitmap = PrintHelper.ToBitmap(paginator, i, true);
+							BitmapFrame bmf = BitmapFrame.Create(bitmap);
+							var enc = new PngBitmapEncoder();
+							enc.Frames.Add(bmf);
+							using (var fs = result.Stream($"_{i + 1}")) {
+								enc.Save(fs);
 							}
 						}
 					}
 				}
-			}
-			*/
-			var result = new SaveFileResult(new[] {
-				Tuple.Create("Файл PNG (*.png)", ".png"),
-				Tuple.Create("Файл RTF (*.rtf)", ".rtf")
-			});
-			result.Execute(new ActionExecutionContext());
-			if (result.Success) {
-				if (result.Dialog.FilterIndex == 1) {
-					var paginator = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
-					for (int i = 0; i < paginator.PageCount; i++) {
-						var bitmap = PrintHelper.ToBitmap(paginator, i, true);
-						BitmapFrame bmf = BitmapFrame.Create(bitmap);
-						var enc = new PngBitmapEncoder();
-						enc.Frames.Add(bmf);
-						using (var fs = result.Stream($"_{i + 1}")) {
-							enc.Save(fs);
+			} else {
+				var printDoc = PrintResult.Docs.First().Value;
+				var bd = printDoc.Item2;
+				var baseFd = bd.Build();
+				var result = new SaveFileResult(new[] {
+					Tuple.Create("Файл PNG (*.png)", ".png"),
+					Tuple.Create("Файл RTF (*.rtf)", ".rtf")
+				});
+				result.Execute(new ActionExecutionContext());
+				if (result.Success) {
+					if (result.Dialog.FilterIndex == 1) {
+						var paginator = PrintResult.GetPaginator(PageRangeSelection.AllPages, new PageRange(0)) as WrapDocumentPaginator;
+						for (int i = 0; i < paginator.PageCount; i++) {
+							var bitmap = PrintHelper.ToBitmap(paginator, i, true);
+							BitmapFrame bmf = BitmapFrame.Create(bitmap);
+							var enc = new PngBitmapEncoder();
+							enc.Frames.Add(bmf);
+							using (var fs = result.Stream($"_{i + 1}")) {
+								enc.Save(fs);
+							}
 						}
-					}
-				} else if (result.Dialog.FilterIndex == 2) {
-					using (var writer = result.Writer()) {
-						var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
-						writer.WriteLine(rtfString);
+					} else if (result.Dialog.FilterIndex == 2) {
+						using (var writer = result.Writer()) {
+							var rtfString = PrintHelper.ToRtfString(baseFd, Orientation);
+							writer.WriteLine(rtfString);
+						}
 					}
 				}
 			}
