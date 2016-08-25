@@ -19,9 +19,6 @@ namespace AnalitF.Net.Client.Models.Print
 		private Size pageSize;
 		private PageRangeSelection selection;
 		private PageRange range;
-		public Dictionary<int,Rect> PageContentRect { get; protected set; }
-		public Dictionary<int,Rect> HeaderContentRect { get; protected set; }
-		public Dictionary<int,Rect> FooterContentRect { get; protected set; }
 
 		public WrapDocumentPaginator(FlowDocument flowDoc, BaseDocument baseDoc,
 			PageRangeSelection selection = PageRangeSelection.AllPages,
