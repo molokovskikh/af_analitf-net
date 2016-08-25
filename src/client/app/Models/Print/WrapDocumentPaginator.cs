@@ -36,10 +36,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 			pageSize = new Size(paginator.PageSize.Width + Margins.Right + Margins.Left,
 				paginator.PageSize.Height + Margins.Top + Margins.Bottom);
-
-			PageContentRect = new Dictionary<int, Rect>();
-			HeaderContentRect = new Dictionary<int, Rect>();
-			FooterContentRect = new Dictionary<int, Rect>();
 		}
 
 		public override DocumentPage GetPage(int pageNumber)
