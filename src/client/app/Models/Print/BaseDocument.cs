@@ -135,7 +135,7 @@ namespace AnalitF.Net.Client.Models.Print
 			};
 		}
 
-		protected virtual void Configure()
+		protected void Configure()
 		{
 			//отступы должны быть тк большинство принтеров требует их
 			doc.PagePadding = new Thickness(36, 36, 50, 36);
