@@ -159,6 +159,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			if (destOrder.IsEmpty)
 				return null;
+			if (action == "вернуть в работу")
+				destOrder.KeepId = null;
 			return destOrder;
 		}
 
