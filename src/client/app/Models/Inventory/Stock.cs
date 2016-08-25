@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
+using NHibernate;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -129,5 +131,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 
+		public static void UpdateStock(IStatelessSession session, IEnumerable<Stock> stocks)
+		{
+			foreach (var stock in stocks) {
+				if (stock.Count == 0)
+					session.Delete(stock);
+				else
+					session.Update(stock);
+			}
+		}
 	}
 }

@@ -24,6 +24,10 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public CheckLine(Stock stock, uint quantity)
 		{
+			if (stock.Count < quantity)
+				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Count}");
+			Stock = stock;
+			Stock.Count -= quantity;
 			CopyFromStock(stock);
 			Quantity = quantity;
 		}
@@ -77,6 +81,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual bool Combined { get; set; }
 		public virtual bool Other { get; set; }
 		public virtual bool IsPKU => Narcotic || Toxic || Combined || Other;
+
+		[Ignore]
+		public virtual Stock Stock { get; set; }
 
 		public virtual void CopyToStock(Stock stock)
 		{

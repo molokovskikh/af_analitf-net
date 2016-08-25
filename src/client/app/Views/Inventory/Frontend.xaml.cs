@@ -38,6 +38,8 @@ namespace AnalitF.Net.Client.Views.Inventory
 				} else if (args.Key == Key.System && args.SystemKey == Key.Delete && ((Keyboard.Modifiers & ModifierKeys.Alt) != 0)) {
 					Model.Cancel();
 					args.Handled = true;
+				} else if (args.Key == Key.Escape) {
+					Model.Quantity.Value = null;
 				} else if (args.Key == Key.F1) {
 					results = Model.Help();
 				} else if (args.Key == Key.F2) {

@@ -141,6 +141,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Error("Введите количество");
 				return;
 			}
+			//списывать количество мы должны с загруженного объекта
+			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
+			if (stock.Count < Quantity.Value) {
+				Error("Нет требуемого количества");
+				return;
+			}
 			Input.Value = null;
 			Message(operation);
 			var line = new CheckLine(stock, Quantity.Value.Value);
@@ -163,6 +169,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				StatelessSession.Insert(check);
 				Lines.Each(x => x.CheckId = check.Id);
 				StatelessSession.InsertEach(Lines);
+				Stock.UpdateStock(StatelessSession, Lines.Select(x => x.Stock).Distinct());
 				trx.Commit();
 			}
 			Message("Оплата наличными");
