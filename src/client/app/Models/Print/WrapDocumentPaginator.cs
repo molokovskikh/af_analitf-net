@@ -58,7 +58,6 @@ namespace AnalitF.Net.Client.Models.Print
 					Margins.Top)
 			};
 			pageVisual.Children.Add(originalVisual);
-
 			visual.Children.Add(pageVisual);
 
 			var header = Header(pageNumber);
@@ -83,7 +82,6 @@ namespace AnalitF.Net.Client.Models.Print
 				pageSize,
 				new Rect(new Point(), pageSize),
 				new Rect(new Point(Margins.Left, Margins.Top), ContentSize()));
-
 			return documentPage;
 		}
 
