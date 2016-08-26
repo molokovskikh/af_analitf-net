@@ -424,11 +424,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Restore_order_check_Id()
 		{
-			PrepareSent();
+			var sentOrderId = PrepareSent().Id;
 			Assert.That(model.CanRestoreOrder, Is.True);
 			TaskResult(model.RestoreOrder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
-			var sentOrderId = model.SentOrders[0].Id;
 			model.IsCurrentSelected.Value = true;
 			model.IsSentSelected.Value = false;
 			Assert.That(model.Orders.Count, Is.EqualTo(1));

@@ -190,7 +190,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
-					if (action != "объединить")
+					if (action == "восстановить" || action == "\"разморозить\"")
 						line.Order.KeepId = oldDisplayId;
 					if (ShouldCalculateStatus(line)) {
 						if (sourceLine.Count == ordered) {
