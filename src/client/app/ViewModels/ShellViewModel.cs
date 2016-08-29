@@ -221,6 +221,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 				CanPrintPreview = CanPrint.ToValue();
+			var task = TaskEx.Run(() => Models.Inventory.Sync.Start(config, CancelDisposable.Token).Wait());
+			CloseDisposable.Add(Disposable.Create(() => {
+				CancelDisposable.Dispose();
+				task.Wait(TimeSpan.FromSeconds(10));
+			}));
 		}
 
 		public Config.Config Config { get; set; }

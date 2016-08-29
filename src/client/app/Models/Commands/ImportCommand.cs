@@ -72,25 +72,7 @@ namespace AnalitF.Net.Client.Models.Commands
 			Session.Clear();
 			Reporter.Stage("Импорт данных");
 			Reporter.Weight(data.Count);
-			Log.Info("Начинаю импорт");
-			var ordered = data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
-			foreach (var table in ordered) {
-				try {
-					var sql = BuildSql(table);
-					if (String.IsNullOrEmpty(sql))
-						continue;
-
-					var dbCommand = Session.Connection.CreateCommand();
-					dbCommand.CommandText = sql;
-					dbCommand.ExecuteNonQuery();
-					CheckWarning(dbCommand);
-					Reporter.Progress();
-				}
-				catch (Exception e) {
-					throw new Exception($"Не могу импортировать {table.Item1}", e);
-				}
-			}
-			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
+			ImportTables();
 
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
@@ -216,6 +198,29 @@ drop temporary table ExistsCatalogs;")
 			//очищаем кеш изображения что бы перезагрузить его
 			Config.Cache.Clear();
 			settings.ApplyChanges(Session);
+		}
+
+		public void ImportTables()
+		{
+			Log.Info("Начинаю импорт");
+			var ordered =
+				data.OrderBy(d => Tuple.Create(weight.GetValueOrDefault(Path.GetFileNameWithoutExtension(d.Item1)), d.Item1));
+			foreach (var table in ordered) {
+				try {
+					var sql = BuildSql(table);
+					if (String.IsNullOrEmpty(sql))
+						continue;
+
+					var dbCommand = Session.Connection.CreateCommand();
+					dbCommand.CommandText = sql;
+					dbCommand.ExecuteNonQuery();
+					CheckWarning(dbCommand);
+					Reporter.Progress();
+				} catch (Exception e) {
+					throw new Exception($"Не могу импортировать {table.Item1}", e);
+				}
+			}
+			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
 		}
 
 		private bool IsImported<T>()

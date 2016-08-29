@@ -80,6 +80,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Recipe { get; set; }
 		public virtual string Agent { get; set; }
 
+		public virtual DateTime Timestamp { get; set; }
+
 		public virtual IList<CheckLine> Lines { get; set; }
 
 		public virtual void UpdateStat()

@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Data;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
+using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
 using NHibernate.Linq;
 using Common.Tools;
+using NHibernate.Dialect;
+using NHibernate.Tool.hbm2ddl;
+using NHibernate.Util;
 
 namespace AnalitF.Net.Client.Models.Commands
 {
@@ -32,14 +38,28 @@ namespace AnalitF.Net.Client.Models.Commands
 					settings.LastUpdate = null;
 				sesssion.Flush();
 
-				var tables = TableNames().Except(ignored, StringComparer.InvariantCultureIgnoreCase).ToArray();
 				var dirs = Config.KnownDirs(settings);
+				var tables = Tables().ToArray();
 
 				Reporter.Weight(tables.Length + dirs.Count);
+				var defaultCatalog = PropertiesHelper.GetString(NHibernate.Cfg.Environment.DefaultCatalog, Configuration.Properties, null);
+				var defaultSchema = PropertiesHelper.GetString(NHibernate.Cfg.Environment.DefaultSchema, Configuration.Properties, null);
 				foreach (var table in tables) {
 					Token.ThrowIfCancellationRequested();
-					sesssion.CreateSQLQuery($"TRUNCATE {table}")
-						.ExecuteUpdate();
+					var dialect = Dialect.GetDialect(Configuration.Properties);
+					var schema = dialect.GetDataBaseSchema((DbConnection)sesssion.Connection);
+					var columns = schema.GetColumns("data", table.Schema ?? defaultSchema, table.Name, null);
+					foreach (var row in columns.AsEnumerable()) {
+						var col = new DevartMySQLColumnMetadata(row);
+						var mappingCol = table.ColumnIterator.FirstOrDefault(x => String.Equals(x.Name, col.Name, StringComparison.InvariantCultureIgnoreCase));
+						if (mappingCol == null) {
+							sesssion.CreateSQLQuery($"alter table {table.Name} drop column {col.Name}").ExecuteUpdate();
+						}
+					}
+
+					if (ignored.Contains(table.Name, StringComparer.InvariantCultureIgnoreCase))
+						continue;
+					sesssion.CreateSQLQuery($"TRUNCATE {table.Name}").ExecuteUpdate();
 					Reporter.Progress();
 				}
 

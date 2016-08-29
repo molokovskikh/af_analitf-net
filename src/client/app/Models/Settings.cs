@@ -176,6 +176,7 @@ namespace AnalitF.Net.Client.Models
 			set { _password = value?.Trim(); }
 		}
 
+		public virtual DateTime LastSync { get; set; }
 		public virtual DateTime? LastUpdate { get; set; }
 
 		//дата вычисления лидеров если включена опция отсрочка платежа

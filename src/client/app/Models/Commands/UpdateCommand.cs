@@ -915,7 +915,7 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			requestId = Convert.ToUInt32(File.ReadAllText(Path.Combine(Config.TmpDir, "id")));
 #endif
 
-			var data = GetDbData(Directory.GetFiles(Config.UpdateTmpDir).Select(Path.GetFileName), Config.UpdateTmpDir);
+			var data = GetDbData(Config.UpdateTmpDir);
 			var maxBatchLineId = (uint?)Session.CreateSQLQuery("select max(Id) from BatchLines").UniqueResult<long?>();
 
 			//будь бдителен ImportCommand очистит сессию
@@ -1311,17 +1311,18 @@ join Offers o on o.CatalogId = a.CatalogId and (o.ProducerId = a.ProducerId or a
 			return result;
 		}
 
-		private static List<Tuple<string, string[]>> GetDbData(IEnumerable<string> files, string tmpDir)
+		public static List<Tuple<string, string[]>> GetDbData(string dir)
 		{
+			var files = Directory.GetFiles(dir).Select(Path.GetFileName);
 			return files.Where(f => f.EndsWith("meta.txt"))
 				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
 					.Match(f.Replace(".meta.txt", "")))))
 				.Where(t => t.Item2 != null)
 				.Select(t => Tuple.Create(
-					Path.GetFullPath(Path.Combine(tmpDir, t.Item2)),
-					File.ReadAllLines(Path.Combine(tmpDir, t.Item1))))
+					Path.GetFullPath(Path.Combine(dir, t.Item2)),
+					File.ReadAllLines(Path.Combine(dir, t.Item1))))
 				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
-					.Select(x => Tuple.Create(Path.Combine(tmpDir, x), new string[0])))
+					.Select(x => Tuple.Create(Path.Combine(dir, x), new string[0])))
 				.ToList();
 		}
 

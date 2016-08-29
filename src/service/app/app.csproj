@@ -94,6 +94,7 @@
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
+    <Compile Include="Controllers\StocksController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Filters\LogAccess.cs" />

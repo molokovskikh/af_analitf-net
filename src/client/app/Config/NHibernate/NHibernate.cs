@@ -182,6 +182,13 @@ namespace AnalitF.Net.Client.Config.NHibernate
 					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
 				});
 			});
+			mapper.Class<Check>(m => {
+				m.Version(p => p.Timestamp, c => {
+					c.Type(new TimestampType());
+					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
+			});
+
 			mapper.Class<Mail>(m => {
 				m.Property(p => p.Subject, c => c.Length(10000));
 				m.Property(p => p.Body, c => c.Length(10000));
