@@ -29,7 +29,7 @@ using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.Test.Fixtures;
 
-namespace AnalitF.Net.Client.Test.Integration.Views
+namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 {
 	[TestFixture]
 	public class DiadokFixture : DispatcherFixture
