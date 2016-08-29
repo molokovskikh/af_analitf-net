@@ -435,6 +435,20 @@ task "test:binary":
 		targetChannel = Configuration.Maybe.targetChannel or "beta"
 		CopyUpdateBin(targetChannel, "output/updater/")
 		CopyUpdateBin("migration-$targetChannel", "output/migration-update/")
+		Db.Execute("""
+update  customers.analitfnetdatas a
+	join Customers.Users u on u.Id = a.UserId
+		join Usersettings.RetClientsSet rcs on rcs.ClientCode = u.ClientId
+set BinUpdateChannel = 'rtm'
+where BinUpdateChannel = 'beta'
+	and rcs.ServiceClient = 0;
+
+update  customers.analitfnetdatas a
+	join Customers.Users u on u.Id = a.UserId
+		join Usersettings.RetClientsSet rcs on rcs.ClientCode = u.ClientId
+set BinUpdateChannel = 'migration'
+where BinUpdateChannel = 'migration-beta'
+	and rcs.ServiceClient = 0;""")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = '$targetChannel'")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'migration-$targetChannel'")
 		Db.Execute("update Customers.BinChannels set Version = '$version' where Dir = 'alpha'")

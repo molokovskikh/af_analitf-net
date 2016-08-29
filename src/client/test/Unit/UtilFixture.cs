@@ -1,7 +1,8 @@
 ﻿using System;
+using System.IO;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
-using Common.Tools;
+using Common.NHibernate;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace AnalitF.Net.Client.Test.Unit
@@ -38,6 +39,26 @@ namespace AnalitF.Net.Client.Test.Unit
 		public void Error_helper()
 		{
 			Assert.IsNull(ErrorHelper.TranslateException(new Exception("test")));
+		}
+
+		public class TestClass
+		{
+			public NotifyValue<string> Value { get; set; } = new NotifyValue<string>();
+		}
+
+		[Test]
+		public void Json()
+		{
+			var model = new TestClass();
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver()
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			serializer.Populate(new StringReader("{Value: null}"), model);
+			Assert.IsNotNull(model.Value);
+
+			serializer.Populate(new StringReader("{Value: \"123\"}"), model);
+			Assert.AreEqual("123", model.Value.Value);
 		}
 	}
 }

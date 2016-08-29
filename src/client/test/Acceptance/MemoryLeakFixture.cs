@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Pipes;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows;
 using System.Windows.Automation;
-using System.Windows.Automation.Provider;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
 using Microsoft.Test.Input;
@@ -77,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var element = FindById(id, MainWindow);
 
 			if (element == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}", id));
+				throw new Exception($"Не могу найти кнопку {id}");
 
 			var invokePattern = (TogglePattern)element.GetCurrentPattern(TogglePattern.Pattern);
 			invokePattern.Toggle();

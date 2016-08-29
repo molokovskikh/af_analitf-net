@@ -8,9 +8,12 @@
 			<Image Source="/assets/images/update.png" Margin="10, 5, 10, 5"></Image>
 			<TextBlock Name="Text"></TextBlock>
 		</StackPanel>
-		<GroupBox Header="Текущая операция">
+		<GroupBox>
+			<GroupBox.Header>
+				<Label FontWeight="Bold">Текущая операция</Label>
+			</GroupBox.Header>
 			<StackPanel>
-				<Label Name="Progress_Stage"></Label>
+				<Label Name="Progress_Stage" FontWeight="Bold"></Label>
 				<ProgressBar Height="20" Name="Progress_Current" />
 			</StackPanel>
 		</GroupBox>

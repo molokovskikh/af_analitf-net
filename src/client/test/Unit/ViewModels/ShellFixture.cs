@@ -257,5 +257,11 @@ namespace AnalitF.Net.Client.Test.Unit.ViewModels
 			Assert.IsInstanceOf<CatalogViewModel>(shell.ActiveItem);
 			Assert.AreEqual(1, reloads.Count);
 		}
+
+		[Test]
+		public void Clean_sync()
+		{
+			shell.CleanSync().ToList();
+		}
 	}
 }

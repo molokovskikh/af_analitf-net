@@ -38,9 +38,9 @@
 			<StackPanel Orientation="Horizontal">
 				<CheckBox VerticalAlignment="Center" IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 									Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterPositive}}"/>
-                <TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}" 
+                <TextBlock Margin="4, 0, 0, 0" Text="{Binding Name}"
 													 Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterPositive}}"/>
-				<Button Content="{Binding Path=Name}"  Style="{StaticResource ButtonInsideComboBoxPopup}" Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterNegative}}" 
+				<Button Content="{Binding Path=Name}"  Style="{StaticResource ButtonInsideComboBoxPopup}" Visibility="{Binding Path=., Converter={StaticResource addressVisiblityConverterNegative}}"
                                 cal:Message.Attach="[Event Click] = [Click()]"/>
 			</StackPanel>
 		</DataTemplate>
@@ -275,12 +275,12 @@
 			</StackPanel>
 		</controls:ToolbarPanel>
 
-		<TabControl Name="Items" Grid.Row="2">
+		<TabControl Name="Items" Grid.Row="2" Background="White">
 			<TabControl.ItemTemplate>
 				<DataTemplate>
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" Margin="0, 0, 10, 0" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-						<Button Focusable="False" cal:Message.Attach="CloseActive" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
+						<Button Focusable="False" cal:Message.Attach="CloseScreen($this)" ToolTip="Закрыть (Ctrl+W)" Style="{StaticResource Borderless}">
 							<Path Margin="3" Data="{StaticResource IconDelete}" Stroke="Gray" Height="8" Width="8" Stretch="Uniform"
 								StrokeThickness="1" StrokeEndLineCap="Round" StrokeStartLineCap="Round" />
 						</Button>
@@ -289,7 +289,7 @@
 			</TabControl.ItemTemplate>
 			<TabControl.ContentTemplate>
 				<DataTemplate>
-					<controls:ScrollGeneralContentViewer cal:View.Model="{TemplateBinding DataContext}" />
+					<ContentControl cal:View.Model="{TemplateBinding DataContext}" />
 				</DataTemplate>
 			</TabControl.ContentTemplate>
 		</TabControl>

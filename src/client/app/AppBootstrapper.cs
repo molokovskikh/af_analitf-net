@@ -251,7 +251,7 @@ namespace AnalitF.Net.Client
 				}
 				if (!Config.Cmd.Match("import")) {
 					try {
-						FileHelper2.DeleteDir(Config.TmpDir);
+						FileHelper.DeleteDir(Config.TmpDir);
 						Directory.CreateDirectory(Config.TmpDir);
 					} catch(Exception e) {
 						log.Warn(e);

@@ -49,11 +49,12 @@ namespace AnalitF.Net.Client.Test.Integration
 				return;
 			}
 
+			Assert.IsNull(server);
 			Directory.CreateDirectory("var");
 
+			clientConfig.BaseUrl = InitHelper.RandomPort();
 			clientConfig.DiadokApiKey = "Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec";
 			clientConfig.DiadokUrl = "https://diadoc-api.kontur.ru";
-			clientConfig.BaseUrl = new Uri(String.Format("http://localhost:{0}", new Random().Next(10000, 20000)));
 			clientConfig.RootDir = @"var\client";
 			clientConfig.RequestInterval = 1.Second();
 			clientConfig.InitDir();
@@ -64,6 +65,9 @@ namespace AnalitF.Net.Client.Test.Integration
 
 			global::Test.Support.Setup.SessionFactory = DbHelper.ServerNHConfig("server");
 			InitWebServer(clientConfig.BaseUrl);
+			var result = InitHelper.InitService(clientConfig.BaseUrl).Result;
+			server = result.Item1;
+			serviceConfig = result.Item2;
 
 			var nhibernate = new Client.Config.NHibernate.NHibernate();
 			AppBootstrapper.NHibernate = nhibernate;
@@ -77,6 +81,7 @@ namespace AnalitF.Net.Client.Test.Integration
 			if (IsClientStale()) {
 				ImportData();
 				BackupData();
+				DbHelper.CopyDb(BackupDir);
 			}
 			DbHelper.SeedDb();
 			isInitialized = true;
@@ -86,6 +91,7 @@ namespace AnalitF.Net.Client.Test.Integration
 		public void TearDown()
 		{
 			server.Dispose();
+			server?.Dispose();
 			server = null;
 		}
 

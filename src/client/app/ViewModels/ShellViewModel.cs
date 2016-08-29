@@ -95,7 +95,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
-		[DataMember]
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -103,7 +102,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
-	
+
 		private bool _leaderCalculationWasStart;
 		public  bool LeaderCalculationWasStart
 		{
@@ -111,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_leaderCalculationWasStart = value;
-				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));			
+				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));
 			}
 		}
 
@@ -186,7 +185,6 @@ namespace AnalitF.Net.Client.ViewModels
 					NotifyOfPropertyChange(nameof(CanShowAwaited));
 					NotifyOfPropertyChange(nameof(CanLoadWaybillHistory));
 					NotifyOfPropertyChange(nameof(CanLoadOrderHistory));
-										
 				});
 
 			CloseDisposable.Add(Env.Bus.Listen<Loadable>().ObserveOn(Env.UiScheduler).Subscribe(l => {
@@ -310,6 +308,11 @@ namespace AnalitF.Net.Client.ViewModels
 		public void CloseActive()
 		{
 			Navigator.CloseActive();
+		}
+
+		public void CloseScreen(IScreen item)
+		{
+			Navigator.CloseScreen(item);
 		}
 
 		public override void CanClose(Action<bool> callback)
@@ -709,7 +712,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
 				yield break;
-			User.Value.LastSync = null;
+			if (User.Value != null)
+				User.Value.LastSync = null;
 			foreach (var result in Sync(new UpdateCommand())) {
 					yield return result;
 			}
@@ -737,7 +741,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			LeaderCalculationWasStart = true;
 			TaskEx.Run(() => {
-				DbMaintain.UpdateLeaders();				
+				DbMaintain.UpdateLeaders();
 			}).ContinueWith(t => {
 				LeaderCalculationWasStart = false;
 			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
@@ -1204,9 +1208,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver()
-				};
+				var serializer = GetSerializer();
 				serializer.Populate(stream, this);
 			} finally {
 				IsNotifying = true;
@@ -1217,16 +1219,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver(),
-#if DEBUG
-					Formatting = Formatting.Indented
-#endif
-				};
+				var serializer = GetSerializer();
 				serializer.Serialize(stream, this);
 			} finally {
 				IsNotifying = true;
 			}
+		}
+
+		private static JsonSerializer GetSerializer()
+		{
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver(),
+#if DEBUG
+				Formatting = Formatting.Indented
+#endif
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			return serializer;
 		}
 	}
 }

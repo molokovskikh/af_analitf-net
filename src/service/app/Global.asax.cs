@@ -31,24 +31,27 @@ namespace AnalitF.Net.Service
 			log.Error("Ошибка в приложении", Server.GetLastError());
 		}
 
-		public static Config.Config InitApp(HttpConfiguration httpConfig)
+		public static Config.Config InitApp(HttpConfiguration httpConfig, Service.Config.Config config = null)
 		{
 			XmlConfigurator.Configure();
 			GlobalContext.Properties["Version"] = typeof(MainController).Assembly.GetName().Version;
 
-			var config = ReadConfig();
+			config = config ?? ReadConfig();
 			if (config.Environment == "Development")
 				new Development().Run(config);
 			else
 				new Production().Run(config);
 
-			var nhibernate = new Config.Initializers.NHibernate();
-			nhibernate.Init();
-			SessionFactory = nhibernate.Factory;
+			//в тестах мы можем запустить две копии приложения
+			if (SessionFactory == null) {
+				var nhibernate = new Config.Initializers.NHibernate();
+				nhibernate.Init();
+				SessionFactory = nhibernate.Factory;
+			}
 			ReadDbConfig(config);
 			var mvc = new Mvc();
-			mvc.Run(httpConfig, nhibernate, config);
-			new Config.Initializers.SmartOrderFactory().Init(nhibernate);
+			mvc.Run(httpConfig, SessionFactory, config);
+			new Config.Initializers.SmartOrderFactory().Init(SessionFactory);
 
 			return config;
 		}
