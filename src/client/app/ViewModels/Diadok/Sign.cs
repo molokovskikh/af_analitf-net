@@ -116,59 +116,46 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		public Task<TResult> Async<TResult>(Func<string, TResult> action)
+		public Task<TResult> Async<TResult>(Func<string, TResult> func)
 		{
-			return Task<TResult>.Factory.StartNew(() => {
-				try {
-					LastPatchStamp = Payload.Message.LastPatchTimestamp;
-					return action(Payload.Token);
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			var task = new Task<TResult>(() => func(Payload.Token), CloseCancellation.Token);
+			task.Start(scheduler);
+			task.ContinueWith(t => {
+				if (t.IsCanceled) {
+					Log.Warn($"Задача отменена");
+				} else if (t.IsFaulted) {
+					var error = ErrorHelper.TranslateException(t.Exception)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+					Log.Warn(error, t.Exception);
 				}
-				catch(Exception exception) {
-					if(exception is TimeoutException) {
-						Log.Warn($"Превышено время ожидания ответа при обработке документа {Payload.Message.MessageId}", exception);
-						Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
-					}
-					else if (exception is HttpClientException) {
-						var e = exception as HttpClientException;
-						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-							Log.Warn($"Документ {Payload.Message.MessageId} был подписан ранее", e);
-							Manager.Warning("Документ уже был подписан другим пользователем.");
-						} else {
-							Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", e);
-							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
-						}
-					}
-					Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", exception);
-					throw;
-				}
-			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+			}, scheduler);
+			return task;
 		}
 
 		public Task Async(Action<string> action)
 		{
-			return Task.Factory.StartNew(() => {
-				try {
-					LastPatchStamp = Payload.Message.LastPatchTimestamp;
-					action(Payload.Token);
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			var task = new Task(() => action(Payload.Token), CloseCancellation.Token);
+			task.Start(scheduler);
+			task.ContinueWith(t => {
+				if (t.IsCanceled) {
+					Log.Warn($"Задача отменена");
+				} else if (t.IsFaulted) {
+					var error = ErrorHelper.TranslateException(t.Exception)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+					Log.Warn(error, t.Exception);
 				}
-				catch(Exception exception) {
-					if(exception is TimeoutException) {
-						Log.Warn($"Превышено время ожидания ответа при обработке документа {Payload.Message.MessageId}", exception);
-						Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
-					}
-					else if (exception is HttpClientException) {
-						var e = exception as HttpClientException;
-						if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-							Log.Warn($"Документ {Payload.Message.MessageId} был подписан ранее", e);
-							Manager.Warning("Документ уже был подписан другим пользователем.");
-						} else {
-							Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", e);
-							Manager.Warning($"Ошибка при обработке документа:\n{e.AdditionalMessage}");
-						}
-					}
-					Log.Warn($"Ошибка при подписи документа {Payload.Message.MessageId}", exception);
-				}
-			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+			}, scheduler);
+			return task;
 		}
 
 		public string SignerFirstName { get; set;}
@@ -239,7 +226,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 			}
 			IsEnabled.Value = true;
-			Success = true;
+			Success = Result != null;
 			TryClose();
 		}
 
@@ -286,7 +273,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 	{
 		public override ValidationResult Validate(object value, CultureInfo cultureInfo)
 		{
-			// Редактор XAML передает в value массив, а CLR передает модель
 			try {
 				BindingGroup bindingGroup = (BindingGroup)value;
 				Sign model = bindingGroup.Items[0] as Sign;
@@ -306,8 +292,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					}
 				}
 				if(bindingGroup.Name == "AttorneyValidation") {
-					if (model.Detailed && model.ByAttorney)
-					{
+					if (model.Detailed && model.ByAttorney)	{
 						if(String.IsNullOrEmpty(model.AtrNum))
 							fields += "\nНомер";
 						if(!model.AtrDate.HasValue)
@@ -315,8 +300,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 						if(!String.IsNullOrEmpty(model.AtrFirstName) ||
 							!String.IsNullOrEmpty(model.AtrSurename) ||
-							!String.IsNullOrEmpty(model.AtrPatronymic))
-						{
+							!String.IsNullOrEmpty(model.AtrPatronymic)) {
 							if(String.IsNullOrEmpty(model.AtrFirstName))
 								fields += "\nИмя";
 							if(String.IsNullOrEmpty(model.AtrSurename))
@@ -370,8 +354,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				}
 			});
 			CurrentAutoSave = new NotifyValue<SignTorg12Autosave>();
-			CurrentAutoSave.Subscribe(x =>
-			{
+			CurrentAutoSave.Subscribe(x => {
 				if(x != null) {
 					RcvJobTitle.Value = x.SignerJobTitle;
 					if(x.LikeReciever) {
@@ -525,7 +508,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					acceptSignature.ParentEntityId = revocReq.EntityId;
 					byte[] sign = null;
 					if(!TrySign(revocReq.Content.Data, out sign))
-						throw new Exception();
+						throw new Exception("Ошибка подписи документа TrySign");
 					if (Settings.Value.DebugUseTestSign) {
 						acceptSignature.SignWithTestSignature = true;
 					}
@@ -537,8 +520,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					if(Payload.Entity.AttachmentType == AttachmentType.Nonformalized) {
 						patch = Payload.Patch();
 						byte[] sign = null;
-						if(TrySign(Payload.Entity.Content.Data, out sign) == false)
-							throw new Exception();
+						if(!TrySign(Payload.Entity.Content.Data, out sign))
+							throw new Exception("Ошибка подписи документа TrySign");
 						var signature = new DocumentSignature {
 							ParentEntityId = Payload.Entity.EntityId,
 							Signature = sign
@@ -600,8 +583,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 						SignedContent signContent = new SignedContent();
 						signContent.Content = torg12XmlForBuyer.Content;
-						if(TrySign(signContent) == false)
-							throw new Exception();
+						if(!TrySign(signContent))
+							throw new Exception("Ошибка подписи документа TrySign");
 
 						ReceiptAttachment receipt = new ReceiptAttachment {
 							ParentEntityId = Payload.Entity.DocumentInfo.EntityId,
@@ -623,8 +606,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 						SignedContent signContentInvoiceReciept = new SignedContent();
 						signContentInvoiceReciept.Content = invoiceReceipt.Content;
-						if(TrySign(signContentInvoiceReciept) == false)
-							throw new Exception();
+						if(!TrySign(signContentInvoiceReciept))
+							throw new Exception("Ошибка подписи документа TrySign");
 
 						ReceiptAttachment receiptInvoice = new ReceiptAttachment {
 							ParentEntityId = invoice.EntityId,
@@ -642,8 +625,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SignedContent signContentInvoiceConfirmationReciept = new SignedContent();
 						signContentInvoiceConfirmationReciept.Content = invoiceReceipt.Content;
 
-						if (TrySign(signContentInvoiceConfirmationReciept) == false)
-							throw new Exception();
+						if (!TrySign(signContentInvoiceConfirmationReciept))
+							throw new Exception("Ошибка подписи документа TrySign");
 
 						ReceiptAttachment invoiceConfirmationreceipt = new ReceiptAttachment {
 							ParentEntityId = invoiceConfirmation.EntityId,
@@ -685,8 +668,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SignedContent signContentOperInvoiceConfrmReciept = new SignedContent();
 						signContentOperInvoiceConfrmReciept.Content = invoiceOperConfirmationReceipt.Content;
 
-						if (TrySign(signContentOperInvoiceConfrmReciept) == false)
-							throw new Exception();
+						if (!TrySign(signContentOperInvoiceConfrmReciept))
+							throw new Exception("Ошибка подписи документа TrySign");
 
 						ReceiptAttachment receipt = new ReceiptAttachment {
 							ParentEntityId = invoiceDateConfirmation.EntityId,
@@ -699,17 +682,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				}
 				EndAction();
 			}
-			catch(Exception exception) {
-				if(exception is TimeoutException) {
-					Manager.Warning("Превышено время ожидания ответа, повторите операцию позже.");
-				}
-				else if (exception is HttpClientException) {
-					var e = exception as HttpClientException;
-					if (e.ResponseStatusCode == HttpStatusCode.Conflict) {
-						Log.Warn($"Документ {patch.MessageId} был подписан ранее", e);
-						Manager.Warning("Документ уже был подписан другим пользователем.");
-					}
-				}
+			catch(Exception e) {
+				var error = ErrorHelper.TranslateException(e)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+				Manager.Warning(error);
+				Log.Error(error, e);
 				EndAction(false);
 			}
 		}

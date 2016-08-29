@@ -41,7 +41,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					SignedContent signcontent = new SignedContent();
 					signcontent.Content = revocRejectSign.Content;
 					if (!TrySign(signcontent))
-						throw new Exception();
+						throw new Exception("Ошибка подписи документа TrySign");
 					signrejattch.SignedContent = signcontent;
 					patch.AddXmlSignatureRejectionAttachment(signrejattch);
 				}
@@ -54,7 +54,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						content.Content = Encoding.UTF8.GetBytes(" ");
 
 					if (!TrySign(content))
-						throw new Exception();
+						throw new Exception("Ошибка подписи документа TrySign");
 					patch.RequestedSignatureRejections.Add(new RequestedSignatureRejection {
 						ParentEntityId = Payload.Entity.EntityId,
 						SignedContent = content
@@ -63,12 +63,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
-			catch(Exception exception) {
-				if(exception is HttpClientException) {
-					var e = exception as HttpClientException;
-					Log.Warn($"Ошибка:", e);
-					Manager.Error(e.AdditionalMessage);
-				}
+			catch(Exception e) {
+				var error = ErrorHelper.TranslateException(e)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+				Manager.Warning(error);
+				Log.Error(error, e);
 				EndAction(false);
 			}
 		}

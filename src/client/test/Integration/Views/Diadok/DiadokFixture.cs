@@ -134,12 +134,14 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 				Assert.Ignore("Не удалось получить исходные данные, тест выполняется или не были удалены документы");
 			}
 
+			// тесты функций диадок
 			Sign_Document();
 			RejectSign_Document();
 			Revocation_Req_Document();
 
 			var messages = diadokDatas.GetMessages();
 
+			// выполняем запрос аннулирования из отправителя
 			Thread.Sleep(15.Second());
 			diadokDatas.OutBoundInvoices(messages.Item2);
 			Thread.Sleep(30.Second());
@@ -177,6 +179,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Thread.Sleep(15.Second());
 			dispatcher.Invoke(() => ddkIndex.Reload());
 
+			// продолжаем тесты
 			DenialRevocation_Document();
 			SignRevocation_Document();
 			Open_Document();

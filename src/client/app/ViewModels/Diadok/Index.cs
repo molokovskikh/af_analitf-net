@@ -677,7 +677,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			IsLoading.Value = true;
 			Observable.Start(() => {
-					if (api == null) {
+				if (api == null) {
 						api = new DiadocApi(Shell.Config.DiadokApiKey, Shell.Config.DiadokUrl, new WinApiCrypt());
 					}
 					if (String.IsNullOrEmpty(token)) {

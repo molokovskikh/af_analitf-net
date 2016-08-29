@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				revocSignContent.Content = revocationXml.Content;
 
 				if(!TrySign(revocSignContent))
-					throw new Exception();
+					throw new Exception("Ошибка подписи документа TrySign");
 
 				RevocationRequestAttachment revattch = new RevocationRequestAttachment();
 				revattch.ParentEntityId = Payload.Entity.EntityId;
@@ -49,12 +49,11 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
 				EndAction();
 			}
-			catch(Exception exception) {
-				if(exception is HttpClientException) {
-					var e = exception as HttpClientException;
-					Log.Warn($"Ошибка:", e);
-					Manager.Error(e.AdditionalMessage);
-				}
+			catch(Exception e) {
+				var error = ErrorHelper.TranslateException(e)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+				Manager.Warning(error);
+				Log.Error(error, e);
 				EndAction(false);
 			}
 		}
