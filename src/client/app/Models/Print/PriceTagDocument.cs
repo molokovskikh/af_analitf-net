@@ -10,10 +10,11 @@ using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using NHibernate.Mapping;
+using Table = System.Windows.Documents.Table;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class PriceTagDocument: BaseDocument
+	public class PriceTagDocument
 	{
 		private IDictionary<string, object> properties;
 
@@ -82,8 +83,8 @@ namespace AnalitF.Net.Client.Models.Print
 			this.lines = lines;
 			this.priceTag = priceTag;
 		}
-
-		protected override void BuildDoc()
+		 
+		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
 			Func<WaybillLine, FrameworkElement> map = Normal;
@@ -97,7 +98,7 @@ namespace AnalitF.Net.Client.Models.Print
 			else if (settings.PriceTag.Type == PriceTagType.Custom)
 				map = x => priceTag.ToElement(x);
 
-			doc = FixedDocumentHelper.BuildFlowDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
 		}
 
 		private string FormatCost(WaybillLine line)
