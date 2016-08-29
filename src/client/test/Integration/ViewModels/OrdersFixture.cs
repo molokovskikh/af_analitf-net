@@ -424,7 +424,13 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Restore_order_check_Id()
 		{
-			var sentOrderId = PrepareSent().Id;
+			session.DeleteEach<Order>();
+			session.DeleteEach<SentOrder>();
+			PrepareCurrent();
+			shell.SendOrders().ToArray();
+			SelectSent();
+			var sentOrderId = model.SentOrders.First().DisplayId;
+			model.Update();
 			Assert.That(model.CanRestoreOrder, Is.True);
 			TaskResult(model.RestoreOrder());
 			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
