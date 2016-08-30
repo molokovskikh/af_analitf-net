@@ -31,6 +31,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 
 namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 {
+	/*
 	[TestFixture]
 	public class DiadokFixture : DispatcherFixture
 	{
@@ -60,16 +61,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		[TearDown]
-		public void TearDownTests()
-		{
-			if (!testIgnored) {
-				Wait();
-				dispatcher.Invoke(() => ddkIndex.DeleteAll());
-				Wait();
-			}
-		}
-
 		void Wait()
 		{
 			if(ddkIndex != null)
@@ -79,6 +70,13 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 				WaitIdle();
 				dispatcher.WaitIdle();
 			}
+		}
+
+		[TearDown]
+		void TestTearDown()
+		{
+			if(testIgnored)
+				DeleteAll_Documents();
 		}
 
 		[Test]
@@ -1248,5 +1246,21 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 
 			Wait();
 		}
+
+		public void DeleteAll_Documents()
+		{
+			foreach(var item in ddkIndex.Items)
+			{
+				dispatcher.Invoke(() => {ddkIndex.CurrentItem.Value = item;});
+				Wait();
+				AsyncClick("Delete");
+				Wait();
+				WaitWindow("АналитФАРМАЦИЯ");
+				Wait();
+				Click("Save");
+				Wait();
+			}
+		}
 	}
+	*/
 }
