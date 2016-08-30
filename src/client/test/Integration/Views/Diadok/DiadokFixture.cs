@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		private bool testIgnored;
 
 		[SetUp]
-		public void SetupTests()
+		public void SetupTest()
 		{
 			StartWait();
 			testIgnored = false;
@@ -64,9 +64,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		public void TearDownTests()
 		{
 			if (!testIgnored) {
-			Wait();
-			dispatcher.Invoke(() => ddkIndex.DeleteAll());
-			Wait();
+				Wait();
+				dispatcher.Invoke(() => ddkIndex.DeleteAll());
+				Wait();
 			}
 		}
 
@@ -103,7 +103,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			}
 
 			diadokDatas = Fixture<CreateDiadokInbox>();
-
 			//парсинг сертификата
 			X509Certificate2 cert = new X509Certificate2();
 			cert.Import(Convert.FromBase64String(DiadokFixtureData.CertBin));

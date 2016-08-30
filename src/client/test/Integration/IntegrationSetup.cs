@@ -64,7 +64,6 @@ namespace AnalitF.Net.Client.Test.Integration
 			AppBootstrapper.InitUi(true);
 
 			global::Test.Support.Setup.SessionFactory = DbHelper.ServerNHConfig("server");
-			InitWebServer(clientConfig.BaseUrl);
 			var result = InitHelper.InitService(clientConfig.BaseUrl).Result;
 			server = result.Item1;
 			serviceConfig = result.Item2;
