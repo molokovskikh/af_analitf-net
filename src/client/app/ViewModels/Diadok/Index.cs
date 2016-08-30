@@ -760,16 +760,27 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async void DeleteAll()
 		{
-			await Task.Factory.StartNew(() => {
-				try {
-					foreach (DisplayItem t in items) {
-						api.Delete(token, box.BoxId, t.Entity.DocumentInfo.MessageId, t.Entity.EntityId);
-					}
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			var task = new Task(() => {
+				foreach (DisplayItem t in items) {
+					api.Delete(token, box.BoxId, t.Entity.DocumentInfo.MessageId, t.Entity.EntityId);
 				}
-				catch(Exception exception) {
-					Log.Warn($"Ошибка ", exception);
+			}, CloseCancellation.Token);
+			task.Start(scheduler);
+			await task.ContinueWith(t => {
+				if (t.IsCanceled) {
+					Log.Warn($"Задача отменена");
+				} else if (t.IsFaulted) {
+					var error = ErrorHelper.TranslateException(t.Exception)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+					Log.Warn(error, t.Exception);
 				}
-			}, CloseCancellation.Token, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+			}, scheduler);
+			await task;
 		}
 
 		public IEnumerable<IResult> Save()

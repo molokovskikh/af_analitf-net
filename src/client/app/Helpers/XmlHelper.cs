@@ -32,19 +32,6 @@ namespace AnalitF.Net.Client.Helpers
 			return node.Current.Value;
 		}
 
-		public string GetDiadokFIO(string xpath)
-		{
-			var fnval = GetValue($"{xpath}@Имя");
-			var snval = GetValue($"{xpath}@Фамилия");
-			var pnval = GetValue($"{xpath}@Отчество");
-			var sn = snval;
-			var fn = fnval.Length > 0 ? fnval[0].ToString() : "";
-			var pn = pnval.Length > 0 ? pnval[0].ToString() : "";
-
-			var fio = $"{sn} {fn}.{pn}.";
-			return fio;
-		}
-
 		protected XPathDocument XmlDocument;
 		protected XPathNavigator XNavigator;
 	}

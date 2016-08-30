@@ -84,7 +84,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		[Test]
 		public void Diadoc_documents_test()
 		{
-			// Ждем пока завершится возможно уже начатый тест
+			// Ждем пока завершится возможно уже начатый тест, проверяем есть ли документы
 			var timeOut = 0;
 			var dataReady = false;
 			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
@@ -140,7 +140,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 
 			var messages = diadokDatas.GetMessages();
 
-			// выполняем запрос аннулирования из отправителя
+			// выполняем запрос аннулирования
 			Thread.Sleep(15.Second());
 			diadokDatas.OutBoundInvoices(messages.Item2);
 			Thread.Sleep(30.Second());

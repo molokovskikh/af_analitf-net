@@ -35,7 +35,7 @@ namespace AnalitF.Net.Client.Helpers
 		public static string TranslateException(Exception exception)
 		{
 			if (exception is TimeoutException) {
-				return "Превышено время ожидания ответа, повторите операцию позже.";
+				return "Превышено время ожидания ответа.";
 			}
 			if (exception is HttpClientException) {
 				var diadokException = ((HttpClientException)exception);
