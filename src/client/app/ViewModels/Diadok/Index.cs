@@ -727,24 +727,24 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 		}
 
-		public async Task RequestSign()
+		public void RequestSign()
 		{
-			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
+			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
 		}
 
-		public async Task RequestResolution()
+		public void RequestResolution()
 		{
-			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
+			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
 		}
 
-		public async Task Approve()
+		public void Approve()
 		{
-			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
+			ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
 		}
 
-		public async Task Disapprove()
+		public void Disapprove()
 		{
-			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
+			ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
 		}
 
 		public void Delete()
@@ -756,31 +756,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				items.Remove(CurrentItem);
 				Items.Value.Remove(current);
 			}
-		}
-
-		public async void DeleteAll()
-		{
-			TaskScheduler scheduler;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-			else
-				scheduler = TaskScheduler.Current;
-			var task = new Task(() => {
-				foreach (DisplayItem t in items) {
-					api.Delete(token, box.BoxId, t.Entity.DocumentInfo.MessageId, t.Entity.EntityId);
-				}
-			}, CloseCancellation.Token);
-			task.Start(scheduler);
-			await task.ContinueWith(t => {
-				if (t.IsCanceled) {
-					Log.Warn($"Задача отменена");
-				} else if (t.IsFaulted) {
-					var error = ErrorHelper.TranslateException(t.Exception)
-						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
-					Log.Warn(error, t.Exception);
-				}
-			}, scheduler);
-			await task;
 		}
 
 		public IEnumerable<IResult> Save()
@@ -796,19 +771,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			yield return new OpenResult(Filename.Value);
 		}
 
-		public async Task Revoke()
+		public void Revoke()
 		{
-			await ProcessAction(new Revocation(GetPayload()));
+			ProcessAction(new Revocation(GetPayload()));
 		}
 
-		public async Task Reject()
+		public void Reject()
 		{
-			await ProcessAction(new Reject(GetPayload()));
+			ProcessAction(new Reject(GetPayload()));
 		}
 
-		public async Task Sign()
+		public void Sign()
 		{
-			await ProcessAction(new Sign(GetPayload()));
+			ProcessAction(new Sign(GetPayload()));
 		}
 
 		public IEnumerable<IResult> PrintItem()
@@ -831,7 +806,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		private async Task ProcessAction(DiadokAction dialog)
+		private void ProcessAction(DiadokAction dialog)
 		{
 			Dictionary<string, object> settings = null;
 			if((dialog as Sign)?.Torg12TitleVisible == true) {

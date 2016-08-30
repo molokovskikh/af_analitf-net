@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public NotifyValue<string> Clarification { get; set; }
 		public NotifyValue<string> Comment { get; set; }
 
-		public async void Save()
+		public async Task Save()
 		{
 			try
 			{
@@ -42,7 +42,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					ResolutionType = type
 				});
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
-				EndAction();
+				await EndAction();
 			}
 			catch(Exception e)
 			{
@@ -50,7 +50,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
 				Manager.Warning(error);
 				Log.Error(error, e);
-				EndAction(false);
+				await EndAction(false);
 			}
 		}
 	}

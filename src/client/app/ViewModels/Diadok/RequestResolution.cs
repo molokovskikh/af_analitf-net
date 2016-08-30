@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = true;
 		}
 
-		public async void Save()
+		public async Task Save()
 		{
 			try {
 				BeginAction();
@@ -79,14 +79,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						?? "00000000-0000-0000-0000-000000000000";
 				patch.AddResolutionRequestAttachment(attachment);
 				await Async(x => Payload.Api.PostMessagePatch(x, patch));
-				EndAction();
+				await EndAction();
 			}
 			catch(Exception e) {
 				var error = ErrorHelper.TranslateException(e)
 						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
 				Manager.Warning(error);
 				Log.Error(error, e);
-				EndAction(false);
+				await EndAction(false);
 			}
 		}
 	}

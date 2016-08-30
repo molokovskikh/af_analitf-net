@@ -20,6 +20,7 @@ using System.Windows.Media;
 using System.Globalization;
 using NHibernate.Linq;
 using System.Threading;
+using Common.Tools.Calendar;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -109,6 +110,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						if(String.IsNullOrEmpty(SignerINN))
 							throw new Exception("Не найдено поле ИНН(OID.1.2.643.3.131.1.1)");
 					}
+					SignerINN = SignerINN.Substring(2);
 				}
 				catch(Exception exept) {
 					Log.Error("Ошибка разбора сертификата, G,SN,OID.1.2.643.3.131.1.1", exept);
@@ -116,46 +118,20 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		public Task<TResult> Async<TResult>(Func<string, TResult> func)
+		public Task<TResult> Async<TResult>(Func<string, TResult> action)
 		{
-			TaskScheduler scheduler;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-			else
-				scheduler = TaskScheduler.Current;
-			var task = new Task<TResult>(() => func(Payload.Token), CloseCancellation.Token);
-			task.Start(scheduler);
-			task.ContinueWith(t => {
-				if (t.IsCanceled) {
-					Log.Warn($"Задача отменена");
-				} else if (t.IsFaulted) {
-					var error = ErrorHelper.TranslateException(t.Exception)
-						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
-					Log.Warn(error, t.Exception);
-				}
-			}, scheduler);
-			return task;
+			return Task<TResult>.Factory.StartNew(() => action(Payload.Token),
+				CancellationToken.None,
+				TaskCreationOptions.None,
+				TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		public Task Async(Action<string> action)
 		{
-			TaskScheduler scheduler;
-			if (SynchronizationContext.Current != null)
-				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-			else
-				scheduler = TaskScheduler.Current;
-			var task = new Task(() => action(Payload.Token), CloseCancellation.Token);
-			task.Start(scheduler);
-			task.ContinueWith(t => {
-				if (t.IsCanceled) {
-					Log.Warn($"Задача отменена");
-				} else if (t.IsFaulted) {
-					var error = ErrorHelper.TranslateException(t.Exception)
-						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
-					Log.Warn(error, t.Exception);
-				}
-			}, scheduler);
-			return task;
+			return Task.Factory.StartNew(() => action(Payload.Token),
+				CancellationToken.None,
+				TaskCreationOptions.None,
+				TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		public string SignerFirstName { get; set;}
@@ -208,7 +184,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			IsEnabled.Value = false;
 		}
 
-		protected async void EndAction(bool waitupdate = true)
+		protected async Task EndAction(bool waitupdate = true)
 		{
 			if(waitupdate) {
 				await Async((x) => {
@@ -219,9 +195,9 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						if(LastPatchStamp != msg.LastPatchTimestamp)
 							break;
 						else
-							TaskEx.Delay(1000).Wait();
+							TaskEx.Delay(500).Wait();
 						breaker++;
-					} while(breaker<5 && LastPatchStamp != DateTime.MinValue);
+					} while(breaker < 10 && LastPatchStamp != DateTime.MinValue);
 					Result = msg;
 				});
 			}
@@ -232,7 +208,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public Message Result { get; set;}
 
-		public bool TrySign(SignedContent content)
+		protected bool TrySign(SignedContent content)
 		{
 			if (Settings.Value.DebugUseTestSign) {
 				content.SignWithTestSignature = true;
@@ -246,7 +222,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			return result;
 		}
 
-		public bool TrySign(byte[] content, out byte[] sign)
+		protected bool TrySign(byte[] content, out byte[] sign)
 		{
 			sign = null;
 			if (Settings.Value.DebugUseTestSign)
@@ -399,12 +375,6 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			});
 		}
 
-		protected override void OnInitialize()
-		{
-			base.OnInitialize();
-			SavedData.Value = Session.Query<SignTorg12Autosave>().OrderByDescending(o => o.CreationDate).ToList();
-		}
-
 		public NotifyValue<string> OperationName { get; set;}
 		public bool Torg12TitleVisible { get;set;}
 		public NotifyValue<bool> Detailed { get;set;}
@@ -435,6 +405,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		const int autosave_max = 10;
 		public NotifyValue<bool> CommentVisibility { get; set;}
 		public NotifyValue<string> Comment { get; set;}
+
+		protected override void OnInitialize()
+		{
+			base.OnInitialize();
+			SavedData.Value = Session.Query<SignTorg12Autosave>().OrderByDescending(o => o.CreationDate).ToList();
+		}
 
 		Official GetRevicedOfficial()
 		{// тоже что и SignerDetails
@@ -493,13 +469,12 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			return invoiceRecieptConfirmation;
 		}
 
-		public async void Save()
+		public async Task Save()
 		{
-			BeginAction();
-
-			MessagePatchToPost patch = null;
-			Signer signer = GetSigner();
 			try {
+				BeginAction();
+				MessagePatchToPost patch = null;
+				Signer signer = GetSigner();
 				if(ReqRevocationSign) {
 					Entity revocReq = Payload.Message.Entities.FirstOrDefault(x => x.AttachmentTypeValue == Diadoc.Api.Com.AttachmentType.RevocationRequest);
 					patch = Payload.Patch();
@@ -643,17 +618,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 							Entity dateConfirm = null;
 							int breaker = 0;
 							do {
-								TaskEx.Delay(1000).Wait();
 								msg = Payload.Api.GetMessage(Payload.Token,
 									Payload.BoxId,
 									Payload.Entity.DocumentInfo.MessageId,
 									Payload.Entity.EntityId);
 								dateConfirm = GetDateConfirmationStep7(msg);
 								breaker++;
+								TaskEx.Delay(500).Wait();
 							}
 							while (dateConfirm == null && breaker < 10);
 							if(dateConfirm == null)
-								throw new TimeoutException("Превышено время ожидания ответа, повторите операцию позже.");
+								throw new TimeoutException("Превышено время ожидания ответа, попробуйте повторить позднее.");
 							LastPatchStamp = msg.LastPatchTimestamp;
 							return dateConfirm;
 						});
@@ -680,14 +655,14 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Log.Info($"Документ {patch.MessageId} invoiceDateConfirmation отправлен");
 					}
 				}
-				EndAction();
+				await EndAction();
 			}
 			catch(Exception e) {
 				var error = ErrorHelper.TranslateException(e)
 						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
 				Manager.Warning(error);
 				Log.Error(error, e);
-				EndAction(false);
+				await EndAction(false);
 			}
 		}
 	}
