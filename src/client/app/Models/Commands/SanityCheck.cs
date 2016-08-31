@@ -170,6 +170,7 @@ namespace AnalitF.Net.Client.Models.Commands
 				var tables = Tables().Where(t => t.IsPhysicalTable && Configuration.IncludeAction(t.SchemaActions, SchemaAction.Update));
 				var meta = new DatabaseMetadata(connection, dialect);
 				var mapping = (IMapping)Configuration.GetType().GetField("mapping", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Configuration);
+				var schema = new DevartMySqlSchema(connection);
 				foreach (var table in tables) {
 					var tableMeta = meta.GetTableMetadata(table.Name,
 						table.Schema ?? defaultSchema,
@@ -224,6 +225,21 @@ namespace AnalitF.Net.Client.Models.Commands
 						}
 					}
 
+					if (table.UniqueKeyIterator.Any()) {
+						var indexes = schema.GetIndexInfo(tableMeta.Catalog, null, tableMeta.Name).AsEnumerable()
+							.Select(x => new DevartMySQLIndexMetadata(x))
+							.Where(x => x.IsUnique)
+							.ToArray();
+
+
+						foreach (var uniqueKey in table.UniqueKeyIterator) {
+							if (!indexes.Any(x => x.Name.Match(uniqueKey.Name))) {
+								var sql = uniqueKey.SqlConstraintString(dialect);
+								alters.Add($"alter table {table.Name} add {sql};");
+							}
+						}
+					}
+
 					// #51646 Проблемы обновления АF.NET
 					if (table.Name.Match("WaybillLines") && tableMeta.GetIndexMetadata("SerialProductIdProducerId") == null)
 						alters.Add("alter table WaybillLines add index SerialProductIdProducerId (SerialNumber, ProductId, ProducerId);");
@@ -233,7 +249,6 @@ namespace AnalitF.Net.Client.Models.Commands
 							alters.Add("alter table Offers add fulltext (ProductSynonym);");
 						}
 						//из-за ошибки в 0.15.0, были созданы дублирующие индексы чистим их
-						var schema = new DevartMySqlSchema(connection);
 						var indexes = schema.GetIndexInfo(tableMeta.Catalog, null, tableMeta.Name).AsEnumerable()
 							.Select(x => new DevartMySQLIndexMetadata(x))
 							.Where(x => Regex.IsMatch(x.Name, @"ProductSynonym_\d+", RegexOptions.IgnoreCase))

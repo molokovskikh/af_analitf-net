@@ -42,18 +42,24 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Items.Value == null || ItemsTotal.Count != 1) return;
 
-			ItemsTotal.First().TotalCount = Items.Value.Sum(c => c.Count);
+			ItemsTotal.First().TotalCount = Items.Value.Sum(c => c.Quantity);
 			ItemsTotal.First().TotalSum = Items.Value.Sum(c => c.Sum);
 			ItemsTotal.First().TotalSumWithNds = Items.Value.Sum(c => c.SumWithNds);
-			ItemsTotal.First().TotalRetailSum = Items.Value.Sum(c => c.RetailSum);
+			ItemsTotal.First().TotalRetailSum = Items.Value.Sum(c => c.RetailSum).GetValueOrDefault();
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			RxQuery(x => x.Query<Stock>().OrderBy(y => y.Product).ToList())
+			Bus.Listen<string>("reload").Cast<object>().Merge(DbReloadToken)
+				.SelectMany(_ => RxQuery(x => x.Query<Stock>().Where(y => y.Quantity != 0).OrderBy(y => y.Product).ToList()))
 				.Subscribe(Items);
+		}
+
+		public void DbRefresh()
+		{
+
 		}
 
 		public IEnumerable<IResult> EnterItems()
@@ -68,8 +74,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public override void Update()
 		{
-			var query = StatelessSession.Query<Stock>();
-			Items.Value = query.ToList();
+			DbReloadToken.Value = new object();
 		}
 
 		public IResult ExportExcel()
@@ -100,13 +105,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Producer,
 				o.Status,
 				o.ReceivingOrderId,
-				o.Count,
+				o.Quantity,
 				o.Cost,
 				o.RetailCost,
 				o.Sum,
 				o.SumWithNds,
 				o.RetailSum,
-				o.CountDelivery
+				o.SupplyQuantity
 			});
 
 			row = ExcelExporter.WriteRows(sheet, rows, row);
@@ -121,7 +126,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var statRow = sheet.CreateRow(row++);
 			ExcelExporter.SetCellValue(statRow, 4, label);
-			ExcelExporter.SetCellValue(statRow, 5, items.Sum(x => x.Count));
+			ExcelExporter.SetCellValue(statRow, 5, items.Sum(x => x.Quantity));
 			var total = items.Sum(x => x.Sum);
 			ExcelExporter.SetCellValue(statRow, 8, total);
 			var totalWithNds = items.Sum(x => x.SumWithNds);

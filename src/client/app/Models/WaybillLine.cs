@@ -192,6 +192,9 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual uint? RejectId { get; set; }
 
+		public virtual ulong? StockId { get; set; }
+		public virtual int? StockVersion { get; set; }
+
 		[Style(Description = "Сертификат не был найден", Columns = new[] { "CertificateLink" })]
 		public virtual bool IsCertificateNotFound
 		{

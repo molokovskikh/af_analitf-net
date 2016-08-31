@@ -11,6 +11,8 @@
 	<Window.InputBindings>
 		<KeyBinding Gesture="CTRL+S" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="SendOrders" />
+		<KeyBinding Gesture="CTRL+SHIFT+S" Command="caliburn:Commands.InvokeViewModel"
+			CommandParameter="SyncInventory" />
 		<KeyBinding Gesture="CTRL+R" Command="caliburn:Commands.InvokeViewModel"
 			CommandParameter="Update" />
 		<KeyBinding Gesture="CTRL+T" Command="caliburn:Commands.InvokeViewModel"

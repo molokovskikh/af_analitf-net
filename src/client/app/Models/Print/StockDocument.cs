@@ -39,7 +39,7 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Barcode,
 				o.Product,
 				o.Producer,
-				o.Count,
+				o.Quantity,
 				o.Cost,
 				o.SumWithNds,
 				o.RetailCost,

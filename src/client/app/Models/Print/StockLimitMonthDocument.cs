@@ -57,10 +57,10 @@ namespace AnalitF.Net.Client.Models.Print
 				i + 1,
 				o.ProductId,
 				o.Product,
-				o.Seria,
+				o.SerialNumber,
 				o.Producer,
 				"",
-				o.Count,
+				o.Quantity,
 				o.Period,
 				o.DocumentDate,
 				o.RetailCost

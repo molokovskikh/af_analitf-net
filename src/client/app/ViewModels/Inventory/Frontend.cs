@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Tools;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using Caliburn.Micro;
@@ -143,7 +144,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			}
 			//списывать количество мы должны с загруженного объекта
 			stock = Lines.Select(x => x.Stock).FirstOrDefault(x => x.Id == stock.Id) ?? stock;
-			if (stock.Count < Quantity.Value) {
+			if (stock.Quantity < Quantity.Value) {
 				Error("Нет требуемого количества");
 				return;
 			}
@@ -169,6 +170,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				StatelessSession.Insert(check);
 				Lines.Each(x => x.CheckId = check.Id);
 				StatelessSession.InsertEach(Lines);
+				StatelessSession.InsertEach(Lines.Select(x => new StockAction {
+					ActionType = ActionType.Sale,
+					ClientStockId = x.Id,
+					SourceStockId = x.Stock.ServerId,
+					SourceStockVersion = x.Stock.ServerVersion,
+					Quantity = x.Quantity
+				}));
 				Stock.UpdateStock(StatelessSession, Lines.Select(x => x.Stock).Distinct());
 				trx.Commit();
 			}

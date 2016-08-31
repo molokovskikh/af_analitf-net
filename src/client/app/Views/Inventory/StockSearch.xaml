@@ -47,7 +47,7 @@
 				<controls:SearchableDataGridColumn HighlightStyle="{StaticResource DataGridHighlight}" Header="Наименование" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Штрих-код" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Цена" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Count}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>

@@ -33,7 +33,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var line = new Stock()
 			{
-				Count = 8.0m,
+				Quantity = 8.0m,
 				Cost = 50.0m,
 				RetailCost = 120.0m
 			};

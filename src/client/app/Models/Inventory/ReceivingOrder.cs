@@ -7,6 +7,7 @@ using AnalitF.Net.Client.Views.Inventory;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -32,12 +33,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Address = waybill.Address;
 			WaybillDate = waybill.DocumentDate;
 			WaybillId = waybill.Id;
-			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
-			foreach (var line in lines) {
-				Lines.Add(new ReceivingLine(line));
-				line.ReceivedQuantity += line.QuantityToReceive;
-			}
-
 			UpdateStat(Lines);
 		}
 
@@ -59,7 +54,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			LineCount = lines.Count();
 			Sum = lines.Sum(x => x.Sum);
-			RetailSum = lines.Sum(x => x.RetailCost);
+			RetailSum = lines.Sum(x => x.RetailCost).GetValueOrDefault();
 		}
 
 		public virtual Stock[] ToStocks()
@@ -69,13 +64,48 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public static bool StockWaybill(ISession session, Waybill waybill)
 		{
-			var order = new ReceivingOrder(waybill);
+			List<Stock> stocks;
+			List<StockAction> stockActions;
+			var serverIds = waybill.Lines.Select(x => x.StockId).ToArray();
+			var sources = session.Query<Stock>().Where(x => serverIds.Contains(x.ServerId)).ToArray();
+			var order = Create(waybill, sources, out stocks, out stockActions);
 			if (order.Lines.Count == 0)
 				return false;
 			if (order.Lines.Count > 0)
 				session.Save(order);
-			session.SaveEach(order.ToStocks());
+			stocks.Each(x => x.ReceivingOrderId = order.Id);
+			session.SaveEach(stocks);
+			stockActions.Each(x => x.ClientStockId = x.Stock.Id);
+			session.SaveEach(stockActions);
 			return true;
+		}
+
+		private static ReceivingOrder Create(Waybill waybill, Stock[] sources, out List<Stock> stocks, out List<StockAction> stockActions)
+		{
+			var order = new ReceivingOrder(waybill);
+			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
+			stocks = new List<Stock>();
+			stockActions = new List<StockAction>();
+			foreach (var line in lines) {
+				var source = sources.First(x => x.ServerId == line.StockId);
+				var receivingLine = new ReceivingLine(line);
+				order.Lines.Add(receivingLine);
+				line.ReceivedQuantity += line.QuantityToReceive;
+				source.Quantity -= line.QuantityToReceive;
+				var stock = new Stock(order, receivingLine);
+				stocks.Add(stock);
+				stockActions.Add(new StockAction {
+					ActionType = ActionType.Stock,
+					SourceStockId = line.StockId,
+					SourceStockVersion = line.StockVersion,
+					Quantity = receivingLine.Quantity,
+					RetailCost = receivingLine.RetailCost,
+					RetailMarkup = receivingLine.RetailMarkup,
+					Stock = stock,
+				});
+			}
+			order.UpdateStat(order.Lines);
+			return order;
 		}
 	}
 }

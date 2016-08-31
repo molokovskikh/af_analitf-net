@@ -24,16 +24,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public CheckLine(Stock stock, uint quantity)
 		{
-			if (stock.Count < quantity)
-				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Count}");
+			if (stock.Quantity < quantity)
+				throw new Exception($"У позиции {stock.Product} нет достаточного количества, требуется {quantity} в наличии {stock.Quantity}");
 			Stock = stock;
-			Stock.Count -= quantity;
+			Stock.Quantity -= quantity;
 			CopyFromStock(stock);
 			Quantity = quantity;
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Cost { get; set; }
 
 		public virtual decimal Quantity
@@ -48,7 +47,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			}
 		}
 
-		public virtual decimal RetailSum => Quantity * RetailCost;
+		public virtual decimal RetailSum => Quantity * RetailCost.GetValueOrDefault();
 		public virtual decimal Sum => RetailSum - DiscontSum;
 		public virtual decimal DiscontSum  { get; set; }
 		public virtual uint CheckId { get; set; }

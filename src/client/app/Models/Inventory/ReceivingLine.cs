@@ -36,35 +36,20 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Quantity = line.QuantityToReceive;
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
 			RetailCost = line.RetailCost.GetValueOrDefault();
+			RetailMarkup = line.RetailMarkup;
 		}
 
 		public virtual uint Id { get; set; }
-		public virtual uint? CatalogId { get; set; }
 
 		public virtual string CountryCode { get; set; }
 		public virtual string Country { get; set; }
 
 		public virtual string Period { get; set; }
 		public virtual DateTime? Exp { get; set; }
-		public virtual string SerialNumber { get; set; }
-		public virtual string Certificates { get; set; }
 
 		public virtual string Unit { get; set; }
-		public virtual decimal? ExciseTax { get; set; }
-		public virtual string BillOfEntryNumber { get; set; }
-
-		public virtual bool? VitallyImportant { get; set; }
-
-		public virtual decimal? ProducerCost { get; set; }
-		public virtual decimal? RegistryCost { get; set; }
-
-		public virtual decimal? SupplierPriceMarkup { get; set; }
-		public virtual decimal? SupplierCostWithoutNds { get; set; }
-		public virtual decimal? SupplierCost { get; set; }
-
 		public virtual int? Nds { get; set; }
 
-		public virtual decimal RetailCost { get; set; }
 		public virtual decimal Quantity { get; set; }
 		public virtual decimal Sum => Quantity * SupplierCost.GetValueOrDefault();
 		public virtual uint ReceivingOrderId { get; set; }

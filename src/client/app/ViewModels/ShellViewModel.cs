@@ -82,6 +82,7 @@ namespace AnalitF.Net.Client.ViewModels
 	[DataContract]
 	public class ShellViewModel : BaseShell, IDisposable
 	{
+		private ManualResetEventSlim startSync = new ManualResetEventSlim();
 		private WindowManager windowManager;
 		private ISession session;
 		private IStatelessSession statelessSession;
@@ -221,7 +222,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
 				CanPrintPreview = CanPrint.ToValue();
-			var task = TaskEx.Run(() => Models.Inventory.Sync.Start(config, CancelDisposable.Token).Wait());
+			var task = TaskEx.Run(() => Models.Inventory.SyncCommand.Start(config, startSync, CancelDisposable.Token).Wait());
 			CloseDisposable.Add(Disposable.Create(() => {
 				CancelDisposable.Dispose();
 				task.Wait(TimeSpan.FromSeconds(10));
@@ -942,6 +943,11 @@ namespace AnalitF.Net.Client.ViewModels
 		protected bool Confirm(string text)
 		{
 			return windowManager.Question(text) == MessageBoxResult.Yes;
+		}
+
+		public void SyncInventory()
+		{
+			startSync.Set();
 		}
 
 		public void RunCmd<T>(WaitViewModel model, DbCommand<T> cmd, Action<T> success = null)

@@ -34,8 +34,11 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			using(var sesssion = Factory.OpenSession()) {
 				var settings = sesssion.Query<Settings>().FirstOrDefault();
-				if (settings != null)
+				if (settings != null) {
 					settings.LastUpdate = null;
+					settings.ServerLastSync = DateTime.MinValue;
+					settings.LastSync = DateTime.MinValue;
+				}
 				sesssion.Flush();
 
 				var dirs = Config.KnownDirs(settings);

@@ -32,8 +32,8 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Barcode,
 				o.Product,
 				o.Producer,
-				o.Seria,
-				o.Count,
+				o.SerialNumber,
+				o.Quantity,
 				o.RejectStatusName,
 			});
 

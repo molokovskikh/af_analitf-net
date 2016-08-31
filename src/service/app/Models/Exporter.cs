@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AnalitF.Net.Service.Models.Inventory;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -1867,6 +1868,7 @@ where d.RowId in ({0})", ids);
 			Export(Result, sql, "Waybills", truncate: false, parameters: new { userId = user.Id });
 			session.CreateSQLQuery(@"drop temporary table if exists RetailCostFixed;").ExecuteUpdate();
 
+			Stock.CreateInTransitStocks(session, user);
 			sql = $@"
 select db.Id,
 	d.RowId as WaybillId,
@@ -1896,11 +1898,14 @@ select db.Id,
 	db.EAN13,
 	db.CountryCode,
 	db.RetailCost as ServerRetailCost,
-	db.RetailCostMarkup as ServerRetailMarkup
+	db.RetailCostMarkup as ServerRetailMarkup,
+	s.Id as StockId,
+	s.Version as StockVersion
 from Logs.Document_logs d
 		join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 			join Documents.DocumentBodies db on db.DocumentId = dh.Id
 				left join Catalogs.Products p on p.Id = db.ProductId
+				left join Inventory.Stocks s on s.WaybillLineId = db.Id
 where d.RowId in ({ids})
 group by dh.Id, db.Id";
 			Export(Result, sql, "WaybillLines", truncate: false, parameters: new { userId = user.Id });

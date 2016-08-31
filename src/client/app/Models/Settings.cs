@@ -176,7 +176,11 @@ namespace AnalitF.Net.Client.Models
 			set { _password = value?.Trim(); }
 		}
 
+		//в жизни часы клиента и сервера не будут совпадать
+		//обновления по часам клиента
 		public virtual DateTime LastSync { get; set; }
+		//обновление по часам сервера
+		public virtual DateTime ServerLastSync { get; set; }
 		public virtual DateTime? LastUpdate { get; set; }
 
 		//дата вычисления лидеров если включена опция отсрочка платежа

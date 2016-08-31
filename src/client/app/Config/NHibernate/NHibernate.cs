@@ -267,6 +267,17 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Catalog, c => c.Index("Catalog"));
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
+
+			mapper.Class<Stock>(m => {
+				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+			});
+			mapper.Class<StockAction>(m => {
+				m.Version(p => p.Timestamp, c => {
+					c.Type(new TimestampType());
+					c.Column(cc => cc.Default("'0001-01-01 00:00:00'"));
+				});
+			});
+
 			mapper.BeforeMapClass += (inspector, type, customizer) => {
 				customizer.Id(m => m.Generator(Generators.Native));
 				if (type == typeof(RegulatorRegistry)) {

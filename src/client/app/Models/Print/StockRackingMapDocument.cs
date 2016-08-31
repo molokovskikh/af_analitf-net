@@ -121,7 +121,7 @@ namespace AnalitF.Net.Client.Models.Print
 			var label7 = new TextBlock
 			{
 				FontSize = 10,
-				Text = "Серия " + line.Seria,
+				Text = "Серия " + line.SerialNumber,
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				Margin = new Thickness(2, 17, 0, 0),
@@ -134,7 +134,7 @@ namespace AnalitF.Net.Client.Models.Print
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Right,
 				FontSize = 10,
-				Text = "Количество " + line.Count.ToString("N2"),
+				Text = "Количество " + line.Quantity.ToString("N2"),
 				Margin = new Thickness(0, 2, 25, 0),
 				Padding = new Thickness(0)
 			};

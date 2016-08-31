@@ -118,8 +118,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Barcode,
 				o.Product,
 				o.Producer,
-				o.Seria,
-				o.Count,
+				o.SerialNumber,
+				o.Quantity,
 				o.RejectStatusName
 			});
 

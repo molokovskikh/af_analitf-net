@@ -102,5 +102,14 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.CreateSQLQuery("insert into Addresses(Id) values(:id)").SetParameter("id", id).ExecuteUpdate();
 			check.Check();
 		}
+
+		[Test]
+		public void Create_uniq_index()
+		{
+			session.CreateSQLQuery("alter table Stocks drop index ServerId").ExecuteUpdate();
+			check.Check(updateSchema: true);
+			var result = session.CreateSQLQuery("show create table Stocks").UniqueResult<object[]>();
+			Assert.That(result[1].ToString(), Does.Contain("UNIQUE KEY `ServerId` "));
+		}
 	}
 }

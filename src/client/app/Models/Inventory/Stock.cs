@@ -29,8 +29,25 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Barcode { get; set; }
 		public virtual string Product { get; set; }
 		public virtual uint? ProductId { get; set; }
+		public virtual uint? CatalogId { get; set; }
 		public virtual string Producer { get; set; }
 		public virtual uint? ProducerId { get; set; }
+		public virtual string SerialNumber { get; set; }
+		public virtual string Certificates { get; set; }
+		public virtual decimal? ProducerCost { get; set; }
+		public virtual decimal? RegistryCost { get; set; }
+		public virtual decimal? RetailCost { get; set; }
+		public virtual decimal? RetailMarkup { get; set; }
+
+		public virtual decimal? SupplierCost { get; set; }
+		public virtual decimal? SupplierCostWithoutNds { get; set; }
+		public virtual decimal? SupplierPriceMarkup { get; set; }
+
+		public virtual decimal? ExciseTax { get; set; }
+		public virtual string BillOfEntryNumber { get; set; }
+		public virtual bool? VitallyImportant { get; set; }
+
+		public virtual decimal SupplyQuantity { get; set; }
 	}
 
 	public class Stock : BaseStock
@@ -41,18 +58,23 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public Stock(ReceivingOrder order, ReceivingLine line)
 		{
+			WaybillId = order.WaybillId;
+			Status = StockStatus.Available;
 			Address = order.Address;
-			Count = line.Quantity;
 			Cost = line.SupplierCost.GetValueOrDefault();
 			line.CopyToStock(this);
 		}
 
 		public virtual uint Id { get; set; }
 
+		public virtual ulong? ServerId { get; set; }
+		public virtual int? ServerVersion { get; set; }
+
 		public virtual Address Address { get; set; }
 		public virtual StockStatus Status { get; set; }
 
 		public virtual uint? ReceivingOrderId { get; set; }
+		public virtual uint? WaybillId { get; set; }
 
 		public virtual string AnalogCode { get; set; }
 		public virtual string ProducerBarcode { get; set; }
@@ -69,11 +91,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string UserCategory { get; set; }
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
-		public virtual string Certificate { get; set; }
-		public virtual decimal Count { get; set; }
+		public virtual decimal Quantity { get; set; }
 		public virtual decimal Cost { get; set; }
-		public virtual decimal RetailCost { get; set; }
-		public virtual decimal ProducerCost { get; set; }
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
 		public virtual double NdsPers { get; set; }
@@ -82,16 +101,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal CostWithNds => Cost + NdsAmount.GetValueOrDefault() + Excise;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
-
-		public virtual decimal RetailMarkup
-		{
-			get
-			{
-				if (Cost != 0)
-					return Math.Round(((RetailCost - Cost) * 100) / Cost, 2);
-				return 0;
-			}
-		}
 
 		public virtual decimal? LowCost { get; set; }
 		public virtual decimal? LowMarkup
@@ -115,14 +124,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 			}
 		}
 
-		public virtual string Seria { get; set; }
-
-		public virtual decimal Sum => Count * Cost;
+		public virtual decimal Sum => Quantity * Cost;
 		public virtual decimal SumWithNds { get; set; }
-		public virtual decimal RetailSum => Count * RetailCost;
-		public virtual uint CountDelivery { get; set; }
+		public virtual decimal? RetailSum => Quantity * RetailCost;
 		public virtual string Vmn { get; set; }
 		public virtual string Gtd { get; set; }
+		public virtual DateTime? Exp { get; set; }
 		public virtual string Period { get; set; }
 		public virtual string DocumentDate { get; set; }
 		public virtual string WaybillNumber { get; set; }
@@ -134,7 +141,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public static void UpdateStock(IStatelessSession session, IEnumerable<Stock> stocks)
 		{
 			foreach (var stock in stocks) {
-				if (stock.Count == 0)
+				if (stock.Quantity == 0)
 					session.Delete(stock);
 				else
 					session.Update(stock);

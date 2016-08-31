@@ -59,6 +59,11 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public bool Strict = true;
 
+		public ImportCommand(string dir)
+		{
+			data = GetDbData(dir);
+		}
+
 		public ImportCommand(List<Tuple<string, string[]>> data)
 		{
 			this.data = data;
@@ -348,6 +353,21 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			if (notFoundInData.Length > 0) {
 				throw new Exception($"В таблице {dbTable.Name} есть колонки которые отсутствуют в данных {notFoundInData.Implode()}");
 			}
+		}
+
+		public static List<Tuple<string, string[]>> GetDbData(string dir)
+		{
+			var files = Directory.GetFiles(dir).Select(Path.GetFileName);
+			return files.Where(f => f.EndsWith("meta.txt"))
+				.Select(f => Tuple.Create(f, files.FirstOrDefault(d => Path.GetFileNameWithoutExtension(d)
+					.Match(f.Replace(".meta.txt", "")))))
+				.Where(t => t.Item2 != null)
+				.Select(t => Tuple.Create(
+					Path.GetFullPath(Path.Combine(dir, t.Item2)),
+					File.ReadAllLines(Path.Combine(dir, t.Item1))))
+				.Concat(files.Where(x => Path.GetFileNameWithoutExtension(x).Match("cmds"))
+					.Select(x => Tuple.Create(Path.Combine(dir, x), new string[0])))
+				.ToList();
 		}
 	}
 }
