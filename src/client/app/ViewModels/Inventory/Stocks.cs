@@ -43,8 +43,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			if (Items.Value == null || ItemsTotal.Count != 1) return;
 
 			ItemsTotal.First().TotalCount = Items.Value.Sum(c => c.Quantity);
-			ItemsTotal.First().TotalSum = Items.Value.Sum(c => c.Sum);
-			ItemsTotal.First().TotalSumWithNds = Items.Value.Sum(c => c.SumWithNds);
+			ItemsTotal.First().TotalSum = Items.Value.Sum(c => c.SupplySumWithoutNds);
+			ItemsTotal.First().TotalSumWithNds = Items.Value.Sum(c => c.SupplySum);
 			ItemsTotal.First().TotalRetailSum = Items.Value.Sum(c => c.RetailSum).GetValueOrDefault();
 		}
 
@@ -106,10 +106,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.Status,
 				o.ReceivingOrderId,
 				o.Quantity,
-				o.Cost,
+				o.SupplierCost,
 				o.RetailCost,
-				o.Sum,
-				o.SumWithNds,
+				o.SupplySumWithoutNds,
+				o.SupplySum,
 				o.RetailSum,
 				o.SupplyQuantity
 			});
@@ -127,9 +127,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			var statRow = sheet.CreateRow(row++);
 			ExcelExporter.SetCellValue(statRow, 4, label);
 			ExcelExporter.SetCellValue(statRow, 5, items.Sum(x => x.Quantity));
-			var total = items.Sum(x => x.Sum);
+			var total = items.Sum(x => x.SupplySumWithoutNds);
 			ExcelExporter.SetCellValue(statRow, 8, total);
-			var totalWithNds = items.Sum(x => x.SumWithNds);
+			var totalWithNds = items.Sum(x => x.SupplySum);
 			ExcelExporter.SetCellValue(statRow, 9, totalWithNds);
 			var retailTotal = items.Sum(x => x.RetailSum);
 			ExcelExporter.SetCellValue(statRow, 10, retailTotal);

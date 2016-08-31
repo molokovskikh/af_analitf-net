@@ -253,7 +253,7 @@ namespace AnalitF.Net.Client.Models.Print
 				BorderThickness = new Thickness(0.5),
 				BorderBrush = Brushes.Black,
 				FontSize = 10,
-				Content = line.Cost,
+				Content = line.SupplierCost,
 				VerticalAlignment = VerticalAlignment.Top,
 				HorizontalAlignment = HorizontalAlignment.Left,
 				Margin = new Thickness(101, 32, 0, 0),

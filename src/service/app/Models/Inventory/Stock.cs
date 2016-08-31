@@ -43,7 +43,7 @@ namespace AnalitF.Net.Service.Models.Inventory
 			CreatedByUser = user;
 			Quantity = Math.Abs(quantity);
 			ClientPrimaryKey = clientId;
-			RegistryCost = retailCost;
+			RetailCost = retailCost;
 			RetailMarkup = retailMarkup;
 		}
 

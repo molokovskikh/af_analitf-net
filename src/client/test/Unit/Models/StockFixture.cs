@@ -17,7 +17,7 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 		{
 			var line = new Stock()
 			{
-				Cost = 50.0m,
+				SupplierCost = 50.0m,
 				RetailCost = 120.0m,
 				LowCost = 100.0m,
 				OptCost = 110.0m
@@ -34,11 +34,11 @@ namespace AnalitF.Net.Client.Test.Unit.Models
 			var line = new Stock()
 			{
 				Quantity = 8.0m,
-				Cost = 50.0m,
+				SupplierCost = 50.0m,
 				RetailCost = 120.0m
 			};
 
-			Assert.AreEqual(400, line.Sum);
+			Assert.AreEqual(400, line.SupplySum);
 			Assert.AreEqual(960, line.RetailSum);
 		}
 

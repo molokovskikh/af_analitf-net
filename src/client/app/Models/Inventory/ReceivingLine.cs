@@ -34,6 +34,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Barcode = line.EAN13;
 
 			Quantity = line.QuantityToReceive;
+			SupplyQuantity = line.Quantity.GetValueOrDefault();
 			SupplierCost = line.SupplierCost.GetValueOrDefault();
 			RetailCost = line.RetailCost.GetValueOrDefault();
 			RetailMarkup = line.RetailMarkup;

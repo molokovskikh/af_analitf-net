@@ -129,7 +129,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private IQueryable<Stock> StockQuery()
 		{
-			return StatelessSession.Query<Stock>().Where(x => x.Address == Address);
+			return Stock.AvailableStocks(StatelessSession, Address);
 		}
 
 		private void UpdateProduct(Stock stock, string operation)

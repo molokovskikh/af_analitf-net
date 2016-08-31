@@ -46,10 +46,10 @@
 				<controls:DataGridTextColumnEx x:Name="ClmnWaybill" Header="Накладная" Binding="{Binding WaybillId}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnOrder" Header="Заказ на приемку" Binding="{Binding ReceivingOrderId}" Width="*" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCount" Header="Кол-во" Binding="{Binding Quantity}" Width="*" TextAlignment="Right" />
-				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding Cost}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnCost" Header="Цена закупки" Binding="{Binding SupplierCost}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnRetailCost" Header="Розничная цена" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx x:Name="ClmnSum" Header="Сумма закупки" Binding="{Binding Sum}" Width="*" TextAlignment="Right" />
-				<controls:DataGridTextColumnEx x:Name="ClmnSumWithNds" Header="Сумма закупки с НДС" Binding="{Binding SumWithNds}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSum" Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" TextAlignment="Right" />
+				<controls:DataGridTextColumnEx x:Name="ClmnSumWithNds" Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnRetailSum" Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" TextAlignment="Right" />
 				<controls:DataGridTextColumnEx x:Name="ClmnCountDelivery" Header="Кол-во поставки" Binding="{Binding SupplyQuantity}" Width="*" TextAlignment="Right" />
 			</DataGrid.Columns>

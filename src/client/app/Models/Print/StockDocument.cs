@@ -40,8 +40,8 @@ namespace AnalitF.Net.Client.Models.Print
 				o.Product,
 				o.Producer,
 				o.Quantity,
-				o.Cost,
-				o.SumWithNds,
+				o.SupplierCost,
+				o.SupplySum,
 				o.RetailCost,
 				o.RetailSum,
 			});
@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.Models.Print
 							ColumnSpan = 5,
 							TextAlignment = TextAlignment.Right
 						},
-						new TableCell(new Paragraph(new Run(_stocks.Sum(x => x.SumWithNds).ToString())) {
+						new TableCell(new Paragraph(new Run(_stocks.Sum(x => x.SupplySum).ToString())) {
 							KeepTogether = true
 						}) {
 							Style = CellStyle,
@@ -87,8 +87,8 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 
 			Block($"Итого товаров на сумму\n"
-				+ "По закупочной цене: " + _stocks.Sum(x => x.SumWithNds).ToString() + "\n"
-				+ "По цене продажи: " + _stocks.Sum(x => x.RetailSum).ToString() + "\n\n"
+				+ "По закупочной цене: " + _stocks.Sum(x => x.SupplySum) + "\n"
+				+ "По цене продажи: " + _stocks.Sum(x => x.RetailSum) + "\n\n"
 				+ "Сдал:                                                                                                Принял:");
 		}
 	}

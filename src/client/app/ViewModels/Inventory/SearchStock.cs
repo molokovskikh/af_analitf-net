@@ -29,7 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			base.OnInitialize();
 
 			SearchBehavior.ActiveSearchTerm.Throttle(Consts.TextInputLoadTimeout, UiScheduler)
-				.SelectMany(_ => RxQuery(s => s.Query<Stock>().Where(x => x.Product.Contains(SearchBehavior.ActiveSearchTerm.Value ?? "") && Address == x.Address)
+				.SelectMany(_ => RxQuery(s => Stock.AvailableStocks(s, Address).Where(x => x.Product.Contains(SearchBehavior.ActiveSearchTerm.Value ?? ""))
 					.OrderBy(x => x.Product)
 					.ThenBy(x => x.RetailCost)
 					.ToList()))

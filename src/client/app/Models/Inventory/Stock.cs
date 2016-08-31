@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
+using System.Linq;
 using NHibernate;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Models.Inventory
 {
@@ -61,7 +64,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 			WaybillId = order.WaybillId;
 			Status = StockStatus.Available;
 			Address = order.Address;
-			Cost = line.SupplierCost.GetValueOrDefault();
 			line.CopyToStock(this);
 		}
 
@@ -92,13 +94,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
 		public virtual decimal Quantity { get; set; }
-		public virtual decimal Cost { get; set; }
+
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
 		public virtual double NdsPers { get; set; }
 		public virtual double NpPers { get; set; }
 		public virtual decimal Excise { get; set; }
-		public virtual decimal CostWithNds => Cost + NdsAmount.GetValueOrDefault() + Excise;
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
@@ -107,8 +108,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			get
 			{
-				if (Cost != 0 && LowCost != null)
-					return Math.Round((((LowCost - Cost) * 100) / Cost).Value, 2);
+				if (RetailCost != 0 && LowCost != null)
+					return Math.Round(((LowCost - SupplierCost) * 100 / SupplierCost).Value, 2);
 				return null;
 			}
 		}
@@ -118,14 +119,14 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			get
 			{
-				if (Cost != 0 && OptCost != null)
-					return Math.Round((((OptCost - Cost) * 100) / Cost).Value, 2);
+				if (SupplierCost != 0 && OptCost != null)
+					return Math.Round((((OptCost - SupplierCost) * 100) / SupplierCost).Value, 2);
 				return null;
 			}
 		}
 
-		public virtual decimal Sum => Quantity * Cost;
-		public virtual decimal SumWithNds { get; set; }
+		public virtual decimal SupplySum => SupplyQuantity * SupplierCost.GetValueOrDefault();
+		public virtual decimal SupplySumWithoutNds => SupplyQuantity * SupplierCostWithoutNds.GetValueOrDefault();
 		public virtual decimal? RetailSum => Quantity * RetailCost;
 		public virtual string Vmn { get; set; }
 		public virtual string Gtd { get; set; }
@@ -146,6 +147,11 @@ namespace AnalitF.Net.Client.Models.Inventory
 				else
 					session.Update(stock);
 			}
+		}
+
+		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address)
+		{
+			return session.Query<Stock>().Where(x => x.Quantity > 0 && x.Status == StockStatus.Available && x.Address == address);
 		}
 	}
 }
