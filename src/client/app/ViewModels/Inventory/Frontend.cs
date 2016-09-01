@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 					Discount.Value = Lines.Sum(x => x.DiscontSum);
 				}
 			});
-			Status.Value = "Готов к работе";
+			Status.Value = "Готов к работе (F1 для справки)";
 		}
 
 		public NotifyValue<bool> HasError { get; set; }

@@ -32,11 +32,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<DateTime> End { get; set; }
 		public NotifyValue<List<Tuple<uint,uint>>> Link { get; set; }
 
-		private string Name;
 
 		public CheckDefectSeries()
 		{
-			Name = User?.FullName ?? "";
+			DisplayName = "Проверка забракованных серий";
 			IsAll = new NotifyValue<bool>(true);
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3));
 			End = new NotifyValue<DateTime>(DateTime.Today);
@@ -146,27 +145,27 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			var result = Session.CreateSQLQuery(@"select s.Id as StockId, r.Id as RejectId " +
 				"from Stocks s " +
-				" join Rejects r on s.ProducerId = r.ProducerId and s.ProductId = r.ProductId and s.Seria = r.Series " +
+				" join Rejects r on s.ProducerId = r.ProducerId and s.ProductId = r.ProductId and s.SerialNumber = r.Series " +
 				"where r.Canceled = 0 " +
 				" and s.ProducerId is not null " +
 				" and s.ProductId is not null " +
-				" and s.Seria is not null " +
+				" and s.SerialNumber is not null " +
 				"union all " +
 				"select s.Id as StockId, r.Id as RejectId " +
 				"from Stocks s " +
-				" join Rejects r on s.ProductId = r.ProductId and s.Seria = r.Series " +
+				" join Rejects r on s.ProductId = r.ProductId and s.SerialNumber = r.Series " +
 				"where r.Canceled = 0 " +
 				" and (s.ProducerId is null or r.ProducerId is null) " +
 				" and s.ProductId is not null " +
-				" and s.Seria is not null " +
+				" and s.SerialNumber is not null " +
 				"union all " +
 				"select s.Id as StockId, r.Id as RejectId " +
 				"from Stocks s " +
-				" join Rejects r on s.Product = r.Product and s.Seria = r.Series " +
+				" join Rejects r on s.Product = r.Product and s.SerialNumber = r.Series " +
 				"where r.Canceled = 0 " +
 				" and s.ProductId is null " +
 				" and s.Product is not null " +
-				" and s.Seria is not null")
+				" and s.SerialNumber is not null")
 			.List<object[]>()
 			.Select(x => Tuple.Create(Convert.ToUInt32(x[0]), Convert.ToUInt32(x[1])))
 			.Distinct()
