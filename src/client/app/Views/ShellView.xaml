@@ -66,6 +66,8 @@
 					cal:Message.Attach="Update" />
 				<MenuItem Header="Отправить заказы" InputGestureText="Ctrl+S"
 					cal:Message.Attach="SendOrders" />
+				<MenuItem Header="Синхронизировать остатки" InputGestureText="CTRL+SHIFT+S"
+					cal:Message.Attach="SyncInventory" />
 				<MenuItem Header="Загрузить и получить накладные, сертификаты"
 					cal:Message.Attach="MicroUpdate" />
 				<MenuItem Header="Кумулятивное обновление"
