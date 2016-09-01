@@ -67,22 +67,29 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		public void CloseActive()
 		{
 			var item = conductor.ActiveItem;
-			if (item != null) {
-				//исправление для ошибки
-				//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
-				var view = (FrameworkElement)conductor.GetView();
-				if (view != null) {
-					var tabs = view.Descendants<TabControl>().First(x => x.Name == "Items");
-					var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
-					if (tab != null)
-						tab.Template = null;
-				}
+			CloseScreen(item);
+		}
 
-				conductor.Items.Remove(item);
-				conductor.DeactivateItem(item, true);
-				navigationStack.Remove(item);
-				(item as IDisposable)?.Dispose();
+		public void CloseScreen(IScreen item)
+		{
+			if (item == null)
+				return;
+
+			//исправление для ошибки
+			//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
+			var view = (FrameworkElement)conductor.GetView();
+			if (view != null)
+			{
+				var tabs = view.Descendants<TabControl>().First(x => x.Name == "Items");
+				var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
+				if (tab != null)
+					tab.Template = null;
 			}
+
+			conductor.Items.Remove(item);
+			conductor.DeactivateItem(item, true);
+			navigationStack.Remove(item);
+			(item as IDisposable)?.Dispose();
 		}
 	}
 }
