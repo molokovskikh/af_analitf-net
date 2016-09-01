@@ -69,6 +69,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 						var values = StatusFilter.GetValues();
 						query = query.Where(y => values.Contains(y.Status));
 					}
+					var addresses = AddressSelector.GetActiveFilter();
+					query = query.Where(y => addresses.Contains(y.Address));
 					return query.OrderBy(y => y.Product).ToList();
 				}))
 				.Subscribe(Items);

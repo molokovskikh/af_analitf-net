@@ -149,9 +149,12 @@ namespace AnalitF.Net.Client.Models.Inventory
 			}
 		}
 
-		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address)
+		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address = null)
 		{
-			return session.Query<Stock>().Where(x => x.Quantity > 0 && x.Status == StockStatus.Available && x.Address == address);
+			var query = session.Query<Stock>().Where(x => x.Quantity > 0 && x.Status == StockStatus.Available);
+			if (address != null)
+				query = query.Where(x => x.Address == address);
+			return query;
 		}
 	}
 }

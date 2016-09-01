@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			// для всех с неизвестным статусом, что попали в Link, устанавливается статус Возможно, но не сохраняется в базе
 			var ids = Link.Value.Select(x => x.Item1).Distinct().ToList();
-			var items = session.Query<Stock>().OrderBy(y => y.Product).ToList();
+			var items = Stock.AvailableStocks(session).OrderBy(y => y.Product).ToList();
 			foreach (var item in items) {
 				if (item.RejectStatus == RejectStatus.Unknown && ids.Contains(item.Id))
 					item.RejectStatus = RejectStatus.Perhaps;

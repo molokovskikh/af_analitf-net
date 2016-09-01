@@ -101,6 +101,7 @@ namespace AnalitF.Net.Service.Controllers
 			//из-за возможных проблем при пересоздании базы
 			Session.Flush();
 			using (var exporter = new Exporter(Session, Config, new RequestLog(CurrentUser, request, GetType().Name))) {
+				exporter.Prefix = Guid.NewGuid().ToString();
 				var sql = @"
 select if(s.CreatedByUserId = ?userId, s.ClientPrimaryKey, null) as Id,
 	s.Id as ServerId,
