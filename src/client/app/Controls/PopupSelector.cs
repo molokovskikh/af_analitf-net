@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,15 +22,45 @@ namespace AnalitF.Net.Client.Controls
 		bool IsSelected {get; set; }
 	}
 
+	public static class SelectableHelper
+	{
+		public static IObservable<EventPattern<PropertyChangedEventArgs>> FilterChanged<T>(this NotifyValue<IList<Selectable<T>>> selectable)
+		{
+			return selectable.SelectMany(p => p?.Select(x => x.Changed()).Merge() ?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>());
+		}
+
+		public static bool IsFiltred<T>(this NotifyValue<IList<Selectable<T>>> selectable)
+		{
+			if (selectable.Value == null)
+				return false;
+			return selectable.Value.Count != selectable.Value.Count(x => x.IsSelected);
+		}
+
+		public static T[] GetValues<T>(this NotifyValue<IList<Selectable<T>>> selectable)
+		{
+			if (selectable.Value == null)
+				return new T[0];
+			return selectable.Value.Where(x => x.IsSelected).Select(x => x.Item).ToArray();
+		}
+	}
+
 	public class Selectable<T> : BaseNotify, ISelectable
 	{
 		private bool isSelected;
 
 		public Selectable(T item)
+			: this(item, null)
+		{
+		}
+
+		public Selectable(T item, string name)
 		{
 			Item = item;
+			Name = name;
 			isSelected = true;
 		}
+
+		public string Name { get; set; }
 
 		public bool IsSelected
 		{
@@ -179,6 +211,7 @@ namespace AnalitF.Net.Client.Controls
 		public PopupSelector()
 		{
 			Member = "Item.Name";
+			VerticalAlignment = VerticalAlignment.Center;
 			Mouse.AddPreviewMouseDownOutsideCapturedElementHandler(this, OnMouseDownOutsideCapturedElement);
 		}
 

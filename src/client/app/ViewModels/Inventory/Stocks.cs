@@ -14,6 +14,8 @@ using NPOI.SS.UserModel;
 using System.Collections.ObjectModel;
 using NPOI.HSSF.UserModel;
 using System;
+using AnalitF.Net.Client.Controls;
+using AnalitF.Net.Client.ViewModels.Parts;
 using Common.NHibernate;
 using NHibernate;
 
@@ -21,22 +23,28 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class Stocks : BaseScreen2
 	{
-		public NotifyValue<List<Stock>> Items { get; set; }
-		public NotifyValue<Stock> CurrentItem { get; set; }
-		public ObservableCollection<StockTotal> ItemsTotal { get; set; }
-
 		private string Name;
 
 		public Stocks()
 		{
 			DisplayName = "Товарные запасы";
+			AddressSelector = new AddressSelector(this);
 			Items.PropertyChanged += Items_PropertyChanged;
 			CurrentItem = new NotifyValue<Stock>();
 			ItemsTotal = new ObservableCollection<StockTotal>();
 			ItemsTotal.Add(new StockTotal { Total = "Итого", TotalCount = 0.0m, TotalSum = 0.0m, TotalSumWithNds = 0.0m, TotalRetailSum = 0.0m });
 
 			Name = User?.FullName ?? "";
+			StatusFilter.Value = DescriptionHelper.GetDescriptions(typeof(StockStatus))
+				.Select(x => new Selectable<StockStatus>((StockStatus)x.Value, x.Name))
+				.ToList();
 		}
+
+		public NotifyValue<List<Stock>> Items { get; set; }
+		public NotifyValue<Stock> CurrentItem { get; set; }
+		public ObservableCollection<StockTotal> ItemsTotal { get; set; }
+		public AddressSelector AddressSelector { get; set; }
+		public NotifyValue<IList<Selectable<StockStatus>>> StatusFilter { get; set; }
 
 		private void Items_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
@@ -52,14 +60,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			base.OnInitialize();
 
-			Bus.Listen<string>("reload").Cast<object>().Merge(DbReloadToken)
-				.SelectMany(_ => RxQuery(x => x.Query<Stock>().Where(y => y.Quantity != 0).OrderBy(y => y.Product).ToList()))
+			Bus.Listen<string>("reload").Cast<object>()
+				.Merge(DbReloadToken)
+				.Merge(StatusFilter.FilterChanged())
+				.SelectMany(_ => RxQuery(x => {
+					var query = x.Query<Stock>().Where(y => y.Quantity != 0);
+					if (StatusFilter.IsFiltred()) {
+						var values = StatusFilter.GetValues();
+						query = query.Where(y => values.Contains(y.Status));
+					}
+					return query.OrderBy(y => y.Product).ToList();
+				}))
 				.Subscribe(Items);
-		}
-
-		public void DbRefresh()
-		{
-
 		}
 
 		public IEnumerable<IResult> EnterItems()

@@ -160,10 +160,9 @@ namespace AnalitF.Net.Client.Helpers
 
 		public void OnError(Exception error)
 		{
+			log.Error(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
 #if DEBUG
 			throw new Exception($"Ошибка при получении значения для свойства {GetType()} = {this}", error);
-#else
-			log.Error(String.Format("Ошибка при получении значения для свойства {0} = {1}", GetType(), this), error);
 #endif
 		}
 

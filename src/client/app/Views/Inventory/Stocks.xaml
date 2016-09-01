@@ -30,6 +30,10 @@
 			</MenuItem>
 		</Menu>
 		<WrapPanel Grid.Row="1" Style="{StaticResource FilterWrapPanel}" >
+			<ContentControl x:Name="AddressSelector" />
+			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
+				ButtonContent="Статус"
+				Member="Name" />
 			<Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Постелажная карта</Button>
 			<Button Name="PrintStock" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товарные запасы</Button>
 			<Button Name="PrintStockLimit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности</Button>

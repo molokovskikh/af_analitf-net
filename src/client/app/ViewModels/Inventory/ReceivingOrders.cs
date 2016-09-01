@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
@@ -34,10 +35,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			RxQuery(x => x.Query<Address>().OrderBy(y => y.Name).ToArray().Select(y => new Selectable<Address>(y)).ToList())
 				.Subscribe(AddressesFilter);
 
-			RxQuery(x => x.Query<ReceivingOrder>()
-					.Fetch(y => y.Supplier)
-					.Fetch(y => y.Address)
-					.OrderByDescending(y => y.Date).ToList())
+			AddressesFilter.FilterChanged()
+				.Merge(Suppliers.FilterChanged())
+				.Merge(Begin.Select(x => (object)x))
+				.Merge(End.Select(x => (object)x))
+				.SelectMany(_ => RxQuery(s => {
+					var query = s.Query<ReceivingOrder>().Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1));
+					if (Suppliers.IsFiltred()) {
+						var values = Suppliers.GetValues();
+						query = query.Where(x => values.Contains(x.Supplier));
+					}
+					if (AddressesFilter.IsFiltred()) {
+						var values = AddressesFilter.GetValues();
+						query = query.Where(x => values.Contains(x.Address));
+					}
+					return query
+						.Fetch(y => y.Supplier)
+						.Fetch(y => y.Address)
+						.OrderByDescending(y => y.Date)
+						.ToList();
+				}))
 				.Subscribe(Items);
 		}
 

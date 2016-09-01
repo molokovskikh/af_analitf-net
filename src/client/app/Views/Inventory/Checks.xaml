@@ -35,8 +35,8 @@
             <DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
           </StackPanel>
         </GroupBox>
-        <controls:PopupSelector VerticalAlignment="Center" x:Name="KKMFilter" ButtonContent="ККМ"
-				Member="Item" />
+        <controls:PopupSelector x:Name="KKMFilter" ButtonContent="ККМ"
+					Member="Item" />
         <ContentControl x:Name="AddressSelector" />
       </StackPanel>
     </Grid>
