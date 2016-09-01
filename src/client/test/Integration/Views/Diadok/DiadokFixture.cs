@@ -72,13 +72,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		}
 
 		[TearDown]
-		void TestTearDown()
+		public void TestTearDown()
 		{
-			if(!testIgnored)
-				DeleteAll_Documents();
+			DeleteAll_Documents();
 		}
 
-		[Test]
+		[Test, Ignore("Нет возможности формировать исходные документы для текущей сборки, т.к. используется один аккаунт и невозможно задать признак")]
 		public void Diadoc_documents_test()
 		{
 			// Ждем пока завершится возможно уже начатый тест, проверяем есть ли документы
@@ -1248,19 +1247,19 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 
 		public void DeleteAll_Documents()
 		{
-			dispatcher.Invoke(() => {
-				foreach(var item in ddkIndex.Items.Value)
-				{
-					ddkIndex.CurrentItem.Value = item;
-					Wait();
-					AsyncClick("Delete");
-					Wait();
-					WaitWindow("АналитФАРМАЦИЯ");
-					Wait();
-					Click("Save");
-					Wait();
-				}
-			});
+			for(var i = 0; i < ddkIndex.Items.Value.Count; i++)
+			{
+				dispatcher.Invoke(() => {
+					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First();
+				});
+				Wait();
+				AsyncClick("Delete");
+				Wait();
+				WaitWindow("АналитФАРМАЦИЯ");
+				Wait();
+				Click("Save");
+				Wait();
+			}
 		}
 	}
 }
