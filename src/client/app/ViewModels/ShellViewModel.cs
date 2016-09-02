@@ -56,10 +56,17 @@ namespace AnalitF.Net.Client.ViewModels
 #if DEBUG
 	public class RestoreData
 	{
-		public RestoreData(object[] args, string typeName)
+		public RestoreData()
 		{
-			Args = args;
-			TypeName = typeName;
+		}
+
+		public RestoreData(object screen)
+		{
+			if (screen is BaseScreen)
+				Args = ((BaseScreen)screen).GetRebuildArgs();
+			else
+				Args = new object[0];
+			TypeName = screen.GetType().FullName;
 		}
 
 		public string TypeName;
@@ -67,7 +74,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override string ToString()
 		{
-			return String.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
+			return string.Format("{0} - {1}", TypeName, Args.Implode(a => String.Format("{1}:{0}", a, a.GetType())));
 		}
 	}
 #endif
@@ -88,7 +95,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public Dictionary<string, object> SessionContext = new Dictionary<string, object>();
 		[DataMember]
 		public Dictionary<string, object> PersistentContext = new Dictionary<string, object>();
-		[DataMember]
 
 		public Subject<string> Notifications = new Subject<string>();
 		public NotifyValue<List<Schedule>> Schedules = new NotifyValue<List<Schedule>>(new List<Schedule>());
@@ -96,6 +102,17 @@ namespace AnalitF.Net.Client.ViewModels
 		public bool ResetAutoComment;
 		public string AutoCommentText;
 		public bool RoundToSingleDigit = true;
+
+		private bool _leaderCalculationWasStart;
+		public  bool LeaderCalculationWasStart
+		{
+			get { return _leaderCalculationWasStart; }
+			set
+			{
+				_leaderCalculationWasStart = value;
+				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));
+			}
+		}
 
 		//не верь решарперу
 		public ShellViewModel()
@@ -203,7 +220,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Switch()
 				.Select(e => e.Value)
 				.ToValue(CancelDisposable);
-			CanPrintPreview = CanPrint.ToValue();
+				CanPrintPreview = CanPrint.ToValue();
 		}
 
 		public Config.Config Config { get; set; }
@@ -324,6 +341,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.CloseActive();
 		}
 
+		public void CloseScreen(IScreen item)
+		{
+			Navigator.CloseScreen(item);
+		}
+
 		public override void CanClose(Action<bool> callback)
 		{
 			if (Config.Quiet) {
@@ -402,7 +424,9 @@ namespace AnalitF.Net.Client.ViewModels
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
 				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
 					t => {
+						LeaderCalculationWasStart = true;
 						DbMaintain.UpdateLeaders();
+						LeaderCalculationWasStart = false;
 						return Enumerable.Empty<IResult>();
 					});
 			}
@@ -472,16 +496,6 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))
 				.Subscribe(SpecialMarkupProducts);
 
-			AppBootstrapper.LeaderCalculationWasStartChanged += (sender, e) =>
-			{
-				if(AppBootstrapper.LeaderCalculationWasStart == true
-				|| Settings.Value.LastLeaderCalculation == DateTime.Today)
-				{
-					return;
-				}
-				Settings.Value.LastLeaderCalculation = DateTime.Today;
-				session.Flush();
-			};
 			//изменились заявки
 			Env.Bus.SendMessage("Changed", "db");
 			//изменилась база данных
@@ -571,12 +585,13 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowMinCosts()
 		{
-			if (AppBootstrapper.LeaderCalculationWasStart)
+			if (LeaderCalculationWasStart)
 			{
 				MessageResult.Warn("Идет расчет минимальных цен. Минимальные цены можно будет посмотреть после окончания расчета, это может занять какое-то время. Пожалуйста, подождите и повторно откройте \"Минимальные цены\"")
 					.Execute(new ActionExecutionContext());
 				return;
 			}
+
 			NavigateRoot(new Offers.MinCosts());
 		}
 
@@ -729,7 +744,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
 				yield break;
-			User.Value.LastSync = null;
+			if (User.Value != null)
+				User.Value.LastSync = null;
 			foreach (var result in Sync(new UpdateCommand())) {
 					yield return result;
 			}
@@ -755,6 +771,14 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Update()
 		{
+			LeaderCalculationWasStart = true;
+			TaskEx.Run(() => {
+				DbMaintain.UpdateLeaders();
+			}).ContinueWith(t => {
+				LeaderCalculationWasStart = false;
+			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
+			TaskScheduler.FromCurrentSynchronizationContext());
+
 			return Sync(new UpdateCommand());
 		}
 
@@ -1151,7 +1175,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			PersistentNavigationStack = NavigationStack
 				.Concat(new [] { ActiveItem })
-				.Select(s => new RestoreData(((BaseScreen)s).GetRebuildArgs(), s.GetType().FullName))
+				.Select(s => new RestoreData(s))
 				.ToList();
 			base.OnDeactivate(close);
 		}
@@ -1216,9 +1240,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver()
-				};
+				var serializer = GetSerializer();
 				serializer.Populate(stream, this);
 			} finally {
 				IsNotifying = true;
@@ -1229,16 +1251,23 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			IsNotifying = false;
 			try {
-				var serializer = new JsonSerializer {
-					ContractResolver = new NHibernateResolver(),
-#if DEBUG
-					Formatting = Formatting.Indented
-#endif
-				};
+				var serializer = GetSerializer();
 				serializer.Serialize(stream, this);
 			} finally {
 				IsNotifying = true;
 			}
+		}
+
+		private static JsonSerializer GetSerializer()
+		{
+			var serializer = new JsonSerializer {
+				ContractResolver = new NHibernateResolver(),
+#if DEBUG
+				Formatting = Formatting.Indented
+#endif
+			};
+			serializer.Converters.Add(new NotifyValueConvert());
+			return serializer;
 		}
 	}
 }

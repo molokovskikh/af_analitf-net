@@ -62,6 +62,7 @@ namespace AnalitF.Net.Client.Models
 			DocType = Models.DocType.Waybill;
 			WriteTime = DateTime.Now;
 			DocumentDate = DateTime.Now;
+			UserSupplierName = supplier.FullName;
 		}
 
 		public Waybill(Address address)
@@ -110,6 +111,9 @@ namespace AnalitF.Net.Client.Models
 
 		[Style(Description = "Накладная с забраковкой")]
 		public virtual bool IsRejectChanged { get; set; }
+
+		[Style(Description = "Накладная с розничной ценой, установленной поставщиком")]
+		public virtual bool IsRetailCostFixed { get; set; }
 
 		[Style]
 		public virtual bool IsNew { get; set; }
@@ -190,6 +194,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
+			if (UserSupplierName == null)
+				UserSupplierName = SupplierName;
 			Settings = settings;
 			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null

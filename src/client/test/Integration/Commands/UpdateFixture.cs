@@ -67,6 +67,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			var command = new UpdateCommand();
 			Run(command);
+			DbMaintain.UpdateLeaders();
+
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
 			Assert.That(localSession.Query<Offer>().Count(x => x.BarCode != null), Is.GreaterThan(0));
@@ -78,6 +80,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.Where(g => g.Count() > 1)
 				.Select(g => g.Key)
 				.First();
+
 			var minCostCount = localSession.Query<MinCost>().Count();
 			Assert.That(minCostCount, Is.GreaterThan(0));
 			var cost = localSession.Query<MinCost>().First(m => m.ProductId == productId);
@@ -137,7 +140,8 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Send_logs()
 		{
-			File.WriteAllText(Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log"), "123");
+			var logfile = Path.Combine(FileHelper.MakeRooted("."), "AnalitF.Net.Client.log");
+			File.WriteAllText(logfile, "123");
 
 			Run(new UpdateCommand());
 
@@ -148,6 +152,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 				.SetParameter("date", begin)
 				.UniqueResult<string>();
 			Assert.That(text, Is.EqualTo("123"));
+			Assert.IsFalse(File.Exists(logfile), $"Файл логов должен быть удален {logfile}");
 		}
 
 		[Test]
@@ -362,9 +367,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
+			DbMaintain.UpdateLeaders();
+
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
 			Assert.IsTrue(user.ShowSupplierCost);
+			localSession.Refresh(settings);
+			Assert.AreEqual(DateTime.Today.Date, settings.LastLeaderCalculation.Date);
 			Assert.That(localSession.Query<DelayOfPayment>().Count(), Is.GreaterThan(0));
 		}
 
@@ -573,21 +582,42 @@ update Addresses set Id =  2575 where Id = :addressId")
 		[Test]
 		public void Select_host()
 		{
-			var emptyServerUrl = String.Format("http://localhost:{0}", new Random().Next(10000, 20000));
-			var cfg = new HttpSelfHostConfiguration(emptyServerUrl);
-			cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-			cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
+			var emptyServerUrl = InitHelper.RandomPort();
+			var cfg = new HttpSelfHostConfiguration(emptyServerUrl) {
+				IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always,
+				HostNameComparisonMode = HostNameComparisonMode.Exact
+			};
 			var server = new HttpSelfHostServer(cfg);
 			disposable.Add(server);
 			server.OpenAsync().Wait();
 
 			clientConfig = clientConfig.Clone();
 			var normalServerUrl = clientConfig.BaseUrl;
-			clientConfig.AltUri = normalServerUrl + "," + emptyServerUrl;
+			clientConfig.AltUri = emptyServerUrl + "," + normalServerUrl;
 			var cmd = new UpdateCommand();
 			disposable.Add(cmd);
 			cmd.Configure(settings, clientConfig);
 			Assert.AreEqual(normalServerUrl, cmd.ConfigureHttp().ToString());
+		}
+
+		[Test]
+		public void Reconfigure_host()
+		{
+			var normal = clientConfig.BaseUrl;
+			var broken = InitHelper.RandomPort();
+			clientConfig = clientConfig.Clone();
+			clientConfig.BaseUrl = broken;
+			clientConfig.AltUri = broken + "," + normal;
+
+			var init = InitHelper.InitService(broken, new Service.Config.Config {
+				RootPath = cleaner.RandomDir(),
+				Environment = "Development",
+				InjectedFault = "Test error"
+			}).Result;
+			disposable.Add(init.Item1);
+
+			var result = Run(new UpdateCommand());
+			Assert.That(result, Is.EqualTo(UpdateResult.SilentOk).Or.EqualTo(UpdateResult.OK));
 		}
 
 		[Test]

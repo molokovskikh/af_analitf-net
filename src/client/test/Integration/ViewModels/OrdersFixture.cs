@@ -366,11 +366,38 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var order = MakeOrder();
 			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
-			order.Price = null;
+			var priceName = order.Price.Name;
+			var regionName = order.Price.RegionName;
+			order.Price.Active = false;
 			model.Update();
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
 			Assert.AreNotEqual(model.Orders.First().Price.Name, null);
+			Assert.AreEqual(order.Price.Name, priceName);
+			Assert.AreEqual(order.Price.RegionName, regionName);
 			session.DeleteEach<Order>();
+		}
+
+		[Test]
+		public void Load_order_without_address()
+		{
+			session.DeleteEach<Order>();
+
+			restore = true;
+			var newAddress = new Address { Name = "Тестовый адрес доставки" };
+			session.Save(newAddress);
+
+			var offer = session.Query<Offer>().First(x => !x.Junk);
+			MakeOrder(offer, newAddress);
+
+			model.AddressSelector.All.Value = false;
+			shell.CurrentAddress.Value = newAddress;
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			session.Delete(newAddress);
+			model.AddressSelector.All.Value = false;
+			shell.CurrentAddress.Value = null;
+			Assert.That(model.Orders.Count, Is.EqualTo(0));
+			model.AddressSelector.All.Value = true;
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
 		}
 	}
 }

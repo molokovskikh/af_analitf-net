@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Helpers;
 using Common.Tools;
 using NHibernate.Mapping;
+using Table = System.Windows.Documents.Table;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -72,15 +73,17 @@ namespace AnalitF.Net.Client.Models.Print
 		private Settings settings;
 		private WaybillSettings waybillSettings;
 		private IList<WaybillLine> lines;
+		private PriceTag priceTag;
 
-		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings)
+		public PriceTagDocument(Waybill waybill, IList<WaybillLine> lines, Settings settings, PriceTag priceTag)
 		{
 			this.waybill = waybill;
 			this.waybillSettings = waybill.WaybillSettings;
 			this.settings = settings;
 			this.lines = lines;
+			this.priceTag = priceTag;
 		}
-
+		 
 		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.PriceTag);
@@ -92,6 +95,8 @@ namespace AnalitF.Net.Client.Models.Print
 				map = Big;
 			else if (settings.PriceTag.Type == PriceTagType.BigCost2)
 				map = Big2;
+			else if (settings.PriceTag.Type == PriceTagType.Custom)
+				map = x => priceTag.ToElement(x);
 
 			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, l => Border(map(l), 0.5), 0.5);
 		}

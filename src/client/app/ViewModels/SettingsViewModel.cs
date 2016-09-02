@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Models.Results;
+using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using Common.NHibernate;
@@ -239,6 +241,7 @@ limit 300";
 		}
 
 		public NotifyValue<WaybillSettings> CurrentWaybillSettings { get; set; }
+		public NotifyValue<FrameworkElement> Preview { get; set; }
 
 		protected override void OnInitialize()
 		{
@@ -246,6 +249,14 @@ limit 300";
 
 			MarkupAddress.Value = Address;
 			CurrentAddress = Address;
+			LoadPriceTagPreview();
+		}
+
+		private void LoadPriceTagPreview()
+		{
+			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => Preview.Value = x.Preview());
 		}
 
 		private static string Mask(string password1)
@@ -414,7 +425,7 @@ limit 300";
 				}
 
 				if (Session.IsChanged(Settings.Value, x => x.JunkPeriod))
-					yield return new Models.Results.TaskResult(TplQuery(s => DbMaintain.CalcJunk(s, Settings.Value)));
+					yield return new Models.Results.TaskResult(Query(s => DbMaintain.CalcJunk(s, Settings.Value)));
 
 				Session.FlushMode = FlushMode.Auto;
 				Settings.Value.ApplyChanges(Session);
@@ -422,6 +433,14 @@ limit 300";
 			}
 			TryClose();
 		}
+
+
+		public IEnumerable<IResult> ShowPriceTagConstructor()
+		{
+			yield return new DialogResult(new PriceTagConstructor(), fullScreen: true);
+			LoadPriceTagPreview();
+		}
+
 		protected override void Broadcast()
 		{
 			Bus.SendMessage<Settings>(null);

@@ -4,7 +4,6 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Common.Tools;
 using NHibernate.Linq;
 using NHibernate.Mapping;
@@ -29,7 +28,7 @@ namespace AnalitF.Net.Client.Models.Commands
 					//сертификаты
 					"IsError", "IsDownloaded", "IsCertificateNotFound",
 					//вычисляемые поля, поиск забраковки
-					"IsRejectCanceled", "IsRejectNew", "RejectId",
+					"IsRejectCanceled", "IsRejectNew", "RejectId", "IsRetailCostFixed",
 					//вычисления розничной цены
 					"MaxRetailMarkup", "RetailMarkup", "RealRetailMarkup", "RetailCost",
 				}},
@@ -195,9 +194,7 @@ set m.HaveOffers = 1,
 	c.HaveOffers = 1;
 drop temporary table ExistsCatalogs;")
 					.ExecuteUpdate();
-				Log.Info("Пересчет лидеров");
-				Task task = new Task(() => {DbMaintain.UpdateLeaders();});
-				task.Start();
+
 				Log.Info("Пересчет уценки");
 				DbMaintain.CalcJunk(StatelessSession, settings);
 			}
@@ -329,7 +326,9 @@ where p.IsSynced = 1 or p.PriceId is null;";
 			if (dbTable.Name.Match("Orders")) {
 				ignored = ignored.Concat(new[] {
 					"DisplayId",
-					"KeepId"
+					"KeepId",
+					"SavePriceName",
+					"SaveRegionName"
 				})
 					.ToArray();
 			}

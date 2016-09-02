@@ -122,19 +122,23 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected Process StartProcess(string fileName, string arguments = "")
 		{
-			var process = new Process();
-			process.StartInfo.FileName = fileName;
-			process.StartInfo.Arguments = arguments;
-			process.Start();
-			process.EnableRaisingEvents = true;
-			return process;
+			try {
+				var process = new Process();
+				process.StartInfo.FileName = fileName;
+				process.StartInfo.Arguments = arguments;
+				process.Start();
+				process.EnableRaisingEvents = true;
+				return process;
+			} catch(Exception ex) {
+				throw new Exception($"Не удалось запустить процесс {fileName}", ex);
+			}
 		}
 
 		protected void ClickByName(string name, AutomationElement element = null)
 		{
 			var launchButton = FindByName(name, element);
 			if (launchButton == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}", name));
+				throw new Exception($"Не могу найти кнопку {name}, форма {AutomationHelper.ToText(element)}");
 
 			launchButton.Invoke();
 		}
@@ -143,7 +147,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		{
 			var launchButton = FindById(id, element);
 			if (launchButton == null)
-				throw new Exception(String.Format("Не могу найти кнопку {0}, форма {1}", id, AutomationHelper.ToText(element)));
+				throw new Exception($"Не могу найти кнопку {id}, форма {AutomationHelper.ToText(element)}");
 
 			launchButton.Invoke();
 		}
@@ -202,7 +206,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 
 		protected AutomationElement WaitForElement(string name)
 		{
-			Wait(() => FindById(name, MainWindow) == null, String.Format("появления элемента {0}", name));
+			Wait(() => FindById(name, MainWindow) == null, $"появления элемента {name}");
 			return FindById(name, MainWindow);
 		}
 
@@ -282,9 +286,9 @@ namespace AnalitF.Net.Client.Test.Acceptance
 		protected void AssertUpdate(string result)
 		{
 			var update = WaitDialog("Обмен данными");
-			Assert.AreEqual("Обмен данными", update.GetName(), AutomationHelper.ToText(update));
+			Assert.AreEqual("Обмен данными", update.Current.Name, AutomationHelper.ToText(update));
 			var dialog = Opened.Timeout(UpdateTimeout).First();
-			if (dialog.GetName() == "Обмен данными") {
+			if (dialog.Current.Name == "Обмен данными") {
 				dialog = Opened.Timeout(UpdateTimeout).First();
 			}
 

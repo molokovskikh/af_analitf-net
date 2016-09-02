@@ -40,6 +40,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		[SetUp]
 		public void Setup()
 		{
+			ConventionManager.DefaultHeaderTemplate = null;
+			ConventionManager.DefaultItemTemplate = null;
 			exceptions = new List<Exception>();
 			windows = new List<Window>();
 			activeWindow = null;
@@ -233,7 +235,12 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			Assert.IsTrue(element.IsEnabled, element.ToString());
 		}
 
-		protected async void Start()
+		public void StartWait()
+		{
+			Start().Wait();
+		}
+
+		protected async Task Start()
 		{
 			session.Flush();
 			//данные могут измениться, нужно перезагрузить данные в shell
@@ -257,6 +264,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//что бы тесты не лезли на первый план
 				activeWindow.ShowActivated = false;
 				activeWindow.ShowInTaskbar = false;
+				var objs = activeWindow.Descendants<DispatcherObject>().Where(x => x.Dispatcher != activeWindow.Dispatcher);
+				Console.WriteLine(objs.Implode());
 				activeWindow.Show();
 			});
 			Env.UiScheduler = new MixedScheduler((TestScheduler)Env.UiScheduler, new DispatcherScheduler(dispatcher));

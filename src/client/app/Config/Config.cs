@@ -177,7 +177,7 @@ namespace AnalitF.Net.Client.Config
 			{
 				var clazz = NHibernateUtil.GetClass(entity);
 				var root = Path.Combine(RootDir, clazz.Name.Pluralize());
-				root = root.Replace(@".\", @"\").ToString();
+				root = root.Replace(@".\", @"\");
 				var id = Util.GetValue(entity, "PromoFileId");
 				return Directory.GetFiles(root, id + ".*").FirstOrDefault();
 			}
@@ -185,20 +185,9 @@ namespace AnalitF.Net.Client.Config
 			{
 				return null;
 			}
-
 		}
 
-		public Uri WaitUrl(Uri url, string key)
-		{
-			var builder = new UriBuilder(url) {
-				Query = BuildQueryString(new List<KeyValuePair<string, string>> {
-					new KeyValuePair<string, string>("data", key)
-				})
-			};
-			return builder.Uri;
-		}
-
-		public Uri SyncUrl(string key, DateTime? lastSync, IEnumerable<Address> addresses)
+		public string SyncUrl(string key, DateTime? lastSync, IEnumerable<Address> addresses)
 		{
 			var queryString = new List<KeyValuePair<string, string>> {
 				new KeyValuePair<string, string>("reset", "true"),
@@ -210,10 +199,7 @@ namespace AnalitF.Net.Client.Config
 			if (addresses != null)
 				queryString.Add(new KeyValuePair<string, string>("addressIds", String.Join(",", addresses.Select(x => x.Id))));
 
-			var builder = new UriBuilder(new Uri(BaseUrl, "Main")) {
-				Query = BuildQueryString(queryString)
-			};
-			return builder.Uri;
+			return $"Main?{BuildQueryString(queryString)}";
 		}
 
 		private static string BuildQueryString(List<KeyValuePair<string, string>> queryString)
@@ -269,6 +255,7 @@ namespace AnalitF.Net.Client.Config
 					bi.BeginInit();
 					bi.StreamSource = new MemoryStream(File.ReadAllBytes(x));
 					bi.EndInit();
+					bi.Freeze();
 					return bi;
 				} catch(Exception e) {
 					log.Error($"Не удалось загрузить изображение {x}", e);

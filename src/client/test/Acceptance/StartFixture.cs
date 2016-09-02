@@ -47,9 +47,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			var windows = new List<Tuple<int, string>>();
 			WindowHandle = w => windows.Add(Tuple.Create(
 				(int)w.GetCurrentPropertyValue(AutomationElement.ProcessIdProperty),
-				String.Format("{0}({1})",
-					w.GetCurrentPropertyValue(AutomationElement.LocalizedControlTypeProperty),
-					w.GetName())));
+				$"{w.Current.LocalizedControlType}({w.Current.Name})"));
 
 			Process = Start();
 			Thread.Sleep(300);
