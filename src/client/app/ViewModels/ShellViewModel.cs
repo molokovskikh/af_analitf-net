@@ -633,10 +633,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrders()
 		{
-			if (ActiveItem is CatalogOfferViewModel)
-				Navigate(new OrdersViewModel());
-			else
-				NavigateRoot(new OrdersViewModel());
+			NavigateRoot(new OrdersViewModel());
 		}
 
 		public bool CanShowBatch => Settings.Value.LastUpdate != null;
