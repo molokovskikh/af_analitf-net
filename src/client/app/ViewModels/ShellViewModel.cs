@@ -398,6 +398,37 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}
 #endif
+
+			var markupNds18 = Settings.Value.Markups.Where(s =>
+				s.Type == MarkupType.Nds18 &&
+				s.Begin == 0 &&
+				s.End == 10000 &&
+				s.Markup == 20 &&
+				s.MaxMarkup == 20 &&
+				s.MaxSupplierMarkup == 0)
+				.ToList();
+			var markupOver = Settings.Value.Markups.Where(s =>
+				s.Type == MarkupType.Over &&
+				s.Begin == 0 &&
+				s.End == 10000 &&
+				s.Markup == 20 &&
+				s.MaxMarkup == 20 &&
+				s.MaxSupplierMarkup == 0)
+				.ToList();
+			bool markUpUpdated = false;
+			if (markupNds18.Count == 1) {
+				markupNds18[0].End = 1000000;
+				markUpUpdated = true;
+			}
+			if (markupOver.Count == 1) {
+				markupOver[0].End = 1000000;
+				markUpUpdated = true;
+			}
+			if (markUpUpdated) {
+				Settings.Value.ApplyChanges(session);
+				session.Flush();
+			}
+
 			return Enumerable.Empty<IResult>();
 		}
 
