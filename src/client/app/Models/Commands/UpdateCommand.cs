@@ -922,6 +922,28 @@ load data infile '{0}' replace into table AwaitedItems (CatalogId, ProducerId);"
 			RunCommand(new ImportCommand(data));
 			var settings = Session.Query<Settings>().First();
 
+			var markupNds18 = settings.Markups.Where(s =>
+				s.Type == MarkupType.Nds18 &&
+				s.End == 10000)
+				.ToList();
+			var markupOver = settings.Markups.Where(s =>
+				s.Type == MarkupType.Over &&
+				s.End == 10000)
+				.ToList();
+			bool markUpUpdated = false;
+			if (markupNds18.Count == 1) {
+				markupNds18[0].End = 1000000;
+				markUpUpdated = true;
+			}
+			if (markupOver.Count == 1) {
+				markupOver[0].End = 1000000;
+				markUpUpdated = true;
+			}
+			if (markUpUpdated) {
+				settings.ApplyChanges(Session);
+				Session.Flush();
+			}
+
 			Log.Info("Пересчет заявок");
 			SyncOrders();
 
