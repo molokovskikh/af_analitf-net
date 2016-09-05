@@ -59,21 +59,29 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			AddressSelector.Init();
 
 			Bus.Listen<string>("reload").Cast<object>()
 				.Merge(DbReloadToken)
 				.Merge(StatusFilter.FilterChanged())
+				.Merge(AddressSelector.FilterChanged.Cast<object>())
 				.SelectMany(_ => RxQuery(x => {
 					var query = x.Query<Stock>().Where(y => y.Quantity != 0);
 					if (StatusFilter.IsFiltred()) {
 						var values = StatusFilter.GetValues();
 						query = query.Where(y => values.Contains(y.Status));
 					}
-					var addresses = AddressSelector.GetActiveFilter();
-					query = query.Where(y => addresses.Contains(y.Address));
+					var addresses = AddressSelector.GetActiveFilter().Select(y => y.Id);
+					query = query.Where(y => addresses.Contains(y.Address.Id));
 					return query.OrderBy(y => y.Product).ToList();
 				}))
-				.Subscribe(Items);
+				.Subscribe(Items, CloseCancellation.Token);
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+			AddressSelector.OnDeactivate();
 		}
 
 		public IEnumerable<IResult> EnterItems()
