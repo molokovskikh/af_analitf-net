@@ -28,21 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			conductor.ActivateItem(item);
 		}
 
-		public void NavigateAndReset(params IScreen[] views)
-		{
-			if (views.Length == 0)
-				return;
-
-			navigationStack.Clear();
-
-			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
-			foreach (var screen in chain) {
-				navigationStack.Add(screen);
-				conductor.Items.Add(screen);
-			}
-			conductor.ActivateItem(views.Last());
-		}
-
 		public void NavigateRoot(IScreen screen)
 		{
 			navigationStack.Clear();
@@ -59,15 +44,15 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			CloseActive();
 			if (navigationStack.Count > 0) {
-				conductor.ActivateItem(navigationStack[0]);
-				navigationStack.RemoveAt(0);
+				var screen = navigationStack.Last();
+				conductor.ActivateItem(screen);
+				navigationStack.Remove(screen);
 			}
 		}
 
 		public void CloseActive()
 		{
-			var item = conductor.ActiveItem;
-			CloseScreen(item);
+			CloseScreen(conductor.ActiveItem);
 		}
 
 		public void CloseScreen(IScreen item)

@@ -270,13 +270,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return;
 
 			var price = CurrentOffer.Value.Price;
-			var catalogViewModel = new PriceViewModel {
-				CurrentPrice = {
-					Value = price
-				}
-			};
-			var offerViewModel = new PriceOfferViewModel(price.Id, catalogViewModel.ShowLeaders, CurrentOffer.Value.Id);
-			Shell.NavigateAndReset(catalogViewModel, offerViewModel);
+			var offerViewModel = new PriceOfferViewModel(price.Id, false, CurrentOffer.Value.Id);
+			Shell.Navigate(offerViewModel);
 		}
 
 		public void SearchInCatalog(object sender, TextCompositionEventArgs args)
