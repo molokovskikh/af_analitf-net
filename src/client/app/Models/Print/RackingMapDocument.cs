@@ -9,7 +9,7 @@ using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
-	public class RackingMapDocument: BaseDocument
+	public class RackingMapDocument
 	{
 		private GridLength defaultHeight;
 		private GridLength bigHeight;
@@ -48,12 +48,11 @@ namespace AnalitF.Net.Client.Models.Print
 			this.lines = lines;
 		}
 
-		protected override void BuildDoc()
+		public FixedDocument Build()
 		{
 			properties = ObjectExtentions.ToDictionary(settings.RackingMap);
 			if (settings.RackingMap.Size == RackingMapSize.Normal2) {
-				doc = FixedDocumentHelper.BuildFlowDoc(waybill, lines, waybillSettings, Map2, 1);
-				return;
+				return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, Map2, 1);
 			}
 			else if (settings.RackingMap.Size == RackingMapSize.Big) {
 				bigHeight = new GridLength(63);
@@ -73,7 +72,7 @@ namespace AnalitF.Net.Client.Models.Print
 				});
 			}
 
-			doc = FixedDocumentHelper.BuildFlowDoc(waybill, lines, waybillSettings, Map, 2.5);
+			return FixedDocumentHelper.BuildFixedDoc(waybill, lines, waybillSettings, Map, 2.5);
 		}
 
 		private Grid Map(WaybillLine line)

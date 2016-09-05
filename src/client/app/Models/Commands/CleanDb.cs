@@ -32,6 +32,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				"WaybillOrders"
 			};
 
+			var repair = Configure(new RepairDb());
+			repair.Execute();
 			using(var sesssion = Factory.OpenSession()) {
 				var settings = sesssion.Query<Settings>().FirstOrDefault();
 				if (settings != null) {

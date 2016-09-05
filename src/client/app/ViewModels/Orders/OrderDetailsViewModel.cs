@@ -17,6 +17,7 @@ using AnalitF.Net.Client.ViewModels.Parts;
 using Common.Tools;
 using NHibernate;
 using ReactiveUI;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -33,7 +34,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			type = NHibernateUtil.GetClass(order);
 			DisplayName = "Архивный заказ";
 
-			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning);
+			Lines = new NotifyValue<IList<IOrderLine>>(new List<IOrderLine>(), Filter, OnlyWarning, LinesFilter);
 			MatchedWaybills = new MatchedWaybills(this,
 				CurrentLine.OfType<SentOrderLine>().ToValue(),
 				new NotifyValue<bool>(!IsCurrentOrder));
@@ -72,6 +73,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public NotifyValue<List<SentOrderLine>> HistoryOrders { get; set; }
 
+		public NotifyValue<LinesFilter> LinesFilter { get; set; }
+
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
@@ -106,11 +109,14 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		private IList<IOrderLine> Filter()
 		{
-			if (OnlyWarning)
-				return Source
-					.OfType<OrderLine>().Where(l => l.SendResult != LineResultStatus.OK)
-					.OrderBy(l => l.ProducerSynonym)
-					.LinkTo(Source);
+			if (OnlyWarning || LinesFilter.Value == Orders.LinesFilter.InFrozenOrders) {
+				var query = Source.OfType<OrderLine>();
+				if (OnlyWarning)
+					query = query.Where(x => x.SendResult != LineResultStatus.OK);
+				if (LinesFilter.Value == Orders.LinesFilter.InFrozenOrders)
+					query = query.Where(x => x.InFrozenOrders);
+				return query.OrderBy(l => l.ProducerSynonym).LinkTo(Source);
+			}
 
 			return Source;
 		}
@@ -133,8 +139,21 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				var lookup = MatchedWaybills.GetLookUp(StatelessSession, sentLines);
 				sentLines.Each(l => l.Configure(User, lookup));
 			}
-			else {
+			// Текущие заказы
+			else
+			{
 				Order.Value.Lines.Each(l => l.Configure(User));
+
+				// #48323 Присутствует в замороженных заказах
+				var productInFrozenOrders = StatelessSession.Query<Order>()
+					.Where(x => x.Frozen)
+					.SelectMany(x => x.Lines)
+					.Select(x => x.ProductId)
+					.ToList();
+				Order.Value.Lines
+					.Cast<OrderLine>()
+					.Where(x => productInFrozenOrders.Contains(x.ProductId))
+					.Each(x => x.InFrozenOrders = true);
 			}
 
 			if (CurrentLine.Value != null)

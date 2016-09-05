@@ -142,7 +142,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_racking_map()
 		{
-			var result = (DialogResult)model.PrintRackingMap().First();
+			var result = (DialogResult)model.PrintRackingMap();
 			var preview = ((PrintPreviewViewModel)result.Model);
 			Assert.IsNotNull(preview);
 		}
@@ -150,9 +150,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_price_tags()
 		{
-			var result = (DialogResult)model.PrintPriceTags().First();
+			var result = (DialogResult)model.PrintPriceTags();
 			var preview = ((PrintPreviewViewModel)result.Model);
-			Assert.IsNotNull(preview.Document);
+			Assert.IsNotNull(preview);
 		}
 
 		[Test]
