@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using AnalitF.Net.Client.Config.NHibernate;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models.Inventory;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models
@@ -38,7 +39,7 @@ namespace AnalitF.Net.Client.Models
 		private bool isCertificateNotFound;
 		private bool _isReadyForStock;
 		private int _quantityToReceive;
-		private int _receivedQuantity;
+		private Stock _stock;
 
 		public WaybillLine()
 		{
@@ -275,23 +276,29 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
-		[Style(Description = "Полностью оприходовано")]
-		public virtual bool IsFullyStocked => Quantity > 0 && Quantity == ReceivedQuantity;
+		public virtual decimal? ReceivedQuantity => Stock?.Quantity;
 
-		[Style(Description = "Частично оприходовано")]
-		public virtual bool IsPartialyStocked => ReceivedQuantity > 0 && Quantity > 0 && Quantity > ReceivedQuantity;
-
-		public virtual int ReceivedQuantity
+		[Ignore]
+		public virtual Stock Stock
 		{
-			get { return _receivedQuantity; }
+			get { return _stock; }
 			set
 			{
-				if (_receivedQuantity != value) {
-					_receivedQuantity = value;
+				if (_stock != value) {
+					_stock = value;
 					OnPropertyChanged();
+					OnPropertyChanged(nameof(ReceivedQuantity));
+					OnPropertyChanged(nameof(IsFullyStocked));
+					OnPropertyChanged(nameof(IsPartialyStocked));
 				}
 			}
 		}
+
+		[Style(Description = "Полностью оприходовано")]
+		public virtual bool IsFullyStocked => Stock?.Quantity == 0;
+
+		[Style(Description = "Частично оприходовано")]
+		public virtual bool IsPartialyStocked => Stock?.Quantity > 0 && Stock?.Quantity < Quantity;
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
@@ -581,8 +588,10 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Receive(int quantity)
 		{
+			if (Stock == null)
+				return;
 			SkipRequest = true;
-			quantity = Math.Min(quantity, Quantity.GetValueOrDefault() - ReceivedQuantity);
+			quantity = Math.Min(quantity, (int)Stock.Quantity);
 			QuantityToReceive = quantity;
 			IsReadyForStock = QuantityToReceive > 0;
 			SkipRequest = false;

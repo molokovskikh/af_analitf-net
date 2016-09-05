@@ -87,11 +87,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 			stocks = new List<Stock>();
 			stockActions = new List<StockAction>();
 			foreach (var line in lines) {
-				var source = sources.First(x => x.ServerId == line.StockId);
 				var receivingLine = new ReceivingLine(line);
 				order.Lines.Add(receivingLine);
-				line.ReceivedQuantity += line.QuantityToReceive;
-				source.Quantity -= line.QuantityToReceive;
+				line.Stock.Quantity -= line.QuantityToReceive;
 				var stock = new Stock(order, receivingLine);
 				stocks.Add(stock);
 				stockActions.Add(new StockAction {

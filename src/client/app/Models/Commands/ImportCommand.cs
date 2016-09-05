@@ -298,6 +298,8 @@ where p.IsSynced = 1 or p.PriceId is null;";
 		{
 			if (!Strict)
 				return;
+			if (dbTable.Name.Match("stocks"))
+				return;
 			//код для отладки, при тестировании мы должны передавать\принимать все колонки таблицы
 			//проверяем что все колонки которые есть в таблице передаются с сервера
 			var ignored = new[] {

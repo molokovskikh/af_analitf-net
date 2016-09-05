@@ -30,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			DisplayName = "Подтвердите количество";
 			Line = line;
-			Quantity = line.Quantity.GetValueOrDefault() - line.ReceivedQuantity;
+			Quantity = (int)(line.Stock?.Quantity).GetValueOrDefault();
 			WasCancelled = true;
 		}
 
@@ -176,7 +176,14 @@ namespace AnalitF.Net.Client.ViewModels
 						line.Receive(0);
 					}
 				});
-
+			var stockids =  Waybill.Lines.Where(x => x.StockId != null).Select(x => x.StockId).ToArray();
+			RxQuery(s => s.Query<Stock>().Where(x => stockids.Contains(x.ServerId)).ToDictionary(x => x.ServerId))
+				.ObserveOn(UiScheduler)
+				.Subscribe(x => {
+					Waybill.Lines.Each(y => {
+						y.Stock = x.GetValueOrDefault(y.StockId);
+					});
+				});
 
 			Lines.Value = new ListCollectionView(Waybill.Lines.OrderBy(l => l.Product).ToList());
 			Taxes = new List<ValueDescription<int?>> {

@@ -102,49 +102,7 @@ namespace AnalitF.Net.Service.Controllers
 			Session.Flush();
 			using (var exporter = new Exporter(Session, Config, new RequestLog(CurrentUser, request, GetType().Name))) {
 				exporter.Prefix = Guid.NewGuid().ToString();
-				var sql = @"
-select if(s.CreatedByUserId = ?userId, s.ClientPrimaryKey, null) as Id,
-	s.Id as ServerId,
-	s.Version as ServerVersion,
-	s.AddressId,
-	s.ProductId,
-	s.CatalogId,
-	s.Product,
-	s.ProducerId,
-	s.Producer,
-	s.Country,
-	s.Period,
-	s.Exp,
-	s.SerialNumber,
-	s.Certificates,
-	s.Unit,
-	s.ExciseTax,
-	s.BillOfEntryNumber,
-	s.VitallyImportant,
-	s.ProducerCost,
-	s.RegistryCost,
-	s.SupplierPriceMarkup,
-	s.SupplierCostWithoutNds,
-	s.SupplierCost,
-	s.Nds,
-	s.NdsAmount,
-	s.Barcode,
-	s.Status,
-	s.Quantity,
-	s.SupplyQuantity,
-	s.RetailCost,
-	s.RetailMarkup,
-	dh.DownloadId as WaybillId
-from Inventory.Stocks s
-	join Customers.Addresses a on a.Id = s.AddressId
-		join Customers.UserAddresses ua on ua.Addressid = a.Id
-			join Customers.Users u on u.Id = ua.UserId
-	left join Documents.DocumentBodies db on db.Id = s.WaybillLineId
-		left join Documents.DocumentHeaders dh on dh.Id = db.DocumentId
-where a.Enabled = 1
-	and u.Id = ?userId
-	and s.Timestamp > ?lastSync";
-				exporter.Export(exporter.Result, sql, "stocks", false, new { userId = CurrentUser.Id, lastSync });
+				exporter.ExportStocks(lastSync);
 				exporter.Result.Add(new UpdateData("server-timestamp") {
 					Content = serverTimestamp.ToString("O")
 				});
