@@ -169,7 +169,7 @@ from Customers.UserAddresses ua
 where ua.UserId = :userId
 	and a.Enabled = 1
 	and s.Id is null
-	and dh.WriteTime > curdate() - interval 1 day")
+	and dh.WriteTime > curdate() - interval 10 day")
 				.SetParameter("userId", user.Id)
 				.SetParameter("status", StockStatus.InTransit)
 				.ExecuteUpdate();
