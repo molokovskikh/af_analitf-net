@@ -124,7 +124,7 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Shell.SpecialMarkupProducts.Subscribe(_ => Calculate());
+			OnCloseDisposable.Add(Shell.SpecialMarkupProducts.Subscribe(_ => Calculate()));
 
 			if (Session == null)
 				return;
