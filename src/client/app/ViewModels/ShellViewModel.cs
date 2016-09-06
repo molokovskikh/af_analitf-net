@@ -259,7 +259,6 @@ namespace AnalitF.Net.Client.ViewModels
 				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
 			}
 			Reload();
-
 		}
 
 		protected override void OnActivate()
@@ -423,7 +422,6 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			}
 #endif
-
 			return Enumerable.Empty<IResult>();
 		}
 
