@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
-using System.Linq;
 using NHibernate;
 using NHibernate.Linq;
 

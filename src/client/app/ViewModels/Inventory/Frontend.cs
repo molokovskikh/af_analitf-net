@@ -160,6 +160,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (Sum.Value.GetValueOrDefault() == 0) {
 				Error("Чек не открыт");
+				yield break;
 			}
 			var checkout = new Checkout(Sum.Value.Value);
 			yield return new DialogResult(checkout);

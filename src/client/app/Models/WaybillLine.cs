@@ -273,10 +273,11 @@ namespace AnalitF.Net.Client.Models
 				OnPropertyChanged();
 				OnPropertyChanged(nameof(IsFullyStocked));
 				OnPropertyChanged(nameof(IsPartialyStocked));
+				OnPropertyChanged(nameof(ReceivedQuantity));
 			}
 		}
 
-		public virtual decimal? ReceivedQuantity => Stock?.Quantity;
+		public virtual decimal? ReceivedQuantity => QuantityToReceive + Quantity - Stock?.Quantity;
 
 		[Ignore]
 		public virtual Stock Stock
@@ -295,10 +296,10 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		[Style(Description = "Полностью оприходовано")]
-		public virtual bool IsFullyStocked => Stock?.Quantity == 0;
+		public virtual bool IsFullyStocked => ReceivedQuantity == Quantity && Quantity > 0;
 
 		[Style(Description = "Частично оприходовано")]
-		public virtual bool IsPartialyStocked => Stock?.Quantity > 0 && Stock?.Quantity < Quantity;
+		public virtual bool IsPartialyStocked => ReceivedQuantity < Quantity && ReceivedQuantity > 0;
 
 		public virtual decimal? ProducerCostWithTax => ProducerCost * (1 + (decimal?) Nds / 100);
 
