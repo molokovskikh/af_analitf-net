@@ -82,6 +82,13 @@ Global(
 			@CheckUrlRoot: "http://test.analit.net/AnalitF.Net.Service.Test",
 			@ProxyUrlRoot: "http://test.analit.net/AnalitF.Net.Service",
 		},
+		@Stocks: {
+			@BaseEnv: "Production",
+			@DeployAlias: "stocks",
+			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\stocks\var\update\""",
+			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service.Stocks",
+			@DefaultUpdateChannel: "rtm",
+		},
 		@Production : {
 			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\var\update\""",

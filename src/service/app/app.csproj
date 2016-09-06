@@ -134,6 +134,7 @@
     <None Include="Web.release.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Web.stocks.config" />
     <None Include="Web.test.config">
       <SubType>Designer</SubType>
     </None>
