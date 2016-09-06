@@ -376,6 +376,7 @@ namespace AnalitF.Net.Client.Controls
 			//перерисовка все равно производится но она затрагивает только заголовок таблицы
 			//это неприятно не лучше чем было
 			var value = GetProperty(this, "InternalColumns");
+			Invoke(value, "ComputeColumnWidths");
 			SetField(value, "_columnWidthsComputationPending", false);
 			return size;
 		}
