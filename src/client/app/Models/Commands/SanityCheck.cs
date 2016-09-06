@@ -151,7 +151,6 @@ namespace AnalitF.Net.Client.Models.Commands
 				markups
 					.Where(c => c.MaxMarkup < c.Markup)
 					.Each(c => c.MaxMarkup = c.Markup);
-				// обновление уже установленных наценок
 				var markupNds18 = markups.Where(s =>
 					s.Type == MarkupType.Nds18 &&
 					s.End == 10000)
