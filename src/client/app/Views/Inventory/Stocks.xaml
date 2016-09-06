@@ -81,5 +81,6 @@
 				<controls:DataGridTextColumnEx Width="{Binding Source={x:Reference ClmnCountDelivery}, Path=ActualWidth}" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
+		<ContentControl x:Name="QuickSearch" Grid.Row="2" Grid.Column="0" caliburn:QuickSearchBehavior.GridRef="{x:Reference Items}"/>
 	</Grid>
 </UserControl>

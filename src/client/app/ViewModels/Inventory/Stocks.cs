@@ -38,8 +38,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			StatusFilter.Value = DescriptionHelper.GetDescriptions(typeof(StockStatus))
 				.Select(x => new Selectable<StockStatus>((StockStatus)x.Value, x.Name))
 				.ToList();
+			QuickSearch = new QuickSearch<Stock>(UiScheduler,
+				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
+				CurrentItem);
 		}
 
+		public QuickSearch<Stock> QuickSearch { get; set; }
 		public NotifyValue<List<Stock>> Items { get; set; }
 		public NotifyValue<Stock> CurrentItem { get; set; }
 		public ObservableCollection<StockTotal> ItemsTotal { get; set; }
