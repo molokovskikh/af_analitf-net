@@ -319,19 +319,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Do_not_reset_navigation_chain_on_orders()
-		{
-			shell.ShowCatalog();
-			var catalog = (CatalogViewModel)shell.ActiveItem;
-			var names = (CatalogNameViewModel)catalog.ActiveItem;
-			scheduler.Start();
-			names.CurrentCatalog = names.Catalogs.Value[0];
-			names.EnterCatalog();
-			shell.ShowOrders();
-			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(2));
-		}
-
-		[Test]
 		public void Check_prev_order_count()
 		{
 			catalog = session.Query<Catalog>()
