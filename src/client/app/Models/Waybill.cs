@@ -192,10 +192,16 @@ namespace AnalitF.Net.Client.Models
 			return NHHelper.IsExists(() => String.IsNullOrEmpty(Address?.Name));
 		}
 
+		public virtual void SaveLocalName()
+		{
+			if (UserSupplierName == null && Supplier != null)
+				UserSupplierName = Supplier.FullName;
+		}
+
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
-			if (UserSupplierName == null)
-				UserSupplierName = SupplierName;
+			//if (UserSupplierName == null && Supplier != null)
+				//UserSupplierName = Supplier.FullName;
 			Settings = settings;
 			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null

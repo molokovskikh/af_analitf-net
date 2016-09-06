@@ -99,7 +99,7 @@
                 <c:DataGridTextColumnEx x:Name="clmnType" Width="100*" Header="Тип документа"
 					Binding="{Binding Type}" />
                 <c:DataGridTextColumnEx x:Name="clmnSupplierName" Width="64*" Header="Поставщик"
-					Binding="{Binding UserSupplierName}" />
+					Binding="{Binding SupplierName}" />
                 <c:DataGridTextColumnEx x:Name="clmnSum" Width="64*" Header="Сумма опт"
 					Binding="{Binding Sum}"
 					TextAlignment="Right" />
