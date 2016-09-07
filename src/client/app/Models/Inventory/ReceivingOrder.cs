@@ -89,6 +89,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				var receivingLine = new ReceivingLine(line);
 				order.Lines.Add(receivingLine);
 				line.Stock.Quantity -= line.QuantityToReceive;
+				line.QuantityToReceive = 0;
 				var stock = new Stock(order, receivingLine);
 				stockActions.Add(new StockAction {
 					ActionType = ActionType.Stock,
