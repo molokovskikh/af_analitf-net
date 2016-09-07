@@ -53,21 +53,25 @@ namespace AnalitF.Net.Client.Views
 		private DataGrid2 lines;
 		private WaybillDetails model;
 
-		public WaybillDetailsView(WaybillDetails model)
-		{
-			this.model = model;
-			Init();
-		}
-
 		public WaybillDetailsView()
 		{
+			InitializeComponent();
+			DataContextChanged += OnDataContextChanged;
+		}
+
+		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)
+		{
+			model = DataContext as WaybillDetails;
+			if (model == null)
+				return;
+
+			DataContextChanged -= OnDataContextChanged;
+			model.SkipRestoreTable = true;
 			Init();
 		}
 
 		private void Init()
 		{
-			InitializeComponent();
-
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности
