@@ -1,19 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.ServiceModel;
-using System.Threading.Tasks;
-using System.Web.Http;
 using System.Web.Http.SelfHost;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Commands;
 using AnalitF.Net.Client.Test.Fixtures;
 using AnalitF.Net.Client.Test.TestHelpers;
 using AnalitF.Net.Client.ViewModels;
-using AnalitF.Net.Service;
 using Common.Tools;
 using Common.Tools.Calendar;
-using Common.Tools.Threading;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Linq;
@@ -27,11 +22,9 @@ namespace AnalitF.Net.Client.Test.Integration
 	[SetUpFixture]
 	public class IntegrationSetup
 	{
-		private HttpSelfHostConfiguration cfg;
 		public HttpSelfHostServer server;
 		private uint serverUserId;
 
-		public static bool isInitialized;
 		public static ISessionFactory Factory;
 		public static Configuration Configuration;
 		public static Client.Config.Config clientConfig = new Client.Config.Config();
@@ -42,19 +35,12 @@ namespace AnalitF.Net.Client.Test.Integration
 		[OneTimeSetUp]
 		public void Setup()
 		{
-			if (isInitialized) {
-				if (server == null) {
-					InitWebServer(clientConfig.BaseUrl);
-				}
-				return;
-			}
-
 			Assert.IsNull(server);
 			Directory.CreateDirectory("var");
 
-			clientConfig.BaseUrl = InitHelper.RandomPort();
 			clientConfig.DiadokApiKey = "Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec";
 			clientConfig.DiadokUrl = "https://diadoc-api.kontur.ru";
+			clientConfig.BaseUrl = InitHelper.RandomPort();
 			clientConfig.RootDir = @"var\client";
 			clientConfig.RequestInterval = 1.Second();
 			clientConfig.InitDir();
@@ -79,17 +65,14 @@ namespace AnalitF.Net.Client.Test.Integration
 			}
 			if (IsClientStale()) {
 				ImportData();
-				BackupData();
 				DbHelper.CopyDb(BackupDir);
 			}
 			DbHelper.SeedDb();
-			isInitialized = true;
 		}
 
 		[OneTimeTearDown]
 		public void TearDown()
 		{
-			server.Dispose();
 			server?.Dispose();
 			server = null;
 		}
@@ -126,22 +109,6 @@ namespace AnalitF.Net.Client.Test.Integration
 			return false;
 		}
 
-		public Task InitWebServer(Uri url)
-		{
-			if (server != null)
-				return Task.FromResult(1);
-			if (cfg == null) {
-				cfg = new HttpSelfHostConfiguration(url);
-				cfg.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-				cfg.HostNameComparisonMode = HostNameComparisonMode.Exact;
-				serviceConfig = Application.InitApp(cfg);
-				serviceConfig.UpdateLifeTime = TimeSpan.FromDays(1);
-			}
-
-			server = new HttpSelfHostServer(cfg);
-			return server.OpenAsync();
-		}
-
 		private void ImportData()
 		{
 			var helper = new FixtureHelper();
@@ -151,11 +118,6 @@ namespace AnalitF.Net.Client.Test.Integration
 				cleaner.Watch(sampleData.Files.Select(x => x.LocalFileName).Where(x => x != null));
 				helper.Run(new LoadSampleData(sampleData.Files));
 			}
-		}
-
-		private void BackupData()
-		{
-			DbHelper.CopyDb(BackupDir);
 		}
 	}
 }

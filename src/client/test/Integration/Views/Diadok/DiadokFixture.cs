@@ -32,7 +32,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 
 namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 {
-	[TestFixture , Ignore("Нет возможности формировать исходные документы для текущей сборки, т.к. используется один аккаунт и невозможно задать признак")]
+	[TestFixture, Ignore("Нет возможности формировать исходные документы для текущей сборки, т.к. используется один аккаунт и невозможно задать признак")]
 	public class DiadokFixture : DispatcherFixture
 	{
 		private CreateDiadokInbox diadokDatas;
@@ -82,7 +82,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		}
 
 		[Test]
-		public void Diadoc_documents_test()
+		public void Diadoc_ParseCertificate()
 		{
 			//парсинг сертификата
 			X509Certificate2 cert = new X509Certificate2();
@@ -105,7 +105,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 
 		void Sign(int count)
 		{
-						//Подписываем Неформализированный 3 документа
+			//Подписываем Неформализированный 3 документа
 			for(var i = 0; i < count; i++)
 			{
 				dispatcher.Invoke(() => {
@@ -1235,7 +1235,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 
 		public void Clear_Documents()
 		{
-			for(var i = 0; i < ddkIndex.Items.Value.Count; i++)
+			for(var i = ddkIndex.Items.Value.Count; i > 0; i--)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First();
