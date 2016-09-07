@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;
@@ -31,7 +32,7 @@ using AnalitF.Net.Client.Test.Fixtures;
 
 namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 {
-	[TestFixture]
+	[TestFixture , Ignore("Нет возможности формировать исходные документы для текущей сборки, т.к. используется один аккаунт и невозможно задать признак")]
 	public class DiadokFixture : DispatcherFixture
 	{
 		private CreateDiadokInbox diadokDatas;
@@ -51,6 +52,9 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			ddksettings.DiadokSignerJobTitle = "Специалист";
 			session.Save(ddksettings);
 			session.Flush();
+
+			diadokDatas = Fixture<CreateDiadokInbox>();
+			Thread.Sleep(30.Second());
 
 			Wait();
 			Click("ShowExtDocs");
@@ -74,31 +78,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 		[TearDown]
 		public void TestTearDown()
 		{
-			DeleteAll_Documents();
+			Clear_Documents();
 		}
 
-		[Test, Ignore("Нет возможности формировать исходные документы для текущей сборки, т.к. используется один аккаунт и невозможно задать признак")]
+		[Test]
 		public void Diadoc_documents_test()
 		{
-			// Ждем пока завершится возможно уже начатый тест, проверяем есть ли документы
-			var timeOut = 0;
-			var dataReady = false;
-			dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
-			Wait();
-			while(!dataReady && timeOut < 10) {
-				Thread.Sleep(60.Second());
-				dispatcher.Invoke(() => ddkIndex.Reload());
-				Wait();
-				dispatcher.Invoke(() => dataReady = ddkIndex.Items.Value.Count == 0);
-				timeOut++;
-			}
-
-			if (timeOut >= 10) {
-				testIgnored = true;
-				Assert.Ignore("Не удалось получить исходные данные, тест выполняется или не были удалены документы");
-			}
-
-			diadokDatas = Fixture<CreateDiadokInbox>();
 			//парсинг сертификата
 			X509Certificate2 cert = new X509Certificate2();
 			cert.Import(Convert.FromBase64String(DiadokFixtureData.CertBin));
@@ -116,94 +101,17 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Assert.IsNotEmpty(signerSureName);
 			Assert.IsNotEmpty(signerPatronimic);
 			Assert.IsNotEmpty(signerInn);
-
-			// тесты диадок
-			Thread.Sleep(60.Second());
-			dispatcher.Invoke(() => ddkIndex.Reload());
-			Wait();
-
-			var docsCount = 0;
-			dispatcher.Invoke(() => docsCount = ddkIndex.Items.Value.Count);
-			if (docsCount != 25) {
-				testIgnored = true;
-				Assert.Ignore("Не удалось получить исходные данные, тест выполняется или не были удалены документы");
-			}
-
-			// тесты функций диадок
-			Sign_Document();
-			RejectSign_Document();
-			Revocation_Req_Document();
-
-			var messages = diadokDatas.GetMessages();
-
-			// выполняем запрос аннулирования
-			Thread.Sleep(15.Second());
-			diadokDatas.OutBoundInvoices(messages.Item2);
-			Thread.Sleep(30.Second());
-
-			messages = diadokDatas.GetMessages();
-
-			var nonform1 = messages.Item2.First(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
-			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
-			var nonform2 = messages.Item2.Where(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
-			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
-
-			var torg121 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
-			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
-			var torg122 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
-			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
-
-			var invoice1 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
-			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
-			var invoice2 = messages.Item2.Where(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
-			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
-			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone).Skip(1).First();
-
-			diadokDatas.Revocation(nonform1);
-			diadokDatas.Revocation(nonform2);
-			diadokDatas.Revocation(torg121);
-			diadokDatas.Revocation(torg122);
-			diadokDatas.Revocation(invoice1);
-			diadokDatas.Revocation(invoice2);
-
-			Thread.Sleep(15.Second());
-			dispatcher.Invoke(() => ddkIndex.Reload());
-
-			// продолжаем тесты
-			DenialRevocation_Document();
-			SignRevocation_Document();
-			Open_Document();
-			Save_Document();
-			Print_Document();
-			Agreement_SugApprove_Document();
-			Agreement_SugDenial_Document();
-			Sign_SugSign_Document();
-			Delete_Document();
-
-			Wait();
 		}
 
-		void Sign_Document()
+		void Sign(int count)
 		{
-			Wait();
-
-			var nonformid = "";
-			var torg12Id = "";
-			var invoiceid = "";
-
-			//Подписываем Неформализированный 3 документа
-			for(var i = 0; i < 3; i++)
+						//Подписываем Неформализированный 3 документа
+			for(var i = 0; i < count; i++)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(
 						f => f.Entity.DocumentInfo.Type == DocumentType.Nonformalized &&
 						f.Entity.DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.InboundWaitingForRecipientSignature);
-					nonformid = ddkIndex.CurrentItem.Value.Entity.EntityId;
 				});
 
 				Wait();
@@ -216,13 +124,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			}
 
 			//Подписываем ТОРГ12 3 документа
-			for(var i = 0; i < 3; i++)
+			for(var i = 0; i < count; i++)
 			{
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(
 						f => f.Entity.DocumentInfo.Type == DocumentType.XmlTorg12 &&
 						f.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWaitingForRecipientSignature);
-					torg12Id = ddkIndex.CurrentItem.Value.Entity.EntityId;
 				});
 
 				Wait();
@@ -234,14 +141,13 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 				Wait();
 			}
 
-			for(var i = 0; i < 3; i++)
+			for(var i = 0; i < count; i++)
 			{
 				//подписываем Инвойс
 				dispatcher.Invoke(() => {
 					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First(
 						f => f.Entity.DocumentInfo.Type == DocumentType.Invoice &&
 						f.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundNotFinished);
-					invoiceid = ddkIndex.CurrentItem.Value.Entity.EntityId;
 				});
 				Wait();
 				AsyncClick("Sign");
@@ -251,32 +157,38 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 				Click("Save");
 				Wait();
 			}
+		}
 
-			dispatcher.Invoke(() => ddkIndex.Reload());
+		[Test]
+		public void Sign_Documents()
+		{
+			Wait();
+			Sign(3);
 			Wait();
 
 			dispatcher.Invoke(() => {
-				var signnonformok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == nonformid)
-				.Entity.DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.InboundWithRecipientSignature;
-				Assert.IsTrue(signnonformok);
+				var signnonform = ddkIndex.Items.Value.Count(e =>
+				e.Entity.DocumentInfo?.NonformalizedDocumentMetadata?.Status == NonformalizedDocumentStatus.InboundWithRecipientSignature);
+				Assert.AreEqual(3, signnonform);
 			});
 
 			dispatcher.Invoke(() => {
-				var signtorg12Ok = ddkIndex.Items.Value.First(e => e.Entity.EntityId == torg12Id)
-				.Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature;
-				Assert.IsTrue(signtorg12Ok);
+				var signtorg12 = ddkIndex.Items.Value.Count(e =>
+				e.Entity.DocumentInfo?.XmlTorg12Metadata?.DocumentStatus == BilateralDocumentStatus.InboundWithRecipientSignature);
+				Assert.AreEqual(3, signtorg12);
 			});
 
 			dispatcher.Invoke(() => {
-				var signinvoice = ddkIndex.Items.Value.First(e => e.Entity.EntityId == invoiceid)
-				.Entity.DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.InboundFinished;
-				Assert.IsTrue(signinvoice);
+				var signinvoice = ddkIndex.Items.Value.Count(e =>
+				e.Entity.DocumentInfo?.InvoiceMetadata?.Status == InvoiceStatus.InboundFinished);
+				Assert.AreEqual(3, signinvoice);
 			});
 
 			Wait();
 		}
 
-		private void RejectSign_Document()
+		[Test]
+		public void RejectSign_Document()
 		{
 			Wait();
 
@@ -344,8 +256,11 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Revocation_Req_Document()
+		[Test]
+		public void Revocation_Req_Document()
 		{
+			Sign(1);
+
 			Wait();
 
 			var nonformid = "";
@@ -440,8 +355,41 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void DenialRevocation_Document()
+		[Test]
+		public void DenialRevocation_Document()
 		{
+			Wait();
+			Sign(3);
+			Wait();
+
+			var messages = diadokDatas.GetMessages();
+
+			// выполняем запрос аннулирования
+			Thread.Sleep(60.Second());
+			diadokDatas.OutBoundInvoices(messages.Item2);
+			Thread.Sleep(30.Second());
+
+			messages = diadokDatas.GetMessages();
+
+			var nonform1 = messages.Item2.First(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
+			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			var torg121 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
+			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			var invoice1 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
+			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			diadokDatas.Revocation(nonform1);
+			diadokDatas.Revocation(torg121);
+			diadokDatas.Revocation(invoice1);
+
+			Thread.Sleep(15.Second());
+			dispatcher.Invoke(() => ddkIndex.Reload());
+
 			Wait();
 
 			var nonformid = "";
@@ -545,8 +493,41 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void SignRevocation_Document()
+		[Test]
+		public void SignRevocation_Document()
 		{
+			Wait();
+			Sign(3);
+			Wait();
+
+			var messages = diadokDatas.GetMessages();
+
+			// выполняем запрос аннулирования
+			Thread.Sleep(60.Second());
+			diadokDatas.OutBoundInvoices(messages.Item2);
+			Thread.Sleep(30.Second());
+
+			messages = diadokDatas.GetMessages();
+
+			var nonform1 = messages.Item2.First(x => x.Entities[0].DocumentInfo.DocumentType == Diadoc.Api.Proto.DocumentType.Nonformalized &&
+			x.Entities[0].DocumentInfo.NonformalizedDocumentMetadata.Status == NonformalizedDocumentStatus.OutboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			var torg121 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.XmlTorg12 &&
+			x.Entities[0].DocumentInfo.XmlTorg12Metadata.Status == BilateralStatus.OutboundWithRecipientSignature &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			var invoice1 = messages.Item2.First(x => x.Entities[0].AttachmentType == AttachmentType.Invoice &&
+			x.Entities[0].DocumentInfo.InvoiceMetadata.Status == InvoiceStatus.OutboundFinished &&
+			x.Entities[0].DocumentInfo.RevocationStatus == RevocationStatus.RevocationStatusNone);
+
+			diadokDatas.Revocation(nonform1);
+			diadokDatas.Revocation(torg121);
+			diadokDatas.Revocation(invoice1);
+
+			Thread.Sleep(15.Second());
+			dispatcher.Invoke(() => ddkIndex.Reload());
+
 			Wait();
 
 			var nonformid = "";
@@ -623,7 +604,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Open_Document()
+		[Test]
+		public void Open_Document()
 		{
 			Wait();
 
@@ -666,7 +648,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Save_Document()
+		[Test]
+		public void Save_Document()
 		{
 			Wait();
 
@@ -721,7 +704,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Print_Document()
+		[Test]
+		public void Print_Document()
 		{
 			Wait();
 
@@ -770,7 +754,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Agreement_SugApprove_Document()
+		[Test]
+		public void Agreement_SugApprove_Document()
 		{
 			Wait();
 
@@ -933,7 +918,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Agreement_SugDenial_Document()
+		[Test]
+		public void Agreement_SugDenial_Document()
 		{
 			Wait();
 
@@ -1093,7 +1079,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		void Sign_SugSign_Document()
+		[Test]
+		public void Sign_SugSign_Document()
 		{
 			Wait();
 
@@ -1194,7 +1181,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			// счет фактура не может быть передана на подпись
 		}
 
-		void Delete_Document()
+		[Test]
+		public void Delete_Document()
 		{
 			Wait();
 
@@ -1245,12 +1233,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 			Wait();
 		}
 
-		public void DeleteAll_Documents()
+		public void Clear_Documents()
 		{
 			for(var i = 0; i < ddkIndex.Items.Value.Count; i++)
 			{
 				dispatcher.Invoke(() => {
-					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.Skip(i).First();
+					ddkIndex.CurrentItem.Value = ddkIndex.Items.Value.First();
 				});
 				Wait();
 				AsyncClick("Delete");
@@ -1259,6 +1247,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views.Diadok
 				Wait();
 				Click("Save");
 				Wait();
+				Thread.Sleep(1000);
 			}
 		}
 	}

@@ -118,20 +118,48 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		public Task<TResult> Async<TResult>(Func<string, TResult> action)
+		public Task<TResult> Async<TResult>(Func<string, TResult> func)
 		{
-			return Task<TResult>.Factory.StartNew(() => action(Payload.Token),
-				CancellationToken.None,
-				TaskCreationOptions.None,
-				TaskScheduler.FromCurrentSynchronizationContext());
+			LastPatchStamp = Payload.Message.LastPatchTimestamp;
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			var task = new Task<TResult>(() => func(Payload.Token), CloseCancellation.Token);
+			task.Start(scheduler);
+			task.ContinueWith(t => {
+				if (t.IsCanceled) {
+					Log.Warn($"Задача отменена");
+				} else if (t.IsFaulted) {
+					var error = ErrorHelper.TranslateException(t.Exception)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+					Log.Warn(error, t.Exception);
+				}
+			}, scheduler);
+			return task;
 		}
 
 		public Task Async(Action<string> action)
 		{
-			return Task.Factory.StartNew(() => action(Payload.Token),
-				CancellationToken.None,
-				TaskCreationOptions.None,
-				TaskScheduler.FromCurrentSynchronizationContext());
+			LastPatchStamp = Payload.Message.LastPatchTimestamp;
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			var task = new Task(() => action(Payload.Token), CloseCancellation.Token);
+			task.Start(scheduler);
+			task.ContinueWith(t => {
+				if (t.IsCanceled) {
+					Log.Warn($"Задача отменена");
+				} else if (t.IsFaulted) {
+					var error = ErrorHelper.TranslateException(t.Exception)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+					Log.Warn(error, t.Exception);
+				}
+			}, scheduler);
+			return task;
 		}
 
 		public string SignerFirstName { get; set;}
