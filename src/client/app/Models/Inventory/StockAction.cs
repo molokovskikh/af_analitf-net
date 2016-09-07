@@ -9,6 +9,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual DateTime Timestamp { get; set; }
 
 		[Ignore]
-		public virtual Stock Stock { get; set; }
+		public virtual Stock DstStock { get; set; }
+
+		[Ignore]
+		public virtual Stock SrcStock { get; set; }
 	}
 }

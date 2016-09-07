@@ -173,7 +173,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				StatelessSession.InsertEach(Lines);
 				StatelessSession.InsertEach(Lines.Select(x => new StockAction {
 					ActionType = ActionType.Sale,
-					ClientStockId = x.Id,
+					ClientStockId = x.Stock.Id,
 					SourceStockId = x.Stock.ServerId,
 					SourceStockVersion = x.Stock.ServerVersion,
 					Quantity = x.Quantity

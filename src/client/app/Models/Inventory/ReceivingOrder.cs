@@ -64,34 +64,32 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public static bool StockWaybill(ISession session, Waybill waybill)
 		{
-			List<Stock> stocks;
 			List<StockAction> stockActions;
-			var serverIds = waybill.Lines.Select(x => x.StockId).ToArray();
-			var sources = session.Query<Stock>().Where(x => serverIds.Contains(x.ServerId)).ToArray();
-			var order = Create(waybill, sources, out stocks, out stockActions);
+			var order = Create(waybill, out stockActions);
 			if (order.Lines.Count == 0)
 				return false;
 			if (order.Lines.Count > 0)
 				session.Save(order);
-			stocks.Each(x => x.ReceivingOrderId = order.Id);
-			session.SaveEach(stocks);
-			stockActions.Each(x => x.ClientStockId = x.Stock.Id);
+			foreach (var action in stockActions) {
+				action.DstStock.ReceivingOrderId = order.Id;
+				session.Save(action.DstStock);
+				session.Update(action.SrcStock);
+				action.ClientStockId = action.DstStock.Id;
+			}
 			session.SaveEach(stockActions);
 			return true;
 		}
 
-		private static ReceivingOrder Create(Waybill waybill, Stock[] sources, out List<Stock> stocks, out List<StockAction> stockActions)
+		private static ReceivingOrder Create(Waybill waybill, out List<StockAction> stockActions)
 		{
 			var order = new ReceivingOrder(waybill);
 			var lines = waybill.Lines.Where(x => x.IsReadyForStock && x.QuantityToReceive > 0).ToArray();
-			stocks = new List<Stock>();
 			stockActions = new List<StockAction>();
 			foreach (var line in lines) {
 				var receivingLine = new ReceivingLine(line);
 				order.Lines.Add(receivingLine);
 				line.Stock.Quantity -= line.QuantityToReceive;
 				var stock = new Stock(order, receivingLine);
-				stocks.Add(stock);
 				stockActions.Add(new StockAction {
 					ActionType = ActionType.Stock,
 					SourceStockId = line.StockId,
@@ -99,7 +97,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 					Quantity = receivingLine.Quantity,
 					RetailCost = receivingLine.RetailCost,
 					RetailMarkup = receivingLine.RetailMarkup,
-					Stock = stock,
+					DstStock = stock,
+					SrcStock = line.Stock,
 				});
 			}
 			order.UpdateStat(order.Lines);
