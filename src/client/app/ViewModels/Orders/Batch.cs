@@ -62,7 +62,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 		public Batch()
 		{
-			NavigateOnShowCatalog = true;
 			DisplayName = "АвтоЗаказ";
 			AddressSelector = new AddressSelector(this);
 			Filter = new[] {

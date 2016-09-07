@@ -1,18 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Interactivity;
-using System.Windows.Interop;
-using System.Windows.Threading;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Controls.Behaviors;
@@ -20,8 +11,6 @@ using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools;
-using log4net.Repository.Hierarchy;
-using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Views
 {
@@ -60,21 +49,25 @@ namespace AnalitF.Net.Client.Views
 		private DataGrid2 lines;
 		private WaybillDetails model;
 
-		public WaybillDetailsView(WaybillDetails model)
-		{
-			this.model = model;
-			Init();
-		}
-
 		public WaybillDetailsView()
 		{
+			InitializeComponent();
+			DataContextChanged += OnDataContextChanged;
+		}
+
+		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)
+		{
+			model = DataContext as WaybillDetails;
+			if (model == null)
+				return;
+
+			DataContextChanged -= OnDataContextChanged;
+			model.SkipRestoreTable = true;
 			Init();
 		}
 
 		private void Init()
 		{
-			InitializeComponent();
-
 			var handler = new BarcodeHandler(this, model.Settings);
 			handler.Barcode.Subscribe(x => model.HandleBarCode(x));
 
