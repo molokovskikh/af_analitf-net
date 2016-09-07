@@ -151,6 +151,20 @@ namespace AnalitF.Net.Client.Models.Commands
 				markups
 					.Where(c => c.MaxMarkup < c.Markup)
 					.Each(c => c.MaxMarkup = c.Markup);
+				var markupNds18 = markups.Where(s =>
+					s.Type == MarkupType.Nds18 &&
+					s.End == 10000)
+					.ToList();
+				var markupOver = markups.Where(s =>
+					s.Type == MarkupType.Over &&
+					s.End == 10000)
+					.ToList();
+				if (markupNds18.Count == 1) {
+					markupNds18[0].End = 1000000;
+				}
+				if (markupOver.Count == 1) {
+					markupOver[0].End = 1000000;
+				}
 				transaction.Commit();
 			}
 		}

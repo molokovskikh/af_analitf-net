@@ -34,7 +34,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			//и пытаться выполнять все уведомления в ui thread
 			//на самом деле у нас dispatcher`а нет
 			Execute.ResetWithoutDispatcher();
-			AppBootstrapper.InitViewLocator();
 		}
 	}
 }

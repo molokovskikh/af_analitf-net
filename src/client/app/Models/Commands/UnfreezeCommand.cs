@@ -159,6 +159,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 			if (destOrder.IsEmpty)
 				return null;
+			if (action == "вернуть в работу")
+				destOrder.KeepId = null;
 			return destOrder;
 		}
 
@@ -175,6 +177,7 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public void Merge(Order order, IOrder sourceOrder, IOrderLine sourceLine, Offer[] offers, StringBuilder log)
 		{
+			var action = GuesAction(sourceOrder);
 			var rest = sourceLine.Count;
 			foreach (var offer in offers) {
 				if (rest == 0)
@@ -187,7 +190,8 @@ namespace AnalitF.Net.Client.Models.Commands
 				}
 				var line = order.TryOrder(offer, rest, out ordered);
 				if (line != null) {
-					line.Order.KeepId = oldDisplayId;
+					if (action == "восстановить" || action == "\"разморозить\"")
+						line.Order.KeepId = oldDisplayId;
 					if (ShouldCalculateStatus(line)) {
 						if (sourceLine.Count == ordered) {
 							line.ExportId = ((OrderLine)sourceLine).ExportId;
