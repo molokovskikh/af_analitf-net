@@ -1752,7 +1752,7 @@ group by ol.RowId";
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.User.Id == user.Id)
+				.Where(l => !l.Committed && l.User.Id == user.Id && l.Document.Address.Enabled)
 				.OrderByDescending(x => x.Document.LogTime)
 				.Take(1000)
 				.ToArray();
@@ -1784,13 +1784,13 @@ group by ol.RowId";
 				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
-						doc.Document.AddressId.ToString(),
+						doc.Document.Address.Id.ToString(),
 						type);
 					if (!Directory.Exists(path)) {
 						log.Warn($"Директория для загрузки документов не существует {path}");
 						continue;
 					}
-					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
+					var files = Directory.GetFiles(path, $"{doc.Document.Id}_*");
 					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f))) {
 						LocalFileName = f
 					}));

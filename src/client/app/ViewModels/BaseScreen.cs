@@ -124,6 +124,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
 		public NotifyValue<object> DbReloadToken = new NotifyValue<object>();
+		public NotifyValue<object> OrdersReloadToken = new NotifyValue<object>();
 		/// <summary>
 		/// использовать только через RxQuery,
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
@@ -268,6 +269,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (clearSession) {
 				RecreateSession();
 				clearSession = false;
+				OrdersReloadToken.OnNext(new object());
 			}
 
 			IsSuccessfulActivated = true;
@@ -277,8 +279,8 @@ namespace AnalitF.Net.Client.ViewModels
 				UpdateOnActivate = false;
 			}
 			if (reload) {
-				DbReloadToken.OnNext(new object());
 				reload = false;
+				DbReloadToken.OnNext(new object());
 			}
 		}
 
