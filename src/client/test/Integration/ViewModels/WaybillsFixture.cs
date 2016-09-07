@@ -11,6 +11,8 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.ViewModels.Dialogs.CreateWaybill;
 using System.Reactive.Disposables;
+using Common.NHibernate;
+using NHibernate.Linq;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -159,6 +161,23 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			WaybillMarkupReport(System.Windows.MessageBoxResult.No, 1);
 		}
+
+		[Test]
+		public void Waybill_Supplier_Name()
+		{
+			restore = true;
+			session.DeleteEach<Waybill>();
+			var waybill = Fixture<Fixtures.CreateWaybill>().Waybill;
+			var supplierName = waybill.Supplier.FullName;
+			var price = session.Query<Price>().Where(p => p.SupplierId == waybill.Supplier.Id).ToArray();
+			price.First().DisabledByClient = true;
+			Deactivate(model);
+			shell.Update();
+			Activate(model);
+			var newWaybill = model.Waybills.Value.First();
+			Assert.AreEqual(supplierName, newWaybill.SupplierName);
+		}
+
 
 		protected void WaybillMarkupReport(System.Windows.MessageBoxResult exceptResult, double k)
 		{
