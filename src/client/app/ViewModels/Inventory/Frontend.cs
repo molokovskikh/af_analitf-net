@@ -181,6 +181,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				Stock.UpdateStock(StatelessSession, Lines.Select(x => x.Stock).Distinct());
 				trx.Commit();
 			}
+			Bus.SendMessage("Stocks", "db");
 			Message("Оплата наличными");
 			Reset();
 		}

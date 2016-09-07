@@ -30,7 +30,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			DisplayName = "Товарные запасы";
 			AddressSelector = new AddressSelector(this);
 			Items.PropertyChanged += Items_PropertyChanged;
-			CurrentItem = new NotifyValue<Stock>();
 			ItemsTotal = new ObservableCollection<StockTotal>();
 			ItemsTotal.Add(new StockTotal { Total = "Итого", TotalCount = 0.0m, TotalSum = 0.0m, TotalSumWithNds = 0.0m, TotalRetailSum = 0.0m });
 
@@ -41,6 +40,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			QuickSearch = new QuickSearch<Stock>(UiScheduler,
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
+			Bus.Listen<string>("db").Where(x => x == "Stocks")
+				.Subscribe(_ => UpdateOnActivate = true, CloseCancellation.Token);
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
