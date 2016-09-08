@@ -88,6 +88,7 @@ Global(
 			@UpdateDeployRoot: """\\adc.analit.net\Inforoom\WebApps\stocks\var\update\""",
 			@CheckUrlRoot: "http://ios.analit.net/AnalitF.Net.Service.Stocks",
 			@DefaultUpdateChannel: "rtm",
+			@TargetChannels: ("beta", "alpha")
 		},
 		@Production : {
 			@FtpRoot: """\\adc.analit.net\Inforoom\FTP\anonymous\""",
@@ -191,7 +192,7 @@ task "deploy:proxy", ["build:proxy"]:
 			fsPath = Path.Combine(Globals.IISPathRoot, name, "bin")
 		RegisterApp(Globals.IISHost, Globals.IISSiteName, name, fsPath, Globals.Maybe.IISAppPool)
 
-task @deploy, ["env", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "post:deploy"]
+task @deploy, ["env", "version:generate", "git:tag", "prepare", "check", "build", "db:migrate", "deploy:service", "deploy:client", "deploy:update", "post:deploy"]
 
 task "post:deploy", ["test:binary", "deploy:notify", "deploy:announce", "git:push:tags"]
 
@@ -234,6 +235,10 @@ task "build:client:package", ["build:client:merged", "build:setup"]:
 task "deploy:update", ["build:update"]:
 	channel = Configuration.Maybe.channel or Globals.DefaultUpdateChannel
 	CopyUpdateBin(channel, "output/updater/")
+	channels = Globals.Maybe.TargetChannels
+	if channels:
+		for channel in channels:
+			CopyUpdateBin(channel, "output/updater")
 
 task "build:client", ["build:client:bin", "build:setup", "build:client:package", "build:update"]
 
@@ -358,6 +363,17 @@ task "build:update", ["build:client:merged"]:
 	Cp(FileSet("**.*", BaseDirectory: updaterOutput), output)
 	Rm(FileSet("AnalitF.Net.Client.*", BaseDirectory: output))
 	Cp(FileSet("AnalitF.*", BaseDirectory: "output/migration"), output)
+
+task "version:generate":
+	return if Globals.Environment == @Production
+	return if Globals.Maybe.Version
+
+	versionFile = Path.Combine(Globals.UpdateDeployRoot, Globals.DefaultUpdateChannel, "version.txt")
+	unless Exist(versionFile):
+		return
+	version = Version.Parse(File.ReadAllText(versionFile))
+	Globals.Version = Version(version.Major, version.Minor, version.Build, version.Revision + 1)
+	print "Новая версия ${Globals.Version} на основе $versionFile"
 
 task "git:push:tags":
 	return unless Globals.Environment == @Production
