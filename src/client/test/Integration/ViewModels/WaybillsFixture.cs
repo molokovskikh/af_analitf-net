@@ -169,8 +169,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.DeleteEach<Waybill>();
 			var waybill = Fixture<Fixtures.CreateWaybill>().Waybill;
 			var supplierName = waybill.Supplier.FullName;
-			var price = session.Query<Price>().Where(p => p.SupplierId == waybill.Supplier.Id).ToArray();
-			price.First().DisabledByClient = true;
+			Fixture<DisablePrice>();
 			Deactivate(model);
 			shell.Update();
 			Activate(model);

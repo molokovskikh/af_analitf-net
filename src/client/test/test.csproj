@@ -152,6 +152,7 @@
     <Compile Include="Fixtures\CreateNews.cs" />
     <Compile Include="Fixtures\CreateProducerPromotion.cs" />
     <Compile Include="Fixtures\CreateOrder.cs" />
+    <Compile Include="Fixtures\DisablePrice.cs" />
     <Compile Include="Fixtures\LocalAddress.cs" />
     <Compile Include="Fixtures\CreateCertificate.cs" />
     <Compile Include="Fixtures\CreateMatrix.cs" />
