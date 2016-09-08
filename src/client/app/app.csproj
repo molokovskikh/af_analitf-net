@@ -239,6 +239,7 @@
     <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
+    <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
@@ -275,6 +276,7 @@
     <Compile Include="Helpers\SqlMapper.cs" />
     <Compile Include="Helpers\SqlMapperExtensions.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
+    <Compile Include="Helpers\XmlHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
     <Compile Include="Helpers\WinApi.cs" />
@@ -292,7 +294,7 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\PriceTag.cs" />
-    <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />    <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
     <Compile Include="Models\ProducerPromotion.cs" />

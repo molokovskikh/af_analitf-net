@@ -69,16 +69,18 @@
 
 			<ListView Grid.Row="1"
 				ItemsSource="{Binding Items.Value}"
+				SelectionMode="Single"
+				Name="Documents"
 				SelectedItem="{Binding CurrentItem.Value}"
 				Visibility="{Binding IsLoaded.Value, Converter={StaticResource BoolToHidden}}"
 				ItemContainerStyle="{StaticResource ItemStyle}">
 				<ListView.View>
 					<GridView>
-						<GridViewColumn Header="Отправитель" DisplayMemberBinding="{Binding Sender}" />
-						<GridViewColumn Header="Документ" DisplayMemberBinding="{Binding FileName}" />
-						<GridViewColumn Header="Статус" DisplayMemberBinding="{Binding Status}" />
-						<GridViewColumn Header="Подразделение" DisplayMemberBinding="{Binding Department}" />
-						<GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}" />
+						<GridViewColumn Header="Отправитель" DisplayMemberBinding="{Binding Sender}"/>
+            <GridViewColumn Header="Документ" DisplayMemberBinding="{Binding DocumentName}"/>
+            <GridViewColumn Header="Статус" DisplayMemberBinding="{Binding Status}"/>
+            <GridViewColumn Header="Подразделение" DisplayMemberBinding="{Binding Department}"/>
+            <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding Date}"/>
 					</GridView>
 				</ListView.View>
 			</ListView>
@@ -115,7 +117,7 @@
 				<Button Style="{StaticResource ActionButton}" Name="Save">Сохранить</Button>
 				<Button Style="{StaticResource ActionButton}" Name="Delete">Удалить</Button>
 				<Button Style="{StaticResource ActionButton}" Name="PrintItem">Распечатать</Button>
-				<xctk:SplitButton VerticalAlignment="Center" Padding="8" Margin="5">
+				<xctk:SplitButton Name="Agreement"  VerticalAlignment="Center" Padding="8" Margin="5">
 					Согласование
 					<xctk:SplitButton.DropDownContent>
 						<ItemsControl>
@@ -155,11 +157,24 @@
 					Margin="10, 0, 0, 0"
 					BorderThickness="0"
 					HorizontalContentAlignment="Stretch"
+					SelectionMode="Single"
 					ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 					<controls:ListView2.ItemTemplate>
 						<DataTemplate>
-							<Grid>
-								<Grid.RowDefinitions>
+              <Grid>
+                <Grid.ToolTip>
+                  <StackPanel Background="#FFFFFF">
+                    <TextBlock Text="{Binding Description}" FontSize="14" />
+                    <TextBlock Text="{Binding Date}" FontSize="12" Foreground="#a6a6a6" />
+                    <TextBlock Padding="5"
+									Margin="10, 5, 5, 5"
+									Text="{Binding Comment}"
+									Visibility="{Binding HasComment, Converter={StaticResource BoolToCollapsed}}"
+									Background="#e4f0d7"
+									HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Grid.ToolTip>
+                <Grid.RowDefinitions>
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
 									<RowDefinition Height="Auto" />
