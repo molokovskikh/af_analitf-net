@@ -163,7 +163,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
-		public void Waybill_Supplier_Name()
+		public void Waybill_supplier_name_disable_price_before_load()
 		{
 			restore = true;
 			session.DeleteEach<Waybill>();
@@ -173,8 +173,28 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Deactivate(model);
 			shell.Update();
 			Activate(model);
-			var newWaybill = model.Waybills.Value.First();
-			Assert.AreEqual(supplierName, newWaybill.SupplierName);
+			var loadWaybill = model.Waybills.Value.First();
+			Assert.AreEqual(supplierName, loadWaybill.SupplierName);
+		}
+
+		[Test]
+		public void Waybill_supplier_name_disable_price_after_load()
+		{
+			restore = true;
+			session.DeleteEach<Waybill>();
+			var waybill = Fixture<Fixtures.CreateWaybill>().Waybill;
+			var supplierName = waybill.Supplier.FullName;
+			Deactivate(model);
+			shell.Update();
+			Activate(model);
+			var loadWaybill = model.Waybills.Value.First();
+			Assert.AreEqual(supplierName, loadWaybill.SupplierName);
+			Fixture<DisablePrice>();
+			Deactivate(model);
+			shell.Update();
+			Activate(model);
+			loadWaybill = model.Waybills.Value.First();
+			Assert.AreEqual(supplierName, loadWaybill.SupplierName);
 		}
 
 
