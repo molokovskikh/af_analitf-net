@@ -366,7 +366,8 @@ task "build:update", ["build:client:merged"]:
 
 task "version:generate":
 	return if Globals.Environment == @Production
-	return if Globals.Maybe.Version
+	version = ReadGlobalConfig(Globals, "asembly:info:generate", "version")
+	return if version
 
 	versionFile = Path.Combine(Globals.UpdateDeployRoot, Globals.DefaultUpdateChannel, "version.txt")
 	unless Exist(versionFile):
