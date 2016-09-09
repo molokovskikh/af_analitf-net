@@ -202,7 +202,6 @@ namespace AnalitF.Net.Service.Models
 						ErrorType.AccessDenied);
 			}
 
-			data.LastPendingUpdateAt = DateTime.Now;
 			//при переходе на новую версию мы должны отдать все данные тк между версиями могла измениться схема
 			//и если не отдать все то часть данных останется в старом состоянии а часть в новом,
 			//что может привести к странным результатам
@@ -211,16 +210,25 @@ namespace AnalitF.Net.Service.Models
 
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
-				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
-					" последние обновление на клиента {0}" +
-					" последнее обновление на сервере {1}" +
-					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
+				log.Warn("Не совпала дата обновления готовим кумулятивное обновление," +
+					$" последние обновление на клиента {data.LastUpdateAt}" +
+					$" последнее обновление на сервере {job.LastSync}" +
+					$" не подтвержденное обновление {data.LastPendingUpdateAt}");
 				data.Reset();
+			}
+
+			var cumulative = data.LastUpdateAt == DateTime.MinValue;
+			//если мы готовим кумулятивное обновление то данные из справочников кешируются, кеш считается актуальным
+			//в течении дня что бы избежать ситуации когда мы из-за кеширования потеряли обновление записи ставим дату обновление на
+			//начало дня что бы при следующем обновлении загрузить данные которые не попали в кеш
+			if (cumulative) {
+				data.LastPendingUpdateAt = DateTime.Today;
+			} else {
+				data.LastPendingUpdateAt = DateTime.Now;
 			}
 			session.Save(data);
 
 			//по умолчанию fresh = 1
-			var cumulative = data.LastUpdateAt == DateTime.MinValue;
 			session.CreateSQLQuery(@"
 drop temporary table if exists usersettings.prices;
 drop temporary table if exists usersettings.activeprices;
