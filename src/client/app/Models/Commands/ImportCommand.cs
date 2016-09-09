@@ -158,6 +158,7 @@ where o.Sum = 0;")
 					foreach (var id in x)
 						s.Load<Waybill>(id).Calculate(settings, products);
 				});
+
 			if (Session.Query<LoadedDocument>().Any()) {
 				Log.Info("Пересчет накладных");
 				Session.CreateSQLQuery(@"
