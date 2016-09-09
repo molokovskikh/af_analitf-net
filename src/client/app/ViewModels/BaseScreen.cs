@@ -321,7 +321,6 @@ namespace AnalitF.Net.Client.ViewModels
 				Dispose();
 			}
 
-
 			if (broacast)
 				Broadcast();
 		}
