@@ -194,8 +194,6 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
-			if (UserSupplierName == null)
-				UserSupplierName = SupplierName;
 			Settings = settings;
 			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null

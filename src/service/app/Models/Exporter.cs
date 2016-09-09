@@ -1832,11 +1832,13 @@ select d.RowId as Id,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	rf.IsRetailCostFixed
+	rf.IsRetailCostFixed,
+	s.FullName as UserSupplierName
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 	join RetailCostFixed rf on rf.Id = dh.Id
 	left join Documents.InvoiceHeaders i on i.Id = dh.Id
+	join Customers.Suppliers s on s.Id = dh.FirmCode
 where d.RowId in ({0})
 group by dh.Id
 union
@@ -1860,7 +1862,8 @@ select d.RowId as Id,
 	null as InvoiceId,
 	null as InvoiceDate,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	0 as IsRetailCostFixed
+	0 as IsRetailCostFixed,
+	null as UserSupplierName
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);
