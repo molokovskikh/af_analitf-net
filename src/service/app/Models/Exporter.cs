@@ -147,7 +147,6 @@ namespace AnalitF.Net.Service.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string DocsPath = "";
-		public string DateTimeNow = DateTime.Now.ToString("yyyy.MM.dd");
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -1228,13 +1227,13 @@ where sp.Status = 1";
 									from ProducerInterface.Promotions pr
 									where pr.Begin <= ?DT AND pr.Enabled = 1 AND pr.Status = 1";
 
-			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select Promo.Id PromotionId, PromoGrug.DrugId CatalogId from ProducerInterface.promotions Promo
 							left join ProducerInterface.promotionToDrug PromoGrug ON Promo.Id = PromoGrug.PromotionId
 							Where Promo.Enabled = 1 AND Promo.`Status` = 1 AND Promo.Begin <= ?DT";
 
-			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select PR.Id PromotionId, PTS.SupplierId SupplierId
 							from ProducerInterface.Promotions PR
@@ -1246,7 +1245,7 @@ where sp.Status = 1";
 
 			var ids = session
 				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
-				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
+				.SetParameter("DateTimeNow", DateTime.Now).List<int>();
 
 			ProducerPromotion producerPromotion = new ProducerPromotion();
 
