@@ -120,7 +120,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			grid.Columns[4].Width = new DataGridLength(15);
 			grid.Columns[5].Width = new DataGridLength(125);
 			var saveWidth = grid.Columns[5].ActualWidth;
-
 			Close(model);
 			InitView();
 			grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");

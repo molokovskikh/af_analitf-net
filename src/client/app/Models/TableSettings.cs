@@ -26,6 +26,9 @@ namespace AnalitF.Net.Client.Models
 			if (view == null)
 				return;
 
+			//if (defaults.Count != 0)
+ 				//return;
+
 			foreach (var grid in GetControls(view)) {
 				SaveView(grid, Persisted);
 			}
