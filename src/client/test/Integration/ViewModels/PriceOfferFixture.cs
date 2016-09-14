@@ -36,9 +36,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.ShowCatalog();
 
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(1));
-			var catalogModel = (CatalogViewModel)shell.NavigationStack.First();
-			Assert.That(catalogModel.CurrentCatalog.Id, Is.EqualTo(offer.CatalogId));
-			Assert.That(catalogModel.CurrentCatalogName.Id, Is.EqualTo(catalogModel.CurrentCatalog.Name.Id));
 
 			var offerModel = (CatalogOfferViewModel)shell.ActiveItem;
 			Assert.That(offerModel.CurrentOffer.Value.Id, Is.EqualTo(offer.Id));

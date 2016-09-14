@@ -147,7 +147,6 @@ namespace AnalitF.Net.Service.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string DocsPath = "";
-		public string DateTimeNow = DateTime.Now.ToString("yyyy.MM.dd");
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -202,7 +201,6 @@ namespace AnalitF.Net.Service.Models
 						ErrorType.AccessDenied);
 			}
 
-			data.LastPendingUpdateAt = DateTime.Now;
 			//при переходе на новую версию мы должны отдать все данные тк между версиями могла измениться схема
 			//и если не отдать все то часть данных останется в старом состоянии а часть в новом,
 			//что может привести к странным результатам
@@ -211,16 +209,25 @@ namespace AnalitF.Net.Service.Models
 
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
-				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
-					" последние обновление на клиента {0}" +
-					" последнее обновление на сервере {1}" +
-					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
+				log.Warn("Не совпала дата обновления готовим кумулятивное обновление," +
+					$" последние обновление на клиента {data.LastUpdateAt}" +
+					$" последнее обновление на сервере {job.LastSync}" +
+					$" не подтвержденное обновление {data.LastPendingUpdateAt}");
 				data.Reset();
+			}
+
+			var cumulative = data.LastUpdateAt == DateTime.MinValue;
+			//если мы готовим кумулятивное обновление то данные из справочников кешируются, кеш считается актуальным
+			//в течении дня что бы избежать ситуации когда мы из-за кеширования потеряли обновление записи ставим дату обновление на
+			//начало дня что бы при следующем обновлении загрузить данные которые не попали в кеш
+			if (cumulative) {
+				data.LastPendingUpdateAt = DateTime.Today;
+			} else {
+				data.LastPendingUpdateAt = DateTime.Now;
 			}
 			session.Save(data);
 
 			//по умолчанию fresh = 1
-			var cumulative = data.LastUpdateAt == DateTime.MinValue;
 			session.CreateSQLQuery(@"
 drop temporary table if exists usersettings.prices;
 drop temporary table if exists usersettings.activeprices;
@@ -1220,13 +1227,13 @@ where sp.Status = 1";
 									from ProducerInterface.Promotions pr
 									where pr.Begin <= ?DT AND pr.Enabled = 1 AND pr.Status = 1";
 
-			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select Promo.Id PromotionId, PromoGrug.DrugId CatalogId from ProducerInterface.promotions Promo
 							left join ProducerInterface.promotionToDrug PromoGrug ON Promo.Id = PromoGrug.PromotionId
 							Where Promo.Enabled = 1 AND Promo.`Status` = 1 AND Promo.Begin <= ?DT";
 
-			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select PR.Id PromotionId, PTS.SupplierId SupplierId
 							from ProducerInterface.Promotions PR
@@ -1238,7 +1245,7 @@ where sp.Status = 1";
 
 			var ids = session
 				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
-				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
+				.SetParameter("DateTimeNow", DateTime.Now).List<int>();
 
 			ProducerPromotion producerPromotion = new ProducerPromotion();
 
@@ -1751,7 +1758,7 @@ group by ol.RowId";
 				.ExecuteUpdate();
 
 			var logs = session.Query<DocumentSendLog>()
-				.Where(l => !l.Committed && l.User.Id == user.Id)
+				.Where(l => !l.Committed && l.User.Id == user.Id && l.Document.Address.Enabled)
 				.OrderByDescending(x => x.Document.LogTime)
 				.Take(1000)
 				.ToArray();
@@ -1783,13 +1790,13 @@ group by ol.RowId";
 				try {
 					var type = doc.Document.DocumentType.ToString();
 					var path = Path.Combine(DocsPath,
-						doc.Document.AddressId.ToString(),
+						doc.Document.Address.Id.ToString(),
 						type);
 					if (!Directory.Exists(path)) {
 						log.Warn($"Директория для загрузки документов не существует {path}");
 						continue;
 					}
-					var files = Directory.GetFiles(path, String.Format("{0}_*", doc.Document.Id));
+					var files = Directory.GetFiles(path, $"{doc.Document.Id}_*");
 					Result.AddRange(files.Select(f => new UpdateData(Path.Combine(type, doc.GetTargetFilename(f))) {
 						LocalFileName = f
 					}));
@@ -1832,11 +1839,13 @@ select d.RowId as Id,
 	i.InvoiceNumber as InvoiceId,
 	i.InvoiceDate,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	rf.IsRetailCostFixed
+	rf.IsRetailCostFixed,
+	s.FullName as UserSupplierName
 from Logs.Document_logs d
 	join Documents.DocumentHeaders dh on dh.DownloadId = d.RowId
 	join RetailCostFixed rf on rf.Id = dh.Id
 	left join Documents.InvoiceHeaders i on i.Id = dh.Id
+	join Customers.Suppliers s on s.Id = dh.FirmCode
 where d.RowId in ({0})
 group by dh.Id
 union
@@ -1860,7 +1869,8 @@ select d.RowId as Id,
 	null as InvoiceId,
 	null as InvoiceDate,
 	if(d.PreserveFilename, d.FileName, null) as Filename,
-	0 as IsRetailCostFixed
+	0 as IsRetailCostFixed,
+	null as UserSupplierName
 from Logs.Document_logs d
 	join Documents.RejectHeaders rh on rh.DownloadId = d.RowId
 where d.RowId in ({0})", ids);

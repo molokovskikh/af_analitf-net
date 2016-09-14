@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interactivity;
@@ -53,21 +54,35 @@ namespace AnalitF.Net.Client.Views
 		private DataGrid2 lines;
 		private WaybillDetails model;
 
-		public WaybillDetailsView(WaybillDetails model)
-		{
-			this.model = model;
-			Init();
-		}
-
 		public WaybillDetailsView()
 		{
+			InitializeComponent();
+			DataContextChanged += OnDataContextChanged;
+
+			var element = Rounding;
+			var items = DescriptionHelper.GetDescriptions(typeof(Rounding));
+			element.ItemsSource = items;
+			element.DisplayMemberPath = "Name";
+
+			var binding = new Binding("Waybill.Rounding");
+			binding.Converter = new ComboBoxSelectedItemConverter();
+			binding.ConverterParameter = items;
+			BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
+		}
+
+		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)
+		{
+			model = DataContext as WaybillDetails;
+			if (model == null)
+				return;
+
+			DataContextChanged -= OnDataContextChanged;
+			model.SkipRestoreTable = true;
 			Init();
 		}
 
 		private void Init()
 		{
-			InitializeComponent();
-
 			//борьба за производительность
 			//операции установки стиля приводят к перестроению дерева элементов wpf
 			//что негативно отражается на производительности

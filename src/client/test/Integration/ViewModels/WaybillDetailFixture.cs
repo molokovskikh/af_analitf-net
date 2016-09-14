@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Windows.Documents;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
@@ -13,8 +14,6 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI.Testing;
 using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
-using System.IO;
-using System.Windows.Documents;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -51,7 +50,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void RegistryDocument_waybillLines()
 		{
-			IList<WaybillLine> waybillLines = waybill.Lines;
+			var waybillLines = waybill.Lines;
 
 			/* проверка надбавки в рублях в первой препарате */
 			Assert.AreEqual(4m, waybillLines[0].RetailMarkupInRubles);
@@ -59,11 +58,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var doc = new RegistryDocument(waybill, waybillLines);
 			var flowDoc = doc.Build();
 
-			List<TableCellCollection> listTableCellCollection = ((Table)flowDoc.Blocks.ToList().Where(x => x.GetType() == new Table().GetType()).First())
-				.RowGroups.Select(x => x.Rows).ToList()
-				.First().Select(x => x.Cells).ToList();
+			var listTableCellCollection = flowDoc.Blocks.OfType<Table>().First()
+					.RowGroups.Select(x => x.Rows).ToList()
+					.First().Select(x => x.Cells).ToList();
 
-			TableCellCollection tableCellCollection = listTableCellCollection[0];
+			var tableCellCollection = listTableCellCollection[0];
 
 			/* проверка количества строк в таблице */
 			Assert.AreEqual(15, listTableCellCollection.Count());
@@ -90,7 +89,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 
 			tableCellCollection = listTableCellCollection[3];
 			ValueCell = new TextRange(tableCellCollection[14].ContentStart, tableCellCollection[14].ContentEnd).Text;
-			Assert.AreEqual(String.Empty, ValueCell);
+			Assert.AreEqual(string.Empty, ValueCell);
 		}
 
 		[Test]
@@ -98,8 +97,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.8, waybillLine.RetailCost);
-			Assert.AreEqual(Rounding.To0_10, model.Rounding.Value);
-			model.Rounding.Value = Rounding.None;
+			Assert.AreEqual(Rounding.To0_10, model.Waybill.Rounding);
+			model.Waybill.Rounding = Rounding.None;
 			waybillLine = model.Lines.Value.Cast<WaybillLine>().First();
 			Assert.AreEqual(24.82, waybillLine.RetailCost);
 		}
@@ -133,7 +132,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var results = model.PrintWaybill().GetEnumerator();
 			var dialog = Next<DialogResult>(results);
-			var settings = ((SimpleSettings)dialog.Model);
+			var settings = (SimpleSettings) dialog.Model;
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
 			var preview = Next<DialogResult>(results);
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
@@ -142,24 +141,24 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		[Test]
 		public void Print_racking_map()
 		{
-			var result = (DialogResult)model.PrintRackingMap().First();
-			var preview = ((PrintPreviewViewModel)result.Model);
+			var result = (DialogResult) model.PrintRackingMap();
+			var preview = (PrintPreviewViewModel) result.Model;
 			Assert.IsNotNull(preview);
 		}
 
 		[Test]
 		public void Print_price_tags()
 		{
-			var result = (DialogResult)model.PrintPriceTags().First();
-			var preview = ((PrintPreviewViewModel)result.Model);
-			Assert.IsNotNull(preview.Document);
+			var result = (DialogResult) model.PrintPriceTags();
+			var preview = (PrintPreviewViewModel) result.Model;
+			Assert.IsNotNull(preview);
 		}
 
 		[Test]
 		public void Print_invoice()
 		{
-			var result = (DialogResult)model.PrintInvoice().First();
-			var preview = ((PrintPreviewViewModel)result.Model);
+			var result = (DialogResult) model.PrintInvoice().First();
+			var preview = (PrintPreviewViewModel) result.Model;
 			Assert.IsNotNull(preview.Document);
 		}
 
@@ -168,7 +167,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var results = model.PrintRegistry().GetEnumerator();
 			var dialog = Next<DialogResult>(results);
-			var settings = ((SimpleSettings)dialog.Model);
+			var settings = (SimpleSettings) dialog.Model;
 			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
 			var preview = Next<DialogResult>(results);
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
@@ -198,7 +197,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var updateResults = shell.Update().ToArray();
 			model = Navigate(new WaybillDetails(waybillId));
 			Assert.AreEqual(2, updateResults.Length,
-				"должны были получить результат открытия файла накладной и оповещение о новой накладной {0}", updateResults.Implode());
+				"должны были получить результат открытия файла накладной и оповещение о новой накладной {0}",
+				updateResults.Implode());
 			Assert.IsInstanceOf<DialogResult>(updateResults[0]);
 			Assert.IsInstanceOf<OpenResult>(updateResults[1]);
 
@@ -214,7 +214,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var results = model.PrintRegistry().GetEnumerator();
 			Assert.IsTrue(results.MoveNext());
-			var target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
+			var target = (RegistryDocumentSettings) ((SimpleSettings) ((DialogResult) results.Current).Model).Target;
 			target.CommitteeMember1 = "Член комитета №1";
 			Assert.IsTrue(results.MoveNext());
 			Assert.IsNotNull(results.Current);
@@ -223,7 +223,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model = Open(new WaybillDetails(waybill.Id));
 			results = model.PrintRegistry().GetEnumerator();
 			Assert.IsTrue(results.MoveNext());
-			target = (RegistryDocumentSettings)((SimpleSettings)((DialogResult)results.Current).Model).Target;
+			target = (RegistryDocumentSettings) ((SimpleSettings) ((DialogResult) results.Current).Model).Target;
 			Assert.AreEqual("Член комитета №1", target.CommitteeMember1);
 		}
 
@@ -231,16 +231,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		public void Export_waybill_to_excel()
 		{
 			var result = model.ExportWaybill();
-			Assert.IsInstanceOf(typeof(OpenResult), result);
+			Assert.IsInstanceOf(typeof (OpenResult), result);
 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
 		}
 
 		[Test]
- 		public void Export_waybill_to_excel_restored_ver()
- 		{
- 			var result = model.RestoredExportWaybill();
- 			Assert.IsInstanceOf(typeof(OpenResult), result);
- 			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
- 		}
+		public void Export_waybill_to_excel_restored_ver()
+		{
+			var result = model.RestoredExportWaybill();
+			Assert.IsInstanceOf(typeof (OpenResult), result);
+			Assert.IsTrue(File.Exists((result as OpenResult).Filename));
+		}
 	}
 }

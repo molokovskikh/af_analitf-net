@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models.Print
 {

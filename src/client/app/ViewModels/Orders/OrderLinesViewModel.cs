@@ -97,6 +97,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Select(_ => false)
 				.Subscribe(IsLoading);
 
+			SessionValue(Begin, GetType().Name + ".Begin");
+			SessionValue(End, GetType().Name + ".End");
+			SessionValue(IsSentSelected, GetType().Name + ".IsSentSelected");
 			Persist(IsExpanded, "IsExpanded");
 		}
 
@@ -194,16 +197,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			var beginValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".Begin");
-			if (beginValue is DateTime)
-				Begin.Value = (DateTime)beginValue;
-			var endValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".End");
-			if (endValue is DateTime)
-				End.Value = (DateTime)endValue;
-			var isSentSelectedValue = Shell.SessionContext.GetValueOrDefault(GetType().Name + ".IsSentSelected");
-			if (isSentSelectedValue is bool)
-				IsSentSelected.Value = (bool)isSentSelectedValue;
-
 			OnlyWarningVisible = IsCurrentSelected.Select(v => v && User.IsPreprocessOrders).ToValue();
 			ProductInfo = new ProductInfo(this, CurrentLine);
 			ProductInfo2 = new ProductInfo(this, SelectedSentLine);
@@ -212,6 +205,8 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(OnlyWarning.Select(v => (object)v))
 				.Merge(LinesFilter.Changed())
+				.Merge(DbReloadToken)
+				.Merge(OrdersReloadToken)
 				.Where(_ => IsCurrentSelected && Session != null)
 				.Select(_ => {
 					var lines = AddressSelector.GetActiveFilter().SelectMany(o => o.ActiveOrders())
@@ -247,6 +242,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Merge(End.Select(d => (object)d))
 				.Merge(Prices.Select(p => p.Changed()).Merge().Throttle(Consts.FilterUpdateTimeout, UiScheduler))
 				.Merge(AddressSelector.FilterChanged)
+				.Merge(DbReloadToken)
 				.Do(_ => { IsLoading.Value = true; })
 				//защита от множества запросов
 				.Throttle(TimeSpan.FromMilliseconds(30), Scheduler)
@@ -301,9 +297,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			base.OnDeactivate(close);
 
 			AddressSelector.OnDeactivate();
-			Shell.SessionContext[GetType().Name + ".IsSentSelected"] = IsSentSelected.Value;
-			Shell.SessionContext[GetType().Name + ".Begin"] = Begin.Value;
-			Shell.SessionContext[GetType().Name + ".End"] = End.Value;
 		}
 
 		protected override void Query()

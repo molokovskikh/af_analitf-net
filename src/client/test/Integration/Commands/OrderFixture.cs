@@ -435,7 +435,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			});
 		}
 		[Test]
-		public void Check_DisplayId()
+		public void Check_DisplayId_update()
 		{
 			localSession.DeleteEach<Order>();
 			var order = MakeOrder();

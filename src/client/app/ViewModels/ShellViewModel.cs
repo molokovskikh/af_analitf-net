@@ -310,6 +310,11 @@ namespace AnalitF.Net.Client.ViewModels
 			Navigator.CloseActive();
 		}
 
+		public void CloseScreen(IScreen item)
+		{
+			Navigator.CloseScreen(item);
+		}
+
 		public override void CanClose(Action<bool> callback)
 		{
 			if (Config.Quiet) {
@@ -399,7 +404,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (!Env.IsUnitTesting) {
 				var disposable = new CompositeDisposable();
 				try {
-					NavigateAndReset(PersistentNavigationStack
+					var items = PersistentNavigationStack
 						.Where(t => t.TypeName != typeof(Main).FullName)
 						.Select(t => {
 							var v = Activator.CreateInstance(Type.GetType(t.TypeName), t.Args);
@@ -409,7 +414,9 @@ namespace AnalitF.Net.Client.ViewModels
 							return v;
 						})
 						.OfType<IScreen>()
-						.ToArray());
+						.ToArray();
+					foreach (var item in items)
+						Items.Add(item);
 				}
 				catch(Exception e) {
 					disposable.Dispose();
@@ -628,10 +635,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowOrders()
 		{
-			if (ActiveItem is CatalogOfferViewModel)
-				Navigate(new OrdersViewModel());
-			else
-				NavigateRoot(new OrdersViewModel());
+			NavigateRoot(new OrdersViewModel());
 		}
 
 		public bool CanShowBatch => Settings.Value.LastUpdate != null;
@@ -707,7 +711,8 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			if (!Confirm("Кумулятивное обновление достаточно длительный процесс. Продолжить?"))
 				yield break;
-			User.Value.LastSync = null;
+			if (User.Value != null)
+				User.Value.LastSync = null;
 			foreach (var result in Sync(new UpdateCommand())) {
 					yield return result;
 			}
@@ -1101,11 +1106,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public void Navigate(IScreen item)
 		{
 			Navigator.Navigate(item);
-		}
-
-		public void NavigateAndReset(params IScreen[] views)
-		{
-			Navigator.NavigateAndReset(views);
 		}
 
 		public void ActivateItemAt(int index)

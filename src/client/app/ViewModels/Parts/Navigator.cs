@@ -28,21 +28,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			conductor.ActivateItem(item);
 		}
 
-		public void NavigateAndReset(params IScreen[] views)
-		{
-			if (views.Length == 0)
-				return;
-
-			navigationStack.Clear();
-
-			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
-			foreach (var screen in chain) {
-				navigationStack.Add(screen);
-				conductor.Items.Add(screen);
-			}
-			conductor.ActivateItem(views.Last());
-		}
-
 		public void NavigateRoot(IScreen screen)
 		{
 			navigationStack.Clear();
@@ -59,30 +44,37 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		{
 			CloseActive();
 			if (navigationStack.Count > 0) {
-				conductor.ActivateItem(navigationStack[0]);
-				navigationStack.RemoveAt(0);
+				var screen = navigationStack.Last();
+				conductor.ActivateItem(screen);
+				navigationStack.Remove(screen);
 			}
 		}
 
 		public void CloseActive()
 		{
-			var item = conductor.ActiveItem;
-			if (item != null) {
-				//исправление для ошибки
-				//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
-				var view = (FrameworkElement)conductor.GetView();
-				if (view != null) {
-					var tabs = view.Descendants<TabControl>().First(x => x.Name == "Items");
-					var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
-					if (tab != null)
-						tab.Template = null;
-				}
+			CloseScreen(conductor.ActiveItem);
+		}
 
-				conductor.Items.Remove(item);
-				conductor.DeactivateItem(item, true);
-				navigationStack.Remove(item);
-				(item as IDisposable)?.Dispose();
+		public void CloseScreen(IScreen item)
+		{
+			if (item == null)
+				return;
+
+			//исправление для ошибки
+			//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
+			var view = (FrameworkElement)conductor.GetView();
+			if (view != null)
+			{
+				var tabs = view.Descendants<TabControl>().First(x => x.Name == "Items");
+				var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
+				if (tab != null)
+					tab.Template = null;
 			}
+
+			conductor.Items.Remove(item);
+			conductor.DeactivateItem(item, true);
+			navigationStack.Remove(item);
+			(item as IDisposable)?.Dispose();
 		}
 	}
 }
