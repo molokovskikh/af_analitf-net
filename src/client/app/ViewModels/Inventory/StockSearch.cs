@@ -13,7 +13,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public StockSearch(string term)
 		{
-			DisplayName = "Поск товара";
+			DisplayName = "Поиск товара";
 			SearchBehavior = new SearchBehavior(this);
 			SearchBehavior.ActiveSearchTerm.Value = term;
 			WasCancelled = true;

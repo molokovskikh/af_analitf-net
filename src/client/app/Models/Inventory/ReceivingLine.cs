@@ -65,7 +65,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			Copy(stock, this);
 		}
 
-		private static void Copy(object srcItem, object dstItem)
+		public static void Copy(object srcItem, object dstItem)
 		{
 			var srcProps = srcItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite);
 			var dstProps = dstItem.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).ToDictionary(x => x.Name);

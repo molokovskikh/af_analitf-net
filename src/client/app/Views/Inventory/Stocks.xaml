@@ -23,6 +23,7 @@
 		<Menu Grid.Row="0">
 			<MenuItem Header="Документы">
 				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
+				<MenuItem Header="Инвентаризация" Name="Inventory" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />

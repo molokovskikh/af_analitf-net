@@ -40,7 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			QuickSearch = new QuickSearch<Stock>(UiScheduler,
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
-			Bus.Listen<string>("db").Where(x => x == "Stocks")
+			Bus.Listen<string>("db").Where(x => x == nameof(Stock))
 				.Subscribe(_ => UpdateOnActivate = true, CloseCancellation.Token);
 		}
 
@@ -224,6 +224,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Checks()
 		{
 			Shell.Navigate(new Checks());
+		}
+
+		public void Inventory()
+		{
+			Shell.Navigate(new InventoryDocs());
 		}
 	}
 }
