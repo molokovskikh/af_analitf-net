@@ -30,6 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		//изменения текущего предложения
 		protected NotifyValue<Offer> LastEditOffer;
 		protected bool NeedToCalculateDiff;
+		protected bool NavigateOnShowCatalog;
 		//адрес доставки для текущего элемента, нужен если мы отображаем элементы которые относятся к разным адресам доставки
 		protected Address CurrentElementAddress;
 		protected OfferComposedId initOfferId;
@@ -287,8 +288,18 @@ where c.Id = ?";
 			if (CurrentCatalog.Value == null)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value, CurrentOffer.Value?.Id);
-			Shell.Navigate(offerViewModel);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value,
+				CurrentOffer.Value?.Id);
+
+			if (NavigateOnShowCatalog || Shell.Navigator is TabNavigator) {
+				Shell.Navigate(offerViewModel);
+			} else {
+				var catalogViewModel = new CatalogViewModel {
+					CurrentCatalog = CurrentCatalog.Value
+				};
+
+				((Navigator)Shell.Navigator).NavigateAndReset(catalogViewModel, offerViewModel);
+			}
 		}
 
 		public static List<Offer> SortByMinCostInGroup<T>(IList<Offer> offer, Func<Offer, T> key, bool setGroupKey = true)

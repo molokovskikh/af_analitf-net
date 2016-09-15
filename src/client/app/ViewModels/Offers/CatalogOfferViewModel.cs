@@ -15,6 +15,7 @@ using Common.Tools;
 using NHibernate.Linq;
 using ReactiveUI;
 using System.Windows;
+using AnalitF.Net.Client.ViewModels.Parts;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
@@ -269,9 +270,20 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (CurrentOffer.Value == null)
 				return;
 
-			var price = CurrentOffer.Value.Price;
-			var offerViewModel = new PriceOfferViewModel(price.Id, false, CurrentOffer.Value.Id);
-			Shell.Navigate(offerViewModel);
+			if (Shell.Navigator is Navigator) {
+				var price = CurrentOffer.Value.Price;
+				var prices = new PriceViewModel {
+					CurrentPrice = {
+						Value = price
+					}
+				};
+				var offerViewModel = new PriceOfferViewModel(price.Id, prices.ShowLeaders, CurrentOffer.Value.Id);
+				((Navigator)Shell.Navigator).NavigateAndReset(prices, offerViewModel);
+			} else {
+				var price = CurrentOffer.Value.Price;
+				var offers = new PriceOfferViewModel(price.Id, false, CurrentOffer.Value.Id);
+				Shell.Navigate(offers);
+			}
 		}
 
 		public void SearchInCatalog(object sender, TextCompositionEventArgs args)

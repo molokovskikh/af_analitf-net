@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
-using AnalitF.Net.Client.Helpers;
 using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Parts
 {
-	public class Navigator
+	public interface INavigator : IDisposable
 	{
-		private Conductor<IScreen>.Collection.OneActive conductor;
-		private List<IScreen> navigationStack = new List<IScreen>();
+		IEnumerable<IScreen> NavigationStack { get; }
+		void Navigate(IScreen item);
+		void NavigateRoot(IScreen screen);
+		void NavigateBack();
+	}
 
-		public Navigator(Conductor<IScreen>.Collection.OneActive conductor)
+	public class Navigator : INavigator
+	{
+		private ConductorBaseWithActiveItem<IScreen> conductor;
+		private Stack<IScreen> navigationStack = new Stack<IScreen>();
+
+		public IScreen DefaultScreen;
+
+		public Navigator(ConductorBaseWithActiveItem<IScreen> conductor)
 		{
 			this.conductor = conductor;
 		}
@@ -23,58 +29,118 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public void Navigate(IScreen item)
 		{
-			if (conductor.ActiveItem != null)
-				navigationStack.Add(conductor.ActiveItem);
+			HideDefault();
+
+			if (conductor.ActiveItem != null) {
+				navigationStack.Push(conductor.ActiveItem);
+				conductor.DeactivateItem(conductor.ActiveItem, false);
+			}
+
 			conductor.ActivateItem(item);
+		}
+
+		private void HideDefault()
+		{
+			if (conductor.ActiveItem != null && conductor.ActiveItem == DefaultScreen)
+				conductor.DeactivateItem(conductor.ActiveItem, false);
+		}
+
+		public void ResetNavigation()
+		{
+			while (navigationStack.Count > 0) {
+				var screen = navigationStack.Pop();
+				CloseAndDispose(screen);
+			}
+
+			if (conductor.ActiveItem != null && conductor.ActiveItem != DefaultScreen)
+				conductor.ActiveItem.TryClose();
+			if (conductor.ActiveItem == null)
+				conductor.ActiveItem = DefaultScreen;
+		}
+
+		public void NavigateAndReset(params IScreen[] views)
+		{
+			if (views.Length == 0)
+				return;
+
+			ResetNavigation();
+			HideDefault();
+
+			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
+			foreach (var screen in chain) {
+				navigationStack.Push(screen);
+			}
+			conductor.ActivateItem(views.Last());
+		}
+
+		public void Activate()
+		{
+			NavigateRoot(DefaultScreen);
 		}
 
 		public void NavigateRoot(IScreen screen)
 		{
-			navigationStack.Clear();
-			var same = conductor.Items.FirstOrDefault(x => x.GetType() == screen.GetType());
-			if (same != null) {
-				(screen as IDisposable)?.Dispose();
-				conductor.ActivateItem(same);
-			} else {
-				conductor.ActivateItem(screen);
+			if (screen == null)
+				return;
+
+			if (ReferenceEquals(screen, conductor.ActiveItem))
+				return;
+
+			if (conductor.ActiveItem != null && conductor.ActiveItem.GetType() == screen.GetType()) {
+				CloseAndDispose(screen);
+				return;
 			}
+
+			HideDefault();
+
+			while (navigationStack.Count > 0) {
+				var closing = navigationStack.Pop();
+				if (closing.GetType() == screen.GetType()) {
+					if (!ReferenceEquals(screen, closing))
+						CloseAndDispose(screen);
+					screen = closing;
+					break;
+				}
+				CloseAndDispose(closing);
+			}
+
+			HideDefault();
+			conductor.ActiveItem?.TryClose();
+			HideDefault();
+
+			if (IsEmptyOrDefault())
+				conductor.ActivateItem(screen);
+		}
+
+		//если форма не была инициализирована то она и не будет закрыта
+		//надо явно освободить ресурсы
+		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
+		public static void CloseAndDispose(IScreen screen)
+		{
+			screen.TryClose();
+			if (screen is IDisposable) {
+				((IDisposable)screen).Dispose();
+			}
+		}
+
+		private bool IsEmptyOrDefault()
+		{
+			return conductor.ActiveItem == null;
 		}
 
 		public void NavigateBack()
 		{
-			CloseActive();
-			if (navigationStack.Count > 0) {
-				var screen = navigationStack.Last();
-				conductor.ActivateItem(screen);
-				navigationStack.Remove(screen);
-			}
+			if (navigationStack.Count > 0)
+				conductor.ActivateItem(navigationStack.Pop());
+			else if (DefaultScreen != null)
+				conductor.ActiveItem = DefaultScreen;
 		}
 
-		public void CloseActive()
+		public void Dispose()
 		{
-			CloseScreen(conductor.ActiveItem);
-		}
-
-		public void CloseScreen(IScreen item)
-		{
-			if (item == null)
-				return;
-
-			//исправление для ошибки
-			//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
-			var view = (FrameworkElement)conductor.GetView();
-			if (view != null)
-			{
-				var tabs = view.Descendants<TabControl>().First(x => x.Name == "Items");
-				var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
-				if (tab != null)
-					tab.Template = null;
-			}
-
-			conductor.Items.Remove(item);
-			conductor.DeactivateItem(item, true);
-			navigationStack.Remove(item);
-			(item as IDisposable)?.Dispose();
+			foreach (var screen in NavigationStack.OfType<IDisposable>())
+				screen.Dispose();
+			navigationStack.Clear();
 		}
 	}
 }

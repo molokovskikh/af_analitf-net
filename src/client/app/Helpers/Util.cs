@@ -21,10 +21,25 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public static class Util
 	{
+		static ILog log = LogManager.GetLogger(typeof(Util));
+
 		private enum State
 		{
 			Key,
 			Value
+		}
+
+		public static void SafeWait(this Task task)
+		{
+#if DEBUG
+			task.Wait();
+#else
+			try {
+				task.Wait();
+			} catch(Exception e) {
+				log.Error("Выполнение задачи завершилось ошибкой", e)
+			}
+#endif
 		}
 
 		[Conditional("DEBUG")]

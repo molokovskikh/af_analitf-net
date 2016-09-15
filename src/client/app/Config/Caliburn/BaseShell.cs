@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 
 	public class BaseShell : Conductor<IScreen>.Collection.OneActive
 	{
-		public Navigator Navigator;
+		public INavigator Navigator;
 
 		public Env Env = Env.Current ?? new Env();
 		public event Func<RemoteCommand, RemoteCommand> CommandExecuting;
@@ -107,10 +107,7 @@ namespace AnalitF.Net.Client.Config.Caliburn
 			base.OnDeactivate(close);
 
 			if (close) {
-				var disposable = this as IDisposable;
-				if (disposable != null) {
-					disposable.Dispose();
-				}
+				(this as IDisposable)?.Dispose();
 			}
 		}
 

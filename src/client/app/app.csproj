@@ -294,7 +294,8 @@
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
     <Compile Include="Models\PriceTag.cs" />
-    <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />    <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
+    <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
     <Compile Include="Models\ProducerPromotion.cs" />
@@ -436,6 +437,7 @@
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\Offers\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
+    <Compile Include="ViewModels\Parts\TabNavigator.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />

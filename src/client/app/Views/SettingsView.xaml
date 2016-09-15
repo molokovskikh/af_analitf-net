@@ -516,6 +516,7 @@
 			<TabItem Header="Визуализация" Name="ViewSettingsTab">
 				<ScrollViewer CanContentScroll="False" VerticalScrollBarVisibility="Auto">
 					<StackPanel>
+						<CheckBox x:Name="Settings_TabbedUI">Интерфейс на основе закладок (требуется перезапуск приложения)</CheckBox>
 						<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
 						<CheckBox x:Name="Settings_EditAddresses"
 						          ToolTip="При включении опции на панели выбора адреса доставки будут отображены флаги активных адресов, для активных адресов будет производиться загрузка заявок">

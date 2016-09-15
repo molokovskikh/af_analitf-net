@@ -27,6 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 		{
 			DisplayName = "Поиск в прайс-листах";
 			NeedToCalculateDiff = true;
+			NavigateOnShowCatalog = true;
 
 			HideJunk = new NotifyValue<bool>();
 			OnlyBase = new NotifyValue<bool>();
