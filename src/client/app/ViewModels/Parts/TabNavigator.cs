@@ -71,9 +71,5 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			navigationStack.Remove(item);
 			(item as IDisposable)?.Dispose();
 		}
-
-		public void Dispose()
-		{
-		}
 	}
 }

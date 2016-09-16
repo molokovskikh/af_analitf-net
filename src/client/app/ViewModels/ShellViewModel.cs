@@ -1145,7 +1145,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			PersistentNavigationStack = NavigationStack
+			PersistentNavigationStack = NavigationStack.Skip(1)
 				.Concat(new [] { ActiveItem })
 				.Select(s => new RestoreData(s))
 				.ToList();
