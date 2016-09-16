@@ -206,6 +206,8 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual void Calculate(Settings settings, IList<uint> specialMarkupProducts)
 		{
+			if (UserSupplierName == null)
+				UserSupplierName = SupplierName;
 			Settings = settings;
 			if (Rounding == null)
 				Rounding = settings.Rounding;
