@@ -37,7 +37,7 @@ namespace AnalitF.Net.Client.Helpers
 			try {
 				task.Wait();
 			} catch(Exception e) {
-				log.Error("Выполнение задачи завершилось ошибкой", e)
+				log.Error("Выполнение задачи завершилось ошибкой", e);
 			}
 #endif
 		}
