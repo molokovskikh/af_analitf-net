@@ -2173,7 +2173,6 @@ where r.DownloadId in (:ids)")
 					&& f.Length < Config.MaxReclameFileSize)
 				.ToArray();
 			if (files.Length == 0) {
-				data.LastPendingReclameUpdateAt = null;
 				return;
 			}
 			data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
@@ -2190,7 +2189,6 @@ where r.DownloadId in (:ids)")
 		{
 			return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind);
 		}
-
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
 		{

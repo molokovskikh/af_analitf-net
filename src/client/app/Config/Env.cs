@@ -103,6 +103,8 @@ namespace AnalitF.Net.Client.Config
 		public Task Query(Action<IStatelessSession> action)
 		{
 			var task = new Task(() => {
+				if (Factory == null)
+					return;
 				if (BaseScreen.BackgroundSession == null)
 					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
 				action(BaseScreen.BackgroundSession);

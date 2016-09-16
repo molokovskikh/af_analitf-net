@@ -278,6 +278,13 @@ namespace AnalitF.Net.Service.Test
 
 			exporter.Confirm(new ConfirmRequest(requestLog.Id));
 
+			//для корректной обработки кеша после первого обновления дата будет установлена на 00:00 текущего дня
+			//те второе обновление может содержать данные которые были обновлены с 00:00 по текущее время
+			Init(session.Load<AnalitfNetData>(user.Id).LastUpdateAt);
+			ReadResult();
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
+
+			//в третьем обновлении никаких справочников быть не должно
 			//кеш данной сессии неактуальный тк обновление происходит в другой сессии
 			var data = session.Load<AnalitfNetData>(user.Id);
 			Init(data.LastUpdateAt);

@@ -15,7 +15,6 @@ using log4net.Appender;
 using log4net.Repository.Hierarchy;
 using NHibernate.Linq;
 using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
