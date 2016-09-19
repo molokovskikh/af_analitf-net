@@ -13,6 +13,9 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			var order = new TestOrder(testUser, price);
 			order.WriteTime = DateTime.Now.AddDays(-1);
 			order.AddItem(price.Core[0], 1);
+			order.Deleted = false;
+			order.Processed = false;
+			order.Submited = false;
 			session.Save(order);
 		}
 	}

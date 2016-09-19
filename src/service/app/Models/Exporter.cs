@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -28,6 +29,7 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
@@ -1561,8 +1563,8 @@ where a.MailId in ({ids.Implode()})";
 
 				return;
 			}
-			if (!userSettings.AllowDownloadUnconfirmedOrders)
-				return;
+			//if (!userSettings.AllowDownloadUnconfirmedOrders)
+				//return;
 
 			session.CreateSQLQuery("delete from Logs.PendingOrderLogs where UserId = :userId")
 				.SetParameter("userId", user.Id)
@@ -1574,11 +1576,13 @@ where a.MailId in ({ids.Implode()})";
 				.Where(o => !o.Deleted
 					&& !o.Processed
 					&& !o.Submited
-					&& o.UserId != user.Id
+					//&& o.UserId != user.Id
 					&& addresses.Contains(o.AddressId))
 				.ToArray();
+			MessageBox.Show(session.Query<Order>().ToList().Count.ToString());
+			MessageBox.Show(orders.Length.ToString());
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
-
+			MessageBox.Show(orders.Length.ToString());
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
 				foreach (var order in group) {
