@@ -300,7 +300,7 @@ namespace AnalitF.Net.Client.Test.Acceptance
 			}
 			else {
 				Assert.That(text, Does.Contain(result));
-				ClickByName("TryClose", dialog);
+				Click("TryClose", dialog);
 			}
 		}
 
