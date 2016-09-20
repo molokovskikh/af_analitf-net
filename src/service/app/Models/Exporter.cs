@@ -1579,10 +1579,7 @@ where a.MailId in ({ids.Implode()})";
 					//&& o.UserId != user.Id
 					&& addresses.Contains(o.AddressId))
 				.ToArray();
-			MessageBox.Show(session.Query<Order>().ToList().Count.ToString());
-			MessageBox.Show(orders.Length.ToString());
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
-			MessageBox.Show(orders.Length.ToString());
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
 				foreach (var order in group) {
