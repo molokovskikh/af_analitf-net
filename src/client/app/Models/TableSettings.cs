@@ -40,9 +40,6 @@ namespace AnalitF.Net.Client.Models
 			if (dependencyObject == null)
 				return;
 
-			if (defaults.Count != 0)
-				return;
-
 			foreach (var grid in GetControls(view)) {
 				SaveView(grid, defaults);
 				RestoreView(grid, Persisted);
