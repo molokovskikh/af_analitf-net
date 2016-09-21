@@ -204,6 +204,7 @@ namespace AnalitF.Net.Service.Test
 			var files = ListResult();
 			Assert.AreEqual(files, String.Format("Waybills/{0}, Waybills.meta.txt, Waybills.txt,"
 				+ " WaybillLines.meta.txt, WaybillLines.txt, WaybillOrders.meta.txt, WaybillOrders.txt,"
+				+ " stocks.meta.txt, stocks.txt,"
 				+ " OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt,"
 				+ " LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				Path.GetFileName(waybillFile)));
@@ -253,6 +254,7 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual("Waybills.meta.txt, Waybills.txt," +
 				" WaybillLines.meta.txt, WaybillLines.txt," +
 				" WaybillOrders.meta.txt, WaybillOrders.txt," +
+				" stocks.meta.txt, stocks.txt," +
 				" OrderRejects.meta.txt, OrderRejects.txt, OrderRejectLines.meta.txt, OrderRejectLines.txt," +
 				" LoadedDocuments.meta.txt, LoadedDocuments.txt",
 				files);
