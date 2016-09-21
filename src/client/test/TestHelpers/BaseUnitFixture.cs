@@ -49,6 +49,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 
 			manager = ViewModelFixture.StubWindowManager();
 			shell = new ShellViewModel();
+			cleanup.Add(shell);
 		}
 
 		[TearDown]

@@ -272,7 +272,6 @@
     <Compile Include="Unit\Models\MailFixture.cs" />
     <Compile Include="Unit\Models\ResultDirFixture.cs" />
     <Compile Include="Unit\Models\ScheduleFixture.cs" />
-    <Compile Include="Unit\Models\StockFixture.cs" />
     <Compile Include="Unit\Models\StockTotalFixture.cs" />
     <Compile Include="Unit\Models\UserFixture.cs" />
     <Compile Include="Unit\Models\WaybillFixture.cs" />
