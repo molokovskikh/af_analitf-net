@@ -182,6 +182,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				trx.Commit();
 			}
 			Bus.SendMessage(nameof(Stock), "db");
+			Bus.SendMessage(nameof(Check), "db");
 			Message("Оплата наличными");
 			Reset();
 		}

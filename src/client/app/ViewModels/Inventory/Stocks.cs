@@ -40,8 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			QuickSearch = new QuickSearch<Stock>(UiScheduler,
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
-			Bus.Listen<string>("db").Where(x => x == nameof(Stock))
-				.Subscribe(_ => UpdateOnActivate = true, CloseCancellation.Token);
+			TrackDb(typeof(Stock));
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -97,11 +96,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			Session.Refresh(stock);
 			Update();
-		}
-
-		public override void Update()
-		{
-			DbReloadToken.Value = new object();
 		}
 
 		public IResult ExportExcel()

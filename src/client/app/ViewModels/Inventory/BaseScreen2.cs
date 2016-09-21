@@ -15,5 +15,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			return base.RxQuery(@select).ObserveOn(UiScheduler);
 		}
+
+		protected void TrackDb(Type type)
+		{
+			Bus.Listen<string>("db").Where(x => x == type.Name)
+				.Subscribe(_ => UpdateOnActivate = true, CloseCancellation.Token);
+		}
+
+		public override void Update()
+		{
+			DbReloadToken.Value = new object();
+		}
 	}
 }

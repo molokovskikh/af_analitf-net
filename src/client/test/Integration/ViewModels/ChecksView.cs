@@ -100,6 +100,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			check.Date = DateTime.Today.AddDays(14);
 			session.Save(check);
 			model.Update();
+			scheduler.AdvanceByMs(500);
+			scheduler.Start();
 			Assert.AreEqual(0, model.Items.Value.Count);
 		}
 
@@ -119,6 +121,8 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.Items.Value.Count, Is.EqualTo(1));
 			model.AddressSelector.All.Value = false;
 			shell.CurrentAddress.Value = null;
+			scheduler.AdvanceByMs(500);
+			scheduler.Start();
 			Assert.That(model.Items.Value.Count, Is.EqualTo(0));
 		}
 	}
