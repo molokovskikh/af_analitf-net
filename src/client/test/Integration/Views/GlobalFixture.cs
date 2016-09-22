@@ -313,7 +313,6 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Make_order_correction()
 		{
-			restore = true;
 			session.DeleteEach<Order>();
 			MakeOrder();
 			Fixture<RandCost>();
@@ -795,7 +794,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		[Test]
 		public void Show_order_restore_result_after_update_notification()
 		{
-			//session.DeleteEach<Order>();
+			session.DeleteEach<Order>();
 			SimpleFixture.CreateCleanAwaited(session);
 			MakeOrder();
 			Fixture<RandCost>();
