@@ -14,7 +14,7 @@ namespace AnalitF.Net.Service.Models
 	public class DocumentLog
 	{
 		public virtual uint Id { get; set; }
-		public virtual uint? AddressId { get; set; }
+		public virtual Address Address { get; set; }
 		public virtual DocType DocumentType { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual string Filename { get; set; }

@@ -40,12 +40,10 @@ namespace AnalitF.Net.Client.ViewModels
 			CurrentLine = new NotifyValue<object>();
 			CurrentWaybillLine = CurrentLine.OfType<WaybillLine>().ToValue();
 			CurrentTax = new NotifyValue<ValueDescription<int?>>();
-			Rounding = new NotifyValue<Rounding>(Models.Rounding.To0_10);
 			CurrentOrderLine = new NotifyValue<SentOrderLine>();
 			Lines = new NotifyValue<ListCollectionView>();
 
-			Rounding.Changed()
-				.Merge(Settings.Changed())
+			Settings.Changed()
 				.Subscribe(v => Calculate());
 			CurrentTax.Subscribe(v => {
 				if (Lines.Value == null)
@@ -91,7 +89,6 @@ namespace AnalitF.Net.Client.ViewModels
 			OrderDetailsVisibility = EmptyLabelVisibility
 				.Select(v => v == Visibility.Collapsed ? Visibility.Visible :  Visibility.Collapsed)
 				.ToValue();
-			SessionValue(Rounding, nameof(Rounding));
 		}
 
 		public Waybill Waybill { get; set; }
@@ -109,22 +106,18 @@ namespace AnalitF.Net.Client.ViewModels
 		public NotifyValue<Visibility> EmptyLabelVisibility { get; set; }
 		public NotifyValue<bool> IsRejectVisible { get; set; }
 		public NotifyValue<Reject> Reject { get; set; }
-		public NotifyValue<Rounding> Rounding { get; set; }
 
 		private void Calculate()
 		{
 			//в случае если мы восстановили значение из сессии
-			if (Waybill == null)
-				return;
-			Settings.Value.Rounding = Rounding.Value;
-			Waybill.Calculate(Settings.Value, Shell?.SpecialMarkupProducts.Value);
+			Waybill?.Calculate(Settings.Value, Shell?.SpecialMarkupProducts.Value);
 		}
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
-			Shell.SpecialMarkupProducts.Subscribe(_ => Calculate());
+			OnCloseDisposable.Add(Shell.SpecialMarkupProducts.Subscribe(_ => Calculate()));
 
 			if (Session == null)
 				return;

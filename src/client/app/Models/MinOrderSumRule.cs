@@ -1,8 +1,9 @@
 ﻿using System;
+using AnalitF.Net.Client.Helpers;
 
 namespace AnalitF.Net.Client.Models
 {
-	public class MinOrderSumRule : IEquatable<MinOrderSumRule>
+	public class MinOrderSumRule : BaseNotify, IEquatable<MinOrderSumRule>
 	{
 		public MinOrderSumRule()
 		{
@@ -39,7 +40,7 @@ namespace AnalitF.Net.Client.Models
 		public override int GetHashCode()
 		{
 			unchecked {
-				return ((Price != null ? Price.Id.GetHashCode() : 0) * 397) ^ (Address != null ? Address.Id.GetHashCode() : 0);
+				return ((Price?.Id.GetHashCode() ?? 0) * 397) ^ (Address?.Id.GetHashCode() ?? 0);
 			}
 		}
 	}

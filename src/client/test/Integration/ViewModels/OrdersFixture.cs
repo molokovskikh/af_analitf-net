@@ -252,6 +252,27 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Check_DisplayId_move()
+		{
+			restore = true;
+
+			var newAddress = new Address("Я - Тестовый адрес доставки");
+			session.Save(newAddress);
+			PrepareCurrent();
+
+			model.AddressSelector.All.Value = true;
+			model.CurrentOrder = model.Orders.First();
+			var displayId = model.Orders.First().DisplayId;
+			model.AddressToMove = model.AddressesToMove.Find(a => a.Id == newAddress.Id);
+			Assert.True(model.CanMove);
+			Assert.That(model.MoveVisible);
+			TaskResult(model.Move());
+			Assert.That(model.Orders[0].Address.Id, Is.EqualTo(newAddress.Id));
+			var newDisplayId = displayId + 1;
+			Assert.AreEqual(newDisplayId, model.Orders[0].DisplayId);
+		}
+
+		[Test]
 		public void Update_stat_after_delete_in_full_view_move()
 		{
 			PrepareCurrent();
@@ -398,6 +419,26 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(model.Orders.Count, Is.EqualTo(0));
 			model.AddressSelector.All.Value = true;
 			Assert.That(model.Orders.Count, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void Restore_order_check_Id()
+		{
+			session.DeleteEach<Order>();
+			session.DeleteEach<SentOrder>();
+			PrepareCurrent();
+			shell.SendOrders().ToArray();
+			SelectSent();
+			var sentOrderId = model.SentOrders.First().DisplayId;
+			model.Update();
+			Assert.That(model.CanRestoreOrder, Is.True);
+			TaskResult(model.RestoreOrder());
+			Assert.That(model.SentOrders.Count, Is.EqualTo(1));
+			model.IsCurrentSelected.Value = true;
+			model.IsSentSelected.Value = false;
+			Assert.That(model.Orders.Count, Is.EqualTo(1));
+			var restoreId = model.Orders[0].DisplayId;
+			Assert.AreNotEqual(restoreId, sentOrderId);
 		}
 	}
 }

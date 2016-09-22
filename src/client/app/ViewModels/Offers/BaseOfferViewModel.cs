@@ -291,15 +291,14 @@ where c.Id = ?";
 			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value,
 				CurrentOffer.Value?.Id);
 
-			if (NavigateOnShowCatalog) {
+			if (NavigateOnShowCatalog || Shell.Navigator is TabNavigator) {
 				Shell.Navigate(offerViewModel);
-			}
-			else {
+			} else {
 				var catalogViewModel = new CatalogViewModel {
 					CurrentCatalog = CurrentCatalog.Value
 				};
 
-				Shell.NavigateAndReset(catalogViewModel, offerViewModel);
+				((Navigator)Shell.Navigator).NavigateAndReset(catalogViewModel, offerViewModel);
 			}
 		}
 

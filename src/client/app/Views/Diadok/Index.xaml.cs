@@ -22,6 +22,20 @@ namespace AnalitF.Net.Client.Views.Diadok
 		public Index()
 		{
 			InitializeComponent();
+			Documents.SizeChanged += Documents_SizeChanged;
+		}
+
+		private void Documents_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			ListView lv = (ListView)e.Source;
+			Size ns = e.NewSize;
+			GridView cols = lv.View as GridView;
+
+			double[] absize = new double[] { 0.20, 0.25, 0.25, 0.15, 0.12 };
+			for(int i = 0; i < cols.Columns.Count && i < absize.Length; i++)
+			{
+				cols.Columns[i].Width = ns.Width * absize[i];
+			}
 		}
 	}
 }

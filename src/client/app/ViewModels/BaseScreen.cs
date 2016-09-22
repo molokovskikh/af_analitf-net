@@ -18,8 +18,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interactivity;
 using AnalitF.Net.Client.Config;
 using AnalitF.Net.Client.Config.Caliburn;
+using AnalitF.Net.Client.Controls.Behaviors;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Results;
@@ -96,6 +98,8 @@ namespace AnalitF.Net.Client.ViewModels
 		private List<PersistedValue> session = new List<PersistedValue>();
 		private bool clearSession;
 		private bool reload;
+		private Dictionary<string, List<ColumnSettings>> temporaryTableSettings
+			= new Dictionary<string, List<ColumnSettings>>();
 
 		protected bool UpdateOnActivate = true;
 		//Флаг отвечает за обновление данных на форме после активации
@@ -124,6 +128,7 @@ namespace AnalitF.Net.Client.ViewModels
 		//Флаг для оптимизации восстановления состояния таблиц
 		public bool SkipRestoreTable;
 		public NotifyValue<object> DbReloadToken = new NotifyValue<object>();
+		public NotifyValue<object> OrdersReloadToken = new NotifyValue<object>();
 		/// <summary>
 		/// использовать только через RxQuery,
 		/// живет на протяжении жизни всего приложения и будет закрыто при завершении приложения
@@ -268,6 +273,7 @@ namespace AnalitF.Net.Client.ViewModels
 			if (clearSession) {
 				RecreateSession();
 				clearSession = false;
+				OrdersReloadToken.OnNext(new object());
 			}
 
 			IsSuccessfulActivated = true;
@@ -277,9 +283,10 @@ namespace AnalitF.Net.Client.ViewModels
 				UpdateOnActivate = false;
 			}
 			if (reload) {
-				DbReloadToken.OnNext(new object());
 				reload = false;
+				DbReloadToken.OnNext(new object());
 			}
+			RestoreSettingWithReopenScreen();
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -321,8 +328,63 @@ namespace AnalitF.Net.Client.ViewModels
 				Dispose();
 			}
 
+			if (!close) {
+				SaveSettingWithReopenScreen();
+			}
+
 			if (broacast)
 				Broadcast();
+		}
+
+		private IEnumerable<DataGrid> GetControls(object view)
+		{
+			var dependencyObject = view as DependencyObject;
+			if (dependencyObject == null)
+				return Enumerable.Empty<DataGrid>();
+			return dependencyObject.LogicalDescendants().OfType<DataGrid>()
+				.Where(c => Interaction.GetBehaviors(c).OfType<Persistable>().Any());
+		}
+
+		private void SaveSettingWithReopenScreen()
+		{
+			foreach (var grid in GetControls(GetView())) {
+				var key = grid.Name;
+				if (temporaryTableSettings.ContainsKey(key)) {
+					temporaryTableSettings.Remove(key);
+				}
+				temporaryTableSettings.Add(key, grid.Columns.Select((c, i) => new ColumnSettings(grid, c, i)).ToList());
+			}
+		}
+
+		private void RestoreSettingWithReopenScreen()
+		{
+			if (temporaryTableSettings.Count == 0)
+				return;
+			foreach (var grid in GetControls(GetView())) {
+				RestoreView(grid, temporaryTableSettings);
+			}
+		}
+		private void RestoreView(DataGrid dataGrid, Dictionary<string, List<ColumnSettings>> storage)
+		{
+			var settings = storage.GetValueOrDefault(dataGrid.Name);
+			if (settings == null)
+				return;
+			foreach (var column in settings.OrderBy(c => c.DisplayIndex))
+				column.Restore(dataGrid, dataGrid.Columns);
+			var sorted = settings.FirstOrDefault(x => x.SortDirection != null);
+			if (sorted != null) {
+				var column = DataGridHelper.FindColumn(dataGrid, sorted.Name);
+				if (column != null) {
+					foreach (var gridColumn in dataGrid.Columns)
+						gridColumn.SortDirection = null;
+					column.SortDirection = sorted.SortDirection;
+					dataGrid.Items.SortDescriptions.Clear();
+					dataGrid.Items.SortDescriptions.Add(new SortDescription(column.SortMemberPath, column.SortDirection.Value));
+				}
+			}
+			foreach (var column in dataGrid.Columns.Where(c => !settings.Select(s => s.Name).Contains(DataGridHelper.GetHeader(c)))) {
+				column.DisplayIndex = dataGrid.Columns.IndexOf(column);
+			}
 		}
 
 		protected virtual void Broadcast()

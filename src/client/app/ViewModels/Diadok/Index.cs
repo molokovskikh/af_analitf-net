@@ -31,11 +31,17 @@ using Message = Diadoc.Api.Proto.Events.Message;
 using ResolutionRequestType = Diadoc.Api.Proto.Events.ResolutionRequestType;
 using ResolutionStatusType = Diadoc.Api.Proto.Documents.ResolutionStatusType;
 using ResolutionType = Diadoc.Api.Proto.Events.ResolutionType;
+using BilateralDocumentStatus = Diadoc.Api.Proto.Documents.BilateralDocument.BilateralDocumentStatus;
 using Diadoc.Api.Proto.Documents.NonformalizedDocument;
 using PdfiumViewer;
 using ReactiveUI;
 using DialogResult = System.Windows.Forms.DialogResult;
+using DocumentType = Diadoc.Api.Com.DocumentType;
 using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
+using Diadoc.Api.Proto.Invoicing;
+using System.Xml.XPath;
+using DocumentFlow = Diadoc.Api.Proto.Docflow;
+using System.Dynamic;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -51,7 +57,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			{ NonformalizedDocumentStatus.InboundWaitingForRecipientSignature, "Требуется подпись" },
 			{ NonformalizedDocumentStatus.InboundWithRecipientSignature, "Подписан" },
 		};
-
+		private string documentFilename;
 		private string localFilename;
 		public Entity Entity;
 		public Message Message;
@@ -66,10 +72,29 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				.FirstOrDefault(x => x.DepartmentId == entity.DocumentInfo.DepartmentId)?.Name
 					?? "Головное подразделение";
 			Date = entity.CreationTime.ToLocalTime();
+
+			switch(entity.AttachmentType) {
+				case AttachmentType.XmlTorg12:
+					documentFilename = new DiadocXmlHelper(entity).GetDiadokTORG12Name();
+					break;
+				case AttachmentType.Invoice:
+					documentFilename = new DiadocXmlHelper(entity).GetDiadokInvoiceName();
+					break;
+				default:
+					documentFilename = entity.FileName;
+					break;
+			}
 		}
 
 		public string Sender { get; set; }
 		public string FileName => Entity.FileName;
+		public string DocumentName
+		{
+			get
+			{
+				return documentFilename;
+			}
+		}
 		public string Status => GetStatus();
 		public bool IsGroup => !String.IsNullOrEmpty(Sender);
 		public string Department { get; set; }
@@ -115,11 +140,76 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			var status = desc.Where(x => !String.IsNullOrEmpty(x)).Implode();
 			if (String.IsNullOrEmpty(status))
 				status = "Получен";
+			switch (Entity.DocumentInfo.Type) {
+				case DocumentType.Invoice: {
+					switch (Entity.DocumentInfo.InvoiceMetadata.Status) {
+						case Diadoc.Api.Com.InvoiceStatus.InboundNotFinished:
+							status = "Требуется подписать извещение";
+						break;
+						case Diadoc.Api.Com.InvoiceStatus.InboundFinished:
+							status = "Документооборот завершен";
+						break;
+					}
+				}
+				break;
+				case DocumentType.XmlTorg12: {
+					switch(Entity.DocumentInfo.XmlTorg12Metadata.DocumentStatus) {
+						case BilateralDocumentStatus.InboundWithRecipientSignature:
+							status = "Подписан";
+						break;
+						case BilateralDocumentStatus.InboundWaitingForRecipientSignature:
+							status = "Требуется подпись";
+						break;
+						case BilateralDocumentStatus.InboundRecipientSignatureRequestRejected:
+							status = "В подписи отказано";
+						break;
+					}
+				}
+				break;
+			}
+			switch (Entity.DocumentInfo.DocumentRevocationStatus) {
+				case Diadoc.Api.Com.RevocationStatus.RevocationRejected:
+					status += ". Отказано в аннулировании";
+				break;
+			}
+			if(Entity.DocumentInfo.ResolutionStatus != null) {
+				switch (Entity.DocumentInfo.ResolutionStatus.StatusType) {
+					case Diadoc.Api.Com.ResolutionStatusType.ApprovementRequested:
+						status += ". На согласовании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.Approved:
+						status += ". Согласован";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.Disapproved:
+						status += ". Отказано в согласовании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.SignatureRequested:
+						status += ". На подписании";
+					break;
+					case Diadoc.Api.Com.ResolutionStatusType.SignatureDenied:
+						status += ". Отказано в подписании";
+					break;
+				}
+			}
+			switch(Entity.DocumentInfo.RevocationStatus) {
+				case RevocationStatus.RevocationIsRequestedByMe:
+					status = "Ожидается аннулирование";
+				break;
+				case RevocationStatus.RevocationAccepted:
+					status = "Аннулирован";
+				break;
+				case RevocationStatus.RequestsMyRevocation:
+					status = "Требуется аннулирование";
+				break;
+			}
+
 			return status;
 		}
 
 		public virtual bool CanSign()
 		{
+			if (Entity.DocumentInfo?.RevocationStatus == RevocationStatus.RequestsMyRevocation)
+				return true;
 			if (Entity.DocumentInfo?.ResolutionStatus?.Type == ResolutionStatusType.ApprovementRequested
 				&& Entity.DocumentInfo?.ResolutionStatus?.Type == ResolutionStatusType.SignatureRequested)
 				return false;
@@ -230,6 +320,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		public DateTime Date { get; set; }
 		public string Comment { get; set; }
 		public bool HasComment => !String.IsNullOrEmpty(Comment);
+		public bool IsChecked { get { return true;} set { } }
 
 		public static List<AttachmentHistory> Collect(DisplayItem item)
 		{
@@ -280,11 +371,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.Resolution) {
-					items.Add(new AttachmentHistory {
-						Description = $"{entity.ResolutionInfo.Author} отказал в согласовании документа",
+					if (entity.ResolutionInfo.ResolutionType == ResolutionType.Approve) {
+						items.Add(new AttachmentHistory {
+						Description = $"{entity.ResolutionInfo.Author} согласовал документ",
 						Comment = Encoding.UTF8.GetString(entity.Content?.Data ?? new byte[0]),
 						Date = entity.CreationTime.ToLocalTime()
 					});
+					} else if (entity.ResolutionInfo.ResolutionType == ResolutionType.Disapprove) {
+						items.Add(new AttachmentHistory {
+							Description = $"{entity.ResolutionInfo.Author} отказал в согласовании документа",
+							Comment = Encoding.UTF8.GetString(entity.Content?.Data ?? new byte[0]),
+							Date = entity.CreationTime.ToLocalTime()
+						});
+					}
 				} else if (entity.AttachmentType == AttachmentType.ResolutionRequestDenial) {
 					items.Add(new AttachmentHistory {
 						Description = $"{entity.ResolutionRequestDenialInfo.Author} отказал в запросе подписи сотруднику",
@@ -292,9 +391,63 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				} else if (entity.AttachmentType == AttachmentType.XmlSignatureRejection) {
-					//todo комментарий содержится внутри xml в Content
+					var xml = new DiadocXmlHelper(entity);
+					var fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
+					var comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
 					items.Add(new AttachmentHistory {
-						Description = "Отказано в подписании документа",
+						Description = $"{fio} отказал в подписи документа",
+						Comment = comment,
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				} else if (entity.AttachmentType == AttachmentType.InvoiceConfirmation) {
+					items.Add(new AttachmentHistory {
+						Description = $"{message.ToTitle}, документ получен",
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				} else if (entity.AttachmentType == AttachmentType.InvoiceReceipt) {
+					var xml = new DiadocXmlHelper(entity);
+					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
+					items.Add(new AttachmentHistory {
+						Description = $"{fio} подписал и отправил извещение о получении",
+						Date = entity.CreationTime.ToLocalTime()
+					});
+				}
+				else if (entity.AttachmentType == AttachmentType.RevocationRequest) {
+					var xml = new DiadocXmlHelper(entity);
+					var orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
+					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
+					var comment = xml.GetValue("Файл/Документ/СвПредАн/ТекстПредАн");
+					items.Add(new AttachmentHistory {
+						Description = $"{orgName}, {fio} подписал и отправил соглашение об аннулировании",
+						Comment = comment,
+						Date = entity.CreationTime.ToLocalTime()
+					});
+					if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationAccepted) {
+						var entityaccept = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
+						orgName = xml.GetValue("Файл/Документ/НапрПредАн/ЮЛ/@НаимОрг");
+						items.Add(new AttachmentHistory {
+							Description = $"{orgName}, аннулировал документ",
+							Date = entityaccept.CreationTime.ToLocalTime()
+						});
+					}
+					else if(current.DocumentInfo.RevocationStatus == RevocationStatus.RevocationRejected) {
+						var entityreject = message.Entities.Where(x => x.ParentEntityId == entity.EntityId).OrderBy(x => x.CreationTime).Last();
+						xml = new DiadocXmlHelper(entityreject);
+						orgName = xml.GetValue("Файл/Документ/УчастЭДО/ЮЛ/@НаимОрг");
+						fio =  xml.GetDiadokFIO("Файл/Документ/Подписант/ФИО/");
+						comment = xml.GetValue("Файл/Документ/СвУведУточ/ТекстУведУточ");
+						items.Add(new AttachmentHistory {
+							Description = $"{orgName}, {fio} отказал в аннулировании документа",
+							Comment = comment,
+							Date = entityreject.CreationTime.ToLocalTime()
+						});
+					}
+				}
+				else if(entity.AttachmentType == AttachmentType.XmlTorg12BuyerTitle) {
+					var xml = new DiadocXmlHelper(entity);
+					var fio = xml.GetDiadokFIO("Файл/Документ/Подписант/ЮЛ/ФИО/");
+					items.Add(new AttachmentHistory {
+						Description = $"{fio} подписал документ и завершил документооборот",
 						Date = entity.CreationTime.ToLocalTime()
 					});
 				}
@@ -340,7 +493,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						filename = Path.Combine(dir, x.Entity.EntityId + Path.GetExtension(x.Entity.FileName));
 						File.WriteAllBytes(filename, bytes);
 						return filename;
-					}).DefaultIfFail();
+					}, Scheduler).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
@@ -357,7 +510,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 					if (fileformats.Contains(Path.GetExtension(x) ?? "", StringComparer.CurrentCultureIgnoreCase))
 						return Observable.Return(x);
 
-					return Observable.Start(() => LoadPrintPdf(attachment)).DefaultIfFail();
+					return Observable.Start(() => LoadPrintPdf(attachment), Scheduler).DefaultIfFail();
 				})
 				.Switch()
 				.ObserveOn(UiScheduler)
@@ -370,7 +523,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			CurrentItem.Select(x => (x?.CanSign()).GetValueOrDefault())
 				.Subscribe(CanRequestSign);
 			CurrentItem.Select(x => x != null &&
-				!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
+			!(x.Entity.DocumentInfo.NonformalizedDocumentMetadata?.DocumentStatus == NonformalizedDocumentStatus.InboundRecipientSignatureRequestRejected
 					|| x.Entity.DocumentInfo.RevocationStatus != RevocationStatus.RevocationStatusNone))
 				.Subscribe(CanRevoke);
 
@@ -524,7 +677,7 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 		{
 			IsLoading.Value = true;
 			Observable.Start(() => {
-					if (api == null) {
+				if (api == null) {
 						api = new DiadocApi(Shell.Config.DiadokApiKey, Shell.Config.DiadokUrl, new WinApiCrypt());
 					}
 					if (String.IsNullOrEmpty(token)) {
@@ -537,16 +690,17 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 						SortDirection = "Descending",
 						AfterIndexKey = key
 					});
-					var items = docs.Documents.Select(x => x.MessageId).Distinct()
+					var items = docs.Documents.Select(x => new { x.MessageId, x.EntityId}).Distinct()
 						.AsParallel()
-						.Select(x => api.GetMessage(token, box.BoxId, x))
+						.Select(x => api.GetMessage(token, box.BoxId, x.MessageId, x.EntityId))
 						.OrderByDescending(x => x.Timestamp)
 						.ToObservableCollection();
+
 					return Tuple.Create(items,
 						$"Загружено {docs.Documents.Count} из {docs.TotalCount}",
 						docs.Documents.LastOrDefault()?.IndexKey,
 						api.GetMyOrganizations(token));
-				})
+				}, Scheduler)
 				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false, _ => IsLoading.Value = false)
 				.Subscribe(x => {
@@ -573,31 +727,31 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				});
 		}
 
-		public async Task RequestSign()
+		public void RequestSign()
 		{
-			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
+			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.SignatureRequest));
 		}
 
-		public async Task RequestResolution()
+		public void RequestResolution()
 		{
-			await ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
+			ProcessAction(new RequestResolution(GetPayload(), ResolutionRequestType.ApprovementRequest));
 		}
 
-		public async Task Approve()
+		public void Approve()
 		{
-			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
+			ProcessAction(new Resolution(GetPayload(), ResolutionType.Approve));
 		}
 
-		public async Task Disapprove()
+		public void Disapprove()
 		{
-			await ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
+			ProcessAction(new Resolution(GetPayload(), ResolutionType.Disapprove));
 		}
 
 		public void Delete()
 		{
 			var dialog = new Delete(GetPayload());
 			Manager.ShowFixedDialog(dialog);
-			if (dialog.Success) {
+			if(dialog.Success) {
 				var current = CurrentItem.Value;
 				items.Remove(CurrentItem);
 				Items.Value.Remove(current);
@@ -617,19 +771,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			yield return new OpenResult(Filename.Value);
 		}
 
-		public async Task Revoke()
+		public void Revoke()
 		{
-			await ProcessAction(new Revocation(GetPayload()));
+			ProcessAction(new Revocation(GetPayload()));
 		}
 
-		public async Task Reject()
+		public void Reject()
 		{
-			await ProcessAction(new Reject(GetPayload()));
+			ProcessAction(new Reject(GetPayload()));
 		}
 
-		public async Task Sign()
+		public void Sign()
 		{
-			await ProcessAction(new Sign(GetPayload()));
+			ProcessAction(new Sign(GetPayload()));
 		}
 
 		public IEnumerable<IResult> PrintItem()
@@ -652,12 +806,19 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 			}
 		}
 
-		private async Task ProcessAction(DiadokAction dialog)
+		private void ProcessAction(DiadokAction dialog)
 		{
-			Manager.ShowFixedDialog(dialog);
-			if (dialog.Success) {
+			Dictionary<string, object> settings = null;
+			if((dialog as Sign)?.Torg12TitleVisible == true) {
+				settings = new Dictionary<string, object>();
+				settings.Add("WindowStartupLocation", WindowStartupLocation.Manual);
+				settings.Add("Top", 0);
+				settings.Add("Left", (SystemParameters.FullPrimaryScreenWidth - 560)/2);
+			}
+			Manager.ShowFixedDialog(dialog, null, settings);
+			if (dialog.Result != null) {
 				var current = CurrentItem.Value;
-				var message = await TaskEx.Run(() => api.GetMessage(token, box.BoxId, current.Message.MessageId));
+				var message = dialog.Result;
 				var index = items.IndexOf(current);
 				Entity prev = null;
 				if (index > 1)
@@ -678,7 +839,8 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 				Api = api,
 				BoxId = box.BoxId,
 				Token = token,
-				Entity = CurrentItem.Value.Entity
+				Entity = CurrentItem.Value.Entity,
+				Message = CurrentItem.Value.Message
 			};
 			return payload;
 		}
