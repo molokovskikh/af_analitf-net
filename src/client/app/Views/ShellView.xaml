@@ -229,6 +229,10 @@
 				</Grid>
 			</Button>
 
+			<Button x:Name="ShowReturnToSuppliers" ToolTip="Возврат поставщику" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+				<Image Source="/assets/images/Document_32.ico" Style="{StaticResource ButtonImage}" />
+			</Button>
+
 			<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Height="32" />
 
 			<Button x:Name="ShowMails" ToolTip="Мини-почта" IsEnabled="{Binding IsDataLoaded.Value}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">

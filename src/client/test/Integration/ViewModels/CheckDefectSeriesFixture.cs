@@ -32,7 +32,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
-
 		[Test]
 		public void Mark()
 		{
