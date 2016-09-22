@@ -933,7 +933,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 		private void WaitMessageBox(string message)
 		{
-			var timeout = 30.Second();
+			var timeout = 180.Second();
 			if (IsCI())
 				timeout = 60.Second();
 
