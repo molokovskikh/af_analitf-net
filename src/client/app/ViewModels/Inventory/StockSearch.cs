@@ -11,7 +11,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class StockSearch : BaseScreen2, ICancelable
 	{
-		public StockSearch(string term)
+		public StockSearch(string term = "")
 		{
 			DisplayName = "Поиск товара";
 			SearchBehavior = new SearchBehavior(this);

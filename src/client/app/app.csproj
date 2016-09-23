@@ -419,6 +419,7 @@
     <Compile Include="ViewModels\Inventory\Checks.cs" />
     <Compile Include="ViewModels\Inventory\EditInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\EditInventoryLine.cs" />
+    <Compile Include="ViewModels\Inventory\EditWriteoffDoc.cs" />
     <Compile Include="ViewModels\Inventory\ProductSearch.cs" />
     <Compile Include="ViewModels\Inventory\Frontend.cs" />
     <Compile Include="ViewModels\Inventory\Help.cs" />
@@ -428,6 +429,7 @@
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
     <Compile Include="ViewModels\Inventory\StockSearch.cs" />
     <Compile Include="ViewModels\Inventory\Stocks.cs" />
+    <Compile Include="ViewModels\Inventory\WriteoffDocs.cs" />
     <Compile Include="ViewModels\Offers\AddAwaited.cs" />
     <Compile Include="ViewModels\Offers\Awaited.cs" />
     <Compile Include="ViewModels\Offers\BaseOfferViewModel.cs" />
@@ -581,6 +583,9 @@
     <Compile Include="Views\Inventory\EditInventoryLine.xaml.cs">
       <DependentUpon>EditInventoryLine.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\EditWriteoffDoc.xaml.cs">
+      <DependentUpon>EditWriteoffDoc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\Frontend.xaml.cs">
       <DependentUpon>Frontend.xaml</DependentUpon>
     </Compile>
@@ -607,6 +612,9 @@
     </Compile>
     <Compile Include="Views\Inventory\StockSearch.xaml.cs">
       <DependentUpon>StockSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\WriteoffDocs.xaml.cs">
+      <DependentUpon>WriteoffDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Offers\AddAwaited.xaml.cs">
       <DependentUpon>AddAwaited.xaml</DependentUpon>
@@ -882,6 +890,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\EditWriteoffDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\Inventory\Frontend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -917,6 +929,10 @@
     <Page Include="Views\Inventory\StockSearch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\WriteoffDocs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Offers\AddAwaited.xaml">
       <SubType>Designer</SubType>

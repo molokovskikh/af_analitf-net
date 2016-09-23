@@ -21,9 +21,12 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Menu Grid.Row="0">
-			<MenuItem Header="Документы">
+			<MenuItem Header="Приходные документы">
 				<MenuItem Header="Приход от поставщика" Name="ReceivingOrders" />
-				<MenuItem Header="Инвентаризация" Name="Inventory" />
+				<MenuItem Header="Инвентаризация" Name="InventoryDocs" />
+			</MenuItem>
+			<MenuItem Header="Расходные документы">
+				<MenuItem Header="Списание" Name="WriteoffDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />

@@ -220,9 +220,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Shell.Navigate(new Checks());
 		}
 
-		public void Inventory()
+		public void InventoryDocs()
 		{
 			Shell.Navigate(new InventoryDocs());
+		}
+
+		public void WriteoffDocs()
+		{
+			Shell.Navigate(new WriteoffDocs());
 		}
 	}
 }

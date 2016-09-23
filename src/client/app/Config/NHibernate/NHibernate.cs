@@ -241,6 +241,9 @@ namespace AnalitF.Net.Client.Config.NHibernate
 			mapper.Class<InventoryDoc>(m => m.Bag(o => o.Lines, c => {
 				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
 			}));
+			mapper.Class<WriteoffDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
 			mapper.Class<Offer>(m => {
 				m.ManyToOne(o => o.Price, c => {
 					c.Insert(false);
