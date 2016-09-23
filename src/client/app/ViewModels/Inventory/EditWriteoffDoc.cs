@@ -77,7 +77,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				EditMode = EditStock.Mode.EditQuantity
 			};
 			yield return new DialogResult(edit);
-			var line = new WriteoffLine(edit.Stock);
+			var line = new WriteoffLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
 			Lines.Add(line);
 			Doc.Lines.Add(line);
 			Doc.UpdateStat();
@@ -85,6 +85,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void DeleteLine()
 		{
+			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
@@ -92,12 +93,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> EditLine()
 		{
-			//if (!CanEditLine)
-			//	yield break;
-			//var line = new EditInventoryLine(CurrentLine.Value);
-			//yield return new DialogResult(line);
-			//Doc.UpdateStat();
-			yield break;
+			if (!CanEditLine)
+				yield break;
+			var stock = StatelessSession.Get<Stock>(CurrentLine.Value.Stock.Id);
+			stock.Quantity = CurrentLine.Value.Quantity;
+			var edit = new EditStock(stock) {
+				EditMode = EditStock.Mode.EditQuantity
+			};
+			yield return new DialogResult(edit);
+			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity);
+			Doc.UpdateStat();
 		}
 
 		public IEnumerable<IResult> EnterLine()

@@ -93,6 +93,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
 		public virtual decimal Quantity { get; set; }
+		public virtual decimal ReservedQuantity { get; set; }
 
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
@@ -148,8 +149,20 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual StockAction ApplyReserved(decimal quantity)
 		{
-			Quantity -= quantity;
+			ReservedQuantity -= quantity;
 			return new StockAction(ActionType.Sale, this, quantity);
+		}
+
+		public virtual void Release(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			Quantity += quantity;
+		}
+
+		public virtual void Reserve(decimal quantity)
+		{
+			Quantity -= quantity;
+			ReservedQuantity += quantity;
 		}
 	}
 }

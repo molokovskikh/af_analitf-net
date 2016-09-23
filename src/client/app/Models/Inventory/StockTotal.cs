@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -14,6 +11,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		private decimal _totalSum;
 		private decimal _totalSumWithNds;
 		private decimal _totalRetailSum;
+		private decimal _reservedQuantity;
 
 		public string Total
 		{
@@ -21,7 +19,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			set
 			{
 				_total = value;
-				OnPropertyChanged("Total");
+				OnPropertyChanged();
 			}
 		}
 
@@ -31,7 +29,17 @@ namespace AnalitF.Net.Client.Models.Inventory
 			set
 			{
 				_totalCount = value;
-				OnPropertyChanged("TotalCount");
+				OnPropertyChanged();
+			}
+		}
+
+		public decimal ReservedQuantity
+		{
+			get { return _reservedQuantity; }
+			set
+			{
+				_reservedQuantity = value;
+				OnPropertyChanged();
 			}
 		}
 
@@ -41,7 +49,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			set
 			{
 				_totalSum = value;
-				OnPropertyChanged("TotalSum");
+				OnPropertyChanged();
 			}
 		}
 
@@ -51,7 +59,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			set
 			{
 				_totalSumWithNds = value;
-				OnPropertyChanged("TotalSumWithNds");
+				OnPropertyChanged();
 			}
 		}
 
@@ -61,15 +69,15 @@ namespace AnalitF.Net.Client.Models.Inventory
 			set
 			{
 				_totalRetailSum = value;
-				OnPropertyChanged("TotalRetailSum");
+				OnPropertyChanged();
 			}
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
-		public void OnPropertyChanged([CallerMemberName]string prop = "")
+
+		public void OnPropertyChanged([CallerMemberName] string prop = "")
 		{
-			if (PropertyChanged != null)
-				PropertyChanged(this, new PropertyChangedEventArgs(prop));
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 		}
 	}
 }
