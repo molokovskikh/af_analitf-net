@@ -116,6 +116,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.Save(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(WriteoffDoc), "db");
+			Bus.SendMessage(nameof(Stock), "db");
 		}
 	}
 }

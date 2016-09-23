@@ -17,6 +17,15 @@
 			<Button Name="Create">Создать</Button>
 			<Button Name="Edit">Редактировать</Button>
 			<Button Name="Delete">Удалить</Button>
+			<Separator />
+			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+					<DatePicker Name="Begin" VerticalAlignment="Center"></DatePicker>
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+					<DatePicker Name="End" VerticalAlignment="Center"></DatePicker>
+				</StackPanel>
+			</GroupBox>
 		</ToolBar>
 
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">

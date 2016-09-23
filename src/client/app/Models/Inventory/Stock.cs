@@ -138,22 +138,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 
-		public static void UpdateStock(IStatelessSession session, IEnumerable<Stock> stocks)
-		{
-			foreach (var stock in stocks) {
-				if (stock.Quantity == 0)
-					session.Delete(stock);
-				else
-					session.Update(stock);
-			}
-		}
-
 		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address = null)
 		{
 			var query = session.Query<Stock>().Where(x => x.Quantity > 0 && x.Status == StockStatus.Available);
 			if (address != null)
 				query = query.Where(x => x.Address == address);
 			return query;
+		}
+
+		public virtual StockAction ApplyReserved(decimal quantity)
+		{
+			Quantity -= quantity;
+			return new StockAction(ActionType.Sale, this, quantity);
 		}
 	}
 }

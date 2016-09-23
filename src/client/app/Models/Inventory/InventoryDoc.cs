@@ -58,6 +58,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Closed;
+			foreach (var line in Lines)
+				session.Save(line.Stock.ApplyReserved(line.Quantity.Value));
 		}
 
 		public virtual void UpdateStat()
@@ -78,6 +80,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public WriteoffLine(Stock stock)
 		{
 			ReceivingLine.Copy(stock, this);
+			Id = 0;
+			Stock = stock;
 		}
 
 		public virtual uint Id { get; set; }
@@ -92,16 +96,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal? Quantity { get; set; }
 
-		public virtual WriteoffLine Copy()
-		{
-			return (WriteoffLine)MemberwiseClone();
-		}
-
-		public virtual void CopyFrom(WriteoffLine line)
-		{
-			ReceivingLine.Copy(line, this);
-			typeof(WriteoffLine).GetProperties().Each(x => OnPropertyChanged(x.Name));
-		}
+		public virtual Stock Stock { get; set; }
 	}
 
 	public class InventoryDoc : BaseNotify
