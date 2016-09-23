@@ -34,6 +34,7 @@
 				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Причина" Binding="{Binding Reason.Name}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />

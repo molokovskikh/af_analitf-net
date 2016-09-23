@@ -14,7 +14,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		[Description("Закрыт")] Closed
 	}
 
-		public class WriteoffDoc : BaseNotify
+		public class WriteoffDoc : BaseNotify, IDataErrorInfo2
 	{
 		private DocStatus _status;
 
@@ -33,6 +33,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual uint Id { get; set; }
 		public virtual DateTime Date { get; set; }
 		public virtual Address Address { get; set; }
+		public virtual WriteoffReason Reason { get; set; }
 
 		public virtual DocStatus Status
 		{
@@ -69,6 +70,23 @@ namespace AnalitF.Net.Client.Models.Inventory
 			SupplySumWithoutNds = Lines.Sum(x => x.SupplierSumWithoutNds);
 			SupplySum = Lines.Sum(x => x.Quantity * x.SupplierCost);
 		}
+
+			public virtual string this[string columnName]
+			{
+				get
+				{
+					if (columnName == nameof(Reason) && Reason == null) {
+						return "Поле 'Причина' должно быть заполнено";
+					}
+					if (columnName == nameof(Address) && Address == null) {
+						return "Поле 'Адрес' должно быть заполнено";
+					}
+					return null;
+				}
+			}
+
+			public virtual string Error { get; }
+			public virtual string[] FieldsForValidate => new [] { nameof(Address), nameof(Reason) };
 	}
 
 	public class WriteoffLine : BaseStock

@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			AddressSelector = new AddressSelector(this);
 			Items.PropertyChanged += Items_PropertyChanged;
 			ItemsTotal = new ObservableCollection<StockTotal>();
-			ItemsTotal.Add(new StockTotal { Total = "Итого", TotalCount = 0.0m, TotalSum = 0.0m, TotalSumWithNds = 0.0m, TotalRetailSum = 0.0m });
+			ItemsTotal.Add(new StockTotal { Total = "Итого", });
 
 			Name = User?.FullName ?? "";
 			StatusFilter.Value = DescriptionHelper.GetDescriptions(typeof(StockStatus))

@@ -703,6 +703,14 @@
 					<Button Name="ScannerConfig">Тест сканера</Button>
 				</StackPanel>
 			</TabItem>
+
+			<TabItem Header="Причины списания">
+				<DataGrid Name="WriteoffReasons">
+					<DataGrid.Columns>
+						<DataGridTextColumn Width="*" Header="Причина" Binding="{Binding Name}" />
+					</DataGrid.Columns>
+				</DataGrid>
+			</TabItem>
 		</TabControl>
 		<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4" HorizontalAlignment="Center">
 			<Button x:Name="Save" MinWidth="100" IsDefault="True">ОК</Button>

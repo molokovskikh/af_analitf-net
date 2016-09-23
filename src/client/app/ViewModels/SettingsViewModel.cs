@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
+using AnalitF.Net.Client.Models.Inventory;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Parts;
@@ -93,7 +94,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Products, CloseCancellation.Token);
 
-
 			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToObservableCollection())
 				.ObserveOn(UiScheduler)
 				.Subscribe(SpecialMarkupProducts);
@@ -107,8 +107,10 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsWaybillDirEnabled);
 
 			LastDayForWarnOrdered = new List<int>() {1,2,3,4,5,6,7};
+			WriteoffReasons = new PersistentList<WriteoffReason>(Session.Query<WriteoffReason>().OrderBy(x => x.Name).ToList(), Session);
 		}
 
+		public PersistentList<WriteoffReason> WriteoffReasons { get; set; }
 		public bool HaveAddresses { get; set; }
 		public NotifyValue<bool> IsWaybillDirEnabled { get; set; }
 
@@ -377,9 +379,11 @@ limit 300";
 		protected void GoToErrorTab(string errorKey)
 		{
 			switch (errorKey) {
-				case "JunkPeriod": SelectedTab.Value = "ViewSettingsTab";
+				case "JunkPeriod":
+					SelectedTab.Value = "ViewSettingsTab";
 					break;
-				default:	SelectedTab.Value = errorKey + "MarkupsTab";
+				default:
+					SelectedTab.Value = errorKey + "MarkupsTab";
 					break;
 			}
 		}
@@ -389,14 +393,12 @@ limit 300";
 			UpdateMarkups();
 			var error = Settings.Value.Validate(validateMarkups: HaveAddresses);
 
-			if(error != null){
-				if (error.Count > 0) {
-					if (Session != null)
-						Session.FlushMode = FlushMode.Never;
-					GoToErrorTab(error.First()[0]);
-					yield return MessageResult.Warn(error.First()[1]);
-					yield break;
-				}
+			if(error?.Count > 0){
+				if (Session != null)
+					Session.FlushMode = FlushMode.Never;
+				GoToErrorTab(error.First()[0]);
+				yield return MessageResult.Warn(error.First()[1]);
+				yield break;
 			}
 
 			if (passwordUpdated)

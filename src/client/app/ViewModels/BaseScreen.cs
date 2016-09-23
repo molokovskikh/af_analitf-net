@@ -713,5 +713,17 @@ namespace AnalitF.Net.Client.ViewModels
 				if (propertyInfo.GetValue(screen, null) == null)
 					propertyInfo.SetValue(screen, Activator.CreateInstance(propertyInfo.PropertyType), null);
 		}
+
+		protected bool IsValide(IDataErrorInfo2 mode)
+		{
+			foreach (var field in mode.FieldsForValidate) {
+				var error = mode[field];
+				if (!string.IsNullOrEmpty(error)) {
+					Manager.Warning(error);
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 }

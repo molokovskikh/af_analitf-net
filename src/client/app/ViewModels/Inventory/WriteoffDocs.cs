@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			End.Value = DateTime.Today;
 			CurrentItem.Subscribe(x => {
 				CanEdit.Value = x != null;
-				CanDelete.Value = x != null;
+				CanDelete.Value = x?.Status == DocStatus.Opened;
 			});
 			DisplayName = "Списание";
 			TrackDb(typeof(WriteoffDoc));
@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.SelectMany(_ => RxQuery(s => s.Query<WriteoffDoc>()
 					.Where(x => x.Date > Begin.Value && x.Date < End.Value.AddDays(1))
 					.Fetch(x => x.Address)
+					.Fetch(x => x.Reason)
 					.OrderByDescending(x => x.Date).ToList()))
 				.Subscribe(Items);
 		}

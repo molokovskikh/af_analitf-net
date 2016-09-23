@@ -34,14 +34,25 @@
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
 			<Label Grid.Row="0" Grid.Column="0" FontWeight="Bold">Дата документа</Label>
-			<DatePicker IsEnabled="{Binding IsDocOpen.Value}" VerticalAlignment="Center" VerticalContentAlignment="Center" Grid.Row="0" Grid.Column="1" Name="Doc_Date" />
+			<DatePicker Grid.Row="0" Grid.Column="1"  IsEnabled="{Binding IsDocOpen.Value}"
+				VerticalAlignment="Center" VerticalContentAlignment="Center" Name="Doc_Date" />
+
 			<Label Grid.Row="0" Grid.Column="2" FontWeight="Bold">Адрес</Label>
-			<ComboBox IsEnabled="{Binding IsDocOpen.Value}" Grid.Row="0" Grid.Column="3" Style="{StaticResource Select}" Width="100"
-				ItemsSource="{Binding Addresses}" SelectedItem="{Binding Doc.Address}" />
-			<Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Статус</Label>
-			<Label Grid.Row="0" Grid.Column="5" Name="Doc_Status" />
+			<ComboBox Grid.Row="0" Grid.Column="3" IsEnabled="{Binding IsDocOpen.Value}"
+				Style="{StaticResource Select}" Width="100"
+				ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" SelectedItem="{Binding Doc.Address}" />
+
+			<Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Причина</Label>
+			<ComboBox Grid.Row="0" Grid.Column="5" IsEnabled="{Binding IsDocOpen.Value}"
+				Style="{StaticResource Select}" Width="100" DisplayMemberPath="Name"
+				ItemsSource="{Binding Reasons.Value}" SelectedItem="{Binding Doc.Reason}" />
+
+			<Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Статус</Label>
+			<Label Grid.Row="0" Grid.Column="7" Name="Doc_Status" />
 		</Grid>
 
 		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">

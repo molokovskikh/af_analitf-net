@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
@@ -7,6 +8,7 @@ using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NHibernate;
+using NHibernate.Linq;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -40,6 +42,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<WriteoffLine> Lines { get; set; }
 		public NotifyValue<WriteoffLine> CurrentLine { get; set; }
+		public NotifyValue<WriteoffReason[]> Reasons { get; set; }
 
 		public NotifyValue<bool> CanAddLine { get; set; }
 		public NotifyValue<bool> CanDeleteLine { get; set; }
@@ -53,6 +56,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			if (Doc.Id == 0)
 				Doc.Address = Address;
+			RxQuery(s => s.Query<WriteoffReason>().OrderBy(x => x.Name).ToArray())
+				.Subscribe(Reasons);
 		}
 
 		private void InitDoc(WriteoffDoc doc)
@@ -118,6 +123,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Save()
 		{
+			if (!IsValide(Doc))
+				return;
 			Session.Save(Doc);
 			Session.Flush();
 			Bus.SendMessage(nameof(WriteoffDoc), "db");
