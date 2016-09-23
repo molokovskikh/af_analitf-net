@@ -10,6 +10,19 @@ using log4net;
 
 namespace AnalitF.Net.Client.Helpers
 {
+	public class EnumConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return DescriptionHelper.GetDescription((Enum)value);
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
 	public class GroupNameConverter : IValueConverter
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

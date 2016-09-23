@@ -93,6 +93,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual string Category { get; set; }
 		public virtual string RegionCert { get; set; }
 		public virtual decimal Quantity { get; set; }
+		public virtual decimal ReservedQuantity { get; set; }
 
 		public virtual int? Nds { get; set; }
 		public virtual decimal? NdsAmount { get; set; }
@@ -138,22 +139,30 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string RejectStatusName => DescriptionHelper.GetDescription(RejectStatus);
 
-		public static void UpdateStock(IStatelessSession session, IEnumerable<Stock> stocks)
-		{
-			foreach (var stock in stocks) {
-				if (stock.Quantity == 0)
-					session.Delete(stock);
-				else
-					session.Update(stock);
-			}
-		}
-
 		public static IQueryable<Stock> AvailableStocks(IStatelessSession session, Address address = null)
 		{
 			var query = session.Query<Stock>().Where(x => x.Quantity > 0 && x.Status == StockStatus.Available);
 			if (address != null)
 				query = query.Where(x => x.Address == address);
 			return query;
+		}
+
+		public virtual StockAction ApplyReserved(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			return new StockAction(ActionType.Sale, this, quantity);
+		}
+
+		public virtual void Release(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			Quantity += quantity;
+		}
+
+		public virtual void Reserve(decimal quantity)
+		{
+			Quantity -= quantity;
+			ReservedQuantity += quantity;
 		}
 	}
 }

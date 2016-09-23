@@ -12,6 +12,7 @@
 	<helpers:InvertConverter x:Key="BoolInvert" />
 	<helpers:NullableConverter x:Key="NullableConverter" />
 	<helpers:InputConverter x:Key="InputConverter" />
+	<helpers:EnumConverter x:Key="EnumConverter" />
 
 	<Style x:Key="Borderless" TargetType="Control">
 		<Style.Triggers>

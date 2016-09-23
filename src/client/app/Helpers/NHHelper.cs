@@ -49,5 +49,13 @@ namespace AnalitF.Net.Client.Helpers
 				session.Insert(item);
 			}
 		}
+
+		public static void UpdateEach<T>(this IStatelessSession session, IEnumerable<T> items)
+		{
+			var toSave = items.ToArray();
+			foreach (var item in toSave) {
+				session.Update(item);
+			}
+		}
 	}
 }

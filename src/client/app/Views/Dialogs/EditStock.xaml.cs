@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using AnalitF.Net.Client.Helpers;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Views.Dialogs
 {
@@ -22,6 +24,16 @@ namespace AnalitF.Net.Client.Views.Dialogs
 		public EditStock()
 		{
 			InitializeComponent();
+
+			DataContextChanged += (sender, args) => {
+				var model = (ViewModels.Dialogs.EditStock)DataContext;
+				if (model.EditMode == ViewModels.Dialogs.EditStock.Mode.EditQuantity) {
+					this.Descendants<TextBox>().Each(x => x.IsReadOnly = true);
+					Stock_Quantity.IsReadOnly = false;
+				} else {
+					Stock_Quantity.IsReadOnly = true;
+				}
+			};
 		}
 	}
 }

@@ -29,6 +29,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			KKMFilter = new NotifyValue<IList<Selectable<string>>>(new List<Selectable<string>>());
 			AddressSelector = new AddressSelector(this);
 			DisplayName = "Чеки";
+			TrackDb(typeof(Check));
 		}
 
 		public NotifyValue<DateTime> Begin { get; set; }
@@ -46,6 +47,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			AddressSelector.Init();
 			AddressSelector.FilterChanged.Cast<object>()
+				.Merge(DbReloadToken)
 				.Merge(KKMFilter.SelectMany(x => x?.Select(c => c.Changed()).Merge()
 					?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>()))
 				.Merge(KKMFilter.Where(x => x != null))

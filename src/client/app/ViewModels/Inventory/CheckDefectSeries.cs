@@ -51,9 +51,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(End.Changed())
 				.Merge(IsPerhaps.Changed())
 				.Merge(IsDefective.Changed())
-				.Select(_ => RxQuery(LoadItems))
-				.Switch()
-				.ObserveOn(UiScheduler)
+				.SelectMany(_ => RxQuery(LoadItems))
 				.Subscribe(Items);
 		}
 

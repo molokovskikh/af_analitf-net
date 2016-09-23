@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using AnalitF.Net.Client.Config.NHibernate;
+using AnalitF.Net.Client.Models.Inventory;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Helpers;
@@ -165,6 +166,11 @@ namespace AnalitF.Net.Client.Models.Commands
 				if (markupOver.Count == 1) {
 					markupOver[0].End = 1000000;
 				}
+
+				if (!session.Query<WriteoffReason>().Any()) {
+					session.SaveEach(WriteoffReason.Default());
+				}
+
 				transaction.Commit();
 			}
 		}

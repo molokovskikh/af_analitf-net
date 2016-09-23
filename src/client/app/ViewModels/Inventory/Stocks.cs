@@ -31,7 +31,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			AddressSelector = new AddressSelector(this);
 			Items.PropertyChanged += Items_PropertyChanged;
 			ItemsTotal = new ObservableCollection<StockTotal>();
-			ItemsTotal.Add(new StockTotal { Total = "Итого", TotalCount = 0.0m, TotalSum = 0.0m, TotalSumWithNds = 0.0m, TotalRetailSum = 0.0m });
+			ItemsTotal.Add(new StockTotal { Total = "Итого", });
 
 			Name = User?.FullName ?? "";
 			StatusFilter.Value = DescriptionHelper.GetDescriptions(typeof(StockStatus))
@@ -40,8 +40,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			QuickSearch = new QuickSearch<Stock>(UiScheduler,
 				t => Items?.Value.FirstOrDefault(p => p.Product.IndexOf(t, StringComparison.CurrentCultureIgnoreCase) >= 0),
 				CurrentItem);
-			Bus.Listen<string>("db").Where(x => x == "Stocks")
-				.Subscribe(_ => UpdateOnActivate = true, CloseCancellation.Token);
+			TrackDb(typeof(Stock));
 		}
 
 		public QuickSearch<Stock> QuickSearch { get; set; }
@@ -53,12 +52,13 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		private void Items_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
-			if (Items.Value == null || ItemsTotal.Count != 1) return;
+			if (Items.Value == null) return;
 
-			ItemsTotal.First().TotalCount = Items.Value.Sum(c => c.Quantity);
-			ItemsTotal.First().TotalSum = Items.Value.Sum(c => c.SupplySumWithoutNds);
-			ItemsTotal.First().TotalSumWithNds = Items.Value.Sum(c => c.SupplySum);
-			ItemsTotal.First().TotalRetailSum = Items.Value.Sum(c => c.RetailSum).GetValueOrDefault();
+			ItemsTotal[0].TotalCount = Items.Value.Sum(c => c.Quantity);
+			ItemsTotal[0].ReservedQuantity = Items.Value.Sum(c => c.ReservedQuantity);
+			ItemsTotal[0].TotalSum = Items.Value.Sum(c => c.SupplySumWithoutNds);
+			ItemsTotal[0].TotalSumWithNds = Items.Value.Sum(c => c.SupplySum);
+			ItemsTotal[0].TotalRetailSum = Items.Value.Sum(c => c.RetailSum).GetValueOrDefault();
 		}
 
 		protected override void OnInitialize()
@@ -97,11 +97,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			Session.Refresh(stock);
 			Update();
-		}
-
-		public override void Update()
-		{
-			DbReloadToken.Value = new object();
 		}
 
 		public IResult ExportExcel()
@@ -200,8 +195,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintStockLimitMonth()
 		{
-			string title = "Товары со сроком годности менее 1 месяца";
-			var stocks = Items.Value.Where(s => Convert.ToDateTime(s.Period) < DateTime.Today.AddMonths(1) && !String.IsNullOrEmpty(s.Period)).ToArray();
+			var title = "Товары со сроком годности менее 1 месяца";
+			var stocks = Items.Value.Where(s => s.Exp < DateTime.Today.AddMonths(1)).ToArray();
 			return Preview(title, new StockLimitMonthDocument(stocks, title, Name));
 		}
 
@@ -224,6 +219,16 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void Checks()
 		{
 			Shell.Navigate(new Checks());
+		}
+
+		public void InventoryDocs()
+		{
+			Shell.Navigate(new InventoryDocs());
+		}
+
+		public void WriteoffDocs()
+		{
+			Shell.Navigate(new WriteoffDocs());
 		}
 	}
 }

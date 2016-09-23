@@ -171,17 +171,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				StatelessSession.Insert(check);
 				Lines.Each(x => x.CheckId = check.Id);
 				StatelessSession.InsertEach(Lines);
-				StatelessSession.InsertEach(Lines.Select(x => new StockAction {
-					ActionType = ActionType.Sale,
-					ClientStockId = x.Stock.Id,
-					SourceStockId = x.Stock.ServerId,
-					SourceStockVersion = x.Stock.ServerVersion,
-					Quantity = x.Quantity
-				}));
-				Stock.UpdateStock(StatelessSession, Lines.Select(x => x.Stock).Distinct());
+				StatelessSession.InsertEach(Lines.Select(x => new StockAction(ActionType.Sale, x.Stock, x.Quantity)));
+				StatelessSession.UpdateEach(Lines.Select(x => x.Stock).Distinct());
 				trx.Commit();
 			}
-			Bus.SendMessage("Stocks", "db");
+			Bus.SendMessage(nameof(Stock), "db");
+			Bus.SendMessage(nameof(Check), "db");
 			Message("Оплата наличными");
 			Reset();
 		}

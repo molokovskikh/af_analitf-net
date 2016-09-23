@@ -39,7 +39,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var stock = new Stock()
 			{
 				Product = reject.Product,
-				SerialNumber = reject.Series
+				SerialNumber = reject.Series,
+				Status = StockStatus.Available,
+				Quantity = 10,
+				SupplyQuantity = 10
 			};
 			session.Save(stock);
 			Assert.IsTrue(stock.RejectStatus == RejectStatus.Unknown);

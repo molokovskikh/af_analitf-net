@@ -9,6 +9,12 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 	{
 		private uint id;
 
+		public enum Mode
+		{
+			EditQuantity,
+			EditStock
+		}
+
 		public EditStock()
 		{
 			DisplayName = "Информация о товаре";
@@ -16,6 +22,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 		}
 
 		public EditStock(Stock stock)
+			: this()
 		{
 			Stock = stock;
 		}
@@ -28,6 +35,7 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public bool WasCancelled { get; private set; }
 		public Stock Stock { get; set; }
+		public Mode EditMode { get; set; }
 
 		public void OK()
 		{
