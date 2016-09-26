@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				.Merge(StatusFilter.FilterChanged())
 				.Merge(AddressSelector.FilterChanged.Cast<object>())
 				.SelectMany(_ => RxQuery(x => {
-					var query = x.Query<Stock>().Where(y => y.Quantity != 0);
+					var query = x.Query<Stock>().Where(y => y.Quantity != 0 || y.ReservedQuantity != 0);
 					if (StatusFilter.IsFiltred()) {
 						var values = StatusFilter.GetValues();
 						query = query.Where(y => values.Contains(y.Status));
