@@ -188,6 +188,7 @@
 		<Setter Property="CanUserDeleteRows" Value="False" />
 		<Setter Property="AutoGenerateColumns" Value="False" />
     <Setter Property="ColumnHeaderStyle" Value="{DynamicResource ColumnHeaderBlackLine}"/>
+		<Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
   </Style>
 
 	<Style TargetType="ComboBox" x:Key="Select">

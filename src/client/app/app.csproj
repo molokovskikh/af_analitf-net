@@ -438,6 +438,7 @@
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\Offers\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
+    <Compile Include="ViewModels\Parts\TabNavigator.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
@@ -172,12 +173,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Version_update()
 		{
+			var user = localSession.Query<User>().First();
+			user.LastSync = null;
 			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
 			//сначала будут загружены только бинарники
 			Assert.AreEqual(UpdateResult.UpdatePending, Run(new UpdateCommand()));
+			Assert.AreEqual(0, localSession.Query<Offer>().Count());
 
 			//теперь только данные
 			Assert.AreEqual(UpdateResult.OK, Run(new UpdateCommand {
@@ -210,9 +214,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(command1);
 
 			Assert.AreEqual(
-				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_{1}(test).txt",
-					fixture.Document.Id,
-					fixture.Document.Supplier.Name),
+				$@"var\client\АналитФАРМАЦИЯ\Отказы\{fixture.Document.Id}_{fixture.Document.Supplier.Name}(test).txt",
 				command1.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
 		}
 

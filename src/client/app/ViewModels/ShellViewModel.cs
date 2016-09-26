@@ -29,6 +29,7 @@ using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.ViewModels.Parts;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
@@ -84,7 +85,6 @@ namespace AnalitF.Net.Client.ViewModels
 	{
 		private WindowManager windowManager;
 		private ISession session;
-		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
 		private List<Address> addresses = new List<Address>();
 
@@ -140,10 +140,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsDataLoaded);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 
-			if (Env.Factory != null) {
-				session = Env.Factory.OpenSession();
-				statelessSession = Env.Factory.OpenStatelessSession();
-			}
+			session = Env.Factory?.OpenSession();
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -166,7 +163,7 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			});
 
-			this.ObservableForProperty(m => m.Settings.Value)
+			Settings
 				.Subscribe(_ => {
 					NotifyOfPropertyChange(nameof(CanShowCatalog));
 					NotifyOfPropertyChange(nameof(CanSearchOffers));
@@ -259,6 +256,10 @@ namespace AnalitF.Net.Client.ViewModels
 				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
 			}
 			Reload();
+			if (Settings.Value.TabbedUI)
+				Navigator = new TabNavigator(this);
+			else
+				Navigator = new Navigator(this);
 		}
 
 		protected override void OnActivate()
@@ -307,12 +308,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void CloseActive()
 		{
-			Navigator.CloseActive();
+			((TabNavigator)Navigator).CloseScreen(ActiveItem);
 		}
 
 		public void CloseScreen(IScreen item)
 		{
-			Navigator.CloseScreen(item);
+			((TabNavigator)Navigator).CloseScreen(item);
 		}
 
 		public override void CanClose(Action<bool> callback)
@@ -322,9 +323,9 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			if (statelessSession != null) {
+			Env.Query(s => {
 				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
-				var orderQuery = statelessSession.Query<SentOrder>()
+				var orderQuery = s.Query<SentOrder>()
 					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
 				if (orderQuery.Any()) {
 					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
@@ -333,13 +334,13 @@ namespace AnalitF.Net.Client.ViewModels
 					if (deleteOldOrders) {
 						var orders = orderQuery.ToArray();
 						foreach (var order in orders) {
-							statelessSession.Delete(order);
+							s.Delete(order);
 						}
 					}
 				}
 
 				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
-				var query = statelessSession.Query<Waybill>()
+				var query = s.Query<Waybill>()
 					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
 				if (query.Any()) {
 					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
@@ -349,11 +350,11 @@ namespace AnalitF.Net.Client.ViewModels
 						var waybills = query.ToArray();
 						foreach (var waybill in waybills) {
 							waybill.DeleteFiles(Settings);
-							statelessSession.Delete(waybill);
+							s.Delete(waybill);
 						}
 					}
 				}
-			}
+			}).SafeWait();
 
 			if (Stat.Value.ReadyForSendOrdersCount > 0
 				&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
@@ -415,8 +416,13 @@ namespace AnalitF.Net.Client.ViewModels
 						})
 						.OfType<IScreen>()
 						.ToArray();
-					foreach (var item in items)
-						Items.Add(item);
+					if (Navigator is Navigator) {
+						((Navigator)Navigator).NavigateAndReset(items);
+					} else {
+						foreach (var item in items) {
+							Navigator.Navigate(item);
+						}
+					}
 				}
 				catch(Exception e) {
 					disposable.Dispose();
@@ -651,10 +657,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowRejectedWaybills()
 		{
-			var rejectStat = statelessSession.Query<WaybillLine>().Where(l => l.IsRejectNew || l.IsRejectCanceled)
-				.GroupBy(l => l.Waybill.Address.Id)
-				.Select(g => new { addressId = g.Key, count = g.Count()})
-				.ToArray();
+			var rejectStat = Env.Query(s => {
+				return s.Query<WaybillLine>().Where(l => l.IsRejectNew || l.IsRejectCanceled)
+					.GroupBy(l => l.Waybill.Address.Id)
+					.Select(g => new { addressId = g.Key, count = g.Count()})
+					.ToArray();
+			}).Result;
 			//мы можем найти отказ в накладной которая принадлежит адресу который больше не доступен клиенту
 			//по этому выбранные идентификаторы нужно сопоставить с существующими адресами
 			var address = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId)
@@ -796,14 +804,16 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
 
-
 			//сохраняем изменения на активной форме
 			ActiveItem?.Deactivate(false);
-			var warningOrders = statelessSession.Query<Order>()
-				.Fetch(o => o.Price)
-				.Fetch(o => o.MinOrderSum)
-				.ReadyToSend(CurrentAddress)
-				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
+			var warningOrders = Env.Query(s => {
+				return s.Query<Order>()
+					.Fetch(o => o.Price)
+					.Fetch(o => o.MinOrderSum)
+					.ReadyToSend(CurrentAddress)
+					.Where(o => o.Sum < o.MinOrderSum.MinOrderSum)
+					.ToList();
+			}).Result;
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
 				yield return new DialogResult(orderWarning);
@@ -1135,7 +1145,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			PersistentNavigationStack = NavigationStack
+			PersistentNavigationStack = NavigationStack.Skip(1)
 				.Concat(new [] { ActiveItem })
 				.Select(s => new RestoreData(s))
 				.ToList();
@@ -1183,11 +1193,6 @@ namespace AnalitF.Net.Client.ViewModels
 			if (session != null) {
 				session.Dispose();
 				session = null;
-			}
-
-			if (statelessSession != null) {
-				statelessSession.Dispose();
-				statelessSession = null;
 			}
 
 			CloseDisposable.Dispose();

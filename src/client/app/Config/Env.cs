@@ -82,16 +82,37 @@ namespace AnalitF.Net.Client.Config
 		{
 			if (Factory == null)
 				return Observable.Empty<T>();
+			var task = Query(@select);
+			//игнорируем отмену задачи, она произойдет если закрыли форму
+			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
+		}
+
+		public Task<T> Query<T>(Func<IStatelessSession, T> @select)
+		{
 			var task = new Task<T>(() => {
 				if (BaseScreen.BackgroundSession == null)
 					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
-					return @select(BaseScreen.BackgroundSession);
+				return @select(BaseScreen.BackgroundSession);
 			});
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
 			if (!task.IsCanceled)
 				task.Start(QueryScheduler);
-			//игнорируем отмену задачи, она произойдет если закрыли форму
-			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
+			return task;
+		}
+
+		public Task Query(Action<IStatelessSession> action)
+		{
+			var task = new Task(() => {
+				if (Factory == null)
+					return;
+				if (BaseScreen.BackgroundSession == null)
+					BaseScreen.BackgroundSession = Factory.OpenStatelessSession();
+				action(BaseScreen.BackgroundSession);
+			});
+			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
+			if (!task.IsCanceled)
+				task.Start(QueryScheduler);
+			return task;
 		}
 	}
 }

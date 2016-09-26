@@ -137,9 +137,13 @@ namespace AnalitF.Net.Client.Models
 			Markups = new List<MarkupConfig>();
 			Waybills = new List<WaybillSettings>();
 			ModePKU = ModePKU.Warning;
+#if DEBUG
+			TabbedUI = true;
+#endif
 		}
 
 		public virtual int Id { get; set; }
+		public virtual bool TabbedUI { get; set; }
 
 		public virtual bool WarnIfOrderedYesterday { get; set; }
 		public virtual bool UseSupplierPriceWithNdsForMarkup { get; set; }
