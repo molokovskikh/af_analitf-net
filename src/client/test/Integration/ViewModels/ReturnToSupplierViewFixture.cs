@@ -61,10 +61,9 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var supplier = session.Query<Supplier>().First();
 			var _returnToSupplier = new ReturnToSupplier
 			{
-				NumDoc = "111",
-				DateDoc = DateTime.Now,
+				Date = DateTime.Now,
 				Supplier = supplier,
-				Department = department
+				Address = department
 			};
 			var returnToSupplierLine = CreateReturnToSupplierLine(_returnToSupplier);
 			session.Save(_returnToSupplier);

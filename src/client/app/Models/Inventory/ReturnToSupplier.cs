@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnalitF.Net.Client.Helpers;
+using NHibernate;
 using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Inventory
@@ -22,24 +23,36 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public ReturnToSupplier(Address address)
 			: this()
 		{
-			Department = address;
-			NumDoc = "1???";
-			DateDoc = DateTime.Now;
-			Status = Status.Open;
+			Address = address;
+			Date = DateTime.Now;
+			Status = DocStatus.Opened;
 			UpdateStat();
 		}
 
+		private DocStatus _status;
+
 		public override uint Id { get; set; }
-		public virtual string NumDoc { get; set; }
-		public virtual DateTime DateDoc { get; set; }
-		public virtual DateTime? DateClosing { get; set; }
-		public virtual Status Status { get; set; }
+		public virtual DateTime Date { get; set; }
+		public virtual DateTime? CloseDate { get; set; }
+		public virtual DocStatus Status
+		{
+			get { return _status; }
+			set
+			{
+				if (_status != value)
+				{
+					_status = value;
+					OnPropertyChanged();
+				}
+			}
+		}
+
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
 
-		public virtual Address Department { get; set; }
+		public virtual Address Address { get; set; }
 		public virtual Supplier Supplier { get; set; }
 		public virtual string SupplierName => Supplier.FullName;
-		public virtual string DepartmentName => Department.Name;
+		public virtual string AddressName => Address.Name;
 
 		public virtual decimal RetailSum { get; set; }
 		public virtual decimal SupplierSumWithoutNds { get; set; }
@@ -52,34 +65,37 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			get
 			{
-				switch (columnName)
+				if (columnName == nameof(Supplier) && Supplier == null)
 				{
-					case "NumDoc":
-						if (String.IsNullOrEmpty(NumDoc))
-							return "Не установлен номер документа.";
-						break;
-					//case "DateDoc":
-					//	if (String.IsNullOrEmpty(DateDoc))
-					//		return "Не установлена дата.";
-					//	break;
-					case "Department":
-						if (Department == null)
-							return "Не установлен отдел.";
-						break;
-					case "Supplier":
-						if (Supplier == null)
-							return "Не установлен поставщик.";
-						break;
-					default:
-						return "";
+					return "Поле 'Поставщик' должно быть заполнено";
 				}
-				return "";
+				if (columnName == nameof(Address) && Address == null)
+				{
+					return "Поле 'Адрес' должно быть заполнено";
+				}
+				return null;
 			}
 		}
 
 		public virtual string Error { get; protected set; }
 
-		public virtual string[] FieldsForValidate => new[] { "NumDoc", "DateDoc", "Department", "Supplier" };
+		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(Supplier) };
+
+		public virtual void Close(ISession session)
+		{
+			CloseDate = DateTime.Now;
+			Status = DocStatus.Closed;
+			foreach (var line in Lines)
+				session.Save(line.Stock.Return(line.Quantity));
+		}
+
+		public virtual void ReOpen(ISession session)
+		{
+			CloseDate = null;
+			Status = DocStatus.Opened;
+			foreach (var line in Lines)
+				session.Save(line.Stock.RecoveryReturn(line.Quantity));
+		}
 
 		public virtual void UpdateStat()
 		{

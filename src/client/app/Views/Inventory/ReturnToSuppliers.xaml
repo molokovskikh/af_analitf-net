@@ -30,10 +30,9 @@
 		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
 			<DataGrid.Columns>
 				<controls:DataGridTextColumnEx Header="Док. ИД" Binding="{Binding Id}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Док. №" Binding="{Binding NumDoc}" Width="*" />
 				<!--<controls:DataGridTextColumnEx Header="Причина возврата" Binding="{Binding NumDoc}" Width="*" />-->
-				<controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding DateDoc}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Отдел" Binding="{Binding DepartmentName}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата документа" Binding="{Binding Date}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Отдел" Binding="{Binding AddressName}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Поставщик" Binding="{Binding SupplierName}" Width="*" />
 				<!--<controls:DataGridTextColumnEx Header="Партия №" Binding="{Binding Supplier.Name}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Накладная №" Binding="{Binding Supplier.Name}" Width="*" />-->
@@ -41,7 +40,7 @@
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplierSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding PosCount}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding DateClosing}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding StatusName}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>

@@ -404,8 +404,6 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
-    <Compile Include="ViewModels\Dialogs\CreateReturnToSupplierLine.cs" />
-    <Compile Include="ViewModels\Dialogs\CreateReturnToSupplier.cs" />
     <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
@@ -495,12 +493,6 @@
     <Compile Include="ViewModels\WaybillsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\CreateReturnToSupplierLine.xaml.cs">
-      <DependentUpon>CreateReturnToSupplierLine.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\CreateReturnToSupplier.xaml.cs">
-      <DependentUpon>CreateReturnToSupplier.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\ScannerConfig.xaml.cs">
       <DependentUpon>ScannerConfig.xaml</DependentUpon>
@@ -829,14 +821,6 @@
     <Page Include="Views\Diadok\Sign.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\CreateReturnToSupplierLine.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Dialogs\CreateReturnToSupplier.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Dialogs\CreateWaybill.xaml">
       <SubType>Designer</SubType>

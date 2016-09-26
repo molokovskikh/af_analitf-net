@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
-using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.Models.Print;
-using AnalitF.Net.Client.ViewModels.Dialogs;
-using AnalitF.Net.Client.ViewModels.Parts;
 using Caliburn.Micro;
 using NPOI.HSSF.UserModel;
-using System.ComponentModel;
-using System.Reactive;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
@@ -23,71 +15,57 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 	{
 		public ReturnToSuppliers()
 		{
-			DisplayName = "Возврат поставщику";
 			SelectedItems = new List<ReturnToSupplier>();
-			CanDelete = CurrentItem.Select(v => v != null).ToValue();
+			CurrentItem.Subscribe(x => {
+				CanEdit.Value = x != null;
+				CanDelete.Value = x?.Status == DocStatus.Opened;
+			});
+			DisplayName = "Возврат поставщику";
+			TrackDb(typeof(ReturnToSupplier));
 		}
 
 		[Export]
-		public NotifyValue<ObservableCollection<ReturnToSupplier>> Items { get; set; }
+		public NotifyValue<List<ReturnToSupplier>> Items { get; set; }
 		public NotifyValue<ReturnToSupplier> CurrentItem { get; set; }
 		public List<ReturnToSupplier> SelectedItems { get; set; }
 		public NotifyValue<bool> CanDelete { get; set; }
+		public NotifyValue<bool> CanEdit { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+			DbReloadToken
+				.SelectMany(_ => RxQuery(s => s.Query<ReturnToSupplier>()
+					.Fetch(x => x.Address)
+					.Fetch(x => x.Supplier)
+					.OrderByDescending(x => x.Date).ToList()))
+				.Subscribe(Items);
 		}
 
-		public void EnterItem()
+		public void Create()
 		{
-			if (CurrentItem.Value == null)
+			Shell.Navigate(new ReturnToSupplierDetails(new ReturnToSupplier(Address)));
+		}
+
+		public void Edit()
+		{
+			if (!CanEdit)
 				return;
 			Shell.Navigate(new ReturnToSupplierDetails(CurrentItem.Value.Id));
 		}
 
-		protected override void OnDeactivate(bool close)
-		{
-			base.OnDeactivate(close);
-		}
-
 		public void Delete()
 		{
-			if (!CanDelete)
-				return;
-
 			if (!Confirm("Удалить выбранные документы?"))
 				return;
 
-			foreach (var item in SelectedItems.ToArray())
-			{
-				Items.Value.Remove(item);
-				StatelessSession.Delete(item);
-				Items.Refresh();
-			}
-		}
-
-		public IEnumerable<IResult> Create()
-		{
-			if (Address == null)
-				yield break;
-			var returnToSupplier = new ReturnToSupplier(Address);
-			yield return new DialogResult(new CreateReturnToSupplier(returnToSupplier));
-			Session.Save(returnToSupplier);
+			StatelessSession.Delete(CurrentItem.Value);
 			Update();
 		}
 
-		public override void Update()
+		public void EnterItem()
 		{
-			RxQuery(x => {
-				return x.Query<ReturnToSupplier>()
-				.OrderByDescending(y => y.DateDoc)
-				.Fetch(y => y.Supplier)
-				.Fetch(y => y.Department)
-				.ToList()
-				.ToObservableCollection();
-			})
-			.Subscribe(Items);
+			Edit();
 		}
 
 		public IResult ExportExcel()
@@ -95,7 +73,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Update();
 			var columns = new[] {
 				"Док. ИД",
-				"Док. №",
 				//"Причина возврата",
 				"Дата документа",
 				"Отдел",
@@ -118,10 +95,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var rows = Items.Value.Select((o, i) => new object[] {
 				o.Id,
-				o.NumDoc,
 				//o.Причина возврата,
-				o.DateDoc,
-				o.DepartmentName,
+				o.Date,
+				o.AddressName,
 				o.SupplierName,
 				//o.Партия №,
 				//o.Накладная №,
@@ -129,7 +105,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				o.SupplierSum,
 				o.RetailSum,
 				o.PosCount,
-				o.DateClosing,
+				o.CloseDate,
 				o.StatusName,
 			});
 

@@ -1,177 +1,167 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
-using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
-using NHibernate.Linq;
 using AnalitF.Net.Client.Models.Results;
-using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.ViewModels.Dialogs;
-using AnalitF.Net.Client.ViewModels.Parts;
+using AnalitF.Net.Client.Models.Print;
+using AnalitF.Net.Client.Models;
 using Caliburn.Micro;
+using NHibernate;
+using NHibernate.Linq;
+using ReactiveUI;
 using NPOI.HSSF.UserModel;
-using System.ComponentModel;
-using System.Reactive;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class ReturnToSupplierDetails : BaseScreen2
 	{
-		public ReturnToSupplierDetails()
+		private ReturnToSupplierDetails()
 		{
-			DisplayName = "Детализация Возврат поставщику";
-			SelectedItems = new List<ReturnToSupplierLine>();
-			CanDelete = CurrentItem.Select(v => v != null).ToValue();
+			Lines = new ReactiveCollection<ReturnToSupplierLine>();
+			Session.FlushMode = FlushMode.Never;
 		}
 
-		public ReturnToSupplierDetails(uint id) : this()
+		public ReturnToSupplierDetails(ReturnToSupplier doc)
+			: this()
 		{
-			var returnToSupplier = Session.Query<ReturnToSupplier>().SingleOrDefault(x => x.Id == id);
-			ReturnToSupplier.Value = returnToSupplier;
-			if (returnToSupplier != null)
-			{
-				DisplayName = $"Возврат №{returnToSupplier.NumDoc} от {returnToSupplier.DateDoc.ToString("dd.MM.yyyy")}";
-				Items.Value = returnToSupplier.Lines;
-			}
+			DisplayName = "Новый возврат поставщику";
+			InitDoc(doc);
+			Lines.AddRange(doc.Lines);
 		}
 
-		[Export]
-		public NotifyValue<IList<ReturnToSupplierLine>> Items { get; set; }
-		public NotifyValue<ReturnToSupplierLine> CurrentItem { get; set; }
-		public List<ReturnToSupplierLine> SelectedItems { get; set; }
-		public NotifyValue<bool> CanDelete { get; set; }
-		public NotifyValue<ReturnToSupplier> ReturnToSupplier { get; set; }
+		public ReturnToSupplierDetails(uint id)
+			: this()
+		{
+			DisplayName = "Редактирование возврата поставщику";
+			InitDoc(Session.Load<ReturnToSupplier>(id));
+			Lines.AddRange(Doc.Lines);
+		}
+
+		public ReturnToSupplier Doc { get; set; }
+
+		public NotifyValue<bool> IsDocOpen { get; set; }
+		public ReactiveCollection<ReturnToSupplierLine> Lines { get; set; }
+		public NotifyValue<ReturnToSupplierLine> CurrentLine { get; set; }
+		//public NotifyValue<WriteoffReason[]> Reasons { get; set; }
+		public Supplier[] Suppliers { get; set; }
+
+		public NotifyValue<bool> CanAddLine { get; set; }
+		public NotifyValue<bool> CanDeleteLine { get; set; }
+		public NotifyValue<bool> CanEditLine { get; set; }
+		public NotifyValue<bool> CanSave { get; set; }
+		public NotifyValue<bool> CanCloseDoc { get; set; }
+		public NotifyValue<bool> CanReOpenDoc { get; set; }
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
+
+			Suppliers = Session.Query<Supplier>().OrderBy(x => x.Name).ToArray();
+
+			if (Doc.Id == 0)
+				Doc.Address = Address;
+			//RxQuery(s => s.Query<WriteoffReason>().OrderBy(x => x.Name).ToArray())
+			//	.Subscribe(Reasons);
 		}
 
-		protected override void OnDeactivate(bool close)
+		private void InitDoc(ReturnToSupplier doc)
 		{
-			base.OnDeactivate(close);
+			Doc = doc;
+			var docStatus = Doc.ObservableForProperty(x => x.Status, skipInitial: false);
+			var editOrDelete = docStatus
+				.CombineLatest(CurrentLine, (x, y) => y != null && x.Value == DocStatus.Opened);
+			editOrDelete.Subscribe(CanEditLine);
+			editOrDelete.Subscribe(CanDeleteLine);
+			docStatus.Subscribe(x => CanAddLine.Value = x.Value == DocStatus.Opened);
+			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(IsDocOpen);
+			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanCloseDoc);
+			docStatus.Select(x => x.Value == DocStatus.Opened).Subscribe(CanSave);
+			docStatus.Select(x => x.Value == DocStatus.Closed).Subscribe(CanReOpenDoc);
 		}
 
-		public IEnumerable<IResult> EnterItem()
+		public IEnumerable<IResult> AddLine()
 		{
-			if (CurrentItem.Value == null)
+			var search = new StockSearch();
+			yield return new DialogResult(search);
+			var edit = new EditStock(search.CurrentItem)
+			{
+				EditMode = EditStock.Mode.EditQuantity
+			};
+			yield return new DialogResult(edit);
+			var line = new ReturnToSupplierLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+			Lines.Add(line);
+			Doc.Lines.Add(line);
+			Doc.UpdateStat();
+		}
+
+		public void DeleteLine()
+		{
+			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
+			Lines.Remove(CurrentLine.Value);
+			Doc.Lines.Remove(CurrentLine.Value);
+			Doc.UpdateStat();
+		}
+
+		public IEnumerable<IResult> EditLine()
+		{
+			if (!CanEditLine)
 				yield break;
+			var stock = StatelessSession.Get<Stock>(CurrentLine.Value.Stock.Id);
+			stock.Quantity = CurrentLine.Value.Quantity;
+			var edit = new EditStock(stock)
+			{
+				EditMode = EditStock.Mode.EditQuantity
+			};
+			yield return new DialogResult(edit);
+			CurrentLine.Value.UpdateQuantity(edit.Stock.Quantity);
+			Doc.UpdateStat();
+		}
 
-			var returnToSupplierLine = Session.Query<ReturnToSupplierLine>().Single(x => x.Id == CurrentItem.Value.Id);
-			yield return new DialogResult(new CreateReturnToSupplierLine(returnToSupplierLine));
+		public IEnumerable<IResult> EnterLine()
+		{
+			return EditLine();
+		}
 
-			var stock = returnToSupplierLine.Stock;
-			returnToSupplierLine.Producer = stock.Producer;
-			returnToSupplierLine.ProducerId = stock.ProducerId;
-			returnToSupplierLine.Product = stock.Product;
-			returnToSupplierLine.ProductId = stock.ProductId;
-			returnToSupplierLine.RetailCost = stock.RetailCost;
-			returnToSupplierLine.SupplierCost = stock.SupplierCost;
-			returnToSupplierLine.SupplierCostWithoutNds = stock.SupplierCostWithoutNds;
+		public void CloseDoc()
+		{
+			Doc.Close(Session);
+			Save();
+		}
 
-			Session.Update(returnToSupplierLine);
+		public void ReOpenDoc()
+		{
+			Doc.ReOpen(Session);
+			Save();
+		}
+
+		public void Save()
+		{
+			if (!IsValide(Doc))
+				return;
+			Session.Save(Doc);
 			Session.Flush();
-			Update();
-		}
-
-		public void Delete()
-		{
-			if (!CanDelete)
-				return;
-
-			if (!Confirm("Удалить выбранные строки?"))
-				return;
-
-			foreach (var item in SelectedItems.ToArray())
-			{
-				Items.Value.Remove(item);
-				StatelessSession.Delete(item);
-				Items.Refresh();
-			}
-		}
-
-		public void Checkout()
-		{
-			if (ReturnToSupplier.Value == null || Items.Value == null || ReturnToSupplier.Value.Status != Status.Open)
-				return;
-
-			using (var trx = StatelessSession.BeginTransaction())
-			{
-				foreach (var item in Items.Value)
-				{
-					var stock = Session.Query<Stock>().SingleOrDefault(x => x.Id == item.Stock.Id);
-					if (stock == null || stock.Quantity < item.Quantity)
-						return;
-					stock.Quantity -= item.Quantity;
-					if (stock.Quantity == 0)
-						Session.Delete(stock);
-					else
-						Session.Update(stock);
-				}
-				var returnToSupplier = Session.Query<ReturnToSupplier>().Single(x => x.Id == ReturnToSupplier.Value.Id);
-				returnToSupplier.Status = Status.Closed;
-				Session.Update(returnToSupplier);
-				trx.Commit();
-			}
-			Bus.SendMessage("Stocks", "db");
-		}
-
-		private IQueryable<Stock> StockQuery()
-		{
-			return Stock.AvailableStocks(StatelessSession, Address);
-		}
-
-		public IEnumerable<IResult> Create()
-		{
-			var returnToSupplierLine = new ReturnToSupplierLine(ReturnToSupplier.Value.Id);
-			yield return new DialogResult(new CreateReturnToSupplierLine(returnToSupplierLine));
-
-			var stock = returnToSupplierLine.Stock;
-			returnToSupplierLine.Producer = stock.Producer;
-			returnToSupplierLine.ProducerId = stock.ProducerId;
-			returnToSupplierLine.Product = stock.Product;
-			returnToSupplierLine.ProductId = stock.ProductId;
-			returnToSupplierLine.RetailCost = stock.RetailCost;
-			returnToSupplierLine.SupplierCost = stock.SupplierCost;
-			returnToSupplierLine.SupplierCostWithoutNds = stock.SupplierCostWithoutNds;
-
-			Session.Save(returnToSupplierLine);
-			Update();
-		}
-
-		public override void Update()
-		{
-			if (ReturnToSupplier.Value == null)
-				return;
-
-			RxQuery(x => {
-				return x.Query<ReturnToSupplierLine>()
-					.Where(y => y.ReturnToSupplierId == ReturnToSupplier.Value.Id)
-					.ToList()
-					.ToObservableCollection();
-			})
-			.Subscribe(Items);
+			Bus.SendMessage(nameof(ReturnToSupplier), "db");
+			Bus.SendMessage(nameof(Stock), "db");
 		}
 
 		public IResult ExportExcel()
 		{
 			Update();
 			var columns = new[] {
-				"№№",
-				"Товар",
-				"Производитель",
-				"Количество",
-				"Цена закупки",
-				"Цена закупки с НДС",
-				"Цена розничная",
-				"Сумма закупки",
-				"Сумма закупки с НДС",
-				"Сумма розничная"
-			};
+						"№№",
+						"Товар",
+						"Производитель",
+						"Количество",
+						"Цена закупки",
+						"Цена закупки с НДС",
+						"Цена розничная",
+						"Сумма закупки",
+						"Сумма закупки с НДС",
+						"Сумма розничная"
+					};
 
 			var book = new HSSFWorkbook();
 			var sheet = book.CreateSheet("Экспорт");
@@ -179,18 +169,18 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			ExcelExporter.WriteRow(sheet, columns, row++);
 
-			var rows = Items.Value.Select((o, i) => new object[] {
-				o.Id,
-				o.Product,
-				o.Producer,
-				o.Quantity,
-				o.SupplierCostWithoutNds,
-				o.SupplierCost,
-				o.RetailCost,
-				o.SupplierSumWithoutNds,
-				o.SupplierSum,
-				o.RetailSum,
-			});
+			var rows = Lines.Select((o, i) => new object[] {
+						o.Id,
+						o.Product,
+						o.Producer,
+						o.Quantity,
+						o.SupplierCostWithoutNds,
+						o.SupplierCost,
+						o.RetailCost,
+						o.SupplierSumWithoutNds,
+						o.SupplierSum,
+						o.RetailSum,
+					});
 
 			ExcelExporter.WriteRows(sheet, rows, row);
 
@@ -199,12 +189,12 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> Print()
 		{
-			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Items.Value.ToArray()));
+			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
-			var docSettings = doc.Settings;
+			 var docSettings = doc.Settings;
 			if (docSettings != null)
 			{
 				yield return new DialogResult(new SimpleSettings(docSettings));
