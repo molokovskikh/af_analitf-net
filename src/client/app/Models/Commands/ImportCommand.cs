@@ -92,6 +92,11 @@ namespace AnalitF.Net.Client.Models.Commands
 			}
 			Log.Info($"Импорт завершен, импортировано {data.Count} таблиц");
 
+			foreach (var order in Session.Query<Order>().Where(o => o.IsLoaded)) {
+				var orderRecord = new OrderRecord(order.Id, order.KeepId);
+				Session.Save(orderRecord);
+			}
+
 			//очистка результатов автозаказа
 			//после обновления набор адресов доставки может измениться нужно удаться те позиции которые не будут отображаться
 			//если этого не сделать то при повторении дефектуры эти позиции будут загружен под текущим адресом
