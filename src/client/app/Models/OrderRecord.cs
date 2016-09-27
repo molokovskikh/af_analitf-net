@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AnalitF.Net.Client.Models
 {
-	class OrderRecord
+	public class OrderRecord
 	{
 		public OrderRecord()
 		{

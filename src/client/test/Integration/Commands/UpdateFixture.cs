@@ -652,5 +652,18 @@ update Addresses set Id =  2575 where Id = :addressId")
 			var orders = localSession.Query<Order>().ToArray();
 			Assert.AreEqual(0, orders.Length);
 		}
+
+		[Test]
+		public void CheckOrderRecord()
+		{
+			var orderRecordCount = localSession.Query<OrderRecord>().ToArray().Length;
+			Fixture<UnconfirmedOrder>();
+			var command = new UpdateCommand();
+			Run(command);
+			DbMaintain.UpdateLeaders();
+			var orderRecordCountAfterUpdate = localSession.Query<OrderRecord>().ToArray().Length;
+			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
+			Assert.AreEqual(orderRecordCount + 1, orderRecordCountAfterUpdate);
+		}
 	}
 }
