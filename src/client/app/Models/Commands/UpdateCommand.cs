@@ -140,13 +140,13 @@ namespace AnalitF.Net.Client.Models.Commands
 					}
 					else if (SyncData.Match("WaybillHistory")) {
 						SuccessMessage = "Загрузка истории документов завершена успешно.";
-						updateType = "загрузка истории заказов";
+						updateType = "загрузка истории накладных";
 						var data = new HistoryRequest {
 							WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
 							IgnoreOrders = true,
 						};
 						Log.Info($"Запрос обновления, тип обновления '{updateType}'");
-						response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);
+						response = Wait("Waybills", Client.PostAsJsonAsync("Waybills", data, Token), ref requestId);
 					}
 					else if (SyncData.Match("OrderHistory")) {
 						SuccessMessage = "Загрузка истории заказов завершена успешно.";

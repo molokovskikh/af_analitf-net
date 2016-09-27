@@ -456,6 +456,13 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(1, localOrder.Lines.Count);
 			Assert.AreEqual(1, localOrder.LinesCount);
 			Assert.That(localOrder.Lines[0].ResultCost, Is.GreaterThan(0));
+
+			cmd = new UpdateCommand {
+				SyncData = "WaybillHistory"
+			};
+			Run(cmd);
+
+			Assert.AreEqual("Загрузка истории документов завершена успешно.", cmd.SuccessMessage);
 		}
 
 		[Test]
