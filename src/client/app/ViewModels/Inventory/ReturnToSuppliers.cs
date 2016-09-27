@@ -56,9 +56,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void Delete()
 		{
-			if (!Confirm("Удалить выбранные документы?"))
+			if (!Confirm("Удалить выбранный документ?"))
 				return;
 
+			CurrentItem.Value.BeforeDelete();
 			StatelessSession.Delete(CurrentItem.Value);
 			Update();
 		}
@@ -73,12 +74,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Update();
 			var columns = new[] {
 				"Док. ИД",
-				//"Причина возврата",
 				"Дата документа",
 				"Отдел",
 				"Поставщик",
-				//"Партия №",
-				//"Накладная №",
 				"Сумма закупки",
 				"Сумма закупки с НДС",
 				"Сумма розничная",
@@ -95,12 +93,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			var rows = Items.Value.Select((o, i) => new object[] {
 				o.Id,
-				//o.Причина возврата,
 				o.Date,
 				o.AddressName,
 				o.SupplierName,
-				//o.Партия №,
-				//o.Накладная №,
 				o.SupplierSumWithoutNds,
 				o.SupplierSum,
 				o.RetailSum,

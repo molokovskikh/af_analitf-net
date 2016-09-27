@@ -17,18 +17,40 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 	[TestFixture]
 	public class ReturnToSupplierViewFixture : ViewModelFixture
 	{
-		private ReturnToSupplier returnToSupplier;
+		private ReturnToSupplier doc;
 
 		private ReturnToSuppliers model;
 
 		private ReturnToSupplierDetails modelDetails;
 
+		private Stock stock;
+
 		[SetUp]
 		public void Setup()
 		{
-			returnToSupplier = CreateReturnToSupplier();
+			stock = new Stock()
+			{
+				Product = "Папаверин",
+				Status = StockStatus.Available,
+				Address = address,
+				Quantity = 5,
+				ReservedQuantity = 0
+			};
+			session.Save(stock);
+
+			session.DeleteEach<ReturnToSupplier>();
+			var supplier = session.Query<Supplier>().First();
+
+			doc = new ReturnToSupplier
+			{
+				Date = DateTime.Now,
+				Supplier = supplier,
+				Address = address
+			};
+			session.Save(doc);
+
 			model = Open(new ReturnToSuppliers());
-			modelDetails = Open(new ReturnToSupplierDetails(returnToSupplier.Id));
+			modelDetails = Open(new ReturnToSupplierDetails(doc.Id));
 		}
 
 		[Test]
@@ -54,32 +76,45 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
 		}
 
-		private ReturnToSupplier CreateReturnToSupplier()
+		[Test]
+		public void Doc_Flow()
 		{
-			session.DeleteEach<ReturnToSupplier>();
-			var department = session.Query<Address>().First();
-			var supplier = session.Query<Supplier>().First();
-			var _returnToSupplier = new ReturnToSupplier
-			{
-				Date = DateTime.Now,
-				Supplier = supplier,
-				Address = department
-			};
-			var returnToSupplierLine = CreateReturnToSupplierLine(_returnToSupplier);
-			session.Save(_returnToSupplier);
-			session.Save(returnToSupplierLine);
-			_returnToSupplier.Lines.Add(returnToSupplierLine);
-			return _returnToSupplier;
-		}
+			//На складе есть Папаверин в количестве 5шт.
+			Assert.AreEqual(stock.Quantity, 5);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
 
-		private ReturnToSupplierLine CreateReturnToSupplierLine(ReturnToSupplier returnToSupplier)
-		{
-			return new ReturnToSupplierLine(returnToSupplier.Id)
-			{
-				ProductId = 10,
-				Product = "Тестовый продукт",
-				Quantity = 1,
-			};
+			//Мы создаем документ списание на 3 упаковки, после того как строка папаверина
+			//добавлена и документ сохранен, на складе у нас будет - Папаверин 2шт, 3шт в резерве
+			var line = new ReturnToSupplierLine(stock, 3);
+			doc.Lines.Add(line);
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 2);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(line.Quantity, 3);
+
+			//Если мы закроем документ то получим - Папаверен 2шт, 0шт в резерве
+			doc.Close(session);
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 2);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
+			Assert.AreEqual(line.Quantity, 3);
+
+			//Если мы снова откроем документ, то получим что было до закрытия - Папаверин 2шт, 3шт в резерве
+			doc.ReOpen(session);
+			session.Save(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 2);
+			Assert.AreEqual(stock.ReservedQuantity, 3);
+			Assert.AreEqual(line.Quantity, 3);
+
+			//Если документ будет удален то на складе получим - Папаверин 5шт, 0шт в резерве
+			doc.BeforeDelete();
+			session.Delete(doc);
+			session.Flush();
+			Assert.AreEqual(stock.Quantity, 5);
+			Assert.AreEqual(stock.ReservedQuantity, 0);
 		}
 	}
 }

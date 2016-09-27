@@ -9,12 +9,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 {
 	public class ReturnToSupplier : BaseStatelessObject, IDataErrorInfo2
 	{
-
-//Причина возврата - выбор из списка, обязат.
-//Партия № - выбор из списка, который зависит от выбора поставщика, не обязат.
-//Накладная № - проставляется при выборе партии, не обязат.
-
-
 		public ReturnToSupplier()
 		{
 			Lines = new List<ReturnToSupplierLine>();
@@ -86,7 +80,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = DateTime.Now;
 			Status = DocStatus.Closed;
 			foreach (var line in Lines)
-				session.Save(line.Stock.Return(line.Quantity));
+				session.Save(line.Stock.ReturnToSupplier(line.Quantity));
 		}
 
 		public virtual void ReOpen(ISession session)
@@ -94,7 +88,13 @@ namespace AnalitF.Net.Client.Models.Inventory
 			CloseDate = null;
 			Status = DocStatus.Opened;
 			foreach (var line in Lines)
-				session.Save(line.Stock.RecoveryReturn(line.Quantity));
+				session.Save(line.Stock.CancelReturnToSupplier(line.Quantity));
+		}
+
+		public virtual void BeforeDelete()
+		{
+			foreach (var line in Lines)
+				line.Stock.Release(line.Quantity);
 		}
 
 		public virtual void UpdateStat()

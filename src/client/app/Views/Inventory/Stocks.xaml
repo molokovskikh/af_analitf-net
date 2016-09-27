@@ -27,6 +27,7 @@
 			</MenuItem>
 			<MenuItem Header="Расходные документы">
 				<MenuItem Header="Списание" Name="WriteoffDocs" />
+				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />

@@ -691,11 +691,6 @@ namespace AnalitF.Net.Client.ViewModels
 			NavigateRoot(new WaybillsViewModel());
 		}
 
-		public void ShowReturnToSuppliers()
-		{
-			NavigateRoot(new Inventory.ReturnToSuppliers());
-		}
-
 		public void ShowMain()
 		{
 			NavigateRoot(new Main());

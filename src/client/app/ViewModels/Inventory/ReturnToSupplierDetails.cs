@@ -45,7 +45,6 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public NotifyValue<bool> IsDocOpen { get; set; }
 		public ReactiveCollection<ReturnToSupplierLine> Lines { get; set; }
 		public NotifyValue<ReturnToSupplierLine> CurrentLine { get; set; }
-		//public NotifyValue<WriteoffReason[]> Reasons { get; set; }
 		public Supplier[] Suppliers { get; set; }
 
 		public NotifyValue<bool> CanAddLine { get; set; }
@@ -58,13 +57,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
-
 			Suppliers = Session.Query<Supplier>().OrderBy(x => x.Name).ToArray();
-
 			if (Doc.Id == 0)
 				Doc.Address = Address;
-			//RxQuery(s => s.Query<WriteoffReason>().OrderBy(x => x.Name).ToArray())
-			//	.Subscribe(Reasons);
 		}
 
 		private void InitDoc(ReturnToSupplier doc)

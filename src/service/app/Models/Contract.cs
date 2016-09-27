@@ -269,8 +269,8 @@ namespace AnalitF.Net.Client.Models
 	{
 		Sale,
 		Stock,
-		Return,
-		RecoveryReturn
+		ReturnToSupplier,
+		CancelReturnToSupplier
 	}
 
 	public class StockActionAttrs
