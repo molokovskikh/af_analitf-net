@@ -28,7 +28,6 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
-using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
