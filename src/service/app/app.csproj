@@ -64,6 +64,7 @@
     <Reference Include="System.Reactive.Core" />
     <Reference Include="System.Reactive.Interfaces" />
     <Reference Include="System.Reactive.Linq" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -111,6 +112,7 @@
     <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
+    <Compile Include="Models\OrderRecordLog.cs" />
     <Compile Include="Models\PendingDocLog.cs" />
     <Compile Include="Models\PendingLimit.cs" />
     <Compile Include="Models\PendingMailLog.cs" />

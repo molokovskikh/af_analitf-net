@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -28,6 +29,7 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
@@ -1582,6 +1584,7 @@ where a.MailId in ({ids.Implode()})";
 			foreach (var @group in groups) {
 				foreach (var order in group) {
 					session.Save(new PendingOrderLog(order, user, group.First().RowId));
+ 					session.Save(new OrderRecordLog(order, user, group.First().RowId, RecordType.Loaded));
 				}
 			}
 
