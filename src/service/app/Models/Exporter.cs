@@ -1580,11 +1580,14 @@ where a.MailId in ({ids.Implode()})";
 					&& addresses.Contains(o.AddressId))
 				.ToArray();
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, order.RowId, RecordType.Loaded));
+			}
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
 				foreach (var order in group) {
 					session.Save(new PendingOrderLog(order, user, group.First().RowId));
- 					session.Save(new OrderRecordLog(order, user, group.First().RowId, RecordType.Loaded));
+
 				}
 			}
 

@@ -12,7 +12,7 @@ namespace AnalitF.Net.Service.Models
 	{
 		public OrderRecordLog()
  		{
- 			ImportTime = DateTime.Now;
+ 			WriteTime = DateTime.Now;
  		}
 
  		public OrderRecordLog(Order order, User user, uint exportId, RecordType recordType) : this()
@@ -33,6 +33,6 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual RecordType RecordType { get; set; }
 
-		public virtual DateTime ImportTime { get; set; }
+		public virtual DateTime WriteTime { get; set; }
 	}
 }
