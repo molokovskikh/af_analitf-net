@@ -9,7 +9,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		public OrderRecord()
 		{
-			ImortTime = DateTime.Now;
+			ImportTime = DateTime.Now;
 		}
 
 		public OrderRecord(uint orderId, uint? keepId) : this()
@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual bool IsImported { get; set; }
 
-		public virtual DateTime ImortTime { get; set; }
+		public virtual DateTime ImportTime { get; set; }
 
 	}
 }
