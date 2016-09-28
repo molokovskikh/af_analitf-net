@@ -230,5 +230,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Shell.Navigate(new WriteoffDocs());
 		}
+
+		public void ReturnToSuppliers()
+		{
+			Shell.Navigate(new ReturnToSuppliers());
+		}
 	}
 }

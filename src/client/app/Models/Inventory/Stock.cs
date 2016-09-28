@@ -153,6 +153,18 @@ namespace AnalitF.Net.Client.Models.Inventory
 			return new StockAction(ActionType.Sale, this, quantity);
 		}
 
+		public virtual StockAction ReturnToSupplier(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			return new StockAction(ActionType.ReturnToSupplier, this, quantity);
+		}
+
+		public virtual StockAction CancelReturnToSupplier(decimal quantity)
+		{
+			ReservedQuantity += quantity;
+			return new StockAction(ActionType.CancelReturnToSupplier, this, quantity);
+		}
+
 		public virtual void Release(decimal quantity)
 		{
 			ReservedQuantity -= quantity;

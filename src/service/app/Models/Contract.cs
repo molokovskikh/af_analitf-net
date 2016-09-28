@@ -268,7 +268,9 @@ namespace AnalitF.Net.Client.Models
 	public enum ActionType
 	{
 		Sale,
-		Stock
+		Stock,
+		ReturnToSupplier,
+		CancelReturnToSupplier
 	}
 
 	public class StockActionAttrs

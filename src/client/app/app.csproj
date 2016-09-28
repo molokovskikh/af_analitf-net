@@ -292,7 +292,9 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
+    <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
     <Compile Include="Models\Inventory\ReceivingLine.cs" />
@@ -304,6 +306,7 @@
     <Compile Include="Models\Inventory\WriteoffReason.cs" />
     <Compile Include="Models\Print\CheckDetailsDocument.cs" />
     <Compile Include="Models\Print\CheckDocument.cs" />
+    <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
     <Compile Include="Models\Print\ReturnActDocument.cs" />
     <Compile Include="Models\Print\DefectStockDocument.cs" />
     <Compile Include="Models\Print\StockDocument.cs" />
@@ -401,6 +404,7 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
     <Compile Include="ViewModels\Diadok\Revocation.cs" />
@@ -478,6 +482,7 @@
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />
     <Compile Include="ViewModels\Sbis\Reject.cs" />
+    <Compile Include="ViewModels\Inventory\ReturnToSupplierDetails.cs" />
     <Compile Include="ViewModels\WaybillLineSearch.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
@@ -568,6 +573,12 @@
     </Compile>
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReturnToSupplierDetails.xaml.cs">
+      <DependentUpon>ReturnToSupplierDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReturnToSuppliers.xaml.cs">
+      <DependentUpon>ReturnToSuppliers.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\CheckDetails.xaml.cs">
       <DependentUpon>CheckDetails.xaml</DependentUpon>
@@ -870,6 +881,14 @@
     <Page Include="Views\Feedback.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReturnToSupplierDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\ReturnToSuppliers.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Inventory\CheckDetails.xaml">
       <SubType>Designer</SubType>
