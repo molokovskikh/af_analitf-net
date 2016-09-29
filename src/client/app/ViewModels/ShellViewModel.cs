@@ -1176,9 +1176,10 @@ namespace AnalitF.Net.Client.ViewModels
 			IsNotifying = false;
 
 			var view = GetView();
-			if (view != null) {
-				foreach (var item in ((ShellView)view).Items.Items) {
-					var el = ((ShellView)view).Items.ItemContainerGenerator.ContainerFromItem(item) as Control;
+			var tabs = ((ShellView) view)?.Items;
+			if (tabs != null) {
+				foreach (var item in tabs.Items) {
+					var el = tabs.ItemContainerGenerator.ContainerFromItem(item) as Control;
 					if (el != null)
 						el.Template = null;
 				}
