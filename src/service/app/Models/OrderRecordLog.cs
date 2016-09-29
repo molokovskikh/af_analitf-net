@@ -6,7 +6,7 @@ namespace AnalitF.Net.Service.Models
 	public enum RecordType
 	{
 		Loaded = 1,
-		Accepted = 2,
+		Confirmed = 2,
 	}
 	public class OrderRecordLog
 	{

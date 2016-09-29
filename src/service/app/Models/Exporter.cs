@@ -2292,6 +2292,15 @@ where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 
+			var orders = session.Query<Order>()
+				.Where(o => !o.Deleted
+				  && o.UserId != userId
+				  && !o.Processed
+				  && !o.Submited);
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, order.RowId, RecordType.Confirmed));
+			}
+
 			session.CreateSQLQuery(@"
 update Orders.OrdersHead oh
 	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
