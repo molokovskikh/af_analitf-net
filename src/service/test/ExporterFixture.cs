@@ -444,7 +444,7 @@ namespace AnalitF.Net.Service.Test
 		}
 
 		[Test]
-		public void Check_OrderRecords()
+		public void Check_Order_Records()
 		{
 			CreateOrder();
 			var recordCount = session.Query<OrderRecordLog>().ToList().Count;
