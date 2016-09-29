@@ -235,5 +235,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Shell.Navigate(new ReturnToSuppliers());
 		}
+
+		public void ReassessmentDocs()
+		{
+			Shell.Navigate(new ReassessmentDocs());
+		}
 	}
 }

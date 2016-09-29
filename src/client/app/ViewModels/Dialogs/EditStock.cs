@@ -11,8 +11,9 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 
 		public enum Mode
 		{
+			EditStock,
 			EditQuantity,
-			EditStock
+			EditRetailCostAndQuantity,
 		}
 
 		public EditStock()
@@ -25,12 +26,14 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 			: this()
 		{
 			Stock = stock;
+			Stock.Configure(Settings);
 		}
 
 		public EditStock(uint id)
 			: this()
 		{
 			Stock = Session.Get<Stock>(id);
+			Stock.Configure(Settings);
 		}
 
 		public bool WasCancelled { get; private set; }

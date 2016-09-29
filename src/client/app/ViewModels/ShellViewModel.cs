@@ -415,12 +415,19 @@ namespace AnalitF.Net.Client.ViewModels
 					var items = PersistentNavigationStack
 						.Where(t => t.TypeName != typeof(Main).FullName)
 						.Select(t => {
-							var v = Activator.CreateInstance(Type.GetType(t.TypeName), t.Args);
+							var type = Type.GetType(t.TypeName);
+							if (type == null)
+								return null;
+							var constructor = type.GetConstructor(t.Args.Select(x => x.GetType()).ToArray());
+							if (constructor == null)
+								return null;
+							var v = Activator.CreateInstance(type, t.Args);
 							if (v is IDisposable) {
 								disposable.Add((IDisposable)v);
 							}
 							return v;
 						})
+						.Where(x => x != null)
 						.OfType<IScreen>()
 						.ToArray();
 					foreach (var item in items)

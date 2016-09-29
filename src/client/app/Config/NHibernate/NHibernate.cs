@@ -277,8 +277,15 @@ namespace AnalitF.Net.Client.Config.NHibernate
 				i.ManyToOne(l => l.Producer, c => c.Index("Producer"));
 			});
 
+			mapper.Class<ReassessmentDoc>(m => m.Bag(o => o.Lines, c => {
+				c.Cascade(Cascade.All | Cascade.DeleteOrphans);
+			}));
+			mapper.Class<ReassessmentLine>(m => m.ManyToOne(x => x.DstStock, p => p.Cascade(Cascade.All)));
+
 			mapper.Class<Stock>(m => {
 				m.Property(x => x.ServerId, p => p.UniqueKey("ServerIdUniq"));
+				m.Property(x => x.RetailCost, p => p.Access(Accessor.Field));
+				m.Property(x => x.RetailMarkup, p => p.Access(Accessor.Field));
 			});
 			mapper.Class<StockAction>(m => {
 				m.Version(p => p.Timestamp, c => {

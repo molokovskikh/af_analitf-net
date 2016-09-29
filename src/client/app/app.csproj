@@ -297,6 +297,7 @@
     <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
+    <Compile Include="Models\Inventory\ReassessmentDoc.cs" />
     <Compile Include="Models\Inventory\ReceivingLine.cs" />
     <Compile Include="Models\Inventory\ReceivingOrder.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
@@ -422,6 +423,7 @@
     <Compile Include="ViewModels\Inventory\CheckDetails.cs" />
     <Compile Include="ViewModels\Inventory\Checkout.cs" />
     <Compile Include="ViewModels\Inventory\Checks.cs" />
+    <Compile Include="ViewModels\Inventory\EditReassessmentDoc.cs" />
     <Compile Include="ViewModels\Inventory\EditInventoryDoc.cs" />
     <Compile Include="ViewModels\Inventory\EditInventoryLine.cs" />
     <Compile Include="ViewModels\Inventory\EditWriteoffDoc.cs" />
@@ -429,6 +431,7 @@
     <Compile Include="ViewModels\Inventory\Frontend.cs" />
     <Compile Include="ViewModels\Inventory\Help.cs" />
     <Compile Include="ViewModels\Inventory\InventoryDocs.cs" />
+    <Compile Include="ViewModels\Inventory\ReassessmentDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingDetails.cs" />
     <Compile Include="ViewModels\Inventory\ReceivingOrders.cs" />
     <Compile Include="ViewModels\Inventory\CheckDefectSeries.cs" />
@@ -595,6 +598,9 @@
     <Compile Include="Views\Inventory\EditInventoryLine.xaml.cs">
       <DependentUpon>EditInventoryLine.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\EditReassessmentDoc.xaml.cs">
+      <DependentUpon>EditReassessmentDoc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\EditWriteoffDoc.xaml.cs">
       <DependentUpon>EditWriteoffDoc.xaml</DependentUpon>
     </Compile>
@@ -609,6 +615,9 @@
     </Compile>
     <Compile Include="Views\Inventory\ProductSearch.xaml.cs">
       <DependentUpon>ProductSearch.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\ReassessmentDocs.xaml.cs">
+      <DependentUpon>ReassessmentDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ReceivingDetails.xaml.cs">
       <DependentUpon>ReceivingDetails.xaml</DependentUpon>
@@ -910,6 +919,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\EditReassessmentDoc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Inventory\EditWriteoffDoc.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -927,6 +940,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Inventory\ProductSearch.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Inventory\ReassessmentDocs.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

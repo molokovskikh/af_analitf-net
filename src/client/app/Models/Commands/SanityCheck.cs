@@ -254,8 +254,8 @@ namespace AnalitF.Net.Client.Models.Commands
 
 						foreach (var uniqueKey in table.UniqueKeyIterator) {
 							if (!indexes.Any(x => x.Name.Match(uniqueKey.Name))) {
-								var sql = uniqueKey.SqlConstraintString(dialect);
-								alters.Add($"alter table {table.Name} add {sql};");
+								var sql = uniqueKey.SqlConstraintString(dialect, uniqueKey.Name, defaultCatalog, defaultSchema);
+								alters.Add($"alter table {table.Name} {sql};");
 							}
 						}
 					}
