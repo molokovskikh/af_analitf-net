@@ -8,6 +8,7 @@ using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Models;
+using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
@@ -446,6 +447,8 @@ namespace AnalitF.Net.Service.Test
 		[Test]
 		public void Check_Order_Records()
 		{
+			Init();
+			//session.DeleteEach<OrderRecordLog>();
 			CreateOrder();
 			var recordCount = session.Query<OrderRecordLog>().ToList().Count;
 			exporter.Export();
@@ -473,13 +476,13 @@ namespace AnalitF.Net.Service.Test
 			var activePrices = testUser2.GetActivePricesNaked(session);
 			var price = activePrices.First()
 				.Price;
-			var Order = new TestOrder(testUser2, price) {
+			var order = new TestOrder(testUser2, price) {
 				Submited = false,
 				Processed = false
 			};
 			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
-			Order.AddItem(offer, 1);
-			session.Save(Order);
+			order.AddItem(offer, 1);
+			session.Save(order);
 		}
 
 		private string GetColumnValue(string table, string column, string[] data)

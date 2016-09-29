@@ -2290,11 +2290,13 @@ where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
 
+			var addresses = Addresses.Select(a => (uint?)a.Id).ToArray();
 			var orders = session.Query<Order>()
 				.Where(o => !o.Deleted
 				  && o.UserId != userId
 				  && !o.Processed
-				  && !o.Submited);
+				  && !o.Submited
+					&& addresses.Contains(o.AddressId));
 			foreach (var order in orders) {
 				session.Save(new OrderRecordLog(order, user, order.RowId, RecordType.Confirmed));
 			}
