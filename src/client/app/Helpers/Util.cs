@@ -20,7 +20,7 @@ namespace AnalitF.Net.Client.Helpers
 {
 	public static class Util
 	{
-		static ILog log = LogManager.GetLogger(typeof(Util));
+		private static ILog log = LogManager.GetLogger(typeof(Util));
 
 		private enum State
 		{
@@ -39,6 +39,15 @@ namespace AnalitF.Net.Client.Helpers
 				log.Error("Выполнение задачи завершилось ошибкой", e);
 			}
 #endif
+		}
+
+		public static void LogResult(this Task task)
+		{
+			task.ContinueWith(x => {
+				if (x.IsFaulted) {
+					log.Error("Выполнение задачи завершилось ошибкой", x.Exception);
+				}
+			});
 		}
 
 		[Conditional("DEBUG")]

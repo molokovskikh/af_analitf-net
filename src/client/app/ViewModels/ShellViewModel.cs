@@ -110,7 +110,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_leaderCalculationWasStart = value;
-				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));
+				NotifyOfPropertyChange(nameof(LeaderCalculationWasStart));
 			}
 		}
 
@@ -250,7 +250,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			Env.RxQuery(x => x.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate());
+			Env.Query(x => x.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate()).LogResult();
 			Instances.Value = new string[0];
 			if (Directory.Exists(Config.Opt)) {
 				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
@@ -316,6 +316,31 @@ namespace AnalitF.Net.Client.ViewModels
 			((TabNavigator)Navigator).CloseScreen(item);
 		}
 
+		public async Task CheckCloseConditions()
+		{
+				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
+				var orders = await Env.Query(s => s.Query<SentOrder>()
+					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays)).Take(1000).ToArray());
+				if (orders.Any()) {
+					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
+						Confirm("В архиве заказов обнаружены заказы," +
+							$" сделанные более {Settings.Value.DeleteOrdersOlderThan} дней назад. Удалить их?");
+					if (deleteOldOrders)
+						await Env.Query(s => s.DeleteEach(orders));
+				}
+
+				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
+				var waybills = await Env.Query(s => s.Query<Waybill>()
+					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays)).Take(1000).ToArray());
+				if (waybills.Any()) {
+					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
+						Confirm("В архиве заказов обнаружены документы (накладные, отказы)," +
+							$" сделанные более {Settings.Value.DeleteWaybillsOlderThan} дней назад. Удалить их?");
+					if (deleteOldWaybills)
+						await Env.Query(s => s.DeleteEach(waybills));
+				}
+		}
+
 		public override void CanClose(Action<bool> callback)
 		{
 			if (Config.Quiet) {
@@ -323,53 +348,22 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			}
 
-			Env.Query(s => {
-				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
-				var orderQuery = s.Query<SentOrder>()
-					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
-				if (orderQuery.Any()) {
-					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
-						Confirm("В архиве заказов обнаружены заказы," +
-							$" сделанные более {Settings.Value.DeleteOrdersOlderThan} дней назад. Удалить их?");
-					if (deleteOldOrders) {
-						var orders = orderQuery.ToArray();
-						foreach (var order in orders) {
-							s.Delete(order);
-						}
-					}
+			CheckCloseConditions().ContinueWith(t => {
+				if (t.IsFaulted)
+					log.Error("Ошибка при проверки условий закрытия", t.Exception);
+				if (Stat.Value.ReadyForSendOrdersCount > 0
+					&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
+					Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
 				}
-
-				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
-				var query = s.Query<Waybill>()
-					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
-				if (query.Any()) {
-					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
-						Confirm("В архиве заказов обнаружены документы (накладные, отказы)," +
-							$" сделанные более {Settings.Value.DeleteWaybillsOlderThan} дней назад. Удалить их?");
-					if (deleteOldWaybills) {
-						var waybills = query.ToArray();
-						foreach (var waybill in waybills) {
-							waybill.DeleteFiles(Settings);
-							s.Delete(waybill);
-						}
-					}
+				else {
+					base.CanClose(callback);
 				}
-			}).SafeWait();
-
-			if (Stat.Value.ReadyForSendOrdersCount > 0
-				&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
-				Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
-			}
-			else {
-				base.CanClose(callback);
-			}
+			});
 		}
 
 		public void UpdateStat()
 		{
-			Env.RxQuery(x => Models.Stat.Update(x, CurrentAddress.Value))
-				.ObserveOn(Env.UiScheduler)
-				.Subscribe(Stat);
+			Env.RxQuery(x => Models.Stat.Update(x, CurrentAddress.Value)).Subscribe(Stat);
 		}
 
 		public IEnumerable<IResult> StartCheck()
@@ -389,16 +383,10 @@ namespace AnalitF.Net.Client.ViewModels
 					return Update();
 			}
 
-			if (User.Value != null
-				&& User.Value.IsDelayOfPaymentEnabled
+			if (User.Value?.IsDelayOfPaymentEnabled == true
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
-				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
-					t => {
-						LeaderCalculationWasStart = true;
-						DbMaintain.UpdateLeaders();
-						LeaderCalculationWasStart = false;
-						return Enumerable.Empty<IResult>();
-					});
+				new Models.Results.TaskResult(UpdateLeaders(), new WaitViewModel("Пересчет отсрочки платежа"))
+					.Execute(new ActionExecutionContext());
 			}
 
 #if DEBUG
@@ -746,15 +734,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Update()
 		{
-			LeaderCalculationWasStart = true;
-			TaskEx.Run(() => {
-				DbMaintain.UpdateLeaders();
-			}).ContinueWith(t => {
-				LeaderCalculationWasStart = false;
-			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
-			TaskScheduler.FromCurrentSynchronizationContext());
+			var result = Sync(new UpdateCommand());
+			UpdateLeaders().LogResult();
+			return result;
+		}
 
-			return Sync(new UpdateCommand());
+		public async Task UpdateLeaders()
+		{
+			LeaderCalculationWasStart = true;
+			await Env.Query(s => DbMaintain.UpdateLeaders(s));
+			LeaderCalculationWasStart = false;
 		}
 
 		private IEnumerable<IResult> UpdateBySchedule()

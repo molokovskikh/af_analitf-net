@@ -84,7 +84,8 @@ namespace AnalitF.Net.Client.Config
 				return Observable.Empty<T>();
 			var task = Query(@select);
 			//игнорируем отмену задачи, она произойдет если закрыли форму
-			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>());
+			return Observable.FromAsync(() => task).Catch<T, TaskCanceledException>(_ => Observable.Empty<T>())
+				.ObserveOn(UiScheduler);
 		}
 
 		public Task<T> Query<T>(Func<IStatelessSession, T> @select)
