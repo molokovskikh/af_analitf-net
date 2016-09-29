@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using Castle.Components.Validator;
 using Common.Models;
 using Common.Models.Helpers;
@@ -1587,7 +1586,6 @@ where a.MailId in ({ids.Implode()})";
 			foreach (var @group in groups) {
 				foreach (var order in group) {
 					session.Save(new PendingOrderLog(order, user, group.First().RowId));
-
 				}
 			}
 
