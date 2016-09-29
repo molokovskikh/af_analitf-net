@@ -443,6 +443,45 @@ namespace AnalitF.Net.Service.Test
 			Assert.AreEqual(1, session.Query<PendingMailLog>().Count());
 		}
 
+		[Test]
+		public void Check_OrderRecords()
+		{
+			CreateOrder();
+			var recordCount = session.Query<OrderRecordLog>().ToList().Count;
+			exporter.Export();
+			Assert.AreEqual(recordCount + 1, session.Query<OrderRecordLog>().ToList().Count);
+			Assert.AreEqual(RecordType.Loaded, session.Query<OrderRecordLog>().ToList().Last().RecordType);
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
+			Assert.AreEqual(recordCount + 2, session.Query<OrderRecordLog>().ToList().Count);
+			Assert.AreEqual(RecordType.Confirmed, session.Query<OrderRecordLog>().ToList().Last().RecordType);
+		}
+
+		public void CreateOrder()
+		{
+			var testUser = session.Load<TestUser>(user.Id);
+			var testUser2 = client.CreateUser(session);
+			testUser2.AvaliableAddresses.AddEach(client.Addresses);
+			testUser.AllowDownloadUnconfirmedOrders = true;
+			session.CreateSQLQuery("insert into Customers.UserPrices(PriceId, RegionId, UserId) " +
+				"select PriceId, RegionId, :target " +
+				"from Customers.UserPrices " +
+				"where UserId = :source")
+				.SetParameter("source", testUser.Id)
+				.SetParameter("target", testUser2.Id)
+				.ExecuteUpdate();
+			session.Flush();
+			var activePrices = testUser2.GetActivePricesNaked(session);
+			var price = activePrices.First()
+				.Price;
+			var Order = new TestOrder(testUser2, price) {
+				Submited = false,
+				Processed = false
+			};
+			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
+			Order.AddItem(offer, 1);
+			session.Save(Order);
+		}
+
 		private string GetColumnValue(string table, string column, string[] data)
 		{
 			var meta = exporter.Result
