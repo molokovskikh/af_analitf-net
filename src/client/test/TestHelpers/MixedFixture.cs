@@ -62,10 +62,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				Path.Combine(ConfigurationManager.AppSettings["ClientDocPath"], "АналитФАРМАЦИЯ"));
 
 			localSession = Integration.IntegrationSetup.Factory.OpenSession();
-			disposable.Add(localSession);
-
 			localStateless = Integration.IntegrationSetup.Factory.OpenStatelessSession();
-			disposable.Add(localSession);
 
 			settings = localSession.Query<Settings>().First();
 			address = localSession.Query<Address>().First();
@@ -95,6 +92,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				XmlConfigurator.Configure();
 			}
 			disposable?.Dispose();
+			localSession?.Dispose();
+			localStateless?.Dispose();
 			DbHelper.SaveFailData();
 		}
 
