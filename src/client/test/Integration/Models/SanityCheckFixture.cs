@@ -109,7 +109,7 @@ namespace AnalitF.Net.Client.Test.Integration.Models
 			session.CreateSQLQuery("alter table Stocks drop index ServerId").ExecuteUpdate();
 			check.Check(updateSchema: true);
 			var result = session.CreateSQLQuery("show create table Stocks").UniqueResult<object[]>();
-			Assert.That(result[1].ToString(), Does.Contain("UNIQUE KEY `ServerId` "));
+			Assert.That(result[1].ToString(), Does.Contain("UNIQUE KEY `ServerIdUniq` (`ServerId`)"));
 		}
 	}
 }

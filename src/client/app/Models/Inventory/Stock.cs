@@ -3,6 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using AnalitF.Net.Client.Helpers;
 using System.ComponentModel;
+using AnalitF.Net.Client.Config.NHibernate;
+using Common.Tools;
 using NHibernate;
 using NHibernate.Linq;
 
@@ -54,6 +56,9 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 	public class Stock : BaseStock
 	{
+		private decimal? _retailCost;
+		private decimal? _retailMarkup;
+
 		public Stock()
 		{
 		}
@@ -102,6 +107,136 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual decimal Excise { get; set; }
 
 		public virtual string StatusName => DescriptionHelper.GetDescription(Status);
+
+		[Ignore]
+		public virtual Settings Settings { get; set; }
+
+		[Ignore]
+		public virtual WaybillSettings WaybillSettings { get; set; }
+
+		[Ignore]
+		public virtual bool SpecialMarkup { get; set; }
+
+		public override decimal? RetailCost
+		{
+			get { return _retailCost; }
+			set
+			{
+				if (_retailCost == value)
+					return;
+				_retailCost = value;
+				RecalculateMarkups(RetailCost);
+				OnPropertyChanged();
+				OnPropertyChanged(nameof(RetailSum));
+			}
+		}
+
+		public override decimal? RetailMarkup
+		{
+			get { return _retailMarkup; }
+			set
+			{
+				if (_retailMarkup == value)
+					return;
+				_retailMarkup = value;
+				RecalculateFromRetailMarkup();
+				OnPropertyChanged();
+			}
+		}
+
+		private void RecalculateMarkups(decimal? retailsCost)
+		{
+			if (Settings == null)
+				return;
+			UpdateMarkups(retailsCost);
+			OnPropertyChanged(nameof(RetailMarkup));
+		}
+
+		private void RecalculateFromRetailMarkup()
+		{
+			if (Settings == null)
+				return;
+			_retailCost = CalculateRetailCost(_retailMarkup);
+			OnPropertyChanged(nameof(RetailCost));
+			OnPropertyChanged(nameof(RetailSum));
+		}
+
+		private void UpdateMarkups(decimal? cost)
+		{
+			if (!IsCalculable())
+				return;
+
+			if (GetMarkupType() == MarkupType.VitallyImportant)
+				_retailMarkup = NullableHelper.Round((cost - SupplierCost) / (ProducerCost * TaxFactor) * 100, 2);
+			else
+				_retailMarkup = NullableHelper.Round((cost - SupplierCost) / (SupplierCostWithoutNds * TaxFactor) * 100, 2);
+		}
+
+		private bool IsCalculable()
+		{
+			if (SupplierCost.GetValueOrDefault() == 0)
+				return false;
+			if (GetMarkupType() == MarkupType.VitallyImportant) {
+				if (ProducerCost.GetValueOrDefault() == 0)
+					return false;
+			} else if (SupplierCostWithoutNds.GetValueOrDefault() == 0) {
+				return false;
+			}
+			return true;
+		}
+
+		private decimal TaxFactor
+		{
+			get
+			{
+				var nds = Nds.GetValueOrDefault(10);
+				if (WaybillSettings.Taxation == Taxation.Envd
+					&& ((VitallyImportant.GetValueOrDefault() && !WaybillSettings.IncludeNdsForVitallyImportant)
+						|| !VitallyImportant.GetValueOrDefault() && !WaybillSettings.IncludeNds)) {
+					nds = 0;
+				}
+				return (1 + nds / 100m);
+			}
+		}
+
+		private MarkupType GetMarkupType()
+		{
+			var markupType = VitallyImportant.GetValueOrDefault() ? MarkupType.VitallyImportant : MarkupType.Over;
+			if (Nds == 18 && (markupType != MarkupType.VitallyImportant || ProducerCost.GetValueOrDefault() == 0))
+				markupType = MarkupType.Nds18;
+			if (SpecialMarkup)
+				markupType = MarkupType.Special;
+			return markupType;
+		}
+
+		private decimal? CalculateRetailCost(decimal? markup)
+		{
+			var type = GetMarkupType();
+			var baseCost = SupplierCostWithoutNds;
+			if (type == MarkupType.VitallyImportant)
+				baseCost = ProducerCost;
+
+			var value = SupplierCost + baseCost * markup / 100 * TaxFactor;
+			return Round(NullableHelper.Round(value, 2));
+		}
+
+		private decimal? Round(decimal? value)
+		{
+			if (Settings.Rounding != Rounding.None) {
+				var @base = 10;
+				var factor = 1;
+				if (Settings.Rounding == Rounding.To1_00) {
+					@base = 1;
+				}
+				else if (Settings.Rounding == Rounding.To0_50) {
+					@factor = 5;
+				}
+				var normalized = (int?)(value * @base);
+				return (normalized - normalized % factor) / (decimal)@base;
+			}
+			return value;
+		}
+
 
 		public virtual decimal? LowCost { get; set; }
 		public virtual decimal? LowMarkup
@@ -208,6 +343,22 @@ namespace AnalitF.Net.Client.Models.Inventory
 		{
 			SupplyQuantity += quantity;
 			Quantity -= quantity;
+		}
+
+		public virtual Stock Copy()
+		{
+			var item = (Stock)MemberwiseClone();
+			item.Id = 0;
+			item.ServerId = null;
+			item.ServerVersion = null;
+			ReservedQuantity = 0;
+			return item;
+		}
+
+		public virtual void Configure(Settings settings)
+		{
+			Settings = settings;
+			WaybillSettings = settings.Waybills.First(x => x.BelongsToAddress.Id == Address.Id);
 		}
 	}
 }

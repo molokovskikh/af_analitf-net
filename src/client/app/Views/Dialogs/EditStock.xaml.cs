@@ -30,6 +30,11 @@ namespace AnalitF.Net.Client.Views.Dialogs
 				if (model.EditMode == ViewModels.Dialogs.EditStock.Mode.EditQuantity) {
 					this.Descendants<TextBox>().Each(x => x.IsReadOnly = true);
 					Stock_Quantity.IsReadOnly = false;
+				} else if (model.EditMode == ViewModels.Dialogs.EditStock.Mode.EditRetailCostAndQuantity) {
+					this.Descendants<TextBox>().Each(x => x.IsReadOnly = true);
+					Stock_Quantity.IsReadOnly = false;
+					Stock_RetailCost.IsReadOnly = false;
+					Stock_RetailMarkup.IsReadOnly = false;
 				} else {
 					Stock_Quantity.IsReadOnly = true;
 				}

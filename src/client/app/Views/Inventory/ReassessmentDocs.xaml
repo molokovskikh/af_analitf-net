@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="AnalitF.Net.Client.Views.Inventory.ReassessmentDocs"
+						xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+						xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+						xmlns:local="clr-namespace:AnalitF.Net.Client.Views.Inventory"
+						xmlns:behaviors="clr-namespace:AnalitF.Net.Client.Controls.Behaviors"
+						xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+						xmlns:controls="clr-namespace:AnalitF.Net.Client.Controls"
+						mc:Ignorable="d"
+						d:DesignHeight="300" d:DesignWidth="300"
+						behaviors:Focusable.DefaultFocus="{x:Reference Items}">
+	<i:Interaction.Behaviors>
+		<behaviors:Focusable />
+	</i:Interaction.Behaviors>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+
+		<ToolBar Grid.Row="0">
+			<Button Name="Create">Создать</Button>
+			<Button Name="Edit">Редактировать</Button>
+			<Button Name="Delete">Удалить</Button>
+			<Separator />
+			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal">
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
+					<DatePicker Name="Begin" VerticalAlignment="Center" />
+					<Label VerticalAlignment="Center" Padding="5,0,5,0">по</Label>
+					<DatePicker Name="End" VerticalAlignment="Center" />
+				</StackPanel>
+			</GroupBox>
+		</ToolBar>
+
+		<controls:DataGrid2 Grid.Row="1" x:Name="Items">
+			<DataGrid.Columns>
+				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Статус"
+																			Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
+			</DataGrid.Columns>
+		</controls:DataGrid2>
+	</Grid>
+</UserControl>
