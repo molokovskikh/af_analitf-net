@@ -178,7 +178,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return new DialogResult(new PrintPreviewViewModel
 			{
 				DisplayName = "Ценники",
-				Document = new StockPriceTagDocument(Items.Value.ToList(), Name).Build()
+				Document = new StockPriceTagDocument(Items.Value.Cast<BaseStock>().ToList(), Name).Build()
 			}, fullScreen: true);
 		}
 

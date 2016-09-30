@@ -98,7 +98,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IResult ExportExcel()
 		{
-			var columns = new[] {"Штрих -код",
+			var columns = new[] {"Штрихкод",
 				"Товар",
 				"Производитель",
 				"Серия",

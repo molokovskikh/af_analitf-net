@@ -15,10 +15,10 @@ namespace AnalitF.Net.Client.Models.Print
 {
 	class StockPriceTagDocument
 	{
-		private IList<Stock> _stocks;
+		private IList<BaseStock> _stocks;
 		private string _name;
 
-		public StockPriceTagDocument(IList<Stock> stocks, string name)
+		public StockPriceTagDocument(IList<BaseStock> stocks, string name)
 		{
 			_stocks = stocks;
 			_name = name;
@@ -26,12 +26,12 @@ namespace AnalitF.Net.Client.Models.Print
 
 		public FixedDocument Build()
 		{
-			Func<Stock, FrameworkElement> map = Normal;
+			Func<BaseStock, FrameworkElement> map = Normal;
 
 			return FixedDocumentHelper.BuildFixedDoc(_stocks, l => Border(map(l), 0.5), 0.5);
 		}
 
-		private FrameworkElement Normal(Stock line)
+		private FrameworkElement Normal(BaseStock line)
 		{
 			var panel = new Grid
 			{

@@ -20,7 +20,13 @@
 			<Button Name="DeleteLine">Удалить строку</Button>
 			<Separator />
 			<Button Name="CloseDoc">Закрыть</Button>
+			<Button Name="ReOpenDoc">Открыть</Button>
 			<Button Name="Save">Сохранить</Button>
+			<Separator />
+			<Button Name="ExportExcel">Список в Excel</Button>
+			<Button Name="Print">Печать</Button>
+			<!--<Button Name="PrintInventoryAct">Акт об излишках</Button>-->
+			<Button Name="PrintStockPriceTags">Ценники</Button>
 		</ToolBar>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
@@ -46,13 +52,16 @@
 
 		<controls:DataGrid2 Grid.Row="2" x:Name="Lines">
 			<DataGrid.Columns>
-				<controls:DataGridTextColumnEx Header="Наименование товара" Binding="{Binding Product}" Width="*" />
+				<controls:DataGridTextColumnEx Header="№ п/п" Binding="{Binding Id}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Товар" Binding="{Binding Product}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Номер накладной" Binding="{Binding WaybillNumber}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Дата накладной" Binding="{Binding DocumentDate}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Серия" Binding="{Binding SerialNumber}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Штрихкод" Binding="{Binding Barcode}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Цена закупки" Binding="{Binding SupplierCostWithoutNds}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Цена розничная" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplierSumWithoutNds}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена закупки с НДС" Binding="{Binding SupplierCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplierSum}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
