@@ -142,8 +142,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						SuccessMessage = "Загрузка истории документов завершена успешно.";
 						updateType = "загрузка истории накладных";
 						var data = new HistoryRequest {
-							WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray(),
-							IgnoreOrders = true,
+							WaybillIds = Session.Query<Waybill>().Select(w => w.Id).ToArray()
 						};
 						Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 						response = Wait("Waybills", Client.PostAsJsonAsync("Waybills", data, Token), ref requestId);
@@ -152,8 +151,7 @@ namespace AnalitF.Net.Client.Models.Commands
 						SuccessMessage = "Загрузка истории заказов завершена успешно.";
 						updateType = "загрузка истории заказов";
 						var data = new HistoryRequest {
-							OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray(),
-							IgnoreWaybills = true,
+							OrderIds = Session.Query<SentOrder>().Select(o => o.ServerId).ToArray()
 						};
 						Log.Info($"Запрос обновления, тип обновления '{updateType}'");
 						response = Wait("History", Client.PostAsJsonAsync("History", data, Token), ref requestId);

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using AnalitF.Net.Service.Models;
 
 namespace AnalitF.Net.Service.Controllers
@@ -11,10 +9,7 @@ namespace AnalitF.Net.Service.Controllers
 		{
 			return StartJob((session, config, job) => {
 				using (var exporter = new Exporter(session, config, job)) {
-					if (!request.IgnoreOrders) {
-						exporter.ExportSentOrders(request.OrderIds ?? new ulong[0]);
-					}
-
+					exporter.ExportSentOrders(request.OrderIds ?? new ulong[0]);
 					exporter.Compress(job.OutputFile(Config));
 				}
 			});
