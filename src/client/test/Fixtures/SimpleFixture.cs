@@ -27,6 +27,21 @@ namespace AnalitF.Net.Client.Test.Fixtures
 			session.Save(item);
 		}
 
+		[Description("Создает отправленный заказ на 100 дней в прошлом для тестирования функции очистки истории заказов")]
+		public static void OldOrder(ISession session)
+		{
+			var offer = session.Query<Offer>().First(x => !x.Junk && x.RequestRatio == null);
+			var address = session.Query<Address>().First();
+
+			var order = new Order(address, offer) {
+				CreatedOn = DateTime.Now.AddDays(-100)
+			};
+			var sent = new SentOrder(order) {
+				SentOn = DateTime.Now.AddDays(-100)
+			};
+			session.Save(sent);
+		}
+
 		[Description("Создает отправленный заказ без предложения, для тестирования функции 'Показать историю заказов'")]
 		public static void SentOrderWithoutOffer(ISession session, bool verbose = false)
 		{

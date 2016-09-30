@@ -28,6 +28,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		private FixtureHelper fixtureHelper;
 
 		protected ISession localSession;
+		protected IStatelessSession localStateless;
 		protected Config.Config clientConfig;
 		protected Service.Config.Config serviceConfig;
 		protected Settings settings;
@@ -61,6 +62,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				Path.Combine(ConfigurationManager.AppSettings["ClientDocPath"], "АналитФАРМАЦИЯ"));
 
 			localSession = Integration.IntegrationSetup.Factory.OpenSession();
+			localStateless = Integration.IntegrationSetup.Factory.OpenStatelessSession();
 
 			settings = localSession.Query<Settings>().First();
 			address = localSession.Query<Address>().First();
@@ -90,6 +92,8 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				XmlConfigurator.Configure();
 			}
 			disposable?.Dispose();
+			localSession?.Dispose();
+			localStateless?.Dispose();
 			DbHelper.SaveFailData();
 		}
 

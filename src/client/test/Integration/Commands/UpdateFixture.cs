@@ -71,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			var command = new UpdateCommand();
 			Run(command);
-			DbMaintain.UpdateLeaders();
+			DbMaintain.UpdateLeaders(localStateless);
 
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
@@ -372,7 +372,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
-			DbMaintain.UpdateLeaders();
+			DbMaintain.UpdateLeaders(localStateless);
 
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
