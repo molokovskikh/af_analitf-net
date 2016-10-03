@@ -291,7 +291,11 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			var text = args.Text;
 			if (Shell == null)
 				return;
-			var catalog = Shell.NavigationStack.LastOrDefault() as CatalogViewModel;
+			CatalogViewModel catalog;
+			if (Shell.Navigator is TabNavigator)
+				catalog = Shell.NavigationStack.LastOrDefault() as CatalogViewModel;
+			else
+				catalog = Shell.NavigationStack.Reverse().Skip(1).FirstOrDefault() as CatalogViewModel;
 			if (catalog == null)
 				return;
 			if (text.All(char.IsControl))
