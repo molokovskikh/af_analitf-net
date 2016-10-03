@@ -385,8 +385,9 @@ namespace AnalitF.Net.Client.ViewModels
 
 			if (User.Value?.IsDelayOfPaymentEnabled == true
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
-				new Models.Results.TaskResult(UpdateLeaders(), new WaitViewModel("Пересчет отсрочки платежа"))
-					.Execute(new ActionExecutionContext());
+				var result = new Models.Results.TaskResult(UpdateLeaders(), new WaitViewModel("Пересчет отсрочки платежа"));
+				IoC.BuildUp(result);
+				result.Execute(new ActionExecutionContext());
 			}
 
 #if DEBUG
@@ -454,7 +455,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => x.Query<Schedule>().ToList())
 				.Subscribe(Schedules);
 			Env.RxQuery(x => x.Query<Mail>().Count(m => m.IsNew))
-				.Subscribe(NewMailsCount);
+				.Subscribe(x => NewMailsCount.Value = x);
 			Env.RxQuery(x => x.Query<Waybill>().Count(m => m.IsNew))
 				.Subscribe(NewDocsCount);
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))

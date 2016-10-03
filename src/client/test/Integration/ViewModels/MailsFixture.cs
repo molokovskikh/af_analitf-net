@@ -68,12 +68,14 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			mail.IsNew = true;
 			session.Save(mail);
 
-			var value = shell.NewMailsCount.Value;
-			Assert.That(value, Is.GreaterThan(0));
+			var value = shell.NewMailsCount;
+			scheduler.Start();
+			var newMailCount = value.Value;
+			Assert.That(newMailCount, Is.GreaterThan(0));
 			model.CurrentItem.Value = model.Items.Value.First(m => m.Id == mail.Id);
 			scheduler.AdvanceByMs(10000);
 			Assert.IsFalse(model.CurrentItem.Value.IsNew);
-			Assert.AreEqual(value - 1, shell.NewMailsCount.Value);
+			Assert.AreEqual(newMailCount - 1, shell.NewMailsCount.Value);
 		}
 
 		[Test]
