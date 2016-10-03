@@ -448,7 +448,6 @@ namespace AnalitF.Net.Service.Test
 		public void Check_Order_Records()
 		{
 			Init();
-			//session.DeleteEach<OrderRecordLog>();
 			CreateOrder();
 			var recordCount = session.Query<OrderRecordLog>().ToList().Count;
 			exporter.Export();
