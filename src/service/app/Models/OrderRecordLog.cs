@@ -15,12 +15,12 @@ namespace AnalitF.Net.Service.Models
  			WriteTime = DateTime.Now;
  		}
 
- 		public OrderRecordLog(Order order, User user, uint exportId, RecordType recordType) : this()
+ 		public OrderRecordLog(Order order, User user, uint requestId, RecordType recordType) : this()
  		{
  			Order = order;
  			User = user;
- 			ExportId = exportId;
  			RecordType = recordType;
+ 			RequestId = requestId;
  		}
 
  		public virtual uint Id { get; set; }
@@ -29,10 +29,10 @@ namespace AnalitF.Net.Service.Models
 
 		public virtual User User { get; set; }
 
-		public virtual uint ExportId { get; set; }
-
 		public virtual RecordType RecordType { get; set; }
 
 		public virtual DateTime WriteTime { get; set; }
+
+		public virtual uint RequestId { get; set; }
 	}
 }

@@ -1580,7 +1580,7 @@ where a.MailId in ({ids.Implode()})";
 				.ToArray();
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
 			foreach (var order in orders) {
-				session.Save(new OrderRecordLog(order, user, order.RowId, RecordType.Loaded));
+				session.Save(new OrderRecordLog(order, user, job.Id, RecordType.Loaded));
 			}
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
@@ -2294,13 +2294,13 @@ where UserId = :userId;")
 select oh.RowID
 from Orders.OrdersHead oh
 	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
-where l.UserId = :userId 
+where l.UserId = :userId
 and oh.Deleted = 0")
 				.SetParameter("userId", userId)
 				.List<uint>();
 			var orders = session.Query<Order>().Where(o => updateOrders.Contains(o.RowId));
 			foreach (var order in orders) {
-				session.Save(new OrderRecordLog(order, user, order.RowId, RecordType.Confirmed));
+				session.Save(new OrderRecordLog(order, user, request.RequestId, RecordType.Confirmed));
 			}
 
 			session.CreateSQLQuery(@"
