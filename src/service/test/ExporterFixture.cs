@@ -8,6 +8,7 @@ using AnalitF.Net.Service.Controllers;
 using AnalitF.Net.Service.Models;
 using AnalitF.Net.Service.Test.TestHelpers;
 using Common.Models;
+using Common.NHibernate;
 using Common.Tools;
 using Ionic.Zip;
 using NHibernate;
@@ -441,6 +442,46 @@ namespace AnalitF.Net.Service.Test
 			session.CreateSQLQuery("delete from Logs.PendingMailLogs").ExecuteUpdate();
 			exporter.ExportDb();
 			Assert.AreEqual(1, session.Query<PendingMailLog>().Count());
+		}
+
+		[Test]
+		public void Check_Order_Records()
+		{
+			Init();
+			CreateOrder();
+			var recordCount = session.Query<OrderRecordLog>().ToList().Count;
+			exporter.Export();
+			Assert.AreEqual(recordCount + 1, session.Query<OrderRecordLog>().ToList().Count);
+			Assert.AreEqual(RecordType.Loaded, session.Query<OrderRecordLog>().ToList().Last().RecordType);
+			exporter.Confirm(new ConfirmRequest(requestLog.Id));
+			Assert.AreEqual(recordCount + 2, session.Query<OrderRecordLog>().ToList().Count);
+			Assert.AreEqual(RecordType.Confirmed, session.Query<OrderRecordLog>().ToList().Last().RecordType);
+		}
+
+		public void CreateOrder()
+		{
+			var testUser = session.Load<TestUser>(user.Id);
+			var testUser2 = client.CreateUser(session);
+			testUser2.AvaliableAddresses.AddEach(client.Addresses);
+			testUser.AllowDownloadUnconfirmedOrders = true;
+			session.CreateSQLQuery("insert into Customers.UserPrices(PriceId, RegionId, UserId) " +
+				"select PriceId, RegionId, :target " +
+				"from Customers.UserPrices " +
+				"where UserId = :source")
+				.SetParameter("source", testUser.Id)
+				.SetParameter("target", testUser2.Id)
+				.ExecuteUpdate();
+			session.Flush();
+			var activePrices = testUser2.GetActivePricesNaked(session);
+			var price = activePrices.First()
+				.Price;
+			var order = new TestOrder(testUser2, price) {
+				Submited = false,
+				Processed = false
+			};
+			var offer = session.Query<TestCore>().First(c => c.Price == price && !c.Junk);
+			order.AddItem(offer, 1);
+			session.Save(order);
 		}
 
 		private string GetColumnValue(string table, string column, string[] data)

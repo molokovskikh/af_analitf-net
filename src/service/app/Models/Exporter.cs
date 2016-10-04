@@ -28,6 +28,7 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
@@ -1578,7 +1579,9 @@ where a.MailId in ({ids.Implode()})";
 					&& addresses.Contains(o.AddressId))
 				.ToArray();
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
-
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, job.Id, RecordType.Loaded));
+			}
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
 				foreach (var order in group) {
@@ -2286,6 +2289,19 @@ delete from Logs.PendingMailLogs
 where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+
+			var updateOrders = session.CreateSQLQuery(@"
+select oh.RowID
+from Orders.OrdersHead oh
+	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
+where l.UserId = :userId
+and oh.Deleted = 0")
+				.SetParameter("userId", userId)
+				.List<uint>();
+			var orders = session.Query<Order>().Where(o => updateOrders.Contains(o.RowId));
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, request.RequestId, RecordType.Confirmed));
+			}
 
 			session.CreateSQLQuery(@"
 update Orders.OrdersHead oh
