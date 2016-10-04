@@ -66,7 +66,8 @@ namespace AnalitF.Net.Client.ViewModels.Dialogs
 				}
 				else {
 					input = new TextBox {
-						MinWidth = 100
+						MinWidth = 100,
+						VerticalAlignment = VerticalAlignment.Center
 					};
 					inputProperty = TextBox.TextProperty;
 				}

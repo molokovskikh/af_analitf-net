@@ -455,7 +455,7 @@ namespace AnalitF.Net.Client.ViewModels
 			Env.RxQuery(x => x.Query<Schedule>().ToList())
 				.Subscribe(Schedules);
 			Env.RxQuery(x => x.Query<Mail>().Count(m => m.IsNew))
-				.Subscribe(x => NewMailsCount.Value = x);
+				.Subscribe(NewMailsCount);
 			Env.RxQuery(x => x.Query<Waybill>().Count(m => m.IsNew))
 				.Subscribe(NewDocsCount);
 			Env.RxQuery(x => SpecialMarkupCatalog.Load(x.Connection))

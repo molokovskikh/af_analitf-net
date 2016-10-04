@@ -380,7 +380,9 @@ namespace AnalitF.Net.Client.Views
 
 		private void CloneClick(object sender, RoutedEventArgs e)
 		{
-			((ShellViewModel)DataContext).OpenClone(((string)((MenuItem)e.OriginalSource).DataContext));
+			var dataContext = ((MenuItem)e.OriginalSource).DataContext;
+			if (dataContext is string)
+				((ShellViewModel)DataContext).OpenClone((string)dataContext);
 		}
 	}
 }
