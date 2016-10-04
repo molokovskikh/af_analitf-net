@@ -10,8 +10,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 	{
 		public virtual uint Id { get; set; }
 
-		public virtual uint ReturnToSupplierId { get; set; }
-
 		public virtual decimal Quantity { get; set; }
 
 		public virtual decimal SupplierSumWithoutNds => Quantity * SupplierCostWithoutNds.GetValueOrDefault();
@@ -25,11 +23,6 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public ReturnToSupplierLine()
 		{
 
-		}
-
-		public ReturnToSupplierLine(uint returnToSupplierId)
-		{
-			ReturnToSupplierId = returnToSupplierId;
 		}
 
 		public ReturnToSupplierLine(Stock stock, decimal quantity)

@@ -17,19 +17,14 @@
 
 		<ToolBar Grid.Row="0">
 			<Button Name="AddLine">Добавить строку</Button>
-			<Separator />
 			<Button Name="EditLine">Редактировать строку</Button>
-			<Separator />
 			<Button Name="DeleteLine">Удалить строку</Button>
 			<Separator />
 			<Button Name="CloseDoc">Закрыть</Button>
-			<Separator />
 			<Button Name="ReOpenDoc">Открыть</Button>
-			<Separator />
 			<Button Name="Save">Сохранить</Button>
 			<Separator />
 			<Button Name="ExportExcel">Список в Excel</Button>
-			<Separator />
 			<Button Name="Print">Печать</Button>
 		</ToolBar>
 

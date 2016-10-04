@@ -17,7 +17,15 @@
 			<Button Name="Create">Создать</Button>
 			<Button Name="Edit">Редактировать</Button>
 			<Button Name="Delete">Удалить</Button>
+			<Button Name="ExportExcel">Список в Excel</Button>
 			<Separator />
+			<GroupBox Header="Фильтровать" Style="{StaticResource FilterElement}">
+				<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+					<RadioButton GroupName="Source" Name="IsAll" Margin="5">Все</RadioButton>
+					<RadioButton GroupName="Source" Name="IsOpened" Margin="5">Открытые</RadioButton>
+					<RadioButton GroupName="Source" Name="IsClosed" Margin="5">Закрытые</RadioButton>
+				</StackPanel>
+			</GroupBox>
 			<GroupBox Header="За период" Style="{StaticResource FilterElement}">
 				<StackPanel Orientation="Horizontal">
 					<Label VerticalAlignment="Center" Padding="5,0,5,0">с</Label>
@@ -33,12 +41,12 @@
 				<controls:DataGridTextColumnEx Header="Номер" Binding="{Binding Id}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Дата" Binding="{Binding Date}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Адрес" Binding="{Binding Address.Name}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Время закрытия" Binding="{Binding CloseDate}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Статус" Binding="{Binding Status, Converter={StaticResource EnumConverter}}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid>
