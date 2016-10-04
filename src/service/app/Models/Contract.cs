@@ -35,8 +35,6 @@ namespace AnalitF.Net.Client.Models
 	{
 		public uint[] WaybillIds;
 		public ulong[] OrderIds;
-		public bool IgnoreOrders;
-		public bool IgnoreWaybills;
 	}
 
 	public class FeedbackMessage
