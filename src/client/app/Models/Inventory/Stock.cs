@@ -318,6 +318,24 @@ namespace AnalitF.Net.Client.Models.Inventory
 		}
 
 		// из резерва на склад
+		public virtual StockAction Displacement(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			return new StockAction(ActionType.Displacement, this, quantity);
+		}
+
+		public virtual StockAction CancelDisplacement(decimal quantity)
+		{
+			ReservedQuantity += quantity;
+			return new StockAction(ActionType.CancelDisplacement, this, quantity);
+		}
+
+		public virtual StockAction EndDisplacement(decimal quantity)
+		{
+			ReservedQuantity += quantity;
+			return new StockAction(ActionType.EndDisplacement, this, quantity);
+		}
+
 		public virtual void Release(decimal quantity)
 		{
 			ReservedQuantity -= quantity;

@@ -240,5 +240,10 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			Shell.Navigate(new ReassessmentDocs());
 		}
+
+		public void DisplacementDocs()
+		{
+			Shell.Navigate(new DisplacementDocs());
+		}
 	}
 }

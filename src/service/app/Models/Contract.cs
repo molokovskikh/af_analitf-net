@@ -272,7 +272,10 @@ namespace AnalitF.Net.Client.Models
 		ReturnToSupplier,
 		CancelReturnToSupplier,
 		InventoryDoc,
-		CancelInventoryDoc
+		CancelInventoryDoc,
+		Displacement,
+		CancelDisplacement,
+		EndDisplacement
 	}
 
 	public class StockActionAttrs
