@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Inventory;
+using AnalitF.Net.Client.Models.Print;
 using AnalitF.Net.Client.Models.Results;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
+using NPOI.HSSF.UserModel;
 using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
@@ -129,6 +132,62 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			Session.Flush();
 			Bus.SendMessage(nameof(WriteoffDoc), "db");
 			Bus.SendMessage(nameof(Stock), "db");
+		}
+
+		public IResult ExportExcel()
+		{
+			Update();
+			var columns = new[] {
+						"№№",
+						"Товар",
+						"Производитель",
+						"Кол-во",
+						"Цена закупки",
+						"Цена розничная",
+						"Сумма закупки",
+						"Сумма розничная"
+					};
+
+			var book = new HSSFWorkbook();
+			var sheet = book.CreateSheet("Экспорт");
+			var row = 0;
+
+			ExcelExporter.WriteRow(sheet, columns, row++);
+
+			var rows = Lines.Select((o, i) => new object[] {
+						o.Id,
+						o.Product,
+						o.Producer,
+						o.Quantity,
+						o.SupplierCostWithoutNds,
+						o.RetailCost,
+						o.SupplierSumWithoutNds,
+						o.RetailSum,
+					});
+
+			ExcelExporter.WriteRows(sheet, rows, row);
+
+			return ExcelExporter.Export(book);
+		}
+
+		public IEnumerable<IResult> Print()
+		{
+			return Preview("Списание", new WriteoffDocument(Lines.ToArray()));
+		}
+
+		public IEnumerable<IResult> PrintAct()
+		{
+			return Preview("Акт списания", new WriteoffActDocument(Lines.ToArray()));
+		}
+
+		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
+		{
+			var docSettings = doc.Settings;
+			if (docSettings != null)
+			{
+				yield return new DialogResult(new SimpleSettings(docSettings));
+			}
+			yield return new DialogResult(new PrintPreviewViewModel(new PrintResult(name, doc)), fullScreen: true);
 		}
 	}
 }
