@@ -309,6 +309,8 @@
     <Compile Include="Models\Print\CheckDocument.cs" />
     <Compile Include="Models\Print\InventoryDocument.cs" />
     <Compile Include="Models\Print\InventoryActDocument.cs" />
+    <Compile Include="Models\Print\WriteoffActDocument.cs" />
+    <Compile Include="Models\Print\WriteoffDocument.cs" />
     <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
     <Compile Include="Models\Print\ReturnActDocument.cs" />
     <Compile Include="Models\Print\DefectStockDocument.cs" />
