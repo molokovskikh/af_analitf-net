@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Forms.VisualStyles;
+using System.Windows.Media;
 using AnalitF.Net.Client.Models.Inventory;
 
 namespace AnalitF.Net.Client.Models.Print
@@ -16,36 +21,84 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var headers = new[]
-			{
-				new PrintColumn("№ чека", 45),
-				new PrintColumn("Дата", 90),
-				new PrintColumn("ККМ", 90),
-				new PrintColumn("Отдел", 120),
-				new PrintColumn("Аннулирован", 80),
-				new PrintColumn("розничная", 80),
-				new PrintColumn("скидки", 80),
-				new PrintColumn("с учетом скидки", 80),
-			};
-
-			var columnGrops = new[]
-			{
-				new ColumnGroup("Сумма", 5, 7),
-			};
-
-			/*var rows = _checks.Select((o, i) => new object[]
-			{
-				o.Id,
-				o.Date.ToString("dd/M/yyyy"),
-				o.KKM,
-				o.Department.Name,
-				o.Cancelled,
-				o.RetailSum,
-				o.DiscountSum,
-				o.Sum,
+			var header = new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 24,
+						Text = "ВОЗВРАТ",
+						TextAlignment = TextAlignment.Center,
+					},
+					HorizontalAlignment = HorizontalAlignment.Center
+				};
+			header.HorizontalAlignment = HorizontalAlignment.Center;
+			var body = new Grid();
+			body.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Auto)
 			});
-
-			BuildTable(rows, headers, columnGrops);*/
+			body.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = GridLength.Auto,
+			});
+			body.RowDefinitions.Add(new RowDefinition());
+			body.RowDefinitions.Add(new RowDefinition());
+			body.Cell(0, 0, new Grid()
+				.Cell(0, 0, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = "Отправитель",
+					}
+				}))
+				.Cell(0, 1, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = returnToSupplier.AddressName,
+					}
+				})
+				.Cell(1, 0, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = "Получатель"
+					}
+				})
+				.Cell(1, 1, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = returnToSupplier.SupplierName,
+					}
+				})
+				.Cell(2, 0, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = "Комментарий",
+					}
+				})
+				.Cell(2, 1, new Label
+				{
+					Content = new TextBlock
+					{
+						FontFamily = new FontFamily("Arial"),
+						FontSize = 12,
+						Text = "",
+					}
+				});
+			doc.Blocks.Add(new BlockUIContainer(header));
+			doc.Blocks.Add(new BlockUIContainer(body));
 		}
 	}
 }
