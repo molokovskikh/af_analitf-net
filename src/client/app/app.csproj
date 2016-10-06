@@ -320,6 +320,7 @@
     <Compile Include="Models\Print\StockPriceTagDocument.cs" />
     <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\PriceTag.cs" />
+    <Compile Include="Models\Print\DisplacementWDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />

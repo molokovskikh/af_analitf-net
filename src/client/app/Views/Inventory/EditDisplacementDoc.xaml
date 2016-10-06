@@ -29,6 +29,9 @@
 			<Separator />
 			<Button Name="ExportExcel">Список в Excel</Button>
 			<Button Name="Print">Печать</Button>
+			<Button Name="PrintStockPriceTags">Ценники</Button>
+			<Button Name="PrintStockRackingMaps">Постеллажная карта</Button>
+			<Button Name="PrintDisplacementWaybill">Требование-накладная</Button>
 		</ToolBar>
 
 		<Grid Grid.Row="1" Margin="0, 10, 0, 10">
@@ -57,7 +60,7 @@
 			<Label Grid.Row="0" Grid.Column="4" FontWeight="Bold">Получатель</Label>
 			<ComboBox Grid.Row="0" Grid.Column="5" IsEnabled="{Binding IsDocOpen.Value}"
 				Style="{StaticResource Select}" Width="100"
-				ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" SelectedItem="{Binding Doc.Recipient}" />
+				ItemsSource="{Binding Addresses}" DisplayMemberPath="Name" SelectedItem="{Binding Doc.DstAddress}" />
 
 			<Label Grid.Row="0" Grid.Column="6" FontWeight="Bold">Статус</Label>
 			<Label Grid.Row="0" Grid.Column="7" Name="Doc_Status" />

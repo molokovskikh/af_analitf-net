@@ -61,7 +61,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				query = query.Where(x => x.Status == DisplacementDocStatus.End);
 
 			var items = query.Fetch(x => x.Address)
-					.Fetch(x => x.Recipient)
+					.Fetch(x => x.DstAddress)
 					.OrderByDescending(x => x.Date).ToList();
 
 			return items;

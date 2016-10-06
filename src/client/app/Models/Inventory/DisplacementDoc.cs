@@ -57,8 +57,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 		public virtual Address Address { get; set; }
 		public virtual string AddressName => Address.Name;
 
-		public virtual Address Recipient { get; set; }
-		public virtual string RecipientName => Recipient.Name;
+		public virtual Address DstAddress { get; set; }
+		public virtual string DstAddressName => DstAddress.Name;
 
 		public virtual decimal SupplierSum { get; set; }
 		public virtual int PosCount { get; set; }
@@ -73,7 +73,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 				{
 					return "Поле 'Отправитель' должно быть заполнено";
 				}
-				if (columnName == nameof(Recipient) && Recipient == null)
+				if (columnName == nameof(DstAddress) && DstAddress == null)
 				{
 					return "Поле 'Получатель' должно быть заполнено";
 				}
@@ -83,36 +83,47 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string Error { get; protected set; }
 
-		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(Recipient) };
+		public virtual string[] FieldsForValidate => new[] { nameof(Address), nameof(DstAddress) };
 
 		public virtual void Close(ISession session)
 		{
 			CloseDate = DateTime.Now;
 			Status = DisplacementDocStatus.Closed;
-			foreach (var line in Lines)
-				session.Save(line.Stock.Displacement(line.Quantity));
+			foreach (var line in Lines) {
+				session.Save(line.SrcStock.DisplacementTo(line.Quantity));
+				session.Save(line.DstStock.DisplacementFrom(line.Quantity));
+			}
 		}
 
 		public virtual void ReOpen(ISession session)
 		{
 			CloseDate = null;
 			Status = DisplacementDocStatus.Opened;
-			foreach (var line in Lines)
-				session.Save(line.Stock.CancelDisplacement(line.Quantity));
+			foreach (var line in Lines) {
+				session.Save(line.SrcStock.CancelDisplacementTo(line.Quantity));
+				session.Save(line.DstStock.CancelDisplacementFrom(line.Quantity));
+			}
 		}
 
 		public virtual void End(ISession session)
 		{
-			CloseDate = null;
 			Status = DisplacementDocStatus.End;
 			foreach (var line in Lines)
-				session.Save(line.Stock.EndDisplacement(line.Quantity));
+				line.DstStock.Incoming(line.Quantity);
+		}
+
+		// для теста
+		public virtual void ReEnd(ISession session)
+		{
+			Status = DisplacementDocStatus.Closed;
+			foreach (var line in Lines)
+				line.DstStock.CancelIncoming(line.Quantity);
 		}
 
 		public virtual void BeforeDelete()
 		{
 			foreach (var line in Lines)
-				line.Stock.Release(line.Quantity);
+				line.SrcStock.Release(line.Quantity);
 		}
 
 		public virtual void UpdateStat()

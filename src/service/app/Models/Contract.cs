@@ -273,8 +273,10 @@ namespace AnalitF.Net.Client.Models
 		CancelReturnToSupplier,
 		InventoryDoc,
 		CancelInventoryDoc,
-		Displacement,
-		CancelDisplacement,
+		DisplacementTo,
+		CancelDisplacementTo,
+		DisplacementFrom,
+		CancelDisplacementFrom,
 		EndDisplacement
 	}
 

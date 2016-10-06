@@ -20,26 +20,29 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual string Period { get; set; }
 
-		public virtual Stock Stock { get; set; }
+		public virtual Stock SrcStock { get; set; }
+
+		public virtual Stock DstStock { get; set; }
 
 		public DisplacementLine()
 		{
 
 		}
 
-		public DisplacementLine(Stock stock, decimal quantity)
+		public DisplacementLine(Stock srcStock, Stock dstStock, decimal quantity)
 		{
-			ReceivingLine.Copy(stock, this);
+			ReceivingLine.Copy(srcStock, this);
 			Id = 0;
-			Stock = stock;
+			SrcStock = srcStock;
+			DstStock = dstStock;
 			Quantity = quantity;
-			Stock.Reserve(Quantity);
+			SrcStock.Reserve(Quantity);
 		}
 
 		public virtual void UpdateQuantity(decimal quantity)
 		{
-			Stock.Release(Quantity);
-			Stock.Reserve(quantity);
+			SrcStock.Release(Quantity);
+			SrcStock.Reserve(quantity);
 			Quantity = quantity;
 		}
 	}

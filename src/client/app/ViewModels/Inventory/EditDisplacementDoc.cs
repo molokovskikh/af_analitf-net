@@ -18,8 +18,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 {
 	public class EditDisplacementDoc : BaseScreen2
 	{
+		private string Name;
+
 		private EditDisplacementDoc()
 		{
+			Name = User?.FullName ?? "";
 			Lines = new ReactiveCollection<DisplacementLine>();
 			Session.FlushMode = FlushMode.Never;
 		}
@@ -27,7 +30,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public EditDisplacementDoc(DisplacementDoc doc)
 			: this()
 		{
-			DisplayName = "Новый возврат поставщику";
+			DisplayName = "Новое внутреннее перемещение";
 			InitDoc(doc);
 			Lines.AddRange(doc.Lines);
 		}
@@ -35,7 +38,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public EditDisplacementDoc(uint id)
 			: this()
 		{
-			DisplayName = "Редактирование возврата поставщику";
+			DisplayName = "Редактирование внутреннего перемещения";
 			InitDoc(Session.Load<DisplacementDoc>(id));
 			Lines.AddRange(Doc.Lines);
 		}
@@ -79,6 +82,9 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> AddLine()
 		{
+			if (!IsValide(Doc))
+				yield break;
+
 			var search = new StockSearch();
 			yield return new DialogResult(search);
 			var edit = new EditStock(search.CurrentItem)
@@ -86,7 +92,14 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 				EditMode = EditStock.Mode.EditQuantity
 			};
 			yield return new DialogResult(edit);
-			var line = new DisplacementLine(Session.Load<Stock>(edit.Stock.Id), edit.Stock.Quantity);
+
+			var srcStock = Session.Load<Stock>(edit.Stock.Id);
+			var dstStock = srcStock.Copy();
+			dstStock.Address = Doc.DstAddress;
+			dstStock.Quantity = dstStock.ReservedQuantity = dstStock.SupplyQuantity = 0;
+			Session.Save(dstStock);
+
+			var line = new DisplacementLine(srcStock, dstStock, edit.Stock.Quantity);
 			Lines.Add(line);
 			Doc.Lines.Add(line);
 			Doc.UpdateStat();
@@ -94,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public void DeleteLine()
 		{
-			CurrentLine.Value.Stock.Release(CurrentLine.Value.Quantity);
+			CurrentLine.Value.SrcStock.Release(CurrentLine.Value.Quantity);
 			Lines.Remove(CurrentLine.Value);
 			Doc.Lines.Remove(CurrentLine.Value);
 			Doc.UpdateStat();
@@ -104,7 +117,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		{
 			if (!CanEditLine)
 				yield break;
-			var stock = StatelessSession.Get<Stock>(CurrentLine.Value.Stock.Id);
+			var stock = StatelessSession.Get<Stock>(CurrentLine.Value.SrcStock.Id);
 			stock.Quantity = CurrentLine.Value.Quantity;
 			var edit = new EditStock(stock)
 			{
@@ -189,6 +202,31 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public IEnumerable<IResult> Print()
 		{
 			return Preview("Внутренее перемещение", new DisplacementDocument(Lines.ToArray()));
+		}
+
+		public IResult PrintStockPriceTags()
+		{
+			return new DialogResult(new PrintPreviewViewModel
+			{
+				DisplayName = "Ценники",
+				Document = new StockPriceTagDocument(Lines.Cast<BaseStock>().ToList(), Name).Build()
+			}, fullScreen: true);
+		}
+
+		public IEnumerable<IResult> PrintDisplacementWaybill()
+		{
+			return Preview("Требование-накладная", new DisplacementWDocument(Doc, Lines));
+		}
+
+		public IResult PrintStockRackingMaps()
+		{
+			var receivingOrders = Session.Query<ReceivingOrder>().ToList();
+
+			return new DialogResult(new PrintPreviewViewModel
+			{
+				DisplayName = "Постеллажная карта",
+				Document = new StockRackingMapDocument(receivingOrders, Lines.Select(x => x.SrcStock).ToList()).Build()
+			}, fullScreen: true);
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
