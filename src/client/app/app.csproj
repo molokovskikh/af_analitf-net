@@ -309,9 +309,13 @@
     <Compile Include="Models\Print\CheckDocument.cs" />
     <Compile Include="Models\Print\InventoryDocument.cs" />
     <Compile Include="Models\Print\InventoryActDocument.cs" />
+    <Compile Include="Models\Print\ReturnDivergenceAct.cs" />
+    <Compile Include="Models\Print\ReturnInvoice.cs" />
+    <Compile Include="Models\Print\ReturnLabel.cs" />
     <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
     <Compile Include="Models\Print\ReturnActDocument.cs" />
     <Compile Include="Models\Print\DefectStockDocument.cs" />
+    <Compile Include="Models\Print\ReturnWaybill.cs" />
     <Compile Include="Models\Print\StockDocument.cs" />
     <Compile Include="Models\Print\StockLimitMonthDocument.cs" />
     <Compile Include="Models\Print\StockPriceTagDocument.cs" />

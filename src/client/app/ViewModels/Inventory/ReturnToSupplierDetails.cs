@@ -187,6 +187,26 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 			return Preview("Возврат товара", new ReturnToSuppliersDetailsDocument(Lines.ToArray()));
 		}
 
+		public IEnumerable<IResult> PrintReturnLabel()
+		{
+			return Preview("Возврат ярлык", new ReturnLabel(Doc));
+		}
+
+		public IEnumerable<IResult> PrintReturnInvoice()
+		{
+			return Preview("Возврат ярлык", new ReturnInvoice(Doc));
+		}
+
+		public IEnumerable<IResult> PrintReturnWaybill()
+		{
+			return Preview("Возврат ярлык", new ReturnWaybill(Doc));
+		}
+
+		public IEnumerable<IResult> PrintReturnDivergenceAct()
+		{
+			return Preview("Возврат ярлык", new ReturnDivergenceAct(Doc));
+		}
+
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
 		{
 			 var docSettings = doc.Settings;
