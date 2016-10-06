@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
 using NHibernate.Linq;
+using NPOI.HSSF.UserModel;
+using Caliburn.Micro;
 
 namespace AnalitF.Net.Client.ViewModels.Inventory
 {
