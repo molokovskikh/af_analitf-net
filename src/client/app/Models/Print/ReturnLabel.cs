@@ -94,7 +94,7 @@ namespace AnalitF.Net.Client.Models.Print
 					{
 						FontFamily = new FontFamily("Arial"),
 						FontSize = 12,
-						Text = "",
+						Text = returnToSupplier.Comment,
 					}
 				});
 			doc.Blocks.Add(new BlockUIContainer(header));
