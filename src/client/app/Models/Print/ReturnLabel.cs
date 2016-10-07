@@ -14,51 +14,39 @@ namespace AnalitF.Net.Client.Models.Print
 	public class ReturnLabel : BaseDocument
 	{
 		private ReturnToSupplier returnToSupplier;
+		private WaybillSettings waybillSettings;
 		public ReturnLabel(ReturnToSupplier _returnToSupplier)
 		{
 			returnToSupplier = _returnToSupplier;
+			if (returnToSupplier.Lines.Count != 0)
+				waybillSettings = returnToSupplier.Lines.First().Stock.WaybillSettings;
 		}
 
 		protected override void BuildDoc()
 		{
-			var header = new Label
-				{
-					Content = new TextBlock
-					{
-						FontFamily = new FontFamily("Arial"),
-						FontSize = 24,
-						Text = "ВОЗВРАТ",
-						TextAlignment = TextAlignment.Center,
-					},
-					HorizontalAlignment = HorizontalAlignment.Center
-				};
-			header.HorizontalAlignment = HorizontalAlignment.Center;
-			var body = new Grid();
-			body.ColumnDefinitions.Add(new ColumnDefinition {
-				Width = new GridLength(1, GridUnitType.Auto)
-			});
-			body.ColumnDefinitions.Add(new ColumnDefinition {
-				Width = GridLength.Auto,
-			});
-			body.RowDefinitions.Add(new RowDefinition());
-			body.RowDefinitions.Add(new RowDefinition());
-			body.Cell(0, 0, new Grid()
+			var center = Header("Приложение N 1 \n" +
+				"к постановлению Правительства Российской Федерации \n" +
+				"от 26 декабря 2011 г. N 1137");
+			center.FontSize = 48;
+			center.FontWeight = FontWeights.Bold;
+
+			var body = new Grid()
 				.Cell(0, 0, new Label
 				{
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
+						FontSize = 20,
 						Text = "Отправитель",
 					}
-				}))
+				})
 				.Cell(0, 1, new Label
 				{
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
-						Text = returnToSupplier.AddressName,
+						FontSize = 10,
+						Text = returnToSupplier.SupplierName + "\n" + returnToSupplier.AddressName,
 					}
 				})
 				.Cell(1, 0, new Label
@@ -66,7 +54,7 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
+						FontSize = 20,
 						Text = "Получатель"
 					}
 				})
@@ -75,8 +63,8 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
-						Text = returnToSupplier.SupplierName,
+						FontSize = 10,
+						Text = waybillSettings==null ? "" : waybillSettings.FullName
 					}
 				})
 				.Cell(2, 0, new Label
@@ -84,7 +72,7 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
+						FontSize = 20,
 						Text = "Комментарий",
 					}
 				})
@@ -93,11 +81,10 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = new TextBlock
 					{
 						FontFamily = new FontFamily("Arial"),
-						FontSize = 12,
+						FontSize = 10,
 						Text = returnToSupplier.Comment,
 					}
 				});
-			doc.Blocks.Add(new BlockUIContainer(header));
 			doc.Blocks.Add(new BlockUIContainer(body));
 		}
 	}
