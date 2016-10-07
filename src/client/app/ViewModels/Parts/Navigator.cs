@@ -41,6 +41,8 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		public void NavigateAndReset(params IScreen[] views)
 		{
 			ResetNavigation();
+			if (views.Length == 0)
+				return;
 
 			var chain = views.TakeWhile((s, i) => i < views.Length - 1);
 			foreach (var screen in chain) {
