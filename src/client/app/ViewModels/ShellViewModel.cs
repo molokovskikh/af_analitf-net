@@ -358,7 +358,7 @@ namespace AnalitF.Net.Client.ViewModels
 				else {
 					base.CanClose(callback);
 				}
-			});
+			}, GetScheduler());
 		}
 
 		public void UpdateStat()
@@ -1046,11 +1046,7 @@ namespace AnalitF.Net.Client.ViewModels
 			do {
 				count++;
 				done = true;
-				TaskScheduler scheduler;
-				if (SynchronizationContext.Current != null)
-					scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-				else
-					scheduler = TaskScheduler.Current;
+				var scheduler = GetScheduler();
 
 				//если это вторая итерация то нужно пересоздать cancellation
 				//тк у предыдущего уже будет стоять флаг IsCancellationRequested
@@ -1094,6 +1090,16 @@ namespace AnalitF.Net.Client.ViewModels
 					success?.Invoke(task);
 				}
 			} while (!done);
+		}
+
+		private static TaskScheduler GetScheduler()
+		{
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			return scheduler;
 		}
 
 		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;
