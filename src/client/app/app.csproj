@@ -292,8 +292,10 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\DisplacementDoc.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
+    <Compile Include="Models\Inventory\DisplacementLine.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
@@ -309,6 +311,7 @@
     <Compile Include="Models\Print\CheckDocument.cs" />
     <Compile Include="Models\Print\InventoryDocument.cs" />
     <Compile Include="Models\Print\InventoryActDocument.cs" />
+    <Compile Include="Models\Print\DisplacementDocument.cs" />
     <Compile Include="Models\Print\WriteoffActDocument.cs" />
     <Compile Include="Models\Print\WriteoffDocument.cs" />
     <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
@@ -319,6 +322,7 @@
     <Compile Include="Models\Print\StockPriceTagDocument.cs" />
     <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\PriceTag.cs" />
+    <Compile Include="Models\Print\DisplacementWDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -409,6 +413,8 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
@@ -580,8 +586,14 @@
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
+      <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\ReturnToSupplierDetails.xaml.cs">
       <DependentUpon>ReturnToSupplierDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\DisplacementDocs.xaml.cs">
+      <DependentUpon>DisplacementDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ReturnToSuppliers.xaml.cs">
       <DependentUpon>ReturnToSuppliers.xaml</DependentUpon>
@@ -891,7 +903,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\EditDisplacementDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\Inventory\ReturnToSupplierDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\DisplacementDocs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

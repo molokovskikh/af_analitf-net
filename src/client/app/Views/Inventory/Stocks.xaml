@@ -29,6 +29,7 @@
 				<MenuItem Header="Переоценка" Name="ReassessmentDocs" />
 				<MenuItem Header="Списание" Name="WriteoffDocs" />
 				<MenuItem Header="Возврат поставщику" Name="ReturnToSuppliers" />
+				<MenuItem Header="Внутренее перемещение" Name="DisplacementDocs" />
 			</MenuItem>
 			<MenuItem Header="Отчеты">
 				<MenuItem Header="Проверка забракованных серий" Name="CheckDefectSeries" />
@@ -40,7 +41,7 @@
 			<controls:PopupSelector VerticalAlignment="Center" x:Name="StatusFilter"
 				ButtonContent="Статус"
 				Member="Name" />
-			<Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Постелажная карта</Button>
+			<Button Name="PrintStockRackingMaps" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Постеллажная карта</Button>
 			<Button Name="PrintStock" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товарные запасы</Button>
 			<Button Name="PrintStockLimit" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности</Button>
 			<Button Name="PrintStockLimitMonth" Style="{StaticResource FilterElement}" HorizontalAlignment="Left">Товары со сроком годности менее 1 месяца</Button>

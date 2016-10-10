@@ -317,6 +317,34 @@ namespace AnalitF.Net.Client.Models.Inventory
 			return new StockAction(ActionType.CancelInventoryDoc, this, quantity);
 		}
 
+		// Перемещение между складами. С резерва наружу, на др склад
+		public virtual StockAction DisplacementTo(decimal quantity)
+		{
+			ReservedQuantity -= quantity;
+			return new StockAction(ActionType.DisplacementTo, this, quantity);
+		}
+
+		// отмена перемещения между складами. Снаружи с др. склада в резерв
+		public virtual StockAction CancelDisplacementTo(decimal quantity)
+		{
+			ReservedQuantity += quantity;
+			return new StockAction(ActionType.CancelDisplacementTo, this, quantity);
+		}
+
+		// Перемещение между складами. Снаружи с др. склада в поставку
+		public virtual StockAction DisplacementFrom(decimal quantity)
+		{
+			SupplyQuantity += quantity;
+			return new StockAction(ActionType.DisplacementFrom, this, quantity);
+		}
+
+		// отмена перемещения между складами. С поставки наружу на др. склад
+		public virtual StockAction CancelDisplacementFrom(decimal quantity)
+		{
+			SupplyQuantity -= quantity;
+			return new StockAction(ActionType.CancelDisplacementFrom, this, quantity);
+		}
+
 		// из резерва на склад
 		public virtual void Release(decimal quantity)
 		{
