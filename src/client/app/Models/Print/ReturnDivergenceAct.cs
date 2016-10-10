@@ -69,14 +69,26 @@ namespace AnalitF.Net.Client.Models.Print
 				.Cell(0, 1, RightHeaderTable())
 				.Cell(1, 0, Caption())
 				.Cell(1, 1, CaptionSignature());;
-			header.ShowGridLines = true;
 			doc.Blocks.Add(new BlockUIContainer(header));
-
-			/*var caption = new Grid();
-			caption
-				.Cell(0, 0, Caption())
-				.Cell(0, 1, CaptionSignature());
-			doc.Blocks.Add(new BlockUIContainer(caption));*/
+			BodyWithLine("Место приемки товара", "");
+			BodyWithoutLine("Настоящий акт составлен комиссией, которая установила:", DateTime.Now.ToString("dd/M/yyyy"));
+			BodyWithLine("по сопроводительным документам",
+				"товарная накладная №ПрДок{0} от {1}".Format(returnToSupplier.Id, returnToSupplier.Date.ToString("dd/M/yyyy")));
+			BodyWithLineSign("доставлен товар. Документ о вызове представителя", "грузоотправителя, поставщика, производителя:",
+				"ненужное зачеркнуть");
+			doc.Blocks.Add(new BlockUIContainer(
+				SingBlockBeforeLabel("телеграмма, факс, телефонограмма, радиограмма", "ненужное зачеркнуть",
+					"№__________ от «       »_____________             года")));
+			BodyWithLine("Грузоотправитель", waybillSettings == null ? "" : waybillSettings.FullName + ", " + waybillSettings.Address);
+			BodyWithLine("Производитель", returnToSupplier.Lines.Count == 0 ? "" : returnToSupplier.Lines.First().Producer);
+			BodyWithLine("Поставщик", returnToSupplier == null ? "" : returnToSupplier.SupplierName + ", " + returnToSupplier.AddressName);
+			BodyWithLineSign("Страховая компания", "", "наименование, адрес, номер телефона, факса");
+			BodyWithoutLine("Договор (контракт) на поставку товара №", "___________ от «       »_____________             года");
+			BodyWithoutLine("Счет фактура", "");
+			BodyWithoutLine("Коммерческий акт №", "___________ от «       »_____________             года");
+			BodyWithoutLine("Ветеринарное свидетельство (свидетельство) №", "___________ от «       »_____________             года");
+			BodyWithoutLine("Железнодорожная накладная №", "___________ от «       »_____________             года");
+			BodyWithoutLine("Способ доставки", "___________ от «       »_____________             года");
 		}
 
 		private void TwoColumns()
@@ -201,6 +213,39 @@ namespace AnalitF.Net.Client.Models.Print
 				Margin = new Thickness(5, 0, 5, 0),
 				Content = text,
 				HorizontalContentAlignment = HorizontalAlignment.Center
+			});
+			grid.HorizontalAlignment = HorizontalAlignment.Left;
+			return grid;
+		}
+
+		private Grid SingBlockBeforeLabel(string text, string signature, string label)
+		{
+			var grid = new Grid();
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = GridLength.Auto,
+			});
+			grid.Cell(0, 0, new Label {
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 0, 0, 1),
+				SnapsToDevicePixels = true,
+				Margin = new Thickness(5, 0, 5, 0),
+				Content = text,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				FontSize = 10
+			});
+			grid.Cell(1, 0, new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 8,
+				Content = signature,
+				HorizontalContentAlignment = HorizontalAlignment.Center
+			});
+			grid.Cell(0, 1, new Label {
+				Content = label,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				FontSize = 10
 			});
 			grid.HorizontalAlignment = HorizontalAlignment.Left;
 			return grid;
@@ -372,23 +417,21 @@ namespace AnalitF.Net.Client.Models.Print
 			}
 		}
 
-		private void BodyLine(string label, string value)
+		private void BodyWithLine(string label, string value)
 		{
-			if (bodyBlock == null) {
-				bodyBlock = new BlockUIContainer();
-				bodyBlock.Child = new Grid {
-					HorizontalAlignment = HorizontalAlignment.Left,
-					Margin = new Thickness(0, 10, 0, 10),
-					Width = 820,
-					ColumnDefinitions = {
-						new ColumnDefinition(),
-						new ColumnDefinition {
-							Width = GridLength.Auto
-						}
+			bodyBlock = new BlockUIContainer();
+			bodyBlock.Child = new Grid {
+				HorizontalAlignment = HorizontalAlignment.Left,
+				Margin = new Thickness(0, 10, 0, 10),
+				Width = 820,
+				ColumnDefinitions = {
+					new ColumnDefinition(),
+					new ColumnDefinition {
+						Width = GridLength.Auto
 					}
-				};
-				doc.Blocks.Add(bodyBlock);
-			}
+				}
+			};
+			doc.Blocks.Add(bodyBlock);
 			var grid = (Grid)bodyBlock.Child;
 			grid.RowDefinitions.Add(new RowDefinition());
 			var inner = new Grid();
@@ -396,16 +439,103 @@ namespace AnalitF.Net.Client.Models.Print
 			inner.ColumnDefinitions.Add(new ColumnDefinition());
 			var labelEl = new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 8,
+				FontSize = 10,
 				Content = label,
 			};
 			labelEl.SetValue(Grid.ColumnProperty, 0);
 			var valueEl = new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 8,
+				FontSize = 10,
 				BorderBrush = Brushes.Black,
 				BorderThickness = new Thickness(0, 0, 0, 1),
 				SnapsToDevicePixels = true,
+				Content = value,
+			};
+			valueEl.SetValue(Grid.ColumnProperty, 1);
+			inner.Children.Add(labelEl);
+			inner.Children.Add(valueEl);
+			inner.SetValue(Grid.ColumnProperty, 0);
+			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
+			grid.Children.Add(inner);
+		}
+
+		private void BodyWithLineSign(string label, string value, string sign)
+		{
+			bodyBlock = new BlockUIContainer();
+			bodyBlock.Child = new Grid {
+				HorizontalAlignment = HorizontalAlignment.Left,
+				Margin = new Thickness(0, 10, 0, 10),
+				Width = 820,
+				ColumnDefinitions = {
+					new ColumnDefinition(),
+					new ColumnDefinition {
+						Width = GridLength.Auto
+					}
+				}
+			};
+			doc.Blocks.Add(bodyBlock);
+			var grid = (Grid)bodyBlock.Child;
+			grid.RowDefinitions.Add(new RowDefinition());
+			var inner = new Grid();
+			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+			inner.ColumnDefinitions.Add(new ColumnDefinition());
+			inner
+				.Cell(0, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					Content = label,
+				})
+				.Cell(0, 1, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+					SnapsToDevicePixels = true,
+					Content = value,
+				})
+				.Cell(1, 1, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 8,
+					Content = sign,
+					HorizontalContentAlignment = HorizontalAlignment.Center
+				});
+			inner.SetValue(Grid.ColumnProperty, 0);
+			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
+			grid.Children.Add(inner);
+		}
+
+		private void BodyWithoutLine(string label, string value)
+		{
+			bodyBlock = new BlockUIContainer();
+			bodyBlock.Child = new Grid {
+				HorizontalAlignment = HorizontalAlignment.Left,
+				Margin = new Thickness(0, 10, 0, 10),
+				Width = 820,
+				ColumnDefinitions = {
+					new ColumnDefinition(),
+					new ColumnDefinition {
+						Width = GridLength.Auto
+					}
+				}
+			};
+			doc.Blocks.Add(bodyBlock);
+			var grid = (Grid)bodyBlock.Child;
+			grid.RowDefinitions.Add(new RowDefinition());
+			var inner = new Grid();
+			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+			inner.ColumnDefinitions.Add(new ColumnDefinition());
+			var labelEl = new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 10,
+				Content = label,
+			};
+			labelEl.SetValue(Grid.ColumnProperty, 0);
+			var valueEl = new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 10,
 				Content = value,
 			};
 			valueEl.SetValue(Grid.ColumnProperty, 1);

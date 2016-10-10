@@ -204,7 +204,8 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			return Preview("Возврат акт о расхождении", new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
+			return Preview("Возврат акт о расхождении",
+				new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)

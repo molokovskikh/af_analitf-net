@@ -95,6 +95,17 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
 
+			var header = new TableRow();
+				(new [] { "1", "2", "2а", "3", "4", "5", "6", "7", "8", "9", "10", "10а", "11" })
+				.Each(i => {
+					var tableCell = Cell(i);
+					tableCell.TextAlignment = TextAlignment.Center;
+					tableCell.FontSize = 8;
+					header.Cells.Add(tableCell);
+				});
+
+			dataTable.RowGroups[0].Rows.Add(header);
+
 			var groups = returnToSupplier.Lines.GroupBy(l => l.Stock.Nds).OrderBy(g => g.Key);
 			foreach (var taxGroup in groups) {
 				var rows = taxGroup.OrderBy(l => l.Product).Select(l => new object[] {
@@ -122,7 +133,6 @@ namespace AnalitF.Net.Client.Models.Print
 			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.NdsAmount).FormatCost(), 3));
 			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.SupplySum)));
 			dataTable.RowGroups[0].Rows.Add(result);
-			//dataTable.FontSize = 7;
 			doc.Blocks.Add(dataTable);
 
 			var tax10Sum = returnToSupplier.Lines.Where(l => l.Stock.Nds == 10).Select(l => l.Stock.NdsAmount).Sum();
@@ -278,9 +288,6 @@ namespace AnalitF.Net.Client.Models.Print
 			var valueEl = new Label {
 				FontFamily = new FontFamily("Arial"),
 				FontSize = 8,
-				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0, 0, 0, 1),
-				SnapsToDevicePixels = true,
 				Content = value,
 			};
 			valueEl.SetValue(Grid.ColumnProperty, 1);
