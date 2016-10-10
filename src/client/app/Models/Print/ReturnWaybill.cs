@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
+using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models.Inventory;
+using Common.Tools;
 
 namespace AnalitF.Net.Client.Models.Print
 {
@@ -14,6 +20,26 @@ namespace AnalitF.Net.Client.Models.Print
 		{
 			returnToSupplier = _returnToSupplier;
 			waybillSettings = _waybillSettings;
+			doc.PagePadding = new Thickness(29);
+			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
+
+			BlockStyle = new Style(typeof(Paragraph)) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+					new Setter(System.Windows.Documents.Block.MarginProperty, new Thickness(0, 3, 0, 3))
+				}
+			};
+
+			HeaderStyle = new Style(typeof(Run), HeaderStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 12d),
+				}
+			};
+			TableHeaderStyle = new Style(typeof(TableCell), TableHeaderStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+				}
+			};
 		}
 
 		protected override void BuildDoc()
