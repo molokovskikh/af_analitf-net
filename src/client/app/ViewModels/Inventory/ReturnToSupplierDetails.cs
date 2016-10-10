@@ -189,22 +189,22 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 		public IEnumerable<IResult> PrintReturnLabel()
 		{
-			return Preview("Возврат ярлык", new ReturnLabel(Doc));
+			return Preview("Возврат ярлык", new ReturnLabel(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnInvoice()
 		{
-			return Preview("Возврат ярлык", new ReturnInvoice(Doc));
+			return Preview("Возврат счет-фактура", new ReturnInvoice(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnWaybill()
 		{
-			return Preview("Возврат ярлык", new ReturnWaybill(Doc));
+			return Preview("Возврат товарная накладная", new ReturnWaybill(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		public IEnumerable<IResult> PrintReturnDivergenceAct()
 		{
-			return Preview("Возврат ярлык", new ReturnDivergenceAct(Doc));
+			return Preview("Возврат акт о расхождении", new ReturnDivergenceAct(Doc, Session.Query<WaybillSettings>().First()));
 		}
 
 		private IEnumerable<IResult> Preview(string name, BaseDocument doc)
