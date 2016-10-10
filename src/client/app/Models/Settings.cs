@@ -380,6 +380,7 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual double DebugTimeout { get; set; }
 		public virtual bool DebugFault { get; set; }
+		public virtual bool DebugLoud { get; set; }
 		public virtual bool DebugUseTestSign { get; set; }
 		public virtual string DebugDiadokSignerINN { get; set; }
 

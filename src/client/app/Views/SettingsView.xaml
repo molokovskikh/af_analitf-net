@@ -667,6 +667,7 @@
 					<Label>Задержка в обработке запросов (секунд)</Label>
 					<TextBox Name="Settings_DebugTimeout" />
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
+					<CheckBox Name="Settings_DebugLoud">Показывать диалоги при запуске и остановке</CheckBox>
 					<CheckBox Name="Settings_DebugUseTestSign">Диадок - симулировать подпись</CheckBox>
           <Label>Диадок - ИНН организации:</Label>
           <TextBox Name="Settings_DebugDiadokSignerINN" />

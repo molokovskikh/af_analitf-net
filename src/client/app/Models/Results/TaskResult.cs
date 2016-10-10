@@ -43,7 +43,7 @@ namespace AnalitF.Net.Client.Models.Results
 					Manager.Error(ErrorHelper.TranslateException(t.Exception) ?? viewModel.GenericErrorMessage);
 			}, scheduler);
 			if (Task.Status == TaskStatus.Created)
-				Task.Start();
+				Task.Start(TaskScheduler.Default);
 			Manager.ShowFixedDialog(viewModel);
 			Completed?.Invoke(this, args);
 		}

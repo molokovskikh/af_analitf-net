@@ -314,6 +314,10 @@
 				<Button x:Name="Collect">Collect</Button>
 			</StatusBarItem>
 
+			<StatusBarItem>
+				<Button x:Name="Touch">Restart</Button>
+			</StatusBarItem>
+
 			<StatusBarItem Name="DebugErrorHolder">
 				<Label x:Name="Debug_ErrorCount">
 					<Label.Style>

@@ -302,6 +302,7 @@ namespace AnalitF.Net.Client.Views
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
 			Collect.Visibility = Visibility.Collapsed;
+			Touch.Visibility = Visibility.Collapsed;
 			Debug_ErrorCount.Visibility = Visibility.Collapsed;
 			ShowDebug.Visibility = Visibility.Collapsed;
 			DebugErrorHolder.Content = null;

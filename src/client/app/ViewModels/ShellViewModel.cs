@@ -343,7 +343,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (Config.Quiet) {
+			if (Config.Quiet && !Settings.Value.DebugLoud) {
 				base.CanClose(callback);
 				return;
 			}
@@ -1058,7 +1058,7 @@ namespace AnalitF.Net.Client.ViewModels
 					viewModel.IsCompleted = true;
 					viewModel.TryClose();
 				}, scheduler);
-				task.Start();
+				task.Start(TaskScheduler.Default);
 
 				windowManager.ShowFixedDialog(viewModel);
 
@@ -1165,6 +1165,14 @@ namespace AnalitF.Net.Client.ViewModels
 		public IResult ShowDebug()
 		{
 			return new WindowResult(Debug);
+		}
+
+		public void Touch()
+		{
+			var src = typeof(ShellViewModel).Assembly.Location;
+			var dir = Path.GetDirectoryName(src);
+			var filename = Path.GetFileName(src);
+			new FileInfo(Path.GetFullPath(Path.Combine(dir, "..", "debug",  filename))).LastWriteTime = DateTime.Now;
 		}
 #endif
 		public void Dispose()
