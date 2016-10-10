@@ -18,11 +18,31 @@ namespace AnalitF.Net.Client.Models.Print
 		private ReturnToSupplier returnToSupplier;
 		private WaybillSettings waybillSettings;
 		private BlockUIContainer bodyBlock;
-		public ReturnInvoice(ReturnToSupplier _returnToSupplier)
+		public ReturnInvoice(ReturnToSupplier returnToSupplier , WaybillSettings waybillSettings)
 		{
-			returnToSupplier = _returnToSupplier;
-			if (returnToSupplier.Lines.Count != 0)
-				waybillSettings = returnToSupplier.Lines.First().Stock.WaybillSettings;
+			this.returnToSupplier = returnToSupplier;
+			this.waybillSettings = waybillSettings;
+
+			doc.PagePadding = new Thickness(29);
+			((IDocumentPaginatorSource)doc).DocumentPaginator.PageSize = new Size(1069, 756);
+
+			BlockStyle = new Style(typeof(Paragraph)) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+					new Setter(System.Windows.Documents.Block.MarginProperty, new Thickness(0, 3, 0, 3))
+				}
+			};
+
+			HeaderStyle = new Style(typeof(Run), HeaderStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 12d),
+				}
+			};
+			TableHeaderStyle = new Style(typeof(TableCell), TableHeaderStyle) {
+				Setters = {
+					new Setter(Control.FontSizeProperty, 10d),
+				}
+			};
 		}
 
 		protected override void BuildDoc()
@@ -69,37 +89,26 @@ namespace AnalitF.Net.Client.Models.Print
 				new PrintColumn("краткое наименование", 90),
 				new PrintColumn("Номер грузовой таможенной декларации", 106)
 			};
-
 			var dataTable = BuildTableHeader(columns, new [] {
 				new ColumnGroup("Единица измерения", 1, 2),
 				new ColumnGroup("Страна происхождения товара", 10, 11),
 			});
 			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
-			var header = new TableRow();
-				(new [] { "1", "2", "2а", "3", "4", "5", "6", "7", "8", "9", "10", "10а", "11" })
-				.Each(i => {
-					var tableCell = Cell(i);
-					tableCell.TextAlignment = TextAlignment.Center;
-					tableCell.FontSize = 8;
-					header.Cells.Add(tableCell);
-				});
-
-			dataTable.RowGroups[0].Rows.Add(header);
 
 			var groups = returnToSupplier.Lines.GroupBy(l => l.Stock.Nds).OrderBy(g => g.Key);
 			foreach (var taxGroup in groups) {
 				var rows = taxGroup.OrderBy(l => l.Product).Select(l => new object[] {
 					l.Product,
 					l.ProductId,
-					null, //найти
+					l.Stock.Unit,
 					l.Quantity,
 					l.SupplierCostWithoutNds.FormatCost(),
-					null, //найти
+					l.Stock.SupplySumWithoutNds,
 					l.ExciseTax,
-					null, //$"{line.Nds}%"
+					$"{l.Stock.Nds}%",
 					l.Stock.NdsAmount.FormatCost(),
-					null, //line.Amount.FormatCost()
-					null, //line.CountryCode
+					l.Stock.SupplySum,
+					l.Stock.CountryCode,
 					l.Stock.Country,
 					l.BillOfEntryNumber
 				});
@@ -109,10 +118,11 @@ namespace AnalitF.Net.Client.Models.Print
 			var result = new TableRow();
 			result.FontWeight = FontWeights.Bold;
 			result.Cells.Add(Cell("Всего к оплате", 5));
-			//result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.AmountExcludeTax).FormatCost()));
+			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.SupplySumWithoutNds)));
 			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.NdsAmount).FormatCost(), 3));
-			//result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.Amount).FormatCost()));
+			result.Cells.Add(Cell(returnToSupplier.Lines.Sum(l => l.Stock.SupplySum)));
 			dataTable.RowGroups[0].Rows.Add(result);
+			//dataTable.FontSize = 7;
 			doc.Blocks.Add(dataTable);
 
 			var tax10Sum = returnToSupplier.Lines.Where(l => l.Stock.Nds == 10).Select(l => l.Stock.NdsAmount).Sum();
