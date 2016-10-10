@@ -9,9 +9,11 @@ namespace AnalitF.Net.Client.Models.Print
 	public class ReturnDivergenceAct : BaseDocument
 	{
 		private ReturnToSupplier returnToSupplier;
-		public ReturnDivergenceAct(ReturnToSupplier _returnToSupplier)
+		private WaybillSettings waybillSettings;
+		public ReturnDivergenceAct(ReturnToSupplier _returnToSupplier, WaybillSettings _waybillSettings)
 		{
 			returnToSupplier = _returnToSupplier;
+			waybillSettings = _waybillSettings;
 		}
 
 		protected override void BuildDoc()

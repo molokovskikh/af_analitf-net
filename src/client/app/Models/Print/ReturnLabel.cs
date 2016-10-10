@@ -15,11 +15,10 @@ namespace AnalitF.Net.Client.Models.Print
 	{
 		private ReturnToSupplier returnToSupplier;
 		private WaybillSettings waybillSettings;
-		public ReturnLabel(ReturnToSupplier _returnToSupplier)
+		public ReturnLabel(ReturnToSupplier _returnToSupplier, WaybillSettings _waybillSettings)
 		{
 			returnToSupplier = _returnToSupplier;
-			if (returnToSupplier.Lines.Count != 0)
-				waybillSettings = returnToSupplier.Lines.First().Stock.WaybillSettings;
+			waybillSettings = _waybillSettings;
 		}
 
 		protected override void BuildDoc()

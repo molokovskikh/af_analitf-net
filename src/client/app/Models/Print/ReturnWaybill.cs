@@ -9,9 +9,11 @@ namespace AnalitF.Net.Client.Models.Print
 	public class ReturnWaybill : BaseDocument
 	{
 		private ReturnToSupplier returnToSupplier;
-		public ReturnWaybill(ReturnToSupplier _returnToSupplier)
+		private WaybillSettings waybillSettings;
+		public ReturnWaybill(ReturnToSupplier _returnToSupplier, WaybillSettings _waybillSettings)
 		{
 			returnToSupplier = _returnToSupplier;
+			waybillSettings = _waybillSettings;
 		}
 
 		protected override void BuildDoc()
