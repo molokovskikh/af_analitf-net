@@ -163,17 +163,85 @@ namespace AnalitF.Net.Client.Models.Print
 				TextWithLineSign("","наименование")
 			});
 
-			//2 страница!
-
 			Block(new List<Grid>
 			{
 				Text("Сведения о состоянии вагонов, автофургонов и т. д. Наличие, описание упаковочных ярлыков, пломб транспорта на" +
 				     " отдельных местах (сертификатов, спецификаций в вагоне, контейнере) и отправительская \n маркировка"),
 			});
+			Block(new List<Grid>
+			{
+				Text("По сопроводительным транспортным документам значится:"),
+			});
 
-			//Таблица
+			var columns = new[] {
+				new PrintColumn("Отметка об опломбировании товара (груза), состояние пломб и содержание оттиска", 240),
+				new PrintColumn("Количество мест", 60),
+				new PrintColumn("Вид упаковки", 80),
+				new PrintColumn("Наименование товара (груза) или номера вагонов (контейнеров,автофургонов и т. д.)", 120),
+				new PrintColumn("Единица измерения", 60),
+				new PrintColumn("Отправителя", 80),
+				new PrintColumn("Транспортной организации (станции, пристани, порта)", 80),
+				new PrintColumn("Особые отметки отправителя по накладной", 120),
+			};
+			var dataTable = BuildTableHeader(columns, new [] {
+				new ColumnGroup("Масса брутто товара (груза) по документам", 5, 6),
+			});
+			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
+			var tableHeader = new TableRow();
+				(new [] { "1", "2", "3", "4", "5", "6", "7", "8" })
+				.Each(i => {
+					var tableCell = Cell(i);
+					tableCell.TextAlignment = TextAlignment.Center;
+					tableCell.FontSize = 8;
+					tableHeader.Cells.Add(tableCell);
+				});
 
-			//3 страница!
+			dataTable.RowGroups[0].Rows.Add(tableHeader);
+			BuildRows(new List<object[]>(), columns, dataTable);
+			doc.Blocks.Add(dataTable);
+
+
+			columns = new[] {
+				new PrintColumn("Тип (наименование)", 240),
+				new PrintColumn("Номер места", 50),
+				new PrintColumn("Наименование", 50),
+				new PrintColumn("код по ОКЕИ", 50),
+				new PrintColumn("Артикул товара", 50),
+				new PrintColumn("Сорт", 50),
+				new PrintColumn("Количество (масса)", 50),
+				new PrintColumn("Цена руб.коп.", 50),
+				new PrintColumn("Сумма руб.коп.", 50),
+			};
+			dataTable = BuildTableHeader(columns, new [] {
+				new ColumnGroup("Единица измерения", 2, 3),
+				new ColumnGroup("По документам поставщика значится", 4, 8),
+			});
+			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
+			tableHeader = new TableRow();
+				(new [] { "1", "2", "3", "4", "5", "6", "7", "8", "9" })
+				.Each(i => {
+					var tableCell = Cell(i);
+					tableCell.TextAlignment = TextAlignment.Center;
+					tableCell.FontSize = 8;
+					tableHeader.Cells.Add(tableCell);
+				});
+			dataTable.RowGroups[0].Rows.Add(tableHeader);
+			var rows = returnToSupplier.Lines.Select((o, i) => new object[]
+			{
+				o.Product,
+				null,
+				null,
+				null,
+				null,
+				null,
+				o.Quantity,
+				o.SupplierCost,
+				o.SupplierSum
+			});
+			BuildRows(rows, columns, dataTable);
+			doc.Blocks.Add(dataTable);
+
+
 			Block(new List<Grid>
 			{
 				Text("Условия хранения товара (продукции) до его вскрытия на складе получателя:"),
@@ -234,9 +302,60 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(new List<Grid> {TextWithLine("")});
 			Block(new List<Grid> {TextWithLine("")});
 
-			//Table
+			columns = new[] {
+				new PrintColumn("Артикул", 40),
+				new PrintColumn("сорт", 40),
+				new PrintColumn("кол-во", 40),
+				new PrintColumn("цена", 40),
+				new PrintColumn("сумма", 40),
+				new PrintColumn("кол-во", 40),
+				new PrintColumn("сумма", 40),
+				new PrintColumn("кол-во", 40),
+				new PrintColumn("сумма", 40),
+				new PrintColumn("кол-во", 40),
+				new PrintColumn("сумма", 40),
+				new PrintColumn("кол-во", 40),
+				new PrintColumn("сумма", 40),
+				new PrintColumn("Номер паспорта", 80),
+			};
+			dataTable = BuildTableHeader(columns, new [] {
+				new ColumnGroup("Фактически оказалось", 0, 4),
+				new ColumnGroup("Брак", 5, 6),
+				new ColumnGroup("Бой", 7, 8),
+				new ColumnGroup("Недостача", 9, 10),
+				new ColumnGroup("Излишки", 11, 12),
+				new ColumnGroup("Отклонение", 9, 12),
+			});
+			dataTable.Margin = new Thickness(dataTable.Margin.Left, 0, dataTable.Margin.Right, dataTable.Margin.Bottom);
+			tableHeader = new TableRow();
+				(new [] { "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" })
+				.Each(i => {
+					var tableCell = Cell(i);
+					tableCell.TextAlignment = TextAlignment.Center;
+					tableCell.FontSize = 8;
+					tableHeader.Cells.Add(tableCell);
+				});
+			dataTable.RowGroups[0].Rows.Add(tableHeader);
+			rows = returnToSupplier.Lines.Select((o, i) => new object[]
+			{
+				null,
+				null,
+				o.Quantity,
+				o.SupplierCost,
+				o.SupplierSum,
+				null, //Брак количество
+				null, //Брак сумма
+				null,//бой кол-во
+				null,//бой сумма
+				null,// недостача кол-во
+				null,// недостача сумма
+				null,// излишки кол-во
+				null,//излишки сумма
+				null //Номер паспорта
+			});
+			BuildRows(rows, columns, dataTable);
+			doc.Blocks.Add(dataTable);
 
-			//page 4
 			Block(new List<Grid>
 			{
 				Text("Определение количества (массы) товара (продукции) проводилось"),
@@ -286,6 +405,78 @@ namespace AnalitF.Net.Client.Models.Print
 				     "действительности."),
 			});
 			//форма подписей
+			Block(new List<Grid>
+			{
+				Text("Председатель комиссии:", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("Члены комиссии:", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("Представитель грузоотправителя (поставщика, производителя)", 150),
+				SingBlock()
+			});
+			Block(new List<Grid>
+			{
+				Text("Документ, удостоверяющий полномочия"),
+				TextWithLineSign("","наименование")
+			});
+			Block(new List<Grid>
+			{
+				Text("№___________________ выдан «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Акт с приложением на _____________ листах получил"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Главный (старший) бухгалтер", 300),
+				TextWithLineSign("","подпись", 120),
+				TextWithLineSign("","расшифровка подписи", 300)
+			});
+			Block(new List<Grid>
+			{
+				Text("«       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Решение руководителя"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Товар и тару на ответственное хранение принял"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Заведующий складом (кладовщик)", 300),
+				TextWithLineSign("","подпись", 120),
+				TextWithLineSign("","расшифровка подписи", 300)
+			});
 		}
 
 		private Grid LeftHeaderTable()
@@ -583,6 +774,29 @@ namespace AnalitF.Net.Client.Models.Print
 			return grid;
 		}
 
+		private Grid Text(string text, int size)
+		{
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
+				{
+					Content = new TextBlock {
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					TextWrapping = TextWrapping.Wrap,
+					Width = size,
+					Text = text
+				}
+				});
+			return grid;
+		}
+
 		private Grid TextWithLine(string text)
 		{
 			var grid = new Grid
@@ -621,6 +835,7 @@ namespace AnalitF.Net.Client.Models.Print
 					FontSize = 10,
 					BorderBrush = Brushes.Black,
 					BorderThickness = new Thickness(0, 0, 0, 1),
+					Margin = new Thickness(5, 0, 0, 0),
 					SnapsToDevicePixels = true,
 					Content = text,
 				})
@@ -631,6 +846,90 @@ namespace AnalitF.Net.Client.Models.Print
 					Content = sign,
 					HorizontalContentAlignment = HorizontalAlignment.Center
 				});
+			return grid;
+		}
+		private Grid TextWithLineSign(string text, string sign, int size)
+		{
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+					Margin = new Thickness(5, 0, 0, 0),
+					SnapsToDevicePixels = true,
+					Content = text,
+					Width = size
+				})
+				.Cell(1, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 8,
+					Content = sign,
+					HorizontalContentAlignment = HorizontalAlignment.Center
+				});
+			return grid;
+		}
+		private Grid SingBlock()
+		{
+			var grid = new Grid();
+			grid.RowDefinitions.Add(new RowDefinition());
+			grid.RowDefinitions.Add(new RowDefinition());
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = GridLength.Auto
+			});
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = GridLength.Auto
+			});
+			grid.ColumnDefinitions.Add(new ColumnDefinition {
+				Width = new GridLength(1, GridUnitType.Star)
+			});
+			grid.Cell(0, 0, new Label {
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 0, 0, 1),
+				SnapsToDevicePixels = true,
+				Margin = new Thickness(5, 5, 5, 0),
+			});
+			grid.Cell(1, 0, new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 6,
+				Content = "место работы, должность",
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Width = 280
+			});
+			grid.Cell(0, 1, new Label {
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 0, 0, 1),
+				SnapsToDevicePixels = true,
+				Margin = new Thickness(5, 5, 5, 0),
+			});
+			grid.Cell(1, 1, new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 6,
+				Content = "подпись",
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Width = 120
+			});
+			grid.Cell(0, 2, new Label {
+				BorderBrush = Brushes.Black,
+				BorderThickness = new Thickness(0, 0, 0, 1),
+				SnapsToDevicePixels = true,
+				Margin = new Thickness(5, 5, 5, 0),
+			});
+			grid.Cell(1, 2, new Label {
+				FontFamily = new FontFamily("Arial"),
+				FontSize = 6,
+				Content = "расшифровка подписи",
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+			});
 			return grid;
 		}
 	}

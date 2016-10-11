@@ -114,7 +114,7 @@ namespace AnalitF.Net.Client.Models.Print
 					l.Stock.Unit,
 					l.Quantity,
 					l.SupplierCostWithoutNds.FormatCost(),
-					l.Stock.SupplySumWithoutNds,
+					"без",
 					l.ExciseTax,
 					$"{l.Stock.Nds}%",
 					l.Stock.NdsAmount.FormatCost(),
@@ -281,13 +281,13 @@ namespace AnalitF.Net.Client.Models.Print
 			inner.ColumnDefinitions.Add(new ColumnDefinition());
 			var labelEl = new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 8,
+				FontSize = 12,
 				Content = label,
 			};
 			labelEl.SetValue(Grid.ColumnProperty, 0);
 			var valueEl = new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 8,
+				FontSize = 12,
 				Content = value,
 			};
 			valueEl.SetValue(Grid.ColumnProperty, 1);
