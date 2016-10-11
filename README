@@ -11,10 +11,6 @@ lib/dcmysql[*]std.exe - драйвер mysql
 
 перед началом работы нужно подготовить приложение
 для этого в корне проекта выполни комманду ./scripts/prepare.sh
-
-для компиляции шейдера нужен Direct3D Shader Compiler, fxc.exe должен быть в PATH
-есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
-
 пусть к msbuild должен быть в переменной среды PATH
 пусть к bake должен быть в переменной среды PATH
 
@@ -85,3 +81,8 @@ http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/OSX/IE6_WinXP.zip
 MSI
 
 В случае проблем с установщиком неудаляемые записи из msi поможем исправил msizap T <{ProductCode}>
+
+Дополнительные инструменты
+
+Для компиляции шейдера нужен Direct3D Shader Compiler - fxc.exe
+должен быть в PATH, есть в windows sdk C:\Program Files (x86)\Windows Kits\8.0\bin\x64
