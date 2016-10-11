@@ -150,6 +150,7 @@
     <Compile Include="Acceptance\WindbgHelper.cs" />
     <Compile Include="Integration\ViewModels\FrontendFixture.cs" />
     <Compile Include="Integration\ViewModels\InventoryDocsFixture.cs" />
+    <Compile Include="Integration\ViewModels\DisplacementFixture.cs" />
     <Compile Include="Integration\ViewModels\ReturnToSupplierViewFixture.cs" />
     <Compile Include="Integration\ViewModels\CheckDetailsView.cs" />
     <Compile Include="Integration\ViewModels\ChecksView.cs" />
