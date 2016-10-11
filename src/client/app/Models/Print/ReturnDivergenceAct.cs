@@ -17,7 +17,6 @@ namespace AnalitF.Net.Client.Models.Print
 		private DocumentTemplate template;
 		private ReturnToSupplier returnToSupplier;
 		private WaybillSettings waybillSettings;
-		private BlockUIContainer bodyBlock;
 
 		public ReturnDivergenceAct(ReturnToSupplier returnToSupplier, WaybillSettings waybillSettings)
 		{
@@ -48,6 +47,9 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
+			var waybillId = returnToSupplier.Lines.Count == 0 ? "        " : returnToSupplier.Lines.First().Stock.WaybillId.ToString();
+			var waybillDate = returnToSupplier.Lines.Count == 0 ? "       " : returnToSupplier.Lines.First().Stock.DocumentDate;
+
 			var right = Block("Унифицированная форма № Торг-12 \n" +
 			                  "Утверждена постановлением Госкомстата \n" +
 												"России от 25.12.98 № 132");
@@ -70,30 +72,220 @@ namespace AnalitF.Net.Client.Models.Print
 				.Cell(1, 0, Caption())
 				.Cell(1, 1, CaptionSignature());;
 			doc.Blocks.Add(new BlockUIContainer(header));
-			BodyWithLine("Место приемки товара", "");
-			BodyWithoutLine("Настоящий акт составлен комиссией, которая установила:", DateTime.Now.ToString("dd/M/yyyy"));
-			BodyWithLine("по сопроводительным документам",
-				"товарная накладная №ПрДок{0} от {1}".Format(returnToSupplier.Id, returnToSupplier.Date.ToString("dd/M/yyyy")));
-			BodyWithLineSign("доставлен товар. Документ о вызове представителя", "грузоотправителя, поставщика, производителя:",
-				"ненужное зачеркнуть");
-			doc.Blocks.Add(new BlockUIContainer(
-				SingBlockBeforeLabel("телеграмма, факс, телефонограмма, радиограмма", "ненужное зачеркнуть",
-					"№__________ от «       »_____________             года")));
-			BodyWithLine("Грузоотправитель", waybillSettings == null ? "" : waybillSettings.FullName + ", " + waybillSettings.Address);
-			BodyWithLine("Производитель", returnToSupplier.Lines.Count == 0 ? "" : returnToSupplier.Lines.First().Producer);
-			BodyWithLine("Поставщик", returnToSupplier == null ? "" : returnToSupplier.SupplierName + ", " + returnToSupplier.AddressName);
-			BodyWithLineSign("Страховая компания", "", "наименование, адрес, номер телефона, факса");
-			BodyWithoutLine("Договор (контракт) на поставку товара №", "___________ от «       »_____________             года");
-			BodyWithoutLine("Счет фактура", "");
-			BodyWithoutLine("Коммерческий акт №", "___________ от «       »_____________             года");
-			BodyWithoutLine("Ветеринарное свидетельство (свидетельство) №", "___________ от «       »_____________             года");
-			BodyWithoutLine("Железнодорожная накладная №", "___________ от «       »_____________             года");
-			BodyWithoutLine("Способ доставки", "___________ от «       »_____________             года");
-		}
 
-		private void TwoColumns()
-		{
-			template = new DocumentTemplate();
+			Block(new List<Grid>
+			{
+				Text("Место приемки товара"),
+				TextWithLine(""),
+			});
+			Block(new List<Grid>
+			{
+				Text("Настоящий акт составлен комиссией, которая установила:"),
+				Text(DateTime.Now.ToString("dd/M/yyyy"))
+			});
+			Block(new List<Grid>
+			{
+				Text("по сопроводительным документам"),
+				TextWithLine($"товарная накладная №ПрДок{waybillId} от {waybillDate}")
+			});
+			Block(new List<Grid>
+			{
+				Text("доставлен товар. Документ о вызове представителя"),
+				TextWithLineSign("грузоотправителя, поставщика, производителя:","ненужное зачеркнуть")
+			});
+			Block(new List<Grid>
+			{
+				TextWithLineSign("телеграмма, факс, телефонограмма, радиограмма","ненужное зачеркнуть"),
+				Text("№__________ от «       »_____________             года")
+			});
+			Block(new List<Grid>
+			{
+				Text("Грузоотправитель"),
+				TextWithLine(waybillSettings == null ? "" : waybillSettings.FullName + ", " + waybillSettings.Address)
+			});
+			Block(new List<Grid>
+			{
+				Text("Производитель"),
+				TextWithLine(returnToSupplier.Lines.Count == 0 ? "" : returnToSupplier.Lines.First().Producer)
+			});
+			Block(new List<Grid>
+			{
+				Text("Поставщик"),
+				TextWithLine(returnToSupplier == null ? "" : returnToSupplier.SupplierName + ", " + returnToSupplier.AddressName)
+			});
+			Block(new List<Grid>
+			{
+				Text("Страховая компания"),
+				TextWithLineSign("","наименование, адрес, номер телефона, факса")
+			});
+			Block(new List<Grid>
+			{
+				Text("Договор (контракт) на поставку товара №___________ от «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Счет-фактура №"),
+				TextWithLine("ПрДок" + waybillId),
+				Text("от "),
+				TextWithLine(waybillDate)
+			});
+			Block(new List<Grid>
+			{
+				Text("Коммерческий акт №___________ от «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Ветеринарное свидетельство (свидетельство) №___________ от «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Железнодорожная накладная №___________ от «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Способ доставки"),
+				TextWithLineSign("","вид транспортного средства"),
+				Text("№"),
+				TextWithLine("")
+			});
+			Block(new List<Grid>
+			{
+				Text("Дата отправления товара «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("со станции (пристани, порта) отправления"),
+				TextWithLineSign("","наименование")
+			});
+			Block(new List<Grid>
+			{
+				Text("или со склада отправителя товара"),
+				TextWithLineSign("","наименование")
+			});
+
+			//2 страница!
+
+			Block(new List<Grid>
+			{
+				Text("Сведения о состоянии вагонов, автофургонов и т. д. Наличие, описание упаковочных ярлыков, пломб транспорта на" +
+				     " отдельных местах (сертификатов, спецификаций в вагоне, контейнере) и отправительская \n маркировка"),
+			});
+
+			//Таблица
+
+			//3 страница!
+			Block(new List<Grid>
+			{
+				Text("Условия хранения товара (продукции) до его вскрытия на складе получателя:"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Сведения о температуре при разгрузке в вагоне (рефрижераторе и т. д.) в товаре, ºC"),
+				TextWithLine(""),
+			});
+			Block(new List<Grid>
+			{
+				Text("Состояние тары и упаковки, маркировка мест, товара и тары в момент внешнего осмотра товара (продукции)"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Содержание наружной маркировки тары и другие данные, на основании которых можно сделать выводы о том, " +
+				     "в чьей упаковке предъявлен товар (производителя или отправителя)"),
+				TextWithLine(""),
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Дата вскрытия тары (тарного места, вагона, контейнера и т. п.) «       »_____________             года"),
+			});
+			Block(new List<Grid>
+			{
+				Text("Организация, которая взвесила и опломбировала отгруженный товар, исправность пломб и содержание оттисков," +
+				     " соответствие пломб товаросопроводительным документам"),
+				TextWithLine(""),
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Порядок отбора товара (продукции) для выборочной проверки с указанием ГОСТ, особых условий поставки по " +
+				     "договору (контракту), основание выборочной проверки:"),
+				TextWithLine(""),
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+
+			//Table
+
+			//page 4
+			Block(new List<Grid>
+			{
+				Text("Определение количества (массы) товара (продукции) проводилось"),
+				TextWithLineSign("","место определения количества (массы) товара (продукции)")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Другие данные"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("По остальным товарно-материальным ценностям, перечисленным в сопроводительных документах поставщика, расхождений " +
+				     "в количестве и качестве нет."),
+			});
+			Block(new List<Grid>
+			{
+				Text("Подробное описание дефектов (характер недостачи, излишков, ненадлежащего качества, брака, боя) и мнение комиссии о " +
+				     "причинах их образования"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Заключение комиссии"),
+				TextWithLine("возврат поставщику")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("ПРИЛОЖЕНИЕ:"),
+				TextWithLine("")
+			});
+			Block(new List<Grid> {TextWithLine("")});
+			Block(new List<Grid>
+			{
+				Text("Члены комиссии предупреждены об ответственности за подписание акта, содержащего данные, не соответствующие " +
+				     "действительности."),
+			});
+			//форма подписей
 		}
 
 		private Grid LeftHeaderTable()
@@ -108,7 +300,6 @@ namespace AnalitF.Net.Client.Models.Print
 			grid.HorizontalAlignment = HorizontalAlignment.Center;
 			return grid;
 		}
-
 		private Grid RightHeaderTable()
 		{
 			var grid = new Grid();
@@ -148,7 +339,6 @@ namespace AnalitF.Net.Client.Models.Print
 				HorizontalContentAlignment = HorizontalAlignment.Right
 			};
 		}
-
 		private static Label LabelWithBorder(string text)
 		{
 			return new Label
@@ -184,7 +374,7 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			grid.Cell(1, 1, new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 9,
+				FontSize = 6,
 				Content = signature,
 				Width = 500,
 				HorizontalContentAlignment = HorizontalAlignment.Center
@@ -192,7 +382,6 @@ namespace AnalitF.Net.Client.Models.Print
 			grid.HorizontalAlignment = HorizontalAlignment.Center;
 			return grid;
 		}
-
 		private Grid SingBlockHeaderLabel(string label, string text)
 		{
 			var grid = new Grid();
@@ -217,40 +406,6 @@ namespace AnalitF.Net.Client.Models.Print
 			grid.HorizontalAlignment = HorizontalAlignment.Left;
 			return grid;
 		}
-
-		private Grid SingBlockBeforeLabel(string text, string signature, string label)
-		{
-			var grid = new Grid();
-			grid.ColumnDefinitions.Add(new ColumnDefinition {
-				Width = new GridLength(1, GridUnitType.Star)
-			});
-			grid.ColumnDefinitions.Add(new ColumnDefinition {
-				Width = GridLength.Auto,
-			});
-			grid.Cell(0, 0, new Label {
-				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0, 0, 0, 1),
-				SnapsToDevicePixels = true,
-				Margin = new Thickness(5, 0, 5, 0),
-				Content = text,
-				HorizontalContentAlignment = HorizontalAlignment.Center,
-				FontSize = 10
-			});
-			grid.Cell(1, 0, new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 8,
-				Content = signature,
-				HorizontalContentAlignment = HorizontalAlignment.Center
-			});
-			grid.Cell(0, 1, new Label {
-				Content = label,
-				HorizontalContentAlignment = HorizontalAlignment.Center,
-				FontSize = 10
-			});
-			grid.HorizontalAlignment = HorizontalAlignment.Left;
-			return grid;
-		}
-
 		private static Grid SingBlock(string text, string signature)
 		{
 			var grid = new Grid();
@@ -278,7 +433,7 @@ namespace AnalitF.Net.Client.Models.Print
 			});
 			grid.Cell(1, 1, new Label {
 				FontFamily = new FontFamily("Arial"),
-				FontSize = 9,
+				FontSize = 6,
 				Content = signature,
 				HorizontalAlignment = HorizontalAlignment.Center,
 			});
@@ -307,7 +462,6 @@ namespace AnalitF.Net.Client.Models.Print
 					});
 			return grid;
 		}
-
 		private Grid CaptionSignature()
 		{
 			var grid = new Grid();
@@ -326,8 +480,8 @@ namespace AnalitF.Net.Client.Models.Print
 					})
 				.Cell(2, 0, SingBlock("", "(должность)"))
 				.Cell(3, 0, new Grid()
-					.Cell(0, 0, SingBlock("", "(подпись)"))
-					.Cell(0, 1, SingBlock("", "  (расшифровка подписи)  ")))
+					.Cell(0, 0, SingBlock("", "    (подпись)     "))
+					.Cell(0, 1, SingBlock("", "      (расшифровка подписи)      ")))
 				.Cell(4, 0, new Grid()
 					.Cell(0, 0, LabelWithoutBorder("<<______>>"))
 					.Cell(0, 1, LabelWithoutBorder("__________ _____года"))
@@ -386,164 +540,98 @@ namespace AnalitF.Net.Client.Models.Print
 			return grid;
 		}
 
-		protected override Paragraph Block(string text)
+		private void Block(List<Grid> items)
 		{
-			var block = base.Block(text);
-			CheckTemplate(block);
-			return block;
-		}
-
-		public override Paragraph Header(string text)
-		{
-			var block = base.Header(text);
-			CheckTemplate(block);
-			return block;
-		}
-
-		private void CheckTemplate(Paragraph block)
-		{
-			if (template != null) {
-				doc.Blocks.Remove(block);
-				Stash(block);
-			}
-		}
-
-		private void Stash(FrameworkContentElement element)
-		{
-			template.Parts.Add(element);
-			if (template.IsReady) {
-				doc.Blocks.Add(template.ToBlock());
-				template = null;
-			}
-		}
-
-		private void BodyWithLine(string label, string value)
-		{
-			bodyBlock = new BlockUIContainer();
-			bodyBlock.Child = new Grid {
+			var bodyBlock = new BlockUIContainer();
+			bodyBlock.Child = new Grid
+			{
 				HorizontalAlignment = HorizontalAlignment.Left,
-				Margin = new Thickness(0, 10, 0, 10),
-				Width = 820,
-				ColumnDefinitions = {
-					new ColumnDefinition(),
-					new ColumnDefinition {
-						Width = GridLength.Auto
-					}
-				}
+				Margin = new Thickness(0, 0, 0, 0),
+				Width = 1069,
 			};
 			doc.Blocks.Add(bodyBlock);
 			var grid = (Grid)bodyBlock.Child;
-			grid.RowDefinitions.Add(new RowDefinition());
-			var inner = new Grid();
-			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			inner.ColumnDefinitions.Add(new ColumnDefinition());
-			var labelEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 10,
-				Content = label,
-			};
-			labelEl.SetValue(Grid.ColumnProperty, 0);
-			var valueEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 10,
-				BorderBrush = Brushes.Black,
-				BorderThickness = new Thickness(0, 0, 0, 1),
-				SnapsToDevicePixels = true,
-				Content = value,
-			};
-			valueEl.SetValue(Grid.ColumnProperty, 1);
-			inner.Children.Add(labelEl);
-			inner.Children.Add(valueEl);
-			inner.SetValue(Grid.ColumnProperty, 0);
-			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
-			grid.Children.Add(inner);
+			var column = 0;
+			foreach (var item in items)
+			{
+				grid.Cell(0, column, item);
+				grid.ColumnDefinitions[column].Width = GridLength.Auto;
+				column++;
+			}
+			grid.ColumnDefinitions[column - 1].Width = new GridLength(1, GridUnitType.Star);
 		}
 
-		private void BodyWithLineSign(string label, string value, string sign)
+		private Grid Text(string text)
 		{
-			bodyBlock = new BlockUIContainer();
-			bodyBlock.Child = new Grid {
-				HorizontalAlignment = HorizontalAlignment.Left,
-				Margin = new Thickness(0, 10, 0, 10),
-				Width = 820,
-				ColumnDefinitions = {
-					new ColumnDefinition(),
-					new ColumnDefinition {
-						Width = GridLength.Auto
-					}
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
 				}
 			};
-			doc.Blocks.Add(bodyBlock);
-			var grid = (Grid)bodyBlock.Child;
-			grid.RowDefinitions.Add(new RowDefinition());
-			var inner = new Grid();
-			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			inner.ColumnDefinitions.Add(new ColumnDefinition());
-			inner
+			grid
 				.Cell(0, 0, new Label
 				{
+					Content = new TextBlock {
 					FontFamily = new FontFamily("Arial"),
 					FontSize = 10,
-					Content = label,
-				})
-				.Cell(0, 1, new Label
+					Text = text,
+					TextWrapping = TextWrapping.Wrap
+				}
+				});
+			return grid;
+		}
+
+		private Grid TextWithLine(string text)
+		{
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
 				{
 					FontFamily = new FontFamily("Arial"),
 					FontSize = 10,
 					BorderBrush = Brushes.Black,
 					BorderThickness = new Thickness(0, 0, 0, 1),
 					SnapsToDevicePixels = true,
-					Content = value,
+					Content = text,
+				});
+			return grid;
+		}
+
+		private Grid TextWithLineSign(string text, string sign)
+		{
+			var grid = new Grid
+			{
+				ColumnDefinitions =
+				{
+					new ColumnDefinition()
+				}
+			};
+			grid
+				.Cell(0, 0, new Label
+				{
+					FontFamily = new FontFamily("Arial"),
+					FontSize = 10,
+					BorderBrush = Brushes.Black,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+					SnapsToDevicePixels = true,
+					Content = text,
 				})
-				.Cell(1, 1, new Label
+				.Cell(1, 0, new Label
 				{
 					FontFamily = new FontFamily("Arial"),
 					FontSize = 8,
 					Content = sign,
 					HorizontalContentAlignment = HorizontalAlignment.Center
 				});
-			inner.SetValue(Grid.ColumnProperty, 0);
-			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
-			grid.Children.Add(inner);
-		}
-
-		private void BodyWithoutLine(string label, string value)
-		{
-			bodyBlock = new BlockUIContainer();
-			bodyBlock.Child = new Grid {
-				HorizontalAlignment = HorizontalAlignment.Left,
-				Margin = new Thickness(0, 10, 0, 10),
-				Width = 820,
-				ColumnDefinitions = {
-					new ColumnDefinition(),
-					new ColumnDefinition {
-						Width = GridLength.Auto
-					}
-				}
-			};
-			doc.Blocks.Add(bodyBlock);
-			var grid = (Grid)bodyBlock.Child;
-			grid.RowDefinitions.Add(new RowDefinition());
-			var inner = new Grid();
-			inner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-			inner.ColumnDefinitions.Add(new ColumnDefinition());
-			var labelEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 10,
-				Content = label,
-			};
-			labelEl.SetValue(Grid.ColumnProperty, 0);
-			var valueEl = new Label {
-				FontFamily = new FontFamily("Arial"),
-				FontSize = 10,
-				Content = value,
-			};
-			valueEl.SetValue(Grid.ColumnProperty, 1);
-			inner.Children.Add(labelEl);
-			inner.Children.Add(valueEl);
-			inner.SetValue(Grid.ColumnProperty, 0);
-			inner.SetValue(Grid.RowProperty, grid.RowDefinitions.Count - 1);
-			grid.Children.Add(inner);
+			return grid;
 		}
 	}
 }
