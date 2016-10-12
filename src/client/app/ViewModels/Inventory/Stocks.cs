@@ -188,7 +188,7 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 
 			return new DialogResult(new PrintPreviewViewModel
 			{
-				DisplayName = "Постелажная карта",
+				DisplayName = "Постеллажная карта",
 				Document = new StockRackingMapDocument(receivingOrders, Items.Value.ToList()).Build()
 			}, fullScreen: true);
 		}
@@ -239,6 +239,11 @@ namespace AnalitF.Net.Client.ViewModels.Inventory
 		public void ReassessmentDocs()
 		{
 			Shell.Navigate(new ReassessmentDocs());
+		}
+
+		public void DisplacementDocs()
+		{
+			Shell.Navigate(new DisplacementDocs());
 		}
 	}
 }
