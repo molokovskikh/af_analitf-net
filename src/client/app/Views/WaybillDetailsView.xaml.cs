@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using AnalitF.Net.Client.Config.Caliburn;
 using AnalitF.Net.Client.Controls;
@@ -53,6 +54,16 @@ namespace AnalitF.Net.Client.Views
 		{
 			InitializeComponent();
 			DataContextChanged += OnDataContextChanged;
+
+			var element = Rounding;
+			var items = DescriptionHelper.GetDescriptions(typeof(Rounding));
+			element.ItemsSource = items;
+			element.DisplayMemberPath = "Name";
+
+			var binding = new Binding("Waybill.Rounding");
+			binding.Converter = new ComboBoxSelectedItemConverter();
+			binding.ConverterParameter = items;
+			BindingOperations.SetBinding(element, Selector.SelectedItemProperty, binding);
 		}
 
 		private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs args)

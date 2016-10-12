@@ -206,6 +206,8 @@ namespace AnalitF.Net.Client.Views
 		private DispatcherTimer notificationTimer = new DispatcherTimer();
 		private AddressProxy _lastSelectedAddress;
 
+		public TabControl Items;
+
 		public ShellView()
 		{
 			InitializeComponent();
@@ -232,6 +234,23 @@ namespace AnalitF.Net.Client.Views
 
 			DataContextChanged += (sender, args) => {
 				var model = (ShellViewModel)DataContext;
+
+				model.Settings.Where(x => x != null).Take(1).Subscribe(x => {
+					if (x.TabbedUI) {
+						Items = new TabControl();
+						Grid.SetRow(Items, 2);
+						Items.SetBinding(TabControl.ItemsSourceProperty, "Items");
+						Items.SetBinding(TabControl.SelectedItemProperty, "ActiveItem");
+						Items.Style = (Style)FindResource("RootTabs");
+						RootGrid.Children.Add(Items);
+					} else {
+						var content = new ContentControl();
+						Grid.SetRow(content, 2);
+						content.SetBinding(View.ModelProperty, "ActiveItem");
+						RootGrid.Children.Add(content);
+					}
+				});
+
 				model.Settings.Where(x => x != null).Subscribe(x => {
 					//если шаблон задан не нужно его переопределять это приведет к ошибкам
 					if (x.EditAddresses) {
@@ -283,6 +302,7 @@ namespace AnalitF.Net.Client.Views
 #if !DEBUG
 			Snoop.Visibility = Visibility.Collapsed;
 			Collect.Visibility = Visibility.Collapsed;
+			Touch.Visibility = Visibility.Collapsed;
 			Debug_ErrorCount.Visibility = Visibility.Collapsed;
 			ShowDebug.Visibility = Visibility.Collapsed;
 			DebugErrorHolder.Content = null;
@@ -361,7 +381,9 @@ namespace AnalitF.Net.Client.Views
 
 		private void CloneClick(object sender, RoutedEventArgs e)
 		{
-			((ShellViewModel)DataContext).OpenClone(((string)((MenuItem)e.OriginalSource).DataContext));
+			var dataContext = ((MenuItem)e.OriginalSource).DataContext;
+			if (dataContext is string)
+				((ShellViewModel)DataContext).OpenClone((string)dataContext);
 		}
 	}
 }

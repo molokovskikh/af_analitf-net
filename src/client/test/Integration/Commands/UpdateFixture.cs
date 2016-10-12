@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.ServiceModel;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
@@ -15,9 +17,11 @@ using AnalitF.Net.Service.Models;
 using Common.NHibernate;
 using Common.Tools;
 using NHibernate.Linq;
+using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
 using Test.Support;
 using Test.Support.Suppliers;
+using CreateWaybill = AnalitF.Net.Client.Test.Fixtures.CreateWaybill;
 using LineResultStatus = AnalitF.Net.Client.Models.LineResultStatus;
 using Promotion = AnalitF.Net.Client.Models.Promotion;
 using Reject = AnalitF.Net.Client.Test.Fixtures.Reject;
@@ -67,7 +71,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 
 			var command = new UpdateCommand();
 			Run(command);
-			DbMaintain.UpdateLeaders();
+			DbMaintain.UpdateLeaders(localStateless);
 
 			Assert.AreEqual("Обновление завершено успешно.", command.SuccessMessage);
 			Assert.That(localSession.Query<Offer>().Count(), Is.GreaterThan(0));
@@ -172,12 +176,15 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		[Test]
 		public void Version_update()
 		{
+			var user = localSession.Query<User>().First();
+			user.LastSync = null;
 			File.WriteAllBytes(Path.Combine(serviceConfig.RtmUpdatePath, "updater.exe"), new byte[] { 0x00 });
 			File.WriteAllText(Path.Combine(serviceConfig.RtmUpdatePath, "version.txt"), "99.99.99.99");
 			localSession.CreateSQLQuery("delete from offers").ExecuteUpdate();
 
 			//сначала будут загружены только бинарники
 			Assert.AreEqual(UpdateResult.UpdatePending, Run(new UpdateCommand()));
+			Assert.AreEqual(0, localSession.Query<Offer>().Count());
 
 			//теперь только данные
 			Assert.AreEqual(UpdateResult.OK, Run(new UpdateCommand {
@@ -210,9 +217,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Run(command1);
 
 			Assert.AreEqual(
-				String.Format(@"var\client\АналитФАРМАЦИЯ\Отказы\{0}_{1}(test).txt",
-					fixture.Document.Id,
-					fixture.Document.Supplier.Name),
+				$@"var\client\АналитФАРМАЦИЯ\Отказы\{fixture.Document.Id}_{fixture.Document.Supplier.Name}(test).txt",
 				command1.Results.OfType<OpenResult>().Select(r => FileHelper.RelativeTo(r.Filename, "var")).Implode());
 		}
 
@@ -367,7 +372,7 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 		{
 			Fixture<CreateDelayOfPayment>();
 			Run(new UpdateCommand());
-			DbMaintain.UpdateLeaders();
+			DbMaintain.UpdateLeaders(localStateless);
 
 			var user = localSession.Query<User>().First();
 			Assert.IsTrue(user.IsDelayOfPaymentEnabled);
@@ -454,6 +459,27 @@ namespace AnalitF.Net.Client.Test.Integration.Commands
 			Assert.AreEqual(1, localOrder.Lines.Count);
 			Assert.AreEqual(1, localOrder.LinesCount);
 			Assert.That(localOrder.Lines[0].ResultCost, Is.GreaterThan(0));
+		}
+
+		[Test]
+		public void Load_WaybillsHistory()
+		{
+			var cmd = new UpdateCommand {
+				SyncData = "WaybillHistory"
+			};
+
+			Assert.AreEqual(UpdateResult.SilentOk, Run(cmd));
+			Assert.AreEqual("Загрузка истории документов завершена успешно.", cmd.SuccessMessage);
+
+			var fields = cmd.GetType().GetRuntimeFields();
+			uint requestId = 0;
+			foreach (FieldInfo field in fields) {
+				if (field.Name.Match("requestId")) {
+					requestId = (uint)field.GetValue(cmd);
+				}
+			}
+			var localWaybill = session.Query<RequestLog>().Where(x => x.Id == requestId);
+			Assert.AreEqual("WaybillsController", localWaybill.First().UpdateType);
 		}
 
 		[Test]

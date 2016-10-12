@@ -516,6 +516,7 @@
 			<TabItem Header="Визуализация" Name="ViewSettingsTab">
 				<ScrollViewer CanContentScroll="False" VerticalScrollBarVisibility="Auto">
 					<StackPanel>
+						<CheckBox x:Name="Settings_TabbedUI">Интерфейс на основе закладок (требуется перезапуск приложения)</CheckBox>
 						<CheckBox x:Name="Settings_CanViewOffersByCatalogName">Управлять показом форм выпуска</CheckBox>
 						<CheckBox x:Name="Settings_EditAddresses"
 						          ToolTip="При включении опции на панели выбора адреса доставки будут отображены флаги активных адресов, для активных адресов будет производиться загрузка заявок">
@@ -666,8 +667,11 @@
 					<Label>Задержка в обработке запросов (секунд)</Label>
 					<TextBox Name="Settings_DebugTimeout" />
 					<CheckBox Name="Settings_DebugFault">Симулировать ошибку</CheckBox>
+					<CheckBox Name="Settings_DebugLoud">Показывать диалоги при запуске и остановке</CheckBox>
 					<CheckBox Name="Settings_DebugUseTestSign">Диадок - симулировать подпись</CheckBox>
-				</StackPanel>
+          <Label>Диадок - ИНН организации:</Label>
+          <TextBox Name="Settings_DebugDiadokSignerINN" />
+        </StackPanel>
 			</TabItem>
 			<TabItem Header="Диадок" Name="DiadokTab">
 				<StackPanel>
@@ -679,7 +683,9 @@
 					<ComboBox Style="{StaticResource Select}"
 					          ItemsSource="{Binding Settings.Value.DiadokCerts}"
 					          SelectedItem="{Binding Settings.Value.DiadokCert}" />
-				</StackPanel>
+          <Label>Должность подписанта</Label>
+          <TextBox Name="Settings_DiadokSignerJobTitle"/>
+        </StackPanel>
 			</TabItem>
 			<TabItem Header="Сбис" Name="SbisTab">
 				<StackPanel>

@@ -97,9 +97,10 @@ namespace AnalitF.Net.Client.Models.Commands
 
 		public abstract void Execute();
 
-		public Task ToTask(Config.Config config)
+		public Task ToTask(Config.Config config, CancellationToken token = default(CancellationToken))
 		{
 			Config = config;
+			Token = token;
 			var task = new Task(() => {
 				using (this) {
 					InitSession();
