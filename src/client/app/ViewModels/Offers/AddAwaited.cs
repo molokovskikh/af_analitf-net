@@ -104,13 +104,12 @@ order by Score, {p.Name}")
 
 		public void OK()
 		{
-			var message = "";
-			if (Item.TrySave(StatelessSession, out message)) {
+			var error = Env.Query(s => Item.TrySave(s)).Result;
+			if (String.IsNullOrEmpty(error)) {
 				WasCancelled = false;
 				TryClose();
-			}
-			else {
-				Manager.Warning(message);
+			} else {
+				Manager.Warning(error);
 			}
 		}
 	}

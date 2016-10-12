@@ -185,7 +185,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				Orders = new ReactiveCollection<Order>(orders) {
 					ChangeTrackingEnabled = true
 				};
-				Price.LoadOrderStat(orders.Select(o => o.Price), Address, StatelessSession);
+				Price.LoadOrderStat(Env, orders.Select(o => o.Price), Address).LogResult();
 			}
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using AnalitF.Net.Client.Helpers;
@@ -38,10 +39,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				))
 				.ObserveOn(UiScheduler)
 				.CatchSubscribe(o => {
-					Calculate(o);
-					LoadOrderItems(o);
-					Offers.Value = o;
-					SelectOffer();
+					UpdateOffers(o);
 					IsLoading.Value = false;
 				}, CloseCancellation);
 		}

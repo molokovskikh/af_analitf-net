@@ -42,13 +42,9 @@ namespace AnalitF.Net.Client.ViewModels
 				v => Catalogs.Value.FirstOrDefault(n => n.Form.StartsWith(v, StringComparison.CurrentCultureIgnoreCase)),
 				c => CurrentCatalog = c);
 
-			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.CurrentFilter).Cast<object>()
-				.Merge(ParentModel.ObservableForProperty(m => m.ShowWithoutOffers))
-				.Subscribe(_ => LoadCatalogs()));
-
-			OnCloseDisposable.Add(ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog, skipInitial: false)
+			ParentModel.ObservableForProperty(m => m.ViewOffersByCatalog, skipInitial: false)
 				.Select(x => x.Value)
-				.Subscribe(CatalogsEnabled));
+				.Subscribe(CatalogsEnabled, CloseCancellation.Token);
 
 			CurrentCatalogName
 				.Subscribe(_ => {
@@ -64,6 +60,8 @@ namespace AnalitF.Net.Client.ViewModels
 				.Throttle(Consts.ScrollLoadTimeout)
 				.ObserveOn(UiScheduler)
 #endif
+				.Merge(ParentModel.ObservableForProperty(m => m.CurrentFilter).Cast<object>())
+				.Merge(ParentModel.ObservableForProperty(m => m.ShowWithoutOffers))
 				.Subscribe(_ => LoadCatalogs(), CloseCancellation.Token);
 			ExcelExporter.ActiveProperty.Value = "CatalogNames";
 		}
@@ -208,36 +206,31 @@ namespace AnalitF.Net.Client.ViewModels
 
 		private void LoadCatalogs()
 		{
-			if (StatelessSession == null)
-				return;
-
 			if (CurrentCatalogName.Value == null) {
 				Catalogs.Value = Enumerable.Empty<Catalog>().ToList();
 				return;
 			}
-
-			//сессия может использоваться для асинхронной загрузки данных выполняем синхронизацию
 			var nameId = CurrentCatalogName.Value.Id;
-			var queryable = StatelessSession.Query<Catalog>()
-				.Fetch(c => c.Name)
-				.ThenFetch(c => c.Mnn)
-				.Where(c => c.Name.Id == nameId);
+			Env.RxQuery(s => {
+				var queryable = s.Query<Catalog>()
+					.Fetch(c => c.Name)
+					.ThenFetch(c => c.Mnn)
+					.Where(c => c.Name.Id == nameId);
 
-			if (!ParentModel.ShowWithoutOffers)
-				queryable = queryable.Where(c => c.HaveOffers);
+				if (!ParentModel.ShowWithoutOffers)
+					queryable = queryable.Where(c => c.HaveOffers);
 
-			if (ParentModel.CurrentFilter == ParentModel.Filters[1])
-				queryable = queryable.Where(c => c.VitallyImportant);
+				if (ParentModel.CurrentFilter == ParentModel.Filters[1])
+					queryable = queryable.Where(c => c.VitallyImportant);
 
-			if (ParentModel.CurrentFilter == ParentModel.Filters[2])
-				queryable = queryable.Where(c => c.MandatoryList);
+				if (ParentModel.CurrentFilter == ParentModel.Filters[2])
+					queryable = queryable.Where(c => c.MandatoryList);
 
-			if (ParentModel.CurrentFilter == ParentModel.Filters[3])
-				queryable = queryable.Where(c => StatelessSession.Query<AwaitedItem>().Any(i => i.Catalog == c));
+				if (ParentModel.CurrentFilter == ParentModel.Filters[3])
+					queryable = queryable.Where(c => s.Query<AwaitedItem>().Any(i => i.Catalog == c));
 
-			Catalogs.Value = queryable
-				.OrderBy(c => c.Form)
-				.ToList();
+				return queryable.OrderBy(c => c.Form).ToList();
+			}).Subscribe(Catalogs, CloseCancellation.Token);
 		}
 
 		//todo: если поставить фокус в строку поиска и ввести запрос

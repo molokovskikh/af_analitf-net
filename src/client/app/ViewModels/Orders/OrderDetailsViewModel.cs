@@ -17,6 +17,7 @@ using Common.Tools;
 using NHibernate;
 using ReactiveUI;
 using NHibernate.Linq;
+using NPOI.HSSF.Record.Chart;
 
 namespace AnalitF.Net.Client.ViewModels.Orders
 {
@@ -78,7 +79,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		{
 			base.OnInitialize();
 
-			ProductInfo = new ProductInfo(this);
+			ProductInfo = new ProductInfo(this, CurrentLine.OfType<BaseOffer>());
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 
 			//если это отправленный заказ редактор не должен работать
@@ -88,9 +89,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				currentOrderLine.Subscribe(v => CurrentLine.Value = v);
 			}
 			editor = new Editor(OrderWarning, Manager, currentOrderLine, Lines.Cast<IList>().ToValue());
-			CurrentLine
-				.Subscribe(_ => ProductInfo.CurrentOffer = (BaseOffer)CurrentLine.Value);
-
 			OnlyWarningVisible = new NotifyValue<bool>(User.IsPreprocessOrders && IsCurrentOrder);
 			CurrentLine.OfType<BaseOffer>()
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
@@ -135,24 +133,26 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			}
 			if (Settings.Value.HighlightUnmatchedOrderLines && !IsCurrentOrder) {
 				var sentLines =  (IList<SentOrderLine>)Order.Value.Lines;
-				var lookup = MatchedWaybills.GetLookUp(StatelessSession, sentLines);
-				sentLines.Each(l => l.Configure(User, lookup));
+				sentLines.Each(l => l.Configure(User));
+				Env.RxQuery(s => MatchedWaybills.GetLookUp(s, sentLines))
+					.Subscribe(x => sentLines.Each(y => y.Configure(x)));
 			}
 			// Текущие заказы
 			else
 			{
 				Order.Value.Lines.Each(l => l.Configure(User));
 
-				// #48323 Присутствует в замороженных заказах
-				var productInFrozenOrders = StatelessSession.Query<Order>()
+				Env.RxQuery(s => s.Query<Order>()
 					.Where(x => x.Frozen)
 					.SelectMany(x => x.Lines)
 					.Select(x => x.ProductId)
-					.ToList();
-				Order.Value.Lines
-					.Cast<OrderLine>()
-					.Where(x => productInFrozenOrders.Contains(x.ProductId))
-					.Each(x => x.InFrozenOrders = true);
+					.ToList())
+					.Subscribe(x => {
+						Order.Value.Lines
+							.Cast<OrderLine>()
+							.Where(y => x.Contains(y.ProductId))
+							.Each(y => y.InFrozenOrders = true);
+					});
 			}
 
 			if (CurrentLine.Value != null)

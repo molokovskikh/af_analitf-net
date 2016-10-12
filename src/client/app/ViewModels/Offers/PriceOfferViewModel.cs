@@ -85,7 +85,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					.Execute(new ActionExecutionContext());
 			}
 
-			Price.Value = StatelessSession?.Get<Price>(priceId);
+			Price.Value = Env.Query(s => s.Get<Price>(priceId)).Result;
 			Promotions.FilterBySupplierId = Price?.Value?.SupplierId;
 			ProducerPromotions.FilterByProducerId = CurrentProducer.Value.Id;
 
@@ -167,7 +167,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 			if (!CanShowHistoryOrders)
 				return null;
 
-			HistoryOrders.Value = LoadHistoryOrders(StatelessSession);
+			HistoryOrders.Value = Env.Query(LoadHistoryOrders).Result;
 			return new DialogResult(new HistoryOrdersViewModel(CurrentCatalog.Value,
 				CurrentOffer.Value, HistoryOrders), fixedSize: true);
 		}

@@ -239,36 +239,27 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			if (Address != null)
 				Bus.RegisterMessageSource(Address.StatSubject);
 
-			if (StatelessSession != null) {
-				CurrentReportLine
-					.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-					.Subscribe(_ => {
-						var line = CurrentReportLine.Value;
-						if (line == null) {
-							CurrentCatalog.Value = null;
-							return;
-						}
-						var catalogId = line.CatalogId;
-						if (catalogId != null) {
-							CurrentCatalog.Value = StatelessSession.Query<Catalog>()
-								.Fetch(c => c.Name)
-								.ThenFetch(n => n.Mnn)
-								.First(c => c.Id == catalogId);
-						}
-						else {
-							CurrentCatalog.Value = null;
-						}
-					}, CloseCancellation.Token);
+			CurrentReportLine
+				.Throttle(Consts.ScrollLoadTimeout)
+				.SelectMany(x => Env.RxQuery(s => {
+					if (x?.CatalogId == null)
+						return null;
+					var catalogId = x.CatalogId;
+					return s.Query<Catalog>()
+						.Fetch(c => c.Name)
+						.ThenFetch(n => n.Mnn)
+						.First(c => c.Id == catalogId);
+				}))
+				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 
-				ReportLines
-					.Select(v => v.Changed())
-					.Switch()
-					.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
-					.Select(x => x.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine).Where(y => y != null))
-					.Where(x => x != null)
-					.CatchSubscribe(x => StatelessSession.DeleteEach(x),
-						CloseCancellation);
-			}
+			ReportLines
+				.Select(v => v.Changed())
+				.Switch()
+				.Where(e => e.EventArgs.Action == NotifyCollectionChangedAction.Remove)
+				.Select(x => x.EventArgs.OldItems.Cast<BatchLineView>().Select(b => b.BatchLine).Where(y => y != null))
+				.Where(x => x != null)
+				.CatchSubscribe(x => StatelessSession?.DeleteEach(x),
+					CloseCancellation);
 		}
 
 		protected override void OnDeactivate(bool close)

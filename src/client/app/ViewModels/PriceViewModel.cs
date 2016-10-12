@@ -62,7 +62,7 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 			var prices = Session.Query<Price>().OrderBy(c => c.Name).ToList();
 			if (Address != null) {
-				Price.LoadOrderStat(prices, Address, StatelessSession);
+				Price.LoadOrderStat(Env, prices, Address).LogResult();
 				prices.Each(p => p.Order = Address.Orders.Where(o => !o.Frozen).FirstOrDefault(o => o.Price == p));
 				prices.Each(p => p.MinOrderSum = Address.Rules.FirstOrDefault(r => r.Price == p));
 			}

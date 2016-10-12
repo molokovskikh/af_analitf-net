@@ -17,6 +17,7 @@ namespace AnalitF.Net.Client.Models
 	{
 		private uint count;
 		private string comment;
+		private bool _inFrozenOrders;
 
 		public OrderLine()
 		{
@@ -116,8 +117,19 @@ namespace AnalitF.Net.Client.Models
 		[Style("Sum", Description = "Корректировка по цене и/или по количеству", Context = "CorrectionEnabled")]
 		public virtual bool IsSendError => SendResult != LineResultStatus.OK;
 
+		//загружается асинхронно
 		[Ignore, Style(Description = "Присутствует в замороженных заказах")]
-		public virtual bool InFrozenOrders { get; set; }
+		public virtual bool InFrozenOrders
+		{
+			get { return _inFrozenOrders; }
+			set
+			{
+				if (_inFrozenOrders == value)
+					return;
+				_inFrozenOrders = value;
+				OnPropertyChanged();
+			}
+		}
 
 		//заглушка что бы работало смешение цветов от IsSendError
 		[Style("Sum")]

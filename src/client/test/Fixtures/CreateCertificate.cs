@@ -18,7 +18,7 @@ namespace AnalitF.Net.Client.Test.Fixtures
 		public override void Execute(ISession session)
 		{
 			var user = User(session);
-			var lines = session.Query<TestWaybillLine>();
+			IQueryable<TestWaybillLine> lines = session.Query<TestWaybillLine>().OrderByDescending(x => x.Id);
 			if (Waybill != null)
 				lines = session.Query<TestWaybillLine>().Where(l => l.Waybill.Id == Waybill.Id);
 			Line = lines.FirstOrDefault(l => l.Waybill.Client == user.Client && l.CatalogProduct != null && l.SerialNumber != null);

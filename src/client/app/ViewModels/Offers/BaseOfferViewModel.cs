@@ -570,5 +570,13 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		{
 			return GetItemsFromView<Offer>("Offers") ?? Offers.Value;
 		}
+
+		protected void UpdateOffers(List<Offer> items)
+		{
+			Calculate(items);
+			LoadOrderItems(items);
+			Offers.Value = items;
+			SelectOffer();
+		}
 	}
 }

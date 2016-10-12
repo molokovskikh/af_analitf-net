@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Linq.Observαble;
+using System.Threading;
 using System.Windows.Media.Imaging;
 using AnalitF.Net.Client.Controls;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels.Parts;
-using Caliburn.Micro;
 using NHibernate;
 using NHibernate.Linq;
-using NHibernate.Mapping;
-using ReactiveUI;
 
 namespace AnalitF.Net.Client.ViewModels.Offers
 {
@@ -58,7 +55,8 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			CurrentCost
 				.Throttle(Consts.ScrollLoadTimeout, UiScheduler)
-				.Subscribe(_ => Update(), CloseCancellation.Token);
+				.Merge(DbReloadToken)
+				.Subscribe(_ => UpdateAsync(), CloseCancellation.Token);
 		}
 
 		private List<MinCost> Load(IStatelessSession session)
@@ -80,7 +78,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.ToList();
 		}
 
-		protected override void Query()
+		private void UpdateAsync()
 		{
 			if (CurrentCost.Value == null) {
 				Offers.Value = new List<Offer>();
@@ -88,19 +86,14 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				return;
 			}
 
-			var catalogId = CurrentCost.Value.Catalog.Id;
-			CurrentCatalog.Value = StatelessSession.Query<Catalog>()
-				.Fetch(c => c.Name)
-				.ThenFetch(n => n.Mnn)
-				.First(c => c.Id == catalogId);
-
 			var productId = CurrentCost.Value.ProductId;
-			Offers.Value = StatelessSession.Query<Offer>()
-				.Fetch(o => o.Price)
-				.Where(o => o.ProductId == productId)
-				.ToList()
-				.OrderBy(o => o.ResultCost)
-				.ToList();
+			Env.RxQuery(s => s.Query<Offer>()
+					.Fetch(o => o.Price)
+					.Where(o => o.ProductId == productId)
+					.ToList()
+					.OrderBy(o => o.ResultCost)
+					.ToList())
+				.Subscribe(UpdateOffers, CloseCancellation.Token);
 		}
 	}
 }
