@@ -44,7 +44,9 @@
 				<controls:DataGridTextColumnEx Header="Дата закрытия" Binding="{Binding CloseDate}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplySumWithoutNds}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Сумма закупки с НДС" Binding="{Binding SupplySum}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма списания" Binding="{Binding SrcRetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма приходования" Binding="{Binding RetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Разница" Binding="{Binding Delta}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Число позиций" Binding="{Binding LinesCount}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>

@@ -95,6 +95,7 @@
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\StocksController.cs" />
+    <Compile Include="Controllers\WaybillsController.cs" />
     <Compile Include="Filters\ConfigFilter.cs" />
     <Compile Include="Filters\DebugFilter.cs" />
     <Compile Include="Filters\LogAccess.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Models\DocumentSendLog.cs" />
     <Compile Include="Models\Exporter.cs" />
     <Compile Include="Models\Inventory\Stock.cs" />
+    <Compile Include="Models\OrderRecordLog.cs" />
     <Compile Include="Models\PendingDocLog.cs" />
     <Compile Include="Models\PendingLimit.cs" />
     <Compile Include="Models\PendingMailLog.cs" />

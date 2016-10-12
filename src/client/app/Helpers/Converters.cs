@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -20,6 +22,19 @@ namespace AnalitF.Net.Client.Helpers
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			throw new NotImplementedException();
+		}
+	}
+
+	public class ComboBoxSelectedItemConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return ((ValueDescription)value).Value;
 		}
 	}
 

@@ -2,6 +2,8 @@
 using AnalitF.Net.Client.Helpers;
 using Diadoc.Api;
 using Diadoc.Api.Proto.Events;
+using Diadoc.Api.Http;
+using System;
 
 namespace AnalitF.Net.Client.ViewModels.Diadok
 {
@@ -30,13 +32,26 @@ namespace AnalitF.Net.Client.ViewModels.Diadok
 
 		public async Task Save()
 		{
-			var patch = Payload.Patch();
-			patch.AddResolution(new ResolutionAttachment {
-				InitialDocumentId = Payload.Entity.EntityId,
-				Comment = Comment.Value,
-				ResolutionType = type
-			});
-			await Async(x => Payload.Api.PostMessagePatch(x, patch));
+			try
+			{
+				BeginAction();
+				var patch = Payload.Patch();
+				patch.AddResolution(new ResolutionAttachment {
+					InitialDocumentId = Payload.Entity.EntityId,
+					Comment = Comment.Value,
+					ResolutionType = type
+				});
+				await Async(x => Payload.Api.PostMessagePatch(x, patch));
+				await EndAction();
+			}
+			catch(Exception e)
+			{
+				var error = ErrorHelper.TranslateException(e)
+						?? "Не удалось выполнить операцию, попробуйте повторить позднее.";
+				Manager.Warning(error);
+				Log.Error(error, e);
+				await EndAction(false);
+			}
 		}
 	}
 }

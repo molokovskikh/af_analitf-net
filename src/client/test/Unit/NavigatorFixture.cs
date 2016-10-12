@@ -58,7 +58,17 @@ namespace AnalitF.Net.Client.Test.Unit
 			navigator.Navigate(screen);
 
 			Assert.AreEqual(screen, shell.ActiveItem);
-			Assert.AreEqual(0, navigator.NavigationStack.Count());
+			Assert.AreEqual(1, navigator.NavigationStack.Count());
+		}
+
+		[Test]
+		public void Navigate_and_reset()
+		{
+			var screen1 = new Screen1();
+			var screen2 = new Screen2();
+			navigator.NavigateAndReset(screen1, screen2);
+			Assert.AreEqual(2, navigator.NavigationStack.Count());
+			Assert.AreEqual(screen2, shell.ActiveItem);
 		}
 
 		[Test]
@@ -76,7 +86,8 @@ namespace AnalitF.Net.Client.Test.Unit
 		private void Init()
 		{
 			shell = new BaseShell();
-			navigator = shell.Navigator;
+			shell.Navigator = new Navigator(shell);
+			navigator = (Navigator)shell.Navigator;
 		}
 	}
 }

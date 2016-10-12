@@ -43,7 +43,11 @@ namespace AnalitF.Net.Service.Controllers
 				.Where(j => j.UpdateType == updateType && !j.IsConfirmed && j.User == CurrentUser)
 				.OrderByDescending(j => j.CreatedOn)
 				.FirstOrDefault();
-			if (existsJob?.GetIsStale(TimeSpan.FromMinutes(30)) == true)
+			//здесь таймаут должен иметь другую семантику
+			//если таймаут нулевой мы должны ждать бесконечно
+			//иначе мы не сможем загрузить ничего
+			var timeout = Config.UpdateLifeTime == TimeSpan.Zero ? TimeSpan.MaxValue : Config.UpdateLifeTime;
+			if (existsJob?.GetIsStale(timeout) == true)
 				return null;
 			return existsJob;
 		}

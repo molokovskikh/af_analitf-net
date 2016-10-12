@@ -2,15 +2,15 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	IsEnabled="{Binding IsEnabled.Value}">
-	<Grid>
+	<Grid Margin="3">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Label Grid.Row="0" FontSize="18">Переместить документ в «Удаленные»?</Label>
-		<StackPanel Orientation="Horizontal" Grid.Row="1">
-			<Button Margin="3" Name="Save" Content="Переместить в «Удаленные»" />
-			<Button Margin="3" Name="TryClose">Отмена</Button>
+    <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,10,0,7">
+      <Button Name="Save" Padding="10,0,10,0" Margin="0,0,10,0" Height="30" Content="Переместить в «Удаленные»" />
+      <Button Name="TryClose" Padding="10,0,10,0">Отмена</Button>
 		</StackPanel>
 	</Grid>
 </UserControl>

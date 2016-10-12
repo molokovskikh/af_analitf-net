@@ -15,16 +15,39 @@ using log4net.Appender;
 using log4net.Repository.Hierarchy;
 using NHibernate.Linq;
 using NHibernate.Util;
-using NPOI.SS.Formula.Functions;
 
 namespace AnalitF.Net.Client.Helpers
 {
 	public static class Util
 	{
+		private static ILog log = LogManager.GetLogger(typeof(Util));
+
 		private enum State
 		{
 			Key,
 			Value
+		}
+
+		public static void SafeWait(this Task task)
+		{
+#if DEBUG
+			task.Wait();
+#else
+			try {
+				task.Wait();
+			} catch(Exception e) {
+				log.Error("Выполнение задачи завершилось ошибкой", e);
+			}
+#endif
+		}
+
+		public static void LogResult(this Task task)
+		{
+			task.ContinueWith(x => {
+				if (x.IsFaulted) {
+					log.Error("Выполнение задачи завершилось ошибкой", x.Exception);
+				}
+			});
 		}
 
 		[Conditional("DEBUG")]

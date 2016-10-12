@@ -239,6 +239,7 @@
     <Compile Include="Controls\Preview.cs" />
     <Compile Include="Controls\ScrollGeneralContentViewer.cs" />
     <Compile Include="Controls\ToolBar2.cs" />
+    <Compile Include="Helpers\X509Helper.cs" />
     <Compile Include="Helpers\Converters.cs" />
     <Compile Include="Config\Caliburn\WindowManager.cs" />
     <Compile Include="Controls\DataGridTextColumn.cs" />
@@ -276,6 +277,7 @@
     <Compile Include="Helpers\SqlMapper.cs" />
     <Compile Include="Helpers\SqlMapperExtensions.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
+    <Compile Include="Helpers\XmlHelper.cs" />
     <Compile Include="Helpers\TimeIt.cs" />
     <Compile Include="Helpers\Util.cs" />
     <Compile Include="Helpers\WinApi.cs" />
@@ -292,8 +294,10 @@
     <Compile Include="Models\ColumnSettings.cs" />
     <Compile Include="Models\Commands\CleanDb.cs" />
     <Compile Include="Models\Commands\DbMaintain.cs" />
+    <Compile Include="Models\Inventory\DisplacementDoc.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplier.cs" />
     <Compile Include="Models\Inventory\Check.cs" />
+    <Compile Include="Models\Inventory\DisplacementLine.cs" />
     <Compile Include="Models\Inventory\ReturnToSupplierLine.cs" />
     <Compile Include="Models\Inventory\CheckLine.cs" />
     <Compile Include="Models\Inventory\InventoryDoc.cs" />
@@ -312,6 +316,9 @@
     <Compile Include="Models\Print\ReturnDivergenceAct.cs" />
     <Compile Include="Models\Print\ReturnInvoice.cs" />
     <Compile Include="Models\Print\ReturnLabel.cs" />
+    <Compile Include="Models\Print\DisplacementDocument.cs" />
+    <Compile Include="Models\Print\WriteoffActDocument.cs" />
+    <Compile Include="Models\Print\WriteoffDocument.cs" />
     <Compile Include="Models\Print\ReturnToSuppliersDetailsDocument.cs" />
     <Compile Include="Models\Print\ReturnActDocument.cs" />
     <Compile Include="Models\Print\DefectStockDocument.cs" />
@@ -321,6 +328,8 @@
     <Compile Include="Models\Print\StockPriceTagDocument.cs" />
     <Compile Include="Models\Print\StockRackingMapDocument.cs" />
     <Compile Include="Models\PriceTag.cs" />
+    <Compile Include="Models\Diadok\SignTorg12Autosave.cs" />
+    <Compile Include="Models\Print\DisplacementWDocument.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\SpecialMarkupCatalog.cs" />
     <Compile Include="Models\Print\WaybillsDoc.cs" />
@@ -411,6 +420,8 @@
     <Compile Include="Config\Caliburn\Conventions.cs" />
     <Compile Include="Config\Caliburn\NavBinder.cs" />
     <Compile Include="ViewModels\About.cs" />
+    <Compile Include="ViewModels\Inventory\EditDisplacementDoc.cs" />
+    <Compile Include="ViewModels\Inventory\DisplacementDocs.cs" />
     <Compile Include="ViewModels\Inventory\ReturnToSuppliers.cs" />
     <Compile Include="ViewModels\Diadok\Delete.cs" />
     <Compile Include="ViewModels\Diadok\Reject.cs" />
@@ -486,6 +497,7 @@
     <Compile Include="ViewModels\Parts\SearchBehavior.cs" />
     <Compile Include="ViewModels\Offers\PriceOfferViewModel.cs" />
     <Compile Include="ViewModels\Dialogs\PrintPreviewViewModel.cs" />
+    <Compile Include="ViewModels\Parts\TabNavigator.cs" />
     <Compile Include="ViewModels\RejectsViewModel.cs" />
     <Compile Include="ViewModels\Offers\SearchOfferViewModel.cs" />
     <Compile Include="ViewModels\Sbis\Index.cs" />
@@ -582,8 +594,14 @@
     <Compile Include="Views\Feedback.xaml.cs">
       <DependentUpon>Feedback.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Inventory\EditDisplacementDoc.xaml.cs">
+      <DependentUpon>EditDisplacementDoc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Inventory\ReturnToSupplierDetails.xaml.cs">
       <DependentUpon>ReturnToSupplierDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Inventory\DisplacementDocs.xaml.cs">
+      <DependentUpon>DisplacementDocs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Inventory\ReturnToSuppliers.xaml.cs">
       <DependentUpon>ReturnToSuppliers.xaml</DependentUpon>
@@ -893,7 +911,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Inventory\EditDisplacementDoc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\Inventory\ReturnToSupplierDetails.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Inventory\DisplacementDocs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

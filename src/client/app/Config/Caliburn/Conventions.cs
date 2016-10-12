@@ -25,19 +25,6 @@ namespace AnalitF.Net.Client.Config.Caliburn
 	{
 		public static EnumConverter EnumConverterInstance = new EnumConverter();
 
-		public class ComboBoxSelectedItemConverter : IValueConverter
-		{
-			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((IEnumerable<ValueDescription>)parameter).FirstOrDefault(d => Equals(d.Value, value));
-			}
-
-			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-			{
-				return ((ValueDescription)value).Value;
-			}
-		}
-
 		public static void Register()
 		{
 			ConventionManager.ApplyValueConverter = ApplyValueConverter;

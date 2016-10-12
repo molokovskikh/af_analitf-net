@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using AnalitF.Net.Client.Helpers;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.Models.Commands;
@@ -25,6 +27,7 @@ using NUnit.Framework;
 using ReactiveUI.Testing;
 using DelayOfPayment = AnalitF.Net.Client.Models.DelayOfPayment;
 using Main = AnalitF.Net.Client.ViewModels.Main;
+using TaskResult = AnalitF.Net.Client.Models.Results.TaskResult;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -172,10 +175,12 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			shell.Reload();
 			scheduler.Start();
 
-			var canClose = false;
-			shell.CanClose(b => canClose = b);
+			var canClose = new Subject<bool>();
+			var canCloseValue = canClose.Take(1).PublishLast();
+			canCloseValue.Connect();
+			shell.CanClose(b => canClose.OnNext(b));
+			Assert.IsTrue(canCloseValue.Timeout(TimeSpan.FromSeconds(3)).First());
 
-			Assert.IsTrue(canClose);
 			Assert.That(manager.MessageBoxes[0], Does.Contain("Обнаружены не отправленные заказы."));
 			Assert.That(manager.MessageBoxes[1], Does.Contain("Отправка заказов завершена успешно."));
 			Assert.That(command, Is.InstanceOf<SendOrders>());
@@ -226,13 +231,16 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Save(order);
 			session.Flush();
 
-			var canClose = false;
 			shell.UpdateStat();
-			shell.CanClose(b => canClose = b);
+			var canClose = new Subject<bool>();
+			var last = canClose.Take(1).PublishLast();
+			last.Connect();
+			shell.CanClose(b => canClose.OnNext(b));
+			Console.WriteLine("exit");
+			Assert.IsTrue(last.Timeout(TimeSpan.FromSeconds(3)).First());
 
 			session.Evict(order);
 			var reloaded = session.Get<SentOrder>(order.Id);
-			Assert.IsTrue(canClose);
 			Assert.IsNull(reloaded);
 			Assert.AreEqual("В архиве заказов обнаружены заказы, сделанные более 35 дней назад. Удалить их?",
 				manager.MessageBoxes.Implode());
@@ -383,7 +391,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			session.Flush();
 
 			manager.DialogOpened.OfType<WaitViewModel>().Subscribe(m => m.Closed.WaitOne());
-			shell.OnViewReady().Each(r => r.Execute(new ActionExecutionContext()));
+			shell.OnViewReady().Each(r => {
+				if (r is TaskResult) {
+					var task = ((TaskResult)r).Task;
+					if (task.Status == TaskStatus.Created)
+						task.Start();
+					if (!task.Wait(30.Second()))
+						throw new Exception("Не удалось дождаться задачи за 30 секунд");
+				} else {
+					r.Execute(new ActionExecutionContext());
+				}
+			});
 			Close(shell);
 
 			session.Refresh(offer);

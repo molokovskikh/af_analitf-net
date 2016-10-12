@@ -109,6 +109,8 @@ namespace AnalitF.Net.Client.Models.Inventory
 
 		public virtual decimal? SupplierSumWithoutNds => SupplierCostWithoutNds*Quantity;
 
+		public virtual decimal? SupplierSum => SupplierCost * Quantity;
+
 		public virtual decimal? RetailSum => RetailCost*Quantity;
 
 		public virtual decimal Quantity { get; set; }

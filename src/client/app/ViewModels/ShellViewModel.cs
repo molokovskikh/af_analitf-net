@@ -29,6 +29,7 @@ using AnalitF.Net.Client.ViewModels.Diadok;
 using AnalitF.Net.Client.ViewModels.Dialogs;
 using AnalitF.Net.Client.ViewModels.Offers;
 using AnalitF.Net.Client.ViewModels.Orders;
+using AnalitF.Net.Client.ViewModels.Parts;
 using AnalitF.Net.Client.Views;
 using Caliburn.Micro;
 using Common.NHibernate;
@@ -85,7 +86,6 @@ namespace AnalitF.Net.Client.ViewModels
 		private ManualResetEventSlim startSync = new ManualResetEventSlim();
 		private WindowManager windowManager;
 		private ISession session;
-		private IStatelessSession statelessSession;
 		private ILog log = LogManager.GetLogger(typeof(ShellViewModel));
 		private List<Address> addresses = new List<Address>();
 
@@ -111,7 +111,7 @@ namespace AnalitF.Net.Client.ViewModels
 			set
 			{
 				_leaderCalculationWasStart = value;
-				OnPropertyChanged(new PropertyChangedEventArgs(nameof(LeaderCalculationWasStart)));
+				NotifyOfPropertyChange(nameof(LeaderCalculationWasStart));
 			}
 		}
 
@@ -141,10 +141,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Subscribe(IsDataLoaded);
 			Version = typeof(ShellViewModel).Assembly.GetName().Version.ToString();
 
-			if (Env.Factory != null) {
-				session = Env.Factory.OpenSession();
-				statelessSession = Env.Factory.OpenStatelessSession();
-			}
+			session = Env.Factory?.OpenSession();
 			windowManager = (WindowManager)IoC.Get<IWindowManager>();
 
 			this.ObservableForProperty(m => m.ActiveItem)
@@ -167,7 +164,7 @@ namespace AnalitF.Net.Client.ViewModels
 				}
 			});
 
-			this.ObservableForProperty(m => m.Settings.Value)
+			Settings
 				.Subscribe(_ => {
 					NotifyOfPropertyChange(nameof(CanShowCatalog));
 					NotifyOfPropertyChange(nameof(CanSearchOffers));
@@ -261,12 +258,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnInitialize()
 		{
-			Env.RxQuery(x => x.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate());
+			Env.Query(x => x.CreateSQLQuery("update Orders set Send = 1 where Send = 0 and Frozen = 0").ExecuteUpdate()).LogResult();
 			Instances.Value = new string[0];
 			if (Directory.Exists(Config.Opt)) {
 				Instances.Value = Directory.GetDirectories(Config.Opt).Select(x => Path.GetFileName(x)).ToArray();
 			}
 			Reload();
+			if (Settings.Value.TabbedUI)
+				Navigator = new TabNavigator(this);
+			else
+				Navigator = new Navigator(this);
 		}
 
 		protected override void OnActivate()
@@ -315,68 +316,62 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void CloseActive()
 		{
-			Navigator.CloseActive();
+			((TabNavigator)Navigator).CloseScreen(ActiveItem);
 		}
 
 		public void CloseScreen(IScreen item)
 		{
-			Navigator.CloseScreen(item);
+			((TabNavigator)Navigator).CloseScreen(item);
+		}
+
+		public async Task CheckCloseConditions()
+		{
+				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
+				var orders = await Env.Query(s => s.Query<SentOrder>()
+					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays)).Take(1000).ToArray());
+				if (orders.Any()) {
+					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
+						Confirm("В архиве заказов обнаружены заказы," +
+							$" сделанные более {Settings.Value.DeleteOrdersOlderThan} дней назад. Удалить их?");
+					if (deleteOldOrders)
+						await Env.Query(s => s.DeleteEach(orders));
+				}
+
+				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
+				var waybills = await Env.Query(s => s.Query<Waybill>()
+					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays)).Take(1000).ToArray());
+				if (waybills.Any()) {
+					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
+						Confirm("В архиве заказов обнаружены документы (накладные, отказы)," +
+							$" сделанные более {Settings.Value.DeleteWaybillsOlderThan} дней назад. Удалить их?");
+					if (deleteOldWaybills)
+						await Env.Query(s => s.DeleteEach(waybills));
+				}
 		}
 
 		public override void CanClose(Action<bool> callback)
 		{
-			if (Config.Quiet) {
+			if (Config.Quiet && !Settings.Value.DebugLoud) {
 				base.CanClose(callback);
 				return;
 			}
 
-			if (statelessSession != null) {
-				var orderDays = -Settings.Value.DeleteOrdersOlderThan;
-				var orderQuery = statelessSession.Query<SentOrder>()
-					.Where(w => w.SentOn < DateTime.Today.AddDays(orderDays));
-				if (orderQuery.Any()) {
-					var deleteOldOrders = !Settings.Value.ConfirmDeleteOldOrders ||
-						Confirm("В архиве заказов обнаружены заказы," +
-							$" сделанные более {Settings.Value.DeleteOrdersOlderThan} дней назад. Удалить их?");
-					if (deleteOldOrders) {
-						var orders = orderQuery.ToArray();
-						foreach (var order in orders) {
-							statelessSession.Delete(order);
-						}
-					}
+			CheckCloseConditions().ContinueWith(t => {
+				if (t.IsFaulted)
+					log.Error("Ошибка при проверки условий закрытия", t.Exception);
+				if (Stat.Value.ReadyForSendOrdersCount > 0
+					&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
+					Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
 				}
-
-				var waybillDays = -Settings.Value.DeleteWaybillsOlderThan;
-				var query = statelessSession.Query<Waybill>()
-					.Where(w => w.WriteTime < DateTime.Today.AddDays(waybillDays));
-				if (query.Any()) {
-					var deleteOldWaybills = !Settings.Value.ConfirmDeleteOldWaybills ||
-						Confirm("В архиве заказов обнаружены документы (накладные, отказы)," +
-							$" сделанные более {Settings.Value.DeleteWaybillsOlderThan} дней назад. Удалить их?");
-					if (deleteOldWaybills) {
-						var waybills = query.ToArray();
-						foreach (var waybill in waybills) {
-							waybill.DeleteFiles(Settings);
-							statelessSession.Delete(waybill);
-						}
-					}
+				else {
+					base.CanClose(callback);
 				}
-			}
-
-			if (Stat.Value.ReadyForSendOrdersCount > 0
-				&& Confirm("Обнаружены не отправленные заказы. Отправить их сейчас?")) {
-				Coroutine.BeginExecute(SendOrders().GetEnumerator(), callback: (s, a) => base.CanClose(callback));
-			}
-			else {
-				base.CanClose(callback);
-			}
+			}, GetScheduler());
 		}
 
 		public void UpdateStat()
 		{
-			Env.RxQuery(x => Models.Stat.Update(x, CurrentAddress.Value))
-				.ObserveOn(Env.UiScheduler)
-				.Subscribe(Stat);
+			Env.RxQuery(x => Models.Stat.Update(x, CurrentAddress.Value)).Subscribe(Stat);
 		}
 
 		public IEnumerable<IResult> StartCheck()
@@ -396,16 +391,11 @@ namespace AnalitF.Net.Client.ViewModels
 					return Update();
 			}
 
-			if (User.Value != null
-				&& User.Value.IsDelayOfPaymentEnabled
+			if (User.Value?.IsDelayOfPaymentEnabled == true
 				&& Settings.Value.LastLeaderCalculation != DateTime.Today) {
-				RunTask(new WaitViewModel("Пересчет отсрочки платежа"),
-					t => {
-						LeaderCalculationWasStart = true;
-						DbMaintain.UpdateLeaders();
-						LeaderCalculationWasStart = false;
-						return Enumerable.Empty<IResult>();
-					});
+				var result = new Models.Results.TaskResult(UpdateLeaders(), new WaitViewModel("Пересчет отсрочки платежа"));
+				IoC.BuildUp(result);
+				result.Execute(new ActionExecutionContext());
 			}
 
 #if DEBUG
@@ -430,8 +420,13 @@ namespace AnalitF.Net.Client.ViewModels
 						.Where(x => x != null)
 						.OfType<IScreen>()
 						.ToArray();
-					foreach (var item in items)
-						Items.Add(item);
+					if (Navigator is Navigator) {
+						((Navigator)Navigator).NavigateAndReset(items);
+					} else {
+						foreach (var item in items) {
+							Navigator.Navigate(item);
+						}
+					}
 				}
 				catch(Exception e) {
 					disposable.Dispose();
@@ -676,10 +671,12 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public void ShowRejectedWaybills()
 		{
-			var rejectStat = statelessSession.Query<WaybillLine>().Where(l => l.IsRejectNew || l.IsRejectCanceled)
-				.GroupBy(l => l.Waybill.Address.Id)
-				.Select(g => new { addressId = g.Key, count = g.Count()})
-				.ToArray();
+			var rejectStat = Env.Query(s => {
+				return s.Query<WaybillLine>().Where(l => l.IsRejectNew || l.IsRejectCanceled)
+					.GroupBy(l => l.Waybill.Address.Id)
+					.Select(g => new { addressId = g.Key, count = g.Count()})
+					.ToArray();
+			}).Result;
 			//мы можем найти отказ в накладной которая принадлежит адресу который больше не доступен клиенту
 			//по этому выбранные идентификаторы нужно сопоставить с существующими адресами
 			var address = rejectStat.OrderByDescending(s => s.count).Select(s => s.addressId)
@@ -763,15 +760,16 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public IEnumerable<IResult> Update()
 		{
-			LeaderCalculationWasStart = true;
-			TaskEx.Run(() => {
-				DbMaintain.UpdateLeaders();
-			}).ContinueWith(t => {
-				LeaderCalculationWasStart = false;
-			}, SynchronizationContext.Current == null ? TaskScheduler.Current :
-			TaskScheduler.FromCurrentSynchronizationContext());
+			var result = Sync(new UpdateCommand());
+			UpdateLeaders().LogResult();
+			return result;
+		}
 
-			return Sync(new UpdateCommand());
+		public async Task UpdateLeaders()
+		{
+			LeaderCalculationWasStart = true;
+			await Env.Query(s => DbMaintain.UpdateLeaders(s));
+			LeaderCalculationWasStart = false;
 		}
 
 		private IEnumerable<IResult> UpdateBySchedule()
@@ -821,14 +819,16 @@ namespace AnalitF.Net.Client.ViewModels
 			if (Settings.Value.ConfirmSendOrders && !Confirm("Вы действительно хотите отправить заказы?"))
 				yield break;
 
-
 			//сохраняем изменения на активной форме
 			ActiveItem?.Deactivate(false);
-			var warningOrders = statelessSession.Query<Order>()
-				.Fetch(o => o.Price)
-				.Fetch(o => o.MinOrderSum)
-				.ReadyToSend(CurrentAddress)
-				.Where(o => o.Sum < o.MinOrderSum.MinOrderSum).ToList();
+			var warningOrders = Env.Query(s => {
+				return s.Query<Order>()
+					.Fetch(o => o.Price)
+					.Fetch(o => o.MinOrderSum)
+					.ReadyToSend(CurrentAddress)
+					.Where(o => o.Sum < o.MinOrderSum.MinOrderSum)
+					.ToList();
+			}).Result;
 			if (warningOrders.Count > 0) {
 				var orderWarning = new OrderWarning(warningOrders);
 				yield return new DialogResult(orderWarning);
@@ -1076,11 +1076,7 @@ namespace AnalitF.Net.Client.ViewModels
 			do {
 				count++;
 				done = true;
-				TaskScheduler scheduler;
-				if (SynchronizationContext.Current != null)
-					scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-				else
-					scheduler = TaskScheduler.Current;
+				var scheduler = GetScheduler();
 
 				//если это вторая итерация то нужно пересоздать cancellation
 				//тк у предыдущего уже будет стоять флаг IsCancellationRequested
@@ -1092,7 +1088,7 @@ namespace AnalitF.Net.Client.ViewModels
 					viewModel.IsCompleted = true;
 					viewModel.TryClose();
 				}, scheduler);
-				task.Start();
+				task.Start(TaskScheduler.Default);
 
 				windowManager.ShowFixedDialog(viewModel);
 
@@ -1124,6 +1120,16 @@ namespace AnalitF.Net.Client.ViewModels
 					success?.Invoke(task);
 				}
 			} while (!done);
+		}
+
+		private static TaskScheduler GetScheduler()
+		{
+			TaskScheduler scheduler;
+			if (SynchronizationContext.Current != null)
+				scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+			else
+				scheduler = TaskScheduler.Current;
+			return scheduler;
 		}
 
 		public IEnumerable<IScreen> NavigationStack => Navigator.NavigationStack;
@@ -1165,7 +1171,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 		protected override void OnDeactivate(bool close)
 		{
-			PersistentNavigationStack = NavigationStack
+			PersistentNavigationStack = NavigationStack.Skip(1)
 				.Concat(new [] { ActiveItem })
 				.Select(s => new RestoreData(s))
 				.ToList();
@@ -1190,15 +1196,24 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			return new WindowResult(Debug);
 		}
+
+		public void Touch()
+		{
+			var src = typeof(ShellViewModel).Assembly.Location;
+			var dir = Path.GetDirectoryName(src);
+			var filename = Path.GetFileName(src);
+			new FileInfo(Path.GetFullPath(Path.Combine(dir, "..", "debug",  filename))).LastWriteTime = DateTime.Now;
+		}
 #endif
 		public void Dispose()
 		{
 			IsNotifying = false;
 
 			var view = GetView();
-			if (view != null) {
-				foreach (var item in ((ShellView)view).Items.Items) {
-					var el = ((ShellView)view).Items.ItemContainerGenerator.ContainerFromItem(item) as Control;
+			var tabs = ((ShellView) view)?.Items;
+			if (tabs != null) {
+				foreach (var item in tabs.Items) {
+					var el = tabs.ItemContainerGenerator.ContainerFromItem(item) as Control;
 					if (el != null)
 						el.Template = null;
 				}
@@ -1213,11 +1228,6 @@ namespace AnalitF.Net.Client.ViewModels
 			if (session != null) {
 				session.Dispose();
 				session = null;
-			}
-
-			if (statelessSession != null) {
-				statelessSession.Dispose();
-				statelessSession = null;
 			}
 
 			CloseDisposable.Dispose();

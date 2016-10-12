@@ -35,8 +35,6 @@ namespace AnalitF.Net.Client.Models
 	{
 		public uint[] WaybillIds;
 		public ulong[] OrderIds;
-		public bool IgnoreOrders;
-		public bool IgnoreWaybills;
 	}
 
 	public class FeedbackMessage
@@ -272,7 +270,12 @@ namespace AnalitF.Net.Client.Models
 		ReturnToSupplier,
 		CancelReturnToSupplier,
 		InventoryDoc,
-		CancelInventoryDoc
+		CancelInventoryDoc,
+		DisplacementTo,
+		CancelDisplacementTo,
+		DisplacementFrom,
+		CancelDisplacementFrom,
+		EndDisplacement
 	}
 
 	public class StockActionAttrs
