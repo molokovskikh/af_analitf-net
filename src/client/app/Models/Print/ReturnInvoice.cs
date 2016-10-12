@@ -162,6 +162,7 @@ namespace AnalitF.Net.Client.Models.Print
 						BorderBrush = Brushes.Black,
 						BorderThickness = new Thickness(0, 0, 0, 1),
 						SnapsToDevicePixels = true,
+						Margin = new Thickness(5, 0, 5, 0),
 					})
 					.Cell(1, 0, new Label
 					{
@@ -169,10 +170,9 @@ namespace AnalitF.Net.Client.Models.Print
 						FontSize = 9,
 						Content = new TextBlock
 						{
-							Text = "(реквизиты свидетельства о государственной регистрации\r\nиндивидуального предпринимателя)",
+							Text = "(реквизиты свидетельства о государственной регистрации индивидуального предпринимателя)",
 							TextAlignment = TextAlignment.Center,
 							TextWrapping = TextWrapping.Wrap,
-							Margin = new Thickness(5, 0, 5, 0),
 						},
 						HorizontalAlignment = HorizontalAlignment.Center,
 					}))

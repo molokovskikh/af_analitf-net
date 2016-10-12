@@ -301,7 +301,7 @@ namespace AnalitF.Net.Client.Models.Print
 			Block(new List<Grid> {TextWithLine("")});
 			Block(new List<Grid> {TextWithLine("")});
 			Block(new List<Grid> {TextWithLine("")});
-
+			Block(new List<Grid> {Text("")});
 			columns = new[] {
 				new PrintColumn("Артикул", 40),
 				new PrintColumn("сорт", 40),
