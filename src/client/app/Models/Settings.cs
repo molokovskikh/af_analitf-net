@@ -264,6 +264,7 @@ namespace AnalitF.Net.Client.Models
 		}
 
 		public virtual WaybillDocumentSettings WaybillDoc { get; set; }
+		public virtual WaybillActDocumentSettings WaybillActDoc { get; set; }
 		public virtual RegistryDocumentSettings RegistryDoc { get; set; }
 		//вторая версия токена приложения, хеш guid и путь, первая версия просто guid
 		public virtual string ClientTokenV2 { get; set; }

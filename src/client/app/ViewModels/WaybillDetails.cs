@@ -241,6 +241,11 @@ namespace AnalitF.Net.Client.ViewModels
 			return Preview("Накладная", new WaybillDocument(Waybill, PrintableLines()));
 		}
 
+		public IEnumerable<IResult> PrintAct()
+		{
+			return Preview("Акт прихода", new WaybillActDocument(Waybill, PrintableLines()));
+		}
+
 		public IEnumerable<IResult> PrintInvoice()
 		{
 			return Preview("Счет-фактура", new InvoiceDocument(Waybill));
