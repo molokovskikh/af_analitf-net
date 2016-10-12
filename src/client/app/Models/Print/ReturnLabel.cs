@@ -44,12 +44,6 @@ namespace AnalitF.Net.Client.Models.Print
 
 		protected override void BuildDoc()
 		{
-			var center = Header("Приложение N 1 \n" +
-				"к постановлению Правительства Российской Федерации \n" +
-				"от 26 декабря 2011 г. N 1137");
-			center.FontSize = 48;
-			center.FontWeight = FontWeights.Bold;
-
 			var body = new Grid()
 				.Cell(0, 0, new Label
 				{

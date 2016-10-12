@@ -146,7 +146,8 @@ namespace AnalitF.Net.Client.Models.Print
 			doc.Blocks.Add(new BlockUIContainer(new Grid()
 				.Cell(0, 0, SingBlock("Руководитель организации\r\nили иное уполномоченное лицо"))
 				.Cell(1, 0, SingBlock("Индивидуальный предприниматель"))
-				.RowSpan(0, 1, 2, new Label {
+				.RowSpan(0, 1, 2, new Label
+				{
 					FontFamily = new FontFamily("Arial"),
 					FontSize = 12,
 					Content = "М. П.",
@@ -155,23 +156,27 @@ namespace AnalitF.Net.Client.Models.Print
 				})
 				.Cell(0, 2, SingBlock("Главный бухгалтер\r\nили иное уполномоченное лицо"))
 				.Cell(1, 2, new Grid()
-					.Cell(0, 0, new Label {
+					.Cell(0, 0, new Label
+					{
 						Width = 430,
 						BorderBrush = Brushes.Black,
 						BorderThickness = new Thickness(0, 0, 0, 1),
 						SnapsToDevicePixels = true,
 					})
-					.Cell(1, 0, new Label {
+					.Cell(1, 0, new Label
+					{
 						FontFamily = new FontFamily("Arial"),
 						FontSize = 9,
-						Content = new TextBlock {
+						Content = new TextBlock
+						{
 							Text = "(реквизиты свидетельства о государственной регистрации\r\nиндивидуального предпринимателя)",
 							TextAlignment = TextAlignment.Center,
-							TextWrapping = TextWrapping.Wrap
+							TextWrapping = TextWrapping.Wrap,
+							Margin = new Thickness(5, 0, 5, 0),
 						},
 						HorizontalAlignment = HorizontalAlignment.Center,
 					}))
-			));
+				));
 		}
 
 		private static Grid SingBlock(string name)
