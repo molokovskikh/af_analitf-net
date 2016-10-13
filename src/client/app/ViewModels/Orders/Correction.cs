@@ -48,7 +48,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 
 			if (IsUpdate)
 				CurrentLine
-					.Throttle(Consts.ScrollLoadTimeout)
+					.Throttle(Consts.ScrollLoadTimeout, Env.Scheduler)
 					.SelectMany(x => Env.RxQuery(s => {
 						if (x == null) {
 							return new List<Offer>();

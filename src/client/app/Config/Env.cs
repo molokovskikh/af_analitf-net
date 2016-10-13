@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using AnalitF.Net.Client.Models;
 using AnalitF.Net.Client.ViewModels;
 using Common.Tools.Calendar;
@@ -26,6 +28,7 @@ namespace AnalitF.Net.Client.Config
 		public Barrier Barrier;
 #if DEBUG
 		public bool IsUnitTesting;
+		private Thread CreateOnThread;
 #endif
 		public IScheduler Scheduler;
 		public IScheduler UiScheduler;
@@ -98,8 +101,11 @@ namespace AnalitF.Net.Client.Config
 			var task = new Task<T>(() => {
 				if (Factory == null)
 					return default(T);
-				if (BackgroundSession == null)
+				if (BackgroundSession == null) {
+					CreateOnThread = Thread.CurrentThread;
 					BackgroundSession = Factory.OpenStatelessSession();
+				}
+				CheckThreading();
 				return @select(BackgroundSession);
 			});
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится
@@ -108,13 +114,23 @@ namespace AnalitF.Net.Client.Config
 			return task;
 		}
 
+		[Conditional("DEBUG")]
+		private void CheckThreading()
+		{
+			if (Thread.CurrentThread != CreateOnThread)
+				throw new Exception("Попытка конкурентного обращения к подключению");
+		}
+
 		public Task Query(Action<IStatelessSession> action, CancellationToken token = default(CancellationToken))
 		{
 			var task = new Task(() => {
 				if (Factory == null)
 					return;
-				if (BackgroundSession == null)
+				if (BackgroundSession == null) {
+					CreateOnThread = Thread.CurrentThread;
 					BackgroundSession = Factory.OpenStatelessSession();
+				}
+				CheckThreading();
 				action(BackgroundSession);
 			}, token);
 			//в жизни это невозможно, но в тестах мы можем отменить задачу до того как она запустится

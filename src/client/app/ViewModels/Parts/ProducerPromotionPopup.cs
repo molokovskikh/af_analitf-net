@@ -27,7 +27,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			Visible = new NotifyValue<bool>();
 			ProducerPromotions = new NotifyValue<List<ProducerPromotion>>(new List<ProducerPromotion>());
 			catalog
-				.Throttle(Consts.ScrollLoadTimeout)
+				.Throttle(Consts.ScrollLoadTimeout, env.Scheduler)
 				.SelectMany(x => env.RxQuery(s => {
 					if (x == null)
 						return new List<ProducerPromotion>();

@@ -56,7 +56,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 				offerId = (x as OrderLine)?.OfferId;
 				NotifyOfPropertyChange(nameof(CurrentOffer));
 			});
-			value.Throttle(Consts.ScrollLoadTimeout)
+			value.Throttle(Consts.ScrollLoadTimeout, screen.Env.Scheduler)
 				.Where(x => x?.CatalogId != CurrentCatalog.Value?.Id)
 				.SelectMany(x => screen.Env.RxQuery(s => {
 					if (x == null)

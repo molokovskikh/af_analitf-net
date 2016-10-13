@@ -260,7 +260,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				Bus.RegisterMessageSource(Address.StatSubject);
 
 			CurrentReportLine
-				.Throttle(Consts.ScrollLoadTimeout)
+				.Throttle(Consts.ScrollLoadTimeout, Env.Scheduler)
 				.SelectMany(x => Env.RxQuery(s => {
 					if (x?.CatalogId == null)
 						return null;
