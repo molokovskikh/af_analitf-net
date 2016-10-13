@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing.Imaging;
 using System.IO;
@@ -49,9 +50,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			windows = new List<Window>();
 			activeWindow = null;
 			dispatcher = null;
-			shell.Config.Quiet = true;
-			shell.ViewModelSettings.Clear();
-
+			config.Quiet = true;
 
 			manager.UnitTesting = false;
 			manager.SkipApp = true;
@@ -262,8 +261,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		protected async Task Start()
 		{
 			session.Flush();
-			//данные могут измениться, нужно перезагрузить данные в shell
-			shell.Reload();
 
 			var loaded = new SemaphoreSlim(0, 1);
 
@@ -283,8 +280,6 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 				//что бы тесты не лезли на первый план
 				activeWindow.ShowActivated = false;
 				activeWindow.ShowInTaskbar = false;
-				var objs = activeWindow.Descendants<DispatcherObject>().Where(x => x.Dispatcher != activeWindow.Dispatcher);
-				Console.WriteLine(objs.Implode());
 				activeWindow.Show();
 			});
 			Env.UiScheduler = new MixedScheduler((TestScheduler)Env.UiScheduler, new DispatcherScheduler(dispatcher));
