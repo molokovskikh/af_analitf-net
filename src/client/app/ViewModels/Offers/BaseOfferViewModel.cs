@@ -139,21 +139,19 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 
 			ProducerPromotions = new ProducerPromotionPopup(Shell.Config,
 				CurrentCatalog.Select(x => x?.Name),
-				RxQuery, Env);
+				Env);
 
 			OrderWarning = new InlineEditWarning(UiScheduler, Manager);
 			CurrentOffer
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.Select(_ => RxQuery(LoadHistoryOrders))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
 			CurrentOffer
 				.Where(x => !(x?.StatLoaded).GetValueOrDefault())
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.Select(_ => RxQuery(LoadStat))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
 					if (x == null || CurrentOffer.Value == null)
 						return;
@@ -185,7 +183,6 @@ where c.Id = ?";
 						}, new { x.CatalogId }).FirstOrDefault();
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Subscribe(CurrentCatalog, CloseCancellation.Token);
 
 			//изменения в LastEditOffer могут произойти уже после перехода на другое предложение
@@ -224,19 +221,16 @@ where c.Id = ?";
 				Shell.ResetAutoComment = ResetAutoComment;
 			}
 
-			if (StatelessSession != null) {
-				var newLines = Addresses.Where(a => NHibernateUtil.IsInitialized(a.Orders))
-					.SelectMany(a => a.Orders)
-					.Where(o => NHibernateUtil.IsInitialized(o.Lines))
-					.SelectMany(o => o.Lines)
-					.Where(l => l.Id == 0)
-					.ToList();
-				if (newLines.Count > 0) {
-					var condition = newLines.Implode(l => String.Format("(a.CatalogId = {0} and (a.ProducerId = {1} or a.Producerid is null))",
-						l.CatalogId, l.ProducerId?.ToString() ?? "null"), " or ");
-					StatelessSession.CreateSQLQuery($"delete a from AwaitedItems a where {condition}")
-						.ExecuteUpdate();
-				}
+			var newLines = Addresses.Where(a => NHibernateUtil.IsInitialized(a.Orders))
+				.SelectMany(a => a.Orders)
+				.Where(o => NHibernateUtil.IsInitialized(o.Lines))
+				.SelectMany(o => o.Lines)
+				.Where(l => l.Id == 0)
+				.ToList();
+			if (newLines.Count > 0) {
+				var condition = newLines.Implode(l => String.Format("(a.CatalogId = {0} and (a.ProducerId = {1} or a.Producerid is null))",
+					l.CatalogId, l.ProducerId?.ToString() ?? "null"), " or ");
+				Env.Query(s => s.CreateSQLQuery($"delete a from AwaitedItems a where {condition}").ExecuteUpdate()).Wait();
 			}
 
 			base.OnDeactivate(close);
@@ -331,7 +325,7 @@ where c.Id = ?";
 				return;
 			}
 			LastEditOffer.Value = offer;
-			ApplyStat(LoadStat(StatelessSession));
+			ApplyStat(Env.Query(LoadStat).Result);
 			if (CurrentCatalog.Value?.IsPKU == true && CurrentCatalog.Value?.Id == offer.CatalogId) {
 				if (Settings.Value.ModePKU == ModePKU.Deny) {
 					offer.OrderCount = null;
@@ -402,7 +396,6 @@ group by l.ProductId")
 					.List<object>()
 					.Select(Convert.ToUInt32)
 					.ToList())
-					.ObserveOn(UiScheduler)
 					.Subscribe(x => Address.YesterdayOrderedProductIds = x, CloseCancellation.Token);
 			}
 		}
@@ -452,10 +445,6 @@ group by l.ProductId")
 			}
 		}
 
-		protected virtual void Query()
-		{
-		}
-
 		protected override void RecreateSession()
 		{
 			base.RecreateSession();
@@ -465,12 +454,12 @@ group by l.ProductId")
 			LoadOrderItems();
 		}
 
-		public override void Update()
+		protected void UpdateOffers(IList<Offer> items)
 		{
-			Query();
+			Calculate(items);
+			LoadOrderItems(items);
+			Offers.Value = items;
 			SelectOffer();
-			Calculate();
-			LoadOrderItems();
 		}
 
 		protected virtual void SelectOffer()
@@ -569,14 +558,6 @@ where o.SentOn > :begin and ol.ProductId = :productId and o.AddressId = :address
 		protected IList<Offer> GetPrintableOffers()
 		{
 			return GetItemsFromView<Offer>("Offers") ?? Offers.Value;
-		}
-
-		protected void UpdateOffers(List<Offer> items)
-		{
-			Calculate(items);
-			LoadOrderItems(items);
-			Offers.Value = items;
-			SelectOffer();
 		}
 	}
 }

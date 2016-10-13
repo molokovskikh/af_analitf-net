@@ -67,7 +67,6 @@ namespace AnalitF.Net.Client.ViewModels
 					});
 			})
 			.Switch()
-			.ObserveOn(UiScheduler)
 			.ToValue(lines => {
 					//тк мы загружаем данные из stateless сессии то отслеживать изменения в них
 					//нужно руками, изменения возникнут из-за загрузки сертификатов

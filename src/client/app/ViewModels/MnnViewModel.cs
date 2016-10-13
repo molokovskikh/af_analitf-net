@@ -16,7 +16,7 @@ namespace AnalitF.Net.Client.ViewModels
 		public MnnViewModel()
 		{
 			DisplayName = "Поиск по МНН";
-			ShowWithoutOffers = new NotifyValue<bool>();
+			InitFields();
 			SearchBehavior = new SearchBehavior(this);
 		}
 
@@ -30,9 +30,9 @@ namespace AnalitF.Net.Client.ViewModels
 		{
 			base.OnInitialize();
 
-			Mnns = SearchBehavior.ActiveSearchTerm.Select(v => (object)v)
+			SearchBehavior.ActiveSearchTerm.Select(v => (object)v)
 				.Merge(ShowWithoutOffers.Select(v => (object)v))
-				.Select(_ => RxQuery(s => {
+				.SelectMany(_ => RxQuery(s => {
 					var query = s.Query<Mnn>();
 					if (!ShowWithoutOffers) {
 						query = query.Where(m => m.HaveOffers);
@@ -45,9 +45,7 @@ namespace AnalitF.Net.Client.ViewModels
 
 					return query.OrderBy(m => m.Name).ToList();
 				}))
-				.Switch()
-				.ObserveOn(UiScheduler)
-				.ToValue();
+				.Subscribe(Mnns);
 		}
 
 		public void EnterMnn()

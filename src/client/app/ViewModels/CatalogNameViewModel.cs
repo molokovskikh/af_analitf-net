@@ -119,14 +119,13 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(ParentModel.ObservableForProperty(m => (object)m.ShowWithoutOffers))
 				.Select(_ => RxQuery(LoadCatalogNames))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Subscribe(CatalogNames, CloseCancellation.Token);
 			CatalogNames.Subscribe(_ => {
 				CurrentCatalogName.Value = CurrentCatalogName.Value
 					?? (CatalogNames.Value ?? Enumerable.Empty<CatalogName>()).FirstOrDefault();
 			});
 
-			ProducerPromotions = new ProducerPromotionPopup(Shell.Config, CurrentCatalogName, RxQuery, Env);
+			ProducerPromotions = new ProducerPromotionPopup(Shell.Config, CurrentCatalogName, Env);
 
 		}
 

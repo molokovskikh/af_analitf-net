@@ -95,7 +95,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					.Fetch(o => o.Price)
 					.Fetch(o => o.LeaderPrice)
 					.ToList()))
-				.ObserveOn(UiScheduler)
 				.CatchSubscribe(BindOffers, CloseCancellation);
 		}
 

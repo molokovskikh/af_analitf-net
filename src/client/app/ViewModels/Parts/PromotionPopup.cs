@@ -42,7 +42,6 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 						.ToList();
 				}))
 				.Switch()
-				.ObserveOn(env.UiScheduler)
 				.Subscribe(x => {
 					Promotions.Value = x;
 					Promotions.Value?.Each(p => p.Init(config));

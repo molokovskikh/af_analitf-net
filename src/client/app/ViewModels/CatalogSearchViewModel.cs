@@ -116,7 +116,6 @@ namespace AnalitF.Net.Client.ViewModels
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(LoadData))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Items, CloseCancellation.Token);
 

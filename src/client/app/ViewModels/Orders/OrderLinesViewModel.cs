@@ -277,8 +277,7 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					return lines;
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
-				.Do(_ => { IsLoading.Value = false; })
+				.Do(_ => IsLoading.Value = false)
 				.Subscribe(SentLines, CloseCancellation.Token);
 
 			CurrentLine

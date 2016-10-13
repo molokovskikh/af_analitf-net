@@ -67,7 +67,6 @@ namespace AnalitF.Net.Client.ViewModels
 					return result;
 				}))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.ToValue(CloseCancellation);
 		}

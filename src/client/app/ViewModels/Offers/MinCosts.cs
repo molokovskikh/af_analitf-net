@@ -49,7 +49,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(Load))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.ToValue(CloseCancellation);
 

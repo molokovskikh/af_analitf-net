@@ -37,7 +37,6 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 					.Fetch(o => o.Price)
 					.ToList()
 				))
-				.ObserveOn(UiScheduler)
 				.CatchSubscribe(o => {
 					UpdateOffers(o);
 					IsLoading.Value = false;

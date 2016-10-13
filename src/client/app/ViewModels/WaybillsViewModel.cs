@@ -20,6 +20,7 @@ using NHibernate.Linq;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Collections.Specialized;
+using System.Reactive;
 
 namespace AnalitF.Net.Client.ViewModels
 {
@@ -41,20 +42,16 @@ namespace AnalitF.Net.Client.ViewModels
 		public WaybillsViewModel()
 		{
 			DisplayName = "Документы";
+			InitFields();
 			SelectedWaybills = new List<Waybill>();
-			Waybills = new NotifyValue<ObservableCollection<Waybill>>();
 
 			Waybills.PropertyChanged += Waybills_PropertyChanged;
 			WaybillsTotal = new ObservableCollection<WaybillTotal>();
 			WaybillsTotal.Add(new WaybillTotal { TotalSum = 0.0m, TotalRetailSum = 0.0m });
 
-			CurrentWaybill = new NotifyValue<Waybill>();
 			Begin = new NotifyValue<DateTime>(DateTime.Today.AddMonths(-3).FirstDayOfMonth());
 			End = new NotifyValue<DateTime>(DateTime.Today);
 			IsFilterByDocumentDate = new NotifyValue<bool>(true);
-			IsFilterByWriteTime = new NotifyValue<bool>();
-			RejectFilter = new NotifyValue<RejectFilter>();
-			TypeFilter = new NotifyValue<DocumentTypeFilter>();
 			CanDelete = CurrentWaybill.Select(v => v != null).ToValue();
 			AddressSelector = new AddressSelector(this) {
 				Description = "Все адреса"
@@ -62,8 +59,6 @@ namespace AnalitF.Net.Client.ViewModels
 
 			Persist(IsFilterByDocumentDate, "IsFilterByDocumentDate");
 			Persist(IsFilterByWriteTime, "IsFilterByWriteTime");
-
-
 		}
 
     public void Waybills_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -74,7 +69,7 @@ namespace AnalitF.Net.Client.ViewModels
 	    WaybillsTotal.First().TotalRetailSum = Waybills.Value.Sum(s => s.RetailSum);
     }
 
-		public IList<Selectable<Supplier>> Suppliers { get; set; }
+		public NotifyValue<IList<Selectable<Supplier>>> Suppliers { get; set; }
 
 		[Export]
 		public NotifyValue<ObservableCollection<Waybill>> Waybills { get; set; }
@@ -95,28 +90,25 @@ namespace AnalitF.Net.Client.ViewModels
 			base.OnInitialize();
 
 			AddressSelector.Init();
-			if (StatelessSession != null)
-				Suppliers = StatelessSession.Query<Supplier>().OrderBy(s => s.Name)
+			Env.RxQuery(s => s.Query<Supplier>().OrderBy(x => x.Name)
 					.ToList()
-					.Select(i => new Selectable<Supplier>(i))
-					.ToList();
-			else
-				Suppliers = new List<Selectable<Supplier>>();
+					.Select(x => new Selectable<Supplier>(x)).ToList())
+				.Subscribe(Suppliers);
 
-			var supplierSelectionChanged = Suppliers
-				.Select(a => a.Changed())
-				.Merge()
-				.Throttle(Consts.FilterUpdateTimeout, UiScheduler);
+			var supplierSelectionChanged = Suppliers.SelectMany(x => x?.Select(p => p.Changed()).Merge()
+				.Throttle(Consts.FilterUpdateTimeout, UiScheduler)
+				?? Observable.Empty<EventPattern<PropertyChangedEventArgs>>());
 
-			var subscription = Begin.Changed()
+			Begin.Changed()
 				.Merge(End.Changed())
 				.Merge(IsFilterByDocumentDate.Changed())
 				.Merge(RejectFilter.Changed())
 				.Merge(supplierSelectionChanged)
 				.Merge(AddressSelector.FilterChanged)
 				.Merge(TypeFilter.Changed())
-				.Subscribe(_ => Update());
-			OnCloseDisposable.Add(subscription);
+				.Merge(Suppliers.Where(x => x != null).Cast<object>())
+				.Throttle(TimeSpan.FromMilliseconds(50), UiScheduler)
+				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 
 		protected override void OnDeactivate(bool close)
@@ -134,10 +126,12 @@ namespace AnalitF.Net.Client.ViewModels
 				return;
 
 			foreach (var waybill in SelectedWaybills.ToArray()) {
-				waybill.DeleteFiles(Settings.Value);
 				Waybills.Value.Remove(waybill);
-				StatelessSession.Delete(waybill);
-				Waybills.Refresh();
+				var item = waybill;
+				Env.Query(s => {
+					s.Delete(item);
+					item.DeleteFiles(Settings.Value);
+				}).LogResult();
 			}
 		}
 
@@ -221,51 +215,53 @@ namespace AnalitF.Net.Client.ViewModels
 
 		public override void Update()
 		{
+			if (Suppliers.Value == null)
+				return;
+			//уже не актуально но поучительно
 			//скорбная песнь: при переходе на форму сводный заказ
 			//wpf обновит состояние флага IsFilterByDocumentDate
 			//когда эта форма уже закрыта
 			//RadioButton имеет внутри статичный список всех кнопок на форме и обновляет их состояние
 			//наверно в качестве родителя считается окно и для всех потомков с одинаковым GroupName
 			//производится обновление
-			if (StatelessSession == null || !StatelessSession.IsOpen)
-				return;
 
-			var query = StatelessSession.Query<Waybill>();
+			Env.RxQuery(s => {
+				var query = s.Query<Waybill>();
+				var begin = Begin.Value;
+				var end = End.Value.AddDays(1);
+				if (IsFilterByDocumentDate) {
+					query = query.Where(w => w.DocumentDate >= begin && w.DocumentDate <= end);
+				}
+				else {
+					query = query.Where(w => w.WriteTime >= begin && w.WriteTime <= end);
+				}
 
-			var begin = Begin.Value;
-			var end = End.Value.AddDays(1);
-			if (IsFilterByDocumentDate) {
-				query = query.Where(w => w.DocumentDate >= begin && w.DocumentDate <= end);
-			}
-			else {
-				query = query.Where(w => w.WriteTime >= begin && w.WriteTime <= end);
-			}
+				if (RejectFilter.Value == ViewModels.RejectFilter.Changed) {
+					query = query.Where(w => w.IsRejectChanged);
+				}
 
-			if (RejectFilter.Value == ViewModels.RejectFilter.Changed) {
-				query = query.Where(w => w.IsRejectChanged);
-			}
+				var supplierIds = Suppliers.Value.Where(x => x.IsSelected).Select(x => x.Item.Id).ToArray();
+				if (supplierIds.Length != Suppliers.Value.Count)
+					query = query.Where(w => supplierIds.Contains(w.Supplier.Id));
 
-			var supplierIds = Suppliers.Where(s => s.IsSelected).Select(s => s.Item.Id).ToArray();
-			if (supplierIds.Length != Suppliers.Count)
-				query = query.Where(w => supplierIds.Contains(w.Supplier.Id));
+				var addressIds = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
+				if (addressIds.Length != AddressSelector.Addresses.Count)
+					query = query.Where(w => addressIds.Contains(w.Address.Id));
 
-			var addressIds = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
-			if (addressIds.Length != AddressSelector.Addresses.Count)
-				query = query.Where(w => addressIds.Contains(w.Address.Id));
+				if (TypeFilter.Value == DocumentTypeFilter.Waybills)
+					query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
+				else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
+					query = query.Where(w => w.DocType == DocType.Reject);
 
-			if (TypeFilter.Value == DocumentTypeFilter.Waybills)
-				query = query.Where(w => w.DocType == DocType.Waybill || w.DocType == null);
-			else if (TypeFilter.Value == DocumentTypeFilter.Rejects)
-				query = query.Where(w => w.DocType == DocType.Reject);
-
-			var docs = query
-				.OrderByDescending(w => w.WriteTime)
-				.Fetch(w => w.Supplier)
-				.Fetch(w => w.Address)
-				.ToObservableCollection();
-
-			Waybills.Value = docs;
-			Waybills.Value.Each(w => w.CalculateStyle(Address));
+				var result = query
+					.OrderByDescending(w => w.WriteTime)
+					.Fetch(w => w.Supplier)
+					.Fetch(w => w.Address)
+					.ToObservableCollection();
+				for(var i = 0; i < result.Count; i++)
+					result[i].CalculateStyle(Address);
+				return result;
+			}).Subscribe(Waybills, CloseCancellation.Token);
 		}
 
 		public IEnumerable<IResult> Create()

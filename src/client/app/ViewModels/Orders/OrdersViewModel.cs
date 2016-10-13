@@ -121,7 +121,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 			AddressesToMove = Addresses.Where(x => x != Address).ToList();
 
 			RxQuery(s => s.Query<Price>().OrderBy(x => x.Name).Select(x => new Selectable<Price>(x)).ToList())
-				.ObserveOn(UiScheduler)
 				.Subscribe(Prices, CloseCancellation.Token);
 		}
 
@@ -141,17 +140,22 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				var filterAddresses = AddressSelector.GetActiveFilter().Select(a => a.Id).ToArray();
 				var begin = Begin.Value;
 				var end = End.Value.AddDays(1);
-				var query = StatelessSession.Query<SentOrder>()
-					.Fetch(o => o.Price)
-					.Fetch(o => o.Address)
-					.Where(o => o.SentOn >= begin && o.SentOn < end
-						&& filterAddresses.Contains(o.Address.Id));
-				query = Util.Filter(query, o => o.Price.Id, Prices.Value);
-				SentOrders = query
-					.OrderByDescending(o => o.SentOn)
-					.Take(1000)
-					.ToObservableCollection();
-				SentOrders.Each(o => o.CalculateStyle(Address));
+				Env.RxQuery(s => {
+					var query = s.Query<SentOrder>()
+						.Fetch(o => o.Price)
+						.Fetch(o => o.Address)
+						.Where(o => o.SentOn >= begin && o.SentOn < end
+							&& filterAddresses.Contains(o.Address.Id));
+					query = Util.Filter(query, o => o.Price.Id, Prices.Value);
+					return query
+						.OrderByDescending(o => o.SentOn)
+						.Take(1000)
+						.ToObservableCollection();
+				}).CatchSubscribe(x => {
+					for(var i = 0; i < x.Count; i++)
+						x[i].CalculateStyle(Address);
+					SentOrders = x;
+				});
 			}
 
 			//обновить данные нужно в нескольких ситуациях
@@ -320,7 +324,9 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 					Log.Info($"Удаление отправленного заказа {selected.DisplayId} дата отправки: {selected.SentOn}" +
 						$" прайс-лист: {selected.SafePrice?.Name}" +
 						$" позиций: {selected.LinesCount}");
-					StatelessSession.Delete(selected);
+					//в замыкании нельзя использовать переменную итератора
+					var order = selected;
+					Env.Query(s => s.Delete(order)).LogResult();
 					SentOrders.Remove(selected);
 				}
 			}
@@ -495,13 +501,13 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 		private BaseDocument BuildPrintOrderDocument(SentOrder order)
 		{
 			var id = order.Id;
-			var result = StatelessSession.Query<SentOrder>()
+			var result = Env.Query(s => s.Query<SentOrder>()
 				.Where(o => o.Id == id)
 				.Fetch(o => o.Price)
 				.Fetch(o => o.Address)
 				.Fetch(o => o.Lines)
 				.ToList()
-				.First();
+				.First()).Result;
 			return new OrderDocument(result);
 		}
 

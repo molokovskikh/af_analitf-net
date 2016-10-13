@@ -25,7 +25,6 @@ namespace AnalitF.Net.Client.ViewModels
 		public override void Update()
 		{
 			RxQuery(s => s.Query<User>().FetchMany(x => x.Permissions).FirstOrDefault())
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
 					CurrentUser.Value = x ?? new User {
 						SupportHours = "будни: с 07:00 до 19:00",
@@ -33,7 +32,6 @@ namespace AnalitF.Net.Client.ViewModels
 					};
 				});
 			RxQuery(s => s.Query<News>().OrderByDescending(n => n.PublicationDate).ToList())
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => {
 					x.Each(y => y.Init(Shell.Config));
 					Newses.Value = x;

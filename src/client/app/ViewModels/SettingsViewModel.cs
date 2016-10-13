@@ -89,13 +89,11 @@ namespace AnalitF.Net.Client.ViewModels
 				.Do(_ => IsLoading.Value = true)
 				.Select(_ => RxQuery(SearchProduct))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Do(_ => IsLoading.Value = false)
 				.Subscribe(Products, CloseCancellation.Token);
 
 
 			RxQuery(s => s.Query<SpecialMarkupCatalog>().OrderBy(n => n.Name).ToObservableCollection())
-				.ObserveOn(UiScheduler)
 				.Subscribe(SpecialMarkupProducts);
 
 			if (string.IsNullOrEmpty(Settings.Value.UserName))
@@ -255,7 +253,6 @@ limit 300";
 		private void LoadPriceTagPreview()
 		{
 			RxQuery(s => PriceTag.LoadOrDefault(s.Connection))
-				.ObserveOn(UiScheduler)
 				.Subscribe(x => Preview.Value = x.Preview());
 		}
 

@@ -94,7 +94,6 @@ namespace AnalitF.Net.Client.ViewModels.Orders
 				.Throttle(Consts.LoadOrderHistoryTimeout, Scheduler)
 				.Select(x => RxQuery(s => BaseOfferViewModel.LoadOrderHistory(s, Cache, Settings.Value, x, Address)))
 				.Switch()
-				.ObserveOn(UiScheduler)
 				.Subscribe(HistoryOrders, CloseCancellation.Token);
 		}
 
