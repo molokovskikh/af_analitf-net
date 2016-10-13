@@ -99,7 +99,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 
 		public bool CanShowDescription => CurrentCatalog.Value?.Name?.Description != null;
 
-		public bool CanShowCatalog => CurrentCatalog != null;
+		public bool CanShowCatalog => CurrentCatalog.Value != null;
 
 		public bool CanShowCatalogWithMnnFilter => CurrentCatalog.Value?.Name?.Mnn != null;
 
@@ -108,7 +108,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (!CanShowCatalog)
 				return;
 
-			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog, offerId);
+			var offerViewModel = new CatalogOfferViewModel(CurrentCatalog.Value, offerId);
 			shell.Navigate(offerViewModel);
 		}
 

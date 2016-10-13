@@ -117,8 +117,10 @@ namespace AnalitF.Net.Client.Config
 		[Conditional("DEBUG")]
 		private void CheckThreading()
 		{
+#if DEBUG
 			if (Thread.CurrentThread != CreateOnThread)
 				throw new Exception("Попытка конкурентного обращения к подключению");
+#endif
 		}
 
 		public Task Query(Action<IStatelessSession> action, CancellationToken token = default(CancellationToken))

@@ -38,6 +38,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(shell.NavigationStack.Count(), Is.EqualTo(1));
 
 			var offerModel = (CatalogOfferViewModel)shell.ActiveItem;
+			scheduler.Start();
 			Assert.That(offerModel.CurrentOffer.Value.Id, Is.EqualTo(offer.Id));
 		}
 

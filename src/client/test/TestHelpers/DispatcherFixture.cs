@@ -136,7 +136,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		private void InternalClick(string name)
 		{
 			var el = activeWindow.FindName(name)
-				?? activeWindow.Descendants<ButtonBase>().First(b => b.Name.Match(name));
+				?? activeWindow.Descendants<ButtonBase>().FirstOrDefault(b => b.Name.Match(name));
 			if (el == null)
 				throw new Exception($"Не могу найти кнопку '{name}'");
 			if (el is SplitButton)

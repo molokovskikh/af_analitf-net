@@ -12,6 +12,7 @@ using Common.Tools;
 using NUnit.Framework;
 using ReactiveUI;
 using System.Windows;
+using ReactiveUI.Testing;
 
 namespace AnalitF.Net.Client.Test.Integration.ViewModels
 {
@@ -143,8 +144,10 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var model = Open(new OrderDetailsViewModel(order));
 			var events = model.ObservableForProperty(x => x.Order.Value.Sum).Collect();
 			model.CurrentLine.Value = model.Lines.Value.First();
+			scheduler.AdvanceByMs(500);
 			model.EnterLine();
 			var offers = (CatalogOfferViewModel)shell.ActiveItem;
+			scheduler.Start();
 			offers.CurrentOffer.Value.OrderCount = 2;
 			offers.OfferUpdated();
 			offers.OfferCommitted();

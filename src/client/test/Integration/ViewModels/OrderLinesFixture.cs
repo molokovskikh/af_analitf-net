@@ -67,6 +67,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			MakeOrder();
 
 			model.CurrentLine.Value = model.Lines.Value.First();
+			scheduler.AdvanceByMs(500);
 			Assert.That(model.ProductInfo.CanShowCatalog, Is.True);
 			model.ProductInfo.ShowCatalog();
 
@@ -156,6 +157,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			model.IsSentSelected.Value = true;
 			scheduler.Start();
 			model.SelectedSentLine.Value = model.SentLines.Value.First();
+			scheduler.AdvanceByMs(500);
 			Assert.AreEqual(catalogId, model.ProductInfo2.CurrentCatalog.Value.Id);
 		}
 
