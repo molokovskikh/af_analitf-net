@@ -110,18 +110,37 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 		}
 
 		[Test]
-		public void Restore_column_width()
+		public void Restore_column_width_view_close()
 		{
 			var grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
 			grid.Columns[0].Width = new DataGridLength(15);
 			grid.Columns[1].Width = new DataGridLength(15);
 			grid.Columns[2].Width = new DataGridLength(15);
-			var saveWidth = grid.Columns[4].ActualWidth;
-
+			grid.Columns[3].Width = new DataGridLength(150);
+			grid.Columns[4].Width = new DataGridLength(15);
+			grid.Columns[5].Width = new DataGridLength(125);
+			var saveWidth = grid.Columns[5].ActualWidth;
 			Close(model);
 			InitView();
 			grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
-			Assert.AreEqual(saveWidth, grid.Columns[4].Width.Value);
+			Assert.AreEqual(saveWidth, grid.Columns[5].Width.Value);
+		}
+
+		[Test]
+		public void Restore_column_width_view_deactivate()
+		{
+			var grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
+			grid.Columns[0].Width = new DataGridLength(15);
+			grid.Columns[1].Width = new DataGridLength(15);
+			grid.Columns[2].Width = new DataGridLength(15);
+			grid.Columns[3].Width = new DataGridLength(150);
+			grid.Columns[4].Width = new DataGridLength(15);
+			grid.Columns[5].Width = new DataGridLength(125);
+			var saveWidth = grid.Columns[5].ActualWidth;
+			Deactivate(model);
+			Activate(model);
+			grid = view.Descendants<DataGrid2>().First(c => c.Name == "HistoryOrders");
+			Assert.AreEqual(saveWidth, grid.Columns[5].Width.Value);
 		}
 	}
 }

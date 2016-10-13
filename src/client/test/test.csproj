@@ -163,7 +163,7 @@
     <Compile Include="Fixtures\CreateSchedule.cs" />
     <Compile Include="Fixtures\CreateAddress.cs" />
     <Compile Include="Fixtures\CreateDelayOfPayment.cs" />
-    <Compile Include="Fixtures\Diadok.cs" />
+    <Compile Include="Fixtures\Diadok\CreateDiadokInbox.cs" />
     <Compile Include="Fixtures\LoadSampleData.cs" />
     <Compile Include="Fixtures\LoadWaybill.cs" />
     <Compile Include="Fixtures\LocalDelayOfPayment.cs" />
@@ -208,6 +208,8 @@
     <Compile Include="Integration\ViewModels\CatalogFixture.cs" />
     <Compile Include="Integration\ViewModels\CatalogOffersByName.cs" />
     <Compile Include="Integration\ViewModels\CorrectionFixture.cs" />
+    <Compile Include="Fixtures\Diadok\DiadokFixtureData.cs" />
+    <Compile Include="Integration\Views\Diadok\DiadokFixture.cs" />
     <Compile Include="Integration\ViewModels\FeedbackFixture.cs" />
     <Compile Include="Integration\ViewModels\JunkOfferFixture.cs" />
     <Compile Include="Integration\ViewModels\MailsFixture.cs" />

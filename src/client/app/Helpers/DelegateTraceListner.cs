@@ -11,8 +11,12 @@ namespace AnalitF.Net.Client.Helpers
 		public override void TraceEvent(TraceEventCache eventCache, string source,
 			TraceEventType eventType, int id, string format, params object[] args)
 		{
-			if (eventType == TraceEventType.Error || eventType == TraceEventType.Critical)
+			if (eventType == TraceEventType.Error || eventType == TraceEventType.Critical) {
+				//ошибки ввода нет смысла протоколировать
+				if (format.IndexOf("ConvertBack cannot convert value ", StringComparison.InvariantCulture) >= 0)
+					return;
 				log.ErrorFormat(format, args);
+			}
 		}
 
 		public override void Write(string message)
@@ -36,8 +40,12 @@ namespace AnalitF.Net.Client.Helpers
 		public override void TraceEvent(TraceEventCache eventCache, string source,
 			TraceEventType eventType, int id, string format, params object[] args)
 		{
-			if (eventType == TraceEventType.Error || eventType == TraceEventType.Critical)
+			if (eventType == TraceEventType.Error || eventType == TraceEventType.Critical) {
+				//ошибки ввода нет смысла протоколировать
+				if (format.IndexOf("ConvertBack cannot convert value ", StringComparison.InvariantCulture) >= 0)
+					return;
 				action(String.Format(format, args));
+			}
 		}
 
 		public override void Write(string message)

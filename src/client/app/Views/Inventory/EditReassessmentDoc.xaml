@@ -50,9 +50,13 @@
 				<controls:DataGridTextColumnEx Header="Производитель" Binding="{Binding Producer}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Кол-во" Binding="{Binding Quantity}" Width="*" />
 				<controls:DataGridTextColumnEx Header="Цена закупки" Binding="{Binding SupplierCostWithoutNds}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Цена розничная" Binding="{Binding RetailCost}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма закупки" Binding="{Binding SupplierSumWithoutNds}" Width="*" />
-				<controls:DataGridTextColumnEx Header="Сумма розничная" Binding="{Binding RetailSum}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Наценка списания, %" Binding="{Binding SrcRetailMarkup}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена списания" Binding="{Binding SrcRetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма списания" Binding="{Binding SrcRetailSum}" Width="*" />
+
+				<controls:DataGridTextColumnEx Header="Наценка приходования, %" Binding="{Binding RetailMarkup}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Цена приходования" Binding="{Binding RetailCost}" Width="*" />
+				<controls:DataGridTextColumnEx Header="Сумма приходования" Binding="{Binding RetailSum}" Width="*" />
 			</DataGrid.Columns>
 		</controls:DataGrid2>
 	</Grid></UserControl>

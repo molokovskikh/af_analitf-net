@@ -138,7 +138,7 @@ namespace AnalitF.Net.Service.Models
 			CompletedOn = DateTime.Now;
 		}
 
-		public virtual bool GetIsStale(TimeSpan lifetime) => DateTime.Now > CreatedOn.Add(lifetime);
+		public virtual bool GetIsStale(TimeSpan lifetime) => lifetime != TimeSpan.MaxValue && DateTime.Now > CreatedOn.Add(lifetime);
 
 		public virtual string OutputFile(Config.Config config)
 		{

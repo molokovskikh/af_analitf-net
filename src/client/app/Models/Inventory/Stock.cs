@@ -379,7 +379,7 @@ namespace AnalitF.Net.Client.Models.Inventory
 			item.Id = 0;
 			item.ServerId = null;
 			item.ServerVersion = null;
-			ReservedQuantity = 0;
+			item.ReservedQuantity = 0;
 			return item;
 		}
 

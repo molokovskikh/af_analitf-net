@@ -47,6 +47,7 @@ namespace AnalitF.Net.Client.Models
 		private ILog _log = LogManager.GetLogger(typeof(Waybill));
 
 		private bool _vitallyImportant;
+		private Rounding? _rounding;
 
 		public Waybill()
 		{
@@ -120,7 +121,18 @@ namespace AnalitF.Net.Client.Models
 
 		public virtual IList<WaybillLine> Lines { get; set; }
 
-		public virtual Rounding Rounding => (Settings?.Rounding).GetValueOrDefault(Rounding.To0_10);
+		public virtual Rounding? Rounding
+		{
+			get { return _rounding; }
+			set
+			{
+				if (_rounding != value) {
+					_rounding = value;
+					Recalculate();
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		[Ignore]
 		public virtual bool VitallyImportant
@@ -197,6 +209,8 @@ namespace AnalitF.Net.Client.Models
 			if (UserSupplierName == null)
 				UserSupplierName = SupplierName;
 			Settings = settings;
+			if (Rounding == null)
+				Rounding = settings.Rounding;
 			WaybillSettings = settings.Waybills.FirstOrDefault(s => s.BelongsToAddress != null
 					&& Address != null
 					&& s.BelongsToAddress.Id == Address.Id)

@@ -25,6 +25,9 @@ using ReactiveUI;
 using Xceed.Wpf.Toolkit;
 using Action = System.Action;
 using Hyperlink = System.Windows.Documents.Hyperlink;
+using System.Reactive.Linq;
+using Common.Tools.Calendar;
+using System.Windows.Automation;
 
 namespace AnalitF.Net.Client.Test.TestHelpers
 {
@@ -159,6 +162,22 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			WaitIdle();
 		}
 
+		protected void AsyncClickSplit(string name, string header)
+		{
+			dispatcher.BeginInvoke(new Action(() =>
+			{
+				var el = activeWindow.FindName(name) ?? activeWindow.Descendants<SplitButton>().First(x => x.Name.Match(name));
+				if (el == null)
+					throw new Exception($"Не могу найти пункт меню с заголовком '{header}' в окне {activeWindow}");
+				var button = el as SplitButton;
+				AssertInputable(button);
+				var menuItem = (button.DropDownContent as ItemsControl).Descendants<MenuItem>().First(x => x.Header.ToString().Match(header));
+				button.IsOpen = true;
+				menuItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent, menuItem));
+			}));
+			WaitIdle();
+		}
+
 		protected void AsyncClickNoWait(string name)
 		{
 			dispatcher.BeginInvoke(new Action(() => InternalClick(name)));
@@ -180,7 +199,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			element.RaiseEvent(WpfTestHelper.TextArgs(text));
 		}
 
-		protected void InputActiveWindow(string name, string text)
+		public void InputActiveWindow(string name, string text)
 		{
 			dispatcher.Invoke(() => {
 				var el = activeWindow.Descendants<FrameworkElement>().FirstOrDefault(e => e.Name == name);
@@ -290,6 +309,23 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 		public T ByName<T>(string name) where T : FrameworkElement
 		{
 			return ByName<T>(activeTab, name);
+		}
+
+		protected void WaitWindow(string title, string body = null)
+		{
+			var found = false;
+			dispatcher.Invoke(() => {
+				found = activeWindow.Title == title;
+			});
+			if (found)
+				return;
+			var opened = manager.WindowOpened.Timeout(30.Second()).First();
+			opened.Dispatcher.Invoke(() => {
+				var text = opened.AsText();
+				Assert.AreEqual(title, opened.Title, text);
+				if (!String.IsNullOrEmpty(body))
+					Assert.That(text, Does.Contain(body), text);
+			});
 		}
 	}
 }

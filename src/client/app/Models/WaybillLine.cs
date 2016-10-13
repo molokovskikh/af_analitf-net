@@ -561,16 +561,17 @@ namespace AnalitF.Net.Client.Models
 
 		private decimal? Round(decimal? value)
 		{
-			if (Waybill.Rounding != Rounding.None) {
+			var rounding = Waybill.Rounding ?? Waybill?.Settings.Rounding ?? Rounding.To0_10;
+			if (rounding != Rounding.None) {
 				var @base = 10;
 				var factor = 1;
-				if (Waybill.Rounding == Rounding.To1_00) {
+				if (rounding == Rounding.To1_00) {
 					@base = 1;
 				}
-				else if (Waybill.Rounding == Rounding.To0_50) {
+				else if (rounding == Rounding.To0_50) {
 					@factor = 5;
 				}
-				var normalized = ((int?)(value * @base));
+				var normalized = (int?)(value * @base);
 				return (normalized - normalized % factor) / (decimal)@base;
 			}
 			return value;

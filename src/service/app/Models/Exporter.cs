@@ -29,6 +29,7 @@ using NHibernate.Linq;
 using log4net;
 using Microsoft.SqlServer.Server;
 using SmartOrderFactory.Domain;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using MySqlHelper = Common.MySql.MySqlHelper;
 
 namespace AnalitF.Net.Service.Models
@@ -148,7 +149,6 @@ namespace AnalitF.Net.Service.Models
 		public string ResultPath = "";
 		public string AdsPath = "";
 		public string DocsPath = "";
-		public string DateTimeNow = DateTime.Now.ToString("yyyy.MM.dd");
 
 		public uint MaxProducerCostPriceId;
 		public uint MaxProducerCostCostId;
@@ -203,7 +203,6 @@ namespace AnalitF.Net.Service.Models
 						ErrorType.AccessDenied);
 			}
 
-			data.LastPendingUpdateAt = DateTime.Now;
 			//при переходе на новую версию мы должны отдать все данные тк между версиями могла измениться схема
 			//и если не отдать все то часть данных останется в старом состоянии а часть в новом,
 			//что может привести к странным результатам
@@ -212,16 +211,25 @@ namespace AnalitF.Net.Service.Models
 
 			data.ClientVersion = job.Version;
 			if (job.LastSync != data.LastUpdateAt) {
-				log.WarnFormat("Не совпала дата обновления готовим кумулятивное обновление," +
-					" последние обновление на клиента {0}" +
-					" последнее обновление на сервере {1}" +
-					" не подтвержденное обновление {2}", data.LastUpdateAt, job.LastSync, data.LastPendingUpdateAt);
+				log.Warn("Не совпала дата обновления готовим кумулятивное обновление," +
+					$" последние обновление на клиента {data.LastUpdateAt}" +
+					$" последнее обновление на сервере {job.LastSync}" +
+					$" не подтвержденное обновление {data.LastPendingUpdateAt}");
 				data.Reset();
+			}
+
+			var cumulative = data.LastUpdateAt == DateTime.MinValue;
+			//если мы готовим кумулятивное обновление то данные из справочников кешируются, кеш считается актуальным
+			//в течении дня что бы избежать ситуации когда мы из-за кеширования потеряли обновление записи ставим дату обновление на
+			//начало дня что бы при следующем обновлении загрузить данные которые не попали в кеш
+			if (cumulative) {
+				data.LastPendingUpdateAt = DateTime.Today;
+			} else {
+				data.LastPendingUpdateAt = DateTime.Now;
 			}
 			session.Save(data);
 
 			//по умолчанию fresh = 1
-			var cumulative = data.LastUpdateAt == DateTime.MinValue;
 			session.CreateSQLQuery(@"
 drop temporary table if exists usersettings.prices;
 drop temporary table if exists usersettings.activeprices;
@@ -1221,13 +1229,13 @@ where sp.Status = 1";
 									from ProducerInterface.Promotions pr
 									where pr.Begin <= ?DT AND pr.Enabled = 1 AND pr.Status = 1";
 
-			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotions", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select Promo.Id PromotionId, PromoGrug.DrugId CatalogId from ProducerInterface.promotions Promo
 							left join ProducerInterface.promotionToDrug PromoGrug ON Promo.Id = PromoGrug.PromotionId
 							Where Promo.Enabled = 1 AND Promo.`Status` = 1 AND Promo.Begin <= ?DT";
 
-			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTimeNow });
+			Export(Result, sql, "ProducerPromotionCatalogs", truncate: true, parameters: new { DT = DateTime.Now });
 
 			sql = @"select PR.Id PromotionId, PTS.SupplierId SupplierId
 							from ProducerInterface.Promotions PR
@@ -1239,7 +1247,7 @@ where sp.Status = 1";
 
 			var ids = session
 				.CreateSQLQuery(@"select PromoFileId from ProducerInterface.Promotions Where Enabled = 1 AND Status = 1 AND Begin <= :DateTimeNow AND PromoFileId IS NOT NULL")
-				.SetParameter("DateTimeNow", DateTimeNow).List<int>();
+				.SetParameter("DateTimeNow", DateTime.Now).List<int>();
 
 			ProducerPromotion producerPromotion = new ProducerPromotion();
 
@@ -1572,7 +1580,9 @@ where a.MailId in ({ids.Implode()})";
 					&& addresses.Contains(o.AddressId))
 				.ToArray();
 			orders = orders.Where(o => prices.Contains(new PriceKey(o.PriceList, o.RegionCode))).ToArray();
-
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, job.Id, RecordType.Loaded));
+			}
 			var groups = orders.GroupBy(o => new { o.AddressId, o.PriceList, o.RegionCode });
 			foreach (var @group in groups) {
 				foreach (var order in group) {
@@ -2172,7 +2182,6 @@ where r.DownloadId in (:ids)")
 					&& f.Length < Config.MaxReclameFileSize)
 				.ToArray();
 			if (files.Length == 0) {
-				data.LastPendingReclameUpdateAt = null;
 				return;
 			}
 			data.LastPendingReclameUpdateAt = files.Max(x => x.LastWriteTime);
@@ -2189,7 +2198,6 @@ where r.DownloadId in (:ids)")
 		{
 			return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind);
 		}
-
 
 		private static void AddDir(List<UpdateData> zip, string dir, string name)
 		{
@@ -2287,6 +2295,19 @@ delete from Logs.PendingMailLogs
 where UserId = :userId;")
 				.SetParameter("userId", userId)
 				.ExecuteUpdate();
+
+			var updateOrders = session.CreateSQLQuery(@"
+select oh.RowID
+from Orders.OrdersHead oh
+	join Logs.PendingOrderLogs l on l.OrderId = oh.RowId
+where l.UserId = :userId
+and oh.Deleted = 0")
+				.SetParameter("userId", userId)
+				.List<uint>();
+			var orders = session.Query<Order>().Where(o => updateOrders.Contains(o.RowId));
+			foreach (var order in orders) {
+				session.Save(new OrderRecordLog(order, user, request.RequestId, RecordType.Confirmed));
+			}
 
 			session.CreateSQLQuery(@"
 update Orders.OrdersHead oh

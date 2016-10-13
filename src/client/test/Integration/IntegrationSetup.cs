@@ -38,6 +38,8 @@ namespace AnalitF.Net.Client.Test.Integration
 			Assert.IsNull(server);
 			Directory.CreateDirectory("var");
 
+			clientConfig.DiadokApiKey = "Analit-988b9e85-1b8e-40a9-b6bd-543790d0a7ec";
+			clientConfig.DiadokUrl = "https://diadoc-api.kontur.ru";
 			clientConfig.BaseUrl = InitHelper.RandomPort();
 			clientConfig.RootDir = @"var\client";
 			clientConfig.RequestInterval = 1.Second();
