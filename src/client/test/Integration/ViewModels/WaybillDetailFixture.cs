@@ -151,6 +151,17 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		}
 
 		[Test]
+		public void Print_PrintProtocol()
+		{
+			var results = model.PrintProtocol().GetEnumerator();
+			var dialog = Next<DialogResult>(results);
+			var settings = ((SimpleSettings)dialog.Model);
+			Assert.That(settings.Properties.Count(), Is.GreaterThan(0));
+			var preview = Next<DialogResult>(results);
+			Assert.IsInstanceOf<PrintPreviewViewModel>(preview.Model);
+		}
+
+		[Test]
 		public void Print_racking_map()
 		{
 			var result = (DialogResult)model.PrintRackingMap();

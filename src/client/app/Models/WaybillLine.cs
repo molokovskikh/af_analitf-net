@@ -188,6 +188,16 @@ namespace AnalitF.Net.Client.Models
 			}
 		}
 
+		public virtual decimal? RetailCostWithoutNds
+		{
+			get
+			{
+				if (RetailCost.HasValue && Nds.HasValue)
+					return RetailCost.Value*100/(100 + Nds.Value);
+				return null;
+			}
+		}
+
 		public virtual decimal? ServerRetailCost { get; set; }
 		public virtual decimal? ServerRetailMarkup { get; set; }
 

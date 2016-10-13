@@ -301,6 +301,13 @@ namespace AnalitF.Net.Client.Models
 			return Settings.WaybillActDoc.Setup(this);
 		}
 
+		public virtual WaybillProtocolDocumentSettings GetWaybillProtocolDocSettings()
+		{
+			if (Settings.WaybillProtocolDoc == null)
+				Settings.WaybillProtocolDoc = new WaybillProtocolDocumentSettings();
+			return Settings.WaybillProtocolDoc.Setup(this);
+		}
+
 		public virtual RegistryDocumentSettings GetRegistryDocSettings()
 		{
 			if (Settings.RegistryDoc == null)

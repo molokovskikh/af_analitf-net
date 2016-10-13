@@ -85,6 +85,9 @@
 				<Button Grid.Column="0" Grid.Row="2" Name="PrintAct" Style="{StaticResource FilterElement}">
 					Печать акта прихода
 				</Button>
+				<Button Grid.Column="0" Grid.Row="2" Name="PrintProtocol" Style="{StaticResource FilterElement}">
+					Печать протокола согласования цен
+				</Button>
 			</Grid>
 		</StackPanel>
 
