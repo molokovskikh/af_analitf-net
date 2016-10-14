@@ -46,10 +46,12 @@ namespace AnalitF.Net.Client.Views.Inventory
 					Model.SearchByProductId();
 				} else if (args.Key == Key.F3) {
 					Model.SearchByBarcode();
+				} else if (args.Key == Key.F4) {
+					Model.Trigger();
 				} else if (args.Key == Key.F6) {
 					results = Model.SearchByTerm();
 				} else if (args.Key == Key.Enter) {
-					results = Model.Checkout();
+					results = Model.Close();
 				}
 				if (results != null) {
 					Coroutine.BeginExecute(results.GetEnumerator(), new ActionExecutionContext { View = this });
