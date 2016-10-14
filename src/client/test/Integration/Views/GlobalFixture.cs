@@ -102,7 +102,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				catalog.CatalogSearch.Value = true;
 			});
-
+			WaitIdle();
 			await ViewLoaded(catalog.ActiveItem);
 			var search = (CatalogSearchViewModel)catalog.ActiveItem;
 			var view = (FrameworkElement)search.GetView();
@@ -148,6 +148,8 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Click("ShowOrderLines");
 			var lines = (OrderLinesViewModel)shell.ActiveItem;
 			await ViewLoaded(lines);
+			AdvanceScheduler(500);
+			Assert.IsTrue(lines.ProductInfo.CanShowCatalog);
 			Input((FrameworkElement)lines.GetView(), "Lines", Key.F2);
 			Assert.That(shell.ActiveItem, Is.InstanceOf<CatalogOfferViewModel>());
 		}
@@ -237,6 +239,10 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			StartWait();
 			Click("ShowWaybills");
+			dispatcher.Invoke(() => {
+				scheduler.AdvanceByMs(100);
+			});
+			WaitIdle();
 			Input("Waybills", Key.Enter);
 			WaitIdle();
 			dispatcher.Invoke(() => {
@@ -425,16 +431,16 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			dispatcher.Invoke(() => {
 				var names = (DataGrid)view.FindName("CatalogNames");
 				names.SelectedItem = names.ItemsSource.Cast<CatalogName>().First(n => n.Id == catalog.Name.Id);
+			});
+			WaitIdle();
+			dispatcher.Invoke(() => {
 				var catalogs = (DataGrid)view.FindName("Catalogs");
 				catalogs.SelectedItem = catalogs.ItemsSource.Cast<Catalog>().First(n => n.Id == catalog.Id);
 			});
 			Input(view, "CatalogNames", Key.Enter);
 			if (viewModel.Catalogs.Value.Count > 1)
 				Input(view, "Catalogs", Key.Enter);
-			dispatcher.Invoke(() => {
-				scheduler.AdvanceByMs(3000);
-			});
-			WaitIdle();
+			AdvanceScheduler(3000);
 			dispatcher.Invoke(() => {
 				var element = (FrameworkElement)((Screen)shell.ActiveItem).GetView();
 				var grid = (DataGrid)element.FindName("HistoryOrders");
@@ -498,6 +504,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			var model = (WaybillsViewModel)shell.ActiveItem;
 			var view = (FrameworkElement)model.GetView();
+			AdvanceScheduler(100);
 			dispatcher.Invoke(() => {
 				var waybills = (DataGrid)view.FindName("Waybills");
 				Assert.AreEqual(1, waybills.Items.Count);
@@ -567,11 +574,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 
 			OpenOffers(fixture.ProducerPromotion.Catalogs.First());
 
-			dispatcher.Invoke(() => {
-				scheduler.AdvanceByMs(500);
-			});
-
-			WaitIdle();
+			AdvanceScheduler(500);
 
 			dispatcher.Invoke(() => {
 				var producerPromotions = activeWindow.Descendants<ProducerPromotionPopup>().First();
@@ -609,10 +612,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			StartWait();
 			Click("ShowCatalog");
 			OpenOffers(fixture.Promotion.Catalogs[0]);
-			dispatcher.Invoke(() => {
-				scheduler.AdvanceByMs(500);
-			});
-			WaitIdle();
+			AdvanceScheduler(500);
 			dispatcher.Invoke(() => {
 				var promotions = activeWindow.Descendants<PromotionPopup>().First();
 				Assert.IsTrue(promotions.IsVisible);
@@ -816,6 +816,7 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			Fixture<LocalWaybill>();
 			StartWait();
 			Click("ShowWaybills");
+			AdvanceScheduler(100);
 
 			Input("Waybills", Key.Return);
 			WaitIdle();
@@ -823,6 +824,12 @@ namespace AnalitF.Net.Client.Test.Integration.Views
 			WaitWindow("Настройка печати накладной");
 			AsyncClickNoWait("OK");
 			WaitWindow("Предварительный просмотр");
+		}
+
+		private void AdvanceScheduler(int milliseconds)
+		{
+			dispatcher.Invoke(() => { scheduler.AdvanceByMs(milliseconds); });
+			WaitIdle();
 		}
 
 		[Test]

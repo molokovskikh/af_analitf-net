@@ -237,7 +237,6 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			var last = canClose.Take(1).PublishLast();
 			last.Connect();
 			shell.CanClose(b => canClose.OnNext(b));
-			Console.WriteLine("exit");
 			Assert.IsTrue(last.Timeout(TimeSpan.FromSeconds(3)).First());
 
 			session.Evict(order);

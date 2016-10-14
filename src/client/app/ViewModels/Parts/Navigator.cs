@@ -11,6 +11,7 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		void Navigate(IScreen item);
 		void NavigateRoot(IScreen screen);
 		void NavigateBack();
+		void Release(IScreen screen);
 	}
 
 	public class Navigator : INavigator
@@ -85,12 +86,15 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 		//если форма не была инициализирована то она и не будет закрыта
 		//надо явно освободить ресурсы
 		//если удалить открытие сессии из конструктора basescreen то этот код не будет нужен
-		public static void CloseAndDispose(IScreen screen)
+		public void CloseAndDispose(IScreen screen)
 		{
 			screen.TryClose();
-			if (screen is IDisposable) {
-				((IDisposable)screen).Dispose();
-			}
+			Release(screen);
+		}
+
+		public void Release(IScreen screen)
+		{
+			(screen as IDisposable)?.Dispose();
 		}
 
 		public void NavigateBack()

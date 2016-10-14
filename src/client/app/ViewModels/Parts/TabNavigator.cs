@@ -55,19 +55,13 @@ namespace AnalitF.Net.Client.ViewModels.Parts
 			if (item == null)
 				return;
 
-			//исправление для ошибки
-			//Cannot find source for binding with reference 'RelativeSource FindAncestor, AncestorType='System.Windows.Controls.TabControl', AncestorLevel='1''. BindingExpression:Path=TabStripPlacement; DataItem=null; target element is 'TabItem' (Name=''); target property is 'NoTarget' (type 'Object')
-			var view = (ShellView)conductor.GetView();
-			if (view != null)
-			{
-				var tabs = view.Items;
-				var tab = (TabItem)tabs.ItemContainerGenerator.ContainerFromItem(item);
-				if (tab != null)
-					tab.Template = null;
-			}
-
-			conductor.Items.Remove(item);
 			conductor.DeactivateItem(item, true);
+			conductor.Items.Remove(item);
+			Release(item);
+		}
+
+		public void Release(IScreen item)
+		{
 			navigationStack.Remove(item);
 			(item as IDisposable)?.Dispose();
 		}

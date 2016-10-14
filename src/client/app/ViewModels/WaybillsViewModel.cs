@@ -107,7 +107,7 @@ namespace AnalitF.Net.Client.ViewModels
 				.Merge(AddressSelector.FilterChanged)
 				.Merge(TypeFilter.Changed())
 				.Merge(Suppliers.Where(x => x != null).Cast<object>())
-				.Throttle(TimeSpan.FromMilliseconds(50), UiScheduler)
+				.Throttle(TimeSpan.FromMilliseconds(50), Scheduler)
 				.Subscribe(_ => Update(), CloseCancellation.Token);
 		}
 

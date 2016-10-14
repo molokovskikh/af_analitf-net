@@ -265,6 +265,7 @@ namespace AnalitF.Net.Client.Test.TestHelpers
 			var loaded = new SemaphoreSlim(0, 1);
 
 			dispatcher = WpfTestHelper.WithDispatcher(() => {
+				Env.TplUiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 				//wpf обеспечивает синхронизацию объектов ui
 				//тк сам тест запускает в отдельной нитке то в статических полях StyleHelper могут содержаться объекты созданные
 				//в других нитках что бы избежать ошибок очищаем статические структуры
