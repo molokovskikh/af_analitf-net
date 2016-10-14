@@ -187,7 +187,7 @@ namespace AnalitF.Net.Client.ViewModels.Offers
 				.Subscribe(MaxProducerCosts, CloseCancellation.Token);
 		}
 
-		private void UpdateFilters()
+		public void UpdateFilters()
 		{
 			Regions.Value = new[] { Consts.AllRegionLabel }
 				.Concat(CatalogOffers.Select(o => o.Price.RegionName).Distinct()
