@@ -22,6 +22,7 @@ using Caliburn.Micro;
 using Common.NHibernate;
 using Common.Tools;
 using Common.Tools.Calendar;
+using Common.Tools.Threading;
 using NHibernate.Linq;
 using NUnit.Framework;
 using ReactiveUI.Testing;

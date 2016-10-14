@@ -73,6 +73,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 			Assert.That(details.Waybill.RetailSum, Is.GreaterThan(retailSum));
 			Close(details);
 			Activate(model);
+			scheduler.Start();
 			var reloaded = model.Waybills.Value.First(w => w.Id == waybill.Id);
 			Assert.That(reloaded.RetailSum, Is.GreaterThan(retailSum));
 		}
@@ -82,10 +83,11 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var result = model.Create().GetEnumerator();
 			Assert.IsTrue(result.MoveNext());
-			var dialog = ((CreateWaybill)((DialogResult)result.Current).Model);
+			var dialog = (CreateWaybill)((DialogResult)result.Current).Model;
 			dialog.Waybill.ProviderDocumentId = "1";
 			dialog.Waybill.UserSupplierName = "test";
 			result.MoveNext();
+			scheduler.Start();
 			Assert.IsNotNull(dialog.Waybill.Address);
 			Assert.AreEqual(dialog.Waybill.Address.Id, address.Id);
 			Assert.Contains(dialog.Waybill.Id, model.Waybills.Value.Select(w => w.Id).ToArray());
@@ -96,7 +98,7 @@ namespace AnalitF.Net.Client.Test.Integration.ViewModels
 		{
 			var result = model.Create().GetEnumerator();
 			Assert.IsTrue(result.MoveNext());
-			var dialog = ((CreateWaybill)((DialogResult)result.Current).Model);
+			var dialog = (CreateWaybill)((DialogResult)result.Current).Model;
 			var supplier = CreateSupplier();
 			dialog.Waybill = new Waybill(new Address("Тестовый адрес"), supplier);
 			Assert.AreEqual(dialog.Waybill.SupplierName,supplier.FullName);
